@@ -1,11 +1,14 @@
 
 #include "filter.hpp"
 
+#include <components/compiler/locals.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -187,33 +190,28 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             if (scriptName.empty())
                 return false; // no script
 
-            const ESM::Script *script =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptName);
+            std::string name = Misc::StringUtils::lowerCase (select.getName());
 
-            std::string name = select.getName();
+            const Compiler::Locals& localDefs =
+                MWBase::Environment::get().getScriptManager()->getLocals (scriptName);
 
-            int i = 0;
+            char type = localDefs.getType (name);
 
-            for (; i<static_cast<int> (script->mVarNames.size()); ++i)
-                if (Misc::StringUtils::ciEqual(script->mVarNames[i], name))
-                    break;
+            if (type==' ')
+                return false; // script does not have a variable of this name.
 
-            if (i>=static_cast<int> (script->mVarNames.size()))
-                return false; // script does not have a variable of this name
+            int index = localDefs.getIndex (name);
 
             const MWScript::Locals& locals = mActor.getRefData().getLocals();
 
-            if (i<script->mData.mNumShorts)
-                return select.selectCompare (static_cast<int> (locals.mShorts[i]));
+            switch (type)
+            {
+                case 's': return select.selectCompare (static_cast<int> (locals.mShorts[index]));
+                case 'l': return select.selectCompare (locals.mLongs[index]);
+                case 'f': return select.selectCompare (locals.mFloats[index]);
+            }
 
-            i -= script->mData.mNumShorts;
-
-            if (i<script->mData.mNumLongs)
-                return select.selectCompare (locals.mLongs[i]);
-
-            i -= script->mData.mNumLongs;
-
-            return select.selectCompare (locals.mFloats.at (i));
+            throw std::logic_error ("unknown local variable type in dialogue filter");
         }
 
         case SelectWrapper::Function_PcHealthPercent:
@@ -453,20 +451,10 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
                 // This actor has no attached script, so there is no local variable
                 return true;
 
-            const ESM::Script *script =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptName);
+            const Compiler::Locals& localDefs =
+                MWBase::Environment::get().getScriptManager()->getLocals (scriptName);
 
-            std::string name = select.getName();
-
-            int i = 0;
-            for (; i < static_cast<int> (script->mVarNames.size()); ++i)
-                if (Misc::StringUtils::ciEqual(script->mVarNames[i], name))
-                    break;
-
-            if (i >= static_cast<int> (script->mVarNames.size()))
-                return true; // script does not have a variable of this name
-
-            return false;
+            return localDefs.getIndex (Misc::StringUtils::lowerCase (select.getName()))==-1;
         }
 
         case SelectWrapper::Function_SameGender:
