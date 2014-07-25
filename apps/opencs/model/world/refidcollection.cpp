@@ -1,4 +1,3 @@
-
 #include "refidcollection.hpp"
 
 #include <stdexcept>
@@ -99,6 +98,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     actorsColumns.mFight = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_AiAlarm, ColumnBase::Display_Integer));
     actorsColumns.mAlarm = &mColumns.back();
+
     mColumns.push_back(RefIdColumn (Columns::ColumnId_ActorInventory, ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue, true, true, true));
     actorsColumns.mInventory = &mColumns.back();
     mColumns.back().addNestedColumn(Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_String);
@@ -665,6 +665,6 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::RefIdCollection::nestedTable(int row
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
     const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
-    
+
     return adaptor.nestedTable(&mColumns.at(column), mData, localIndex.first);
 }

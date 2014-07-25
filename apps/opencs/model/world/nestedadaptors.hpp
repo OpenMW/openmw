@@ -2,6 +2,7 @@
 #define CSM_WORLD_NESTEDADAPTORS_H
 
 #include <vector>
+#include <string>
 #include <stdexcept>
 
 #include "universalid.hpp"
@@ -83,6 +84,92 @@ namespace CSMWorld
             return dynamic_cast<Record<ESXRecordT>&> (
                 data.getRecord (RefIdData::LocalIndex (index, mType)));
         }
+    };
+
+    template <typename ESXRecordT>
+    class SpellsHelper : public CastableHelper<ESXRecordT>
+    {
+    public:
+
+        SpellsHelper(CSMWorld::UniversalId::Type type) 
+            : CastableHelper<ESXRecordT>(type) {}
+
+        virtual void setNestedTable(RefIdData& data,
+                                    int index,
+                                    const NestedTableWrapperBase& nestedTable)
+        {
+            CastableHelper<ESXRecordT>::getRecord(data, index).get().mSpells.mList = 
+                (static_cast<const NestedTableWrapper<std::vector<std::string> >&>(nestedTable)).mNestedTable;
+        }
+        
+        virtual NestedTableWrapperBase* nestedTable(const RefIdData& data,
+                                                    int index) const
+        {
+            return new NestedTableWrapper<std::vector<std::string> >(CastableHelper<ESXRecordT>::getRecord(data, index).get().mSpells.mList);
+        }
+        
+        virtual QVariant getNestedData(const CSMWorld::RefIdData& data,
+                                       int index,
+                                       int subRowIndex,
+                                       int subColIndex) const
+        {
+            const std::string& content = CastableHelper<ESXRecordT>::getRecord(data, index).get().mSpells.mList.at(subRowIndex);
+
+            if (subColIndex == 0)
+            {
+                return QString::fromUtf8(content.c_str());
+            }
+            
+            throw std::logic_error("Trying to access non-existing column in the nested table!");
+        }
+
+        virtual void removeNestedRow (RefIdData& data, int index, int rowToRemove) const
+        {
+            std::vector<std::string>& list = CastableHelper<ESXRecordT>::getRecord(data, index).get().mSpells.mList;
+
+            list.erase (list.begin () + rowToRemove);
+        }
+
+        void setNestedData (RefIdData& data,
+                            int index,
+                            const QVariant& value,
+                            int subRowIndex,
+                            int subColIndex) const
+        {
+            if (subColIndex == 0)
+            {
+                CastableHelper<ESXRecordT>::getRecord(data, index).get().mSpells.mList.at(subRowIndex) = std::string(value.toString().toUtf8());
+            } 
+
+            throw std::logic_error("Trying to access non-existing column in the nested table!");
+        }
+        
+        virtual void addNestedRow (RefIdData& data, int index, int position) const
+        {
+            std::vector<std::string>& list = CastableHelper<ESXRecordT>::getRecord(data, index).get().mSpells.mList;
+
+            std::string newString;
+            if (position >= (int)list.size())
+            {
+                list.push_back(newString);
+                return;
+            }
+            
+            list.insert(list.begin()+position, newString);
+        }
+        
+        virtual int getNestedColumnsCount(const RefIdData& data) const
+        {
+            return 1;
+        }
+            
+
+        virtual int getNestedRowsCount(const RefIdData& data,
+                                       int index) const
+        {
+            return CastableHelper<ESXRecordT>::getRecord(data, index).get().mSpells.mList.size();
+        }
+
     };
 
     template <typename ESXRecordT>

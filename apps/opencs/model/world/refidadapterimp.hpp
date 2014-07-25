@@ -478,6 +478,7 @@ namespace CSMWorld
         std::vector<std::pair <const RefIdColumn*, HelperBase*> > assoCol;
 
         assoCol.push_back(std::make_pair(mActors.mInventory, new InventoryHelper<RecordT>(type)));
+        assoCol.push_back(std::make_pair(mActors.mSpells, new SpellsHelper<RecordT>(type)));
         
         setAssocColumns(assoCol);
     }
@@ -507,6 +508,9 @@ namespace CSMWorld
         if (column==mActors.mInventory)
             return true;
 
+        if (column==mActors.mSpells)
+            return true;
+            
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
             mActors.mServices.find (column);
 
