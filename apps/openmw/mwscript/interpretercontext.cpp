@@ -3,8 +3,12 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <sstream>
 
 #include <components/interpreter/types.hpp>
+
+#include <components/compiler/locals.hpp>
+
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -102,6 +106,32 @@ namespace MWScript
             return ptr.getRefData().getLocals();
         }
     }
+
+    int InterpreterContext::findLocalVariableIndex (const std::string& scriptId,
+        const std::string& name, char type) const
+    {
+        int index = MWBase::Environment::get().getScriptManager()->getLocals (scriptId).
+            search (type, name);
+
+        if (index!=-1)
+            return index;
+
+        std::ostringstream stream;
+
+        stream << "Failed to access ";
+
+        switch (type)
+        {
+            case 's': stream << "short"; break;
+            case 'l': stream << "long"; break;
+            case 'f': stream << "float"; break;
+        }
+
+        stream << " member variable " << name << " in script " << scriptId;
+
+        throw std::runtime_error (stream.str().c_str());
+    }
+
 
     InterpreterContext::InterpreterContext (
         MWScript::Locals *locals, MWWorld::Ptr reference, const std::string& targetId)
@@ -485,10 +515,7 @@ namespace MWScript
 
         const Locals& locals = getMemberLocals (scriptId, global);
 
-        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (
-            scriptId, name, 's');
-
-        return locals.mShorts[index];
+        return locals.mShorts[findLocalVariableIndex (scriptId, name, 's')];
     }
 
     int InterpreterContext::getMemberLong (const std::string& id, const std::string& name,
@@ -498,10 +525,7 @@ namespace MWScript
 
         const Locals& locals = getMemberLocals (scriptId, global);
 
-        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (
-            scriptId, name, 'l');
-
-        return locals.mLongs[index];
+        return locals.mLongs[findLocalVariableIndex (scriptId, name, 'l')];
     }
 
     float InterpreterContext::getMemberFloat (const std::string& id, const std::string& name,
@@ -511,10 +535,7 @@ namespace MWScript
 
         const Locals& locals = getMemberLocals (scriptId, global);
 
-        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (
-            scriptId, name, 'f');
-
-        return locals.mFloats[index];
+        return locals.mFloats[findLocalVariableIndex (scriptId, name, 'f')];
     }
 
     void InterpreterContext::setMemberShort (const std::string& id, const std::string& name,
@@ -524,10 +545,7 @@ namespace MWScript
 
         Locals& locals = getMemberLocals (scriptId, global);
 
-        int index =
-            MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 's');
-
-        locals.mShorts[index] = value;
+        locals.mShorts[findLocalVariableIndex (scriptId, name, 's')] = value;
     }
 
     void InterpreterContext::setMemberLong (const std::string& id, const std::string& name, int value, bool global)
@@ -536,10 +554,7 @@ namespace MWScript
 
         Locals& locals = getMemberLocals (scriptId, global);
 
-        int index =
-            MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'l');
-
-        locals.mLongs[index] = value;
+        locals.mLongs[findLocalVariableIndex (scriptId, name, 'l')] = value;
     }
 
     void InterpreterContext::setMemberFloat (const std::string& id, const std::string& name, float value, bool global)
@@ -548,10 +563,7 @@ namespace MWScript
 
         Locals& locals = getMemberLocals (scriptId, global);
 
-        int index =
-            MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'f');
-
-        locals.mFloats[index] = value;
+        locals.mFloats[findLocalVariableIndex (scriptId, name, 'f')] = value;
     }
 
     MWWorld::Ptr InterpreterContext::getReference(bool required)

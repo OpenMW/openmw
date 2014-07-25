@@ -17,8 +17,6 @@ namespace Compiler
 
             int searchIndex (char type, const std::string& name) const;
 
-            bool search (char type, const std::string& name) const;
-
             std::vector<std::string>& get (char type);
 
         public:
@@ -28,6 +26,10 @@ namespace Compiler
 
             int getIndex (const std::string& name) const;
             ///< return index for local variable \a name (-1: does not exist).
+
+            /// Return index for local variable \a name of type \a type (-1: variable does not
+            /// exit).
+            bool search (char type, const std::string& name) const;
 
             const std::vector<std::string>& get (char type) const;
 

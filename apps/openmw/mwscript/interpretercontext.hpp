@@ -50,6 +50,10 @@ namespace MWScript
             Locals& getMemberLocals (std::string& id, bool global);
             ///< \a id is changed to the respective script ID, if \a id wasn't a script ID before
 
+            /// Throws an exception if local variable can't be found.
+            int findLocalVariableIndex (const std::string& scriptId, const std::string& name,
+                char type) const;
+
         public:
 
             InterpreterContext (MWScript::Locals *locals, MWWorld::Ptr reference,
