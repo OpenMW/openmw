@@ -46,7 +46,7 @@ namespace MWBase
             ///< Compile all scripts
             /// \return count, success
 
-            virtual Compiler::Locals& getLocals (const std::string& name) = 0;
+            virtual const Compiler::Locals& getLocals (const std::string& name) = 0;
             ///< Return locals for script \a name.
 
             virtual MWScript::GlobalScripts& getGlobalScripts() = 0;

@@ -67,7 +67,7 @@ namespace MWScript
             ///< Compile all scripts
             /// \return count, success
 
-            virtual Compiler::Locals& getLocals (const std::string& name);
+            virtual const Compiler::Locals& getLocals (const std::string& name);
             ///< Return locals for script \a name.
 
             virtual GlobalScripts& getGlobalScripts();

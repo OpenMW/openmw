@@ -156,7 +156,7 @@ namespace MWScript
         return std::make_pair (count, success);
     }
 
-    Compiler::Locals& ScriptManager::getLocals (const std::string& name)
+    const Compiler::Locals& ScriptManager::getLocals (const std::string& name)
     {
         std::string name2 = Misc::StringUtils::lowerCase (name);
 
