@@ -174,6 +174,7 @@ namespace CSMWorld
             { ColumnId_PcRank, "PC Rank" },
             { ColumnId_Scope, "Scope" },
             { ColumnId_ReferenceableId, "Referenceable ID" },
+            { ColumnId_NpcDestinations, "Destinations" },
             { ColumnId_InventoryItemId, "ID"},
             { ColumnId_SpellId, "ID"},
             { ColumnId_ItemCount, "Count"},
@@ -184,6 +185,14 @@ namespace CSMWorld
             { ColumnId_Vampire, "Vampire" },
             { ColumnId_BodyPartType, "Bodypart Type" },
             { ColumnId_MeshType, "Mesh Type" },
+            
+            { ColumnId_NpcDestinations, "Cell"},
+            { ColumnId_PosX, "X"},
+            { ColumnId_PosY, "Y"},
+            { ColumnId_PosZ, "Z"},
+            { ColumnId_RotX, "Rotation X"},
+            { ColumnId_RotY, "Rotation Y"},
+            { ColumnId_RotZ, "Rotation Z"},
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },

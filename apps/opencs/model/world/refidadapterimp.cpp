@@ -452,7 +452,9 @@ CSMWorld::NpcColumns::NpcColumns (const ActorColumns& actorColumns) : ActorColum
 
 CSMWorld::NpcRefIdAdapter::NpcRefIdAdapter (const NpcColumns& columns)
 : ActorRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, columns), mColumns (columns)
-{}
+{
+    NestedRefIdAdapter::addAssocColumn(std::make_pair(columns.mDestinations, new DestinationsHelper<ESM::NPC>(UniversalId::Type_Npc)));
+}
 
 QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data, int index)
     const
@@ -474,13 +476,16 @@ QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const Re
 
     if (column==mColumns.mHead)
         return QString::fromUtf8 (record.get().mHead.c_str());
+    
+    if (column==mColumns.mDestinations)
+        return true;
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
 
     if (iter!=mColumns.mFlags.end())
         return (record.get().mFlags & iter->second)!=0;
-
+    
     return ActorRefIdAdapter<ESM::NPC>::getData (column, data, index);
 }
 

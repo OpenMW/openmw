@@ -106,6 +106,9 @@ namespace CSMWorld
         ///The ownership of the column pointers it not transfered (it is not surprising, since columns are created by collection).
         ///You MUST call this method to setup the nested adaptor!
         
+        void addAssocColumn(const std::pair <const RefIdColumn*, HelperBase*>& assocColumn); 
+        ///Like setAssocColumn, when it is impossible to set all columns at once
+        
     private:
         
         HelperBase* getHelper(const RefIdColumn *column) const;

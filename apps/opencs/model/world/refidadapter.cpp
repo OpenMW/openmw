@@ -87,3 +87,8 @@ void CSMWorld::NestedRefIdAdapter::setAssocColumns(const std::vector<std::pair <
 {
     mAssociatedColumns = assocColumns;
 }
+
+void CSMWorld::NestedRefIdAdapter::addAssocColumn(const std::pair <const RefIdColumn*, HelperBase*>& assocColumn)
+{
+    mAssociatedColumns.push_back(assocColumn);
+}

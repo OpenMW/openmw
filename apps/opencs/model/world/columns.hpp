@@ -182,6 +182,14 @@ namespace CSMWorld
             ColumnId_ActorInventory = 167,
             ColumnId_ActorSpells = 168,
             ColumnId_SpellId = 169,
+            ColumnId_NpcDestinations = 170,
+            ColumnId_PosX = 171,
+            ColumnId_PosY = 172,
+            ColumnId_PosZ = 173,
+            ColumnId_RotX = 174,
+            ColumnId_RotY = 175,
+            ColumnId_RotZ = 176,
+            ColumnId_DestinationCell = 177,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

@@ -95,6 +95,7 @@ namespace CSMWorld
             //Those are top level columns that nest other columns
             Display_NestedItemList,
             Display_NestedSpellList,
+            Display_NestedDestinationsList,
 
             Display_EnchantmentType,
             Display_BodyPartType,

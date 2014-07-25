@@ -315,6 +315,16 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     npcColumns.mFlags.insert (std::make_pair (metalBlood, ESM::NPC::Metal));
 
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_NpcDestinations, ColumnBase::Display_NestedDestinationsList, ColumnBase::Flag_Dialogue, true, true, true));
+    npcColumns.mDestinations = &mColumns.back();
+    mColumns.back().addNestedColumn(Columns::ColumnId_DestinationCell, CSMWorld::ColumnBase::Display_String);
+    mColumns.back().addNestedColumn(Columns::ColumnId_PosX, CSMWorld::ColumnBase::Display_Float);
+    mColumns.back().addNestedColumn(Columns::ColumnId_PosY, CSMWorld::ColumnBase::Display_Float);
+    mColumns.back().addNestedColumn(Columns::ColumnId_PosZ, CSMWorld::ColumnBase::Display_Float);
+    mColumns.back().addNestedColumn(Columns::ColumnId_RotX, CSMWorld::ColumnBase::Display_Float);
+    mColumns.back().addNestedColumn(Columns::ColumnId_RotY, CSMWorld::ColumnBase::Display_Float);
+    mColumns.back().addNestedColumn(Columns::ColumnId_RotZ, CSMWorld::ColumnBase::Display_Float);
+    
     WeaponColumns weaponColumns (enchantableColumns);
 
     mColumns.push_back (RefIdColumn (Columns::ColumnId_WeaponType, ColumnBase::Display_WeaponType));

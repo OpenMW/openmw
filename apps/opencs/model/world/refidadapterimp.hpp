@@ -742,6 +742,7 @@ namespace CSMWorld
         const RefIdColumn *mFaction;
         const RefIdColumn *mHair;
         const RefIdColumn *mHead;
+        const RefIdColumn *mDestinations;
 
         NpcColumns (const ActorColumns& actorColumns);
     };
