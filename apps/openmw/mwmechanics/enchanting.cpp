@@ -62,7 +62,7 @@ namespace MWMechanics
 
         if(mSelfEnchanting)
         {
-            if(getEnchantChance()<std::rand()/static_cast<double> (RAND_MAX)*100)
+            if(std::rand()/static_cast<double> (RAND_MAX)*100 < getEnchantChance())
                 return false;
 
             mEnchanter.getClass().skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 2);
