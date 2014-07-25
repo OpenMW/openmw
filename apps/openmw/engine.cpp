@@ -421,8 +421,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mOgre->getRoot()->addFrameListener (this);
 
     // scripts
-    mEnvironment.getScriptManager()->getGlobalScripts().addStartup();
-
     if (mCompileAll)
     {
         std::pair<int, int> result = MWBase::Environment::get().getScriptManager()->compileAll();
