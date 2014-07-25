@@ -446,6 +446,7 @@ namespace CSMWorld
         const RefIdColumn *mFight;
         const RefIdColumn *mAlarm;
         const RefIdColumn *mInventory;
+        const RefIdColumn *mSpells;
         std::map<const RefIdColumn *, unsigned int> mServices;
 
         ActorColumns (const NameColumns& base) : NameColumns (base) {}

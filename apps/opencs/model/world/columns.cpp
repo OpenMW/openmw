@@ -175,6 +175,7 @@ namespace CSMWorld
             { ColumnId_Scope, "Scope" },
             { ColumnId_ReferenceableId, "Referenceable ID" },
             { ColumnId_InventoryItemId, "ID"},
+            { ColumnId_SpellId, "ID"},
             { ColumnId_ItemCount, "Count"},
             { ColumnId_CombatState, "Combat" },
             { ColumnId_MagicState, "Magic" },

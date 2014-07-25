@@ -180,6 +180,8 @@ namespace CSMWorld
             ColumnId_BodyPartType = 165,
             ColumnId_MeshType = 166,
             ColumnId_ActorInventory = 167,
+            ColumnId_ActorSpells = 168,
+            ColumnId_SpellId = 169,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

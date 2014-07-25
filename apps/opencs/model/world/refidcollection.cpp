@@ -104,6 +104,10 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addNestedColumn(Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_String);
     mColumns.back().addNestedColumn(Columns::ColumnId_ItemCount, CSMWorld::ColumnBase::Display_Integer);
 
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_ActorSpells, ColumnBase::Display_NestedSpellList, ColumnBase::Flag_Dialogue, true, true, true));
+    actorsColumns.mSpells = &mColumns.back();
+    mColumns.back().addNestedColumn(Columns::ColumnId_SpellId, CSMWorld::ColumnBase::Display_String);
+
     static const struct
     {
         int mName;
