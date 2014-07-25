@@ -144,6 +144,8 @@ namespace MWGui
         mEnchanting.setSelfEnchanting(false);
         mEnchanting.setEnchanter(actor);
 
+        mBuyButton->setCaptionWithReplacing("#{sBuy}");
+
         mPtr = actor;
 
         startEditing ();
@@ -155,6 +157,8 @@ namespace MWGui
 
         mEnchanting.setSelfEnchanting(true);
         mEnchanting.setEnchanter(player);
+
+        mBuyButton->setCaptionWithReplacing("#{sCreate}");
 
         mPtr = player;
         startEditing();
