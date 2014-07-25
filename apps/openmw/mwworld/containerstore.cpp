@@ -141,6 +141,34 @@ void MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container)
     remove(ptr, ptr.getRefData().getCount()-1, container);
 }
 
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::Ptr& item)
+{
+    MWWorld::ContainerStoreIterator retval = end();
+    for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
+    {
+        if (item == *iter)
+        {
+            retval = iter;
+            break;
+        }
+    }
+
+    if (retval == end())
+        throw std::runtime_error("item is not from this container");
+
+    for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
+    {
+        if (stacks(*iter, item))
+        {
+            iter->getRefData().setCount(iter->getRefData().getCount() + item.getRefData().getCount());
+            item.getRefData().setCount(0);
+            retval = iter;
+            break;
+        }
+    }
+    return retval;
+}
+
 bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 {
     const MWWorld::Class& cls1 = ptr1.getClass();

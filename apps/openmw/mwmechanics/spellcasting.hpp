@@ -35,6 +35,11 @@ namespace MWMechanics
     int getSpellSchool(const std::string& spellId, const MWWorld::Ptr& actor);
     int getSpellSchool(const ESM::Spell* spell, const MWWorld::Ptr& actor);
 
+    /// Get the resistance attribute against an effect for a given actor. This will add together
+    /// ResistX and Weakness to X effects relevant against the given effect.
+    float getEffectResistanceAttribute (short effectId, const MagicEffects* actorEffects);
+
+    /// Get the effective resistance against an effect casted by the given actor in the given spell (optional).
     /// @return >=100 for fully resisted. can also return negative value for damage amplification.
     /// @param effects Override the actor's current magicEffects. Useful if there are effects currently
     ///                being applied (but not applied yet) that should also be considered.

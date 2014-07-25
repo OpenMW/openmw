@@ -1088,7 +1088,7 @@ public:
 
     void close() { }
 
-    bool update(Ogre::MaterialPtr &mat, Ogre::Rectangle2D *rect, int screen_width, int screen_height)
+    bool update()
     { return false; }
 };
 

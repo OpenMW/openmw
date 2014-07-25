@@ -473,8 +473,9 @@ namespace MWWorld
             /// open or close a non-teleport door (depending on current state)
             virtual void activateDoor(const MWWorld::Ptr& door);
 
-            /// open or close a non-teleport door as specified
-            virtual void activateDoor(const MWWorld::Ptr& door, bool open);
+            /// update movement state of a non-teleport door as specified
+            /// @param state see MWClass::setDoorState
+            virtual void activateDoor(const MWWorld::Ptr& door, int state);
 
             virtual bool getPlayerStandingOn (const MWWorld::Ptr& object); ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::Ptr& object); ///< @return true if any actor is standing on \a object

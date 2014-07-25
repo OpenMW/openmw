@@ -340,7 +340,9 @@ Ogre::TexturePtr LocalMap::createFogOfWarTexture(const std::string &texName)
                         sFogOfWarResolution, sFogOfWarResolution,
                         0,
                         PF_A8R8G8B8,
-                        TU_DYNAMIC_WRITE_ONLY);
+                        TU_DYNAMIC_WRITE_ONLY,
+                    this // ManualResourceLoader required if the texture contents are lost (due to lost devices nonsense that can occur with D3D)
+                    );
     }
 
     return tex;
@@ -455,6 +457,30 @@ bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interi
     Ogre::uint32 clr = mBuffers[texName][texV * sFogOfWarResolution + texU];
     uint8 alpha = (clr >> 24);
     return alpha < 200;
+}
+
+void LocalMap::loadResource(Ogre::Resource* resource)
+{
+    std::string resourceName = resource->getName();
+    size_t pos = resourceName.find("_fog");
+    if (pos != std::string::npos)
+        resourceName = resourceName.substr(0, pos);
+    if (mBuffers.find(resourceName) == mBuffers.end())
+    {
+        // create a buffer to use for dynamic operations
+        std::vector<uint32> buffer;
+
+        // initialize to (0, 0, 0, 1)
+        buffer.resize(sFogOfWarResolution*sFogOfWarResolution, 0xFF000000);
+        mBuffers[resourceName] = buffer;
+    }
+
+    std::vector<uint32>& buffer = mBuffers[resourceName];
+
+    Ogre::Texture* tex = dynamic_cast<Ogre::Texture*>(resource);
+    tex->createInternalResources();
+    memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
+    tex->getBuffer()->unlock();
 }
 
 void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaternion& orientation)

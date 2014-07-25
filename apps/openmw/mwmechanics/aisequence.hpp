@@ -63,6 +63,12 @@ namespace MWMechanics
             /// Return true and assign target if combat package is currently active, return false otherwise
             bool getCombatTarget (MWWorld::Ptr &targetActor) const;
 
+            /// Is there any combat package?
+            bool isInCombat () const;
+
+            /// Are we in combat with this particular actor?
+            bool isInCombat (const MWWorld::Ptr& actor) const;
+
             bool canAddTarget(const ESM::Position& actorPos, float distToTarget) const;
             ///< Function assumes that actor can have only 1 target apart player
 

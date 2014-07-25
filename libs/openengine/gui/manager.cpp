@@ -135,28 +135,6 @@ public:
         setRenderWindow(_window);
         setSceneManager(_scene);
 
-        // ADDED
-        sh::MaterialInstance* mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/NoTexture");
-        sh::Factory::getInstance()._ensureMaterial("MyGUI/NoTexture", "Default");
-        mVertexProgramNoTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
-                ->getVertexProgram()->_getBindingDelegate();
-
-        mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/OneTexture");
-        sh::Factory::getInstance()._ensureMaterial("MyGUI/OneTexture", "Default");
-        mVertexProgramOneTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
-                ->getVertexProgram()->_getBindingDelegate();
-
-        mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/NoTexture");
-        sh::Factory::getInstance()._ensureMaterial("MyGUI/NoTexture", "Default");
-        mFragmentProgramNoTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
-                ->getFragmentProgram()->_getBindingDelegate();
-
-        mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/OneTexture");
-        sh::Factory::getInstance()._ensureMaterial("MyGUI/OneTexture", "Default");
-        mFragmentProgramOneTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
-                ->getFragmentProgram()->_getBindingDelegate();
-
-
 
         MYGUI_PLATFORM_LOG(Info, getClassTypeName() << " successfully initialized");
         mIsInitialise = true;
@@ -359,6 +337,30 @@ public:
         }
     }
 
+    void initShaders()
+    {
+        // ADDED
+        sh::MaterialInstance* mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/NoTexture");
+        sh::Factory::getInstance()._ensureMaterial("MyGUI/NoTexture", "Default");
+        mVertexProgramNoTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
+                ->getVertexProgram()->_getBindingDelegate();
+
+        mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/OneTexture");
+        sh::Factory::getInstance()._ensureMaterial("MyGUI/OneTexture", "Default");
+        mVertexProgramOneTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
+                ->getVertexProgram()->_getBindingDelegate();
+
+        mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/NoTexture");
+        sh::Factory::getInstance()._ensureMaterial("MyGUI/NoTexture", "Default");
+        mFragmentProgramNoTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
+                ->getFragmentProgram()->_getBindingDelegate();
+
+        mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/OneTexture");
+        sh::Factory::getInstance()._ensureMaterial("MyGUI/OneTexture", "Default");
+        mFragmentProgramOneTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
+                ->getFragmentProgram()->_getBindingDelegate();
+    }
+
     void doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count)
     {
         if (getManualRender())
@@ -368,6 +370,8 @@ public:
         }
 
         // ADDED
+        if (!mVertexProgramNoTexture)
+            initShaders();
 
         if (_texture)
         {

@@ -27,8 +27,8 @@ struct Spell
 
     enum Flags
     {
-        F_Autocalc = 1,
-        F_PCStart = 2,
+        F_Autocalc = 1, // Can be selected by NPC spells auto-calc
+        F_PCStart = 2, // Can be selected by player spells auto-calc
         F_Always = 4 // Casting always succeeds
     };
 

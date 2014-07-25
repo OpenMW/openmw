@@ -165,6 +165,8 @@ void Recharge::onItemClicked(MyGUI::Widget *sender)
         item.getCellRef().setEnchantmentCharge(
             std::min(item.getCellRef().getEnchantmentCharge() + restored, static_cast<float>(enchantment->mData.mCharge)));
 
+        player.getClass().getContainerStore(player).restack(item);
+
         player.getClass().skillUsageSucceeded (player, ESM::Skill::Enchant, 0);
     }
 

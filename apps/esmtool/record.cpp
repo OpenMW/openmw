@@ -513,7 +513,7 @@ void Record<ESM::Cell>::print()
     else
         std::cout << "  Map Color: " << boost::format("0x%08X") % mData.mMapColor << std::endl;
     std::cout << "  Water Level Int: " << mData.mWaterInt << std::endl;
-    std::cout << "  NAM0: " << mData.mNAM0 << std::endl;
+    std::cout << "  RefId counter: " << mData.mRefIdCounter << std::endl;
 
 }
 

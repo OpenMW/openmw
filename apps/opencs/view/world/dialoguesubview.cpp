@@ -471,25 +471,32 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
     QToolButton* prevButton = new QToolButton(mainWidget);
     prevButton->setIcon(QIcon(":/go-previous.png"));
+    prevButton->setToolTip ("Switch to previous record");
     QToolButton* nextButton = new QToolButton(mainWidget);
     nextButton->setIcon(QIcon(":/go-next.png"));
+    nextButton->setToolTip ("Switch to next record");
     buttonsLayout->addWidget(prevButton, 0);
     buttonsLayout->addWidget(nextButton, 1);
     buttonsLayout->addStretch(2);
 
     QToolButton* cloneButton = new QToolButton(mainWidget);
     cloneButton->setIcon(QIcon(":/edit-clone.png"));
+    cloneButton->setToolTip ("Clone record");
     QToolButton* addButton = new QToolButton(mainWidget);
     addButton->setIcon(QIcon(":/add.png"));
+    addButton->setToolTip ("Add new record");
     QToolButton* deleteButton = new QToolButton(mainWidget);
     deleteButton->setIcon(QIcon(":/edit-delete.png"));
+    deleteButton->setToolTip ("Delete record");
     QToolButton* revertButton = new QToolButton(mainWidget);
     revertButton->setIcon(QIcon(":/edit-undo.png"));
+    revertButton->setToolTip ("Revert record");
 
     if (mTable->getFeatures() & CSMWorld::IdTable::Feature_Preview)
     {
         QToolButton* previewButton = new QToolButton(mainWidget);
         previewButton->setIcon(QIcon(":/edit-preview.png"));
+        previewButton->setToolTip ("Open a preview of this record");
         buttonsLayout->addWidget(previewButton);
         connect(previewButton, SIGNAL(clicked()), this, SLOT(showPreview()));
     }
@@ -498,6 +505,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     {
         QToolButton* viewButton = new QToolButton(mainWidget);
         viewButton->setIcon(QIcon(":/cell.png"));
+        viewButton->setToolTip ("Open a scene view of the cell this record is located in");
         buttonsLayout->addWidget(viewButton);
         connect(viewButton, SIGNAL(clicked()), this, SLOT(viewRecord()));
     }

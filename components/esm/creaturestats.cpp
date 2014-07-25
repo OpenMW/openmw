@@ -33,6 +33,9 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mAlarmed = false;
     esm.getHNOT (mAlarmed, "ALRM");
 
+    mAttacked = false;
+    esm.getHNOT (mAttacked, "ATKD");
+
     mHostile = false;
     esm.getHNOT (mHostile, "HOST");
 
@@ -141,6 +144,9 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
 
     if (mAlarmed)
         esm.writeHNT ("ALRM", mAlarmed);
+
+    if (mAttacked)
+        esm.writeHNT ("ATKD", mAttacked);
 
     if (mHostile)
         esm.writeHNT ("HOST", mHostile);

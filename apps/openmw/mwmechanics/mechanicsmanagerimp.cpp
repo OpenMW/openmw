@@ -19,6 +19,7 @@
 #include <OgreSceneNode.h>
 
 #include "spellcasting.hpp"
+#include "autocalcspell.hpp"
 
 namespace
 {
@@ -33,8 +34,17 @@ namespace
         if (!faction.empty() && ptr.getClass().isNpc())
         {
             const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
-            if (factions.find(Misc::StringUtils::lowerCase(faction)) == factions.end())
+            std::map<std::string, int>::const_iterator found = factions.find(Misc::StringUtils::lowerCase(faction));
+            if (found == factions.end()
+                    || found->second < item.getCellRef().getFactionRank())
                 isFactionOwned = true;
+        }
+
+        const std::string& globalVariable = item.getCellRef().getGlobalVariable();
+        if (!globalVariable.empty() && MWBase::Environment::get().getWorld()->getGlobalInt(Misc::StringUtils::lowerCase(globalVariable)) == 1)
+        {
+            isOwned = false;
+            isFactionOwned = false;
         }
 
         if (!item.getCellRef().getOwner().empty())
@@ -155,19 +165,6 @@ namespace MWMechanics
                         npcStats.getSkill (index).setBase (
                             npcStats.getSkill (index).getBase() + bonus);
                     }
-
-                    if (i==1)
-                    {
-                        // Major skill - add starting spells for this skill if existing
-                        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-                        MWWorld::Store<ESM::Spell>::iterator it = store.get<ESM::Spell>().begin();
-                        for (; it != store.get<ESM::Spell>().end(); ++it)
-                        {
-                            if (it->mData.mFlags & ESM::Spell::F_PCStart
-                                    && spellSchoolToSkill(getSpellSchool(&*it, ptr)) == index)
-                                creatureStats.getSpells().add(it->mId);
-                        }
-                    }
                 }
             }
 
@@ -189,6 +186,87 @@ namespace MWMechanics
                 }
             }
         }
+
+        // F_PCStart spells
+        static const float fPCbaseMagickaMult = esmStore.get<ESM::GameSetting>().find("fPCbaseMagickaMult")->getFloat();
+
+        float baseMagicka = fPCbaseMagickaMult * creatureStats.getAttribute(ESM::Attribute::Intelligence).getBase();
+        bool reachedLimit = false;
+        const ESM::Spell* weakestSpell = NULL;
+        int minCost = INT_MAX;
+
+        std::vector<std::string> selectedSpells;
+
+        const ESM::Race* race = NULL;
+        if (mRaceSelected)
+            race = esmStore.get<ESM::Race>().find(player->mRace);
+
+        int skills[ESM::Skill::Length];
+        for (int i=0; i<ESM::Skill::Length; ++i)
+            skills[i] = npcStats.getSkill(i).getBase();
+
+        int attributes[ESM::Attribute::Length];
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+            attributes[i] = npcStats.getAttribute(i).getBase();
+
+        const MWWorld::Store<ESM::Spell> &spells =
+            esmStore.get<ESM::Spell>();
+        for (MWWorld::Store<ESM::Spell>::iterator iter = spells.begin(); iter != spells.end(); ++iter)
+        {
+            const ESM::Spell* spell = &*iter;
+
+            if (spell->mData.mType != ESM::Spell::ST_Spell)
+                continue;
+            if (!(spell->mData.mFlags & ESM::Spell::F_PCStart))
+                continue;
+            if (reachedLimit && spell->mData.mCost <= minCost)
+                continue;
+            if (race && std::find(race->mPowers.mList.begin(), race->mPowers.mList.end(), spell->mId) != race->mPowers.mList.end())
+                continue;
+            if (baseMagicka < spell->mData.mCost)
+                continue;
+
+            static const float fAutoPCSpellChance = esmStore.get<ESM::GameSetting>().find("fAutoPCSpellChance")->getFloat();
+            if (calcAutoCastChance(spell, skills, attributes, -1) < fAutoPCSpellChance)
+                continue;
+
+            if (!attrSkillCheck(spell, skills, attributes))
+                continue;
+
+            selectedSpells.push_back(spell->mId);
+
+            if (reachedLimit)
+            {
+                std::vector<std::string>::iterator it = std::find(selectedSpells.begin(), selectedSpells.end(), weakestSpell->mId);
+                if (it != selectedSpells.end())
+                    selectedSpells.erase(it);
+
+                minCost = INT_MAX;
+                for (std::vector<std::string>::iterator weakIt = selectedSpells.begin(); weakIt != selectedSpells.end(); ++weakIt)
+                {
+                    const ESM::Spell* testSpell = esmStore.get<ESM::Spell>().find(*weakIt);
+                    if (testSpell->mData.mCost < minCost)
+                    {
+                        minCost = testSpell->mData.mCost;
+                        weakestSpell = testSpell;
+                    }
+                }
+            }
+            else
+            {
+                if (spell->mData.mCost < minCost)
+                {
+                    weakestSpell = spell;
+                    minCost = weakestSpell->mData.mCost;
+                }
+                static const unsigned int iAutoPCSpellMax = esmStore.get<ESM::GameSetting>().find("iAutoPCSpellMax")->getInt();
+                if (selectedSpells.size() == iAutoPCSpellMax)
+                    reachedLimit = true;
+            }
+        }
+
+        for (std::vector<std::string>::iterator it = selectedSpells.begin(); it != selectedSpells.end(); ++it)
+            creatureStats.getSpells().add(*it);
 
         // forced update and current value adjustments
         mActors.updateActor (ptr, 0);
@@ -584,6 +662,10 @@ namespace MWMechanics
         return mActors.countDeaths (id);
     }
 
+    void MechanicsManager::killDeadActors()
+    {
+        mActors.killDeadActors();
+    }
 
     void MechanicsManager::getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
         float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange)

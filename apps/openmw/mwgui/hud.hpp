@@ -104,7 +104,7 @@ namespace MWGui
 
         SpellIcons* mSpellIcons;
 
-        MWWorld::Ptr mEnemy;
+        int mEnemyActorId;
         float mEnemyHealthTimer;
 
         bool  mIsDrowning;

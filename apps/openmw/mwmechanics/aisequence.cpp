@@ -72,6 +72,30 @@ bool AiSequence::getCombatTarget(MWWorld::Ptr &targetActor) const
     return true;
 }
 
+bool AiSequence::isInCombat() const
+{
+    for(std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+    {
+        if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+            return true;
+    }
+    return false;
+}
+
+bool AiSequence::isInCombat(const MWWorld::Ptr &actor) const
+{
+    for(std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+    {
+        if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+        {
+            const AiCombat *combat = static_cast<const AiCombat *>(*it);
+            if (combat->getTarget() == actor)
+                return true;
+        }
+    }
+    return false;
+}
+
 bool AiSequence::canAddTarget(const ESM::Position& actorPos, float distToTarget) const
 {
     bool firstCombatFound = false;

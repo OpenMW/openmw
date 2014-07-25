@@ -9,6 +9,7 @@
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/disease.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/difficultyscaling.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -254,6 +255,23 @@ namespace MWClass
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
             victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, false);
+
+            // Weapon health is reduced by 1 even if the attack misses
+            const bool weaphashealth = !weapon.isEmpty() && weapon.getClass().hasItemHealth(weapon);
+            if(weaphashealth)
+            {
+                int weaphealth = weapon.getClass().getItemHealth(weapon);
+
+                if (!MWBase::Environment::get().getWorld()->getGodModeState())
+                {
+                    weaphealth -= std::min(1, weaphealth);
+                    weapon.getCellRef().setCharge(weaphealth);
+                }
+
+                // Weapon broken? unequip it
+                if (weapon.getCellRef().getCharge() == 0)
+                    weapon = *getInventoryStore(ptr).unequipItem(weapon, ptr);
+            }
             return;
         }
 
@@ -290,13 +308,13 @@ namespace MWClass
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust;
             if(attack)
             {
-                float weaponDamage = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
-                weaponDamage *= 0.5f + (stats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
+                damage = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
+                damage *= 0.5f + (stats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
                 if(weaphashealth)
                 {
                     int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
                     int weaphealth = weapon.getClass().getItemHealth(weapon);
-                    weaponDamage *= float(weaphealth) / weapmaxhealth;
+                    damage *= float(weaphealth) / weapmaxhealth;
 
                     if (!MWBase::Environment::get().getWorld()->getGodModeState())
                     {
@@ -311,8 +329,6 @@ namespace MWClass
                     if (weapon.getCellRef().getCharge() == 0)
                         weapon = *getInventoryStore(ptr).unequipItem(weapon, ptr);
                 }
-
-                damage += weaponDamage;
             }
 
             // Apply "On hit" enchanted weapons
@@ -329,6 +345,8 @@ namespace MWClass
                 }
             }
         }
+
+        MWMechanics::applyElementalShields(ptr, victim);
 
         if (!weapon.isEmpty() && MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
             damage = 0;
@@ -376,6 +394,9 @@ namespace MWClass
         if (damage > 0.0f && !object.isEmpty())
             MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
 
+        if (damage < 0.001f)
+            damage = 0;
+
         if (damage > 0.f)
         {
             // Check for knockdown
@@ -391,8 +412,13 @@ namespace MWClass
             else
                 getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
+            damage = std::max(1.f, damage);
+
             if(ishealth)
             {
+                if (!attacker.isEmpty())
+                    damage = scaleDamage(damage, attacker, ptr);
+
                 MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
                 float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
                 setActorHealth(ptr, health, attacker);
@@ -618,8 +644,8 @@ namespace MWClass
 
     float Creature::getArmorRating (const MWWorld::Ptr& ptr) const
     {
-        /// \todo add Shield magic effect magnitude here, controlled by a GMST (Vanilla vs MCP behaviour)
-        return 0.f;
+        // Note this is currently unused. Creatures do not use armor mitigation.
+        return getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).mMagnitude;
     }
 
     float Creature::getCapacity (const MWWorld::Ptr& ptr) const

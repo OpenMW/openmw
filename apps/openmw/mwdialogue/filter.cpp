@@ -76,8 +76,18 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
     }
     else if (info.mData.mRank != -1)
     {
-        // if there is a rank condition, but the NPC is not in a faction, always fail
-        return false;
+        if (isCreature)
+            return false;
+
+        // Rank requirement, but no faction given. Use the actor's faction, if there is one.
+        MWMechanics::NpcStats& stats = mActor.getClass().getNpcStats (mActor);
+
+        if (!stats.getFactionRanks().size())
+            return false;
+
+        // check rank
+        if (stats.getFactionRanks().begin()->second < info.mData.mRank)
+            return false;
     }
 
     // Gender

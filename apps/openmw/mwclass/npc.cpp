@@ -22,6 +22,8 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/disease.hpp"
 #include "../mwmechanics/combat.hpp"
+#include "../mwmechanics/autocalcspell.hpp"
+#include "../mwmechanics/difficultyscaling.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -51,6 +53,24 @@ namespace
     MWWorld::CustomData *NpcCustomData::clone() const
     {
         return new NpcCustomData (*this);
+    }
+
+    int is_even(double d) {
+        double int_part;
+        modf(d / 2.0, &int_part);
+        return 2.0 * int_part == d;
+    }
+
+    int round_ieee_754(double d) {
+        double i = floor(d);
+        d -= i;
+        if(d < 0.5)
+            return i;
+        if(d > 0.5)
+            return i + 1.0;
+        if(is_even(i))
+            return i;
+        return i + 1.0;
     }
 
     void autoCalculateAttributes (const ESM::NPC* npc, MWMechanics::CreatureStats& creatureStats)
@@ -108,8 +128,9 @@ namespace
                 }
                 modifierSum += add;
             }
-            creatureStats.setAttribute(attribute, std::min(creatureStats.getAttribute(attribute).getBase()
-                + static_cast<int>((level-1) * modifierSum+0.5), 100) );
+            creatureStats.setAttribute(attribute, std::min(
+                                           round_ieee_754(creatureStats.getAttribute(attribute).getBase()
+                + (level-1) * modifierSum), 100) );
         }
 
         // initial health
@@ -193,18 +214,6 @@ namespace
                     majorMultiplier = 1.0f;
                     break;
                 }
-                if (class_->mData.mSkills[k][1] == skillIndex)
-                {
-                    // Major skill -> add starting spells for this skill if existing
-                    const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-                    MWWorld::Store<ESM::Spell>::iterator it = store.get<ESM::Spell>().begin();
-                    for (; it != store.get<ESM::Spell>().end(); ++it)
-                    {
-                        if (it->mData.mFlags & ESM::Spell::F_Autocalc
-                                && MWMechanics::spellSchoolToSkill(MWMechanics::getSpellSchool(&*it, ptr)) == skillIndex)
-                            npcStats.getSpells().add(it->mId);
-                    }
-                }
             }
 
             // is this skill in the same Specialization as the class?
@@ -217,12 +226,25 @@ namespace
 
             npcStats.getSkill(skillIndex).setBase(
                   std::min(
-                    npcStats.getSkill(skillIndex).getBase()
+                    round_ieee_754(
+                            npcStats.getSkill(skillIndex).getBase()
                     + 5
                     + raceBonus
                     + specBonus
-                    + static_cast<int>((level-1) * (majorMultiplier + specMultiplier)), 100));
+                    +(int(level)-1) * (majorMultiplier + specMultiplier)), 100)); // Must gracefully handle level 0
         }
+
+        int skills[ESM::Skill::Length];
+        for (int i=0; i<ESM::Skill::Length; ++i)
+            skills[i] = npcStats.getSkill(i).getBase();
+
+        int attributes[ESM::Attribute::Length];
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+            attributes[i] = npcStats.getAttribute(i).getBase();
+
+        std::vector<std::string> spells = MWMechanics::autoCalcNpcSpells(skills, attributes, race);
+        for (std::vector<std::string>::iterator it = spells.begin(); it != spells.end(); ++it)
+            npcStats.getSpells().add(*it);
     }
 }
 
@@ -258,6 +280,7 @@ namespace MWClass
             gmst.iKnockDownOddsBase = store.find("iKnockDownOddsBase");
             gmst.fDamageStrengthBase = store.find("fDamageStrengthBase");
             gmst.fDamageStrengthMult = store.find("fDamageStrengthMult");
+            gmst.fCombatArmorMinMult = store.find("fCombatArmorMinMult");
 
             inited = true;
         }
@@ -506,6 +529,24 @@ namespace MWClass
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
             othercls.onHit(victim, 0.0f, false, weapon, ptr, false);
+
+            // Weapon health is reduced by 1 even if the attack misses
+            const bool weaphashealth = !weapon.isEmpty() && weapon.getClass().hasItemHealth(weapon);
+            if(weaphashealth)
+            {
+                int weaphealth = weapon.getClass().getItemHealth(weapon);
+
+                if (!MWBase::Environment::get().getWorld()->getGodModeState())
+                {
+                    weaphealth -= std::min(1, weaphealth);
+                    weapon.getCellRef().setCharge(weaphealth);
+                }
+
+                // Weapon broken? unequip it
+                if (weaphealth == 0)
+                    weapon = *inv.unequipItem(weapon, ptr);
+            }
+
             return;
         }
 
@@ -560,8 +601,8 @@ namespace MWClass
             damage  = stats.getSkill(weapskill).getModified();
             damage *= minstrike + ((maxstrike-minstrike)*stats.getAttackStrength());
 
-            healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f)
-                    || (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0);
+            healthdmg = (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0)
+                    || otherstats.getKnockedDown();
             if(stats.isWerewolf())
             {
                 healthdmg = true;
@@ -583,15 +624,21 @@ namespace MWClass
                 sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
         }
         if(ptr.getRefData().getHandle() == "player")
+        {
             skillUsageSucceeded(ptr, weapskill, 0);
 
-        bool detected = MWBase::Environment::get().getMechanicsManager()->awarenessCheck(ptr, victim);
-        if(!detected)
-        {
-            damage *= store.find("fCombatCriticalStrikeMult")->getFloat();
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
-            MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+            const MWMechanics::AiSequence& seq = victim.getClass().getCreatureStats(victim).getAiSequence();
+
+            bool unaware = !seq.isInCombat()
+                    && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(ptr, victim);
+            if(unaware)
+            {
+                damage *= store.find("fCombatCriticalStrikeMult")->getFloat();
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
+                MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+            }
         }
+
         if (othercls.getCreatureStats(victim).getKnockedDown())
             damage *= store.find("fCombatKODamageMult")->getFloat();
 
@@ -608,6 +655,8 @@ namespace MWClass
                 cast.cast(weapon);
             }
         }
+
+        MWMechanics::applyElementalShields(ptr, victim);
 
         if (!weapon.isEmpty() && MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
             damage = 0;
@@ -630,6 +679,14 @@ namespace MWClass
         if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).isHostile() &&
                 !MWBase::Environment::get().getMechanicsManager()->isAggressive(ptr, attacker))
             MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
+
+        if (!attacker.isEmpty() && attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)
+                && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
+        {
+            // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
+            // Note: accidental or collateral damage attacks are ignored.
+            MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, attacker);
+        }
 
         bool wasDead = getCreatureStats(ptr).isDead();
 
@@ -657,6 +714,9 @@ namespace MWClass
 
         if (damage > 0.0f && !object.isEmpty())
             MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
+
+        if (damage < 0.001f)
+            damage = 0;
 
         if(damage > 0.0f)
         {
@@ -686,7 +746,7 @@ namespace MWClass
             else
                 getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
-            if(ishealth && !attacker.isEmpty()) // Don't use armor mitigation for fall damage
+            if(damage > 0 && ishealth && !attacker.isEmpty()) // Don't use armor mitigation for fall damage
             {
                 // Hit percentages:
                 // cuirass = 30%
@@ -706,9 +766,12 @@ namespace MWClass
                 };
                 int hitslot = hitslots[(int)(::rand()/(RAND_MAX+1.0)*20.0)];
 
-                float damagediff = damage;
-                damage /= std::min(1.0f + getArmorRating(ptr)/std::max(1.0f, damage), 4.0f);
-                damagediff -= damage;
+                float unmitigatedDamage = damage;
+                float x = damage / (damage + getArmorRating(ptr));
+                damage *= std::max(gmst.fCombatArmorMinMult->getFloat(), x);
+                int damageDiff = unmitigatedDamage - damage;
+                if (damage < 1)
+                    damage = 1;
 
                 MWWorld::InventoryStore &inv = getInventoryStore(ptr);
                 MWWorld::ContainerStoreIterator armorslot = inv.getSlot(hitslot);
@@ -716,13 +779,13 @@ namespace MWClass
                 if(!armor.isEmpty() && armor.getTypeName() == typeid(ESM::Armor).name())
                 {
                     int armorhealth = armor.getClass().getItemHealth(armor);
-                    armorhealth -= std::min(std::max(1, (int)damagediff),
+                    armorhealth -= std::min(std::max(1, damageDiff),
                                                  armorhealth);
                     armor.getCellRef().setCharge(armorhealth);
 
                     // Armor broken? unequip it
                     if (armorhealth == 0)
-                        inv.unequipItem(armor, ptr);
+                        armor = *inv.unequipItem(armor, ptr);
 
                     if (ptr.getRefData().getHandle() == "player")
                         skillUsageSucceeded(ptr, armor.getClass().getEquipmentSkill(armor), 0);
@@ -747,6 +810,9 @@ namespace MWClass
 
         if(ishealth)
         {
+            if (!attacker.isEmpty())
+                damage = scaleDamage(damage, attacker, ptr);
+
             if(damage > 0.0f)
                 sndMgr->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
             float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
@@ -827,6 +893,7 @@ namespace MWClass
         if(ptr.getRefData().getHandle() == "player")
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
 
+        // Werewolfs can't activate NPCs
         if(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -837,6 +904,7 @@ namespace MWClass
 
             return action;
         }
+
         if(getCreatureStats(ptr).isDead())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
         if(ptr.getClass().getCreatureStats(ptr).isHostile())
@@ -844,8 +912,10 @@ namespace MWClass
         if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
         
+        // Can't talk to werewolfs
+        if(ptr.getClass().isNpc() && ptr.getClass().getNpcStats(ptr).isWerewolf())
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
-
     }
 
     MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)

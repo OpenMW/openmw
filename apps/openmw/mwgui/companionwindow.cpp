@@ -153,6 +153,13 @@ void CompanionWindow::onReferenceUnavailable()
     MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);
 }
 
+void CompanionWindow::resetReference()
+{
+    ReferenceInterface::resetReference();
+    mItemView->setModel(NULL);
+    mModel = NULL;
+    mSortModel = NULL;
+}
 
 
 }

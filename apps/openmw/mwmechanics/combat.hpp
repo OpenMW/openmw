@@ -19,6 +19,9 @@ void projectileHit (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, MW
 /// Get the chance (in percent) for \a attacker to successfully hit \a victim with a given weapon skill value
 float getHitChance (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, int skillValue);
 
+/// Applies damage to attacker based on the victim's elemental shields.
+void applyElementalShields(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim);
+
 }
 
 #endif

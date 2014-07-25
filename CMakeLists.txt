@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
-set(OPENMW_VERSION_MINOR 30)
+set(OPENMW_VERSION_MINOR 31)
 set(OPENMW_VERSION_RELEASE 0)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -325,12 +325,14 @@ else ()
     add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="_d")
 endif()
 
-add_definitions(-DOGRE_PLUGIN_DIR_REL="${OGRE_PLUGIN_DIR_REL}")
-add_definitions(-DOGRE_PLUGIN_DIR_DBG="${OGRE_PLUGIN_DIR_DBG}")
 if (APPLE AND OPENMW_OSX_DEPLOYMENT)
     # make it empty so plugin loading code can check this and try to find plugins inside app bundle
     add_definitions(-DOGRE_PLUGIN_DIR="")
 else()
+    if (NOT DEFINED ${OGRE_PLUGIN_DIR})
+        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
+    endif()
+
     add_definitions(-DOGRE_PLUGIN_DIR="${OGRE_PLUGIN_DIR}")
 endif()
 

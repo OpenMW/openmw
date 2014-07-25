@@ -1123,24 +1123,30 @@ namespace MWWorld
 
         ptr.getRefData().setPosition(pos);
 
-        mWorldScene->updateObjectRotation(ptr);
+        if(ptr.getRefData().getBaseNode() == 0)
+            return;
+
+        if (ptr.getClass().isActor())
+            mWorldScene->updateObjectRotation(ptr);
+        else
+            mWorldScene->updateObjectLocalRotation(ptr);
     }
 
     void World::localRotateObject (const Ptr& ptr, float x, float y, float z)
     {
+        LocalRotation rot = ptr.getRefData().getLocalRotation();
+        rot.rot[0]=Ogre::Degree(x).valueRadians();
+        rot.rot[1]=Ogre::Degree(y).valueRadians();
+        rot.rot[2]=Ogre::Degree(z).valueRadians();
+
+        wrap(rot.rot[0]);
+        wrap(rot.rot[1]);
+        wrap(rot.rot[2]);
+
+        ptr.getRefData().setLocalRotation(rot);
+
         if (ptr.getRefData().getBaseNode() != 0)
         {
-            LocalRotation rot = ptr.getRefData().getLocalRotation();
-            rot.rot[0]=Ogre::Degree(x).valueRadians();
-            rot.rot[1]=Ogre::Degree(y).valueRadians();
-            rot.rot[2]=Ogre::Degree(z).valueRadians();
-
-            wrap(rot.rot[0]);
-            wrap(rot.rot[1]);
-            wrap(rot.rot[2]);
-
-            ptr.getRefData().setLocalRotation(rot);
-
             mWorldScene->updateObjectLocalRotation(ptr);
         }
     }
@@ -1980,11 +1986,12 @@ namespace MWWorld
         mDoorStates[door] = state;
     }
 
-    void World::activateDoor(const Ptr &door, bool open)
+    void World::activateDoor(const Ptr &door, int state)
     {
-        int state = open ? 1 : 2;
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;
+        if (state == 0)
+            mDoorStates.erase(door);
     }
 
     bool World::getPlayerStandingOn (const MWWorld::Ptr& object)
@@ -2313,15 +2320,10 @@ namespace MWWorld
             }
 
             // If this is a power, check if it was already used in the last 24h
-            if (!fail && spell->mData.mType == ESM::Spell::ST_Power)
+            if (!fail && spell->mData.mType == ESM::Spell::ST_Power && !stats.getSpells().canUsePower(spell->mId))
             {
-                if (stats.getSpells().canUsePower(spell->mId))
-                    stats.getSpells().usePower(spell->mId);
-                else
-                {
-                    message = "#{sPowerAlreadyUsed}";
-                    fail = true;
-                }
+                message = "#{sPowerAlreadyUsed}";
+                fail = true;
             }
 
             // Reduce mana
@@ -2354,6 +2356,10 @@ namespace MWWorld
         if (!selectedSpell.empty())
         {
             const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
+	    
+	    // A power can be used once per 24h
+	    if (spell->mData.mType == ESM::Spell::ST_Power)
+	        stats.getSpells().usePower(spell->mId);
 
             cast.cast(spell);
         }
@@ -2583,8 +2589,14 @@ namespace MWWorld
         float fCrimeGoldDiscountMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->getFloat();
         float fCrimeGoldTurnInMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldTurnInMult")->getFloat();
 
-        int discount = bounty*fCrimeGoldDiscountMult;
+        int discount = bounty * fCrimeGoldDiscountMult;
         int turnIn = bounty * fCrimeGoldTurnInMult;
+
+        if (bounty > 0)
+        {
+            discount = std::max(1, discount);
+            turnIn = std::max(1, turnIn);
+        }
 
         mGlobalVariables["pchascrimegold"].setInteger((bounty <= playerGold) ? 1 : 0);
 
@@ -2648,6 +2660,8 @@ namespace MWWorld
         else
         {
             mGoToJail = false;
+
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
 
             MWWorld::Ptr player = getPlayerPtr();
             teleportToClosestMarker(player, "prisonmarker");

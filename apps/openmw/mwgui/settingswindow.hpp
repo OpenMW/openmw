@@ -30,6 +30,7 @@ namespace MWGui
             MyGUI::Button* mVSyncButton;
             MyGUI::Button* mFPSButton;
             MyGUI::ScrollBar* mFOVSlider;
+            MyGUI::ScrollBar* mDifficultySlider;
             MyGUI::ScrollBar* mAnisotropySlider;
             MyGUI::ComboBox* mTextureFilteringButton;
             MyGUI::TextBox* mAnisotropyLabel;

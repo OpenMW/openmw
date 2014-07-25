@@ -92,6 +92,7 @@ namespace MWGui
         , mSpellVisible(true)
         , mWorldMouseOver(false)
         , mEnemyHealthTimer(-1)
+        , mEnemyActorId(-1)
         , mIsDrowning(false)
         , mWeaponSpellTimer(0.f)
         , mDrowningFlashTheta(0.f)
@@ -609,7 +610,10 @@ namespace MWGui
 
     void HUD::updateEnemyHealthBar()
     {
-        MWMechanics::CreatureStats& stats = mEnemy.getClass().getCreatureStats(mEnemy);
+        MWWorld::Ptr enemy = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mEnemyActorId);
+        if (enemy.isEmpty())
+            return;
+        MWMechanics::CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
         mEnemyHealth->setProgressRange(100);
         // Health is usually cast to int before displaying. Actors die whenever they are < 1 health.
         // Therefore any value < 1 should show as an empty health bar. We do the same in statswindow :)
@@ -620,7 +624,7 @@ namespace MWGui
     {
         mSpellIcons->updateWidgets(mEffectBox, true);
 
-        if (!mEnemy.isEmpty() && mEnemyHealth->getVisible())
+        if (mEnemyActorId != -1 && mEnemyHealth->getVisible())
         {
             updateEnemyHealthBar();
         }
@@ -634,7 +638,7 @@ namespace MWGui
 
     void HUD::setEnemy(const MWWorld::Ptr &enemy)
     {
-        mEnemy = enemy;
+        mEnemyActorId = enemy.getClass().getCreatureStats(enemy).getActorId();
         mEnemyHealthTimer = 5;
         if (!mEnemyHealth->getVisible())
             mWeaponSpellBox->setPosition(mWeaponSpellBox->getPosition() - MyGUI::IntPoint(0,20));
@@ -644,7 +648,7 @@ namespace MWGui
 
     void HUD::resetEnemy()
     {
-        mEnemy = MWWorld::Ptr();
+        mEnemyActorId = -1;
         mEnemyHealthTimer = -1;
     }
 

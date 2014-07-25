@@ -266,7 +266,7 @@ namespace MWDialogue
             }
             catch (const std::exception& error)
             {
-                std::cerr << std::string ("Dialogue error: An exception has been thrown: ") + error.what();
+                std::cerr << std::string ("Dialogue error: An exception has been thrown: ") + error.what() << std::endl;
             }
         }
     }
@@ -505,9 +505,10 @@ namespace MWDialogue
 
     void DialogueManager::askQuestion (const std::string& question, int choice)
     {
+        mIsInChoice = true;
+
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         win->addChoice(question, choice);
-        mIsInChoice = true;
     }
 
     void DialogueManager::goodbye()

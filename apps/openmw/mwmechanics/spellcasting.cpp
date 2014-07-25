@@ -92,7 +92,7 @@ namespace MWMechanics
             x *= 0.1 * magicEffect->mData.mBaseCost;
             x *= 0.5 * (it->mMagnMin + it->mMagnMax);
             x *= it->mArea * 0.05 * magicEffect->mData.mBaseCost;
-            if (magicEffect->mData.mFlags & ESM::MagicEffect::CastTarget)
+            if (it->mRange == ESM::RT_Target)
                 x *= 1.5;
             static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                         "fEffectCostMult")->getFloat();
@@ -148,6 +148,27 @@ namespace MWMechanics
         return school;
     }
 
+    float getEffectResistanceAttribute (short effectId, const MagicEffects* actorEffects)
+    {
+        short resistanceEffect = ESM::MagicEffect::getResistanceEffect(effectId);
+        short weaknessEffect = ESM::MagicEffect::getWeaknessEffect(effectId);
+
+        float resistance = 0;
+        if (resistanceEffect != -1)
+            resistance += actorEffects->get(resistanceEffect).mMagnitude;
+        if (weaknessEffect != -1)
+            resistance -= actorEffects->get(weaknessEffect).mMagnitude;
+
+        if (effectId == ESM::MagicEffect::FireDamage)
+            resistance += actorEffects->get(ESM::MagicEffect::FireShield).mMagnitude;
+        if (effectId == ESM::MagicEffect::ShockDamage)
+            resistance += actorEffects->get(ESM::MagicEffect::LightningShield).mMagnitude;
+        if (effectId == ESM::MagicEffect::FrostDamage)
+            resistance += actorEffects->get(ESM::MagicEffect::FrostShield).mMagnitude;
+
+        return resistance;
+    }
+
     float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
                                const ESM::Spell* spell, const MagicEffects* effects)
     {
@@ -163,16 +184,7 @@ namespace MWMechanics
         float resisted = 0;
         if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
         {
-
-            short resistanceEffect = ESM::MagicEffect::getResistanceEffect(effectId);
-            short weaknessEffect = ESM::MagicEffect::getWeaknessEffect(effectId);
-
-            float resistance = 0;
-            if (resistanceEffect != -1)
-                resistance += magicEffects->get(resistanceEffect).mMagnitude;
-            if (weaknessEffect != -1)
-                resistance -= magicEffects->get(weaknessEffect).mMagnitude;
-
+            float resistance = getEffectResistanceAttribute(effectId, magicEffects);
 
             float willpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
             float luck = stats.getAttribute(ESM::Attribute::Luck).getModified();
@@ -484,7 +496,11 @@ namespace MWMechanics
             if (effectId == ESM::MagicEffect::Lock)
             {
                 if (target.getCellRef().getLockLevel() < magnitude) //If the door is not already locked to a higher value, lock it to spell magnitude
+                {
+                    if (caster.getRefData().getHandle() == "player")
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicLockSuccess}");
                     target.getCellRef().setLockLevel(magnitude);
+                }
             }
             else if (effectId == ESM::MagicEffect::Open)
             {
@@ -492,12 +508,14 @@ namespace MWMechanics
                 {
                     if (target.getCellRef().getLockLevel() > 0)
                     {
-                        //Door not already unlocked
                         MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock", 1.f, 1.f);
                         if (!caster.isEmpty() && caster.getClass().isActor())
                             MWBase::Environment::get().getMechanicsManager()->objectOpened(caster, target);
+
+                        if (caster.getRefData().getHandle() == "player")
+                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicOpenSuccess}");
                     }
-                    target.getCellRef().setLockLevel(-abs(target.getCellRef().getLockLevel())); //unlocks the door
+                    target.getCellRef().setLockLevel(-abs(target.getCellRef().getLockLevel()));
                 }
                 else
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);

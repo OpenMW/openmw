@@ -40,6 +40,7 @@ namespace MWClass
                 const ESM::GameSetting *iKnockDownOddsBase;
                 const ESM::GameSetting *fDamageStrengthBase;
                 const ESM::GameSetting *fDamageStrengthMult;
+                const ESM::GameSetting *fCombatArmorMinMult;
             };
 
             static const GMST& getGmst();

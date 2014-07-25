@@ -268,7 +268,7 @@ namespace MWGui
         mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
         trackWindow(mCompanionWindow, "companion");
 
-        mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows");
+        mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Overlay");
 
         mHud->setVisible(mHudEnabled);
 
@@ -1528,6 +1528,8 @@ namespace MWGui
         mContainerWindow->resetReference();
         mCompanionWindow->resetReference();
         mConsole->resetReference();
+
+        mSelectedSpell.clear();
 
         mGuiModes.clear();
         MWBase::Environment::get().getInputManager()->changeInputMode(false);

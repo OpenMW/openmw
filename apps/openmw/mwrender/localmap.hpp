@@ -5,6 +5,7 @@
 
 #include <OgreAxisAlignedBox.h>
 #include <OgreColourValue.h>
+#include <OgreResource.h>
 
 namespace MWWorld
 {
@@ -23,11 +24,13 @@ namespace MWRender
     ///
     /// \brief Local map rendering
     ///
-    class LocalMap
+    class LocalMap : public Ogre::ManualResourceLoader
     {
     public:
         LocalMap(OEngine::Render::OgreRenderer*, MWRender::RenderingManager* rendering);
         ~LocalMap();
+
+        virtual void loadResource(Ogre::Resource* resource);
 
         /**
          * Clear all savegame-specific data (i.e. fog of war textures)

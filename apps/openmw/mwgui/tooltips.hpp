@@ -66,6 +66,9 @@ namespace MWGui
         static std::string getCountString(const int value);
         ///< @return blank string if count is 1, or else " (value)"
 
+        static std::string getCellRefString(const MWWorld::CellRef& cellref);
+        ///< Returns a string containing debug tooltip information about the given cellref.
+
         // these do not create an actual tooltip, but they fill in the data that is required so the tooltip
         // system knows what to show in case this widget is hovered
         static void createSkillToolTip(MyGUI::Widget* widget, int skillId);

@@ -547,6 +547,17 @@ namespace MWGui
             return " (" + boost::lexical_cast<std::string>(value) + ")";
     }
 
+    std::string ToolTips::getCellRefString(const MWWorld::CellRef& cellref)
+    {
+        std::string ret;
+        ret += getMiscString(cellref.getOwner(), "Owner");
+        ret += getMiscString(cellref.getFaction(), "Faction");
+        if (cellref.getFactionRank() > 0)
+            ret += getValueString(cellref.getFactionRank(), "Rank");
+        ret += getMiscString(cellref.getGlobalVariable(), "Global");
+        return ret;
+    }
+
     bool ToolTips::toggleFullHelp()
     {
         mFullHelp = !mFullHelp;

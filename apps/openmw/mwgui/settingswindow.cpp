@@ -157,6 +157,8 @@ namespace MWGui
     {
         configureWidgets(mMainWidget);
 
+        setTitle("#{sOptions}");
+
         getWidget(mOkButton, "OkButton");
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mFullscreenButton, "FullscreenButton");
@@ -174,6 +176,7 @@ namespace MWGui
         getWidget(mControlsBox, "ControlsBox");
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mRefractionButton, "RefractionButton");
+        getWidget(mDifficultySlider, "DifficultySlider");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mShaderModeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShaderModeToggled);
@@ -227,6 +230,10 @@ namespace MWGui
         MyGUI::TextBox* fovText;
         getWidget(fovText, "FovText");
         fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("field of view", "General"))) + ")");
+
+        MyGUI::TextBox* diffText;
+        getWidget(diffText, "DifficultyText");
+        diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
@@ -405,6 +412,12 @@ namespace MWGui
                     MyGUI::TextBox* fovText;
                     getWidget(fovText, "FovText");
                     fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int(value)) + ")");
+                }
+                if (scroller == mDifficultySlider)
+                {
+                    MyGUI::TextBox* diffText;
+                    getWidget(diffText, "DifficultyText");
+                    diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(value)) + ")");
                 }
             }
             else

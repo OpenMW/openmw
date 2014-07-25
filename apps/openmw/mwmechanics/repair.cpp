@@ -57,10 +57,13 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
         charge = std::min(charge + y, itemToRepair.getClass().getItemMaxHealth(itemToRepair));
         itemToRepair.getCellRef().setCharge(charge);
 
+        // attempt to re-stack item, in case it was fully repaired
+        MWWorld::ContainerStoreIterator stacked = player.getClass().getContainerStore(player).restack(itemToRepair);
+
         // set the OnPCRepair variable on the item's script
-        std::string script = itemToRepair.getClass().getScript(itemToRepair);
+        std::string script = stacked->getClass().getScript(itemToRepair);
         if(script != "")
-            itemToRepair.getRefData().getLocals().setVarByInt(script, "onpcrepair", 1);
+            stacked->getRefData().getLocals().setVarByInt(script, "onpcrepair", 1);
 
         // increase skill
         player.getClass().skillUsageSucceeded(player, ESM::Skill::Armorer, 0);

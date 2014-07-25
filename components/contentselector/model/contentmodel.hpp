@@ -64,6 +64,7 @@ namespace ContentSelectorModel
         ContentFileList mFiles;
         QHash<QString, Qt::CheckState> mCheckStates;
         QTextCodec *mCodec;
+        QString mEncoding;
 
     public:
 

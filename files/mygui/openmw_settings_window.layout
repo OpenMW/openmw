@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Window_NoCaption" layer="Windows" position="0 0 400 426" name="_Main">
+    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 400 426" name="_Main">
 
         <Property key="MinSize" value="400 446"/>
         <Property key="MaxSize" value="400 446"/>
@@ -12,47 +12,86 @@
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sPrefs}  "/>
 
-                <Widget type="TextBox" skin="NormalText" position="4 4 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sTransparency_Menu}"/>
-                </Widget>
-                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 28 352 18" align="Left Top" name="MenuTransparencySlider">
-                    <Property key="Range" value="10000"/>
-                    <Property key="Page" value="300"/>
-                    <UserString key="SettingType" value="Slider"/>
-                    <UserString key="SettingCategory" value="GUI"/>
-                    <UserString key="SettingName" value="menu transparency"/>
-                    <UserString key="SettingValueType" value="Float"/>
-                </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 52 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sFull}"/>
-                    <Property key="TextAlign" value="Left"/>
-                </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 52 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sNone}"/>
-                    <Property key="TextAlign" value="Right"/>
-                </Widget>
-
-                <Widget type="TextBox" skin="NormalText" position="4 78 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sMenu_Help_Delay}"/>
-                </Widget>
-                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 102 352 18" align="Left Top" name="ToolTipDelaySlider">
-                    <Property key="Range" value="10000"/>
-                    <Property key="Page" value="300"/>
-                    <UserString key="SettingType" value="Slider"/>
-                    <UserString key="SettingCategory" value="GUI"/>
-                    <UserString key="SettingName" value="tooltip delay"/>
-                    <UserString key="SettingValueType" value="Float"/>
-                </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 126 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sFast}"/>
-                    <Property key="TextAlign" value="Left"/>
-                </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 126 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sSlow}"/>
-                    <Property key="TextAlign" value="Right"/>
+                <Widget type="Widget" position="4 4 352 54" align="Left Top">
+                    <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top">
+                        <Property key="Caption" value="#{sTransparency_Menu}"/>
+                    </Widget>
+                    <Widget type="MWScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top" name="MenuTransparencySlider">
+                        <Property key="Range" value="10000"/>
+                        <Property key="Page" value="300"/>
+                        <UserString key="SettingType" value="Slider"/>
+                        <UserString key="SettingCategory" value="GUI"/>
+                        <UserString key="SettingName" value="menu transparency"/>
+                        <UserString key="SettingValueType" value="Float"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
+                        <Property key="Caption" value="#{sFull}"/>
+                        <Property key="TextAlign" value="Left"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
+                        <Property key="Caption" value="#{sNone}"/>
+                        <Property key="TextAlign" value="Right"/>
+                    </Widget>
                 </Widget>
 
-                <Widget type="HBox" skin="" position="4 170 260 24">
+                <Widget type="Widget" position="4 64 352 54" align="Left Top">
+                    <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top">
+                        <Property key="Caption" value="#{sMenu_Help_Delay}"/>
+                    </Widget>
+                    <Widget type="MWScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top" name="ToolTipDelaySlider">
+                        <Property key="Range" value="10000"/>
+                        <Property key="Page" value="300"/>
+                        <UserString key="SettingType" value="Slider"/>
+                        <UserString key="SettingCategory" value="GUI"/>
+                        <UserString key="SettingName" value="tooltip delay"/>
+                        <UserString key="SettingValueType" value="Float"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
+                        <Property key="Caption" value="#{sFast}"/>
+                        <Property key="TextAlign" value="Left"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
+                        <Property key="Caption" value="#{sSlow}"/>
+                        <Property key="TextAlign" value="Right"/>
+                    </Widget>
+                </Widget>
+
+                <Widget type="Widget" position="4 124 352 54" align="Left Top">
+                    <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top" name="DifficultyText">
+                        <Property key="Caption" value="#{sDifficulty}"/>
+                    </Widget>
+                    <Widget type="MWScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top" name="DifficultySlider">
+                        <Property key="Range" value="10000"/>
+                        <Property key="Page" value="300"/>
+                        <UserString key="SettingType" value="Slider"/>
+                        <UserString key="SettingCategory" value="Game"/>
+                        <UserString key="SettingName" value="difficulty"/>
+                        <UserString key="SettingValueType" value="Float"/>
+                        <UserString key="SettingMin" value="-100"/>
+                        <UserString key="SettingMax" value="100"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
+                        <Property key="Caption" value="#{sEasy}"/>
+                        <Property key="TextAlign" value="Left"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
+                        <Property key="Caption" value="#{sHard}"/>
+                        <Property key="TextAlign" value="Right"/>
+                    </Widget>
+                </Widget>
+
+                <Widget type="HBox" skin="" position="4 200 260 24">
+                    <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="AutosaveButton">
+                        <UserString key="SettingCategory" value="Saves"/>
+                        <UserString key="SettingName" value="autosave"/>
+                        <UserString key="SettingType" value="CheckButton"/>
+                    </Widget>
+                    <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                        <Property key="Caption" value="#{sQuick_Save}"/>
+                    </Widget>
+                </Widget>
+
+                <Widget type="HBox" skin="" position="4 230 260 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="BestAttackButton">
                         <UserString key="SettingCategory" value="Game"/>
                         <UserString key="SettingName" value="best attack"/>
@@ -63,7 +102,7 @@
                     </Widget>
                 </Widget>
 
-                <Widget type="HBox" skin="" position="4 200 260 24">
+                <Widget type="HBox" skin="" position="4 260 260 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="SubtitlesButton">
                         <UserString key="SettingCategory" value="GUI"/>
                         <UserString key="SettingName" value="subtitles"/>
@@ -74,7 +113,7 @@
                     </Widget>
                 </Widget>
 
-                <Widget type="HBox" skin="" position="4 230 260 24">
+                <Widget type="HBox" skin="" position="4 290 260 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="CrosshairButton">
                         <UserString key="SettingCategory" value="HUD"/>
                         <UserString key="SettingName" value="crosshair"/>
@@ -82,28 +121,6 @@
                     </Widget>
                     <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
                         <Property key="Caption" value="#{sCursorOff}"/>
-                    </Widget>
-                </Widget>
-
-                <Widget type="HBox" skin="" position="4 260 260 24">
-                    <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="GrabCursorButton">
-                        <UserString key="SettingCategory" value="Input"/>
-                        <UserString key="SettingName" value="grab cursor"/>
-                        <UserString key="SettingType" value="CheckButton"/>
-                    </Widget>
-                    <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
-                        <Property key="Caption" value="Grab cursor"/>
-                    </Widget>
-                </Widget>
-
-		<Widget type="HBox" skin="" position="4 290 260 24">
-                    <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="AutosaveButton">
-                        <UserString key="SettingCategory" value="Saves"/>
-                        <UserString key="SettingName" value="autosave"/>
-                        <UserString key="SettingType" value="CheckButton"/>
-                    </Widget>
-                    <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
-                        <Property key="Caption" value="#{sQuick_Save}"/>
                     </Widget>
                 </Widget>
 

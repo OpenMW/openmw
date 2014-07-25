@@ -28,15 +28,13 @@ namespace MWWorld
                 cellRef.mRefNum.mContentFile = -1;
                 cellRef.mRefID = name;
                 cellRef.mScale = 1;
-                cellRef.mFactIndex = 0;
+                cellRef.mFactionRank = 0;
                 cellRef.mCharge = -1;
                 cellRef.mGoldValue = 1;
                 cellRef.mEnchantmentCharge = -1;
                 cellRef.mTeleport = false;
                 cellRef.mLockLevel = 0;
                 cellRef.mReferenceBlocked = 0;
-                cellRef.mFltv = 0;
-                cellRef.mNam0 = 0;
 
                 LiveCellRef<T> ref(cellRef, base);
 

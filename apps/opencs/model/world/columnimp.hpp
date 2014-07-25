@@ -977,13 +977,13 @@ namespace CSMWorld
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
-            return record.get().mFactIndex;
+            return record.get().mFactionRank;
         }
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
         {
             ESXRecordT record2 = record.get();
-            record2.mFactIndex = data.toInt();
+            record2.mFactionRank = data.toInt();
             record.setModified (record2);
         }
 

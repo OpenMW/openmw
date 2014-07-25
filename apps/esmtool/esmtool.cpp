@@ -249,6 +249,9 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
         std::cout << "    Refnum: " << ref.mRefNum.mIndex << std::endl;
         std::cout << "    ID: '" << ref.mRefID << "'\n";
         std::cout << "    Owner: '" << ref.mOwner << "'\n";
+        std::cout << "    Global: '" << ref.mGlobalVariable << "'" << std::endl;
+        std::cout << "    Faction: '" << ref.mFaction << "'" << std::endl;
+        std::cout << "    Faction rank: '" << ref.mFactionRank << "'" << std::endl;
         std::cout << "    Enchantment charge: '" << ref.mEnchantmentCharge << "'\n";
         std::cout << "    Uses/health: '" << ref.mCharge << "'\n";
         std::cout << "    Gold value: '" << ref.mGoldValue << "'\n";
