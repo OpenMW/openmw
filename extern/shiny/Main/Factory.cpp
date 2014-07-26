@@ -51,23 +51,31 @@ namespace sh
 	{
 		assert(mCurrentLanguage != Language_None);
 
-		if (boost::filesystem::exists (mPlatform->getCacheFolder () + "/lastModified.txt"))
+		try
 		{
-			std::ifstream file;
-			file.open(std::string(mPlatform->getCacheFolder () + "/lastModified.txt").c_str());
-
-			std::string line;
-			while (getline(file, line))
+			if (boost::filesystem::exists (mPlatform->getCacheFolder () + "/lastModified.txt"))
 			{
-				std::string sourceFile = line;
+				std::ifstream file;
+				file.open(std::string(mPlatform->getCacheFolder () + "/lastModified.txt").c_str());
 
-				if (!getline(file, line))
-					assert(0);
+				std::string line;
+				while (getline(file, line))
+				{
+					std::string sourceFile = line;
 
-				int modified = boost::lexical_cast<int>(line);
+					if (!getline(file, line))
+						assert(0);
 
-				mShadersLastModified[sourceFile] = modified;
+					int modified = boost::lexical_cast<int>(line);
+
+					mShadersLastModified[sourceFile] = modified;
+				}
 			}
+		}
+		catch (std::exception& e)
+		{
+			std::cerr << "Failed to load shader modification index: " << e.what() << std::endl;
+			mShadersLastModified.clear();
 		}
 
 		// load configurations
