@@ -309,6 +309,8 @@ int main(int argc, char**argv)
 
     boost::filesystem::ofstream logfile;
 
+    std::auto_ptr<OMW::Engine> engine;
+
     int ret = 0;
     try
     {
@@ -350,11 +352,11 @@ int main(int argc, char**argv)
         boost::filesystem::current_path(bundlePath);
 #endif
 
-        OMW::Engine engine(cfgMgr);
+        engine.reset(new OMW::Engine(cfgMgr));
 
-        if (parseOptions(argc, argv, engine, cfgMgr))
+        if (parseOptions(argc, argv, *engine, cfgMgr))
         {
-            engine.go();
+            engine->go();
         }
     }
     catch (std::exception &e)
