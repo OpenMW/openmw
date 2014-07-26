@@ -637,7 +637,10 @@ namespace MWGui
             ++i;
         }
 
+        // Canvas size must be expressed with HScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mUsedEffectsView->setVisibleHScroll(false);
         mUsedEffectsView->setCanvasSize(size);
+        mUsedEffectsView->setVisibleHScroll(true);
 
         notifyEffectsChanged();
     }

@@ -82,7 +82,10 @@ namespace MWGui
     {
         mLeftPane->setCoord( MyGUI::IntCoord(0, 0, 0.44*window->getSize().width, window->getSize().height) );
         mRightPane->setCoord( MyGUI::IntCoord(0.44*window->getSize().width, 0, 0.56*window->getSize().width, window->getSize().height) );
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mSkillView->setVisibleVScroll(false);
         mSkillView->setCanvasSize (mSkillView->getWidth(), mSkillView->getCanvasSize().height);
+        mSkillView->setVisibleVScroll(true);
     }
 
     void StatsWindow::setBar(const std::string& name, const std::string& tname, int val, int max)
@@ -578,7 +581,10 @@ namespace MWGui
             mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_Text", "#{sCrimeHelp}");
         }
 
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mSkillView->setVisibleVScroll(false);
         mSkillView->setCanvasSize (mSkillView->getWidth(), std::max(mSkillView->getHeight(), coord1.top));
+        mSkillView->setVisibleVScroll(true);
     }
 
     void StatsWindow::onPinToggled()

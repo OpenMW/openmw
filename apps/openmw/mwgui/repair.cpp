@@ -126,7 +126,10 @@ void Repair::updateRepairView()
             currentY += 32 + 4;
         }
     }
+    // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+    mRepairView->setVisibleVScroll(false);
     mRepairView->setCanvasSize (MyGUI::IntSize(mRepairView->getWidth(), std::max(mRepairView->getHeight(), currentY)));
+    mRepairView->setVisibleVScroll(true);
 }
 
 void Repair::onCancel(MyGUI::Widget *sender)

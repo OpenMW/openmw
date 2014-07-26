@@ -126,7 +126,10 @@ namespace MWGui
         }
 
         updateLabels();
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mDestinationsView->setVisibleVScroll(false);
         mDestinationsView->setCanvasSize (MyGUI::IntSize(mDestinationsView->getWidth(), std::max(mDestinationsView->getHeight(), mCurrentY)));
+        mDestinationsView->setVisibleVScroll(true);
     }
 
     void TravelWindow::onTravelButtonClick(MyGUI::Widget* _sender)

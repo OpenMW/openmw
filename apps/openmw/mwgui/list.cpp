@@ -93,7 +93,11 @@ namespace MWGui
                 }
                 ++i;
             }
+
+            // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+            mScrollView->setVisibleVScroll(false);
             mScrollView->setCanvasSize(mClient->getSize().width, std::max(mItemHeight, mClient->getSize().height));
+            mScrollView->setVisibleVScroll(true);
 
             if (!scrollbarShown && mItemHeight > mClient->getSize().height)
                 redraw(true);

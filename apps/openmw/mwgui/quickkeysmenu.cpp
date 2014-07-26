@@ -654,9 +654,10 @@ namespace MWGui
             mHeight += spellHeight;
         }
 
-
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mMagicList->setVisibleVScroll(false);
         mMagicList->setCanvasSize (mWidth, std::max(mMagicList->getHeight(), mHeight));
-
+        mMagicList->setVisibleVScroll(true);
     }
 
     void MagicSelectionDialog::addGroup(const std::string &label, const std::string& label2)

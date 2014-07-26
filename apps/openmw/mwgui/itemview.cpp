@@ -115,7 +115,13 @@ void ItemView::update()
     }
     x += 42;
     MyGUI::IntSize size = MyGUI::IntSize(std::max(mScrollView->getSize().width, x), mScrollView->getSize().height);
+
+    // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+    mScrollView->setVisibleVScroll(false);
+    mScrollView->setVisibleHScroll(false);
     mScrollView->setCanvasSize(size);
+    mScrollView->setVisibleVScroll(true);
+    mScrollView->setVisibleHScroll(true);
     dragArea->setSize(size);
 }
 

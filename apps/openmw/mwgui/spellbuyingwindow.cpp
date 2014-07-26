@@ -50,6 +50,8 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
+        // TODO: refactor to use MyGUI::ListBox
+
         MyGUI::Button* toAdd =
             mSpellsView->createWidget<MyGUI::Button>(
                 "SandTextButton",
@@ -106,7 +108,10 @@ namespace MWGui
 
         updateLabels();
 
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mSpellsView->setVisibleVScroll(false);
         mSpellsView->setCanvasSize (MyGUI::IntSize(mSpellsView->getWidth(), std::max(mSpellsView->getHeight(), mCurrentY)));
+        mSpellsView->setVisibleVScroll(true);
     }
 
     bool SpellBuyingWindow::playerHasSpell(const std::string &id)

@@ -91,7 +91,10 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onRepairButtonClick);
         }
     }
+    // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+    mList->setVisibleVScroll(false);
     mList->setCanvasSize (MyGUI::IntSize(mList->getWidth(), std::max(mList->getHeight(), currentY)));
+    mList->setVisibleVScroll(true);
 
     mGoldLabel->setCaptionWithReplacing("#{sGold}: "
         + boost::lexical_cast<std::string>(playerGold));
