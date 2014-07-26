@@ -737,7 +737,7 @@ namespace Physic
     {
     }
 
-    std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly,bool ignoreHeightMap, Ogre::Vector3* normal)
+    std::pair<std::string,float> PhysicEngine::rayTest(const btVector3 &from, const btVector3 &to, bool raycastingObjectOnly, bool ignoreHeightMap, Ogre::Vector3* normal)
     {
         std::string name = "";
         float d = -1;
@@ -801,7 +801,7 @@ namespace Physic
             return std::make_pair(false, 1);
     }
 
-    std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(btVector3& from, btVector3& to)
+    std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(const btVector3& from, const btVector3& to)
     {
         MyRayResultCallback resultCallback1;
         resultCallback1.m_collisionFilterGroup = 0xff;

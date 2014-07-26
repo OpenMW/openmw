@@ -92,7 +92,6 @@ namespace MWWorld
 
             int mActivationDistanceOverride;
             std::string mFacedHandle;
-            float mFacedDistance;
 
             std::string mStartupScript;
 
@@ -114,6 +113,7 @@ namespace MWWorld
             void updateWindowManager ();
             void performUpdateSceneQueries ();
             void updateFacedHandle ();
+            void getFacedHandle(std::string& facedHandle, float maxDistance);
 
             float getMaxActivationDistance ();
             float getNpcActivationDistance ();
