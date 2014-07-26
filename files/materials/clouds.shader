@@ -25,7 +25,7 @@
 
         shOutputPosition = shMatrixMult(proj, shMatrixMult(worldviewFixed, shInputPosition));
         UV = uv0;
-            alphaFade = (shInputPosition.z <= 200.f) ? ((shInputPosition.z <= 100.f) ? 0.0 : 0.25) : 1.0;
+            alphaFade = (shInputPosition.z <= 200.0) ? ((shInputPosition.z <= 100.0) ? 0.0 : 0.25) : 1.0;
     }
 
 #else

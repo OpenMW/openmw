@@ -210,11 +210,11 @@
 #if VERTEXCOLOR_MODE == 2
             lightResult.xyz += colour.xyz * lightDiffuse[@shIterator].xyz
                     * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(viewNormal.xyz, lightDir), 0);
+                    * max(dot(viewNormal.xyz, lightDir), 0.0);
 #else
             lightResult.xyz += materialDiffuse.xyz * lightDiffuse[@shIterator].xyz
                     * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(viewNormal.xyz, lightDir), 0);
+                    * max(dot(viewNormal.xyz, lightDir), 0.0);
 #endif
 
 #if @shIterator == 0
@@ -432,11 +432,11 @@
 #if VERTEXCOLOR_MODE == 2
             lightResult.xyz += colourPassthrough.xyz * lightDiffuse[@shIterator].xyz
                     * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(viewNormal.xyz, lightDir), 0);
+                    * max(dot(viewNormal.xyz, lightDir), 0.0);
 #else
             lightResult.xyz += materialDiffuse.xyz * lightDiffuse[@shIterator].xyz
                     * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(viewNormal.xyz, lightDir), 0);
+                    * max(dot(viewNormal.xyz, lightDir), 0.0);
 #endif
 
 #if @shIterator == 0
@@ -504,8 +504,8 @@
 
 #if ENV_MAP
         // Everything looks better with fresnel
-        float facing = 1.0 - max(abs(dot(-eyeDir, normal)), 0);
-        float envFactor = shSaturate(0.25 + 0.75 * pow(facing, 1));
+        float facing = 1.0 - max(abs(dot(-eyeDir, normal)), 0.0);
+        float envFactor = shSaturate(0.25 + 0.75 * pow(facing, 1.0));
 
         shOutputColour(0).xyz += shSample(envMap, UV.zw).xyz * envFactor * env_map_color;
 #endif
@@ -513,7 +513,7 @@
 #if SPECULAR
         float3 light0Dir = normalize(lightPosObjSpace0.xyz);
 
-        float NdotL = max(dot(normal, light0Dir), 0);
+        float NdotL = max(dot(normal, light0Dir), 0.0);
         float3 halfVec = normalize (light0Dir + eyeDir);
 
         float shininess = matShininess;
@@ -522,7 +522,7 @@
         shininess *= (specTex.a);
 #endif
 
-        float3 specular = pow(max(dot(normal, halfVec), 0), shininess) * lightSpec0 * matSpec;
+        float3 specular = pow(max(dot(normal, halfVec), 0.0), shininess) * lightSpec0 * matSpec;
 #if SPEC_MAP
         specular *= specTex.xyz;
 #else

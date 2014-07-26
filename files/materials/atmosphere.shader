@@ -33,7 +33,7 @@
 
     SH_START_PROGRAM
     {
-        shOutputColour(0) = alphaFade * atmosphereColour + (1.f - alphaFade) * horizonColour;
+        shOutputColour(0) = alphaFade * atmosphereColour + (1.0 - alphaFade) * horizonColour;
     }
 
 #endif
