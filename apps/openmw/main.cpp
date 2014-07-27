@@ -184,6 +184,14 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     if (variables.count ("version"))
     {
         std::cout << "OpenMW version " << OPENMW_VERSION << std::endl;
+
+        std::string rev = OPENMW_VERSION_COMMITHASH;
+        std::string tag = OPENMW_VERSION_TAGHASH;
+        if (!rev.empty() && !tag.empty())
+        {
+            rev = rev.substr(0, 10);
+            std::cout << "Revision " << rev << std::endl;
+        }
         run = false;
     }
 
