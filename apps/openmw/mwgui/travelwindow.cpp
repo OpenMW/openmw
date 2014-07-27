@@ -12,6 +12,8 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/actionteleport.hpp"
@@ -149,6 +151,10 @@ namespace MWGui
             MWBase::Environment::get().getSoundManager()->playSound("mysticism cast", 1, 1);
 
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+
+        // add gold to NPC trading gold pool
+        MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
+        npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(1);
         ESM::Position pos = *_sender->getUserData<ESM::Position>();

@@ -135,6 +135,11 @@ namespace MWGui
         MWMechanics::Spells& spells = stats.getSpells();
         spells.add (mSpellsWidgetMap.find(_sender)->second);
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+
+        // add gold to NPC trading gold pool
+        MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
+        npcStats.setGoldPool(npcStats.getGoldPool() + price);
+
         startSpellBuying(mPtr);
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);

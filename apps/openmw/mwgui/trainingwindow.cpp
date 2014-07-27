@@ -159,6 +159,9 @@ namespace MWGui
         // remove gold
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
+        // add gold to NPC trading gold pool
+        npcStats.setGoldPool(npcStats.getGoldPool() + price);
+
         // go back to game mode
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);

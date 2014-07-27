@@ -292,5 +292,9 @@ namespace MWMechanics
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
         store.remove(MWWorld::ContainerStore::sGoldId, getEnchantPrice(), player);
+
+        // add gold to NPC trading gold pool
+        CreatureStats& enchanterStats = mEnchanter.getClass().getCreatureStats(mEnchanter);
+        enchanterStats.setGoldPool(enchanterStats.getGoldPool() + getEnchantPrice());
     }
 }
