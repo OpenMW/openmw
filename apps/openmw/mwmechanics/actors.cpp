@@ -192,6 +192,15 @@ namespace MWMechanics
         CreatureStats& creatureStats = actor1.getClass().getCreatureStats(actor1);
         
         if (againstPlayer && creatureStats.isHostile()) return; // already fighting against player
+        if (actor2.getClass().getCreatureStats(actor2).isDead()
+                || actor1.getClass().getCreatureStats(actor1).isDead())
+            return;
+
+        const ESM::Position& actor1Pos = actor2.getRefData().getPosition();
+        const ESM::Position& actor2Pos = actor2.getRefData().getPosition();
+        float sqrDist = Ogre::Vector3(actor1Pos.pos).squaredDistance(Ogre::Vector3(actor2Pos.pos));
+        if (sqrDist > 7168*7168)
+            return;
 
         // pure water creatures won't try to fight with the target on the ground
         // except that creature is already hostile
@@ -208,9 +217,9 @@ namespace MWMechanics
         else
         {
             aggressive = false;
-            // if one of actors is creature then we should make a decision to start combat or not
-            // NOTE: function doesn't take into account combat between 2 creatures
-            if (!actor1.getClass().isNpc())
+
+            // Make guards fight aggressive creatures
+            if (!actor1.getClass().isNpc() && actor2.getClass().isClass(actor2, "Guard"))
             {
                 // if creature is hostile then it is necessarily to start combat
                 if (creatureStats.isHostile()) aggressive = true;
@@ -218,24 +227,34 @@ namespace MWMechanics
             }
         }
 
+        // start combat if we are in combat with any followers of this actor
+        const std::list<MWWorld::Ptr>& followers = getActorsFollowing(actor2);
+        for (std::list<MWWorld::Ptr>::const_iterator it = followers.begin(); it != followers.end(); ++it)
+        {
+            if (creatureStats.getAiSequence().isInCombat(*it))
+                aggressive = true;
+        }
+        // start combat if we are in combat with someone this actor is following
+        const CreatureStats& creatureStats2 = actor2.getClass().getCreatureStats(actor2);
+        for (std::list<MWMechanics::AiPackage*>::const_iterator it = creatureStats2.getAiSequence().begin(); it != creatureStats2.getAiSequence().end(); ++it)
+        {
+            if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow &&
+                    creatureStats.getAiSequence().isInCombat(dynamic_cast<MWMechanics::AiFollow*>(*it)->getTarget()))
+                aggressive = true;
+        }
+
         if(aggressive)
         {
-            const ESM::Position& actor1Pos = actor2.getRefData().getPosition();
-            const ESM::Position& actor2Pos = actor2.getRefData().getPosition();
-            float d = Ogre::Vector3(actor1Pos.pos).distance(Ogre::Vector3(actor2Pos.pos));
-            if (againstPlayer || actor2.getClass().getCreatureStats(actor2).getAiSequence().canAddTarget(actor2Pos, d))
+            bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor1, actor2);
+
+            if (againstPlayer) LOS &= MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor2, actor1);
+
+            if (LOS)
             {
-                bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor1, actor2);
-
-                if (againstPlayer) LOS &= MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor2, actor1);
-
-                if (LOS)
+                MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
+                if (!againstPlayer) // start combat between each other
                 {
-                    MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
-                    if (!againstPlayer) // start combat between each other
-                    {
-                        MWBase::Environment::get().getMechanicsManager()->startCombat(actor2, actor1);
-                    }
+                    MWBase::Environment::get().getMechanicsManager()->startCombat(actor2, actor1);
                 }
             }
         }
@@ -964,19 +983,10 @@ namespace MWMechanics
         }
     }
 
-    static Ogre::Vector3 sBasePoint;
-    bool comparePtrDist (const MWWorld::Ptr& ptr1, const MWWorld::Ptr& ptr2)
-    {
-        return (sBasePoint.squaredDistance(Ogre::Vector3(ptr1.getRefData().getPosition().pos))
-            < sBasePoint.squaredDistance(Ogre::Vector3(ptr2.getRefData().getPosition().pos)));
-    }
-
     void Actors::update (float duration, bool paused)
     {
         if(!paused)
-        {
-            std::list<MWWorld::Ptr> listGuards; // at the moment only guards certainly will fight with creatures
-            
+        {            
             static float timerUpdateAITargets = 0;
 
             // target lists get updated once every 1.0 sec
@@ -989,15 +999,9 @@ namespace MWMechanics
                 // Note, the new hit object for this frame may be set by CharacterController::update -> Animation::runAnimation
                 // (below)
                 iter->first.getClass().getCreatureStats(iter->first).setLastHitObject(std::string());
-
-                // add guards to list to later make them fight with creatures
-                if (timerUpdateAITargets == 0 && iter->first.getClass().isClass(iter->first, "Guard"))
-                    listGuards.push_back(iter->first);
             }
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
-            listGuards.push_back(player);
 
              // AI and magic effects update
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
@@ -1008,19 +1012,15 @@ namespace MWMechanics
 
                     if (MWBase::Environment::get().getMechanicsManager()->isAIActive())
                     {
-                        // make guards and creatures fight each other
-                        if (timerUpdateAITargets == 0 && iter->first.getTypeName() == typeid(ESM::Creature).name() && !listGuards.empty())
-                        {
-                            sBasePoint = Ogre::Vector3(iter->first.getRefData().getPosition().pos);
-                            listGuards.sort(comparePtrDist); // try to engage combat starting from the nearest guard
-                            
-                            for (std::list<MWWorld::Ptr>::iterator it = listGuards.begin(); it != listGuards.end(); ++it)
+                        if (timerUpdateAITargets == 0)
+                        {                            
+                            for(PtrControllerMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                             {
-                                engageCombat(iter->first, *it, *it == player);
+                                if (it->first == iter->first || iter->first == player) // player is not AI-controlled
+                                    continue;
+                                engageCombat(iter->first, it->first, it->first == player);
                             }
                         }
-
-                        if (iter->first != player) engageCombat(iter->first, player, true);
 
                         if (iter->first.getClass().isNpc() && iter->first != player)
                             updateCrimePersuit(iter->first, duration);

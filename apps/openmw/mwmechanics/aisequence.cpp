@@ -72,6 +72,16 @@ bool AiSequence::getCombatTarget(MWWorld::Ptr &targetActor) const
     return true;
 }
 
+std::list<AiPackage*>::const_iterator AiSequence::begin() const
+{
+    return mPackages.begin();
+}
+
+std::list<AiPackage*>::const_iterator AiSequence::end() const
+{
+    return mPackages.end();
+}
+
 bool AiSequence::isInCombat() const
 {
     for(std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
