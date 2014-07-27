@@ -17,6 +17,7 @@ namespace Compiler
             int mWarnings;
             int mErrors;
             int mWarningsMode;
+            bool mDowngradeErrors;
 
         protected:
 
@@ -66,6 +67,26 @@ namespace Compiler
 
             void setWarningsMode (int mode);
             ///< // 0 ignore, 1 rate as warning, 2 rate as error
+
+            /// Treat errors as warnings.
+            void downgradeErrors (bool downgrade);
+    };
+
+    class ErrorDowngrade
+    {
+            ErrorHandler& mHandler;
+
+            /// not implemented
+            ErrorDowngrade (const ErrorDowngrade&);
+
+            /// not implemented
+            ErrorDowngrade& operator= (const ErrorDowngrade&);
+
+        public:
+
+            ErrorDowngrade (ErrorHandler& handler);
+
+            ~ErrorDowngrade();
     };
 }
 

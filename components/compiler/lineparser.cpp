@@ -11,6 +11,7 @@
 #include "generator.hpp"
 #include "extensions.hpp"
 #include "declarationparser.hpp"
+#include "exception.hpp"
 
 namespace Compiler
 {
@@ -292,9 +293,31 @@ namespace Compiler
                         mExplicit.clear();
                     }
 
-                    int optionals = mExprParser.parseArguments (argumentType, scanner, mCode);
+                    int optionals = 0;
 
-                    extensions->generateInstructionCode (keyword, mCode, mLiterals, mExplicit, optionals);
+                    try
+                    {
+                        ErrorDowngrade errorDowngrade (getErrorHandler());
+                        std::vector<Interpreter::Type_Code> code;
+                        optionals = mExprParser.parseArguments (argumentType, scanner, code);
+                        mCode.insert (mCode.begin(), code.begin(), code.end());
+                        extensions->generateInstructionCode (keyword, mCode, mLiterals,
+                            mExplicit, optionals);
+                    }
+                    catch (const SourceException& exception)
+                    {
+                        // Ignore argument exceptions for positioncell.
+                        /// \todo add option to disable this
+                        if (Misc::StringUtils::lowerCase (loc.mLiteral)=="positioncell")
+                        {
+                            SkipParser skip (getErrorHandler(), getContext());
+                            scanner.scan (skip);
+                            return false;
+                        }
+
+                        throw;
+                    }
+
                     mState = EndState;
                     return true;
                 }
