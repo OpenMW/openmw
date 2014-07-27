@@ -386,7 +386,7 @@ namespace Compiler
                     if (declaration.parseKeyword (keyword, loc, scanner))
                         scanner.scan (declaration);
 
-                    return true;
+                    return false;
                 }
 
                 case Scanner::K_set: mState = SetState; return true;
