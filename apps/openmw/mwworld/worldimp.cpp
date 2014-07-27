@@ -319,8 +319,9 @@ namespace MWWorld
         MWMechanics::CreatureStats::writeActorIdCounter(writer);
         progress.increaseProgress();
 
+        mStore.write (writer, progress); // dynamic Store must be written (and read) before Cells, so that
+                                         // references to custom made records will be recognized
         mCells.write (writer, progress);
-        mStore.write (writer, progress);
         mGlobalVariables.write (writer, progress);
         mPlayer->write (writer, progress);
         mWeatherManager->write (writer, progress);
