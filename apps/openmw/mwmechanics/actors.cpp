@@ -924,12 +924,7 @@ namespace MWMechanics
 
     Actors::~Actors()
     {
-      PtrControllerMap::iterator it(mActors.begin());
-      for (; it != mActors.end(); ++it)
-      {
-        delete it->second;
-        it->second = NULL;
-      }
+        clear();
     }
 
     void Actors::addActor (const MWWorld::Ptr& ptr, bool updateImmediately)
@@ -1359,6 +1354,13 @@ namespace MWMechanics
 
     void Actors::clear()
     {
+        PtrControllerMap::iterator it(mActors.begin());
+        for (; it != mActors.end(); ++it)
+        {
+            delete it->second;
+            it->second = NULL;
+        }
+        mActors.clear();
         mDeathCount.clear();
     }
 }

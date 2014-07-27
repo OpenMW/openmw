@@ -2111,8 +2111,8 @@ namespace MWWorld
     void World::enableActorCollision(const MWWorld::Ptr& actor, bool enable)
     {
         OEngine::Physic::PhysicActor *physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
-
-        physicActor->enableCollisionBody(enable);
+        if (physicActor)
+            physicActor->enableCollisionBody(enable);
     }
 
     bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)
