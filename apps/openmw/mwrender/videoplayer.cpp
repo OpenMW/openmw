@@ -26,8 +26,6 @@ typedef SSIZE_T ssize_t;
 namespace MWRender
 {
 
-#ifdef OPENMW_USE_FFMPEG
-
 extern "C"
 {
     #include <libavcodec/avcodec.h>
@@ -1072,27 +1070,6 @@ void VideoState::deinit()
         avformat_close_input(&this->format_ctx);
     }
 }
-
-#else // defined OPENMW_USE_FFMPEG
-
-class VideoState
-{
-public:
-    VideoState() { }
-
-    void init(const std::string& resourceName)
-    {
-        throw std::runtime_error("FFmpeg not supported, cannot play \""+resourceName+"\"");
-    }
-    void deinit() { }
-
-    void close() { }
-
-    bool update()
-    { return false; }
-};
-
-#endif // defined OPENMW_USE_FFMPEG
 
 
 VideoPlayer::VideoPlayer()
