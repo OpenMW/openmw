@@ -69,7 +69,7 @@ struct ObjectScene {
     // The maximum length on any of the controllers. For animations with controllers, but no text keys, consider this the animation length.
     float mMaxControllerLength;
 
-    std::map<int,TextKeyMap> mTextKeys;
+    TextKeyMap mTextKeys;
 
     MaterialControllerManager mMaterialControllerMgr;
 

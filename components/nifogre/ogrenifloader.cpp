@@ -1038,11 +1038,7 @@ class NIFObjectLoader
             {
                 const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
 
-                if (scene->mSkelBase)
-                {
-                    int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, node->recIndex);
-                    extractTextKeys(tk, scene->mTextKeys[trgtid]);
-                }
+                extractTextKeys(tk, scene->mTextKeys);
             }
             else if(e->recType == Nif::RC_NiStringExtraData)
             {
