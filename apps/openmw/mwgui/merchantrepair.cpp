@@ -10,6 +10,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -91,7 +93,10 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onRepairButtonClick);
         }
     }
+    // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+    mList->setVisibleVScroll(false);
     mList->setCanvasSize (MyGUI::IntSize(mList->getWidth(), std::max(mList->getHeight(), currentY)));
+    mList->setVisibleVScroll(true);
 
     mGoldLabel->setCaptionWithReplacing("#{sGold}: "
         + boost::lexical_cast<std::string>(playerGold));
@@ -130,6 +135,10 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
     int price = boost::lexical_cast<int>(sender->getUserString("Price"));
 
     player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+
+    // add gold to NPC trading gold pool
+    MWMechanics::CreatureStats& actorStats = mActor.getClass().getCreatureStats(mActor);
+    actorStats.setGoldPool(actorStats.getGoldPool() + price);
 
     startRepair(mActor);
 }

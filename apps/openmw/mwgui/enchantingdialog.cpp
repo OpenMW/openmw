@@ -144,9 +144,14 @@ namespace MWGui
         mEnchanting.setSelfEnchanting(false);
         mEnchanting.setEnchanter(actor);
 
+        mBuyButton->setCaptionWithReplacing("#{sBuy}");
+
         mPtr = actor;
 
         startEditing ();
+        mPrice->setVisible(true);
+        mPriceText->setVisible(true);
+        updateLabels();
     }
 
     void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
@@ -156,9 +161,10 @@ namespace MWGui
         mEnchanting.setSelfEnchanting(true);
         mEnchanting.setEnchanter(player);
 
+        mBuyButton->setCaptionWithReplacing("#{sCreate}");
+
         mPtr = player;
         startEditing();
-        mEnchanting.setSoulGem(soulgem);
 
         setSoulGem(soulgem);
 
@@ -299,7 +305,7 @@ namespace MWGui
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
-        if (mEnchanting.getEnchantPrice() > playerGold)
+        if (mPtr != player && mEnchanting.getEnchantPrice() > playerGold)
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;

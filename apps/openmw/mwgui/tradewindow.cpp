@@ -99,8 +99,6 @@ namespace MWGui
         mCurrentBalance = 0;
         mCurrentMerchantOffer = 0;
 
-        restock();
-
         std::vector<MWWorld::Ptr> itemSources;
         MWBase::Environment::get().getWorld()->getContainersOwnedBy(actor, itemSources);
 
@@ -507,29 +505,6 @@ namespace MWGui
     {
         int merchantGold = mPtr.getClass().getCreatureStats(mPtr).getGoldPool();
         return merchantGold;
-    }
-
-    void TradeWindow::restock()
-    {
-        MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
-        float delay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fBarterGoldResetDelay")->getFloat();
-
-        if (MWBase::Environment::get().getWorld()->getTimeStamp() >= sellerStats.getLastRestockTime() + delay)
-        {
-            sellerStats.setGoldPool(mPtr.getClass().getBaseGold(mPtr));
-
-            mPtr.getClass().restock(mPtr);
-
-            // Also restock any containers owned by this merchant, which are also available to buy in the trade window
-            std::vector<MWWorld::Ptr> itemSources;
-            MWBase::Environment::get().getWorld()->getContainersOwnedBy(mPtr, itemSources);
-            for (std::vector<MWWorld::Ptr>::iterator it = itemSources.begin(); it != itemSources.end(); ++it)
-            {
-                it->getClass().restock(*it);
-            }
-
-            sellerStats.setLastRestockTime(MWBase::Environment::get().getWorld()->getTimeStamp());
-        }
     }
 
     void TradeWindow::resetReference()

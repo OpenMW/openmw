@@ -50,6 +50,8 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
+        // TODO: refactor to use MyGUI::ListBox
+
         MyGUI::Button* toAdd =
             mSpellsView->createWidget<MyGUI::Button>(
                 "SandTextButton",
@@ -106,7 +108,10 @@ namespace MWGui
 
         updateLabels();
 
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mSpellsView->setVisibleVScroll(false);
         mSpellsView->setCanvasSize (MyGUI::IntSize(mSpellsView->getWidth(), std::max(mSpellsView->getHeight(), mCurrentY)));
+        mSpellsView->setVisibleVScroll(true);
     }
 
     bool SpellBuyingWindow::playerHasSpell(const std::string &id)
@@ -130,6 +135,11 @@ namespace MWGui
         MWMechanics::Spells& spells = stats.getSpells();
         spells.add (mSpellsWidgetMap.find(_sender)->second);
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+
+        // add gold to NPC trading gold pool
+        MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
+        npcStats.setGoldPool(npcStats.getGoldPool() + price);
+
         startSpellBuying(mPtr);
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);

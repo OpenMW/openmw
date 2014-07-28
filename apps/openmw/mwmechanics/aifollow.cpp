@@ -121,3 +121,8 @@ MWMechanics::AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
 {
 
 }
+
+MWWorld::Ptr MWMechanics::AiFollow::getTarget() const
+{
+    return MWBase::Environment::get().getWorld()->searchPtr(mActorId, false);
+}

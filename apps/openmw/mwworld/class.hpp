@@ -72,12 +72,6 @@ namespace MWWorld
 
         public:
 
-            /// NPC-stances.
-            enum Stance
-            {
-                Run, Sneak
-            };
-
             virtual ~Class();
 
             const std::string& getTypeName() const {

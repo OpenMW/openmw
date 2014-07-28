@@ -352,7 +352,13 @@ namespace MWGui
 
         mSpell.mName = mNameEdit->getCaption();
 
-        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, boost::lexical_cast<int>(mPriceLabel->getCaption()), player);
+        int price = boost::lexical_cast<int>(mPriceLabel->getCaption());
+
+        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+
+        // add gold to NPC trading gold pool
+        MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
+        npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
@@ -637,7 +643,10 @@ namespace MWGui
             ++i;
         }
 
+        // Canvas size must be expressed with HScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mUsedEffectsView->setVisibleHScroll(false);
         mUsedEffectsView->setCanvasSize(size);
+        mUsedEffectsView->setVisibleHScroll(true);
 
         notifyEffectsChanged();
     }

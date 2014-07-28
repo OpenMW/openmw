@@ -174,6 +174,8 @@ namespace MWMechanics
             return true;
 
         MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+        if (target.isEmpty())
+            return false;
 
         if(target.getClass().getCreatureStats(target).isDead())
             return true;

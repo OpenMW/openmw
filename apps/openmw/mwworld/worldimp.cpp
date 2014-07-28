@@ -148,7 +148,7 @@ namespace MWWorld
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (activationDistanceOverride),
       mFallback(fallbackMap), mTeleportEnabled(true), mLevitationEnabled(true),
-      mFacedDistance(FLT_MAX), mGodMode(false), mContentFiles (contentFiles),
+      mGodMode(false), mContentFiles (contentFiles),
       mGoToJail(false),
       mStartCell (startCell), mStartupScript(startupScript)
     {
@@ -290,7 +290,6 @@ namespace MWWorld
         mGodMode = false;
         mSky = true;
         mTeleportEnabled = true;
-        mFacedDistance = FLT_MAX;
 
         mGlobalVariables.fill (mStore);
     }
@@ -320,8 +319,9 @@ namespace MWWorld
         MWMechanics::CreatureStats::writeActorIdCounter(writer);
         progress.increaseProgress();
 
+        mStore.write (writer, progress); // dynamic Store must be written (and read) before Cells, so that
+                                         // references to custom made records will be recognized
         mCells.write (writer, progress);
-        mStore.write (writer, progress);
         mGlobalVariables.write (writer, progress);
         mPlayer->write (writer, progress);
         mWeatherManager->write (writer, progress);
@@ -1462,30 +1462,22 @@ namespace MWWorld
         updateFacedHandle ();
     }
 
-    void World::updateFacedHandle ()
+    void World::getFacedHandle(std::string& facedHandle, float maxDistance)
     {
-        float telekinesisRangeBonus =
-                mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
-                .get(ESM::MagicEffect::Telekinesis).mMagnitude;
-        telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
+        maxDistance += mRendering->getCameraDistance();
 
-        float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
-        activationDistance += mRendering->getCameraDistance();
-
-        // send new query
-        // figure out which object we want to test against
         std::vector < std::pair < float, std::string > > results;
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            results = mPhysics->getFacedHandles(x, y, activationDistance);
+            results = mPhysics->getFacedHandles(x, y, maxDistance);
             if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
                 results = mPhysics->getFacedHandles(x, y, getMaxActivationDistance ()*50);
         }
         else
         {
-            results = mPhysics->getFacedHandles(activationDistance);
+            results = mPhysics->getFacedHandles(maxDistance);
         }
 
         // ignore the player and other things we're not interested in
@@ -1508,15 +1500,21 @@ namespace MWWorld
 
         if (results.empty()
                 || results.front().second.find("HeightField") != std::string::npos) // Blocked by terrain
-        {
-            mFacedHandle = "";
-            mFacedDistance = FLT_MAX;
-        }
+            facedHandle = "";
         else
-        {
-            mFacedHandle = results.front().second;
-            mFacedDistance = results.front().first;
-        }
+            facedHandle = results.front().second;
+    }
+
+    void World::updateFacedHandle ()
+    {
+        float telekinesisRangeBonus =
+                mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
+                .get(ESM::MagicEffect::Telekinesis).mMagnitude;
+        telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
+
+        float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
+
+        getFacedHandle(mFacedHandle, activationDistance);
     }
 
     bool World::isCellExterior() const
@@ -2114,8 +2112,8 @@ namespace MWWorld
     void World::enableActorCollision(const MWWorld::Ptr& actor, bool enable)
     {
         OEngine::Physic::PhysicActor *physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
-
-        physicActor->enableCollisionBody(enable);
+        if (physicActor)
+            physicActor->enableCollisionBody(enable);
     }
 
     bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)
@@ -2344,8 +2342,49 @@ namespace MWWorld
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        // TODO: this only works for the player
-        MWWorld::Ptr target = getFacedObject();
+        // Get the target to use for "on touch" effects
+        MWWorld::Ptr target;
+        float distance = 192.f; // ??
+
+        if (actor == getPlayerPtr())
+        {
+            // For the player, use camera to aim
+            std::string facedHandle;
+            getFacedHandle(facedHandle, distance);
+            if (!facedHandle.empty())
+                target = getPtrViaHandle(facedHandle);
+        }
+        else
+        {
+            // For NPCs use facing direction from Head node
+            Ogre::Vector3 origin(actor.getRefData().getPosition().pos);
+            MWRender::Animation *anim = mRendering->getAnimation(actor);
+            if(anim != NULL)
+            {
+                Ogre::Node *node = anim->getNode("Head");
+                if (node == NULL)
+                    node = anim->getNode("Bip01 Head");
+                if(node != NULL)
+                    origin += node->_getDerivedPosition();
+            }
+            Ogre::Quaternion orient;
+            orient = Ogre::Quaternion(Ogre::Radian(actor.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
+                    Ogre::Quaternion(Ogre::Radian(actor.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X);
+            Ogre::Vector3 direction = orient.yAxis();
+            Ogre::Vector3 dest = origin + direction * distance;
+
+
+            std::vector<std::pair<float, std::string> > collisions = mPhysEngine->rayTest2(btVector3(origin.x, origin.y, origin.z), btVector3(dest.x, dest.y, dest.z));
+            for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end(); ++cIt)
+            {
+                MWWorld::Ptr collided = getPtrViaHandle(cIt->second);
+                if (collided != actor)
+                {
+                    target = collided;
+                    break;
+                }
+            }
+        }
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
 

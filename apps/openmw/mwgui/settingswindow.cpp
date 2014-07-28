@@ -473,7 +473,10 @@ namespace MWGui
             curH += h;
         }
 
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mControlsBox->setVisibleVScroll(false);
         mControlsBox->setCanvasSize (mControlsBox->getWidth(), std::max(curH, mControlsBox->getHeight()));
+        mControlsBox->setVisibleVScroll(true);
     }
 
     void SettingsWindow::onRebindAction(MyGUI::Widget* _sender)

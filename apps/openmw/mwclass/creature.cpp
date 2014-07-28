@@ -366,10 +366,17 @@ namespace MWClass
         getCreatureStats(ptr).setAttacked(true);
 
         // Self defense
-        if (!attacker.isEmpty() && !MWBase::Environment::get().getMechanicsManager()->isAggressive(ptr, attacker)
-                && (canWalk(ptr) || canFly(ptr) || canSwim(ptr))) // No retaliation for totally static creatures
-                                                                  // (they have no movement or attacks anyway)
+        if ( ((!attacker.isEmpty() && attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr))
+              || attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker)
+            && (canWalk(ptr) || canFly(ptr) || canSwim(ptr)) // No retaliation for totally static creatures
+                                                              // (they have no movement or attacks anyway)
+            )
+        {
+            // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
+            // Note: accidental or collateral damage attacks are ignored.
             MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, attacker);
+        }
 
         if(!successful)
         {

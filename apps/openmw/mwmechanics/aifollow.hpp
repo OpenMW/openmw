@@ -31,6 +31,8 @@ namespace MWMechanics
 
             AiFollow(const ESM::AiSequence::AiFollow* follow);
 
+            MWWorld::Ptr getTarget() const;
+
             virtual AiFollow *clone() const;
 
             virtual bool execute (const MWWorld::Ptr& actor,float duration);

@@ -181,7 +181,13 @@ void MWMechanics::Alchemy::updateEffects()
             ESM::ENAMstruct effect;
             effect.mEffectID = iter->mId;
 
-            effect.mSkill = effect.mAttribute = iter->mArg; // somewhat hack-ish, but should work
+            effect.mAttribute = -1;
+            effect.mSkill = -1;
+
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
+                effect.mSkill = iter->mArg;
+            else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
+                effect.mAttribute = iter->mArg;
 
             effect.mRange = 0;
             effect.mArea = 0;

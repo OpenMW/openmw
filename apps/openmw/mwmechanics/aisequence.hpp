@@ -50,6 +50,10 @@ namespace MWMechanics
 
             virtual ~AiSequence();
 
+            /// Iterator may be invalidated by any function calls other than begin() or end().
+            std::list<AiPackage*>::const_iterator begin() const;
+            std::list<AiPackage*>::const_iterator end() const;
+
             /// Returns currently executing AiPackage type
             /** \see enum AiPackage::TypeId **/
             int getTypeId() const;

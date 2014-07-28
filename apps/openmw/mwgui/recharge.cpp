@@ -119,7 +119,11 @@ void Recharge::updateView()
 
         currentY += 32 + 4;
     }
+
+    // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+    mView->setVisibleVScroll(false);
     mView->setCanvasSize (MyGUI::IntSize(mView->getWidth(), std::max(mView->getHeight(), currentY)));
+    mView->setVisibleVScroll(true);
 }
 
 void Recharge::onCancel(MyGUI::Widget *sender)

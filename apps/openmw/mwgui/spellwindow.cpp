@@ -261,7 +261,10 @@ namespace MWGui
             mHeight += spellHeight;
         }
 
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mSpellView->setVisibleVScroll(false);
         mSpellView->setCanvasSize(mSpellView->getWidth(), std::max(mSpellView->getHeight(), mHeight));
+        mSpellView->setVisibleVScroll(true);
     }
 
     void SpellWindow::addGroup(const std::string &label, const std::string& label2)

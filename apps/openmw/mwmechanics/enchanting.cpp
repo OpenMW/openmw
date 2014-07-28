@@ -62,7 +62,7 @@ namespace MWMechanics
 
         if(mSelfEnchanting)
         {
-            if(getEnchantChance()<std::rand()/static_cast<double> (RAND_MAX)*100)
+            if(std::rand()/static_cast<double> (RAND_MAX)*100 < getEnchantChance())
                 return false;
 
             mEnchanter.getClass().skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 2);
@@ -292,5 +292,9 @@ namespace MWMechanics
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
         store.remove(MWWorld::ContainerStore::sGoldId, getEnchantPrice(), player);
+
+        // add gold to NPC trading gold pool
+        CreatureStats& enchanterStats = mEnchanter.getClass().getCreatureStats(mEnchanter);
+        enchanterStats.setGoldPool(enchanterStats.getGoldPool() + getEnchantPrice());
     }
 }

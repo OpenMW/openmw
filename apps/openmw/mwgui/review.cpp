@@ -320,7 +320,10 @@ namespace MWGui
         if (!mMiscSkills.empty())
             addSkills(mMiscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
 
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mSkillView->setVisibleVScroll(false);
         mSkillView->setCanvasSize (mSkillView->getWidth(), std::max(mSkillView->getHeight(), coord1.top));
+        mSkillView->setVisibleVScroll(true);
     }
 
     // widget controls

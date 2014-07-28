@@ -400,7 +400,10 @@ namespace
 
             getPage (pageId)->showPage (book, 0);
 
+            // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+            getWidget <MyGUI::ScrollView> (listId)->setVisibleVScroll(false);
             getWidget <MyGUI::ScrollView> (listId)->setCanvasSize (size.first, size.second);
+            getWidget <MyGUI::ScrollView> (listId)->setVisibleVScroll(true);
         }
 
         void notifyIndexLinkClicked (MWGui::TypesetBook::InteractiveId character)
