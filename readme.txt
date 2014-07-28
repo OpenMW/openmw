@@ -130,6 +130,7 @@ Bug #1179: Crash after trying to load game after being killed
 Bug #1180: Changing footstep sound location
 Bug #1196: Jumping not disabled when showing messageboxes
 Bug #1202: "strange" keys are not shown in binding menu, and are not saved either, but works
+Bug #1216: Broken dialog topics in russian Morrowind
 Bug #1217: Container content changes based on the current position of the mouse
 Bug #1234: Loading/saving issues with dynamic records
 Bug #1277: Text pasted into the console appears twice
@@ -248,6 +249,8 @@ Bug #1590: Failed to save game: compile error
 Bug #1598: Segfault when making Drain/Fortify Skill spells
 Bug #1599: Unable to switch to fullscreen
 Bug #1613: Morrowind Rebirth duplicate objects / vanilla objects not removed
+Bug #1618: Death notice fails to show up
+Bug #1628: Alt+Tab Segfault
 Feature #32: Periodic Cleanup/Refill
 Feature #41: Precipitation and weather particles
 Feature #568: Editor: Configuration setup
