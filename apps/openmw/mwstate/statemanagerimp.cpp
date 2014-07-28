@@ -132,12 +132,12 @@ void MWState::StateManager::newGame (bool bypass)
 {
     cleanup();
 
-    MWBase::Environment::get().getWorld()->startNewGame (bypass);
-
     if (!bypass)
         MWBase::Environment::get().getWindowManager()->setNewGame (true);
-    else
-        MWBase::Environment::get().getWorld()->setGlobalInt ("chargenstate", -1);
+
+    MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
+
+    MWBase::Environment::get().getWorld()->startNewGame (bypass);
 
     mState = State_Running;
 }
@@ -400,6 +400,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
 
         // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
         MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false);
+
+        MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
 
         // Do not trigger erroneous cellChanged events
         MWBase::Environment::get().getWorld()->markCellAsUnchanged();

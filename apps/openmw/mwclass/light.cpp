@@ -47,6 +47,11 @@ namespace
 
 namespace MWClass
 {
+    std::string Light::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Light>()->mBase->mId;
+    }
+
     void Light::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);

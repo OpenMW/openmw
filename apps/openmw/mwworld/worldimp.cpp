@@ -211,9 +211,9 @@ namespace MWWorld
             // set new game mark
             mGlobalVariables["chargenstate"].setInteger (1);
             mGlobalVariables["pcrace"].setInteger (3);
-
-            MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
         }
+        else
+            mGlobalVariables["chargenstate"].setInteger (-1);
 
         if (bypass && !mStartCell.empty())
         {

@@ -180,6 +180,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mEncoder(NULL)
   , mActivationDistanceOverride(-1)
   , mGrab(true)
+  , mScriptBlacklistUse (true)
 
 {
     std::srand ( std::time(NULL) );
@@ -406,7 +407,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mScriptContext->setExtensions (&mExtensions);
 
     mEnvironment.setScriptManager (new MWScript::ScriptManager (MWBase::Environment::get().getWorld()->getStore(),
-        mVerboseScripts, *mScriptContext, mWarningsMode));
+        mVerboseScripts, *mScriptContext, mWarningsMode,
+        mScriptBlacklistUse ? mScriptBlacklist : std::vector<std::string>()));
 
     // Create game mechanics system
     MWMechanics::MechanicsManager* mechanics = new MWMechanics::MechanicsManager;
@@ -564,4 +566,14 @@ void OMW::Engine::setActivationDistanceOverride (int distance)
 void OMW::Engine::setWarningsMode (int mode)
 {
     mWarningsMode = mode;
+}
+
+void OMW::Engine::setScriptBlacklist (const std::vector<std::string>& list)
+{
+    mScriptBlacklist = list;
+}
+
+void OMW::Engine::setScriptBlacklistUse (bool use)
+{
+    mScriptBlacklistUse = use;
 }

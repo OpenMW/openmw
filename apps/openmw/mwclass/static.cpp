@@ -12,6 +12,11 @@
 
 namespace MWClass
 {
+    std::string Static::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Static>()->mBase->mId;
+    }
+
     void Static::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         MWWorld::LiveCellRef<ESM::Static> *ref =

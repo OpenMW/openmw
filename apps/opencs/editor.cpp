@@ -86,7 +86,11 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))
     ("resources", boost::program_options::value<std::string>()->default_value("resources"))
     ("fallback-archive", boost::program_options::value<std::vector<std::string> >()->
-        default_value(std::vector<std::string>(), "fallback-archive")->multitoken());
+        default_value(std::vector<std::string>(), "fallback-archive")->multitoken())
+    ("script-blacklist", boost::program_options::value<std::vector<std::string> >()->default_value(std::vector<std::string>(), "")
+        ->multitoken(), "exclude specified script from the verifier (if the use of the blacklist is enabled)")
+    ("script-blacklist-use", boost::program_options::value<bool>()->implicit_value(true)
+        ->default_value(true), "enable script blacklisting");
 
     boost::program_options::notify(variables);
 
@@ -96,6 +100,10 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
         ToUTF8::calculateEncoding (variables["encoding"].as<std::string>()));
 
     mDocumentManager.setResourceDir (mResources = variables["resources"].as<std::string>());
+
+    if (variables["script-blacklist-use"].as<bool>())
+        mDocumentManager.setBlacklistedScripts (
+            variables["script-blacklist"].as<std::vector<std::string> >());
 
     mFsStrict = variables["fs-strict"].as<bool>();
 

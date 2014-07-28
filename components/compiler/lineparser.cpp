@@ -11,6 +11,7 @@
 #include "generator.hpp"
 #include "extensions.hpp"
 #include "declarationparser.hpp"
+#include "exception.hpp"
 
 namespace Compiler
 {
@@ -262,6 +263,20 @@ namespace Compiler
                     Generator::disable (mCode, mLiterals, mExplicit);
                     mState = PotentialEndState;
                     return true;
+
+                case Scanner::K_startscript:
+
+                    mExprParser.parseArguments ("c", scanner, mCode);
+                    Generator::startScript (mCode, mLiterals, mExplicit);
+                    mState = EndState;
+                    return true;
+
+                case Scanner::K_stopscript:
+
+                    mExprParser.parseArguments ("c", scanner, mCode);
+                    Generator::stopScript (mCode);
+                    mState = EndState;
+                    return true;
             }
 
             // check for custom extensions
@@ -278,9 +293,31 @@ namespace Compiler
                         mExplicit.clear();
                     }
 
-                    int optionals = mExprParser.parseArguments (argumentType, scanner, mCode);
+                    int optionals = 0;
 
-                    extensions->generateInstructionCode (keyword, mCode, mLiterals, mExplicit, optionals);
+                    try
+                    {
+                        ErrorDowngrade errorDowngrade (getErrorHandler());
+                        std::vector<Interpreter::Type_Code> code;
+                        optionals = mExprParser.parseArguments (argumentType, scanner, code);
+                        mCode.insert (mCode.begin(), code.begin(), code.end());
+                        extensions->generateInstructionCode (keyword, mCode, mLiterals,
+                            mExplicit, optionals);
+                    }
+                    catch (const SourceException& exception)
+                    {
+                        // Ignore argument exceptions for positioncell.
+                        /// \todo add option to disable this
+                        if (Misc::StringUtils::lowerCase (loc.mLiteral)=="positioncell")
+                        {
+                            SkipParser skip (getErrorHandler(), getContext());
+                            scanner.scan (skip);
+                            return false;
+                        }
+
+                        throw;
+                    }
+
                     mState = EndState;
                     return true;
                 }
@@ -349,7 +386,7 @@ namespace Compiler
                     if (declaration.parseKeyword (keyword, loc, scanner))
                         scanner.scan (declaration);
 
-                    return true;
+                    return false;
                 }
 
                 case Scanner::K_set: mState = SetState; return true;
@@ -358,13 +395,6 @@ namespace Compiler
                 case Scanner::K_return:
 
                     Generator::exit (mCode);
-                    mState = EndState;
-                    return true;
-
-                case Scanner::K_startscript:
-
-                    mExprParser.parseArguments ("c", scanner, mCode);
-                    Generator::startScript (mCode);
                     mState = EndState;
                     return true;
 
