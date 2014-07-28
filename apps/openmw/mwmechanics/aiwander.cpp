@@ -43,7 +43,7 @@ namespace MWMechanics
         mReaction = 0;
         mRotate = false;
         mTargetAngle = 0;
-        mSaidGreeting = false;
+        mSaidGreeting = Greet_None;
         mHasReturnPosition = false;
         mReturnPosition = Ogre::Vector3(0,0,0);
 
@@ -407,7 +407,7 @@ namespace MWMechanics
         }
 
         // Allow interrupting a walking actor to trigger a greeting
-        if(mIdleNow || (mWalking && !mObstacleCheck.isNormalState() && mDistance))
+        if(mIdleNow || mWalking)
         {
             // Play a random voice greeting if the player gets too close
             int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
@@ -421,8 +421,18 @@ namespace MWMechanics
             Ogre::Vector3 playerPos(player.getRefData().getPosition().pos);
             Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
             float playerDistSqr = playerPos.squaredDistance(actorPos);
-
-            if(playerDistSqr <= helloDistance*helloDistance)
+            
+            if (mSaidGreeting == Greet_None)
+            {
+                // TODO: check if actor is aware / has line of sight
+                if (playerDistSqr <= helloDistance*helloDistance)
+                {
+                    mSaidGreeting = Greet_InProgress;
+                    MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
+                }
+            }
+            
+            if(mSaidGreeting == Greet_InProgress)
             {
                 if(mWalking)
                 {
@@ -449,29 +459,22 @@ namespace MWMechanics
                         mRotate = true;
                     }
                 }
+                
+                mSaidGreeting = Greet_Done;
             }
-
-            if (!mSaidGreeting)
-            {
-                // TODO: check if actor is aware / has line of sight
-                if (playerDistSqr <= helloDistance*helloDistance)
-                {
-                    mSaidGreeting = true;
-                    MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
-                }
-            }
-            else
+            
+            if (mSaidGreeting == MWMechanics::AiWander::Greet_Done)
             {
                 static float fGreetDistanceReset = MWBase::Environment::get().getWorld()->getStore()
                         .get<ESM::GameSetting>().find("fGreetDistanceReset")->getFloat();
 
                 if (playerDistSqr >= fGreetDistanceReset*fGreetDistanceReset)
-                    mSaidGreeting = false;
+                    mSaidGreeting = Greet_None;
             }
 
             // Check if idle animation finished
             // FIXME: don't stay forever
-            if(!checkIdle(actor, mPlayedIdle) && playerDistSqr > helloDistance*helloDistance)
+            if(!checkIdle(actor, mPlayedIdle) && (playerDistSqr > helloDistance*helloDistance || mSaidGreeting == MWMechanics::AiWander::Greet_Done))
             {
                 mPlayedIdle = 0;
                 mIdleNow = false;
