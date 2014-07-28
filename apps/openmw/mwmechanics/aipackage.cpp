@@ -16,7 +16,7 @@
 
 MWMechanics::AiPackage::~AiPackage() {}
 
-MWMechanics::AiPackage::AiPackage() : mLastDoorChecked(MWWorld::Ptr()), mTimer(.26), mStuckTimer(0) { //mTimer starts at .26 to force initial pathbuild
+MWMechanics::AiPackage::AiPackage() : mTimer(.26), mStuckTimer(0) { //mTimer starts at .26 to force initial pathbuild
 
 }
 
@@ -92,22 +92,19 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     {
 /// TODO (tluppi#1#): Use ObstacleCheck here. Not working for some reason
         //if(mObstacleCheck.check(actor, duration)) {
-        if(distance(start, mStuckPos.pos[0], mStuckPos.pos[1], mStuckPos.pos[2]) < 10 && distance(dest, start) > 20) { //Actually stuck, and far enough away from destination to care
+        if(distance(start, mStuckPos.pos[0], mStuckPos.pos[1], mStuckPos.pos[2]) < actor.getClass().getSpeed(actor)*0.05 && distance(dest, start) > 20) { //Actually stuck, and far enough away from destination to care
             // first check if we're walking into a door
             MWWorld::Ptr door = getNearbyDoor(actor);
             if(door != MWWorld::Ptr()) // NOTE: checks interior cells only
             {
-                if(door.getCellRef().getTrap().empty() && mLastDoorChecked != door) { //Open the door if untrapped
-                    door.getClass().activate(door, actor).get()->execute(actor);
-                    mLastDoorChecked = door;
+                if(door.getCellRef().getTrap().empty() && door.getClass().getDoorState(door) == 0) { //Open the door if untrapped
+                    MWBase::Environment::get().getWorld()->activateDoor(door, 1);
                 }
             }
             else // probably walking into another NPC
             {
-                // TODO: diagonal should have same animation as walk forward
-                //       but doesn't seem to do that?
                 actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
-                actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
+                actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
                 // change the angle a bit, too
                 zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
             }
@@ -115,7 +112,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
         else { //Not stuck, so reset things
             mStuckTimer = 0;
             mStuckPos = pos;
-            mLastDoorChecked = MWWorld::Ptr(); //Resets it, in case he gets stuck behind the door again
             actor.getClass().getMovementSettings(actor).mPosition[1] = 1; //Just run forward
         }
     }
