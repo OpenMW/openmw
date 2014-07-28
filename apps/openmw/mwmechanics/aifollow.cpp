@@ -74,9 +74,9 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
     }
 
     //Check if you're far away
-    if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) > 1000)
+    if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) > 450)
         actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, true); //Make NPC run
-    else if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2])  < 800) //Have a bit of a dead zone, otherwise npc will constantly flip between running and not when right on the edge of the running threshhold
+    else if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2])  < 325) //Have a bit of a dead zone, otherwise npc will constantly flip between running and not when right on the edge of the running threshhold
         actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, false); //make NPC walk
 
     return false;
