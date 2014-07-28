@@ -1176,8 +1176,6 @@ namespace MWMechanics
         ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
         if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
         {
-            ptr.getClass().getCreatureStats(ptr).setHostile(true);
-
             // if guard starts combat with player, guards pursuing player should do the same
             if (ptr.getClass().isClass(ptr, "Guard"))
             {

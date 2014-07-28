@@ -678,8 +678,8 @@ namespace MWClass
         if (ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
         {
             // Attacking peaceful NPCs is a crime
-            if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).isHostile() &&
-                    !MWBase::Environment::get().getMechanicsManager()->isAggressive(ptr, attacker))
+            if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker)
+                    && !MWBase::Environment::get().getMechanicsManager()->isAggressive(ptr, attacker))
                 MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
             if (!attacker.isEmpty() && attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)
@@ -910,7 +910,7 @@ namespace MWClass
 
         if(getCreatureStats(ptr).isDead())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
-        if(ptr.getClass().getCreatureStats(ptr).isHostile())
+        if(ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("#{sActorInCombat}"));
         if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing

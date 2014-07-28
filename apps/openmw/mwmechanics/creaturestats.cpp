@@ -17,7 +17,7 @@ namespace MWMechanics
     CreatureStats::CreatureStats()
         : mLevel (0), mDead (false), mDied (false), mMurdered(false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
-          mAttacked (false), mHostile (false),
+          mAttacked (false),
           mAttackingOrSpell(false),
           mIsWerewolf(false),
           mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mKnockdownOneFrame(false),
@@ -331,16 +331,6 @@ namespace MWMechanics
         mAttacked = attacked;
     }
 
-    bool CreatureStats::isHostile() const
-    {
-        return mHostile;
-    }
-
-    void CreatureStats::setHostile (bool hostile)
-    {
-        mHostile = hostile;
-    }
-
     bool CreatureStats::getCreatureTargetted() const
     {
         MWWorld::Ptr targetPtr;
@@ -506,7 +496,6 @@ namespace MWMechanics
         state.mTalkedTo = mTalkedTo;
         state.mAlarmed = mAlarmed;
         state.mAttacked = mAttacked;
-        state.mHostile = mHostile;
         state.mAttackingOrSpell = mAttackingOrSpell;
         // TODO: rewrite. does this really need 3 separate bools?
         state.mKnockdown = mKnockdown;
@@ -555,7 +544,6 @@ namespace MWMechanics
         mTalkedTo = state.mTalkedTo;
         mAlarmed = state.mAlarmed;
         mAttacked = state.mAttacked;
-        mHostile = state.mHostile;
         mAttackingOrSpell = state.mAttackingOrSpell;
         // TODO: rewrite. does this really need 3 separate bools?
         mKnockdown = state.mKnockdown;

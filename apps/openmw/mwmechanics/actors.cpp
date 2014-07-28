@@ -191,7 +191,6 @@ namespace MWMechanics
     {
         CreatureStats& creatureStats = actor1.getClass().getCreatureStats(actor1);
         
-        if (againstPlayer && creatureStats.isHostile()) return; // already fighting against player
         if (actor2.getClass().getCreatureStats(actor2).isDead()
                 || actor1.getClass().getCreatureStats(actor1).isDead())
             return;
@@ -204,7 +203,7 @@ namespace MWMechanics
 
         // pure water creatures won't try to fight with the target on the ground
         // except that creature is already hostile
-        if ((againstPlayer || !creatureStats.isHostile()) 
+        if ((againstPlayer || !creatureStats.getAiSequence().isInCombat())
                 && ((actor1.getClass().canSwim(actor1) && !actor1.getClass().canWalk(actor1) // pure water creature
                 && !MWBase::Environment::get().getWorld()->isSwimming(actor2))
                 || (!actor1.getClass().canSwim(actor1) && MWBase::Environment::get().getWorld()->isSwimming(actor2)))) // creature can't swim to target
@@ -222,7 +221,7 @@ namespace MWMechanics
             if (!actor1.getClass().isNpc() && actor2.getClass().isClass(actor2, "Guard"))
             {
                 // if creature is hostile then it is necessarily to start combat
-                if (creatureStats.isHostile()) aggressive = true;
+                if (creatureStats.getAiSequence().isInCombat()) aggressive = true;
                 else aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
             }
         }
@@ -796,7 +795,7 @@ namespace MWMechanics
             {
                 if (torch != inventoryStore.end())
                 {
-                    if (!ptr.getClass().getCreatureStats (ptr).isHostile())
+                    if (!ptr.getClass().getCreatureStats (ptr).getAiSequence().isInCombat())
                     {
                         // For non-hostile NPCs, unequip whatever is in the left slot in favor of a light.
                         if (heldIter != inventoryStore.end() && heldIter->getTypeName() != typeid(ESM::Light).name())
@@ -876,7 +875,7 @@ namespace MWMechanics
             CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
             NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
 
-            if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue && !creatureStats.isHostile())
+            if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue && !creatureStats.getAiSequence().isInCombat())
             {
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
                 int cutoff = esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt();
@@ -909,7 +908,6 @@ namespace MWMechanics
                     creatureStats.getAiSequence().stopCombat();
 
                     // Reset factors to attack
-                    creatureStats.setHostile(false);
                     creatureStats.setAttacked(false);
                     creatureStats.setAlarmed(false);
 
@@ -1074,7 +1072,7 @@ namespace MWMechanics
 
                 if(!stats.isDead())
                 {
-                    if (stats.isHostile()) hostilesCount++;
+                    if (stats.getAiSequence().isInCombat()) hostilesCount++;
                 }
             }
 

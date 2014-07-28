@@ -190,8 +190,6 @@ namespace MWMechanics
             // 2. creature can't swim to target
             || (!actorClass.canSwim(actor) && world->isSwimming(target))))
         {
-            if (target == world->getPlayerPtr())
-                actorClass.getCreatureStats(actor).setHostile(false);
             actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
             return true;
         }  

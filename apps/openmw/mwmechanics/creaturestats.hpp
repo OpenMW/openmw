@@ -200,9 +200,6 @@ namespace MWMechanics
         bool getAttacked() const;
         void setAttacked (bool attacked);
 
-        bool isHostile() const;
-        void setHostile (bool hostile);
-
         bool getCreatureTargetted() const;
 
         float getEvasion() const;

@@ -36,8 +36,8 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mAttacked = false;
     esm.getHNOT (mAttacked, "ATKD");
 
-    mHostile = false;
-    esm.getHNOT (mHostile, "HOST");
+    if (esm.isNextSub("HOST"))
+        esm.skipHSub(); // Hostile, no longer used
 
     mAttackingOrSpell = false;
     esm.getHNOT (mAttackingOrSpell, "ATCK");
@@ -147,9 +147,6 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
 
     if (mAttacked)
         esm.writeHNT ("ATKD", mAttacked);
-
-    if (mHostile)
-        esm.writeHNT ("HOST", mHostile);
 
     if (mAttackingOrSpell)
         esm.writeHNT ("ATCK", mAttackingOrSpell);
