@@ -68,6 +68,7 @@ namespace MWMechanics
                 Greet_Done
             };
             GreetingState mSaidGreeting;
+            int greetingTimer;
 
             bool mHasReturnPosition; // NOTE: Could be removed if mReturnPosition was initialized to actor position,
                                     // if we had the actor in the AiWander constructor...
