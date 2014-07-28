@@ -23,8 +23,16 @@ private:
     float mTalkStop;
     float mBlinkStart;
     float mBlinkStop;
+
+    float mBlinkTimer;
+
+    float mValue;
+private:
+    void resetBlinkTimer();
 public:
     HeadAnimationTime(MWWorld::Ptr reference);
+
+    void update(float dt);
 
     void setTalkStart(float value);
     void setTalkStop(float value);

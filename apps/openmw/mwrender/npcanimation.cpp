@@ -67,19 +67,45 @@ namespace MWRender
 {
 
 HeadAnimationTime::HeadAnimationTime(MWWorld::Ptr reference)
-    : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0)
+    : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0), mValue(0)
 {
+    resetBlinkTimer();
+}
+
+void HeadAnimationTime::resetBlinkTimer()
+{
+    mBlinkTimer = -(2 + (std::rand() / double(RAND_MAX*1.0)) * 6);
+}
+
+void HeadAnimationTime::update(float dt)
+{
+    if (MWBase::Environment::get().getSoundManager()->sayDone(mReference))
+    {
+        mBlinkTimer += dt;
+
+        float duration = mBlinkStop - mBlinkStart;
+
+        if (mBlinkTimer >= 0 && mBlinkTimer <= duration)
+        {
+            mValue = mBlinkStart + mBlinkTimer;
+        }
+        else
+            mValue = mBlinkStop;
+
+        if (mBlinkTimer > duration)
+            resetBlinkTimer();
+    }
+    else
+    {
+        mValue = mTalkStart +
+            (mTalkStop - mTalkStart) *
+            std::min(1.f, MWBase::Environment::get().getSoundManager()->getSaySoundLoudness(mReference)*4); // Rescale a bit (most voices are not very loud)
+    }
 }
 
 float HeadAnimationTime::getValue() const
 {
-    // TODO: Handle eye blinking
-    if (MWBase::Environment::get().getSoundManager()->sayDone(mReference))
-        return mBlinkStop;
-    else
-        return mTalkStart +
-            (mTalkStop - mTalkStart) *
-            std::min(1.f, MWBase::Environment::get().getSoundManager()->getSaySoundLoudness(mReference)*4); // Rescale a bit (most voices are not very loud)
+    return mValue;
 }
 
 void HeadAnimationTime::setTalkStart(float value)
@@ -540,6 +566,8 @@ NifOgre::ObjectScenePtr NpcAnimation::insertBoundedPart(const std::string &model
 Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 {
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
+
+    mHeadAnimationTime->update(timepassed);
 
     Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
     if(mViewMode == VM_FirstPerson)
