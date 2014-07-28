@@ -1,6 +1,7 @@
 #include "document.hpp"
 
 #include <cassert>
+#include <fstream>
 
 #include <boost/filesystem.hpp>
 
@@ -2218,16 +2219,18 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
     if (!boost::filesystem::exists (mProjectPath))
     {
-        boost::filesystem::path locCustomFiltersPath (configuration.getUserDataPath());
-        locCustomFiltersPath /= "defaultfilters";
+        boost::filesystem::path customFiltersPath (configuration.getUserDataPath());
+        customFiltersPath /= "defaultfilters";
+        
+        std::string destinationPath = mProjectPath.string() + "/defaultfilters";
+        std::ofstream  dst(destinationPath.c_str(), std::ios::binary);
 
-        if (boost::filesystem::exists (locCustomFiltersPath))
+        if (boost::filesystem::exists (customFiltersPath))
         {
-            boost::filesystem::copy_file (locCustomFiltersPath, mProjectPath);
-        }
-        else
+            dst<<std::ifstream(customFiltersPath.c_str(), std::ios::binary).rdbuf();
+        } else
         {
-            boost::filesystem::copy_file (mResDir / "defaultfilters", mProjectPath);
+            dst<<std::ifstream(std::string(mResDir.string() + "/defaultfilters").c_str(), std::ios::binary).rdbuf();
         }
     }
 
