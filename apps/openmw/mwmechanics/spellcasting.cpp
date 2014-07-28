@@ -379,7 +379,7 @@ namespace MWMechanics
                         // Fully resisted, show message
                         if (target.getRefData().getHandle() == "player")
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicPCResisted}");
-                        else
+                        else if (castByPlayer)
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
                     }
                 }
