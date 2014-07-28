@@ -59,7 +59,7 @@ namespace Compiler
             extensions.registerInstruction ("modfight", "l", opcodeModFight, opcodeModFightExplicit);
             extensions.registerInstruction ("modflee", "l", opcodeModFlee, opcodeModFleeExplicit);
             extensions.registerInstruction ("modalarm", "l", opcodeModAlarm, opcodeModAlarmExplicit);
-            extensions.registerInstruction ("toggleai", "X", opcodeToggleAI, opcodeToggleAI);
+            extensions.registerInstruction ("toggleai", "", opcodeToggleAI, opcodeToggleAI);
             extensions.registerInstruction ("tai", "", opcodeToggleAI, opcodeToggleAI);
             extensions.registerInstruction("startcombat", "c", opcodeStartCombat, opcodeStartCombatExplicit);
             extensions.registerInstruction("stopcombat", "x", opcodeStopCombat, opcodeStopCombatExplicit);
@@ -113,7 +113,7 @@ namespace Compiler
     {
         void registerExtensions (Extensions& extensions)
         {
-            extensions.registerInstruction ("additem", "clxx", opcodeAddItem, opcodeAddItemExplicit);
+            extensions.registerInstruction ("additem", "cl", opcodeAddItem, opcodeAddItemExplicit);
             extensions.registerFunction ("getitemcount", 'l', "c", opcodeGetItemCount,
                 opcodeGetItemCountExplicit);
             extensions.registerInstruction ("removeitem", "cl", opcodeRemoveItem,
@@ -163,7 +163,7 @@ namespace Compiler
     {
         void registerExtensions (Extensions& extensions)
         {
-            extensions.registerInstruction ("journal", "clxxX", opcodeJournal);
+            extensions.registerInstruction ("journal", "cl", opcodeJournal);
             extensions.registerInstruction ("setjournalindex", "cl", opcodeSetJournalIndex);
             extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
             extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);
