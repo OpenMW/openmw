@@ -66,15 +66,40 @@ std::string getVampireHead(const std::string& race, bool female)
 namespace MWRender
 {
 
+HeadAnimationTime::HeadAnimationTime(MWWorld::Ptr reference)
+    : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0)
+{
+}
+
 float HeadAnimationTime::getValue() const
 {
-    // TODO use time from text keys (Talk Start/Stop, Blink Start/Stop)
     // TODO: Handle eye blinking
     if (MWBase::Environment::get().getSoundManager()->sayDone(mReference))
-        return 0;
+        return mBlinkStop;
     else
-        // TODO: Use the loudness of the currently playing sound
-        return 1;
+        return mTalkStart +
+            (mTalkStop - mTalkStart) *
+            std::min(1.f, MWBase::Environment::get().getSoundManager()->getSaySoundLoudness(mReference)*4); // Rescale a bit (most voices are not very loud)
+}
+
+void HeadAnimationTime::setTalkStart(float value)
+{
+    mTalkStart = value;
+}
+
+void HeadAnimationTime::setTalkStop(float value)
+{
+    mTalkStop = value;
+}
+
+void HeadAnimationTime::setBlinkStart(float value)
+{
+    mBlinkStart = value;
+}
+
+void HeadAnimationTime::setBlinkStop(float value)
+{
+    mBlinkStop = value;
 }
 
 static NpcAnimation::PartBoneMap createPartListMap()
@@ -620,7 +645,21 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
             ctrl->setSource(mNullAnimationTimePtr);
 
             if (type == ESM::PRT_Head)
+            {
                 ctrl->setSource(mHeadAnimationTime);
+                const NifOgre::TextKeyMap& keys = mObjectParts[type]->mTextKeys;
+                for (NifOgre::TextKeyMap::const_iterator it = keys.begin(); it != keys.end(); ++it)
+                {
+                    if (Misc::StringUtils::ciEqual(it->second, "talk: start"))
+                        mHeadAnimationTime->setTalkStart(it->first);
+                    if (Misc::StringUtils::ciEqual(it->second, "talk: stop"))
+                        mHeadAnimationTime->setTalkStop(it->first);
+                    if (Misc::StringUtils::ciEqual(it->second, "blink: start"))
+                        mHeadAnimationTime->setBlinkStart(it->first);
+                    if (Misc::StringUtils::ciEqual(it->second, "blink: stop"))
+                        mHeadAnimationTime->setBlinkStop(it->first);
+                }
+            }
             else if (type == ESM::PRT_Weapon)
                 ctrl->setSource(mWeaponAnimationTime);
         }

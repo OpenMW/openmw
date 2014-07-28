@@ -19,8 +19,17 @@ class HeadAnimationTime : public Ogre::ControllerValue<Ogre::Real>
 {
 private:
     MWWorld::Ptr mReference;
+    float mTalkStart;
+    float mTalkStop;
+    float mBlinkStart;
+    float mBlinkStop;
 public:
-    HeadAnimationTime(MWWorld::Ptr reference) : mReference(reference) {}
+    HeadAnimationTime(MWWorld::Ptr reference);
+
+    void setTalkStart(float value);
+    void setTalkStop(float value);
+    void setBlinkStart(float value);
+    void setBlinkStop(float value);
 
     virtual Ogre::Real getValue() const;
     virtual void setValue(Ogre::Real value)

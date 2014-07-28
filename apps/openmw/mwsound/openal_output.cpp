@@ -11,11 +11,16 @@
 #include "sound_decoder.hpp"
 #include "sound.hpp"
 #include "soundmanagerimp.hpp"
+#include "loudness.hpp"
 
 #ifndef ALC_ALL_DEVICES_SPECIFIER
 #define ALC_ALL_DEVICES_SPECIFIER 0x1013
 #endif
 
+namespace
+{
+    const int loudnessFPS = 20; // loudness values per second of audio
+}
 
 namespace MWSound
 {
@@ -750,7 +755,7 @@ void OpenAL_Output::deinit()
 }
 
 
-ALuint OpenAL_Output::getBuffer(const std::string &fname)
+ALuint OpenAL_Output::getBuffer(const std::string &fname, std::vector<float>* loudnessBuffer)
 {
     ALuint buf = 0;
 
@@ -765,10 +770,11 @@ ALuint OpenAL_Output::getBuffer(const std::string &fname)
             if(iter != mUnusedBuffers.end())
                 mUnusedBuffers.erase(iter);
         }
-
-        return buf;
     }
     throwALerror();
+
+    if (buf != 0 && loudnessBuffer == NULL)
+        return buf;
 
     std::vector<char> data;
     ChannelConfig chans;
@@ -795,42 +801,50 @@ ALuint OpenAL_Output::getBuffer(const std::string &fname)
     decoder->readAll(data);
     decoder->close();
 
-    alGenBuffers(1, &buf);
-    throwALerror();
-
-    alBufferData(buf, format, &data[0], data.size(), srate);
-    mBufferCache[fname] = buf;
-    mBufferRefs[buf] = 1;
-
-    ALint bufsize = 0;
-    alGetBufferi(buf, AL_SIZE, &bufsize);
-    mBufferCacheMemSize += bufsize;
-
-    // NOTE: Max buffer cache: 15MB
-    while(mBufferCacheMemSize > 15*1024*1024)
+    if (loudnessBuffer != NULL)
     {
-        if(mUnusedBuffers.empty())
+        analyzeLoudness(data, srate, chans, type, *loudnessBuffer, loudnessFPS);
+    }
+
+    if (buf == 0)
+    {
+        alGenBuffers(1, &buf);
+        throwALerror();
+
+        alBufferData(buf, format, &data[0], data.size(), srate);
+        mBufferCache[fname] = buf;
+        mBufferRefs[buf] = 1;
+
+        ALint bufsize = 0;
+        alGetBufferi(buf, AL_SIZE, &bufsize);
+        mBufferCacheMemSize += bufsize;
+
+        // NOTE: Max buffer cache: 15MB
+        while(mBufferCacheMemSize > 15*1024*1024)
         {
-            std::cout <<"No more unused buffers to clear!"<< std::endl;
-            break;
+            if(mUnusedBuffers.empty())
+            {
+                std::cout <<"No more unused buffers to clear!"<< std::endl;
+                break;
+            }
+
+            ALuint oldbuf = mUnusedBuffers.front();
+            mUnusedBuffers.pop_front();
+
+            NameMap::iterator nameiter = mBufferCache.begin();
+            while(nameiter != mBufferCache.end())
+            {
+                if(nameiter->second == oldbuf)
+                    mBufferCache.erase(nameiter++);
+                else
+                    ++nameiter;
+            }
+
+            bufsize = 0;
+            alGetBufferi(oldbuf, AL_SIZE, &bufsize);
+            alDeleteBuffers(1, &oldbuf);
+            mBufferCacheMemSize -= bufsize;
         }
-
-        ALuint oldbuf = mUnusedBuffers.front();
-        mUnusedBuffers.pop_front();
-
-        NameMap::iterator nameiter = mBufferCache.begin();
-        while(nameiter != mBufferCache.end())
-        {
-            if(nameiter->second == oldbuf)
-                mBufferCache.erase(nameiter++);
-            else
-                ++nameiter;
-        }
-
-        bufsize = 0;
-        alGetBufferi(oldbuf, AL_SIZE, &bufsize);
-        alDeleteBuffers(1, &oldbuf);
-        mBufferCacheMemSize -= bufsize;
     }
     return buf;
 }
@@ -883,7 +897,7 @@ MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, f
 }
 
 MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector3 &pos, float vol, float basevol, float pitch,
-                                            float min, float max, int flags, float offset)
+                                            float min, float max, int flags, float offset, bool extractLoudness)
 {
     boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
@@ -895,8 +909,12 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre
 
     try
     {
-        buf = getBuffer(fname);
+        std::vector<float> loudnessVector;
+
+        buf = getBuffer(fname, extractLoudness ? &loudnessVector : NULL);
+
         sound.reset(new OpenAL_Sound3D(*this, src, buf, pos, vol, basevol, pitch, min, max, flags));
+        sound->setLoudnessVector(loudnessVector, loudnessFPS);
     }
     catch(std::exception&)
     {
