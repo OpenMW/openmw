@@ -221,6 +221,21 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 mCurrentHit = "shield";
                 mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::Group_All, true, 1, "block start", "block stop", 0.0f, 0);
             }
+
+            // Cancel upper body animations
+            if (mHitState == CharState_KnockDown || mHitState == CharState_KnockOut)
+            {
+                if (mUpperBodyState > UpperCharState_WeapEquiped)
+                {
+                    mAnimation->disable(mCurrentWeapon);
+                    mUpperBodyState = UpperCharState_WeapEquiped;
+                }
+                else if (mUpperBodyState > UpperCharState_Nothing && mUpperBodyState < UpperCharState_WeapEquiped)
+                {
+                    mAnimation->disable(mCurrentWeapon);
+                    mUpperBodyState = UpperCharState_Nothing;
+                }
+            }
         }
         else if(!mAnimation->isPlaying(mCurrentHit))
         {
