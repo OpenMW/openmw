@@ -220,9 +220,8 @@ namespace MWMechanics
             // Make guards fight aggressive creatures
             if (!actor1.getClass().isNpc() && actor2.getClass().isClass(actor2, "Guard"))
             {
-                // if creature is hostile then it is necessarily to start combat
-                if (creatureStats.getAiSequence().isInCombat()) aggressive = true;
-                else aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
+                if (creatureStats.getAiSequence().isInCombat() && MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2))
+                    aggressive = true;
             }
         }
 
