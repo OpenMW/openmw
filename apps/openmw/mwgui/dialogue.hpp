@@ -152,6 +152,7 @@ namespace MWGui
 
     private:
         void updateOptions();
+        void restock();
 
         int mServices;
 
