@@ -35,6 +35,8 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 
     if(target == MWWorld::Ptr()) return true;   //Target doesn't exist
 
+    actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 
     if(!mAlwaysFollow) //Update if you only follow for a bit

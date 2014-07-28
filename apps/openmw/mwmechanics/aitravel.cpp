@@ -44,6 +44,8 @@ namespace MWMechanics
 
         actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
 
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+
         MWWorld::Ptr player = world->getPlayerPtr();
         if(cell->mData.mX != player.getCell()->getCell()->mData.mX)
         {

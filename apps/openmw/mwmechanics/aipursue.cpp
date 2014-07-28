@@ -38,6 +38,8 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, float duration)
     if(target == MWWorld::Ptr())
         return true; //Target doesn't exist
 
+    actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+
     //Set the target desition from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 

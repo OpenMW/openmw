@@ -9,6 +9,8 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "steering.hpp"
 #include "movement.hpp"
 
@@ -71,6 +73,8 @@ namespace MWMechanics
             if (duration <= 0)
                 return true;
         }
+
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
         const MWWorld::Ptr follower = MWBase::Environment::get().getWorld()->getPtr(mActorId, false);
         const float* const leaderPos = actor.getRefData().getPosition().pos;
