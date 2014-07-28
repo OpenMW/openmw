@@ -454,9 +454,7 @@ namespace MWMechanics
             if (!mSaidGreeting)
             {
                 // TODO: check if actor is aware / has line of sight
-                if (playerDistSqr <= helloDistance*helloDistance
-                        // Only play a greeting if the player is not moving
-                        && Ogre::Vector3(player.getClass().getMovementSettings(player).mPosition).squaredLength() == 0)
+                if (playerDistSqr <= helloDistance*helloDistance)
                 {
                     mSaidGreeting = true;
                     MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
@@ -467,7 +465,7 @@ namespace MWMechanics
                 static float fGreetDistanceReset = MWBase::Environment::get().getWorld()->getStore()
                         .get<ESM::GameSetting>().find("fGreetDistanceReset")->getFloat();
 
-                if (playerDistSqr >= fGreetDistanceReset*fGreetDistanceReset * iGreetDistanceMultiplier*iGreetDistanceMultiplier)
+                if (playerDistSqr >= fGreetDistanceReset*fGreetDistanceReset)
                     mSaidGreeting = false;
             }
 
