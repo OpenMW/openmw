@@ -25,16 +25,16 @@ namespace MWSound
                 // get sample on a scale from -1 to 1
                 float value = 0;
                 if (type == SampleType_UInt8)
-                    value = data[sample*advance]/128.f;
+                    value = ((char)(data[sample*advance]^0x80))/128.f;
                 else if (type == SampleType_Int16)
                 {
                     value = *reinterpret_cast<const Ogre::int16*>(&data[sample*advance]);
-                    value /= float(std::numeric_limits<Ogre::uint16>().max());
+                    value /= float(std::numeric_limits<Ogre::int16>().max());
                 }
                 else if (type == SampleType_Float32)
                 {
                     value = *reinterpret_cast<const float*>(&data[sample*advance]);
-                    value /= std::numeric_limits<float>().max();
+                    value = std::max(-1.f, std::min(1.f, value)); // Float samples *should* be scaled to [-1,1] already.
                 }
 
                 sum += value*value;

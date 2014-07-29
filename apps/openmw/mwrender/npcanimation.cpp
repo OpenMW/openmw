@@ -99,7 +99,7 @@ void HeadAnimationTime::update(float dt)
     {
         mValue = mTalkStart +
             (mTalkStop - mTalkStart) *
-            std::min(1.f, MWBase::Environment::get().getSoundManager()->getSaySoundLoudness(mReference)*4); // Rescale a bit (most voices are not very loud)
+            std::min(1.f, MWBase::Environment::get().getSoundManager()->getSaySoundLoudness(mReference)*2); // Rescale a bit (most voices are not very loud)
     }
 }
 
