@@ -1718,6 +1718,7 @@ namespace MWWorld
         localRotation.rot[2] = 0;
         dropped.getRefData().setLocalRotation(localRotation);
         dropped.getCellRef().setPosition(pos);
+        dropped.getCellRef().unsetRefNum();
 
         if (mWorldScene->isCellActive(*cell)) {
             if (dropped.getRefData().isEnabled()) {

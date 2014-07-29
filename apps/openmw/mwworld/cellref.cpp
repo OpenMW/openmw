@@ -10,6 +10,12 @@ namespace MWWorld
         return mCellRef.mRefNum;
     }
 
+    void CellRef::unsetRefNum()
+    {
+        mCellRef.mRefNum.mContentFile = -1;
+        mCellRef.mRefNum.mIndex = 0;
+    }
+
     std::string CellRef::getRefId() const
     {
         return mCellRef.mRefID;

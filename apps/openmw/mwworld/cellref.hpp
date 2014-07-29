@@ -25,6 +25,9 @@ namespace MWWorld
         // Note: Currently unused for items in containers
         ESM::RefNum getRefNum() const;
 
+        // Set RefNum to its default state.
+        void unsetRefNum();
+
         // Id of object being referenced
         std::string getRefId() const;
 
