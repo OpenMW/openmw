@@ -16,6 +16,12 @@ namespace MWSound
     class SoundManager;
     class Sound;
 
+    struct CachedSound
+    {
+        ALuint mALBuffer;
+        std::vector<float> mLoudnessVector;
+    };
+
     class OpenAL_Output : public Sound_Output
     {
         ALCdevice *mDevice;
@@ -25,7 +31,7 @@ namespace MWSound
         IDDq mFreeSources;
         IDDq mUnusedBuffers;
 
-        typedef std::map<std::string,ALuint> NameMap;
+        typedef std::map<std::string,CachedSound> NameMap;
         NameMap mBufferCache;
 
         typedef std::map<ALuint,ALuint> IDRefMap;
@@ -36,7 +42,7 @@ namespace MWSound
         typedef std::vector<Sound*> SoundVec;
         SoundVec mActiveSounds;
 
-        ALuint getBuffer(const std::string &fname, std::vector<float>* loudnessBuffer=NULL);
+        const CachedSound& getBuffer(const std::string &fname);
         void bufferFinished(ALuint buffer);
 
         Environment mLastEnvironment;
