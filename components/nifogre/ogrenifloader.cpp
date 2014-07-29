@@ -54,6 +54,45 @@
 
 namespace NifOgre
 {
+class DefaultFunction : public Ogre::ControllerFunction<Ogre::Real>
+{
+private:
+    float mFrequency;
+    float mPhase;
+    float mStartTime;
+public:
+    float mStopTime;
+
+public:
+    DefaultFunction(const Nif::Controller *ctrl, bool deltaInput)
+        : Ogre::ControllerFunction<Ogre::Real>(deltaInput)
+        , mFrequency(ctrl->frequency)
+        , mPhase(ctrl->phase)
+        , mStartTime(ctrl->timeStart)
+        , mStopTime(ctrl->timeStop)
+    {
+        if(mDeltaInput)
+            mDeltaCount = mPhase;
+    }
+
+    virtual Ogre::Real calculate(Ogre::Real value)
+    {
+        if(mDeltaInput)
+        {
+            mDeltaCount += value*mFrequency;
+            if(mDeltaCount < mStartTime)
+                mDeltaCount = mStopTime - std::fmod(mStartTime - mDeltaCount,
+                                                    mStopTime - mStartTime);
+            mDeltaCount = std::fmod(mDeltaCount - mStartTime,
+                                    mStopTime - mStartTime) + mStartTime;
+            return mDeltaCount;
+        }
+
+        value = std::min(mStopTime, std::max(mStartTime, value+mPhase));
+        return value;
+    }
+};
+
 
 Ogre::MaterialPtr MaterialControllerManager::getWritableMaterial(Ogre::MovableObject *movable)
 {
