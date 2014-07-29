@@ -94,10 +94,10 @@ struct Cell
   float mWater; // Water level
   bool mWaterInt;
   int mMapColor;
-  // Counter for RefIds. This is only used during content file editing and has no impact on gameplay.
-  // It prevents overwriting previous refIDs, even if they were deleted.
+  // Counter for RefNums. This is only used during content file editing and has no impact on gameplay.
+  // It prevents overwriting previous refNums, even if they were deleted.
   // as that would collide with refs when a content file is upgraded.
-  int mRefIdCounter;
+  int mRefNumCounter;
 
   // References "leased" from another cell (i.e. a different cell
   //  introduced this ref, and it has been moved here by a plugin)

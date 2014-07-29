@@ -58,7 +58,7 @@ void Cell::load(ESMReader &esm, bool saveContext)
 
 void Cell::loadCell(ESMReader &esm, bool saveContext)
 {
-    mRefIdCounter = 0;
+    mRefNumCounter = 0;
 
     if (mData.mFlags & Interior)
     {
@@ -92,7 +92,7 @@ void Cell::loadCell(ESMReader &esm, bool saveContext)
         esm.getHNOT(mMapColor, "NAM5");
     }
     if (esm.isNextSub("NAM0")) {
-        esm.getHT(mRefIdCounter);
+        esm.getHT(mRefNumCounter);
     }
 
     if (saveContext) {
@@ -150,8 +150,8 @@ void Cell::save(ESMWriter &esm) const
             esm.writeHNT("NAM5", mMapColor);
     }
 
-    if (mRefIdCounter != 0)
-        esm.writeHNT("NAM0", mRefIdCounter);
+    if (mRefNumCounter != 0)
+        esm.writeHNT("NAM0", mRefNumCounter);
 }
 
 void Cell::restore(ESMReader &esm, int iCtx) const
@@ -220,7 +220,7 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
         mWater = 0;
         mWaterInt = false;
         mMapColor = 0;
-        mRefIdCounter = 0;
+        mRefNumCounter = 0;
 
         mData.mFlags = 0;
         mData.mX = 0;
