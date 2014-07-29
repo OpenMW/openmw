@@ -58,9 +58,6 @@ namespace MWGui
     void EnchantingDialog::open()
     {
         center();
-
-        setSoulGem(MWWorld::Ptr());
-        setItem(MWWorld::Ptr());
     }
 
     void EnchantingDialog::setSoulGem(const MWWorld::Ptr &gem)
@@ -78,7 +75,6 @@ namespace MWGui
             mSoulBox->setUserData(gem);
             mEnchanting.setSoulGem(gem);
         }
-        updateLabels();
     }
 
     void EnchantingDialog::setItem(const MWWorld::Ptr &item)
@@ -96,7 +92,6 @@ namespace MWGui
             mItemBox->setUserData(item);
             mEnchanting.setOldItem(item);
         }
-        updateLabels();
     }
 
     void EnchantingDialog::exit()
@@ -148,6 +143,9 @@ namespace MWGui
 
         mPtr = actor;
 
+        setSoulGem(MWWorld::Ptr());
+        setItem(MWWorld::Ptr());
+
         startEditing ();
         mPrice->setVisible(true);
         mPriceText->setVisible(true);
@@ -167,6 +165,7 @@ namespace MWGui
         startEditing();
 
         setSoulGem(soulgem);
+        setItem(MWWorld::Ptr());
 
         mPrice->setVisible(false);
         mPriceText->setVisible(false);
@@ -177,6 +176,16 @@ namespace MWGui
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
+        resetReference();
+    }
+
+    void EnchantingDialog::resetReference()
+    {
+        ReferenceInterface::resetReference();
+        setItem(MWWorld::Ptr());
+        setSoulGem(MWWorld::Ptr());
+        mPtr = MWWorld::Ptr();
+        mEnchanting.setEnchanter(MWWorld::Ptr());
     }
 
     void EnchantingDialog::onCancelButtonClicked(MyGUI::Widget* sender)
@@ -219,8 +228,8 @@ namespace MWGui
     void EnchantingDialog::onSoulSelected(MWWorld::Ptr item)
     {
         mItemSelectionDialog->setVisible(false);
-        mEnchanting.setSoulGem(item);
 
+        mEnchanting.setSoulGem(item);
         if(mEnchanting.getGemCharge()==0)
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage32}");
@@ -228,6 +237,7 @@ namespace MWGui
         }
 
         setSoulGem(item);
+        updateLabels();
     }
 
     void EnchantingDialog::onSoulCancel()
@@ -252,6 +262,7 @@ namespace MWGui
         else
         {
             setSoulGem(MWWorld::Ptr());
+            updateLabels();
         }
     }
 

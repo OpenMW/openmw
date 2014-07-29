@@ -29,6 +29,8 @@ namespace MWGui
         void startEnchanting(MWWorld::Ptr actor);
         void startSelfEnchanting(MWWorld::Ptr soulgem);
 
+        virtual void resetReference();
+
     protected:
         virtual void onReferenceUnavailable();
         virtual void notifyEffectsChanged ();
