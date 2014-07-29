@@ -272,6 +272,10 @@ namespace Compiler
             extensions.registerInstruction ("fall", "", opcodeFall, opcodeFallExplicit);
             extensions.registerFunction ("getstandingpc", 'l', "", opcodeGetStandingPc, opcodeGetStandingPcExplicit);
             extensions.registerFunction ("getstandingactor", 'l', "", opcodeGetStandingActor, opcodeGetStandingActorExplicit);
+            extensions.registerFunction ("getcollidingpc", 'l', "", opcodeGetCollidingPc, opcodeGetCollidingPcExplicit);
+            extensions.registerFunction ("getcollidingactor", 'l', "", opcodeGetCollidingActor, opcodeGetCollidingActorExplicit);
+            extensions.registerInstruction ("hurtstandingactor", "f", opcodeHurtStandingActor, opcodeHurtStandingActorExplicit);
+            extensions.registerInstruction ("hurtcollidingactor", "f", opcodeHurtCollidingActor, opcodeHurtCollidingActorExplicit);
             extensions.registerFunction ("getwindspeed", 'f', "", opcodeGetWindSpeed);
             extensions.registerFunction ("hitonme", 'l', "S", opcodeHitOnMe, opcodeHitOnMeExplicit);
             extensions.registerInstruction ("disableteleporting", "", opcodeDisableTeleporting);

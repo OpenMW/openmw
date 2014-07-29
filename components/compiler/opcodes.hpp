@@ -238,6 +238,14 @@ namespace Compiler
         const int opcodeGetStandingPcExplicit = 0x200020d;
         const int opcodeGetStandingActor = 0x200020e;
         const int opcodeGetStandingActorExplicit = 0x200020f;
+        const int opcodeGetCollidingPc = 0x2000250;
+        const int opcodeGetCollidingPcExplicit = 0x2000251;
+        const int opcodeGetCollidingActor = 0x2000252;
+        const int opcodeGetCollidingActorExplicit = 0x2000253;
+        const int opcodeHurtStandingActor = 0x2000254;
+        const int opcodeHurtStandingActorExplicit = 0x2000255;
+        const int opcodeHurtCollidingActor = 0x2000256;
+        const int opcodeHurtCollidingActorExplicit = 0x2000257;
         const int opcodeGetWindSpeed = 0x2000212;
         const int opcodePlayBink = 0x20001f7;
         const int opcodeGoToJail = 0x2000235;

@@ -18,6 +18,7 @@ namespace Physic
     {
         Ogre::Vector3 mEndPos;
         Ogre::Vector3 mPlaneNormal;
+        const btCollisionObject* mHitObject;
 
         float mFraction;
 

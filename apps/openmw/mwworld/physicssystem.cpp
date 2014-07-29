@@ -241,7 +241,9 @@ namespace MWWorld
         }
 
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
-                                  bool isFlying, float waterlevel, float slowFall, OEngine::Physic::PhysicEngine *engine)
+                                  bool isFlying, float waterlevel, float slowFall, OEngine::Physic::PhysicEngine *engine
+                                  , std::map<std::string, std::string>& collisionTracker
+                                  , std::map<std::string, std::string>& standingCollisionTracker)
         {
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
@@ -318,6 +320,11 @@ namespace MWWorld
                     tracer.doTrace(colobj, position, position - Ogre::Vector3(0,0,2), engine); // check if down 2 possible
                     if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
                     {
+                        const btCollisionObject* standingOn = tracer.mHitObject;
+                        if (const OEngine::Physic::RigidBody* body = dynamic_cast<const OEngine::Physic::RigidBody*>(standingOn))
+                        {
+                            standingCollisionTracker[ptr.getRefData().getHandle()] = body->mName;
+                        }
                         isOnGround = true;
                         // if we're on the ground, don't try to fall any more
                         velocity.z = std::max(0.0f, velocity.z);
@@ -375,6 +382,14 @@ namespace MWWorld
                         newPosition = tracer.mEndPos; // ok to move, so set newPosition
                         remainingTime *= (1.0f-tracer.mFraction); // FIXME: remainingTime is no longer used so don't set it?
                         break;
+                    }
+                    else
+                    {
+                        const btCollisionObject* standingOn = tracer.mHitObject;
+                        if (const OEngine::Physic::RigidBody* body = dynamic_cast<const OEngine::Physic::RigidBody*>(standingOn))
+                        {
+                            collisionTracker[ptr.getRefData().getHandle()] = body->mName;
+                        }
                     }
                 }
                 else
@@ -771,6 +786,10 @@ namespace MWWorld
 
     const PtrVelocityList& PhysicsSystem::applyQueuedMovement(float dt)
     {
+        // Collision events are only tracked for a single frame, so reset first
+        mCollisions.clear();
+        mStandingCollisions.clear();
+
         mMovementResults.clear();
 
         mTimeAccum += dt;
@@ -810,7 +829,7 @@ namespace MWWorld
 
                 Ogre::Vector3 newpos = MovementSolver::move(iter->first, iter->second, mTimeAccum,
                                                             world->isFlying(iter->first),
-                                                            waterlevel, slowFall, mEngine);
+                                                            waterlevel, slowFall, mEngine, mCollisions, mStandingCollisions);
 
                 if (waterCollision)
                     mEngine->mDynamicsWorld->removeCollisionObject(&object);
@@ -837,4 +856,57 @@ namespace MWWorld
 
         mEngine->stepSimulation(dt);
     }
+
+    bool PhysicsSystem::isActorStandingOn(const Ptr &actor, const Ptr &object) const
+    {
+        const std::string& actorHandle = actor.getRefData().getHandle();
+        const std::string& objectHandle = object.getRefData().getHandle();
+
+        for (std::map<std::string, std::string>::const_iterator it = mStandingCollisions.begin();
+             it != mStandingCollisions.end(); ++it)
+        {
+            if (it->first == actorHandle && it->second == objectHandle)
+                return true;
+        }
+        return false;
+    }
+
+    void PhysicsSystem::getActorsStandingOn(const Ptr &object, std::vector<std::string> &out) const
+    {
+        const std::string& objectHandle = object.getRefData().getHandle();
+
+        for (std::map<std::string, std::string>::const_iterator it = mStandingCollisions.begin();
+             it != mStandingCollisions.end(); ++it)
+        {
+            if (it->second == objectHandle)
+                out.push_back(it->first);
+        }
+    }
+
+    bool PhysicsSystem::isActorCollidingWith(const Ptr &actor, const Ptr &object) const
+    {
+        const std::string& actorHandle = actor.getRefData().getHandle();
+        const std::string& objectHandle = object.getRefData().getHandle();
+
+        for (std::map<std::string, std::string>::const_iterator it = mCollisions.begin();
+             it != mCollisions.end(); ++it)
+        {
+            if (it->first == actorHandle && it->second == objectHandle)
+                return true;
+        }
+        return false;
+    }
+
+    void PhysicsSystem::getActorsCollidingWith(const Ptr &object, std::vector<std::string> &out) const
+    {
+        const std::string& objectHandle = object.getRefData().getHandle();
+
+        for (std::map<std::string, std::string>::const_iterator it = mCollisions.begin();
+             it != mCollisions.end(); ++it)
+        {
+            if (it->second == objectHandle)
+                out.push_back(it->first);
+        }
+    }
+
 }

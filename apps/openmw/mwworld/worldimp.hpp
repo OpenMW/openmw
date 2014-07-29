@@ -479,6 +479,15 @@ namespace MWWorld
 
             virtual bool getPlayerStandingOn (const MWWorld::Ptr& object); ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::Ptr& object); ///< @return true if any actor is standing on \a object
+            virtual bool getPlayerCollidingWith(const MWWorld::Ptr& object); ///< @return true if the player is colliding with \a object
+            virtual bool getActorCollidingWith (const MWWorld::Ptr& object); ///< @return true if any actor is colliding with \a object
+            virtual void hurtStandingActors (const MWWorld::Ptr& object, float dmgPerSecond);
+            ///< Apply a health difference to any actors standing on \a object.
+            /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
+            virtual void hurtCollidingActors (const MWWorld::Ptr& object, float dmgPerSecond);
+            ///< Apply a health difference to any actors colliding with \a object.
+            /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
+
             virtual float getWindSpeed();
 
             virtual void getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);

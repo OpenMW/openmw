@@ -611,6 +611,60 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpGetCollidingPc : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    runtime.push (MWBase::Environment::get().getWorld()->getPlayerStandingOn(ptr));
+                }
+        };
+
+        template <class R>
+        class OpGetCollidingActor : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    runtime.push (MWBase::Environment::get().getWorld()->getActorStandingOn(ptr));
+                }
+        };
+
+        template <class R>
+        class OpHurtStandingActor : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    float healthDiffPerSecond = runtime[0].mFloat;
+                    runtime.pop();
+
+                    MWBase::Environment::get().getWorld()->hurtStandingActors(ptr, healthDiffPerSecond);
+                }
+        };
+
+        template <class R>
+        class OpHurtCollidingActor : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    float healthDiffPerSecond = runtime[0].mFloat;
+                    runtime.pop();
+
+                    MWBase::Environment::get().getWorld()->hurtCollidingActors(ptr, healthDiffPerSecond);
+                }
+        };
+
         class OpGetWindSpeed : public Interpreter::Opcode0
         {
             public:
@@ -967,6 +1021,14 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeGetStandingPcExplicit, new OpGetStandingPc<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetStandingActor, new OpGetStandingActor<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetStandingActorExplicit, new OpGetStandingActor<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetCollidingPc, new OpGetCollidingPc<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetCollidingPcExplicit, new OpGetCollidingPc<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetCollidingActor, new OpGetCollidingActor<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetCollidingActorExplicit, new OpGetCollidingActor<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeHurtStandingActor, new OpHurtStandingActor<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeHurtStandingActorExplicit, new OpHurtStandingActor<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeHurtCollidingActor, new OpHurtCollidingActor<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeHurtCollidingActorExplicit, new OpHurtCollidingActor<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetWindSpeed, new OpGetWindSpeed);
             interpreter.installSegment5 (Compiler::Misc::opcodeHitOnMe, new OpHitOnMe<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeHitOnMeExplicit, new OpHitOnMe<ExplicitRef>);

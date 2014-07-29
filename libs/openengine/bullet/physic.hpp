@@ -296,8 +296,6 @@ namespace Physic
 
         void setSceneManager(Ogre::SceneManager* sceneMgr);
 
-        bool isAnyActorStandingOn (const std::string& objectName);
-
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
          * If \a normal is non-NULL, the hit normal will be written there (if there is a hit)

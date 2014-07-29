@@ -1995,18 +1995,62 @@ namespace MWWorld
 
     bool World::getPlayerStandingOn (const MWWorld::Ptr& object)
     {
-        MWWorld::Ptr player = mPlayer->getPlayer();
-        if (!mPhysEngine->getCharacter("player")->getOnGround())
-            return false;
-        btVector3 from (player.getRefData().getPosition().pos[0], player.getRefData().getPosition().pos[1], player.getRefData().getPosition().pos[2]);
-        btVector3 to = from - btVector3(0,0,5);
-        std::pair<std::string, float> result = mPhysEngine->rayTest(from, to);
-        return result.first == object.getRefData().getBaseNode()->getName();
+        MWWorld::Ptr player = getPlayerPtr();
+        return mPhysics->isActorStandingOn(player, object);
     }
 
     bool World::getActorStandingOn (const MWWorld::Ptr& object)
     {
-        return mPhysEngine->isAnyActorStandingOn(object.getRefData().getBaseNode()->getName());
+        std::vector<std::string> actors;
+        mPhysics->getActorsStandingOn(object, actors);
+        return !actors.empty();
+    }
+
+    bool World::getPlayerCollidingWith (const MWWorld::Ptr& object)
+    {
+        MWWorld::Ptr player = getPlayerPtr();
+        return mPhysics->isActorCollidingWith(player, object);
+    }
+
+    bool World::getActorCollidingWith (const MWWorld::Ptr& object)
+    {
+        std::vector<std::string> actors;
+        mPhysics->getActorsCollidingWith(object, actors);
+        return !actors.empty();
+    }
+
+    void World::hurtStandingActors(const Ptr &object, float healthPerSecond)
+    {
+        std::vector<std::string> actors;
+        mPhysics->getActorsStandingOn(object, actors);
+        for (std::vector<std::string>::iterator it = actors.begin(); it != actors.end(); ++it)
+        {
+            MWWorld::Ptr actor = searchPtrViaHandle(*it); // Collision events are from the last frame, actor might no longer exist
+            if (actor.isEmpty())
+                continue;
+
+            MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+            MWMechanics::DynamicStat<float> health = stats.getHealth();
+            health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
+            stats.setHealth(health);
+        }
+    }
+
+    void World::hurtCollidingActors(const Ptr &object, float healthPerSecond)
+    {
+        std::vector<std::string> actors;
+        mPhysics->getActorsCollidingWith(object, actors);
+        for (std::vector<std::string>::iterator it = actors.begin(); it != actors.end(); ++it)
+        {
+            MWWorld::Ptr actor = searchPtrViaHandle(*it); // Collision events are from the last frame, actor might no longer exist
+            if (actor.isEmpty())
+                continue;
+
+            MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+            MWMechanics::DynamicStat<float> health = stats.getHealth();
+            health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
+            stats.setHealth(health);
+        }
     }
 
     float World::getWindSpeed()

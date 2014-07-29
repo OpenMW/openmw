@@ -846,21 +846,5 @@ namespace Physic
         }
     }
 
-    bool PhysicEngine::isAnyActorStandingOn (const std::string& objectName)
-    {
-        for (PhysicActorContainer::iterator it = mActorMap.begin(); it != mActorMap.end(); ++it)
-        {
-            if (!it->second->getOnGround())
-                continue;
-            Ogre::Vector3 pos = it->second->getPosition();
-            btVector3 from (pos.x, pos.y, pos.z);
-            btVector3 to = from - btVector3(0,0,5);
-            std::pair<std::string, float> result = rayTest(from, to);
-            if (result.first == objectName)
-                return true;
-        }
-        return false;
-    }
-
 }
 }
