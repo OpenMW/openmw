@@ -2205,9 +2205,10 @@ void CSMDoc::Document::createBase()
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     const std::vector< boost::filesystem::path >& files, bool new_,
     const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
-    ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager)
+    ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
+    const std::vector<std::string>& blacklistedScripts)
 : mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
-  mTools (mData), mResDir(resDir),
+  mTools (*this), mResDir(resDir),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
   mSaving (*this, mProjectPath, encoding)
@@ -2238,6 +2239,8 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
         if (mContentFiles.size()==1)
             createBase();
     }
+
+    mBlacklist.add (CSMWorld::UniversalId::Type_Script, blacklistedScripts);
 
     addOptionalGmsts();
     addOptionalGlobals();
@@ -2357,6 +2360,13 @@ CSMTools::ReportModel *CSMDoc::Document::getReport (const CSMWorld::UniversalId&
 {
     return mTools.getReport (id);
 }
+
+bool CSMDoc::Document::isBlacklisted (const CSMWorld::UniversalId& id)
+    const
+{
+    return mBlacklist.isBlacklisted (id);
+}
+
 
 void CSMDoc::Document::progress (int current, int max, int type)
 {

@@ -7,6 +7,8 @@
 #include <components/compiler/exception.hpp>
 #include <components/compiler/extensions0.hpp>
 
+#include "../doc/document.hpp"
+
 #include "../world/data.hpp"
 
 void CSMTools::ScriptCheckStage::report (const std::string& message, const Compiler::TokenLoc& loc,
@@ -37,8 +39,8 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, Type type)
         (type==ErrorMessage ? "error: " : "warning: ") + message));
 }
 
-CSMTools::ScriptCheckStage::ScriptCheckStage (const CSMWorld::Data& data)
-: mData (data), mContext (data), mMessages (0)
+CSMTools::ScriptCheckStage::ScriptCheckStage (const CSMDoc::Document& document)
+: mDocument (document), mContext (document.getData()), mMessages (0)
 {
     /// \todo add an option to configure warning mode
     setWarningsMode (0);
@@ -53,18 +55,25 @@ int CSMTools::ScriptCheckStage::setup()
     mMessages = 0;
     mId.clear();
 
-    return mData.getScripts().getSize();
+    return mDocument.getData().getScripts().getSize();
 }
 
 void CSMTools::ScriptCheckStage::perform (int stage, Messages& messages)
 {
+    mId = mDocument.getData().getScripts().getId (stage);
+
+    if (mDocument.isBlacklisted (
+        CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Script, mId)))
+        return;
+
     mMessages = &messages;
-    mId = mData.getScripts().getId (stage);
 
     try
     {
-        mFile = mData.getScripts().getRecord (stage).get().mId;
-        std::istringstream input (mData.getScripts().getRecord (stage).get().mScriptText);
+        const CSMWorld::Data& data = mDocument.getData();
+
+        mFile = data.getScripts().getRecord (stage).get().mId;
+        std::istringstream input (data.getScripts().getRecord (stage).get().mScriptText);
 
         Compiler::Scanner scanner (*this, input, mContext.getExtensions());
 

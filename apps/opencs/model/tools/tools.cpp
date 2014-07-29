@@ -5,6 +5,7 @@
 
 #include "../doc/state.hpp"
 #include "../doc/operation.hpp"
+#include "../doc/document.hpp"
 
 #include "../world/data.hpp"
 #include "../world/universalid.hpp"
@@ -80,13 +81,14 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
 
 	mVerifier->appendStage (new ReferenceableCheckStage (mData.getReferenceables().getDataSet(), mData.getRaces(), mData.getClasses(), mData.getFactions()));
 
-        mVerifier->appendStage (new ScriptCheckStage (mData));
+        mVerifier->appendStage (new ScriptCheckStage (mDocument));
     }
 
     return mVerifier;
 }
 
-CSMTools::Tools::Tools (CSMWorld::Data& data) : mData (data), mVerifier (0), mNextReportNumber (0)
+CSMTools::Tools::Tools (CSMDoc::Document& document)
+: mDocument (document), mData (document.getData()), mVerifier (0), mNextReportNumber (0)
 {
     // index 0: load error log
     mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));

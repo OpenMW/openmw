@@ -89,6 +89,8 @@ namespace OMW
             Files::Collections mFileCollections;
             bool mFSStrict;
             Translation::Storage mTranslationDataStorage;
+            std::vector<std::string> mScriptBlacklist;
+            bool mScriptBlacklistUse;
 
             // not implemented
             Engine (const Engine&);
@@ -180,6 +182,10 @@ namespace OMW
             void setActivationDistanceOverride (int distance);
 
             void setWarningsMode (int mode);
+
+            void setScriptBlacklist (const std::vector<std::string>& list);
+
+            void setScriptBlacklistUse (bool use);
 
         private:
             Files::ConfigurationManager& mCfgMgr;

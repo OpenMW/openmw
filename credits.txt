@@ -72,6 +72,7 @@ Sandy Carter (bwrsandman)
 Sebastian Wick (swick)
 Sergey Shambir
 sir_herrbatka
+Stefan Galowicz (bogglez)
 Sylvain Thesnieres (Garvek)
 Thomas Luppi (Digmaster)
 Tom Mason (wheybags)

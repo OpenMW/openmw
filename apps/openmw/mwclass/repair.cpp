@@ -21,6 +21,11 @@
 
 namespace MWClass
 {
+    std::string Repair::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Repair>()->mBase->mId;
+    }
+
     void Repair::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);

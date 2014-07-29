@@ -113,7 +113,7 @@ namespace Compiler
 
         void scriptRunning (CodeContainer& code);
 
-        void startScript (CodeContainer& code);
+        void startScript (CodeContainer& code, Literals& literals, const std::string& id);
 
         void stopScript (CodeContainer& code);
 

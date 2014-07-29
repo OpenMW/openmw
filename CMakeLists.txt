@@ -74,9 +74,6 @@ option(BUILD_OPENCS "build OpenMW Construction Set" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock frameworks" OFF)
 
-# Sound source selection
-option(USE_FFMPEG "use ffmpeg for sound" ON)
-
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
 
@@ -138,32 +135,10 @@ set(OPENMW_LIBS ${OENGINE_ALL})
 set(OPENMW_LIBS_HEADER)
 
 # Sound setup
-set(GOT_SOUND_INPUT 0)
-set(SOUND_INPUT_INCLUDES "")
-set(SOUND_INPUT_LIBRARY "")
-set(SOUND_DEFINE "")
-if (USE_FFMPEG)
-    set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
-    find_package(FFmpeg)
-    if (FFMPEG_FOUND)
-        set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${FFMPEG_INCLUDE_DIRS})
-        set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${FFMPEG_LIBRARIES} ${SWSCALE_LIBRARIES})
-        set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_FFMPEG)
-        set(GOT_SOUND_INPUT 1)
-    endif (FFMPEG_FOUND)
-endif (USE_FFMPEG)
-
-if (NOT GOT_SOUND_INPUT)
-    message(WARNING "--------------------")
-    message(WARNING "Failed to find any sound input packages")
-    message(WARNING "--------------------")
-endif (NOT GOT_SOUND_INPUT)
-
-if (NOT FFMPEG_FOUND)
-    message(WARNING "--------------------")
-    message(WARNING "FFmpeg not found, video playback will be disabled")
-    message(WARNING "--------------------")
-endif (NOT FFMPEG_FOUND)
+set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
+find_package(FFmpeg REQUIRED)
+set(SOUND_INPUT_INCLUDES ${FFMPEG_INCLUDE_DIRS})
+set(SOUND_INPUT_LIBRARY ${FFMPEG_LIBRARIES} ${SWSCALE_LIBRARIES})
 
 # TinyXML
 option(USE_SYSTEM_TINYXML "Use system TinyXML library instead of internal." OFF)

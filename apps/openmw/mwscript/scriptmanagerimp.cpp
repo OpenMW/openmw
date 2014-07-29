@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <exception>
+#include <algorithm>
 
 #include <components/esm/loadscpt.hpp>
 
@@ -22,12 +23,19 @@
 namespace MWScript
 {
     ScriptManager::ScriptManager (const MWWorld::ESMStore& store, bool verbose,
-        Compiler::Context& compilerContext, int warningsMode)
+        Compiler::Context& compilerContext, int warningsMode,
+        const std::vector<std::string>& scriptBlacklist)
     : mErrorHandler (std::cerr), mStore (store), mVerbose (verbose),
       mCompilerContext (compilerContext), mParser (mErrorHandler, mCompilerContext),
       mOpcodesInstalled (false), mGlobalScripts (store)
     {
         mErrorHandler.setWarningsMode (warningsMode);
+
+        mScriptBlacklist.resize (scriptBlacklist.size());
+
+        std::transform (scriptBlacklist.begin(), scriptBlacklist.end(),
+            mScriptBlacklist.begin(), Misc::StringUtils::lowerCase);
+        std::sort (mScriptBlacklist.begin(), mScriptBlacklist.end());
     }
 
     bool ScriptManager::compile (const std::string& name)
@@ -133,16 +141,22 @@ namespace MWScript
         int success = 0;
 
         const MWWorld::Store<ESM::Script>& scripts = mStore.get<ESM::Script>();
-        MWWorld::Store<ESM::Script>::iterator it = scripts.begin();
 
-        for (; it != scripts.end(); ++it, ++count)
-            if (compile (it->mId))
-                ++success;
+        for (MWWorld::Store<ESM::Script>::iterator iter = scripts.begin();
+            iter != scripts.end(); ++iter)
+            if (!std::binary_search (mScriptBlacklist.begin(), mScriptBlacklist.end(),
+                Misc::StringUtils::lowerCase (iter->mId)))
+            {
+                ++count;
+
+                if (compile (iter->mId))
+                    ++success;
+            }
 
         return std::make_pair (count, success);
     }
 
-    Compiler::Locals& ScriptManager::getLocals (const std::string& name)
+    const Compiler::Locals& ScriptManager::getLocals (const std::string& name)
     {
         std::string name2 = Misc::StringUtils::lowerCase (name);
 
@@ -181,47 +195,5 @@ namespace MWScript
     GlobalScripts& ScriptManager::getGlobalScripts()
     {
         return mGlobalScripts;
-    }
-
-    int ScriptManager::getLocalIndex (const std::string& scriptId, const std::string& variable,
-        char type)
-    {
-        const ESM::Script *script = mStore.get<ESM::Script>().find (scriptId);
-
-        int offset = 0;
-        int size = 0;
-
-        switch (type)
-        {
-            case 's':
-
-                offset = 0;
-                size = script->mData.mNumShorts;
-                break;
-
-            case 'l':
-
-                offset = script->mData.mNumShorts;
-                size = script->mData.mNumLongs;
-                break;
-
-            case 'f':
-
-                offset = script->mData.mNumShorts+script->mData.mNumLongs;
-                size = script->mData.mNumFloats;
-                break;
-
-            default:
-
-                throw std::runtime_error ("invalid variable type");
-        }
-
-        std::string variable2 = Misc::StringUtils::lowerCase (variable);
-
-        for (int i=0; i<size; ++i)
-            if (Misc::StringUtils::lowerCase (script->mVarNames.at (i+offset))==variable2)
-                return i;
-
-        throw std::runtime_error ("unable to access local variable " + variable + " of " + scriptId);
     }
 }

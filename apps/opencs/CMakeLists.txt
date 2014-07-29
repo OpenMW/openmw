@@ -9,7 +9,7 @@ opencs_units (model/doc
     )
 
 opencs_units_noqt (model/doc
-    stage savingstate savingstages
+    stage savingstate savingstages blacklist
     )
 
 opencs_hdrs_noqt (model/doc

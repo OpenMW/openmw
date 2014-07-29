@@ -26,16 +26,25 @@ namespace MWWorld
 
 namespace MWScript
 {
+    struct GlobalScriptDesc
+    {
+        bool mRunning;
+        Locals mLocals;
+        std::string mId; // ID used to start targeted script (empty if not a targeted script)
+
+        GlobalScriptDesc();
+    };
+
     class GlobalScripts
     {
             const MWWorld::ESMStore& mStore;
-            std::map<std::string, std::pair<bool, Locals> > mScripts; // running, local variables
+            std::map<std::string, GlobalScriptDesc> mScripts;
 
         public:
 
             GlobalScripts (const MWWorld::ESMStore& store);
 
-            void addScript (const std::string& name);
+            void addScript (const std::string& name, const std::string& targetId = "");
 
             void removeScript (const std::string& name);
 

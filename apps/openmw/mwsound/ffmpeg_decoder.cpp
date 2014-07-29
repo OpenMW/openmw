@@ -1,6 +1,3 @@
-#ifdef OPENMW_USE_FFMPEG
-
-
 #include "ffmpeg_decoder.hpp"
 
 // auto_ptr
@@ -375,5 +372,3 @@ FFmpeg_Decoder::~FFmpeg_Decoder()
 }
 
 }
-
-#endif

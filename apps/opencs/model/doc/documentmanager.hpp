@@ -34,6 +34,7 @@ namespace CSMDoc
             Loader mLoader;
             ToUTF8::FromType mEncoding;
             CSMWorld::ResourcesManager mResourcesManager;
+            std::vector<std::string> mBlacklistedScripts;
 
             DocumentManager (const DocumentManager&);
             DocumentManager& operator= (const DocumentManager&);
@@ -52,6 +53,8 @@ namespace CSMDoc
 	    void setResourceDir (const boost::filesystem::path& parResDir);
 
             void setEncoding (ToUTF8::FromType encoding);
+
+            void setBlacklistedScripts (const std::vector<std::string>& scriptIds);
 
             /// Ask OGRE for a list of available resources.
             void listResources();

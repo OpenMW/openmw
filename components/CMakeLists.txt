@@ -58,7 +58,7 @@ add_component_dir (compiler
     context controlparser errorhandler exception exprparser extensions fileparser generator
     lineparser literals locals output parser scanner scriptparser skipparser streamerrorhandler
     stringparser tokenloc nullerrorhandler opcodes extensions0 declarationparser
-    quickfileparser
+    quickfileparser discardparser
     )
 
 add_component_dir (interpreter
