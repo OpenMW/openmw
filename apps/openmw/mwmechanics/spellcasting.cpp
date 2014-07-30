@@ -230,6 +230,44 @@ namespace MWMechanics
             return -(resistance-100) / 100.f;
     }
 
+    /// Check if the given affect can be applied to the target. If \a castByPlayer, emits a message box on failure.
+    bool checkEffectTarget (int effectId, const MWWorld::Ptr& target, bool castByPlayer)
+    {
+        switch (effectId)
+        {
+            case ESM::MagicEffect::Levitate:
+                if (!MWBase::Environment::get().getWorld()->isLevitationEnabled())
+                {
+                    if (castByPlayer)
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sLevitateDisabled}");
+                    return false;
+                }
+                break;
+            case ESM::MagicEffect::Soultrap:
+                if ((target.getClass().isActor() && target.getClass().isNpc())
+                     || (target.getTypeName() == typeid(ESM::Creature).name() && target.get<ESM::Creature>()->mBase->mData.mSoul == 0))
+                {
+                    if (castByPlayer)
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInvalidTarget}");
+                    return false;
+                }
+                break;
+            case ESM::MagicEffect::AlmsiviIntervention:
+            case ESM::MagicEffect::DivineIntervention:
+            case ESM::MagicEffect::Mark:
+            case ESM::MagicEffect::Recall:
+                if (!MWBase::Environment::get().getWorld()->isTeleportingEnabled())
+                {
+                    if (castByPlayer)
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sTeleportDisabled}");
+                    return false;
+                }
+                break;
+        }
+
+        return true;
+    }
+
     CastSpell::CastSpell(const MWWorld::Ptr &caster, const MWWorld::Ptr &target)
         : mCaster(caster)
         , mTarget(target)
@@ -318,23 +356,8 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 effectIt->mEffectID);
 
-            if (!MWBase::Environment::get().getWorld()->isLevitationEnabled() && effectIt->mEffectID == ESM::MagicEffect::Levitate)
-            {
-                if (castByPlayer)
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sLevitateDisabled}");
+            if (!checkEffectTarget(effectIt->mEffectID, target, castByPlayer))
                 continue;
-            }
-
-            if (!MWBase::Environment::get().getWorld()->isTeleportingEnabled() &&
-                (effectIt->mEffectID == ESM::MagicEffect::AlmsiviIntervention ||
-                 effectIt->mEffectID == ESM::MagicEffect::DivineIntervention ||
-                 effectIt->mEffectID == ESM::MagicEffect::Mark ||
-                 effectIt->mEffectID == ESM::MagicEffect::Recall))
-            {
-                if (castByPlayer)
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sTeleportDisabled}");
-                continue;
-            }
 
             // If player is healing someone, show the target's HP bar
             if (castByPlayer && target != caster
