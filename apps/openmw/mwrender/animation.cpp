@@ -1,5 +1,7 @@
 #include "animation.hpp"
 
+#include <iostream>
+
 #include <OgreSkeletonManager.h>
 #include <OgreSkeletonInstance.h>
 #include <OgreEntity.h>

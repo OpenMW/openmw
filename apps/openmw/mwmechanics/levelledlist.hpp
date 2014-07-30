@@ -8,6 +8,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
+#include <iostream>
+
 namespace MWMechanics
 {
 

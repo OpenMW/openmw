@@ -18,6 +18,7 @@ namespace CSVRender
             CSMWorld::CellSelection mSelection;
             std::map<CSMWorld::CellCoordinates, Cell *> mCells;
             std::string mWorldspace;
+            bool mDisplayCellCoord;
 
         private:
 
@@ -52,7 +53,9 @@ namespace CSVRender
 
             void useViewHint (const std::string& hint);
 
-            void setCellSelection (const CSMWorld::CellSelection& selection);
+            void setCellSelection(const CSMWorld::CellSelection& selection);
+
+            void displayCellCoord(bool display);
 
             virtual void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
 

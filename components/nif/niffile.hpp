@@ -37,6 +37,7 @@
 #include <vector>
 #include <cassert>
 #include <typeinfo>
+#include <iostream>
 
 #include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>

@@ -13,6 +13,7 @@
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
 #include <components/ogreinit/ogreinit.hpp>
+#include <Overlay/OgreFontManager.h>
 
 #include <components/bsa/resources.hpp>
 
@@ -304,6 +305,8 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
     sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
 
     sh::Factory::getInstance ().setGlobalSetting ("num_lights", "8");
+
+	Ogre::FontManager* fontManager = new Ogre::FontManager();
 
     /// \todo add more configurable shiny settings
 
