@@ -428,10 +428,10 @@ namespace MWMechanics
             
             if (mSaidGreeting == Greet_None)
             {
-                if (playerDistSqr <= helloDistance*helloDistance)
+                if ((playerDistSqr <= helloDistance*helloDistance) && MWBase::Environment::get().getWorld()->getLOS(player, actor)
+                    && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
                     greetingTimer++;
                 
-                // TODO: check if actor is aware / has line of sight
                 if (greetingTimer >= GREETING_SHOULD_START)
                 {
                     mSaidGreeting = Greet_InProgress;
