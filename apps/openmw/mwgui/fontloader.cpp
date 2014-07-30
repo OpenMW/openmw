@@ -262,11 +262,32 @@ namespace MWGui
             // in the cp437 encoding of the font. Fall back to similar available characters.
             if (mEncoding == ToUTF8::CP437)
             {
-                std::multimap<int, int> additional;
+                std::multimap<int, int> additional; // <cp437, unicode>
                 additional.insert(std::make_pair(39, 0x2019)); // apostrophe
                 additional.insert(std::make_pair(45, 0x2013)); // dash
+                additional.insert(std::make_pair(45, 0x2014)); // dash
                 additional.insert(std::make_pair(34, 0x201D)); // right double quotation mark
                 additional.insert(std::make_pair(34, 0x201C)); // left double quotation mark
+                additional.insert(std::make_pair(44, 0x201A));
+                additional.insert(std::make_pair(44, 0x201E));
+                additional.insert(std::make_pair(43, 0x2020));
+                additional.insert(std::make_pair(94, 0x02C6));
+                additional.insert(std::make_pair(37, 0x2030));
+                additional.insert(std::make_pair(83, 0x0160));
+                additional.insert(std::make_pair(60, 0x2039));
+                additional.insert(std::make_pair(79, 0x0152));
+                additional.insert(std::make_pair(90, 0x017D));
+                additional.insert(std::make_pair(39, 0x2019));
+                additional.insert(std::make_pair(126, 0x02DC));
+                additional.insert(std::make_pair(84, 0x2122));
+                additional.insert(std::make_pair(83, 0x0161));
+                additional.insert(std::make_pair(62, 0x203A));
+                additional.insert(std::make_pair(111, 0x0153));
+                additional.insert(std::make_pair(122, 0x017E));
+                additional.insert(std::make_pair(89, 0x0178));
+                additional.insert(std::make_pair(156, 0x00A2));
+                additional.insert(std::make_pair(46, 0x2026));
+
                 for (std::multimap<int, int>::iterator it = additional.begin(); it != additional.end(); ++it)
                 {
                     if (it->first != i)
