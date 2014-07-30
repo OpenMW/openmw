@@ -581,6 +581,8 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
                     }
                 }
 
+                tex->load();
+
                 // copy to the texture
                 // NOTE: Could be optimized later. We actually only need to update the region that changed.
                 // Not a big deal at the moment, the FoW is only 32x32 anyway.
