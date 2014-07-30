@@ -17,8 +17,6 @@
 
 #include "collectionbase.hpp"
 
-#include "nestedtablewrapper.hpp"
-
 namespace CSMWorld
 {
     /// \brief Access to ID field in records
@@ -77,10 +75,6 @@ namespace CSMWorld
 
             virtual int getSize() const;
 
-            virtual int getNestedColumnsCount(int column) const;
-
-            virtual int getNestedRowsCount(int row, int column) const;
-
             virtual std::string getId (int index) const;
 
             virtual int getIndex (const std::string& id) const;
@@ -89,13 +83,7 @@ namespace CSMWorld
 
             virtual QVariant getData (int index, int column) const;
 
-            virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const;
-
             virtual void setData (int index, int column, const QVariant& data);
-
-            virtual NestedTableWrapperBase* nestedTable(int row, int column) const;
-
-            virtual void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable);
 
             virtual const ColumnBase& getColumn (int column) const;
 
@@ -262,18 +250,6 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    int Collection<ESXRecordT, IdAccessorT>::getNestedRowsCount(int row, int column) const
-    {
-        return 0;
-    }
-
-    template<typename ESXRecordT, typename IdAccessorT>
-    int Collection<ESXRecordT, IdAccessorT>::getNestedColumnsCount(int column) const
-    {
-        return 0;
-    }
-
-    template<typename ESXRecordT, typename IdAccessorT>
     std::string Collection<ESXRecordT, IdAccessorT>::getId (int index) const
     {
         return IdAccessorT().getId (mRecords.at (index).get());
@@ -300,25 +276,6 @@ namespace CSMWorld
     QVariant Collection<ESXRecordT, IdAccessorT>::getData (int index, int column) const
     {
         return mColumns.at (column)->get (mRecords.at (index));
-    }
-
-    template<typename ESXRecordT, typename IdAccessorT>
-    QVariant Collection<ESXRecordT, IdAccessorT>::getNestedData(int row, int column, int subRow, int subColumn) const
-    {
-        return QVariant();
-    }
-    
-    template<typename ESXRecordT, typename IdAccessorT>
-    NestedTableWrapperBase* Collection<ESXRecordT, IdAccessorT>::nestedTable(int row, int column) const 
-    {
-        assert(false);
-        return new NestedTableWrapperBase();
-    }
-
-    template<typename ESXRecordT, typename IdAccessorT>
-    void Collection<ESXRecordT, IdAccessorT>::setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable)
-    {
-        throw std::logic_error("setNestedTable was not overriden");
     }
 
     template<typename ESXRecordT, typename IdAccessorT>

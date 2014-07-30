@@ -18,7 +18,7 @@ int CSMWorld::IdTable::rowCount (const QModelIndex & parent) const
 {
     if (hasChildren(parent))
     {
-        return mIdCollection->getNestedRowsCount(parent.row(), parent.column());
+        return dynamic_cast<NestedCollection*>(mIdCollection)->getNestedRowsCount(parent.row(), parent.column());
     }
 
     return mIdCollection->getSize();
@@ -26,10 +26,9 @@ int CSMWorld::IdTable::rowCount (const QModelIndex & parent) const
 
 int CSMWorld::IdTable::columnCount (const QModelIndex & parent) const
 {
-    if (parent.isValid() &&
-        parent.data().isValid())
+    if (hasChildren(parent))
     {
-        return mIdCollection->getNestedColumnsCount(parent.row(), parent.column());
+        return dynamic_cast<NestedCollection*>(mIdCollection)->getNestedColumnsCount(parent.row(), parent.column());
     }
 
     return mIdCollection->getColumns();
@@ -46,10 +45,10 @@ QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
     if (index.internalId() != 0)
     {
         std::pair<int, int> parentAdress(unfoldIndexAdress(index.internalId()));
-        return mIdCollection->getNestedData(parentAdress.first,
-                                            parentAdress.second,
-                                            index.row(),
-                                            index.column());
+        return dynamic_cast<NestedCollection*>(mIdCollection)->getNestedData(parentAdress.first,
+                                                                           parentAdress.second,
+                                                                           index.row(),
+                                                                           index.column());
     } else {
         return mIdCollection->getData (index.row(), index.column());
     }
@@ -101,7 +100,7 @@ bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value
         {
             const std::pair<int, int>& parentAdress(unfoldIndexAdress(index.internalId()));
 
-            mIdCollection->setNestedData(parentAdress.first, parentAdress.second, value, index.row(), index.column());
+            dynamic_cast<NestedCollection*>(mIdCollection)->setNestedData(parentAdress.first, parentAdress.second, value, index.row(), index.column());
            
             emit dataChanged (CSMWorld::IdTable::index (parentAdress.first, 0),
                               CSMWorld::IdTable::index (parentAdress.second, mIdCollection->getColumns()-1));
@@ -144,7 +143,7 @@ bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& paren
     {
         for (int i = 0; i < count; ++i)
         {
-            mIdCollection->removeNestedRows(parent.row(), parent.column(), row+i);
+            dynamic_cast<NestedCollection*>(mIdCollection)->removeNestedRows(parent.row(), parent.column(), row+i);
         }
     } else
     {
@@ -164,12 +163,15 @@ bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& paren
 
 void CSMWorld::IdTable::addNestedRow(const QModelIndex& parent, int position)
 {
-    assert(parent.isValid());
+    if (!hasChildren(parent))
+    {
+        throw std::logic_error("Tried to set nested table, but index has no children");
+    }
 
     int row = parent.row();
 
     beginInsertRows(parent, position, position);
-    mIdCollection->addNestedRow(row, parent.column(), position);
+    dynamic_cast<NestedCollection*>(mIdCollection)->addNestedRow(row, parent.column(), position);
 
     endInsertRows();
    
@@ -373,7 +375,7 @@ void CSMWorld::IdTable::setNestedTable(const QModelIndex& index, const CSMWorld:
         removeRowsMode = true;
     }
     
-    mIdCollection->setNestedTable(index.row(), index.column(), nestedTable);
+    dynamic_cast<NestedCollection*>(mIdCollection)->setNestedTable(index.row(), index.column(), nestedTable);
 
     emit dataChanged (CSMWorld::IdTable::index (index.row(), 0),
                       CSMWorld::IdTable::index (index.row(), mIdCollection->getColumns()-1));
@@ -391,5 +393,5 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::IdTable::nestedTable(const QModelInd
         throw std::logic_error("Tried to retrive nested table, but index has no children");
     }
     
-    return mIdCollection->nestedTable(index.row(), index.column());
+    return dynamic_cast<NestedCollection*>(mIdCollection)->nestedTable(index.row(), index.column());
 }

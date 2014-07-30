@@ -30,30 +30,3 @@ int CSMWorld::CollectionBase::findColumnIndex (Columns::ColumnId id) const
 
     return index;
 }
-
-void CSMWorld::CollectionBase::setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn)
-{
-    assert(false); //TODO remove and make pure abstract
-}
-
-int CSMWorld::CollectionBase::getNestedColumnsCount(int row, int column) const
-{
-    assert(false); //TODO remove and make pure abstract
-    return 0;
-}
-
-int CSMWorld::CollectionBase::getNestedRowsCount(int row, int column) const
-{
-    assert(false); //TODO, make pure abstract
-    return 0;
-}
-
-void CSMWorld::CollectionBase::removeNestedRows(int row, int column, int subRow)
-{
-    assert(false); //todo, make pure abstract
-}
-
-void  CSMWorld::CollectionBase::addNestedRow(int row, int col, int position)
-{
-    assert(false);
-}

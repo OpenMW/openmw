@@ -35,7 +35,7 @@ namespace CSMWorld
             virtual bool isUserEditable() const;
     };
 
-    class RefIdCollection : public CollectionBase
+    class RefIdCollection : public NestedCollection
     {
         private:
 
