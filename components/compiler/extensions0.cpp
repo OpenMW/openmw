@@ -113,7 +113,7 @@ namespace Compiler
     {
         void registerExtensions (Extensions& extensions)
         {
-            extensions.registerInstruction ("additem", "cl", opcodeAddItem, opcodeAddItemExplicit);
+            extensions.registerInstruction ("additem", "clX", opcodeAddItem, opcodeAddItemExplicit);
             extensions.registerFunction ("getitemcount", 'l', "c", opcodeGetItemCount,
                 opcodeGetItemCountExplicit);
             extensions.registerInstruction ("removeitem", "cl", opcodeRemoveItem,
