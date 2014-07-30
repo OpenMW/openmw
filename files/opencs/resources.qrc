@@ -75,5 +75,8 @@
         <file alias="night">Moon-48.png</file>
         <file alias="day">Sun-48.png</file>
         <file alias="bright">Lightbulb-48.png</file>
+        <file alias="1st-person">eyeballdude.png</file>
+        <file alias="free-camera">flying eye.png</file>
+        <file alias="orbiting-camera">orbit2.png</file>
     </qresource>
 </RCC>

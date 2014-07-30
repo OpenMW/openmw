@@ -61,7 +61,7 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
 
     /// \todo replace icons
     /// \todo consider user-defined button-mapping
-    tool->addButton (":door.png", "1st",
+    tool->addButton (":scenetoolbar/1st-person", "1st",
         "First Person"
         "<ul><li>Mouse-Look while holding the left button</li>"
         "<li>WASD movement keys</li>"
@@ -70,7 +70,7 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
         "<li>Camera is held upright</li>"
         "<li>Hold shift to speed up movement</li>"
         "</ul>");
-    tool->addButton (":GMST.png", "free",
+    tool->addButton (":scenetoolbar/free-camera", "free",
         "Free Camera"
         "<ul><li>Mouse-Look while holding the left button</li>"
         "<li>Stafing (also vertically) via WASD or by holding the left mouse button and control</li>"
@@ -78,7 +78,7 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
         "<li>Roll camera with Q and E keys</li>"
         "<li>Hold shift to speed up movement</li>"
         "</ul>");
-    tool->addButton (":Info.png", "orbit",
+    tool->addButton (":scenetoolbar/orbiting-camera", "orbit",
         "Orbiting Camera"
         "<ul><li>Always facing the centre point</li>"
         "<li>Rotate around the centre point via WASD or by moving the mouse while holding the left button</li>"
