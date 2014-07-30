@@ -72,7 +72,7 @@ namespace MWMechanics
         return schoolSkillMap[school];
     }
 
-    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool)
+    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap)
     {
         CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
@@ -123,14 +123,17 @@ namespace MWMechanics
         if (MWBase::Environment::get().getWorld()->getGodModeState() && actor.getRefData().getHandle() == "player")
             castChance = 100;
 
-        return std::max(0.f, std::min(100.f, castChance));
+        if (!cap)
+            return std::max(0.f, castChance);
+        else
+            return std::max(0.f, std::min(100.f, castChance));
     }
 
-    float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool)
+    float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap)
     {
         const ESM::Spell* spell =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-        return getSpellSuccessChance(spell, actor, effectiveSchool);
+        return getSpellSuccessChance(spell, actor, effectiveSchool, cap);
     }
 
 
@@ -184,6 +187,10 @@ namespace MWMechanics
         float resisted = 0;
         if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
         {
+            // Effects with no resistance attribute belonging to them can not be resisted
+            if (ESM::MagicEffect::getResistanceEffect(effectId) == -1)
+                return 0.f;
+
             float resistance = getEffectResistanceAttribute(effectId, magicEffects);
 
             float willpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
@@ -191,12 +198,13 @@ namespace MWMechanics
             float x = (willpower + 0.1 * luck) * stats.getFatigueTerm();
 
             // This makes spells that are easy to cast harder to resist and vice versa
+            float castChance = 100.f;
             if (spell != NULL && !caster.isEmpty() && caster.getClass().isActor())
             {
-                float castChance = getSpellSuccessChance(spell, caster);
-                if (castChance > 0)
-                    x *= 50 / castChance;
+                castChance = getSpellSuccessChance(spell, caster, NULL, false); // Uncapped casting chance
             }
+            if (castChance > 0)
+                x *= 50 / castChance;
 
             float roll = static_cast<float>(std::rand()) / RAND_MAX * 100;
             if (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude)
