@@ -46,7 +46,6 @@ QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent,
                                               const QModelIndex& index) const
 {
     return createEditor(parent, option, index, CSMWorld::ColumnBase::Display_None);
-    //overloading virtual functions is HARD
 }
 
 QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem& option,

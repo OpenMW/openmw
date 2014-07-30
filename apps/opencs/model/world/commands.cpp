@@ -173,13 +173,17 @@ void CSMWorld::CloneCommand::undo()
     mModel.removeRow (mModel.getModelIndex (mIdDestination, 0).row());
 }
 
-CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent)
-    : mId(id),
-      mModel(model),
-      mParentColumn(parentColumn),
-      QUndoCommand(parent),
-      mNestedRow(nestedRow),
-      NestedTableStoring(model, id, parentColumn)
+CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTable& model,
+                                                    const std::string& id,
+                                                    int nestedRow, 
+                                                    int parentColumn, 
+                                                    QUndoCommand* parent) :
+    mId(id),
+    mModel(model),
+    mParentColumn(parentColumn),
+    QUndoCommand(parent),
+    mNestedRow(nestedRow),
+    NestedTableStoring(model, id, parentColumn)
 {
     setText (("Delete nested row in " + mId).c_str());
 }

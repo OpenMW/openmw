@@ -13,6 +13,9 @@
 #include <components/esm/loadcont.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/loadnpc.hpp>
+#include <components/esm/loadspel.hpp>
+#include <components/esm/effectlist.hpp>
+#include <components/esm/loadmgef.hpp>
 
 #include <QVariant>
 
@@ -174,6 +177,129 @@ namespace CSMWorld
 
     };
 
+    /*
+    template <typename ESXRecordT>
+    class MagicEffectsHelper : public CastableHelper<ESXRecordT>
+    {
+    public:
+
+        MagicEffectsHelper(CSMWorld::UniversalId::Type type) 
+            : CastableHelper<ESXRecordT>(type) {}
+
+        virtual void setNestedTable(RefIdData& data,
+                                    int index,
+                                    const NestedTableWrapperBase& nestedTable)
+        {
+            CastableHelper<ESXRecordT>::getRecord(data, index).get().mEffects = 
+                (static_cast<const NestedTableWrapper<ESM::EffectList>&>(nestedTable)).mNestedTable;
+        }
+        
+        virtual NestedTableWrapperBase* nestedTable(const RefIdData& data,
+                                                    int index) const
+        {
+            return new NestedTableWrapper<ESM::EffectList>(CastableHelper<ESXRecordT>::getRecord(data, index).get().mEffects);
+        }
+        
+        virtual QVariant getNestedData(const CSMWorld::RefIdData& data,
+                                       int index,
+                                       int subRowIndex,
+                                       int subColIndex) const
+        {
+            const ESM::EffectList& content = CastableHelper<ESXRecordT>::getRecord(data, index).get().mEffects;
+
+            switch (subColIndex)
+            {
+            case 0:
+                return content.at(subRowIndex).mEffectID;
+                
+            case 1:
+                return content.at(subRowIndex).mRange;
+
+            case 2:
+                return content.at(subRowIndex).mDuration;
+
+            case 3:
+                return content.at(subRowIndex).mArea;
+
+            case 4:
+                return content.at(subRowIndex).mMagMin;
+
+            case 5:
+                return content.at(subRowIndex).mMagMax;
+                
+            case 6:
+                return (int)content.at(rubRowIndex).mSkill;
+
+            case 7:
+                return (int)content.at(subRowIndex).mAttribute;
+                
+            default:
+                throw std::logic_error("Trying to access non-existing column in the nested table!");
+            }
+        }
+
+        virtual void removeNestedRow (RefIdData& data, int index, int rowToRemove) const
+        {
+            ESM::EffectList& list = CastableHelper<ESXRecordT>::getRecord(data, index).get().mEffects;
+
+            list.erase (list.begin () + rowToRemove);
+        }
+
+        void setNestedData (RefIdData& data,
+                            int index,
+                            const QVariant& value,
+                            int subRowIndex,
+                            int subColIndex) const
+        {
+            switch(subColIndex)
+            {
+            case 0:
+                CastableHelper<ESXRecordT>::getRecord(data, index).get().mEffects.at(subRowIndex).mEffectID = value.toInt();
+                break;
+
+            default:
+                throw std::logic_error("Trying to access non-existing column in the nested table!");
+            }
+        }
+        
+        virtual void addNestedRow (RefIdData& data, int index, int position) const
+        {
+            std::vector<ESM::NPC::Dest>& list = CastableHelper<ESXRecordT>::getRecord(data, index).get().mTransport;
+
+            ESM::Position newPos;
+            for (unsigned i = 0; i < 3; ++i)
+            {
+                newPos.pos[i] = 0;
+                newPos.rot[i] = 0;
+            }
+
+            ESM::NPC::Dest newRow;
+            newRow.mPos = newPos;
+            newRow.mCellName = "";
+
+            if (position >= (int)list.size())
+            {
+                list.push_back(newRow);
+                return;
+            }
+            
+            list.insert(list.begin()+position, newRow);
+        }
+        
+        virtual int getNestedColumnsCount(const RefIdData& data) const
+        {
+            return 7;
+        }
+            
+
+        virtual int getNestedRowsCount(const RefIdData& data,
+                                       int index) const
+        {
+            return CastableHelper<ESXRecordT>::getRecord(data, index).get().mTransport.size();
+        }
+
+    };
+    */
     template <typename ESXRecordT>
     class DestinationsHelper : public CastableHelper<ESXRecordT>
     {
@@ -316,7 +442,7 @@ namespace CSMWorld
         }
 
     };
-        
+
     template <typename ESXRecordT>
     class InventoryHelper : public CastableHelper<ESXRecordT>
     {

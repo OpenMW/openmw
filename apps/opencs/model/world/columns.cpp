@@ -24,6 +24,7 @@ namespace CSMWorld
             { ColumnId_ValueType, "Value Type" },
             { ColumnId_Description, "Description" },
             { ColumnId_Specialisation, "Specialisation" },
+            { ColumnId_Skill, "Skill" },
             { ColumnId_Attribute, "Attribute" },
             { ColumnId_Name, "Name" },
             { ColumnId_Playable, "Playable" },
@@ -248,6 +249,11 @@ int CSMWorld::Columns::getId (const std::string& name)
 
 namespace
 {
+    static const char *sSkills[] =
+    {
+        "Long Blade"
+    };
+
     static const char *sSpecialisations[] =
     {
         "Combat", "Magic", "Stealth", 0
@@ -339,6 +345,7 @@ namespace
         switch (column)
         {
             case CSMWorld::Columns::ColumnId_Specialisation: return sSpecialisations;
+            case CSMWorld::Columns::ColumnId_Skill: return sSkills;
             case CSMWorld::Columns::ColumnId_Attribute: return sAttributes;
             case CSMWorld::Columns::ColumnId_SpellType: return sSpellTypes;
             case CSMWorld::Columns::ColumnId_ApparatusType: return sApparatusTypes;

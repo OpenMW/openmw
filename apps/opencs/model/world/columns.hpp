@@ -190,6 +190,7 @@ namespace CSMWorld
             ColumnId_RotY = 175,
             ColumnId_RotZ = 176,
             ColumnId_DestinationCell = 177,
+            ColumnId_Skill = 178,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

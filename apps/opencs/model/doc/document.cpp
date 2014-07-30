@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <fstream>
+#include <iostream>
 
 #include <boost/filesystem.hpp>
 
@@ -2221,8 +2222,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
         boost::filesystem::path customFiltersPath (configuration.getUserDataPath());
         customFiltersPath /= "defaultfilters";
         
-        std::string destinationPath = mProjectPath.string() + "/defaultfilters";
-        std::ofstream  dst(destinationPath.c_str(), std::ios::binary);
+        std::ofstream  dst(mProjectPath.c_str(), std::ios::binary);
 
         if (boost::filesystem::exists (customFiltersPath))
         {
