@@ -260,8 +260,9 @@ namespace MWWorld
             virtual Ptr searchPtrViaActorId (int actorId);
             ///< Search is limited to the active cells.
 
-            virtual void adjustPosition (const Ptr& ptr);
+            virtual void adjustPosition (const Ptr& ptr, bool force);
             ///< Adjust position after load to be on ground. Must be called after model load.
+            /// @param force do this even if the ptr is flying
 
             virtual void fixPosition (const Ptr& actor);
             ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.

@@ -86,7 +86,7 @@ namespace
 
                 updateObjectLocalRotation(ptr, mPhysics, mRendering);
                 MWBase::Environment::get().getWorld()->scaleObject (ptr, ptr.getCellRef().getScale());
-                ptr.getClass().adjustPosition (ptr);
+                ptr.getClass().adjustPosition (ptr, false);
             }
             catch (const std::exception& e)
             {
@@ -232,7 +232,7 @@ namespace MWWorld
             float z = Ogre::Radian(pos.rot[2]).valueDegrees();
             world->rotateObject(player, x, y, z);
 
-            player.getClass().adjustPosition(player);
+            player.getClass().adjustPosition(player, true);
         }
 
         MWBase::MechanicsManager *mechMgr =
@@ -431,7 +431,7 @@ namespace MWWorld
             float z = Ogre::Radian(position.rot[2]).valueDegrees();
             world->rotateObject(world->getPlayerPtr(), x, y, z);
 
-            world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr());
+            world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr(), true);
             world->getFader()->fadeIn(0.5f);
             return;
         }

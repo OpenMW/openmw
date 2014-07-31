@@ -148,9 +148,9 @@ namespace MWClass
         return ref->mBase->mId;
     }
 
-    void Creature::adjustPosition(const MWWorld::Ptr& ptr) const
+    void Creature::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
     {
-        MWBase::Environment::get().getWorld()->adjustPosition(ptr);
+        MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
     }
 
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const

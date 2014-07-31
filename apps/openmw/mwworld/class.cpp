@@ -322,7 +322,7 @@ namespace MWWorld
         return std::make_pair (1, "");
     }
 
-    void Class::adjustPosition(const MWWorld::Ptr& ptr) const
+    void Class::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
     {
     }
 

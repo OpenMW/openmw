@@ -271,8 +271,9 @@ namespace MWBase
             /// use the "Head" node, or alternatively the "Bip01 Head" node as a basis.
             virtual std::pair<MWWorld::Ptr,Ogre::Vector3> getHitContact(const MWWorld::Ptr &ptr, float distance) = 0;
 
-            virtual void adjustPosition (const MWWorld::Ptr& ptr) = 0;
+            virtual void adjustPosition (const MWWorld::Ptr& ptr, bool force) = 0;
             ///< Adjust position after load to be on ground. Must be called after model load.
+            /// @param force do this even if the ptr is flying
 
             virtual void fixPosition (const MWWorld::Ptr& actor) = 0;
             ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.

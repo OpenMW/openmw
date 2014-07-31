@@ -403,9 +403,9 @@ namespace MWClass
         return ref->mBase->mId;
     }
 
-    void Npc::adjustPosition(const MWWorld::Ptr& ptr) const
+    void Npc::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
     {
-        MWBase::Environment::get().getWorld()->adjustPosition(ptr);
+        MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
     }
 
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
