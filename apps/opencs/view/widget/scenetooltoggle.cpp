@@ -92,7 +92,7 @@ QRect CSVWidget::SceneToolToggle::getIconBox (int index) const
     {
         // space out icons vertically, if there aren't enough to populate all rows
         int diff = yMax - actualYIcons;
-        yBorder += (diff*(yBorder+iconXSize)) / actualYIcons;
+        yBorder += (diff*(yBorder+iconXSize)) / (actualYIcons+1);
     }
 
     if (y==actualYIcons-1)
@@ -100,12 +100,12 @@ QRect CSVWidget::SceneToolToggle::getIconBox (int index) const
         // generating the last row of icons
         int actualXIcons = total % xMax;
 
-        if (actualYIcons)
+        if (actualXIcons)
         {
             // space out icons horizontally, if there aren't enough to fill the last row
-            int diff = xMax - actualYIcons;
+            int diff = xMax - actualXIcons;
 
-            xBorder += (diff*(xBorder+iconYSize)) / actualXIcons;
+            xBorder += (diff*(xBorder+iconXSize)) / (actualXIcons+1);
         }
     }
 
