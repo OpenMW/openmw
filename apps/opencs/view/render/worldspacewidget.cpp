@@ -10,6 +10,9 @@
 #include "../../model/world/universalid.hpp"
 
 #include "../widget/scenetoolmode.hpp"
+#include "../widget/scenetooltoggle.hpp"
+
+#include "elements.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
 : SceneWidget (parent), mDocument(document)
@@ -94,6 +97,21 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
     return tool;
 }
 
+CSVWidget::SceneToolToggle *CSVRender::WorldspaceWidget::makeSceneVisibilitySelector (CSVWidget::SceneToolbar *parent)
+{
+    mSceneElements= new CSVWidget::SceneToolToggle (parent,
+        "Scene Element Visibility", ":door.png");
+
+    addVisibilitySelectorButtons (mSceneElements);
+
+    mSceneElements->setSelection (0xffffffff);
+
+    connect (mSceneElements, SIGNAL (selectionChanged()),
+        this, SLOT (elementSelectionChanged()));
+
+    return mSceneElements;
+}
+
 CSVRender::WorldspaceWidget::dropType CSVRender::WorldspaceWidget::getDropType (
     const std::vector< CSMWorld::UniversalId >& data)
 {
@@ -147,6 +165,20 @@ CSVRender::WorldspaceWidget::dropType CSVRender::WorldspaceWidget::getDropType (
     return output;
 }
 
+unsigned int CSVRender::WorldspaceWidget::getElementMask() const
+{
+    return mSceneElements->getSelection();
+}
+
+void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
+    CSVWidget::SceneToolToggle *tool)
+{
+    tool->addButton (":activator.png", Element_Reference, ":activator.png", "References");
+    tool->addButton (":armor.png", Element_Terrain, ":armor.png", "Terrain");
+    tool->addButton (":armor.png", Element_Water, ":armor.png", "Water");
+    tool->addButton (":armor.png", Element_Pathgrid, ":armor.png", "Pathgrid");
+}
+
 void CSVRender::WorldspaceWidget::dragEnterEvent (QDragEnterEvent* event)
 {
     event->accept();
@@ -156,7 +188,6 @@ void CSVRender::WorldspaceWidget::dragMoveEvent(QDragMoveEvent *event)
 {
     event->accept();
 }
-
 
 void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
 {
@@ -168,4 +199,9 @@ void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
     {
         emit dataDropped(mime->getData());
     } //not handling drops from different documents at the moment
+}
+
+void CSVRender::WorldspaceWidget::elementSelectionChanged()
+{
+    setVisibilityMask (getElementMask());
 }

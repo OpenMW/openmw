@@ -11,6 +11,10 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
+#include "../widget/scenetooltoggle.hpp"
+
+#include "elements.hpp"
+
 void CSVRender::UnpagedWorldspaceWidget::update()
 {
     const CSMWorld::Record<CSMWorld::Cell>& record =
@@ -23,6 +27,14 @@ void CSVRender::UnpagedWorldspaceWidget::update()
     /// \todo deal with mSunlight and mFog/mForDensity
 
     flagAsModified();
+}
+
+void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
+    CSVWidget::SceneToolToggle *tool)
+{
+    WorldspaceWidget::addVisibilitySelectorButtons (tool);
+
+    tool->addButton (":armor.png", Element_Fog, ":armor.png", "Fog");
 }
 
 CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document, QWidget* parent)

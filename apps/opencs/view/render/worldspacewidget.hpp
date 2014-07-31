@@ -16,6 +16,7 @@ namespace CSMWorld
 namespace CSVWidget
 {
     class SceneToolMode;
+    class SceneToolToggle;
     class SceneToolbar;
 }
 
@@ -28,6 +29,7 @@ namespace CSVRender
             CSVRender::Navigation1st m1st;
             CSVRender::NavigationFree mFree;
             CSVRender::NavigationOrbit mOrbit;
+            CSVWidget::SceneToolToggle *mSceneElements;
 
         public:
 
@@ -53,6 +55,11 @@ namespace CSVRender
             ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
             /// is the responsibility of the calling function.
 
+            /// \attention The created tool is not added to the toolbar (via addTool). Doing
+            /// that is the responsibility of the calling function.
+            CSVWidget::SceneToolToggle *makeSceneVisibilitySelector (
+                CSVWidget::SceneToolbar *parent);
+
             void selectDefaultNavigationMode();
 
             static dropType getDropType(const std::vector<CSMWorld::UniversalId>& data);
@@ -64,8 +71,13 @@ namespace CSVRender
 
             virtual void handleDrop(const std::vector<CSMWorld::UniversalId>& data) = 0;
 
+            virtual unsigned int getElementMask() const;
+
         protected:
-        const CSMDoc::Document& mDocument; //for checking if drop comes from same document
+
+            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle *tool);
+
+            const CSMDoc::Document& mDocument;
 
         private:
 
@@ -91,6 +103,10 @@ namespace CSVRender
             virtual void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end) = 0;
 
             virtual void referenceAdded (const QModelIndex& index, int start, int end) = 0;
+
+        protected slots:
+
+            void elementSelectionChanged();
 
         signals:
 

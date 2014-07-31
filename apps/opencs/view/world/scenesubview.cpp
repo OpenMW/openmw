@@ -19,6 +19,7 @@
 
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
+#include "../widget/scenetooltoggle.hpp"
 
 #include "tablebottombox.hpp"
 #include "creator.hpp"
@@ -106,6 +107,10 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
 
     CSVWidget::SceneToolMode *lightingTool = widget->makeLightingSelector (toolbar);
     toolbar->addTool (lightingTool);
+
+    CSVWidget::SceneToolToggle *sceneVisibilityTool =
+        widget->makeSceneVisibilitySelector (toolbar);
+    toolbar->addTool (sceneVisibilityTool);
 
 /* Add buttons specific to the type. For now no need for it.
  *
