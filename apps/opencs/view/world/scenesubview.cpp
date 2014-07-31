@@ -112,18 +112,15 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
         widget->makeSceneVisibilitySelector (toolbar);
     toolbar->addTool (sceneVisibilityTool);
 
-/* Add buttons specific to the type. For now no need for it.
- *
-    switch (type)
+    if (type==widget_Paged)
     {
-        case widget_Paged:
-            break;
+        CSVWidget::SceneToolToggle *controlVisibilityTool =
+            dynamic_cast<CSVRender::PagedWorldspaceWidget&> (*widget).
+            makeControlVisibilitySelector (toolbar);
 
-        case widget_Unpaged:
-            break;
-
+        toolbar->addTool (controlVisibilityTool);
     }
-*/
+
     return toolbar;
 }
 
