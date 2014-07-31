@@ -204,4 +204,5 @@ void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
 void CSVRender::WorldspaceWidget::elementSelectionChanged()
 {
     setVisibilityMask (getElementMask());
+    flagAsModified();
 }
