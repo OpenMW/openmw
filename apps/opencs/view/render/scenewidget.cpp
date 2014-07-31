@@ -126,7 +126,9 @@ namespace CSVRender
 #endif
 
         mWindow = Ogre::Root::getSingleton().createRenderWindow(windowTitle.str(), this->width(), this->height(), false, &params);
-        mWindow->addViewport(mCamera)->setBackgroundColour(Ogre::ColourValue(0.3,0.3,0.3,1));
+
+        mViewport = mWindow->addViewport (mCamera);
+        mViewport->setBackgroundColour (Ogre::ColourValue (0.3,0.3,0.3,1));
 
         Ogre::Real aspectRatio = Ogre::Real(width()) / Ogre::Real(height());
         mCamera->setAspectRatio(aspectRatio);
@@ -139,6 +141,11 @@ namespace CSVRender
 
         if (mSceneMgr)
             Ogre::Root::getSingleton().destroySceneManager (mSceneMgr);
+    }
+
+    void SceneWidget::setVisibilityMask (unsigned int mask)
+    {
+        mViewport->setVisibilityMask (mask);
     }
 
     void SceneWidget::setNavigation (Navigation *navigation)

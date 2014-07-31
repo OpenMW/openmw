@@ -19,6 +19,7 @@
 
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
+#include "../widget/scenetooltoggle.hpp"
 
 #include "tablebottombox.hpp"
 #include "creator.hpp"
@@ -107,18 +108,19 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
     CSVWidget::SceneToolMode *lightingTool = widget->makeLightingSelector (toolbar);
     toolbar->addTool (lightingTool);
 
-/* Add buttons specific to the type. For now no need for it.
- *
-    switch (type)
+    CSVWidget::SceneToolToggle *sceneVisibilityTool =
+        widget->makeSceneVisibilitySelector (toolbar);
+    toolbar->addTool (sceneVisibilityTool);
+
+    if (type==widget_Paged)
     {
-        case widget_Paged:
-            break;
+        CSVWidget::SceneToolToggle *controlVisibilityTool =
+            dynamic_cast<CSVRender::PagedWorldspaceWidget&> (*widget).
+            makeControlVisibilitySelector (toolbar);
 
-        case widget_Unpaged:
-            break;
-
+        toolbar->addTool (controlVisibilityTool);
     }
-*/
+
     return toolbar;
 }
 

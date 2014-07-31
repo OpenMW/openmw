@@ -115,6 +115,24 @@ ObjectScene::~ObjectScene()
     mSkelBase = NULL;
 }
 
+void ObjectScene::setVisibilityFlags (unsigned int flags)
+{
+    if (mSkelBase)
+        mSkelBase->setVisibilityFlags (flags);
+
+    for (std::vector<Ogre::Entity*>::iterator iter (mEntities.begin()); iter!=mEntities.end();
+        ++iter)
+        (*iter)->setVisibilityFlags (flags);
+
+    for (std::vector<Ogre::ParticleSystem*>::iterator iter (mParticles.begin());
+        iter!=mParticles.end(); ++iter)
+        (*iter)->setVisibilityFlags (flags);
+
+    for (std::vector<Ogre::Light*>::iterator iter (mLights.begin()); iter!=mLights.end();
+        ++iter)
+        (*iter)->setVisibilityFlags (flags);
+}
+
 void ObjectScene::rotateBillboardNodes(Ogre::Camera *camera)
 {
     for (std::vector<Ogre::Node*>::iterator it = mBillboardNodes.begin(); it != mBillboardNodes.end(); ++it)

@@ -69,7 +69,7 @@ opencs_units_noqt (view/world
     )
 
 opencs_units (view/widget
-    scenetoolbar scenetool scenetoolmode pushbutton
+    scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle
     )
 
 opencs_units (view/render
@@ -80,6 +80,10 @@ opencs_units (view/render
 opencs_units_noqt (view/render
     navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
     lightingbright object cell
+    )
+
+opencs_hdrs_noqt (view/render
+    elements
     )
 
 

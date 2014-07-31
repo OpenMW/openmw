@@ -32,6 +32,10 @@ namespace CSVRender
 
             void update();
 
+        protected:
+
+            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle *tool);
+
         public:
 
             UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document,

@@ -10,6 +10,10 @@
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
 
+#include "../widget/scenetooltoggle.hpp"
+
+#include "elements.hpp"
+
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
     bool modified = false;
@@ -235,6 +239,31 @@ CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::g
         default:
             return ignored;
     }
+}
+
+
+unsigned int CSVRender::PagedWorldspaceWidget::getElementMask() const
+{
+    return WorldspaceWidget::getElementMask() | mControlElements->getSelection();
+}
+
+CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (
+    CSVWidget::SceneToolbar *parent)
+{
+    mControlElements = new CSVWidget::SceneToolToggle (parent,
+        "Controls & Guides Visibility", ":door.png");
+
+    mControlElements->addButton (":activator.png", Element_CellMarker, ":activator.png",
+        "Cell marker");
+    mControlElements->addButton (":armor.png", Element_CellArrow, ":armor.png", "Cell arrows");
+    mControlElements->addButton (":armor.png", Element_CellBorder, ":armor.png", "Cell border");
+
+    mControlElements->setSelection (0xffffffff);
+
+    connect (mControlElements, SIGNAL (selectionChanged()),
+        this, SLOT (elementSelectionChanged()));
+
+    return mControlElements;
 }
 
 void CSVRender::PagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,

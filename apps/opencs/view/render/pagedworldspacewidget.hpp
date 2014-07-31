@@ -18,6 +18,7 @@ namespace CSVRender
             CSMWorld::CellSelection mSelection;
             std::map<CSMWorld::CellCoordinates, Cell *> mCells;
             std::string mWorldspace;
+            CSVWidget::SceneToolToggle *mControlElements;
 
         private:
 
@@ -57,6 +58,13 @@ namespace CSVRender
             virtual void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
 
             virtual dropRequirments getDropRequirements(dropType type) const;
+
+            /// \attention The created tool is not added to the toolbar (via addTool). Doing
+            /// that is the responsibility of the calling function.
+            virtual CSVWidget::SceneToolToggle *makeControlVisibilitySelector (
+                CSVWidget::SceneToolbar *parent);
+
+            virtual unsigned int getElementMask() const;
 
         signals:
 
