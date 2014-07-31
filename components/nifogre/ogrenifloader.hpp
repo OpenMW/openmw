@@ -82,6 +82,8 @@ struct ObjectScene {
 
     // Rotate nodes in mBillboardNodes so they face the given camera
     void rotateBillboardNodes(Ogre::Camera* camera);
+
+    void setVisibilityFlags (unsigned int flags);
 };
 
 typedef Ogre::SharedPtr<ObjectScene> ObjectScenePtr;

@@ -72,6 +72,7 @@ void CSVRender::Object::update()
     else
     {
         mObject = NifOgre::Loader::createObjects (mBase, "Meshes\\" + model);
+        mObject->setVisibilityFlags (Element_Reference);
     }
 }
 
