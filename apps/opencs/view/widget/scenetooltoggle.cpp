@@ -143,7 +143,8 @@ void CSVWidget::SceneToolToggle::addButton (const std::string& icon, unsigned in
         throw std::runtime_error ("Exceeded number of buttons in toggle type tool");
 
     PushButton *button = new PushButton (QIcon (QPixmap (icon.c_str())),
-        PushButton::Type_Toggle, tooltip, mPanel);
+        PushButton::Type_Toggle, tooltip.isEmpty() ? name: tooltip, mPanel);
+
     button->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
     button->setIconSize (QSize (mIconSize, mIconSize));
     button->setFixedSize (mButtonSize, mButtonSize);
