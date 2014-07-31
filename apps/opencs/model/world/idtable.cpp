@@ -2,6 +2,7 @@
 #include <QDebug>
 
 #include <cassert>
+#include <iostream>
 #include "nestedtablewrapper.hpp"
 
 #include "collectionbase.hpp"
@@ -30,7 +31,7 @@ int CSMWorld::IdTable::columnCount (const QModelIndex & parent) const
     {
         return dynamic_cast<NestedCollection*>(mIdCollection)->getNestedColumnsCount(parent.row(), parent.column());
     }
-
+    
     return mIdCollection->getColumns();
 }
 
@@ -46,9 +47,9 @@ QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
     {
         std::pair<int, int> parentAdress(unfoldIndexAdress(index.internalId()));
         return dynamic_cast<NestedCollection*>(mIdCollection)->getNestedData(parentAdress.first,
-                                                                           parentAdress.second,
-                                                                           index.row(),
-                                                                           index.column());
+                                                                             parentAdress.second,
+                                                                             index.row(),
+                                                                             index.column());
     } else {
         return mIdCollection->getData (index.row(), index.column());
     }
@@ -68,8 +69,10 @@ QVariant CSMWorld::IdTable::headerData (int section,
         return mIdCollection->getColumn (section).mFlags;
 
     if (role==ColumnBase::Role_Display)
+    {
         return mIdCollection->getColumn (section).mDisplayType;
-
+    }
+    
     return QVariant();
 }
 

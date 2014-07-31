@@ -2,6 +2,7 @@
 #define CSM_WOLRD_COLLECTION_H
 
 #include <vector>
+#include <iostream>
 #include <map>
 #include <algorithm>
 #include <cctype>
