@@ -9,6 +9,8 @@
 #include "../../model/world/ref.hpp"
 #include "../../model/world/refidcollection.hpp"
 
+#include "elements.hpp"
+
 void CSVRender::Object::clearSceneNode (Ogre::SceneNode *node)
 {
     for (Ogre::SceneNode::ObjectIterator iter = node->getAttachedObjectIterator();
@@ -63,6 +65,7 @@ void CSVRender::Object::update()
     {
         Ogre::Entity* entity = mBase->getCreator()->createEntity (Ogre::SceneManager::PT_CUBE);
         entity->setMaterialName("BaseWhite"); /// \todo adjust material according to error
+        entity->setVisibilityFlags (Element_Reference);
 
         mBase->attachObject (entity);
     }

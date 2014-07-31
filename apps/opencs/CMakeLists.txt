@@ -82,6 +82,10 @@ opencs_units_noqt (view/render
     lightingbright object cell
     )
 
+opencs_hdrs_noqt (view/render
+    elements
+    )
+
 
 opencs_units (view/tools
     reportsubview
