@@ -805,16 +805,16 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        if((!MWBase::Environment::get().getWindowManager()->isGuiMode()
-            || MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Dialogue)
-                && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
+        if(MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Journal
+                && MWBase::Environment::get().getWindowManager ()->getJournalAllowed()
+                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console)
         {
             MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Journal);
         }
-        else if(MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Journal)
+        else if(MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Journal))
         {
-            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Journal);
         }
     }
 
