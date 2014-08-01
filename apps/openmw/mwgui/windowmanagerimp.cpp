@@ -180,12 +180,7 @@ namespace MWGui
 
         MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
-        // Get size info from the Gui object
-        int w = MyGUI::RenderManager::getInstance().getViewSize().width;
-        int h = MyGUI::RenderManager::getInstance().getViewSize().height;
-
         mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow ());
-        mLoadingScreen->onResChange (w,h);
 
         //set up the hardware cursor manager
         mCursorManager = new SFO::SDLCursorManager();
@@ -195,7 +190,6 @@ namespace MWGui
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
 
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
-        //SDL_ShowCursor(false);
 
         mCursorManager->setEnabled(true);
 
@@ -242,7 +236,7 @@ namespace MWGui
         trackWindow(mDialogueWindow, "dialogue");
         mContainerWindow = new ContainerWindow(mDragAndDrop);
         trackWindow(mContainerWindow, "container");
-        mHud = new HUD(w,h, mShowFPSLevel, mDragAndDrop);
+        mHud = new HUD(mShowFPSLevel, mDragAndDrop);
         mToolTips = new ToolTips();
         mScrollWindow = new ScrollWindow();
         mBookWindow = new BookWindow();
@@ -266,7 +260,7 @@ namespace MWGui
         trackWindow(mCompanionWindow, "companion");
         mScreenFader = new ScreenFader();
 
-        mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Overlay");
+        mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"Overlay");
 
         mHud->setVisible(mHudEnabled);
 
@@ -1020,7 +1014,6 @@ namespace MWGui
     {
         sizeVideo(x, y);
         mGuiManager->windowResized();
-        mLoadingScreen->onResChange (x,y);
         if (!mHud)
             return; // UI not initialized yet
 
@@ -1034,7 +1027,6 @@ namespace MWGui
             it->first->setSize(size);
         }
 
-        mHud->onResChange(x, y);
         mConsole->onResChange(x, y);
         mMenu->onResChange(x, y);
         mSettingsWindow->center();
@@ -1043,7 +1035,6 @@ namespace MWGui
         mBookWindow->center();
         mQuickKeysMenu->center();
         mSpellBuyingWindow->center();
-        mInputBlocker->setSize(MyGUI::IntSize(x,y));
     }
 
     void WindowManager::pushGuiMode(GuiMode mode)
