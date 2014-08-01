@@ -4,8 +4,6 @@
 
 #include <OgreVector3.h>
 
-#include <libs/openengine/ogre/fader.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -156,7 +154,7 @@ namespace MWGui
         MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(1);
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
         ESM::Position pos = *_sender->getUserData<ESM::Position>();
         std::string cellname = _sender->getUserString("Destination");
         bool interior = _sender->getUserString("interior") == "y";
@@ -179,8 +177,8 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0);
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(1);
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
     }
 
     void TravelWindow::onCancelButtonClicked(MyGUI::Widget* _sender)

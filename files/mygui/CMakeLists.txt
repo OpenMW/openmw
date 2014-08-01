@@ -80,6 +80,7 @@ set(MYGUI_FILES
     openmw_companion_window.layout
     openmw_savegame_dialog.layout
     openmw_recharge_dialog.layout
+    openmw_screen_fader.layout
     DejaVuLGCSansMono.ttf
     markers.png
     ../launcher/images/openmw.png

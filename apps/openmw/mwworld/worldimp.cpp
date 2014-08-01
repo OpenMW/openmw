@@ -1555,11 +1555,6 @@ namespace MWWorld
         mWeatherManager->modRegion(regionid, chances);
     }
 
-    OEngine::Render::Fader* World::getFader()
-    {
-        return mRendering->getFader();
-    }
-
     Ogre::Vector2 World::getNorthVector (CellStore* cell)
     {
         MWWorld::CellRefList<ESM::Static>& statics = cell->get<ESM::Static>();

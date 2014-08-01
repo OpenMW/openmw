@@ -17,11 +17,6 @@ namespace Ogre
 
 namespace OEngine
 {
-    namespace Render
-    {
-        class Fader;
-    }
-
     namespace Physic
     {
         class PhysicEngine;
@@ -112,9 +107,6 @@ namespace MWBase
 
             virtual void readRecord (ESM::ESMReader& reader, int32_t type,
                 const std::map<int, int>& contentFileMap) = 0;
-
-            virtual OEngine::Render::Fader* getFader() = 0;
-            ///< \todo remove this function. Rendering details should not be exposed.
 
             virtual MWWorld::CellStore *getExterior (int x, int y) = 0;
 

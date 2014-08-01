@@ -65,6 +65,7 @@
 #include "videowidget.hpp"
 #include "backgroundimage.hpp"
 #include "itemwidget.hpp"
+#include "screenfader.hpp"
 
 namespace MWGui
 {
@@ -112,6 +113,7 @@ namespace MWGui
       , mCompanionWindow(NULL)
       , mVideoBackground(NULL)
       , mVideoWidget(NULL)
+      , mScreenFader(NULL)
       , mTranslationDataStorage (translationDataStorage)
       , mCharGen(NULL)
       , mInputBlocker(NULL)
@@ -267,6 +269,7 @@ namespace MWGui
         mSoulgemDialog = new SoulgemDialog(mMessageBoxManager);
         mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
         trackWindow(mCompanionWindow, "companion");
+        mScreenFader = new ScreenFader();
 
         mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Overlay");
 
@@ -357,6 +360,7 @@ namespace MWGui
         delete mCursorManager;
         delete mRecharge;
         delete mCompanionWindow;
+        delete mScreenFader;
 
         cleanupGarbage();
 
@@ -858,6 +862,8 @@ namespace MWGui
         mCompanionWindow->checkReferenceAvailable();
         mConsole->checkReferenceAvailable();
         mCompanionWindow->onFrame();
+
+        mScreenFader->update(frameDuration);
     }
 
     void WindowManager::changeCell(MWWorld::CellStore* cell)
@@ -1687,5 +1693,25 @@ namespace MWGui
         }
 
         updateVisible();
+    }
+
+    void WindowManager::fadeScreenIn(const float time)
+    {
+        mScreenFader->fadeIn(time);
+    }
+
+    void WindowManager::fadeScreenOut(const float time)
+    {
+        mScreenFader->fadeOut(time);
+    }
+
+    void WindowManager::fadeScreenTo(const int percent, const float time)
+    {
+        mScreenFader->fadeTo(percent, time);
+    }
+
+    void WindowManager::setScreenFactor(float factor)
+    {
+        mScreenFader->setFactor(factor);
     }
 }

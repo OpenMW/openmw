@@ -4,8 +4,6 @@
 
 #include <components/nif/niffile.hpp>
 
-#include <libs/openengine/ogre/fader.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" /// FIXME
 #include "../mwbase/soundmanager.hpp"
@@ -406,7 +404,7 @@ namespace MWWorld
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
         Nif::NIFFile::CacheLock lock;
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0.5);
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
@@ -432,7 +430,7 @@ namespace MWWorld
             world->rotateObject(world->getPlayerPtr(), x, y, z);
 
             world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr(), true);
-            world->getFader()->fadeIn(0.5f);
+            MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
             return;
         }
 
@@ -480,7 +478,7 @@ namespace MWWorld
         MWBase::Environment::get().getWorld()->adjustSky();
 
         mCellChanged = true;
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.5);
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position)

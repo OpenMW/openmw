@@ -169,9 +169,6 @@ namespace MWWorld
             virtual void readRecord (ESM::ESMReader& reader, int32_t type,
                 const std::map<int, int>& contentFileMap);
 
-            virtual OEngine::Render::Fader* getFader();
-            ///< \todo remove this function. Rendering details should not be exposed.
-
             virtual CellStore *getExterior (int x, int y);
 
             virtual CellStore *getInterior (const std::string& name);
