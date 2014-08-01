@@ -98,6 +98,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
             return;
 
         Ogre::Image image;
+        tex->load();
         tex->convertToImage(image);
 
         Ogre::DataStreamPtr encoded = image.encode("tga");
@@ -137,6 +138,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
                     return;
 
                 Ogre::Image image;
+                tex->load();
                 tex->convertToImage(image);
 
                 fog->mFogTextures.push_back(ESM::FogTexture());
