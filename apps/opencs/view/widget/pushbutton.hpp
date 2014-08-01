@@ -26,7 +26,7 @@ namespace CSVWidget
 
         private:
 
-            void setExtendedToolTip (const QString& text);
+            void setExtendedToolTip();
 
         protected:
 

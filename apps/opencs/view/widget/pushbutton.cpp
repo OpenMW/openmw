@@ -4,9 +4,9 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 
-void CSVWidget::PushButton::setExtendedToolTip (const QString& text)
+void CSVWidget::PushButton::setExtendedToolTip()
 {
-    QString tooltip = text;
+    QString tooltip = mToolTip;
 
     if (tooltip.isEmpty())
         tooltip = "(Tool tip not implemented yet)";
@@ -50,14 +50,8 @@ void CSVWidget::PushButton::keyPressEvent (QKeyEvent *event)
 
 void CSVWidget::PushButton::keyReleaseEvent (QKeyEvent *event)
 {
-    if (event->key()==Qt::Key_Return || event->key()==Qt::Key_Enter)
-    {
+    if (event->key()==Qt::Key_Space)
         mKeepOpen = event->modifiers() & Qt::ShiftModifier;
-
-        setChecked (!isChecked());
-
-        emit clicked();
-    }
 
     QPushButton::keyReleaseEvent (event);
 }
@@ -73,14 +67,14 @@ CSVWidget::PushButton::PushButton (const QIcon& icon, Type type, const QString& 
 : QPushButton (icon, "", parent), mKeepOpen (false), mType (type), mToolTip (tooltip)
 {
     setCheckable (type==Type_Mode || type==Type_Toggle);
-    setExtendedToolTip (tooltip);
+    setExtendedToolTip();
 }
 
 CSVWidget::PushButton::PushButton (Type type, const QString& tooltip, QWidget *parent)
 : QPushButton (parent), mKeepOpen (false), mType (type), mToolTip (tooltip)
 {
     setCheckable (type==Type_Mode || type==Type_Toggle);
-    setExtendedToolTip (tooltip);
+    setExtendedToolTip();
 }
 
 bool CSVWidget::PushButton::hasKeepOpen() const
