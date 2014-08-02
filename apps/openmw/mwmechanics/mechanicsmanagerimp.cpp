@@ -973,6 +973,9 @@ namespace MWMechanics
                 if (!it->getClass().isNpc())
                     continue;
 
+                if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
+                    continue;
+
                 // Will the witness report the crime?
                 if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
                 {
@@ -1070,6 +1073,9 @@ namespace MWMechanics
             // Note: iFightAttack is used for the victim, iFightAttacking for witnesses?
             if (*it != victim && type == OT_Assault)
                 aggression = iFightAttacking;
+
+            if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
+                continue;
 
             if (it->getClass().isClass(*it, "guard"))
             {
