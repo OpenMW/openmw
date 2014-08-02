@@ -529,24 +529,7 @@ namespace MWClass
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
             othercls.onHit(victim, 0.0f, false, weapon, ptr, false);
-
-            // Weapon health is reduced by 1 even if the attack misses
-            const bool weaphashealth = !weapon.isEmpty() && weapon.getClass().hasItemHealth(weapon);
-            if(weaphashealth)
-            {
-                int weaphealth = weapon.getClass().getItemHealth(weapon);
-
-                if (!MWBase::Environment::get().getWorld()->getGodModeState())
-                {
-                    weaphealth -= std::min(1, weaphealth);
-                    weapon.getCellRef().setCharge(weaphealth);
-                }
-
-                // Weapon broken? unequip it
-                if (weaphealth == 0)
-                    weapon = *inv.unequipItem(weapon, ptr);
-            }
-
+            MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
             return;
         }
 
@@ -555,7 +538,6 @@ namespace MWClass
         MWMechanics::NpcStats &stats = getNpcStats(ptr);
         if(!weapon.isEmpty())
         {
-            const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
             const unsigned char *attack = NULL;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
@@ -568,27 +550,9 @@ namespace MWClass
                 damage  = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
                 damage *= gmst.fDamageStrengthBase->getFloat() +
                         (stats.getAttribute(ESM::Attribute::Strength).getModified() * gmst.fDamageStrengthMult->getFloat() * 0.1);
-                if(weaphashealth)
-                {
-                    int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
-                    int weaphealth = weapon.getClass().getItemHealth(weapon);
-
-                    damage *= float(weaphealth) / weapmaxhealth;
-
-                    if (!MWBase::Environment::get().getWorld()->getGodModeState())
-                    {
-                        // Reduce weapon charge by at least one, but cap at 0
-                        weaphealth -= std::min(std::max(1,
-                                    (int)(damage * store.find("fWeaponDamageMult")->getFloat())), weaphealth);
-
-                        weapon.getCellRef().setCharge(weaphealth);
-                    }
-
-                    // Weapon broken? unequip it
-                    if (weaphealth == 0)
-                        weapon = *inv.unequipItem(weapon, ptr);
-                }
             }
+            MWMechanics::adjustWeaponDamage(damage, weapon);
+            MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
             healthdmg = true;
         }
         else
