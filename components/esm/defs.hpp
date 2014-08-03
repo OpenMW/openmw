@@ -114,7 +114,8 @@ enum RecNameInts
     REC_DCOU = FourCC<'D','C','O','U'>::value,
 
     // format 1
-    REC_FILT = 0x544C4946
+    REC_FILT = 0x544C4946,
+    REC_DBGP = FourCC<'D','B','G','P'>::value ///< only used in project files
 };
 
 }
