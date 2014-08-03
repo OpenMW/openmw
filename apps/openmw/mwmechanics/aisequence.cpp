@@ -245,6 +245,9 @@ void AiSequence::clear()
 
 void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
 {
+    if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        throw std::runtime_error("Can't add AI packages to player");
+
     if (package.getTypeId() == AiPackage::TypeIdCombat || package.getTypeId() == AiPackage::TypeIdPursue)
     {
         // Notify AiWander of our current position so we can return to it after combat finished
