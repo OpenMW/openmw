@@ -1053,10 +1053,12 @@ namespace MWMechanics
                 //KnockedOutOneFrameLogic
                 //Used for "OnKnockedOut" command
                 //Put here to ensure that it's run for PRECISELY one frame.
-                if (stats.getKnockedDown() && !stats.getKnockedDownOneFrame() && !stats.getKnockedDownOverOneFrame()) { //Start it for one frame if nessesary
+                if (stats.getKnockedDown() && !stats.getKnockedDownOneFrame() && !stats.getKnockedDownOverOneFrame())
+                { //Start it for one frame if nessesary
                     stats.setKnockedDownOneFrame(true);
                 }
-                else if (stats.getKnockedDownOneFrame() && !stats.getKnockedDownOverOneFrame()) { //Turn off KnockedOutOneframe
+                else if (stats.getKnockedDownOneFrame() && !stats.getKnockedDownOverOneFrame())
+                { //Turn off KnockedOutOneframe
                     stats.setKnockedDownOneFrame(false);
                     stats.setKnockedDownOverOneFrame(true);
                 }
