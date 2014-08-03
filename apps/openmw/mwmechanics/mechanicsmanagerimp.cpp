@@ -1106,6 +1106,35 @@ namespace MWMechanics
         }
     }
 
+    void MechanicsManager::actorAttacked(const MWWorld::Ptr &ptr, const MWWorld::Ptr &attacker)
+    {
+        if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            return;
+
+        std::list<MWWorld::Ptr> followers = getActorsFollowing(attacker);
+        if (std::find(followers.begin(), followers.end(), ptr) != followers.end())
+        {
+            ptr.getClass().getCreatureStats(ptr).friendlyHit();
+
+            if (ptr.getClass().getCreatureStats(ptr).getFriendlyHits() < 4)
+                return;
+        }
+
+        // Attacking peaceful NPCs is a crime
+        if (ptr.getClass().isNpc() && !attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker)
+                && !isAggressive(ptr, attacker))
+            commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
+
+        if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)
+                                    || attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
+        {
+            // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
+            // Note: accidental or collateral damage attacks are ignored.
+            startCombat(ptr, attacker);
+        }
+    }
+
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)
     {
         if (observer.getClass().getCreatureStats(observer).isDead())

@@ -639,25 +639,12 @@ namespace MWClass
 
         // NOTE: 'object' and/or 'attacker' may be empty.
 
-        if (ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
-        {
-            // Attacking peaceful NPCs is a crime
-            if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker)
-                    && !MWBase::Environment::get().getMechanicsManager()->isAggressive(ptr, attacker))
-                MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
-
-            if (!attacker.isEmpty() && attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)
-                    && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
-            {
-                // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
-                // Note: accidental or collateral damage attacks are ignored.
-                MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, attacker);
-            }
-        }
-
         bool wasDead = getCreatureStats(ptr).isDead();
 
         getCreatureStats(ptr).setAttacked(true);
+
+        if (!attacker.isEmpty())
+            MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
 
         if(!successful)
         {
