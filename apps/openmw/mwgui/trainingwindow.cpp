@@ -2,8 +2,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <openengine/ogre/fader.hpp>
-
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -171,7 +169,7 @@ namespace MWGui
         MWBase::Environment::get().getMechanicsManager()->rest(false);
         MWBase::Environment::get().getMechanicsManager()->rest(false);
 
-        MWBase::Environment::get().getWorld ()->getFader()->fadeOut(0.25);
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.25);
         mFadeTimeRemaining = 0.5;
     }
 
@@ -183,6 +181,6 @@ namespace MWGui
         mFadeTimeRemaining -= dt;
 
         if (mFadeTimeRemaining <= 0)
-            MWBase::Environment::get().getWorld ()->getFader()->fadeIn(0.25);
+            MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.25);
     }
 }

@@ -33,7 +33,7 @@ add_openmw_dir (mwgui
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
     keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel fontloader controllers savegamedialog
-    recharge mode videowidget backgroundimage itemwidget
+    recharge mode videowidget backgroundimage itemwidget screenfader
     )
 
 add_openmw_dir (mwdialogue

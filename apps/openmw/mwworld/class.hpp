@@ -90,8 +90,9 @@ namespace MWWorld
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
-            virtual void adjustPosition(const MWWorld::Ptr& ptr) const;
+            virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) const;
             ///< Adjust position to stand on ground. Must be called post model load
+            /// @param force do this even if the ptr is flying
 
             virtual MWMechanics::CreatureStats& getCreatureStats (const Ptr& ptr) const;
             ///< Return creature stats or throw an exception, if class does not have creature stats

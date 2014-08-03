@@ -212,11 +212,6 @@ MWRender::Actors& RenderingManager::getActors(){
     return *mActors;
 }
 
-OEngine::Render::Fader* RenderingManager::getFader()
-{
-    return mRendering.getFader();
-}
-
 MWRender::Camera* RenderingManager::getCamera() const
 {
     return mCamera;
@@ -345,7 +340,7 @@ void RenderingManager::update (float duration, bool paused)
     MWWorld::Ptr player = world->getPlayerPtr();
 
     int blind = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
-    mRendering.getFader()->setFactor(std::max(0.f, 1.f-(blind / 100.f)));
+    MWBase::Environment::get().getWindowManager()->setScreenFactor(std::max(0.f, 1.f-(blind / 100.f)));
     setAmbientMode();
 
     // player position

@@ -40,6 +40,17 @@ namespace MWGui
             bool mEnabled;
             float mTimeLeft;
         };
+
+        /// Automatically positions a widget below the mouse cursor.
+        class ControllerFollowMouse :
+            public MyGUI::ControllerItem
+        {
+            MYGUI_RTTI_DERIVED( ControllerFollowMouse )
+
+        private:
+            bool addTime(MyGUI::Widget* _widget, float _time);
+            void prepareItem(MyGUI::Widget* _widget);
+        };
     }
 }
 

@@ -331,6 +331,15 @@ namespace MWBase
             virtual void removeCurrentModal(MWGui::WindowModal* input) = 0;
 
             virtual void pinWindow (MWGui::GuiWindow window) = 0;
+
+            /// Fade the screen in, over \a time seconds
+            virtual void fadeScreenIn(const float time) = 0;
+            /// Fade the screen out to black, over \a time seconds
+            virtual void fadeScreenOut(const float time) = 0;
+            /// Fade the screen to a specified percentage of black, over \a time seconds
+            virtual void fadeScreenTo(const int percent, const float time) = 0;
+            /// Darken the screen by \a factor (1.0 = no darkening). Works independently from screen fading.
+            virtual void setScreenFactor (float factor) = 0;
     };
 }
 

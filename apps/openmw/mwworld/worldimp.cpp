@@ -1151,7 +1151,7 @@ namespace MWWorld
         }
     }
 
-    void World::adjustPosition(const Ptr &ptr)
+    void World::adjustPosition(const Ptr &ptr, bool force)
     {
         ESM::Position pos (ptr.getRefData().getPosition());
 
@@ -1170,7 +1170,7 @@ namespace MWWorld
 
         ptr.getRefData().setPosition(pos);
 
-        if (!isFlying(ptr))
+        if (force || !isFlying(ptr))
         {
             Ogre::Vector3 traced = mPhysics->traceDown(ptr, 200);
             if (traced.z < pos.pos[2])
@@ -1553,11 +1553,6 @@ namespace MWWorld
     void World::modRegion(const std::string &regionid, const std::vector<char> &chances)
     {
         mWeatherManager->modRegion(regionid, chances);
-    }
-
-    OEngine::Render::Fader* World::getFader()
-    {
-        return mRendering->getFader();
     }
 
     Ogre::Vector2 World::getNorthVector (CellStore* cell)

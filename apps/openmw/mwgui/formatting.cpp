@@ -406,7 +406,7 @@ namespace MWGui
         box->setTextAlign(mTextStyle.mTextAlign);
         box->setTextColour(mTextStyle.mColour);
         box->setFontName(mTextStyle.mFont);
-        box->setCaption(realText);
+        box->setCaption(MyGUI::TextIterator::toTagsString(realText));
         box->setSize(box->getSize().width, box->getTextSize().height);
         mHeight += box->getTextSize().height;
 

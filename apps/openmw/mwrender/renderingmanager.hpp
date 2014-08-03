@@ -4,8 +4,6 @@
 #include "sky.hpp"
 #include "debugging.hpp"
 
-#include <openengine/ogre/fader.hpp>
-
 #include <components/settings/settings.hpp>
 
 #include <boost/filesystem.hpp>
@@ -97,8 +95,6 @@ public:
 
     void toggleLight();
     bool toggleRenderMode(int mode);
-
-    OEngine::Render::Fader* getFader();
 
     void removeCell (MWWorld::CellStore *store);
 

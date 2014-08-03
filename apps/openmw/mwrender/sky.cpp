@@ -294,7 +294,12 @@ void SkyManager::create()
 
     // Stars
     mAtmosphereNight = mRootNode->createChildSceneNode();
-    NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(mAtmosphereNight, "meshes\\sky_night_01.nif");
+    NifOgre::ObjectScenePtr objects;
+    if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("meshes\\sky_night_02.nif"))
+        objects = NifOgre::Loader::createObjects(mAtmosphereNight, "meshes\\sky_night_02.nif");
+    else
+        objects = NifOgre::Loader::createObjects(mAtmosphereNight, "meshes\\sky_night_01.nif");
+
     for(size_t i = 0, matidx = 0;i < objects->mEntities.size();i++)
     {
         Entity* night1_ent = objects->mEntities[i];

@@ -59,7 +59,7 @@ namespace MWGui
     };
 
 
-    HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
+    HUD::HUD(int fpsLevel, DragAndDrop* dragAndDrop)
         : Layout("openmw_hud.layout")
         , mHealth(NULL)
         , mMagicka(NULL)
@@ -97,7 +97,7 @@ namespace MWGui
         , mWeaponSpellTimer(0.f)
         , mDrowningFlashTheta(0.f)
     {
-        setCoord(0,0, width, height);
+        mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
 
         // Energy bars
         getWidget(mHealthFrame, "HealthFrame");
@@ -403,11 +403,6 @@ namespace MWGui
 
         if (mIsDrowning)
             mDrowningFlashTheta += dt * Ogre::Math::TWO_PI;
-    }
-
-    void HUD::onResChange(int width, int height)
-    {
-        setCoord(0, 0, width, height);
     }
 
     void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
