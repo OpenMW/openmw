@@ -1192,7 +1192,6 @@ void CharacterController::update(float duration)
                     cls.getMovementSettings(mPtr).mPosition[2] = 0;
             }
             //Force Move Jump, only jump if they're otherwise moving
-            std::cout << isMoving << std::endl;
             if(stats.getMovementFlag(MWMechanics::CreatureStats::Flag_ForceMoveJump) && isMoving)
             {
 
