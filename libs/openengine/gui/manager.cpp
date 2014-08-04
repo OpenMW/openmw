@@ -653,7 +653,7 @@ void MyGUIManager::updateWindow (Ogre::RenderWindow *wnd)
 
 void MyGUIManager::windowResized()
 {
-    mRenderManager->setActiveViewport(0);
+ //   mRenderManager->setActiveViewport(0);
 }
 
 void MyGUIManager::shutdown()

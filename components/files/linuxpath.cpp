@@ -7,7 +7,11 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <boost/filesystem/fstream.hpp>
-
+/*bool flag=false;
+ #ifdef ENABLE_PLUGIN_GLES2
+  flag=true;  
+#endif
+*/
 
 namespace
 {
@@ -54,23 +58,40 @@ LinuxPath::LinuxPath(const std::string& application_name)
 
 boost::filesystem::path LinuxPath::getUserConfigPath() const
 {
-    return getEnv("XDG_CONFIG_HOME", getUserHome() / ".config") / mName;
+//if (flag==false)
+  //  return getEnv("XDG_CONFIG_HOME", getUserHome() / ".config") / mName;
+//else
+    return getEnv("XDG_CONFIG_HOME",  "/sdcard/morrowind/config") / mName;
+
 }
 
 boost::filesystem::path LinuxPath::getUserDataPath() const
 {
-    return getEnv("XDG_DATA_HOME", getUserHome() / ".local/share") / mName;
+//if (flag==false)
+  //  return getEnv("XDG_DATA_HOME", getUserHome() / ".local/share") / mName;
+//else
+    return getEnv("XDG_DATA_HOME", "/sdcard/morrowind/share") / mName;
+
+
 }
 
 boost::filesystem::path LinuxPath::getCachePath() const
 {
-    return getEnv("XDG_CACHE_HOME", getUserHome() / ".cache") / mName;
+//if (flag==false)
+  //  return getEnv("XDG_CACHE_HOME", getUserHome() / ".cache") / mName;
+//else
+    return getEnv("XDG_CACHE_HOME", "/sdcard/morrowind/cache") / mName;
+
 }
 
 boost::filesystem::path LinuxPath::getGlobalConfigPath() const
 {
-    boost::filesystem::path globalPath("/etc/");
-    return globalPath / mName;
+//if (flag==false)
+  //  boost::filesystem::path globalPath("/etc/");
+//else
+   boost::filesystem::path globalPath("/sdcard/morrowind/");
+     
+return globalPath / mName;
 }
 
 boost::filesystem::path LinuxPath::getLocalPath() const
@@ -80,8 +101,12 @@ boost::filesystem::path LinuxPath::getLocalPath() const
 
 boost::filesystem::path LinuxPath::getGlobalDataPath() const
 {
-    boost::filesystem::path globalDataPath("/usr/share/games/");
-    return globalDataPath / mName;
+//if (flag==false)
+  //  boost::filesystem::path globalDataPath("/usr/share/games/");
+//else
+  boost::filesystem::path globalDataPath("/sdcard/morrowind/data");
+      
+return globalDataPath / mName;
 }
 
 boost::filesystem::path LinuxPath::getInstallPath() const
