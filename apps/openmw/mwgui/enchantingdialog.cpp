@@ -338,7 +338,7 @@ namespace MWGui
                     MWBase::Environment::get().getMechanicsManager()->reportCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
                                                                                   item.getClass().getValue(item));
                     MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
-                    MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
+                    MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
                     return;
                 }
             }

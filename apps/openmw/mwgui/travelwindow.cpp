@@ -9,6 +9,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
@@ -171,12 +172,13 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->advanceTime(hours);
         }
 
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
+        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+
         // Teleports any followers, too.
         MWWorld::ActionTeleport action(interior ? cellname : "", pos);
         action.execute(player);
 
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
     }
