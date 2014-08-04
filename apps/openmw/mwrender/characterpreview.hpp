@@ -22,7 +22,7 @@ namespace MWRender
 
     class NpcAnimation;
 
-    class CharacterPreview
+    class CharacterPreview : public Ogre::ManualResourceLoader
     {
     public:
         CharacterPreview(MWWorld::Ptr character, int sizeX, int sizeY, const std::string& name,
@@ -34,12 +34,16 @@ namespace MWRender
 
         virtual void rebuild();
 
+        void loadResource(Ogre::Resource *resource);
+
     private:
         CharacterPreview(const CharacterPreview&);
         CharacterPreview& operator=(const CharacterPreview&);
 
     protected:
         virtual bool renderHeadOnly() { return false; }
+
+        virtual void setupRenderTarget();
 
         Ogre::TexturePtr mTexture;
         Ogre::RenderTarget* mRenderTarget;
@@ -76,7 +80,12 @@ namespace MWRender
 
         int getSlotSelected(int posX, int posY);
 
+    protected:
+        virtual void setupRenderTarget();
+
     private:
+        int mSizeX;
+        int mSizeY;
 
         OEngine::Render::SelectionBuffer* mSelectionBuffer;
     };

@@ -83,19 +83,10 @@ namespace MWRender
         mCamera->setNearClipDistance (0.01);
         mCamera->setFarClipDistance (1000);
 
-        mTexture = Ogre::TextureManager::getSingleton().getByName (mName);
-        if (mTexture.isNull ())
-            mTexture = Ogre::TextureManager::getSingleton().createManual(mName,
-                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, mSizeX, mSizeY, 0, Ogre::PF_A8R8G8B8, Ogre::TU_RENDERTARGET);
+        mTexture = Ogre::TextureManager::getSingleton().createManual(mName,
+                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, mSizeX, mSizeY, 0, Ogre::PF_A8R8G8B8, Ogre::TU_RENDERTARGET, this);
 
-        mRenderTarget = mTexture->getBuffer()->getRenderTarget();
-        mRenderTarget->removeAllViewports ();
-        mViewport = mRenderTarget->addViewport(mCamera);
-        mViewport->setOverlaysEnabled(false);
-        mViewport->setBackgroundColour(Ogre::ColourValue(0, 0, 0, 0));
-        mViewport->setShadowsEnabled(false);
-        mRenderTarget->setActive(true);
-        mRenderTarget->setAutoUpdated (false);
+        setupRenderTarget();
 
         onSetup ();
     }
@@ -107,6 +98,7 @@ namespace MWRender
             mSceneMgr->destroyAllCameras();
             delete mAnimation;
             Ogre::Root::getSingleton().destroySceneManager(mSceneMgr);
+            Ogre::TextureManager::getSingleton().remove(mName);
         }
     }
 
@@ -127,12 +119,39 @@ namespace MWRender
         onSetup();
     }
 
+    void CharacterPreview::loadResource(Ogre::Resource *resource)
+    {
+        Ogre::Texture* tex = dynamic_cast<Ogre::Texture*>(resource);
+        if (!tex)
+            return;
+
+        tex->createInternalResources();
+
+        setupRenderTarget();
+
+        mRenderTarget->update();
+    }
+
+    void CharacterPreview::setupRenderTarget()
+    {
+        mRenderTarget = mTexture->getBuffer()->getRenderTarget();
+        mRenderTarget->removeAllViewports ();
+        mViewport = mRenderTarget->addViewport(mCamera);
+        mViewport->setOverlaysEnabled(false);
+        mViewport->setBackgroundColour(Ogre::ColourValue(0, 0, 0, 0));
+        mViewport->setShadowsEnabled(false);
+        mRenderTarget->setActive(true);
+        mRenderTarget->setAutoUpdated (false);
+    }
+
     // --------------------------------------------------------------------------------------------------
 
 
     InventoryPreview::InventoryPreview(MWWorld::Ptr character)
         : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 65, -180), Ogre::Vector3(0,65,0))
         , mSelectionBuffer(NULL)
+        , mSizeX(0)
+        , mSizeY(0)
     {
     }
 
@@ -143,6 +162,9 @@ namespace MWRender
 
     void InventoryPreview::update(int sizeX, int sizeY)
     {
+        mSizeX = sizeX;
+        mSizeY = sizeY;
+
         mAnimation->updateParts();
 
         MWWorld::InventoryStore &inv = mCharacter.getClass().getInventoryStore(mCharacter);
@@ -197,13 +219,19 @@ namespace MWRender
 
         mAnimation->runAnimation(0.0f);
 
-        mViewport->setDimensions (0, 0, std::min(1.f, float(sizeX) / float(512)), std::min(1.f, float(sizeY) / float(1024)));
-
         mNode->setOrientation (Ogre::Quaternion::IDENTITY);
 
+        mViewport->setDimensions (0, 0, std::min(1.f, float(mSizeX) / float(512)), std::min(1.f, float(mSizeY) / float(1024)));
+        mTexture->load();
         mRenderTarget->update();
 
         mSelectionBuffer->update();
+    }
+
+    void InventoryPreview::setupRenderTarget()
+    {
+        CharacterPreview::setupRenderTarget();
+        mViewport->setDimensions (0, 0, std::min(1.f, float(mSizeX) / float(512)), std::min(1.f, float(mSizeY) / float(1024)));
     }
 
     int InventoryPreview::getSlotSelected (int posX, int posY)
@@ -243,6 +271,7 @@ namespace MWRender
 
     void RaceSelectionPreview::render()
     {
+        mTexture->load();
         mRenderTarget->update();
     }
 

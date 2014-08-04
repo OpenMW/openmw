@@ -91,6 +91,13 @@ namespace MWGui
         mTradeModel = new TradeItemModel(new InventoryItemModel(mPtr), MWWorld::Ptr());
         mSortModel = new SortFilterItemModel(mTradeModel);
         mItemView->setModel(mSortModel);
+
+        mPreview.reset(NULL);
+        mAvatarImage->setImageTexture("");
+        MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().getTexture("CharacterPreview");
+        if (tex)
+            MyGUI::RenderManager::getInstance().destroyTexture(tex);
+
         mPreview.reset(new MWRender::InventoryPreview(mPtr));
         mPreview->setup();
     }
