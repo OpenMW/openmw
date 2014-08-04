@@ -23,6 +23,7 @@
 #include <components/esm/loaddial.hpp>
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadbody.hpp>
+#include <components/esm/debugprofile.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
 
@@ -70,6 +71,7 @@ namespace CSMWorld
             IdCollection<ESM::Dialogue> mJournals;
             IdCollection<ESM::Enchantment> mEnchantments;
             IdCollection<ESM::BodyPart> mBodyParts;
+            IdCollection<ESM::DebugProfile> mDebugProfiles;
             InfoCollection mTopicInfos;
             InfoCollection mJournalInfos;
             IdCollection<Cell> mCells;
@@ -189,6 +191,10 @@ namespace CSMWorld
             const IdCollection<ESM::BodyPart>& getBodyParts() const;
 
             IdCollection<ESM::BodyPart>& getBodyParts();
+
+            const IdCollection<ESM::DebugProfile>& getDebugProfiles() const;
+
+            IdCollection<ESM::DebugProfile>& getDebugProfiles();
 
             /// Throws an exception, if \a id does not match a resources list.
             const Resources& getResources (const UniversalId& id) const;

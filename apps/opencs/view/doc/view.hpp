@@ -67,6 +67,8 @@ namespace CSVDoc
 
             void setupAssetsMenu();
 
+            void setupDebugMenu();
+
             void setupUi();
 
             void updateTitle();
@@ -193,6 +195,8 @@ namespace CSVDoc
             void addTexturesSubView();
 
             void addVideosSubView();
+
+            void addDebugProfilesSubView();
 
             void toggleShowStatusBar (bool show);
 

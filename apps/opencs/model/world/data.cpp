@@ -258,6 +258,11 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mFilters.addColumn (new DescriptionColumn<CSMFilter::Filter>);
     mFilters.addColumn (new ScopeColumn<CSMFilter::Filter>);
 
+    mDebugProfiles.addColumn (new StringIdColumn<ESM::DebugProfile>);
+    mDebugProfiles.addColumn (new RecordStateColumn<ESM::DebugProfile>);
+    mDebugProfiles.addColumn (new FixedRecordTypeColumn<ESM::DebugProfile> (UniversalId::Type_DebugProfile));
+    mDebugProfiles.addColumn (new DescriptionColumn<ESM::DebugProfile>);
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skill);
@@ -280,6 +285,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs, IdTable::Feature_ViewCell | IdTable::Feature_Preview), UniversalId::Type_Reference);
     addModel (new IdTable (&mFilters), UniversalId::Type_Filter);
+    addModel (new IdTable (&mDebugProfiles), UniversalId::Type_DebugProfile);
     addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Mesh)),
         UniversalId::Type_Mesh);
     addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Icon)),
@@ -513,6 +519,16 @@ CSMWorld::IdCollection<ESM::BodyPart>& CSMWorld::Data::getBodyParts()
     return mBodyParts;
 }
 
+const CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfiles() const
+{
+    return mDebugProfiles;
+}
+
+CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfiles()
+{
+    return mDebugProfiles;
+}
+
 const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) const
 {
     return mResourcesManager.get (UniversalId::getParentType (id.getType()));
@@ -581,6 +597,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
 
     ESM::NAME n = mReader->getRecName();
     mReader->getRecHeader();
+
+    bool unhandledRecord = false;
 
     switch (n.val)
     {
@@ -692,23 +710,40 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
 
         case ESM::REC_FILT:
 
-            if (mProject)
+            if (!mProject)
             {
-                mFilters.load (*mReader, mBase);
-                mFilters.setData (mFilters.getSize()-1,
-                    mFilters.findColumnIndex (CSMWorld::Columns::ColumnId_Scope),
-                    static_cast<int> (CSMFilter::Filter::Scope_Project));
+                unhandledRecord = true;
                 break;
             }
 
-            // fall through (filter record in a content file is an error with format 0)
+            mFilters.load (*mReader, mBase);
+            mFilters.setData (mFilters.getSize()-1,
+                mFilters.findColumnIndex (CSMWorld::Columns::ColumnId_Scope),
+                static_cast<int> (CSMFilter::Filter::Scope_Project));
+            break;
+
+        case ESM::REC_DBGP:
+
+            if (!mProject)
+            {
+                unhandledRecord = true;
+                break;
+            }
+
+            mDebugProfiles.load (*mReader, mBase);
+            break;
 
         default:
 
-            messages.push_back (std::make_pair (UniversalId::Type_None,
-                "Unsupported record type: " + n.toString()));
+            unhandledRecord = true;
+    }
 
-            mReader->skipRecord();
+    if (unhandledRecord)
+    {
+        messages.push_back (std::make_pair (UniversalId::Type_None,
+            "Unsupported record type: " + n.toString()));
+
+        mReader->skipRecord();
     }
 
     return false;

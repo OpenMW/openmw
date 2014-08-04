@@ -95,6 +95,10 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<TableSubView,
         CreatorFactory<CSVFilter::FilterCreator> >);
 
+    manager.add (CSMWorld::UniversalId::Type_DebugProfiles,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView,
+        NullCreatorFactory>);
+
     manager.add (CSMWorld::UniversalId::Type_Scene, new CSVDoc::SubViewFactory<SceneSubView>);
 
     // Dialogue subviews

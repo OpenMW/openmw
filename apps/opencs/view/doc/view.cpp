@@ -232,6 +232,15 @@ void CSVDoc::View::setupAssetsMenu()
     assets->addAction (videos);
 }
 
+void CSVDoc::View::setupDebugMenu()
+{
+    QMenu *debug = menuBar()->addMenu (tr ("Debug"));
+
+    QAction *profiles = new QAction (tr ("Debug Profiles"), this);
+    connect (profiles, SIGNAL (triggered()), this, SLOT (addDebugProfilesSubView()));
+    debug->addAction (profiles);
+}
+
 void CSVDoc::View::setupUi()
 {
     setupFileMenu();
@@ -241,6 +250,7 @@ void CSVDoc::View::setupUi()
     setupMechanicsMenu();
     setupCharacterMenu();
     setupAssetsMenu();
+    setupDebugMenu();
 }
 
 void CSVDoc::View::updateTitle()
@@ -541,6 +551,11 @@ void CSVDoc::View::addTexturesSubView()
 void CSVDoc::View::addVideosSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Videos);
+}
+
+void CSVDoc::View::addDebugProfilesSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_DebugProfiles);
 }
 
 void CSVDoc::View::abortOperation (int type)
