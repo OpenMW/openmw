@@ -1,11 +1,25 @@
 # local files
+
+if (ANDROID) 
+set(GAME
+    main.cpp
+    SDL_android_main.c
+    engine.cpp
+)
+endif (ANDROID)
+
+
+if (NOT ANDROID) 
 set(GAME
     main.cpp
     engine.cpp
 )
-if(NOT WIN32)
+endif ()
+
+if(NOT WIN32 AND NOT ANDROID)
     set(GAME ${GAME} crashcatcher.cpp)
 endif()
+
 set(GAME_HEADER
     engine.hpp
 )
@@ -82,19 +96,36 @@ add_openmw_dir (mwbase
     )
 
 # Main executable
+if (ANDROID)
+set(BOOST_COMPONENTS system filesystem program_options thread wave atomic)
+endif (ANDROID)
+if (NOT ANDROID)
 set(BOOST_COMPONENTS system filesystem program_options thread wave)
+endif ()
 if(WIN32)
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
 endif(WIN32)
 
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
+if (NOT ANDROID)
 add_executable(openmw
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
     ${OPENMW_FILES}
     ${GAME} ${GAME_HEADER}
     ${APPLE_BUNDLE_RESOURCES}
 )
+endif ()
+
+if (ANDROID)
+add_library(openmw SHARED
+    ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
+    ${OPENMW_FILES}
+    ${GAME} ${GAME_HEADER}
+    ${APPLE_BUNDLE_RESOURCES}
+)
+
+endif (ANDROID)
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
@@ -115,6 +146,47 @@ target_link_libraries(openmw
     "sdl4ogre"
     components
 )
+
+if (ANDROID)
+target_link_libraries(openmw
+${OGRE_STATIC_PLUGINS}   
+)
+
+target_link_libraries(openmw
+EGL
+android
+log
+dl  
+)
+target_link_libraries(openmw
+boost_atomic
+boost_chrono
+boost_date_time
+boost_filesystem
+boost_program_options
+boost_system
+boost_thread
+boost_wave  
+)
+target_link_libraries(openmw
+FreeImage
+freetype  
+)
+
+target_link_libraries(openmw
+OgreMainStatic   
+)
+
+target_link_libraries(openmw
+MyGUI.OgrePlatform
+MyGUIEngineStatic
+Plugin_StrangeButtonStatic
+cpufeatures
+BulletCollision
+BulletDynamics
+LinearMath 
+)
+endif (ANDROID)
 
 if (USE_SYSTEM_TINYXML)
     target_link_libraries(openmw ${TINYXML_LIBRARIES})

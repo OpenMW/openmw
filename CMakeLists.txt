@@ -54,6 +54,10 @@ endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 # Macros
 include(OpenMWMacros)
 
+if (ANDROID)
+set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
+endif (ANDROID)
+
 # doxygen main page
 
 configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/docs/mainpage.hpp")
@@ -233,7 +237,12 @@ if(OGRE_STATIC)
         list(APPEND OGRE_STATIC_PLUGINS ${Cg_LIBRARIES})
     endif(Cg_FOUND)
 
-    add_static_ogre_plugin(RenderSystem_GL)
+if (ANDROID)
+    add_static_ogre_plugin(RenderSystem_GLES2)
+endif (ANDROID)
+if (NOT ANDROID)
+add_static_ogre_plugin(RenderSystem_GL)
+endif ()
     if(WIN32)
         add_static_ogre_plugin(RenderSystem_Direct3D9)
     endif(WIN32)
