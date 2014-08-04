@@ -66,6 +66,12 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setSpellVisibility(!mPinned);
     }
 
+    void SpellWindow::onTitleDoubleClicked()
+    {
+        if (!mPinned)
+            MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Magic);
+    }
+
     void SpellWindow::open()
     {
         updateSpells();

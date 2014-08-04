@@ -42,6 +42,7 @@ namespace MWGui
         void onDeleteSpellAccept();
 
         virtual void onPinToggled();
+        virtual void onTitleDoubleClicked();
         virtual void open();
 
         SpellIcons* mSpellIcons;

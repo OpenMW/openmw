@@ -536,6 +536,12 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setMinimapVisibility(!mPinned);
     }
 
+    void MapWindow::onTitleDoubleClicked()
+    {
+        if (!mPinned)
+            MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Map);
+    }
+
     void MapWindow::open()
     {
         // force markers to foreground

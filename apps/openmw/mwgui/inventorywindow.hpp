@@ -98,6 +98,7 @@ namespace MWGui
             void onFilterChanged(MyGUI::Widget* _sender);
             void onAvatarClicked(MyGUI::Widget* _sender);
             void onPinToggled();
+            void onTitleDoubleClicked();
 
             void updateEncumbranceBar();
             void notifyContentChanged();

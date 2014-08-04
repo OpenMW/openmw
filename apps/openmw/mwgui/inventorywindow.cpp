@@ -373,6 +373,12 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setWeaponVisibility(!mPinned);
     }
 
+    void InventoryWindow::onTitleDoubleClicked()
+    {
+        if (!mPinned)
+            MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Inventory);
+    }
+
     void InventoryWindow::useItem(const MWWorld::Ptr &ptr)
     {
         const std::string& script = ptr.getClass().getScript(ptr);
