@@ -95,7 +95,7 @@ namespace OgreInit
     Ogre::Root* OgreInit::init(const std::string &logPath)
     {
 
-        #ifdef NOT ANDROID
+        #ifdef NOT_ANDROID
     
         // Set up logging first
         new Ogre::LogManager;
