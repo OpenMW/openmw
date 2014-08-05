@@ -4,12 +4,15 @@
 #include <string>
 #include <boost/filesystem.hpp>
 
-#if defined(__UNIX__) || defined(__FreeBSD__) 
+#if defined(__linux__) || defined(__FreeBSD__) 
+#ifdef NOT_ANDROID
     #include <components/files/linuxpath.hpp>
     namespace Files { typedef LinuxPath TargetPathType; }
-#elif defined (__ANDROID__)
+#else
+
  #include <components/files/androidpath.hpp>
     namespace Files { typedef AndroidPath TargetPathType; }
+#endif
 #elif defined(__WIN32) || defined(__WINDOWS__) || defined(_WIN32)
     #include <components/files/windowspath.hpp>
     namespace Files { typedef WindowsPath TargetPathType; }
