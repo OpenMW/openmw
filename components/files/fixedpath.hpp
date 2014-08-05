@@ -103,7 +103,7 @@ struct FixedPath
         return mLocalPath;
     }
 
-#ifndef NOT_ANDROID
+#ifdef NOT_ANDROID
     const boost::filesystem::path& getInstallPath() const
     {
         return mInstallPath;
