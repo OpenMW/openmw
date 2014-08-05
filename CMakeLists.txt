@@ -62,10 +62,6 @@ if (NOT ANDROID)
 ADD_DEFINITIONS(-DNOT_ANDROID)
 endif()
 
-if (ANDROID)
-ADD_DEFINITIONS(-DBUILD_ANDROID)
-endif()
-
 
 # doxygen main page
 
@@ -248,10 +244,10 @@ if(OGRE_STATIC)
 
 if (ANDROID)
     add_static_ogre_plugin(RenderSystem_GLES2)
-endif (ANDROID)
-if (NOT ANDROID)
+else ()
 add_static_ogre_plugin(RenderSystem_GL)
 endif ()
+
     if(WIN32)
         add_static_ogre_plugin(RenderSystem_Direct3D9)
     endif(WIN32)

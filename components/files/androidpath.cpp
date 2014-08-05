@@ -1,17 +1,13 @@
-#include "linuxpath.hpp"
+#include "androidpath.hpp"
 
-#if defined(__linux__) || defined(__FreeBSD__)
+#if defined(__ANDROID__) 
 
 #include <cstdlib>
 #include <cstring>
 #include <pwd.h>
 #include <unistd.h>
 #include <boost/filesystem/fstream.hpp>
-/*bool flag=false;
- #ifdef ENABLE_PLUGIN_GLES2
-  flag=true;  
-#endif
-*/
+
 
 namespace
 {
@@ -51,57 +47,54 @@ namespace
 namespace Files
 {
 
-LinuxPath::LinuxPath(const std::string& application_name)
+AndroidPath::AndroidPath(const std::string& application_name)
     : mName(application_name)
 {
 }
 
-boost::filesystem::path LinuxPath::getUserConfigPath() const
+boost::filesystem::path AndroidPath::getUserConfigPath() const
 {
-
-    return getEnv("XDG_CONFIG_HOME", getUserHome() / ".config") / mName;
-
-
-
-}
-
-boost::filesystem::path LinuxPath::getUserDataPath() const
-{
-
   
-  return getEnv("XDG_DATA_HOME", getUserHome() / ".local/share") / mName;
-
+   return getEnv("XDG_CONFIG_HOME",  "/sdcard/morrowind/config") / mName;
 
 }
 
-boost::filesystem::path LinuxPath::getCachePath() const
+boost::filesystem::path AndroidPath::getUserDataPath() const
 {
 
-  return getEnv("XDG_CACHE_HOME", getUserHome() / ".cache") / mName;
+
+    return getEnv("XDG_DATA_HOME", "/sdcard/morrowind/share") / mName;
+
 }
 
-boost::filesystem::path LinuxPath::getGlobalConfigPath() const
+boost::filesystem::path AndroidPath::getCachePath() const
 {
 
-  boost::filesystem::path globalPath("/etc/");
+    return getEnv("XDG_CACHE_HOME", "/sdcard/morrowind/cache") / mName;
+
+}
+
+boost::filesystem::path AndroidPath::getGlobalConfigPath() const
+{
+   boost::filesystem::path globalPath("/sdcard/morrowind/");
     
 return globalPath / mName;
 }
 
-boost::filesystem::path LinuxPath::getLocalPath() const
+boost::filesystem::path AndroidPath::getLocalPath() const
 {
     return boost::filesystem::path("./");
 }
 
-boost::filesystem::path LinuxPath::getGlobalDataPath() const
+boost::filesystem::path AndroidPath::getGlobalDataPath() const
 {
 
-  boost::filesystem::path globalDataPath("/usr/share/games/");
-    
+  boost::filesystem::path globalDataPath("/sdcard/morrowind/data");
+
 return globalDataPath / mName;
 }
 
-boost::filesystem::path LinuxPath::getInstallPath() const
+boost::filesystem::path AndroidPath::getInstallPath() const
 {
     boost::filesystem::path installPath;
 

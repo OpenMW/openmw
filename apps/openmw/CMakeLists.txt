@@ -1,30 +1,18 @@
 # local files
 
-if (ANDROID) 
+
+
 set(GAME
     main.cpp
-    SDL_android_main.c
+#ifdef ANDROID
+android_main.c
+#endif
     engine.cpp
 )
-endif (ANDROID)
 
 
-if (NOT ANDROID) 
-set(GAME
-    main.cpp
-    engine.cpp
-)
-endif ()
-
-if(NOT WIN32 AND NOT ANDROID)
+if(NOT WIN32 OR NOT ANDROID)
     set(GAME ${GAME} crashcatcher.cpp)
-endif()
-if (NOT ANDROID)
-ADD_DEFINITIONS(-DNOT_ANDROID)
-endif()
-
-if (ANDROID)
-ADD_DEFINITIONS(-DBUILD_ANDROID)
 endif()
 
 
@@ -106,8 +94,7 @@ add_openmw_dir (mwbase
 # Main executable
 if (ANDROID)
 set(BOOST_COMPONENTS system filesystem program_options thread wave atomic)
-endif (ANDROID)
-if (NOT ANDROID)
+else ()
 set(BOOST_COMPONENTS system filesystem program_options thread wave)
 endif ()
 if(WIN32)
@@ -123,9 +110,8 @@ add_executable(openmw
     ${GAME} ${GAME_HEADER}
     ${APPLE_BUNDLE_RESOURCES}
 )
-endif ()
+else ()
 
-if (ANDROID)
 add_library(openmw SHARED
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
     ${OPENMW_FILES}
@@ -133,7 +119,7 @@ add_library(openmw SHARED
     ${APPLE_BUNDLE_RESOURCES}
 )
 
-endif (ANDROID)
+endif ()
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
@@ -156,36 +142,14 @@ target_link_libraries(openmw
 )
 
 if (ANDROID)
-target_link_libraries(openmw
-${OGRE_STATIC_PLUGINS}   
-)
+
 
 target_link_libraries(openmw
+${OGRE_STATIC_PLUGINS} 
 EGL
 android
 log
 dl  
-)
-target_link_libraries(openmw
-boost_atomic
-boost_chrono
-boost_date_time
-boost_filesystem
-boost_program_options
-boost_system
-boost_thread
-boost_wave  
-)
-target_link_libraries(openmw
-FreeImage
-freetype  
-)
-
-target_link_libraries(openmw
-OgreMainStatic   
-)
-
-target_link_libraries(openmw
 MyGUI.OgrePlatform
 MyGUIEngineStatic
 Plugin_StrangeButtonStatic
@@ -194,6 +158,7 @@ BulletCollision
 BulletDynamics
 LinearMath 
 )
+
 endif (ANDROID)
 
 if (USE_SYSTEM_TINYXML)

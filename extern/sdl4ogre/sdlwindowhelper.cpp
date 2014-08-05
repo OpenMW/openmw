@@ -45,14 +45,14 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 		winHandle  = Ogre::StringConverter::toString(WindowContentViewHandle(wmInfo));
 		break;
 
-#elif BUILD_ANDROID
+#elif ANDROID
              case SDL_SYSWM_ANDROID:
 		winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.android.window);
 		winHandleSurface = Ogre::StringConverter::toString((unsigned long)wmInfo.info.android.surface);
-             //   flag1=true;
+             
 		break;
 
-      #elif NOT_ANDROID
+ #else
 
 	case SDL_SYSWM_X11:
 		winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.x11.window);
@@ -70,12 +70,10 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 
 	/// \todo externalWindowHandle is deprecated according to the source code. Figure out a way to get parentWindowHandle
 	/// to work properly. On Linux/X11 it causes an occasional GLXBadDrawable error.
-#ifdef BUILD_ANDROID	
-params.insert(std::make_pair("externalWindowHandle",  winHandle));
+#ifdef ANDROID	
 params.insert(std::make_pair("externalSurface",  winHandleSurface));
-#else
-params.insert(std::make_pair("externalWindowHandle",  winHandle));
 #endif
+params.insert(std::make_pair("externalWindowHandle",  winHandle));
 
 	mWindow = Ogre::Root::getSingleton().createRenderWindow(title, w, h, fullscreen, &params);
 }

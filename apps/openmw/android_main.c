@@ -1,11 +1,7 @@
-/*
-    SDL_android_main.c, placed in the public domain by Sam Lantinga  3/13/14
-*/
+
 #include "../../SDL_internal.h"
 
 #ifdef __ANDROID__
-
-/* Include the SDL main definition header */
 #include "SDL_main.h"
 
 
@@ -14,24 +10,19 @@
 *******************************************************************************/
 #include <jni.h>
 
-/* Called before SDL_main() to initialize JNI bindings in SDL library */
+/* Called before  to initialize JNI bindings  */
  
  
-//extern void SDL_Android_Init(JNIEnv* env, jclass cls);
 
 extern void SDL_Android_Init(JNIEnv* env, jclass cls);
 
-/* Start up the SDL app */
+
 int Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls, jobject obj)
 {
-    /* This interface could expand with ABI negotiation, calbacks, etc. */
+    
     SDL_Android_Init(env, cls);
  
     SDL_SetMainReady();
- 
- //DL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
-
-  //  SDL_SetHint(SDL_HINT_SIMULATE_INPUT_EVENTS, "0");
 
      
 /* Run the application code! */
@@ -50,4 +41,3 @@ int Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls, jobject 
 
 #endif /* __ANDROID__ */
 
-/* vi: set ts=4 sw=4 expandtab: */
