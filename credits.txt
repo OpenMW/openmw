@@ -68,6 +68,7 @@ Pieter van der Kloet (pvdk)
 Radu-Marius Popovici (rpopovici)
 Roman Melnik (Kromgart)
 Roman Proskuryakov (humbug)
+sandstranger
 Sandy Carter (bwrsandman)
 Sebastian Wick (swick)
 Sergey Shambir
