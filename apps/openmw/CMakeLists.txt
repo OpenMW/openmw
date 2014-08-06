@@ -1,15 +1,15 @@
 # local files
 if (NOT ANDROID)
-set(GAME
-    main.cpp
-    engine.cpp
-)
+    set(GAME
+        main.cpp
+        engine.cpp
+    )
 else()
-set(GAME
-    main.cpp
-    android_main.c
-    engine.cpp
-)
+    set(GAME
+        main.cpp
+        android_main.c
+        engine.cpp
+    )
 endif()
 if(NOT WIN32 AND NOT ANDROID)
     set(GAME ${GAME} crashcatcher.cpp)
@@ -103,19 +103,19 @@ endif(WIN32)
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
 if (NOT ANDROID)
-add_executable(openmw
-    ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
-    ${OPENMW_FILES}
-    ${GAME} ${GAME_HEADER}
-    ${APPLE_BUNDLE_RESOURCES}
-)
+    add_executable(openmw
+        ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
+        ${OPENMW_FILES}
+        ${GAME} ${GAME_HEADER}
+        ${APPLE_BUNDLE_RESOURCES}
+    )
 else ()
-add_library(openmw 
-    SHARED
-    ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
-    ${OPENMW_FILES}
-    ${GAME} ${GAME_HEADER}
-)
+    add_library(openmw 
+        SHARED
+        ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
+        ${OPENMW_FILES}
+        ${GAME} ${GAME_HEADER}
+    )
 endif ()
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
@@ -137,21 +137,22 @@ target_link_libraries(openmw
     "sdl4ogre"
     components
 )
+
 if (ANDROID)
-target_link_libraries(openmw
-    ${OGRE_STATIC_PLUGINS} 
-    EGL
-    android
-    log
-    dl  
-    MyGUI.OgrePlatform
-    MyGUIEngineStatic
-    Plugin_StrangeButtonStatic
-    cpufeatures
-    BulletCollision
-    BulletDynamics
-    LinearMath 
-)
+    target_link_libraries(openmw
+        ${OGRE_STATIC_PLUGINS} 
+        EGL
+        android
+        log
+        dl  
+        MyGUI.OgrePlatform
+        MyGUIEngineStatic
+        Plugin_StrangeButtonStatic
+        cpufeatures
+        BulletCollision
+        BulletDynamics
+        LinearMath 
+    )
 endif (ANDROID)
 
 if (USE_SYSTEM_TINYXML)
