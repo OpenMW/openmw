@@ -252,12 +252,12 @@ namespace MWMechanics
                 }
                 break;
             case ESM::MagicEffect::Soultrap:
-                if ((target.getClass().isActor() && target.getClass().isNpc())
-                     || (target.getTypeName() == typeid(ESM::Creature).name() && target.get<ESM::Creature>()->mBase->mData.mSoul == 0))
+                if (!target.getClass().isNpc() // no messagebox for NPCs
+                     && (target.getTypeName() == typeid(ESM::Creature).name() && target.get<ESM::Creature>()->mBase->mData.mSoul == 0))
                 {
                     if (castByPlayer)
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInvalidTarget}");
-                    return false;
+                    return true; // must still apply to get visual effect and have target regard it as attack
                 }
                 break;
             case ESM::MagicEffect::AlmsiviIntervention:
