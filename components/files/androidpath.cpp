@@ -83,6 +83,11 @@ boost::filesystem::path AndroidPath::getGlobalDataPath() const
     return globalDataPath / mName;
 }
 
+boost::filesystem::path AndroidPath::getInstallPath() const
+{
+    return boost::filesystem::path();
+}
+
 
 } /* namespace Files */
 

@@ -1,5 +1,4 @@
 # local files
-
 if (NOT ANDROID)
 set(GAME
     main.cpp
@@ -12,13 +11,9 @@ set(GAME
     engine.cpp
 )
 endif()
-
-
 if(NOT WIN32 AND NOT ANDROID)
     set(GAME ${GAME} crashcatcher.cpp)
 endif()
-
-
 set(GAME_HEADER
     engine.hpp
 )
@@ -115,7 +110,8 @@ add_executable(openmw
     ${APPLE_BUNDLE_RESOURCES}
 )
 else ()
-add_library(openmw SHARED
+add_library(openmw 
+    SHARED
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
     ${OPENMW_FILES}
     ${GAME} ${GAME_HEADER}

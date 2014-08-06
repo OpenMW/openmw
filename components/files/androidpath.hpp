@@ -42,6 +42,8 @@ struct AndroidPath
      */
     boost::filesystem::path getCachePath() const;
 
+    boost::filesystem::path getInstallPath() const;
+
     std::string mName;
 };
 
