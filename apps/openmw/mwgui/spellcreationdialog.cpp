@@ -398,7 +398,7 @@ namespace MWGui
 
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
-            float x = 0.5 * it->mMagnMin + it->mMagnMax;
+            float x = 0.5 * (it->mMagnMin + it->mMagnMax);
 
             const ESM::MagicEffect* effect =
                 store.get<ESM::MagicEffect>().find(it->mEffectID);
@@ -413,7 +413,7 @@ namespace MWGui
             y += x * fEffectCostMult;
             y = std::max(1.f,y);
 
-            if (effect->mData.mFlags & ESM::MagicEffect::CastTarget)
+            if (it->mRange == ESM::RT_Target)
                 y *= 1.5;
         }
 
