@@ -58,6 +58,8 @@ namespace AiSequence
         esm.getHNT (mRemainingDuration, "DURA");
         mCellId = esm.getHNOString ("CELL");
         esm.getHNT (mAlwaysFollow, "ALWY");
+        mCommanded = false;
+        esm.getHNOT (mCommanded, "CMND");
     }
 
     void AiFollow::save(ESMWriter &esm) const
@@ -68,6 +70,7 @@ namespace AiSequence
         if (!mCellId.empty())
             esm.writeHNString ("CELL", mCellId);
         esm.writeHNT ("ALWY", mAlwaysFollow);
+        esm.writeHNT ("CMND", mCommanded);
     }
 
     void AiActivate::load(ESMReader &esm)

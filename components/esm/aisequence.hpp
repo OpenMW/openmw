@@ -96,6 +96,7 @@ namespace ESM
         float mRemainingDuration;
 
         bool mAlwaysFollow;
+        bool mCommanded;
 
         void load(ESMReader &esm);
         void save(ESMWriter &esm) const;

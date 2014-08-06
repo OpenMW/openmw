@@ -16,16 +16,16 @@
 #include "steering.hpp"
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId("")
+: mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId("")
 {
 }
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(cellId)
+: mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(cellId)
 {
 }
 
-MWMechanics::AiFollow::AiFollow(const std::string &actorId)
-: mAlwaysFollow(true), mRemainingDuration(0), mX(0), mY(0), mZ(0), mActorId(actorId), mCellId("")
+MWMechanics::AiFollow::AiFollow(const std::string &actorId, bool commanded)
+: mAlwaysFollow(true), mCommanded(commanded), mRemainingDuration(0), mX(0), mY(0), mZ(0), mActorId(actorId), mCellId("")
 {
 }
 
@@ -99,6 +99,11 @@ int MWMechanics::AiFollow::getTypeId() const
     return TypeIdFollow;
 }
 
+bool MWMechanics::AiFollow::isCommanded() const
+{
+    return mCommanded;
+}
+
 void MWMechanics::AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) const
 {
     std::auto_ptr<ESM::AiSequence::AiFollow> follow(new ESM::AiSequence::AiFollow());
@@ -109,6 +114,7 @@ void MWMechanics::AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) co
     follow->mRemainingDuration = mRemainingDuration;
     follow->mCellId = mCellId;
     follow->mAlwaysFollow = mAlwaysFollow;
+    follow->mCommanded = mCommanded;
 
     ESM::AiSequence::AiPackageContainer package;
     package.mType = ESM::AiSequence::Ai_Follow;
@@ -120,6 +126,7 @@ MWMechanics::AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
     : mAlwaysFollow(follow->mAlwaysFollow), mRemainingDuration(follow->mRemainingDuration)
     , mX(follow->mData.mX), mY(follow->mData.mY), mZ(follow->mData.mZ)
     , mActorId(follow->mTargetId), mCellId(follow->mCellId)
+    , mCommanded(follow->mCommanded)
 {
 
 }

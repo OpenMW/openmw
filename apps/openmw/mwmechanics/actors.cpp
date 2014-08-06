@@ -89,6 +89,58 @@ bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
     return false;
 }
 
+class CheckActorCommanded : public MWMechanics::EffectSourceVisitor
+{
+    MWWorld::Ptr mActor;
+public:
+    bool mCommanded;
+    CheckActorCommanded(MWWorld::Ptr actor)
+        : mActor(actor)
+    , mCommanded(false){}
+
+    virtual void visit (MWMechanics::EffectKey key,
+                             const std::string& sourceName, int casterActorId,
+                        float magnitude, float remainingTime = -1)
+    {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        if (    ((key.mId == ESM::MagicEffect::CommandHumanoid && mActor.getClass().isNpc())
+                || (key.mId == ESM::MagicEffect::CommandCreature && mActor.getTypeName() == typeid(ESM::Creature).name()))
+            && casterActorId == player.getClass().getCreatureStats(player).getActorId()
+            && magnitude >= mActor.getClass().getCreatureStats(mActor).getLevel())
+                mCommanded = true;
+    }
+};
+
+void adjustCommandedActor (const MWWorld::Ptr& actor)
+{
+    CheckActorCommanded check(actor);
+    MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+    stats.getActiveSpells().visitEffectSources(check);
+
+    bool hasCommandPackage = false;
+
+    std::list<MWMechanics::AiPackage*>::const_iterator it;
+    for (it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
+    {
+        if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow &&
+                dynamic_cast<MWMechanics::AiFollow*>(*it)->isCommanded())
+        {
+            hasCommandPackage = true;
+            break;
+        }
+    }
+
+    if (check.mCommanded && !hasCommandPackage)
+    {
+        MWMechanics::AiFollow package("player", true);
+        stats.getAiSequence().stack(package, actor);
+    }
+    else if (!check.mCommanded && hasCommandPackage)
+    {
+        stats.getAiSequence().erase(it);
+    }
+}
+
 void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float& magicka)
 {
     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
@@ -1005,7 +1057,10 @@ namespace MWMechanics
                     if (MWBase::Environment::get().getMechanicsManager()->isAIActive())
                     {
                         if (timerUpdateAITargets == 0)
-                        {                            
+                        {
+                            if (iter->first != player)
+                                adjustCommandedActor(iter->first);
+
                             for(PtrControllerMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                             {
                                 if (it->first == iter->first || iter->first == player) // player is not AI-controlled
