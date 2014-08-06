@@ -4,12 +4,213 @@
 #include <OgreRoot.h>
 #include <OgreTextureManager.h>
 
+#include <GL/gl.h>
+#include <OgreBuildSettings.h> /* OGRE_NO_GL_STATE_CACHE_SUPPORT */
+
 #include <SDL_syswm.h>
 #include <SDL_endian.h>
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include "osx_utils.h"
 #endif
+
+namespace
+{
+
+bool checkMinGLVersion(std::ostream& error)
+{
+#ifdef WIN32 /* FIXME: Windows only until linux and mac calls to GetDC() are tested */
+
+    // Similar issues with old OpenGL versions reported here:
+    //
+    //   https://github.com/mono/MonoGame/issues/998
+    //   http://www.ogre3d.org/forums/viewtopic.php?f=1&t=79698
+    //
+    // If using OpenGL we must ensure framebuffer object functions exist for Ogre 1.9.
+    //
+    // Ogre::Root::getSingleton().createRenderWindow() below eventualy ends up calling
+    // GLStateCacheManagerImp::initializeCache() which uses glBindFramebuffer() and
+    // glBindRenderbuffer().  This is the default where GL state cache is disabled.
+    //
+    // They are part of OpenGL 3.0 core functions, but older drivers with lower
+    // versions may still support them.  If these are not available then a null
+    // pointer exception will occur.
+    //
+    // If GL state cache is enabled in the Ogre build then glBindFramebufferEXT()
+    // and glBindRenderbufferEXT() are used instead.
+    //
+    // More detail below:
+    //
+    // Ogre 1.9 introduced StateCacheManager/OgreGLNullStateCacheManagerImp.cpp and
+    // StateCacheManager/OgreGLStateCacheManagerImp.cpp.  Details from mercurial log:
+    //
+    //   Changeset: 4934 (fdc9a9a081f6) Many updates to the GL state cache. Also use the
+    //     same CMake config to enable the state cache regardless of GL render system.
+    //   Branch:    v1-9
+    //   User:      David Rogers <masterfalcon@ogre3d.org>
+    //   Date:      2013-09-02 00:06:32 -0500 (9 months)
+    //
+    // The cache managers call OpenGL framebuffer object methods. They were available as
+    // extensions but became core from version 3.0.  See:
+    //
+    //   http://www.opengl.org/wiki/GLAPI/glBindRenderbuffer
+    //   http://www.opengl.org/wiki/GLAPI/glBindFramebuffer
+    //
+    // Ogre recently made a change to use the extension methods instead (because some
+    // earlier hardware/drivers had them) in OgreGLStateCacheManagerImp. But these
+    // changes were not made to OgreGLNullStateCacheManagerImp (used by default).
+    // See: https://ogre3d.atlassian.net/browse/OGRE-402.  Mercurial log:
+    //
+    //   Changeset: 6346 (499ae0d1273b) [OGRE-402] Use extension function names to
+    //     maintain compatibility with some drivers when using the GL state cache
+    //   Branch:    v1-9
+    //   User:      David Rogers <masterfalcon@ogre3d.org>
+    //   Date:      2014-03-17 23:41:36 -0500 (2 months)
+    //
+    // Note that even though equivalent extensions may be available they were deprecated
+    // in v3.0 and removed in v3.1 and therefore not recommended for use.
+    // See: http://www.opengl.org/wiki/Framebuffer_Object.
+    //
+    typedef HGLRC (* WGL_CreateContext_Func) (HDC);
+    typedef BOOL (* WGL_MakeCurrent_Func) (HDC, HGLRC);
+    typedef BOOL (* WGL_DeleteContext_Func) (HGLRC);
+    typedef const GLubyte* (* GL_GetString_Func) (unsigned int);
+    typedef void (* GL_BindFramebuffer_Func) (GLenum, GLuint);
+    typedef void (* GL_BindRenderbuffer_Func) (GLenum, GLuint);
+
+    WGL_CreateContext_Func wglCreateContextPtr = 0;
+    WGL_MakeCurrent_Func wglMakeCurrentPtr = 0;
+    WGL_DeleteContext_Func wglDeleteContextPtr = 0;
+    GL_GetString_Func glGetStringPtr = 0;
+    GL_BindFramebuffer_Func glBindFramebufferPtr = 0;
+    GL_BindRenderbuffer_Func glBindRenderbufferPtr = 0;
+
+    SDL_Window* sdlWin = SDL_CreateWindow(
+        "temp",           // window title
+        0,                // initial x position
+        0,                // initial y position
+        100,              // width, in pixels
+        100,              // height, in pixels
+        SDL_WINDOW_HIDDEN
+        );
+    struct SDL_SysWMinfo swmInfo;
+    SDL_VERSION(&swmInfo.version);
+
+    if (!sdlWin || (SDL_GetWindowWMInfo(sdlWin, &swmInfo) == SDL_FALSE))
+    {
+        error << "OpenGL version check: Couldn't get WM Info!";
+        return false;
+    }
+
+    PIXELFORMATDESCRIPTOR pfd =
+    {
+        sizeof(PIXELFORMATDESCRIPTOR),
+        1,
+        PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, //Flags
+        PFD_TYPE_RGBA,    //The kind of framebuffer. RGBA or palette.
+        32,               //Colordepth of the framebuffer.
+        0, 0, 0, 0, 0, 0,
+        0,
+        0,
+        0,
+        0, 0, 0, 0,
+        24,               //Number of bits for the depthbuffer
+        8,                //Number of bits for the stencilbuffer
+        0,                //Number of Aux buffers in the framebuffer.
+        PFD_MAIN_PLANE,
+        0,
+        0, 0, 0
+    };
+
+    HWND hwnd;
+#ifdef WIN32
+    hwnd = swmInfo.info.win.window;
+#elif __MACOSX__
+    hwnd = WindowContentViewHandle(swmInfo); // FIXME: not tested
+#else
+    hwnd = swmInfo.info.x11.window; // FIXME: not tested
+#endif
+    HDC hdc = GetDC(hwnd);
+    if (!hdc)
+    {
+        error << "OpenGL version check: Failed to get device context";
+        return false;
+    }
+    int pixelFormat = ChoosePixelFormat(hdc, &pfd);
+    if (!pixelFormat || !SetPixelFormat(hdc, pixelFormat, &pfd))
+    {
+        error << "OpenGL version check: Failed to choose or set pixel format for temp context";
+        return false;
+    }
+
+    if (SDL_GL_LoadLibrary(NULL) != 0)
+    {
+        error << "OpenGL version check: Failed to load GL library";
+        return false;
+    }
+    wglCreateContextPtr = (WGL_CreateContext_Func) SDL_GL_GetProcAddress("wglCreateContext");
+    wglMakeCurrentPtr = (WGL_MakeCurrent_Func) SDL_GL_GetProcAddress("wglMakeCurrent");
+    wglDeleteContextPtr = (WGL_DeleteContext_Func) SDL_GL_GetProcAddress("wglDeleteContext");
+    glGetStringPtr = (GL_GetString_Func) SDL_GL_GetProcAddress("glGetString");
+    if (!wglCreateContextPtr || !wglMakeCurrentPtr || !wglDeleteContextPtr || !glGetStringPtr)
+    {
+        error << "OpenGL version check: Null GL functions";
+        return false;
+    }
+
+    // Create temporary context and make sure we have support
+    HGLRC tempContext = wglCreateContextPtr(hdc);
+    if (!tempContext || !wglMakeCurrentPtr(hdc, tempContext))
+    {
+        error << "OpenGL version check: Failed to create or activate temp context";
+        return false;
+    }
+
+    // Ogre 1.9 uses EXT versions of these functions only when state cache is enabled
+    // See: https://ogre3d.atlassian.net/browse/OGRE-402
+#if OGRE_NO_GL_STATE_CACHE_SUPPORT == 0
+    glBindFramebufferPtr = (GL_BindFramebuffer_Func) SDL_GL_GetProcAddress("glBindFramebufferEXT");
+    glBindRenderbufferPtr = (GL_BindRenderbuffer_Func) SDL_GL_GetProcAddress("glBindRenderbufferEXT");
+    std::cout << "OpenGL: State cache enabled, looking for EXT framebuffer functions" << std::endl;
+#else
+    glBindFramebufferPtr = (GL_BindFramebuffer_Func) SDL_GL_GetProcAddress("glBindFramebuffer");
+    glBindRenderbufferPtr = (GL_BindRenderbuffer_Func) SDL_GL_GetProcAddress("glBindRenderbuffer");
+    std::cout << "OpenGL: State cache disabled, looking for core framebuffer functions" << std::endl;
+#endif
+
+    if (!glBindFramebufferPtr || !glBindRenderbufferPtr)
+    {
+        const GLubyte* pcVer = glGetStringPtr(GL_VERSION);
+        if (!pcVer)
+        {
+            error << "OpenGL version check: Failed to get GL version string";
+            return false;
+        }
+
+        Ogre::String tmpStr = (const char*)pcVer;
+        std::cout << "OpenGL GL_VERSION: " + tmpStr << std::endl;
+
+        error << "OpenGL: Missing required functions for Ogre-1.9:";
+        if (!glBindFramebufferPtr)
+            error << " glBindFramebuffer";
+        if (!glBindRenderbufferPtr)
+            error << " glBindRenderbuffer";
+        return false;
+    }
+    else
+        std::cout << "OpenGL: Found framebuffer functions" << std::endl;
+
+    // Remove temporary context, device context and dummy window
+    wglMakeCurrentPtr(NULL, NULL);
+    wglDeleteContextPtr(tempContext);
+    ReleaseDC(hwnd, hdc);
+    SDL_DestroyWindow(sdlWin);
+    SDL_GL_UnloadLibrary();
+#endif
+    return true;
+}
+
+}
 
 namespace SFO
 {
@@ -65,6 +266,15 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
         params.insert(std::make_pair("externalSurface",  winHandleSurface));
 #endif
         params.insert(std::make_pair("externalWindowHandle",  winHandle));
+
+	Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
+	if (rs && (rs->getName() == "OpenGL Rendering Subsystem")
+		&& (OGRE_VERSION_MAJOR >= 1) && (OGRE_VERSION_MINOR >= 9))
+	{
+		std::stringstream error;
+		if (!checkMinGLVersion(error))
+			throw std::runtime_error(error.str());
+	}
 
 	mWindow = Ogre::Root::getSingleton().createRenderWindow(title, w, h, fullscreen, &params);
 }
