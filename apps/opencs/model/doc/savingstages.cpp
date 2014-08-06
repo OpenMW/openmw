@@ -201,23 +201,6 @@ void CSMDoc::WriteRefIdCollectionStage::perform (int stage, Messages& messages)
 }
 
 
-CSMDoc::WriteFilterStage::WriteFilterStage (Document& document, SavingState& state,
-    CSMFilter::Filter::Scope scope)
-: WriteCollectionStage<CSMWorld::IdCollection<CSMFilter::Filter> > (document.getData().getFilters(),
-  state),
-  mDocument (document), mScope (scope)
-{}
-
-void CSMDoc::WriteFilterStage::perform (int stage, Messages& messages)
-{
-    const CSMWorld::Record<CSMFilter::Filter>& record =
-        mDocument.getData().getFilters().getRecord (stage);
-
-    if (record.get().mScope==mScope)
-        WriteCollectionStage<CSMWorld::IdCollection<CSMFilter::Filter> >::perform (stage, messages);
-}
-
-
 CSMDoc::CollectionReferencesStage::CollectionReferencesStage (Document& document,
     SavingState& state)
 : mDocument (document), mState (state)
