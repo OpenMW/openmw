@@ -290,11 +290,11 @@ namespace MWMechanics
     {
         CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
 
-        int strength     = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
-        int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getBase();
-        int willpower    = creatureStats.getAttribute(ESM::Attribute::Willpower).getBase();
-        int agility      = creatureStats.getAttribute(ESM::Attribute::Agility).getBase();
-        int endurance    = creatureStats.getAttribute(ESM::Attribute::Endurance).getBase();
+        int strength     = creatureStats.getAttribute(ESM::Attribute::Strength).getModified();
+        int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
+        int willpower    = creatureStats.getAttribute(ESM::Attribute::Willpower).getModified();
+        int agility      = creatureStats.getAttribute(ESM::Attribute::Agility).getModified();
+        int endurance    = creatureStats.getAttribute(ESM::Attribute::Endurance).getModified();
 
         double magickaFactor =
             creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude * 0.1 + 0.5;
