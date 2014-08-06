@@ -50,7 +50,6 @@ struct FixedPath
      *
      * \param [in] application_name - Name of the application
      */
-
     FixedPath(const std::string& application_name)
         : mPath(application_name + "/")
         , mUserConfigPath(mPath.getUserConfigPath())
@@ -63,7 +62,6 @@ struct FixedPath
     {
     }
 
-#endif
     /**
      * \brief Return path pointing to the user local configuration directory.
      */

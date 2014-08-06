@@ -137,7 +137,6 @@ target_link_libraries(openmw
     "sdl4ogre"
     components
 )
-
 if (ANDROID)
 target_link_libraries(openmw
     ${OGRE_STATIC_PLUGINS} 
