@@ -701,7 +701,8 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& state)
     for (std::vector<std::pair<ESM::LightState, int> >::const_iterator iter (state.mLights.begin());
         iter!=state.mLights.end(); ++iter)
     {
-        getState (lights, iter->first);
+        int slot = iter->second;
+        setSlot (getState (lights, iter->first), slot);
     }
 
     mLevelledItemMap = state.mLevelledItemMap;
