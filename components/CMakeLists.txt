@@ -50,7 +50,7 @@ add_component_dir (misc
     )
 
 add_component_dir (files
-    linuxpath windowspath macospath fixedpath multidircollection collections configurationmanager
+    linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
     constrainedfiledatastream lowlevelfile
     )
 
