@@ -257,6 +257,7 @@ namespace MWGui
             code->addAttribute("advance", data[i].width);
             code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                + MyGUI::utility::toString((fontSize-data[i].ascent)));
+            code->addAttribute("size", MyGUI::IntSize(data[i].width, data[i].height));
 
             // More hacks! The french game uses several win1252 characters that are not included
             // in the cp437 encoding of the font. Fall back to similar available characters.
@@ -302,6 +303,7 @@ namespace MWGui
                     code->addAttribute("advance", data[i].width);
                     code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                        + MyGUI::utility::toString((fontSize-data[i].ascent)));
+                    code->addAttribute("size", MyGUI::IntSize(data[i].width, data[i].height));
                 }
             }
 
@@ -317,6 +319,7 @@ namespace MWGui
                 cursorCode->addAttribute("advance", data[i].width);
                 cursorCode->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                    + MyGUI::utility::toString((fontSize-data[i].ascent)));
+                cursorCode->addAttribute("size", MyGUI::IntSize(data[i].width, data[i].height));
             }
 
             // Question mark, use for NotDefined marker (used for glyphs not existing in the font)
@@ -331,6 +334,7 @@ namespace MWGui
                 cursorCode->addAttribute("advance", data[i].width);
                 cursorCode->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                    + MyGUI::utility::toString((fontSize-data[i].ascent)));
+                cursorCode->addAttribute("size", MyGUI::IntSize(data[i].width, data[i].height));
             }
         }
 
@@ -348,7 +352,7 @@ namespace MWGui
             cursorCode->addAttribute("coord", "0 0 0 0");
             cursorCode->addAttribute("advance", "0");
             cursorCode->addAttribute("bearing", "0 0");
-
+            cursorCode->addAttribute("size", "0 0");
         }
 
         font->deserialization(root, MyGUI::Version(3,2,0));
