@@ -403,21 +403,20 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
-        Nif::NIFFile::CacheLock lock;
-        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
-
-        Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
-        Loading::ScopedLoad load(loadingListener);
-
-        mRendering.enableTerrain(false);
-
-        std::string loadingInteriorText = "#{sLoadingMessage2}";
-        loadingListener->setLabel(loadingInteriorText);
-
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
         bool loadcell = (mCurrentCell == NULL);
         if(!loadcell)
             loadcell = *mCurrentCell != *cell;
+
+        Nif::NIFFile::CacheLock lock;
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
+
+        Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+        std::string loadingInteriorText = "#{sLoadingMessage2}";
+        loadingListener->setLabel(loadingInteriorText);
+        Loading::ScopedLoad load(loadingListener);
+
+        mRendering.enableTerrain(false);
 
         if(!loadcell)
         {
