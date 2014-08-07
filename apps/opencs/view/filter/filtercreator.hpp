@@ -36,7 +36,7 @@ namespace CSVFilter
 
         private slots:
 
-            void setScope (int index);
+            void setScope2 (int index);
     };
 }
 

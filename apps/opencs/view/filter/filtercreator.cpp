@@ -56,7 +56,7 @@ CSVFilter::FilterCreator::FilterCreator (CSMWorld::Data& data, QUndoStack& undoS
     /// \todo re-enable for OpenMW 1.1
     // mScope->addItem ("Content");
 
-    connect (mScope, SIGNAL (currentIndexChanged (int)), this, SLOT (setScope (int)));
+    connect (mScope, SIGNAL (currentIndexChanged (int)), this, SLOT (setScope2 (int)));
 
     insertAtBeginning (mScope, false);
 
@@ -71,7 +71,7 @@ void CSVFilter::FilterCreator::reset()
     GenericCreator::reset();
 }
 
-void CSVFilter::FilterCreator::setScope (int index)
+void CSVFilter::FilterCreator::setScope2 (int index)
 {
     update();
 }
