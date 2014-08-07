@@ -45,6 +45,10 @@ add_component_dir (esm
     aisequence
     )
 
+add_component_dir (esmterrain
+    storage
+    )
+
 add_component_dir (misc
     utf8stream stringops
     )
