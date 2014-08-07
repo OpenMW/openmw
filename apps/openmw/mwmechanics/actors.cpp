@@ -159,6 +159,30 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
     }
 }
 
+void cleanupSummonedCreature (MWMechanics::CreatureStats& casterStats, int creatureActorId)
+{
+    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(creatureActorId);
+    if (!ptr.isEmpty())
+    {
+        // TODO: Show death animation before deleting? We shouldn't allow looting the corpse while the animation
+        // plays though, which is a rather lame exploit in vanilla.
+        MWBase::Environment::get().getWorld()->deleteObject(ptr);
+
+        const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
+                .search("VFX_Summon_End");
+        if (fx)
+            MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
+                "", Ogre::Vector3(ptr.getRefData().getPosition().pos));
+    }
+    else
+    {
+        // We didn't find the creature. It's probably in an inactive cell.
+        // Add to graveyard so we can delete it when the cell becomes active.
+        std::vector<int>& graveyard = casterStats.getSummonedCreatureGraveyard();
+        graveyard.push_back(creatureActorId);
+    }
+}
+
 }
 
 namespace MWMechanics
@@ -664,9 +688,9 @@ namespace MWMechanics
             summonMap[ESM::MagicEffect::SummonCreature05] = "sMagicCreature05ID";
         }
 
+        std::map<int, int>& creatureMap = creatureStats.getSummonedCreatureMap();
         for (std::map<int, std::string>::iterator it = summonMap.begin(); it != summonMap.end(); ++it)
         {
-            std::map<int, int>& creatureMap = creatureStats.getSummonedCreatureMap();
             bool found = creatureMap.find(it->first) != creatureMap.end();
             int magnitude = creatureStats.getMagicEffects().get(it->first).mMagnitude;
             if (found != (magnitude > 0))
@@ -717,32 +741,29 @@ namespace MWMechanics
                 }
                 else
                 {
-                    // Summon lifetime has expired. Try to delete the creature.
-                    int actorId = creatureMap[it->first];
-                    creatureMap.erase(it->first);
-
-                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(actorId);
-                    if (!ptr.isEmpty())
-                    {
-                        // TODO: Show death animation before deleting? We shouldn't allow looting the corpse while the animation
-                        // plays though, which is a rather lame exploit in vanilla.
-                        MWBase::Environment::get().getWorld()->deleteObject(ptr);
-
-                        const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
-                                .search("VFX_Summon_End");
-                        if (fx)
-                            MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
-                                "", Ogre::Vector3(ptr.getRefData().getPosition().pos));
-                    }
-                    else
-                    {
-                        // We didn't find the creature. It's probably in an inactive cell.
-                        // Add to graveyard so we can delete it when the cell becomes active.
-                        std::vector<int>& graveyard = creatureStats.getSummonedCreatureGraveyard();
-                        graveyard.push_back(actorId);
-                    }
+                    // Effect has ended
+                    std::map<int, int>::iterator foundCreature = creatureMap.find(it->first);
+                    cleanupSummonedCreature(creatureStats, foundCreature->second);
+                    creatureMap.erase(foundCreature);
                 }
             }
+        }
+
+        for (std::map<int, int>::iterator it = creatureMap.begin(); it != creatureMap.end(); )
+        {
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->second);
+            if (!ptr.isEmpty() && ptr.getClass().getCreatureStats(ptr).isDead())
+            {
+                // Purge the magic effect so a new creature can be summoned if desired
+                creatureStats.getActiveSpells().purgeEffect(it->first);
+                if (ptr.getClass().hasInventoryStore(ptr))
+                    ptr.getClass().getInventoryStore(ptr).purgeEffect(it->first);
+
+                cleanupSummonedCreature(creatureStats, it->second);
+                creatureMap.erase(it++);
+            }
+            else
+                ++it;
         }
 
         std::vector<int>& graveyard = creatureStats.getSummonedCreatureGraveyard();
