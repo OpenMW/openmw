@@ -4,12 +4,9 @@
 #include <OgreSceneNode.h>
 #include <OgreAxisAlignedBox.h>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
+#include "chunk.hpp"
 
-#include <components/terrain/chunk.hpp>
-
-namespace MWRender
+namespace Terrain
 {
 
 TerrainGrid::TerrainGrid(Ogre::SceneManager *sceneMgr, Terrain::Storage *storage, int visibilityFlags, bool shaders, Terrain::Alignment align)
@@ -145,8 +142,10 @@ void TerrainGrid::setVisible(bool visible)
 
 Ogre::AxisAlignedBox TerrainGrid::getWorldBoundingBox (const Ogre::Vector2& center)
 {
-    int cellX, cellY;
-    MWBase::Environment::get().getWorld()->positionToIndex(center.x, center.y, cellX, cellY);
+    float cellSize = getStorage()->getCellWorldSize();
+
+    int cellX = std::floor(center.x/cellSize);
+    int cellY = std::floor(center.y/cellSize);
 
     Grid::iterator it = mGrid.find(std::make_pair(cellX, cellY));
     if (it == mGrid.end())
