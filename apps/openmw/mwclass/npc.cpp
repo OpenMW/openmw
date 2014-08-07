@@ -672,7 +672,7 @@ namespace MWClass
         if (damage < 0.001f)
             damage = 0;
 
-        if(damage > 0.0f)
+        if(damage > 0.0f && !attacker.isEmpty())
         {
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
             // something, alert the character controller, scripts, etc.
@@ -700,7 +700,7 @@ namespace MWClass
             else
                 getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
-            if(damage > 0 && ishealth && !attacker.isEmpty()) // Don't use armor mitigation for fall damage
+            if(damage > 0 && ishealth)
             {
                 // Hit percentages:
                 // cuirass = 30%
