@@ -179,6 +179,9 @@ namespace MWInput
         std::map<std::string, SDL_Joystick*> mJoysticks;
         float mJoystickCheckTimer;
 
+        float mXAxis;
+        float mYAxis;
+
         //Used for mouseless interfaces
         bool mJoystickLastUsed;
 

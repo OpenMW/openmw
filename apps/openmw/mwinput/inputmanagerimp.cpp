@@ -411,6 +411,33 @@ namespace MWInput
             }
         }
 
+        //Update look based on last set axis
+        if(mJoystickLastUsed)
+        {
+            if (mMouseLookEnabled)
+            {
+                resetIdleTime();
+
+                float rot[3];
+                rot[0] = -mYAxis;
+                rot[1] = 0.0f;
+                rot[2] = -mYAxis;
+
+                // Only actually turn player when we're not in vanity mode
+                if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
+                {
+                    mPlayer->yaw(mXAxis);
+                    mPlayer->pitch(mYAxis);
+                }
+
+                /*if (arg.zrel && mControlSwitch["playerviewswitch"]) //Check to make sure you are allowed to zoomout and there is a change
+                {
+                    MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.zrel);
+                    MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
+                }*/
+            }
+        }
+
         // Disable movement in Gui mode
         if (!(MWBase::Environment::get().getWindowManager()->isGuiMode()
             || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running))
@@ -660,17 +687,38 @@ namespace MWInput
     void InputManager::buttonPressed(const SDL_JoyButtonEvent &evt, int button)
     {
         mJoystickLastUsed = true;
-        std::cout << button << std::endl;
+        OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(button);
+
+        if (kc != OIS::KC_UNASSIGNED)
+        {
+            bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+            setPlayerControlsEnabled(!guiFocus);
+        }
+        if (!mControlsDisabled)
+            mInputBinder->buttonPressed(evt, button);
     }
     void InputManager::buttonReleased(const SDL_JoyButtonEvent &evt, int button)
     {
-        mJoystickLastUsed = true;
-        std::cout << button << std::endl;
+        OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(button);
+
+        setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
+        mInputBinder->buttonReleased(evt, button);
     }
     void InputManager::axisMoved(const SDL_JoyAxisEvent &evt, int axis)
     {
         mJoystickLastUsed = true;
-        std::cout << axis << std::endl;
+        mInputBinder->axisMoved(evt, axis);
+
+        resetIdleTime ();
+
+        if(evt.axis == 0)
+        {
+            mXAxis = float(evt.value) / 2767.0f * mCameraSensitivity * (1.0f/256.f);
+        }
+        else if(evt.axis ==1)
+        {
+            mYAxis = float(evt.value) / 2767.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
+        }
     }
     void InputManager::povMoved(const SDL_JoyHatEvent &evt, int index)
     {
