@@ -120,6 +120,8 @@ namespace MWInput
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
         , mAttemptJump(false)
         , mControlsDisabled(false)
+        , mJoystickCheckTimer(0)
+        , mJoystickLastUsed(false)
     {
 
         Ogre::RenderWindow* window = ogre.getWindow ();
@@ -128,6 +130,31 @@ namespace MWInput
         mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
+        mInputManager->setJoyEventCallback(this);
+
+        //Set up joysticks/gamepads
+        int numSticks = SDL_NumJoysticks();
+
+        if(numSticks > 0) //Joysticks found
+        {
+            std::cout << numSticks << " Joysticks found:" << std::endl;
+            for(int i = 0; i < numSticks; i++)
+            {
+                SDL_Joystick* stick = SDL_JoystickOpen(i);
+                char guid[33];
+                SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(stick), guid, 33);
+                mJoysticks[std::string(guid)] = stick;
+                std::cout << SDL_JoystickName(stick) << std::endl;
+            }
+        }
+        else if(numSticks < 0) //SDL Error
+        {
+            throw new std::runtime_error("Error in getting joysticks: " + std::string(SDL_GetError()));
+        }
+        else //No Joysticks
+        {
+            std::cout << "No Joysticks Found" << std::endl;
+        }
 
         std::string file = userFileExists ? userFile : "";
         mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
@@ -160,6 +187,12 @@ namespace MWInput
     InputManager::~InputManager()
     {
         mInputBinder->save (mUserFile);
+
+        //Clean up joysticks
+        for(std::map<std::string, SDL_Joystick*>::iterator it = mJoysticks.begin(); it != mJoysticks.end(); it++)
+        {
+            SDL_JoystickClose(it->second);
+        }
 
         delete mInputBinder;
 
@@ -291,6 +324,8 @@ namespace MWInput
 
     void InputManager::update(float dt, bool disableControls, bool disableEvents)
     {
+        const float cJoystickCheckTimer = 5; //Check for new joysticks every 5 seconds
+
         mControlsDisabled = disableControls;
 
         mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
@@ -323,6 +358,57 @@ namespace MWInput
         if( !is_relative && was_relative != is_relative )
         {
             mInputManager->warpMouse(mMouseX, mMouseY);
+        }
+
+        //check if any new joysticks were connected
+        //Enumerating joysticks to costy so only do it every so often (dofined at top of method
+        mJoystickCheckTimer += dt;
+        if(mJoystickCheckTimer >= cJoystickCheckTimer)
+        {
+            mJoystickCheckTimer = 0;
+            int numSticks = SDL_NumJoysticks();
+            if(mJoysticks.size() != numSticks)
+            {
+                if(mJoysticks.size() < numSticks) //one was added
+                {
+                    for(int i = 0; i < numSticks; i++)
+                    {
+                        char guid[33];
+                        SDL_JoystickGetGUIDString(SDL_JoystickGetDeviceGUID(i), guid, 33);
+                        if(mJoysticks.find(std::string(guid)) == mJoysticks.end())
+                        {
+                            SDL_Joystick* stick = SDL_JoystickOpen(i);
+                            mJoysticks[std::string(guid)] = stick;
+                            std::cout << "New Joystick added: " << SDL_JoystickName(stick) << std::endl;
+                            break;
+                        }
+                    }
+                }
+                else //one was removed
+                {
+                    for(std::map<std::string, SDL_Joystick*>::iterator it = mJoysticks.begin(); it != mJoysticks.end(); it++)
+                    {
+                        bool found = false;
+                        for(int i = 0; i < numSticks; i++)
+                        {
+                            char guid[33];
+                            SDL_JoystickGetGUIDString(SDL_JoystickGetDeviceGUID(i), guid, 33);
+                            if(std::string(guid) == it->first)
+                            {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(!found)
+                        {
+                            SDL_JoystickClose(it->second);
+                            mJoysticks.erase(it->first);
+                            break;
+                        }
+                    }
+                    std::cout << "Joystick removed" << std::endl;
+                }
+            }
         }
 
         // Disable movement in Gui mode
@@ -498,6 +584,8 @@ namespace MWInput
 
     void InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
+        mJoystickLastUsed = false;
+
         // Cut, copy & paste
         MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
         if (focus)
@@ -569,8 +657,30 @@ namespace MWInput
         mInputBinder->keyReleased (arg);
     }
 
+    void InputManager::buttonPressed(const SDL_JoyButtonEvent &evt, int button)
+    {
+        mJoystickLastUsed = true;
+        std::cout << button << std::endl;
+    }
+    void InputManager::buttonReleased(const SDL_JoyButtonEvent &evt, int button)
+    {
+        mJoystickLastUsed = true;
+        std::cout << button << std::endl;
+    }
+    void InputManager::axisMoved(const SDL_JoyAxisEvent &evt, int axis)
+    {
+        mJoystickLastUsed = true;
+        std::cout << axis << std::endl;
+    }
+    void InputManager::povMoved(const SDL_JoyHatEvent &evt, int index)
+    {
+        mJoystickLastUsed = true;
+        std::cout << index << std::endl;
+    }
+
     void InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
+        mJoystickLastUsed = false;
         bool guiMode = false;
 
         if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI only uses these mouse events
@@ -594,7 +704,7 @@ namespace MWInput
     }
 
     void InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
-    {      
+    {
 
         if(mInputBinder->detectingBindingState())
         {
@@ -612,6 +722,7 @@ namespace MWInput
 
     void InputManager::mouseMoved(const SFO::MouseMotionEvent &arg )
     {
+        mJoystickLastUsed = false;
         mInputBinder->mouseMoved (arg);
 
         resetIdleTime ();

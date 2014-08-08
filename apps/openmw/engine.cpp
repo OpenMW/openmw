@@ -186,7 +186,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
     std::srand ( std::time(NULL) );
     MWClass::registerClasses();
 
-    Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE;
+     Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE|SDL_INIT_GAMECONTROLLER|SDL_INIT_JOYSTICK;
     if(SDL_WasInit(flags) == 0)
     {
         //kindly ask SDL not to trash our OGL context

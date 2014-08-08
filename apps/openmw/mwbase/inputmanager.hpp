@@ -42,6 +42,9 @@ namespace MWBase
             virtual int getNumActions() = 0;
             virtual void enableDetectingBindingMode (int action) = 0;
             virtual void resetToDefaultBindings() = 0;
+
+            ///Returns true if the last used input device was a joystick/gamepad
+            virtual bool joystickLastUsed() = 0;
     };
 }
 

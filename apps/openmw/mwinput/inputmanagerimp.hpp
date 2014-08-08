@@ -54,6 +54,7 @@ namespace MWInput
             public MWBase::InputManager,
             public SFO::KeyListener,
             public SFO::MouseListener,
+            public SFO::JoyListener,
             public SFO::WindowListener,
             public ICS::ChannelListener,
             public ICS::DetectingBindingListener
@@ -88,10 +89,17 @@ namespace MWInput
         virtual void enableDetectingBindingMode (int action);
         virtual void resetToDefaultBindings();
 
+        virtual bool joystickLastUsed() {return mJoystickLastUsed;}
+
     public:
         virtual void keyPressed(const SDL_KeyboardEvent &arg );
         virtual void keyReleased( const SDL_KeyboardEvent &arg );
         virtual void textInput (const SDL_TextInputEvent &arg);
+
+        virtual void buttonPressed(const SDL_JoyButtonEvent &evt, int button);
+        virtual void buttonReleased(const SDL_JoyButtonEvent &evt, int button);
+        virtual void axisMoved(const SDL_JoyAxisEvent &evt, int axis);
+        virtual void povMoved(const SDL_JoyHatEvent &evt, int index);
 
         virtual void mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual void mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
@@ -166,6 +174,13 @@ namespace MWInput
         bool mAttemptJump;
 
         std::map<std::string, bool> mControlSwitch;
+
+        //Once we upgrade to C++11, this really should be std::unordered_map<SDL_JoyStickGUID, SDL_Joystick*>
+        std::map<std::string, SDL_Joystick*> mJoysticks;
+        float mJoystickCheckTimer;
+
+        //Used for mouseless interfaces
+        bool mJoystickLastUsed;
 
     private:
         void adjustMouseRegion(int width, int height);
