@@ -37,6 +37,7 @@ namespace MWRender
         , mViewport(NULL)
         , mCamera(NULL)
         , mNode(NULL)
+        , mRecover(false)
     {
         mCharacter.mCell = NULL;
     }
@@ -44,6 +45,16 @@ namespace MWRender
     void CharacterPreview::onSetup()
     {
 
+    }
+
+    void CharacterPreview::onFrame()
+    {
+        if (mRecover)
+        {
+            setupRenderTarget();
+            mRenderTarget->update();
+            mRecover = false;
+        }
     }
 
     void CharacterPreview::setup ()
@@ -127,9 +138,9 @@ namespace MWRender
 
         tex->createInternalResources();
 
-        setupRenderTarget();
-
-        mRenderTarget->update();
+        mRenderTarget = NULL;
+        mViewport = NULL;
+        mRecover = true;
     }
 
     void CharacterPreview::setupRenderTarget()
@@ -223,6 +234,10 @@ namespace MWRender
 
         mViewport->setDimensions (0, 0, std::min(1.f, float(mSizeX) / float(512)), std::min(1.f, float(mSizeY) / float(1024)));
         mTexture->load();
+
+        if (!mRenderTarget)
+            setupRenderTarget();
+
         mRenderTarget->update();
 
         mSelectionBuffer->update();

@@ -34,7 +34,12 @@ namespace MWRender
 
         virtual void rebuild();
 
+        void onFrame();
+
         void loadResource(Ogre::Resource *resource);
+
+    private:
+        bool mRecover; // Texture content was lost and needs to be re-rendered
 
     private:
         CharacterPreview(const CharacterPreview&);

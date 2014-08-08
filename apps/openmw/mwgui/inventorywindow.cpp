@@ -504,6 +504,7 @@ namespace MWGui
 
     void InventoryWindow::doRenderUpdate ()
     {
+        mPreview->onFrame();
         if (mPreviewDirty)
         {
             mPreviewDirty = false;

@@ -51,9 +51,9 @@ namespace Render
 
         tex->createInternalResources();
 
-        setupRenderTarget();
+        mRenderTarget = NULL;
 
-        mRenderTarget->update();
+        // Don't need to re-render texture, because we have a copy in system memory (mBuffer)
     }
 
     SelectionBuffer::~SelectionBuffer()
@@ -64,6 +64,9 @@ namespace Render
     void SelectionBuffer::update ()
     {
         Ogre::MaterialManager::getSingleton ().addListener (this);
+
+        if (mRenderTarget == NULL)
+            setupRenderTarget();
 
         mRenderTarget->update();
 
