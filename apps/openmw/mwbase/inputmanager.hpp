@@ -36,15 +36,21 @@ namespace MWBase
             virtual void toggleControlSwitch (const std::string& sw, bool value) = 0;
             virtual bool getControlSwitch (const std::string& sw) = 0;
 
+            virtual void EatMouseUp() = 0;
+
             virtual std::string getActionDescription (int action) = 0;
             virtual std::string getActionBindingName (int action) = 0;
+            virtual std::string getActionBindingName (int action, int deviceID) = 0;
             virtual std::vector<int> getActionSorting () = 0;
             virtual int getNumActions() = 0;
             virtual void enableDetectingBindingMode (int action) = 0;
-            virtual void resetToDefaultBindings() = 0;
+            /// -1 is mouse/keyboard
+            virtual void resetToDefaultBindings(int deviceID) = 0;
 
             ///Returns true if the last used input device was a joystick/gamepad
             virtual bool joystickLastUsed() = 0;
+
+            virtual std::list<int> joystickList() = 0;
     };
 }
 

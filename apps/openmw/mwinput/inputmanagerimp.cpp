@@ -120,8 +120,8 @@ namespace MWInput
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
         , mAttemptJump(false)
         , mControlsDisabled(false)
-        , mJoystickCheckTimer(0)
         , mJoystickLastUsed(false)
+        , mEatMouseUp(false)
     {
 
         Ogre::RenderWindow* window = ogre.getWindow ();
@@ -131,30 +131,6 @@ namespace MWInput
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
         mInputManager->setJoyEventCallback(this);
-
-        //Set up joysticks/gamepads
-        int numSticks = SDL_NumJoysticks();
-
-        if(numSticks > 0) //Joysticks found
-        {
-            std::cout << numSticks << " Joysticks found:" << std::endl;
-            for(int i = 0; i < numSticks; i++)
-            {
-                SDL_Joystick* stick = SDL_JoystickOpen(i);
-                char guid[33];
-                SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(stick), guid, 33);
-                mJoysticks[std::string(guid)] = stick;
-                std::cout << SDL_JoystickName(stick) << std::endl;
-            }
-        }
-        else if(numSticks < 0) //SDL Error
-        {
-            throw new std::runtime_error("Error in getting joysticks: " + std::string(SDL_GetError()));
-        }
-        else //No Joysticks
-        {
-            std::cout << "No Joysticks Found" << std::endl;
-        }
 
         std::string file = userFileExists ? userFile : "";
         mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
@@ -166,6 +142,27 @@ namespace MWInput
         for (int i = 0; i < A_Last; ++i)
         {
             mInputBinder->getChannel (i)->addListener (this);
+        }
+
+        //Set up joysticks/gamepads
+        int numSticks = SDL_NumJoysticks();
+
+        if(numSticks > 0) //Joysticks found
+        {
+            std::cout << numSticks << " Joysticks found:" << std::endl;
+            for(int i = 0; i < numSticks; i++)
+            {
+                SDL_JoystickOpen(i);
+                mInputBinder->addJoystick(i);
+            }
+        }
+        else if(numSticks < 0) //SDL Error
+        {
+            throw new std::runtime_error("Error in getting joysticks: " + std::string(SDL_GetError()));
+        }
+        else //No Joysticks
+        {
+            std::cout << "No Joysticks Found" << std::endl;
         }
 
         mControlSwitch["playercontrols"]      = true;
@@ -187,12 +184,6 @@ namespace MWInput
     InputManager::~InputManager()
     {
         mInputBinder->save (mUserFile);
-
-        //Clean up joysticks
-        for(std::map<std::string, SDL_Joystick*>::iterator it = mJoysticks.begin(); it != mJoysticks.end(); it++)
-        {
-            SDL_JoystickClose(it->second);
-        }
 
         delete mInputBinder;
 
@@ -324,7 +315,6 @@ namespace MWInput
 
     void InputManager::update(float dt, bool disableControls, bool disableEvents)
     {
-        const float cJoystickCheckTimer = 5; //Check for new joysticks every 5 seconds
 
         mControlsDisabled = disableControls;
 
@@ -360,57 +350,6 @@ namespace MWInput
             mInputManager->warpMouse(mMouseX, mMouseY);
         }
 
-        //check if any new joysticks were connected
-        //Enumerating joysticks to costy so only do it every so often (dofined at top of method
-        mJoystickCheckTimer += dt;
-        if(mJoystickCheckTimer >= cJoystickCheckTimer)
-        {
-            mJoystickCheckTimer = 0;
-            int numSticks = SDL_NumJoysticks();
-            if(mJoysticks.size() != numSticks)
-            {
-                if(mJoysticks.size() < numSticks) //one was added
-                {
-                    for(int i = 0; i < numSticks; i++)
-                    {
-                        char guid[33];
-                        SDL_JoystickGetGUIDString(SDL_JoystickGetDeviceGUID(i), guid, 33);
-                        if(mJoysticks.find(std::string(guid)) == mJoysticks.end())
-                        {
-                            SDL_Joystick* stick = SDL_JoystickOpen(i);
-                            mJoysticks[std::string(guid)] = stick;
-                            std::cout << "New Joystick added: " << SDL_JoystickName(stick) << std::endl;
-                            break;
-                        }
-                    }
-                }
-                else //one was removed
-                {
-                    for(std::map<std::string, SDL_Joystick*>::iterator it = mJoysticks.begin(); it != mJoysticks.end(); it++)
-                    {
-                        bool found = false;
-                        for(int i = 0; i < numSticks; i++)
-                        {
-                            char guid[33];
-                            SDL_JoystickGetGUIDString(SDL_JoystickGetDeviceGUID(i), guid, 33);
-                            if(std::string(guid) == it->first)
-                            {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if(!found)
-                        {
-                            SDL_JoystickClose(it->second);
-                            mJoysticks.erase(it->first);
-                            break;
-                        }
-                    }
-                    std::cout << "Joystick removed" << std::endl;
-                }
-            }
-        }
-
         //Update look based on last set axis
         if(mJoystickLastUsed)
         {
@@ -429,12 +368,6 @@ namespace MWInput
                     mPlayer->yaw(mXAxis);
                     mPlayer->pitch(mYAxis);
                 }
-
-                /*if (arg.zrel && mControlSwitch["playerviewswitch"]) //Check to make sure you are allowed to zoomout and there is a change
-                {
-                    MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.zrel);
-                    MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
-                }*/
             }
         }
 
@@ -749,20 +682,22 @@ namespace MWInput
 
         resetIdleTime ();
 
-        if(evt.axis == 2)
+        std::cout << axis << " > " << evt.value << std::endl;
+
+        if(axis == 2)
         {
             mXAxis = float(evt.value) / 2767.0f * mCameraSensitivity * (1.0f/256.f);
         }
-        else if(evt.axis ==3)
+        else if(axis == 3)
         {
             mYAxis = float(evt.value) / 2767.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
         }
-        if(evt.axis == 0)
+        if(axis == 0)
         {
             float percent = evt.value/32767.0f;
             mXAxisMove = percent;
         }
-        else if(evt.axis == 1)
+        else if(axis == 1)
         {
             float percent = -evt.value/32767.0f;
             mYAxisMove = percent;
@@ -772,9 +707,12 @@ namespace MWInput
     {
         mJoystickLastUsed = true;
         mInputBinder->povMoved(evt, index);
-        std::cout << index << std::endl;
     }
-
+    void InputManager::joystickAdded(int deviceID)
+    {
+        mInputBinder->addJoystick(deviceID);
+        loadJoystickDefaults(false, deviceID);
+    }
     void InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
         mJoystickLastUsed = false;
@@ -802,6 +740,12 @@ namespace MWInput
 
     void InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
+        //MyGUI has a bug where comboboxes react on MouseDown, resulting in an extra mouseReleased command which causes some issues
+        if(mEatMouseUp)
+        {
+            mEatMouseUp = false;
+            return;
+        }
 
         if(mInputBinder->detectingBindingState())
         {
@@ -1171,15 +1115,12 @@ namespace MWInput
                 control = mInputBinder->getChannel(i)->getAttachedControls ().front().control;
             }
 
-            if (!controlExists || force ||
-                    ( mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) == SDLK_UNKNOWN
-                      && mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS
-                      ))
+            if (!controlExists || force || ( mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) == SDLK_UNKNOWN && mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS ))
             {
-                clearAllBindings (control);
+                clearAllBindings(control, deviceID);
 
                 if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
-                    mInputBinder->addJoystickButtonBinding(control, deviceID, defaultButtonBindings[i], ICS::Control::INCREASE);
+                    mInputBinder->addJoystickButtonBinding(control, deviceID, defaultButtonBindings[i]-1, ICS::Control::INCREASE);
                 ///todo: Handle POV settings here
             }
         }
@@ -1304,6 +1245,26 @@ namespace MWInput
         return "#{" + descriptions[action] + "}";
     }
 
+    std::string InputManager::getActionBindingName (int action, int deviceID)
+    {
+        if (mInputBinder->getChannel (action)->getControlsCount () == 0)
+            return "#{sNone}";
+
+        ICS::Control* c = mInputBinder->getChannel (action)->getAttachedControls ().front().control;
+
+        if (mInputBinder->getJoystickButtonBinding(c, deviceID, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
+            return "Button " + boost::lexical_cast<std::string>(mInputBinder->getJoystickButtonBinding(c, deviceID, ICS::Control::INCREASE) + 1);
+        else if (mInputBinder->getJoystickPOVBinding(c, deviceID, ICS::Control::INCREASE).index != -1)
+        {
+            InputControlSystem::POVBindingPair res = mInputBinder->getJoystickPOVBinding(c, deviceID, ICS::Control::INCREASE);
+            return "#{sJoystickHatShort} " + boost::lexical_cast<std::string>(res.index + 1) + ((res.axis != ICS::InputControlSystem::EastWest) ? " East/West" : " North/South");
+        }
+        else if (mInputBinder->getJoystickAxisBinding(c, deviceID, ICS::Control::INCREASE) >= 0)
+            return "Analog Stick " + boost::lexical_cast<std::string>(mInputBinder->getJoystickAxisBinding(c, deviceID, ICS::Control::INCREASE)/2 + 1);
+        else
+            return "#{sNone}";
+    }
+
     std::string InputManager::getActionBindingName (int action)
     {
         if (mInputBinder->getChannel (action)->getControlsCount () == 0)
@@ -1315,15 +1276,6 @@ namespace MWInput
             return mInputBinder->keyCodeToString (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE));
         else if (mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
             return "#{sMouse} " + boost::lexical_cast<std::string>(mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE));
-        else if (mInputBinder->getJoystickButtonBinding(c, 0, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
-            return "Button " + boost::lexical_cast<std::string>(mInputBinder->getJoystickButtonBinding(c, 0, ICS::Control::INCREASE) + 1);
-        else if (mInputBinder->getJoystickPOVBinding(c, 0, ICS::Control::INCREASE).index != -1)
-        {
-            InputControlSystem::POVBindingPair res = mInputBinder->getJoystickPOVBinding(c, 0, ICS::Control::INCREASE);
-            return "#{sJoystickHatShort} " + boost::lexical_cast<std::string>(res.index + 1) + ((res.axis != ICS::InputControlSystem::EastWest) ? " East/West" : " North/South");
-        }
-        else if (mInputBinder->getJoystickAxisBinding(c, 0, ICS::Control::INCREASE) >= 0)
-            return "Analog Stick " + boost::lexical_cast<std::string>(mInputBinder->getJoystickAxisBinding(c, 0, ICS::Control::INCREASE)/2 + 1);
         else
             return "#{sNone}";
     }
@@ -1404,7 +1356,7 @@ namespace MWInput
     void InputManager::joystickAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , int deviceId, int axis, ICS::Control::ControlChangingDirection direction)
     {
-        clearAllBindings(control);
+        clearAllBindings(control, deviceId);
         ICS::DetectingBindingListener::joystickAxisBindingDetected (ICS, control, deviceId, axis, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
     }
@@ -1412,7 +1364,7 @@ namespace MWInput
     void InputManager::joystickButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , int deviceId, unsigned int button, ICS::Control::ControlChangingDirection direction)
     {
-        clearAllBindings(control);
+        clearAllBindings(control, deviceId);
         ICS::DetectingBindingListener::joystickButtonBindingDetected (ICS, control, deviceId, button, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
     }
@@ -1420,7 +1372,7 @@ namespace MWInput
     void InputManager::joystickPOVBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , int deviceId, int pov,ICS:: InputControlSystem::POVAxis axis, ICS::Control::ControlChangingDirection direction)
     {
-        clearAllBindings(control);
+        clearAllBindings(control, deviceId);
         ICS::DetectingBindingListener::joystickPOVBindingDetected (ICS, control, deviceId, pov, axis, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
     }
@@ -1428,7 +1380,7 @@ namespace MWInput
     void InputManager::joystickSliderBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , int deviceId, int slider, ICS::Control::ControlChangingDirection direction)
     {
-        clearAllBindings(control);
+        clearAllBindings(control, deviceId);
         ICS::DetectingBindingListener::joystickSliderBindingDetected (ICS, control, deviceId, slider, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
     }
@@ -1443,20 +1395,26 @@ namespace MWInput
         if (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
             mInputBinder->removeMouseButtonBinding (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE));
 
-        //Joysticks
-        if (mInputBinder->getJoystickButtonBinding (control, 0, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
-            mInputBinder->removeJoystickButtonBinding(0, mInputBinder->getJoystickButtonBinding (control, 0, ICS::Control::INCREASE));
-        if (mInputBinder->getJoystickAxisBinding(control, 0, ICS::Control::INCREASE) >= 0)
-            mInputBinder->removeJoystickAxisBinding (0, mInputBinder->getJoystickAxisBinding(control, 0, ICS::Control::INCREASE));
-        if (mInputBinder->getJoystickPOVBinding(control, 0, ICS::Control::INCREASE).index != -1)
-            mInputBinder->removeJoystickPOVBinding(0, mInputBinder->getJoystickPOVBinding(control, 0, ICS::Control::INCREASE).index, mInputBinder->getJoystickPOVBinding(control, 0, ICS::Control::INCREASE).axis);
-        if (mInputBinder->getJoystickSliderBinding(control, 0, ICS::Control::INCREASE) >= 0)
-            mInputBinder->removeJoystickSliderBinding(0, mInputBinder->getJoystickSliderBinding(control, 0, ICS::Control::INCREASE));
     }
 
-    void InputManager::resetToDefaultBindings()
+    void InputManager::clearAllBindings(ICS::Control* control, int deviceID)
     {
-        loadKeyDefaults(true);
+        if (mInputBinder->getJoystickButtonBinding (control, deviceID, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
+            mInputBinder->removeJoystickButtonBinding(deviceID, mInputBinder->getJoystickButtonBinding (control, 0, ICS::Control::INCREASE));
+        if (mInputBinder->getJoystickAxisBinding(control, deviceID, ICS::Control::INCREASE) >= 0)
+            mInputBinder->removeJoystickAxisBinding (deviceID, mInputBinder->getJoystickAxisBinding(control, 0, ICS::Control::INCREASE));
+        if (mInputBinder->getJoystickPOVBinding(control, deviceID, ICS::Control::INCREASE).index != -1)
+            mInputBinder->removeJoystickPOVBinding(deviceID, mInputBinder->getJoystickPOVBinding(control, 0, ICS::Control::INCREASE).index, mInputBinder->getJoystickPOVBinding(control, 0, ICS::Control::INCREASE).axis);
+        if (mInputBinder->getJoystickSliderBinding(control, deviceID, ICS::Control::INCREASE) >= 0)
+            mInputBinder->removeJoystickSliderBinding(deviceID, mInputBinder->getJoystickSliderBinding(control, 0, ICS::Control::INCREASE));
+    }
+
+    void InputManager::resetToDefaultBindings(int deviceID)
+    {
+        if(deviceID == -1)
+            loadKeyDefaults(true);
+        else
+            loadJoystickDefaults(true, deviceID);
     }
 
     MyGUI::MouseButton InputManager::sdlButtonToMyGUI(Uint8 button)

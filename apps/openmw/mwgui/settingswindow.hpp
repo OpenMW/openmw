@@ -43,6 +43,7 @@ namespace MWGui
             MyGUI::ComboBox* mShadowsTextureSize;
 
             // controls
+            MyGUI::ComboBox* mInputDevice;
             MyGUI::ScrollView* mControlsBox;
             MyGUI::Button* mResetControlsButton;
 
@@ -62,6 +63,7 @@ namespace MWGui
             void onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel);
             void onResetDefaultBindings(MyGUI::Widget* _sender);
             void onResetDefaultBindingsAccept ();
+            void onInputDeviceChanged(MyGUI::ComboBox* _sender, size_t pos);
 
             void apply();
 

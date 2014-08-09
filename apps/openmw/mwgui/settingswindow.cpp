@@ -8,6 +8,7 @@
 #include <boost/math/common_factor_rt.hpp>
 
 #include <SDL_video.h>
+#include <SDL_joystick.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -174,6 +175,7 @@ namespace MWGui
         getWidget(mShadowsEnabledButton, "ShadowsEnabledButton");
         getWidget(mShadowsTextureSize, "ShadowsTextureSize");
         getWidget(mControlsBox, "ControlsBox");
+        getWidget(mInputDevice, "InputDevice");
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mRefractionButton, "RefractionButton");
         getWidget(mDifficultySlider, "DifficultySlider");
@@ -183,6 +185,7 @@ namespace MWGui
         mTextureFilteringButton->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringChanged);
         mFPSButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onFpsToggled);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
+        mInputDevice->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onInputDeviceChanged);
 
         mShadowsTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onShadowTextureSizeChanged);
 
@@ -234,6 +237,15 @@ namespace MWGui
         MyGUI::TextBox* diffText;
         getWidget(diffText, "DifficultyText");
         diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
+
+        mInputDevice->removeAllItems();
+        mInputDevice->addItem("Mouse/Keyboard", -1);
+        std::list<int> joysticks = MWBase::Environment::get().getInputManager()->joystickList();
+        for(std::list<int>::iterator it = joysticks.begin(); it != joysticks.end(); it++)
+        {
+            mInputDevice->addItem(SDL_JoystickNameForIndex(*it), *it);
+        }
+        mInputDevice->setIndexSelected(0);
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
@@ -441,8 +453,16 @@ namespace MWGui
         MWBase::Environment::get().getInputManager()->processChangedSettings(changed);
     }
 
+    void SettingsWindow::onInputDeviceChanged(MyGUI::ComboBox* _sender, size_t pos)
+    {
+        updateControlsBox();
+        _sender->setIndexSelected(pos);
+        MWBase::Environment::get().getInputManager()->EatMouseUp();
+    }
+
     void SettingsWindow::updateControlsBox()
     {
+
         while (mControlsBox->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mControlsBox->getChildAt(0));
 
@@ -453,24 +473,50 @@ namespace MWGui
         const int h = 18;
         const int w = mControlsBox->getWidth() - 28;
         int curH = 0;
-        for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+        int val = *mInputDevice->getItemDataAt<int>(mInputDevice->getIndexSelected(), true);
+        if(val == -1) // Mouse/Keyboard
         {
-            std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
-            if (desc == "")
-                continue;
+            for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+            {
+                std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
+                if (desc == "")
+                    continue;
 
-            std::string binding = MWBase::Environment::get().getInputManager()->getActionBindingName (*it);
+                std::string binding = MWBase::Environment::get().getInputManager()->getActionBindingName (*it);
 
-            MyGUI::TextBox* leftText = mControlsBox->createWidget<MyGUI::TextBox>("SandText", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
-            leftText->setCaptionWithReplacing(desc);
+                MyGUI::TextBox* leftText = mControlsBox->createWidget<MyGUI::TextBox>("SandText", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
+                leftText->setCaptionWithReplacing(desc);
 
-            MyGUI::Button* rightText = mControlsBox->createWidget<MyGUI::Button>("SandTextButton", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
-            rightText->setCaptionWithReplacing(binding);
-            rightText->setTextAlign (MyGUI::Align::Right);
-            rightText->setUserData(*it); // save the action id for callbacks
-            rightText->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onRebindAction);
-            rightText->eventMouseWheel += MyGUI::newDelegate(this, &SettingsWindow::onInputTabMouseWheel);
-            curH += h;
+                MyGUI::Button* rightText = mControlsBox->createWidget<MyGUI::Button>("SandTextButton", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
+                rightText->setCaptionWithReplacing(binding);
+                rightText->setTextAlign (MyGUI::Align::Right);
+                rightText->setUserData(*it); // save the action id for callbacks
+                rightText->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onRebindAction);
+                rightText->eventMouseWheel += MyGUI::newDelegate(this, &SettingsWindow::onInputTabMouseWheel);
+                curH += h;
+            }
+        }
+        else
+        {
+            for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+            {
+                std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
+                if (desc == "")
+                    continue;
+
+                std::string binding = MWBase::Environment::get().getInputManager()->getActionBindingName(*it, val);
+
+                MyGUI::TextBox* leftText = mControlsBox->createWidget<MyGUI::TextBox>("SandText", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
+                leftText->setCaptionWithReplacing(desc);
+
+                MyGUI::Button* rightText = mControlsBox->createWidget<MyGUI::Button>("SandTextButton", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
+                rightText->setCaptionWithReplacing(binding);
+                rightText->setTextAlign (MyGUI::Align::Right);
+                rightText->setUserData(*it); // save the action id for callbacks
+                rightText->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onRebindAction);
+                rightText->eventMouseWheel += MyGUI::newDelegate(this, &SettingsWindow::onInputTabMouseWheel);
+                curH += h;
+            }
         }
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
@@ -511,7 +557,7 @@ namespace MWGui
 
     void SettingsWindow::onResetDefaultBindingsAccept()
     {
-        MWBase::Environment::get().getInputManager ()->resetToDefaultBindings ();
+        MWBase::Environment::get().getInputManager()->resetToDefaultBindings(*mInputDevice->getItemDataAt<int>(mInputDevice->getIndexSelected(), true));
         updateControlsBox ();
     }
 

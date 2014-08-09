@@ -84,12 +84,14 @@ namespace MWInput
 
         virtual std::string getActionDescription (int action);
         virtual std::string getActionBindingName (int action);
+        virtual std::string getActionBindingName (int action, int deviceID);
         virtual int getNumActions() { return A_Last; }
         virtual std::vector<int> getActionSorting ();
         virtual void enableDetectingBindingMode (int action);
-        virtual void resetToDefaultBindings();
+        virtual void resetToDefaultBindings(int deviceID);
 
         virtual bool joystickLastUsed() {return mJoystickLastUsed;}
+        virtual std::list<int> joystickList() {return mInputBinder->getJoystickIdList();}
 
     public:
         virtual void keyPressed(const SDL_KeyboardEvent &arg );
@@ -100,6 +102,7 @@ namespace MWInput
         virtual void buttonReleased(const SDL_JoyButtonEvent &evt, int button);
         virtual void axisMoved(const SDL_JoyAxisEvent &evt, int axis);
         virtual void povMoved(const SDL_JoyHatEvent &evt, int index);
+        virtual void joystickAdded(int deviceID);
 
         virtual void mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual void mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
@@ -109,6 +112,8 @@ namespace MWInput
         virtual void windowFocusChange( bool have_focus );
         virtual void windowResized (int x, int y);
         virtual void windowClosed ();
+
+        virtual void EatMouseUp() { mEatMouseUp = true; }
 
         virtual void channelChanged(ICS::Channel* channel, float currentValue, float previousValue);
 
@@ -134,6 +139,7 @@ namespace MWInput
             , int deviceId, int slider, ICS::Control::ControlChangingDirection direction);
 
         void clearAllBindings (ICS::Control* control);
+        void clearAllBindings (ICS::Control* control, int deviceID);
 
     private:
         OEngine::Render::OgreRenderer &mOgre;
@@ -155,6 +161,8 @@ namespace MWInput
 
         bool mControlsDisabled;
 
+        bool mEatMouseUp;
+
         float mCameraSensitivity;
         float mUISensitivity;
         float mCameraYMultiplier;
@@ -174,10 +182,6 @@ namespace MWInput
         bool mAttemptJump;
 
         std::map<std::string, bool> mControlSwitch;
-
-        //Once we upgrade to C++11, this really should be std::unordered_map<SDL_JoyStickGUID, SDL_Joystick*>
-        std::map<std::string, SDL_Joystick*> mJoysticks;
-        float mJoystickCheckTimer;
 
         float mXAxis;
         float mYAxis;
