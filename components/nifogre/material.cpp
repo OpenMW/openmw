@@ -55,14 +55,14 @@ static const char *getTestMode(int mode)
 }
 
 
-std::string NIFMaterialLoader::findTextureName(const std::string &filename)
+std::string NIFMaterialLoader::findMaterialName(const std::string &topLevelDirectory, const std::string &filename)
 {
     /* Bethesda at some point converted all their BSA
      * textures from tga to dds for increased load speed, but all
      * texture file name references were kept as .tga.
      */
-    static const char path[] = "textures\\";
-    static const char path2[] = "textures/";
+    std::string path = topLevelDirectory + '\\';
+    std::string path2 = topLevelDirectory + '/';
 
     std::string texname = filename;
     Misc::StringUtils::toLower(texname);
@@ -71,8 +71,8 @@ std::string NIFMaterialLoader::findTextureName(const std::string &filename)
     while (texname.size() && (texname[0] == '/' || texname[0] == '\\'))
         texname.erase(0, 1);
 
-    if(texname.compare(0, sizeof(path)-1, path) != 0 &&
-       texname.compare(0, sizeof(path2)-1, path2) != 0)
+    if(texname.compare(0, path.size()-1, path.data()) != 0 &&
+       texname.compare(0, path2.size()-1, path2.data()) != 0)
         texname = path + texname;
 
     Ogre::String::size_type pos = texname.rfind('.');
@@ -88,13 +88,25 @@ std::string NIFMaterialLoader::findTextureName(const std::string &filename)
         {
             texname = filename;
             Misc::StringUtils::toLower(texname);
-            if(texname.compare(0, sizeof(path)-1, path) != 0 &&
-               texname.compare(0, sizeof(path2)-1, path2) != 0)
+            if(texname.compare(0, path.size()-1, path.data()) != 0 &&
+               texname.compare(0, path2.size()-1, path2.data()) != 0)
                 texname = path + texname;
         }
     }
 
     return texname;
+}
+
+std::string NIFMaterialLoader::findTextureName(const std::string &filename)
+{
+    static const std::string dir = "textures";
+    return findMaterialName(dir, filename);
+}
+
+std::string NIFMaterialLoader::findIconName(const std::string &filename)
+{
+    static const std::string dir = "icons";
+    return findMaterialName(dir, filename);
 }
 
 Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
