@@ -447,34 +447,77 @@ namespace MWInput
             if (mControlSwitch["playercontrols"])
             {
                 bool triedToMove = false;
-                if (actionIsActive(A_MoveLeft))
+                if(mJoystickLastUsed)
                 {
-                    triedToMove = true;
-                    mPlayer->setLeftRight (-1);
-                }
-                else if (actionIsActive(A_MoveRight))
-                {
-                    triedToMove = true;
-                    mPlayer->setLeftRight (1);
-                }
 
-                if (actionIsActive(A_MoveForward))
-                {
-                    triedToMove = true;
-                    mPlayer->setAutoMove (false);
-                    mPlayer->setForwardBackward (1);
-                }
-                else if (actionIsActive(A_MoveBackward))
-                {
-                    triedToMove = true;
-                    mPlayer->setAutoMove (false);
-                    mPlayer->setForwardBackward (-1);
-                }
+                    ///todo: Implement variable "dead-zone" for sticks
+                    if(mXAxisMove > .2)
+                    {
+                        triedToMove = true;
+                        mPlayer->setLeftRight (1);
+                    }
+                    else if(mXAxisMove < -.2)
+                    {
+                        triedToMove = true;
+                        mPlayer->setLeftRight (-1);
+                    }
+                    if(mYAxisMove > .2)
+                    {
+                        triedToMove = true;
+                        mPlayer->setForwardBackward(1);
+                    }
+                    else if(mYAxisMove < -.2)
+                    {
+                        triedToMove = true;
+                        mPlayer->setForwardBackward(-1);
+                    }
+                    else if(mPlayer->getAutoMove())
+                    {
+                        triedToMove = true;
+                        mPlayer->setForwardBackward (1);
+                    }
 
-                else if(mPlayer->getAutoMove())
+                    ///todo: Implement seporate run/walk states for forward/barkwards and left/right
+                    if(mXAxisMove > .75 || mYAxisMove > .75) //run if sticks are pressed all the way up
+                        mPlayer->setRunState(true);
+                    else
+                        mPlayer->setRunState(false);
+                }
+                else
                 {
-                    triedToMove = true;
-                    mPlayer->setForwardBackward (1);
+                    if (actionIsActive(A_MoveLeft))
+                    {
+                        triedToMove = true;
+                        mPlayer->setLeftRight (-1);
+                    }
+                    else if (actionIsActive(A_MoveRight))
+                    {
+                        triedToMove = true;
+                        mPlayer->setLeftRight (1);
+                    }
+
+                    if (actionIsActive(A_MoveForward))
+                    {
+                        triedToMove = true;
+                        mPlayer->setAutoMove (false);
+                        mPlayer->setForwardBackward (1);
+                    }
+                    else if (actionIsActive(A_MoveBackward))
+                    {
+                        triedToMove = true;
+                        mPlayer->setAutoMove (false);
+                        mPlayer->setForwardBackward (-1);
+                    }
+                    else if(mPlayer->getAutoMove())
+                    {
+                        triedToMove = true;
+                        mPlayer->setForwardBackward (1);
+                    }
+
+                    if (mAlwaysRunActive)
+                        mPlayer->setRunState(!actionIsActive(A_Run));
+                    else
+                        mPlayer->setRunState(actionIsActive(A_Run));
                 }
 
                 mPlayer->setSneak(actionIsActive(A_Sneak));
@@ -484,11 +527,6 @@ namespace MWInput
                     mPlayer->setUpDown (1);
                     triedToMove = true;
                 }
-
-                if (mAlwaysRunActive)
-                    mPlayer->setRunState(!actionIsActive(A_Run));
-                else
-                    mPlayer->setRunState(actionIsActive(A_Run));
 
                 // if player tried to start moving, but can't (due to being overencumbered), display a notification.
                 if (triedToMove)
@@ -711,18 +749,29 @@ namespace MWInput
 
         resetIdleTime ();
 
-        if(evt.axis == 0)
+        if(evt.axis == 2)
         {
             mXAxis = float(evt.value) / 2767.0f * mCameraSensitivity * (1.0f/256.f);
         }
-        else if(evt.axis ==1)
+        else if(evt.axis ==3)
         {
             mYAxis = float(evt.value) / 2767.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
+        }
+        if(evt.axis == 0)
+        {
+            float percent = evt.value/32767.0f;
+            mXAxisMove = percent;
+        }
+        else if(evt.axis == 1)
+        {
+            float percent = -evt.value/32767.0f;
+            mYAxisMove = percent;
         }
     }
     void InputManager::povMoved(const SDL_JoyHatEvent &evt, int index)
     {
         mJoystickLastUsed = true;
+        mInputBinder->povMoved(evt, index);
         std::cout << index << std::endl;
     }
 
@@ -1061,6 +1110,81 @@ namespace MWInput
         return mInputBinder->getChannel (id)->getValue () == 1;
     }
 
+    void InputManager::loadJoystickDefaults(bool force, bool deviceID)
+    {
+        // using hardcoded key defaults is inevitable, if we want the configuration files to stay valid
+        // across different versions of OpenMW (in the case where another input action is added)
+        std::map<int, int> defaultButtonBindings;
+
+        //Gets the Buttonvalue from the Scancode; gives the button in the same place reguardless of Buttonboard format
+        defaultButtonBindings[A_Activate] = 2;
+        //defaultButtonBindings[A_MoveBackward] = SDL_GetButtonFromScancode(SDL_SCANCODE_S);
+        //defaultButtonBindings[A_MoveForward] = SDL_GetButtonFromScancode(SDL_SCANCODE_W);
+        //defaultButtonBindings[A_MoveLeft] = SDL_GetButtonFromScancode(SDL_SCANCODE_A);
+        //defaultButtonBindings[A_MoveRight] = SDL_GetButtonFromScancode(SDL_SCANCODE_D);
+        defaultButtonBindings[A_ToggleWeapon] = 1;
+        defaultButtonBindings[A_ToggleSpell] = 5;
+        //defaultButtonBindings[A_QuickButtonsMenu] = SDL_GetButtonFromScancode(SDL_SCANCODE_F1); // Need to implement, should be ToggleSpell(5) and Wait(9)
+        //defaultButtonBindings[A_Console] = SDL_GetButtonFromScancode(SDL_SCANCODE_F2);
+        //defaultButtonBindings[A_Run] = SDL_GetButtonFromScancode(SDL_SCANCODE_LSHIFT); // Half way is walk, all the way is run. No dedicated button
+        defaultButtonBindings[A_Sneak] = 11;
+        //defaultButtonBindings[A_AutoMove] = SDL_GetButtonFromScancode(SDL_SCANCODE_Q);
+        defaultButtonBindings[A_Jump] = 4;
+        defaultButtonBindings[A_Journal] = 6;
+        defaultButtonBindings[A_Rest] = 9;
+        defaultButtonBindings[A_GameMenu] = 10;
+        defaultButtonBindings[A_TogglePOV] = 12;
+        /*defaultButtonBindings[A_QuickButton1] = SDL_GetButtonFromScancode(SDL_SCANCODE_1); //All quickButtons are on the POVHat
+        defaultButtonBindings[A_QuickButton2] = SDL_GetButtonFromScancode(SDL_SCANCODE_2);
+        defaultButtonBindings[A_QuickButton3] = SDL_GetButtonFromScancode(SDL_SCANCODE_3);
+        defaultButtonBindings[A_QuickButton4] = SDL_GetButtonFromScancode(SDL_SCANCODE_4);
+        defaultButtonBindings[A_QuickButton5] = SDL_GetButtonFromScancode(SDL_SCANCODE_5);
+        defaultButtonBindings[A_QuickButton6] = SDL_GetButtonFromScancode(SDL_SCANCODE_6);
+        defaultButtonBindings[A_QuickButton7] = SDL_GetButtonFromScancode(SDL_SCANCODE_7);
+        defaultButtonBindings[A_QuickButton8] = SDL_GetButtonFromScancode(SDL_SCANCODE_8);
+        defaultButtonBindings[A_QuickButton9] = SDL_GetButtonFromScancode(SDL_SCANCODE_9);
+        defaultButtonBindings[A_QuickButton10] = SDL_GetButtonFromScancode(SDL_SCANCODE_0);*/
+        //defaultButtonBindings[A_Screenshot] = SDL_GetButtonFromScancode(SDL_SCANCODE_F12);
+        //defaultButtonBindings[A_ToggleHUD] = SDL_GetButtonFromScancode(SDL_SCANCODE_F11);
+        //defaultButtonBindings[A_AlwaysRun] = SDL_GetButtonFromScancode(SDL_SCANCODE_Y);
+        //defaultButtonBindings[A_QuickSave] = SDL_GetButtonFromScancode(SDL_SCANCODE_F5); //On the POVHat
+        //defaultButtonBindings[A_QuickLoad] = SDL_GetButtonFromScancode(SDL_SCANCODE_F9);
+        defaultButtonBindings[A_Inventory] = 3;
+        defaultButtonBindings[A_Use] = 8;
+
+        //std::map<int, int> defaultPOVBindings;
+        //defaultPOVBindings[] = SDL_BUTTON_RIGHT;
+        //defaultPOVBindings[A_Use] = SDL_BUTTON_LEFT;
+
+        for (int i = 0; i < A_Last; ++i)
+        {
+            ICS::Control* control;
+            bool controlExists = mInputBinder->getChannel(i)->getControlsCount () != 0;
+            if (!controlExists)
+            {
+                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, 0, ICS::ICS_MAX, ICS::ICS_MAX);
+                mInputBinder->addControl(control);
+                control->attachChannel(mInputBinder->getChannel(i), ICS::Channel::DIRECT);
+            }
+            else
+            {
+                control = mInputBinder->getChannel(i)->getAttachedControls ().front().control;
+            }
+
+            if (!controlExists || force ||
+                    ( mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) == SDLK_UNKNOWN
+                      && mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS
+                      ))
+            {
+                clearAllBindings (control);
+
+                if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
+                    mInputBinder->addJoystickButtonBinding(control, deviceID, defaultButtonBindings[i], ICS::Control::INCREASE);
+                ///todo: Handle POV settings here
+            }
+        }
+    }
+
     void InputManager::loadKeyDefaults (bool force)
     {
         // using hardcoded key defaults is inevitable, if we want the configuration files to stay valid
@@ -1191,6 +1315,15 @@ namespace MWInput
             return mInputBinder->keyCodeToString (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE));
         else if (mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
             return "#{sMouse} " + boost::lexical_cast<std::string>(mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE));
+        else if (mInputBinder->getJoystickButtonBinding(c, 0, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
+            return "Button " + boost::lexical_cast<std::string>(mInputBinder->getJoystickButtonBinding(c, 0, ICS::Control::INCREASE) + 1);
+        else if (mInputBinder->getJoystickPOVBinding(c, 0, ICS::Control::INCREASE).index != -1)
+        {
+            InputControlSystem::POVBindingPair res = mInputBinder->getJoystickPOVBinding(c, 0, ICS::Control::INCREASE);
+            return "#{sJoystickHatShort} " + boost::lexical_cast<std::string>(res.index + 1) + ((res.axis != ICS::InputControlSystem::EastWest) ? " East/West" : " North/South");
+        }
+        else if (mInputBinder->getJoystickAxisBinding(c, 0, ICS::Control::INCREASE) >= 0)
+            return "Analog Stick " + boost::lexical_cast<std::string>(mInputBinder->getJoystickAxisBinding(c, 0, ICS::Control::INCREASE)/2 + 1);
         else
             return "#{sNone}";
     }
@@ -1303,12 +1436,22 @@ namespace MWInput
     void InputManager::clearAllBindings (ICS::Control* control)
     {
         // right now we don't really need multiple bindings for the same action, so remove all others first
+
+        //Mouse/Keyboard
         if (mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) != SDLK_UNKNOWN)
             mInputBinder->removeKeyBinding (mInputBinder->getKeyBinding (control, ICS::Control::INCREASE));
         if (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
             mInputBinder->removeMouseButtonBinding (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE));
 
-        /// \todo add joysticks here once they are added
+        //Joysticks
+        if (mInputBinder->getJoystickButtonBinding (control, 0, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
+            mInputBinder->removeJoystickButtonBinding(0, mInputBinder->getJoystickButtonBinding (control, 0, ICS::Control::INCREASE));
+        if (mInputBinder->getJoystickAxisBinding(control, 0, ICS::Control::INCREASE) >= 0)
+            mInputBinder->removeJoystickAxisBinding (0, mInputBinder->getJoystickAxisBinding(control, 0, ICS::Control::INCREASE));
+        if (mInputBinder->getJoystickPOVBinding(control, 0, ICS::Control::INCREASE).index != -1)
+            mInputBinder->removeJoystickPOVBinding(0, mInputBinder->getJoystickPOVBinding(control, 0, ICS::Control::INCREASE).index, mInputBinder->getJoystickPOVBinding(control, 0, ICS::Control::INCREASE).axis);
+        if (mInputBinder->getJoystickSliderBinding(control, 0, ICS::Control::INCREASE) >= 0)
+            mInputBinder->removeJoystickSliderBinding(0, mInputBinder->getJoystickSliderBinding(control, 0, ICS::Control::INCREASE));
     }
 
     void InputManager::resetToDefaultBindings()

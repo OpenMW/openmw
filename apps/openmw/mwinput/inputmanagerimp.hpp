@@ -181,6 +181,8 @@ namespace MWInput
 
         float mXAxis;
         float mYAxis;
+        float mXAxisMove;
+        float mYAxisMove;
 
         //Used for mouseless interfaces
         bool mJoystickLastUsed;
@@ -214,6 +216,7 @@ namespace MWInput
 
         bool actionIsActive (int id);
 
+        void loadJoystickDefaults(bool force, bool deviceID);
         void loadKeyDefaults(bool force = false);
 
     private:
