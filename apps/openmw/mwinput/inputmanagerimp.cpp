@@ -224,6 +224,26 @@ namespace MWInput
             mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
         }
 
+        if (action == A_MoveForwardBackwards)
+        {
+            mYAxisMove = -((currentValue*2)-1); //turns 0 through 1 into -1 through 1
+        }
+
+        if (action == A_MoveLeftRight)
+        {
+            mXAxisMove = (currentValue*2)-1; //turns 0 through 1 into -1 through 1
+        }
+
+        if (action == A_LookUpDown)
+        {
+            mYAxis = ((currentValue*2)-1) * 10 * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
+        }
+
+        if (action == A_LookLeftRight)
+        {
+            mXAxis = ((currentValue*2)-1) * 10 * mCameraSensitivity * (1.0f/256.f);
+        }
+
         if (currentValue == 1)
         {
             // trigger action activated
@@ -360,7 +380,7 @@ namespace MWInput
                 float rot[3];
                 rot[0] = -mYAxis;
                 rot[1] = 0.0f;
-                rot[2] = -mYAxis;
+                rot[2] = -mXAxis;
 
                 // Only actually turn player when we're not in vanity mode
                 if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
@@ -411,7 +431,7 @@ namespace MWInput
                     }
 
                     ///todo: Implement seporate run/walk states for forward/barkwards and left/right
-                    if(mXAxisMove > .75 || mYAxisMove > .75) //run if sticks are pressed all the way up
+                    if(std::abs(mXAxisMove) > .75 || std::abs(mYAxisMove) > .75) //run if sticks are pressed all the way up
                         mPlayer->setRunState(true);
                     else
                         mPlayer->setRunState(false);
@@ -681,27 +701,6 @@ namespace MWInput
         mInputBinder->axisMoved(evt, axis);
 
         resetIdleTime ();
-
-        std::cout << axis << " > " << evt.value << std::endl;
-
-        if(axis == 2)
-        {
-            mXAxis = float(evt.value) / 2767.0f * mCameraSensitivity * (1.0f/256.f);
-        }
-        else if(axis == 3)
-        {
-            mYAxis = float(evt.value) / 2767.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
-        }
-        if(axis == 0)
-        {
-            float percent = evt.value/32767.0f;
-            mXAxisMove = percent;
-        }
-        else if(axis == 1)
-        {
-            float percent = -evt.value/32767.0f;
-            mYAxisMove = percent;
-        }
     }
     void InputManager::povMoved(const SDL_JoyHatEvent &evt, int index)
     {
@@ -1061,44 +1060,34 @@ namespace MWInput
         std::map<int, int> defaultButtonBindings;
 
         //Gets the Buttonvalue from the Scancode; gives the button in the same place reguardless of Buttonboard format
-        defaultButtonBindings[A_Activate] = 2;
-        //defaultButtonBindings[A_MoveBackward] = SDL_GetButtonFromScancode(SDL_SCANCODE_S);
-        //defaultButtonBindings[A_MoveForward] = SDL_GetButtonFromScancode(SDL_SCANCODE_W);
-        //defaultButtonBindings[A_MoveLeft] = SDL_GetButtonFromScancode(SDL_SCANCODE_A);
-        //defaultButtonBindings[A_MoveRight] = SDL_GetButtonFromScancode(SDL_SCANCODE_D);
-        defaultButtonBindings[A_ToggleWeapon] = 1;
-        defaultButtonBindings[A_ToggleSpell] = 5;
+        defaultButtonBindings[A_Activate] = 1;
+        defaultButtonBindings[A_ToggleWeapon] = 3;
+        defaultButtonBindings[A_ToggleSpell] = 4;
         //defaultButtonBindings[A_QuickButtonsMenu] = SDL_GetButtonFromScancode(SDL_SCANCODE_F1); // Need to implement, should be ToggleSpell(5) and Wait(9)
-        //defaultButtonBindings[A_Console] = SDL_GetButtonFromScancode(SDL_SCANCODE_F2);
-        //defaultButtonBindings[A_Run] = SDL_GetButtonFromScancode(SDL_SCANCODE_LSHIFT); // Half way is walk, all the way is run. No dedicated button
-        defaultButtonBindings[A_Sneak] = 11;
-        //defaultButtonBindings[A_AutoMove] = SDL_GetButtonFromScancode(SDL_SCANCODE_Q);
+        defaultButtonBindings[A_Sneak] = 10;
         defaultButtonBindings[A_Jump] = 4;
-        defaultButtonBindings[A_Journal] = 6;
-        defaultButtonBindings[A_Rest] = 9;
-        defaultButtonBindings[A_GameMenu] = 10;
-        defaultButtonBindings[A_TogglePOV] = 12;
-        /*defaultButtonBindings[A_QuickButton1] = SDL_GetButtonFromScancode(SDL_SCANCODE_1); //All quickButtons are on the POVHat
+        defaultButtonBindings[A_Journal] = 5;
+        defaultButtonBindings[A_Rest] = 8;
+        defaultButtonBindings[A_TogglePOV] = 11;
+        defaultButtonBindings[A_Inventory] = 2;
+        defaultButtonBindings[A_Use] = 5;
+        defaultButtonBindings[A_GameMenu] = 9;
+
+        //std::map<int, int> defaultPOVBindings;
+        /*defaultButtonBindings[A_QuickButton1] = SDL_GetButtonFromScancode(SDL_SCANCODE_1);
         defaultButtonBindings[A_QuickButton2] = SDL_GetButtonFromScancode(SDL_SCANCODE_2);
         defaultButtonBindings[A_QuickButton3] = SDL_GetButtonFromScancode(SDL_SCANCODE_3);
         defaultButtonBindings[A_QuickButton4] = SDL_GetButtonFromScancode(SDL_SCANCODE_4);
         defaultButtonBindings[A_QuickButton5] = SDL_GetButtonFromScancode(SDL_SCANCODE_5);
         defaultButtonBindings[A_QuickButton6] = SDL_GetButtonFromScancode(SDL_SCANCODE_6);
         defaultButtonBindings[A_QuickButton7] = SDL_GetButtonFromScancode(SDL_SCANCODE_7);
-        defaultButtonBindings[A_QuickButton8] = SDL_GetButtonFromScancode(SDL_SCANCODE_8);
-        defaultButtonBindings[A_QuickButton9] = SDL_GetButtonFromScancode(SDL_SCANCODE_9);
-        defaultButtonBindings[A_QuickButton10] = SDL_GetButtonFromScancode(SDL_SCANCODE_0);*/
-        //defaultButtonBindings[A_Screenshot] = SDL_GetButtonFromScancode(SDL_SCANCODE_F12);
-        //defaultButtonBindings[A_ToggleHUD] = SDL_GetButtonFromScancode(SDL_SCANCODE_F11);
-        //defaultButtonBindings[A_AlwaysRun] = SDL_GetButtonFromScancode(SDL_SCANCODE_Y);
-        //defaultButtonBindings[A_QuickSave] = SDL_GetButtonFromScancode(SDL_SCANCODE_F5); //On the POVHat
-        //defaultButtonBindings[A_QuickLoad] = SDL_GetButtonFromScancode(SDL_SCANCODE_F9);
-        defaultButtonBindings[A_Inventory] = 3;
-        defaultButtonBindings[A_Use] = 8;
+        defaultButtonBindings[A_QuickSave] = SDL_GetButtonFromScancode(SDL_SCANCODE_F5);*/
 
-        //std::map<int, int> defaultPOVBindings;
-        //defaultPOVBindings[] = SDL_BUTTON_RIGHT;
-        //defaultPOVBindings[A_Use] = SDL_BUTTON_LEFT;
+        std::map<int, int> defaultAxisBindings;
+        defaultAxisBindings[A_MoveForwardBackwards] = 1;
+        defaultAxisBindings[A_MoveLeftRight] = 0;
+        defaultAxisBindings[A_LookUpDown] = 4;
+        defaultAxisBindings[A_LookLeftRight] = 3;
 
         for (int i = 0; i < A_Last; ++i)
         {
@@ -1120,7 +1109,9 @@ namespace MWInput
                 clearAllBindings(control, deviceID);
 
                 if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
-                    mInputBinder->addJoystickButtonBinding(control, deviceID, defaultButtonBindings[i]-1, ICS::Control::INCREASE);
+                    mInputBinder->addJoystickButtonBinding(control, deviceID, defaultButtonBindings[i], ICS::Control::INCREASE);
+                else if (defaultAxisBindings.find(i) != defaultAxisBindings.end())
+                    mInputBinder->addJoystickAxisBinding(control, deviceID, defaultAxisBindings[i], ICS::Control::INCREASE);
                 ///todo: Handle POV settings here
             }
         }
@@ -1204,45 +1195,47 @@ namespace MWInput
     {
         std::map<int, std::string> descriptions;
 
-        if (action == A_Screenshot)
-            return "Screenshot";
-
-        descriptions[A_Use] = "sUse";
-        descriptions[A_Activate] = "sActivate";
-        descriptions[A_MoveBackward] = "sBack";
-        descriptions[A_MoveForward] = "sForward";
-        descriptions[A_MoveLeft] = "sLeft";
-        descriptions[A_MoveRight] = "sRight";
-        descriptions[A_ToggleWeapon] = "sReady_Weapon";
-        descriptions[A_ToggleSpell] = "sReady_Magic";
-        descriptions[A_Console] = "sConsoleTitle";
-        descriptions[A_Run] = "sRun";
-        descriptions[A_Sneak] = "sCrouch_Sneak";
-        descriptions[A_AutoMove] = "sAuto_Run";
-        descriptions[A_Jump] = "sJump";
-        descriptions[A_Journal] = "sJournal";
-        descriptions[A_Rest] = "sRestKey";
-        descriptions[A_Inventory] = "sInventory";
-        descriptions[A_TogglePOV] = "sTogglePOVCmd";
-        descriptions[A_QuickKeysMenu] = "sQuickMenu";
-        descriptions[A_QuickKey1] = "sQuick1Cmd";
-        descriptions[A_QuickKey2] = "sQuick2Cmd";
-        descriptions[A_QuickKey3] = "sQuick3Cmd";
-        descriptions[A_QuickKey4] = "sQuick4Cmd";
-        descriptions[A_QuickKey5] = "sQuick5Cmd";
-        descriptions[A_QuickKey6] = "sQuick6Cmd";
-        descriptions[A_QuickKey7] = "sQuick7Cmd";
-        descriptions[A_QuickKey8] = "sQuick8Cmd";
-        descriptions[A_QuickKey9] = "sQuick9Cmd";
-        descriptions[A_QuickKey10] = "sQuick10Cmd";
-        descriptions[A_AlwaysRun] = "sAlways_Run";
-        descriptions[A_QuickSave] = "sQuickSaveCmd";
-        descriptions[A_QuickLoad] = "sQuickLoadCmd";
+        descriptions[A_Use] = "#{sUse}";
+        descriptions[A_Activate] = "#{sActivate}";
+        descriptions[A_MoveBackward] = "#{sBack}";
+        descriptions[A_MoveForward] = "#{sForward}";
+        descriptions[A_MoveLeft] = "#{sLeft}";
+        descriptions[A_MoveRight] = "#{sRight}";
+        descriptions[A_MoveForwardBackwards] = "Move Forwards/Backwards";
+        descriptions[A_MoveLeftRight] = "Move Left/Right";
+        descriptions[A_LookUpDown] = "Look Up/Down";
+        descriptions[A_LookLeftRight] = "Look Left/Right";
+        descriptions[A_ToggleWeapon] = "#{sReady_Weapon}";
+        descriptions[A_ToggleSpell] = "#{sReady_Magic}";
+        descriptions[A_Console] = "#{sConsoleTitle}";
+        descriptions[A_Run] = "#{sRun}";
+        descriptions[A_Sneak] = "#{sCrouch_Sneak}";
+        descriptions[A_AutoMove] = "#{sAuto_Run}";
+        descriptions[A_Jump] = "#{sJump}";
+        descriptions[A_Journal] = "#{sJournal}";
+        descriptions[A_Rest] = "#{sRestKey}";
+        descriptions[A_Inventory] = "#{sInventory}";
+        descriptions[A_TogglePOV] = "#{sTogglePOVCmd}";
+        descriptions[A_QuickKeysMenu] = "#{sQuickMenu}";
+        descriptions[A_Screenshot] = "Screenshot";
+        descriptions[A_QuickKey1] = "#{sQuick1Cmd}";
+        descriptions[A_QuickKey2] = "#{sQuick2Cmd}";
+        descriptions[A_QuickKey3] = "#{sQuick3Cmd}";
+        descriptions[A_QuickKey4] = "#{sQuick4Cmd}";
+        descriptions[A_QuickKey5] = "#{sQuick5Cmd}";
+        descriptions[A_QuickKey6] = "#{sQuick6Cmd}";
+        descriptions[A_QuickKey7] = "#{sQuick7Cmd}";
+        descriptions[A_QuickKey8] = "#{sQuick8Cmd}";
+        descriptions[A_QuickKey9] = "#{sQuick9Cmd}";
+        descriptions[A_QuickKey10] = "#{sQuick10Cmd}";
+        descriptions[A_AlwaysRun] = "#{sAlways_Run}";
+        descriptions[A_QuickSave] = "#{sQuickSaveCmd}";
+        descriptions[A_QuickLoad] = "#{sQuickLoadCmd}";
 
         if (descriptions[action] == "")
             return ""; // not configurable
 
-        return "#{" + descriptions[action] + "}";
+        return descriptions[action];
     }
 
     std::string InputManager::getActionBindingName (int action, int deviceID)
@@ -1287,6 +1280,10 @@ namespace MWInput
         ret.push_back(A_MoveBackward);
         ret.push_back(A_MoveLeft);
         ret.push_back(A_MoveRight);
+        ret.push_back(A_MoveForwardBackwards);
+        ret.push_back(A_MoveLeftRight);
+        ret.push_back(A_LookUpDown);
+        ret.push_back(A_LookLeftRight);
         ret.push_back(A_TogglePOV);
         ret.push_back(A_Run);
         ret.push_back(A_AlwaysRun);
@@ -1324,6 +1321,11 @@ namespace MWInput
         ICS::Control* c = mInputBinder->getChannel (action)->getAttachedControls ().front().control;
 
         mInputBinder->enableDetectingBindingState (c, ICS::Control::INCREASE);
+    }
+
+    void InputManager::enableJoystickSetupMode(int step)
+    {
+        mJoystickSetupStep = step;
     }
 
     void InputManager::mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control

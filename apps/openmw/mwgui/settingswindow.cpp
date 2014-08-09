@@ -238,6 +238,11 @@ namespace MWGui
         getWidget(diffText, "DifficultyText");
         diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
 
+        updateInputList();
+    }
+
+    void SettingsWindow::updateInputList()
+    {
         mInputDevice->removeAllItems();
         mInputDevice->addItem("Mouse/Keyboard", -1);
         std::list<int> joysticks = MWBase::Environment::get().getInputManager()->joystickList();
@@ -479,7 +484,7 @@ namespace MWGui
             for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
             {
                 std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
-                if (desc == "")
+                if (desc == "" || desc == "Move Left/Right" || desc == "Move Forwards/Backwards"  || desc == "Look Up/Down"  || desc == "Look Left/Right")
                     continue;
 
                 std::string binding = MWBase::Environment::get().getInputManager()->getActionBindingName (*it);
@@ -501,7 +506,7 @@ namespace MWGui
             for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
             {
                 std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
-                if (desc == "")
+                if (desc == "" || desc == "#{sBack}" || desc == "#{sForward}"  || desc == "#{sLeft}"  || desc == "#{sRight}")
                     continue;
 
                 std::string binding = MWBase::Environment::get().getInputManager()->getActionBindingName(*it, val);

@@ -20,6 +20,7 @@ namespace MWGui
             virtual void exit();
 
             void updateControlsBox();
+            void updateInputList();
 
     protected:
             MyGUI::Button* mOkButton;

@@ -284,6 +284,11 @@ namespace MWInput
 
             A_ToggleHUD,
 
+            A_MoveForwardBackwards, //For joysticks
+            A_MoveLeftRight,
+            A_LookUpDown,
+            A_LookLeftRight,
+
             A_Last            // Marker for the last item
         };
     };
