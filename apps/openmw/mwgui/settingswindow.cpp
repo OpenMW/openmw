@@ -539,7 +539,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager ()->staticMessageBox ("#{sControlsMenu3}");
         MWBase::Environment::get().getWindowManager ()->disallowMouse();
 
-        MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId);
+        MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId, *mInputDevice->getItemDataAt<int>(mInputDevice->getIndexSelected(), true));
 
     }
 

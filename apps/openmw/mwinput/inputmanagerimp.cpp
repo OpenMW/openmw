@@ -122,6 +122,8 @@ namespace MWInput
         , mControlsDisabled(false)
         , mJoystickLastUsed(false)
         , mEatMouseUp(false)
+        , mBindDeviceID(-1)
+        , mMouseInjected(false)
     {
 
         Ogre::RenderWindow* window = ogre.getWindow ();
@@ -373,6 +375,23 @@ namespace MWInput
         //Update look based on last set axis
         if(mJoystickLastUsed)
         {
+            if (mGuiCursorEnabled)
+            {
+                const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+
+                // We keep track of our own mouse position, so that moving the mouse while in
+                // game mode does not move the position of the GUI cursor
+                mMouseX += (mXAxisMove*10);
+                mMouseY += -(mYAxisMove*10);
+
+                mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
+                mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
+
+                MyGUI::InputManager::getInstance().injectMouseMove( mMouseX, mMouseY, mMouseWheel);
+                SDL_Window* window = mOgre.getSDLWindow();
+                SDL_WarpMouseInWindow(window, mMouseX, mMouseY);
+                mMouseInjected = true; //Don't register the WarpMouse as a mousemove event
+            }
             if (mMouseLookEnabled)
             {
                 resetIdleTime();
@@ -678,6 +697,23 @@ namespace MWInput
     void InputManager::buttonPressed(const SDL_JoyButtonEvent &evt, int button)
     {
         mJoystickLastUsed = true;
+
+        bool guiMode = false;
+
+        if (button == 0 || button == 1) // We'll pretend that button0 is left click and button1 is right click
+        {
+            guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
+            guiMode = MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI((button) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
+            if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
+            {
+                MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
+                if (b && b->getEnabled())
+                {
+                    MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+                }
+            }
+        }
+
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(button);
 
         if (kc != OIS::KC_UNASSIGNED)
@@ -690,6 +726,11 @@ namespace MWInput
     }
     void InputManager::buttonReleased(const SDL_JoyButtonEvent &evt, int button)
     {
+        if(button == 0 || button ==1)
+        {
+            bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
+            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI((button) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
+        }
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(button);
 
         setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
@@ -711,6 +752,7 @@ namespace MWInput
     {
         mInputBinder->addJoystick(deviceID);
         loadJoystickDefaults(false, deviceID);
+        MWBase::Environment::get().getWindowManager()->notifyJoystickAdded();
     }
     void InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
@@ -762,6 +804,12 @@ namespace MWInput
 
     void InputManager::mouseMoved(const SFO::MouseMotionEvent &arg )
     {
+        if(mMouseInjected) //Ignore the WarpMouse event
+        {
+            mMouseInjected = false;
+            return;
+        }
+
         mJoystickLastUsed = false;
         mInputBinder->mouseMoved (arg);
 
@@ -1316,16 +1364,13 @@ namespace MWInput
         return ret;
     }
 
-    void InputManager::enableDetectingBindingMode (int action)
+    void InputManager::enableDetectingBindingMode (int action, int deviceID)
     {
         ICS::Control* c = mInputBinder->getChannel (action)->getAttachedControls ().front().control;
 
         mInputBinder->enableDetectingBindingState (c, ICS::Control::INCREASE);
-    }
 
-    void InputManager::enableJoystickSetupMode(int step)
-    {
-        mJoystickSetupStep = step;
+        mBindDeviceID = deviceID;
     }
 
     void InputManager::mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
@@ -1342,6 +1387,9 @@ namespace MWInput
         if(key==SDLK_ESCAPE)
             return;
 
+        if(mBindDeviceID != -1)
+            return;
+
         clearAllBindings(control);
         ICS::DetectingBindingListener::keyBindingDetected (ICS, control, key, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
@@ -1350,6 +1398,9 @@ namespace MWInput
     void InputManager::mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , unsigned int button, ICS::Control::ControlChangingDirection direction)
     {
+        if(mBindDeviceID != -1)
+            return;
+
         clearAllBindings(control);
         ICS::DetectingBindingListener::mouseButtonBindingDetected (ICS, control, button, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
@@ -1358,6 +1409,9 @@ namespace MWInput
     void InputManager::joystickAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , int deviceId, int axis, ICS::Control::ControlChangingDirection direction)
     {
+        if(mBindDeviceID != deviceId)
+            return;
+
         clearAllBindings(control, deviceId);
         ICS::DetectingBindingListener::joystickAxisBindingDetected (ICS, control, deviceId, axis, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
@@ -1366,6 +1420,9 @@ namespace MWInput
     void InputManager::joystickButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , int deviceId, unsigned int button, ICS::Control::ControlChangingDirection direction)
     {
+        if(mBindDeviceID != deviceId)
+            return;
+
         clearAllBindings(control, deviceId);
         ICS::DetectingBindingListener::joystickButtonBindingDetected (ICS, control, deviceId, button, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
@@ -1374,6 +1431,9 @@ namespace MWInput
     void InputManager::joystickPOVBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , int deviceId, int pov,ICS:: InputControlSystem::POVAxis axis, ICS::Control::ControlChangingDirection direction)
     {
+        if(mBindDeviceID != deviceId)
+            return;
+
         clearAllBindings(control, deviceId);
         ICS::DetectingBindingListener::joystickPOVBindingDetected (ICS, control, deviceId, pov, axis, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
@@ -1382,6 +1442,9 @@ namespace MWInput
     void InputManager::joystickSliderBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , int deviceId, int slider, ICS::Control::ControlChangingDirection direction)
     {
+        if(mBindDeviceID != deviceId)
+            return;
+
         clearAllBindings(control, deviceId);
         ICS::DetectingBindingListener::joystickSliderBindingDetected (ICS, control, deviceId, slider, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();

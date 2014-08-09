@@ -87,7 +87,7 @@ namespace MWInput
         virtual std::string getActionBindingName (int action, int deviceID);
         virtual int getNumActions() { return A_Last; }
         virtual std::vector<int> getActionSorting ();
-        virtual void enableDetectingBindingMode (int action);
+        virtual void enableDetectingBindingMode (int action, int deviceID);
         virtual void resetToDefaultBindings(int deviceID);
 
         virtual bool joystickLastUsed() {return mJoystickLastUsed;}
@@ -190,6 +190,10 @@ namespace MWInput
 
         //Used for mouseless interfaces
         bool mJoystickLastUsed;
+
+        int mBindDeviceID;
+
+        bool mMouseInjected;
 
     private:
         void adjustMouseRegion(int width, int height);

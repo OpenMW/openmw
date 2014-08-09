@@ -1324,6 +1324,11 @@ namespace MWGui
         allowMouse();
     }
 
+    void WindowManager::notifyJoystickAdded()
+    {
+        mSettingsWindow->updateInputList();
+    }
+
     bool WindowManager::containsMode(GuiMode mode) const
     {
         if(mGuiModes.empty())

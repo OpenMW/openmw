@@ -43,7 +43,7 @@ namespace MWBase
             virtual std::string getActionBindingName (int action, int deviceID) = 0;
             virtual std::vector<int> getActionSorting () = 0;
             virtual int getNumActions() = 0;
-            virtual void enableDetectingBindingMode (int action) = 0;
+            virtual void enableDetectingBindingMode (int action, int deviceID) = 0;
             /// -1 is mouse/keyboard
             virtual void resetToDefaultBindings(int deviceID) = 0;
 
