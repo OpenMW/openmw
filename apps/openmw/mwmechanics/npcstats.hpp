@@ -52,8 +52,6 @@ namespace MWMechanics
             /// time since last hit from drowning
             float mLastDrowningHit;
 
-            float mLevelHealthBonus;
-
         public:
 
             NpcStats();
@@ -104,7 +102,7 @@ namespace MWMechanics
 
             void updateHealth();
             ///< Calculate health based on endurance and strength.
-            ///  Called at character creation and at level up.
+            ///  Called at character creation.
 
             void flagAsUsed (const std::string& id);
 
