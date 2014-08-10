@@ -24,10 +24,9 @@
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadbody.hpp>
 #include <components/esm/debugprofile.hpp>
+#include <components/esm/filter.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
-
-#include "../filter/filter.hpp"
 
 #include "../doc/stage.hpp"
 
@@ -77,7 +76,7 @@ namespace CSMWorld
             IdCollection<Cell> mCells;
             RefIdCollection mReferenceables;
             RefCollection mRefs;
-            IdCollection<CSMFilter::Filter> mFilters;
+            IdCollection<ESM::Filter> mFilters;
             const ResourcesManager& mResourcesManager;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
@@ -180,9 +179,9 @@ namespace CSMWorld
 
             RefCollection& getReferences();
 
-            const IdCollection<CSMFilter::Filter>& getFilters() const;
+            const IdCollection<ESM::Filter>& getFilters() const;
 
-            IdCollection<CSMFilter::Filter>& getFilters();
+            IdCollection<ESM::Filter>& getFilters();
 
             const IdCollection<ESM::Enchantment>& getEnchantments() const;
 

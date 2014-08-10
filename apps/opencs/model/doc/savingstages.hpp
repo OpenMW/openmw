@@ -7,8 +7,6 @@
 #include "../world/idcollection.hpp"
 #include "../world/scope.hpp"
 
-#include "../filter/filter.hpp"
-
 #include "savingstate.hpp"
 
 namespace ESM

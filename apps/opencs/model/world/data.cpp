@@ -251,11 +251,11 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRefs.addColumn (new KeyColumn<CellRef>);
     mRefs.addColumn (new TrapColumn<CellRef>);
 
-    mFilters.addColumn (new StringIdColumn<CSMFilter::Filter>);
-    mFilters.addColumn (new RecordStateColumn<CSMFilter::Filter>);
-    mFilters.addColumn (new FixedRecordTypeColumn<CSMFilter::Filter> (UniversalId::Type_Filter));
-    mFilters.addColumn (new FilterColumn<CSMFilter::Filter>);
-    mFilters.addColumn (new DescriptionColumn<CSMFilter::Filter>);
+    mFilters.addColumn (new StringIdColumn<ESM::Filter>);
+    mFilters.addColumn (new RecordStateColumn<ESM::Filter>);
+    mFilters.addColumn (new FixedRecordTypeColumn<ESM::Filter> (UniversalId::Type_Filter));
+    mFilters.addColumn (new FilterColumn<ESM::Filter>);
+    mFilters.addColumn (new DescriptionColumn<ESM::Filter>);
 
     mDebugProfiles.addColumn (new StringIdColumn<ESM::DebugProfile>);
     mDebugProfiles.addColumn (new RecordStateColumn<ESM::DebugProfile>);
@@ -488,12 +488,12 @@ CSMWorld::RefCollection& CSMWorld::Data::getReferences()
     return mRefs;
 }
 
-const CSMWorld::IdCollection<CSMFilter::Filter>& CSMWorld::Data::getFilters() const
+const CSMWorld::IdCollection<ESM::Filter>& CSMWorld::Data::getFilters() const
 {
     return mFilters;
 }
 
-CSMWorld::IdCollection<CSMFilter::Filter>& CSMWorld::Data::getFilters()
+CSMWorld::IdCollection<ESM::Filter>& CSMWorld::Data::getFilters()
 {
     return mFilters;
 }
