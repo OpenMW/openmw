@@ -56,7 +56,7 @@ void Script::load(ESMReader &esm)
                 ss << "\n  Record: " << esm.getContext().recName.toString();
                 ss << "\n  Subrecord: " << "SCVR";
                 ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
-                std::cout << ss.str() << std::endl;
+                std::cerr << ss.str() << std::endl;
                 break;
             }
 
