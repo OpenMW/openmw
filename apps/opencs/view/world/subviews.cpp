@@ -93,7 +93,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add (CSMWorld::UniversalId::Type_Filters,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView,
-        CreatorFactory<CSVFilter::FilterCreator> >);
+        CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> >);
 
     manager.add (CSMWorld::UniversalId::Type_DebugProfiles,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView,

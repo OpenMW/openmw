@@ -7,6 +7,8 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QUndoStack>
+#include <QLabel>
+#include <QComboBox>
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/data.hpp"
@@ -22,6 +24,9 @@ void CSVWorld::GenericCreator::update()
     mId->setToolTip (QString::fromUtf8 (mErrors.c_str()));
 
     mCreate->setEnabled (mErrors.empty() && !mLocked);
+
+    if (mNamespace)
+        mNamespace->setText (QString::fromUtf8 (getNamespace().c_str()));
 }
 
 void CSVWorld::GenericCreator::setManualEditing (bool enabled)
@@ -41,7 +46,7 @@ void CSVWorld::GenericCreator::insertBeforeButtons (QWidget *widget, bool stretc
 
 std::string CSVWorld::GenericCreator::getId() const
 {
-    return mId->text().toUtf8().constData();
+    return getNamespace() + mId->text().toUtf8().constData();
 }
 
 void CSVWorld::GenericCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const {}
@@ -56,16 +61,37 @@ const CSMWorld::UniversalId& CSVWorld::GenericCreator::getCollectionId() const
     return mListId;
 }
 
+std::string CSVWorld::GenericCreator::getNamespace() const
+{
+    CSMWorld::Scope scope = CSMWorld::Scope_Content;
+
+    if (mScope)
+    {
+        scope = static_cast<CSMWorld::Scope> (mScope->itemData (mScope->currentIndex()).toInt());
+    }
+    else
+    {
+        if (mScopes & CSMWorld::Scope_Project)
+            scope = CSMWorld::Scope_Project;
+        else if (mScopes & CSMWorld::Scope_Session)
+            scope = CSMWorld::Scope_Session;
+    }
+
+    switch (scope)
+    {
+        case CSMWorld::Scope_Content: return "";
+        case CSMWorld::Scope_Project: return "project::";
+        case CSMWorld::Scope_Session: return "session::";
+    }
+
+    return "";
+}
+
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-    const CSMWorld::UniversalId& id, bool relaxedIdRules):
-
-    mData (data),
-    mUndoStack (undoStack),
-    mListId (id),
-    mLocked (false),
-    mCloneMode(false),
-    mClonedType(CSMWorld::UniversalId::Type_None)
-
+    const CSMWorld::UniversalId& id, bool relaxedIdRules)
+: mData (data), mUndoStack (undoStack), mListId (id), mLocked (false), mCloneMode (false),
+  mClonedType (CSMWorld::UniversalId::Type_None), mScopes (CSMWorld::Scope_Content), mScope (0),
+  mScopeLabel (0), mNamespace (0)
 {
     mLayout = new QHBoxLayout;
     mLayout->setContentsMargins (0, 0, 0, 0);
@@ -128,29 +154,28 @@ void CSVWorld::GenericCreator::create()
 {
     if (!mLocked)
     {
+        std::string id = getId();
+
         if (mCloneMode)
         {
-            std::string id = getId();
             std::auto_ptr<CSMWorld::CloneCommand> command (new CSMWorld::CloneCommand (
                 dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel(mListId)), mClonedId, id, mClonedType));
 
             mUndoStack.push(command.release());
 
-            emit done();
-            emit requestFocus(id);
-        } else {
-            std::string id = getId();
-
+        }
+        else
+        {
             std::auto_ptr<CSMWorld::CreateCommand> command (new CSMWorld::CreateCommand (
             dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)), id));
 
             configureCreateCommand (*command);
 
             mUndoStack.push (command.release());
-
-            emit done();
-            emit requestFocus (id);
         }
+
+        emit done();
+        emit requestFocus(id);
     }
 }
 
@@ -164,4 +189,62 @@ void CSVWorld::GenericCreator::cloneMode(const std::string& originId,
 
 void CSVWorld::GenericCreator::toggleWidgets(bool active)
 {
+}
+
+void CSVWorld::GenericCreator::setScope (unsigned int scope)
+{
+    mScopes = scope;
+    int count = (mScopes & CSMWorld::Scope_Content) + (mScopes & CSMWorld::Scope_Project) +
+        (mScopes & CSMWorld::Scope_Session);
+
+    // namespace widget
+    if (count>1 || (count>0 && !(mScopes & CSMWorld::Scope_Content)))
+    {
+        if (!mNamespace)
+        {
+            mNamespace = new QLabel ("::", this);
+            insertAtBeginning (mNamespace, false);
+        }
+    }
+    else
+    {
+        delete mNamespace;
+        mNamespace = 0;
+    }
+
+    // scope selector widget
+    if (count>1)
+    {
+        mScope = new QComboBox (this);
+        insertAtBeginning (mScope, false);
+
+        if (mScopes & CSMWorld::Scope_Content)
+            mScope->addItem ("Content", static_cast<int> (CSMWorld::Scope_Content));
+
+        if (mScopes & CSMWorld::Scope_Project)
+            mScope->addItem ("Project", static_cast<int> (CSMWorld::Scope_Project));
+
+        if (mScopes & CSMWorld::Scope_Session)
+            mScope->addItem ("Session", static_cast<int> (CSMWorld::Scope_Session));
+
+        connect (mScope, SIGNAL (currentIndexChanged (int)), this, SLOT (scopeChanged (int)));
+
+        mScopeLabel = new QLabel ("Scope", this);
+        insertAtBeginning (mScopeLabel, false);
+
+        mScope->setCurrentIndex (0);
+    }
+    else
+    {
+        delete mScope;
+        mScope = 0;
+
+        delete mScopeLabel;
+        mScopeLabel = 0;
+    }
+}
+
+void CSVWorld::GenericCreator::scopeChanged (int index)
+{
+    update();
 }

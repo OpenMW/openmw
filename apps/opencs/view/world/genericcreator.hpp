@@ -5,6 +5,8 @@ class QString;
 class QPushButton;
 class QLineEdit;
 class QHBoxLayout;
+class QComboBox;
+class QLabel;
 
 #include "creator.hpp"
 
@@ -31,6 +33,10 @@ namespace CSVWorld
             bool mLocked;
             std::string mClonedId;
             CSMWorld::UniversalId::Type mClonedType;
+            unsigned int mScopes;
+            QComboBox *mScope;
+            QLabel *mScopeLabel;
+            QLabel *mNamespace;
 
         protected:
             bool mCloneMode;
@@ -54,6 +60,8 @@ namespace CSVWorld
 
             const CSMWorld::UniversalId& getCollectionId() const;
 
+            std::string getNamespace() const;
+
         public:
 
             GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
@@ -65,18 +73,22 @@ namespace CSVWorld
 
             virtual void toggleWidgets (bool active = true);
 
-            virtual void cloneMode(const std::string& originId, 
+            virtual void cloneMode(const std::string& originId,
                                    const CSMWorld::UniversalId::Type type);
 
             virtual std::string getErrors() const;
             ///< Return formatted error descriptions for the current state of the creator. if an empty
             /// string is returned, there is no error.
 
+            virtual void setScope (unsigned int scope);
+
         private slots:
 
             void textChanged (const QString& text);
 
             void create();
+
+            void scopeChanged (int index);
     };
 }
 

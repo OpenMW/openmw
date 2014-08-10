@@ -131,7 +131,7 @@ opencs_hdrs_noqt (model/filter
     )
 
 opencs_units (view/filter
-    filtercreator filterbox recordfilterbox editwidget
+    filterbox recordfilterbox editwidget
     )
 
 set (OPENCS_US
