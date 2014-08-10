@@ -165,7 +165,6 @@ namespace CSMWorld
             ColumnId_Rank = 152,
             ColumnId_Gender = 153,
             ColumnId_PcRank = 154,
-            ColumnId_Scope = 155,
             ColumnId_ReferenceableId = 156,
             ColumnId_CombatState = 157,
             ColumnId_MagicState = 158,

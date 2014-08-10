@@ -3,8 +3,6 @@
 
 #include "../doc/subviewfactoryimp.hpp"
 
-#include "../filter/filtercreator.hpp"
-
 #include "tablesubview.hpp"
 #include "dialoguesubview.hpp"
 #include "scriptsubview.hpp"

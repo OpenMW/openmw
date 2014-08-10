@@ -256,7 +256,6 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mFilters.addColumn (new FixedRecordTypeColumn<CSMFilter::Filter> (UniversalId::Type_Filter));
     mFilters.addColumn (new FilterColumn<CSMFilter::Filter>);
     mFilters.addColumn (new DescriptionColumn<CSMFilter::Filter>);
-    mFilters.addColumn (new ScopeColumn<CSMFilter::Filter>);
 
     mDebugProfiles.addColumn (new StringIdColumn<ESM::DebugProfile>);
     mDebugProfiles.addColumn (new RecordStateColumn<ESM::DebugProfile>);
@@ -717,9 +716,6 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
             }
 
             mFilters.load (*mReader, mBase);
-            mFilters.setData (mFilters.getSize()-1,
-                mFilters.findColumnIndex (CSMWorld::Columns::ColumnId_Scope),
-                static_cast<int> (CSMFilter::Filter::Scope_Project));
             break;
 
         case ESM::REC_DBGP:

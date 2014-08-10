@@ -172,7 +172,6 @@ namespace CSMWorld
             { ColumnId_Rank, "Rank" },
             { ColumnId_Gender, "Gender" },
             { ColumnId_PcRank, "PC Rank" },
-            { ColumnId_Scope, "Scope" },
             { ColumnId_ReferenceableId, "Referenceable ID" },
             { ColumnId_CombatState, "Combat" },
             { ColumnId_MagicState, "Magic" },
