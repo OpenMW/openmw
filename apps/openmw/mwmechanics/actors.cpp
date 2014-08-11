@@ -374,10 +374,10 @@ namespace MWMechanics
         int endurance    = creatureStats.getAttribute(ESM::Attribute::Endurance).getModified();
 
         double magickaFactor =
-            creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude * 0.1 + 0.5;
+            creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude * 0.1 + 1;
 
         DynamicStat<float> magicka = creatureStats.getMagicka();
-        float diff = (static_cast<int>(intelligence + magickaFactor*intelligence)) - magicka.getBase();
+        float diff = (static_cast<int>(magickaFactor*intelligence)) - magicka.getBase();
         magicka.modify(diff);
         creatureStats.setMagicka(magicka);
 
