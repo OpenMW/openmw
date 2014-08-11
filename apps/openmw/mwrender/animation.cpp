@@ -467,7 +467,13 @@ float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::Node
     const std::string stop = groupname+": stop";
     float starttime = std::numeric_limits<float>::max();
     float stoptime = 0.0f;
-    // Have to find keys in reverse (see reset method)
+
+    // Pick the last Loop Stop key and the last Loop Start key.
+    // This is required because of broken text keys in AshVampire.nif.
+    // It has *two* WalkForward: Loop Stop keys at different times, the first one is used for stopping playback
+    // but the animation velocity calculation uses the second one.
+    // As result the animation velocity calculation is not correct, and this incorrect velocity must be replicated,
+    // because otherwise the Creature's Speed (dagoth uthol) would not be sufficient to move fast enough.
     NifOgre::TextKeyMap::const_reverse_iterator keyiter(keys.rbegin());
     while(keyiter != keys.rend())
     {
@@ -476,8 +482,18 @@ float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::Node
             starttime = keyiter->first;
             break;
         }
-        else if(keyiter->second == loopstop || keyiter->second == stop)
+        ++keyiter;
+    }
+    keyiter = keys.rbegin();
+    while(keyiter != keys.rend())
+    {
+        if (keyiter->second == stop)
             stoptime = keyiter->first;
+        else if (keyiter->second == loopstop)
+        {
+            stoptime = keyiter->first;
+            break;
+        }
         ++keyiter;
     }
 
