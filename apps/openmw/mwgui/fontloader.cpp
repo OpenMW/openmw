@@ -134,7 +134,7 @@ namespace MWGui
             mEncoding = encoding;
     }
 
-    void FontLoader::loadAllFonts()
+    void FontLoader::loadAllFonts(bool exportToFile)
     {
         Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
         for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
@@ -142,7 +142,7 @@ namespace MWGui
             Ogre::StringVectorPtr resourcesInThisGroup = Ogre::ResourceGroupManager::getSingleton ().findResourceNames (*it, "*.fnt");
             for (Ogre::StringVector::iterator resource = resourcesInThisGroup->begin(); resource != resourcesInThisGroup->end(); ++resource)
             {
-                loadFont(*resource);
+                loadFont(*resource, exportToFile);
             }
         }
     }
@@ -168,7 +168,7 @@ namespace MWGui
         float ascent;
     } GlyphInfo;
 
-    void FontLoader::loadFont(const std::string &fileName)
+    void FontLoader::loadFont(const std::string &fileName, bool exportToFile)
     {
         Ogre::DataStreamPtr file = Ogre::ResourceGroupManager::getSingleton().openResource(fileName);
 
@@ -221,6 +221,9 @@ namespace MWGui
             width, height, 0, Ogre::PF_BYTE_RGBA);
         texture->loadImage(image);
 
+        if (exportToFile)
+            image.save(resourceName + ".png");
+
         // Register the font with MyGUI
         MyGUI::ResourceManualFont* font = static_cast<MyGUI::ResourceManualFont*>(
                     MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
@@ -240,10 +243,10 @@ namespace MWGui
 
         for(int i = 0; i < 256; i++)
         {
-            int x1 = data[i].top_left.x*width;
-            int y1 = data[i].top_left.y*height;
-            int w  = data[i].top_right.x*width - x1;
-            int h  = data[i].bottom_left.y*height - y1;
+            float x1 = data[i].top_left.x*width;
+            float y1 = data[i].top_left.y*height;
+            float w  = data[i].top_right.x*width - x1;
+            float h  = data[i].bottom_left.y*height - y1;
 
             ToUTF8::Utf8Encoder encoder(mEncoding);
             unsigned long unicodeVal = utf8ToUnicode(getUtf8(i, encoder, mEncoding));
@@ -353,6 +356,12 @@ namespace MWGui
             cursorCode->addAttribute("advance", "0");
             cursorCode->addAttribute("bearing", "0 0");
             cursorCode->addAttribute("size", "0 0");
+        }
+
+        if (exportToFile)
+        {
+            xmlDocument.createDeclaration();
+            xmlDocument.save(resourceName + ".xml");
         }
 
         font->deserialization(root, MyGUI::Version(3,2,0));

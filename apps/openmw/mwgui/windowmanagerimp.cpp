@@ -73,7 +73,7 @@ namespace MWGui
     WindowManager::WindowManager(
         const Compiler::Extensions& extensions, int fpsLevel, OEngine::Render::OgreRenderer *ogre,
             const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
-            Translation::Storage& translationDataStorage, ToUTF8::FromType encoding)
+            Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts)
       : mConsoleOnlyScripts(consoleOnlyScripts)
       , mGuiManager(NULL)
       , mRendering(ogre)
@@ -148,7 +148,7 @@ namespace MWGui
 
         // Load fonts
         FontLoader fontLoader (encoding);
-        fontLoader.loadAllFonts();
+        fontLoader.loadAllFonts(exportFonts);
 
         //Register own widgets with MyGUI
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");

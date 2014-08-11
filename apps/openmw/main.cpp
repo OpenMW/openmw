@@ -168,6 +168,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
         ("no-grab", "Don't grab mouse cursor")
 
+        ("export-fonts", bpo::value<bool>()->implicit_value(true)
+            ->default_value(false), "Export Morrowind .fnt fonts to PNG image and XML file in current directory")
+
         ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
@@ -268,6 +271,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setSoundUsage(!variables["no-sound"].as<bool>());
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
     engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
+    engine.enableFontExport(variables["export-fonts"].as<bool>());
 
     return true;
 }

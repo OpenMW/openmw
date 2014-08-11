@@ -181,7 +181,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mActivationDistanceOverride(-1)
   , mGrab(true)
   , mScriptBlacklistUse (true)
-
+  , mExportFonts(false)
 {
     std::srand ( std::time(NULL) );
     MWClass::registerClasses();
@@ -372,7 +372,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     MWGui::WindowManager* window = new MWGui::WindowManager(
                 mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
-                mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding);
+                mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts);
     mEnvironment.setWindowManager (window);
 
     // Create sound system
@@ -576,4 +576,9 @@ void OMW::Engine::setScriptBlacklist (const std::vector<std::string>& list)
 void OMW::Engine::setScriptBlacklistUse (bool use)
 {
     mScriptBlacklistUse = use;
+}
+
+void OMW::Engine::enableFontExport(bool exportFonts)
+{
+    mExportFonts = exportFonts;
 }
