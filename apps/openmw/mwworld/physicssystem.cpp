@@ -612,9 +612,9 @@ namespace MWWorld
         }
     }
 
-    std::vector<std::string> PhysicsSystem::getCollisions(const Ptr &ptr)
+    std::vector<std::string> PhysicsSystem::getCollisions(const Ptr &ptr, int collisionGroup, int collisionMask)
     {
-        return mEngine->getCollisions(ptr.getRefData().getBaseNode()->getName());
+        return mEngine->getCollisions(ptr.getRefData().getBaseNode()->getName(), collisionGroup, collisionMask);
     }
 
     Ogre::Vector3 PhysicsSystem::traceDown(const MWWorld::Ptr &ptr, float maxHeight)
