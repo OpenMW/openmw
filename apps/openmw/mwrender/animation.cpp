@@ -1431,6 +1431,15 @@ void ObjectAnimation::addLight(const ESM::Light *light)
     addExtraLight(mInsert->getCreator(), mObjectRoot, light);
 }
 
+void ObjectAnimation::removeParticles()
+{
+    for (unsigned int i=0; i<mObjectRoot->mParticles.size(); ++i)
+    {
+        mObjectRoot->mSceneMgr->destroyParticleSystem(mObjectRoot->mParticles[i]);
+    }
+    mObjectRoot->mParticles.clear();
+}
+
 
 class FindEntityTransparency {
 public:
