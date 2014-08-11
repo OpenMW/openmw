@@ -46,6 +46,7 @@
 
 #include <components/nif/node.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "skeleton.hpp"
 #include "material.hpp"
@@ -169,7 +170,7 @@ public:
                 const Nif::NiSourceTexture* tex = ctrl->mSources[i].getPtr();
                 if (!tex->external)
                     std::cerr << "Warning: Found internal texture, ignoring." << std::endl;
-                mTextures.push_back(NIFMaterialLoader::findTextureName(tex->filename));
+                mTextures.push_back(Misc::ResourceHelpers::correctTexturePath(tex->filename));
             }
         }
 

@@ -46,7 +46,7 @@ add_component_dir (esm
     )
 
 add_component_dir (misc
-    utf8stream stringops
+    utf8stream stringops resourcehelpers
     )
 
 add_component_dir (files

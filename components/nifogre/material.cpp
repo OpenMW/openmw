@@ -1,7 +1,7 @@
 #include "material.hpp"
 
 #include <components/nif/node.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
@@ -54,61 +54,6 @@ static const char *getTestMode(int mode)
     return "less_equal";
 }
 
-
-std::string NIFMaterialLoader::findMaterialName(const std::string &topLevelDirectory, const std::string &filename)
-{
-    /* Bethesda at some point converted all their BSA
-     * textures from tga to dds for increased load speed, but all
-     * texture file name references were kept as .tga.
-     */
-    std::string path = topLevelDirectory + '\\';
-    std::string path2 = topLevelDirectory + '/';
-
-    std::string texname = filename;
-    Misc::StringUtils::toLower(texname);
-
-    // Apparently, leading separators are allowed
-    while (texname.size() && (texname[0] == '/' || texname[0] == '\\'))
-        texname.erase(0, 1);
-
-    if(texname.compare(0, path.size()-1, path.data()) != 0 &&
-       texname.compare(0, path2.size()-1, path2.data()) != 0)
-        texname = path + texname;
-
-    Ogre::String::size_type pos = texname.rfind('.');
-    if(pos != Ogre::String::npos && texname.compare(pos, texname.length() - pos, ".dds") != 0)
-    {
-        // since we know all (GOTY edition or less) textures end
-        // in .dds, we change the extension
-        texname.replace(pos, texname.length(), ".dds");
-
-        // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
-        // verify, and revert if false (this call succeeds quickly, but fails slowly)
-        if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texname))
-        {
-            texname = filename;
-            Misc::StringUtils::toLower(texname);
-            if(texname.compare(0, path.size()-1, path.data()) != 0 &&
-               texname.compare(0, path2.size()-1, path2.data()) != 0)
-                texname = path + texname;
-        }
-    }
-
-    return texname;
-}
-
-std::string NIFMaterialLoader::findTextureName(const std::string &filename)
-{
-    static const std::string dir = "textures";
-    return findMaterialName(dir, filename);
-}
-
-std::string NIFMaterialLoader::findIconName(const std::string &filename)
-{
-    static const std::string dir = "icons";
-    return findMaterialName(dir, filename);
-}
-
 Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
                                             const Ogre::String &name, const Ogre::String &group,
                                             const Nif::NiTexturingProperty *texprop,
@@ -158,7 +103,7 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
 
             const Nif::NiSourceTexture *st = texprop->textures[i].texture.getPtr();
             if(st->external)
-                texName[i] = findTextureName(st->filename);
+                texName[i] = Misc::ResourceHelpers::correctTexturePath(st->filename);
             else
                 warn("Found internal texture, ignoring.");
         }

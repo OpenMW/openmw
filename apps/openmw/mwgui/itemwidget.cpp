@@ -3,7 +3,7 @@
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_ImageBox.h>
 
-#include <components/nifogre/material.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwworld/class.hpp"
 
@@ -65,7 +65,7 @@ namespace MWGui
 
     void ItemWidget::setIcon(const MWWorld::Ptr &ptr)
     {
-        setIcon(NifOgre::NIFMaterialLoader::findIconName(ptr.getClass().getInventoryIcon(ptr)));
+        setIcon(Misc::ResourceHelpers::correctIconPath(ptr.getClass().getInventoryIcon(ptr)));
     }
 
 
