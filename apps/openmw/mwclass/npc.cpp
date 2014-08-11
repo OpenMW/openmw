@@ -918,8 +918,6 @@ namespace MWClass
 
         float runSpeed = walkSpeed*(0.01f * npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified() *
                                     gmst.fAthleticsRunBonus->getFloat() + gmst.fBaseRunMultiplier->getFloat());
-        if(npcdata->mNpcStats.isWerewolf())
-            runSpeed *= gmst.fWereWolfRunMult->getFloat();
 
         float moveSpeed;
         if(normalizedEncumbrance >= 1.0f)
@@ -950,6 +948,9 @@ namespace MWClass
             moveSpeed = walkSpeed;
         if(getMovementSettings(ptr).mPosition[0] != 0 && getMovementSettings(ptr).mPosition[1] == 0)
             moveSpeed *= 0.75f;
+
+        if(npcdata->mNpcStats.isWerewolf() && running && npcdata->mNpcStats.getDrawState() == MWMechanics::DrawState_Nothing)
+            moveSpeed *= gmst.fWereWolfRunMult->getFloat();
 
         return moveSpeed;
     }
