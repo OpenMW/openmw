@@ -145,11 +145,8 @@ namespace MWClass
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->getFloat();
         for (MWGui::Widgets::SpellEffectList::iterator it = info.effects.begin(); it != info.effects.end(); ++it)
         {
-            it->mKnown = ( (i == 0 && alchemySkill >= fWortChanceValue)
-                 || (i == 1 && alchemySkill >= fWortChanceValue*2)
-                 || (i == 2 && alchemySkill >= fWortChanceValue*3)
-                 || (i == 3 && alchemySkill >= fWortChanceValue*4));
-
+            it->mKnown = (i <= 1 && alchemySkill >= fWortChanceValue)
+                 || (i <= 3 && alchemySkill >= fWortChanceValue*2);
             ++i;
         }
 
