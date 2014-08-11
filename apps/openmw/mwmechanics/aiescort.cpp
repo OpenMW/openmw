@@ -75,6 +75,7 @@ namespace MWMechanics
         }
 
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
 
         const MWWorld::Ptr follower = MWBase::Environment::get().getWorld()->getPtr(mActorId, false);
         const float* const leaderPos = actor.getRefData().getPosition().pos;
