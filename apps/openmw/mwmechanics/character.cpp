@@ -1511,6 +1511,8 @@ void CharacterController::update(float duration)
     else if (mAnimation)
         mAnimation->updateEffects(duration);
     mSkipAnim = false;
+
+    mAnimation->enableHeadAnimation(cls.isActor() && !cls.getCreatureStats(mPtr).isDead());
 }
 
 

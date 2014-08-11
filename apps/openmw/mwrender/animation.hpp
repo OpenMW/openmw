@@ -306,6 +306,7 @@ public:
     virtual void attachArrow() {}
     virtual void releaseArrow() {}
     void enableLights(bool enable);
+    virtual void enableHeadAnimation(bool enable) {}
 
     Ogre::AxisAlignedBox getWorldBounds();
 
