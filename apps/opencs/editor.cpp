@@ -298,8 +298,6 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     sh::Factory::getInstance ().setGlobalSetting ("num_lights", "8");
 
-	Ogre::FontManager* fontManager = new Ogre::FontManager();
-
     /// \todo add more configurable shiny settings
 
     return factory;

@@ -45,7 +45,7 @@ static char strict_normalize_char(char ch)
 
 static char nonstrict_normalize_char(char ch)
 {
-    return ch == '\\' ? '/' : std::tolower(ch,std::locale());
+    return ch == '\\' ? '/' : std::tolower(ch,std::locale::classic());
 }
 
 template<typename T1, typename T2>
