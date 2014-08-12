@@ -81,7 +81,8 @@ namespace MWRender
         virtual ~InventoryPreview();
         virtual void onSetup();
 
-        void update(int sizeX, int sizeY);
+        void update(); // Render preview again, e.g. after changed equipment
+        void resize(int sizeX, int sizeY);
 
         int getSlotSelected(int posX, int posY);
 

@@ -171,11 +171,22 @@ namespace MWRender
         delete mSelectionBuffer;
     }
 
-    void InventoryPreview::update(int sizeX, int sizeY)
+    void InventoryPreview::resize(int sizeX, int sizeY)
     {
         mSizeX = sizeX;
         mSizeY = sizeY;
 
+        mViewport->setDimensions (0, 0, std::min(1.f, float(mSizeX) / float(512)), std::min(1.f, float(mSizeY) / float(1024)));
+        mTexture->load();
+
+        if (!mRenderTarget)
+            setupRenderTarget();
+
+        mRenderTarget->update();
+    }
+
+    void InventoryPreview::update()
+    {
         mAnimation->updateParts();
 
         MWWorld::InventoryStore &inv = mCharacter.getClass().getInventoryStore(mCharacter);

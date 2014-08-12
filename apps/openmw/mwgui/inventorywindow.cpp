@@ -37,6 +37,7 @@ namespace MWGui
         , mLastYSize(0)
         , mPreview(new MWRender::InventoryPreview(MWBase::Environment::get().getWorld ()->getPlayerPtr()))
         , mPreviewDirty(true)
+        , mPreviewResize(true)
         , mDragAndDrop(dragAndDrop)
         , mSelectedItem(-1)
         , mGuiMode(GM_Inventory)
@@ -100,6 +101,9 @@ namespace MWGui
 
         mPreview.reset(new MWRender::InventoryPreview(mPtr));
         mPreview->setup();
+
+        mPreviewDirty = true;
+        mPreviewResize = true;
     }
 
     void InventoryWindow::setGuiMode(GuiMode mode)
@@ -132,7 +136,7 @@ namespace MWGui
                              Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height);
 
         if (size.width != mMainWidget->getWidth() || size.height != mMainWidget->getHeight())
-            mPreviewDirty = true;
+            mPreviewResize = true;
 
         mMainWidget->setPosition(pos);
         mMainWidget->setSize(size);
@@ -340,7 +344,7 @@ namespace MWGui
         {
             mLastXSize = mMainWidget->getSize().width;
             mLastYSize = mMainWidget->getSize().height;
-            mPreviewDirty = true;
+            mPreviewResize = true;
         }
     }
 
@@ -416,9 +420,13 @@ namespace MWGui
         else
             mSkippedToEquip = ptr;
 
-        mItemView->update();
+        if (isVisible())
+        {
+            mItemView->update();
 
-        notifyContentChanged();
+            notifyContentChanged();
+        }
+        // else: will be updated in open()
     }
 
     void InventoryWindow::onAvatarClicked(MyGUI::Widget* _sender)
@@ -505,16 +513,22 @@ namespace MWGui
     void InventoryWindow::doRenderUpdate ()
     {
         mPreview->onFrame();
-        if (mPreviewDirty)
+        if (mPreviewResize)
         {
-            mPreviewDirty = false;
+            mPreviewResize = false;
             MyGUI::IntSize size = mAvatarImage->getSize();
-
-            mPreview->update (size.width, size.height);
+            mPreview->resize(size.width, size.height);
 
             mAvatarImage->setImageTexture("CharacterPreview");
             mAvatarImage->setImageCoord(MyGUI::IntCoord(0, 0, std::min(512, size.width), std::min(1024, size.height)));
             mAvatarImage->setImageTile(MyGUI::IntSize(std::min(512, size.width), std::min(1024, size.height)));
+        }
+        if (mPreviewDirty)
+        {
+            mPreviewDirty = false;
+            mPreview->update ();
+
+            mAvatarImage->setImageTexture("CharacterPreview");
 
             mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
                 + boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
