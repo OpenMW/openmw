@@ -2,6 +2,7 @@
 #include "pagedworldspacewidget.hpp"
 
 #include <sstream>
+#include <iostream>
 
 #include <OgreCamera.h>
 #include <OgreTextureManager.h>
@@ -9,187 +10,15 @@
 #include <OgreMaterialManager.h>
 #include <OgreBillboardSet.h>
 #include <OgreBillboard.h>
-#include <Overlay/OgreFontManager.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 
 #include <QtGui/qevent.h>
+#include <Qt/qpainter.h>
 
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
-
-//all credits to http://www.ogre3d.org/tikiwiki/tiki-index.php?page=HowTo:+Write+text+on+texture
-void WriteToTexture(const Ogre::String &str, Ogre::TexturePtr destTexture, Ogre::Image::Box destRectangle, Ogre::Font* font, const Ogre::ColourValue &color, char justify = 'l', bool wordwrap = true)
-{
-    using namespace Ogre;
-
-    if (destTexture->getHeight() < destRectangle.bottom)
-        destRectangle.bottom = destTexture->getHeight();
-    if (destTexture->getWidth() < destRectangle.right)
-        destRectangle.right = destTexture->getWidth();
-
-    if (!font->isLoaded())
-        font->load();
-
-    TexturePtr fontTexture = (TexturePtr)TextureManager::getSingleton().getByName(font->getMaterial()->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureName());
-
-    HardwarePixelBufferSharedPtr fontBuffer = fontTexture->getBuffer();
-    HardwarePixelBufferSharedPtr destBuffer = destTexture->getBuffer();
-
-    PixelBox destPb = destBuffer->lock(destRectangle, HardwareBuffer::HBL_NORMAL);
-
-    // The font texture buffer was created write only...so we cannot read it back :o). One solution is to copy the buffer  instead of locking it. (Maybe there is a way to create a font texture which is not write_only ?)
-
-    // create a buffer
-    size_t nBuffSize = fontBuffer->getSizeInBytes();
-    uint8* buffer = (uint8*)calloc(nBuffSize, sizeof(uint8));
-
-    // create pixel box using the copy of the buffer
-    PixelBox fontPb(fontBuffer->getWidth(), fontBuffer->getHeight(), fontBuffer->getDepth(), fontBuffer->getFormat(), buffer);
-    fontBuffer->blitToMemory(fontPb);
-
-    uint8* fontData = static_cast<uint8*>(fontPb.data);
-    uint8* destData = static_cast<uint8*>(destPb.data);
-
-    const size_t fontPixelSize = PixelUtil::getNumElemBytes(fontPb.format);
-    const size_t destPixelSize = PixelUtil::getNumElemBytes(destPb.format);
-
-    const size_t fontRowPitchBytes = fontPb.rowPitch * fontPixelSize;
-    const size_t destRowPitchBytes = destPb.rowPitch * destPixelSize;
-
-    Box *GlyphTexCoords;
-    GlyphTexCoords = new Box[str.size()];
-
-    Font::UVRect glypheTexRect;
-    size_t charheight = 0;
-    size_t charwidth = 0;
-
-    for (unsigned int i = 0; i < str.size(); i++)
-    {
-        if ((str[i] != '\t') && (str[i] != '\n') && (str[i] != ' '))
-        {
-            glypheTexRect = font->getGlyphTexCoords(str[i]);
-            GlyphTexCoords[i].left = glypheTexRect.left * fontTexture->getSrcWidth();
-            GlyphTexCoords[i].top = glypheTexRect.top * fontTexture->getSrcHeight();
-            GlyphTexCoords[i].right = glypheTexRect.right * fontTexture->getSrcWidth();
-            GlyphTexCoords[i].bottom = glypheTexRect.bottom * fontTexture->getSrcHeight();
-
-            if (GlyphTexCoords[i].getHeight() > charheight)
-                charheight = GlyphTexCoords[i].getHeight();
-            if (GlyphTexCoords[i].getWidth() > charwidth)
-                charwidth = GlyphTexCoords[i].getWidth();
-        }
-
-    }
-
-    size_t cursorX = 0;
-    size_t cursorY = 0;
-    size_t lineend = destRectangle.getWidth();
-    bool carriagreturn = true;
-    for (unsigned int strindex = 0; strindex < str.size(); strindex++)
-    {
-        switch (str[strindex])
-        {
-        case ' ': cursorX += charwidth;  break;
-        case '\t':cursorX += charwidth * 3; break;
-        case '\n':cursorY += charheight; carriagreturn = true; break;
-        default:
-        {
-                   //wrapping
-                   if ((cursorX + GlyphTexCoords[strindex].getWidth()> lineend) && !carriagreturn)
-                   {
-                       cursorY += charheight;
-                       carriagreturn = true;
-                   }
-
-                   //justify
-                   if (carriagreturn)
-                   {
-                       size_t l = strindex;
-                       size_t textwidth = 0;
-                       size_t wordwidth = 0;
-
-                       while ((l < str.size()) && (str[l] != '\n)'))
-                       {
-                           wordwidth = 0;
-
-                           switch (str[l])
-                           {
-                           case ' ': wordwidth = charwidth; ++l; break;
-                           case '\t': wordwidth = charwidth * 3; ++l; break;
-                           case '\n': l = str.size();
-                           }
-
-                           if (wordwrap)
-                           while ((l < str.size()) && (str[l] != ' ') && (str[l] != '\t') && (str[l] != '\n'))
-                           {
-                               wordwidth += GlyphTexCoords[l].getWidth();
-                               ++l;
-                           }
-                           else
-                           {
-                               wordwidth += GlyphTexCoords[l].getWidth();
-                               l++;
-                           }
-
-                           if ((textwidth + wordwidth) <= destRectangle.getWidth())
-                               textwidth += (wordwidth);
-                           else
-                               break;
-                       }
-
-                       if ((textwidth == 0) && (wordwidth > destRectangle.getWidth()))
-                           textwidth = destRectangle.getWidth();
-
-                       switch (justify)
-                       {
-                       case 'c':    cursorX = (destRectangle.getWidth() - textwidth) / 2;
-                           lineend = destRectangle.getWidth() - cursorX;
-                           break;
-
-                       case 'r':    cursorX = (destRectangle.getWidth() - textwidth);
-                           lineend = destRectangle.getWidth();
-                           break;
-
-                       default:    cursorX = 0;
-                           lineend = textwidth;
-                           break;
-                       }
-
-                       carriagreturn = false;
-                   }
-
-                   //abort - net enough space to draw
-                   if ((cursorY + charheight) > destRectangle.getHeight())
-                       goto stop;
-
-                   //draw pixel by pixel
-                   for (size_t i = 0; i < GlyphTexCoords[strindex].getHeight(); i++)
-                   for (size_t j = 0; j < GlyphTexCoords[strindex].getWidth(); j++)
-                   {
-                       float alpha = color.a * (fontData[(i + GlyphTexCoords[strindex].top) * fontRowPitchBytes + (j + GlyphTexCoords[strindex].left) * fontPixelSize + 1] / 255.0);
-                       float invalpha = 1.0 - alpha;
-                       size_t offset = (i + cursorY) * destRowPitchBytes + (j + cursorX) * destPixelSize;
-                       ColourValue pix;
-                       PixelUtil::unpackColour(&pix, destPb.format, &destData[offset]);
-                       pix = (pix * invalpha) + (color * alpha);
-                       PixelUtil::packColour(pix, destPb.format, &destData[offset]);
-                   }
-
-                   cursorX += GlyphTexCoords[strindex].getWidth();
-        }//default
-        }//switch
-    }//for
-
-stop:
-    delete[] GlyphTexCoords;
-
-    destBuffer->unlock();
-
-    // Free the memory allocated for the buffer
-    free(buffer); buffer = 0;
-}
 
 void CSVRender::PagedWorldspaceWidget::displayCellCoord(bool display)
 {
@@ -225,8 +54,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                 mCells.erase (iter++);
 
                 getSceneManager()->getSceneNode("CellBillboardNode" + iter->first.getId(mWorldspace))->detachAllObjects();
-                getSceneManager()->getBillboardSet("CellBillboardSet" + iter->first.getId(mWorldspace))->removeBillboard(
-                    getSceneManager()->getBillboardSet("CellBillboardSet" + iter->first.getId(mWorldspace))->getBillboard(0));
+                getSceneManager()->destroySceneNode("CellBillboardNode" + iter->first.getId(mWorldspace));
                 getSceneManager()->destroyBillboardSet("CellBillboardSet" + iter->first.getId(mWorldspace));
 
                 modified = true;
@@ -262,19 +90,17 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             Ogre::SceneNode* billboardNode = getSceneManager()->getRootSceneNode()->createChildSceneNode("CellBillboardNode" + iter->getId(mWorldspace));
             billboardNode->setPosition(8192 * iter->getX() + 4096, 8192 * iter->getY() + 4096, 0);
 
-            Ogre::Font* font;
-            if (!Ogre::FontManager::getSingletonPtr()->resourceExists("CellBillboardFont" + iter->getId(mWorldspace)))
-            {
-                font = Ogre::FontManager::getSingletonPtr()->create("CellBillboardFont" + iter->getId(mWorldspace), "Data00000001").getPointer();
-                font->setType(Ogre::FT_TRUETYPE);
-                font->setSource("Comic.ttf");
-                font->setTrueTypeSize(256);
-                font->load();
-            }
-            else
-            {
-                font = Ogre::FontManager::getSingletonPtr()->getByName("CellBillboardFont" + iter->getId(mWorldspace)).getPointer();
-            }
+            QImage image(QSize(1024, 512), QImage::Format::Format_RGB888);
+            QPainter painter(&image);
+            std::string text = std::to_string(iter->getX()) + ";" + std::to_string(iter->getY());
+            QFont font = painter.font();
+            font.setPointSize(18);
+            painter.setFont(font);
+            painter.setBrush(Qt::blue);
+            painter.setPen(Qt::SolidLine);
+            painter.setPen(Qt::red);
+            painter.drawText(QPoint(100, 100), QString(text.c_str()));
+            painter.save();
 
             Ogre::TexturePtr texture;
             if (Ogre::TextureManager::getSingleton().resourceExists("CellBillboardTexture" + iter->getId(mWorldspace)))
@@ -283,8 +109,41 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             }
             else
             {
-                texture = Ogre::TextureManager::getSingleton().createManual("CellBillboardTexture" + iter->getId(mWorldspace), "Data00000001", Ogre::TEX_TYPE_2D, 1024, 512, Ogre::MIP_UNLIMITED, Ogre::PF_X8R8G8B8, Ogre::TU_STATIC | Ogre::TU_AUTOMIPMAP);
-                WriteToTexture(std::to_string(iter->getX()) + ";" + std::to_string(iter->getY()), texture, Ogre::Image::Box(0, 100, 1024, 512), font, Ogre::ColourValue(1.0, 1.0, 1.0, 1.0), 'c');
+                texture = Ogre::TextureManager::getSingleton().createManual("CellBillboardTexture" + iter->getId(mWorldspace), 
+                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                    Ogre::TEX_TYPE_2D, 1024, 512, 1, Ogre::PF_X8B8G8R8, Ogre::TU_DEFAULT);
+                Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
+                pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
+                const Ogre::PixelBox& pixBox = pixelBuffer->getCurrentLock();
+
+                Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixBox.data);
+                for (size_t i = 0, width = texture->getWidth(); i < width; ++i)
+                {
+                    for (size_t j = 0, height = texture->getHeight(); j < height; ++j)
+                    {
+                        QRgb color = image.pixel(QPoint(i,j));
+                        *pDest++ = qBlue(color);
+                        *pDest++ = qGreen(color);
+                        *pDest++ = qRed(color);
+                        *pDest++ = 0;
+                    }
+                }
+                pixelBuffer->unlock();
+                texture->load();
+                /*Ogre::HardwarePixelBufferSharedPtr buffer = texture->getBuffer();
+                buffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
+                const Ogre::PixelBox &pb = buffer->getCurrentLock();
+
+                /// Update the contents of pb here
+                /// Image data starts at pb.data and has format pb.format
+                /// Here we assume data.format is PF_X8R8G8B8 so we can address pixels as uint32.
+                uchar *data = static_cast<uchar*>(pb.data);
+                memcpy(data, img.bits(), buffer->getSizeInBytes());
+                std::cout << buffer->getSizeInBytes() << std::endl << img.byteCount();
+
+
+                /// Unlock the buffer again (frees it for use by the GPU)
+                buffer->unlock();*/
             }
 
             Ogre::MaterialPtr material;
@@ -307,7 +166,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             Ogre::BillboardSet* mySet = getSceneManager()->createBillboardSet("CellBillboardSet" + iter->getId(mWorldspace));
             Ogre::Billboard* myBillboard = mySet->createBillboard(Ogre::Vector3(0, 0, 0));
             mySet->setMaterial(material);
-            myBillboard->setDimensions(4000, 2000);
+            myBillboard->setDimensions(1024, 512);
             mySet->setRenderQueueGroup(mySet->getRenderQueueGroup() + 1); // render the bilboard on top
             billboardNode->attachObject(mySet);
 
