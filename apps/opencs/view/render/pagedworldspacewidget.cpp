@@ -109,23 +109,11 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                 texture = Ogre::TextureManager::getSingleton().createManual("CellBillboardTexture" + iter->getId(mWorldspace), 
                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                     Ogre::TEX_TYPE_2D, 1024, 1024, 1, Ogre::PF_X8R8G8B8, Ogre::TU_DEFAULT);
-                Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
-                pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
-                const Ogre::PixelBox& pixBox = pixelBuffer->getCurrentLock();
 
-                Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixBox.data);
-                for (size_t i = 0, width = texture->getWidth(); i < width; ++i)
-                {
-                    for (size_t j = 0, height = texture->getHeight(); j < height; ++j)
-                    {
-                        QRgb color = image.pixel(QPoint(j,i));
-                        *pDest++ = qBlue(color);
-                        *pDest++ = qGreen(color);
-                        *pDest++ = qRed(color);
-                        *pDest++ = 0;
-                    }
-                }
-                pixelBuffer->unlock();
+                int w = 1024;
+                int h = 1024;
+                Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream((void*)image.constBits(), w*h*Ogre::PixelUtil::getNumElemBytes(Ogre::PixelFormat::PF_R8G8B8), false));
+                texture->loadRawData(stream, w, h, Ogre::PixelFormat::PF_R8G8B8);
                 texture->load();
             }
 
