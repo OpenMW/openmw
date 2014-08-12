@@ -90,17 +90,15 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             Ogre::SceneNode* billboardNode = getSceneManager()->getRootSceneNode()->createChildSceneNode("CellBillboardNode" + iter->getId(mWorldspace));
             billboardNode->setPosition(8192 * iter->getX() + 4096, 8192 * iter->getY() + 4096, 0);
 
-            QImage image(QSize(1024, 512), QImage::Format::Format_RGB888);
+            QImage image(QSize(1024, 1024), QImage::Format::Format_RGB888);
             QPainter painter(&image);
             std::string text = std::to_string(iter->getX()) + ";" + std::to_string(iter->getY());
             QFont font = painter.font();
-            font.setPointSize(18);
+            font.setPointSize(256);
             painter.setFont(font);
-            painter.setBrush(Qt::blue);
             painter.setPen(Qt::SolidLine);
-            painter.setPen(Qt::red);
-            painter.drawText(QPoint(100, 100), QString(text.c_str()));
-            painter.save();
+            painter.setPen(Qt::white);
+            painter.drawText(QRect(0, 0, 1024, 1024), Qt::AlignCenter, QString(text.c_str()));
 
             Ogre::TexturePtr texture;
             if (Ogre::TextureManager::getSingleton().resourceExists("CellBillboardTexture" + iter->getId(mWorldspace)))
@@ -111,17 +109,19 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             {
                 texture = Ogre::TextureManager::getSingleton().createManual("CellBillboardTexture" + iter->getId(mWorldspace), 
                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                    Ogre::TEX_TYPE_2D, 1024, 512, 1, Ogre::PF_X8B8G8R8, Ogre::TU_DEFAULT);
+                    Ogre::TEX_TYPE_2D, 1024, 1024, 1, Ogre::PF_X8R8G8B8, Ogre::TU_DEFAULT);
                 Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
                 pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
                 const Ogre::PixelBox& pixBox = pixelBuffer->getCurrentLock();
+
+                std::cout << texture->getWidth() << texture->getHeight();
 
                 Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixBox.data);
                 for (size_t i = 0, width = texture->getWidth(); i < width; ++i)
                 {
                     for (size_t j = 0, height = texture->getHeight(); j < height; ++j)
                     {
-                        QRgb color = image.pixel(QPoint(i,j));
+                        QRgb color = image.pixel(QPoint(j,i));
                         *pDest++ = qBlue(color);
                         *pDest++ = qGreen(color);
                         *pDest++ = qRed(color);
@@ -151,8 +151,8 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
 
             Ogre::BillboardSet* mySet = getSceneManager()->createBillboardSet("CellBillboardSet" + iter->getId(mWorldspace));
             Ogre::Billboard* myBillboard = mySet->createBillboard(Ogre::Vector3(0, 0, 0));
+            mySet->setDefaultDimensions(4000, 2000);
             mySet->setMaterial(material);
-            myBillboard->setDimensions(1024, 512);
             mySet->setRenderQueueGroup(mySet->getRenderQueueGroup() + 1); // render the bilboard on top
             billboardNode->attachObject(mySet);
 
