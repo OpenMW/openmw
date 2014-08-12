@@ -13,7 +13,6 @@
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
 #include <components/ogreinit/ogreinit.hpp>
-#include <Overlay/OgreFontManager.h>
 
 #include <components/bsa/resources.hpp>
 
