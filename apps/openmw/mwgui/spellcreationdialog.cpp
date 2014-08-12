@@ -387,6 +387,14 @@ namespace MWGui
 
     void SpellCreationDialog::notifyEffectsChanged ()
     {
+        if (mEffects.empty())
+        {
+            mMagickaCost->setCaption("0");
+            mPriceLabel->setCaption("0");
+            mSuccessChance->setCaption("0");
+            return;
+        }
+
         float y = 0;
 
         const MWWorld::ESMStore &store =
