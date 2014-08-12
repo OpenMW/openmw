@@ -73,11 +73,6 @@ Rain Height Max=700 ?
 Rain Threshold=0.6 ?
 Max Raindrops=650 ?
 */
-
-    size_t offset = weather.mCloudTexture.find(".tga");
-    if (offset != std::string::npos)
-        weather.mCloudTexture.replace(offset, weather.mCloudTexture.length() - offset, ".dds");
-
     weather.mIsStorm = (name == "ashstorm" || name == "blight");
 
     mWeatherSettings[name] = weather;

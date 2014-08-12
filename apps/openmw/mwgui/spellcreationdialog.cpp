@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -143,13 +145,7 @@ namespace MWGui
 
     void EditEffectDialog::setMagicEffect (const ESM::MagicEffect *effect)
     {
-        std::string icon = effect->mIcon;
-        icon[icon.size()-3] = 'd';
-        icon[icon.size()-2] = 'd';
-        icon[icon.size()-1] = 's';
-        icon = "icons\\" + icon;
-
-        mEffectImage->setImageTexture (icon);
+        mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(effect->mIcon));
 
         mEffectName->setCaptionWithReplacing("#{"+ESM::MagicEffect::effectIdToString  (effect->mIndex)+"}");
 

@@ -11,6 +11,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <components/terrain/quadtreenode.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 namespace ESMTerrain
 {
@@ -276,14 +277,13 @@ namespace ESMTerrain
     std::string Storage::getTextureName(UniqueTextureId id)
     {
         if (id.first == 0)
-            return "_land_default.dds"; // Not sure if the default texture really is hardcoded?
+            return "textures\\_land_default.dds"; // Not sure if the default texture really is hardcoded?
 
         // NB: All vtex ids are +1 compared to the ltex ids
         const ESM::LandTexture* ltex = getLandTexture(id.first-1, id.second);
 
-        std::string texture = ltex->mTexture;
         //TODO this is needed due to MWs messed up texture handling
-        texture = texture.substr(0, texture.rfind(".")) + ".dds";
+        std::string texture = Misc::ResourceHelpers::correctTexturePath(ltex->mTexture);
 
         return texture;
     }
@@ -472,27 +472,28 @@ namespace ESMTerrain
         Terrain::LayerInfo info;
         info.mParallax = false;
         info.mSpecular = false;
-        info.mDiffuseMap = "textures\\" + texture;
+        info.mDiffuseMap = texture;
         std::string texture_ = texture;
         boost::replace_last(texture_, ".", "_nh.");
-        if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("textures\\" + texture_))
+
+        if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texture_))
         {
-            info.mNormalMap = "textures\\" + texture_;
+            info.mNormalMap = texture_;
             info.mParallax = true;
         }
         else
         {
             texture_ = texture;
             boost::replace_last(texture_, ".", "_n.");
-            if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("textures\\" + texture_))
-                info.mNormalMap = "textures\\" + texture_;
+            if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texture_))
+                info.mNormalMap = texture_;
         }
 
         texture_ = texture;
         boost::replace_last(texture_, ".", "_diffusespec.");
-        if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("textures\\" + texture_))
+        if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texture_))
         {
-            info.mDiffuseMap = "textures\\" + texture_;
+            info.mDiffuseMap = texture_;
             info.mSpecular = true;
         }
 

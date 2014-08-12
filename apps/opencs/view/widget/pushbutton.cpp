@@ -26,6 +26,8 @@ void CSVWidget::PushButton::setExtendedToolTip()
                 "<p>(left click to activate,"
                 "<br>shift-left click to activate and keep panel open)";
 
+            break;
+
         case Type_Toggle:
 
             tooltip += "<p>(left click to ";

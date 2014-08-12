@@ -1,6 +1,7 @@
 #include "formatting.hpp"
 
 #include <components/interpreter/defines.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwscript/interpretercontext.hpp"
 
@@ -269,15 +270,6 @@ namespace MWGui
     void BookTextParser::parseImage(std::string tag, bool createWidget)
     {
         int src_start = tag.find("SRC=")+5;
-        std::string image = tag.substr(src_start, tag.find('"', src_start)-src_start);
-
-        // fix texture extension to .dds
-        if (image.size() > 4)
-        {
-            image[image.size()-3] = 'd';
-            image[image.size()-2] = 'd';
-            image[image.size()-1] = 's';
-        }
 
         int width_start = tag.find("WIDTH=")+7;
         int width = boost::lexical_cast<int>(tag.substr(width_start, tag.find('"', width_start)-width_start));
@@ -291,16 +283,8 @@ namespace MWGui
                 MyGUI::IntCoord(0, mHeight, width, height), MyGUI::Align::Left | MyGUI::Align::Top,
                 mParent->getName() + boost::lexical_cast<std::string>(mParent->getChildCount()));
 
-            // Apparently a bug with some morrowind versions, they reference the image without the size suffix.
-            // So if the image isn't found, try appending the size.
-            if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("bookart\\"+image))
-            {
-                std::stringstream str;
-                str << image.substr(0, image.rfind(".")) << "_" << width << "_" << height << image.substr(image.rfind("."));
-                image = str.str();
-            }
-
-            box->setImageTexture("bookart\\" + image);
+            std::string image = Misc::ResourceHelpers::correctBookartPath(tag.substr(src_start, tag.find('"', src_start)-src_start), width, height);
+            box->setImageTexture(image);
             box->setProperty("NeedMouse", "false");
         }
 
