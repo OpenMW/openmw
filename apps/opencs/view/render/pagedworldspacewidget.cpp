@@ -130,20 +130,6 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                 }
                 pixelBuffer->unlock();
                 texture->load();
-                /*Ogre::HardwarePixelBufferSharedPtr buffer = texture->getBuffer();
-                buffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
-                const Ogre::PixelBox &pb = buffer->getCurrentLock();
-
-                /// Update the contents of pb here
-                /// Image data starts at pb.data and has format pb.format
-                /// Here we assume data.format is PF_X8R8G8B8 so we can address pixels as uint32.
-                uchar *data = static_cast<uchar*>(pb.data);
-                memcpy(data, img.bits(), buffer->getSizeInBytes());
-                std::cout << buffer->getSizeInBytes() << std::endl << img.byteCount();
-
-
-                /// Unlock the buffer again (frees it for use by the GPU)
-                buffer->unlock();*/
             }
 
             Ogre::MaterialPtr material;
