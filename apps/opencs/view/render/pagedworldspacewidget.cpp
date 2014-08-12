@@ -2,7 +2,6 @@
 #include "pagedworldspacewidget.hpp"
 
 #include <sstream>
-#include <iostream>
 
 #include <OgreCamera.h>
 #include <OgreTextureManager.h>
@@ -113,8 +112,6 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                 Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
                 pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
                 const Ogre::PixelBox& pixBox = pixelBuffer->getCurrentLock();
-
-                std::cout << texture->getWidth() << texture->getHeight();
 
                 Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixBox.data);
                 for (size_t i = 0, width = texture->getWidth(); i < width; ++i)
