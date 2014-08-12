@@ -19,6 +19,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <components/nifogre/ogrenifloader.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <extern/shiny/Platforms/Ogre/OgreMaterial.hpp>
 
@@ -589,13 +590,13 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 
     if (mClouds != weather.mCloudTexture)
     {
-        sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", "textures\\"+weather.mCloudTexture);
+        sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", Misc::ResourceHelpers::correctTexturePath(weather.mCloudTexture));
         mClouds = weather.mCloudTexture;
     }
 
     if (mNextClouds != weather.mNextCloudTexture)
     {
-        sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", "textures\\"+weather.mNextCloudTexture);
+        sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", Misc::ResourceHelpers::correctTexturePath(weather.mNextCloudTexture));
         mNextClouds = weather.mNextCloudTexture;
     }
 

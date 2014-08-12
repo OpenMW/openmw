@@ -17,6 +17,7 @@
 #include <components/esm/loadweap.hpp>
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadstat.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <libs/openengine/ogre/lights.hpp>
 
@@ -1191,13 +1192,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
         if (it->mLoop && loop && it->mEffectId == effectId && it->mBoneName == bonename)
             return;
 
-    // fix texture extension to .dds
-    if (texture.size() > 4)
-    {
-        texture[texture.size()-3] = 'd';
-        texture[texture.size()-2] = 'd';
-        texture[texture.size()-1] = 's';
-    }
+    std::string correctedTexture = Misc::ResourceHelpers::correctTexturePath(texture);
 
     EffectParams params;
     params.mModelName = model;
@@ -1255,7 +1250,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
                     for (int tex=0; tex<pass->getNumTextureUnitStates(); ++tex)
                     {
                         Ogre::TextureUnitState* tus = pass->getTextureUnitState(tex);
-                        tus->setTextureName("textures\\" + texture);
+                        tus->setTextureName(correctedTexture);
                     }
                 }
             }
@@ -1285,7 +1280,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
                     for (int tex=0; tex<pass->getNumTextureUnitStates(); ++tex)
                     {
                         Ogre::TextureUnitState* tus = pass->getTextureUnitState(tex);
-                        tus->setTextureName("textures\\" + texture);
+                        tus->setTextureName(correctedTexture);
                     }
                 }
             }

@@ -3,6 +3,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <components/esm/quickkeys.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
@@ -226,12 +227,9 @@ namespace MWGui
             esmStore.get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
 
         std::string path = effect->mIcon;
-        int slashPos = path.find("\\");
+        int slashPos = path.rfind('\\');
         path.insert(slashPos+1, "b_");
-        path = std::string("icons\\") + path;
-        int pos = path.rfind(".");
-        path.erase(pos);
-        path.append(".dds");
+        path = Misc::ResourceHelpers::correctIconPath(path);
 
         button->setFrame("textures\\menu_icon_select_magic.dds", MyGUI::IntCoord(2, 2, 40, 40));
         button->setIcon(path);

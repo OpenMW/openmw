@@ -84,8 +84,6 @@ namespace MWGui
 
         MWWorld::Ptr mFocusObject;
 
-        void findImageExtension(std::string& image);
-
         MyGUI::IntSize getToolTipViaPtr (bool image=true);
         ///< @return requested tooltip size
 
