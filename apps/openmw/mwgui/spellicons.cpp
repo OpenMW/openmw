@@ -5,6 +5,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -133,13 +135,7 @@ namespace MWGui
                         ("ImageBox", MyGUI::IntCoord(w,2,16,16), MyGUI::Align::Default);
                     mWidgetMap[it->first] = image;
 
-                    std::string icon = effect->mIcon;
-                    icon[icon.size()-3] = 'd';
-                    icon[icon.size()-2] = 'd';
-                    icon[icon.size()-1] = 's';
-                    icon = "icons\\" + icon;
-
-                    image->setImageTexture(icon);
+                    image->setImageTexture(Misc::ResourceHelpers::correctIconPath(effect->mIcon));
 
                     std::string name = ESM::MagicEffect::effectIdToString (it->first);
 

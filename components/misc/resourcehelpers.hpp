@@ -7,9 +7,12 @@ namespace Misc
 {
     namespace ResourceHelpers
     {
-        std::string correctResourcePath(const std::string &topLevelDirectory, const std::string &filename);
-        std::string correctTexturePath(const std::string &filename);
-        std::string correctIconPath(const std::string &filename);
+        bool changeExtensionToDds(std::string &path);
+        std::string correctResourcePath(const std::string &topLevelDirectory, const std::string &resPath);
+        std::string correctTexturePath(const std::string &resPath);
+        std::string correctIconPath(const std::string &resPath);
+        std::string correctBookartPath(const std::string &resPath);
+        std::string correctBookartPath(const std::string &resPath, int width, int height);
     }
 }
 
