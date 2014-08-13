@@ -137,10 +137,19 @@ MWMechanics::AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
 
 MWWorld::Ptr MWMechanics::AiFollow::getTarget()
 {
+    if (mActorId == -2)
+        return MWWorld::Ptr();
+
     if (mActorId == -1)
     {
         MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mActorRefId, false);
-        mActorId = target.getClass().getCreatureStats(target).getActorId();
+        if (target.isEmpty())
+        {
+            mActorId = -2;
+            return target;
+        }
+        else
+            mActorId = target.getClass().getCreatureStats(target).getActorId();
     }
 
     if (mActorId != -1)
