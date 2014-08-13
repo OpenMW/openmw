@@ -840,6 +840,8 @@ namespace MWWorld
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
+        mPhysics->clearQueuedMovement();
+
         if (mCurrentWorldSpace != cellName)
         {
             // changed worldspace
@@ -855,6 +857,8 @@ namespace MWWorld
 
     void World::changeToExteriorCell (const ESM::Position& position)
     {
+        mPhysics->clearQueuedMovement();
+
         if (mCurrentWorldSpace != "sys::default") // FIXME
         {
             // changed worldspace
