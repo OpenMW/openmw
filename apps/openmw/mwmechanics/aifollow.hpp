@@ -31,7 +31,7 @@ namespace MWMechanics
 
             AiFollow(const ESM::AiSequence::AiFollow* follow);
 
-            MWWorld::Ptr getTarget() const;
+            MWWorld::Ptr getTarget();
 
             virtual AiFollow *clone() const;
 
@@ -55,7 +55,8 @@ namespace MWMechanics
             float mX;
             float mY;
             float mZ;
-            std::string mActorId;
+            std::string mActorRefId;
+            int mActorId;
             std::string mCellId;
     };
 }

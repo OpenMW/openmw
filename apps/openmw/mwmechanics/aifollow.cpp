@@ -16,24 +16,28 @@
 #include "steering.hpp"
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId("")
+: mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
+, mActorRefId(actorId), mCellId(""), mActorId(-1)
 {
 }
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(cellId)
+: mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
+, mActorRefId(actorId), mCellId(cellId), mActorId(-1)
 {
 }
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId, bool commanded)
-: mAlwaysFollow(true), mCommanded(commanded), mRemainingDuration(0), mX(0), mY(0), mZ(0), mActorId(actorId), mCellId("")
+: mAlwaysFollow(true), mCommanded(commanded), mRemainingDuration(0), mX(0), mY(0), mZ(0)
+, mActorRefId(actorId), mCellId(""), mActorId(-1)
 {
 }
 
 bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 {
-    const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mActorId, false); //The target to follow
+    MWWorld::Ptr target = getTarget();
 
-    if(target == MWWorld::Ptr()) return true;   //Target doesn't exist
+    if (target.isEmpty())
+        return true; //Target doesn't exist
 
     actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
@@ -86,7 +90,7 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 
 std::string MWMechanics::AiFollow::getFollowedActor()
 {
-    return mActorId;
+    return mActorRefId;
 }
 
 MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
@@ -110,7 +114,7 @@ void MWMechanics::AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) co
     follow->mData.mX = mX;
     follow->mData.mY = mY;
     follow->mData.mZ = mZ;
-    follow->mTargetId = mActorId;
+    follow->mTargetId = mActorRefId;
     follow->mRemainingDuration = mRemainingDuration;
     follow->mCellId = mCellId;
     follow->mAlwaysFollow = mAlwaysFollow;
@@ -125,13 +129,22 @@ void MWMechanics::AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) co
 MWMechanics::AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
     : mAlwaysFollow(follow->mAlwaysFollow), mRemainingDuration(follow->mRemainingDuration)
     , mX(follow->mData.mX), mY(follow->mData.mY), mZ(follow->mData.mZ)
-    , mActorId(follow->mTargetId), mCellId(follow->mCellId)
+    , mActorRefId(follow->mTargetId), mCellId(follow->mCellId)
     , mCommanded(follow->mCommanded)
 {
 
 }
 
-MWWorld::Ptr MWMechanics::AiFollow::getTarget() const
+MWWorld::Ptr MWMechanics::AiFollow::getTarget()
 {
-    return MWBase::Environment::get().getWorld()->searchPtr(mActorId, false);
+    if (mActorId == -1)
+    {
+        MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mActorRefId, false);
+        mActorId = target.getClass().getCreatureStats(target).getActorId();
+    }
+
+    if (mActorId != -1)
+        return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mActorId);
+    else
+        return MWWorld::Ptr();
 }
