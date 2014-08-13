@@ -29,6 +29,8 @@ namespace MWGui
         int mHeight;
         int mWidth;
 
+        MyGUI::IntSize mWindowSize;
+
         std::string mSpellToDelete;
 
         void addGroup(const std::string& label, const std::string& label2);
@@ -42,6 +44,7 @@ namespace MWGui
         void onDeleteSpellAccept();
 
         virtual void onPinToggled();
+        virtual void onTitleDoubleClicked();
         virtual void open();
 
         SpellIcons* mSpellIcons;

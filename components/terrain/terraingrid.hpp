@@ -1,16 +1,12 @@
-#ifndef OPENMW_MWRENDER_TERRAINGRID_H
-#define OPENMW_MWRENDER_TERRAINGRID_H
+#ifndef COMPONENTS_TERRAIN_TERRAINGRID_H
+#define COMPONENTS_TERRAIN_TERRAINGRID_H
 
-#include <components/terrain/world.hpp>
-#include <components/terrain/material.hpp>
+#include "world.hpp"
+#include "material.hpp"
 
 namespace Terrain
 {
     class Chunk;
-}
-
-namespace MWRender
-{
 
     struct GridElement
     {

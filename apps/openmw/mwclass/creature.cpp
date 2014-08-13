@@ -368,18 +368,21 @@ namespace MWClass
 
         if (damage > 0.f)
         {
-            // Check for knockdown
-            float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
-            float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
-                    * getGmst().iKnockDownOddsMult->getInt() * 0.01 + getGmst().iKnockDownOddsBase->getInt();
-            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-            if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
+            if (!attacker.isEmpty())
             {
-                getCreatureStats(ptr).setKnockedDown(true);
+                // Check for knockdown
+                float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
+                float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
+                        * getGmst().iKnockDownOddsMult->getInt() * 0.01 + getGmst().iKnockDownOddsBase->getInt();
+                int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
+                {
+                    getCreatureStats(ptr).setKnockedDown(true);
 
+                }
+                else
+                    getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
             }
-            else
-                getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
             damage = std::max(1.f, damage);
 

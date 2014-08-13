@@ -591,4 +591,10 @@ namespace MWGui
     {
         MWBase::Environment::get().getWindowManager()->setHMSVisibility(!mPinned);
     }
+
+    void StatsWindow::onTitleDoubleClicked()
+    {
+        if (!mPinned)
+            MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Stats);
+    }
 }

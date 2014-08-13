@@ -74,6 +74,7 @@ namespace MWGui
 
         protected:
             virtual void onPinToggled();
+            virtual void onTitleDoubleClicked();
     };
 }
 #endif

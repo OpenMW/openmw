@@ -20,7 +20,7 @@ namespace Render
         }
     };
 
-    class SelectionBuffer : public Ogre::MaterialManager::Listener
+    class SelectionBuffer : public Ogre::MaterialManager::Listener, public Ogre::ManualResourceLoader
     {
     public:
         SelectionBuffer(Ogre::Camera* camera, int sizeX, int sizeY, int visibilityFlags);
@@ -30,6 +30,8 @@ namespace Render
         ///< @return ID of the selected object
 
         void update();
+
+        virtual void loadResource(Ogre::Resource* resource);
 
         virtual Ogre::Technique* handleSchemeNotFound (
             unsigned short schemeIndex, const Ogre::String &schemeName, Ogre::Material *originalMaterial,
@@ -46,7 +48,12 @@ namespace Render
 
         Ogre::ColourValue mCurrentColour;
 
+        Ogre::Camera* mCamera;
+        int mVisibilityFlags;
+
         void getNextColour();
+
+        void setupRenderTarget();
     };
 
 }

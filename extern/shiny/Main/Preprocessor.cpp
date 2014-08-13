@@ -9,8 +9,7 @@
 /*
 	Almost exact copy of load_file_to_string policy found in
 	boost::wave headers with the only change that it uses
-	boost::filesystem facility to handle UTF-8 paths used
-	throughout OpenMW (bfs::fstream, bfs::path).
+	boost::filesystem facility to handle UTF-8 paths properly on windows.
 
 	Original namespace is used due to required bost::wave
 	internal symbols.

@@ -23,6 +23,7 @@
 
 #include <components/settings/settings.hpp>
 #include <components/terrain/defaultworld.hpp>
+#include <components/terrain/terraingrid.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -45,7 +46,6 @@
 #include "globalmap.hpp"
 #include "terrainstorage.hpp"
 #include "effectmanager.hpp"
-#include "terraingrid.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -1045,7 +1045,7 @@ void RenderingManager::enableTerrain(bool enable)
                 mTerrain = new Terrain::DefaultWorld(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
                                                 Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY, 1, 64);
             else
-                mTerrain = new MWRender::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                mTerrain = new Terrain::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
                                                 Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY);
             mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
                                      Settings::Manager::getBool("split", "Shadows"));

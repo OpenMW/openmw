@@ -177,8 +177,7 @@ namespace MWGui
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
-        bool full = (stats.getFatigue().getCurrent() >= stats.getFatigue().getModified())
-                && (stats.getHealth().getCurrent() >= stats.getHealth().getModified())
+        bool full = (stats.getHealth().getCurrent() >= stats.getHealth().getModified())
                 && (stats.getMagicka().getCurrent() >= stats.getMagicka().getModified());
         MWMechanics::NpcStats& npcstats = player.getClass().getNpcStats(player);
         bool werewolf = npcstats.isWerewolf();

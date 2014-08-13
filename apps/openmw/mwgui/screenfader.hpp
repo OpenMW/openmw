@@ -1,3 +1,6 @@
+#ifndef OPENMW_MWGUI_SCREENFADER_H
+#define OPENMW_MWGUI_SCREENFADER_H
+
 #include "windowbase.hpp"
 
 namespace MWGui
@@ -37,3 +40,5 @@ namespace MWGui
     };
 
 }
+
+#endif

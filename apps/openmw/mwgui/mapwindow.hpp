@@ -150,6 +150,7 @@ namespace MWGui
 
     protected:
         virtual void onPinToggled();
+        virtual void onTitleDoubleClicked();
 
         virtual void notifyPlayerUpdate();
         virtual void notifyMapChanged();

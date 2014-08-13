@@ -661,12 +661,14 @@ namespace Physic
     };
 
 
-    std::vector<std::string> PhysicEngine::getCollisions(const std::string& name)
+    std::vector<std::string> PhysicEngine::getCollisions(const std::string& name, int collisionGroup, int collisionMask)
     {
         RigidBody* body = getRigidBody(name);
         if (!body) // fall back to raycasting body if there is no collision body
             body = getRigidBody(name, true);
         ContactTestResultCallback callback;
+        callback.m_collisionFilterGroup = collisionGroup;
+        callback.m_collisionFilterMask = collisionMask;
         mDynamicsWorld->contactTest(body, callback);
         return callback.mResult;
     }

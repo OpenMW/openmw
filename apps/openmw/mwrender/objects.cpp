@@ -73,14 +73,19 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
     ptr.getRefData().setBaseNode(insert);
 }
 
-void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool batch)
+void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool batch, bool addLight)
 {
     insertBegin(ptr);
 
     std::auto_ptr<ObjectAnimation> anim(new ObjectAnimation(ptr, mesh));
 
     if(ptr.getTypeName() == typeid(ESM::Light).name())
-        anim->addLight(ptr.get<ESM::Light>()->mBase);
+    {
+        if (addLight)
+            anim->addLight(ptr.get<ESM::Light>()->mBase);
+        else
+            anim->removeParticles();
+    }
 
     if (!mesh.empty())
     {

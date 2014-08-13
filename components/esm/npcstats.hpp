@@ -46,7 +46,6 @@ namespace ESM
         std::vector<std::string> mUsedIds;
         float mTimeToStartDrowning;
         float mLastDrowningHit;
-        float mLevelHealthBonus;
         int mCrimeId;
 
         void load (ESMReader &esm);

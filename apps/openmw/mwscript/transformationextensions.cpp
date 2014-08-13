@@ -363,8 +363,19 @@ namespace MWScript
                     runtime.pop();
                     int cx,cy;
                     MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
-                    MWBase::Environment::get().getWorld()->moveObject(ptr,
-                        MWBase::Environment::get().getWorld()->getExterior(cx,cy),x,y,z);
+
+                    // another morrowind oddity: player will be moved to the exterior cell at this location,
+                    // non-player actors will move within the cell they are in.
+                    if (ptr.getRefData().getHandle() == "player")
+                    {
+                        MWBase::Environment::get().getWorld()->moveObject(ptr,
+                            MWBase::Environment::get().getWorld()->getExterior(cx,cy),x,y,z);
+                    }
+                    else
+                    {
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, x, y, z);
+                    }
+
                     float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                     if(ptr.getTypeName() == typeid(ESM::NPC).name())//some morrowind oddity
