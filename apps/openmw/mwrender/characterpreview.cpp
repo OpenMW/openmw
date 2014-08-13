@@ -298,6 +298,9 @@ namespace MWRender
     void RaceSelectionPreview::render()
     {
         mTexture->load();
+
+        if (!mRenderTarget)
+            setupRenderTarget();
         mRenderTarget->update();
     }
 
