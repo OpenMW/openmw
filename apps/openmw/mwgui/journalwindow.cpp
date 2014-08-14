@@ -201,10 +201,6 @@ namespace
 
             setBookMode ();
 
-            /// \todo Wiping the whole book layout each time the journal is opened is probably too costly for a large journal (eg 300+ pages).
-            /// There should be a way to keep the existing layout and append new entries to the end of it.
-            /// However, that still leaves the problem of having to add links to previously unknown, but now known topics, so
-            /// we maybe need to find another way to speed things up.
             Book journalBook;
             if (mModel->isEmpty ())
                 journalBook = createEmptyJournalBook ();
