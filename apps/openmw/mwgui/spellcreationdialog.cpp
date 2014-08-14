@@ -524,16 +524,24 @@ namespace MWGui
 
     void EffectEditorBase::onSelectAttribute ()
     {
-        mAddEffectDialog.setVisible(true);
+        const ESM::MagicEffect* effect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
+
+        mAddEffectDialog.newEffect(effect);
         mAddEffectDialog.setAttribute (mSelectAttributeDialog->getAttributeId());
+        mAddEffectDialog.setVisible(true);
         MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectAttributeDialog);
         mSelectAttributeDialog = 0;
     }
 
     void EffectEditorBase::onSelectSkill ()
     {
+        const ESM::MagicEffect* effect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
+
+        mAddEffectDialog.newEffect(effect);
+        mAddEffectDialog.setSkill (mSelectSkillDialog->getSkillId());
         mAddEffectDialog.setVisible(true);
-        mAddEffectDialog.setSkill (mSelectSkillDialog->getSkillId ());
         MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectSkillDialog);
         mSelectSkillDialog = 0;
     }
@@ -558,11 +566,10 @@ namespace MWGui
         }
 
         int buttonId = *sender->getUserData<int>();
-        short effectId = mButtonMapping[buttonId];
-
+        mSelectedKnownEffectId = mButtonMapping[buttonId];
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
-            if (it->mEffectID == effectId)
+            if (it->mEffectID == mSelectedKnownEffectId)
             {
                 MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
                 return;
@@ -570,9 +577,7 @@ namespace MWGui
         }
 
         const ESM::MagicEffect* effect =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
-
-        mAddEffectDialog.newEffect (effect);
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
 
         if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
         {
@@ -592,6 +597,7 @@ namespace MWGui
         }
         else
         {
+            mAddEffectDialog.newEffect(effect);
             mAddEffectDialog.setVisible(true);
         }
     }
