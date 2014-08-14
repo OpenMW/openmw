@@ -1458,4 +1458,10 @@ namespace MWMechanics
         mActors.clear();
         mDeathCount.clear();
     }
+
+    void Actors::updateMagicEffects(const MWWorld::Ptr &ptr)
+    {
+        adjustMagicEffects(ptr);
+        calculateCreatureStatModifiers(ptr, 0.f);
+    }
 }

@@ -543,6 +543,9 @@ namespace MWGui
         if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
             MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
 
+        MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(
+                    MWBase::Environment::get().getWorld()->getPlayerPtr());
+
         mPreviewDirty = true;
     }
 
