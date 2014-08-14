@@ -83,7 +83,7 @@ public:
   //  indirectly to the load() method.
   int mIdx;
   void setIndex(const int index) {mIdx = index; mCtx.index = index;}
-  const int getIndex() {return mIdx;}
+  int getIndex() {return mIdx;}
 
   void setGlobalReaderList(std::vector<ESMReader> *list) {mGlobalReaderList = list;}
   std::vector<ESMReader> *getGlobalReaderList() {return mGlobalReaderList;}
