@@ -1,6 +1,8 @@
 #ifndef CSV_WORLD_IDVALIDATOR_H
 #define CSV_WORLD_IDVALIDATOR_H
 
+#include <string>
+
 #include <QValidator>
 
 namespace CSVWorld
@@ -8,6 +10,7 @@ namespace CSVWorld
     class IdValidator : public QValidator
     {
             bool mRelaxed;
+            std::string mNamespace;
 
         private:
 
@@ -19,6 +22,8 @@ namespace CSVWorld
             ///< \param relaxed Relaxed rules for IDs that also functino as user visible text
 
             virtual State validate (QString& input, int& pos) const;
+
+            void setNamespace (const std::string& namespace_);
 
     };
 }

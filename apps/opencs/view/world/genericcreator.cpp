@@ -10,6 +10,8 @@
 #include <QLabel>
 #include <QComboBox>
 
+#include <components/misc/stringops.hpp>
+
 #include "../../model/world/commands.hpp"
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
@@ -24,9 +26,6 @@ void CSVWorld::GenericCreator::update()
     mId->setToolTip (QString::fromUtf8 (mErrors.c_str()));
 
     mCreate->setEnabled (mErrors.empty() && !mLocked);
-
-    if (mNamespace)
-        mNamespace->setText (QString::fromUtf8 (getNamespace().c_str()));
 }
 
 void CSVWorld::GenericCreator::setManualEditing (bool enabled)
@@ -87,17 +86,40 @@ std::string CSVWorld::GenericCreator::getNamespace() const
     return "";
 }
 
+void CSVWorld::GenericCreator::updateNamespace()
+{
+    std::string namespace_ = getNamespace();
+
+    mValidator->setNamespace (namespace_);
+
+    int index = mId->text().indexOf ("::");
+
+    if (index==-1)
+    {
+        // no namespace in old text
+        mId->setText (QString::fromUtf8 (namespace_.c_str()) + mId->text());
+    }
+    else
+    {
+        std::string oldNamespace =
+            Misc::StringUtils::lowerCase (mId->text().left (index).toUtf8().constData());
+
+        if (oldNamespace=="project" || oldNamespace=="session")
+            mId->setText (QString::fromUtf8 (namespace_.c_str()) + mId->text().mid (index+2));
+    }
+}
+
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id, bool relaxedIdRules)
 : mData (data), mUndoStack (undoStack), mListId (id), mLocked (false), mCloneMode (false),
   mClonedType (CSMWorld::UniversalId::Type_None), mScopes (CSMWorld::Scope_Content), mScope (0),
-  mScopeLabel (0), mNamespace (0)
+  mScopeLabel (0)
 {
     mLayout = new QHBoxLayout;
     mLayout->setContentsMargins (0, 0, 0, 0);
 
     mId = new QLineEdit;
-    mId->setValidator (new IdValidator (relaxedIdRules, this));
+    mId->setValidator (mValidator = new IdValidator (relaxedIdRules, this));
     mLayout->addWidget (mId, 1);
 
     mCreate = new QPushButton ("Create");
@@ -125,6 +147,7 @@ void CSVWorld::GenericCreator::reset()
     mCloneMode = false;
     mId->setText ("");
     update();
+    updateNamespace();
 }
 
 std::string CSVWorld::GenericCreator::getErrors() const
@@ -197,21 +220,6 @@ void CSVWorld::GenericCreator::setScope (unsigned int scope)
     int count = (mScopes & CSMWorld::Scope_Content) + (mScopes & CSMWorld::Scope_Project) +
         (mScopes & CSMWorld::Scope_Session);
 
-    // namespace widget
-    if (count>1 || (count>0 && !(mScopes & CSMWorld::Scope_Content)))
-    {
-        if (!mNamespace)
-        {
-            mNamespace = new QLabel ("::", this);
-            insertAtBeginning (mNamespace, false);
-        }
-    }
-    else
-    {
-        delete mNamespace;
-        mNamespace = 0;
-    }
-
     // scope selector widget
     if (count>1)
     {
@@ -242,9 +250,12 @@ void CSVWorld::GenericCreator::setScope (unsigned int scope)
         delete mScopeLabel;
         mScopeLabel = 0;
     }
+
+    updateNamespace();
 }
 
 void CSVWorld::GenericCreator::scopeChanged (int index)
 {
     update();
+    updateNamespace();
 }

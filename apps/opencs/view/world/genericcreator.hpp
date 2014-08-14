@@ -19,6 +19,8 @@ namespace CSMWorld
 
 namespace CSVWorld
 {
+    class IdValidator;
+
     class GenericCreator : public Creator
     {
             Q_OBJECT
@@ -36,7 +38,7 @@ namespace CSVWorld
             unsigned int mScopes;
             QComboBox *mScope;
             QLabel *mScopeLabel;
-            QLabel *mNamespace;
+            IdValidator *mValidator;
 
         protected:
             bool mCloneMode;
@@ -61,6 +63,10 @@ namespace CSVWorld
             const CSMWorld::UniversalId& getCollectionId() const;
 
             std::string getNamespace() const;
+
+        private:
+
+            void updateNamespace();
 
         public:
 
