@@ -40,7 +40,9 @@ CSVWorld::ScriptEdit::ScriptEdit (QWidget* parent, const CSMDoc::Document& docum
                   <<CSMWorld::UniversalId::Type_Probe
                   <<CSMWorld::UniversalId::Type_Repair
                   <<CSMWorld::UniversalId::Type_Static
-                  <<CSMWorld::UniversalId::Type_Weapon;
+                  <<CSMWorld::UniversalId::Type_Weapon
+                  <<CSMWorld::UniversalId::Type_Script
+                  <<CSMWorld::UniversalId::Type_Region;
 }
 
 void CSVWorld::ScriptEdit::dragEnterEvent (QDragEnterEvent* event)
