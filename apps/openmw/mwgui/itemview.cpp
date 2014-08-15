@@ -56,6 +56,43 @@ void ItemView::initialiseOverride()
     mScrollView->setCanvasAlign(MyGUI::Align::Left | MyGUI::Align::Top);
 }
 
+void ItemView::layoutWidgets()
+{
+    if (!mScrollView->getChildCount())
+        return;
+
+    int x = 0;
+    int y = 0;
+    int maxHeight = mScrollView->getSize().height - 58;
+
+    MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
+
+    for (unsigned int i=0; i<dragArea->getChildCount(); ++i)
+    {
+        MyGUI::Widget* w = dragArea->getChildAt(i);
+
+        w->setPosition(x, y);
+
+        y += 42;
+        if (y > maxHeight)
+        {
+            x += 42;
+            y = 0;
+        }
+    }
+    x += 42;
+
+    MyGUI::IntSize size = MyGUI::IntSize(std::max(mScrollView->getSize().width, x), mScrollView->getSize().height);
+
+    // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+    mScrollView->setVisibleVScroll(false);
+    mScrollView->setVisibleHScroll(false);
+    mScrollView->setCanvasSize(size);
+    mScrollView->setVisibleVScroll(true);
+    mScrollView->setVisibleHScroll(true);
+    dragArea->setSize(size);
+}
+
 void ItemView::update()
 {
     while (mScrollView->getChildCount())
@@ -63,10 +100,6 @@ void ItemView::update()
 
     if (!mModel)
         return;
-
-    int x = 0;
-    int y = 0;
-    int maxHeight = mScrollView->getSize().height - 58;
 
     mModel->update();
 
@@ -80,9 +113,8 @@ void ItemView::update()
     {
         const ItemStack& item = mModel->getItem(i);
 
-        /// \todo performance improvement: don't create/destroy all the widgets everytime the container window changes size, only reposition them
         ItemWidget* itemWidget = dragArea->createWidget<ItemWidget>("MW_ItemIcon",
-            MyGUI::IntCoord(x, y, 42, 42), MyGUI::Align::Default);
+            MyGUI::IntCoord(0, 0, 42, 42), MyGUI::Align::Default);
         itemWidget->setUserString("ToolTipType", "ItemModelIndex");
         itemWidget->setUserData(std::make_pair(i, mModel));
         ItemWidget::ItemState state = ItemWidget::None;
@@ -104,25 +136,9 @@ void ItemView::update()
         text->setTextShadow(true);
         text->setTextShadowColour(MyGUI::Colour(0,0,0));
         text->setCaption(getCountString(item.mCount));
-
-        y += 42;
-        if (y > maxHeight)
-        {
-            x += 42;
-            y = 0;
-        }
-
     }
-    x += 42;
-    MyGUI::IntSize size = MyGUI::IntSize(std::max(mScrollView->getSize().width, x), mScrollView->getSize().height);
 
-    // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
-    mScrollView->setVisibleVScroll(false);
-    mScrollView->setVisibleHScroll(false);
-    mScrollView->setCanvasSize(size);
-    mScrollView->setVisibleVScroll(true);
-    mScrollView->setVisibleHScroll(true);
-    dragArea->setSize(size);
+    layoutWidgets();
 }
 
 void ItemView::onSelectedItem(MyGUI::Widget *sender)
@@ -149,7 +165,7 @@ void ItemView::setSize(const MyGUI::IntSize &_value)
     bool changed = (_value.width != getWidth() || _value.height != getHeight());
     Base::setSize(_value);
     if (changed)
-        update();
+        layoutWidgets();
 }
 
 void ItemView::setSize(int _width, int _height)
@@ -162,7 +178,7 @@ void ItemView::setCoord(const MyGUI::IntCoord &_value)
     bool changed = (_value.width != getWidth() || _value.height != getHeight());
     Base::setCoord(_value);
     if (changed)
-        update();
+        layoutWidgets();
 }
 
 void ItemView::setCoord(int _left, int _top, int _width, int _height)
