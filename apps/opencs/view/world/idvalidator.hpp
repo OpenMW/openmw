@@ -11,6 +11,7 @@ namespace CSVWorld
     {
             bool mRelaxed;
             std::string mNamespace;
+            mutable std::string mError;
 
         private:
 
@@ -24,6 +25,12 @@ namespace CSVWorld
             virtual State validate (QString& input, int& pos) const;
 
             void setNamespace (const std::string& namespace_);
+
+            /// Return a description of the error that resulted in the last call of validate
+            /// returning QValidator::Intermediate. If the last call to validate returned
+            /// a different value (or if there was no such call yet), an empty string is
+            /// returned.
+            std::string getError() const;
 
     };
 }

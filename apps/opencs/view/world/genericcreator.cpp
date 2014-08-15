@@ -154,16 +154,10 @@ std::string CSVWorld::GenericCreator::getErrors() const
 {
     std::string errors;
 
-    std::string id = getId();
-
-    if (id.empty())
-    {
-        errors = "Missing ID";
-    }
-    else if (mData.hasId (id))
-    {
+    if (!mId->hasAcceptableInput())
+        errors = mValidator->getError();
+    else if (mData.hasId (getId()))
         errors = "ID is already in use";
-    }
 
     return errors;
 }

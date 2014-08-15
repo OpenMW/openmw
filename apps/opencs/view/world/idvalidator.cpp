@@ -20,6 +20,8 @@ CSVWorld::IdValidator::IdValidator (bool relaxed, QObject *parent)
 
 QValidator::State CSVWorld::IdValidator::validate (QString& input, int& pos) const
 {
+    mError.clear();
+
     if (mRelaxed)
     {
         if (input.indexOf ('"')!=-1 || input.indexOf ("::")!=-1 || input.indexOf ("#")!=-1)
@@ -27,6 +29,12 @@ QValidator::State CSVWorld::IdValidator::validate (QString& input, int& pos) con
     }
     else
     {
+        if (input.isEmpty())
+        {
+            mError = "Missing ID";
+            return QValidator::Intermediate;
+        }
+
         bool first = true;
         bool scope = false;
         bool prevScope = false;
@@ -88,8 +96,17 @@ QValidator::State CSVWorld::IdValidator::validate (QString& input, int& pos) con
             }
         }
 
+        if (scope)
+        {
+            mError = "ID ending with incomplete scope operator";
+            return QValidator::Intermediate;
+        }
+
         if (prevScope)
-            return QValidator::Intermediate; // ending with scope operator
+        {
+            mError = "ID ending with scope operator";
+            return QValidator::Intermediate;
+        }
     }
 
     return QValidator::Acceptable;
@@ -98,4 +115,9 @@ QValidator::State CSVWorld::IdValidator::validate (QString& input, int& pos) con
 void CSVWorld::IdValidator::setNamespace (const std::string& namespace_)
 {
     mNamespace = Misc::StringUtils::lowerCase (namespace_);
+}
+
+std::string CSVWorld::IdValidator::getError() const
+{
+    return mError;
 }
