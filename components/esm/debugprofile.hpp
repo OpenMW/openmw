@@ -12,15 +12,20 @@ namespace ESM
     {
         static unsigned int sRecordId;
 
+        enum Flags
+        {
+            Flag_Default = 1,       // add to newly opened scene subviews
+            Flag_BypassNewGame = 2, // bypass regular game startup
+            Flag_Global = 4         // make available from main menu (i.e. not location specific)
+        };
+
         std::string mId;
 
         std::string mDescription;
 
         std::string mScript;
 
-        bool mDefault;
-
-        bool mBypassNewGame;
+        unsigned int mFlags;
 
         void load (ESMReader& esm);
         void save (ESMWriter& esm) const;
