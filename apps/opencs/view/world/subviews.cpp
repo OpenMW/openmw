@@ -149,6 +149,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     manager.add (CSMWorld::UniversalId::Type_Journal,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, JournalCreatorFactory> (false));
 
+    manager.add (CSMWorld::UniversalId::Type_DebugProfile,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> > (false));
+
     //preview
     manager.add (CSMWorld::UniversalId::Type_Preview, new CSVDoc::SubViewFactory<PreviewSubView>);
 }
