@@ -501,6 +501,47 @@ namespace CSMWorld
     };
 
     template<typename ESXRecordT>
+    struct FlagColumn2 : public Column<ESXRecordT>
+    {
+        int mMask;
+        bool mInverted;
+
+        FlagColumn2 (int columnId, int mask, bool inverted = false)
+        : Column<ESXRecordT> (columnId, ColumnBase::Display_Boolean), mMask (mask),
+          mInverted (inverted)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            bool flag = (record.get().mFlags & mMask)!=0;
+
+            if (mInverted)
+                flag = !flag;
+
+            return flag;
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            int flags = record2.mFlags & ~mMask;
+
+            if ((data.toInt()!=0)!=mInverted)
+                flags |= mMask;
+
+            record2.mFlags = flags;
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
     struct WeightHeightColumn : public Column<ESXRecordT>
     {
         bool mMale;

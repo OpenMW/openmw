@@ -260,6 +260,12 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mDebugProfiles.addColumn (new StringIdColumn<ESM::DebugProfile>);
     mDebugProfiles.addColumn (new RecordStateColumn<ESM::DebugProfile>);
     mDebugProfiles.addColumn (new FixedRecordTypeColumn<ESM::DebugProfile> (UniversalId::Type_DebugProfile));
+    mDebugProfiles.addColumn (new FlagColumn2<ESM::DebugProfile> (
+        Columns::ColumnId_DefaultProfile, ESM::DebugProfile::Flag_Default));
+    mDebugProfiles.addColumn (new FlagColumn2<ESM::DebugProfile> (
+        Columns::ColumnId_BypassNewGame, ESM::DebugProfile::Flag_BypassNewGame));
+    mDebugProfiles.addColumn (new FlagColumn2<ESM::DebugProfile> (
+        Columns::ColumnId_GlobalProfile, ESM::DebugProfile::Flag_Global));
     mDebugProfiles.addColumn (new DescriptionColumn<ESM::DebugProfile>);
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);

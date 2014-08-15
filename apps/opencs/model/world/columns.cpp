@@ -180,6 +180,9 @@ namespace CSMWorld
             { ColumnId_Vampire, "Vampire" },
             { ColumnId_BodyPartType, "Bodypart Type" },
             { ColumnId_MeshType, "Mesh Type" },
+            { ColumnId_DefaultProfile, "Default Profile" },
+            { ColumnId_BypassNewGame, "Bypass New Game" },
+            { ColumnId_GlobalProfile, "Global Profile" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
