@@ -95,7 +95,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add (CSMWorld::UniversalId::Type_DebugProfiles,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView,
-        NullCreatorFactory>);
+        CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> >);
 
     manager.add (CSMWorld::UniversalId::Type_Scene, new CSVDoc::SubViewFactory<SceneSubView>);
 
