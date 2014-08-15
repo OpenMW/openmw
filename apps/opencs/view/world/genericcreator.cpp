@@ -45,7 +45,7 @@ void CSVWorld::GenericCreator::insertBeforeButtons (QWidget *widget, bool stretc
 
 std::string CSVWorld::GenericCreator::getId() const
 {
-    return getNamespace() + mId->text().toUtf8().constData();
+    return mId->text().toUtf8().constData();
 }
 
 void CSVWorld::GenericCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const {}
