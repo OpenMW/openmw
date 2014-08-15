@@ -108,7 +108,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Global,
         CSMWorld::UniversalId::Type_Race,
         CSMWorld::UniversalId::Type_Class,
-        CSMWorld::UniversalId::Type_Filter,
         CSMWorld::UniversalId::Type_Sound,
         CSMWorld::UniversalId::Type_Faction,
         CSMWorld::UniversalId::Type_Enchantment,
@@ -150,6 +149,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, JournalCreatorFactory> (false));
 
     manager.add (CSMWorld::UniversalId::Type_DebugProfile,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Filter,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> > (false));
 
     //preview
