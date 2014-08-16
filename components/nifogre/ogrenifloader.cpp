@@ -118,9 +118,6 @@ ObjectScene::~ObjectScene()
 
 void ObjectScene::setVisibilityFlags (unsigned int flags)
 {
-    if (mSkelBase)
-        mSkelBase->setVisibilityFlags (flags);
-
     for (std::vector<Ogre::Entity*>::iterator iter (mEntities.begin()); iter!=mEntities.end();
         ++iter)
         (*iter)->setVisibilityFlags (flags);

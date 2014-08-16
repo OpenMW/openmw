@@ -324,6 +324,7 @@ void LocalMap::createFogOfWar(const std::string& texturePrefix)
     buffer.resize(sFogOfWarResolution*sFogOfWarResolution, 0xFF000000);
 
     // upload to the texture
+    tex->load();
     memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
     tex->getBuffer()->unlock();
 

@@ -301,20 +301,31 @@ namespace MWMechanics
             }
         }
 
-        // start combat if we are in combat with any followers of this actor
-        const std::list<MWWorld::Ptr>& followers = getActorsFollowing(actor2);
+        // start combat if target actor is in combat with one of our followers
+        const std::list<MWWorld::Ptr>& followers = getActorsFollowing(actor1);
+        const CreatureStats& creatureStats2 = actor2.getClass().getCreatureStats(actor2);
         for (std::list<MWWorld::Ptr>::const_iterator it = followers.begin(); it != followers.end(); ++it)
         {
-            if (creatureStats.getAiSequence().isInCombat(*it))
+            // need to check both ways since player doesn't use AI packages
+            if (creatureStats2.getAiSequence().isInCombat(*it)
+                    || it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(actor2))
                 aggressive = true;
         }
-        // start combat if we are in combat with someone this actor is following
-        const CreatureStats& creatureStats2 = actor2.getClass().getCreatureStats(actor2);
-        for (std::list<MWMechanics::AiPackage*>::const_iterator it = creatureStats2.getAiSequence().begin(); it != creatureStats2.getAiSequence().end(); ++it)
+
+        // start combat if target actor is in combat with someone we are following
+        for (std::list<MWMechanics::AiPackage*>::const_iterator it = creatureStats.getAiSequence().begin(); it != creatureStats.getAiSequence().end(); ++it)
         {
-            if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow &&
-                    creatureStats.getAiSequence().isInCombat(dynamic_cast<MWMechanics::AiFollow*>(*it)->getTarget()))
-                aggressive = true;
+            if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
+            {
+                MWWorld::Ptr followTarget = dynamic_cast<MWMechanics::AiFollow*>(*it)->getTarget();
+                if (followTarget.isEmpty())
+                    continue;
+
+                // need to check both ways since player doesn't use AI packages
+                if (creatureStats2.getAiSequence().isInCombat(followTarget)
+                        || followTarget.getClass().getCreatureStats(followTarget).getAiSequence().isInCombat(actor2))
+                    aggressive = true;
+            }
         }
 
         if(aggressive)
@@ -1374,11 +1385,19 @@ namespace MWMechanics
         {
             const MWWorld::Class &cls = iter->first.getClass();
             CreatureStats &stats = cls.getCreatureStats(iter->first);
-            if(!stats.isDead() && stats.getAiSequence().getTypeId() == AiPackage::TypeIdFollow)
+            if (stats.isDead())
+                continue;
+
+            for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
             {
-                MWMechanics::AiFollow* package = static_cast<MWMechanics::AiFollow*>(stats.getAiSequence().getActivePackage());
-                if(package->getFollowedActor() == actor.getCellRef().getRefId())
-                    list.push_front(iter->first);
+                if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
+                {
+                    MWWorld::Ptr followTarget = dynamic_cast<MWMechanics::AiFollow*>(*it)->getTarget();
+                    if (followTarget.isEmpty())
+                        continue;
+                    if (followTarget == actor)
+                        list.push_back(iter->first);
+                }
             }
         }
         return list;
@@ -1438,5 +1457,11 @@ namespace MWMechanics
         }
         mActors.clear();
         mDeathCount.clear();
+    }
+
+    void Actors::updateMagicEffects(const MWWorld::Ptr &ptr)
+    {
+        adjustMagicEffects(ptr);
+        calculateCreatureStatModifiers(ptr, 0.f);
     }
 }

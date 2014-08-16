@@ -544,15 +544,9 @@ namespace MWGui
 
     void MapWindow::open()
     {
-        // force markers to foreground
-        for (unsigned int i=0; i<mGlobalMapOverlay->getChildCount (); ++i)
-        {
-            if (mGlobalMapOverlay->getChildAt (i)->getName().substr(0,4) == "Door")
-                mGlobalMapOverlay->getChildAt (i)->castType<MyGUI::Button>()->setImageResource("DoorMarker");
-        }
-
         globalMapUpdatePlayer();
 
+        mPlayerArrowGlobal->setImageTexture ("");
         mPlayerArrowGlobal->setImageTexture ("textures\\compass.dds");
     }
 

@@ -350,36 +350,59 @@ namespace MWWorld
 
     void World::ensureNeededRecords()
     {
-        if (!mStore.get<ESM::GameSetting>().search("sCompanionShare"))
+        std::map<std::string, ESM::Variant> gmst;
+        // Companion (tribunal)
+        gmst["sCompanionShare"] = ESM::Variant("Companion Share");
+        gmst["sCompanionWarningMessage"] = ESM::Variant("Warning message");
+        gmst["sCompanionWarningButtonOne"] = ESM::Variant("Button 1");
+        gmst["sCompanionWarningButtonTwo"] = ESM::Variant("Button 2");
+        gmst["sCompanionShare"] = ESM::Variant("Companion Share");
+        gmst["sProfitValue"] = ESM::Variant("Profit Value");
+        gmst["sTeleportDisabled"] = ESM::Variant("Teleport disabled");
+        gmst["sLevitateDisabled"] = ESM::Variant("Levitate disabled");
+
+        // Missing in unpatched MW 1.0
+        gmst["sDifficulty"] = ESM::Variant("Difficulty");
+        gmst["fDifficultyMult"] = ESM::Variant(5.f);
+        gmst["sAuto_Run"] = ESM::Variant("Auto Run");
+        gmst["sServiceRefusal"] = ESM::Variant("Service Refusal");
+        gmst["sNeedOneSkill"] = ESM::Variant("Need one skill");
+        gmst["sNeedTwoSkills"] = ESM::Variant("Need two skills");
+        gmst["sEasy"] = ESM::Variant("Easy");
+        gmst["sHard"] = ESM::Variant("Hard");
+        gmst["sDeleteNote"] = ESM::Variant("Delete Note");
+        gmst["sEditNote"] = ESM::Variant("Edit Note");
+
+        // Werewolf (BM)
+        gmst["fWereWolfRunMult"] = ESM::Variant(1.f);
+        gmst["fWereWolfSilverWeaponDamageMult"] = ESM::Variant(1.f);
+
+
+        std::map<std::string, ESM::Variant> globals;
+        // vanilla Morrowind does not define dayspassed.
+        globals["dayspassed"] = ESM::Variant(1); // but the addons start counting at 1 :(
+        globals["WerewolfClawMult"] = ESM::Variant(1.f);
+
+        for (std::map<std::string, ESM::Variant>::iterator it = gmst.begin(); it != gmst.end(); ++it)
         {
-            ESM::GameSetting sCompanionShare;
-            sCompanionShare.mId = "sCompanionShare";
-            ESM::Variant value;
-            value.setType(ESM::VT_String);
-            value.setString("Companion Share");
-            sCompanionShare.mValue = value;
-            mStore.insertStatic(sCompanionShare);
+            if (!mStore.get<ESM::GameSetting>().search(it->first))
+            {
+                ESM::GameSetting setting;
+                setting.mId = it->first;
+                setting.mValue = it->second;
+                mStore.insertStatic(setting);
+            }
         }
-        if (!mStore.get<ESM::Global>().search("dayspassed"))
+
+        for (std::map<std::string, ESM::Variant>::iterator it = globals.begin(); it != globals.end(); ++it)
         {
-            // vanilla Morrowind does not define dayspassed.
-            ESM::Global dayspassed;
-            dayspassed.mId = "dayspassed";
-            ESM::Variant value;
-            value.setType(ESM::VT_Long);
-            value.setInteger(1); // but the addons start counting at 1 :(
-            dayspassed.mValue = value;
-            mStore.insertStatic(dayspassed);
-        }
-        if (!mStore.get<ESM::GameSetting>().search("fWereWolfRunMult"))
-        {
-            ESM::GameSetting fWereWolfRunMult;
-            fWereWolfRunMult.mId = "fWereWolfRunMult";
-            ESM::Variant value;
-            value.setType(ESM::VT_Float);
-            value.setFloat(1.f);
-            fWereWolfRunMult.mValue = value;
-            mStore.insertStatic(fWereWolfRunMult);
+            if (!mStore.get<ESM::Global>().search(it->first))
+            {
+                ESM::Global setting;
+                setting.mId = it->first;
+                setting.mValue = it->second;
+                mStore.insertStatic(setting);
+            }
         }
     }
 
@@ -840,6 +863,8 @@ namespace MWWorld
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
+        mPhysics->clearQueuedMovement();
+
         if (mCurrentWorldSpace != cellName)
         {
             // changed worldspace
@@ -855,6 +880,8 @@ namespace MWWorld
 
     void World::changeToExteriorCell (const ESM::Position& position)
     {
+        mPhysics->clearQueuedMovement();
+
         if (mCurrentWorldSpace != "sys::default") // FIXME
         {
             // changed worldspace

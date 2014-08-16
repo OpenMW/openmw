@@ -85,7 +85,11 @@ namespace MWWorld
             /// be overwritten. Valid until the next call to applyQueuedMovement.
             void queueObjectMovement(const Ptr &ptr, const Ogre::Vector3 &velocity);
 
+            /// Apply all queued movements, then clear the list.
             const PtrVelocityList& applyQueuedMovement(float dt);
+
+            /// Clear the queued movements list without applying.
+            void clearQueuedMovement();
 
             /// Return true if \a actor has been standing on \a object in this frame
             /// This will trigger whenever the object is directly below the actor.

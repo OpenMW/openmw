@@ -92,7 +92,6 @@ namespace MWGui
         MWBase::Environment::get().getSoundManager()->playSound("Menu Click", 1.f, 1.f);
         if (name == "return")
         {
-            MWBase::Environment::get().getSoundManager ()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);
             MWBase::Environment::get().getWindowManager ()->removeGuiMode (GM_MainMenu);
         }
         else if (name == "options")

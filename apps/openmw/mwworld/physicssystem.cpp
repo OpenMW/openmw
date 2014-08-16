@@ -784,6 +784,13 @@ namespace MWWorld
         mMovementQueue.push_back(std::make_pair(ptr, movement));
     }
 
+    void PhysicsSystem::clearQueuedMovement()
+    {
+        mMovementQueue.clear();
+        mCollisions.clear();
+        mStandingCollisions.clear();
+    }
+
     const PtrVelocityList& PhysicsSystem::applyQueuedMovement(float dt)
     {
         // Collision events are only tracked for a single frame, so reset first

@@ -205,7 +205,7 @@ namespace MWWorld
             virtual bool isCellQuasiExterior() const;
 
             virtual Ogre::Vector2 getNorthVector (CellStore* cell);
-            ///< get north vector (OGRE coordinates) for given interior cell
+            ///< get north vector for given interior cell
 
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out);
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
