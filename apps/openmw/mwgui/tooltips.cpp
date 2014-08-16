@@ -238,12 +238,23 @@ namespace MWGui
                         size_t underscorePos = it->first.find("_");
                         if (underscorePos == std::string::npos)
                             continue;
-                        std::string propertyKey = it->first.substr(0, underscorePos);
+                        std::string key = it->first.substr(0, underscorePos);
                         std::string widgetName = it->first.substr(underscorePos+1, it->first.size()-(underscorePos+1));
+
+                        std::string type = "Property";
+                        size_t caretPos = key.find("^");
+                        if (caretPos != std::string::npos)
+                        {
+                            type = key.substr(0, caretPos);
+                            key.erase(key.begin(), key.begin() + caretPos + 1);
+                        }
 
                         MyGUI::Widget* w;
                         getWidget(w, widgetName);
-                        w->setProperty(propertyKey, it->second);
+                        if (type == "Property")
+                            w->setProperty(key, it->second);
+                        else if (type == "UserData")
+                            w->setUserString(key, it->second);
                     }
 
                     tooltipSize = tooltip->getSize();
