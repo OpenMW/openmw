@@ -134,14 +134,20 @@
                 <Property key="TextAlign" value="Left Top"/>
             </Widget>
 
-            <Widget type="AutoSizedTextBox" skin="NormalText" position="8 48 284 18" align="Left Bottom">
-                <Property key="Caption" value="#{sSkillProgress}"/>
+            <Widget type="AutoSizedTextBox" skin="SandText" position="8 48 284 18" align="Left Bottom" name="SkillMaxed">
+                <Property key="Caption" value="#{sSkillMaxReached}"/>
                 <Property key="TextAlign" value="Center"/>
             </Widget>
-
-            <Widget type="ProgressBar" skin="MW_Progress_Red" position="50 70 200 20" align="HCenter Bottom" name="SkillProgress">
-                <Widget type="TextBox" skin="ProgressText" position="0 0 200 20" align="Stretch" name="SkillProgressText">
+            <Widget type="VBox" name="SkillProgressVBox">
+                <Widget type="AutoSizedTextBox" skin="NormalText" position="8 48 284 18" align="Left Bottom">
+                    <Property key="Caption" value="#{sSkillProgress}"/>
                     <Property key="TextAlign" value="Center"/>
+                </Widget>
+
+                <Widget type="ProgressBar" skin="MW_Progress_Red" position="50 70 200 20" align="HCenter Bottom" name="SkillProgress">
+                    <Widget type="TextBox" skin="ProgressText" position="0 0 200 20" align="Stretch" name="SkillProgressText">
+                        <Property key="TextAlign" value="Center"/>
+                    </Widget>
                 </Widget>
             </Widget>
         </Widget>
