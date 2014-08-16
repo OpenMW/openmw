@@ -670,7 +670,7 @@ namespace MWGui
             align();
         }
 
-        void Box::_setPropertyImpl(const std::string& _key, const std::string& _value)
+        bool Box::_setPropertyImpl(const std::string& _key, const std::string& _value)
         {
             if (_key == "Spacing")
                 mSpacing = MyGUI::utility::parseValue<int>(_value);
@@ -678,6 +678,10 @@ namespace MWGui
                 mPadding = MyGUI::utility::parseValue<int>(_value);
             else if (_key == "AutoResize")
                 mAutoResize = MyGUI::utility::parseValue<bool>(_value);
+            else
+                return false;
+
+            return true;
         }
 
         void HBox::align ()
@@ -756,7 +760,8 @@ namespace MWGui
 
         void HBox::setPropertyOverride(const std::string& _key, const std::string& _value)
         {
-            Box::_setPropertyImpl (_key, _value);
+            if (!Box::_setPropertyImpl (_key, _value))
+                MyGUI::Widget::setPropertyOverride(_key, _value);
         }
 
         void HBox::setSize (const MyGUI::IntSize& _value)
@@ -892,7 +897,8 @@ namespace MWGui
 
         void VBox::setPropertyOverride(const std::string& _key, const std::string& _value)
         {
-            Box::_setPropertyImpl (_key, _value);
+            if (!Box::_setPropertyImpl (_key, _value))
+                MyGUI::Widget::setPropertyOverride(_key, _value);
         }
 
         void VBox::setSize (const MyGUI::IntSize& _value)
