@@ -40,6 +40,11 @@ namespace MWMechanics
         return left.mArg<right.mArg;
     }
 
+    float EffectParam::getMagnitude() const
+    {
+        return mMagnitude;
+    }
+
     EffectParam::EffectParam() : mMagnitude (0) {}
 
     EffectParam& EffectParam::operator+= (const EffectParam& param)

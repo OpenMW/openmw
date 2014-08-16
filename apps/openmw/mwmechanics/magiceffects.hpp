@@ -28,8 +28,13 @@ namespace MWMechanics
 
     struct EffectParam
     {
-        // Note usually this would be int, but applying partial resistance might introduce decimal point.
+    private:
+        // Note usually this would be int, but applying partial resistance might introduce a decimal point.
         float mMagnitude;
+
+    public:
+        /// Get the total magnitude including base and modifier.
+        float getMagnitude() const;
 
         EffectParam();
 

@@ -213,8 +213,8 @@ namespace MWMechanics
 
     void CreatureStats::setMagicEffects(const MagicEffects &effects)
     {
-        if (effects.get(ESM::MagicEffect::FortifyMaximumMagicka).mMagnitude
-                != mMagicEffects.get(ESM::MagicEffect::FortifyMaximumMagicka).mMagnitude)
+        if (effects.get(ESM::MagicEffect::FortifyMaximumMagicka).getMagnitude()
+                != mMagicEffects.get(ESM::MagicEffect::FortifyMaximumMagicka).getMagnitude())
             mRecalcDynamicStats = true;
 
         mMagicEffects = effects;
@@ -346,7 +346,7 @@ namespace MWMechanics
         float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                         (getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         evasion *= getFatigueTerm();
-        evasion += mMagicEffects.get(ESM::MagicEffect::Sanctuary).mMagnitude;
+        evasion += mMagicEffects.get(ESM::MagicEffect::Sanctuary).getMagnitude();
 
         return evasion;
     }
