@@ -32,6 +32,15 @@ MWMechanics::AiFollow::AiFollow(const std::string &actorId, bool commanded)
 {
 }
 
+MWMechanics::AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
+    : mAlwaysFollow(follow->mAlwaysFollow), mRemainingDuration(follow->mRemainingDuration)
+    , mX(follow->mData.mX), mY(follow->mData.mY), mZ(follow->mData.mZ)
+    , mActorRefId(follow->mTargetId), mActorId(-1), mCellId(follow->mCellId)
+    , mCommanded(follow->mCommanded)
+{
+
+}
+
 bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 {
     MWWorld::Ptr target = getTarget();
@@ -129,15 +138,6 @@ void MWMechanics::AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) co
     package.mType = ESM::AiSequence::Ai_Follow;
     package.mPackage = follow.release();
     sequence.mPackages.push_back(package);
-}
-
-MWMechanics::AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
-    : mAlwaysFollow(follow->mAlwaysFollow), mRemainingDuration(follow->mRemainingDuration)
-    , mX(follow->mData.mX), mY(follow->mData.mY), mZ(follow->mData.mZ)
-    , mActorRefId(follow->mTargetId), mCellId(follow->mCellId)
-    , mCommanded(follow->mCommanded)
-{
-
 }
 
 MWWorld::Ptr MWMechanics::AiFollow::getTarget()
