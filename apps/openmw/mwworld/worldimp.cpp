@@ -372,6 +372,14 @@ namespace MWWorld
         gmst["sHard"] = ESM::Variant("Hard");
         gmst["sDeleteNote"] = ESM::Variant("Delete Note");
         gmst["sEditNote"] = ESM::Variant("Edit Note");
+        gmst["sAdmireSuccess"] = ESM::Variant("Admire Success");
+        gmst["sAdmireFail"] = ESM::Variant("Admire Fail");
+        gmst["sIntimidateSuccess"] = ESM::Variant("Intimidate Success");
+        gmst["sIntimidateFail"] = ESM::Variant("Intimidate Fail");
+        gmst["sTauntSuccess"] = ESM::Variant("Taunt Success");
+        gmst["sTauntFail"] = ESM::Variant("Taunt Fail");
+        gmst["sBribeSuccess"] = ESM::Variant("Bribe Success");
+        gmst["sBribeFail"] = ESM::Variant("Bribe Fail");
 
         // Werewolf (BM)
         gmst["fWereWolfRunMult"] = ESM::Variant(1.f);
