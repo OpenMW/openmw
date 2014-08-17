@@ -1639,7 +1639,7 @@ void CharacterController::updateContinuousVfx()
     for (std::vector<int>::iterator it = effects.begin(); it != effects.end(); ++it)
     {
         if (mPtr.getClass().getCreatureStats(mPtr).isDead()
-            || mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(*it)).mMagnitude <= 0)
+            || mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(*it)).getMagnitude() <= 0)
             mAnimation->removeEffect(*it);
     }
 }
@@ -1649,14 +1649,14 @@ void CharacterController::updateVisibility()
     if (!mPtr.getClass().isActor())
         return;
     float alpha = 1.f;
-    if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).mMagnitude)
+    if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude())
     {
         if (mPtr.getRefData().getHandle() == "player")
             alpha = 0.4f;
         else
             alpha = 0.f;
     }
-    float chameleon = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Chameleon).mMagnitude;
+    float chameleon = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
     if (chameleon)
     {
         alpha *= std::max(0.2f, (100.f - chameleon)/100.f);

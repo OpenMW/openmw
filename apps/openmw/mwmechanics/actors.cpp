@@ -146,7 +146,7 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
     const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-    bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).mMagnitude > 0;
+    bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).getMagnitude() > 0;
     int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
 
     health = 0.1 * endurance;
@@ -357,6 +357,7 @@ namespace MWMechanics
         CreatureStats& creatureStats =  creature.getClass().getCreatureStats (creature);
         if (creatureStats.isDead())
             return;
+
         MagicEffects now = creatureStats.getSpells().getMagicEffects();
 
         if (creature.getTypeName()==typeid (ESM::NPC).name())
@@ -367,11 +368,7 @@ namespace MWMechanics
 
         now += creatureStats.getActiveSpells().getMagicEffects();
 
-        //MagicEffects diff = MagicEffects::diff (creatureStats.getMagicEffects(), now);
-
-        creatureStats.setMagicEffects(now);
-
-        // TODO apply diff to other stats
+        creatureStats.modifyMagicEffects(now);
     }
 
     void Actors::calculateDynamicStats (const MWWorld::Ptr& ptr)
@@ -385,7 +382,7 @@ namespace MWMechanics
         int endurance    = creatureStats.getAttribute(ESM::Attribute::Endurance).getModified();
 
         double magickaFactor =
-            creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude * 0.1 + 1;
+            creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).getMagnitude() * 0.1 + 1;
 
         DynamicStat<float> magicka = creatureStats.getMagicka();
         float diff = (static_cast<int>(magickaFactor*intelligence)) - magicka.getBase();
@@ -473,9 +470,9 @@ namespace MWMechanics
         for(int i = 0;i < ESM::Attribute::Length;++i)
         {
             AttributeValue stat = creatureStats.getAttribute(i);
-            stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyAttribute, i)).mMagnitude -
-                             effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).mMagnitude -
-                             effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).mMagnitude);
+            stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyAttribute, i)).getMagnitude() -
+                             effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).getMagnitude() -
+                             effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).getMagnitude());
 
             creatureStats.setAttribute(i, stat);
         }
@@ -484,13 +481,13 @@ namespace MWMechanics
         for(int i = 0;i < 3;++i)
         {
             DynamicStat<float> stat = creatureStats.getDynamic(i);
-            stat.setModifier(effects.get(ESM::MagicEffect::FortifyHealth+i).mMagnitude -
-                             effects.get(ESM::MagicEffect::DrainHealth+i).mMagnitude);
+            stat.setModifier(effects.get(ESM::MagicEffect::FortifyHealth+i).getMagnitude() -
+                             effects.get(ESM::MagicEffect::DrainHealth+i).getMagnitude());
 
 
-            float currentDiff = creatureStats.getMagicEffects().get(ESM::MagicEffect::RestoreHealth+i).mMagnitude
-                    - creatureStats.getMagicEffects().get(ESM::MagicEffect::DamageHealth+i).mMagnitude
-                    - creatureStats.getMagicEffects().get(ESM::MagicEffect::AbsorbHealth+i).mMagnitude;
+            float currentDiff = creatureStats.getMagicEffects().get(ESM::MagicEffect::RestoreHealth+i).getMagnitude()
+                    - creatureStats.getMagicEffects().get(ESM::MagicEffect::DamageHealth+i).getMagnitude()
+                    - creatureStats.getMagicEffects().get(ESM::MagicEffect::AbsorbHealth+i).getMagnitude();
             stat.setCurrent(stat.getCurrent() + currentDiff * duration, i == 2);
 
             creatureStats.setDynamic(i, stat);
@@ -504,27 +501,27 @@ namespace MWMechanics
         if (!creature || ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Creatures)
         {
             Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Fight);
-            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::FrenzyHumanoid+creature).mMagnitude
-                - creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid+creature).mMagnitude);
+            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::FrenzyHumanoid+creature).getMagnitude()
+                - creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid+creature).getMagnitude());
             creatureStats.setAiSetting(CreatureStats::AI_Fight, stat);
 
             stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
-            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::DemoralizeHumanoid+creature).mMagnitude
-                - creatureStats.getMagicEffects().get(ESM::MagicEffect::RallyHumanoid+creature).mMagnitude);
+            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::DemoralizeHumanoid+creature).getMagnitude()
+                - creatureStats.getMagicEffects().get(ESM::MagicEffect::RallyHumanoid+creature).getMagnitude());
             creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
         }
         if (creature && ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Undead)
         {
             Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
-            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::TurnUndead).mMagnitude);
+            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::TurnUndead).getMagnitude());
             creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
         }
 
         // Apply disintegration (reduces item health)
-        float disintegrateWeapon = effects.get(ESM::MagicEffect::DisintegrateWeapon).mMagnitude;
+        float disintegrateWeapon = effects.get(ESM::MagicEffect::DisintegrateWeapon).getMagnitude();
         if (disintegrateWeapon > 0)
             disintegrateSlot(ptr, MWWorld::InventoryStore::Slot_CarriedRight, disintegrateWeapon*duration);
-        float disintegrateArmor = effects.get(ESM::MagicEffect::DisintegrateArmor).mMagnitude;
+        float disintegrateArmor = effects.get(ESM::MagicEffect::DisintegrateArmor).getMagnitude();
         if (disintegrateArmor > 0)
         {
             // According to UESP
@@ -556,7 +553,7 @@ namespace MWMechanics
         DynamicStat<float> health = creatureStats.getHealth();
         for (unsigned int i=0; i<sizeof(damageEffects)/sizeof(int); ++i)
         {
-            float magnitude = creatureStats.getMagicEffects().get(damageEffects[i]).mMagnitude;
+            float magnitude = creatureStats.getMagicEffects().get(damageEffects[i]).getMagnitude();
 
             if (damageEffects[i] == ESM::MagicEffect::SunDamage)
             {
@@ -647,7 +644,7 @@ namespace MWMechanics
         for (std::map<int, std::string>::iterator it = boundItemsMap.begin(); it != boundItemsMap.end(); ++it)
         {
             bool found = creatureStats.mBoundItems.find(it->first) != creatureStats.mBoundItems.end();
-            int magnitude = creatureStats.getMagicEffects().get(it->first).mMagnitude;
+            int magnitude = creatureStats.getMagicEffects().get(it->first).getMagnitude();
             if (found != (magnitude > 0))
             {
                 std::string itemGmst = it->second;
@@ -704,7 +701,7 @@ namespace MWMechanics
         for (std::map<int, std::string>::iterator it = summonMap.begin(); it != summonMap.end(); ++it)
         {
             bool found = creatureMap.find(it->first) != creatureMap.end();
-            int magnitude = creatureStats.getMagicEffects().get(it->first).mMagnitude;
+            int magnitude = creatureStats.getMagicEffects().get(it->first).getMagnitude();
             if (found != (magnitude > 0))
             {
                 if (magnitude > 0)
@@ -808,9 +805,9 @@ namespace MWMechanics
         for(int i = 0;i < ESM::Skill::Length;++i)
         {
             SkillValue& skill = npcStats.getSkill(i);
-            skill.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifySkill, i)).mMagnitude -
-                             effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).mMagnitude -
-                             effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).mMagnitude);
+            skill.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifySkill, i)).getMagnitude() -
+                             effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).getMagnitude() -
+                             effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).getMagnitude());
         }
     }
 
@@ -819,7 +816,7 @@ namespace MWMechanics
         MWBase::World *world = MWBase::Environment::get().getWorld();
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
         if(world->isSubmerged(ptr) &&
-           stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).mMagnitude == 0)
+           stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
         {
             float timeLeft = 0.0f;
             if(stats.getFatigue().getCurrent() == 0)
@@ -1128,7 +1125,7 @@ namespace MWMechanics
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
-                            ESM::MagicEffect::Paralyze).mMagnitude > 0)
+                            ESM::MagicEffect::Paralyze).getMagnitude() > 0)
                     iter->second->skipAnim();
                 iter->second->update(duration);
             }
@@ -1297,7 +1294,7 @@ namespace MWMechanics
 
                 // Reset magic effects and recalculate derived effects
                 // One case where we need this is to make sure bound items are removed upon death
-                stats.setMagicEffects(MWMechanics::MagicEffects());
+                stats.modifyMagicEffects(MWMechanics::MagicEffects());
                 stats.getActiveSpells().clear();
                 calculateCreatureStatModifiers(iter->first, 0);
 
@@ -1463,5 +1460,7 @@ namespace MWMechanics
     {
         adjustMagicEffects(ptr);
         calculateCreatureStatModifiers(ptr, 0.f);
+        if (ptr.getClass().isNpc())
+            calculateNpcStatModifiers(ptr);
     }
 }

@@ -180,7 +180,7 @@ namespace MWClass
 
         std::string text;
 
-        if (!gold)
+        if (!gold && !ref->mBase->mData.mIsKey)
         {
             text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
             text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");

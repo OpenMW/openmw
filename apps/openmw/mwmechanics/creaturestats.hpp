@@ -141,7 +141,8 @@ namespace MWMechanics
 
         void setActiveSpells(const ActiveSpells &active);
 
-        void setMagicEffects(const MagicEffects &effects);
+        /// Set Modifier for each magic effect according to \a effects. Does not touch Base values.
+        void modifyMagicEffects(const MagicEffects &effects);
 
         void setAttackingOrSpell(bool attackingOrSpell);
 

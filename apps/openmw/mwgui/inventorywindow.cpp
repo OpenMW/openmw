@@ -229,9 +229,6 @@ namespace MWGui
             else
                 dragItem (NULL, count);
         }
-
-        // item might have been unequipped
-        notifyContentChanged();
     }
 
     void InventoryWindow::ensureSelectedItemUnequipped()
@@ -269,6 +266,7 @@ namespace MWGui
     {
         ensureSelectedItemUnequipped();
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mTradeModel, mItemView, count);
+        notifyContentChanged();
     }
 
     void InventoryWindow::sellItem(MyGUI::Widget* sender, int count)
@@ -292,6 +290,7 @@ namespace MWGui
         }
 
         mItemView->update();
+        notifyContentChanged();
     }
 
     void InventoryWindow::updateItemView()

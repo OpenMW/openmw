@@ -45,14 +45,14 @@ namespace MWMechanics
 
             float resist = 0.f;
             if (hasCorprusEffect)
-                resist = 1.f - 0.01 * (actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::ResistCorprusDisease).mMagnitude
-                                        - actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::WeaknessToCorprusDisease).mMagnitude);
+                resist = 1.f - 0.01 * (actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::ResistCorprusDisease).getMagnitude()
+                                        - actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::WeaknessToCorprusDisease).getMagnitude());
             else if (spell->mData.mType == ESM::Spell::ST_Disease)
-                resist = 1.f - 0.01 * (actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::ResistCommonDisease).mMagnitude
-                                        - actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::WeaknessToCommonDisease).mMagnitude);
+                resist = 1.f - 0.01 * (actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::ResistCommonDisease).getMagnitude()
+                                        - actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::WeaknessToCommonDisease).getMagnitude());
             else if (spell->mData.mType == ESM::Spell::ST_Blight)
-                resist = 1.f - 0.01 * (actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::ResistBlightDisease).mMagnitude
-                                        - actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::WeaknessToBlightDisease).mMagnitude);
+                resist = 1.f - 0.01 * (actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::ResistBlightDisease).getMagnitude()
+                                        - actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::WeaknessToBlightDisease).getMagnitude());
             else
                 continue;
 

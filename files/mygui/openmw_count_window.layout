@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 600 125" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 600 128" name="_Main">
         <Property key="Visible" value="false"/>
 
-        <Widget type="TextBox" skin="SandText" position="4 0 592 24" name="LabelText" align="Left Top HStretch">
+        <Widget type="TextBox" skin="SandText" position="4 4 592 24" name="LabelText" align="Left Top HStretch">
             <Property key="TextAlign" value="Center"/>
         </Widget>
 
-        <Widget type="TextBox" skin="SandText" position="4 30 532 24" name="ItemText" align="Left Top HStretch">
+        <Widget type="TextBox" skin="SandText" position="4 30 507 24" name="ItemText" align="Left Top HStretch">
             <Property key="TextAlign" value="Right"/>
         </Widget>
 
-        <Widget type="EditBox" skin="MW_TextEdit" position="540 30 32 24" name="ItemEdit" align="Right Top">
+        <Widget type="EditBox" skin="MW_TextEdit" position="520 30 52 24" name="ItemEdit" align="Right Top">
             <Property key="TextAlign" value="Center"/>
         </Widget>
 
@@ -21,7 +21,7 @@
         </Widget>
 
 
-        <Widget type="HBox" position="0 90 572 24" align="Right Bottom">
+        <Widget type="HBox" position="0 86 572 24" align="Right Bottom">
             <Widget type="Widget">
                 <UserString key="HStretch" value="true"/>
             </Widget>

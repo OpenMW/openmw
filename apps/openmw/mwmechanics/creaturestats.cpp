@@ -211,13 +211,13 @@ namespace MWMechanics
         mActiveSpells = active;
     }
 
-    void CreatureStats::setMagicEffects(const MagicEffects &effects)
+    void CreatureStats::modifyMagicEffects(const MagicEffects &effects)
     {
-        if (effects.get(ESM::MagicEffect::FortifyMaximumMagicka).mMagnitude
-                != mMagicEffects.get(ESM::MagicEffect::FortifyMaximumMagicka).mMagnitude)
+        if (effects.get(ESM::MagicEffect::FortifyMaximumMagicka).getModifier()
+                != mMagicEffects.get(ESM::MagicEffect::FortifyMaximumMagicka).getModifier())
             mRecalcDynamicStats = true;
 
-        mMagicEffects = effects;
+        mMagicEffects.setModifiers(effects);
     }
 
     void CreatureStats::setAttackingOrSpell(bool attackingOrSpell)
@@ -346,7 +346,7 @@ namespace MWMechanics
         float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                         (getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         evasion *= getFatigueTerm();
-        evasion += mMagicEffects.get(ESM::MagicEffect::Sanctuary).mMagnitude;
+        evasion += mMagicEffects.get(ESM::MagicEffect::Sanctuary).getMagnitude();
 
         return evasion;
     }
@@ -516,6 +516,7 @@ namespace MWMechanics
         mSpells.writeState(state.mSpells);
         mActiveSpells.writeState(state.mActiveSpells);
         mAiSequence.writeState(state.mAiSequence);
+        mMagicEffects.writeState(state.mMagicEffects);
 
         state.mSummonedCreatureMap = mSummonedCreatures;
         state.mSummonGraveyard = mSummonGraveyard;
@@ -564,6 +565,7 @@ namespace MWMechanics
         mSpells.readState(state.mSpells);
         mActiveSpells.readState(state.mActiveSpells);
         mAiSequence.readState(state.mAiSequence);
+        mMagicEffects.readState(state.mMagicEffects);
 
         mSummonedCreatures = state.mSummonedCreatureMap;
         mSummonGraveyard = state.mSummonGraveyard;
