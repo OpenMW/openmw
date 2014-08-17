@@ -14,6 +14,11 @@ CSVWorld::ScriptEdit::ScriptEdit (QWidget* parent, const CSMDoc::Document& docum
     mDocument (document),
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive)
 {
+    setAcceptRichText (false);
+    setLineWrapMode (QTextEdit::NoWrap);
+    setTabStopWidth (4);
+    setUndoRedoEnabled (false); // we use OpenCS-wide undo/redo instead
+
     mAllowedTypes <<CSMWorld::UniversalId::Type_Journal
                   <<CSMWorld::UniversalId::Type_Global
                   <<CSMWorld::UniversalId::Type_Topic

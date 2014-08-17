@@ -30,11 +30,6 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
 {
     setWidget (mEditor = new ScriptEdit (this, mDocument));
 
-    mEditor->setAcceptRichText (false);
-    mEditor->setLineWrapMode (QTextEdit::NoWrap);
-    mEditor->setTabStopWidth (4);
-    mEditor->setUndoRedoEnabled (false); // we use OpenCS-wide undo/redo instead
-
     mModel = &dynamic_cast<CSMWorld::IdTable&> (
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Scripts));
 
