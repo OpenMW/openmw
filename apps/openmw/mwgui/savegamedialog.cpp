@@ -41,6 +41,7 @@ namespace MWGui
         mSaveList->eventListChangePosition += MyGUI::newDelegate(this, &SaveGameDialog::onSlotSelected);
         mSaveList->eventListMouseItemActivate += MyGUI::newDelegate(this, &SaveGameDialog::onSlotMouseClick);
         mSaveList->eventListSelectAccept += MyGUI::newDelegate(this, &SaveGameDialog::onSlotActivated);
+        mSaveList->eventKeyButtonPressed += MyGUI::newDelegate(this, &SaveGameDialog::onKeyButtonPressed);
         mSaveNameEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &SaveGameDialog::onEditSelectAccept);
         mSaveNameEdit->eventEditTextChange += MyGUI::newDelegate(this, &SaveGameDialog::onSaveNameChanged);
     }
@@ -245,6 +246,12 @@ namespace MWGui
             assert (mCurrentCharacter && mCurrentSlot);
             MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot);
         }
+    }
+
+    void SaveGameDialog::onKeyButtonPressed(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char character)
+    {
+        if (key == MyGUI::KeyCode::Delete && mCurrentSlot)
+            confirmDeleteSave();
     }
 
     void SaveGameDialog::onOkButtonClicked(MyGUI::Widget *sender)
