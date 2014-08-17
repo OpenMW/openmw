@@ -1460,5 +1460,7 @@ namespace MWMechanics
     {
         adjustMagicEffects(ptr);
         calculateCreatureStatModifiers(ptr, 0.f);
+        if (ptr.getClass().isNpc())
+            calculateNpcStatModifiers(ptr);
     }
 }
