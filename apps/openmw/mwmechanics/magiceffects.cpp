@@ -42,21 +42,43 @@ namespace MWMechanics
 
     float EffectParam::getMagnitude() const
     {
-        return mMagnitude;
+        return mBase + mModifier;
     }
 
-    EffectParam::EffectParam() : mMagnitude (0) {}
+    void EffectParam::modifyBase(int diff)
+    {
+        mBase += diff;
+    }
+
+    void EffectParam::setModifier(float mod)
+    {
+        mModifier = mod;
+    }
+
+    float EffectParam::getModifier() const
+    {
+        return mModifier;
+    }
+
+    EffectParam::EffectParam() : mModifier (0), mBase(0) {}
 
     EffectParam& EffectParam::operator+= (const EffectParam& param)
     {
-        mMagnitude += param.mMagnitude;
+        mModifier += param.mModifier;
+        mBase += param.mBase;
         return *this;
     }
 
     EffectParam& EffectParam::operator-= (const EffectParam& param)
     {
-        mMagnitude -= param.mMagnitude;
+        mModifier -= param.mModifier;
+        mBase -= param.mBase;
         return *this;
+    }
+
+    void MagicEffects::remove(const EffectKey &key)
+    {
+        mCollection.erase(key);
     }
 
     void MagicEffects::add (const EffectKey& key, const EffectParam& param)
@@ -70,6 +92,24 @@ namespace MWMechanics
         else
         {
             iter->second += param;
+        }
+    }
+
+    void MagicEffects::modifyBase(const EffectKey &key, int diff)
+    {
+        mCollection[key].modifyBase(diff);
+    }
+
+    void MagicEffects::setModifiers(const MagicEffects &effects)
+    {
+        for (Collection::iterator it = mCollection.begin(); it != mCollection.end(); ++it)
+        {
+            it->second.setModifier(effects.get(it->first).getModifier());
+        }
+
+        for (Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
+        {
+            mCollection[it->first].setModifier(it->second.getModifier());
         }
     }
 

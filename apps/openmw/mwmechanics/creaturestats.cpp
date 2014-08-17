@@ -211,13 +211,13 @@ namespace MWMechanics
         mActiveSpells = active;
     }
 
-    void CreatureStats::setMagicEffects(const MagicEffects &effects)
+    void CreatureStats::modifyMagicEffects(const MagicEffects &effects)
     {
-        if (effects.get(ESM::MagicEffect::FortifyMaximumMagicka).getMagnitude()
-                != mMagicEffects.get(ESM::MagicEffect::FortifyMaximumMagicka).getMagnitude())
+        if (effects.get(ESM::MagicEffect::FortifyMaximumMagicka).getModifier()
+                != mMagicEffects.get(ESM::MagicEffect::FortifyMaximumMagicka).getModifier())
             mRecalcDynamicStats = true;
 
-        mMagicEffects = effects;
+        mMagicEffects.setModifiers(effects);
     }
 
     void CreatureStats::setAttackingOrSpell(bool attackingOrSpell)

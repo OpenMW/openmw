@@ -640,7 +640,7 @@ void MWWorld::InventoryStore::rechargeItems(float duration)
 
 void MWWorld::InventoryStore::purgeEffect(short effectId)
 {
-    mMagicEffects.add(MWMechanics::EffectKey(effectId), -mMagicEffects.get(MWMechanics::EffectKey(effectId)).getMagnitude());
+    mMagicEffects.remove(MWMechanics::EffectKey(effectId));
 }
 
 void MWWorld::InventoryStore::clear()

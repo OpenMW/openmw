@@ -370,6 +370,16 @@ namespace Compiler
                 "mercantile", "speechcraft", "handtohand"
             };
 
+            static const char *magicEffects[numberOfMagicEffects] =
+            {
+                "resistmagicka", "resistfire", "resistfrost", "resistshock",
+                "resistdisease", "resistblight", "resistcorprus", "resistpoison",
+                "resistparalysis", "resistnormalweapons", "waterbreathing", "chameleon",
+                "waterwalking", "swimspeed", "superjump", "flying",
+                "armorbonus", "castpenalty", "silence", "blindness",
+                "paralysis", "invisible", "attackbonus", "defendbonus"
+            };
+
             std::string get ("get");
             std::string set ("set");
             std::string mod ("mod");
@@ -416,6 +426,18 @@ namespace Compiler
 
                 extensions.registerInstruction (mod + skills[i], "l",
                     opcodeModSkill+i, opcodeModSkillExplicit+i);
+            }
+
+            for (int i=0; i<numberOfMagicEffects; ++i)
+            {
+                extensions.registerFunction (get + magicEffects[i], 'l', "",
+                    opcodeGetMagicEffect+i, opcodeGetMagicEffectExplicit+i);
+
+                extensions.registerInstruction (set + magicEffects[i], "l",
+                    opcodeSetMagicEffect+i, opcodeSetMagicEffectExplicit+i);
+
+                extensions.registerInstruction(mod + magicEffects[i], "l",
+                    opcodeModMagicEffect+i, opcodeModMagicEffectExplicit+i);
             }
 
             extensions.registerFunction ("getpccrimelevel", 'f', "", opcodeGetPCCrimeLevel);

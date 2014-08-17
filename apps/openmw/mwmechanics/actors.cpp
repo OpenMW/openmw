@@ -357,6 +357,7 @@ namespace MWMechanics
         CreatureStats& creatureStats =  creature.getClass().getCreatureStats (creature);
         if (creatureStats.isDead())
             return;
+
         MagicEffects now = creatureStats.getSpells().getMagicEffects();
 
         if (creature.getTypeName()==typeid (ESM::NPC).name())
@@ -367,11 +368,7 @@ namespace MWMechanics
 
         now += creatureStats.getActiveSpells().getMagicEffects();
 
-        //MagicEffects diff = MagicEffects::diff (creatureStats.getMagicEffects(), now);
-
-        creatureStats.setMagicEffects(now);
-
-        // TODO apply diff to other stats
+        creatureStats.modifyMagicEffects(now);
     }
 
     void Actors::calculateDynamicStats (const MWWorld::Ptr& ptr)
@@ -1297,7 +1294,7 @@ namespace MWMechanics
 
                 // Reset magic effects and recalculate derived effects
                 // One case where we need this is to make sure bound items are removed upon death
-                stats.setMagicEffects(MWMechanics::MagicEffects());
+                stats.modifyMagicEffects(MWMechanics::MagicEffects());
                 stats.getActiveSpells().clear();
                 calculateCreatureStatModifiers(iter->first, 0);
 
