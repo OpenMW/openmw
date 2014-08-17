@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include <components/esm/effectlist.hpp>
+#include <components/esm/magiceffects.hpp>
 
 namespace MWMechanics
 {
@@ -48,6 +49,16 @@ namespace MWMechanics
     void EffectParam::modifyBase(int diff)
     {
         mBase += diff;
+    }
+
+    int EffectParam::getBase() const
+    {
+        return mBase;
+    }
+
+    void EffectParam::setBase(int base)
+    {
+        mBase = base;
     }
 
     void EffectParam::setModifier(float mod)
@@ -181,5 +192,26 @@ namespace MWMechanics
         }
 
         return result;
+    }
+
+    void MagicEffects::writeState(ESM::MagicEffects &state) const
+    {
+        // Don't need to save Modifiers, they are recalculated every frame anyway.
+        for (Collection::const_iterator iter (begin()); iter!=end(); ++iter)
+        {
+            if (iter->second.getBase() != 0)
+            {
+                // Don't worry about mArg, never used by magic effect script instructions
+                state.mEffects.insert(std::make_pair(iter->first.mId, iter->second.getBase()));
+            }
+        }
+    }
+
+    void MagicEffects::readState(const ESM::MagicEffects &state)
+    {
+        for (std::map<int, int>::const_iterator it = state.mEffects.begin(); it != state.mEffects.end(); ++it)
+        {
+            mCollection[EffectKey(it->first)].setBase(it->second);
+        }
     }
 }

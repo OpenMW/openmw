@@ -516,6 +516,7 @@ namespace MWMechanics
         mSpells.writeState(state.mSpells);
         mActiveSpells.writeState(state.mActiveSpells);
         mAiSequence.writeState(state.mAiSequence);
+        mMagicEffects.writeState(state.mMagicEffects);
 
         state.mSummonedCreatureMap = mSummonedCreatures;
         state.mSummonGraveyard = mSummonGraveyard;
@@ -564,6 +565,7 @@ namespace MWMechanics
         mSpells.readState(state.mSpells);
         mActiveSpells.readState(state.mActiveSpells);
         mAiSequence.readState(state.mAiSequence);
+        mMagicEffects.readState(state.mMagicEffects);
 
         mSummonedCreatures = state.mSummonedCreatureMap;
         mSummonGraveyard = state.mSummonGraveyard;

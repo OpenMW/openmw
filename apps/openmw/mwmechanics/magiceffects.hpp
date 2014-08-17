@@ -8,6 +8,8 @@ namespace ESM
 {
     struct ENAMstruct;
     struct EffectList;
+
+    struct MagicEffects;
 }
 
 namespace MWMechanics
@@ -43,6 +45,8 @@ namespace MWMechanics
 
         /// Change mBase by \a diff
         void modifyBase(int diff);
+        void setBase(int base);
+        int getBase() const;
 
         EffectParam();
 
@@ -89,6 +93,9 @@ namespace MWMechanics
             Collection::const_iterator begin() const { return mCollection.begin(); }
 
             Collection::const_iterator end() const { return mCollection.end(); }
+
+            void readState (const ESM::MagicEffects& state);
+            void writeState (ESM::MagicEffects& state) const;
 
             void add (const EffectKey& key, const EffectParam& param);
             void remove (const EffectKey& key);

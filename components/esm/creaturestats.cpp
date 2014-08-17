@@ -86,6 +86,7 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mSpells.load(esm);
     mActiveSpells.load(esm);
     mAiSequence.load(esm);
+    mMagicEffects.load(esm);
 
     while (esm.isNextSub("SUMM"))
     {
@@ -196,6 +197,7 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     mSpells.save(esm);
     mActiveSpells.save(esm);
     mAiSequence.save(esm);
+    mMagicEffects.save(esm);
 
     for (std::map<int, int>::const_iterator it = mSummonedCreatureMap.begin(); it != mSummonedCreatureMap.end(); ++it)
     {
