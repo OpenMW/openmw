@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 336 242" name="_Main">
+
+        <Widget type="AutoSizedTextBox" skin="SandText" position="13 13 200 16">
+            <Property key="Caption" value="#{sEditNote}"/>
+        </Widget>
+
+        <Widget type="EditBox" skin="MW_TextBoxEditWithBorder" position="13 38 303 150" name="TextEdit" align="Left Top Stretch">
+            <Property key="MultiLine" value="true"/>
+            <Property key="VisibleVScroll" value="true"/>
+            <Property key="WordWrap" value="true"/>
+            <Property key="TextAlign" value="Left Top"/>
+        </Widget>
+
+        <Widget type="HBox" position="13 200 303 24">
+            <Property key="Spacing" value="6"/>
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="DeleteButton">
+                <Property key="Caption" value="#{sDelete}"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
+                <Property key="Caption" value="#{sCancel}"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton">
+                <Property key="Caption" value="#{sOk}"/>
+            </Widget>
+        </Widget>
+
+    </Widget>
+</MyGUI>

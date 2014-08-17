@@ -74,7 +74,9 @@ namespace MWRender
          * Get the interior map texture index and normalized position
          * on this texture, given a world position
          */
-        void getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y);
+        void worldToInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y);
+
+        Ogre::Vector2 interiorMapToWorldPosition (float nX, float nY, int x, int y);
 
         /**
          * Check if a given position is explored by the player (i.e. not obscured by fog of war)

@@ -148,8 +148,11 @@ namespace MWBase
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out) = 0;
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
-            virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y) = 0;
-            ///< see MWRender::LocalMap::getInteriorMapPosition
+            virtual void worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y) = 0;
+            ///< see MWRender::LocalMap::worldToInteriorMapPosition
+
+            virtual Ogre::Vector2 interiorMapToWorldPosition (float nX, float nY, int x, int y) = 0;
+            ///< see MWRender::LocalMap::interiorMapToWorldPosition
 
             virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior) = 0;
             ///< see MWRender::LocalMap::isPositionExplored

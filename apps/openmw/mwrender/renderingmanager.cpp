@@ -945,9 +945,14 @@ void RenderingManager::setCameraDistance(float dist, bool adjust, bool override)
     }
 }
 
-void RenderingManager::getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
+void RenderingManager::worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
 {
-    return mLocalMap->getInteriorMapPosition (position, nX, nY, x, y);
+    return mLocalMap->worldToInteriorMapPosition (position, nX, nY, x, y);
+}
+
+Ogre::Vector2 RenderingManager::interiorMapToWorldPosition(float nX, float nY, int x, int y)
+{
+    return mLocalMap->interiorMapToWorldPosition(nX, nY, x, y);
 }
 
 bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, bool interior)

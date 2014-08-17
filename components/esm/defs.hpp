@@ -112,6 +112,7 @@ enum RecNameInts
     REC_MPRJ = FourCC<'M','P','R','J'>::value,
     REC_PROJ = FourCC<'P','R','O','J'>::value,
     REC_DCOU = FourCC<'D','C','O','U'>::value,
+    REC_MARK = FourCC<'M','A','R','K'>::value,
 
     // format 1
     REC_FILT = 0x544C4946

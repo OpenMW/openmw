@@ -12,6 +12,8 @@
 
 #include "../mwbase/windowmanager.hpp"
 
+#include "mapwindow.hpp"
+
 #include <MyGUI_KeyCode.h>
 #include <MyGUI_Types.h>
 
@@ -344,6 +346,9 @@ namespace MWGui
     std::string mSelectedSpell;
 
     std::stack<WindowModal*> mCurrentModals;
+
+    // Markers placed manually by the player. Must be shared between both map views (the HUD map and the map window).
+    CustomMarkerCollection mCustomMarkers;
 
     OEngine::GUI::MyGUIManager *mGuiManager;
     OEngine::Render::OgreRenderer *mRendering;

@@ -198,8 +198,11 @@ public:
 
     Ogre::Viewport* getViewport() { return mRendering.getViewport(); }
 
-    void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
-    ///< see MWRender::LocalMap::getInteriorMapPosition
+    void worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
+    ///< see MWRender::LocalMap::worldToInteriorMapPosition
+
+    Ogre::Vector2 interiorMapToWorldPosition (float nX, float nY, int x, int y);
+    ///< see MWRender::LocalMap::interiorMapToWorldPosition
 
     bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
     ///< see MWRender::LocalMap::isPositionExplored

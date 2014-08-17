@@ -12,7 +12,9 @@
                 <Property key="ImageTexture" value="textures\compass.dds"/>
             </Widget>
 
-            <Widget type="Button" skin="" position_real="0 0 1 1" name="EventBoxLocal" align="Stretch"/>
+            <Widget type="Button" skin="" position_real="0 0 1 1" name="EventBoxLocal" align="Stretch">
+                <Property key="Depth" value="10"/>
+            </Widget>
         </Widget>
 
         <!-- Global map -->
@@ -27,7 +29,6 @@
 
             <Widget type="Button" skin="" position_real="0 0 1 1" name="EventBoxGlobal" align="Stretch"/>
         </Widget>
-
 
         <!-- World button -->
         <Widget type="AutoSizedButton" skin="MW_Button" position="213 233 61 22" align="Bottom Right" name="WorldButton">
