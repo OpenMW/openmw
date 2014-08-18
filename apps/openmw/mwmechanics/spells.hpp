@@ -45,6 +45,18 @@ namespace MWMechanics
             std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
 
         public:
+            struct CorprusStats
+            {
+                static const int sWorseningPeriod = 24;
+
+                int mWorsenings;
+                MWWorld::TimeStamp mNextWorsening;
+            };
+
+            std::map<std::string, CorprusStats> mCorprusSpells;
+            void worsenCorprus(const std::string &corpSpellId);
+
+        public:
 
             bool canUsePower (const std::string& power) const;
             void usePower (const std::string& power);

@@ -44,6 +44,25 @@ namespace MWMechanics
                 }
             }
 
+            bool hasCorprusEffect = false;
+            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = spell->mEffects.mList.begin(); effectIt != spell->mEffects.mList.end(); ++effectIt)
+            {
+                if (effectIt->mEffectID == ESM::MagicEffect::Corprus)
+                {
+                    hasCorprusEffect = true;
+                    break;
+                }
+            }
+
+            if (hasCorprusEffect)
+            {
+                CorprusStats corprus;
+                corprus.mWorsenings = 0;
+                corprus.mNextWorsening = MWBase::Environment::get().getWorld()->getTimeStamp() + CorprusStats::sWorseningPeriod;
+
+                mCorprusSpells[spellId] = corprus;
+            }
+
             mSpells.insert (std::make_pair (Misc::StringUtils::lowerCase(spellId), random));
         }
     }
@@ -52,9 +71,13 @@ namespace MWMechanics
     {
         std::string lower = Misc::StringUtils::lowerCase(spellId);
         TContainer::iterator iter = mSpells.find (lower);
+        std::map<std::string, CorprusStats>::iterator corprusIt = mCorprusSpells.find(lower);
 
         if (iter!=mSpells.end())
             mSpells.erase (iter);
+
+        if (corprusIt != mCorprusSpells.end())
+            mCorprusSpells.erase(corprusIt);
 
         if (spellId==mSelectedSpell)
             mSelectedSpell.clear();
@@ -81,7 +104,15 @@ namespace MWMechanics
                     if (iter->second.find(i) != iter->second.end())
                         random = iter->second.at(i);
 
-                    effects.add (*it, it->mMagnMin + (it->mMagnMax - it->mMagnMin) * random);
+                    int applyTimes = 1;
+                    if (mCorprusSpells.find(spell->mId) != mCorprusSpells.end())
+                    {
+                        const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
+                        if ((it->mEffectID != ESM::MagicEffect::Corprus) && (effect->mData.mFlags & ESM::MagicEffect::UncappedDamage)) // APPLIED_ONCE
+                            applyTimes += mCorprusSpells.at(spell->mId).mWorsenings;
+                    }
+                    for (int j = 0; j < applyTimes; j++)
+                        effects.add (*it, it->mMagnMin + (it->mMagnMax - it->mMagnMin) * random);
                     ++i;
                 }
             }
@@ -214,6 +245,12 @@ namespace MWMechanics
                 visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, -1, magnitude);
             }
         }
+    }
+
+    void Spells::worsenCorprus(const std::string &corpSpellId)
+    {
+        mCorprusSpells[corpSpellId].mNextWorsening = MWBase::Environment::get().getWorld()->getTimeStamp() + CorprusStats::sWorseningPeriod;
+        mCorprusSpells[corpSpellId].mWorsenings++;
     }
 
     bool Spells::canUsePower(const std::string &power) const

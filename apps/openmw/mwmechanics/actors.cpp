@@ -477,6 +477,25 @@ namespace MWMechanics
             creatureStats.setAttribute(i, stat);
         }
 
+        {
+            Spells & spells = creatureStats.getSpells();
+            for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
+            {
+                if (spells.mCorprusSpells.find(it->first) != spells.mCorprusSpells.end())
+                {
+                    const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(it->first);
+
+                    if (MWBase::Environment::get().getWorld()->getTimeStamp() >= spells.mCorprusSpells[it->first].mNextWorsening)
+                    {
+                        spells.worsenCorprus(it->first);
+
+                        if (ptr.getRefData().getHandle() == "player")
+                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
+                    }
+                }
+            }
+        }
+
         // dynamic stats
         for(int i = 0;i < 3;++i)
         {
