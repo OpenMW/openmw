@@ -916,8 +916,10 @@ class NIFObjectLoader
 
                 scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
 
-                if (partflags&Nif::NiNode::ParticleFlag_AutoPlay)
-                    partsys->fastForward(1, 0.1);
+                // Emitting state will be overwritten on frame update by the ParticleSystemController,
+                // but set up an initial value anyway so the user can fast-forward particle systems
+                // immediately after creation if desired.
+                partsys->setEmitting(partflags&Nif::NiNode::ParticleFlag_AutoPlay);
             }
             ctrl = ctrl->next;
         }

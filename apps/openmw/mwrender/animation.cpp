@@ -110,6 +110,11 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
 
     mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, mdlname) :
                                NifOgre::Loader::createObjectBase(mInsert, mdlname));
+
+    // Fast forward auto-play particles, which will have been set up as Emitting by the loader.
+    for (unsigned int i=0; i<mObjectRoot->mParticles.size(); ++i)
+        mObjectRoot->mParticles[i]->fastForward(1, 0.1);
+
     if(mObjectRoot->mSkelBase)
     {
         mSkelBase = mObjectRoot->mSkelBase;
