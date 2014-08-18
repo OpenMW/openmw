@@ -70,7 +70,7 @@ static const struct {
     int code;
     const char *name;
 } sigill_codes[] = {
-    #ifndef __FreeBSD__
+    #if !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__)
     { ILL_ILLOPC, "Illegal opcode" },
     { ILL_ILLOPN, "Illegal operand" },
     { ILL_ILLADR, "Illegal addressing mode" },
