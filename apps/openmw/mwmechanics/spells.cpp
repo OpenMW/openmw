@@ -175,7 +175,7 @@ namespace MWMechanics
             const ESM::Spell *spell =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
 
-            if (spell->mData.mType == ESM::Spell::ST_Blight)
+            if (spell->mData.mType == ESM::Spell::ST_Blight && !hasCorprusEffect(spell))
                 mSpells.erase(iter++);
             else
                 ++iter;
@@ -189,7 +189,7 @@ namespace MWMechanics
             const ESM::Spell *spell =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
 
-            if (Misc::StringUtils::ciEqual(spell->mId, "corprus"))
+            if (hasCorprusEffect(spell))
                 mSpells.erase(iter++);
             else
                 ++iter;
