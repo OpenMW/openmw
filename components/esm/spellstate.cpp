@@ -27,6 +27,17 @@ namespace ESM
             mSpells[id] = random;
         }
 
+        while (esm.isNextSub("CORP"))
+        {
+            std::string id = esm.getHString();
+
+            CorprusStats stats;
+            esm.getHNT(stats.mWorsenings, "WORS");
+            esm.getHNT(stats.mNextWorsening, "TIME");
+
+            mCorprusSpells[id] = stats;
+        }
+
         while (esm.isNextSub("USED"))
         {
             std::string id = esm.getHString();
@@ -51,6 +62,15 @@ namespace ESM
                 esm.writeHNT("INDX", rIt->first);
                 esm.writeHNT("RAND", rIt->second);
             }
+        }
+
+        for (std::map<std::string, CorprusStats>::const_iterator it = mCorprusSpells.begin(); it != mCorprusSpells.end(); ++it)
+        {
+            esm.writeHNString("CORP", it->first);
+
+            const CorprusStats & stats = it->second;
+            esm.writeHNT("WORS", stats.mWorsenings);
+            esm.writeHNT("TIME", stats.mNextWorsening);
         }
 
         for (std::map<std::string, TimeStamp>::const_iterator it = mUsedPowers.begin(); it != mUsedPowers.end(); ++it)

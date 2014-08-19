@@ -56,6 +56,8 @@ namespace MWMechanics
             std::map<std::string, CorprusStats> mCorprusSpells;
             void worsenCorprus(const std::string &corpSpellId);
 
+            static bool hasCorprusEffect(const ESM::Spell *spell);
+
         public:
 
             bool canUsePower (const std::string& power) const;

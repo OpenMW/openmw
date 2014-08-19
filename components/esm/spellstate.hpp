@@ -13,8 +13,16 @@ namespace ESM
 
     struct SpellState
     {
+        struct CorprusStats
+        {
+            int mWorsenings;
+            TimeStamp mNextWorsening;
+        };
+
         typedef std::map<std::string, std::map<const int, float> > TContainer;
         TContainer mSpells;
+
+        std::map<std::string, CorprusStats> mCorprusSpells;
 
         std::map<std::string, TimeStamp> mUsedPowers;
 

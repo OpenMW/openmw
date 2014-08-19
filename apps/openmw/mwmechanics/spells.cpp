@@ -44,17 +44,7 @@ namespace MWMechanics
                 }
             }
 
-            bool hasCorprusEffect = false;
-            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = spell->mEffects.mList.begin(); effectIt != spell->mEffects.mList.end(); ++effectIt)
-            {
-                if (effectIt->mEffectID == ESM::MagicEffect::Corprus)
-                {
-                    hasCorprusEffect = true;
-                    break;
-                }
-            }
-
-            if (hasCorprusEffect)
+            if (hasCorprusEffect(spell))
             {
                 CorprusStats corprus;
                 corprus.mWorsenings = 0;
@@ -104,15 +94,15 @@ namespace MWMechanics
                     if (iter->second.find(i) != iter->second.end())
                         random = iter->second.at(i);
 
-                    int applyTimes = 1;
+                    int magnMult = 1;
                     if (mCorprusSpells.find(spell->mId) != mCorprusSpells.end())
                     {
                         const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
                         if ((it->mEffectID != ESM::MagicEffect::Corprus) && (effect->mData.mFlags & ESM::MagicEffect::UncappedDamage)) // APPLIED_ONCE
-                            applyTimes += mCorprusSpells.at(spell->mId).mWorsenings;
+                            magnMult += mCorprusSpells.at(spell->mId).mWorsenings;
                     }
-                    for (int j = 0; j < applyTimes; j++)
-                        effects.add (*it, it->mMagnMin + (it->mMagnMax - it->mMagnMin) * random);
+
+                    effects.add (*it, (it->mMagnMin + (it->mMagnMax - it->mMagnMin) * random) * magnMult);
                     ++i;
                 }
             }
@@ -253,6 +243,18 @@ namespace MWMechanics
         mCorprusSpells[corpSpellId].mWorsenings++;
     }
 
+    bool Spells::hasCorprusEffect(const ESM::Spell *spell)
+    {
+        for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = spell->mEffects.mList.begin(); effectIt != spell->mEffects.mList.end(); ++effectIt)
+        {
+            if (effectIt->mEffectID == ESM::MagicEffect::Corprus)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     bool Spells::canUsePower(const std::string &power) const
     {
         std::map<std::string, MWWorld::TimeStamp>::const_iterator it = mUsedPowers.find(power);
@@ -289,6 +291,16 @@ namespace MWMechanics
         // No need to discard spells here (doesn't really matter if non existent ids are kept)
         for (std::map<std::string, ESM::TimeStamp>::const_iterator it = state.mUsedPowers.begin(); it != state.mUsedPowers.end(); ++it)
             mUsedPowers[it->first] = MWWorld::TimeStamp(it->second);
+
+        mCorprusSpells.clear();
+        for (std::map<std::string, ESM::SpellState::CorprusStats>::const_iterator it = state.mCorprusSpells.begin(); it != state.mCorprusSpells.end(); ++it)
+        {
+            if (mSpells.find(it->first) != mSpells.end()) // Discard unavailable corprus spells
+            {
+                mCorprusSpells[it->first].mWorsenings = state.mCorprusSpells.at(it->first).mWorsenings;
+                mCorprusSpells[it->first].mNextWorsening = MWWorld::TimeStamp(state.mCorprusSpells.at(it->first).mNextWorsening);
+            }
+        }
     }
 
     void Spells::writeState(ESM::SpellState &state) const
@@ -298,5 +310,11 @@ namespace MWMechanics
 
         for (std::map<std::string, MWWorld::TimeStamp>::const_iterator it = mUsedPowers.begin(); it != mUsedPowers.end(); ++it)
             state.mUsedPowers[it->first] = it->second.toEsm();
+
+        for (std::map<std::string, CorprusStats>::const_iterator it = mCorprusSpells.begin(); it != mCorprusSpells.end(); ++it)
+        {
+            state.mCorprusSpells[it->first].mWorsenings = mCorprusSpells.at(it->first).mWorsenings;
+            state.mCorprusSpells[it->first].mNextWorsening = mCorprusSpells.at(it->first).mNextWorsening.toEsm();
+        }
     }
 }

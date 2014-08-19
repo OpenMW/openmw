@@ -483,8 +483,6 @@ namespace MWMechanics
             {
                 if (spells.mCorprusSpells.find(it->first) != spells.mCorprusSpells.end())
                 {
-                    const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(it->first);
-
                     if (MWBase::Environment::get().getWorld()->getTimeStamp() >= spells.mCorprusSpells[it->first].mNextWorsening)
                     {
                         spells.worsenCorprus(it->first);
