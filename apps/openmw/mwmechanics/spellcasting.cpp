@@ -76,7 +76,7 @@ namespace MWMechanics
     {
         CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).mMagnitude)
+        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude())
             return 0;
 
         float y = FLT_MAX;
@@ -114,7 +114,7 @@ namespace MWMechanics
         if (spell->mData.mFlags & ESM::Spell::F_Always)
             return 100;
 
-        int castBonus = -stats.getMagicEffects().get(ESM::MagicEffect::Sound).mMagnitude;
+        int castBonus = -stats.getMagicEffects().get(ESM::MagicEffect::Sound).getMagnitude();
 
         int actorWillpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
         int actorLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
@@ -158,16 +158,16 @@ namespace MWMechanics
 
         float resistance = 0;
         if (resistanceEffect != -1)
-            resistance += actorEffects->get(resistanceEffect).mMagnitude;
+            resistance += actorEffects->get(resistanceEffect).getMagnitude();
         if (weaknessEffect != -1)
-            resistance -= actorEffects->get(weaknessEffect).mMagnitude;
+            resistance -= actorEffects->get(weaknessEffect).getMagnitude();
 
         if (effectId == ESM::MagicEffect::FireDamage)
-            resistance += actorEffects->get(ESM::MagicEffect::FireShield).mMagnitude;
+            resistance += actorEffects->get(ESM::MagicEffect::FireShield).getMagnitude();
         if (effectId == ESM::MagicEffect::ShockDamage)
-            resistance += actorEffects->get(ESM::MagicEffect::LightningShield).mMagnitude;
+            resistance += actorEffects->get(ESM::MagicEffect::LightningShield).getMagnitude();
         if (effectId == ESM::MagicEffect::FrostDamage)
-            resistance += actorEffects->get(ESM::MagicEffect::FrostShield).mMagnitude;
+            resistance += actorEffects->get(ESM::MagicEffect::FrostShield).getMagnitude();
 
         return resistance;
     }
@@ -306,8 +306,8 @@ namespace MWMechanics
         if (spell && (spell->mData.mType == ESM::Spell::ST_Disease || spell->mData.mType == ESM::Spell::ST_Blight))
         {
             float x = (spell->mData.mType == ESM::Spell::ST_Disease) ?
-                        target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::ResistCommonDisease).mMagnitude
-                      : target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::ResistBlightDisease).mMagnitude;
+                        target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::ResistCommonDisease).getMagnitude()
+                      : target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::ResistBlightDisease).getMagnitude();
 
             int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
             if (roll <= x)
@@ -339,7 +339,7 @@ namespace MWMechanics
         bool absorbed = false;
         if (spell && caster != target && target.getClass().isActor())
         {
-            int absorb = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).mMagnitude;
+            int absorb = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude();
             int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
             absorbed = (roll < absorb);
             if (absorbed)
@@ -388,7 +388,7 @@ namespace MWMechanics
                 // Try reflecting
                 if (!reflected && magnitudeMult > 0 && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
                 {
-                    int reflect = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Reflect).mMagnitude;
+                    int reflect = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Reflect).getMagnitude();
                     int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
                     bool isReflected = (roll < reflect);
                     if (isReflected)

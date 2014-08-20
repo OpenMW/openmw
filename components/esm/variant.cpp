@@ -17,6 +17,30 @@ namespace
 
 ESM::Variant::Variant() : mType (VT_None), mData (0) {}
 
+ESM::Variant::Variant(const std::string &value)
+{
+    mData = 0;
+    mType = VT_None;
+    setType(VT_String);
+    setString(value);
+}
+
+ESM::Variant::Variant(int value)
+{
+    mData = 0;
+    mType = VT_None;
+    setType(VT_Long);
+    setInteger(value);
+}
+
+ESM::Variant::Variant(float value)
+{
+    mData = 0;
+    mType = VT_None;
+    setType(VT_Float);
+    setFloat(value);
+}
+
 ESM::Variant::~Variant()
 {
     delete mData;

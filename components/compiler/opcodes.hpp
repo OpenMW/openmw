@@ -322,6 +322,8 @@ namespace Compiler
         const int numberOfDynamics = 3;
         const int numberOfSkills = 27;
 
+        const int numberOfMagicEffects = 24;
+
         const int opcodeGetAttribute = 0x2000027;
         const int opcodeGetAttributeExplicit = 0x200002f;
         const int opcodeSetAttribute = 0x2000037;
@@ -346,6 +348,13 @@ namespace Compiler
         const int opcodeSetSkillExplicit = 0x20000df;
         const int opcodeModSkill = 0x20000fa;
         const int opcodeModSkillExplicit = 0x2000115;
+
+        const int opcodeGetMagicEffect = 0x2000264;
+        const int opcodeGetMagicEffectExplicit = 0x200027c;
+        const int opcodeSetMagicEffect = 0x2000294;
+        const int opcodeSetMagicEffectExplicit = 0x20002ac;
+        const int opcodeModMagicEffect = 0x20002c4;
+        const int opcodeModMagicEffectExplicit = 0x20002dc;
 
         const int opcodeGetPCCrimeLevel = 0x20001ec;
         const int opcodeSetPCCrimeLevel = 0x20001ed;

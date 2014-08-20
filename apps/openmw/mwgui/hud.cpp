@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -430,10 +432,9 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
 
         std::string icon = effect->mIcon;
-        int slashPos = icon.find("\\");
+        int slashPos = icon.rfind('\\');
         icon.insert(slashPos+1, "b_");
-        icon = std::string("icons\\") + icon;
-        Widgets::fixTexturePath(icon);
+        icon = Misc::ResourceHelpers::correctIconPath(icon);
 
         mSpellImage->setItem(MWWorld::Ptr());
         mSpellImage->setIcon(icon);

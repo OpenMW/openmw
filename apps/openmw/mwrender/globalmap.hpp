@@ -18,10 +18,11 @@ namespace ESM
 namespace MWRender
 {
 
-    class GlobalMap
+    class GlobalMap : public Ogre::ManualResourceLoader
     {
     public:
         GlobalMap(const std::string& cacheDir);
+        ~GlobalMap();
 
         void render(Loading::Listener* loadingListener);
 
@@ -29,12 +30,12 @@ namespace MWRender
         int getHeight() { return mHeight; }
 
         void worldPosToImageSpace(float x, float z, float& imageX, float& imageY);
-        ///< @param x x ogre coords
-        /// @param z z ogre coords
 
         void cellTopLeftCornerToImageSpace(int x, int y, float& imageX, float& imageY);
 
         void exploreCell (int cellX, int cellY);
+
+        virtual void loadResource(Ogre::Resource* resource);
 
         /// Clears the overlay
         void clear();
@@ -48,6 +49,7 @@ namespace MWRender
         std::vector< std::pair<int,int> > mExploredCells;
 
         Ogre::TexturePtr mOverlayTexture;
+        Ogre::Image mOverlayImage; // Backup in system memory
 
         int mWidth;
         int mHeight;

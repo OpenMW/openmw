@@ -689,12 +689,10 @@ namespace MWInput
         if(!MWBase::Environment::get().getWindowManager()->isGuiMode()) //No open GUIs, open up the MainMenu
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
-            MWBase::Environment::get().getSoundManager()->pauseSounds (MWBase::SoundManager::Play_TypeSfx);
         }
         else //Close current GUI
         {
             MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
-            MWBase::Environment::get().getSoundManager()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);
         }
     }
 

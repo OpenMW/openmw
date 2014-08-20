@@ -1430,9 +1430,12 @@ void ObjectAnimation::removeParticles()
 {
     for (unsigned int i=0; i<mObjectRoot->mParticles.size(); ++i)
     {
-        mObjectRoot->mSceneMgr->destroyParticleSystem(mObjectRoot->mParticles[i]);
+        // Don't destroyParticleSystem, the ParticleSystemController is still holding a pointer to it.
+        // Don't setVisible, this could conflict with a VisController.
+        // The following will remove all spawned particles, then set the speed factor to zero so that no new ones will be spawned.
+        mObjectRoot->mParticles[i]->setSpeedFactor(0.f);
+        mObjectRoot->mParticles[i]->clear();
     }
-    mObjectRoot->mParticles.clear();
 }
 
 

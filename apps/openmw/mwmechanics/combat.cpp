@@ -59,7 +59,7 @@ namespace MWMechanics
 
         if (blockerStats.getKnockedDown() // Used for both knockout or knockdown
                 || blockerStats.getHitRecovery()
-                || blockerStats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0)
+                || blockerStats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
             return false;
 
         // Don't block when in spellcasting state (shield is equipped, but not visible)
@@ -144,8 +144,8 @@ namespace MWMechanics
     void resistNormalWeapon(const MWWorld::Ptr &actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr &weapon, float &damage)
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-        float resistance = std::min(100.f, stats.getMagicEffects().get(ESM::MagicEffect::ResistNormalWeapons).mMagnitude
-                - stats.getMagicEffects().get(ESM::MagicEffect::WeaknessToNormalWeapons).mMagnitude);
+        float resistance = std::min(100.f, stats.getMagicEffects().get(ESM::MagicEffect::ResistNormalWeapons).getMagnitude()
+                - stats.getMagicEffects().get(ESM::MagicEffect::WeaknessToNormalWeapons).getMagnitude());
 
         float multiplier = 1.f - resistance / 100.f;
 
@@ -246,8 +246,8 @@ namespace MWMechanics
                           (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                           (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         hitchance *= stats.getFatigueTerm();
-        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).mMagnitude -
-                     mageffects.get(ESM::MagicEffect::Blind).mMagnitude;
+        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).getMagnitude() -
+                     mageffects.get(ESM::MagicEffect::Blind).getMagnitude();
         hitchance -= victim.getClass().getCreatureStats(victim).getEvasion();
         return hitchance;
     }
@@ -256,7 +256,7 @@ namespace MWMechanics
     {
         for (int i=0; i<3; ++i)
         {
-            float magnitude = victim.getClass().getCreatureStats(victim).getMagicEffects().get(ESM::MagicEffect::FireShield+i).mMagnitude;
+            float magnitude = victim.getClass().getCreatureStats(victim).getMagicEffects().get(ESM::MagicEffect::FireShield+i).getMagnitude();
 
             if (!magnitude)
                 continue;

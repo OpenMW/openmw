@@ -492,7 +492,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
         case SelectWrapper::Function_PcCorprus:
 
             return player.getClass().getCreatureStats (player).
-                getMagicEffects().get (ESM::MagicEffect::Corprus).mMagnitude!=0;
+                getMagicEffects().get (ESM::MagicEffect::Corprus).getMagnitude()!=0;
 
         case SelectWrapper::Function_PcExpelled:
         {
@@ -508,7 +508,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
         case SelectWrapper::Function_PcVampire:
 
             return player.getClass().getCreatureStats(player).getMagicEffects().
-                    get(ESM::MagicEffect::Vampirism).mMagnitude > 0;
+                    get(ESM::MagicEffect::Vampirism).getMagnitude() > 0;
 
         case SelectWrapper::Function_TalkedToPc:
 

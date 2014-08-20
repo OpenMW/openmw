@@ -35,6 +35,8 @@ namespace MWMechanics
 
     void AiWander::init()
     {
+        // NOTE: mDistance and mDuration must be set already
+
         mCellX = std::numeric_limits<int>::max();
         mCellY = std::numeric_limits<int>::max();
         mXCell = 0;
@@ -47,7 +49,7 @@ namespace MWMechanics
         mRotate = false;
         mTargetAngle = 0;
         mSaidGreeting = Greet_None;
-        greetingTimer = 0;
+        mGreetingTimer = 0;
         mHasReturnPosition = false;
         mReturnPosition = Ogre::Vector3(0,0,0);
 
@@ -430,19 +432,19 @@ namespace MWMechanics
             {
                 if ((playerDistSqr <= helloDistance*helloDistance) && MWBase::Environment::get().getWorld()->getLOS(player, actor)
                     && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
-                    greetingTimer++;
+                    mGreetingTimer++;
                 
-                if (greetingTimer >= GREETING_SHOULD_START)
+                if (mGreetingTimer >= GREETING_SHOULD_START)
                 {
                     mSaidGreeting = Greet_InProgress;
                     MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
-                    greetingTimer = 0;
+                    mGreetingTimer = 0;
                 }
             }
             
             if(mSaidGreeting == Greet_InProgress)
             {
-                greetingTimer++;
+                mGreetingTimer++;
                 
                 if(mWalking)
                 {
@@ -470,10 +472,10 @@ namespace MWMechanics
                     }
                 }
                 
-                if (greetingTimer >= GREETING_SHOULD_END)
+                if (mGreetingTimer >= GREETING_SHOULD_END)
                 {
                     mSaidGreeting = Greet_Done;
-                    greetingTimer = 0;
+                    mGreetingTimer = 0;
                 }
             }
             
@@ -680,8 +682,6 @@ namespace MWMechanics
 
     AiWander::AiWander (const ESM::AiSequence::AiWander* wander)
     {
-        init();
-
         mDistance = wander->mData.mDistance;
         mDuration = wander->mData.mDuration;
         mStartTime = MWWorld::TimeStamp(wander->mStartTime);
@@ -690,6 +690,8 @@ namespace MWMechanics
             mIdle.push_back(wander->mData.mIdle[i]);
 
         mRepeat = wander->mData.mShouldRepeat;
+
+        init();
     }
 }
 
