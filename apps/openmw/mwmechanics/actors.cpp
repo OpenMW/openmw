@@ -481,9 +481,9 @@ namespace MWMechanics
             Spells & spells = creatureStats.getSpells();
             for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
             {
-                if (spells.mCorprusSpells.find(it->first) != spells.mCorprusSpells.end())
+                if (spells.getCorprusSpells().find(it->first) != spells.getCorprusSpells().end())
                 {
-                    if (MWBase::Environment::get().getWorld()->getTimeStamp() >= spells.mCorprusSpells[it->first].mNextWorsening)
+                    if (MWBase::Environment::get().getWorld()->getTimeStamp() >= spells.getCorprusSpells().at(it->first).mNextWorsening)
                     {
                         spells.worsenCorprus(it->first);
 

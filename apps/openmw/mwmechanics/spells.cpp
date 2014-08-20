@@ -255,6 +255,11 @@ namespace MWMechanics
         return false;
     }
 
+    const std::map<std::string, Spells::CorprusStats> &Spells::getCorprusSpells() const
+    {
+        return mCorprusSpells;
+    }
+
     bool Spells::canUsePower(const std::string &power) const
     {
         std::map<std::string, MWWorld::TimeStamp>::const_iterator it = mUsedPowers.find(power);
