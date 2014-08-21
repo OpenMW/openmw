@@ -46,6 +46,9 @@ namespace MWMechanics
 
             TContainer mSpells;
 
+            // spell-tied effects that will be applied even after removing the spell (currently used to keep positive effects when corprus is removed)
+            std::map<std::string, MagicEffects> mPermanentSpellEffects;
+
             // Note: this is the spell that's about to be cast, *not* the spell selected in the GUI (which may be different)
             std::string mSelectedSpell;
 

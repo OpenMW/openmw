@@ -63,11 +63,25 @@ namespace MWMechanics
         TContainer::iterator iter = mSpells.find (lower);
         std::map<std::string, CorprusStats>::iterator corprusIt = mCorprusSpells.find(lower);
 
+        // if it's corprus, remove negative and keep positive effects
+        if (corprusIt != mCorprusSpells.end())
+        {
+            worsenCorprus(lower);
+            if (mPermanentSpellEffects.find(lower) != mPermanentSpellEffects.end())
+            {
+                MagicEffects & effects = mPermanentSpellEffects[lower];
+                for (MagicEffects::Collection::const_iterator effectIt = effects.begin(); effectIt != effects.end(); ++effectIt)
+                {
+                    const ESM::MagicEffect * magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->first.mId);
+                    if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
+                        effects.remove(effectIt->first);
+                }
+            }
+            mCorprusSpells.erase(corprusIt);
+        }
+
         if (iter!=mSpells.end())
             mSpells.erase (iter);
-
-        if (corprusIt != mCorprusSpells.end())
-            mCorprusSpells.erase(corprusIt);
 
         if (spellId==mSelectedSpell)
             mSelectedSpell.clear();
@@ -94,18 +108,15 @@ namespace MWMechanics
                     if (iter->second.find(i) != iter->second.end())
                         random = iter->second.at(i);
 
-                    int magnMult = 1;
-                    if (mCorprusSpells.find(spell->mId) != mCorprusSpells.end())
-                    {
-                        const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
-                        if ((it->mEffectID != ESM::MagicEffect::Corprus) && (effect->mData.mFlags & ESM::MagicEffect::UncappedDamage)) // APPLIED_ONCE
-                            magnMult += mCorprusSpells.at(spell->mId).mWorsenings;
-                    }
-
-                    effects.add (*it, (it->mMagnMin + (it->mMagnMax - it->mMagnMin) * random) * magnMult);
+                    effects.add (*it, it->mMagnMin + (it->mMagnMax - it->mMagnMin) * random);
                     ++i;
                 }
             }
+        }
+
+        for (std::map<std::string, MagicEffects>::const_iterator it = mPermanentSpellEffects.begin(); it != mPermanentSpellEffects.end(); ++it)
+        {
+            effects += it->second;
         }
 
         return effects;
@@ -241,6 +252,25 @@ namespace MWMechanics
     {
         mCorprusSpells[corpSpellId].mNextWorsening = MWBase::Environment::get().getWorld()->getTimeStamp() + CorprusStats::sWorseningPeriod;
         mCorprusSpells[corpSpellId].mWorsenings++;
+
+        // update worsened effects
+        mPermanentSpellEffects[corpSpellId] = MagicEffects();
+        const ESM::Spell * spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(corpSpellId);
+        int i=0;
+        for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = spell->mEffects.mList.begin(); effectIt != spell->mEffects.mList.end(); ++effectIt, ++i)
+        {
+            const ESM::MagicEffect * magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
+            if ((effectIt->mEffectID != ESM::MagicEffect::Corprus) && (magicEffect->mData.mFlags & ESM::MagicEffect::UncappedDamage)) // APPLIED_ONCE
+            {
+                float random = 1.f;
+                if (mSpells[corpSpellId].find(i) != mSpells[corpSpellId].end())
+                    random = mSpells[corpSpellId].at(i);
+
+                float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
+                magnitude *= std::max(1, mCorprusSpells[corpSpellId].mWorsenings);
+                mPermanentSpellEffects[corpSpellId].add(MWMechanics::EffectKey(*effectIt), MWMechanics::EffectParam(magnitude));
+            }
+        }
     }
 
     bool Spells::hasCorprusEffect(const ESM::Spell *spell)
@@ -297,6 +327,20 @@ namespace MWMechanics
         for (std::map<std::string, ESM::TimeStamp>::const_iterator it = state.mUsedPowers.begin(); it != state.mUsedPowers.end(); ++it)
             mUsedPowers[it->first] = MWWorld::TimeStamp(it->second);
 
+        for (std::map<std::string, std::vector<ESM::SpellState::PermanentSpellEffectInfo> >::const_iterator it =
+            state.mPermanentSpellEffects.begin(); it != state.mPermanentSpellEffects.end(); ++it)
+        {
+            const ESM::Spell * spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);
+            if (!spell)
+                continue;
+
+            mPermanentSpellEffects[it->first] = MagicEffects();
+            for (std::vector<ESM::SpellState::PermanentSpellEffectInfo>::const_iterator effectIt = it->second.begin(); effectIt != it->second.end(); ++effectIt)
+            {
+                mPermanentSpellEffects[it->first].add(EffectKey(effectIt->mId, effectIt->mArg), effectIt->mMagnitude);
+            }
+        }
+
         mCorprusSpells.clear();
         for (std::map<std::string, ESM::SpellState::CorprusStats>::const_iterator it = state.mCorprusSpells.begin(); it != state.mCorprusSpells.end(); ++it)
         {
@@ -315,6 +359,21 @@ namespace MWMechanics
 
         for (std::map<std::string, MWWorld::TimeStamp>::const_iterator it = mUsedPowers.begin(); it != mUsedPowers.end(); ++it)
             state.mUsedPowers[it->first] = it->second.toEsm();
+
+        for (std::map<std::string, MagicEffects>::const_iterator it = mPermanentSpellEffects.begin(); it != mPermanentSpellEffects.end(); ++it)
+        {
+            std::vector<ESM::SpellState::PermanentSpellEffectInfo> effectList;
+            for (MagicEffects::Collection::const_iterator effectIt = it->second.begin(); effectIt != it->second.end(); ++effectIt)
+            {
+                ESM::SpellState::PermanentSpellEffectInfo info;
+                info.mId = effectIt->first.mId;
+                info.mArg = effectIt->first.mArg;
+                info.mMagnitude = effectIt->second.getModifier();
+
+                effectList.push_back(info);
+            }
+            state.mPermanentSpellEffects[it->first] = effectList;
+        }
 
         for (std::map<std::string, CorprusStats>::const_iterator it = mCorprusSpells.begin(); it != mCorprusSpells.end(); ++it)
         {
