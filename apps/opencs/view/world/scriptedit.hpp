@@ -19,8 +19,36 @@ namespace CSVWorld
     class ScriptEdit : public QTextEdit
     {
             Q_OBJECT
+
         public:
+
+            class ChangeLock
+            {
+                    ScriptEdit& mEdit;
+
+                    ChangeLock (const ChangeLock&);
+                    ChangeLock& operator= (const ChangeLock&);
+
+                public:
+
+                    ChangeLock (ScriptEdit& edit);
+                    ~ChangeLock();
+            };
+
+            friend class ChangeLock;
+
+        private:
+
+            int mChangeLocked;
+
+        public:
+
             ScriptEdit (QWidget* parent, const CSMDoc::Document& document);
+
+            /// Should changes to the data be ignored (i.e. not cause updated)?
+            ///
+            /// \note This mechanism is used to avoid infinite update recursions
+            bool isChangeLocked() const;
 
         private:
             QVector<CSMWorld::UniversalId::Type> mAllowedTypes;

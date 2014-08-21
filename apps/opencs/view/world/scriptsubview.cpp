@@ -15,18 +15,8 @@
 #include "scripthighlighter.hpp"
 #include "scriptedit.hpp"
 
-CSVWorld::ScriptSubView::ChangeLock::ChangeLock (ScriptSubView& view) : mView (view)
-{
-    ++mView.mChangeLocked;
-}
-
-CSVWorld::ScriptSubView::ChangeLock::~ChangeLock()
-{
-    --mView.mChangeLocked;
-}
-
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id), mDocument (document), mColumn (-1), mChangeLocked (0)
+: SubView (id), mDocument (document), mColumn (-1)
 {
     setWidget (mEditor = new ScriptEdit (this, mDocument));
 
@@ -78,10 +68,10 @@ void CSVWorld::ScriptSubView::idListChanged()
 
 void CSVWorld::ScriptSubView::textChanged()
 {
-    if (mChangeLocked)
+    if (mEditor->isChangeLocked())
         return;
 
-    ChangeLock lock (*this);
+    ScriptEdit::ChangeLock lock (*mEditor);
 
     mDocument.getUndoStack().push (new CSMWorld::ModifyCommand (*mModel,
         mModel->getModelIndex (getUniversalId().getId(), mColumn), mEditor->toPlainText()));
@@ -89,10 +79,10 @@ void CSVWorld::ScriptSubView::textChanged()
 
 void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
-    if (mChangeLocked)
+    if (mEditor->isChangeLocked())
         return;
 
-    ChangeLock lock (*this);
+    ScriptEdit::ChangeLock lock (*mEditor);
 
     QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
 
@@ -115,10 +105,10 @@ void CSVWorld::ScriptSubView::rowsAboutToBeRemoved (const QModelIndex& parent, i
 
 void CSVWorld::ScriptSubView::updateHighlighting()
 {
-    if (mChangeLocked)
+    if (mEditor->isChangeLocked())
         return;
 
-    ChangeLock lock (*this);
+    ScriptEdit::ChangeLock lock (*mEditor);
 
     mHighlighter->rehighlight();
 }

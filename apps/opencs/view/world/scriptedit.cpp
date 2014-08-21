@@ -9,10 +9,22 @@
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
+CSVWorld::ScriptEdit::ChangeLock::ChangeLock (ScriptEdit& edit) : mEdit (edit)
+{
+    ++mEdit.mChangeLocked;
+}
+
+CSVWorld::ScriptEdit::ChangeLock::~ChangeLock()
+{
+    --mEdit.mChangeLocked;
+}
+
+
 CSVWorld::ScriptEdit::ScriptEdit (QWidget* parent, const CSMDoc::Document& document) :
     QTextEdit (parent),
     mDocument (document),
-    mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive)
+    mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive),
+    mChangeLocked (0)
 {
     setAcceptRichText (false);
     setLineWrapMode (QTextEdit::NoWrap);
@@ -48,6 +60,11 @@ CSVWorld::ScriptEdit::ScriptEdit (QWidget* parent, const CSMDoc::Document& docum
                   <<CSMWorld::UniversalId::Type_Weapon
                   <<CSMWorld::UniversalId::Type_Script
                   <<CSMWorld::UniversalId::Type_Region;
+}
+
+bool CSVWorld::ScriptEdit::isChangeLocked() const
+{
+    return mChangeLocked!=0;
 }
 
 void CSVWorld::ScriptEdit::dragEnterEvent (QDragEnterEvent* event)
