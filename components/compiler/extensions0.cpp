@@ -113,7 +113,7 @@ namespace Compiler
     {
         void registerExtensions (Extensions& extensions)
         {
-            extensions.registerInstruction ("additem", "cl", opcodeAddItem, opcodeAddItemExplicit);
+            extensions.registerInstruction ("additem", "clX", opcodeAddItem, opcodeAddItemExplicit);
             extensions.registerFunction ("getitemcount", 'l', "c", opcodeGetItemCount,
                 opcodeGetItemCountExplicit);
             extensions.registerInstruction ("removeitem", "cl", opcodeRemoveItem,
@@ -148,6 +148,16 @@ namespace Compiler
             extensions.registerInstruction ("forcerun", "", opcodeForceRun,
                 opcodeForceRunExplicit);
 
+            extensions.registerInstruction ("clearforcejump", "", opcodeClearForceJump,
+                opcodeClearForceJumpExplicit);
+            extensions.registerInstruction ("forcejump", "", opcodeForceJump,
+                opcodeForceJumpExplicit);
+
+            extensions.registerInstruction ("clearforcemovejump", "", opcodeClearForceMoveJump,
+                opcodeClearForceMoveJumpExplicit);
+            extensions.registerInstruction ("forcemovejump", "", opcodeForceMoveJump,
+                opcodeForceMoveJumpExplicit);
+
             extensions.registerInstruction ("clearforcesneak", "", opcodeClearForceSneak,
                 opcodeClearForceSneakExplicit);
             extensions.registerInstruction ("forcesneak", "", opcodeForceSneak,
@@ -155,6 +165,8 @@ namespace Compiler
             extensions.registerFunction ("getpcrunning", 'l', "", opcodeGetPcRunning);
             extensions.registerFunction ("getpcsneaking", 'l', "", opcodeGetPcSneaking);
             extensions.registerFunction ("getforcerun", 'l', "", opcodeGetForceRun, opcodeGetForceRunExplicit);
+            extensions.registerFunction ("getforcejump", 'l', "", opcodeGetForceJump, opcodeGetForceJumpExplicit);
+            extensions.registerFunction ("getforcemovejump", 'l', "", opcodeGetForceMoveJump, opcodeGetForceMoveJumpExplicit);
             extensions.registerFunction ("getforcesneak", 'l', "", opcodeGetForceSneak, opcodeGetForceSneakExplicit);
         }
     }

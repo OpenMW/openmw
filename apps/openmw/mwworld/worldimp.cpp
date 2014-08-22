@@ -1151,7 +1151,7 @@ namespace MWWorld
         }
     }
 
-    void World::adjustPosition(const Ptr &ptr)
+    void World::adjustPosition(const Ptr &ptr, bool force)
     {
         ESM::Position pos (ptr.getRefData().getPosition());
 
@@ -1170,7 +1170,7 @@ namespace MWWorld
 
         ptr.getRefData().setPosition(pos);
 
-        if (!isFlying(ptr))
+        if (force || !isFlying(ptr))
         {
             Ogre::Vector3 traced = mPhysics->traceDown(ptr, 200);
             if (traced.z < pos.pos[2])
@@ -1284,7 +1284,8 @@ namespace MWWorld
                 bool reached = (targetRot == 90.f && it->second) || targetRot == 0.f;
 
                 /// \todo should use convexSweepTest here
-                std::vector<std::string> collisions = mPhysics->getCollisions(it->first);
+                std::vector<std::string> collisions = mPhysics->getCollisions(it->first, OEngine::Physic::CollisionType_Actor
+                                                                              , OEngine::Physic::CollisionType_Actor);
                 for (std::vector<std::string>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
                 {
                     MWWorld::Ptr ptr = getPtrViaHandle(*cit);
@@ -1300,7 +1301,6 @@ namespace MWWorld
                         // we need to undo the rotation
                         localRotateObject(it->first, 0, 0, oldRot);
                         reached = false;
-                        //break; //Removed in case multiple actors are touching
                     }
                 }
 
@@ -1553,11 +1553,6 @@ namespace MWWorld
     void World::modRegion(const std::string &regionid, const std::vector<char> &chances)
     {
         mWeatherManager->modRegion(regionid, chances);
-    }
-
-    OEngine::Render::Fader* World::getFader()
-    {
-        return mRendering->getFader();
     }
 
     Ogre::Vector2 World::getNorthVector (CellStore* cell)

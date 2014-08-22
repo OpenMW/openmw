@@ -82,6 +82,20 @@ std::list<AiPackage*>::const_iterator AiSequence::end() const
     return mPackages.end();
 }
 
+void AiSequence::erase(std::list<AiPackage*>::const_iterator package)
+{
+    // Not sure if manually terminated packages should trigger mDone, probably not?
+    for(std::list<AiPackage*>::iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+    {
+        if (package == it)
+        {
+            mPackages.erase(it);
+            return;
+        }
+    }
+    throw std::runtime_error("can't find package to erase");
+}
+
 bool AiSequence::isInCombat() const
 {
     for(std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
@@ -245,6 +259,9 @@ void AiSequence::clear()
 
 void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
 {
+    if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        throw std::runtime_error("Can't add AI packages to player");
+
     if (package.getTypeId() == AiPackage::TypeIdCombat || package.getTypeId() == AiPackage::TypeIdPursue)
     {
         // Notify AiWander of our current position so we can return to it after combat finished

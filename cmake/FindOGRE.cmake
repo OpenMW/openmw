@@ -127,7 +127,7 @@ endif ()
 set(OGRE_COMPONENTS Paging Terrain 
   Plugin_BSPSceneManager Plugin_CgProgramManager Plugin_OctreeSceneManager
   Plugin_OctreeZone Plugin_PCZSceneManager Plugin_ParticleFX
-  RenderSystem_Direct3D10 RenderSystem_Direct3D9 RenderSystem_GL RenderSystem_GLES)
+  RenderSystem_Direct3D10 RenderSystem_Direct3D9 RenderSystem_GL RenderSystem_GLES2)
 set(OGRE_RESET_VARS 
   OGRE_CONFIG_INCLUDE_DIR OGRE_INCLUDE_DIR 
   OGRE_LIBRARY_FWK OGRE_LIBRARY_REL OGRE_LIBRARY_DBG
@@ -234,10 +234,10 @@ if (OGRE_STATIC)
   find_package(FreeImage QUIET)
   find_package(Freetype QUIET)
   find_package(OpenGL QUIET)
-  find_package(OpenGLES QUIET)
+  find_package(OpenGLES2 QUIET)
   find_package(ZLIB QUIET)
   find_package(ZZip QUIET)
-  if (UNIX AND NOT APPLE)
+  if (UNIX AND (NOT APPLE AND NOT ANDROID))
     find_package(X11 QUIET)
     find_library(XAW_LIBRARY NAMES Xaw Xaw7 PATHS ${DEP_LIB_SEARCH_DIR} ${X11_LIB_SEARCH_PATH})
     if (NOT XAW_LIBRARY OR NOT X11_Xt_FOUND)
@@ -258,10 +258,16 @@ if (OGRE_STATIC)
     endif ()
   endif ()
 
-  set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${OGRE_LIBRARY_FWK} ${ZZip_LIBRARIES} ${ZLIB_LIBRARIES} 
+if (ANDROID)
+    set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${OGRE_LIBRARY_FWK} ${ZZip_LIBRARIES} ${ZLIB_LIBRARIES} 
     ${FreeImage_LIBRARIES} ${FREETYPE_LIBRARIES} 
-    ${X11_LIBRARIES} ${X11_Xt_LIBRARIES} ${XAW_LIBRARY} ${X11_Xrandr_LIB}
     ${Cocoa_LIBRARIES} ${Carbon_LIBRARIES})
+else ()
+    set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${OGRE_LIBRARY_FWK} ${ZZip_LIBRARIES} ${ZLIB_LIBRARIES} 
+    ${FreeImage_LIBRARIES} ${FREETYPE_LIBRARIES} 
+    ${X11_LIBRARIES} ${X11_Xt_LIBRARIES} ${XAW_LIBRARY} ${X11_Xrandr_LIB}   
+    ${Cocoa_LIBRARIES} ${Carbon_LIBRARIES})
+endif()
 
   if (NOT ZLIB_FOUND OR NOT ZZip_FOUND)
     set(OGRE_DEPS_FOUND FALSE)
@@ -272,7 +278,7 @@ if (OGRE_STATIC)
   if (NOT FREETYPE_FOUND)
     set(OGRE_DEPS_FOUND FALSE)
   endif ()
-  if (UNIX AND NOT APPLE)
+  if (UNIX AND NOT APPLE AND NOT ANDROID)
 	if (NOT X11_FOUND)
       set(OGRE_DEPS_FOUND FALSE)
 	endif ()
@@ -486,7 +492,7 @@ ogre_find_plugin(Plugin_CgProgramManager OgreCgProgram.h PlugIns/CgProgramManage
 ogre_find_plugin(Plugin_OctreeSceneManager OgreOctreeSceneManager.h PlugIns/OctreeSceneManager/include)
 ogre_find_plugin(Plugin_ParticleFX OgreParticleFXPrerequisites.h PlugIns/ParticleFX/include)
 ogre_find_plugin(RenderSystem_GL OgreGLRenderSystem.h RenderSystems/GL/include)
-ogre_find_plugin(RenderSystem_GLES OgreGLESRenderSystem.h RenderSystems/GLES/include)
+ogre_find_plugin(RenderSystem_GLES2 OgreGLES2RenderSystem.h RenderSystems/GLES2/include)
 ogre_find_plugin(RenderSystem_Direct3D9 OgreD3D9RenderSystem.h RenderSystems/Direct3D9/include)
 ogre_find_plugin(RenderSystem_Direct3D10 OgreD3D10RenderSystem.h RenderSystems/Direct3D10/include)
 ogre_find_plugin(RenderSystem_Direct3D11 OgreD3D11RenderSystem.h RenderSystems/Direct3D11/include)
@@ -528,8 +534,8 @@ if (OGRE_STATIC)
   set(OGRE_RenderSystem_GL_LIBRARIES ${OGRE_RenderSystem_GL_LIBRARIES}
     ${OPENGL_LIBRARIES}
   )
-  set(OGRE_RenderSystem_GLES_LIBRARIES ${OGRE_RenderSystem_GLES_LIBRARIES}
-    ${OPENGLES_LIBRARIES}
+  set(OGRE_RenderSystem_GLES2_LIBRARIES ${OGRE_RenderSystem_GLES2_LIBRARIES}
+    ${OPENGLES2_LIBRARIES}
   )
   set(OGRE_Plugin_CgProgramManager_LIBRARIES ${OGRE_Plugin_CgProgramManager_LIBRARIES}
     ${Cg_LIBRARIES}

@@ -17,6 +17,7 @@
 #include <components/esm/loadweap.hpp>
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadstat.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <libs/openengine/ogre/lights.hpp>
 
@@ -467,7 +468,13 @@ float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::Node
     const std::string stop = groupname+": stop";
     float starttime = std::numeric_limits<float>::max();
     float stoptime = 0.0f;
-    // Have to find keys in reverse (see reset method)
+
+    // Pick the last Loop Stop key and the last Loop Start key.
+    // This is required because of broken text keys in AshVampire.nif.
+    // It has *two* WalkForward: Loop Stop keys at different times, the first one is used for stopping playback
+    // but the animation velocity calculation uses the second one.
+    // As result the animation velocity calculation is not correct, and this incorrect velocity must be replicated,
+    // because otherwise the Creature's Speed (dagoth uthol) would not be sufficient to move fast enough.
     NifOgre::TextKeyMap::const_reverse_iterator keyiter(keys.rbegin());
     while(keyiter != keys.rend())
     {
@@ -476,8 +483,18 @@ float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::Node
             starttime = keyiter->first;
             break;
         }
-        else if(keyiter->second == loopstop || keyiter->second == stop)
+        ++keyiter;
+    }
+    keyiter = keys.rbegin();
+    while(keyiter != keys.rend())
+    {
+        if (keyiter->second == stop)
             stoptime = keyiter->first;
+        else if (keyiter->second == loopstop)
+        {
+            stoptime = keyiter->first;
+            break;
+        }
         ++keyiter;
     }
 
@@ -1191,13 +1208,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
         if (it->mLoop && loop && it->mEffectId == effectId && it->mBoneName == bonename)
             return;
 
-    // fix texture extension to .dds
-    if (texture.size() > 4)
-    {
-        texture[texture.size()-3] = 'd';
-        texture[texture.size()-2] = 'd';
-        texture[texture.size()-1] = 's';
-    }
+    std::string correctedTexture = Misc::ResourceHelpers::correctTexturePath(texture);
 
     EffectParams params;
     params.mModelName = model;
@@ -1255,7 +1266,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
                     for (int tex=0; tex<pass->getNumTextureUnitStates(); ++tex)
                     {
                         Ogre::TextureUnitState* tus = pass->getTextureUnitState(tex);
-                        tus->setTextureName("textures\\" + texture);
+                        tus->setTextureName(correctedTexture);
                     }
                 }
             }
@@ -1285,7 +1296,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
                     for (int tex=0; tex<pass->getNumTextureUnitStates(); ++tex)
                     {
                         Ogre::TextureUnitState* tus = pass->getTextureUnitState(tex);
-                        tus->setTextureName("textures\\" + texture);
+                        tus->setTextureName(correctedTexture);
                     }
                 }
             }
@@ -1413,6 +1424,15 @@ ObjectAnimation::ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &mod
 void ObjectAnimation::addLight(const ESM::Light *light)
 {
     addExtraLight(mInsert->getCreator(), mObjectRoot, light);
+}
+
+void ObjectAnimation::removeParticles()
+{
+    for (unsigned int i=0; i<mObjectRoot->mParticles.size(); ++i)
+    {
+        mObjectRoot->mSceneMgr->destroyParticleSystem(mObjectRoot->mParticles[i]);
+    }
+    mObjectRoot->mParticles.clear();
 }
 
 

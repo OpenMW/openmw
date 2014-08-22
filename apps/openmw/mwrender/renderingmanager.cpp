@@ -23,6 +23,7 @@
 
 #include <components/settings/settings.hpp>
 #include <components/terrain/defaultworld.hpp>
+#include <components/terrain/terraingrid.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -45,7 +46,6 @@
 #include "globalmap.hpp"
 #include "terrainstorage.hpp"
 #include "effectmanager.hpp"
-#include "terraingrid.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -212,11 +212,6 @@ MWRender::Actors& RenderingManager::getActors(){
     return *mActors;
 }
 
-OEngine::Render::Fader* RenderingManager::getFader()
-{
-    return mRendering.getFader();
-}
-
 MWRender::Camera* RenderingManager::getCamera() const
 {
     return mCamera;
@@ -345,7 +340,7 @@ void RenderingManager::update (float duration, bool paused)
     MWWorld::Ptr player = world->getPlayerPtr();
 
     int blind = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
-    mRendering.getFader()->setFactor(std::max(0.f, 1.f-(blind / 100.f)));
+    MWBase::Environment::get().getWindowManager()->setScreenFactor(std::max(0.f, 1.f-(blind / 100.f)));
     setAmbientMode();
 
     // player position
@@ -1050,7 +1045,7 @@ void RenderingManager::enableTerrain(bool enable)
                 mTerrain = new Terrain::DefaultWorld(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
                                                 Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY, 1, 64);
             else
-                mTerrain = new MWRender::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                mTerrain = new Terrain::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
                                                 Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY);
             mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
                                      Settings::Manager::getBool("split", "Shadows"));

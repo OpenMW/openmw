@@ -637,8 +637,6 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime);
-
                     std::string factionID = "";
                     if(arg0 >0)
                     {
@@ -647,6 +645,8 @@ namespace MWScript
                     }
                     else
                     {
+                        MWWorld::Ptr ptr = R()(runtime);
+
                         if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
                         {
                             factionID = "";
@@ -913,8 +913,6 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime);
-
                     std::string factionID = "";
                     if(arg0 >0 )
                     {
@@ -923,6 +921,8 @@ namespace MWScript
                     }
                     else
                     {
+                        MWWorld::Ptr ptr = R()(runtime);
+
                         if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
                         {
                             factionID = "";

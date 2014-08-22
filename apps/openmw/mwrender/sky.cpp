@@ -19,6 +19,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <components/nifogre/ogrenifloader.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <extern/shiny/Platforms/Ogre/OgreMaterial.hpp>
 
@@ -294,7 +295,12 @@ void SkyManager::create()
 
     // Stars
     mAtmosphereNight = mRootNode->createChildSceneNode();
-    NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(mAtmosphereNight, "meshes\\sky_night_01.nif");
+    NifOgre::ObjectScenePtr objects;
+    if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("meshes\\sky_night_02.nif"))
+        objects = NifOgre::Loader::createObjects(mAtmosphereNight, "meshes\\sky_night_02.nif");
+    else
+        objects = NifOgre::Loader::createObjects(mAtmosphereNight, "meshes\\sky_night_01.nif");
+
     for(size_t i = 0, matidx = 0;i < objects->mEntities.size();i++)
     {
         Entity* night1_ent = objects->mEntities[i];
@@ -584,13 +590,13 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 
     if (mClouds != weather.mCloudTexture)
     {
-        sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", "textures\\"+weather.mCloudTexture);
+        sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", Misc::ResourceHelpers::correctTexturePath(weather.mCloudTexture));
         mClouds = weather.mCloudTexture;
     }
 
     if (mNextClouds != weather.mNextCloudTexture)
     {
-        sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", "textures\\"+weather.mNextCloudTexture);
+        sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", Misc::ResourceHelpers::correctTexturePath(weather.mNextCloudTexture));
         mNextClouds = weather.mNextCloudTexture;
     }
 

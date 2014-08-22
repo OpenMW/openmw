@@ -157,15 +157,19 @@ namespace MWClass
 
         float iWeight = gmst.find (typeGmst)->getInt();
 
-        if (iWeight * gmst.find ("fLightMaxMod")->getFloat()>=
-            ref->mBase->mData.mWeight)
+        float epsilon = 5e-4;
+
+        if (ref->mBase->mData.mWeight == 0)
+            return ESM::Skill::Unarmored;
+
+        if (ref->mBase->mData.mWeight <= iWeight * gmst.find ("fLightMaxMod")->getFloat() + epsilon)
             return ESM::Skill::LightArmor;
 
-        if (iWeight * gmst.find ("fMedMaxMod")->getFloat()>=
-            ref->mBase->mData.mWeight)
+        if (ref->mBase->mData.mWeight <= iWeight * gmst.find ("fMedMaxMod")->getFloat() + epsilon)
             return ESM::Skill::MediumArmor;
 
-        return ESM::Skill::HeavyArmor;
+        else
+            return ESM::Skill::HeavyArmor;
     }
 
     int Armor::getValue (const MWWorld::Ptr& ptr) const

@@ -134,7 +134,7 @@ namespace MWGui
             mEncoding = encoding;
     }
 
-    void FontLoader::loadAllFonts()
+    void FontLoader::loadAllFonts(bool exportToFile)
     {
         Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
         for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
@@ -142,7 +142,7 @@ namespace MWGui
             Ogre::StringVectorPtr resourcesInThisGroup = Ogre::ResourceGroupManager::getSingleton ().findResourceNames (*it, "*.fnt");
             for (Ogre::StringVector::iterator resource = resourcesInThisGroup->begin(); resource != resourcesInThisGroup->end(); ++resource)
             {
-                loadFont(*resource);
+                loadFont(*resource, exportToFile);
             }
         }
     }
@@ -168,7 +168,7 @@ namespace MWGui
         float ascent;
     } GlyphInfo;
 
-    void FontLoader::loadFont(const std::string &fileName)
+    void FontLoader::loadFont(const std::string &fileName, bool exportToFile)
     {
         Ogre::DataStreamPtr file = Ogre::ResourceGroupManager::getSingleton().openResource(fileName);
 
@@ -221,6 +221,9 @@ namespace MWGui
             width, height, 0, Ogre::PF_BYTE_RGBA);
         texture->loadImage(image);
 
+        if (exportToFile)
+            image.save(resourceName + ".png");
+
         // Register the font with MyGUI
         MyGUI::ResourceManualFont* font = static_cast<MyGUI::ResourceManualFont*>(
                     MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
@@ -240,10 +243,10 @@ namespace MWGui
 
         for(int i = 0; i < 256; i++)
         {
-            int x1 = data[i].top_left.x*width;
-            int y1 = data[i].top_left.y*height;
-            int w  = data[i].top_right.x*width - x1;
-            int h  = data[i].bottom_left.y*height - y1;
+            float x1 = data[i].top_left.x*width;
+            float y1 = data[i].top_left.y*height;
+            float w  = data[i].top_right.x*width - x1;
+            float h  = data[i].bottom_left.y*height - y1;
 
             ToUTF8::Utf8Encoder encoder(mEncoding);
             unsigned long unicodeVal = utf8ToUnicode(getUtf8(i, encoder, mEncoding));
@@ -257,16 +260,38 @@ namespace MWGui
             code->addAttribute("advance", data[i].width);
             code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                + MyGUI::utility::toString((fontSize-data[i].ascent)));
+            code->addAttribute("size", MyGUI::IntSize(data[i].width, data[i].height));
 
             // More hacks! The french game uses several win1252 characters that are not included
             // in the cp437 encoding of the font. Fall back to similar available characters.
             if (mEncoding == ToUTF8::CP437)
             {
-                std::multimap<int, int> additional;
+                std::multimap<int, int> additional; // <cp437, unicode>
                 additional.insert(std::make_pair(39, 0x2019)); // apostrophe
                 additional.insert(std::make_pair(45, 0x2013)); // dash
+                additional.insert(std::make_pair(45, 0x2014)); // dash
                 additional.insert(std::make_pair(34, 0x201D)); // right double quotation mark
                 additional.insert(std::make_pair(34, 0x201C)); // left double quotation mark
+                additional.insert(std::make_pair(44, 0x201A));
+                additional.insert(std::make_pair(44, 0x201E));
+                additional.insert(std::make_pair(43, 0x2020));
+                additional.insert(std::make_pair(94, 0x02C6));
+                additional.insert(std::make_pair(37, 0x2030));
+                additional.insert(std::make_pair(83, 0x0160));
+                additional.insert(std::make_pair(60, 0x2039));
+                additional.insert(std::make_pair(79, 0x0152));
+                additional.insert(std::make_pair(90, 0x017D));
+                additional.insert(std::make_pair(39, 0x2019));
+                additional.insert(std::make_pair(126, 0x02DC));
+                additional.insert(std::make_pair(84, 0x2122));
+                additional.insert(std::make_pair(83, 0x0161));
+                additional.insert(std::make_pair(62, 0x203A));
+                additional.insert(std::make_pair(111, 0x0153));
+                additional.insert(std::make_pair(122, 0x017E));
+                additional.insert(std::make_pair(89, 0x0178));
+                additional.insert(std::make_pair(156, 0x00A2));
+                additional.insert(std::make_pair(46, 0x2026));
+
                 for (std::multimap<int, int>::iterator it = additional.begin(); it != additional.end(); ++it)
                 {
                     if (it->first != i)
@@ -281,6 +306,7 @@ namespace MWGui
                     code->addAttribute("advance", data[i].width);
                     code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                        + MyGUI::utility::toString((fontSize-data[i].ascent)));
+                    code->addAttribute("size", MyGUI::IntSize(data[i].width, data[i].height));
                 }
             }
 
@@ -296,6 +322,7 @@ namespace MWGui
                 cursorCode->addAttribute("advance", data[i].width);
                 cursorCode->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                    + MyGUI::utility::toString((fontSize-data[i].ascent)));
+                cursorCode->addAttribute("size", MyGUI::IntSize(data[i].width, data[i].height));
             }
 
             // Question mark, use for NotDefined marker (used for glyphs not existing in the font)
@@ -310,6 +337,7 @@ namespace MWGui
                 cursorCode->addAttribute("advance", data[i].width);
                 cursorCode->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                    + MyGUI::utility::toString((fontSize-data[i].ascent)));
+                cursorCode->addAttribute("size", MyGUI::IntSize(data[i].width, data[i].height));
             }
         }
 
@@ -327,7 +355,13 @@ namespace MWGui
             cursorCode->addAttribute("coord", "0 0 0 0");
             cursorCode->addAttribute("advance", "0");
             cursorCode->addAttribute("bearing", "0 0");
+            cursorCode->addAttribute("size", "0 0");
+        }
 
+        if (exportToFile)
+        {
+            xmlDocument.createDeclaration();
+            xmlDocument.save(resourceName + ".xml");
         }
 
         font->deserialization(root, MyGUI::Version(3,2,0));

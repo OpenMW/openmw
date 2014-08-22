@@ -2,7 +2,7 @@
 
 <MyGUI type="Layout">
     <!-- The entire screen -->
-    <Widget type="Widget" layer="LoadingScreen" position="0 0 300 300" name="_Main">
+    <Widget type="Widget" layer="LoadingScreen" position="0 0 300 300" name="_Main" align="Stretch">
 
         <Widget type="Widget" skin="HUD_Box" position="0 245 300 48" align="Bottom HCenter">
 

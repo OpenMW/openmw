@@ -83,6 +83,8 @@ namespace OMW
             // Grab mouse?
             bool mGrab;
 
+            bool mExportFonts;
+
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
 
@@ -186,6 +188,8 @@ namespace OMW
             void setScriptBlacklist (const std::vector<std::string>& list);
 
             void setScriptBlacklistUse (bool use);
+
+            void enableFontExport(bool exportFonts);
 
         private:
             Files::ConfigurationManager& mCfgMgr;

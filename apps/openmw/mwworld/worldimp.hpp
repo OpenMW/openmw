@@ -169,9 +169,6 @@ namespace MWWorld
             virtual void readRecord (ESM::ESMReader& reader, int32_t type,
                 const std::map<int, int>& contentFileMap);
 
-            virtual OEngine::Render::Fader* getFader();
-            ///< \todo remove this function. Rendering details should not be exposed.
-
             virtual CellStore *getExterior (int x, int y);
 
             virtual CellStore *getInterior (const std::string& name);
@@ -260,8 +257,9 @@ namespace MWWorld
             virtual Ptr searchPtrViaActorId (int actorId);
             ///< Search is limited to the active cells.
 
-            virtual void adjustPosition (const Ptr& ptr);
+            virtual void adjustPosition (const Ptr& ptr, bool force);
             ///< Adjust position after load to be on ground. Must be called after model load.
+            /// @param force do this even if the ptr is flying
 
             virtual void fixPosition (const Ptr& actor);
             ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.

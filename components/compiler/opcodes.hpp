@@ -123,6 +123,14 @@ namespace Compiler
         const int opcodeClearForceRunExplicit = 0x2000155;
         const int opcodeForceRun = 0x2000156;
         const int opcodeForceRunExplicit = 0x2000157;
+        const int opcodeClearForceJump = 0x2000258;
+        const int opcodeClearForceJumpExplicit = 0x2000259;
+        const int opcodeForceJump = 0x200025a;
+        const int opcodeForceJumpExplicit = 0x200025b;
+        const int opcodeClearForceMoveJump = 0x200025c;
+        const int opcodeClearForceMoveJumpExplicit = 0x200025d;
+        const int opcodeForceMoveJump = 0x200025e;
+        const int opcodeForceMoveJumpExplicit = 0x200025f;
         const int opcodeClearForceSneak = 0x2000158;
         const int opcodeClearForceSneakExplicit = 0x2000159;
         const int opcodeForceSneak = 0x200015a;
@@ -134,6 +142,10 @@ namespace Compiler
         const int opcodeGetForceSneak = 0x20001cc;
         const int opcodeGetForceRunExplicit = 0x20001cd;
         const int opcodeGetForceSneakExplicit = 0x20001ce;
+        const int opcodeGetForceJump = 0x2000260;
+        const int opcodeGetForceMoveJump = 0x2000262;
+        const int opcodeGetForceJumpExplicit = 0x2000261;
+        const int opcodeGetForceMoveJumpExplicit = 0x2000263;
     }
 
     namespace Dialogue

@@ -413,5 +413,13 @@ op 0x2000254: HurtStandingActor
 op 0x2000255: HurtStandingActor, explicit
 op 0x2000256: HurtCollidingActor
 op 0x2000257: HurtCollidingActor, explicit
+op 0x2000258: ClearForceJump
+op 0x2000259: ClearForceJump, explicit reference
+op 0x200025a: ForceJump
+op 0x200025b: ForceJump, explicit reference
+op 0x200025c: ClearForceMoveJump
+op 0x200025d: ClearForceMoveJump, explicit reference
+op 0x200025e: ForceMoveJump
+op 0x200025f: ForceMoveJump, explicit reference
 
-opcodes 0x2000258-0x3ffffff unused
+opcodes 0x2000260-0x3ffffff unused

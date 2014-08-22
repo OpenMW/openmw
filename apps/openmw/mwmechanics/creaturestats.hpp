@@ -227,7 +227,9 @@ namespace MWMechanics
             Flag_ForceRun = 1,
             Flag_ForceSneak = 2,
             Flag_Run = 4,
-            Flag_Sneak = 8
+            Flag_Sneak = 8,
+            Flag_ForceJump = 16,
+            Flag_ForceMoveJump = 32
         };
         enum Stance
         {

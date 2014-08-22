@@ -181,6 +181,10 @@ void Recharge::onItemClicked(MyGUI::Widget *sender)
         std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage51")->getString();
         message = boost::str(boost::format(message) % gem.getClass().getName(gem));
         MWBase::Environment::get().getWindowManager()->messageBox(message);
+
+        // special case: readd Azura's Star
+        if (Misc::StringUtils::ciEqual(gem.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
+            player.getClass().getContainerStore(player).add("Misc_SoulGem_Azura", 1, player);
     }
 
     updateView();

@@ -395,22 +395,35 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 CharacterState walkState = runStateToWalkState(mMovementState);
                 const StateInfo *stateinfo = std::find_if(sMovementList, sMovementListEnd, FindCharState(walkState));
                 anim = stateinfo->groupname;
+
+                if (mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(anim)) > 1.0f)
+                    speedmult = mMovementSpeed / vel;
+                else
+                    // Another bug: when using a fallback animation (e.g. RunForward as fallback to SwimRunForward),
+                    // then the equivalent Walk animation will not use a fallback, and if that animation doesn't exist
+                    // we will play without any scaling.
+                    // Makes the speed attribute of most water creatures totally useless.
+                    // And again, this can not be fixed without patching game data.
+                    speedmult = 1.f;
+            }
+            else
+            {
+                if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(anim)) > 1.0f)
+                {
+                    speedmult = mMovementSpeed / vel;
+                }
+                else if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
+                    speedmult = 1.f; // TODO: should get a speed mult depending on the current turning speed
+                else if (mMovementSpeed > 0.0f)
+                {
+                    // The first person anims don't have any velocity to calculate a speed multiplier from.
+                    // We use the third person velocities instead.
+                    // FIXME: should be pulled from the actual animation, but it is not presently loaded.
+                    speedmult = mMovementSpeed / (isrunning ? 222.857f : 154.064f);
+                    mMovementAnimationControlled = false;
+                }
             }
 
-            if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(anim)) > 1.0f)
-            {
-                speedmult = mMovementSpeed / vel;
-            }
-            else if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
-                speedmult = 1.f; // TODO: should get a speed mult depending on the current turning speed
-            else if (mMovementSpeed > 0.0f)
-            {
-                // The first person anims don't have any velocity to calculate a speed multiplier from.
-                // We use the third person velocities instead.
-                // FIXME: should be pulled from the actual animation, but it is not presently loaded.
-                speedmult = mMovementSpeed / (isrunning ? 222.857f : 154.064f);
-                mMovementAnimationControlled = false;
-            }
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
                              speedmult, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
         }
@@ -1174,6 +1187,36 @@ void CharacterController::update(float duration)
         bool isrunning = cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run);
         bool sneak = cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Sneak);
         bool flying = world->isFlying(mPtr);
+        CreatureStats &stats = cls.getCreatureStats(mPtr);
+
+        //Force Jump Logic
+
+        bool isMoving = (std::abs(cls.getMovementSettings(mPtr).mPosition[0]) > .5 || abs(cls.getMovementSettings(mPtr).mPosition[1]) > .5);
+        if(!inwater && !flying)
+        {
+            //Force Jump
+            if(stats.getMovementFlag(MWMechanics::CreatureStats::Flag_ForceJump))
+            {
+                if(onground)
+                {
+                    cls.getMovementSettings(mPtr).mPosition[2] = 1;
+                }
+                else
+                    cls.getMovementSettings(mPtr).mPosition[2] = 0;
+            }
+            //Force Move Jump, only jump if they're otherwise moving
+            if(stats.getMovementFlag(MWMechanics::CreatureStats::Flag_ForceMoveJump) && isMoving)
+            {
+
+                if(onground)
+                {
+                    cls.getMovementSettings(mPtr).mPosition[2] = 1;
+                }
+                else
+                    cls.getMovementSettings(mPtr).mPosition[2] = 0;
+            }
+        }
+
         //Ogre::Vector3 vec = cls.getMovementVector(mPtr);
         Ogre::Vector3 vec(cls.getMovementSettings(mPtr).mPosition);
         if(vec.z > 0.0f) // to avoid slow-down when jumping
@@ -1183,7 +1226,7 @@ void CharacterController::update(float duration)
             vec.x = vecXY.x;
             vec.y = vecXY.y;
         }
-        else 
+        else
             vec.normalise();
 
         if(mHitState != CharState_None && mJumpState == JumpState_None)
@@ -1352,8 +1395,7 @@ void CharacterController::update(float duration)
         }
         else
         {
-            if(!(vec.z > 0.0f))
-                mJumpState = JumpState_None;
+            mJumpState = JumpState_None;
             vec.z = 0.0f;
 
             inJump = false;
@@ -1482,6 +1524,8 @@ void CharacterController::update(float duration)
     else if (mAnimation)
         mAnimation->updateEffects(duration);
     mSkipAnim = false;
+
+    mAnimation->enableHeadAnimation(cls.isActor() && !cls.getCreatureStats(mPtr).isDead());
 }
 
 

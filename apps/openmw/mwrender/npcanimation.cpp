@@ -67,9 +67,14 @@ namespace MWRender
 {
 
 HeadAnimationTime::HeadAnimationTime(MWWorld::Ptr reference)
-    : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0), mValue(0)
+    : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0), mValue(0), mEnabled(true)
 {
     resetBlinkTimer();
+}
+
+void HeadAnimationTime::setEnabled(bool enabled)
+{
+    mEnabled = enabled;
 }
 
 void HeadAnimationTime::resetBlinkTimer()
@@ -79,6 +84,9 @@ void HeadAnimationTime::resetBlinkTimer()
 
 void HeadAnimationTime::update(float dt)
 {
+    if (!mEnabled)
+        return;
+
     if (MWBase::Environment::get().getSoundManager()->sayDone(mReference))
     {
         mBlinkTimer += dt;
@@ -862,6 +870,11 @@ void NpcAnimation::setAlpha(float alpha)
                 applyAlpha(alpha, ent, mObjectParts[i]);
         }
     }
+}
+
+void NpcAnimation::enableHeadAnimation(bool enable)
+{
+    mHeadAnimationTime->setEnabled(enable);
 }
 
 void NpcAnimation::preRender(Ogre::Camera *camera)

@@ -123,6 +123,9 @@ namespace
 
                 getPage (LeftBookPage)->adviseLinkClicked (callback);
                 getPage (RightBookPage)->adviseLinkClicked (callback);
+
+                getPage (LeftBookPage)->eventMouseWheel += MyGUI::newDelegate(this, &JournalWindowImpl::notifyMouseWheel);
+                getPage (RightBookPage)->eventMouseWheel += MyGUI::newDelegate(this, &JournalWindowImpl::notifyMouseWheel);
             }
 
             {
@@ -488,6 +491,14 @@ namespace
             MWBase::Environment::get().getWindowManager ()->popGuiMode ();
         }
 
+        void notifyMouseWheel(MyGUI::Widget* sender, int rel)
+        {
+            if (rel < 0)
+                notifyNextPage(sender);
+            else
+                notifyPrevPage(sender);
+        }
+
         void notifyNextPage(MyGUI::Widget* _sender)
         {
             if (!mStates.empty ())
@@ -509,7 +520,7 @@ namespace
             {
                 unsigned int & page = mStates.top ().mPage;
 
-                if(page > 0)
+                if(page >= 2)
                 {
                     page -= 2;
                     updateShowingPages ();

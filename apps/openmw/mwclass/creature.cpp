@@ -148,9 +148,9 @@ namespace MWClass
         return ref->mBase->mId;
     }
 
-    void Creature::adjustPosition(const MWWorld::Ptr& ptr) const
+    void Creature::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
     {
-        MWBase::Environment::get().getWorld()->adjustPosition(ptr);
+        MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
     }
 
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
@@ -255,23 +255,7 @@ namespace MWClass
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
             victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, false);
-
-            // Weapon health is reduced by 1 even if the attack misses
-            const bool weaphashealth = !weapon.isEmpty() && weapon.getClass().hasItemHealth(weapon);
-            if(weaphashealth)
-            {
-                int weaphealth = weapon.getClass().getItemHealth(weapon);
-
-                if (!MWBase::Environment::get().getWorld()->getGodModeState())
-                {
-                    weaphealth -= std::min(1, weaphealth);
-                    weapon.getCellRef().setCharge(weaphealth);
-                }
-
-                // Weapon broken? unequip it
-                if (weapon.getCellRef().getCharge() == 0)
-                    weapon = *getInventoryStore(ptr).unequipItem(weapon, ptr);
-            }
+            MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
             return;
         }
 
@@ -298,7 +282,6 @@ namespace MWClass
 
         if (!weapon.isEmpty())
         {
-            const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
             const unsigned char *attack = NULL;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
@@ -309,26 +292,10 @@ namespace MWClass
             if(attack)
             {
                 damage = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
-                damage *= 0.5f + (stats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
-                if(weaphashealth)
-                {
-                    int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
-                    int weaphealth = weapon.getClass().getItemHealth(weapon);
-                    damage *= float(weaphealth) / weapmaxhealth;
-
-                    if (!MWBase::Environment::get().getWorld()->getGodModeState())
-                    {
-                        // Reduce weapon charge by at least one, but cap at 0
-                        weaphealth -= std::min(std::max(1,
-                                    (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weaphealth);
-
-                        weapon.getCellRef().setCharge(weaphealth);
-                    }
-
-                    // Weapon broken? unequip it
-                    if (weapon.getCellRef().getCharge() == 0)
-                        weapon = *getInventoryStore(ptr).unequipItem(weapon, ptr);
-                }
+                damage *= gmst.find("fDamageStrengthBase")->getFloat() +
+                        (stats.getAttribute(ESM::Attribute::Strength).getModified() * gmst.find("fDamageStrengthMult")->getFloat() * 0.1);
+                MWMechanics::adjustWeaponDamage(damage, weapon);
+                MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
             }
 
             // Apply "On hit" enchanted weapons
@@ -366,16 +333,11 @@ namespace MWClass
         getCreatureStats(ptr).setAttacked(true);
 
         // Self defense
-        if ( ((!attacker.isEmpty() && attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr))
-              || attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
-                && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker)
-            && (canWalk(ptr) || canFly(ptr) || canSwim(ptr)) // No retaliation for totally static creatures
+        if ((canWalk(ptr) || canFly(ptr) || canSwim(ptr)) // No retaliation for totally static creatures
                                                               // (they have no movement or attacks anyway)
-            )
+            && !attacker.isEmpty())
         {
-            // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
-            // Note: accidental or collateral damage attacks are ignored.
-            MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, attacker);
+            MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
         if(!successful)
@@ -406,18 +368,21 @@ namespace MWClass
 
         if (damage > 0.f)
         {
-            // Check for knockdown
-            float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
-            float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
-                    * getGmst().iKnockDownOddsMult->getInt() * 0.01 + getGmst().iKnockDownOddsBase->getInt();
-            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-            if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
+            if (!attacker.isEmpty())
             {
-                getCreatureStats(ptr).setKnockedDown(true);
+                // Check for knockdown
+                float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
+                float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
+                        * getGmst().iKnockDownOddsMult->getInt() * 0.01 + getGmst().iKnockDownOddsBase->getInt();
+                int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
+                {
+                    getCreatureStats(ptr).setKnockedDown(true);
 
+                }
+                else
+                    getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
             }
-            else
-                getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
             damage = std::max(1.f, damage);
 

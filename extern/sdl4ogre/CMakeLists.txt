@@ -15,6 +15,7 @@ endif ()
 set(SDL4OGRE_HEADER_FILES
 	OISCompat.h
 	cursormanager.hpp
+	events.h
 )
 
 add_library(${SDL4OGRE_LIBRARY} STATIC ${SDL4OGRE_SOURCE_FILES} ${SDL4OGRE_HEADER_FILES})

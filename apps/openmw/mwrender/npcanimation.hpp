@@ -26,6 +26,8 @@ private:
 
     float mBlinkTimer;
 
+    bool mEnabled;
+
     float mValue;
 private:
     void resetBlinkTimer();
@@ -33,6 +35,8 @@ public:
     HeadAnimationTime(MWWorld::Ptr reference);
 
     void update(float dt);
+
+    void setEnabled(bool enabled);
 
     void setTalkStart(float value);
     void setTalkStop(float value);
@@ -124,6 +128,8 @@ public:
     NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, bool disableListener = false,
                  ViewMode viewMode=VM_Normal);
     virtual ~NpcAnimation();
+
+    virtual void enableHeadAnimation(bool enable);
 
     virtual void setWeaponGroup(const std::string& group) { mWeaponAnimationTime->setGroup(group); }
 

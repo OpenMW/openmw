@@ -89,6 +89,58 @@ bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
     return false;
 }
 
+class CheckActorCommanded : public MWMechanics::EffectSourceVisitor
+{
+    MWWorld::Ptr mActor;
+public:
+    bool mCommanded;
+    CheckActorCommanded(MWWorld::Ptr actor)
+        : mActor(actor)
+    , mCommanded(false){}
+
+    virtual void visit (MWMechanics::EffectKey key,
+                             const std::string& sourceName, int casterActorId,
+                        float magnitude, float remainingTime = -1)
+    {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        if (    ((key.mId == ESM::MagicEffect::CommandHumanoid && mActor.getClass().isNpc())
+                || (key.mId == ESM::MagicEffect::CommandCreature && mActor.getTypeName() == typeid(ESM::Creature).name()))
+            && casterActorId == player.getClass().getCreatureStats(player).getActorId()
+            && magnitude >= mActor.getClass().getCreatureStats(mActor).getLevel())
+                mCommanded = true;
+    }
+};
+
+void adjustCommandedActor (const MWWorld::Ptr& actor)
+{
+    CheckActorCommanded check(actor);
+    MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+    stats.getActiveSpells().visitEffectSources(check);
+
+    bool hasCommandPackage = false;
+
+    std::list<MWMechanics::AiPackage*>::const_iterator it;
+    for (it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
+    {
+        if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow &&
+                dynamic_cast<MWMechanics::AiFollow*>(*it)->isCommanded())
+        {
+            hasCommandPackage = true;
+            break;
+        }
+    }
+
+    if (check.mCommanded && !hasCommandPackage)
+    {
+        MWMechanics::AiFollow package("player", true);
+        stats.getAiSequence().stack(package, actor);
+    }
+    else if (!check.mCommanded && hasCommandPackage)
+    {
+        stats.getAiSequence().erase(it);
+    }
+}
+
 void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float& magicka)
 {
     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
@@ -104,6 +156,30 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
     {
         float fRestMagicMult = settings.find("fRestMagicMult")->getFloat ();
         magicka = fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
+    }
+}
+
+void cleanupSummonedCreature (MWMechanics::CreatureStats& casterStats, int creatureActorId)
+{
+    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(creatureActorId);
+    if (!ptr.isEmpty())
+    {
+        // TODO: Show death animation before deleting? We shouldn't allow looting the corpse while the animation
+        // plays though, which is a rather lame exploit in vanilla.
+        MWBase::Environment::get().getWorld()->deleteObject(ptr);
+
+        const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
+                .search("VFX_Summon_End");
+        if (fx)
+            MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
+                "", Ogre::Vector3(ptr.getRefData().getPosition().pos));
+    }
+    else
+    {
+        // We didn't find the creature. It's probably in an inactive cell.
+        // Add to graveyard so we can delete it when the cell becomes active.
+        std::vector<int>& graveyard = casterStats.getSummonedCreatureGraveyard();
+        graveyard.push_back(creatureActorId);
     }
 }
 
@@ -268,7 +344,8 @@ namespace MWMechanics
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
     {
         CreatureStats& creatureStats =  creature.getClass().getCreatureStats (creature);
-
+        if (creatureStats.isDead())
+            return;
         MagicEffects now = creatureStats.getSpells().getMagicEffects();
 
         if (creature.getTypeName()==typeid (ESM::NPC).name())
@@ -290,17 +367,17 @@ namespace MWMechanics
     {
         CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
 
-        int strength     = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
-        int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getBase();
-        int willpower    = creatureStats.getAttribute(ESM::Attribute::Willpower).getBase();
-        int agility      = creatureStats.getAttribute(ESM::Attribute::Agility).getBase();
-        int endurance    = creatureStats.getAttribute(ESM::Attribute::Endurance).getBase();
+        int strength     = creatureStats.getAttribute(ESM::Attribute::Strength).getModified();
+        int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
+        int willpower    = creatureStats.getAttribute(ESM::Attribute::Willpower).getModified();
+        int agility      = creatureStats.getAttribute(ESM::Attribute::Agility).getModified();
+        int endurance    = creatureStats.getAttribute(ESM::Attribute::Endurance).getModified();
 
         double magickaFactor =
-            creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude * 0.1 + 0.5;
+            creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude * 0.1 + 1;
 
         DynamicStat<float> magicka = creatureStats.getMagicka();
-        float diff = (static_cast<int>(intelligence + magickaFactor*intelligence)) - magicka.getBase();
+        float diff = (static_cast<int>(magickaFactor*intelligence)) - magicka.getBase();
         magicka.modify(diff);
         creatureStats.setMagicka(magicka);
 
@@ -612,9 +689,9 @@ namespace MWMechanics
             summonMap[ESM::MagicEffect::SummonCreature05] = "sMagicCreature05ID";
         }
 
+        std::map<int, int>& creatureMap = creatureStats.getSummonedCreatureMap();
         for (std::map<int, std::string>::iterator it = summonMap.begin(); it != summonMap.end(); ++it)
         {
-            std::map<int, int>& creatureMap = creatureStats.getSummonedCreatureMap();
             bool found = creatureMap.find(it->first) != creatureMap.end();
             int magnitude = creatureStats.getMagicEffects().get(it->first).mMagnitude;
             if (found != (magnitude > 0))
@@ -665,32 +742,29 @@ namespace MWMechanics
                 }
                 else
                 {
-                    // Summon lifetime has expired. Try to delete the creature.
-                    int actorId = creatureMap[it->first];
-                    creatureMap.erase(it->first);
-
-                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(actorId);
-                    if (!ptr.isEmpty())
-                    {
-                        // TODO: Show death animation before deleting? We shouldn't allow looting the corpse while the animation
-                        // plays though, which is a rather lame exploit in vanilla.
-                        MWBase::Environment::get().getWorld()->deleteObject(ptr);
-
-                        const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
-                                .search("VFX_Summon_End");
-                        if (fx)
-                            MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
-                                "", Ogre::Vector3(ptr.getRefData().getPosition().pos));
-                    }
-                    else
-                    {
-                        // We didn't find the creature. It's probably in an inactive cell.
-                        // Add to graveyard so we can delete it when the cell becomes active.
-                        std::vector<int>& graveyard = creatureStats.getSummonedCreatureGraveyard();
-                        graveyard.push_back(actorId);
-                    }
+                    // Effect has ended
+                    std::map<int, int>::iterator foundCreature = creatureMap.find(it->first);
+                    cleanupSummonedCreature(creatureStats, foundCreature->second);
+                    creatureMap.erase(foundCreature);
                 }
             }
+        }
+
+        for (std::map<int, int>::iterator it = creatureMap.begin(); it != creatureMap.end(); )
+        {
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->second);
+            if (!ptr.isEmpty() && ptr.getClass().getCreatureStats(ptr).isDead())
+            {
+                // Purge the magic effect so a new creature can be summoned if desired
+                creatureStats.getActiveSpells().purgeEffect(it->first);
+                if (ptr.getClass().hasInventoryStore(ptr))
+                    ptr.getClass().getInventoryStore(ptr).purgeEffect(it->first);
+
+                cleanupSummonedCreature(creatureStats, it->second);
+                creatureMap.erase(it++);
+            }
+            else
+                ++it;
         }
 
         std::vector<int>& graveyard = creatureStats.getSummonedCreatureGraveyard();
@@ -1005,7 +1079,10 @@ namespace MWMechanics
                     if (MWBase::Environment::get().getMechanicsManager()->isAIActive())
                     {
                         if (timerUpdateAITargets == 0)
-                        {                            
+                        {
+                            if (iter->first != player)
+                                adjustCommandedActor(iter->first);
+
                             for(PtrControllerMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                             {
                                 if (it->first == iter->first || iter->first == player) // player is not AI-controlled
@@ -1053,10 +1130,12 @@ namespace MWMechanics
                 //KnockedOutOneFrameLogic
                 //Used for "OnKnockedOut" command
                 //Put here to ensure that it's run for PRECISELY one frame.
-                if (stats.getKnockedDown() && !stats.getKnockedDownOneFrame() && !stats.getKnockedDownOverOneFrame()) { //Start it for one frame if nessesary
+                if (stats.getKnockedDown() && !stats.getKnockedDownOneFrame() && !stats.getKnockedDownOverOneFrame())
+                { //Start it for one frame if nessesary
                     stats.setKnockedDownOneFrame(true);
                 }
-                else if (stats.getKnockedDownOneFrame() && !stats.getKnockedDownOverOneFrame()) { //Turn off KnockedOutOneframe
+                else if (stats.getKnockedDownOneFrame() && !stats.getKnockedDownOverOneFrame())
+                { //Turn off KnockedOutOneframe
                     stats.setKnockedDownOneFrame(false);
                     stats.setKnockedDownOverOneFrame(true);
                 }

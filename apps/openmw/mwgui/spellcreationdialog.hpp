@@ -99,6 +99,7 @@ namespace MWGui
         SelectSkillDialog* mSelectSkillDialog;
 
         int mSelectedEffect;
+        short mSelectedKnownEffectId;
 
         std::vector<ESM::ENAMstruct> mEffects;
 

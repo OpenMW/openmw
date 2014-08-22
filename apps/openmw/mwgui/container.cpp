@@ -28,6 +28,16 @@
 namespace MWGui
 {
 
+    DragAndDrop::DragAndDrop()
+        : mDraggedWidget(NULL)
+        , mDraggedCount(0)
+        , mSourceModel(NULL)
+        , mSourceView(NULL)
+        , mSourceSortModel(NULL)
+        , mIsOnDragAndDrop(NULL)
+    {
+    }
+
     void DragAndDrop::startDrag (int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView, int count)
     {
         mItem = sourceModel->getItem(index);
@@ -36,7 +46,6 @@ namespace MWGui
         mSourceView = sourceView;
         mSourceSortModel = sortModel;
         mIsOnDragAndDrop = true;
-        mDragAndDropWidget->setVisible(true);
 
         // If picking up an item that isn't from the player's inventory, the item gets added to player inventory backend
         // immediately, even though it's still floating beneath the mouse cursor. A bit counterintuitive,
@@ -73,8 +82,13 @@ namespace MWGui
             mSourceSortModel->addDragItem(mItem.mBase, count);
         }
 
-        ItemWidget* baseWidget = mDragAndDropWidget->createWidget<ItemWidget>
-                ("MW_ItemIcon", MyGUI::IntCoord(0, 0, 42, 42), MyGUI::Align::Default);
+        ItemWidget* baseWidget = MyGUI::Gui::getInstance().createWidget<ItemWidget>("MW_ItemIcon", 0, 0, 42, 42, MyGUI::Align::Default, "DragAndDrop");
+
+        Controllers::ControllerFollowMouse* controller =
+                MyGUI::ControllerManager::getInstance().createItem(Controllers::ControllerFollowMouse::getClassTypeName())
+                ->castType<Controllers::ControllerFollowMouse>();
+        MyGUI::ControllerManager::getInstance().addItem(baseWidget, controller);
+
         mDraggedWidget = baseWidget;
         baseWidget->setItem(mItem.mBase);
         baseWidget->setNeedMouseFocus(false);
@@ -98,8 +112,6 @@ namespace MWGui
     {
         std::string sound = mItem.mBase.getClass().getDownSoundId(mItem.mBase);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
-
-        mDragAndDropWidget->setVisible(false);
 
         // If item is dropped where it was taken from, we don't need to do anything -
         // otherwise, do the transfer

@@ -3,6 +3,8 @@
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_ImageBox.h>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwworld/class.hpp"
 
 namespace MWGui
@@ -63,15 +65,7 @@ namespace MWGui
 
     void ItemWidget::setIcon(const MWWorld::Ptr &ptr)
     {
-        // image
-        std::string path = std::string("icons\\");
-        path += ptr.getClass().getInventoryIcon(ptr);
-
-        std::string::size_type pos = path.rfind(".");
-        if(pos != std::string::npos)
-            path.erase(pos);
-        path.append(".dds");
-        setIcon(path);
+        setIcon(Misc::ResourceHelpers::correctIconPath(ptr.getClass().getInventoryIcon(ptr)));
     }
 
 

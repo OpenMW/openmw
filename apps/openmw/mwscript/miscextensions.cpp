@@ -3,8 +3,6 @@
 
 #include <cstdlib>
 
-#include <libs/openengine/ogre/fader.hpp>
-
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 #include <components/compiler/locals.hpp>
@@ -248,7 +246,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWorld()->getFader()->fadeIn(time);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenIn(time);
                 }
         };
 
@@ -261,7 +259,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWorld()->getFader()->fadeOut(time);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenOut(time);
                 }
         };
 
@@ -277,7 +275,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWorld()->getFader()->fadeTo(alpha, time);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenTo(alpha, time);
                 }
         };
 

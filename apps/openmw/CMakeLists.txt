@@ -1,9 +1,17 @@
 # local files
-set(GAME
-    main.cpp
-    engine.cpp
-)
-if(NOT WIN32)
+if (NOT ANDROID)
+    set(GAME
+        main.cpp
+        engine.cpp
+    )
+else()
+    set(GAME
+        main.cpp
+        android_main.c
+        engine.cpp
+    )
+endif()
+if(NOT WIN32 AND NOT ANDROID)
     set(GAME ${GAME} crashcatcher.cpp)
 endif()
 set(GAME_HEADER
@@ -15,7 +23,7 @@ add_openmw_dir (mwrender
     renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
     actors objects renderinginterface localmap occlusionquery water shadows
     characterpreview globalmap videoplayer ripplesimulation refraction
-    terrainstorage renderconst effectmanager weaponanimation terraingrid
+    terrainstorage renderconst effectmanager weaponanimation
     )
 
 add_openmw_dir (mwinput
@@ -33,7 +41,7 @@ add_openmw_dir (mwgui
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
     keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel fontloader controllers savegamedialog
-    recharge mode videowidget backgroundimage itemwidget
+    recharge mode videowidget backgroundimage itemwidget screenfader
     )
 
 add_openmw_dir (mwdialogue
@@ -82,19 +90,33 @@ add_openmw_dir (mwbase
     )
 
 # Main executable
-set(BOOST_COMPONENTS system filesystem program_options thread wave)
+if (ANDROID)
+    set(BOOST_COMPONENTS system filesystem program_options thread wave atomic)
+else ()
+    set(BOOST_COMPONENTS system filesystem program_options thread wave)
+endif ()
+
 if(WIN32)
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
 endif(WIN32)
 
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
-add_executable(openmw
-    ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
-    ${OPENMW_FILES}
-    ${GAME} ${GAME_HEADER}
-    ${APPLE_BUNDLE_RESOURCES}
-)
+if (NOT ANDROID)
+    add_executable(openmw
+        ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
+        ${OPENMW_FILES}
+        ${GAME} ${GAME_HEADER}
+        ${APPLE_BUNDLE_RESOURCES}
+    )
+else ()
+    add_library(openmw 
+        SHARED
+        ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
+        ${OPENMW_FILES}
+        ${GAME} ${GAME_HEADER}
+    )
+endif ()
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
@@ -115,6 +137,23 @@ target_link_libraries(openmw
     "sdl4ogre"
     components
 )
+
+if (ANDROID)
+    target_link_libraries(openmw
+        ${OGRE_STATIC_PLUGINS} 
+        EGL
+        android
+        log
+        dl  
+        MyGUI.OgrePlatform
+        MyGUIEngineStatic
+        Plugin_StrangeButtonStatic
+        cpufeatures
+        BulletCollision
+        BulletDynamics
+        LinearMath 
+    )
+endif (ANDROID)
 
 if (USE_SYSTEM_TINYXML)
     target_link_libraries(openmw ${TINYXML_LIBRARIES})

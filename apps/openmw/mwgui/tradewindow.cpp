@@ -308,7 +308,7 @@ namespace MWGui
                                                                               it->mBase.getClass().getValue(it->mBase)
                                                                               * it->mCount);
                 onCancelButtonClicked(mCancelButton);
-                MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
+                MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
                 return;
             }
         }

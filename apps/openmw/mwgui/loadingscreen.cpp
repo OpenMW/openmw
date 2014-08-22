@@ -30,6 +30,8 @@ namespace MWGui
         , mProgress(0)
         , mVSyncWasEnabled(false)
     {
+        mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
+
         getWidget(mLoadingText, "LoadingText");
         getWidget(mProgressBar, "ProgressBar");
 
@@ -54,13 +56,6 @@ namespace MWGui
     {
         WindowBase::setVisible(visible);
         mBackgroundImage->setVisible(visible);
-    }
-
-    void LoadingScreen::onResChange(int w, int h)
-    {
-        setCoord(0,0,w,h);
-
-        mBackgroundImage->setCoord(MyGUI::IntCoord(0,0,w,h));
     }
 
     void LoadingScreen::loadingOn()
