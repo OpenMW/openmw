@@ -1,8 +1,9 @@
 #ifndef SCRIPTEDIT_H
 #define SCRIPTEDIT_H
 
-#include <qtextedit.h>
+#include <QTextEdit>
 #include <QVector>
+#include <QTimer>
 
 #include "../../model/world/universalid.hpp"
 
@@ -16,6 +17,8 @@ namespace CSMDoc
 
 namespace CSVWorld
 {
+    class ScriptHighlighter;
+
     class ScriptEdit : public QTextEdit
     {
             Q_OBJECT
@@ -40,6 +43,8 @@ namespace CSVWorld
         private:
 
             int mChangeLocked;
+            ScriptHighlighter *mHighlighter;
+            QTimer mUpdateTimer;
 
         public:
 
@@ -62,6 +67,12 @@ namespace CSVWorld
             void dragMoveEvent (QDragMoveEvent* event);
 
             bool stringNeedsQuote(const std::string& id) const;
+
+        private slots:
+
+            void idListChanged();
+
+            void updateHighlighting();
     };
 }
 #endif // SCRIPTEDIT_H

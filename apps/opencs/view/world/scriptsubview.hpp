@@ -3,9 +3,6 @@
 
 #include "../doc/subview.hpp"
 
-#include <QTimer>
-
-class QTextEdit;
 class QModelIndex;
 
 namespace CSMDoc
@@ -20,7 +17,6 @@ namespace CSMWorld
 
 namespace CSVWorld
 {
-    class ScriptHighlighter;
     class ScriptEdit;
 
     class ScriptSubView : public CSVDoc::SubView
@@ -31,8 +27,6 @@ namespace CSVWorld
             CSMDoc::Document& mDocument;
             CSMWorld::IdTable *mModel;
             int mColumn;
-            ScriptHighlighter *mHighlighter;
-            QTimer mUpdateTimer;
 
         public:
 
@@ -42,17 +36,11 @@ namespace CSVWorld
 
         public slots:
 
-            void idListChanged();
-
             void textChanged();
 
             void dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
             void rowsAboutToBeRemoved (const QModelIndex& parent, int start, int end);
-
-        private slots:
-
-            void updateHighlighting();
     };
 }
 

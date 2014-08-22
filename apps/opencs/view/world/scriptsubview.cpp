@@ -3,8 +3,6 @@
 
 #include <stdexcept>
 
-#include <QTextEdit>
-
 #include "../../model/doc/document.hpp"
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/data.hpp"
@@ -12,7 +10,6 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
 
-#include "scripthighlighter.hpp"
 #include "scriptedit.hpp"
 
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
@@ -43,27 +40,11 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     connect (mModel, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (rowsAboutToBeRemoved (const QModelIndex&, int, int)));
-
-    connect (&document.getData(), SIGNAL (idListChanged()), this, SLOT (idListChanged()));
-
-    mHighlighter = new ScriptHighlighter (document.getData(), mEditor->document());
-
-    connect (&mUpdateTimer, SIGNAL (timeout()), this, SLOT (updateHighlighting()));
-
-    mUpdateTimer.setSingleShot (true);
 }
 
 void CSVWorld::ScriptSubView::setEditLock (bool locked)
 {
     mEditor->setReadOnly (locked);
-}
-
-void CSVWorld::ScriptSubView::idListChanged()
-{
-    mHighlighter->invalidateIds();
-
-    if (!mUpdateTimer.isActive())
-        mUpdateTimer.start (0);
 }
 
 void CSVWorld::ScriptSubView::textChanged()
@@ -103,12 +84,3 @@ void CSVWorld::ScriptSubView::rowsAboutToBeRemoved (const QModelIndex& parent, i
         deleteLater();
 }
 
-void CSVWorld::ScriptSubView::updateHighlighting()
-{
-    if (mEditor->isChangeLocked())
-        return;
-
-    ScriptEdit::ChangeLock lock (*mEditor);
-
-    mHighlighter->rehighlight();
-}

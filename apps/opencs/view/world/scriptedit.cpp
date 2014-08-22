@@ -6,8 +6,12 @@
 #include <QRegExp>
 #include <QString>
 
+#include "../../model/doc/document.hpp"
+
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/tablemimedata.hpp"
+
+#include "scripthighlighter.hpp"
 
 CSVWorld::ScriptEdit::ChangeLock::ChangeLock (ScriptEdit& edit) : mEdit (edit)
 {
@@ -60,6 +64,14 @@ CSVWorld::ScriptEdit::ScriptEdit (QWidget* parent, const CSMDoc::Document& docum
                   <<CSMWorld::UniversalId::Type_Weapon
                   <<CSMWorld::UniversalId::Type_Script
                   <<CSMWorld::UniversalId::Type_Region;
+
+    mHighlighter = new ScriptHighlighter (document.getData(), ScriptEdit::document());
+
+    connect (&document.getData(), SIGNAL (idListChanged()), this, SLOT (idListChanged()));
+
+    connect (&mUpdateTimer, SIGNAL (timeout()), this, SLOT (updateHighlighting()));
+
+    mUpdateTimer.setSingleShot (true);
 }
 
 bool CSVWorld::ScriptEdit::isChangeLocked() const
@@ -126,4 +138,22 @@ bool CSVWorld::ScriptEdit::stringNeedsQuote (const std::string& id) const
     const QString string(QString::fromUtf8(id.c_str())); //<regex> is only for c++11, so let's use qregexp for now.
     //I'm not quite sure when do we need to put quotes. To be safe we will use quotes for anything other than…
     return !(string.contains(mWhiteListQoutes));
+}
+
+void CSVWorld::ScriptEdit::idListChanged()
+{
+    mHighlighter->invalidateIds();
+
+    if (!mUpdateTimer.isActive())
+        mUpdateTimer.start (0);
+}
+
+void CSVWorld::ScriptEdit::updateHighlighting()
+{
+    if (isChangeLocked())
+        return;
+
+    ChangeLock lock (*this);
+
+    mHighlighter->rehighlight();
 }
