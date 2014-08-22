@@ -216,6 +216,17 @@ namespace MWInput
 
         int action = channel->getNumber();
 
+        //Used for joystick, ranges from -1 to +1 with a deadzone
+        float percent = ((currentValue*2.0f)-1.0f);
+        float deadZone = 0.2f;
+        float DZMult = 1/(1-deadZone);
+        if(percent > deadZone)
+            percent = (percent - deadZone) * DZMult;
+        else if(percent < -deadZone)
+            percent = (percent + deadZone) * DZMult;
+        else
+            percent = 0;
+
         if (action == A_Use)
         {
             mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
@@ -228,22 +239,22 @@ namespace MWInput
 
         if (action == A_MoveForwardBackwards)
         {
-            mYAxisMove = -((currentValue*2)-1); //turns 0 through 1 into -1 through 1
+            mYAxisMove = -percent;
         }
 
         if (action == A_MoveLeftRight)
         {
-            mXAxisMove = (currentValue*2)-1; //turns 0 through 1 into -1 through 1
+            mXAxisMove = percent;
         }
 
         if (action == A_LookUpDown)
         {
-            mYAxis = ((currentValue*2)-1) * 10 * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
+            mYAxis = -percent;
         }
 
         if (action == A_LookLeftRight)
         {
-            mXAxis = ((currentValue*2)-1) * 10 * mCameraSensitivity * (1.0f/256.f);
+            mXAxis = percent;
         }
 
         if (currentValue == 1)
@@ -381,8 +392,8 @@ namespace MWInput
 
                 // We keep track of our own mouse position, so that moving the mouse while in
                 // game mode does not move the position of the GUI cursor
-                mMouseX += (mXAxisMove*10);
-                mMouseY += -(mYAxisMove*10);
+                mMouseX += mXAxisMove * (dt * 500.0f) * 500.0f * mCameraSensitivity * (1.0f/256.f);
+                mMouseY += mYAxisMove * (dt * 500.0f) * 500.0f * mCameraSensitivity * (1.0f/256.f) * -1;
 
                 mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
                 mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
@@ -397,15 +408,15 @@ namespace MWInput
                 resetIdleTime();
 
                 float rot[3];
-                rot[0] = -mYAxis;
+                rot[0] = mYAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? 1 : -1) * mCameraYMultiplier;
                 rot[1] = 0.0f;
-                rot[2] = -mXAxis;
+                rot[2] = mXAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f);
 
                 // Only actually turn player when we're not in vanity mode
                 if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
                 {
-                    mPlayer->yaw(mXAxis);
-                    mPlayer->pitch(mYAxis);
+                    mPlayer->yaw(rot[2]);
+                    mPlayer->pitch(rot[0]);
                 }
             }
         }
@@ -423,22 +434,22 @@ namespace MWInput
                 {
 
                     ///todo: Implement variable "dead-zone" for sticks
-                    if(mXAxisMove > .2)
+                    if(mXAxisMove > 0)
                     {
                         triedToMove = true;
                         mPlayer->setLeftRight (1);
                     }
-                    else if(mXAxisMove < -.2)
+                    else if(mXAxisMove < 0)
                     {
                         triedToMove = true;
                         mPlayer->setLeftRight (-1);
                     }
-                    if(mYAxisMove > .2)
+                    if(mYAxisMove > 0)
                     {
                         triedToMove = true;
                         mPlayer->setForwardBackward(1);
                     }
-                    else if(mYAxisMove < -.2)
+                    else if(mYAxisMove < 0)
                     {
                         triedToMove = true;
                         mPlayer->setForwardBackward(-1);

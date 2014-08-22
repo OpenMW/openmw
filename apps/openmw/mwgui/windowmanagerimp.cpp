@@ -1326,7 +1326,8 @@ namespace MWGui
 
     void WindowManager::notifyJoystickAdded()
     {
-        mSettingsWindow->updateInputList();
+        if(mSettingsWindow)
+            mSettingsWindow->updateInputList();
     }
 
     bool WindowManager::containsMode(GuiMode mode) const
