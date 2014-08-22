@@ -23,7 +23,7 @@ namespace ESM
 
         std::string mDescription;
 
-        std::string mScript;
+        std::string mScriptText;
 
         unsigned int mFlags;
 

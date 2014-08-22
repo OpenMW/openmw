@@ -10,20 +10,20 @@ unsigned int ESM::DebugProfile::sRecordId = REC_DBGP;
 void ESM::DebugProfile::load (ESMReader& esm)
 {
     mDescription = esm.getHNString ("DESC");
-    mScript = esm.getHNString ("SCRP");
+    mScriptText = esm.getHNString ("SCRP");
     esm.getHNT (mFlags, "FLAG");
 }
 
 void ESM::DebugProfile::save (ESMWriter& esm) const
 {
     esm.writeHNCString ("DESC", mDescription);
-    esm.writeHNCString ("SCRP", mScript);
+    esm.writeHNCString ("SCRP", mScriptText);
     esm.writeHNT ("FLAG", mFlags);
 }
 
 void ESM::DebugProfile::blank()
 {
     mDescription.clear();
-    mScript.clear();
+    mScriptText.clear();
     mFlags = 0;
 }
