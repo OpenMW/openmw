@@ -24,7 +24,7 @@ CSVWorld::ScriptEdit::ChangeLock::~ChangeLock()
 }
 
 
-CSVWorld::ScriptEdit::ScriptEdit (QWidget* parent, const CSMDoc::Document& document) :
+CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, QWidget* parent) :
     QTextEdit (parent),
     mDocument (document),
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive),

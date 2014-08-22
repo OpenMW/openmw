@@ -15,7 +15,7 @@
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : SubView (id), mDocument (document), mColumn (-1)
 {
-    setWidget (mEditor = new ScriptEdit (this, mDocument));
+    setWidget (mEditor = new ScriptEdit (mDocument, this));
 
     mModel = &dynamic_cast<CSMWorld::IdTable&> (
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Scripts));

@@ -48,7 +48,7 @@ namespace CSVWorld
 
         public:
 
-            ScriptEdit (QWidget* parent, const CSMDoc::Document& document);
+            ScriptEdit (const CSMDoc::Document& document, QWidget* parent);
 
             /// Should changes to the data be ignored (i.e. not cause updated)?
             ///
