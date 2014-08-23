@@ -739,7 +739,7 @@ namespace MWInput
             }
         }
 
-        OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(button);
+        OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
 
         if (kc != OIS::KC_UNASSIGNED)
         {
@@ -756,8 +756,7 @@ namespace MWInput
             bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
             guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI((button) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
         }
-        OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(button);
-
+        OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
         setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
         mInputBinder->buttonReleased(evt, button);
     }
@@ -1150,7 +1149,6 @@ namespace MWInput
         defaultButtonBindings[A_Rest] = 6;
         defaultButtonBindings[A_TogglePOV] = 9;
         defaultButtonBindings[A_Inventory] = 1;
-        defaultButtonBindings[A_Use] = 4;
         defaultButtonBindings[A_GameMenu] = 7;
         defaultButtonBindings[A_QuickSave] = 8;
 
@@ -1169,7 +1167,7 @@ namespace MWInput
         defaultAxisBindings[A_MoveLeftRight] = 0;
         defaultAxisBindings[A_LookUpDown] = 4;
         defaultAxisBindings[A_LookLeftRight] = 3;
-        defaultAxisBindings[A_Activate] = 5;
+        defaultAxisBindings[A_Use] = 5;
 
         for (int i = 0; i < A_Last; ++i)
         {
