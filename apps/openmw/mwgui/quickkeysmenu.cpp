@@ -300,9 +300,9 @@ namespace MWGui
         {
             MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
             MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
-
+            MWWorld::ContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             // draw weapon only if the item *is* a weapon
-            if (item.getTypeName() == typeid(ESM::Weapon).name())
+            if (rightHand != store.end() && item == *rightHand)
             {
                 MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
             }
