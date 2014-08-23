@@ -9,16 +9,16 @@
 
 CSVWorld::RecordStatusDelegate::RecordStatusDelegate(const ValueList& values,
                                                      const IconList & icons,
-                                                     QUndoStack &undoStack, QObject *parent)
-    : DataDisplayDelegate (values, icons, undoStack,
+                                                     CSMDoc::Document& document, QObject *parent)
+    : DataDisplayDelegate (values, icons, document,
                            "Display Format", "Record Status Display",
                            parent)
 {}
 
-CSVWorld::CommandDelegate *CSVWorld::RecordStatusDelegateFactory::makeDelegate (QUndoStack& undoStack,
-    QObject *parent) const
+CSVWorld::CommandDelegate *CSVWorld::RecordStatusDelegateFactory::makeDelegate (
+    CSMDoc::Document& document, QObject *parent) const
 {
-    return new RecordStatusDelegate (mValues, mIcons, undoStack, parent);
+    return new RecordStatusDelegate (mValues, mIcons, document, parent);
 }
 
 CSVWorld::RecordStatusDelegateFactory::RecordStatusDelegateFactory()

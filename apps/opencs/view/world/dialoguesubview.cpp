@@ -167,10 +167,10 @@ void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::
 ==============================DialogueDelegateDispatcher==========================================
 */
 
-CSVWorld::DialogueDelegateDispatcher::DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table, QUndoStack& undoStack) :
+CSVWorld::DialogueDelegateDispatcher::DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table, CSMDoc::Document& document) :
 mParent(parent),
 mTable(table),
-mUndoStack(undoStack),
+mDocument (document),
 mNotEditableDelegate(table, parent)
 {
 }
@@ -182,7 +182,7 @@ CSVWorld::CommandDelegate* CSVWorld::DialogueDelegateDispatcher::makeDelegate(CS
     if (delegateIt == mDelegates.end())
     {
         delegate = CommandDelegateFactoryCollection::get().makeDelegate (
-                                    display, mUndoStack, mParent);
+                                    display, mDocument, mParent);
         mDelegates.insert(std::make_pair(display, delegate));
     } else
     {
@@ -315,12 +315,12 @@ CSVWorld::DialogueDelegateDispatcher::~DialogueDelegateDispatcher()
 =============================================================EditWidget=====================================================
 */
 
-CSVWorld::EditWidget::EditWidget(QWidget *parent, int row, CSMWorld::IdTable* table, QUndoStack& undoStack, bool createAndDelete) :
-mDispatcher(this, table, undoStack),
+CSVWorld::EditWidget::EditWidget(QWidget *parent, int row, CSMWorld::IdTable* table, CSMDoc::Document& document, bool createAndDelete) :
+mDispatcher(this, table, document),
 QScrollArea(parent),
 mWidgetMapper(NULL),
 mMainWidget(NULL),
-mUndoStack(undoStack),
+mDocument (document),
 mTable(table)
 {
     remake (row);
@@ -478,7 +478,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     mMainLayout = new QVBoxLayout(mainWidget);
 
-    mEditWidget = new EditWidget(mainWidget, mRow, mTable, mUndoStack, false);
+    mEditWidget = new EditWidget(mainWidget, mRow, mTable, document, false);
     connect(mEditWidget, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
             this, SLOT(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
 

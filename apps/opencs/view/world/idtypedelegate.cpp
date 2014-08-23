@@ -3,8 +3,8 @@
 #include "../../model/world/universalid.hpp"
 
 CSVWorld::IdTypeDelegate::IdTypeDelegate
-    (const ValueList &values, const IconList &icons, QUndoStack& undoStack, QObject *parent)
-    : DataDisplayDelegate (values, icons, undoStack,
+    (const ValueList &values, const IconList &icons, CSMDoc::Document& document, QObject *parent)
+    : DataDisplayDelegate (values, icons, document,
                            "Display Format", "Referenceable ID Type Display",
                            parent)
 {}
@@ -20,8 +20,8 @@ CSVWorld::IdTypeDelegateFactory::IdTypeDelegateFactory()
     }
 }
 
-CSVWorld::CommandDelegate *CSVWorld::IdTypeDelegateFactory::makeDelegate (QUndoStack& undoStack,
-    QObject *parent) const
+CSVWorld::CommandDelegate *CSVWorld::IdTypeDelegateFactory::makeDelegate (
+    CSMDoc::Document& document, QObject *parent) const
 {
-    return new IdTypeDelegate (mValues, mIcons, undoStack, parent);
+    return new IdTypeDelegate (mValues, mIcons, document, parent);
 }
