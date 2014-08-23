@@ -103,6 +103,7 @@ namespace MWInput
         virtual void axisMoved(const SDL_JoyAxisEvent &evt, int axis);
         virtual void povMoved(const SDL_JoyHatEvent &evt, int index);
         virtual void joystickAdded(int deviceID);
+        virtual void joystickRemoved(int which);
 
         virtual void mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual void mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
@@ -190,6 +191,9 @@ namespace MWInput
 
         //Used for mouseless interfaces
         bool mJoystickLastUsed;
+
+        //Used for joystickAxis as button
+        std::map<int, bool> mJoystickAxisButtonState;
 
         int mBindDeviceID;
 

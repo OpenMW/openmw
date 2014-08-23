@@ -462,7 +462,7 @@ namespace MWGui
     {
         updateControlsBox();
         _sender->setIndexSelected(pos);
-        MWBase::Environment::get().getInputManager()->EatMouseUp();
+        MWBase::Environment::get().getInputManager()->EatMouseUp(); //Fix for MyGUI bug
     }
 
     void SettingsWindow::updateControlsBox()
@@ -484,7 +484,7 @@ namespace MWGui
             for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
             {
                 std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
-                if (desc == "" || desc == "Move Left/Right" || desc == "Move Forwards/Backwards"  || desc == "Look Up/Down"  || desc == "Look Left/Right")
+                if (desc == "" || desc == "Move Left/Right" || desc == "Move Forwards/Backwards"  || desc == "Look Up/Down"  || desc == "Look Left/Right" || desc == "Escape Menu")
                     continue;
 
                 std::string binding = MWBase::Environment::get().getInputManager()->getActionBindingName (*it);

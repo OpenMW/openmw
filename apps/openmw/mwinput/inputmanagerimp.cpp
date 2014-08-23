@@ -146,27 +146,6 @@ namespace MWInput
             mInputBinder->getChannel (i)->addListener (this);
         }
 
-        //Set up joysticks/gamepads
-        int numSticks = SDL_NumJoysticks();
-
-        if(numSticks > 0) //Joysticks found
-        {
-            std::cout << numSticks << " Joysticks found:" << std::endl;
-            for(int i = 0; i < numSticks; i++)
-            {
-                SDL_JoystickOpen(i);
-                mInputBinder->addJoystick(i);
-            }
-        }
-        else if(numSticks < 0) //SDL Error
-        {
-            throw new std::runtime_error("Error in getting joysticks: " + std::string(SDL_GetError()));
-        }
-        else //No Joysticks
-        {
-            std::cout << "No Joysticks Found" << std::endl;
-        }
-
         mControlSwitch["playercontrols"]      = true;
         mControlSwitch["playerfighting"]      = true;
         mControlSwitch["playerjumping"]       = true;
@@ -216,6 +195,8 @@ namespace MWInput
 
         int action = channel->getNumber();
 
+        //***** Joystick Axis Control *****
+
         //Used for joystick, ranges from -1 to +1 with a deadzone
         float percent = ((currentValue*2.0f)-1.0f);
         float deadZone = 0.2f;
@@ -226,16 +207,6 @@ namespace MWInput
             percent = (percent + deadZone) * DZMult;
         else
             percent = 0;
-
-        if (action == A_Use)
-        {
-            mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
-        }
-
-        if (action == A_Jump)
-        {
-            mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
-        }
 
         if (action == A_MoveForwardBackwards)
         {
@@ -255,6 +226,49 @@ namespace MWInput
         if (action == A_LookLeftRight)
         {
             mXAxis = percent;
+        }
+
+        //Changes axises to work like buttons, for the triggers on xBox controllers
+        if(mJoystickLastUsed)
+        {
+            //Never pressed before
+            if(mJoystickAxisButtonState.find(action) == mJoystickAxisButtonState.end())
+                mJoystickAxisButtonState[action] = false;
+
+            if(mJoystickAxisButtonState[action])
+            {
+                if(currentValue <= .25)
+                {
+                    mJoystickAxisButtonState[action] = false;
+                    currentValue = 0;
+                    previousValue = 1;
+                }
+                else
+                    return;
+            }
+            else
+            {
+                if(currentValue >= .75)
+                {
+                    mJoystickAxisButtonState[action] = true;
+                    currentValue = 1;
+                    previousValue = 0;
+                }
+                else
+                    return;
+            }
+        }
+
+        //***** End Joystick Axis Control Section *****
+
+        if (action == A_Use)
+        {
+            mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
+        }
+
+        if (action == A_Jump)
+        {
+            mAttemptJump = (currentValue == 1.0 && previousValue != 1.0);
         }
 
         if (currentValue == 1)
@@ -761,9 +775,17 @@ namespace MWInput
     }
     void InputManager::joystickAdded(int deviceID)
     {
+        SDL_JoystickOpen(deviceID);
         mInputBinder->addJoystick(deviceID);
         loadJoystickDefaults(false, deviceID);
         MWBase::Environment::get().getWindowManager()->notifyJoystickAdded();
+    }
+    void InputManager::joystickRemoved(int which)
+    {
+        //Can't close the joystick; the memory loss is very very small (if any at all) and maintaining a list of joysticks just so we can close them is too annoying
+        //SDL_JoystickClose(
+        mInputBinder->removeJoystick(which);
+        MWBase::Environment::get().getWindowManager()->notifyJoystickAdded(); //Despite the name, this just asks to requerry the device name
     }
     void InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
@@ -1121,16 +1143,17 @@ namespace MWInput
         //Gets the Buttonvalue from the Scancode; gives the button in the same place reguardless of Buttonboard format
         defaultButtonBindings[A_Activate] = 1;
         defaultButtonBindings[A_ToggleWeapon] = 3;
-        defaultButtonBindings[A_ToggleSpell] = 4;
+        defaultButtonBindings[A_ToggleSpell] = 5;
         //defaultButtonBindings[A_QuickButtonsMenu] = SDL_GetButtonFromScancode(SDL_SCANCODE_F1); // Need to implement, should be ToggleSpell(5) and Wait(9)
-        defaultButtonBindings[A_Sneak] = 10;
+        defaultButtonBindings[A_Sneak] = 11;
         defaultButtonBindings[A_Jump] = 4;
-        defaultButtonBindings[A_Journal] = 5;
-        defaultButtonBindings[A_Rest] = 8;
-        defaultButtonBindings[A_TogglePOV] = 11;
+        defaultButtonBindings[A_Journal] = 6;
+        defaultButtonBindings[A_Rest] = 7;
+        defaultButtonBindings[A_TogglePOV] = 10;
         defaultButtonBindings[A_Inventory] = 2;
         defaultButtonBindings[A_Use] = 5;
-        defaultButtonBindings[A_GameMenu] = 9;
+        defaultButtonBindings[A_GameMenu] = 8;
+        defaultButtonBindings[A_QuickSave] = 9;
 
         //std::map<int, int> defaultPOVBindings;
         /*defaultButtonBindings[A_QuickButton1] = SDL_GetButtonFromScancode(SDL_SCANCODE_1);
@@ -1147,6 +1170,7 @@ namespace MWInput
         defaultAxisBindings[A_MoveLeftRight] = 0;
         defaultAxisBindings[A_LookUpDown] = 4;
         defaultAxisBindings[A_LookLeftRight] = 3;
+        defaultAxisBindings[A_Activate] = 5;
 
         for (int i = 0; i < A_Last; ++i)
         {
@@ -1277,6 +1301,7 @@ namespace MWInput
         descriptions[A_TogglePOV] = "#{sTogglePOVCmd}";
         descriptions[A_QuickKeysMenu] = "#{sQuickMenu}";
         descriptions[A_Screenshot] = "Screenshot";
+        descriptions[A_GameMenu] = "Escape Menu";
         descriptions[A_QuickKey1] = "#{sQuick1Cmd}";
         descriptions[A_QuickKey2] = "#{sQuick2Cmd}";
         descriptions[A_QuickKey3] = "#{sQuick3Cmd}";
@@ -1312,7 +1337,7 @@ namespace MWInput
             return "#{sJoystickHatShort} " + boost::lexical_cast<std::string>(res.index + 1) + ((res.axis != ICS::InputControlSystem::EastWest) ? " East/West" : " North/South");
         }
         else if (mInputBinder->getJoystickAxisBinding(c, deviceID, ICS::Control::INCREASE) >= 0)
-            return "Analog Stick " + boost::lexical_cast<std::string>(mInputBinder->getJoystickAxisBinding(c, deviceID, ICS::Control::INCREASE)/2 + 1);
+            return "Axis " + boost::lexical_cast<std::string>(mInputBinder->getJoystickAxisBinding(c, deviceID, ICS::Control::INCREASE));
         else
             return "#{sNone}";
     }
@@ -1360,6 +1385,7 @@ namespace MWInput
         ret.push_back(A_QuickSave);
         ret.push_back(A_QuickLoad);
         ret.push_back(A_Screenshot);
+        ret.push_back(A_GameMenu);
         ret.push_back(A_QuickKeysMenu);
         ret.push_back(A_QuickKey1);
         ret.push_back(A_QuickKey2);
