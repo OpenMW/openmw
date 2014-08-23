@@ -110,6 +110,7 @@ namespace SFO
                     break;
                 case SDL_JOYDEVICEREMOVED:
                     std::cout << "A joystick has been removed" << std::endl;
+                    mJoyListener->joystickRemoved(evt.jdevice.which);
                     break;
                 /*case SDL_CONTROLLERAXISMOTION:
                 case SDL_CONTROLLERBUTTONDOWN:

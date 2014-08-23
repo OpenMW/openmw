@@ -268,7 +268,7 @@ namespace MWInput
 
         if (action == A_Jump)
         {
-            mAttemptJump = (currentValue == 1.0 && previousValue != 1.0);
+            mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
         }
 
         if (currentValue == 1)
