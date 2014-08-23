@@ -528,11 +528,12 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    MWWorld::Ptr actor = R()(runtime, false);
+
                     std::string factionID = "";
 
                     if(arg0==0)
                     {
-                        MWWorld::Ptr actor = R()(runtime);
                         factionID = getDialogueActorFaction(actor);
                     }
                     else
@@ -637,7 +638,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime);
+                    MWWorld::Ptr ptr = R()(runtime, false);
 
                     std::string factionID = "";
                     if(arg0 >0)
