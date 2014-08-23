@@ -276,7 +276,6 @@ namespace MWGui
         {
             // in choice, not allowed to escape, but give access to main menu to allow loading other saves
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
-            MWBase::Environment::get().getSoundManager()->pauseSounds (MWBase::SoundManager::Play_TypeSfx);
         }
         else
             MWBase::Environment::get().getDialogueManager()->goodbyeSelected();

@@ -36,6 +36,7 @@ namespace MWMechanics
 
             AiWander (const ESM::AiSequence::AiWander* wander);
 
+            // NOTE: mDistance and mDuration must be set already
             void init();
 
             virtual AiPackage *clone() const;
@@ -68,7 +69,7 @@ namespace MWMechanics
                 Greet_Done
             };
             GreetingState mSaidGreeting;
-            int greetingTimer;
+            int mGreetingTimer;
 
             bool mHasReturnPosition; // NOTE: Could be removed if mReturnPosition was initialized to actor position,
                                     // if we had the actor in the AiWander constructor...

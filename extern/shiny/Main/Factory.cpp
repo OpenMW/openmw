@@ -278,14 +278,15 @@ namespace sh
 		MaterialMap::iterator it = mMaterials.find(name);
 		if (it != mMaterials.end())
 			return &(it->second);
-                else
+		else
 			return NULL;
 	}
 
 	MaterialInstance* Factory::findInstance (const std::string& name)
 	{
-		assert (mMaterials.find(name) != mMaterials.end());
-		return &mMaterials.find(name)->second;
+		MaterialInstance* m = searchInstance(name);
+		assert (m);
+		return m;
 	}
 
 	MaterialInstance* Factory::requestMaterial (const std::string& name, const std::string& configuration, unsigned short lodIndex)
@@ -297,27 +298,24 @@ namespace sh
 
 		if (m)
 		{
-			// make sure all lod techniques below (higher lod) exist
-			int i = lodIndex;
-			while (i>0)
+			if (m->createForConfiguration (configuration, 0))
 			{
-				--i;
-				if (m->createForConfiguration (configuration, i))
+				if (mListener)
+					mListener->materialCreated (m, configuration, 0);
+			}
+			else
+				return NULL;
+
+			for (LodConfigurationMap::iterator it = mLodConfigurations.begin(); it != mLodConfigurations.end(); ++it)
+			{
+				if (m->createForConfiguration (configuration, it->first))
 				{
 					if (mListener)
-					mListener->materialCreated (m, configuration, i);
+						mListener->materialCreated (m, configuration, it->first);
 				}
 				else
 					return NULL;
 			}
-
-			if (m->createForConfiguration (configuration, lodIndex))
-			{
-				if (mListener)
-					mListener->materialCreated (m, configuration, lodIndex);
-			}
-			else
-				return NULL;
 		}
 		return m;
 	}
@@ -625,8 +623,14 @@ namespace sh
 	{
 		MaterialInstance* m = searchInstance (name);
 		assert(m);
+
 		m->createForConfiguration (configuration, 0);
-	}
+
+		for (LodConfigurationMap::iterator it = mLodConfigurations.begin(); it != mLodConfigurations.end(); ++it)
+		{
+			m->createForConfiguration (configuration, it->first);
+		}
+   	}
 
 	bool Factory::removeCache(const std::string& pattern)
 	{

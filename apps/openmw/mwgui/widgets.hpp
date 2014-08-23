@@ -367,7 +367,7 @@ namespace MWGui
         protected:
             virtual void align() = 0;
 
-            virtual void _setPropertyImpl(const std::string& _key, const std::string& _value);
+            virtual bool _setPropertyImpl(const std::string& _key, const std::string& _value);
 
             int mSpacing; // how much space to put between elements
 

@@ -86,6 +86,7 @@ namespace MWGui
   class CompanionWindow;
   class VideoWidget;
   class WindowModal;
+  class ScreenFader;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -96,7 +97,7 @@ namespace MWGui
     WindowManager(const Compiler::Extensions& extensions, int fpsLevel,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
-                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding);
+                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts);
     virtual ~WindowManager();
 
     void initUI();
@@ -326,6 +327,15 @@ namespace MWGui
 
     virtual void pinWindow (MWGui::GuiWindow window);
 
+    /// Fade the screen in, over \a time seconds
+    virtual void fadeScreenIn(const float time);
+    /// Fade the screen out to black, over \a time seconds
+    virtual void fadeScreenOut(const float time);
+    /// Fade the screen to a specified percentage of black, over \a time seconds
+    virtual void fadeScreenTo(const int percent, const float time);
+    /// Darken the screen by \a factor (1.0 = no darkening). Works independently from screen fading.
+    virtual void setScreenFactor (float factor);
+
   private:
     bool mConsoleOnlyScripts;
 
@@ -375,6 +385,7 @@ namespace MWGui
     CompanionWindow* mCompanionWindow;
     MyGUI::ImageBox* mVideoBackground;
     VideoWidget* mVideoWidget;
+    ScreenFader* mScreenFader;
 
     Translation::Storage& mTranslationDataStorage;
     Cursor* mSoftwareCursor;

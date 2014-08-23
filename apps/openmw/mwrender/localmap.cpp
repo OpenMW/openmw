@@ -98,6 +98,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
             return;
 
         Ogre::Image image;
+        tex->load();
         tex->convertToImage(image);
 
         Ogre::DataStreamPtr encoded = image.encode("tga");
@@ -137,6 +138,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
                     return;
 
                 Ogre::Image image;
+                tex->load();
                 tex->convertToImage(image);
 
                 fog->mFogTextures.push_back(ESM::FogTexture());
@@ -322,6 +324,7 @@ void LocalMap::createFogOfWar(const std::string& texturePrefix)
     buffer.resize(sFogOfWarResolution*sFogOfWarResolution, 0xFF000000);
 
     // upload to the texture
+    tex->load();
     memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
     tex->getBuffer()->unlock();
 
@@ -580,6 +583,8 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
                         ++i;
                     }
                 }
+
+                tex->load();
 
                 // copy to the texture
                 // NOTE: Could be optimized later. We actually only need to update the region that changed.

@@ -5,6 +5,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ControllerManager.h>
@@ -20,21 +22,6 @@ namespace MWGui
 {
     namespace Widgets
     {
-
-        /* Helper functions */
-
-        /*
-         * Fixes the filename of a texture path to use the correct .dds extension.
-         * This is needed on some ESM entries which point to a .tga file instead.
-         */
-        void fixTexturePath(std::string &path)
-        {
-            int offset = path.rfind(".");
-            if (offset < 0)
-                return;
-            path.replace(offset, path.length() - offset, ".dds");
-        }
-
         /* MWSkill */
 
         MWSkill::MWSkill()
@@ -486,9 +473,7 @@ namespace MWGui
             static_cast<MyGUI::TextBox*>(mTextWidget)->setCaptionWithReplacing(spellLine);
             mRequestedWidth = mTextWidget->getTextSize().width + 24;
 
-            std::string path = std::string("icons\\") + magicEffect->mIcon;
-            fixTexturePath(path);
-            mImageWidget->setImageTexture(path);
+            mImageWidget->setImageTexture(Misc::ResourceHelpers::correctIconPath(magicEffect->mIcon));
         }
 
         MWSpellEffect::~MWSpellEffect()
@@ -670,7 +655,7 @@ namespace MWGui
             align();
         }
 
-        void Box::_setPropertyImpl(const std::string& _key, const std::string& _value)
+        bool Box::_setPropertyImpl(const std::string& _key, const std::string& _value)
         {
             if (_key == "Spacing")
                 mSpacing = MyGUI::utility::parseValue<int>(_value);
@@ -678,6 +663,10 @@ namespace MWGui
                 mPadding = MyGUI::utility::parseValue<int>(_value);
             else if (_key == "AutoResize")
                 mAutoResize = MyGUI::utility::parseValue<bool>(_value);
+            else
+                return false;
+
+            return true;
         }
 
         void HBox::align ()
@@ -756,7 +745,8 @@ namespace MWGui
 
         void HBox::setPropertyOverride(const std::string& _key, const std::string& _value)
         {
-            Box::_setPropertyImpl (_key, _value);
+            if (!Box::_setPropertyImpl (_key, _value))
+                MyGUI::Widget::setPropertyOverride(_key, _value);
         }
 
         void HBox::setSize (const MyGUI::IntSize& _value)
@@ -892,7 +882,8 @@ namespace MWGui
 
         void VBox::setPropertyOverride(const std::string& _key, const std::string& _value)
         {
-            Box::_setPropertyImpl (_key, _value);
+            if (!Box::_setPropertyImpl (_key, _value))
+                MyGUI::Widget::setPropertyOverride(_key, _value);
         }
 
         void VBox::setSize (const MyGUI::IntSize& _value)

@@ -2,8 +2,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <libs/openengine/ogre/fader.hpp>
-
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -128,7 +126,7 @@ namespace MWGui
             MWBase::Environment::get().getStateManager()->quickSave("Autosave");
 
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        world->getFader ()->fadeOut(0.2);
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.2);
         setVisible(false);
         mProgressBar.setVisible (true);
 
@@ -179,8 +177,7 @@ namespace MWGui
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
-        bool full = (stats.getFatigue().getCurrent() >= stats.getFatigue().getModified())
-                && (stats.getHealth().getCurrent() >= stats.getHealth().getModified())
+        bool full = (stats.getHealth().getCurrent() >= stats.getHealth().getModified())
                 && (stats.getMagicka().getCurrent() >= stats.getMagicka().getModified());
         MWMechanics::NpcStats& npcstats = player.getClass().getNpcStats(player);
         bool werewolf = npcstats.isWerewolf();
@@ -243,7 +240,7 @@ namespace MWGui
 
     void WaitDialog::stopWaiting ()
     {
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.2);
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.2);
         mProgressBar.setVisible (false);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Rest);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_RestBed);

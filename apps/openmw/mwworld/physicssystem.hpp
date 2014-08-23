@@ -55,7 +55,7 @@ namespace MWWorld
 
             void stepSimulation(float dt);
 
-            std::vector<std::string> getCollisions(const MWWorld::Ptr &ptr); ///< get handles this object collides with
+            std::vector<std::string> getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask); ///< get handles this object collides with
             Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr, float maxHeight);
 
             std::pair<float, std::string> getFacedHandle(float queryDistance);
@@ -85,7 +85,11 @@ namespace MWWorld
             /// be overwritten. Valid until the next call to applyQueuedMovement.
             void queueObjectMovement(const Ptr &ptr, const Ogre::Vector3 &velocity);
 
+            /// Apply all queued movements, then clear the list.
             const PtrVelocityList& applyQueuedMovement(float dt);
+
+            /// Clear the queued movements list without applying.
+            void clearQueuedMovement();
 
             /// Return true if \a actor has been standing on \a object in this frame
             /// This will trigger whenever the object is directly below the actor.

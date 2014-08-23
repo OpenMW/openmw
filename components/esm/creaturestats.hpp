@@ -11,6 +11,7 @@
 
 #include "spellstate.hpp"
 #include "activespells.hpp"
+#include "magiceffects.hpp"
 #include "aisequence.hpp"
 
 namespace ESM
@@ -23,6 +24,8 @@ namespace ESM
     {
         StatState<int> mAttributes[8];
         StatState<float> mDynamic[3];
+
+        MagicEffects mMagicEffects;
 
         AiSequence::AiSequence mAiSequence;
 

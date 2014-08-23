@@ -42,15 +42,19 @@ add_component_dir (esm
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
     savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap lightstate inventorystate containerstate npcstate creaturestate dialoguestate statstate
     npcstats creaturestats weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate
-    aisequence
+    aisequence magiceffects
+    )
+
+add_component_dir (esmterrain
+    storage
     )
 
 add_component_dir (misc
-    utf8stream stringops
+    utf8stream stringops resourcehelpers
     )
 
 add_component_dir (files
-    linuxpath windowspath macospath fixedpath multidircollection collections configurationmanager
+    linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
     constrainedfiledatastream lowlevelfile
     )
 
@@ -72,7 +76,7 @@ add_component_dir (translation
 
 add_definitions(-DTERRAIN_USE_SHADER=1)
 add_component_dir (terrain
-    quadtreenode chunk world defaultworld storage material buffercache defs
+    quadtreenode chunk world defaultworld terraingrid storage material buffercache defs
     )
 
 add_component_dir (loadinglistener

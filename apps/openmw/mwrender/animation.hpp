@@ -306,6 +306,7 @@ public:
     virtual void attachArrow() {}
     virtual void releaseArrow() {}
     void enableLights(bool enable);
+    virtual void enableHeadAnimation(bool enable) {}
 
     Ogre::AxisAlignedBox getWorldBounds();
 
@@ -323,6 +324,7 @@ public:
     ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model);
 
     void addLight(const ESM::Light *light);
+    void removeParticles();
 
     bool canBatch() const;
     void fillBatch(Ogre::StaticGeometry *sg);

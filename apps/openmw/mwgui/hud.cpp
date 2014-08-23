@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -59,7 +61,7 @@ namespace MWGui
     };
 
 
-    HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
+    HUD::HUD(int fpsLevel, DragAndDrop* dragAndDrop)
         : Layout("openmw_hud.layout")
         , mHealth(NULL)
         , mMagicka(NULL)
@@ -97,7 +99,7 @@ namespace MWGui
         , mWeaponSpellTimer(0.f)
         , mDrowningFlashTheta(0.f)
     {
-        setCoord(0,0, width, height);
+        mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
 
         // Energy bars
         getWidget(mHealthFrame, "HealthFrame");
@@ -405,11 +407,6 @@ namespace MWGui
             mDrowningFlashTheta += dt * Ogre::Math::TWO_PI;
     }
 
-    void HUD::onResChange(int width, int height)
-    {
-        setCoord(0, 0, width, height);
-    }
-
     void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
     {
         const ESM::Spell* spell =
@@ -435,10 +432,9 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
 
         std::string icon = effect->mIcon;
-        int slashPos = icon.find("\\");
+        int slashPos = icon.rfind('\\');
         icon.insert(slashPos+1, "b_");
-        icon = std::string("icons\\") + icon;
-        Widgets::fixTexturePath(icon);
+        icon = Misc::ResourceHelpers::correctIconPath(icon);
 
         mSpellImage->setItem(MWWorld::Ptr());
         mSpellImage->setIcon(icon);

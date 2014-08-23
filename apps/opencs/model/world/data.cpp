@@ -280,17 +280,17 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs, IdTable::Feature_ViewCell | IdTable::Feature_Preview), UniversalId::Type_Reference);
     addModel (new IdTable (&mFilters), UniversalId::Type_Filter);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Mesh)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Meshes)),
         UniversalId::Type_Mesh);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Icon)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Icons)),
         UniversalId::Type_Icon);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Music)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Musics)),
         UniversalId::Type_Music);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_SoundRes)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_SoundsRes)),
         UniversalId::Type_SoundRes);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Texture)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Textures)),
         UniversalId::Type_Texture);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Video)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Videos)),
         UniversalId::Type_Video);
 }
 
@@ -515,7 +515,7 @@ CSMWorld::IdCollection<ESM::BodyPart>& CSMWorld::Data::getBodyParts()
 
 const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) const
 {
-    return mResourcesManager.get (UniversalId::getParentType (id.getType()));
+    return mResourcesManager.get (id.getType());
 }
 
 QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& id)

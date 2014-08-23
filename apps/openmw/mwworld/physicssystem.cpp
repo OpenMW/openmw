@@ -612,9 +612,9 @@ namespace MWWorld
         }
     }
 
-    std::vector<std::string> PhysicsSystem::getCollisions(const Ptr &ptr)
+    std::vector<std::string> PhysicsSystem::getCollisions(const Ptr &ptr, int collisionGroup, int collisionMask)
     {
-        return mEngine->getCollisions(ptr.getRefData().getBaseNode()->getName());
+        return mEngine->getCollisions(ptr.getRefData().getBaseNode()->getName(), collisionGroup, collisionMask);
     }
 
     Ogre::Vector3 PhysicsSystem::traceDown(const MWWorld::Ptr &ptr, float maxHeight)
@@ -784,6 +784,13 @@ namespace MWWorld
         mMovementQueue.push_back(std::make_pair(ptr, movement));
     }
 
+    void PhysicsSystem::clearQueuedMovement()
+    {
+        mMovementQueue.clear();
+        mCollisions.clear();
+        mStandingCollisions.clear();
+    }
+
     const PtrVelocityList& PhysicsSystem::applyQueuedMovement(float dt)
     {
         // Collision events are only tracked for a single frame, so reset first
@@ -809,7 +816,7 @@ namespace MWWorld
                 const MWMechanics::MagicEffects& effects = iter->first.getClass().getCreatureStats(iter->first).getMagicEffects();
 
                 bool waterCollision = false;
-                if (effects.get(ESM::MagicEffect::WaterWalking).mMagnitude
+                if (effects.get(ESM::MagicEffect::WaterWalking).getMagnitude()
                         && cell->hasWater()
                         && !world->isUnderwater(iter->first.getCell(),
                                                Ogre::Vector3(iter->first.getRefData().getPosition().pos)))
@@ -825,7 +832,7 @@ namespace MWWorld
                                                                 0xff, OEngine::Physic::CollisionType_Actor);
 
                 // 100 points of slowfall reduce gravity by 90% (this is just a guess)
-                float slowFall = 1-std::min(std::max(0.f, (effects.get(ESM::MagicEffect::SlowFall).mMagnitude / 100.f) * 0.9f), 0.9f);
+                float slowFall = 1-std::min(std::max(0.f, (effects.get(ESM::MagicEffect::SlowFall).getMagnitude() / 100.f) * 0.9f), 0.9f);
 
                 Ogre::Vector3 newpos = MovementSolver::move(iter->first, iter->second, mTimeAccum,
                                                             world->isFlying(iter->first),

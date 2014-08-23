@@ -61,8 +61,6 @@ namespace MWRender
          * Set the position & direction of the player.
          * @remarks This is used to draw a "fog of war" effect
          * to hide areas on the map the player has not discovered yet.
-         * @param position (OGRE coordinates)
-         * @param camera orientation (OGRE coordinates)
          */
         void updatePlayer (const Ogre::Vector3& position, const Ogre::Quaternion& orientation);
 
@@ -74,7 +72,7 @@ namespace MWRender
 
         /**
          * Get the interior map texture index and normalized position
-         * on this texture, given a world position (in ogre coordinates)
+         * on this texture, given a world position
          */
         void getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y);
 

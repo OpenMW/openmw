@@ -34,7 +34,6 @@ MWMechanics::NpcStats::NpcStats()
 , mProfit(0)
 , mTimeToStartDrowning(20.0)
 , mLastDrowningHit(0)
-, mLevelHealthBonus(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
 }
@@ -262,8 +261,7 @@ void MWMechanics::NpcStats::levelUp()
     // "When you gain a level, in addition to increasing three primary attributes, your Health
     // will automatically increase by 10% of your Endurance attribute. If you increased Endurance this level,
     // the Health increase is calculated from the increased Endurance"
-    mLevelHealthBonus += endurance * gmst.find("fLevelUpHealthEndMult")->getFloat();
-    updateHealth();
+    setHealth(getHealth().getBase() + endurance * gmst.find("fLevelUpHealthEndMult")->getFloat());
 
     setLevel(getLevel()+1);
 }
@@ -273,7 +271,7 @@ void MWMechanics::NpcStats::updateHealth()
     const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
     const int strength = getAttribute(ESM::Attribute::Strength).getBase();
 
-    setHealth(static_cast<int> (0.5 * (strength + endurance)) + mLevelHealthBonus);
+    setHealth(static_cast<int> (0.5 * (strength + endurance)));
 }
 
 int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const
@@ -497,7 +495,6 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
 
     state.mTimeToStartDrowning = mTimeToStartDrowning;
     state.mLastDrowningHit = mLastDrowningHit;
-    state.mLevelHealthBonus = mLevelHealthBonus;
 }
 
 void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
@@ -549,5 +546,4 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
 
     mTimeToStartDrowning = state.mTimeToStartDrowning;
     mLastDrowningHit = state.mLastDrowningHit;
-    mLevelHealthBonus = state.mLevelHealthBonus;
 }

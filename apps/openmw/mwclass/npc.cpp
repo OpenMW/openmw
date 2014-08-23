@@ -403,9 +403,9 @@ namespace MWClass
         return ref->mBase->mId;
     }
 
-    void Npc::adjustPosition(const MWWorld::Ptr& ptr) const
+    void Npc::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
     {
-        MWBase::Environment::get().getWorld()->adjustPosition(ptr);
+        MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
     }
 
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
@@ -529,24 +529,7 @@ namespace MWClass
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
             othercls.onHit(victim, 0.0f, false, weapon, ptr, false);
-
-            // Weapon health is reduced by 1 even if the attack misses
-            const bool weaphashealth = !weapon.isEmpty() && weapon.getClass().hasItemHealth(weapon);
-            if(weaphashealth)
-            {
-                int weaphealth = weapon.getClass().getItemHealth(weapon);
-
-                if (!MWBase::Environment::get().getWorld()->getGodModeState())
-                {
-                    weaphealth -= std::min(1, weaphealth);
-                    weapon.getCellRef().setCharge(weaphealth);
-                }
-
-                // Weapon broken? unequip it
-                if (weaphealth == 0)
-                    weapon = *inv.unequipItem(weapon, ptr);
-            }
-
+            MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
             return;
         }
 
@@ -555,7 +538,6 @@ namespace MWClass
         MWMechanics::NpcStats &stats = getNpcStats(ptr);
         if(!weapon.isEmpty())
         {
-            const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
             const unsigned char *attack = NULL;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
@@ -568,27 +550,9 @@ namespace MWClass
                 damage  = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
                 damage *= gmst.fDamageStrengthBase->getFloat() +
                         (stats.getAttribute(ESM::Attribute::Strength).getModified() * gmst.fDamageStrengthMult->getFloat() * 0.1);
-                if(weaphashealth)
-                {
-                    int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
-                    int weaphealth = weapon.getClass().getItemHealth(weapon);
-
-                    damage *= float(weaphealth) / weapmaxhealth;
-
-                    if (!MWBase::Environment::get().getWorld()->getGodModeState())
-                    {
-                        // Reduce weapon charge by at least one, but cap at 0
-                        weaphealth -= std::min(std::max(1,
-                                    (int)(damage * store.find("fWeaponDamageMult")->getFloat())), weaphealth);
-
-                        weapon.getCellRef().setCharge(weaphealth);
-                    }
-
-                    // Weapon broken? unequip it
-                    if (weaphealth == 0)
-                        weapon = *inv.unequipItem(weapon, ptr);
-                }
             }
+            MWMechanics::adjustWeaponDamage(damage, weapon);
+            MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
             healthdmg = true;
         }
         else
@@ -601,7 +565,7 @@ namespace MWClass
             damage  = stats.getSkill(weapskill).getModified();
             damage *= minstrike + ((maxstrike-minstrike)*stats.getAttackStrength());
 
-            healthdmg = (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0)
+            healthdmg = (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
                     || otherstats.getKnockedDown();
             if(stats.isWerewolf())
             {
@@ -675,25 +639,12 @@ namespace MWClass
 
         // NOTE: 'object' and/or 'attacker' may be empty.
 
-        if (ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
-        {
-            // Attacking peaceful NPCs is a crime
-            if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker)
-                    && !MWBase::Environment::get().getMechanicsManager()->isAggressive(ptr, attacker))
-                MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
-
-            if (!attacker.isEmpty() && attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)
-                    && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
-            {
-                // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
-                // Note: accidental or collateral damage attacks are ignored.
-                MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, attacker);
-            }
-        }
-
         bool wasDead = getCreatureStats(ptr).isDead();
 
         getCreatureStats(ptr).setAttacked(true);
+
+        if (!attacker.isEmpty())
+            MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
 
         if(!successful)
         {
@@ -721,7 +672,7 @@ namespace MWClass
         if (damage < 0.001f)
             damage = 0;
 
-        if(damage > 0.0f)
+        if(damage > 0.0f && !attacker.isEmpty())
         {
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
             // something, alert the character controller, scripts, etc.
@@ -749,7 +700,7 @@ namespace MWClass
             else
                 getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
 
-            if(damage > 0 && ishealth && !attacker.isEmpty()) // Don't use armor mitigation for fall damage
+            if(damage > 0 && ishealth)
             {
                 // Hit percentages:
                 // cuirass = 30%
@@ -967,17 +918,15 @@ namespace MWClass
 
         float runSpeed = walkSpeed*(0.01f * npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified() *
                                     gmst.fAthleticsRunBonus->getFloat() + gmst.fBaseRunMultiplier->getFloat());
-        if(npcdata->mNpcStats.isWerewolf())
-            runSpeed *= gmst.fWereWolfRunMult->getFloat();
 
         float moveSpeed;
         if(normalizedEncumbrance >= 1.0f)
             moveSpeed = 0.0f;
-        else if(mageffects.get(ESM::MagicEffect::Levitate).mMagnitude > 0 &&
+        else if(mageffects.get(ESM::MagicEffect::Levitate).getMagnitude() > 0 &&
                 world->isLevitationEnabled())
         {
             float flySpeed = 0.01f*(npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified() +
-                                    mageffects.get(ESM::MagicEffect::Levitate).mMagnitude);
+                                    mageffects.get(ESM::MagicEffect::Levitate).getMagnitude());
             flySpeed = gmst.fMinFlySpeed->getFloat() + flySpeed*(gmst.fMaxFlySpeed->getFloat() - gmst.fMinFlySpeed->getFloat());
             flySpeed *= 1.0f - gmst.fEncumberedMoveEffect->getFloat() * normalizedEncumbrance;
             flySpeed = std::max(0.0f, flySpeed);
@@ -988,7 +937,7 @@ namespace MWClass
             float swimSpeed = walkSpeed;
             if(running)
                 swimSpeed = runSpeed;
-            swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).mMagnitude;
+            swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude();
             swimSpeed *= gmst.fSwimRunBase->getFloat() + 0.01f*npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified()*
                                                     gmst.fSwimRunAthleticsMult->getFloat();
             moveSpeed = swimSpeed;
@@ -999,6 +948,9 @@ namespace MWClass
             moveSpeed = walkSpeed;
         if(getMovementSettings(ptr).mPosition[0] != 0 && getMovementSettings(ptr).mPosition[1] == 0)
             moveSpeed *= 0.75f;
+
+        if(npcdata->mNpcStats.isWerewolf() && running && npcdata->mNpcStats.getDrawState() == MWMechanics::DrawState_Nothing)
+            moveSpeed *= gmst.fWereWolfRunMult->getFloat();
 
         return moveSpeed;
     }
@@ -1023,7 +975,7 @@ namespace MWClass
         float x = gmst.fJumpAcrobaticsBase->getFloat() +
                   std::pow(a / 15.0f, gmst.fJumpAcroMultiplier->getFloat());
         x += 3.0f * b * gmst.fJumpAcroMultiplier->getFloat();
-        x += mageffects.get(ESM::MagicEffect::Jump).mMagnitude * 64;
+        x += mageffects.get(ESM::MagicEffect::Jump).getMagnitude() * 64;
         x *= encumbranceTerm;
 
         if(ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
@@ -1046,7 +998,7 @@ namespace MWClass
         {
             const float acrobaticsSkill = ptr.getClass().getNpcStats (ptr).getSkill(ESM::Skill::Acrobatics).getModified();
             const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
-            const float jumpSpellBonus = npcdata->mNpcStats.getMagicEffects().get(ESM::MagicEffect::Jump).mMagnitude;
+            const float jumpSpellBonus = npcdata->mNpcStats.getMagicEffects().get(ESM::MagicEffect::Jump).getMagnitude();
             const float fallAcroBase = store.find("fFallAcroBase")->getFloat();
             const float fallAcroMult = store.find("fFallAcroMult")->getFloat();
             const float fallDistanceBase = store.find("fFallDistanceBase")->getFloat();
@@ -1152,8 +1104,8 @@ namespace MWClass
         if(!stats.isWerewolf())
         {
             weight  = getContainerStore(ptr).getWeight();
-            weight -= stats.getMagicEffects().get(ESM::MagicEffect::Feather).mMagnitude;
-            weight += stats.getMagicEffects().get(ESM::MagicEffect::Burden).mMagnitude;
+            weight -= stats.getMagicEffects().get(ESM::MagicEffect::Feather).getMagnitude();
+            weight += stats.getMagicEffects().get(ESM::MagicEffect::Burden).getMagnitude();
             if(weight < 0.0f)
                 weight = 0.0f;
         }
@@ -1218,7 +1170,7 @@ namespace MWClass
             }
         }
 
-        float shield = stats.getMagicEffects().get(ESM::MagicEffect::Shield).mMagnitude;
+        float shield = stats.getMagicEffects().get(ESM::MagicEffect::Shield).getMagnitude();
 
         return ratings[MWWorld::InventoryStore::Slot_Cuirass] * 0.3f
                 + (ratings[MWWorld::InventoryStore::Slot_CarriedLeft] + ratings[MWWorld::InventoryStore::Slot_Helmet]

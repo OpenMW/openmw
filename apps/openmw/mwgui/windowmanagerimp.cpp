@@ -65,6 +65,7 @@
 #include "videowidget.hpp"
 #include "backgroundimage.hpp"
 #include "itemwidget.hpp"
+#include "screenfader.hpp"
 
 namespace MWGui
 {
@@ -72,7 +73,7 @@ namespace MWGui
     WindowManager::WindowManager(
         const Compiler::Extensions& extensions, int fpsLevel, OEngine::Render::OgreRenderer *ogre,
             const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
-            Translation::Storage& translationDataStorage, ToUTF8::FromType encoding)
+            Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts)
       : mConsoleOnlyScripts(consoleOnlyScripts)
       , mGuiManager(NULL)
       , mRendering(ogre)
@@ -112,6 +113,7 @@ namespace MWGui
       , mCompanionWindow(NULL)
       , mVideoBackground(NULL)
       , mVideoWidget(NULL)
+      , mScreenFader(NULL)
       , mTranslationDataStorage (translationDataStorage)
       , mCharGen(NULL)
       , mInputBlocker(NULL)
@@ -146,7 +148,7 @@ namespace MWGui
 
         // Load fonts
         FontLoader fontLoader (encoding);
-        fontLoader.loadAllFonts();
+        fontLoader.loadAllFonts(exportFonts);
 
         //Register own widgets with MyGUI
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
@@ -171,18 +173,14 @@ namespace MWGui
         ItemWidget::registerComponents();
 
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatClick>("Controller");
+        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerFollowMouse>("Controller");
 
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::ResourceManager::getInstance().load("core.xml");
 
         MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
-        // Get size info from the Gui object
-        int w = MyGUI::RenderManager::getInstance().getViewSize().width;
-        int h = MyGUI::RenderManager::getInstance().getViewSize().height;
-
         mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow ());
-        mLoadingScreen->onResChange (w,h);
 
         //set up the hardware cursor manager
         mCursorManager = new SFO::SDLCursorManager();
@@ -192,7 +190,6 @@ namespace MWGui
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
 
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
-        //SDL_ShowCursor(false);
 
         mCursorManager->setEnabled(true);
 
@@ -217,13 +214,7 @@ namespace MWGui
         int w = MyGUI::RenderManager::getInstance().getViewSize().width;
         int h = MyGUI::RenderManager::getInstance().getViewSize().height;
 
-        MyGUI::Widget* dragAndDropWidget = mGui->createWidgetT("Widget","",0,0,w,h,MyGUI::Align::Default,"DragAndDrop","DragAndDropWidget");
-        dragAndDropWidget->setVisible(false);
-
         mDragAndDrop = new DragAndDrop();
-        mDragAndDrop->mIsOnDragAndDrop = false;
-        mDragAndDrop->mDraggedWidget = 0;
-        mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
 
         mRecharge = new Recharge();
         mMenu = new MainMenu(w,h);
@@ -245,7 +236,7 @@ namespace MWGui
         trackWindow(mDialogueWindow, "dialogue");
         mContainerWindow = new ContainerWindow(mDragAndDrop);
         trackWindow(mContainerWindow, "container");
-        mHud = new HUD(w,h, mShowFPSLevel, mDragAndDrop);
+        mHud = new HUD(mShowFPSLevel, mDragAndDrop);
         mToolTips = new ToolTips();
         mScrollWindow = new ScrollWindow();
         mBookWindow = new BookWindow();
@@ -267,8 +258,9 @@ namespace MWGui
         mSoulgemDialog = new SoulgemDialog(mMessageBoxManager);
         mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
         trackWindow(mCompanionWindow, "companion");
+        mScreenFader = new ScreenFader();
 
-        mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Overlay");
+        mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"Overlay");
 
         mHud->setVisible(mHudEnabled);
 
@@ -357,6 +349,7 @@ namespace MWGui
         delete mCursorManager;
         delete mRecharge;
         delete mCompanionWindow;
+        delete mScreenFader;
 
         cleanupGarbage();
 
@@ -858,6 +851,8 @@ namespace MWGui
         mCompanionWindow->checkReferenceAvailable();
         mConsole->checkReferenceAvailable();
         mCompanionWindow->onFrame();
+
+        mScreenFader->update(frameDuration);
     }
 
     void WindowManager::changeCell(MWWorld::CellStore* cell)
@@ -1019,7 +1014,6 @@ namespace MWGui
     {
         sizeVideo(x, y);
         mGuiManager->windowResized();
-        mLoadingScreen->onResChange (x,y);
         if (!mHud)
             return; // UI not initialized yet
 
@@ -1033,7 +1027,6 @@ namespace MWGui
             it->first->setSize(size);
         }
 
-        mHud->onResChange(x, y);
         mConsole->onResChange(x, y);
         mMenu->onResChange(x, y);
         mSettingsWindow->center();
@@ -1042,8 +1035,6 @@ namespace MWGui
         mBookWindow->center();
         mQuickKeysMenu->center();
         mSpellBuyingWindow->center();
-        mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
-        mInputBlocker->setSize(MyGUI::IntSize(x,y));
     }
 
     void WindowManager::pushGuiMode(GuiMode mode)
@@ -1693,5 +1684,25 @@ namespace MWGui
         }
 
         updateVisible();
+    }
+
+    void WindowManager::fadeScreenIn(const float time)
+    {
+        mScreenFader->fadeIn(time);
+    }
+
+    void WindowManager::fadeScreenOut(const float time)
+    {
+        mScreenFader->fadeOut(time);
+    }
+
+    void WindowManager::fadeScreenTo(const int percent, const float time)
+    {
+        mScreenFader->fadeTo(percent, time);
+    }
+
+    void WindowManager::setScreenFactor(float factor)
+    {
+        mScreenFader->setFactor(factor);
     }
 }

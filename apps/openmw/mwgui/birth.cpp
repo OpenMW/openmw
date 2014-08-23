@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -182,9 +184,7 @@ namespace MWGui
         const ESM::BirthSign *birth =
             store.get<ESM::BirthSign>().find(mCurrentBirthId);
 
-        std::string texturePath = std::string("textures\\") + birth->mTexture;
-        Widgets::fixTexturePath(texturePath);
-        mBirthImage->setImageTexture(texturePath);
+        mBirthImage->setImageTexture(Misc::ResourceHelpers::correctTexturePath(birth->mTexture));
 
         std::vector<std::string> abilities, powers, spells;
 

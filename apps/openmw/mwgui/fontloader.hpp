@@ -12,12 +12,15 @@ namespace MWGui
     {
     public:
         FontLoader (ToUTF8::FromType encoding);
-        void loadAllFonts ();
+
+        /// @param exportToFile export the converted fonts (Images and XML with glyph metrics) to files?
+        void loadAllFonts (bool exportToFile);
 
     private:
         ToUTF8::FromType mEncoding;
 
-        void loadFont (const std::string& fileName);
+        /// @param exportToFile export the converted font (Image and XML with glyph metrics) to files?
+        void loadFont (const std::string& fileName, bool exportToFile);
     };
 
 }

@@ -350,36 +350,67 @@ namespace MWWorld
 
     void World::ensureNeededRecords()
     {
-        if (!mStore.get<ESM::GameSetting>().search("sCompanionShare"))
+        std::map<std::string, ESM::Variant> gmst;
+        // Companion (tribunal)
+        gmst["sCompanionShare"] = ESM::Variant("Companion Share");
+        gmst["sCompanionWarningMessage"] = ESM::Variant("Warning message");
+        gmst["sCompanionWarningButtonOne"] = ESM::Variant("Button 1");
+        gmst["sCompanionWarningButtonTwo"] = ESM::Variant("Button 2");
+        gmst["sCompanionShare"] = ESM::Variant("Companion Share");
+        gmst["sProfitValue"] = ESM::Variant("Profit Value");
+        gmst["sTeleportDisabled"] = ESM::Variant("Teleport disabled");
+        gmst["sLevitateDisabled"] = ESM::Variant("Levitate disabled");
+
+        // Missing in unpatched MW 1.0
+        gmst["sDifficulty"] = ESM::Variant("Difficulty");
+        gmst["fDifficultyMult"] = ESM::Variant(5.f);
+        gmst["sAuto_Run"] = ESM::Variant("Auto Run");
+        gmst["sServiceRefusal"] = ESM::Variant("Service Refusal");
+        gmst["sNeedOneSkill"] = ESM::Variant("Need one skill");
+        gmst["sNeedTwoSkills"] = ESM::Variant("Need two skills");
+        gmst["sEasy"] = ESM::Variant("Easy");
+        gmst["sHard"] = ESM::Variant("Hard");
+        gmst["sDeleteNote"] = ESM::Variant("Delete Note");
+        gmst["sEditNote"] = ESM::Variant("Edit Note");
+        gmst["sAdmireSuccess"] = ESM::Variant("Admire Success");
+        gmst["sAdmireFail"] = ESM::Variant("Admire Fail");
+        gmst["sIntimidateSuccess"] = ESM::Variant("Intimidate Success");
+        gmst["sIntimidateFail"] = ESM::Variant("Intimidate Fail");
+        gmst["sTauntSuccess"] = ESM::Variant("Taunt Success");
+        gmst["sTauntFail"] = ESM::Variant("Taunt Fail");
+        gmst["sBribeSuccess"] = ESM::Variant("Bribe Success");
+        gmst["sBribeFail"] = ESM::Variant("Bribe Fail");
+
+        // Werewolf (BM)
+        gmst["fWereWolfRunMult"] = ESM::Variant(1.f);
+        gmst["fWereWolfSilverWeaponDamageMult"] = ESM::Variant(1.f);
+
+
+        std::map<std::string, ESM::Variant> globals;
+        // vanilla Morrowind does not define dayspassed.
+        globals["dayspassed"] = ESM::Variant(1); // but the addons start counting at 1 :(
+        globals["WerewolfClawMult"] = ESM::Variant(1.f);
+
+        for (std::map<std::string, ESM::Variant>::iterator it = gmst.begin(); it != gmst.end(); ++it)
         {
-            ESM::GameSetting sCompanionShare;
-            sCompanionShare.mId = "sCompanionShare";
-            ESM::Variant value;
-            value.setType(ESM::VT_String);
-            value.setString("Companion Share");
-            sCompanionShare.mValue = value;
-            mStore.insertStatic(sCompanionShare);
+            if (!mStore.get<ESM::GameSetting>().search(it->first))
+            {
+                ESM::GameSetting setting;
+                setting.mId = it->first;
+                setting.mValue = it->second;
+                mStore.insertStatic(setting);
+            }
         }
-        if (!mStore.get<ESM::Global>().search("dayspassed"))
+
+        for (std::map<std::string, ESM::Variant>::iterator it = globals.begin(); it != globals.end(); ++it)
         {
-            // vanilla Morrowind does not define dayspassed.
-            ESM::Global dayspassed;
-            dayspassed.mId = "dayspassed";
-            ESM::Variant value;
-            value.setType(ESM::VT_Long);
-            value.setInteger(1); // but the addons start counting at 1 :(
-            dayspassed.mValue = value;
-            mStore.insertStatic(dayspassed);
-        }
-        if (!mStore.get<ESM::GameSetting>().search("fWereWolfRunMult"))
-        {
-            ESM::GameSetting fWereWolfRunMult;
-            fWereWolfRunMult.mId = "fWereWolfRunMult";
-            ESM::Variant value;
-            value.setType(ESM::VT_Float);
-            value.setFloat(1.f);
-            fWereWolfRunMult.mValue = value;
-            mStore.insertStatic(fWereWolfRunMult);
+            if (!mStore.get<ESM::Global>().search(it->first))
+            {
+                ESM::Global setting;
+                setting.mId = it->first;
+                setting.mValue = it->second;
+                mStore.insertStatic(setting);
+            }
         }
     }
 
@@ -840,6 +871,8 @@ namespace MWWorld
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
+        mPhysics->clearQueuedMovement();
+
         if (mCurrentWorldSpace != cellName)
         {
             // changed worldspace
@@ -855,6 +888,8 @@ namespace MWWorld
 
     void World::changeToExteriorCell (const ESM::Position& position)
     {
+        mPhysics->clearQueuedMovement();
+
         if (mCurrentWorldSpace != "sys::default") // FIXME
         {
             // changed worldspace
@@ -1151,7 +1186,7 @@ namespace MWWorld
         }
     }
 
-    void World::adjustPosition(const Ptr &ptr)
+    void World::adjustPosition(const Ptr &ptr, bool force)
     {
         ESM::Position pos (ptr.getRefData().getPosition());
 
@@ -1170,7 +1205,7 @@ namespace MWWorld
 
         ptr.getRefData().setPosition(pos);
 
-        if (!isFlying(ptr))
+        if (force || !isFlying(ptr))
         {
             Ogre::Vector3 traced = mPhysics->traceDown(ptr, 200);
             if (traced.z < pos.pos[2])
@@ -1284,7 +1319,8 @@ namespace MWWorld
                 bool reached = (targetRot == 90.f && it->second) || targetRot == 0.f;
 
                 /// \todo should use convexSweepTest here
-                std::vector<std::string> collisions = mPhysics->getCollisions(it->first);
+                std::vector<std::string> collisions = mPhysics->getCollisions(it->first, OEngine::Physic::CollisionType_Actor
+                                                                              , OEngine::Physic::CollisionType_Actor);
                 for (std::vector<std::string>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
                 {
                     MWWorld::Ptr ptr = getPtrViaHandle(*cit);
@@ -1300,7 +1336,6 @@ namespace MWWorld
                         // we need to undo the rotation
                         localRotateObject(it->first, 0, 0, oldRot);
                         reached = false;
-                        //break; //Removed in case multiple actors are touching
                     }
                 }
 
@@ -1509,7 +1544,7 @@ namespace MWWorld
     {
         float telekinesisRangeBonus =
                 mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
-                .get(ESM::MagicEffect::Telekinesis).mMagnitude;
+                .get(ESM::MagicEffect::Telekinesis).getMagnitude();
         telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
 
         float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
@@ -1553,11 +1588,6 @@ namespace MWWorld
     void World::modRegion(const std::string &regionid, const std::vector<char> &chances)
     {
         mWeatherManager->modRegion(regionid, chances);
-    }
-
-    OEngine::Render::Fader* World::getFader()
-    {
-        return mRendering->getFader();
     }
 
     Ogre::Vector2 World::getNorthVector (CellStore* cell)
@@ -1781,7 +1811,7 @@ namespace MWWorld
     World::isFlying(const MWWorld::Ptr &ptr) const
     {
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-        bool isParalyzed = (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0);
+        bool isParalyzed = (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0);
 
         if(!ptr.getClass().isActor())
             return false;
@@ -1792,7 +1822,7 @@ namespace MWWorld
         if (ptr.getClass().canFly(ptr))
             return !isParalyzed;
 
-        if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).mMagnitude > 0
+        if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).getMagnitude() > 0
                 && isLevitationEnabled())
             return true;
 
@@ -1810,7 +1840,7 @@ namespace MWWorld
             return false;
 
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-        if(stats.getMagicEffects().get(ESM::MagicEffect::SlowFall).mMagnitude > 0)
+        if(stats.getMagicEffects().get(ESM::MagicEffect::SlowFall).getMagnitude() > 0)
             return true;
 
         return false;
@@ -2631,11 +2661,11 @@ namespace MWWorld
         const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
         float dist=0;
         if (type == World::Detect_Creature)
-            dist = effects.get(ESM::MagicEffect::DetectAnimal).mMagnitude;
+            dist = effects.get(ESM::MagicEffect::DetectAnimal).getMagnitude();
         else if (type == World::Detect_Key)
-            dist = effects.get(ESM::MagicEffect::DetectKey).mMagnitude;
+            dist = effects.get(ESM::MagicEffect::DetectKey).getMagnitude();
         else if (type == World::Detect_Enchantment)
-            dist = effects.get(ESM::MagicEffect::DetectEnchantment).mMagnitude;
+            dist = effects.get(ESM::MagicEffect::DetectEnchantment).getMagnitude();
 
         if (!dist)
             return;

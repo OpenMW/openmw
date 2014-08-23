@@ -290,6 +290,9 @@ namespace MWDialogue
             std::string title;
             if (dialogue.mType==ESM::Dialogue::Persuasion)
             {
+                // Determine GMST from dialogue topic. GMSTs are:
+                // sAdmireSuccess, sAdmireFail, sIntimidateSuccess, sIntimidateFail,
+                // sTauntSuccess, sTauntFail, sBribeSuccess, sBribeFail
                 std::string modifiedTopic = "s" + topic;
 
                 modifiedTopic.erase (std::remove (modifiedTopic.begin(), modifiedTopic.end(), ' '), modifiedTopic.end());

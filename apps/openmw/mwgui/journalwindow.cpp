@@ -123,6 +123,9 @@ namespace
 
                 getPage (LeftBookPage)->adviseLinkClicked (callback);
                 getPage (RightBookPage)->adviseLinkClicked (callback);
+
+                getPage (LeftBookPage)->eventMouseWheel += MyGUI::newDelegate(this, &JournalWindowImpl::notifyMouseWheel);
+                getPage (RightBookPage)->eventMouseWheel += MyGUI::newDelegate(this, &JournalWindowImpl::notifyMouseWheel);
             }
 
             {
@@ -198,10 +201,6 @@ namespace
 
             setBookMode ();
 
-            /// \todo Wiping the whole book layout each time the journal is opened is probably too costly for a large journal (eg 300+ pages).
-            /// There should be a way to keep the existing layout and append new entries to the end of it.
-            /// However, that still leaves the problem of having to add links to previously unknown, but now known topics, so
-            /// we maybe need to find another way to speed things up.
             Book journalBook;
             if (mModel->isEmpty ())
                 journalBook = createEmptyJournalBook ();
@@ -488,6 +487,14 @@ namespace
             MWBase::Environment::get().getWindowManager ()->popGuiMode ();
         }
 
+        void notifyMouseWheel(MyGUI::Widget* sender, int rel)
+        {
+            if (rel < 0)
+                notifyNextPage(sender);
+            else
+                notifyPrevPage(sender);
+        }
+
         void notifyNextPage(MyGUI::Widget* _sender)
         {
             if (!mStates.empty ())
@@ -509,7 +516,7 @@ namespace
             {
                 unsigned int & page = mStates.top ().mPage;
 
-                if(page > 0)
+                if(page >= 2)
                 {
                     page -= 2;
                     updateShowingPages ();

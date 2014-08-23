@@ -395,22 +395,35 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 CharacterState walkState = runStateToWalkState(mMovementState);
                 const StateInfo *stateinfo = std::find_if(sMovementList, sMovementListEnd, FindCharState(walkState));
                 anim = stateinfo->groupname;
+
+                if (mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(anim)) > 1.0f)
+                    speedmult = mMovementSpeed / vel;
+                else
+                    // Another bug: when using a fallback animation (e.g. RunForward as fallback to SwimRunForward),
+                    // then the equivalent Walk animation will not use a fallback, and if that animation doesn't exist
+                    // we will play without any scaling.
+                    // Makes the speed attribute of most water creatures totally useless.
+                    // And again, this can not be fixed without patching game data.
+                    speedmult = 1.f;
+            }
+            else
+            {
+                if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(anim)) > 1.0f)
+                {
+                    speedmult = mMovementSpeed / vel;
+                }
+                else if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
+                    speedmult = 1.f; // TODO: should get a speed mult depending on the current turning speed
+                else if (mMovementSpeed > 0.0f)
+                {
+                    // The first person anims don't have any velocity to calculate a speed multiplier from.
+                    // We use the third person velocities instead.
+                    // FIXME: should be pulled from the actual animation, but it is not presently loaded.
+                    speedmult = mMovementSpeed / (isrunning ? 222.857f : 154.064f);
+                    mMovementAnimationControlled = false;
+                }
             }
 
-            if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(anim)) > 1.0f)
-            {
-                speedmult = mMovementSpeed / vel;
-            }
-            else if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
-                speedmult = 1.f; // TODO: should get a speed mult depending on the current turning speed
-            else if (mMovementSpeed > 0.0f)
-            {
-                // The first person anims don't have any velocity to calculate a speed multiplier from.
-                // We use the third person velocities instead.
-                // FIXME: should be pulled from the actual animation, but it is not presently loaded.
-                speedmult = mMovementSpeed / (isrunning ? 222.857f : 154.064f);
-                mMovementAnimationControlled = false;
-            }
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
                              speedmult, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
         }
@@ -1192,7 +1205,6 @@ void CharacterController::update(float duration)
                     cls.getMovementSettings(mPtr).mPosition[2] = 0;
             }
             //Force Move Jump, only jump if they're otherwise moving
-            std::cout << isMoving << std::endl;
             if(stats.getMovementFlag(MWMechanics::CreatureStats::Flag_ForceMoveJump) && isMoving)
             {
 
@@ -1512,6 +1524,8 @@ void CharacterController::update(float duration)
     else if (mAnimation)
         mAnimation->updateEffects(duration);
     mSkipAnim = false;
+
+    mAnimation->enableHeadAnimation(cls.isActor() && !cls.getCreatureStats(mPtr).isDead());
 }
 
 
@@ -1625,7 +1639,7 @@ void CharacterController::updateContinuousVfx()
     for (std::vector<int>::iterator it = effects.begin(); it != effects.end(); ++it)
     {
         if (mPtr.getClass().getCreatureStats(mPtr).isDead()
-            || mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(*it)).mMagnitude <= 0)
+            || mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(*it)).getMagnitude() <= 0)
             mAnimation->removeEffect(*it);
     }
 }
@@ -1635,14 +1649,14 @@ void CharacterController::updateVisibility()
     if (!mPtr.getClass().isActor())
         return;
     float alpha = 1.f;
-    if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).mMagnitude)
+    if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude())
     {
         if (mPtr.getRefData().getHandle() == "player")
             alpha = 0.4f;
         else
             alpha = 0.f;
     }
-    float chameleon = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Chameleon).mMagnitude;
+    float chameleon = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
     if (chameleon)
     {
         alpha *= std::max(0.2f, (100.f - chameleon)/100.f);

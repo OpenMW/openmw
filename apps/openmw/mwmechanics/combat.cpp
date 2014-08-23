@@ -59,7 +59,7 @@ namespace MWMechanics
 
         if (blockerStats.getKnockedDown() // Used for both knockout or knockdown
                 || blockerStats.getHitRecovery()
-                || blockerStats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0)
+                || blockerStats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
             return false;
 
         // Don't block when in spellcasting state (shield is equipped, but not visible)
@@ -144,8 +144,8 @@ namespace MWMechanics
     void resistNormalWeapon(const MWWorld::Ptr &actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr &weapon, float &damage)
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-        float resistance = std::min(100.f, stats.getMagicEffects().get(ESM::MagicEffect::ResistNormalWeapons).mMagnitude
-                - stats.getMagicEffects().get(ESM::MagicEffect::WeaknessToNormalWeapons).mMagnitude);
+        float resistance = std::min(100.f, stats.getMagicEffects().get(ESM::MagicEffect::ResistNormalWeapons).getMagnitude()
+                - stats.getMagicEffects().get(ESM::MagicEffect::WeaknessToNormalWeapons).getMagnitude());
 
         float multiplier = 1.f - resistance / 100.f;
 
@@ -169,12 +169,12 @@ namespace MWMechanics
 
         MWMechanics::CreatureStats& attackerStats = attacker.getClass().getCreatureStats(attacker);
 
-        const MWWorld::Class &othercls = victim.getClass();
-        if(!othercls.isActor()) // Can't hit non-actors
+        if(victim.isEmpty() || !victim.getClass().isActor() || victim.getClass().getCreatureStats(victim).isDead())
+            // Can't hit non-actors or dead actors
+        {
+            reduceWeaponCondition(0.f, false, weapon, attacker);
             return;
-        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
-        if(otherstats.isDead()) // Can't hit dead actors
-            return;
+        }
 
         if(attacker.getRefData().getHandle() == "player")
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
@@ -189,6 +189,7 @@ namespace MWMechanics
         if((::rand()/(RAND_MAX+1.0)) > getHitChance(attacker, victim, skillValue)/100.0f)
         {
             victim.getClass().onHit(victim, 0.0f, false, projectile, attacker, false);
+            MWMechanics::reduceWeaponCondition(0.f, false, weapon, attacker);
             return;
         }
 
@@ -209,6 +210,8 @@ namespace MWMechanics
         damage *= fDamageStrengthBase +
                 (attackerStats.getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult * 0.1);
 
+        adjustWeaponDamage(damage, weapon);
+        reduceWeaponCondition(damage, true, weapon, attacker);
 
         if(attacker.getRefData().getHandle() == "player")
             attacker.getClass().skillUsageSucceeded(attacker, weapskill, 0);
@@ -243,8 +246,8 @@ namespace MWMechanics
                           (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                           (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         hitchance *= stats.getFatigueTerm();
-        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).mMagnitude -
-                     mageffects.get(ESM::MagicEffect::Blind).mMagnitude;
+        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).getMagnitude() -
+                     mageffects.get(ESM::MagicEffect::Blind).getMagnitude();
         hitchance -= victim.getClass().getCreatureStats(victim).getEvasion();
         return hitchance;
     }
@@ -253,7 +256,7 @@ namespace MWMechanics
     {
         for (int i=0; i<3; ++i)
         {
-            float magnitude = victim.getClass().getCreatureStats(victim).getMagicEffects().get(ESM::MagicEffect::FireShield+i).mMagnitude;
+            float magnitude = victim.getClass().getCreatureStats(victim).getMagicEffects().get(ESM::MagicEffect::FireShield+i).getMagnitude();
 
             if (!magnitude)
                 continue;
@@ -295,4 +298,42 @@ namespace MWMechanics
         }
     }
 
+    void reduceWeaponCondition(float damage, bool hit, MWWorld::Ptr &weapon, const MWWorld::Ptr &attacker)
+    {
+        if (weapon.isEmpty())
+            return;
+
+        if (!hit)
+            damage = 0.f;
+
+        const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
+        if(weaphashealth)
+        {
+            int weaphealth = weapon.getClass().getItemHealth(weapon);
+
+            const float fWeaponDamageMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWeaponDamageMult")->getFloat();
+            float x = std::max(1.f, fWeaponDamageMult * damage);
+
+            weaphealth -= std::min(int(x), weaphealth);
+            weapon.getCellRef().setCharge(weaphealth);
+
+            // Weapon broken? unequip it
+            if (weaphealth == 0)
+                weapon = *attacker.getClass().getInventoryStore(attacker).unequipItem(weapon, attacker);
+        }
+    }
+
+    void adjustWeaponDamage(float &damage, const MWWorld::Ptr &weapon)
+    {
+        if (weapon.isEmpty())
+            return;
+
+        const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
+        if(weaphashealth)
+        {
+            int weaphealth = weapon.getClass().getItemHealth(weapon);
+            int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
+            damage *= (float(weaphealth) / weapmaxhealth);
+        }
+    }
 }

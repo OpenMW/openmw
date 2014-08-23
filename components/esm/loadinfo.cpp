@@ -10,6 +10,9 @@ namespace ESM
 
 void DialInfo::load(ESMReader &esm)
 {
+    mQuestStatus = QS_None;
+    mFactionLess = false;
+
     mPrev = esm.getHNString("PNAM");
     mNext = esm.getHNString("NNAM");
 
@@ -49,7 +52,6 @@ void DialInfo::load(ESMReader &esm)
             return;
     }
 
-    mFactionLess = false;
     if (subName.val == REC_FNAM)
     {
         mFaction = esm.getHString();
@@ -103,8 +105,6 @@ void DialInfo::load(ESMReader &esm)
         if (esm.isEmptyOrGetName())
             return;
     }
-
-    mQuestStatus = QS_None;
 
     if (subName.val == REC_QSTN)
         mQuestStatus = QS_Name;

@@ -33,12 +33,13 @@ namespace MWGui
     public:
         bool mIsOnDragAndDrop;
         MyGUI::Widget* mDraggedWidget;
-        MyGUI::Widget* mDragAndDropWidget;
         ItemModel* mSourceModel;
         ItemView* mSourceView;
         SortFilterItemModel* mSourceSortModel;
         ItemStack mItem;
         int mDraggedCount;
+
+        DragAndDrop();
 
         void startDrag (int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView, int count);
         void drop (ItemModel* targetModel, ItemView* targetView);

@@ -653,7 +653,9 @@ void MyGUIManager::updateWindow (Ogre::RenderWindow *wnd)
 
 void MyGUIManager::windowResized()
 {
+#ifndef ANDROID
     mRenderManager->setActiveViewport(0);
+#endif
 }
 
 void MyGUIManager::shutdown()

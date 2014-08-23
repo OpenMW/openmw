@@ -637,8 +637,6 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime);
-
                     std::string factionID = "";
                     if(arg0 >0)
                     {
@@ -647,6 +645,8 @@ namespace MWScript
                     }
                     else
                     {
+                        MWWorld::Ptr ptr = R()(runtime);
+
                         if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
                         {
                             factionID = "";
@@ -913,8 +913,6 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime);
-
                     std::string factionID = "";
                     if(arg0 >0 )
                     {
@@ -923,6 +921,8 @@ namespace MWScript
                     }
                     else
                     {
+                        MWWorld::Ptr ptr = R()(runtime);
+
                         if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
                         {
                             factionID = "";
@@ -1176,6 +1176,91 @@ namespace MWScript
             }
         };
 
+        template <class R>
+        class OpGetMagicEffect : public Interpreter::Opcode0
+        {
+            int mPositiveEffect;
+            int mNegativeEffect;
+
+        public:
+            OpGetMagicEffect (int positiveEffect, int negativeEffect)
+                : mPositiveEffect(positiveEffect)
+                , mNegativeEffect(negativeEffect)
+            {
+            }
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWWorld::Ptr ptr = R()(runtime);
+
+                MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+                float currentValue = stats.getMagicEffects().get(mPositiveEffect).getMagnitude();
+                if (mNegativeEffect != -1)
+                    currentValue -= stats.getMagicEffects().get(mNegativeEffect).getMagnitude();
+
+                int ret = static_cast<int>(currentValue);
+                runtime.push(ret);
+            }
+        };
+
+        template <class R>
+        class OpSetMagicEffect : public Interpreter::Opcode0
+        {
+            int mPositiveEffect;
+            int mNegativeEffect;
+
+        public:
+            OpSetMagicEffect (int positiveEffect, int negativeEffect)
+                : mPositiveEffect(positiveEffect)
+                , mNegativeEffect(negativeEffect)
+            {
+            }
+
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                MWWorld::Ptr ptr = R()(runtime);
+                MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+                float currentValue = stats.getMagicEffects().get(mPositiveEffect).getMagnitude();
+                if (mNegativeEffect != -1)
+                    currentValue -= stats.getMagicEffects().get(mNegativeEffect).getMagnitude();
+                currentValue = int(currentValue);
+
+                int arg = runtime[0].mInteger;
+                runtime.pop();
+                stats.getMagicEffects().modifyBase(mPositiveEffect, (arg - currentValue));
+            }
+        };
+
+        template <class R>
+        class OpModMagicEffect : public Interpreter::Opcode0
+        {
+            int mPositiveEffect;
+            int mNegativeEffect;
+
+        public:
+            OpModMagicEffect (int positiveEffect, int negativeEffect)
+                : mPositiveEffect(positiveEffect)
+                , mNegativeEffect(negativeEffect)
+            {
+            }
+
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                MWWorld::Ptr ptr = R()(runtime);
+                MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+
+                int arg = runtime[0].mInteger;
+                runtime.pop();
+                stats.getMagicEffects().modifyBase(mPositiveEffect, arg);
+            }
+        };
+
+        struct MagicEffect
+        {
+            int mPositiveEffect;
+            int mNegativeEffect;
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             for (int i=0; i<Compiler::Stats::numberOfAttributes; ++i)
@@ -1320,6 +1405,48 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobaticsExplicit, new OpSetWerewolfAcrobatics<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeGetStat, new OpGetStat<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeGetStatExplicit, new OpGetStat<ExplicitRef>);
+
+            static const MagicEffect sMagicEffects[] = {
+                { ESM::MagicEffect::ResistMagicka, ESM::MagicEffect::WeaknessToMagicka },
+                { ESM::MagicEffect::ResistFire, ESM::MagicEffect::WeaknessToFire },
+                { ESM::MagicEffect::ResistFrost, ESM::MagicEffect::WeaknessToFrost },
+                { ESM::MagicEffect::ResistShock, ESM::MagicEffect::WeaknessToShock },
+                { ESM::MagicEffect::ResistCommonDisease, ESM::MagicEffect::WeaknessToCommonDisease },
+                { ESM::MagicEffect::ResistBlightDisease, ESM::MagicEffect::WeaknessToBlightDisease },
+                { ESM::MagicEffect::ResistCorprusDisease, ESM::MagicEffect::WeaknessToCorprusDisease },
+                { ESM::MagicEffect::ResistPoison, ESM::MagicEffect::WeaknessToPoison },
+                { ESM::MagicEffect::ResistParalysis, -1 },
+                { ESM::MagicEffect::ResistNormalWeapons, ESM::MagicEffect::WeaknessToNormalWeapons },
+                { ESM::MagicEffect::WaterBreathing, -1 },
+                { ESM::MagicEffect::Chameleon, -1 },
+                { ESM::MagicEffect::WaterWalking, -1 },
+                { ESM::MagicEffect::SwiftSwim, -1 },
+                { ESM::MagicEffect::Jump, -1 },
+                { ESM::MagicEffect::Levitate, -1 },
+                { ESM::MagicEffect::Shield, -1 },
+                { ESM::MagicEffect::Sound, -1 },
+                { ESM::MagicEffect::Silence, -1 },
+                { ESM::MagicEffect::Blind, -1 },
+                { ESM::MagicEffect::Paralyze, -1 },
+                { ESM::MagicEffect::Invisibility, -1 },
+                { ESM::MagicEffect::FortifyAttack, -1 },
+                { ESM::MagicEffect::Sanctuary, -1 },
+            };
+
+            for (int i=0; i<24; ++i)
+            {
+                int positive = sMagicEffects[i].mPositiveEffect;
+                int negative = sMagicEffects[i].mNegativeEffect;
+
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetMagicEffect+i, new OpGetMagicEffect<ImplicitRef> (positive, negative));
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetMagicEffectExplicit+i, new OpGetMagicEffect<ExplicitRef> (positive, negative));
+
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetMagicEffect+i, new OpSetMagicEffect<ImplicitRef> (positive, negative));
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetMagicEffectExplicit+i, new OpSetMagicEffect<ExplicitRef> (positive, negative));
+
+                interpreter.installSegment5 (Compiler::Stats::opcodeModMagicEffect+i, new OpModMagicEffect<ImplicitRef> (positive, negative));
+                interpreter.installSegment5 (Compiler::Stats::opcodeModMagicEffectExplicit+i, new OpModMagicEffect<ExplicitRef> (positive, negative));
+            }
         }
     }
 }

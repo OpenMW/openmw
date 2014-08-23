@@ -244,6 +244,8 @@ namespace MWWorld
 
             mPlayer.load (player.mObject);
 
+            getPlayer().getClass().getCreatureStats(getPlayer()).getAiSequence().clear();
+
             MWBase::World& world = *MWBase::Environment::get().getWorld();
 
             try

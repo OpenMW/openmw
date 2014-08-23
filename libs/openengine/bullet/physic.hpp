@@ -311,7 +311,7 @@ namespace Physic
         std::pair<bool, float> sphereCast (float radius, btVector3& from, btVector3& to);
         ///< @return (hit, relative distance)
 
-        std::vector<std::string> getCollisions(const std::string& name);
+        std::vector<std::string> getCollisions(const std::string& name, int collisionGroup, int collisionMask);
 
         // Get the nearest object that's inside the given object, filtering out objects of the
         // provided name

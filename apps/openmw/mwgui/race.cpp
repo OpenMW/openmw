@@ -32,7 +32,6 @@ namespace MWGui
       , mHairIndex(0)
       , mCurrentAngle(0)
       , mPreviewDirty(true)
-      , mPreview(NULL)
     {
         // Centre dialog
         center();
@@ -115,7 +114,14 @@ namespace MWGui
         updateSkills();
         updateSpellPowers();
 
-        mPreview = new MWRender::RaceSelectionPreview();
+        mPreview.reset(NULL);
+
+        mPreviewImage->setImageTexture("");
+
+        const std::string textureName = "CharacterHeadPreview";
+        MyGUI::RenderManager::getInstance().destroyTexture(MyGUI::RenderManager::getInstance().getTexture(textureName));
+
+        mPreview.reset(new MWRender::RaceSelectionPreview());
         mPreview->setup();
         mPreview->update (0);
 
@@ -129,7 +135,7 @@ namespace MWGui
         index = proto.mHair.substr(proto.mHair.size() - 2, 2);
         mHairIndex = boost::lexical_cast<int>(index) - 1;
 
-        mPreviewImage->setImageTexture ("CharacterHeadPreview");
+        mPreviewImage->setImageTexture (textureName);
 
         mPreviewDirty = true;
     }
@@ -157,8 +163,7 @@ namespace MWGui
 
     void RaceDialog::close()
     {
-        delete mPreview;
-        mPreview = 0;
+        mPreview.reset(NULL);
     }
 
     // widget controls
@@ -306,6 +311,10 @@ namespace MWGui
 
     void RaceDialog::doRenderUpdate()
     {
+        if (!mPreview.get())
+            return;
+
+        mPreview->onFrame();
         if (mPreviewDirty)
         {
             mPreview->render();

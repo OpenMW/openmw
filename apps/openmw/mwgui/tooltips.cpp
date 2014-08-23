@@ -4,6 +4,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -236,12 +238,23 @@ namespace MWGui
                         size_t underscorePos = it->first.find("_");
                         if (underscorePos == std::string::npos)
                             continue;
-                        std::string propertyKey = it->first.substr(0, underscorePos);
+                        std::string key = it->first.substr(0, underscorePos);
                         std::string widgetName = it->first.substr(underscorePos+1, it->first.size()-(underscorePos+1));
+
+                        std::string type = "Property";
+                        size_t caretPos = key.find("^");
+                        if (caretPos != std::string::npos)
+                        {
+                            type = key.substr(0, caretPos);
+                            key.erase(key.begin(), key.begin() + caretPos + 1);
+                        }
 
                         MyGUI::Widget* w;
                         getWidget(w, widgetName);
-                        w->setProperty(propertyKey, it->second);
+                        if (type == "Property")
+                            w->setProperty(key, it->second);
+                        else if (type == "UserData")
+                            w->setUserString(key, it->second);
                     }
 
                     tooltipSize = tooltip->getSize();
@@ -319,20 +332,6 @@ namespace MWGui
         return tooltipSize;
     }
 
-    void ToolTips::findImageExtension(std::string& image)
-    {
-        int len = image.size();
-        if (len < 4) return;
-
-        if (!Ogre::ResourceGroupManager::getSingleton().resourceExists(Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, image))
-        {
-            // Change texture extension to .dds
-            image[len-3] = 'd';
-            image[len-2] = 'd';
-            image[len-1] = 's';
-        }
-    }
-
     MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     {
         mDynamicToolTipBox->setVisible(true);
@@ -371,8 +370,7 @@ namespace MWGui
         const int imageCaptionHPadding = (caption != "" ? 8 : 0);
         const int imageCaptionVPadding = (caption != "" ? 4 : 0);
 
-        std::string realImage = "icons\\" + image;
-        findImageExtension(realImage);
+        std::string realImage = Misc::ResourceHelpers::correctIconPath(image);
 
         MyGUI::EditBox* captionWidget = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("NormalText", MyGUI::IntCoord(0, 0, 300, 300), MyGUI::Align::Left | MyGUI::Align::Top, "ToolTipCaption");
         captionWidget->setProperty("Static", "true");
@@ -644,9 +642,7 @@ namespace MWGui
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "BirthSignToolTip");
-        std::string image = sign->mTexture;
-        image.replace(image.size()-3, 3, "dds");
-        widget->setUserString("ImageTexture_BirthSignImage", "textures\\" + image);
+        widget->setUserString("ImageTexture_BirthSignImage", Misc::ResourceHelpers::correctTexturePath(sign->mTexture));
         std::string text;
 
         text += sign->mName;
@@ -739,15 +735,9 @@ namespace MWGui
         const std::string &name = ESM::MagicEffect::effectIdToString (id);
 
         std::string icon = effect->mIcon;
-
-        int slashPos = icon.find("\\");
+        int slashPos = icon.rfind('\\');
         icon.insert(slashPos+1, "b_");
-
-        icon[icon.size()-3] = 'd';
-        icon[icon.size()-2] = 'd';
-        icon[icon.size()-1] = 's';
-
-        icon = "icons\\" + icon;
+        icon = Misc::ResourceHelpers::correctIconPath(icon);
 
         std::vector<std::string> schools;
         schools.push_back ("#{sSchoolAlteration}");

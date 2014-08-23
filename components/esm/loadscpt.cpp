@@ -38,13 +38,28 @@ void Script::load(ESMReader &esm)
         char* str = &tmp[0];
         for (size_t i = 0; i < mVarNames.size(); i++)
         {
+            // Support '\r' terminated strings like vanilla.  See Bug #1324.
             char *termsym = strchr(str, '\r');
             if(termsym) *termsym = '\0';
             mVarNames[i] = std::string(str);
             str += mVarNames[i].size() + 1;
 
             if (str - &tmp[0] > s)
-                esm.fail("String table overflow");
+            {
+                // Apparently SCVR subrecord is not used and variable names are
+                // determined on the fly from the script text.  Therefore don't throw
+                // an exeption, just log an error and continue.
+                std::stringstream ss;
+
+                ss << "ESM Error: " << "String table overflow";
+                ss << "\n  File: " << esm.getName();
+                ss << "\n  Record: " << esm.getContext().recName.toString();
+                ss << "\n  Subrecord: " << "SCVR";
+                ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
+                std::cerr << ss.str() << std::endl;
+                break;
+            }
+
         }
     }
 

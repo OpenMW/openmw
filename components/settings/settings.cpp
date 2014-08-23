@@ -79,7 +79,7 @@ void Manager::saveUser(const std::string& file)
     fout.close();
 }
 
-const std::string Manager::getString (const std::string& setting, const std::string& category)
+std::string Manager::getString (const std::string& setting, const std::string& category)
 {
     if (mNewSettings.find(std::make_pair(category, setting)) != mNewSettings.end())
         return mNewSettings[std::make_pair(category, setting)];
@@ -92,17 +92,17 @@ const std::string Manager::getString (const std::string& setting, const std::str
     return val;
 }
 
-const float Manager::getFloat (const std::string& setting, const std::string& category)
+float Manager::getFloat (const std::string& setting, const std::string& category)
 {
     return Ogre::StringConverter::parseReal( getString(setting, category) );
 }
 
-const int Manager::getInt (const std::string& setting, const std::string& category)
+int Manager::getInt (const std::string& setting, const std::string& category)
 {
     return Ogre::StringConverter::parseInt( getString(setting, category) );
 }
 
-const bool Manager::getBool (const std::string& setting, const std::string& category)
+bool Manager::getBool (const std::string& setting, const std::string& category)
 {
     return Ogre::StringConverter::parseBool( getString(setting, category) );
 }

@@ -45,6 +45,7 @@ namespace MWGui
         , NoDrop(drag, mMainWidget)
         , mHeight(0)
         , mWidth(0)
+        , mWindowSize(mMainWidget->getSize())
     {
         mSpellIcons = new SpellIcons();
 
@@ -64,6 +65,12 @@ namespace MWGui
     void SpellWindow::onPinToggled()
     {
         MWBase::Environment::get().getWindowManager()->setSpellVisibility(!mPinned);
+    }
+
+    void SpellWindow::onTitleDoubleClicked()
+    {
+        if (!mPinned)
+            MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Magic);
     }
 
     void SpellWindow::open()
@@ -302,7 +309,11 @@ namespace MWGui
 
     void SpellWindow::onWindowResize(MyGUI::Window* _sender)
     {
-        updateSpells();
+        if (mMainWidget->getSize() != mWindowSize)
+        {
+            mWindowSize = mMainWidget->getSize();
+            updateSpells();
+        }
     }
 
     void SpellWindow::onEnchantedItemSelected(MyGUI::Widget* _sender)

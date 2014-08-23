@@ -17,11 +17,6 @@ namespace Ogre
 
 namespace OEngine
 {
-    namespace Render
-    {
-        class Fader;
-    }
-
     namespace Physic
     {
         class PhysicEngine;
@@ -113,9 +108,6 @@ namespace MWBase
             virtual void readRecord (ESM::ESMReader& reader, int32_t type,
                 const std::map<int, int>& contentFileMap) = 0;
 
-            virtual OEngine::Render::Fader* getFader() = 0;
-            ///< \todo remove this function. Rendering details should not be exposed.
-
             virtual MWWorld::CellStore *getExterior (int x, int y) = 0;
 
             virtual MWWorld::CellStore *getInterior (const std::string& name) = 0;
@@ -151,7 +143,7 @@ namespace MWBase
             virtual bool isCellQuasiExterior() const = 0;
 
             virtual Ogre::Vector2 getNorthVector (MWWorld::CellStore* cell) = 0;
-            ///< get north vector (OGRE coordinates) for given interior cell
+            ///< get north vector for given interior cell
 
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out) = 0;
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
@@ -271,8 +263,9 @@ namespace MWBase
             /// use the "Head" node, or alternatively the "Bip01 Head" node as a basis.
             virtual std::pair<MWWorld::Ptr,Ogre::Vector3> getHitContact(const MWWorld::Ptr &ptr, float distance) = 0;
 
-            virtual void adjustPosition (const MWWorld::Ptr& ptr) = 0;
+            virtual void adjustPosition (const MWWorld::Ptr& ptr, bool force) = 0;
             ///< Adjust position after load to be on ground. Must be called after model load.
+            /// @param force do this even if the ptr is flying
 
             virtual void fixPosition (const MWWorld::Ptr& actor) = 0;
             ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.

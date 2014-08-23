@@ -31,6 +31,10 @@ namespace MWRender
     {
     }
 
+    GlobalMap::~GlobalMap()
+    {
+        Ogre::TextureManager::getSingleton().remove(mOverlayTexture->getName());
+    }
 
     void GlobalMap::render (Loading::Listener* loadingListener)
     {
@@ -168,9 +172,8 @@ namespace MWRender
 
         tex->load();
 
-
         mOverlayTexture = Ogre::TextureManager::getSingleton().createManual("GlobalMapOverlay", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-            Ogre::TEX_TYPE_2D, mWidth, mHeight, 0, Ogre::PF_A8B8G8R8, Ogre::TU_DYNAMIC_WRITE_ONLY);
+            Ogre::TEX_TYPE_2D, mWidth, mHeight, 0, Ogre::PF_A8B8G8R8, Ogre::TU_DYNAMIC, this);
 
         clear();
 
@@ -194,9 +197,11 @@ namespace MWRender
 
     void GlobalMap::exploreCell(int cellX, int cellY)
     {
-        float originX = (cellX - mMinX) * 24;
+        const int size = 24;
+
+        float originX = (cellX - mMinX) * size;
         // NB y + 1, because we want the top left corner, not bottom left where the origin of the cell is
-        float originY = mHeight - (cellY+1 - mMinY) * 24;
+        float originY = mHeight - (cellY+1 - mMinY) * size;
 
         if (cellX > mMaxX || cellX < mMinX || cellY > mMaxY || cellY < mMinY)
             return;
@@ -204,31 +209,47 @@ namespace MWRender
         Ogre::TexturePtr localMapTexture = Ogre::TextureManager::getSingleton().getByName("Cell_"
             + boost::lexical_cast<std::string>(cellX) + "_" + boost::lexical_cast<std::string>(cellY));
 
-        // mipmap version - can't get ogre to generate automips..
-        /*if (!localMapTexture.isNull())
-        {
-            assert(localMapTexture->getBuffer(0, 4)->getWidth() == 64); // 1024 / 2^4
-
-            mOverlayTexture->getBuffer()->blit(localMapTexture->getBuffer(0, 4), Ogre::Image::Box(0,0,64, 64),
-                         Ogre::Image::Box(originX,originY,originX+24,originY+24));
-        }*/
-
         if (!localMapTexture.isNull())
         {
+            mOverlayTexture->load();
             mOverlayTexture->getBuffer()->blit(localMapTexture->getBuffer(), Ogre::Image::Box(0,0,512,512),
-                         Ogre::Image::Box(originX,originY,originX+24,originY+24));
+                         Ogre::Image::Box(originX,originY,originX+size,originY+size));
+
+            Ogre::Image backup;
+            std::vector<Ogre::uchar> data;
+            data.resize(size*size*4, 0);
+            backup.loadDynamicImage(&data[0], size, size, Ogre::PF_A8B8G8R8);
+
+            localMapTexture->getBuffer()->blitToMemory(Ogre::Image::Box(0,0,512,512), backup.getPixelBox());
+
+            for (int x=0; x<size; ++x)
+                for (int y=0; y<size; ++y)
+                {
+                    assert (originX+x < mOverlayImage.getWidth());
+                    assert (originY+y < mOverlayImage.getHeight());
+                    assert (x < int(backup.getWidth()));
+                    assert (y < int(backup.getHeight()));
+                    mOverlayImage.setColourAt(backup.getColourAt(x, y, 0), originX+x, originY+y, 0);
+                }
         }
     }
 
     void GlobalMap::clear()
     {
-        std::vector<Ogre::uint32> buffer;
-        // initialize to (0,0,0,0)
-        buffer.resize(mWidth * mHeight, 0);
+        Ogre::uchar* buffer =  OGRE_ALLOC_T(Ogre::uchar, mWidth * mHeight * 4, Ogre::MEMCATEGORY_GENERAL);
+        memset(buffer, 0, mWidth * mHeight * 4);
 
-        Ogre::PixelBox pb(mWidth, mHeight, 1, Ogre::PF_A8B8G8R8, &buffer[0]);
+        mOverlayImage.loadDynamicImage(&buffer[0], mWidth, mHeight, 1, Ogre::PF_A8B8G8R8, true); // pass ownership of buffer to image
 
-        mOverlayTexture->getBuffer()->blitFromMemory(pb);
+        mOverlayTexture->load();
+    }
+
+    void GlobalMap::loadResource(Ogre::Resource *resource)
+    {
+        Ogre::Texture* tex = dynamic_cast<Ogre::Texture*>(resource);
+        Ogre::ConstImagePtrList list;
+        list.push_back(&mOverlayImage);
+        tex->_loadImages(list);
     }
 
     void GlobalMap::write(ESM::GlobalMap& map)
@@ -238,9 +259,7 @@ namespace MWRender
         map.mBounds.mMinY = mMinY;
         map.mBounds.mMaxY = mMaxY;
 
-        Ogre::Image image;
-        mOverlayTexture->convertToImage(image);
-        Ogre::DataStreamPtr encoded = image.encode("png");
+        Ogre::DataStreamPtr encoded = mOverlayImage.encode("png");
         map.mImageData.resize(encoded->size());
         encoded->read(&map.mImageData[0], encoded->size());
     }
@@ -303,7 +322,14 @@ namespace MWRender
                                                                                  image.getHeight(), 0, Ogre::PF_A8B8G8R8);
         tex->loadImage(image);
 
+        mOverlayTexture->load();
         mOverlayTexture->getBuffer()->blit(tex->getBuffer(), srcBox, destBox);
+
+        if (srcBox.left == destBox.left && srcBox.right == destBox.right
+                && srcBox.top == destBox.top && srcBox.bottom == destBox.bottom)
+            mOverlayImage = image;
+        else
+            mOverlayTexture->convertToImage(mOverlayImage);
 
         Ogre::TextureManager::getSingleton().remove("@temp");
     }
