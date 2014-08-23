@@ -1141,19 +1141,19 @@ namespace MWInput
         std::map<int, int> defaultButtonBindings;
 
         //Gets the Buttonvalue from the Scancode; gives the button in the same place reguardless of Buttonboard format
-        defaultButtonBindings[A_Activate] = 1;
-        defaultButtonBindings[A_ToggleWeapon] = 3;
-        defaultButtonBindings[A_ToggleSpell] = 5;
+        defaultButtonBindings[A_Activate] = 0;
+        defaultButtonBindings[A_ToggleWeapon] = 2;
+        defaultButtonBindings[A_ToggleSpell] = 4;
         //defaultButtonBindings[A_QuickButtonsMenu] = SDL_GetButtonFromScancode(SDL_SCANCODE_F1); // Need to implement, should be ToggleSpell(5) and Wait(9)
-        defaultButtonBindings[A_Sneak] = 11;
-        defaultButtonBindings[A_Jump] = 4;
-        defaultButtonBindings[A_Journal] = 6;
-        defaultButtonBindings[A_Rest] = 7;
-        defaultButtonBindings[A_TogglePOV] = 10;
-        defaultButtonBindings[A_Inventory] = 2;
-        defaultButtonBindings[A_Use] = 5;
-        defaultButtonBindings[A_GameMenu] = 8;
-        defaultButtonBindings[A_QuickSave] = 9;
+        defaultButtonBindings[A_Sneak] = 10;
+        defaultButtonBindings[A_Jump] = 3;
+        defaultButtonBindings[A_Journal] = 5;
+        defaultButtonBindings[A_Rest] = 6;
+        defaultButtonBindings[A_TogglePOV] = 9;
+        defaultButtonBindings[A_Inventory] = 1;
+        defaultButtonBindings[A_Use] = 4;
+        defaultButtonBindings[A_GameMenu] = 7;
+        defaultButtonBindings[A_QuickSave] = 8;
 
         //std::map<int, int> defaultPOVBindings;
         /*defaultButtonBindings[A_QuickButton1] = SDL_GetButtonFromScancode(SDL_SCANCODE_1);
