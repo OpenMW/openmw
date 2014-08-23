@@ -1663,6 +1663,9 @@ void CharacterController::updateVisibility()
     }
 
     mAnimation->setAlpha(alpha);
+
+    float light = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Light).getMagnitude();
+    mAnimation->setLightEffect(light);
 }
 
 void CharacterController::determineAttackType()

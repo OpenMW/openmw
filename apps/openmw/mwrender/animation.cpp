@@ -71,6 +71,7 @@ Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
     , mNonAccumCtrl(NULL)
     , mAccumulate(0.0f)
     , mNullAnimationTimePtr(OGRE_NEW NullAnimationTime)
+    , mGlowLight(NULL)
 {
     for(size_t i = 0;i < sNumGroups;i++)
         mAnimationTimePtr[i].bind(OGRE_NEW AnimationTime(this));
@@ -78,6 +79,8 @@ Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
 
 Animation::~Animation()
 {
+    setLightEffect(0);
+
     mEffects.clear();
 
     mAnimSources.clear();
@@ -1395,6 +1398,37 @@ Ogre::Vector3 Animation::getEnchantmentColor(MWWorld::Ptr item)
     result.y = magicEffect->mData.mGreen / 255.f;
     result.z = magicEffect->mData.mBlue / 255.f;
     return result;
+}
+
+void Animation::setLightEffect(float effect)
+{
+    if (effect == 0)
+    {
+        if (mGlowLight)
+        {
+            mInsert->getCreator()->destroySceneNode(mGlowLight->getParentSceneNode());
+            mInsert->getCreator()->destroyLight(mGlowLight);
+            mGlowLight = NULL;
+        }
+    }
+    else
+    {
+        if (!mGlowLight)
+        {
+            mGlowLight = mInsert->getCreator()->createLight();
+
+            Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
+            for(size_t i = 0;i < mObjectRoot->mEntities.size();i++)
+            {
+                Ogre::Entity *ent = mObjectRoot->mEntities[i];
+                bounds.merge(ent->getBoundingBox());
+            }
+            mInsert->createChildSceneNode(bounds.getCenter())->attachObject(mGlowLight);
+        }
+        mGlowLight->setType(Ogre::Light::LT_POINT);
+        effect += 3;
+        mGlowLight->setAttenuation(1.0f / (0.03 * (0.5/effect)), 0, 0.5/effect, 0);
+    }
 }
 
 
