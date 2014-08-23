@@ -194,6 +194,7 @@ namespace MWInput
 
         //Used for joystickAxis as button
         std::map<int, bool> mJoystickAxisButtonState;
+        std::map<int, SDL_Joystick*> mJoysticks;
 
         int mBindDeviceID;
 

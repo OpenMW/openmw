@@ -775,15 +775,16 @@ namespace MWInput
     }
     void InputManager::joystickAdded(int deviceID)
     {
-        SDL_JoystickOpen(deviceID);
+        SDL_Joystick* joy = SDL_JoystickOpen(deviceID);
+        mJoysticks[SDL_JoystickInstanceID(joy)] = joy;
         mInputBinder->addJoystick(deviceID);
         loadJoystickDefaults(false, deviceID);
         MWBase::Environment::get().getWindowManager()->notifyJoystickAdded();
     }
     void InputManager::joystickRemoved(int which)
     {
-        //Can't close the joystick; the memory loss is very very small (if any at all) and maintaining a list of joysticks just so we can close them is too annoying
-        //SDL_JoystickClose(
+        SDL_JoystickClose(mJoysticks[which]);
+        mJoysticks.erase(which);
         mInputBinder->removeJoystick(which);
         MWBase::Environment::get().getWindowManager()->notifyJoystickAdded(); //Despite the name, this just asks to requerry the device name
     }
