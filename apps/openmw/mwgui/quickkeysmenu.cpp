@@ -7,6 +7,7 @@
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -293,12 +294,18 @@ namespace MWGui
                 return;
             store.setSelectedEnchantItem(store.end());
             MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
+            MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Spell);
         }
         else if (type == Type_Item)
         {
             MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
-
             MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
+
+            // draw weapon only if the item *is* a weapon
+            if (item.getTypeName() == typeid(ESM::Weapon).name())
+            {
+                MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
+            }
         }
         else if (type == Type_MagicItem)
         {
@@ -322,6 +329,7 @@ namespace MWGui
             }
 
             store.setSelectedEnchantItem(it);
+            MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Spell);
         }
     }
 
