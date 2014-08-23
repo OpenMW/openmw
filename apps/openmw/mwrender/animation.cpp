@@ -1199,8 +1199,9 @@ bool Animation::allowSwitchViewMode() const
 {
     for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
     {
-        if(stateiter->second.mPriority > MWMechanics::Priority_Movement
+        if((stateiter->second.mPriority > MWMechanics::Priority_Movement
                 && stateiter->second.mPriority < MWMechanics::Priority_Torch)
+                || stateiter->second.mPriority == MWMechanics::Priority_Death)
             return false;
     }
     return true;
