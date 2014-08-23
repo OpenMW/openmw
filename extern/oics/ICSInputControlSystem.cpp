@@ -765,6 +765,13 @@ namespace ICS
 		mJoystickIDList.push_back(deviceId);
 	}
 
+	void InputControlSystem::removeJoystick(int deviceId)
+	{
+        ICS_LOG("Removing joystick (device id: " + ToString<int>(deviceId) + ")");
+        mControlsJoystickAxisBinderMap.erase(deviceId);
+        mJoystickIDList.remove(deviceId);
+	}
+
 	Control* InputControlSystem::findControl(std::string name)
 	{
 		if(mActive)
