@@ -73,11 +73,6 @@ class NIFFile
     /// Parse the file
     void parse();
 
-    class LoadedCache;
-    friend class LoadedCache;
-
-    // attempt to protect NIFFile from misuse...
-    struct psudo_private_modifier {}; // this dirty little trick should optimize out
     NIFFile (NIFFile const &);
     void operator = (NIFFile const &);
 
@@ -96,21 +91,9 @@ public:
                   << "File: " << filename <<std::endl;
     }
 
-    typedef boost::shared_ptr <NIFFile> ptr;
-
     /// Open a NIF stream. The name is used for error messages.
-    NIFFile(const std::string &name, psudo_private_modifier);
+    NIFFile(const std::string &name);
     ~NIFFile();
-
-    static ptr create (const std::string &name);
-    static void lockCache ();
-    static void unlockCache ();
-
-    struct CacheLock
-    {
-        CacheLock () { lockCache (); }
-        ~CacheLock () { unlockCache (); }
-    };
 
     /// Get a given record
     Record *getRecord(size_t index) const

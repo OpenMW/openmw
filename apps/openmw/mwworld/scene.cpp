@@ -259,8 +259,6 @@ namespace MWWorld
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
-        Nif::NIFFile::CacheLock cachelock;
-
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
 
@@ -408,7 +406,6 @@ namespace MWWorld
         if(!loadcell)
             loadcell = *mCurrentCell != *cell;
 
-        Nif::NIFFile::CacheLock lock;
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();

@@ -45,6 +45,7 @@
 #include <extern/shiny/Main/Factory.hpp>
 
 #include <components/nif/node.hpp>
+#include <components/nifcache/nifcache.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
@@ -1123,7 +1124,7 @@ class NIFObjectLoader
 public:
     static void load(Ogre::SceneNode *sceneNode, ObjectScenePtr scene, const std::string &name, const std::string &group, int flags=0)
     {
-        Nif::NIFFile::ptr nif = Nif::NIFFile::create(name);
+        Nif::NIFFilePtr nif = Nif::Cache::getInstance().load(name);
         if(nif->numRoots() < 1)
         {
             nif->warn("Found no root nodes in "+name+".");
@@ -1153,7 +1154,7 @@ public:
     static void loadKf(Ogre::Skeleton *skel, const std::string &name,
                        TextKeyMap &textKeys, std::vector<Ogre::Controller<Ogre::Real> > &ctrls)
     {
-        Nif::NIFFile::ptr nif = Nif::NIFFile::create(name);
+        Nif::NIFFilePtr nif = Nif::Cache::getInstance().load(name);
         if(nif->numRoots() < 1)
         {
             nif->warn("Found no root nodes in "+name+".");

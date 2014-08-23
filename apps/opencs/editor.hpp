@@ -16,6 +16,8 @@
 
 #include <components/files/multidircollection.hpp>
 
+#include <components/nifcache/nifcache.hpp>
+
 #include "model/settings/usersettings.hpp"
 #include "model/doc/documentmanager.hpp"
 
@@ -37,6 +39,7 @@ namespace CS
     {
             Q_OBJECT
 
+            Nif::Cache mNifCache;
             Files::ConfigurationManager mCfgMgr;
             CSMSettings::UserSettings mUserSettings;
             CSMDoc::DocumentManager mDocumentManager;
