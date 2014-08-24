@@ -1,18 +1,15 @@
 #!/bin/bash
 
-make || exit
+#Script to test all nif files (both loose, and in BSA archives) in data files directory
 
-mkdir -p output
+DATAFILESDIR="$1"
 
-PROGS=*_test
+find "$DATAFILESDIR" -iname *bsa > nifs.txt
+find "$DATAFILESDIR" -iname *nif >> nifs.txt
 
-for a in $PROGS; do
-    if [ -f "output/$a.out" ]; then
-        echo "Running $a:"
-        ./$a | diff output/$a.out -
-    else
-        echo "Creating $a.out"
-        ./$a > "output/$a.out"
-        git add "output/$a.out"
-    fi
-done
+sed -e 's/.*/\"&\"/' nifs.txt > quoted_nifs.txt
+
+xargs --arg-file=quoted_nifs.txt ../../../niftest
+
+rm nifs.txt
+rm quoted_nifs.txt
