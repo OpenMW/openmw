@@ -7,6 +7,8 @@
 
 #include "../../model/world/universalid.hpp"
 
+#include "scripthighlighter.hpp"
+
 class QWidget;
 class QRegExp;
 
@@ -17,8 +19,6 @@ namespace CSMDoc
 
 namespace CSVWorld
 {
-    class ScriptHighlighter;
-
     class ScriptEdit : public QTextEdit
     {
             Q_OBJECT
@@ -48,7 +48,8 @@ namespace CSVWorld
 
         public:
 
-            ScriptEdit (const CSMDoc::Document& document, QWidget* parent);
+            ScriptEdit (const CSMDoc::Document& document, ScriptHighlighter::Mode mode,
+                QWidget* parent);
 
             /// Should changes to the data be ignored (i.e. not cause updated)?
             ///

@@ -11,7 +11,6 @@
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
-#include "scripthighlighter.hpp"
 
 CSVWorld::ScriptEdit::ChangeLock::ChangeLock (ScriptEdit& edit) : mEdit (edit)
 {
@@ -24,8 +23,9 @@ CSVWorld::ScriptEdit::ChangeLock::~ChangeLock()
 }
 
 
-CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, QWidget* parent) :
-    QTextEdit (parent),
+CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, ScriptHighlighter::Mode mode,
+    QWidget* parent)
+    : QTextEdit (parent),
     mDocument (document),
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive),
     mChangeLocked (0)
@@ -65,7 +65,7 @@ CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, QWidget* par
                   <<CSMWorld::UniversalId::Type_Script
                   <<CSMWorld::UniversalId::Type_Region;
 
-    mHighlighter = new ScriptHighlighter (document.getData(), ScriptEdit::document());
+    mHighlighter = new ScriptHighlighter (document.getData(), mode, ScriptEdit::document());
 
     connect (&document.getData(), SIGNAL (idListChanged()), this, SLOT (idListChanged()));
 

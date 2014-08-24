@@ -195,7 +195,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
 
         case CSMWorld::ColumnBase::Display_ScriptLines:
 
-            return new ScriptEdit (mDocument, parent);
+            return new ScriptEdit (mDocument, ScriptHighlighter::Mode_Console, parent);
 
         default:
 
