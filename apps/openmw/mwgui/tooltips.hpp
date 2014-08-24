@@ -96,6 +96,8 @@ namespace MWGui
         /// Adjust position for a tooltip so that it doesn't leave the screen and does not obscure the mouse cursor
         void position(MyGUI::IntPoint& position, MyGUI::IntSize size, MyGUI::IntSize viewportSize);
 
+        static std::string sSchoolNames[6];
+
 	int mHorizontalScrollIndex;
 
 

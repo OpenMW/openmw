@@ -11,6 +11,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "mapwindow.hpp"
 #include "inventorywindow.hpp"
@@ -19,6 +20,7 @@
 
 namespace MWGui
 {
+    std::string ToolTips::sSchoolNames[] = {"#{sSchoolAlteration}", "#{sSchoolConjuration}", "#{sSchoolDestruction}", "#{sSchoolIllusion}", "#{sSchoolMysticism}", "#{sSchoolRestoration}"};
 
     ToolTips::ToolTips() :
         Layout("openmw_tooltips.layout")
@@ -219,6 +221,12 @@ namespace MWGui
                         params.mIsConstant = (spell->mData.mType == ESM::Spell::ST_Ability);
                         params.mNoTarget = false;
                         effects.push_back(params);
+                    }
+                    if (MWMechanics::spellIncreasesSkill(spell)) // display school of spells that contribute to skill progress
+                    {
+                        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                        int school = MWMechanics::getSpellSchool(spell, player);
+                        info.text = "#{sSchool}: " + sSchoolNames[school];
                     }
                     info.effects = effects;
                     tooltipSize = createToolTip(info);
@@ -739,19 +747,11 @@ namespace MWGui
         icon.insert(slashPos+1, "b_");
         icon = Misc::ResourceHelpers::correctIconPath(icon);
 
-        std::vector<std::string> schools;
-        schools.push_back ("#{sSchoolAlteration}");
-        schools.push_back ("#{sSchoolConjuration}");
-        schools.push_back ("#{sSchoolDestruction}");
-        schools.push_back ("#{sSchoolIllusion}");
-        schools.push_back ("#{sSchoolMysticism}");
-        schools.push_back ("#{sSchoolRestoration}");
-
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");
         widget->setUserString("Caption_MagicEffectName", "#{" + name + "}");
         widget->setUserString("Caption_MagicEffectDescription", effect->mDescription);
-        widget->setUserString("Caption_MagicEffectSchool", "#{sSchool}: " + schools[effect->mData.mSchool]);
+        widget->setUserString("Caption_MagicEffectSchool", "#{sSchool}: " + sSchoolNames[effect->mData.mSchool]);
         widget->setUserString("ImageTexture_MagicEffectImage", icon);
     }
 
