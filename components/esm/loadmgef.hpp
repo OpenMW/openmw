@@ -16,6 +16,7 @@ struct MagicEffect
 
     enum Flags
     {
+        // Hardcoded flags
         TargetSkill = 0x1, // Affects a specific skill, which is specified elsewhere in the effect structure.
         TargetAttribute = 0x2, // Affects a specific attribute, which is specified elsewhere in the effect structure.
         NoDuration = 0x4, // Has no duration. Only runs effect once on cast.
@@ -28,7 +29,12 @@ struct MagicEffect
         UncappedDamage = 0x1000, // Negates multiple cap behaviours. Allows an effect to reduce an attribute below zero; removes the normal minimum effect duration of 1 second.
         NonRecastable = 0x4000,	// Does not land if parent spell is already affecting target. Shows "you cannot re-cast" message for self target.
         Unreflectable = 0x10000, // Cannot be reflected, the effect always lands normally.
-        CasterLinked = 0x20000	// Must quench if caster is dead, or not an NPC/creature. Not allowed in containter/door trap spells.
+        CasterLinked = 0x20000,	// Must quench if caster is dead, or not an NPC/creature. Not allowed in containter/door trap spells.
+
+        // Moddable flags
+        AllowSpellmaking = 0x200,
+        AllowEnchanting = 0x400,
+        Negative = 0x800 // TODO: needs research
     };
     enum MagnitudeDisplayType
     {
