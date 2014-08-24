@@ -493,6 +493,7 @@ namespace MWGui
 
         float capacity = player.getClass().getCapacity(player);
         float encumbrance = player.getClass().getEncumbrance(player);
+        mTradeModel->adjustEncumbrance(encumbrance);
         mEncumbranceBar->setValue(encumbrance, capacity);
     }
 
