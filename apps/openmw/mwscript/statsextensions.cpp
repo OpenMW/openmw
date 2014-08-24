@@ -528,11 +528,12 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    MWWorld::Ptr actor = R()(runtime, false);
+
                     std::string factionID = "";
 
                     if(arg0==0)
                     {
-                        MWWorld::Ptr actor = R()(runtime);
                         factionID = getDialogueActorFaction(actor);
                     }
                     else
@@ -562,11 +563,12 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    MWWorld::Ptr actor = R()(runtime, false);
+
                     std::string factionID = "";
 
                     if(arg0==0)
                     {
-                        MWWorld::Ptr actor = R()(runtime);
                         factionID = getDialogueActorFaction(actor);
                     }
                     else
@@ -602,11 +604,12 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    MWWorld::Ptr actor = R()(runtime, false);
+
                     std::string factionID = "";
 
                     if(arg0==0)
                     {
-                        MWWorld::Ptr actor = R()(runtime);
                         factionID = getDialogueActorFaction(actor);
                     }
                     else
@@ -637,6 +640,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    MWWorld::Ptr ptr = R()(runtime, false);
+
                     std::string factionID = "";
                     if(arg0 >0)
                     {
@@ -645,8 +650,6 @@ namespace MWScript
                     }
                     else
                     {
-                        MWWorld::Ptr ptr = R()(runtime);
-
                         if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
                         {
                             factionID = "";
@@ -750,6 +753,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    MWWorld::Ptr ptr = R()(runtime, false);
+
                     std::string factionId;
 
                     if (arg0==1)
@@ -759,8 +764,6 @@ namespace MWScript
                     }
                     else
                     {
-                        MWWorld::Ptr ptr = R()(runtime);
-
                         if (!ptr.getClass().getNpcStats (ptr).getFactionRanks().empty())
                             factionId = ptr.getClass().getNpcStats (ptr).getFactionRanks().begin()->first;
                     }
@@ -783,6 +786,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    MWWorld::Ptr ptr = R()(runtime, false);
+
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
@@ -795,8 +800,6 @@ namespace MWScript
                     }
                     else
                     {
-                        MWWorld::Ptr ptr = R()(runtime);
-
                         if (!ptr.getClass().getNpcStats (ptr).getFactionRanks().empty())
                             factionId = ptr.getClass().getNpcStats (ptr).getFactionRanks().begin()->first;
                     }
@@ -818,6 +821,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    MWWorld::Ptr ptr = R()(runtime, false);
+
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
@@ -830,8 +835,6 @@ namespace MWScript
                     }
                     else
                     {
-                        MWWorld::Ptr ptr = R()(runtime);
-
                         if (!ptr.getClass().getNpcStats (ptr).getFactionRanks().empty())
                             factionId = ptr.getClass().getNpcStats (ptr).getFactionRanks().begin()->first;
                     }
@@ -913,6 +916,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    MWWorld::Ptr ptr = R()(runtime, false);
+
                     std::string factionID = "";
                     if(arg0 >0 )
                     {
@@ -921,8 +926,6 @@ namespace MWScript
                     }
                     else
                     {
-                        MWWorld::Ptr ptr = R()(runtime);
-
                         if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
                         {
                             factionID = "";
@@ -952,6 +955,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    MWWorld::Ptr ptr = R()(runtime, false);
+
                     std::string factionID = "";
                     if(arg0 >0 )
                     {
@@ -960,7 +965,6 @@ namespace MWScript
                     }
                     else
                     {
-                        MWWorld::Ptr ptr = R()(runtime);
                         if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
                         {
                             factionID = "";
@@ -985,6 +989,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
+                    MWWorld::Ptr ptr = R()(runtime, false);
+
                     std::string factionID = "";
                     if(arg0 >0 )
                     {
@@ -993,7 +999,6 @@ namespace MWScript
                     }
                     else
                     {
-                        MWWorld::Ptr ptr = R()(runtime);
                         if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
                         {
                             factionID = "";
