@@ -269,24 +269,6 @@ namespace MWWorld
 
         CellStoreCollection::iterator active = mActiveCells.begin();
 
-        // get the number of cells to unload
-        int numUnload = 0;
-        while (active!=mActiveCells.end())
-        {
-            if ((*active)->getCell()->isExterior())
-            {
-                if (std::abs (X-(*active)->getCell()->getGridX())<=1 &&
-                    std::abs (Y-(*active)->getCell()->getGridY())<=1)
-                {
-                    // keep cells within the new 3x3 grid
-                    ++active;
-                    continue;
-                }
-            }
-            ++active;
-            ++numUnload;
-        }
-
         active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
@@ -434,14 +416,6 @@ namespace MWWorld
 
         // remove active
         CellStoreCollection::iterator active = mActiveCells.begin();
-
-        // count number of cells to unload
-        int numUnload = 0;
-        while (active!=mActiveCells.end())
-        {
-            ++active;
-            ++numUnload;
-        }
 
         // unload
         int current = 0;
