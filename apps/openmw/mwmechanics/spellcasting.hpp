@@ -36,6 +36,10 @@ namespace MWMechanics
     int getSpellSchool(const std::string& spellId, const MWWorld::Ptr& actor);
     int getSpellSchool(const ESM::Spell* spell, const MWWorld::Ptr& actor);
 
+    /// Get whether or not the given spell contributes to skill progress.
+    bool spellIncreasesSkill(const ESM::Spell* spell);
+    bool spellIncreasesSkill(const std::string& spellId);
+
     /// Get the resistance attribute against an effect for a given actor. This will add together
     /// ResistX and Weakness to X effects relevant against the given effect.
     float getEffectResistanceAttribute (short effectId, const MagicEffects* actorEffects);
