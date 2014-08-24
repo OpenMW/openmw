@@ -1,39 +1,7 @@
-/*
-  OpenMW - The completely unofficial reimplementation of Morrowind
-  Copyright (C) 2008-2010  Nicolay Korslund
-  Email: < korslund@gmail.com >
-  WWW: http://openmw.sourceforge.net/
-
-  This file (nif_file.cpp) is part of the OpenMW package.
-
-  OpenMW is distributed as free software: you can redistribute it
-  and/or modify it under the terms of the GNU General Public License
-  version 3, as published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  version 3 along with this program. If not, see
-  http://www.gnu.org/licenses/ .
-
- */
-
 #include "niffile.hpp"
-#include "record.hpp"
-#include "components/misc/stringops.hpp"
-
-#include "extra.hpp"
-#include "controlled.hpp"
-#include "node.hpp"
-#include "property.hpp"
-#include "data.hpp"
 #include "effect.hpp"
-#include "controller.hpp"
 
-#include <iostream>
+#include <OgreResourceGroupManager.h>
 
 namespace Nif
 {
@@ -204,15 +172,6 @@ void NIFFile::parse()
       r->recIndex = i;
       records[i] = r;
       r->read(&nif);
-
-      // Discard tranformations for the root node, otherwise some meshes
-      // occasionally get wrong orientation. Only for NiNode-s for now, but
-      // can be expanded if needed.
-      // This should be rewritten when the method is cleaned up.
-      if (0 == i && rec == "NiNode")
-      {
-          static_cast<Nif::Node*>(r)->trafo = Nif::Transformation::getIdentity();
-      }
     }
 
     size_t rootNum = nif.getUInt();
@@ -227,83 +186,6 @@ void NIFFile::parse()
     // Once parsing is done, do post-processing.
     for(size_t i=0; i<recNum; i++)
         records[i]->post(this);
-}
-
-/// \todo move to the write cpp file
-
-void NiSkinInstance::post(NIFFile *nif)
-{
-    data.post(nif);
-    root.post(nif);
-    bones.post(nif);
-
-    if(data.empty() || root.empty())
-        nif->fail("NiSkinInstance missing root or data");
-
-    size_t bnum = bones.length();
-    if(bnum != data->bones.size())
-        nif->fail("Mismatch in NiSkinData bone count");
-
-    root->makeRootBone(&data->trafo);
-
-    for(size_t i=0; i<bnum; i++)
-    {
-        if(bones[i].empty())
-            nif->fail("Oops: Missing bone! Don't know how to handle this.");
-        bones[i]->makeBone(i, data->bones[i]);
-    }
-}
-
-
-void Node::getProperties(const Nif::NiTexturingProperty *&texprop,
-                         const Nif::NiMaterialProperty *&matprop,
-                         const Nif::NiAlphaProperty *&alphaprop,
-                         const Nif::NiVertexColorProperty *&vertprop,
-                         const Nif::NiZBufferProperty *&zprop,
-                         const Nif::NiSpecularProperty *&specprop,
-                         const Nif::NiWireframeProperty *&wireprop) const
-{
-    if(parent)
-        parent->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
-
-    for(size_t i = 0;i < props.length();i++)
-    {
-        // Entries may be empty
-        if(props[i].empty())
-            continue;
-
-        const Nif::Property *pr = props[i].getPtr();
-        if(pr->recType == Nif::RC_NiTexturingProperty)
-            texprop = static_cast<const Nif::NiTexturingProperty*>(pr);
-        else if(pr->recType == Nif::RC_NiMaterialProperty)
-            matprop = static_cast<const Nif::NiMaterialProperty*>(pr);
-        else if(pr->recType == Nif::RC_NiAlphaProperty)
-            alphaprop = static_cast<const Nif::NiAlphaProperty*>(pr);
-        else if(pr->recType == Nif::RC_NiVertexColorProperty)
-            vertprop = static_cast<const Nif::NiVertexColorProperty*>(pr);
-        else if(pr->recType == Nif::RC_NiZBufferProperty)
-            zprop = static_cast<const Nif::NiZBufferProperty*>(pr);
-        else if(pr->recType == Nif::RC_NiSpecularProperty)
-            specprop = static_cast<const Nif::NiSpecularProperty*>(pr);
-        else if(pr->recType == Nif::RC_NiWireframeProperty)
-            wireprop = static_cast<const Nif::NiWireframeProperty*>(pr);
-        else
-            std::cerr<< "Unhandled property type: "<<pr->recName <<std::endl;
-    }
-}
-
-Ogre::Matrix4 Node::getLocalTransform() const
-{
-    Ogre::Matrix4 mat4 = Ogre::Matrix4(Ogre::Matrix4::IDENTITY);
-    mat4.makeTransform(trafo.pos, Ogre::Vector3(trafo.scale), Ogre::Quaternion(trafo.rotation));
-    return mat4;
-}
-
-Ogre::Matrix4 Node::getWorldTransform() const
-{
-    if(parent != NULL)
-        return parent->getWorldTransform() * getLocalTransform();
-    return getLocalTransform();
 }
 
 }
