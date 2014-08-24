@@ -37,6 +37,7 @@ resources
 /omwlauncher
 /openmw
 /opencs
+/niftest
 
 ## generated objects
 apps/openmw/config.hpp
