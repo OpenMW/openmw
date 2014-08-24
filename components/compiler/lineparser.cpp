@@ -122,7 +122,7 @@ namespace Compiler
 
         if (mState==SetMemberVarState)
         {
-            mMemberName = name;
+            mMemberName = Misc::StringUtils::lowerCase (name);
             std::pair<char, bool> type = getContext().getMemberType (mMemberName, mName);
 
             if (type.first!=' ')
