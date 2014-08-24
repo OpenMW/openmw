@@ -69,7 +69,7 @@ void readBSA(std::string filename)
       if(isNIF(name))
       {
           //std::cout << "Decoding " << name << std::endl;
-          Nif::NIFFile::create(name);
+          Nif::NIFFile temp_nif(name);
       }
     }
 }
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
             if(isNIF(name))
             {
                 //std::cout << "Decoding " << name << std::endl;
-                Nif::NIFFile::create(name);
+                Nif::NIFFile temp_nif(name);
              }
              else if(isBSA(name))
              {

@@ -22,6 +22,10 @@ add_component_dir (nif
     controlled effect niftypes record controller extra node record_ptr data niffile property nifkey data node
     )
 
+add_component_dir (nifcache
+    nifcache
+    )
+
 add_component_dir (nifogre
     ogrenifloader skeleton material mesh particles controller
     )

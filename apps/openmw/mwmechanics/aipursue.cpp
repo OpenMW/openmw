@@ -32,11 +32,17 @@ AiPursue *MWMechanics::AiPursue::clone() const
 }
 bool AiPursue::execute (const MWWorld::Ptr& actor, float duration)
 {
+    if(actor.getClass().getCreatureStats(actor).isDead())
+        return true;
+
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
     const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId); //The target to follow
 
     if(target == MWWorld::Ptr())
         return true; //Target doesn't exist
+
+    if(target.getClass().getCreatureStats(target).isDead())
+        return true;
 
     actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 

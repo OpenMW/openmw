@@ -67,13 +67,7 @@ class NIFFile
      */
     void parse();
 
-    class LoadedCache;
-    friend class LoadedCache;
-
-    // attempt to protect NIFFile from misuse...
-    struct psudo_private_modifier {}; // this dirty little trick should optimize out
-
-    /**
+   /**
      * @name Private Copy Constructors
      * @brief Prevent anyone from copying one of these classes
      * @details These aren't even coded in.  Calling one of these functions in code will trigger a compiler error.
@@ -107,31 +101,9 @@ public:
      * @brief Open a nif file
      * 
      * @param name A string containing the filename to be opened.
-     * @param psudo_private_modifier An unused parameter that's supposed to prevent misuse
-     * \TODO Remove psudo_private_modifier, and consider making this function private
      */
-    NIFFile(const std::string &name, psudo_private_modifier);
+    NIFFile(const std::string &name);
     ~NIFFile();
-
-    typedef boost::shared_ptr <NIFFile> ptr;
-
-    /**
-     * @brief Create a NIFFile pointer
-     * @details Use this to create a NIFFIle object, and initialize it.
-     * 
-     * @param name The file name to open
-     * @return A pointer to the created NIFFile object
-     */
-    static ptr create (const std::string &name);
-
-    static void lockCache ();
-    static void unlockCache ();
-
-    struct CacheLock
-    {
-        CacheLock () { lockCache (); }
-        ~CacheLock () { unlockCache (); }
-    };
 
     /**
      * @brief Get a given record pointer
