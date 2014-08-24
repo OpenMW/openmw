@@ -807,8 +807,18 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ScriptColumn : public Column<ESXRecordT>
     {
-        ScriptColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_ScriptText, ColumnBase::Display_Script, 0) {}
+        enum Type
+        {
+            Type_File, // regular script record
+            Type_Lines, // console context
+            Type_Info // dialogue context (not implemented yet)
+        };
+
+        ScriptColumn (Type type)
+        : Column<ESXRecordT> (Columns::ColumnId_ScriptText,
+            type==Type_File ? ColumnBase::Display_Script : ColumnBase::Display_ScriptLines,
+            type==Type_File ? 0 : ColumnBase::Flag_Dialogue)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {

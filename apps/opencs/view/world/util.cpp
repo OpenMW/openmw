@@ -17,6 +17,8 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
+#include "scriptedit.hpp"
+
 CSVWorld::NastyTableModelHack::NastyTableModelHack (QAbstractItemModel& model)
 : mModel (model)
 {}
@@ -190,6 +192,10 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_Video:
 
             return new DropLineEdit(parent);
+
+        case CSMWorld::ColumnBase::Display_ScriptLines:
+
+            return new ScriptEdit (mDocument, parent);
 
         default:
 

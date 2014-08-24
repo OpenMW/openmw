@@ -131,7 +131,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mScripts.addColumn (new StringIdColumn<ESM::Script>);
     mScripts.addColumn (new RecordStateColumn<ESM::Script>);
     mScripts.addColumn (new FixedRecordTypeColumn<ESM::Script> (UniversalId::Type_Script));
-    mScripts.addColumn (new ScriptColumn<ESM::Script>);
+    mScripts.addColumn (new ScriptColumn<ESM::Script> (ScriptColumn<ESM::Script>::Type_File));
 
     mRegions.addColumn (new StringIdColumn<ESM::Region>);
     mRegions.addColumn (new RecordStateColumn<ESM::Region>);
@@ -267,6 +267,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mDebugProfiles.addColumn (new FlagColumn2<ESM::DebugProfile> (
         Columns::ColumnId_GlobalProfile, ESM::DebugProfile::Flag_Global));
     mDebugProfiles.addColumn (new DescriptionColumn<ESM::DebugProfile>);
+    mDebugProfiles.addColumn (new ScriptColumn<ESM::DebugProfile> (
+        ScriptColumn<ESM::DebugProfile>::Type_Lines));
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
