@@ -29,6 +29,7 @@
 #include "controlled.hpp"
 #include "data.hpp"
 #include "property.hpp"
+#include "niftypes.hpp"
 
 namespace Nif
 {

@@ -26,11 +26,12 @@
 
 #include <string>
 
+#include "nifstream.hpp"
+
 namespace Nif
 {
 
 class NIFFile;
-class NIFStream;
 
 enum RecordType
 {
