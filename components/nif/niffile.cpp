@@ -191,15 +191,6 @@ void NIFFile::parse()
       r->recIndex = i;
       records[i] = r;
       r->read(&nif);
-
-      // Discard tranformations for the root node, otherwise some meshes
-      // occasionally get wrong orientation. Only for NiNode-s for now, but
-      // can be expanded if needed.
-      // This should be rewritten when the method is cleaned up.
-      if (0 == i && rec == "NiNode")
-      {
-          static_cast<Nif::Node*>(r)->trafo = Nif::Transformation::getIdentity();
-      }
     }
 
     size_t rootNum = nif.getUInt();
