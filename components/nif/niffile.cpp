@@ -18,16 +18,8 @@
  */
 
 #include "niffile.hpp"
-#include "extra.hpp"
-#include "controlled.hpp"
-#include "node.hpp"
-#include "property.hpp"
-#include "data.hpp"
 #include "effect.hpp"
-#include "controller.hpp"
-#include "niftypes.hpp"
 
-#include <iostream>
 #include <OgreResourceGroupManager.h>
 
 //TODO: when threading is needed, enable these

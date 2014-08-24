@@ -150,6 +150,15 @@ struct NiNode : Node
         Node::read(nif);
         children.read(nif);
         effects.read(nif);
+
+        // Discard tranformations for the root node, otherwise some meshes
+        // occasionally get wrong orientation. Only for NiNode-s for now, but
+        // can be expanded if needed.
+        /// \todo This should be rewritten by someone who knows what's going on
+        if (0 == recIndex)
+        {
+            static_cast<Nif::Node*>(this)->trafo = Nif::Transformation::getIdentity();
+        }
     }
 
     void post(NIFFile *nif)
