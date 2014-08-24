@@ -99,17 +99,18 @@ namespace ICS
 		inline void deactivate(){ this->mActive = false; };
 
 		void addJoystick(int deviceId);
+        void removeJoystick(int deviceId);
 		JoystickIDList& getJoystickIdList(){ return mJoystickIDList; };
-		
+
 		// MouseListener
         void mouseMoved(const SFO::MouseMotionEvent &evt);
         void mousePressed(const SDL_MouseButtonEvent &evt, Uint8);
         void mouseReleased(const SDL_MouseButtonEvent &evt, Uint8);
-		
+
 		// KeyListener
         void keyPressed(const SDL_KeyboardEvent &evt);
         void keyReleased(const SDL_KeyboardEvent &evt);
-		
+
 		// JoyStickListener
         void buttonPressed(const SDL_JoyButtonEvent &evt, int button);
         void buttonReleased(const SDL_JoyButtonEvent &evt, int button);

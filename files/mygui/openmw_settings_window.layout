@@ -191,15 +191,19 @@
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sControls}  "/>
 
-                <Widget type="Widget" skin="MW_Box" position="4 4 352 154">
+                <Widget type="ComboBox" skin="MW_ComboBox" position="4 4 352 24" align="Left Top" name="InputDevice">
+                    <Property key="AddItem" value="Mouse/Keyboard"/>
+                </Widget>
+
+                <Widget type="Widget" skin="MW_Box" position="4 28 352 154">
                     <Widget type="ScrollView" skin="MW_ScrollView" name="ControlsBox" position="4 4 344 146"/>
                 </Widget>
 
-                <Widget type="AutoSizedButton" skin="MW_Button" name="ResetControlsButton" position="4 162 100 24">
+                <Widget type="AutoSizedButton" skin="MW_Button" name="ResetControlsButton" position="4 182 100 24">
                     <Property key="Caption" value="#{sControlsMenu1}"/>
                 </Widget>
 
-                <Widget type="HBox" position="4 192 300 24">
+                <Widget type="HBox" position="4 206 300 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" name="InvertYButton">
                         <UserString key="SettingCategory" value="Input"/>
                         <UserString key="SettingName" value="invert y axis"/>
@@ -210,7 +214,7 @@
                     </Widget>
                 </Widget>
 
-                <Widget type="TextBox" skin="NormalText" position="4 228 336 18" align="Left Top">
+                <Widget type="TextBox" skin="NormalText" position="4 230 336 18" align="Left Top">
                     <Property key="Caption" value="Camera sensitivity"/>
                 </Widget>
                 <Widget type="MWScrollBar" skin="MW_HScroll" position="4 252 336 18" align="Left Top" name="CameraSensitivitySlider">

@@ -234,6 +234,9 @@ namespace MWBase
             virtual void allowMouse() = 0;
             virtual void notifyInputActionBound() = 0;
 
+            ///Alerts the options menu that a new joystick was added
+            virtual void notifyJoystickAdded() = 0;
+
             virtual void addVisitedLocation(const std::string& name, int x, int y) = 0;
 
             /// Hides dialog and schedules dialog to be deleted.
@@ -275,7 +278,7 @@ namespace MWBase
 
             virtual void enableRest() = 0;
             virtual bool getRestEnabled() = 0;
-            virtual bool getJournalAllowed() = 0; 
+            virtual bool getJournalAllowed() = 0;
 
             virtual bool getPlayerSleeping() = 0;
             virtual void wakeUpPlayer() = 0;

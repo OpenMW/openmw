@@ -229,7 +229,9 @@ namespace MWGui
 
     virtual void disallowMouse();
     virtual void allowMouse();
+
     virtual void notifyInputActionBound();
+    virtual void notifyJoystickAdded();
 
     virtual void addVisitedLocation(const std::string& name, int x, int y);
 

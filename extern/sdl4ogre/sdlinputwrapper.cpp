@@ -100,13 +100,24 @@ namespace SFO
                     if (mJoyListener)
                         mJoyListener->buttonReleased(evt.jbutton, evt.jbutton.button);
                     break;
+                case SDL_JOYHATMOTION:
+                    if (mJoyListener)
+                        mJoyListener->povMoved(evt.jhat, evt.jhat.hat);
+                    break;
                 case SDL_JOYDEVICEADDED:
-                    //SDL_JoystickOpen(evt.jdevice.which);
-                    //std::cout << "Detected a new joystick: " << SDL_JoystickNameForIndex(evt.jdevice.which) << std::endl;
+                    std::cout << "Detected a new joystick: " << SDL_JoystickNameForIndex(evt.jdevice.which) << std::endl;
+                    mJoyListener->joystickAdded(evt.jdevice.which);
                     break;
                 case SDL_JOYDEVICEREMOVED:
-                    //std::cout << "A joystick has been removed" << std::endl;
+                    std::cout << "A joystick has been removed" << std::endl;
+                    mJoyListener->joystickRemoved(evt.jdevice.which);
                     break;
+                /*case SDL_CONTROLLERAXISMOTION:
+                case SDL_CONTROLLERBUTTONDOWN:
+                case SDL_CONTROLLERBUTTONUP:
+                case SDL_CONTROLLERDEVICEADDED:
+                case SDL_CONTROLLERDEVICEREMOVED:
+                case SDL_CONTROLLERDEVICEREMAPPED:*/
                 case SDL_WINDOWEVENT:
                     handleWindowEvent(evt);
                     break;

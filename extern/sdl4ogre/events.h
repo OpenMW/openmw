@@ -57,6 +57,9 @@ public:
 
     //! Joystick Event, and povID
     virtual void povMoved( const SDL_JoyHatEvent &arg, int index) {}
+
+    virtual void joystickAdded(int deviceID) {}
+    virtual void joystickRemoved(int which) {}
 };
 
 class WindowListener
