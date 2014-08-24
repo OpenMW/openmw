@@ -77,7 +77,7 @@ option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
 option(BUILD_OPENCS "build OpenMW Construction Set" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock frameworks" OFF)
-option(BUILD_NIFTEST "build nif file tester" ON)
+option(BUILD_NIFTEST "build nif file tester" OFF)
 
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
