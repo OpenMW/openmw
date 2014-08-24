@@ -87,6 +87,7 @@ namespace MWGui
         }
         else
         {
+            mName->setCaption(item.getClass().getName(item));
             mItemBox->setItem(item);
             mItemBox->setUserString ("ToolTipType", "ItemPtr");
             mItemBox->setUserData(item);
@@ -208,6 +209,7 @@ namespace MWGui
         else
         {
             setItem(MWWorld::Ptr());
+            updateLabels();
         }
     }
 
@@ -216,6 +218,7 @@ namespace MWGui
         mItemSelectionDialog->setVisible(false);
 
         setItem(item);
+        MWBase::Environment::get().getSoundManager()->playSound(item.getClass().getDownSoundId(item), 1, 1);
         mEnchanting.nextCastStyle();
         updateLabels();
     }
@@ -237,6 +240,7 @@ namespace MWGui
         }
 
         setSoulGem(item);
+        MWBase::Environment::get().getSoundManager()->playSound(item.getClass().getDownSoundId(item), 1, 1);
         updateLabels();
     }
 
