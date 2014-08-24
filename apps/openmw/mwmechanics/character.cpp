@@ -1674,9 +1674,9 @@ void CharacterController::determineAttackType()
 
     if(mPtr.getClass().hasInventoryStore(mPtr))
     {
-        if (move[1]) // forward-backward
+        if (move[1] && !move[0]) // forward-backward
             mAttackType = "thrust";
-        else if (move[0]) //sideway
+        else if (move[0] && !move[1]) //sideway
             mAttackType = "slash";
         else
             mAttackType = "chop";
