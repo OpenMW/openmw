@@ -15,7 +15,6 @@
 #include <components/bsa/resources.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
-#include <components/nif/niffile.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bulletnifloader.hpp>
@@ -314,8 +313,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 {
     mEnvironment.setStateManager (
         new MWState::StateManager (mCfgMgr.getUserDataPath() / "saves", mContentFiles.at (0)));
-
-    Nif::NIFFile::CacheLock cachelock;
 
     std::string renderSystem = settings.getString("render system", "Video");
     if (renderSystem == "")
