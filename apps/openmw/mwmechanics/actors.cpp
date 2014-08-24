@@ -1402,6 +1402,7 @@ namespace MWMechanics
             if (stats.isDead())
                 continue;
 
+            // An actor counts as following if AiFollow is the current AiPackage, or there are only Combat packages before the AiFollow package
             for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
             {
                 if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
@@ -1412,6 +1413,8 @@ namespace MWMechanics
                     if (followTarget == actor)
                         list.push_back(iter->first);
                 }
+                else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
+                    break;
             }
         }
         return list;
