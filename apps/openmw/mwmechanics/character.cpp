@@ -196,7 +196,8 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         bool block = mPtr.getClass().getCreatureStats(mPtr).getBlock();
         if(mHitState == CharState_None)
         {
-            if (mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() < 0)
+            if (mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() < 0
+                    || mPtr.getClass().getCreatureStats(mPtr).getFatigue().getBase() == 0)
             {
                 mHitState = CharState_KnockOut;
                 mCurrentHit = "knockout";
