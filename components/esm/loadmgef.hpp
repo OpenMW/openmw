@@ -54,8 +54,10 @@ struct MagicEffect
         int mFlags;
         // Glow color for enchanted items with this effect
         int mRed, mGreen, mBlue;
-        // Properties of the fired magic 'ball'
-        float mSpeed, mSize, mSizeCap;
+
+        float mUnknown1;
+        float mSpeed; // Speed of fired projectile
+        float mUnknown2;
     }; // 36 bytes
 
     static const std::map<short,std::string> sNames;
