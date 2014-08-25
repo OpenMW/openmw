@@ -448,6 +448,9 @@ namespace MWGui
     void onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char);
 
     void sizeVideo(int screenWidth, int screenHeight);
+
+    void onClipboardChanged(const std::string& _type, const std::string& _data);
+    void onClipboardRequested(const std::string& _type, std::string& _data);
   };
 }
 

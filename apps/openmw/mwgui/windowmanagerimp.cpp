@@ -206,6 +206,15 @@ namespace MWGui
         mVideoWidget = mVideoBackground->createWidgetReal<VideoWidget>("ImageBox", 0,0,1,1, MyGUI::Align::Default);
         mVideoWidget->setNeedMouseFocus(true);
         mVideoWidget->setNeedKeyFocus(true);
+
+#if MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3,2,1)
+        // Removes default MyGUI system clipboard implementation, which supports windows only
+        MyGUI::ClipboardManager::getInstance().eventClipboardChanged.clear();
+        MyGUI::ClipboardManager::getInstance().eventClipboardRequested.clear();
+
+        MyGUI::ClipboardManager::getInstance().eventClipboardChanged += MyGUI::newDelegate(this, &WindowManager::onClipboardChanged);
+        MyGUI::ClipboardManager::getInstance().eventClipboardRequested += MyGUI::newDelegate(this, &WindowManager::onClipboardRequested);
+#endif
     }
 
     void WindowManager::initUI()
@@ -1699,4 +1708,27 @@ namespace MWGui
     {
         mScreenFader->setFactor(factor);
     }
+
+    void WindowManager::onClipboardChanged(const std::string &_type, const std::string &_data)
+    {
+        if (_type == "Text")
+            SDL_SetClipboardText(MyGUI::TextIterator::getOnlyText(MyGUI::UString(_data)).asUTF8().c_str());
+    }
+
+    void WindowManager::onClipboardRequested(const std::string &_type, std::string &_data)
+    {
+        if (_type != "Text")
+            return;
+        char* text=0;
+        text = SDL_GetClipboardText();
+        if (text)
+        {
+            // MyGUI's clipboard might still have color information, to retain that information, only set the new text
+            // if it actually changed (clipboard inserted by an external application)
+            if (MyGUI::TextIterator::getOnlyText(_data) != text)
+                _data = text;
+        }
+        SDL_free(text);
+    }
+
 }

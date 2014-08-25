@@ -498,6 +498,7 @@ namespace MWInput
 
     void InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
+#if MYGUI_VERSION <= MYGUI_DEFINE_VERSION(3,2,0)
         // Cut, copy & paste
         MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
         if (focus)
@@ -537,6 +538,7 @@ namespace MWInput
                 }
             }
         }
+#endif
 
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
@@ -550,7 +552,9 @@ namespace MWInput
 
         // Clear MyGUI's clipboard, so it doesn't interfere with our own clipboard implementation.
         // We do not use MyGUI's clipboard manager because it doesn't support system clipboard integration with SDL.
+#if MYGUI_VERSION <= MYGUI_DEFINE_VERSION(3,2,0)
         MyGUI::ClipboardManager::getInstance().clearClipboardData("Text");
+#endif
     }
 
     void InputManager::textInput(const SDL_TextInputEvent &arg)
