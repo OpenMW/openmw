@@ -53,6 +53,24 @@
 #include "material.hpp"
 #include "mesh.hpp"
 #include "controller.hpp"
+#include "particles.hpp"
+
+namespace
+{
+
+    void getAllNiNodes(const Nif::Node* node, std::vector<const Nif::NiNode*>& out)
+    {
+        const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(node);
+        if (ninode)
+        {
+            out.push_back(ninode);
+            for (unsigned int i=0; i<ninode->children.length(); ++i)
+                if (!ninode->children[i].empty())
+                    getAllNiNodes(ninode->children[i].getPtr(), out);
+        }
+    }
+
+}
 
 namespace NifOgre
 {
@@ -902,9 +920,28 @@ class NIFObjectLoader
                 {
                     int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partctrl->emitter->recIndex);
                     Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
-                    // Set the emitter bone as user data on the particle system
+                    // Set the emitter bone(s) as user data on the particle system
                     // so the emitters/affectors can access it easily.
-                    partsys->getUserObjectBindings().setUserAny(Ogre::Any(trgtbone));
+                    std::vector<Ogre::Bone*> bones;
+                    if (partctrl->recType == Nif::RC_NiBSPArrayController)
+                    {
+                        std::vector<const Nif::NiNode*> nodes;
+                        getAllNiNodes(partctrl->emitter.getPtr(), nodes);
+                        if (nodes.empty())
+                            throw std::runtime_error("Emitter for NiBSPArrayController must be a NiNode");
+                        for (unsigned int i=0; i<nodes.size(); ++i)
+                        {
+                            bones.push_back(scene->mSkelBase->getSkeleton()->getBone(
+                                                NIFSkeletonLoader::lookupOgreBoneHandle(name, nodes[i]->recIndex)));
+                        }
+                    }
+                    else
+                    {
+                        bones.push_back(trgtbone);
+                    }
+                    NiNodeHolder holder;
+                    holder.mBones = bones;
+                    partsys->getUserObjectBindings().setUserAny(Ogre::Any(holder));
                     createParticleEmitterAffectors(partsys, partctrl, trgtbone, scene->mSkelBase->getName());
                 }
 
