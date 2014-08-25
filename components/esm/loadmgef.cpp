@@ -42,8 +42,13 @@ void MagicEffect::load(ESMReader &esm)
   esm.getHNT(mIndex, "INDX");
 
   esm.getHNT(mData, "MEDT", 36);
-  if (mIndex>=0 && mIndex<NumberOfHardcodedFlags)
-    mData.mFlags |= HardcodedFlags[mIndex];
+  if (esm.getFormat() == 0)
+  {
+      // don't allow mods to change fixed flags in the legacy format
+      mData.mFlags &= (AllowSpellmaking | AllowEnchanting | NegativeLight);
+      if (mIndex>=0 && mIndex<NumberOfHardcodedFlags)
+        mData.mFlags |= HardcodedFlags[mIndex];
+  }
 
   mIcon = esm.getHNOString("ITEX");
   mParticle = esm.getHNOString("PTEX");

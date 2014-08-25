@@ -471,6 +471,7 @@ namespace MWGui
             mWeaponSpellBox->setVisible(true);
         }
 
+        mWeapBox->clearUserStrings();
         mWeapBox->setUserString("ToolTipType", "ItemPtr");
         mWeapBox->setUserData(item);
 
@@ -515,12 +516,14 @@ namespace MWGui
         MWWorld::Ptr player = world->getPlayerPtr();
 
         mWeapImage->setItem(MWWorld::Ptr());
-        if (player.getClass().getNpcStats(player).isWerewolf())
-            mWeapImage->setIcon("icons\\k\\tx_werewolf_hand.dds");
-        else
-            mWeapImage->setIcon("icons\\k\\stealth_handtohand.dds");
+        std::string icon = (player.getClass().getNpcStats(player).isWerewolf()) ? "icons\\k\\tx_werewolf_hand.dds" : "icons\\k\\stealth_handtohand.dds";
+        mWeapImage->setIcon(icon);
 
         mWeapBox->clearUserStrings();
+        mWeapBox->setUserString("ToolTipType", "Layout");
+        mWeapBox->setUserString("ToolTipLayout", "HandToHandToolTip");
+        mWeapBox->setUserString("Caption_HandToHandText", itemName);
+        mWeapBox->setUserString("ImageTexture_HandToHandImage", icon);
     }
 
     void HUD::setCrosshairVisible(bool visible)
