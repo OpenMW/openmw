@@ -88,7 +88,7 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
             new BodyPartCheckStage(
                 mData.getBodyParts(),
                 mData.getResources(
-                    CSMWorld::UniversalId( CSMWorld::UniversalId::Type_Mesh )),
+                    CSMWorld::UniversalId( CSMWorld::UniversalId::Type_Meshes )),
                 mData.getRaces() ));
     }
 
