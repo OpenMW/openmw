@@ -244,7 +244,8 @@ namespace MWGui
         {
             // we are stealing stuff
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            mModel = new PickpocketItemModel(player, new InventoryItemModel(container));
+            mModel = new PickpocketItemModel(player, new InventoryItemModel(container),
+                                             !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown());
         }
         else
             mModel = new InventoryItemModel(container);
@@ -368,7 +369,9 @@ namespace MWGui
     bool ContainerWindow::onTakeItem(const ItemStack &item, int count)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        if (dynamic_cast<PickpocketItemModel*>(mModel))
+        // TODO: move to ItemModels
+        if (dynamic_cast<PickpocketItemModel*>(mModel)
+                && !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown())
         {
             MWMechanics::Pickpocket pickpocket(player, mPtr);
             if (pickpocket.pick(item.mBase, count))
