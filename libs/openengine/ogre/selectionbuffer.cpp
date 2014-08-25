@@ -32,6 +32,7 @@ namespace Render
     void SelectionBuffer::setupRenderTarget()
     {
         mRenderTarget = mTexture->getBuffer()->getRenderTarget();
+        mRenderTarget->removeAllViewports();
         Ogre::Viewport* vp = mRenderTarget->addViewport(mCamera);
         vp->setOverlaysEnabled(false);
         vp->setBackgroundColour(Ogre::ColourValue(0, 0, 0, 0));
@@ -65,6 +66,7 @@ namespace Render
     {
         Ogre::MaterialManager::getSingleton ().addListener (this);
 
+        mTexture->load();
         if (mRenderTarget == NULL)
             setupRenderTarget();
 

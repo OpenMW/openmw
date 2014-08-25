@@ -15,6 +15,7 @@
 #include <OgreKeyFrame.h>
 
 #include <components/nif/node.hpp>
+#include <components/nifcache/nifcache.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "material.hpp"
@@ -383,7 +384,7 @@ void NIFMeshLoader::loadResource(Ogre::Resource *resource)
     Ogre::Mesh *mesh = dynamic_cast<Ogre::Mesh*>(resource);
     OgreAssert(mesh, "Attempting to load a mesh into a non-mesh resource!");
 
-    Nif::NIFFile::ptr nif = Nif::NIFFile::create(mName);
+    Nif::NIFFilePtr nif = Nif::Cache::getInstance().load(mName);
     if(mShapeIndex >= nif->numRecords())
     {
         Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();

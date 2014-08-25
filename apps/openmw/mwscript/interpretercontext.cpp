@@ -111,7 +111,7 @@ namespace MWScript
         const std::string& name, char type) const
     {
         int index = MWBase::Environment::get().getScriptManager()->getLocals (scriptId).
-            search (type, name);
+            searchIndex (type, name);
 
         if (index!=-1)
             return index;

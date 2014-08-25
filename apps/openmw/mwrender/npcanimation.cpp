@@ -552,6 +552,10 @@ NifOgre::ObjectScenePtr NpcAnimation::insertBoundedPart(const std::string &model
     std::for_each(objects->mEntities.begin(), objects->mEntities.end(), SetObjectGroup(group));
     std::for_each(objects->mParticles.begin(), objects->mParticles.end(), SetObjectGroup(group));
 
+    // Fast forward auto-play particles, which will have been set up as Emitting by the loader.
+    for (unsigned int i=0; i<objects->mParticles.size(); ++i)
+        objects->mParticles[i]->fastForward(1, 0.1);
+
     if(objects->mSkelBase)
     {
         Ogre::AnimationStateSet *aset = objects->mSkelBase->getAllAnimationStates();

@@ -45,6 +45,7 @@
 #include <extern/shiny/Main/Factory.hpp>
 
 #include <components/nif/node.hpp>
+#include <components/nifcache/nifcache.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
@@ -390,9 +391,10 @@ public:
     class Value : public NodeTargetValue<Ogre::Real>, public ValueInterpolator
     {
     private:
-        Nif::QuaternionKeyList mRotations;
-        Nif::Vector3KeyList mTranslations;
-        Nif::FloatKeyList mScales;
+        const Nif::QuaternionKeyList* mRotations;
+        const Nif::Vector3KeyList* mTranslations;
+        const Nif::FloatKeyList* mScales;
+        Nif::NIFFilePtr mNif; // Hold a SharedPtr to make sure key lists stay valid
 
         using ValueInterpolator::interpKey;
 
@@ -420,31 +422,33 @@ public:
         }
 
     public:
-        Value(Ogre::Node *target, const Nif::NiKeyframeData *data)
+        /// @note The NiKeyFrameData must be valid as long as this KeyframeController exists.
+        Value(Ogre::Node *target, const Nif::NIFFilePtr& nif, const Nif::NiKeyframeData *data)
           : NodeTargetValue<Ogre::Real>(target)
-          , mRotations(data->mRotations)
-          , mTranslations(data->mTranslations)
-          , mScales(data->mScales)
+          , mRotations(&data->mRotations)
+          , mTranslations(&data->mTranslations)
+          , mScales(&data->mScales)
+          , mNif(nif)
         { }
 
         virtual Ogre::Quaternion getRotation(float time) const
         {
-            if(mRotations.mKeys.size() > 0)
-                return interpKey(mRotations.mKeys, time);
+            if(mRotations->mKeys.size() > 0)
+                return interpKey(mRotations->mKeys, time);
             return mNode->getOrientation();
         }
 
         virtual Ogre::Vector3 getTranslation(float time) const
         {
-            if(mTranslations.mKeys.size() > 0)
-                return interpKey(mTranslations.mKeys, time);
+            if(mTranslations->mKeys.size() > 0)
+                return interpKey(mTranslations->mKeys, time);
             return mNode->getPosition();
         }
 
         virtual Ogre::Vector3 getScale(float time) const
         {
-            if(mScales.mKeys.size() > 0)
-                return Ogre::Vector3(interpKey(mScales.mKeys, time));
+            if(mScales->mKeys.size() > 0)
+                return Ogre::Vector3(interpKey(mScales->mKeys, time));
             return mNode->getScale();
         }
 
@@ -456,12 +460,12 @@ public:
 
         virtual void setValue(Ogre::Real time)
         {
-            if(mRotations.mKeys.size() > 0)
-                mNode->setOrientation(interpKey(mRotations.mKeys, time));
-            if(mTranslations.mKeys.size() > 0)
-                mNode->setPosition(interpKey(mTranslations.mKeys, time));
-            if(mScales.mKeys.size() > 0)
-                mNode->setScale(Ogre::Vector3(interpKey(mScales.mKeys, time)));
+            if(mRotations->mKeys.size() > 0)
+                mNode->setOrientation(interpKey(mRotations->mKeys, time));
+            if(mTranslations->mKeys.size() > 0)
+                mNode->setPosition(interpKey(mTranslations->mKeys, time));
+            if(mScales->mKeys.size() > 0)
+                mNode->setScale(Ogre::Vector3(interpKey(mScales->mKeys, time)));
         }
     };
 
@@ -916,8 +920,10 @@ class NIFObjectLoader
 
                 scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
 
-                if (partflags&Nif::NiNode::ParticleFlag_AutoPlay)
-                    partsys->fastForward(1, 0.1);
+                // Emitting state will be overwritten on frame update by the ParticleSystemController,
+                // but set up an initial value anyway so the user can fast-forward particle systems
+                // immediately after creation if desired.
+                partsys->setEmitting(partflags&Nif::NiNode::ParticleFlag_AutoPlay);
             }
             ctrl = ctrl->next;
         }
@@ -929,7 +935,7 @@ class NIFObjectLoader
     }
 
 
-    static void createNodeControllers(const std::string &name, Nif::ControllerPtr ctrl, ObjectScenePtr scene, int animflags)
+    static void createNodeControllers(const Nif::NIFFilePtr& nif, const std::string &name, Nif::ControllerPtr ctrl, ObjectScenePtr scene, int animflags)
     {
         do {
             if (ctrl->flags & Nif::NiNode::ControllerFlag_Active)
@@ -963,7 +969,7 @@ class NIFObjectLoader
                         Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
                                                             Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                             Ogre::ControllerValueRealPtr());
-                        Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
+                        Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, nif, key->data.getPtr()));
                         KeyframeController::Function* function = OGRE_NEW KeyframeController::Function(key, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
                         scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
                         Ogre::ControllerFunctionRealPtr func(function);
@@ -1016,7 +1022,7 @@ class NIFObjectLoader
     }
 
 
-    static void createObjects(const std::string &name, const std::string &group,
+    static void createObjects(const Nif::NIFFilePtr& nif, const std::string &name, const std::string &group,
                               Ogre::SceneNode *sceneNode, const Nif::Node *node,
                               ObjectScenePtr scene, int flags, int animflags, int partflags)
     {
@@ -1073,7 +1079,7 @@ class NIFObjectLoader
         }
 
         if(!node->controller.empty())
-            createNodeControllers(name, node->controller, scene, animflags);
+            createNodeControllers(nif, name, node->controller, scene, animflags);
 
         if(node->recType == Nif::RC_NiCamera)
         {
@@ -1098,7 +1104,7 @@ class NIFObjectLoader
             for(size_t i = 0;i < children.length();i++)
             {
                 if(!children[i].empty())
-                    createObjects(name, group, sceneNode, children[i].getPtr(), scene, flags, animflags, partflags);
+                    createObjects(nif, name, group, sceneNode, children[i].getPtr(), scene, flags, animflags, partflags);
             }
         }
     }
@@ -1121,7 +1127,7 @@ class NIFObjectLoader
 public:
     static void load(Ogre::SceneNode *sceneNode, ObjectScenePtr scene, const std::string &name, const std::string &group, int flags=0)
     {
-        Nif::NIFFile::ptr nif = Nif::NIFFile::create(name);
+        Nif::NIFFilePtr nif = Nif::Cache::getInstance().load(name);
         if(nif->numRoots() < 1)
         {
             nif->warn("Found no root nodes in "+name+".");
@@ -1145,13 +1151,13 @@ public:
             // Create a base skeleton entity if this NIF needs one
             createSkelBase(name, group, sceneNode->getCreator(), node, scene);
         }
-        createObjects(name, group, sceneNode, node, scene, flags, 0, 0);
+        createObjects(nif, name, group, sceneNode, node, scene, flags, 0, 0);
     }
 
     static void loadKf(Ogre::Skeleton *skel, const std::string &name,
                        TextKeyMap &textKeys, std::vector<Ogre::Controller<Ogre::Real> > &ctrls)
     {
-        Nif::NIFFile::ptr nif = Nif::NIFFile::create(name);
+        Nif::NIFFilePtr nif = Nif::Cache::getInstance().load(name);
         if(nif->numRoots() < 1)
         {
             nif->warn("Found no root nodes in "+name+".");
@@ -1202,7 +1208,7 @@ public:
 
             Ogre::Bone *trgtbone = skel->getBone(strdata->string);
             Ogre::ControllerValueRealPtr srcval;
-            Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
+            Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, nif, key->data.getPtr()));
             Ogre::ControllerFunctionRealPtr func(OGRE_NEW KeyframeController::Function(key, false));
 
             ctrls.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));

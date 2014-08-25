@@ -20,6 +20,8 @@
 #include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwrender/effectmanager.hpp"
+#include "../mwrender/animation.hpp"
+#include "../mwrender/renderconst.hpp"
 
 #include "../mwsound/sound.hpp"
 
@@ -41,6 +43,9 @@ namespace MWWorld
             if(state.mObject->mControllers[i].getSource().isNull())
                 state.mObject->mControllers[i].setSource(Ogre::SharedPtr<MWRender::EffectAnimationTime> (new MWRender::EffectAnimationTime()));
         }
+
+        MWRender::Animation::setRenderProperties(state.mObject, MWRender::RV_Misc,
+                            MWRender::RQG_Main, MWRender::RQG_Alpha, 0.f, false, NULL);
     }
 
     void ProjectileManager::update(NifOgre::ObjectScenePtr object, float duration)

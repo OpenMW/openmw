@@ -126,6 +126,8 @@ protected:
 
     MWWorld::Ptr mPtr;
 
+    Ogre::Light* mGlowLight;
+
     Ogre::SceneNode *mInsert;
     Ogre::Entity *mSkelBase;
     NifOgre::ObjectScenePtr mObjectRoot;
@@ -300,6 +302,11 @@ public:
 
     /// This is typically called as part of runAnimation, but may be called manually if needed.
     void updateEffects(float duration);
+
+    // TODO: move outside of this class
+    /// Makes this object glow, by placing a Light in its center.
+    /// @param effect Controls the radius and intensity of the light.
+    void setLightEffect(float effect);
 
     virtual void showWeapons(bool showWeapon);
     virtual void showCarriedLeft(bool show) {}
