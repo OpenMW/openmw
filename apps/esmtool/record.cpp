@@ -950,9 +950,9 @@ void Record<ESM::MagicEffect>::print()
     std::cout << "  School: " << schoolLabel(mData.mData.mSchool)
               << " (" << mData.mData.mSchool << ")" << std::endl;
     std::cout << "  Base Cost: " << mData.mData.mBaseCost << std::endl;
+    std::cout << "  Unknown 1: " << mData.mData.mUnknown1 << std::endl;
     std::cout << "  Speed: " << mData.mData.mSpeed << std::endl;
-    std::cout << "  Size: " << mData.mData.mSize << std::endl;
-    std::cout << "  Size Cap: " << mData.mData.mSizeCap << std::endl;
+    std::cout << "  Unknown 2: " << mData.mData.mUnknown2 << std::endl;
     std::cout << "  RGB Color: " << "("
               << mData.mData.mRed << ","
               << mData.mData.mGreen << ","

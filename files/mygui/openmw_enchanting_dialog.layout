@@ -7,6 +7,9 @@
 
             <Widget type="AutoSizedTextBox" skin="NormalText">
                 <Property key="Caption" value="#{sName}"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                <UserString key="Caption_Text" value="#{sEnchantmentHelp8}"/>
             </Widget>
 
             <Widget type="EditBox" skin="MW_TextEdit" position="0 0 30 30" name="NameEdit">
@@ -25,6 +28,9 @@
 
             <Widget type="AutoSizedTextBox" skin="NormalText">
                 <Property key="Caption" value="#{sItem}"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                <UserString key="Caption_Text" value="#{sEnchantmentHelp1}"/>
             </Widget>
             <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 0 50 50" name="ItemBox">
             </Widget>
@@ -33,6 +39,9 @@
 
             <Widget type="AutoSizedTextBox" skin="NormalText">
                 <Property key="Caption" value="#{sSoulGem}"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                <UserString key="Caption_Text" value="#{sEnchantmentHelp2}"/>
             </Widget>
             <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 0 50 50" name="SoulBox">
             </Widget>
@@ -70,6 +79,9 @@
         <!-- Available effects -->
         <Widget type="TextBox" skin="NormalText" position="12 108 300 24">
             <Property key="Caption" value="#{sMagicEffects}"/>
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="TextToolTip"/>
+            <UserString key="Caption_Text" value="#{sEnchantmentHelp9}"/>
         </Widget>
         <Widget type="MWList" skin="MW_SimpleList" position="12 136 202 209" name="AvailableEffects">
         </Widget>
@@ -77,6 +89,9 @@
         <!-- Used effects -->
         <Widget type="TextBox" skin="NormalText" position="226 108 300 24">
             <Property key="Caption" value="#{sEffects}"/>
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="TextToolTip"/>
+            <UserString key="Caption_Text" value="#{sEnchantmentHelp10}"/>
         </Widget>
         <Widget type="Widget" skin="MW_Box" position="226 136 316 209">
             <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 308 201" name="UsedEffects">
@@ -89,6 +104,9 @@
 
             <Widget type="AutoSizedButton" skin="MW_Button" name="TypeButton">
                 <Property key="Caption" value="Constant effect"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                <UserString key="Caption_Text" value="#{sEnchantmentHelp7}"/>
             </Widget>
 
             <Widget type="Widget">
@@ -100,6 +118,9 @@
             </Widget>
             <Widget type="AutoSizedTextBox" skin="SandText" name="PriceLabel">
                 <Property key="Caption" value="0"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                <UserString key="Caption_Text" value="#{sEnchantmentHelp6}"/>
             </Widget>
 
 

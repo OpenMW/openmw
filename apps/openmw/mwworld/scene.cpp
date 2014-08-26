@@ -259,8 +259,6 @@ namespace MWWorld
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
-        Nif::NIFFile::CacheLock cachelock;
-
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
 
@@ -270,24 +268,6 @@ namespace MWWorld
         loadingListener->setLabel(loadingExteriorText);
 
         CellStoreCollection::iterator active = mActiveCells.begin();
-
-        // get the number of cells to unload
-        int numUnload = 0;
-        while (active!=mActiveCells.end())
-        {
-            if ((*active)->getCell()->isExterior())
-            {
-                if (std::abs (X-(*active)->getCell()->getGridX())<=1 &&
-                    std::abs (Y-(*active)->getCell()->getGridY())<=1)
-                {
-                    // keep cells within the new 3x3 grid
-                    ++active;
-                    continue;
-                }
-            }
-            ++active;
-            ++numUnload;
-        }
 
         active = mActiveCells.begin();
         while (active!=mActiveCells.end())
@@ -408,7 +388,6 @@ namespace MWWorld
         if(!loadcell)
             loadcell = *mCurrentCell != *cell;
 
-        Nif::NIFFile::CacheLock lock;
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
@@ -437,14 +416,6 @@ namespace MWWorld
 
         // remove active
         CellStoreCollection::iterator active = mActiveCells.begin();
-
-        // count number of cells to unload
-        int numUnload = 0;
-        while (active!=mActiveCells.end())
-        {
-            ++active;
-            ++numUnload;
-        }
 
         // unload
         int current = 0;

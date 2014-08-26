@@ -25,9 +25,8 @@
 #define OPENMW_COMPONENTS_NIF_DATA_HPP
 
 #include "controlled.hpp"
-
-#include <OgreQuaternion.h>
-#include <OgreVector3.h>
+#include "nifstream.hpp"
+#include "nifkey.hpp"
 
 namespace Nif
 {

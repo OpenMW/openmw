@@ -6,16 +6,19 @@
 namespace MWGui
 {
 
-    PickpocketItemModel::PickpocketItemModel(const MWWorld::Ptr& thief, ItemModel *sourceModel)
+    PickpocketItemModel::PickpocketItemModel(const MWWorld::Ptr& thief, ItemModel *sourceModel, bool hideItems)
     {
         mSourceModel = sourceModel;
         int chance = thief.getClass().getSkill(thief, ESM::Skill::Sneak);
 
         mSourceModel->update();
-        for (size_t i = 0; i<mSourceModel->getItemCount(); ++i)
+        if (hideItems)
         {
-            if (std::rand() / static_cast<float>(RAND_MAX) * 100 > chance)
-                mHiddenItems.push_back(mSourceModel->getItem(i));
+            for (size_t i = 0; i<mSourceModel->getItemCount(); ++i)
+            {
+                if (std::rand() / static_cast<float>(RAND_MAX) * 100 > chance)
+                    mHiddenItems.push_back(mSourceModel->getItem(i));
+            }
         }
     }
 

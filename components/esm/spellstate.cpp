@@ -27,6 +27,23 @@ namespace ESM
             mSpells[id] = random;
         }
 
+        while (esm.isNextSub("PERM"))
+        {
+            std::string spellId = esm.getHString();
+
+            std::vector<PermanentSpellEffectInfo> permEffectList;
+            while (esm.isNextSub("EFID"))
+            {
+                PermanentSpellEffectInfo info;
+                esm.getHT(info.mId);
+                esm.getHNT(info.mArg, "ARG_");
+                esm.getHNT(info.mMagnitude, "MAGN");
+
+                permEffectList.push_back(info);
+            }
+            mPermanentSpellEffects[spellId] = permEffectList;
+        }
+
         while (esm.isNextSub("CORP"))
         {
             std::string id = esm.getHString();
@@ -61,6 +78,19 @@ namespace ESM
             {
                 esm.writeHNT("INDX", rIt->first);
                 esm.writeHNT("RAND", rIt->second);
+            }
+        }
+
+        for (std::map<std::string, std::vector<PermanentSpellEffectInfo> >::const_iterator it = mPermanentSpellEffects.begin(); it != mPermanentSpellEffects.end(); ++it)
+        {
+            esm.writeHNString("PERM", it->first);
+
+            const std::vector<PermanentSpellEffectInfo> & effects = it->second;
+            for (std::vector<PermanentSpellEffectInfo>::const_iterator effectIt = effects.begin(); effectIt != effects.end(); ++effectIt)
+            {
+                esm.writeHNT("EFID", effectIt->mId);
+                esm.writeHNT("ARG_", effectIt->mArg);
+                esm.writeHNT("MAGN", effectIt->mMagnitude);
             }
         }
 

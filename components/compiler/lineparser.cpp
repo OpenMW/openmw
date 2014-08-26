@@ -1,6 +1,8 @@
 
 #include "lineparser.hpp"
 
+#include <memory>
+
 #include <components/misc/stringops.hpp>
 
 #include "scanner.hpp"
@@ -120,7 +122,7 @@ namespace Compiler
 
         if (mState==SetMemberVarState)
         {
-            mMemberName = name;
+            mMemberName = Misc::StringUtils::lowerCase (name);
             std::pair<char, bool> type = getContext().getMemberType (mMemberName, mName);
 
             if (type.first!=' ')
@@ -297,7 +299,12 @@ namespace Compiler
 
                     try
                     {
-                        ErrorDowngrade errorDowngrade (getErrorHandler());
+                        // workaround for broken positioncell instructions.
+                        /// \todo add option to disable this
+                        std::auto_ptr<ErrorDowngrade> errorDowngrade (0);
+                        if (Misc::StringUtils::lowerCase (loc.mLiteral)=="positioncell")
+                            errorDowngrade.reset (new ErrorDowngrade (getErrorHandler()));
+
                         std::vector<Interpreter::Type_Code> code;
                         optionals = mExprParser.parseArguments (argumentType, scanner, code);
                         mCode.insert (mCode.begin(), code.begin(), code.end());

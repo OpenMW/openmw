@@ -37,6 +37,10 @@ static const char pipe_err[] = "!!! Failed to create pipe\n";
 static const char fork_err[] = "!!! Failed to fork debug process\n";
 static const char exec_err[] = "!!! Failed to exec debug process\n";
 
+#ifndef PATH_MAX		/* Not all platforms (GNU Hurd) have this. */
+#	define PATH_MAX 256
+#endif
+
 static char argv0[PATH_MAX];
 
 static char altstack[SIGSTKSZ];
@@ -66,7 +70,7 @@ static const struct {
     int code;
     const char *name;
 } sigill_codes[] = {
-    #ifndef __FreeBSD__
+    #if !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__)
     { ILL_ILLOPC, "Illegal opcode" },
     { ILL_ILLOPN, "Illegal operand" },
     { ILL_ILLADR, "Illegal addressing mode" },

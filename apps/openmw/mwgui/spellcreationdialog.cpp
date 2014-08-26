@@ -287,7 +287,7 @@ namespace MWGui
 
     SpellCreationDialog::SpellCreationDialog()
         : WindowBase("openmw_spellcreation_dialog.layout")
-        , EffectEditorBase()
+        , EffectEditorBase(EffectEditorBase::Spellmaking)
     {
         getWidget(mNameEdit, "NameEdit");
         getWidget(mMagickaCost, "MagickaCost");
@@ -444,10 +444,11 @@ namespace MWGui
     // ------------------------------------------------------------------------------------------------
 
 
-    EffectEditorBase::EffectEditorBase()
+    EffectEditorBase::EffectEditorBase(Type type)
         : mAddEffectDialog()
         , mSelectAttributeDialog(NULL)
         , mSelectSkillDialog(NULL)
+        , mType(type)
     {
         mAddEffectDialog.eventEffectAdded += MyGUI::newDelegate(this, &EffectEditorBase::onEffectAdded);
         mAddEffectDialog.eventEffectModified += MyGUI::newDelegate(this, &EffectEditorBase::onEffectModified);
@@ -482,6 +483,13 @@ namespace MWGui
             const std::vector<ESM::ENAMstruct>& list = spell->mEffects.mList;
             for (std::vector<ESM::ENAMstruct>::const_iterator it2 = list.begin(); it2 != list.end(); ++it2)
             {
+                const ESM::MagicEffect * effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(it2->mEffectID);
+
+                // skip effects that do not allow spellmaking/enchanting
+                int requiredFlags = (mType == Spellmaking) ? ESM::MagicEffect::AllowSpellmaking : ESM::MagicEffect::AllowEnchanting;
+                if (!(effect->mData.mFlags & requiredFlags))
+                    continue;
+
                 if (std::find(knownEffects.begin(), knownEffects.end(), it2->mEffectID) == knownEffects.end())
                     knownEffects.push_back(it2->mEffectID);
             }

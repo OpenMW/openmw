@@ -196,7 +196,8 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         bool block = mPtr.getClass().getCreatureStats(mPtr).getBlock();
         if(mHitState == CharState_None)
         {
-            if (mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() < 0)
+            if (mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() < 0
+                    || mPtr.getClass().getCreatureStats(mPtr).getFatigue().getBase() == 0)
             {
                 mHitState = CharState_KnockOut;
                 mCurrentHit = "knockout";
@@ -1663,6 +1664,9 @@ void CharacterController::updateVisibility()
     }
 
     mAnimation->setAlpha(alpha);
+
+    float light = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Light).getMagnitude();
+    mAnimation->setLightEffect(light);
 }
 
 void CharacterController::determineAttackType()
@@ -1671,9 +1675,9 @@ void CharacterController::determineAttackType()
 
     if(mPtr.getClass().hasInventoryStore(mPtr))
     {
-        if (move[1]) // forward-backward
+        if (move[1] && !move[0]) // forward-backward
             mAttackType = "thrust";
-        else if (move[0]) //sideway
+        else if (move[0] && !move[1]) //sideway
             mAttackType = "slash";
         else
             mAttackType = "chop";

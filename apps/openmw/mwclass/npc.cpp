@@ -863,9 +863,9 @@ namespace MWClass
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
         if(ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction("#{sActorInCombat}"));
-        if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak))
+        if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak)
+                || ptr.getClass().getCreatureStats(ptr).getKnockedDown())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
-        
         // Can't talk to werewolfs
         if(ptr.getClass().isNpc() && ptr.getClass().getNpcStats(ptr).isWerewolf())
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));

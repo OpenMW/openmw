@@ -85,7 +85,13 @@ namespace MWGui
     class EffectEditorBase
     {
     public:
-        EffectEditorBase();
+        enum Type
+        {
+            Spellmaking,
+            Enchanting
+        };
+
+        EffectEditorBase(Type type);
         virtual ~EffectEditorBase();
 
     protected:
@@ -121,6 +127,9 @@ namespace MWGui
         void setWidgets (Widgets::MWList* availableEffectsList, MyGUI::ScrollView* usedEffectsView);
 
         virtual void notifyEffectsChanged () {}
+
+    private:
+        Type mType;
     };
 
     class SpellCreationDialog : public WindowBase, public ReferenceInterface, public EffectEditorBase

@@ -7,6 +7,8 @@
 #include <components/files/collections.hpp>
 #include <components/translation/translation.hpp>
 #include <components/settings/settings.hpp>
+#include <components/nifcache/nifcache.hpp>
+
 
 #include "mwbase/environment.hpp"
 
@@ -93,6 +95,8 @@ namespace OMW
             Translation::Storage mTranslationDataStorage;
             std::vector<std::string> mScriptBlacklist;
             bool mScriptBlacklistUse;
+
+            Nif::Cache mNifCache;
 
             // not implemented
             Engine (const Engine&);
