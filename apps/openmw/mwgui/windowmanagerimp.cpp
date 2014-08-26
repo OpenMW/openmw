@@ -207,14 +207,12 @@ namespace MWGui
         mVideoWidget->setNeedMouseFocus(true);
         mVideoWidget->setNeedKeyFocus(true);
 
-#if MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3,2,1)
         // Removes default MyGUI system clipboard implementation, which supports windows only
         MyGUI::ClipboardManager::getInstance().eventClipboardChanged.clear();
         MyGUI::ClipboardManager::getInstance().eventClipboardRequested.clear();
 
         MyGUI::ClipboardManager::getInstance().eventClipboardChanged += MyGUI::newDelegate(this, &WindowManager::onClipboardChanged);
         MyGUI::ClipboardManager::getInstance().eventClipboardRequested += MyGUI::newDelegate(this, &WindowManager::onClipboardRequested);
-#endif
     }
 
     void WindowManager::initUI()
