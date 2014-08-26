@@ -1,16 +1,13 @@
 # local files
-if (NOT ANDROID)
-    set(GAME
-        main.cpp
-        engine.cpp
-    )
-else()
-    set(GAME
-        main.cpp
-        android_main.c
-        engine.cpp
-    )
+set(GAME
+    main.cpp
+    engine.cpp
+)
+
+if (ANDROID)
+    set(GAME ${GAME} android_main.c)
 endif()
+
 if(NOT WIN32 AND NOT ANDROID)
     set(GAME ${GAME} crashcatcher.cpp)
 endif()
