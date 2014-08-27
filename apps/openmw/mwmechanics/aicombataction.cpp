@@ -73,14 +73,16 @@ namespace MWMechanics
         return rateEffects(potion->mEffects, actor, MWWorld::Ptr());
     }
 
-    float rateWeapon (const MWWorld::Ptr &item, const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
+    float rateWeapon (const MWWorld::Ptr &item, const MWWorld::Ptr& actor, const MWWorld::Ptr& target, int type,
+                      float arrowRating, float boltRating)
     {
         if (item.getTypeName() != typeid(ESM::Weapon).name())
             return 0.f;
 
         const ESM::Weapon* weapon = item.get<ESM::Weapon>()->mBase;
 
-        // TODO: Check that we have ammunition if needed
+        if (type != -1 && weapon->mData.mType != type)
+            return 0.f;
 
         float rating=0.f;
 
@@ -102,7 +104,20 @@ namespace MWMechanics
         if (item.getClass().hasItemHealth(item))
             rating *= item.getClass().getItemHealth(item) / float(item.getClass().getItemMaxHealth(item));
 
-        rating *= actor.getClass().getSkill(actor, item.getClass().getEquipmentSkill(item)) / 100.f;
+        if (weapon->mData.mType == ESM::Weapon::MarksmanBow)
+        {
+            if (arrowRating <= 0.f)
+                rating = 0.f;
+            else
+                rating += arrowRating;
+        }
+        else if (weapon->mData.mType == ESM::Weapon::MarksmanCrossbow)
+        {
+            if (boltRating <= 0.f)
+                rating = 0.f;
+            else
+                rating += boltRating;
+        }
 
         if (!weapon->mEnchant.empty())
         {
@@ -112,6 +127,11 @@ namespace MWMechanics
                         || item.getCellRef().getEnchantmentCharge() >= enchantment->mData.mCost))
                 rating += rateEffects(enchantment->mEffects, actor, target);
         }
+
+        int skill = item.getClass().getEquipmentSkill(item);
+        if (skill != -1)
+            rating *= actor.getClass().getSkill(actor, skill) / 100.f;
+
         return rating;
     }
 
@@ -323,7 +343,12 @@ namespace MWMechanics
                 MWWorld::ActionEquip equip(mWeapon);
                 equip.execute(actor);
             }
-            // TODO: equip ammunition and shield where needed
+
+            if (!mAmmunition.isEmpty())
+            {
+                MWWorld::ActionEquip equip(mAmmunition);
+                equip.execute(actor);
+            }
         }
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Weapon);
     }
@@ -365,13 +390,50 @@ namespace MWMechanics
                 }
             }
 
+            float bestArrowRating = 0;
+            MWWorld::Ptr bestArrow;
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {
-                float rating = rateWeapon(*it, actor, target);
+                float rating = rateWeapon(*it, actor, target, ESM::Weapon::Arrow);
+                if (rating > bestArrowRating)
+                {
+                    bestArrowRating = rating;
+                    bestArrow = *it;
+                }
+            }
+
+            float bestBoltRating = 0;
+            MWWorld::Ptr bestBolt;
+            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+            {
+                float rating = rateWeapon(*it, actor, target, ESM::Weapon::Bolt);
+                if (rating > bestBoltRating)
+                {
+                    bestBoltRating = rating;
+                    bestBolt = *it;
+                }
+            }
+
+            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+            {
+                std::vector<int> equipmentSlots = it->getClass().getEquipmentSlots(*it).first;
+                if (std::find(equipmentSlots.begin(), equipmentSlots.end(), (int)MWWorld::InventoryStore::Slot_CarriedRight)
+                        == equipmentSlots.end())
+                    continue;
+
+                float rating = rateWeapon(*it, actor, target, -1, bestArrowRating, bestBoltRating);
                 if (rating > bestActionRating)
                 {
+                    const ESM::Weapon* weapon = it->get<ESM::Weapon>()->mBase;
+
+                    MWWorld::Ptr ammo;
+                    if (weapon->mData.mType == ESM::Weapon::MarksmanBow)
+                        ammo = bestArrow;
+                    else if (weapon->mData.mType == ESM::Weapon::MarksmanCrossbow)
+                        ammo = bestBolt;
+
                     bestActionRating = rating;
-                    bestAction.reset(new ActionWeapon(*it));
+                    bestAction.reset(new ActionWeapon(*it, ammo));
                 }
             }
         }
