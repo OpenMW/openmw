@@ -44,7 +44,7 @@ void CSMTools::BodyPartCheckStage::perform ( int stage, Messages &messages )
     if ( bodyPart.mModel.empty() )
         messages.push_back(std::make_pair( id, bodyPart.mId + " has no model." ));
     else if ( mMeshes.searchId( bodyPart.mModel ) == -1 )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has unreferenced model." ));
+        messages.push_back(std::make_pair( id, bodyPart.mId + " has invalid model." ));
 
     // Check FNAM
 
