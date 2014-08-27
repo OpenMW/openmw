@@ -14,6 +14,8 @@
 
 #include "../mwbase/world.hpp"
 
+#include <boost/shared_ptr.hpp>
+
 namespace ESM
 {
     namespace AiSequence
@@ -24,6 +26,8 @@ namespace ESM
 
 namespace MWMechanics
 {
+    class Action;
+
     /// \brief Causes the actor to fight another actor
     class AiCombat : public AiPackage
     {
@@ -78,6 +82,9 @@ namespace MWMechanics
 
             const MWWorld::CellStore* mCell;
             ObstacleCheck mObstacleCheck;
+
+            boost::shared_ptr<Action> mCurrentAction;
+            float mActionCooldown;
 
             void buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
     };
