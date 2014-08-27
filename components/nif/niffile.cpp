@@ -39,7 +39,7 @@ struct RecordFactoryEntry {
 static std::pair<std::string,RecordFactoryEntry> makeEntry(std::string recName, Record* (*create_t) (), RecordType type)
 {
     RecordFactoryEntry anEntry = {create_t,type};
-    return std::make_pair<std::string,RecordFactoryEntry>(recName, anEntry);
+    return std::make_pair(recName, anEntry);
 }
 
 ///These are all the record types we know how to read.
