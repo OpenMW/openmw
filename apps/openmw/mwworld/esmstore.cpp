@@ -99,17 +99,6 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
             }
             it->second->load(esm, id);
 
-            // NOTE: A minor hack/workaround...
-            //
-            // MAO_Containers.esp from Morrowind Acoustic Overhaul has SCVR records
-            // at the end (see Bug #1849). Since OpenMW does not use SCVR subrecords
-            // for variable names just skip these as a quick fix.  An alternative
-            // solution would be to decode and validate SCVR subrecords even if they
-            // appear at the end (in loadscpt.cpp).
-            if (esm.isNextSub("SCVR")) {
-              esm.skipRecord();
-            }
-
             // DELE can also occur after the usual subrecords
             if (esm.isNextSub("DELE")) {
               esm.skipRecord();
