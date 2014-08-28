@@ -289,7 +289,7 @@ namespace MWMechanics
 
         // FIXME: consider moving this stuff to ActionWeapon::getCombatRange
         const ESM::Weapon *weapon = NULL;
-        MWMechanics::WeaponType weaptype;
+        MWMechanics::WeaponType weaptype = WeapType_None;
         float weapRange = 1.0f;
 
         // Get weapon characteristics
@@ -308,7 +308,7 @@ namespace MWMechanics
                     world->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
                 weapRange = fHandToHandReach;
             }
-            else if (weaptype != WeapType_PickProbe && weaptype != WeapType_Spell)
+            else if (weaptype != WeapType_PickProbe && weaptype != WeapType_Spell && weaptype != WeapType_None)
             {
                 // All other WeapTypes are actually weapons, so get<ESM::Weapon> is safe.
                 weapon = weaponSlot->get<ESM::Weapon>()->mBase;
