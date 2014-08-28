@@ -490,7 +490,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
     }
 
     if (item.getRefData().getCount() == 0 && mSelectedEnchantItem != end()
-            && *mSelectedEnchantItem == item && actor.getRefData().getHandle() == "player")
+            && *mSelectedEnchantItem == item)
     {
         mSelectedEnchantItem = end();
     }
@@ -521,11 +521,11 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
                 const std::string& script = it->getClass().getScript(*it);
                 if (script != "")
                     (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
+            }
 
-                if ((mSelectedEnchantItem != end()) && (mSelectedEnchantItem == it))
-                {
-                    mSelectedEnchantItem = end();
-                }
+            if ((mSelectedEnchantItem != end()) && (mSelectedEnchantItem == it))
+            {
+                mSelectedEnchantItem = end();
             }
         }
 
