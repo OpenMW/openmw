@@ -45,13 +45,13 @@ class JoyListener
 public:
     virtual ~JoyListener() {}
     /** @remarks Joystick button down event */
-    virtual void buttonPressed( const SDL_JoyButtonEvent &evt, int button ) = 0;
+    virtual void buttonPressed( const SDL_ControllerButtonEvent &evt, int button ) = 0;
 
     /** @remarks Joystick button up event */
-    virtual void buttonReleased( const SDL_JoyButtonEvent &evt, int button ) = 0;
+    virtual void buttonReleased( const SDL_ControllerButtonEvent &evt, int button ) = 0;
 
     /** @remarks Joystick axis moved event */
-    virtual void axisMoved( const SDL_JoyAxisEvent &arg, int axis ) = 0;
+    virtual void axisMoved( const SDL_ControllerAxisEvent &arg, int axis ) = 0;
 
     //-- Not so common control events, so are not required --//
 

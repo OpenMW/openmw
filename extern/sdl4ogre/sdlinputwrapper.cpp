@@ -88,7 +88,19 @@ namespace SFO
                 case SDL_TEXTINPUT:
                     mKeyboardListener->textInput(evt.text);
                     break;
-                case SDL_JOYAXISMOTION:
+                case SDL_CONTROLLERAXISMOTION:
+                    if (mJoyListener)
+                        mJoyListener->axisMoved(evt.caxis, evt.caxis.axis);
+                    break;
+                case SDL_CONTROLLERBUTTONDOWN:
+                    if (mJoyListener)
+                        mJoyListener->buttonPressed(evt.cbutton, evt.cbutton.button);
+                    break;
+                case SDL_CONTROLLERBUTTONUP:
+                    if (mJoyListener)
+                        mJoyListener->buttonReleased(evt.cbutton, evt.cbutton.button);
+                    break;
+                /*case SDL_JOYAXISMOTION:
                     if (mJoyListener)
                         mJoyListener->axisMoved(evt.jaxis, evt.jaxis.axis);
                     break;
@@ -103,6 +115,8 @@ namespace SFO
                 case SDL_JOYHATMOTION:
                     if (mJoyListener)
                         mJoyListener->povMoved(evt.jhat, evt.jhat.hat);
+                    break*/
+                case SDL_CONTROLLERDEVICEADDED: //Ignore, as JOYDEVICEADDED is also fired at this time
                     break;
                 case SDL_JOYDEVICEADDED:
                     std::cout << "Detected a new joystick: " << SDL_JoystickNameForIndex(evt.jdevice.which) << std::endl;
@@ -112,12 +126,6 @@ namespace SFO
                     std::cout << "A joystick has been removed" << std::endl;
                     mJoyListener->joystickRemoved(evt.jdevice.which);
                     break;
-                /*case SDL_CONTROLLERAXISMOTION:
-                case SDL_CONTROLLERBUTTONDOWN:
-                case SDL_CONTROLLERBUTTONUP:
-                case SDL_CONTROLLERDEVICEADDED:
-                case SDL_CONTROLLERDEVICEREMOVED:
-                case SDL_CONTROLLERDEVICEREMAPPED:*/
                 case SDL_WINDOWEVENT:
                     handleWindowEvent(evt);
                     break;

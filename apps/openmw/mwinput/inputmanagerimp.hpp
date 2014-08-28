@@ -93,15 +93,14 @@ namespace MWInput
         virtual bool joystickLastUsed() {return mJoystickLastUsed;}
         virtual std::list<int> joystickList() {return mInputBinder->getJoystickIdList();}
 
-    public:
         virtual void keyPressed(const SDL_KeyboardEvent &arg );
         virtual void keyReleased( const SDL_KeyboardEvent &arg );
         virtual void textInput (const SDL_TextInputEvent &arg);
 
-        virtual void buttonPressed(const SDL_JoyButtonEvent &evt, int button);
-        virtual void buttonReleased(const SDL_JoyButtonEvent &evt, int button);
-        virtual void axisMoved(const SDL_JoyAxisEvent &evt, int axis);
-        virtual void povMoved(const SDL_JoyHatEvent &evt, int index);
+        virtual void buttonPressed(const SDL_ControllerButtonEvent &evt, int button);
+        virtual void buttonReleased(const SDL_ControllerButtonEvent &evt, int button);
+        virtual void axisMoved(const SDL_ControllerAxisEvent &evt, int axis);
+        //virtual void povMoved(const SDL_JoyHatEvent &evt, int index);
         virtual void joystickAdded(int deviceID);
         virtual void joystickRemoved(int which);
 
@@ -154,6 +153,9 @@ namespace MWInput
 
         std::string mUserFile;
 
+        std::string sdlControllerButtonToString(SDL_GameControllerButton);
+        std::string sdlControllerAxisToString(SDL_GameControllerAxis);
+
         bool mDragDrop;
 
         bool mGrabCursor;
@@ -200,7 +202,6 @@ namespace MWInput
 
         bool mMouseInjected;
 
-    private:
         void adjustMouseRegion(int width, int height);
         MyGUI::MouseButton sdlButtonToMyGUI(Uint8 button);
 
@@ -209,7 +210,6 @@ namespace MWInput
 
         void setPlayerControlsEnabled(bool enabled);
 
-    private:
         void toggleMainMenu();
         void toggleSpell();
         void toggleWeapon();
@@ -232,7 +232,6 @@ namespace MWInput
         void loadJoystickDefaults(bool force, bool deviceID);
         void loadKeyDefaults(bool force = false);
 
-    private:
         enum Actions
         {
             // please add new actions at the bottom, in order to preserve the channel IDs in the key configuration files
