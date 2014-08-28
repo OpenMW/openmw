@@ -96,6 +96,151 @@ Allowed options:
 
 CHANGELOG
 
+0.32.0
+
+Bug #1132: Unable to jump when facing a wall
+Bug #1341: Summoned Creatures do not immediately disappear when killed.
+Bug #1430: CharGen Revamped script does not compile
+Bug #1451: NPCs shouldn't equip weapons prior to fighting
+Bug #1461: Stopped start scripts do not restart on load
+Bug #1473: Dead NPC standing and in 2 pieces
+Bug #1482: Abilities are depleted when interrupted during casting
+Bug #1503: Behaviour of NPCs facing the player
+Bug #1506: Missing character, French edition: three-points
+Bug #1528: Inventory very slow after 2 hours
+Bug #1540: Extra arguments should be ignored for script functions
+Bug #1541: Helseth's Champion: Tribunal
+Bug #1570: Journal cannot be opened while in inventory screen
+Bug #1573: PC joins factions at random
+Bug #1576: NPCs aren't switching their weapons when out of ammo
+Bug #1579: Guards detect creatures in far distance, instead on sight
+Bug #1588: The Siege of the Skaal Village: bloodmoon
+Bug #1593: The script compiler isn't recognising some names that contain a -
+Bug #1606: Books: Question marks instead of quotation marks
+Bug #1608: Dead bodies prevent door from opening/closing.
+Bug #1609: Imperial guards in Sadrith Mora are not using their spears
+Bug #1610: The bounty number is not displayed properly with high numbers
+Bug #1620: Implement correct formula for auto-calculated NPC spells
+Bug #1630: Boats standing vertically in Vivec
+Bug #1635: Arrest dialogue is executed second time after I select "Go to jail"
+Bug #1637: Weird NPC behaviour in Vivec, Hlaalu Ancestral Vaults?
+Bug #1641: Persuasion dialog remains after loading, possibly resulting in crash
+Bug #1644: "Goodbye" and similar options on dialogues prevents escape working properly.
+Bug #1646: PC skill stats are not updated immediately when changing equipment
+Bug #1652: Non-aggressive creature
+Bug #1653: Quickloading while the container window is open crashes the game
+Bug #1654: Priority of checks in organic containers
+Bug #1656: Inventory items merge issue when repairing
+Bug #1657: Attacked state of NPCs is not saved properly
+Bug #1660: Rank dialogue condition ignored
+Bug #1668: Game starts on day 2 instead of day 1
+Bug #1669: Critical Strikes while fighting a target who is currently fighting me
+Bug #1672: OpenCS doesn't save the projects
+Bug #1673: Fatigue decreasing by only one point when running
+Bug #1675: Minimap and localmap graphic glitches
+Bug #1676: Pressing the OK button on the travel menu cancels the travel and exits the menu
+Bug #1677: Sleeping in a rented bed is considered a crime
+Bug #1685: NPCs turn towards player even if invisible/sneaking
+Bug #1686: UI bug: cursor is clicking "world/local" map button while inventory window is closed?
+Bug #1690: Double clicking on a inventory window header doesn't close it.
+Bug #1693: Spell Absorption does not absorb shrine blessings
+Bug #1694: journal displays learned topics as quests
+Bug #1700: Sideways scroll of text boxes
+Bug #1701: Player enchanting requires player hold money, always 100% sucessful.
+Bug #1704: self-made Fortify Intelligence/Drain willpower potions are broken
+Bug #1707: Pausing the game through the esc menu will silence rain, pausing it by opening the inventory will not.
+Bug #1709: Remesa Othril is hostile to Hlaalu members
+Bug #1713: Crash on load after death
+Bug #1719: Blind effect has slight border at the edge of the screen where it is ineffective.
+Bug #1722: Crash after creating enchanted item, reloading saved game
+Bug #1723: Content refs that are stacked share the same index after unstacking
+Bug #1726: Can't finish Aengoth the Jeweler's quest : Retrieve the Scrap Metal
+Bug #1727: Targets almost always resist soultrap scrolls
+Bug #1728: Casting a soultrap spell on invalid target yields no message
+Bug #1729: Chop attack doesn't work if walking diagonally
+Bug #1732: Error handling for missing script function arguments produces weird message
+Bug #1736: Alt-tabbing removes detail from overworld map.
+Bug #1737: Going through doors with (high magnitude?) leviation will put the player high up, possibly even out of bounds.
+Bug #1739: Setting a variable on an NPC from another NPC's dialogue result sets the wrong variable
+Bug #1741: The wait dialogue doesn't black the screen out properly during waiting.
+Bug #1742: ERROR: Object 'sDifficulty' not found (const)
+Bug #1744: Night sky in Skies V.IV (& possibly v3) by SWG rendered incorrectly
+Bug #1746: Bow/marksman weapon condition does not degrade with use
+Bug #1749: Constant Battle Music
+Bug #1752: Alt-Tabbing in the character menus makes the paper doll disappear temporarily
+Bug #1753: Cost of training is not added to merchant's inventory
+Bug #1755: Disposition changes do not persist if the conversation menu is closed by purchasing training.
+Bug #1756: Caught Blight after being cured of Corprus
+Bug #1758: Crash Upon Loading New Cell
+Bug #1760: Player's Magicka is not recalculated upon drained or boosted intelligence
+Bug #1761: Equiped torches lost on reload
+Bug #1762: Your spell did not get a target. Soul trap. Gorenea Andrano
+Bug #1763: Custom Spell Magicka Cost
+Bug #1765: Azuras Star breaks on recharging item
+Bug #1767: GetPCRank did not handle ignored explicit references
+Bug #1772: Dark Brotherhood Assassins never use their Carved Ebony Dart, sticking to their melee weapon.
+Bug #1774: String table overflow also occurs when loading TheGloryRoad.esm
+Bug #1776: dagoth uthol runs in slow motion
+Bug #1778: Incorrect values in spellmaking window
+Bug #1779: Icon of Master Propylon Index is not visible
+Bug #1783: Invisible NPC after looting corpse
+Bug #1787: Health Calculation
+Bug #1788: Skeletons, ghosts etc block doors when we try to open
+Bug #1791: [MOD: LGNPC Foreign Quarter] NPC in completely the wrong place.
+Bug #1792: Potions should show more effects
+Bug #1793: Encumbrance while bartering
+Bug #1794: Fortify attribute not affecting fatigue
+Bug #1795: Too much magicka
+Bug #1796: "Off by default" torch burning
+Bug #1797: Fish too slow
+Bug #1798: Rest until healed shouldn't show with full health and magicka
+Bug #1802: Mark location moved
+Bug #1804: stutter with recent builds
+Bug #1810: attack gothens dremora doesnt agro the others.
+Bug #1811: Regression: Crash Upon Loading New Cell
+Bug #1812: Mod: "QuickChar" weird button placement
+Bug #1815: Keys show value and weight, Vanilla Morrowind's keys dont.
+Bug #1817: Persuasion results do not show using unpatched MW ESM
+Bug #1818: Quest B3_ZainabBride moves to stage 47 upon loading save while Falura Llervu is following
+Bug #1823: AI response to theft incorrect - only guards react, in vanilla everyone does.
+Bug #1829: On-Target Spells Rendered Behind Water Surface Effects
+Bug #1830: Galsa Gindu's house is on fire
+Bug #1832: Fatal Error: OGRE Exception(2:InvalidParametersException)
+Bug #1836: Attacked Guards open "fine/jail/resist"-dialogue after killing you
+Bug #1840: Infinite recursion in ActionTeleport
+Bug #1843: Escorted people change into player's cell after completion of escort stage
+Bug #1845: Typing 'j' into 'Name' fields opens the journal
+Bug #1846: Text pasted into the console still appears twice (Windows)
+Bug #1847: "setfatigue 0" doesn't render NPC unconscious
+Bug #1848: I can talk to unconscious actors
+Feature #47: Magic Effects
+Feature #642: Control NPC mouth movement using current Say sound
+Feature #939: Editor: Resources tables
+Feature #961: AI Combat for magic (spells, potions and enchanted items)
+Feature #1111: Collision script instructions (used e.g. by Lava)
+Feature #1120: Command creature/humanoid magic effects
+Feature #1121: Elemental shield magic effects
+Feature #1122: Light magic effect
+Feature #1139: AI: Friendly hits
+Feature #1141: AI: combat party
+Feature #1326: Editor: Add tooltips to all graphical buttons
+Feature #1489: Magic effect Get/Mod/Set functions
+Feature #1505: Difficulty slider
+Feature #1538: Targeted scripts
+Feature #1571: Allow creating custom markers on the local map
+Feature #1615: Determine local variables from compiled scripts instead of the values in the script record
+Feature #1616: Editor: Body part record verifier
+Feature #1651: Editor: Improved keyboard navigation for scene toolbar
+Feature #1666: Script blacklisting
+Feature #1711: Including the Git revision number from the command line "--version" switch.
+Feature #1721: NPC eye blinking
+Feature #1740: Scene toolbar buttons for selecting which type of elements are rendered
+Feature #1790: Mouse wheel scrolling for the journal
+Feature #1850: NiBSPArrayController
+Task #768: On windows, settings folder should be "OpenMW", not "openmw"
+Task #908: Share keyframe data
+Task #1716: Remove defunct option for building without FFmpeg
+
 0.31.0
 
 Bug #245: Cloud direction and weather systems differ from Morrowind
