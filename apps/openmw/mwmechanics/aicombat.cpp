@@ -777,7 +777,8 @@ void getMinMaxAttackDuration(const MWWorld::Ptr& actor, float (*fMinMaxDurations
 
     float weapSpeed;
     if (weaptype != MWMechanics::WeapType_HandToHand
-            && weaptype != MWMechanics::WeapType_Spell)
+            && weaptype != MWMechanics::WeapType_Spell
+            && weaptype != MWMechanics::WeapType_None)
     {
         weapon = weaponSlot->get<ESM::Weapon>()->mBase;
         weapSpeed = weapon->mData.mSpeed;
