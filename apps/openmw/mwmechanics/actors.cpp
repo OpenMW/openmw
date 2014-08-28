@@ -248,6 +248,12 @@ namespace MWMechanics
 
             if (caster.getRefData().getHandle() == "player")
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
+
+            const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
+                    .search("VFX_Soul_Trap");
+            if (fx)
+                MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
+                    "", Ogre::Vector3(mCreature.getRefData().getPosition().pos));
         }
     };
 
