@@ -770,7 +770,7 @@ void getMinMaxAttackDuration(const MWWorld::Ptr& actor, float (*fMinMaxDurations
 
     // get weapon information: type and speed
     const ESM::Weapon *weapon = NULL;
-    MWMechanics::WeaponType weaptype;
+    MWMechanics::WeaponType weaptype = MWMechanics::WeapType_None;
 
     MWWorld::ContainerStoreIterator weaponSlot =
         MWMechanics::getActiveWeapon(actor.getClass().getCreatureStats(actor), actor.getClass().getInventoryStore(actor), &weaptype);
