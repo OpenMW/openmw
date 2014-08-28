@@ -22,6 +22,8 @@
 #include "movement.hpp"
 #include "character.hpp" // fixme: for getActiveWeapon
 
+#include "aicombataction.hpp"
+
 namespace
 {
     static float sgn(Ogre::Radian a)
@@ -107,6 +109,7 @@ namespace MWMechanics
 
     void AiCombat::init()
     {
+        mActionCooldown = 0;
         mTimerAttack = 0;
         mTimerReact = 0;
         mTimerCombatMove = 0;
@@ -246,6 +249,8 @@ namespace MWMechanics
 
         actorClass.getCreatureStats(actor).setAttackingOrSpell(mAttack);
 
+        mActionCooldown -= duration;
+
         float tReaction = 0.25f;
         if(mTimerReact < tReaction)
         {
@@ -263,19 +268,33 @@ namespace MWMechanics
             mCell = actor.getCell();
         }
 
-        const ESM::Weapon *weapon = NULL;
-        MWMechanics::WeaponType weaptype;
-        float weapRange = 1.0f;
+        MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(actor);
+        if (!anim) // shouldn't happen
+            return false;
 
         actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
+
+        if (mActionCooldown > 0)
+            return false;
+
+        float rangeAttack = 0;
+        float rangeFollow = 0;
+        if (anim->upperBodyReady())
+        {
+            mCurrentAction = prepareNextAction(actor, target);
+            mActionCooldown = mCurrentAction->getActionCooldown();
+        }
+        if (mCurrentAction.get())
+            mCurrentAction->getCombatRange(rangeAttack, rangeFollow);
+
+        // FIXME: consider moving this stuff to ActionWeapon::getCombatRange
+        const ESM::Weapon *weapon = NULL;
+        MWMechanics::WeaponType weaptype = WeapType_None;
+        float weapRange = 1.0f;
 
         // Get weapon characteristics
         if (actorClass.hasInventoryStore(actor))
         {
-            MWMechanics::DrawState_ state = actorClass.getCreatureStats(actor).getDrawState();
-            if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-                actorClass.getCreatureStats(actor).setDrawState(MWMechanics::DrawState_Weapon);
-
             // TODO: Check equipped weapon and equip a different one if we can't attack with it
             // (e.g. no ammunition, or wrong type of ammunition equipped, etc. autoEquip is not very smart in this regard))
 
@@ -285,11 +304,11 @@ namespace MWMechanics
 
             if (weaptype == WeapType_HandToHand)
             {
-                static float fHandToHandReach = 
+                static float fHandToHandReach =
                     world->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
                 weapRange = fHandToHandReach;
             }
-            else if (weaptype != WeapType_PickProbe && weaptype != WeapType_Spell)
+            else if (weaptype != WeapType_PickProbe && weaptype != WeapType_Spell && weaptype != WeapType_None)
             {
                 // All other WeapTypes are actually weapons, so get<ESM::Weapon> is safe.
                 weapon = weaponSlot->get<ESM::Weapon>()->mBase;
@@ -303,19 +322,26 @@ namespace MWMechanics
             weapRange = 150.0f; //TODO: use true attack range (the same problem in Creature::hit)
         }
 
-        float rangeAttack;
-        float rangeFollow;
         bool distantCombat = false;
-        if (weaptype == WeapType_BowAndArrow || weaptype == WeapType_Crossbow || weaptype == WeapType_Thrown)
+        if (weaptype != WeapType_Spell)
         {
-            rangeAttack = 1000; // TODO: should depend on archer skill
-            rangeFollow = 0; // not needed in ranged combat
-            distantCombat = true;
+            // TODO: move to ActionWeapon
+            if (weaptype == WeapType_BowAndArrow || weaptype == WeapType_Crossbow || weaptype == WeapType_Thrown)
+            {
+                rangeAttack = 1000;
+                rangeFollow = 0; // not needed in ranged combat
+                distantCombat = true;
+            }
+            else
+            {
+                rangeAttack = weapRange;
+                rangeFollow = 300;
+            }
         }
         else
         {
-            rangeAttack = weapRange;
-            rangeFollow = 300;
+            distantCombat = (rangeAttack > 500);
+            weapRange = 150.f;
         }
 
         // start new attack
@@ -345,7 +371,7 @@ namespace MWMechanics
                         MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
                     }
                 }
-            }            
+            }
         }
 
 
@@ -750,7 +776,9 @@ void getMinMaxAttackDuration(const MWWorld::Ptr& actor, float (*fMinMaxDurations
         MWMechanics::getActiveWeapon(actor.getClass().getCreatureStats(actor), actor.getClass().getInventoryStore(actor), &weaptype);
 
     float weapSpeed;
-    if (weaptype != MWMechanics::WeapType_HandToHand) 
+    if (weaptype != MWMechanics::WeapType_HandToHand
+            && weaptype != MWMechanics::WeapType_Spell
+            && weaptype != MWMechanics::WeapType_None)
     {
         weapon = weaponSlot->get<ESM::Weapon>()->mBase;
         weapSpeed = weapon->mData.mSpeed;

@@ -198,11 +198,6 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
             continue;
         }
 
-        // Don't auto-equip probes or lockpicks. NPCs can't use them (yet). And AiCombat would attempt to "attack" with them.
-        // NOTE: In the future AiCombat should handle equipping appropriate weapons
-        if (test.getTypeName() == typeid(ESM::Lockpick).name() || test.getTypeName() == typeid(ESM::Probe).name())
-            continue;
-
         // Only autoEquip if we are the original owner of the item.
         // This stops merchants from auto equipping anything you sell to them.
         // ...unless this is a companion, he should always equip items given to him.
@@ -219,6 +214,10 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
             iter2!=itemsSlots.first.end(); ++iter2)
         {
+            if (*iter2 == Slot_CarriedRight) // Items in right hand are situational use, so don't equip them.
+                // Equipping weapons is handled by AiCombat. Anything else (lockpicks, probes) can't be used by NPCs anyway (yet)
+                continue;
+
             bool use = false;
 
             if (slots_.at (*iter2)==end())
