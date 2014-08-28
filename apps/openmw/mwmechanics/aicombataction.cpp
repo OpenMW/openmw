@@ -178,7 +178,7 @@ namespace MWMechanics
     {
         // NOTE: target may be empty
 
-        float baseRating = 1;
+        float rating = 1;
         switch (effect.mEffectID)
         {
         case ESM::MagicEffect::Soultrap:
@@ -231,24 +231,11 @@ namespace MWMechanics
             }
             break;
 
-        // Give a small boost to all direct damage effects. This is combat, after all!
-        case ESM::MagicEffect::FireDamage:
-        case ESM::MagicEffect::ShockDamage:
-        case ESM::MagicEffect::FrostDamage:
-        case ESM::MagicEffect::Poison:
-        case ESM::MagicEffect::AbsorbHealth:
-        case ESM::MagicEffect::DamageHealth:
-            baseRating *= 4;
-            break;
-
-        case ESM::MagicEffect::Paralyze: // *Evil laughter*
-            baseRating *= 5;
-            break;
-
         // TODO: rate these effects very high if we are currently suffering from negative effects that could be cured
         case ESM::MagicEffect::Dispel:
         case ESM::MagicEffect::CureParalyzation:
         case ESM::MagicEffect::CurePoison:
+            return 0.f;
             break;
 
         default:
@@ -261,12 +248,10 @@ namespace MWMechanics
 
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
 
-        baseRating *= magicEffect->mData.mBaseCost;
+        rating *= magicEffect->mData.mBaseCost;
 
-        if (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude)
-            return 0.f; // No clue how useful this would be; will need special cases for each effect
-
-        float rating = baseRating * (effect.mMagnMin + effect.mMagnMax)/2.f;
+        if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+            rating *= (effect.mMagnMin + effect.mMagnMax)/2.f;
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
             rating *= effect.mDuration;
 
