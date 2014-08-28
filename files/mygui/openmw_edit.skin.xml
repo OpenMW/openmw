@@ -40,4 +40,21 @@
 
     </Skin>
 
+    <Skin name="MW_TextBoxEditWithBorder" size="512 20">
+
+        <!-- Borders -->
+        <Child type="Widget" skin="MW_Box" offset="0 0 512 20" align="Stretch"/>
+
+        <Property key="FontName" value="Default"/>
+
+        <Property key="TextAlign" value="Left Top"/>
+
+        <Property key="TextColour" value="0.75 0.6 0.35"/>
+
+        <Child type="TextBox" skin="MW_TextEditClient" offset="2 2 490 18" align="Stretch" name="Client"/>
+
+        <Child type="MWScrollBar" skin="MW_VScroll" offset="494 3 14 14" align="Right VStretch" name="VScroll"/>
+
+    </Skin>
+
 </MyGUI>

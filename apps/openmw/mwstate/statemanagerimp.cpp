@@ -363,6 +363,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_GMAP:
                 case ESM::REC_KEYS:
                 case ESM::REC_ASPL:
+                case ESM::REC_MARK:
 
                     MWBase::Environment::get().getWindowManager()->readRecord(reader, n.val);
                     break;
@@ -375,7 +376,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 default:
 
                     // ignore invalid records
-                    /// \todo log error
+                    std::cerr << "Ignoring unknown record: " << n.name << std::endl;
                     reader.skipRecord();
             }
             listener.increaseProgress();

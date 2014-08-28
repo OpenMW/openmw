@@ -1627,9 +1627,14 @@ namespace MWWorld
         }
     }
 
-    void World::getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
+    void World::worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
     {
-        mRendering->getInteriorMapPosition(position, nX, nY, x, y);
+        mRendering->worldToInteriorMapPosition(position, nX, nY, x, y);
+    }
+
+    Ogre::Vector2 World::interiorMapToWorldPosition(float nX, float nY, int x, int y)
+    {
+        return mRendering->interiorMapToWorldPosition(nX, nY, x, y);
     }
 
     bool World::isPositionExplored (float nX, float nY, int x, int y, bool interior)

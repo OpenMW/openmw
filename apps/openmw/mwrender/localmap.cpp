@@ -431,7 +431,7 @@ void LocalMap::render(const float x, const float y,
     mRendering->getScene()->setAmbientLight(oldAmbient);
 }
 
-void LocalMap::getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y)
+void LocalMap::worldToInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y)
 {
     pos = rotatePoint(pos, Vector2(mBounds.getCenter().x, mBounds.getCenter().y), mAngle);
 
@@ -442,6 +442,18 @@ void LocalMap::getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, 
 
     nX = (pos.x - min.x - sSize*x)/sSize;
     nY = 1.0-(pos.y - min.y - sSize*y)/sSize;
+}
+
+Ogre::Vector2 LocalMap::interiorMapToWorldPosition (float nX, float nY, int x, int y)
+{
+    Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().y);
+    Ogre::Vector2 pos;
+
+    pos.x = sSize * (nX + x) + min.x;
+    pos.y = sSize * (1.0-nY + y) + min.y;
+
+    pos = rotatePoint(pos, Vector2(mBounds.getCenter().x, mBounds.getCenter().y), -mAngle);
+    return pos;
 }
 
 bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interior)
@@ -502,7 +514,7 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     Vector2 pos(position.x, position.y);
 
     if (mInterior)
-        getInteriorMapPosition(pos, u,v, x,y);
+        worldToInteriorMapPosition(pos, u,v, x,y);
 
     Vector3 playerdirection = mCameraRotNode->convertWorldToLocalOrientation(orientation).yAxis();
 

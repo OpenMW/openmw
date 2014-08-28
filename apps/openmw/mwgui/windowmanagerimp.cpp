@@ -207,14 +207,12 @@ namespace MWGui
         mVideoWidget->setNeedMouseFocus(true);
         mVideoWidget->setNeedKeyFocus(true);
 
-#if MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3,2,1)
         // Removes default MyGUI system clipboard implementation, which supports windows only
         MyGUI::ClipboardManager::getInstance().eventClipboardChanged.clear();
         MyGUI::ClipboardManager::getInstance().eventClipboardRequested.clear();
 
         MyGUI::ClipboardManager::getInstance().eventClipboardChanged += MyGUI::newDelegate(this, &WindowManager::onClipboardChanged);
         MyGUI::ClipboardManager::getInstance().eventClipboardRequested += MyGUI::newDelegate(this, &WindowManager::onClipboardRequested);
-#endif
     }
 
     void WindowManager::initUI()
@@ -227,7 +225,7 @@ namespace MWGui
 
         mRecharge = new Recharge();
         mMenu = new MainMenu(w,h);
-        mMap = new MapWindow(mDragAndDrop, "");
+        mMap = new MapWindow(mCustomMarkers, mDragAndDrop, "");
         trackWindow(mMap, "map");
         mStatsWindow = new StatsWindow(mDragAndDrop);
         trackWindow(mStatsWindow, "stats");
@@ -245,7 +243,7 @@ namespace MWGui
         trackWindow(mDialogueWindow, "dialogue");
         mContainerWindow = new ContainerWindow(mDragAndDrop);
         trackWindow(mContainerWindow, "container");
-        mHud = new HUD(mShowFPSLevel, mDragAndDrop);
+        mHud = new HUD(mCustomMarkers, mShowFPSLevel, mDragAndDrop);
         mToolTips = new ToolTips();
         mScrollWindow = new ScrollWindow();
         mBookWindow = new BookWindow();
@@ -1532,6 +1530,8 @@ namespace MWGui
 
         mSelectedSpell.clear();
 
+        mCustomMarkers.clear();
+
         mGuiModes.clear();
         MWBase::Environment::get().getInputManager()->changeInputMode(false);
         updateVisible();
@@ -1551,6 +1551,14 @@ namespace MWGui
             writer.endRecord(ESM::REC_ASPL);
             progress.increaseProgress();
         }
+
+        for (std::vector<CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
+        {
+            writer.startRecord(ESM::REC_MARK);
+            (*it).save(writer);
+            writer.endRecord(ESM::REC_MARK);
+            progress.increaseProgress();
+        }
     }
 
     void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)
@@ -1564,12 +1572,19 @@ namespace MWGui
             reader.getSubNameIs("ID__");
             mSelectedSpell = reader.getHString();
         }
+        else if (type == ESM::REC_MARK)
+        {
+            CustomMarker marker;
+            marker.load(reader);
+            mCustomMarkers.addMarker(marker, false);
+        }
     }
 
     int WindowManager::countSavedGameRecords() const
     {
         return 1 // Global map
                 + 1 // QuickKeysMenu
+                + mCustomMarkers.size()
                 + (!mSelectedSpell.empty() ? 1 : 0);
     }
 

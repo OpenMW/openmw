@@ -498,48 +498,6 @@ namespace MWInput
 
     void InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
-#if MYGUI_VERSION <= MYGUI_DEFINE_VERSION(3,2,0)
-        // Cut, copy & paste
-        MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-        if (focus)
-        {
-            MyGUI::EditBox* edit = focus->castType<MyGUI::EditBox>(false);
-            if (edit && !edit->getEditReadOnly())
-            {
-                if (arg.keysym.sym == SDLK_v && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
-                {
-                    char* text = SDL_GetClipboardText();
-
-                    if (text)
-                    {
-                        edit->insertText(MyGUI::UString(text), edit->getTextCursor());
-                        SDL_free(text);
-                    }
-                }
-                if (arg.keysym.sym == SDLK_x && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
-                {
-                    // Discard color codes and other escape characters
-                    std::string text = MyGUI::TextIterator::getOnlyText(edit->getTextSelection());
-                    if (text.length())
-                    {
-                        SDL_SetClipboardText(text.c_str());
-                        edit->deleteTextSelection();
-                    }
-                }
-            }
-            if (edit && !edit->getEditStatic())
-            {
-                if (arg.keysym.sym == SDLK_c && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
-                {
-                    // Discard color codes and other escape characters
-                    std::string text = MyGUI::TextIterator::getOnlyText(edit->getTextSelection());
-                    if (text.length())
-                        SDL_SetClipboardText(text.c_str());
-                }
-            }
-        }
-#endif
-
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
         bool consumed = false;
@@ -552,12 +510,6 @@ namespace MWInput
         }
         if (!mControlsDisabled && !consumed)
             mInputBinder->keyPressed (arg);
-
-        // Clear MyGUI's clipboard, so it doesn't interfere with our own clipboard implementation.
-        // We do not use MyGUI's clipboard manager because it doesn't support system clipboard integration with SDL.
-#if MYGUI_VERSION <= MYGUI_DEFINE_VERSION(3,2,0)
-        MyGUI::ClipboardManager::getInstance().clearClipboardData("Text");
-#endif
     }
 
     void InputManager::textInput(const SDL_TextInputEvent &arg)

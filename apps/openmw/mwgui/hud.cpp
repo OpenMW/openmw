@@ -61,8 +61,9 @@ namespace MWGui
     };
 
 
-    HUD::HUD(int fpsLevel, DragAndDrop* dragAndDrop)
+    HUD::HUD(CustomMarkerCollection &customMarkers, int fpsLevel, DragAndDrop* dragAndDrop)
         : Layout("openmw_hud.layout")
+        , LocalMapBase(customMarkers)
         , mHealth(NULL)
         , mMagicka(NULL)
         , mStamina(NULL)
@@ -161,7 +162,7 @@ namespace MWGui
         getWidget(mTriangleCounter, "TriangleCounter");
         getWidget(mBatchCounter, "BatchCounter");
 
-        LocalMapBase::init(mMinimap, mCompass, this);
+        LocalMapBase::init(mMinimap, mCompass);
 
         mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
         mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
