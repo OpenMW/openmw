@@ -14,7 +14,7 @@ namespace MWMechanics
     class Action
     {
     public:
-        virtual ~Action() {};
+        virtual ~Action() {}
         virtual void prepare(const MWWorld::Ptr& actor) = 0;
         virtual void getCombatRange (float& rangeAttack, float& rangeFollow) = 0;
         virtual float getActionCooldown() { return 0.f; }
