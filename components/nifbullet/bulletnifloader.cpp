@@ -281,8 +281,6 @@ void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int
     // anything. So don't do anything.
     if ((flags & 0x800) && !raycasting)
     {
-        collide = false;
-        bbcollide = false;
         return;
     }
 
