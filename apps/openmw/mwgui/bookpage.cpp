@@ -386,8 +386,6 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
                 int sectionHeightLeft = sectionHeight;
                 while (sectionHeightLeft > mPageHeight)
                 {
-                    spaceLeft = mPageHeight - (curPageStop - curPageStart);
-
                     // Adjust to the top of the first line that does not fit on the current page anymore
                     int splitPos = curPageStop;
                     for (Lines::iterator j = i->mLines.begin (); j != i->mLines.end (); ++j)

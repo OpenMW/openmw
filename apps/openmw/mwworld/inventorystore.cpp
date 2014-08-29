@@ -220,28 +220,22 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 
             bool use = false;
 
-            if (slots_.at (*iter2)==end())
-                use = true; // slot was empty before -> skip all further checks
-            else
+            if (slots_.at (*iter2)!=end())
             {
                 Ptr old = *slots_.at (*iter2);
 
-                if (!use)
+                // check skill
+                int oldSkill = old.getClass().getEquipmentSkill (old);
+
+                if (testSkill!=-1 && oldSkill==-1)
+                    use = true;
+                else if (testSkill!=-1 && oldSkill!=-1 && testSkill!=oldSkill)
                 {
-                    // check skill
-                    int oldSkill =
-                        old.getClass().getEquipmentSkill (old);
+                    if (actor.getClass().getSkill(actor, oldSkill) > actor.getClass().getSkill (actor, testSkill))
+                        continue; // rejected, because old item better matched the NPC's skills.
 
-                    if (testSkill!=-1 && oldSkill==-1)
+                    if (actor.getClass().getSkill(actor, oldSkill) < actor.getClass().getSkill (actor, testSkill))
                         use = true;
-                    else if (testSkill!=-1 && oldSkill!=-1 && testSkill!=oldSkill)
-                    {
-                        if (actor.getClass().getSkill(actor, oldSkill) > actor.getClass().getSkill (actor, testSkill))
-                            continue; // rejected, because old item better matched the NPC's skills.
-
-                        if (actor.getClass().getSkill(actor, oldSkill) < actor.getClass().getSkill (actor, testSkill))
-                            use = true;
-                    }
                 }
 
                 if (!use)
@@ -252,8 +246,6 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                     {
                         continue;
                     }
-
-                    use = true;
                 }
             }
 
