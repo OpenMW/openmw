@@ -59,6 +59,29 @@ void suggestCombatRange(int rangeTypes, float& rangeAttack, float& rangeFollow)
     }
 }
 
+int numEffectsToCure (const MWWorld::Ptr& actor, int effectFilter=-1)
+{
+    int toCure=0;
+    const MWMechanics::ActiveSpells& activeSpells = actor.getClass().getCreatureStats(actor).getActiveSpells();
+    for (MWMechanics::ActiveSpells::TIterator it = activeSpells.begin(); it != activeSpells.end(); ++it)
+    {
+        const MWMechanics::ActiveSpells::ActiveSpellParams& params = it->second;
+        for (std::vector<MWMechanics::ActiveSpells::ActiveEffect>::const_iterator effectIt = params.mEffects.begin();
+             effectIt != params.mEffects.end(); ++effectIt)
+        {
+            int effectId = effectIt->mEffectId;
+            if (effectFilter != -1 && effectId != effectFilter)
+                continue;
+            const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful
+                    && effectIt->mDuration > 3 // Don't attempt to cure if effect runs out shortly anyway
+                    )
+                ++toCure;
+        }
+    }
+    return toCure;
+}
+
 }
 
 namespace MWMechanics
@@ -184,14 +207,18 @@ namespace MWMechanics
         case ESM::MagicEffect::Soultrap:
         case ESM::MagicEffect::AlmsiviIntervention:
         case ESM::MagicEffect::DivineIntervention:
-        case ESM::MagicEffect::CalmCreature:
         case ESM::MagicEffect::CalmHumanoid:
+        case ESM::MagicEffect::CalmCreature:
+        case ESM::MagicEffect::FrenzyHumanoid:
+        case ESM::MagicEffect::FrenzyCreature:
+        case ESM::MagicEffect::DemoralizeHumanoid:
+        case ESM::MagicEffect::DemoralizeCreature:
+        case ESM::MagicEffect::RallyHumanoid:
+        case ESM::MagicEffect::RallyCreature:
         case ESM::MagicEffect::Charm:
         case ESM::MagicEffect::DetectAnimal:
         case ESM::MagicEffect::DetectEnchantment:
         case ESM::MagicEffect::DetectKey:
-        case ESM::MagicEffect::FrenzyCreature:
-        case ESM::MagicEffect::FrenzyHumanoid:
         case ESM::MagicEffect::Telekinesis:
         case ESM::MagicEffect::Mark:
         case ESM::MagicEffect::Recall:
@@ -204,16 +231,39 @@ namespace MWMechanics
         case ESM::MagicEffect::Lock:
         case ESM::MagicEffect::Open:
         case ESM::MagicEffect::TurnUndead:
+        case ESM::MagicEffect::WeaknessToCommonDisease:
+        case ESM::MagicEffect::WeaknessToBlightDisease:
+        case ESM::MagicEffect::WeaknessToCorprusDisease:
+        case ESM::MagicEffect::CureCommonDisease:
+        case ESM::MagicEffect::CureBlightDisease:
+        case ESM::MagicEffect::CureCorprusDisease:
+        case ESM::MagicEffect::Invisibility:
             return 0.f;
         case ESM::MagicEffect::Feather:
-            return 0.f; // TODO: check if target is overencumbered
+            if (actor.getClass().getEncumbrance(actor) - actor.getClass().getCapacity(actor) >= 0)
+                return 100.f;
+            else
+                return 0.f;
         case ESM::MagicEffect::Levitate:
             return 0.f; // AI isn't designed to take advantage of this, and could be perceived as unfair anyway
-        // TODO: check if Beast race (can't wear boots or helm)
-        /*
         case ESM::MagicEffect::BoundBoots:
         case ESM::MagicEffect::BoundHelm:
-        */
+            if (actor.getClass().isNpc())
+            {
+                // Beast races can't wear helmets or boots
+                std::string raceid = actor.get<ESM::NPC>()->mBase->mRace;
+                const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(raceid);
+                if (race->mData.mFlags & ESM::Race::Beast)
+                    return 0.f;
+            }
+            // Intended fall-through
+        // Creatures can not wear armor
+        case ESM::MagicEffect::BoundCuirass:
+        case ESM::MagicEffect::BoundGloves:
+            if (!actor.getClass().isNpc())
+                return 0.f;
+            break;
+
         case ESM::MagicEffect::RestoreHealth:
         case ESM::MagicEffect::RestoreMagicka:
         case ESM::MagicEffect::RestoreFatigue:
@@ -231,12 +281,13 @@ namespace MWMechanics
             }
             break;
 
-        // TODO: rate these effects very high if we are currently suffering from negative effects that could be cured
+        // Prefer Cure effects over Dispel, because Dispel also removes positive effects
         case ESM::MagicEffect::Dispel:
+            return 1000.f * numEffectsToCure(actor);
         case ESM::MagicEffect::CureParalyzation:
+            return 1001.f * numEffectsToCure(actor, ESM::MagicEffect::Paralyze);
         case ESM::MagicEffect::CurePoison:
-            return 0.f;
-            break;
+            return 1001.f * numEffectsToCure(actor, ESM::MagicEffect::Poison);
 
         default:
             break;
