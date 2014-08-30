@@ -358,7 +358,7 @@ namespace MWWorld
     Class::copyToCell(const Ptr &ptr, CellStore &cell) const
     {
         Ptr newPtr = copyToCellImpl(ptr, cell);
-
+        newPtr.getCellRef().unsetRefNum(); // This RefNum is only valid within the original cell of the reference
         return newPtr;
     }
 
