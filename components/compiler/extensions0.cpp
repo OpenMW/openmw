@@ -527,6 +527,8 @@ namespace Compiler
             extensions.registerInstruction("move","cf",opcodeMove,opcodeMoveExplicit);
             extensions.registerInstruction("moveworld","cf",opcodeMoveWorld,opcodeMoveWorldExplicit);
             extensions.registerFunction("getstartingangle",'f',"c",opcodeGetStartingAngle,opcodeGetStartingAngleExplicit);
+            extensions.registerInstruction("resetactors","",opcodeResetActors);
+            extensions.registerInstruction("ra","",opcodeResetActors);
         }
     }
 

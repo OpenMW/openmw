@@ -484,6 +484,7 @@ namespace Compiler
         const int opcodeMoveExplicit = 0x2000207;
         const int opcodeMoveWorld = 0x2000208;
         const int opcodeMoveWorldExplicit = 0x2000209;
+        const int opcodeResetActors = 0x20002f4;
     }
 
     namespace User

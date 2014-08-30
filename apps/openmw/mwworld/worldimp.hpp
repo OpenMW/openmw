@@ -611,6 +611,9 @@ namespace MWWorld
 
             /// @see MWWorld::WeatherManager::getStormDirection
             virtual Ogre::Vector3 getStormDirection() const;
+
+            /// Resets all actors in the current active cells to their original location within that cell.
+            virtual void resetActors();
     };
 }
 
