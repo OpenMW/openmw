@@ -684,9 +684,23 @@ namespace MWMechanics
 
             if (item.getCellRef().getEnchantmentCharge() < castCost)
             {
-                // TODO: Should there be a sound here?
                 if (mCaster.getRefData().getHandle() == "player")
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
+
+                // Failure sound
+                int school = 0;
+                for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment->mEffects.mList.begin());
+                    effectIt!=enchantment->mEffects.mList.end(); ++effectIt)
+                {
+                    const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
+                    school = magicEffect->mData.mSchool;
+                    break;
+                }
+                static const std::string schools[] = {
+                    "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                };
+                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                sndMgr->playSound3D(mCaster, "Spell Failure " + schools[school], 1.0f, 1.0f);
                 return false;
             }
             // Reduce charge
