@@ -21,6 +21,8 @@
 #include "spellcasting.hpp"
 #include "autocalcspell.hpp"
 
+#include <limits.h>
+
 namespace
 {
     /// @return is \a ptr allowed to take/use \a item or is it a crime?

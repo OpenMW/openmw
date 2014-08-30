@@ -6,6 +6,7 @@
 
 #include <SDL_syswm.h>
 #include <SDL_endian.h>
+#include <stdexcept>
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include "osx_utils.h"
