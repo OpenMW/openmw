@@ -183,6 +183,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_SoundRes:
         case CSMWorld::ColumnBase::Display_Texture:
         case CSMWorld::ColumnBase::Display_Video:
+        case CSMWorld::ColumnBase::Display_GlobalVariable:
 
             return new DropLineEdit(parent);
 

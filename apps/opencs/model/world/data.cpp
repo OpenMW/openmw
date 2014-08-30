@@ -250,6 +250,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRefs.addColumn (new LockLevelColumn<CellRef>);
     mRefs.addColumn (new KeyColumn<CellRef>);
     mRefs.addColumn (new TrapColumn<CellRef>);
+    mRefs.addColumn (new OwnerGlobalColumn<CellRef>);
 
     mFilters.addColumn (new StringIdColumn<CSMFilter::Filter>);
     mFilters.addColumn (new RecordStateColumn<CSMFilter::Filter>);

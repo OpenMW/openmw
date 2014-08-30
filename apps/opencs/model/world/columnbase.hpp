@@ -68,6 +68,7 @@ namespace CSMWorld
             Display_TopicInfo,
             Display_JournalInfo,
             Display_Scene,
+            Display_GlobalVariable,
             //CONCRETE TYPES ENDS HERE
 
             Display_Integer,

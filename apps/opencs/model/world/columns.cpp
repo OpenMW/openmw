@@ -181,6 +181,7 @@ namespace CSMWorld
             { ColumnId_Vampire, "Vampire" },
             { ColumnId_BodyPartType, "Bodypart Type" },
             { ColumnId_MeshType, "Mesh Type" },
+            { ColumnId_OwnerGlobal, "Owner Global" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
