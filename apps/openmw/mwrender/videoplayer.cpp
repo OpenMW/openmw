@@ -439,7 +439,7 @@ public:
       , mSwr(0)
       , mSamplesAllChannels(0)
       , mOutputSampleRatio(1)
-      , mOutputSampleFormat(AV_SAMPLE_FMT_S16)
+      , mOutputSampleFormat(AV_SAMPLE_FMT_NONE)
     { }
     virtual ~MovieAudioDecoder()
     {
@@ -450,22 +450,15 @@ public:
 
     void getInfo(int *samplerate, MWSound::ChannelConfig *chans, MWSound::SampleType * type)
     {
-        if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8)
+        if((mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8) ||
+                                        (mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8P))
             *type = MWSound::SampleType_UInt8;
-        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16)
+        else if((mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16) ||
+                                        (mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16P))
             *type = MWSound::SampleType_Int16;
-        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLT)
+        else if((mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLT) ||
+                                        (mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP))
             *type = MWSound::SampleType_Float32;
-        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
-        {
-            // resample to a known format for OpenAL_SoundStream
-            if(mOutputSampleFormat == AV_SAMPLE_FMT_S16)
-                *type = MWSound::SampleType_Int16;
-            else if(mOutputSampleFormat == AV_SAMPLE_FMT_FLT)
-                *type = MWSound::SampleType_Float32;
-            else
-                *type = MWSound::SampleType_Int16; // default
-        }
         else
             fail(std::string("Unsupported sample format: ")+
                  av_get_sample_fmt_name(mAVStream->codec->sample_fmt));
@@ -504,29 +497,43 @@ public:
 
         *samplerate = mAVStream->codec->sample_rate;
 
-        // FIXME: error handling
-        if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
+        if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8P)
+            mOutputSampleFormat = AV_SAMPLE_FMT_U8;
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16P)
+            mOutputSampleFormat = AV_SAMPLE_FMT_S16;
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
+            mOutputSampleFormat = AV_SAMPLE_FMT_FLT;
+        else
+            fail(std::string("Should never reach here."));
+
+        if(mOutputSampleFormat != AV_SAMPLE_FMT_NONE)
         {
-            mSwr = swr_alloc();
-            av_opt_set_int(mSwr, "in_channel_layout", mAVStream->codec->channel_layout, 0);
-            av_opt_set_int(mSwr, "out_channel_layout", mAVStream->codec->channel_layout, 0);
-            av_opt_set_int(mSwr, "in_sample_rate", mAVStream->codec->sample_rate, 0);
-            av_opt_set_int(mSwr, "out_sample_rate", mAVStream->codec->sample_rate, 0);
-            av_opt_set_sample_fmt(mSwr, "in_sample_fmt", AV_SAMPLE_FMT_FLTP, 0);
-            av_opt_set_sample_fmt(mSwr, "out_sample_fmt", mOutputSampleFormat, 0);
-            swr_init(mSwr);
+            mSwr = swr_alloc_set_opts(mSwr,                             // SwrContext
+                                      mAVStream->codec->channel_layout, // output ch layout
+                                      mOutputSampleFormat,              // output sample format
+                                      mAVStream->codec->sample_rate,    // output sample rate
+                                      mAVStream->codec->channel_layout, // input ch layout
+                                      mAVStream->codec->sample_fmt,     // input sample format
+                                      mAVStream->codec->sample_rate,    // input sample rate
+                                      0,                                // logging level offset
+                                      NULL);                            // log context
+            if(!mSwr)
+                fail(std::string("Couldn't allocate SwrContext"));
+            if(swr_init(mSwr) < 0)
+                fail(std::string("Couldn't initialize SwrContext"));
 
             mSamplesAllChannels = av_get_bytes_per_sample(mOutputSampleFormat)
                                   * mAVStream->codec->channels;
-            mOutputSampleRatio =  av_get_bytes_per_sample(AV_SAMPLE_FMT_FLTP)
-                                  / av_get_bytes_per_sample(mOutputSampleFormat);
+            /* only required if output sample format size is different to input */
+            //mOutputSampleRatio =  av_get_bytes_per_sample(mAVStream->codec->sample_fmt)
+                                  /// av_get_bytes_per_sample(mOutputSampleFormat);
         }
     }
 
     size_t read(char *stream, size_t len)
     {
         int sample_skip = synchronize_audio();
-        if(mSwr) sample_skip /= mOutputSampleRatio;
+        //if(mSwr) sample_skip /= mOutputSampleRatio;
         size_t total = 0;
 
         while(total < len)
@@ -540,7 +547,7 @@ public:
                     /* If error, we're done */
                     break;
                 }
-                if(mSwr) mFrameSize /= mOutputSampleRatio;
+                //if(mSwr) mFrameSize /= mOutputSampleRatio;
 
                 mFramePos = std::min<ssize_t>(mFrameSize, sample_skip);
                 sample_skip -= mFramePos;
