@@ -660,7 +660,7 @@ int VideoState::OgreResource_Read(void *user_data, uint8_t *buf, int buf_size)
     return stream->read(buf, buf_size);
 }
 
-    int VideoState::OgreResource_Write(void *user_data, uint8_t *buf, int buf_size)
+int VideoState::OgreResource_Write(void *user_data, uint8_t *buf, int buf_size)
 {
     Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
     return stream->write(buf, buf_size);
