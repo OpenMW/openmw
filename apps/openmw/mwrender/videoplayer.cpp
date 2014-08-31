@@ -313,12 +313,12 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     VideoState *mVideoState;
     AVStream *mAVStream;
 
-    bool mSwr; /* non-zero indicates FLTP format */
+    bool mSwr;
     int mSamplesAllChannels;
     int mOutputSampleSize;
 
     AutoAVPacket mPacket;
-    AVFrame *mFrame; /* AVFrame is now defined in libavutil/frame.h (used to be libavcodec/avcodec.h) */
+    AVFrame *mFrame;
     ssize_t mFramePos;
     ssize_t mFrameSize;
 
@@ -453,7 +453,6 @@ public:
         else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
         {
             // resample to a known format for OpenAL_SoundStream
-            // TODO: allow different size sample format, e.g. Int16
             *type = MWSound::SampleType_Float32;
         }
         else
@@ -494,7 +493,6 @@ public:
 
         *samplerate = mAVStream->codec->sample_rate;
 
-        // FIXME: error handling
         if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
         {
             mSwr = true;
@@ -502,35 +500,9 @@ public:
 
         mSamplesAllChannels = av_get_bytes_per_sample(mAVStream->codec->sample_fmt) *
                       mAVStream->codec->channels;
-        mOutputSampleSize = av_get_bytes_per_sample(mAVStream->codec->sample_fmt); // TODO: not correct for S16
+        mOutputSampleSize = av_get_bytes_per_sample(mAVStream->codec->sample_fmt);
     }
 
-    /*
-     * stream is a ptr to vector<char> on the stack, see OpenAL_SoundStream::process in
-     * mwsound/openal_output.cpp (around line 481)
-     *
-     * len is the size of the output buffer (i.e. stream) based on the number of
-     * channels, rate and sample type (as reported by getInfo).
-     *
-     * sample_skip is the number of bytes to skip (from all channels) or repeat (i.e. negative)
-     *
-     * mFrameSize is the number of bytes decoded audio frame (from all channels), or -1 if finished
-     *
-     *
-     * +---------------------------------------------------------------------------------+
-     * |                                                                                 |
-     * |<------------------------------------------ len -------------------------------->|
-     * |                                                                                 |
-     * |<------ mFrameSize ------>|                                                      |
-     * |                                                                                 |
-     * +---------------------------------------------------------------------------------+
-     *      ^
-     *      |
-     *   mFramePos >= 0
-     *
-     *      |<----- len1 -------->|
-     *
-     */
     size_t read(char *stream, size_t len)
     {
         int sample_skip = synchronize_audio();
@@ -549,8 +521,6 @@ public:
                     /* If error, we're done */
                     break;
                 }
-                // for FLT sample format mFrameSize returned by audio_decode_frame is:
-                // 1920 samples x 4 bytes/sample x 2 channels = 15360 bytes
 
                 mFramePos = std::min<ssize_t>(mFrameSize, sample_skip);
                 sample_skip -= mFramePos;
@@ -572,9 +542,7 @@ public:
                     inputChannel0 += mFramePos/mSamplesAllChannels;
                     inputChannel1 += mFramePos/mSamplesAllChannels;
 
-                    // samples per channel = len1 bytes / bytes per sample / number of channels
                     unsigned int len1Samples = len1 / mSamplesAllChannels;
-                    // stream offset = total bytes / bytes per sample
                     unsigned int totalOffset = total / mOutputSampleSize;
                     float sample0 = 0;
                     float sample1 = 0;
@@ -591,7 +559,7 @@ public:
                     memcpy(stream, mFrame->data[0]+mFramePos, len1);
                 }
             }
-            else // repeat some samples FIXME: support ftlp
+            else // FIXME: support ftlp
             {
                 len1 = std::min<size_t>(len1, -mFramePos);
 
