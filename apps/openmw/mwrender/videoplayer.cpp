@@ -53,8 +53,6 @@ extern "C"
     // http://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
     #if AV_VERSION_INT(54, 56, 0) <= AV_VERSION_INT(LIBAVCODEC_VERSION_MAJOR, \
         LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO)
-        #include <libswresample/swresample.h> /* swr_init, swr_alloc, swr_convert, swr_free */
-        #include <libavutil/opt.h>            /* av_opt_set_int, av_opt_set_sample_fmt */
         #define FFMPEG_PLAY_BINKAUDIO
     #elif defined(_WIN32) && defined(_WIN64)
         // Versions up to 54.54.100 potentially crashes on Windows 64bit.
@@ -315,7 +313,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     VideoState *mVideoState;
     AVStream *mAVStream;
 
-    SwrContext *mSwr; /* non-zero indicates FLTP format */
+    bool mSwr; /* non-zero indicates FLTP format */
     int mSamplesAllChannels;
     int mOutputSampleSize;
 
@@ -435,15 +433,13 @@ public:
       /* Correct audio only if larger error than this */
       , mAudioDiffThreshold(2.0 * 0.050/* 50 ms */)
       , mAudioDiffAvgCount(0)
-      , mSwr(0)
+      , mSwr(false)
       , mSamplesAllChannels(0)
       , mOutputSampleSize(0)
     { }
     virtual ~MovieAudioDecoder()
     {
         av_freep(&mFrame);
-        if(mSwr)
-            swr_free(&mSwr);
     }
 
     void getInfo(int *samplerate, MWSound::ChannelConfig *chans, MWSound::SampleType * type)
@@ -501,14 +497,7 @@ public:
         // FIXME: error handling
         if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
         {
-            mSwr = swr_alloc();
-            av_opt_set_int(mSwr, "in_channel_layout", mAVStream->codec->channel_layout, 0);
-            av_opt_set_int(mSwr, "out_channel_layout", mAVStream->codec->channel_layout, 0);
-            av_opt_set_int(mSwr, "in_sample_rate", mAVStream->codec->sample_rate, 0);
-            av_opt_set_int(mSwr, "out_sample_rate", mAVStream->codec->sample_rate, 0);
-            av_opt_set_sample_fmt(mSwr, "in_sample_fmt", AV_SAMPLE_FMT_FLTP, 0);
-            av_opt_set_sample_fmt(mSwr, "out_sample_fmt", AV_SAMPLE_FMT_FLT, 0); // TODO: Try S16
-            swr_init(mSwr);
+            mSwr = true;
         }
 
         mSamplesAllChannels = av_get_bytes_per_sample(mAVStream->codec->sample_fmt) *
