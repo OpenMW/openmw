@@ -513,7 +513,7 @@ public:
 
         mSamplesAllChannels = av_get_bytes_per_sample(mAVStream->codec->sample_fmt) *
                       mAVStream->codec->channels;
-        mOutputSampleSize = av_get_bytes_per_sample(mAVStream->codec->sample_fmt); // TODO: not correct for S16
+        mOutputSampleSize = av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT);
     }
 
     /*
@@ -547,8 +547,6 @@ public:
         int sample_skip = synchronize_audio();
         size_t total = 0;
 
-        float *outputStream = (float *)&stream[0];
-
         while(total < len)
         {
             if(mFramePos >= mFrameSize)
@@ -575,27 +573,24 @@ public:
 
                 if(mSwr)
                 {
-                    // Convert from AV_SAMPLE_FMT_FLTP to AV_SAMPLE_FMT_FLT
-                    // FIXME: support channel formats other than stereo
-                    // FIXME: support sample formats other than Float32
-                    float* inputChannel0 = (float*)mFrame->extended_data[0];
-                    float* inputChannel1 = (float*)mFrame->extended_data[1];
-                    inputChannel0 += mFramePos/mSamplesAllChannels;
-                    inputChannel1 += mFramePos/mSamplesAllChannels;
-
-                    // samples per channel = len1 bytes / bytes per sample / number of channels
-                    unsigned int len1Samples = len1 / mSamplesAllChannels;
-                    // stream offset = total bytes / bytes per sample
-                    unsigned int totalOffset = total / mOutputSampleSize;
-                    float sample0 = 0;
-                    float sample1 = 0;
-                    for (unsigned int i = 0 ; i < len1Samples ; ++i)
+                    int convertedSamples = 0;
+                    if(mFramePos > 0 && mFramePos < mFrameSize)
                     {
-                        sample0 = *inputChannel0++;
-                        sample1 = *inputChannel1++;
-                        outputStream[totalOffset+i*2] = sample0;
-                        outputStream[totalOffset+i*2+1] = sample1;
+                        if(swr_drop_output(mSwr, mFramePos/mSamplesAllChannels) < 0)
+                            break;
+
+                        convertedSamples = swr_convert(mSwr, (uint8_t**)&stream, len1/mSamplesAllChannels,
+                           (const uint8_t**)mFrame->extended_data, (len1+mFramePos)/mSamplesAllChannels);
                     }
+                    else
+                    {
+                        convertedSamples = swr_convert(mSwr, (uint8_t**)&stream, len1/mSamplesAllChannels,
+                           (const uint8_t**)mFrame->extended_data, len1/mSamplesAllChannels);
+                    }
+                    if(convertedSamples > 0)
+                        len1 = convertedSamples * mSamplesAllChannels;
+                    else
+                        break;
                 }
                 else
                 {
@@ -660,7 +655,7 @@ int VideoState::OgreResource_Read(void *user_data, uint8_t *buf, int buf_size)
     return stream->read(buf, buf_size);
 }
 
-    int VideoState::OgreResource_Write(void *user_data, uint8_t *buf, int buf_size)
+int VideoState::OgreResource_Write(void *user_data, uint8_t *buf, int buf_size)
 {
     Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
     return stream->write(buf, buf_size);
