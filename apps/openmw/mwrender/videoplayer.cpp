@@ -315,13 +315,13 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     VideoState *mVideoState;
     AVStream *mAVStream;
 
-    SwrContext *mSwr; /* non-zero indicates FLTP format */
+    SwrContext *mSwr;
     int mSamplesAllChannels;
     float mOutputSampleRatio;
     enum AVSampleFormat mOutputSampleFormat;
 
     AutoAVPacket mPacket;
-    AVFrame *mFrame; /* AVFrame is now defined in libavutil/frame.h (used to be libavcodec/avcodec.h) */
+    AVFrame *mFrame;
     ssize_t mFramePos;
     ssize_t mFrameSize;
 
@@ -523,32 +523,6 @@ public:
         }
     }
 
-    /*
-     * stream is a ptr to vector<char> on the stack, see OpenAL_SoundStream::process in
-     * mwsound/openal_output.cpp (around line 481)
-     *
-     * len is the size of the output buffer (i.e. stream) based on the number of
-     * channels, rate and sample type (as reported by getInfo).
-     *
-     * sample_skip is the number of bytes to skip (from all channels) or repeat (i.e. negative)
-     *
-     * mFrameSize is the number of bytes decoded audio frame (from all channels), or -1 if finished
-     *
-     *
-     * +---------------------------------------------------------------------------------+
-     * |                                                                                 |
-     * |<------------------------------------------ len -------------------------------->|
-     * |                                                                                 |
-     * |<------ mFrameSize ------>|                                                      |
-     * |                                                                                 |
-     * +---------------------------------------------------------------------------------+
-     *      ^
-     *      |
-     *   mFramePos >= 0
-     *
-     *      |<----- len1 -------->|
-     *
-     */
     size_t read(char *stream, size_t len)
     {
         int sample_skip = synchronize_audio();
@@ -604,7 +578,7 @@ public:
                     memcpy(stream, mFrame->data[0]+mFramePos, len1);
                 }
             }
-            else // repeat some samples FIXME: support ftlp
+            else // FIXME: support ftlp
             {
                 len1 = std::min<size_t>(len1, -mFramePos);
 
