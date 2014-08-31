@@ -317,7 +317,8 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
 
     SwrContext *mSwr; /* non-zero indicates FLTP format */
     int mSamplesAllChannels;
-    int mOutputSampleSize;
+    float mOutputSampleRatio;
+    enum AVSampleFormat mOutputSampleFormat;
 
     AutoAVPacket mPacket;
     AVFrame *mFrame; /* AVFrame is now defined in libavutil/frame.h (used to be libavcodec/avcodec.h) */
@@ -437,7 +438,8 @@ public:
       , mAudioDiffAvgCount(0)
       , mSwr(0)
       , mSamplesAllChannels(0)
-      , mOutputSampleSize(0)
+      , mOutputSampleRatio(1)
+      , mOutputSampleFormat(AV_SAMPLE_FMT_S16)
     { }
     virtual ~MovieAudioDecoder()
     {
@@ -457,8 +459,12 @@ public:
         else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
         {
             // resample to a known format for OpenAL_SoundStream
-            // TODO: allow different size sample format, e.g. Int16
-            *type = MWSound::SampleType_Float32;
+            if(mOutputSampleFormat == AV_SAMPLE_FMT_S16)
+                *type = MWSound::SampleType_Int16;
+            else if(mOutputSampleFormat == AV_SAMPLE_FMT_FLT)
+                *type = MWSound::SampleType_Float32;
+            else
+                *type = MWSound::SampleType_Int16; // default
         }
         else
             fail(std::string("Unsupported sample format: ")+
@@ -507,13 +513,14 @@ public:
             av_opt_set_int(mSwr, "in_sample_rate", mAVStream->codec->sample_rate, 0);
             av_opt_set_int(mSwr, "out_sample_rate", mAVStream->codec->sample_rate, 0);
             av_opt_set_sample_fmt(mSwr, "in_sample_fmt", AV_SAMPLE_FMT_FLTP, 0);
-            av_opt_set_sample_fmt(mSwr, "out_sample_fmt", AV_SAMPLE_FMT_FLT, 0); // TODO: Try S16
+            av_opt_set_sample_fmt(mSwr, "out_sample_fmt", mOutputSampleFormat, 0);
             swr_init(mSwr);
-        }
 
-        mSamplesAllChannels = av_get_bytes_per_sample(mAVStream->codec->sample_fmt) *
-                      mAVStream->codec->channels;
-        mOutputSampleSize = av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT);
+            mSamplesAllChannels = av_get_bytes_per_sample(mOutputSampleFormat)
+                                  * mAVStream->codec->channels;
+            mOutputSampleRatio =  av_get_bytes_per_sample(AV_SAMPLE_FMT_FLTP)
+                                  / av_get_bytes_per_sample(mOutputSampleFormat);
+        }
     }
 
     /*
@@ -545,6 +552,7 @@ public:
     size_t read(char *stream, size_t len)
     {
         int sample_skip = synchronize_audio();
+        if(mSwr) sample_skip /= mOutputSampleRatio;
         size_t total = 0;
 
         while(total < len)
@@ -558,8 +566,7 @@ public:
                     /* If error, we're done */
                     break;
                 }
-                // for FLT sample format mFrameSize returned by audio_decode_frame is:
-                // 1920 samples x 4 bytes/sample x 2 channels = 15360 bytes
+                if(mSwr) mFrameSize /= mOutputSampleRatio;
 
                 mFramePos = std::min<ssize_t>(mFrameSize, sample_skip);
                 sample_skip -= mFramePos;
