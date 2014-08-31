@@ -317,7 +317,6 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
 
     SwrContext *mSwr;
     int mSamplesAllChannels;
-    float mOutputSampleRatio;
     enum AVSampleFormat mOutputSampleFormat;
 
     AutoAVPacket mPacket;
@@ -438,7 +437,6 @@ public:
       , mAudioDiffAvgCount(0)
       , mSwr(0)
       , mSamplesAllChannels(0)
-      , mOutputSampleRatio(1)
       , mOutputSampleFormat(AV_SAMPLE_FMT_NONE)
     { }
     virtual ~MovieAudioDecoder()
@@ -524,16 +522,12 @@ public:
 
             mSamplesAllChannels = av_get_bytes_per_sample(mOutputSampleFormat)
                                   * mAVStream->codec->channels;
-            /* only required if output sample format size is different to input */
-            //mOutputSampleRatio =  av_get_bytes_per_sample(mAVStream->codec->sample_fmt)
-                                  /// av_get_bytes_per_sample(mOutputSampleFormat);
         }
     }
 
     size_t read(char *stream, size_t len)
     {
         int sample_skip = synchronize_audio();
-        //if(mSwr) sample_skip /= mOutputSampleRatio;
         size_t total = 0;
 
         while(total < len)
@@ -547,7 +541,6 @@ public:
                     /* If error, we're done */
                     break;
                 }
-                //if(mSwr) mFrameSize /= mOutputSampleRatio;
 
                 mFramePos = std::min<ssize_t>(mFrameSize, sample_skip);
                 sample_skip -= mFramePos;
