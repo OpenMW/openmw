@@ -32,10 +32,11 @@ extern "C"
     #include <libavformat/avformat.h>
     #include <libswscale/swscale.h>
 
-    // From libavformat version 55.0.100 and onward the declaration of av_gettime() is removed from libavformat/avformat.h and moved
-    // to libavutil/time.h
+    // From libavformat version 55.0.100 and onward the declaration of av_gettime() is
+    // removed from libavformat/avformat.h and moved to libavutil/time.h
     // https://github.com/FFmpeg/FFmpeg/commit/06a83505992d5f49846c18507a6c3eb8a47c650e
-    #if AV_VERSION_INT(55, 0, 100) <= AV_VERSION_INT(LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO)
+    #if AV_VERSION_INT(55, 0, 100) <= AV_VERSION_INT(LIBAVFORMAT_VERSION_MAJOR, \
+        LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO)
         #include <libavutil/time.h>
     #endif
 
@@ -46,30 +47,25 @@ extern "C"
         LIBAVUTIL_VERSION_MINOR, LIBAVUTIL_VERSION_MICRO)
         #include <libavutil/channel_layout.h>
     #endif
-}
 
-#ifdef _WIN32
-    // Decide whether to play binkaudio.
-    #include <libavcodec/version.h>
-    // libavcodec versions 54.10.100 (or maybe earlier) to 54.54.100 potentially crashes Windows 64bit.
-    // From version 54.56 or higher, there's no sound due to the encoding format changing from S16 to FLTP
-    // (see https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d and
-    // http://git.videolan.org/?p=ffmpeg.git;a=commitdiff;h=3049d5b9b32845c86aa5588bb3352bdeb2edfdb2;hp=43c6b45a53a186a187f7266e4d6bd3c2620519f1),
-    // but does not crash (or at least no known crash).
-    #if (LIBAVCODEC_VERSION_MAJOR > 54)
+    // From version 54.56 binkaudio encoding format changed from S16 to FLTP. See:
+    // https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d
+    // http://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
+    #if AV_VERSION_INT(54, 56, 0) <= AV_VERSION_INT(LIBAVCODEC_VERSION_MAJOR, \
+        LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO)
         #define FFMPEG_PLAY_BINKAUDIO
-    #else
-        #ifdef _WIN64
-            #if ((LIBAVCODEC_VERSION_MAJOR == 54) && (LIBAVCODEC_VERSION_MINOR >= 55))
-                #define FFMPEG_PLAY_BINKAUDIO
-            #endif
-        #else
-            #if ((LIBAVCODEC_VERSION_MAJOR == 54) && (LIBAVCODEC_VERSION_MINOR >= 10))
-                #define FFMPEG_PLAY_BINKAUDIO
-            #endif
+    #elif defined(_WIN32) && defined(_WIN64)
+        // Versions up to 54.54.100 potentially crashes on Windows 64bit.
+        #if ((LIBAVCODEC_VERSION_MAJOR == 54) && (LIBAVCODEC_VERSION_MINOR >= 55))
+            #define FFMPEG_PLAY_BINKAUDIO
+        #endif
+    #elif defined(_WIN32)
+        // 54.10.100 is a known working version on 32bit, but earlier ones may also work.
+        #if ((LIBAVCODEC_VERSION_MAJOR == 54) && (LIBAVCODEC_VERSION_MINOR >= 10))
+            #define FFMPEG_PLAY_BINKAUDIO
         #endif
     #endif
-#endif
+}
 
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
 #define MAX_VIDEOQ_SIZE (5 * 256 * 1024)
@@ -317,6 +313,10 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     VideoState *mVideoState;
     AVStream *mAVStream;
 
+    bool mSwr;
+    int mSamplesAllChannels;
+    int mOutputSampleSize;
+
     AutoAVPacket mPacket;
     AVFrame *mFrame;
     ssize_t mFramePos;
@@ -420,7 +420,11 @@ public:
     MovieAudioDecoder(VideoState *is)
       : mVideoState(is)
       , mAVStream(*is->audio_st)
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55, 28, 1)
       , mFrame(avcodec_alloc_frame())
+#else
+      , mFrame(av_frame_alloc())
+#endif
       , mFramePos(0)
       , mFrameSize(0)
       , mAudioClock(0.0)
@@ -429,6 +433,9 @@ public:
       /* Correct audio only if larger error than this */
       , mAudioDiffThreshold(2.0 * 0.050/* 50 ms */)
       , mAudioDiffAvgCount(0)
+      , mSwr(false)
+      , mSamplesAllChannels(0)
+      , mOutputSampleSize(0)
     { }
     virtual ~MovieAudioDecoder()
     {
@@ -443,6 +450,11 @@ public:
             *type = MWSound::SampleType_Int16;
         else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLT)
             *type = MWSound::SampleType_Float32;
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
+        {
+            // resample to a known format for OpenAL_SoundStream
+            *type = MWSound::SampleType_Float32;
+        }
         else
             fail(std::string("Unsupported sample format: ")+
                  av_get_sample_fmt_name(mAVStream->codec->sample_fmt));
@@ -480,12 +492,23 @@ public:
         }
 
         *samplerate = mAVStream->codec->sample_rate;
+
+        if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
+        {
+            mSwr = true;
+        }
+
+        mSamplesAllChannels = av_get_bytes_per_sample(mAVStream->codec->sample_fmt) *
+                      mAVStream->codec->channels;
+        mOutputSampleSize = av_get_bytes_per_sample(mAVStream->codec->sample_fmt);
     }
 
     size_t read(char *stream, size_t len)
     {
         int sample_skip = synchronize_audio();
         size_t total = 0;
+
+        float *outputStream = (float *)&stream[0];
 
         while(total < len)
         {
@@ -508,9 +531,35 @@ public:
             if(mFramePos >= 0)
             {
                 len1 = std::min<size_t>(len1, mFrameSize-mFramePos);
-                memcpy(stream, mFrame->data[0]+mFramePos, len1);
+
+                if(mSwr)
+                {
+                    // Convert from AV_SAMPLE_FMT_FLTP to AV_SAMPLE_FMT_FLT
+                    // FIXME: support channel formats other than stereo
+                    // FIXME: support sample formats other than Float32
+                    float* inputChannel0 = (float*)mFrame->extended_data[0];
+                    float* inputChannel1 = (float*)mFrame->extended_data[1];
+                    inputChannel0 += mFramePos/mSamplesAllChannels;
+                    inputChannel1 += mFramePos/mSamplesAllChannels;
+
+                    unsigned int len1Samples = len1 / mSamplesAllChannels;
+                    unsigned int totalOffset = total / mOutputSampleSize;
+                    float sample0 = 0;
+                    float sample1 = 0;
+                    for (unsigned int i = 0 ; i < len1Samples ; ++i)
+                    {
+                        sample0 = *inputChannel0++;
+                        sample1 = *inputChannel1++;
+                        outputStream[totalOffset+i*2] = sample0;
+                        outputStream[totalOffset+i*2+1] = sample1;
+                    }
+                }
+                else
+                {
+                    memcpy(stream, mFrame->data[0]+mFramePos, len1);
+                }
             }
-            else
+            else // FIXME: support ftlp
             {
                 len1 = std::min<size_t>(len1, -mFramePos);
 
@@ -768,9 +817,15 @@ void VideoState::video_thread_loop(VideoState *self)
     AVFrame *pFrame;
     double pts;
 
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55, 28, 1)
     pFrame = avcodec_alloc_frame();
 
     self->rgbaFrame = avcodec_alloc_frame();
+#else
+    pFrame = av_frame_alloc();
+
+    self->rgbaFrame = av_frame_alloc();
+#endif
     avpicture_alloc((AVPicture*)self->rgbaFrame, PIX_FMT_RGBA, (*self->video_st)->codec->width, (*self->video_st)->codec->height);
 
     while(self->videoq.get(packet, self) >= 0)
