@@ -317,7 +317,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
 
     SwrContext *mSwr; /* non-zero indicates FLTP format */
     int mSamplesAllChannels;
-    int mSampleSize;
+    int mOutputSampleSize;
 
     AutoAVPacket mPacket;
     AVFrame *mFrame; /* AVFrame is now defined in libavutil/frame.h (used to be libavcodec/avcodec.h) */
@@ -437,7 +437,7 @@ public:
       , mAudioDiffAvgCount(0)
       , mSwr(0)
       , mSamplesAllChannels(0)
-      , mSampleSize(0)
+      , mOutputSampleSize(0)
     { }
     virtual ~MovieAudioDecoder()
     {
@@ -513,7 +513,7 @@ public:
 
         mSamplesAllChannels = av_get_bytes_per_sample(mAVStream->codec->sample_fmt) *
                       mAVStream->codec->channels;
-        mSampleSize = av_get_bytes_per_sample(mAVStream->codec->sample_fmt);
+        mOutputSampleSize = av_get_bytes_per_sample(mAVStream->codec->sample_fmt); // TODO: not correct for S16
     }
 
     /*
@@ -548,14 +548,11 @@ public:
         size_t total = 0;
 
         float *outputStream = (float *)&stream[0];
-        //uint16_t *intStream = (uint16_t *)&stream[0];
 
         while(total < len)
         {
             if(mFramePos >= mFrameSize)
             {
-                // for FLT sample format mFrameSize returned by audio_decode_frame is:
-                // 1920 samples x 4 bytes/sample x 2 channels = 15360 bytes
                 /* We have already sent all our data; get more */
                 mFrameSize = audio_decode_frame(mFrame);
                 if(mFrameSize < 0)
@@ -563,6 +560,8 @@ public:
                     /* If error, we're done */
                     break;
                 }
+                // for FLT sample format mFrameSize returned by audio_decode_frame is:
+                // 1920 samples x 4 bytes/sample x 2 channels = 15360 bytes
 
                 mFramePos = std::min<ssize_t>(mFrameSize, sample_skip);
                 sample_skip -= mFramePos;
@@ -581,38 +580,19 @@ public:
                     // FIXME: support sample formats other than Float32
                     float* inputChannel0 = (float*)mFrame->extended_data[0];
                     float* inputChannel1 = (float*)mFrame->extended_data[1];
-#if 0
-                    uint16_t* inputChannel0 = (uint16_t*)mFrame->extended_data[0];
-                    uint16_t* inputChannel1 = (uint16_t*)mFrame->extended_data[1];
-#endif
                     inputChannel0 += mFramePos/mSamplesAllChannels;
                     inputChannel1 += mFramePos/mSamplesAllChannels;
-                    //if(mFramePos > 0)
-                        //std::cout << "mFramePos (bytes): " + std::to_string(mFramePos)
-                        //<< " samples: " + std::to_string(mFramePos/mSamplesAllChannels) << std::endl;
 
                     // samples per channel = len1 bytes / bytes per sample / number of channels
                     unsigned int len1Samples = len1 / mSamplesAllChannels;
                     // stream offset = total bytes / bytes per sample
-                    unsigned int totalOffset = total / mSampleSize;
+                    unsigned int totalOffset = total / mOutputSampleSize;
                     float sample0 = 0;
                     float sample1 = 0;
                     for (unsigned int i = 0 ; i < len1Samples ; ++i)
                     {
                         sample0 = *inputChannel0++;
                         sample1 = *inputChannel1++;
-#if 0
-                        if(sample0<-1.0f)
-                            sample0=-1.0f;
-                        else if(sample0>1.0f)
-                            sample0=1.0f;
-                        if(sample1<-1.0f)
-                            sample1=-1.0f;
-                        else if(sample1>1.0f)
-                            sample1=1.0f;
-                        intStream[totalOffset+i*2] = (uint16_t) (sample0 * 32767.0f);
-                        intStream[totalOffset+i*2+1] = (uint16_t) (sample1 * 32767.0f);
-#endif
                         outputStream[totalOffset+i*2] = sample0;
                         outputStream[totalOffset+i*2+1] = sample1;
                     }
