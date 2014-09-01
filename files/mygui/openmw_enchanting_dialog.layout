@@ -48,33 +48,52 @@
 
         </Widget>
 
-
-        <Widget type="TextBox" skin="NormalText" position="320 0 300 24">
-            <Property key="Caption" value="#{sEnchantmentMenu3}:"/>
+        <!-- Values -->
+        <Widget type="VBox" position="320 8 222 72">
+            <Widget type="HBox">
+                <UserString key="HStretch" value="true"/>
+                <Widget type="AutoSizedTextBox" skin="NormalText">
+                    <Property key="Caption" value="#{sEnchantmentMenu3}:"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="TextToolTip"/>
+                    <UserString key="Caption_Text" value="#{sEnchantmentHelp3}"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" name="Enchantment">
+                    <Property key="Caption" value="1"/>
+                    <Property key="TextAlign" value="Right VCenter"/>
+                    <UserString key="HStretch" value="true"/>
+                </Widget>
+            </Widget>
+            <Widget type="HBox">
+                <UserString key="HStretch" value="true"/>
+                <Widget type="AutoSizedTextBox" skin="NormalText">
+                    <Property key="Caption" value="#{sCastCost}:"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="TextToolTip"/>
+                    <UserString key="Caption_Text" value="#{sEnchantmentHelp4}"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" name="CastCost">
+                    <Property key="Caption" value="39"/>
+                    <Property key="TextAlign" value="Right VCenter"/>
+                    <UserString key="HStretch" value="true"/>
+                </Widget>
+            </Widget>
+            <Widget type="HBox">
+                <UserString key="HStretch" value="true"/>
+                <Widget type="AutoSizedTextBox" skin="NormalText">
+                    <Property key="Caption" value="#{sCharges}"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="TextToolTip"/>
+                    <UserString key="Caption_Text" value="#{sEnchantmentHelp5}"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" name="Charge">
+                    <Property key="Caption" value="39"/>
+                    <Property key="TextAlign" value="Right VCenter"/>
+                    <UserString key="HStretch" value="true"/>
+                </Widget>
+            </Widget>
+            <Widget type="Widget"/>
         </Widget>
-        <Widget type="TextBox" skin="SandText" position="280 0 258 24" name="Enchantment">
-            <Property key="Caption" value="1"/>
-            <Property key="TextAlign" value="Right HCenter"/>
-        </Widget>
-
-
-        <Widget type="TextBox" skin="NormalText" position="320 24 300 24">
-            <Property key="Caption" value="#{sCastCost}:"/>
-        </Widget>
-        <Widget type="TextBox" skin="SandText" position="280 24 258 24" name="CastCost">
-            <Property key="Caption" value="39"/>
-            <Property key="TextAlign" value="Right HCenter"/>
-        </Widget>
-
-
-        <Widget type="TextBox" skin="NormalText" position="320 48 300 24">
-            <Property key="Caption" value="#{sCharges}"/>
-        </Widget>
-        <Widget type="TextBox" skin="SandText" position="280 48 258 24" name="Charge">
-            <Property key="Caption" value="39"/>
-            <Property key="TextAlign" value="Right HCenter"/>
-        </Widget>
-
 
         <!-- Available effects -->
         <Widget type="TextBox" skin="NormalText" position="12 108 300 24">
