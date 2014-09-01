@@ -245,12 +245,15 @@ namespace MWGui
     {
         mInputDevice->removeAllItems();
         mInputDevice->addItem("Mouse/Keyboard", -1);
-        std::list<int> joysticks = MWBase::Environment::get().getInputManager()->joystickList();
+        if(MWBase::Environment::get().getInputManager()->joystickList().size() != 0)
+            mInputDevice->addItem("Game Controller", 0);
+        /*std::list<int> joysticks = MWBase::Environment::get().getInputManager()->joystickList();
         for(std::list<int>::iterator it = joysticks.begin(); it != joysticks.end(); it++)
         {
             mInputDevice->addItem(SDL_JoystickNameForIndex(*it), *it);
-        }
-        mInputDevice->setIndexSelected(0);
+        */
+        bool joystickLastUsed = MWBase::Environment::get().getInputManager()->joystickLastUsed();
+        mInputDevice->setIndexSelected((joystickLastUsed) ? 1 : 0);
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
@@ -462,7 +465,6 @@ namespace MWGui
     {
         updateControlsBox();
         _sender->setIndexSelected(pos);
-        MWBase::Environment::get().getInputManager()->EatMouseUp(); //Fix for MyGUI bug
     }
 
     void SettingsWindow::updateControlsBox()

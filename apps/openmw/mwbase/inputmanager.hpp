@@ -36,8 +36,6 @@ namespace MWBase
             virtual void toggleControlSwitch (const std::string& sw, bool value) = 0;
             virtual bool getControlSwitch (const std::string& sw) = 0;
 
-            virtual void EatMouseUp() = 0;
-
             virtual std::string getActionDescription (int action) = 0;
             virtual std::string getActionBindingName (int action) = 0;
             virtual std::string getActionBindingName (int action, int deviceID) = 0;

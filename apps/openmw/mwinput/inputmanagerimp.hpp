@@ -113,8 +113,6 @@ namespace MWInput
         virtual void windowResized (int x, int y);
         virtual void windowClosed ();
 
-        virtual void EatMouseUp() { mEatMouseUp = true; }
-
         virtual void channelChanged(ICS::Channel* channel, float currentValue, float previousValue);
 
         virtual void mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
@@ -163,8 +161,6 @@ namespace MWInput
         bool mInvertY;
 
         bool mControlsDisabled;
-
-        bool mEatMouseUp;
 
         float mCameraSensitivity;
         float mUISensitivity;

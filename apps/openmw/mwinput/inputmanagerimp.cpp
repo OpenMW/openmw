@@ -121,7 +121,6 @@ namespace MWInput
         , mAttemptJump(false)
         , mControlsDisabled(false)
         , mJoystickLastUsed(false)
-        , mEatMouseUp(false)
         , mBindDeviceID(-1)
         , mMouseInjected(false)
     {
@@ -827,13 +826,6 @@ namespace MWInput
 
     void InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
-        //MyGUI has a bug where comboboxes react on MouseDown, resulting in an extra mouseReleased command which causes some issues
-        if(mEatMouseUp)
-        {
-            mEatMouseUp = false;
-            return;
-        }
-
         if(mInputBinder->detectingBindingState())
         {
             mInputBinder->mouseReleased (arg, id);
