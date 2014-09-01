@@ -53,9 +53,10 @@ extern "C"
     // http://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
     #if AV_VERSION_INT(54, 56, 0) <= AV_VERSION_INT(LIBAVCODEC_VERSION_MAJOR, \
         LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO)
-        #include <libswresample/swresample.h> /* swr_init, swr_alloc, swr_convert, swr_free */
-        #include <libavutil/opt.h>            /* av_opt_set_int, av_opt_set_sample_fmt */
-        #define FFMPEG_PLAY_BINKAUDIO
+        #ifdef HAVE_LIBSWRESAMPLE
+            #include <libswresample/swresample.h>
+            #define FFMPEG_PLAY_BINKAUDIO
+        #endif
     #elif defined(_WIN32) && defined(_WIN64)
         // Versions up to 54.54.100 potentially crashes on Windows 64bit.
         #if ((LIBAVCODEC_VERSION_MAJOR == 54) && (LIBAVCODEC_VERSION_MINOR >= 55))
@@ -315,7 +316,11 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     VideoState *mVideoState;
     AVStream *mAVStream;
 
+#ifdef HAVE_LIBSWRESAMPLE
     SwrContext *mSwr;
+#else
+    bool mSwr;
+#endif
     int mSamplesAllChannels;
     enum AVSampleFormat mOutputSampleFormat;
 
@@ -442,21 +447,27 @@ public:
     virtual ~MovieAudioDecoder()
     {
         av_freep(&mFrame);
-        if(mSwr)
-            swr_free(&mSwr);
+#ifdef HAVE_LIBSWRESAMPLE
+        swr_free(&mSwr);
+#endif
     }
 
     void getInfo(int *samplerate, MWSound::ChannelConfig *chans, MWSound::SampleType * type)
     {
-        if((mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8) ||
-                                        (mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8P))
+        if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8)
             *type = MWSound::SampleType_UInt8;
-        else if((mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16) ||
-                                        (mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16P))
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16)
             *type = MWSound::SampleType_Int16;
-        else if((mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLT) ||
-                                        (mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP))
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLT)
             *type = MWSound::SampleType_Float32;
+#ifdef HAVE_LIBSWRESAMPLE
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8P)
+            *type = MWSound::SampleType_UInt8;
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16P)
+            *type = MWSound::SampleType_Int16;
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
+            *type = MWSound::SampleType_Float32;
+#endif
         else
             fail(std::string("Unsupported sample format: ")+
                  av_get_sample_fmt_name(mAVStream->codec->sample_fmt));
@@ -495,6 +506,7 @@ public:
 
         *samplerate = mAVStream->codec->sample_rate;
 
+#ifdef HAVE_LIBSWRESAMPLE
         if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8P)
             mOutputSampleFormat = AV_SAMPLE_FMT_U8;
         else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16P)
@@ -506,15 +518,15 @@ public:
 
         if(mOutputSampleFormat != AV_SAMPLE_FMT_NONE)
         {
-            mSwr = swr_alloc_set_opts(mSwr,                             // SwrContext
-                                      mAVStream->codec->channel_layout, // output ch layout
-                                      mOutputSampleFormat,              // output sample format
-                                      mAVStream->codec->sample_rate,    // output sample rate
-                                      mAVStream->codec->channel_layout, // input ch layout
-                                      mAVStream->codec->sample_fmt,     // input sample format
-                                      mAVStream->codec->sample_rate,    // input sample rate
-                                      0,                                // logging level offset
-                                      NULL);                            // log context
+            mSwr = swr_alloc_set_opts(mSwr,                     // SwrContext
+                              mAVStream->codec->channel_layout, // output ch layout
+                              mOutputSampleFormat,              // output sample format
+                              mAVStream->codec->sample_rate,    // output sample rate
+                              mAVStream->codec->channel_layout, // input ch layout
+                              mAVStream->codec->sample_fmt,     // input sample format
+                              mAVStream->codec->sample_rate,    // input sample rate
+                              0,                                // logging level offset
+                              NULL);                            // log context
             if(!mSwr)
                 fail(std::string("Couldn't allocate SwrContext"));
             if(swr_init(mSwr) < 0)
@@ -523,12 +535,16 @@ public:
             mSamplesAllChannels = av_get_bytes_per_sample(mOutputSampleFormat)
                                   * mAVStream->codec->channels;
         }
+#endif
     }
 
     size_t read(char *stream, size_t len)
     {
         int sample_skip = synchronize_audio();
         size_t total = 0;
+        uint8_t *output = NULL;
+        if(mSwr) av_samples_alloc(&output, NULL, mAVStream->codec->channels,
+                                  len/mSamplesAllChannels, mOutputSampleFormat, 0);
 
         while(total < len)
         {
@@ -546,7 +562,17 @@ public:
                 sample_skip -= mFramePos;
                 continue;
             }
-
+#ifdef HAVE_LIBSWRESAMPLE
+            if(mSwr)
+            {
+                int n = swr_convert(mSwr, (uint8_t**)&output, mFrame->nb_samples,
+                                    (const uint8_t**)mFrame->extended_data, mFrame->nb_samples);
+                if(n < 0)
+                    break;
+                else if(n < mFrame->nb_samples)
+                    std::cerr<<"swr_convert error: "+std::to_string(mFrame->nb_samples-n)<<std::endl;
+            }
+#endif
             size_t len1 = len - total;
             if(mFramePos >= 0)
             {
@@ -554,24 +580,7 @@ public:
 
                 if(mSwr)
                 {
-                    int convertedSamples = 0;
-                    if(mFramePos > 0 && mFramePos < mFrameSize)
-                    {
-                        if(swr_drop_output(mSwr, mFramePos/mSamplesAllChannels) < 0)
-                            break;
-
-                        convertedSamples = swr_convert(mSwr, (uint8_t**)&stream, len1/mSamplesAllChannels,
-                           (const uint8_t**)mFrame->extended_data, (len1+mFramePos)/mSamplesAllChannels);
-                    }
-                    else
-                    {
-                        convertedSamples = swr_convert(mSwr, (uint8_t**)&stream, len1/mSamplesAllChannels,
-                           (const uint8_t**)mFrame->extended_data, len1/mSamplesAllChannels);
-                    }
-                    if(convertedSamples > 0)
-                        len1 = convertedSamples * mSamplesAllChannels;
-                    else
-                        break;
+                    memcpy(stream, &output[0]+mFramePos, len1);
                 }
                 else
                 {
@@ -617,6 +626,7 @@ public:
             stream += len1;
             mFramePos += len1;
         }
+        if(mSwr) av_freep(&output);
 
         return total;
     }
