@@ -229,6 +229,7 @@ namespace MWInput
         }
 
         //Changes axises to work like buttons, for the triggers on xBox controllers
+        //Triggers range from .5 to 1 for some godaweful reason
         if(mJoystickLastUsed)
         {
             //Never pressed before
@@ -237,7 +238,7 @@ namespace MWInput
 
             if(mJoystickAxisButtonState[action])
             {
-                if(currentValue <= .25)
+                if(currentValue <= .6)
                 {
                     mJoystickAxisButtonState[action] = false;
                     currentValue = 0;
@@ -248,7 +249,7 @@ namespace MWInput
             }
             else
             {
-                if(currentValue >= .75)
+                if(currentValue >= .9)
                 {
                     mJoystickAxisButtonState[action] = true;
                     currentValue = 1;
@@ -406,8 +407,8 @@ namespace MWInput
 
                 // We keep track of our own mouse position, so that moving the mouse while in
                 // game mode does not move the position of the GUI cursor
-                mMouseX += mXAxisMove * (dt * 500.0f) * 500.0f * mCameraSensitivity * (1.0f/256.f);
-                mMouseY += mYAxisMove * (dt * 500.0f) * 500.0f * mCameraSensitivity * (1.0f/256.f) * -1;
+                mMouseX += mXAxisMove * dt * 1500.0f;
+                mMouseY += mYAxisMove * dt * -1500.0f;
 
                 mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
                 mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
@@ -474,7 +475,7 @@ namespace MWInput
                         mPlayer->setForwardBackward (1);
                     }
 
-                    ///todo: Implement seporate run/walk states for forward/barkwards and left/right
+                    ///todo: Implement separate run/walk states for forward/backwards and left/right
                     if(std::abs(mXAxisMove) > .75 || std::abs(mYAxisMove) > .75) //run if sticks are pressed all the way up
                         mPlayer->setRunState(true);
                     else
@@ -774,12 +775,14 @@ namespace MWInput
     }*/
     void InputManager::joystickAdded(int deviceID)
     {
+        //We only support joysticks that SDL supports
         if(!SDL_IsGameController(deviceID))
         {
             std::cout << "Unsupported Gamecontroller Added" << std::endl;
+            return;
         }
 
-        SDL_GameController* joy = SDL_GameControllerOpen(deviceID);
+        SDL_GameControllerOpen(deviceID);
 
         // If this is the first joystick added, give the input control system something to work with
         // This is mostly so I can avoid finding a fix for the system and fixing it. SDL makes working with game controllers annoying
