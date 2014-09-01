@@ -1,7 +1,7 @@
 #ifndef SCRIPTEDIT_H
 #define SCRIPTEDIT_H
 
-#include <QTextEdit>
+#include <QPlainTextEdit>
 #include <QVector>
 #include <QTimer>
 
@@ -19,7 +19,7 @@ namespace CSMDoc
 
 namespace CSVWorld
 {
-    class ScriptEdit : public QTextEdit
+    class ScriptEdit : public QPlainTextEdit
     {
             Q_OBJECT
 

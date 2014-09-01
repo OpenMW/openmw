@@ -25,13 +25,13 @@ CSVWorld::ScriptEdit::ChangeLock::~ChangeLock()
 
 CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, ScriptHighlighter::Mode mode,
     QWidget* parent)
-    : QTextEdit (parent),
+    : QPlainTextEdit (parent),
     mDocument (document),
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive),
     mChangeLocked (0)
 {
-    setAcceptRichText (false);
-    setLineWrapMode (QTextEdit::NoWrap);
+//    setAcceptRichText (false);
+    setLineWrapMode (QPlainTextEdit::NoWrap);
     setTabStopWidth (4);
     setUndoRedoEnabled (false); // we use OpenCS-wide undo/redo instead
 
@@ -83,7 +83,7 @@ void CSVWorld::ScriptEdit::dragEnterEvent (QDragEnterEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
     if (!mime)
-        QTextEdit::dragEnterEvent(event);
+        QPlainTextEdit::dragEnterEvent(event);
     else
     {
         setTextCursor (cursorForPosition (event->pos()));
@@ -95,7 +95,7 @@ void CSVWorld::ScriptEdit::dragMoveEvent (QDragMoveEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
     if (!mime)
-        QTextEdit::dragMoveEvent(event);
+        QPlainTextEdit::dragMoveEvent(event);
     else
     {
         setTextCursor (cursorForPosition (event->pos()));
@@ -108,7 +108,7 @@ void CSVWorld::ScriptEdit::dropEvent (QDropEvent* event)
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
     if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
     {
-        QTextEdit::dropEvent(event);
+        QPlainTextEdit::dropEvent(event);
         return;
     }
 
