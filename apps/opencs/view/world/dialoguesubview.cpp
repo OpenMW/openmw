@@ -266,7 +266,6 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         editor = delegateIt->second->createEditor(qobject_cast<QWidget*>(mParent), QStyleOptionViewItem(), index, display);
         DialogueDelegateDispatcherProxy* proxy = new DialogueDelegateDispatcherProxy(editor, display);
 
-        bool skip = false;
         if (qobject_cast<DropLineEdit*>(editor))
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
@@ -274,27 +273,22 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
                     proxy, SLOT(tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>&, const CSMDoc::Document*)));
             connect(proxy, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
                     this, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
-            skip = true;
         }
-        if(!skip && qobject_cast<QCheckBox*>(editor))
+        else if (qobject_cast<QCheckBox*>(editor))
         {
             connect(editor, SIGNAL(stateChanged(int)), proxy, SLOT(editorDataCommited()));
-            skip = true;
         }
-        if(!skip && qobject_cast<QPlainTextEdit*>(editor))
+        else if (qobject_cast<QPlainTextEdit*>(editor))
         {
             connect(editor, SIGNAL(textChanged()), proxy, SLOT(editorDataCommited()));
-            skip = true;
         }
-        if(!skip && qobject_cast<QComboBox*>(editor))
+        else if (qobject_cast<QComboBox*>(editor))
         {
             connect(editor, SIGNAL(currentIndexChanged (int)), proxy, SLOT(editorDataCommited()));
-            skip = true;
         }
-        if(!skip && qobject_cast<QAbstractSpinBox*>(editor))
+        else if (qobject_cast<QAbstractSpinBox*>(editor))
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
-            skip = true;
         }
 
         connect(proxy, SIGNAL(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)), this, SLOT(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)));
