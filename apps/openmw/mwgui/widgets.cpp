@@ -544,19 +544,22 @@ namespace MWGui
 
         void AutoSizedWidget::notifySizeChange (MyGUI::Widget* w)
         {
-            if (w->getParent () != 0)
+            MyGUI::Widget * parent = w->getParent();
+            if (parent != 0)
             {
-                Box* b = dynamic_cast<Box*>(w->getParent());
-                if (b)
-                    b->notifyChildrenSizeChanged ();
-                else
+                if (mExpandDirection == MyGUI::Align::Left)
                 {
-                    if (mExpandDirection == MyGUI::Align::Left)
-                    {
-                        int hdiff = getRequestedSize ().width - w->getSize().width;
-                        w->setPosition(w->getPosition() - MyGUI::IntPoint(hdiff, 0));
-                    }
-                    w->setSize(getRequestedSize ());
+                    int hdiff = getRequestedSize ().width - w->getSize().width;
+                    w->setPosition(w->getPosition() - MyGUI::IntPoint(hdiff, 0));
+                }
+                w->setSize(getRequestedSize ());
+
+                while (parent != 0)
+                {
+                    Box * b = dynamic_cast<Box*>(parent);
+                    if (b)
+                        b->notifyChildrenSizeChanged();
+                    parent = parent->getParent();
                 }
             }
         }
