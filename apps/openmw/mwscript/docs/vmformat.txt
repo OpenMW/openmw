@@ -431,5 +431,6 @@ op 0x2000294-0x20002ab: SetMagicEffect
 op 0x20002ac-0x20002c3: SetMagicEffect, explicit
 op 0x20002c4-0x20002db: ModMagicEffect
 op 0x20002dc-0x20002f3: ModMagicEffect, explicit
+op 0x20002f4: ResetActors
 
-opcodes 0x20002f4-0x3ffffff unused
+opcodes 0x20002f5-0x3ffffff unused

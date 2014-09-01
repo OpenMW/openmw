@@ -2989,4 +2989,31 @@ namespace MWWorld
         if (!interpreterContext.hasActivationBeenHandled())
             interpreterContext.executeActivation(object, actor);
     }
+
+    struct ResetActorsFunctor
+    {
+        bool operator() (Ptr ptr)
+        {
+            // Can't reset actors that were moved to a different cell, because we don't know what cell they came from.
+            // This could be fixed once we properly track actor cell changes, but may not be desirable behaviour anyhow.
+            if (ptr.getClass().isActor() && ptr.getCellRef().getRefNum().mContentFile != -1)
+            {
+                const ESM::Position& origPos = ptr.getCellRef().getPosition();
+                MWBase::Environment::get().getWorld()->moveObject(ptr, origPos.pos[0], origPos.pos[1], origPos.pos[2]);
+                MWBase::Environment::get().getWorld()->rotateObject(ptr, origPos.rot[0], origPos.rot[1], origPos.rot[2]);
+                ptr.getClass().adjustPosition(ptr, false);
+            }
+            return true;
+        }
+    };
+    void World::resetActors()
+    {
+        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
+            iter!=mWorldScene->getActiveCells().end(); ++iter)
+        {
+            CellStore* cellstore = *iter;
+            ResetActorsFunctor functor;
+            cellstore->forEach(functor);
+        }
+    }
 }
