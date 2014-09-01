@@ -182,6 +182,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mGrab(true)
   , mScriptBlacklistUse (true)
   , mExportFonts(false)
+  , mNewGame (false)
 {
     std::srand ( std::time(NULL) );
     MWClass::registerClasses();
@@ -264,9 +265,10 @@ void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
     mVerboseScripts = scriptsVerbosity;
 }
 
-void OMW::Engine::setSkipMenu (bool skipMenu)
+void OMW::Engine::setSkipMenu (bool skipMenu, bool newGame)
 {
     mSkipMenu = skipMenu;
+    mNewGame = newGame;
 }
 
 std::string OMW::Engine::loadSettings (Settings::Manager & settings)
@@ -472,7 +474,7 @@ void OMW::Engine::go()
     }
     else
     {
-        MWBase::Environment::get().getStateManager()->newGame (true);
+        MWBase::Environment::get().getStateManager()->newGame (!mNewGame);
     }
 
     // Start the main rendering loop
