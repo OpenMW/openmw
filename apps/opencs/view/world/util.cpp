@@ -169,8 +169,11 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             return new QDoubleSpinBox(parent);
 
         case CSMWorld::ColumnBase::Display_LongString:
-
-            return new QTextEdit(parent);
+        {
+            QPlainTextEdit *edit = new QPlainTextEdit(parent);
+            edit->setUndoRedoEnabled (false);
+            return edit;
+        }
 
         case CSMWorld::ColumnBase::Display_Boolean:
 
