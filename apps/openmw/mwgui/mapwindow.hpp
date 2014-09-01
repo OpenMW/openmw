@@ -5,6 +5,8 @@
 
 #include "windowpinnablebase.hpp"
 
+#include <components/esm/cellid.hpp>
+
 namespace MWRender
 {
     class GlobalMap;
@@ -23,12 +25,52 @@ namespace Loading
 
 namespace MWGui
 {
+
+    struct CustomMarker
+    {
+        float mWorldX;
+        float mWorldY;
+
+        ESM::CellId mCell;
+
+        std::string mNote;
+
+        bool operator == (const CustomMarker& other)
+        {
+            return mNote == other.mNote && mCell == other.mCell && mWorldX == other.mWorldX && mWorldY == other.mWorldY;
+        }
+
+        void load (ESM::ESMReader& reader);
+        void save (ESM::ESMWriter& writer) const;
+    };
+
+    class CustomMarkerCollection
+    {
+    public:
+        void addMarker(const CustomMarker& marker, bool triggerEvent=true);
+        void deleteMarker (const CustomMarker& marker);
+        void updateMarker(const CustomMarker& marker, const std::string& newNote);
+
+        void clear();
+
+        size_t size() const;
+
+        std::vector<CustomMarker>::const_iterator begin() const;
+        std::vector<CustomMarker>::const_iterator end() const;
+
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
+        EventHandle_Void eventMarkersChanged;
+
+    private:
+        std::vector<CustomMarker> mMarkers;
+    };
+
     class LocalMapBase
     {
     public:
-        LocalMapBase();
+        LocalMapBase(CustomMarkerCollection& markers);
         virtual ~LocalMapBase();
-        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, OEngine::GUI::Layout* layout, bool mapDragAndDrop=false);
+        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass);
 
         void setCellPrefix(const std::string& prefix);
         void setActiveCell(const int x, const int y, bool interior=false);
@@ -57,33 +99,34 @@ namespace MWGui
         bool mChanged;
         bool mFogOfWar;
 
+        // Stores markers that were placed by a player. May be shared between multiple map views.
+        CustomMarkerCollection& mCustomMarkers;
+
         std::vector<MyGUI::ImageBox*> mMapWidgets;
         std::vector<MyGUI::ImageBox*> mFogWidgets;
 
         // Keep track of created marker widgets, just to easily remove them later.
-        std::vector<MyGUI::Widget*> mDoorMarkerWidgets; // Doors
-        std::vector<MyGUI::Widget*> mMarkerWidgets; // Other markers
+        std::vector<MyGUI::Widget*> mDoorMarkerWidgets;
+        std::vector<MyGUI::Widget*> mMagicMarkerWidgets;
+        std::vector<MyGUI::Widget*> mCustomMarkerWidgets;
+
+        void updateCustomMarkers();
 
         void applyFogOfWar();
-
-        void onMarkerFocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
-        void onMarkerUnfocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
 
         MyGUI::IntPoint getMarkerPosition (float worldX, float worldY, MarkerPosition& markerPos);
 
         virtual void notifyPlayerUpdate() {}
         virtual void notifyMapChanged() {}
 
-        // Update markers (Detect X effects, Mark/Recall effects)
-        // Note, door markers are handled in setActiveCell
-        void updateMarkers();
+        virtual void onCustomMarkerDoubleClicked(MyGUI::Widget* sender) {}
+
+        void updateMagicMarkers();
         void addDetectionMarkers(int type);
 
-        OEngine::GUI::Layout* mLayout;
+        void redraw();
 
         float mMarkerUpdateTimer;
-
-        bool mMapDragAndDrop;
 
         float mLastPositionX;
         float mLastPositionY;
@@ -91,10 +134,39 @@ namespace MWGui
         float mLastDirectionY;
     };
 
+    class EditNoteDialog : public MWGui::WindowModal
+    {
+    public:
+        EditNoteDialog();
+
+        virtual void open();
+        virtual void exit();
+
+        void showDeleteButton(bool show);
+        bool getDeleteButtonShown();
+        void setText(const std::string& text);
+        std::string getText();
+
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
+
+        EventHandle_Void eventDeleteClicked;
+        EventHandle_Void eventOkClicked;
+
+    private:
+        void onCancelButtonClicked(MyGUI::Widget* sender);
+        void onOkButtonClicked(MyGUI::Widget* sender);
+        void onDeleteButtonClicked(MyGUI::Widget* sender);
+
+        MyGUI::TextBox* mTextEdit;
+        MyGUI::Button* mOkButton;
+        MyGUI::Button* mCancelButton;
+        MyGUI::Button* mDeleteButton;
+    };
+
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase, public NoDrop
     {
     public:
-        MapWindow(DragAndDrop* drag, const std::string& cacheDir);
+        MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, const std::string& cacheDir);
         virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);
@@ -123,7 +195,10 @@ namespace MWGui
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onWorldButtonClicked(MyGUI::Widget* _sender);
-
+        void onMapDoubleClicked(MyGUI::Widget* sender);
+        void onNoteEditOk();
+        void onNoteEditDelete();
+        void onNoteDoubleClicked(MyGUI::Widget* sender);
         void globalMapUpdatePlayer();
 
         MyGUI::ScrollView* mGlobalMap;
@@ -148,12 +223,14 @@ namespace MWGui
 
         MWRender::GlobalMap* mGlobalMapRender;
 
-    protected:
+        EditNoteDialog mEditNoteDialog;
+        CustomMarker mEditingMarker;
+
         virtual void onPinToggled();
         virtual void onTitleDoubleClicked();
+        virtual void onCustomMarkerDoubleClicked(MyGUI::Widget* sender);
 
         virtual void notifyPlayerUpdate();
-        virtual void notifyMapChanged();
 
     };
 }

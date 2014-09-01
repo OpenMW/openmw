@@ -1870,6 +1870,33 @@ namespace CSMWorld
             return true;
         }
     };
+
+    template<typename ESXRecordT>
+    struct OwnerGlobalColumn : public Column<ESXRecordT>
+    {
+        OwnerGlobalColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_OwnerGlobal, ColumnBase::Display_GlobalVariable)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mGlobalVariable.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mGlobalVariable = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
 }
 
 #endif

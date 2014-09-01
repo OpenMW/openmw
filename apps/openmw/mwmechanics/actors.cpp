@@ -248,6 +248,15 @@ namespace MWMechanics
 
             if (caster.getRefData().getHandle() == "player")
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
+
+            const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
+                    .search("VFX_Soul_Trap");
+            if (fx)
+                MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
+                    "", Ogre::Vector3(mCreature.getRefData().getPosition().pos));
+
+            MWBase::Environment::get().getSoundManager()->playSound3D(mCreature, "conjuration hit", 1.f, 1.f,
+                                                                      MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
         }
     };
 
@@ -475,6 +484,23 @@ namespace MWMechanics
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).getMagnitude());
 
             creatureStats.setAttribute(i, stat);
+        }
+
+        {
+            Spells & spells = creatureStats.getSpells();
+            for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
+            {
+                if (spells.getCorprusSpells().find(it->first) != spells.getCorprusSpells().end())
+                {
+                    if (MWBase::Environment::get().getWorld()->getTimeStamp() >= spells.getCorprusSpells().at(it->first).mNextWorsening)
+                    {
+                        spells.worsenCorprus(it->first);
+
+                        if (ptr.getRefData().getHandle() == "player")
+                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
+                    }
+                }
+            }
         }
 
         // dynamic stats
@@ -1385,6 +1411,7 @@ namespace MWMechanics
             if (stats.isDead())
                 continue;
 
+            // An actor counts as following if AiFollow is the current AiPackage, or there are only Combat packages before the AiFollow package
             for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
             {
                 if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
@@ -1395,6 +1422,8 @@ namespace MWMechanics
                     if (followTarget == actor)
                         list.push_back(iter->first);
                 }
+                else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
+                    break;
             }
         }
         return list;

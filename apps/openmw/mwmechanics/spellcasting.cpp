@@ -151,6 +151,20 @@ namespace MWMechanics
         return school;
     }
 
+    bool spellIncreasesSkill(const ESM::Spell *spell)
+    {
+        if (spell->mData.mType == ESM::Spell::ST_Spell && !(spell->mData.mFlags & ESM::Spell::F_Always))
+            return true;
+        return false;
+    }
+
+    bool spellIncreasesSkill(const std::string &spellId)
+    {
+        const ESM::Spell* spell =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+        return spellIncreasesSkill(spell);
+    }
+
     float getEffectResistanceAttribute (short effectId, const MagicEffects* actorEffects)
     {
         short resistanceEffect = ESM::MagicEffect::getResistanceEffect(effectId);
@@ -775,7 +789,7 @@ namespace MWMechanics
             }
         }
 
-        if (mCaster.getRefData().getHandle() == "player" && spell->mData.mType == ESM::Spell::ST_Spell)
+        if (mCaster.getRefData().getHandle() == "player" && spellIncreasesSkill(spell))
             mCaster.getClass().skillUsageSucceeded(mCaster,
                 spellSchoolToSkill(school), 0);
 
@@ -874,5 +888,4 @@ namespace MWMechanics
 
         return true;
     }
-
 }

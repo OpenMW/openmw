@@ -35,6 +35,11 @@ namespace sh
 		return (!mMaterial.isNull() && mMaterial.useCount() <= Ogre::ResourceGroupManager::RESOURCE_SYSTEM_NUM_REFERENCE_COUNTS+1);
 	}
 
+	void OgreMaterial::unreferenceTextures()
+	{
+		mMaterial->unload();
+	}
+
 	OgreMaterial::~OgreMaterial()
 	{
 		if (!mMaterial.isNull())

@@ -8,8 +8,7 @@
 #include <map>
 #include "BulletShapeLoader.h"
 #include "BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h"
-
-
+#include <boost/shared_ptr.hpp>
 
 class btRigidBody;
 class btBroadphaseInterface;

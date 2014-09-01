@@ -691,17 +691,16 @@ namespace MWInput
 
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
+        bool consumed = false;
         if (kc != OIS::KC_UNASSIGNED)
         {
+            consumed = SDL_IsTextInputActive() &&
+                    ( !(SDLK_SCANCODE_MASK & arg.keysym.sym) && std::isprint(arg.keysym.sym)); // Little trick to check if key is printable
             bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
             setPlayerControlsEnabled(!guiFocus);
         }
-        if (!mControlsDisabled)
+        if (!mControlsDisabled && !consumed)
             mInputBinder->keyPressed (arg);
-
-        // Clear MyGUI's clipboard, so it doesn't interfere with our own clipboard implementation.
-        // We do not use MyGUI's clipboard manager because it doesn't support system clipboard integration with SDL.
-        MyGUI::ClipboardManager::getInstance().clearClipboardData("Text");
     }
 
     void InputManager::textInput(const SDL_TextInputEvent &arg)
@@ -1050,8 +1049,7 @@ namespace MWInput
             return;
 
         if(MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Journal
-                && MWBase::Environment::get().getWindowManager ()->getJournalAllowed()
-                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console)
+                && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
         {
             MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Journal);

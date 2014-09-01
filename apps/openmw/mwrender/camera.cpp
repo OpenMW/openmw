@@ -107,7 +107,7 @@ namespace MWRender
 
     void Camera::update(float duration, bool paused)
     {
-        if (mAnimation->allowSwitchViewMode())
+        if (mAnimation->upperBodyReady())
         {
             // Now process the view changes we queued earlier
             if (mVanityToggleQueued)
@@ -144,7 +144,7 @@ namespace MWRender
     {
         // Changing the view will stop all playing animations, so if we are playing
         // anything important, queue the view change for later
-        if (!mAnimation->allowSwitchViewMode() && !force)
+        if (!mAnimation->upperBodyReady() && !force)
         {
             mViewModeToggleQueued = true;
             return;
@@ -207,7 +207,7 @@ namespace MWRender
 
     void Camera::togglePreviewMode(bool enable)
     {
-        if (mFirstPersonView && !mAnimation->allowSwitchViewMode())
+        if (mFirstPersonView && !mAnimation->upperBodyReady())
             return;
 
         if(mPreviewMode == enable)

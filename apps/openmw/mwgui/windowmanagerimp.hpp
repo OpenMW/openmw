@@ -12,6 +12,8 @@
 
 #include "../mwbase/windowmanager.hpp"
 
+#include "mapwindow.hpp"
+
 #include <MyGUI_KeyCode.h>
 #include <MyGUI_Types.h>
 
@@ -347,6 +349,9 @@ namespace MWGui
 
     std::stack<WindowModal*> mCurrentModals;
 
+    // Markers placed manually by the player. Must be shared between both map views (the HUD map and the map window).
+    CustomMarkerCollection mCustomMarkers;
+
     OEngine::GUI::MyGUIManager *mGuiManager;
     OEngine::Render::OgreRenderer *mRendering;
     HUD *mHud;
@@ -450,6 +455,9 @@ namespace MWGui
     void onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char);
 
     void sizeVideo(int screenWidth, int screenHeight);
+
+    void onClipboardChanged(const std::string& _type, const std::string& _data);
+    void onClipboardRequested(const std::string& _type, std::string& _data);
   };
 }
 

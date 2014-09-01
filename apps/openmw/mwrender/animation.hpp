@@ -126,6 +126,8 @@ protected:
 
     MWWorld::Ptr mPtr;
 
+    Ogre::Light* mGlowLight;
+
     Ogre::SceneNode *mInsert;
     Ogre::Entity *mSkelBase;
     NifOgre::ObjectScenePtr mObjectRoot;
@@ -261,8 +263,8 @@ public:
     /** Returns true if the named animation group is playing. */
     bool isPlaying(const std::string &groupname) const;
 
-    //Checks if playing any animation which shouldn't be stopped when switching camera view modes
-    bool allowSwitchViewMode() const;
+    /// Returns true if no important animations are currently playing on the upper body.
+    bool upperBodyReady() const;
 
     /** Gets info about the given animation group.
      * \param groupname Animation group to check.
@@ -300,6 +302,11 @@ public:
 
     /// This is typically called as part of runAnimation, but may be called manually if needed.
     void updateEffects(float duration);
+
+    // TODO: move outside of this class
+    /// Makes this object glow, by placing a Light in its center.
+    /// @param effect Controls the radius and intensity of the light.
+    void setLightEffect(float effect);
 
     virtual void showWeapons(bool showWeapon);
     virtual void showCarriedLeft(bool show) {}

@@ -150,7 +150,6 @@ namespace MWGui
                         parseFont(tag);
                         if (currentWidth != 0) {
                             currentHeight += currentFontHeight();
-                            currentWidth = 0;
                         }
                         currentWidth = 0;
                     }

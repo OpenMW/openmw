@@ -19,9 +19,6 @@ namespace ESM
 namespace MWMechanics
 {
     /// \brief Additional stats for NPCs
-    ///
-    /// \note For technical reasons the spell list and the currently selected spell is also handled by
-    /// CreatureStats, even though they are actually NPC stats.
 
     class NpcStats : public CreatureStats
     {

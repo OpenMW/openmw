@@ -1,16 +1,13 @@
 # local files
-if (NOT ANDROID)
-    set(GAME
-        main.cpp
-        engine.cpp
-    )
-else()
-    set(GAME
-        main.cpp
-        android_main.c
-        engine.cpp
-    )
+set(GAME
+    main.cpp
+    engine.cpp
+)
+
+if (ANDROID)
+    set(GAME ${GAME} android_main.c)
 endif()
+
 if(NOT WIN32 AND NOT ANDROID)
     set(GAME ${GAME} crashcatcher.cpp)
 endif()
@@ -77,7 +74,7 @@ add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
     drawstate spells activespells npcstats aipackage aisequence aipursue alchemy aiwander aitravel aifollow aiavoiddoor
     aiescort aiactivate aicombat repair enchanting pathfinding pathgrid security spellsuccess spellcasting
-    disease pickpocket levelledlist combat steering obstacle autocalcspell difficultyscaling
+    disease pickpocket levelledlist combat steering obstacle autocalcspell difficultyscaling aicombataction
     )
 
 add_openmw_dir (mwstate

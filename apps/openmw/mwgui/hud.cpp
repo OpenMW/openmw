@@ -61,8 +61,9 @@ namespace MWGui
     };
 
 
-    HUD::HUD(int fpsLevel, DragAndDrop* dragAndDrop)
+    HUD::HUD(CustomMarkerCollection &customMarkers, int fpsLevel, DragAndDrop* dragAndDrop)
         : Layout("openmw_hud.layout")
+        , LocalMapBase(customMarkers)
         , mHealth(NULL)
         , mMagicka(NULL)
         , mStamina(NULL)
@@ -161,7 +162,7 @@ namespace MWGui
         getWidget(mTriangleCounter, "TriangleCounter");
         getWidget(mBatchCounter, "BatchCounter");
 
-        LocalMapBase::init(mMinimap, mCompass, this);
+        LocalMapBase::init(mMinimap, mCompass);
 
         mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
         mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
@@ -471,6 +472,7 @@ namespace MWGui
             mWeaponSpellBox->setVisible(true);
         }
 
+        mWeapBox->clearUserStrings();
         mWeapBox->setUserString("ToolTipType", "ItemPtr");
         mWeapBox->setUserData(item);
 
@@ -515,12 +517,14 @@ namespace MWGui
         MWWorld::Ptr player = world->getPlayerPtr();
 
         mWeapImage->setItem(MWWorld::Ptr());
-        if (player.getClass().getNpcStats(player).isWerewolf())
-            mWeapImage->setIcon("icons\\k\\tx_werewolf_hand.dds");
-        else
-            mWeapImage->setIcon("icons\\k\\stealth_handtohand.dds");
+        std::string icon = (player.getClass().getNpcStats(player).isWerewolf()) ? "icons\\k\\tx_werewolf_hand.dds" : "icons\\k\\stealth_handtohand.dds";
+        mWeapImage->setIcon(icon);
 
         mWeapBox->clearUserStrings();
+        mWeapBox->setUserString("ToolTipType", "Layout");
+        mWeapBox->setUserString("ToolTipLayout", "HandToHandToolTip");
+        mWeapBox->setUserString("Caption_HandToHandText", itemName);
+        mWeapBox->setUserString("ImageTexture_HandToHandImage", icon);
     }
 
     void HUD::setCrosshairVisible(bool visible)

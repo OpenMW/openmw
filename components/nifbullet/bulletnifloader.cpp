@@ -28,6 +28,8 @@ http://www.gnu.org/licenses/ .
 
 #include <components/misc/stringops.hpp>
 
+#include <components/nifcache/nifcache.hpp>
+
 #include "../nif/niffile.hpp"
 #include "../nif/node.hpp"
 #include "../nif/data.hpp"
@@ -74,7 +76,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     // of the early stages of development. Right now we WANT to catch
     // every error as early and intrusively as possible, as it's most
     // likely a sign of incomplete code rather than faulty input.
-    Nif::NIFFile::ptr pnif (Nif::NIFFile::create (mResourceName.substr(0, mResourceName.length()-7)));
+    Nif::NIFFilePtr pnif (Nif::Cache::getInstance().load(mResourceName.substr(0, mResourceName.length()-7)));
     Nif::NIFFile & nif = *pnif.get ();
     if (nif.numRoots() < 1)
     {
@@ -279,8 +281,6 @@ void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int
     // anything. So don't do anything.
     if ((flags & 0x800) && !raycasting)
     {
-        collide = false;
-        bbcollide = false;
         return;
     }
 
@@ -388,7 +388,7 @@ bool findBoundingBox (const Nif::Node* node, Ogre::Vector3& halfExtents, Ogre::V
 
 bool getBoundingBox(const std::string& nifFile, Ogre::Vector3& halfExtents, Ogre::Vector3& translation, Ogre::Quaternion& orientation)
 {
-    Nif::NIFFile::ptr pnif (Nif::NIFFile::create (nifFile));
+    Nif::NIFFilePtr pnif (Nif::Cache::getInstance().load(nifFile));
     Nif::NIFFile & nif = *pnif.get ();
 
     if (nif.numRoots() < 1)

@@ -65,6 +65,24 @@
             </Widget>
         </Widget>
 
+        <!-- Hand-to-hand tooltip -->
+        <Widget type="HBox" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="HandToHandToolTip">
+            <Property key="AutoResize" value="true"/>
+            <Property key="Padding" value="8"/>
+
+            <Widget type="VBox">
+                <UserString key="VStretch" value="true"/>
+                <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="HandToHandImage"/>
+                <Widget type="Widget">
+                    <UserString key="VStretch" value="true"/>
+                </Widget>
+            </Widget>
+
+            <Widget type="AutoSizedTextBox" skin="SandText" position="44 8 248 284" align="Left Top" name="HandToHandText">
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+        </Widget>
+
         <!-- Health tooltip -->
         <Widget type="HBox" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="HealthToolTip">
             <Property key="AutoResize" value="true"/>

@@ -77,6 +77,7 @@ option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
 option(BUILD_OPENCS "build OpenMW Construction Set" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock frameworks" OFF)
+option(BUILD_NIFTEST "build nif file tester" OFF)
 
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
@@ -205,7 +206,12 @@ IF(BOOST_STATIC)
 endif()
 
 find_package(OGRE REQUIRED)
+
 find_package(MyGUI REQUIRED)
+if (${MYGUI_VERSION} VERSION_LESS "3.2.1")
+    message(FATAL_ERROR "OpenMW requires MyGUI 3.2.1 or later, please install the latest version from http://mygui.info")
+endif()
+
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
@@ -396,6 +402,9 @@ IF(NOT WIN32 AND NOT APPLE)
     IF(BUILD_OPENCS)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_OPENCS)
+    IF(BUILD_NIFTEST)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/niftest" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_NIFTEST)
 
     # Install licenses
     INSTALL(FILES "docs/license/DejaVu Font License.txt" DESTINATION "${LICDIR}" )
@@ -511,6 +520,11 @@ add_subdirectory (extern/sdl4ogre)
 
 # Components
 add_subdirectory (components)
+
+#Testing
+if (BUILD_NIFTEST)
+  add_subdirectory(components/nif/tests/)
+endif(BUILD_NIFTEST)
 
 # Apps and tools
 add_subdirectory( apps/openmw )

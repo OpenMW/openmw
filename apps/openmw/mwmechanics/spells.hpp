@@ -31,20 +31,36 @@ namespace MWMechanics
     {
         public:
 
-
             typedef std::map<std::string, std::map<const int, float> > TContainer; // ID, <effect index, normalised random magnitude>
             typedef TContainer::const_iterator TIterator;
+
+            struct CorprusStats
+            {
+                static const int sWorseningPeriod = 24;
+
+                int mWorsenings;
+                MWWorld::TimeStamp mNextWorsening;
+            };
 
         private:
 
             TContainer mSpells;
+
+            // spell-tied effects that will be applied even after removing the spell (currently used to keep positive effects when corprus is removed)
+            std::map<std::string, MagicEffects> mPermanentSpellEffects;
 
             // Note: this is the spell that's about to be cast, *not* the spell selected in the GUI (which may be different)
             std::string mSelectedSpell;
 
             std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
 
+            std::map<std::string, CorprusStats> mCorprusSpells;
+
         public:
+
+            void worsenCorprus(const std::string &corpSpellId);
+            static bool hasCorprusEffect(const ESM::Spell *spell);
+            const std::map<std::string, CorprusStats> & getCorprusSpells() const;
 
             bool canUsePower (const std::string& power) const;
             void usePower (const std::string& power);

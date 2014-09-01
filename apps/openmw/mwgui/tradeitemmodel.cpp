@@ -93,6 +93,21 @@ namespace MWGui
         unborrowImpl(item, count, mBorrowedFromUs);
     }
 
+    void TradeItemModel::adjustEncumbrance(float &encumbrance)
+    {
+        for (std::vector<ItemStack>::iterator it = mBorrowedToUs.begin(); it != mBorrowedToUs.end(); ++it)
+        {
+            MWWorld::Ptr item = it->mBase;
+            encumbrance += item.getClass().getWeight(item) * it->mCount;
+        }
+        for (std::vector<ItemStack>::iterator it = mBorrowedFromUs.begin(); it != mBorrowedFromUs.end(); ++it)
+        {
+            MWWorld::Ptr item = it->mBase;
+            encumbrance -= item.getClass().getWeight(item) * it->mCount;
+        }
+        encumbrance = std::max(0.f, encumbrance);
+    }
+
     void TradeItemModel::abort()
     {
         mBorrowedFromUs.clear();

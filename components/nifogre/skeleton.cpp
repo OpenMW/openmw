@@ -6,6 +6,7 @@
 #include <OgreBone.h>
 
 #include <components/nif/node.hpp>
+#include <components/nifcache/nifcache.hpp>
 #include <components/misc/stringops.hpp>
 
 namespace NifOgre
@@ -83,7 +84,7 @@ void NIFSkeletonLoader::loadResource(Ogre::Resource *resource)
     Ogre::Skeleton *skel = dynamic_cast<Ogre::Skeleton*>(resource);
     OgreAssert(skel, "Attempting to load a skeleton into a non-skeleton resource!");
 
-    Nif::NIFFile::ptr nif(Nif::NIFFile::create(skel->getName()));
+    Nif::NIFFilePtr nif(Nif::Cache::getInstance().load(skel->getName()));
     const Nif::Node *node = static_cast<const Nif::Node*>(nif->getRoot(0));
 
     try {
