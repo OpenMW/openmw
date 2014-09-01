@@ -380,7 +380,8 @@ namespace MWClass
 
     bool Armor::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Armor;
+        return (npcServices & ESM::NPC::Armor)
+                || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
     float Armor::getWeight(const MWWorld::Ptr &ptr) const
