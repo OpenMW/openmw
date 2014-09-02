@@ -35,7 +35,7 @@ namespace NifOgre
                 return aLastKey->mValue + ((aKey->mValue - aLastKey->mValue) * a);
             }
             else
-                return (--keys.end())->second.mValue;
+                return keys.rbegin()->second.mValue;
         }
 
         Ogre::Vector3 interpKey(const Nif::Vector3KeyMap::MapType &keys, float time) const
@@ -59,7 +59,7 @@ namespace NifOgre
                 return aLastKey->mValue + ((aKey->mValue - aLastKey->mValue) * a);
             }
             else
-                return (--keys.end())->second.mValue;
+                return keys.rbegin()->second.mValue;
         }
     };
 

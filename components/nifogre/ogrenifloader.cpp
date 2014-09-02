@@ -437,7 +437,7 @@ public:
                 return Ogre::Quaternion::nlerp(a, aLastKey->mValue, aKey->mValue);
             }
             else
-                return (--keys.end())->second.mValue;
+                return keys.rbegin()->second.mValue;
         }
 
     public:
