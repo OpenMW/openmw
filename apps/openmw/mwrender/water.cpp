@@ -384,10 +384,11 @@ void Water::update(float dt, Ogre::Vector3 player)
 
 void Water::frameStarted(float dt)
 {
-    mSimulation->update(dt, mPlayer);
-
     if (mReflection)
+    {
+        mSimulation->update(dt, mPlayer);
         mReflection->update();
+    }
 }
 
 void Water::applyRTT()
