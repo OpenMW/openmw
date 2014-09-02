@@ -201,6 +201,10 @@ namespace CSVDoc
             void toggleShowStatusBar (bool show);
 
             void loadErrorLog();
+
+            void run();
+
+            void stop();
     };
 }
 

@@ -239,6 +239,16 @@ void CSVDoc::View::setupDebugMenu()
     QAction *profiles = new QAction (tr ("Debug Profiles"), this);
     connect (profiles, SIGNAL (triggered()), this, SLOT (addDebugProfilesSubView()));
     debug->addAction (profiles);
+
+    debug->addSeparator();
+
+    QAction *run = new QAction (tr ("Run OpenMW"), this);
+    connect (run, SIGNAL (triggered()), this, SLOT (run()));
+    debug->addAction (run);
+
+    QAction *stop = new QAction (tr ("Shutdown OpenMW"), this);
+    connect (stop, SIGNAL (triggered()), this, SLOT (stop()));
+    debug->addAction (stop);
 }
 
 void CSVDoc::View::setupUi()
@@ -602,4 +612,14 @@ void CSVDoc::View::toggleShowStatusBar (bool show)
 void CSVDoc::View::loadErrorLog()
 {
     addSubView (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_LoadErrorLog, 0));
+}
+
+void CSVDoc::View::run()
+{
+    mDocument->startRunning ("", "");
+}
+
+void CSVDoc::View::stop()
+{
+    mDocument->stopRunning();
 }

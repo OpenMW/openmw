@@ -2367,6 +2367,16 @@ bool CSMDoc::Document::isBlacklisted (const CSMWorld::UniversalId& id)
     return mBlacklist.isBlacklisted (id);
 }
 
+void CSMDoc::Document::startRunning (const std::string& profile,
+    const std::string& startupInstruction)
+{
+    mRunner.start();
+}
+
+void CSMDoc::Document::stopRunning()
+{
+    mRunner.stop();
+}
 
 void CSMDoc::Document::progress (int current, int max, int type)
 {
