@@ -556,7 +556,7 @@ public:
                 if(n < 0)
                     break;
                 else if(n < mFrame->nb_samples)
-                    std::cerr<<"swr_convert error: "+std::to_string(mFrame->nb_samples-n)<<std::endl;
+                    std::cerr << "swr_convert error" << std::endl;
             }
 
             size_t len1 = len - total;
