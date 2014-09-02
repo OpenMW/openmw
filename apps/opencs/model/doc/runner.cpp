@@ -2,7 +2,7 @@
 #include "runner.hpp"
 
 
-CSMDoc::Runner::Runner()
+CSMDoc::Runner::Runner() : mRunning (false)
 {
     connect (&mProcess, SIGNAL (finished (int, QProcess::ExitStatus)),
         this, SLOT (finished (int, QProcess::ExitStatus)));
@@ -21,7 +21,8 @@ void CSMDoc::Runner::start()
 #endif
 
     mProcess.start (path);
-    emit runStateChanged (true);
+    mRunning = true;
+    emit runStateChanged();
 }
 
 void CSMDoc::Runner::stop()
@@ -29,7 +30,13 @@ void CSMDoc::Runner::stop()
     mProcess.kill();
 }
 
+bool CSMDoc::Runner::isRunning() const
+{
+    return mRunning;
+}
+
 void CSMDoc::Runner::finished (int exitCode, QProcess::ExitStatus exitStatus)
 {
-    emit runStateChanged (false);
+    mRunning = false;
+    emit runStateChanged();
 }

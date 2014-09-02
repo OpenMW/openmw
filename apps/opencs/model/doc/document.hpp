@@ -137,6 +137,8 @@ namespace CSMDoc
 
             void operationDone (int type);
 
+            void runStateChanged();
+
         public slots:
 
             void progress (int current, int max, int type);

@@ -242,13 +242,13 @@ void CSVDoc::View::setupDebugMenu()
 
     debug->addSeparator();
 
-    QAction *run = new QAction (tr ("Run OpenMW"), this);
-    connect (run, SIGNAL (triggered()), this, SLOT (run()));
-    debug->addAction (run);
+    mRunDebug = new QAction (tr ("Run OpenMW"), this);
+    connect (mRunDebug, SIGNAL (triggered()), this, SLOT (run()));
+    debug->addAction (mRunDebug);
 
-    QAction *stop = new QAction (tr ("Shutdown OpenMW"), this);
-    connect (stop, SIGNAL (triggered()), this, SLOT (stop()));
-    debug->addAction (stop);
+    mStopDebug = new QAction (tr ("Shutdown OpenMW"), this);
+    connect (mStopDebug, SIGNAL (triggered()), this, SLOT (stop()));
+    debug->addAction (mStopDebug);
 }
 
 void CSVDoc::View::setupUi()
@@ -290,6 +290,9 @@ void CSVDoc::View::updateActions()
 
     mSave->setEnabled (!(mDocument->getState() & CSMDoc::State_Saving));
     mVerify->setEnabled (!(mDocument->getState() & CSMDoc::State_Verifying));
+
+    mRunDebug->setEnabled (!(mDocument->getState() & CSMDoc::State_Running));
+    mStopDebug->setEnabled ((mDocument->getState() & CSMDoc::State_Running));
 }
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)

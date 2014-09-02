@@ -39,6 +39,8 @@ namespace CSVDoc
             QAction *mSave;
             QAction *mVerify;
             QAction *mShowStatusBar;
+            QAction *mRunDebug;
+            QAction *mStopDebug;
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
             SubViewFactoryManager mSubViewFactory;

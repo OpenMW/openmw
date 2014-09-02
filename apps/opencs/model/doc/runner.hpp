@@ -11,6 +11,7 @@ namespace CSMDoc
             Q_OBJECT
 
             QProcess mProcess;
+            bool mRunning;
 
         public:
 
@@ -20,9 +21,13 @@ namespace CSMDoc
 
             void stop();
 
+            /// \note Running state is entered when the start function is called. This
+            /// is not necessarily identical to the moment the child process is started.
+            bool isRunning() const;
+
         signals:
 
-            void runStateChanged (bool running);
+            void runStateChanged();
 
         private slots:
 

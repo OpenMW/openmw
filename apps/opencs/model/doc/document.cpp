@@ -2256,6 +2256,8 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     connect (
         &mSaving, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)),
         this, SLOT (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)));
+
+    connect (&mRunner, SIGNAL (runStateChanged()), this, SLOT (runStateChanged()));
 }
 
 CSMDoc::Document::~Document()
@@ -2276,6 +2278,9 @@ int CSMDoc::Document::getState() const
 
     if (mSaving.isRunning())
         state |= State_Locked | State_Saving | State_Operation;
+
+    if (mRunner.isRunning())
+        state |= State_Locked | State_Running;
 
     if (int operations = mTools.getRunningOperations())
         state |= State_Locked | State_Operation | operations;
@@ -2376,6 +2381,11 @@ void CSMDoc::Document::startRunning (const std::string& profile,
 void CSMDoc::Document::stopRunning()
 {
     mRunner.stop();
+}
+
+void CSMDoc::Document::runStateChanged()
+{
+    emit stateChanged (getState(), this);
 }
 
 void CSMDoc::Document::progress (int current, int max, int type)
