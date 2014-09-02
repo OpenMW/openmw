@@ -557,11 +557,11 @@ void CharacterController::playRandomDeath(float startpoint)
     {
         mDeathState = CharState_SwimDeath;
     }
-    else if (mHitState == CharState_KnockDown)
+    else if (mHitState == CharState_KnockDown && mAnimation->hasAnimation("deathknockdown"))
     {
         mDeathState = CharState_DeathKnockDown;
     }
-    else if (mHitState == CharState_KnockOut)
+    else if (mHitState == CharState_KnockOut && mAnimation->hasAnimation("deathknockout"))
     {
         mDeathState = CharState_DeathKnockOut;
     }
