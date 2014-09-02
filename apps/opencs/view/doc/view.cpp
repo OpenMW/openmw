@@ -281,6 +281,7 @@ void CSVDoc::View::updateTitle()
 void CSVDoc::View::updateActions()
 {
     bool editing = !(mDocument->getState() & CSMDoc::State_Locked);
+    bool running = mDocument->getState() & CSMDoc::State_Running;
 
     for (std::vector<QAction *>::iterator iter (mEditingActions.begin()); iter!=mEditingActions.end(); ++iter)
         (*iter)->setEnabled (editing);
@@ -288,11 +289,11 @@ void CSVDoc::View::updateActions()
     mUndo->setEnabled (editing & mDocument->getUndoStack().canUndo());
     mRedo->setEnabled (editing & mDocument->getUndoStack().canRedo());
 
-    mSave->setEnabled (!(mDocument->getState() & CSMDoc::State_Saving));
+    mSave->setEnabled (!(mDocument->getState() & CSMDoc::State_Saving) && !running);
     mVerify->setEnabled (!(mDocument->getState() & CSMDoc::State_Verifying));
 
-    mRunDebug->setEnabled (!(mDocument->getState() & CSMDoc::State_Running));
-    mStopDebug->setEnabled ((mDocument->getState() & CSMDoc::State_Running));
+    mRunDebug->setEnabled (!running);
+    mStopDebug->setEnabled (running);
 }
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
