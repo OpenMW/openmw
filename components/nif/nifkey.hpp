@@ -12,7 +12,6 @@ namespace Nif
 
 template<typename T>
 struct KeyT {
-    float mTime;
     T mValue;
     T mForwardValue;  // Only for Quadratic interpolation, and never for QuaternionKeyList
     T mBackwardValue; // Only for Quadratic interpolation, and never for QuaternionKeyList
@@ -26,8 +25,8 @@ typedef KeyT<Ogre::Vector4> Vector4Key;
 typedef KeyT<Ogre::Quaternion> QuaternionKey;
 
 template<typename T, T (NIFStream::*getValue)()>
-struct KeyListT {
-    typedef std::vector< KeyT<T> > VecType;
+struct KeyMapT {
+    typedef std::map< float, KeyT<T> > MapType;
 
     static const unsigned int sLinearInterpolation = 1;
     static const unsigned int sQuadraticInterpolation = 2;
@@ -35,9 +34,9 @@ struct KeyListT {
     static const unsigned int sXYZInterpolation = 4;
 
     unsigned int mInterpolationType;
-    VecType mKeys;
+    MapType mKeys;
 
-    KeyListT() : mInterpolationType(sLinearInterpolation) {}
+    KeyMapT() : mInterpolationType(sLinearInterpolation) {}
 
     //Read in a KeyGroup (see http://niftools.sourceforge.net/doc/nif/NiKeyframeData.html)
     void read(NIFStream *nif, bool force=false)
@@ -63,24 +62,27 @@ struct KeyListT {
         {
             for(size_t i = 0;i < count;i++)
             {
-                readTimeAndValue(nifReference, key);
-                mKeys.push_back(key);
+                float time = nif->getFloat();
+                readValue(nifReference, key);
+                mKeys[time] = key;
             }
         }
         else if(mInterpolationType == sQuadraticInterpolation)
         {
             for(size_t i = 0;i < count;i++)
             {
+                float time = nif->getFloat();
                 readQuadratic(nifReference, key);
-                mKeys.push_back(key);
+                mKeys[time] = key;
             }
         }
         else if(mInterpolationType == sTBCInterpolation)
         {
             for(size_t i = 0;i < count;i++)
             {
+                float time = nif->getFloat();
                 readTBC(nifReference, key);
-                mKeys.push_back(key);
+                mKeys[time] = key;
             }
         }
         //XYZ keys aren't actually read here.
@@ -104,37 +106,36 @@ struct KeyListT {
     }
 
 private:
-    static void readTimeAndValue(NIFStream &nif, KeyT<T> &key)
+    static void readValue(NIFStream &nif, KeyT<T> &key)
     {
-        key.mTime = nif.getFloat();
         key.mValue = (nif.*getValue)();
     }
 
     static void readQuadratic(NIFStream &nif, KeyT<Ogre::Quaternion> &key)
     {
-        readTimeAndValue(nif, key);
+        readValue(nif, key);
     }
 
     template <typename U>
     static void readQuadratic(NIFStream &nif, KeyT<U> &key)
     {
-        readTimeAndValue(nif, key);
+        readValue(nif, key);
         key.mForwardValue = (nif.*getValue)();
         key.mBackwardValue = (nif.*getValue)();
     }
 
     static void readTBC(NIFStream &nif, KeyT<T> &key)
     {
-        readTimeAndValue(nif, key);
+        readValue(nif, key);
         key.mTension = nif.getFloat();
         key.mBias = nif.getFloat();
         key.mContinuity = nif.getFloat();
     }
 };
-typedef KeyListT<float,&NIFStream::getFloat> FloatKeyList;
-typedef KeyListT<Ogre::Vector3,&NIFStream::getVector3> Vector3KeyList;
-typedef KeyListT<Ogre::Vector4,&NIFStream::getVector4> Vector4KeyList;
-typedef KeyListT<Ogre::Quaternion,&NIFStream::getQuaternion> QuaternionKeyList;
+typedef KeyMapT<float,&NIFStream::getFloat> FloatKeyMap;
+typedef KeyMapT<Ogre::Vector3,&NIFStream::getVector3> Vector3KeyMap;
+typedef KeyMapT<Ogre::Vector4,&NIFStream::getVector4> Vector4KeyMap;
+typedef KeyMapT<Ogre::Quaternion,&NIFStream::getQuaternion> QuaternionKeyMap;
 
 } // Namespace
 #endif //#ifndef OPENMW_COMPONENTS_NIF_NIFKEY_HPP

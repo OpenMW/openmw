@@ -719,6 +719,15 @@ namespace MWScript
                 }
         };
 
+        class OpResetActors : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWBase::Environment::get().getWorld()->resetActors();
+            }
+        };
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -759,6 +768,7 @@ namespace MWScript
             interpreter.installSegment5(Compiler::Transformation::opcodeMoveWorldExplicit,new OpMoveWorld<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingAngle, new OpGetStartingAngle<ImplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingAngleExplicit, new OpGetStartingAngle<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeResetActors, new OpResetActors);
         }
     }
 }

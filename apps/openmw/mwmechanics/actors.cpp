@@ -280,7 +280,7 @@ namespace MWMechanics
                 || actor1.getClass().getCreatureStats(actor1).isDead())
             return;
 
-        const ESM::Position& actor1Pos = actor2.getRefData().getPosition();
+        const ESM::Position& actor1Pos = actor1.getRefData().getPosition();
         const ESM::Position& actor2Pos = actor2.getRefData().getPosition();
         float sqrDist = Ogre::Vector3(actor1Pos.pos).squaredDistance(Ogre::Vector3(actor2Pos.pos));
         if (sqrDist > 7168*7168)
@@ -763,7 +763,7 @@ namespace MWMechanics
                         MWMechanics::CreatureStats& summonedCreatureStats = ref.getPtr().getClass().getCreatureStats(ref.getPtr());
 
                         // Make the summoned creature follow its master and help in fights
-                        AiFollow package(ptr.getRefData().getHandle());
+                        AiFollow package(ptr.getCellRef().getRefId());
                         summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
                         int creatureActorId = summonedCreatureStats.getActorId();
 

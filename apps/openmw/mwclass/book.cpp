@@ -202,7 +202,8 @@ namespace MWClass
 
     bool Book::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Books;
+        return (npcServices & ESM::NPC::Books)
+                || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
     float Book::getWeight(const MWWorld::Ptr &ptr) const

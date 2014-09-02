@@ -406,7 +406,11 @@ namespace MWMechanics
                     static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
                             .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
 
-                    if (roll < fVoiceIdleOdds && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos)) < 1500*1500)
+                    // Only say Idle voices when player is in LOS
+                    // A bit counterintuitive, likely vanilla did this to reduce the appearance of
+                    // voices going through walls?
+                    if (roll < fVoiceIdleOdds && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos)) < 1500*1500
+                            && MWBase::Environment::get().getWorld()->getLOS(player, actor))
                         MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
                 }
             }

@@ -237,7 +237,7 @@ public:
     {
     private:
         Ogre::MovableObject* mMovable;
-        Nif::FloatKeyList mData;
+        Nif::FloatKeyMap mData;
         MaterialControllerManager* mMaterialControllerMgr;
 
     public:
@@ -284,7 +284,7 @@ public:
     {
     private:
         Ogre::MovableObject* mMovable;
-        Nif::Vector3KeyList mData;
+        Nif::Vector3KeyMap mData;
         MaterialControllerManager* mMaterialControllerMgr;
 
     public:
@@ -409,34 +409,35 @@ public:
     class Value : public NodeTargetValue<Ogre::Real>, public ValueInterpolator
     {
     private:
-        const Nif::QuaternionKeyList* mRotations;
-        const Nif::Vector3KeyList* mTranslations;
-        const Nif::FloatKeyList* mScales;
+        const Nif::QuaternionKeyMap* mRotations;
+        const Nif::Vector3KeyMap* mTranslations;
+        const Nif::FloatKeyMap* mScales;
         Nif::NIFFilePtr mNif; // Hold a SharedPtr to make sure key lists stay valid
 
         using ValueInterpolator::interpKey;
 
-        static Ogre::Quaternion interpKey(const Nif::QuaternionKeyList::VecType &keys, float time)
+        static Ogre::Quaternion interpKey(const Nif::QuaternionKeyMap::MapType &keys, float time)
         {
-            if(time <= keys.front().mTime)
-                return keys.front().mValue;
+            if(time <= keys.begin()->first)
+                return keys.begin()->second.mValue;
 
-            const Nif::QuaternionKey* keyArray = keys.data();
-            size_t size = keys.size();
-
-            for (size_t i = 1; i < size; ++i)
+            Nif::QuaternionKeyMap::MapType::const_iterator it = keys.lower_bound(time);
+            if (it != keys.end())
             {
-                const Nif::QuaternionKey* aKey = &keyArray[i];
+                float aTime = it->first;
+                const Nif::QuaternionKey* aKey = &it->second;
 
-                if(aKey->mTime < time)
-                    continue;
+                assert (it != keys.begin()); // Shouldn't happen, was checked at beginning of this function
 
-                const Nif::QuaternionKey* aLastKey = &keyArray[i-1];
-                float a = (time - aLastKey->mTime) / (aKey->mTime - aLastKey->mTime);
+                Nif::QuaternionKeyMap::MapType::const_iterator last = --it;
+                float aLastTime = last->first;
+                const Nif::QuaternionKey* aLastKey = &last->second;
+
+                float a = (time - aLastTime) / (aTime - aLastTime);
                 return Ogre::Quaternion::nlerp(a, aLastKey->mValue, aKey->mValue);
             }
-
-            return keys.back().mValue;
+            else
+                return keys.rbegin()->second.mValue;
         }
 
     public:
@@ -497,10 +498,10 @@ public:
     {
     private:
         Ogre::MovableObject* mMovable;
-        Nif::FloatKeyList mUTrans;
-        Nif::FloatKeyList mVTrans;
-        Nif::FloatKeyList mUScale;
-        Nif::FloatKeyList mVScale;
+        Nif::FloatKeyMap mUTrans;
+        Nif::FloatKeyMap mVTrans;
+        Nif::FloatKeyMap mUScale;
+        Nif::FloatKeyMap mVScale;
         MaterialControllerManager* mMaterialControllerMgr;
 
     public:
@@ -839,18 +840,19 @@ class NIFObjectLoader
                 const Nif::NiColorData *clrdata = cl->data.getPtr();
 
                 Ogre::ParticleAffector *affector = partsys->addAffector("ColourInterpolator");
-                size_t num_colors = std::min<size_t>(6, clrdata->mKeyList.mKeys.size());
-                for(size_t i = 0;i < num_colors;i++)
+                size_t num_colors = std::min<size_t>(6, clrdata->mKeyMap.mKeys.size());
+                unsigned int i=0;
+                for (Nif::Vector4KeyMap::MapType::const_iterator it = clrdata->mKeyMap.mKeys.begin(); it != clrdata->mKeyMap.mKeys.end() && i < num_colors; ++it,++i)
                 {
                     Ogre::ColourValue color;
-                    color.r = clrdata->mKeyList.mKeys[i].mValue[0];
-                    color.g = clrdata->mKeyList.mKeys[i].mValue[1];
-                    color.b = clrdata->mKeyList.mKeys[i].mValue[2];
-                    color.a = clrdata->mKeyList.mKeys[i].mValue[3];
+                    color.r = it->second.mValue[0];
+                    color.g = it->second.mValue[1];
+                    color.b = it->second.mValue[2];
+                    color.a = it->second.mValue[3];
                     affector->setParameter("colour"+Ogre::StringConverter::toString(i),
                                            Ogre::StringConverter::toString(color));
                     affector->setParameter("time"+Ogre::StringConverter::toString(i),
-                                           Ogre::StringConverter::toString(clrdata->mKeyList.mKeys[i].mTime));
+                                           Ogre::StringConverter::toString(it->first));
                 }
             }
             else if(e->recType == Nif::RC_NiParticleRotation)
