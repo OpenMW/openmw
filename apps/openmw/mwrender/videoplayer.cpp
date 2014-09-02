@@ -48,27 +48,28 @@ extern "C"
         #include <libavutil/channel_layout.h>
     #endif
 
-    // From version 54.56 binkaudio encoding format changed from S16 to FLTP. See:
-    // https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d
-    // http://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
-    #if AV_VERSION_INT(54, 56, 0) <= AV_VERSION_INT(LIBAVCODEC_VERSION_MAJOR, \
-        LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO)
-        #ifdef HAVE_LIBSWRESAMPLE
-            #include <libswresample/swresample.h>
-            #define FFMPEG_PLAY_BINKAUDIO
-        #endif
-    #elif defined(_WIN32) && defined(_WIN64)
-        // Versions up to 54.54.100 potentially crashes on Windows 64bit.
-        #if ((LIBAVCODEC_VERSION_MAJOR == 54) && (LIBAVCODEC_VERSION_MINOR >= 55))
-            #define FFMPEG_PLAY_BINKAUDIO
-        #endif
-    #elif defined(_WIN32)
-        // 54.10.100 is a known working version on 32bit, but earlier ones may also work.
-        #if ((LIBAVCODEC_VERSION_MAJOR == 54) && (LIBAVCODEC_VERSION_MINOR >= 10))
-            #define FFMPEG_PLAY_BINKAUDIO
-        #endif
-    #endif
+    // WARNING: avcodec versions up to 54.54.100 potentially crashes on Windows 64bit.
 }
+
+// From version 54.56 binkaudio encoding format changed from S16 to FLTP. See:
+// https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d
+// http://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
+#ifdef HAVE_LIBSWRESAMPLE
+extern "C" {
+#include <libswresample/swresample.h>
+}
+#else
+/* some dummy definitions to make the code more legible */
+int  swr_init(int *n) { n = 0; return 1; }
+int  swr_convert(int *s, uint8_t** output, int outs, const uint8_t** input, int ins)
+    { return 1; }
+int * swr_alloc_set_opts(int *s, int64_t outc, AVSampleFormat outf, int outr,
+    int64_t inc, AVSampleFormat inf, int inr, int o, void* l) { *s = 1; return s; }
+void  swr_free(int **n) { }
+#define SwrContext int
+#undef AV_SAMPLE_FMT_FLTP
+#define AV_SAMPLE_FMT_FLTP 3
+#endif
 
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
 #define MAX_VIDEOQ_SIZE (5 * 256 * 1024)
@@ -316,12 +317,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     VideoState *mVideoState;
     AVStream *mAVStream;
 
-#ifdef HAVE_LIBSWRESAMPLE
     SwrContext *mSwr;
-#else
-    bool mSwr;
-#endif
-    int mSamplesAllChannels;
     enum AVSampleFormat mOutputSampleFormat;
 
     AutoAVPacket mPacket;
@@ -441,15 +437,12 @@ public:
       , mAudioDiffThreshold(2.0 * 0.050/* 50 ms */)
       , mAudioDiffAvgCount(0)
       , mSwr(0)
-      , mSamplesAllChannels(0)
       , mOutputSampleFormat(AV_SAMPLE_FMT_NONE)
     { }
     virtual ~MovieAudioDecoder()
     {
         av_freep(&mFrame);
-#ifdef HAVE_LIBSWRESAMPLE
         swr_free(&mSwr);
-#endif
     }
 
     void getInfo(int *samplerate, MWSound::ChannelConfig *chans, MWSound::SampleType * type)
@@ -460,14 +453,12 @@ public:
             *type = MWSound::SampleType_Int16;
         else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLT)
             *type = MWSound::SampleType_Float32;
-#ifdef HAVE_LIBSWRESAMPLE
         else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8P)
             *type = MWSound::SampleType_UInt8;
         else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16P)
             *type = MWSound::SampleType_Int16;
         else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
             *type = MWSound::SampleType_Float32;
-#endif
         else
             fail(std::string("Unsupported sample format: ")+
                  av_get_sample_fmt_name(mAVStream->codec->sample_fmt));
@@ -506,15 +497,12 @@ public:
 
         *samplerate = mAVStream->codec->sample_rate;
 
-#ifdef HAVE_LIBSWRESAMPLE
         if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8P)
             mOutputSampleFormat = AV_SAMPLE_FMT_U8;
         else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16P)
             mOutputSampleFormat = AV_SAMPLE_FMT_S16;
         else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
             mOutputSampleFormat = AV_SAMPLE_FMT_FLT;
-        else
-            fail(std::string("Should never reach here."));
 
         if(mOutputSampleFormat != AV_SAMPLE_FMT_NONE)
         {
@@ -531,20 +519,17 @@ public:
                 fail(std::string("Couldn't allocate SwrContext"));
             if(swr_init(mSwr) < 0)
                 fail(std::string("Couldn't initialize SwrContext"));
-
-            mSamplesAllChannels = av_get_bytes_per_sample(mOutputSampleFormat)
-                                  * mAVStream->codec->channels;
         }
-#endif
     }
 
     size_t read(char *stream, size_t len)
     {
         int sample_skip = synchronize_audio();
         size_t total = 0;
-        uint8_t *output = NULL;
+        uint8_t *output = 0;
         if(mSwr) av_samples_alloc(&output, NULL, mAVStream->codec->channels,
-                                  len/mSamplesAllChannels, mOutputSampleFormat, 0);
+              len/(av_get_bytes_per_sample(mOutputSampleFormat) * mAVStream->codec->channels),
+              mOutputSampleFormat, 0);
 
         while(total < len)
         {
@@ -559,11 +544,12 @@ public:
                 }
 
                 mFramePos = std::min<ssize_t>(mFrameSize, sample_skip);
-                sample_skip -= mFramePos;
+                if(sample_skip > 0 || mFrameSize > -sample_skip)
+                    sample_skip -= mFramePos;
                 continue;
             }
-#ifdef HAVE_LIBSWRESAMPLE
-            if(mSwr)
+
+            if(mSwr && !sample_skip)
             {
                 int n = swr_convert(mSwr, (uint8_t**)&output, mFrame->nb_samples,
                                     (const uint8_t**)mFrame->extended_data, mFrame->nb_samples);
@@ -572,22 +558,18 @@ public:
                 else if(n < mFrame->nb_samples)
                     std::cerr<<"swr_convert error: "+std::to_string(mFrame->nb_samples-n)<<std::endl;
             }
-#endif
+
             size_t len1 = len - total;
             if(mFramePos >= 0)
             {
                 len1 = std::min<size_t>(len1, mFrameSize-mFramePos);
 
                 if(mSwr)
-                {
                     memcpy(stream, &output[0]+mFramePos, len1);
-                }
                 else
-                {
                     memcpy(stream, mFrame->data[0]+mFramePos, len1);
-                }
             }
-            else // FIXME: support ftlp
+            else
             {
                 len1 = std::min<size_t>(len1, -mFramePos);
 
@@ -1076,12 +1058,8 @@ void VideoState::init(const std::string& resourceName)
 
     this->external_clock_base = av_gettime();
 
-#if !defined(_WIN32) || defined(FFMPEG_PLAY_BINKAUDIO)
     if(audio_index >= 0)
         this->stream_open(audio_index, this->format_ctx);
-#else
-    std::cout<<"FFmpeg sound disabled for \""+resourceName+"\""<<std::endl;
-#endif
 
     if(video_index >= 0)
     {
