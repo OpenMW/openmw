@@ -83,13 +83,19 @@ namespace MWGui
     {
         const int coinSpacing = 10;
         int curX = mCoinBox->getWidth()/2 - (coinSpacing*(mCoinCount - 1) + 16*mCoinCount)/2;
-        for (unsigned int i=0; i<mCoinCount; ++i)
+        for (unsigned int i=0; i<sMaxCoins; ++i)
         {
             MyGUI::ImageBox* image = mCoins[i];
             image->detachFromWidget();
             image->attachToWidget(mCoinBox);
-            image->setCoord(MyGUI::IntCoord(curX,0,16,16));
-            curX += 16+coinSpacing;
+            if (i < mCoinCount)
+            {
+                mCoins[i]->setVisible(true);
+                image->setCoord(MyGUI::IntCoord(curX,0,16,16));
+                curX += 16+coinSpacing;
+            }
+            else
+                mCoins[i]->setVisible(false);
         }
     }
 
@@ -177,14 +183,6 @@ namespace MWGui
         }
 
         mCoinCount = std::min(sMaxCoins, availableAttributes);
-
-        for (unsigned int i = 0; i < sMaxCoins; i++)
-        {
-            if (i < mCoinCount)
-                mCoins[i]->attachToWidget(mCoinBox);
-            else
-                mCoins[i]->detachFromWidget();
-        }
 
         mSpentAttributes.clear();
         resetCoins();
