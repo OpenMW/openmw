@@ -63,16 +63,36 @@ extern "C" {
 #include <libswresample/swresample.h>
 }
 #else
-/* some dummy definitions to make the code more legible */
-int  swr_init(int *n) { n = 0; return 1; }
-int  swr_convert(int *s, uint8_t** output, int outs, const uint8_t** input, int ins)
-    { return 1; }
+/* nasty hack to support FLTP, but no other formats, on systems without libswresample */
+int  swr_init(int *n) { return 1; }
+int  swr_convert(int *s, uint8_t** output, int outs, const uint8_t** input, int ins) {
+    uint8_t *stream = *output;
+    float *outputStream = (float *)&stream[0];
+    float* inputChannel0 = (float *)input[0];
+    float* inputChannel1 = (float *)input[1];
+    float sample0, sample1 = 0;
+    for (unsigned int i = 0 ; i < (unsigned int)ins ; ++i) {
+        sample0 = *inputChannel0++;
+        sample1 = *inputChannel1++;
+        outputStream[i*2] = sample0;
+        outputStream[i*2+1] = sample1;
+    }
+    return ins;
+}
 int * swr_alloc_set_opts(int *s, int64_t outc, AVSampleFormat outf, int outr,
-    int64_t inc, AVSampleFormat inf, int inr, int o, void* l) { *s = 1; return s; }
-void  swr_free(int **n) { }
+    int64_t inc, AVSampleFormat inf, int inr, int o, void* l) {
+    if(inf == AV_SAMPLE_FMT_FLTP) {
+        s = new int;
+        *s = 1;
+    }
+    return s;
+}
+void  swr_free(int **s) { delete *s; }
 #define SwrContext int
-#undef AV_SAMPLE_FMT_FLTP
-#define AV_SAMPLE_FMT_FLTP 3
+#undef AV_SAMPLE_FMT_U8P
+#define AV_SAMPLE_FMT_U8P 0
+#undef AV_SAMPLE_FMT_S16P
+#define AV_SAMPLE_FMT_S16P 1
 #endif
 
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
@@ -324,7 +344,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     SwrContext *mSwr;
     enum AVSampleFormat mOutputSampleFormat;
     uint8_t *mDataBuf;
-    uint8_t **mData;
+    uint8_t **mFrameData;
     int mDataBufLen;
 
     AutoAVPacket mPacket;
@@ -410,10 +430,10 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                     {
                         break;
                     }
-                    mData = &mDataBuf;
+                    mFrameData = &mDataBuf;
                 }
                 else
-                    mData = &frame->data[0];
+                    mFrameData = &frame->data[0];
 
                 mAudioClock += (double)frame->nb_samples /
                                (double)mAVStream->codec->sample_rate;
@@ -464,7 +484,7 @@ public:
       , mSwr(0)
       , mOutputSampleFormat(AV_SAMPLE_FMT_NONE)
       , mDataBuf(NULL)
-      , mData(NULL)
+      , mFrameData(NULL)
       , mDataBufLen(0)
     { }
     virtual ~MovieAudioDecoder()
@@ -578,7 +598,7 @@ public:
             if(mFramePos >= 0)
             {
                 len1 = std::min<size_t>(len1, mFrameSize-mFramePos);
-                memcpy(stream, mData[0]+mFramePos, len1);
+                memcpy(stream, mFrameData[0]+mFramePos, len1);
             }
             else
             {
@@ -589,29 +609,29 @@ public:
 
                 /* add samples by copying the first sample*/
                 if(n == 1)
-                    memset(stream, *mData[0], len1);
+                    memset(stream, *mFrameData[0], len1);
                 else if(n == 2)
                 {
-                    const int16_t val = *((int16_t*)mData[0]);
+                    const int16_t val = *((int16_t*)mFrameData[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
                         *((int16_t*)(stream+nb)) = val;
                 }
                 else if(n == 4)
                 {
-                    const int32_t val = *((int32_t*)mData[0]);
+                    const int32_t val = *((int32_t*)mFrameData[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
                         *((int32_t*)(stream+nb)) = val;
                 }
                 else if(n == 8)
                 {
-                    const int64_t val = *((int64_t*)mData[0]);
+                    const int64_t val = *((int64_t*)mFrameData[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
                         *((int64_t*)(stream+nb)) = val;
                 }
                 else
                 {
                     for(size_t nb = 0;nb < len1;nb += n)
-                        memcpy(stream+nb, mData[0], n);
+                        memcpy(stream+nb, mFrameData[0], n);
                 }
             }
 
