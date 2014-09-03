@@ -86,6 +86,11 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         // update input
         MWBase::Environment::get().getInputManager()->update(frametime, false);
 
+        // When the window is minimized, pause everything. Currently this *has* to be here to work around a MyGUI bug.
+        // If we are not currently rendering, then RenderItems will not be reused resulting in a memory leak upon changing widget textures.
+        if (!mOgre->getWindow()->isActive() || !mOgre->getWindow()->isVisible())
+            return true;
+
         // sound
         if (mUseSound)
             MWBase::Environment::get().getSoundManager()->update(frametime);
