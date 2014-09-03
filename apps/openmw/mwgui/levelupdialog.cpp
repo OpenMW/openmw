@@ -26,6 +26,7 @@ namespace MWGui
         getWidget(mLevelText, "LevelText");
         getWidget(mLevelDescription, "LevelDescription");
         getWidget(mCoinBox, "Coins");
+        getWidget(mAssignWidget, "AssignWidget");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &LevelupDialog::onOkButtonClicked);
 
@@ -106,13 +107,13 @@ namespace MWGui
         {
             MyGUI::ImageBox* image = mCoins[i];
             image->detachFromWidget();
-            image->attachToWidget(mMainWidget);
+            image->attachToWidget(mAssignWidget);
 
             int attribute = mSpentAttributes[i];
 
             int xdiff = mAttributeMultipliers[attribute]->getCaption() == "" ? 0 : 20;
 
-            MyGUI::IntPoint pos = mAttributes[attribute]->getAbsolutePosition() - mMainWidget->getAbsolutePosition() - MyGUI::IntPoint(22+xdiff,0);
+            MyGUI::IntPoint pos = mAttributes[attribute]->getAbsolutePosition() - mAssignWidget->getAbsolutePosition() - MyGUI::IntPoint(22+xdiff,0);
             pos.top += (mAttributes[attribute]->getHeight() - image->getHeight())/2;
             image->setPosition(pos);
         }

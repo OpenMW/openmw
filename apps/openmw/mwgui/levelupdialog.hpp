@@ -20,6 +20,7 @@ namespace MWGui
         MyGUI::EditBox* mLevelDescription;
 
         MyGUI::Widget* mCoinBox;
+        MyGUI::Widget* mAssignWidget;
 
         std::vector<MyGUI::Button*> mAttributes;
         std::vector<MyGUI::TextBox*> mAttributeValues;
