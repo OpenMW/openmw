@@ -323,6 +323,9 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
 
     SwrContext *mSwr;
     enum AVSampleFormat mOutputSampleFormat;
+    uint8_t *mDataBuf;
+    uint8_t **mData;
+    int mDataBufLen;
 
     AutoAVPacket mPacket;
     AVFrame *mFrame;
@@ -390,6 +393,28 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 if(!got_frame || frame->nb_samples <= 0)
                     continue;
 
+                if(mSwr)
+                {
+                    if(!mDataBuf || mDataBufLen < frame->nb_samples)
+                    {
+                        av_freep(&mDataBuf);
+                        if(av_samples_alloc(&mDataBuf, NULL, mAVStream->codec->channels,
+                                            frame->nb_samples, mOutputSampleFormat, 0) < 0)
+                            break;
+                        else
+                            mDataBufLen = frame->nb_samples;
+                    }
+
+                    if(swr_convert(mSwr, (uint8_t**)&mDataBuf, frame->nb_samples,
+                        (const uint8_t**)frame->extended_data, frame->nb_samples) < 0)
+                    {
+                        break;
+                    }
+                    mData = &mDataBuf;
+                }
+                else
+                    mData = &frame->data[0];
+
                 mAudioClock += (double)frame->nb_samples /
                                (double)mAVStream->codec->sample_rate;
 
@@ -438,11 +463,15 @@ public:
       , mAudioDiffAvgCount(0)
       , mSwr(0)
       , mOutputSampleFormat(AV_SAMPLE_FMT_NONE)
+      , mDataBuf(NULL)
+      , mData(NULL)
+      , mDataBufLen(0)
     { }
     virtual ~MovieAudioDecoder()
     {
         av_freep(&mFrame);
         swr_free(&mSwr);
+        av_freep(&mDataBuf);
     }
 
     void getInfo(int *samplerate, MWSound::ChannelConfig *chans, MWSound::SampleType * type)
@@ -526,11 +555,6 @@ public:
     {
         int sample_skip = synchronize_audio();
         size_t total = 0;
-        uint8_t *dataBuf = 0;
-        uint8_t ** data = &dataBuf;
-        if(mSwr) av_samples_alloc(&dataBuf, NULL, mAVStream->codec->channels,
-              len/(av_get_bytes_per_sample(mOutputSampleFormat) * mAVStream->codec->channels),
-              mOutputSampleFormat, 0);
 
         while(total < len)
         {
@@ -550,21 +574,11 @@ public:
                 continue;
             }
 
-            if(mSwr && !sample_skip)
-            {
-                if(swr_convert(mSwr, (uint8_t**)data, mFrame->nb_samples,
-                    (const uint8_t**)mFrame->extended_data, mFrame->nb_samples) < 0)
-                {
-                    break;
-                }
-            }
-            if(!mSwr) data = &mFrame->data[0];
-
             size_t len1 = len - total;
             if(mFramePos >= 0)
             {
                 len1 = std::min<size_t>(len1, mFrameSize-mFramePos);
-                memcpy(stream, data[0]+mFramePos, len1);
+                memcpy(stream, mData[0]+mFramePos, len1);
             }
             else
             {
@@ -575,29 +589,29 @@ public:
 
                 /* add samples by copying the first sample*/
                 if(n == 1)
-                    memset(stream, *data[0], len1);
+                    memset(stream, *mData[0], len1);
                 else if(n == 2)
                 {
-                    const int16_t val = *((int16_t*)data[0]);
+                    const int16_t val = *((int16_t*)mData[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
                         *((int16_t*)(stream+nb)) = val;
                 }
                 else if(n == 4)
                 {
-                    const int32_t val = *((int32_t*)data[0]);
+                    const int32_t val = *((int32_t*)mData[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
                         *((int32_t*)(stream+nb)) = val;
                 }
                 else if(n == 8)
                 {
-                    const int64_t val = *((int64_t*)data[0]);
+                    const int64_t val = *((int64_t*)mData[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
                         *((int64_t*)(stream+nb)) = val;
                 }
                 else
                 {
                     for(size_t nb = 0;nb < len1;nb += n)
-                        memcpy(stream+nb, data[0], n);
+                        memcpy(stream+nb, mData[0], n);
                 }
             }
 
@@ -605,7 +619,6 @@ public:
             stream += len1;
             mFramePos += len1;
         }
-        if(mSwr) av_freep(data);
 
         return total;
     }
