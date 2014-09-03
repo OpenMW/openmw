@@ -2375,7 +2375,20 @@ bool CSMDoc::Document::isBlacklisted (const CSMWorld::UniversalId& id)
 void CSMDoc::Document::startRunning (const std::string& profile,
     const std::string& startupInstruction)
 {
-    mRunner.start();
+    int state = getState();
+
+    if (state & State_Modified)
+    {
+        // need to save first
+        mRunner.start (true);
+
+        new SaveWatcher (&mRunner, &mSaving); // no, that is not a memory leak. Qt is weird.
+
+        if (!(state & State_Saving))
+            save();
+    }
+    else
+        mRunner.start();
 }
 
 void CSMDoc::Document::stopRunning()

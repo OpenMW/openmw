@@ -17,7 +17,9 @@ namespace CSMDoc
 
             Runner();
 
-            void start();
+            /// \param delayed Flag as running but do not start the OpenMW process yet (the
+            /// process must be started by another call of start with delayed==false)
+            void start (bool delayed = false);
 
             void stop();
 
@@ -32,6 +34,25 @@ namespace CSMDoc
         private slots:
 
             void finished (int exitCode, QProcess::ExitStatus exitStatus);
+    };
+
+    class Operation;
+
+    /// \brief Watch for end of save operation and restart or stop runner
+    class SaveWatcher : public QObject
+    {
+            Q_OBJECT
+
+            Runner *mRunner;
+
+        public:
+
+            /// *this attaches itself to runner
+            SaveWatcher (Runner *runner, Operation *operation);
+
+        private slots:
+
+            void saveDone (int type, bool failed);
     };
 }
 
