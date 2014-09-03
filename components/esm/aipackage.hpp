@@ -16,8 +16,8 @@ namespace ESM
 
     struct AIData
     {
-        // These are probabilities
-        char mHello, mU1, mFight, mFlee, mAlarm, mU2, mU3, mU4;
+        char mU1, mU2, mU3, mU4; // Unknown values
+        unsigned char mHello, mFight, mFlee, mAlarm; // These are probabilities [0, 100]
         int mServices; // See the Services enum
 
         void blank();

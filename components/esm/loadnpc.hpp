@@ -81,9 +81,11 @@ struct NPC
              mLuck;
 
         char mSkills[Skill::Length];
-        char mReputation;
+
+        // at opencs/model/tools/referenceablecheck.cpp:679 is assumed that negative reputation values are invalid, can we assume we won't find any negative value?
+        unsigned char mReputation;
         unsigned short mHealth, mMana, mFatigue;
-        char mDisposition, mFactionID, mRank;
+        signed char mDisposition, mFactionID, mRank;
         char mUnknown;
         int mGold;
     }; // 52 bytes
@@ -91,7 +93,8 @@ struct NPC
     struct NPDTstruct12
     {
         short mLevel;
-        char mDisposition, mReputation, mRank;
+        unsigned char mReputation; // see NPTDstruct52.mReputation
+        signed char mDisposition, mRank;
         char mUnknown1, mUnknown2, mUnknown3;
         int mGold; // ?? not certain
     }; // 12 bytes
@@ -103,7 +106,7 @@ struct NPC
     };
     #pragma pack(pop)
 
-    char mNpdtType;
+    unsigned char mNpdtType;
     NPDTstruct52 mNpdt52;
     NPDTstruct12 mNpdt12; //for autocalculated characters
 

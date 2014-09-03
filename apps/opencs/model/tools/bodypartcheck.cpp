@@ -33,7 +33,7 @@ void CSMTools::BodyPartCheckStage::perform ( int stage, Messages &messages )
     if ( bodyPart.mData.mVampire < 0 )
         messages.push_back(std::make_pair( id, bodyPart.mId + " has negative vampire flag." ));
 
-    if ( bodyPart.mData.mFlags < 0 || bodyPart.mData.mFlags > 2 )
+    if ( bodyPart.mData.mFlags < 0 || bodyPart.mData.mFlags > 3 )
         messages.push_back(std::make_pair( id, bodyPart.mId + " has out of range flags value." ));
 
     if ( bodyPart.mData.mType < 0 || bodyPart.mData.mType > 2 )
