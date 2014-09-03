@@ -9,6 +9,16 @@ CSMDoc::Runner::Runner() : mRunning (false)
         this, SLOT (finished (int, QProcess::ExitStatus)));
 }
 
+CSMDoc::Runner::~Runner()
+{
+    if (mRunning)
+    {
+        disconnect (&mProcess, 0, this, 0);
+        mProcess.kill();
+        mProcess.waitForFinished();
+    }
+}
+
 void CSMDoc::Runner::start (bool delayed)
 {
     if (!delayed)

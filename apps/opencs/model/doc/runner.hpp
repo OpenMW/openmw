@@ -17,6 +17,8 @@ namespace CSMDoc
 
             Runner();
 
+            ~Runner();
+
             /// \param delayed Flag as running but do not start the OpenMW process yet (the
             /// process must be started by another call of start with delayed==false)
             void start (bool delayed = false);
