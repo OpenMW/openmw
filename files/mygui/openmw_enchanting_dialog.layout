@@ -92,7 +92,6 @@
                     <UserString key="HStretch" value="true"/>
                 </Widget>
             </Widget>
-            <Widget type="Widget"/>
         </Widget>
 
         <!-- Available effects -->

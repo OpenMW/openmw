@@ -26,6 +26,7 @@ namespace MWGui
         getWidget(mLevelText, "LevelText");
         getWidget(mLevelDescription, "LevelDescription");
         getWidget(mCoinBox, "Coins");
+        getWidget(mAssignWidget, "AssignWidget");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &LevelupDialog::onOkButtonClicked);
 
@@ -83,13 +84,19 @@ namespace MWGui
     {
         const int coinSpacing = 10;
         int curX = mCoinBox->getWidth()/2 - (coinSpacing*(mCoinCount - 1) + 16*mCoinCount)/2;
-        for (unsigned int i=0; i<mCoinCount; ++i)
+        for (unsigned int i=0; i<sMaxCoins; ++i)
         {
             MyGUI::ImageBox* image = mCoins[i];
             image->detachFromWidget();
             image->attachToWidget(mCoinBox);
-            image->setCoord(MyGUI::IntCoord(curX,0,16,16));
-            curX += 16+coinSpacing;
+            if (i < mCoinCount)
+            {
+                mCoins[i]->setVisible(true);
+                image->setCoord(MyGUI::IntCoord(curX,0,16,16));
+                curX += 16+coinSpacing;
+            }
+            else
+                mCoins[i]->setVisible(false);
         }
     }
 
@@ -100,13 +107,13 @@ namespace MWGui
         {
             MyGUI::ImageBox* image = mCoins[i];
             image->detachFromWidget();
-            image->attachToWidget(mMainWidget);
+            image->attachToWidget(mAssignWidget);
 
             int attribute = mSpentAttributes[i];
 
             int xdiff = mAttributeMultipliers[attribute]->getCaption() == "" ? 0 : 20;
 
-            MyGUI::IntPoint pos = mAttributes[attribute]->getAbsolutePosition() - mMainWidget->getAbsolutePosition() - MyGUI::IntPoint(22+xdiff,0);
+            MyGUI::IntPoint pos = mAttributes[attribute]->getAbsolutePosition() - mAssignWidget->getAbsolutePosition() - MyGUI::IntPoint(22+xdiff,0);
             pos.top += (mAttributes[attribute]->getHeight() - image->getHeight())/2;
             image->setPosition(pos);
         }
@@ -177,14 +184,6 @@ namespace MWGui
         }
 
         mCoinCount = std::min(sMaxCoins, availableAttributes);
-
-        for (unsigned int i = 0; i < sMaxCoins; i++)
-        {
-            if (i < mCoinCount)
-                mCoins[i]->attachToWidget(mCoinBox);
-            else
-                mCoins[i]->detachFromWidget();
-        }
 
         mSpentAttributes.clear();
         resetCoins();
