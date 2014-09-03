@@ -32,6 +32,10 @@ extern "C"
     #include <libavformat/avformat.h>
     #include <libswscale/swscale.h>
 
+    #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
+    #define av_frame_alloc  avcodec_alloc_frame
+    #endif
+
     // From libavformat version 55.0.100 and onward the declaration of av_gettime() is
     // removed from libavformat/avformat.h and moved to libavutil/time.h
     // https://github.com/FFmpeg/FFmpeg/commit/06a83505992d5f49846c18507a6c3eb8a47c650e
@@ -423,11 +427,7 @@ public:
     MovieAudioDecoder(VideoState *is)
       : mVideoState(is)
       , mAVStream(*is->audio_st)
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55, 28, 1)
-      , mFrame(avcodec_alloc_frame())
-#else
       , mFrame(av_frame_alloc())
-#endif
       , mFramePos(0)
       , mFrameSize(0)
       , mAudioClock(0.0)
@@ -526,8 +526,9 @@ public:
     {
         int sample_skip = synchronize_audio();
         size_t total = 0;
-        uint8_t *output = 0;
-        if(mSwr) av_samples_alloc(&output, NULL, mAVStream->codec->channels,
+        uint8_t *dataBuf = 0;
+        uint8_t ** data = &dataBuf;
+        if(mSwr) av_samples_alloc(&dataBuf, NULL, mAVStream->codec->channels,
               len/(av_get_bytes_per_sample(mOutputSampleFormat) * mAVStream->codec->channels),
               mOutputSampleFormat, 0);
 
@@ -551,23 +552,19 @@ public:
 
             if(mSwr && !sample_skip)
             {
-                int n = swr_convert(mSwr, (uint8_t**)&output, mFrame->nb_samples,
-                                    (const uint8_t**)mFrame->extended_data, mFrame->nb_samples);
-                if(n < 0)
+                if(swr_convert(mSwr, (uint8_t**)data, mFrame->nb_samples,
+                    (const uint8_t**)mFrame->extended_data, mFrame->nb_samples) < 0)
+                {
                     break;
-                else if(n < mFrame->nb_samples)
-                    std::cerr << "swr_convert error" << std::endl;
+                }
             }
+            if(!mSwr) data = &mFrame->data[0];
 
             size_t len1 = len - total;
             if(mFramePos >= 0)
             {
                 len1 = std::min<size_t>(len1, mFrameSize-mFramePos);
-
-                if(mSwr)
-                    memcpy(stream, &output[0]+mFramePos, len1);
-                else
-                    memcpy(stream, mFrame->data[0]+mFramePos, len1);
+                memcpy(stream, data[0]+mFramePos, len1);
             }
             else
             {
@@ -578,29 +575,29 @@ public:
 
                 /* add samples by copying the first sample*/
                 if(n == 1)
-                    memset(stream, *mFrame->data[0], len1);
+                    memset(stream, *data[0], len1);
                 else if(n == 2)
                 {
-                    const int16_t val = *((int16_t*)mFrame->data[0]);
+                    const int16_t val = *((int16_t*)data[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
                         *((int16_t*)(stream+nb)) = val;
                 }
                 else if(n == 4)
                 {
-                    const int32_t val = *((int32_t*)mFrame->data[0]);
+                    const int32_t val = *((int32_t*)data[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
                         *((int32_t*)(stream+nb)) = val;
                 }
                 else if(n == 8)
                 {
-                    const int64_t val = *((int64_t*)mFrame->data[0]);
+                    const int64_t val = *((int64_t*)data[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
                         *((int64_t*)(stream+nb)) = val;
                 }
                 else
                 {
                     for(size_t nb = 0;nb < len1;nb += n)
-                        memcpy(stream+nb, mFrame->data[0], n);
+                        memcpy(stream+nb, data[0], n);
                 }
             }
 
@@ -608,7 +605,7 @@ public:
             stream += len1;
             mFramePos += len1;
         }
-        if(mSwr) av_freep(&output);
+        if(mSwr) av_freep(data);
 
         return total;
     }
@@ -828,15 +825,9 @@ void VideoState::video_thread_loop(VideoState *self)
     AVFrame *pFrame;
     double pts;
 
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55, 28, 1)
-    pFrame = avcodec_alloc_frame();
-
-    self->rgbaFrame = avcodec_alloc_frame();
-#else
     pFrame = av_frame_alloc();
 
     self->rgbaFrame = av_frame_alloc();
-#endif
     avpicture_alloc((AVPicture*)self->rgbaFrame, PIX_FMT_RGBA, (*self->video_st)->codec->width, (*self->video_st)->codec->height);
 
     while(self->videoq.get(packet, self) >= 0)
