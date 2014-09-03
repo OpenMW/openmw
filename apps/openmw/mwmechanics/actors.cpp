@@ -297,7 +297,14 @@ namespace MWMechanics
         bool aggressive;
 
         if (againstPlayer) 
+        {
+            // followers with high fight should not engage in combat with the player (e.g. bm_bear_black_summon)
+            const std::list<MWWorld::Ptr>& followers = getActorsFollowing(actor2);
+            if (std::find(followers.begin(), followers.end(), actor1) != followers.end())
+                return;
+
             aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(actor1, actor2);
+        }
         else
         {
             aggressive = false;
