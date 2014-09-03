@@ -45,7 +45,7 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
         mVerifier = new CSMDoc::Operation (CSMDoc::State_Verifying, false);
 
         connect (mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
-        connect (mVerifier, SIGNAL (done (int)), this, SIGNAL (done (int)));
+        connect (mVerifier, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
         connect (mVerifier,
             SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)),
             this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, int)));

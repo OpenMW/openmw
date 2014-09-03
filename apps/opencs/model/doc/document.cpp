@@ -2248,10 +2248,10 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     connect (&mUndoStack, SIGNAL (cleanChanged (bool)), this, SLOT (modificationStateChanged (bool)));
 
     connect (&mTools, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
-    connect (&mTools, SIGNAL (done (int)), this, SLOT (operationDone (int)));
+    connect (&mTools, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
 
     connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
-    connect (&mSaving, SIGNAL (done (int)), this, SLOT (operationDone (int)));
+    connect (&mSaving, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
 
     connect (
         &mSaving, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)),
@@ -2346,7 +2346,7 @@ void CSMDoc::Document::reportMessage (const CSMWorld::UniversalId& id, const std
     std::cout << message << std::endl;
 }
 
-void CSMDoc::Document::operationDone (int type)
+void CSMDoc::Document::operationDone (int type, bool failed)
 {
     emit stateChanged (getState(), this);
 }

@@ -70,7 +70,7 @@ namespace CSMTools
 
             void progress (int current, int max, int type);
 
-            void done (int type);
+            void done (int type, bool failed);
     };
 }
 

@@ -135,7 +135,7 @@ namespace CSMDoc
             void reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
                 int type);
 
-            void operationDone (int type);
+            void operationDone (int type, bool failed);
 
             void runStateChanged();
 
