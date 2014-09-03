@@ -84,7 +84,7 @@ namespace ICS
 	            TiXmlElement* xmlChannel = xmlControl->FirstChildElement("Channel");    
 				while(xmlChannel)
 				{
-	                controlChannelCount = std::max(channelCount, FromString<size_t>(xmlChannel->Attribute("number")));
+					controlChannelCount = std::max(channelCount, FromString<size_t>(xmlChannel->Attribute("number"))+1);
 
 					xmlChannel = xmlChannel->NextSiblingElement("Channel");
 				}
