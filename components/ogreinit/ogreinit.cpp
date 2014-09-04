@@ -94,9 +94,9 @@ namespace OgreInit
 
     Ogre::Root* OgreInit::init(const std::string &logPath)
     {
-/*
-        if (flag1==false)
-    {
+
+        #ifdef NOT_ANDROID
+    
         // Set up logging first
         new Ogre::LogManager;
         Ogre::Log *log = Ogre::LogManager::getSingleton().createLog(logPath);
@@ -108,7 +108,7 @@ namespace OgreInit
 
         // Disable logging to cout/cerr
         log->setDebugOutputEnabled(false);
-    }*/
+    #endif
         mRoot = new Ogre::Root("", "", "");
 
         #if defined(ENABLE_PLUGIN_GL) || (ENABLE_PLUGIN_GLES2) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)

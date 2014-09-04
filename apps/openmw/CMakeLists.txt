@@ -19,6 +19,14 @@ endif ()
 if(NOT WIN32 AND NOT ANDROID)
     set(GAME ${GAME} crashcatcher.cpp)
 endif()
+if (NOT ANDROID)
+ADD_DEFINITIONS(-DNOT_ANDROID)
+endif()
+
+if (ANDROID)
+ADD_DEFINITIONS(-DBUILD_ANDROID)
+endif()
+
 
 set(GAME_HEADER
     engine.hpp

@@ -44,18 +44,21 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 
 		winHandle  = Ogre::StringConverter::toString(WindowContentViewHandle(wmInfo));
 		break;
-#else
+
+#elif BUILD_ANDROID
              case SDL_SYSWM_ANDROID:
 		winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.android.window);
 		winHandleSurface = Ogre::StringConverter::toString((unsigned long)wmInfo.info.android.surface);
                 flag1=true;
 		break;
-      if (flag1==false)
-{
-	//case SDL_SYSWM_X11:
-	//	winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.x11.window);
-	//	break;
-}
+
+      #elif NOT_ANDROID
+
+	case SDL_SYSWM_X11:
+		winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.x11.window);
+		break;
+
+     
 #endif
 
   

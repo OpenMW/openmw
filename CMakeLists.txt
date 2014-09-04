@@ -58,6 +58,15 @@ if (ANDROID)
 set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
 endif (ANDROID)
 
+if (NOT ANDROID)
+ADD_DEFINITIONS(-DNOT_ANDROID)
+endif()
+
+if (ANDROID)
+ADD_DEFINITIONS(-DBUILD_ANDROID)
+endif()
+
+
 # doxygen main page
 
 configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/docs/mainpage.hpp")

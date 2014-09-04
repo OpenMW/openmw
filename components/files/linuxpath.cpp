@@ -58,39 +58,51 @@ LinuxPath::LinuxPath(const std::string& application_name)
 
 boost::filesystem::path LinuxPath::getUserConfigPath() const
 {
-//if (flag==false)
-  //  return getEnv("XDG_CONFIG_HOME", getUserHome() / ".config") / mName;
+#ifdef NOT_ANDROID
+    return getEnv("XDG_CONFIG_HOME", getUserHome() / ".config") / mName;
+#endif
 //else
-    return getEnv("XDG_CONFIG_HOME",  "/sdcard/morrowind/config") / mName;
-
+#ifdef BUILD_ANDROID 
+   return getEnv("XDG_CONFIG_HOME",  "/sdcard/morrowind/config") / mName;
+#endif
 }
 
 boost::filesystem::path LinuxPath::getUserDataPath() const
 {
 //if (flag==false)
-  //  return getEnv("XDG_DATA_HOME", getUserHome() / ".local/share") / mName;
+#ifdef NOT_ANDROID
+  
+  return getEnv("XDG_DATA_HOME", getUserHome() / ".local/share") / mName;
+#endif
 //else
+#ifdef BUILD_ANDROID
     return getEnv("XDG_DATA_HOME", "/sdcard/morrowind/share") / mName;
-
+#endif
 
 }
 
 boost::filesystem::path LinuxPath::getCachePath() const
 {
 //if (flag==false)
-  //  return getEnv("XDG_CACHE_HOME", getUserHome() / ".cache") / mName;
+#ifdef NOT_ANDROID  
+  return getEnv("XDG_CACHE_HOME", getUserHome() / ".cache") / mName;
+#endif
 //else
+#ifdef BUILD_ANDROID
     return getEnv("XDG_CACHE_HOME", "/sdcard/morrowind/cache") / mName;
-
+#endif
 }
 
 boost::filesystem::path LinuxPath::getGlobalConfigPath() const
 {
 //if (flag==false)
-  //  boost::filesystem::path globalPath("/etc/");
+#ifdef NOT_ANDROID
+  boost::filesystem::path globalPath("/etc/");
+#endif
 //else
+#ifdef BUILD_ANDROID
    boost::filesystem::path globalPath("/sdcard/morrowind/");
-     
+#endif     
 return globalPath / mName;
 }
 
@@ -102,10 +114,14 @@ boost::filesystem::path LinuxPath::getLocalPath() const
 boost::filesystem::path LinuxPath::getGlobalDataPath() const
 {
 //if (flag==false)
-  //  boost::filesystem::path globalDataPath("/usr/share/games/");
+#ifdef NOT_ANDROID
+  
+  boost::filesystem::path globalDataPath("/usr/share/games/");
+#endif
 //else
+#ifdef BUILD_ANDROID
   boost::filesystem::path globalDataPath("/sdcard/morrowind/data");
-      
+#endif      
 return globalDataPath / mName;
 }
 
