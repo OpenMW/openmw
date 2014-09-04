@@ -71,7 +71,7 @@ int  swr_convert(int *s, uint8_t** output, int outs, const uint8_t** input, int 
     float* inputChannel0 = (float *)input[0];
     float* inputChannel1 = (float *)input[1];
     float sample0, sample1 = 0;
-    for (i = 0 ; i < ins ; ++i) {
+    for (int i = 0 ; i < ins ; ++i) {
         sample0 = *inputChannel0++;
         sample1 = *inputChannel1++;
         outputStream[i*2] = sample0;
