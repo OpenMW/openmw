@@ -12,6 +12,8 @@
 #include "../../model/doc/document.hpp"
 #include "../../model/settings/usersettings.hpp"
 
+#include "../../model/world/idtable.hpp"
+
 #include "../world/subviews.hpp"
 
 #include "../tools/subviews.hpp"
@@ -19,6 +21,7 @@
 #include "viewmanager.hpp"
 #include "operations.hpp"
 #include "subview.hpp"
+#include "globaldebugprofilemenu.hpp"
 
 void CSVDoc::View::closeEvent (QCloseEvent *event)
 {
@@ -242,9 +245,15 @@ void CSVDoc::View::setupDebugMenu()
 
     debug->addSeparator();
 
-    mRunDebug = new QAction (tr ("Run OpenMW"), this);
-    connect (mRunDebug, SIGNAL (triggered()), this, SLOT (run()));
-    debug->addAction (mRunDebug);
+    mGlobalDebugProfileMenu = new GlobalDebugProfileMenu (
+        &dynamic_cast<CSMWorld::IdTable&> (*mDocument->getData().getTableModel (
+        CSMWorld::UniversalId::Type_DebugProfiles)), this);
+
+    connect (mGlobalDebugProfileMenu, SIGNAL (triggered (const std::string&)),
+        this, SLOT (run (const std::string&)));
+
+    QAction *runDebug = debug->addMenu (mGlobalDebugProfileMenu);
+    runDebug->setText (tr ("Run OpenMW"));
 
     mStopDebug = new QAction (tr ("Shutdown OpenMW"), this);
     connect (mStopDebug, SIGNAL (triggered()), this, SLOT (stop()));
@@ -292,7 +301,7 @@ void CSVDoc::View::updateActions()
     mSave->setEnabled (!(mDocument->getState() & CSMDoc::State_Saving) && !running);
     mVerify->setEnabled (!(mDocument->getState() & CSMDoc::State_Verifying));
 
-    mRunDebug->setEnabled (!running);
+    mGlobalDebugProfileMenu->updateActions (running);
     mStopDebug->setEnabled (running);
 }
 
@@ -620,9 +629,9 @@ void CSVDoc::View::loadErrorLog()
     addSubView (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_LoadErrorLog, 0));
 }
 
-void CSVDoc::View::run()
+void CSVDoc::View::run (const std::string& profile, const std::string& startupInstruction)
 {
-    mDocument->startRunning ("", "");
+    mDocument->startRunning (profile, startupInstruction);
 }
 
 void CSVDoc::View::stop()

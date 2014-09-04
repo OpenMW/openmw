@@ -25,6 +25,7 @@ namespace CSVDoc
 {
     class ViewManager;
     class Operations;
+    class GlobalDebugProfileMenu;
 
     class View : public QMainWindow
     {
@@ -39,12 +40,12 @@ namespace CSVDoc
             QAction *mSave;
             QAction *mVerify;
             QAction *mShowStatusBar;
-            QAction *mRunDebug;
             QAction *mStopDebug;
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
             SubViewFactoryManager mSubViewFactory;
             QMainWindow mSubViewWindow;
+            GlobalDebugProfileMenu *mGlobalDebugProfileMenu;
 
 
             // not implemented
@@ -204,7 +205,7 @@ namespace CSVDoc
 
             void loadErrorLog();
 
-            void run();
+            void run (const std::string& profile, const std::string& startupInstruction = "");
 
             void stop();
     };
