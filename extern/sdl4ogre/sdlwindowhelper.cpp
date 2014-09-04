@@ -10,7 +10,7 @@
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include "osx_utils.h"
 #endif
-bool flag1=false;
+//bool flag1=false;
 
 namespace SFO
 {
@@ -49,7 +49,7 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
              case SDL_SYSWM_ANDROID:
 		winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.android.window);
 		winHandleSurface = Ogre::StringConverter::toString((unsigned long)wmInfo.info.android.surface);
-                flag1=true;
+             //   flag1=true;
 		break;
 
       #elif NOT_ANDROID
@@ -70,14 +70,13 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 
 	/// \todo externalWindowHandle is deprecated according to the source code. Figure out a way to get parentWindowHandle
 	/// to work properly. On Linux/X11 it causes an occasional GLXBadDrawable error.
-if (flag1==false)	
-params.insert(std::make_pair("externalWindowHandle",  winHandle));
-else
-{
+#ifdef BUILD_ANDROID	
 params.insert(std::make_pair("externalWindowHandle",  winHandle));
 params.insert(std::make_pair("externalSurface",  winHandleSurface));
+#else
+params.insert(std::make_pair("externalWindowHandle",  winHandle));
+#endif
 
-}
 	mWindow = Ogre::Root::getSingleton().createRenderWindow(title, w, h, fullscreen, &params);
 }
 
