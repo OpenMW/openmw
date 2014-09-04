@@ -71,7 +71,7 @@ int  swr_convert(int *s, uint8_t** output, int outs, const uint8_t** input, int 
     float* inputChannel0 = (float *)input[0];
     float* inputChannel1 = (float *)input[1];
     float sample0, sample1 = 0;
-    for (unsigned int i = 0 ; i < (unsigned int)ins ; ++i) {
+    for (i = 0 ; i < ins ; ++i) {
         sample0 = *inputChannel0++;
         sample1 = *inputChannel1++;
         outputStream[i*2] = sample0;
@@ -81,10 +81,7 @@ int  swr_convert(int *s, uint8_t** output, int outs, const uint8_t** input, int 
 }
 int * swr_alloc_set_opts(int *s, int64_t outc, AVSampleFormat outf, int outr,
     int64_t inc, AVSampleFormat inf, int inr, int o, void* l) {
-    if(inf == AV_SAMPLE_FMT_FLTP) {
-        s = new int;
-        *s = 1;
-    }
+    if(inf == AV_SAMPLE_FMT_FLTP) { s = new int(1); }
     return s;
 }
 void  swr_free(int **s) { delete *s; }
