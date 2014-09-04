@@ -874,6 +874,12 @@ namespace MWMechanics
 
     bool MechanicsManager::sleepInBed(const MWWorld::Ptr &ptr, const MWWorld::Ptr &bed)
     {
+        if (ptr.getClass().getNpcStats(ptr).isWerewolf())
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
+            return true;
+        }
+
         if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()) {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
             return true;
@@ -1300,6 +1306,14 @@ namespace MWMechanics
                 + (iFightDistanceBase - fFightDistanceMultiplier * d)
                 + ((50 - disposition)  * fFightDispMult))
                 + bias;
+
+        if (target.getClass().getNpcStats(target).isWerewolf() ||
+                (target == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                 MWBase::Environment::get().getWorld()->getGlobalInt("pcknownwerewolf")))
+        {
+            const ESM::GameSetting * iWerewolfFightMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("iWerewolfFightMod");
+            fight += iWerewolfFightMod->getInt();
+        }
 
         return (fight >= 100);
     }

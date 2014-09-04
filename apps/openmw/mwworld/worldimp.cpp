@@ -390,6 +390,7 @@ namespace MWWorld
         // vanilla Morrowind does not define dayspassed.
         globals["dayspassed"] = ESM::Variant(1); // but the addons start counting at 1 :(
         globals["WerewolfClawMult"] = ESM::Variant(1.f);
+        globals["PCKnownWerewolf"] = ESM::Variant(0);
 
         for (std::map<std::string, ESM::Variant>::iterator it = gmst.begin(); it != gmst.end(); ++it)
         {
@@ -2329,6 +2330,31 @@ namespace MWWorld
             {
                 windowManager->unsetForceHide(MWGui::GW_Inventory);
                 windowManager->unsetForceHide(MWGui::GW_Magic);
+            }
+
+            // Witnesses of the player's transformation will make them a globally known werewolf
+            std::vector<MWWorld::Ptr> closeActors;
+            MWBase::Environment::get().getMechanicsManager()->getActorsInRange(Ogre::Vector3(actor.getRefData().getPosition().pos),
+                                                                               getStore().get<ESM::GameSetting>().search("fAlarmRadius")->getFloat(),
+                                                                               closeActors);
+
+            bool detected = false;
+            for (std::vector<MWWorld::Ptr>::const_iterator it = closeActors.begin(); it != closeActors.end(); ++it)
+            {
+                if (*it == actor)
+                    continue;
+
+                if (getLOS(*it, actor) && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, *it))
+                {
+                    detected = true;
+                    break;
+                }
+            }
+
+            if (detected)
+            {
+                windowManager->messageBox("#{sWerewolfAlarmMessage}");
+                setGlobalInt("pcknownwerewolf", 1);
             }
         }
     }
