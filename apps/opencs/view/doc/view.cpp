@@ -319,6 +319,8 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
 
     setupUi();
 
+    updateActions();
+
     CSVWorld::addSubViewFactories (mSubViewFactory);
     CSVTools::addSubViewFactories (mSubViewFactory);
 
