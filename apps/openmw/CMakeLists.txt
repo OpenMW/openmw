@@ -2,6 +2,8 @@
 set(GAME
     main.cpp
     engine.cpp
+
+    ${CMAKE_SOURCE_DIR}/files/openmw/openmw.rc
 )
 
 if (ANDROID)
