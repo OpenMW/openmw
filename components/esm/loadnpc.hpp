@@ -80,7 +80,8 @@ struct NPC
              mPersonality,
              mLuck;
 
-        char mSkills[Skill::Length];
+        // mSkill vals are used only in MWMechanics::AttributeValue.setBase(), if less than 0 they are not considered
+        unsigned char mSkills[Skill::Length];
 
         // at opencs/model/tools/referenceablecheck.cpp:679 is assumed that negative reputation values are invalid, can we assume we won't find any negative value?
         unsigned char mReputation;
