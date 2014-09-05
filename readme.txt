@@ -213,6 +213,7 @@ Bug #1845: Typing 'j' into 'Name' fields opens the journal
 Bug #1846: Text pasted into the console still appears twice (Windows)
 Bug #1847: "setfatigue 0" doesn't render NPC unconscious
 Bug #1848: I can talk to unconscious actors
+Bug #1868: Memory leaking when openmw window is minimized
 Feature #47: Magic Effects
 Feature #642: Control NPC mouth movement using current Say sound
 Feature #939: Editor: Resources tables
