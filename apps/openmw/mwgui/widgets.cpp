@@ -559,6 +559,8 @@ namespace MWGui
                     Box * b = dynamic_cast<Box*>(parent);
                     if (b)
                         b->notifyChildrenSizeChanged();
+                    else
+                        break;
                     parent = parent->getParent();
                 }
             }
