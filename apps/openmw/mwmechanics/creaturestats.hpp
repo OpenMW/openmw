@@ -168,6 +168,8 @@ namespace MWMechanics
 
         bool isDead() const;
 
+        void notifyDied();
+
         bool hasDied() const;
 
         void clearHasDied();
