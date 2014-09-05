@@ -3,7 +3,7 @@ set(GAME
     main.cpp
     engine.cpp
 
-    ${CMAKE_SOURCE_DIR}/files/openmw/openmw.rc
+    ${CMAKE_SOURCE_DIR}/files/windows/openmw.rc
 )
 
 if (ANDROID)

@@ -1,5 +1,5 @@
 set (OPENCS_SRC main.cpp
-    ${CMAKE_SOURCE_DIR}/files/opencs/opencs.rc
+    ${CMAKE_SOURCE_DIR}/files/windows/opencs.rc
     )
 
 opencs_units (. editor)
