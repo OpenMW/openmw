@@ -1,9 +1,12 @@
 
 #include "runner.hpp"
 
+#include <QTemporaryFile>
+#include <QTextStream>
+
 #include "operation.hpp"
 
-CSMDoc::Runner::Runner() : mRunning (false)
+CSMDoc::Runner::Runner() : mRunning (false), mStartup (0)
 {
     connect (&mProcess, SIGNAL (finished (int, QProcess::ExitStatus)),
         this, SLOT (finished (int, QProcess::ExitStatus)));
@@ -23,6 +26,12 @@ CSMDoc::Runner::~Runner()
 
 void CSMDoc::Runner::start (bool delayed)
 {
+    if (mStartup)
+    {
+        delete mStartup;
+        mStartup = 0;
+    }
+
     if (!delayed)
     {
         QString path = "openmw";
@@ -35,6 +44,20 @@ void CSMDoc::Runner::start (bool delayed)
         path.prepend(QString("./"));
 #endif
 
+        mStartup = new QTemporaryFile (this);
+        mStartup->open();
+
+        {
+            QTextStream stream (mStartup);
+
+            if (!mStartupInstruction.empty())
+                stream << QString::fromUtf8 (mStartupInstruction.c_str()) << '\n';
+
+            stream << QString::fromUtf8 (mProfile.mScriptText.c_str());
+        }
+
+        mStartup->close();
+
         QStringList arguments;
         arguments << "--skip-menu";
 
@@ -42,6 +65,8 @@ void CSMDoc::Runner::start (bool delayed)
             arguments << "--new-game=0";
         else
             arguments << "--new-game=1";
+
+        arguments << ("--script-run="+mStartup->fileName());
 
         mProcess.start (path, arguments);
     }
@@ -52,6 +77,9 @@ void CSMDoc::Runner::start (bool delayed)
 
 void CSMDoc::Runner::stop()
 {
+    delete mStartup;
+    mStartup = 0;
+
     if (mProcess.state()==QProcess::NotRunning)
     {
         mRunning = false;
@@ -66,9 +94,11 @@ bool CSMDoc::Runner::isRunning() const
     return mRunning;
 }
 
-void CSMDoc::Runner::configure (const ESM::DebugProfile& profile)
+void CSMDoc::Runner::configure (const ESM::DebugProfile& profile,
+    const std::string& startupInstruction)
 {
     mProfile = profile;
+    mStartupInstruction = startupInstruction;
 }
 
 void CSMDoc::Runner::finished (int exitCode, QProcess::ExitStatus exitStatus)

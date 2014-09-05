@@ -6,6 +6,8 @@
 
 #include <components/esm/debugprofile.hpp>
 
+class QTemporaryFile;
+
 namespace CSMDoc
 {
     class Runner : public QObject
@@ -15,6 +17,8 @@ namespace CSMDoc
             QProcess mProcess;
             bool mRunning;
             ESM::DebugProfile mProfile;
+            std::string mStartupInstruction;
+            QTemporaryFile *mStartup;
 
         public:
 
@@ -32,7 +36,8 @@ namespace CSMDoc
             /// is not necessarily identical to the moment the child process is started.
             bool isRunning() const;
 
-            void configure (const ESM::DebugProfile& profile);
+            void configure (const ESM::DebugProfile& profile,
+                const std::string& startupInstruction);
 
         signals:
 
