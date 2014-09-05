@@ -2375,6 +2375,8 @@ bool CSMDoc::Document::isBlacklisted (const CSMWorld::UniversalId& id)
 void CSMDoc::Document::startRunning (const std::string& profile,
     const std::string& startupInstruction)
 {
+    mRunner.configure (getData().getDebugProfiles().getRecord (profile).get());
+
     int state = getState();
 
     if (state & State_Modified)

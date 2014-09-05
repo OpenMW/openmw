@@ -7,6 +7,8 @@ CSMDoc::Runner::Runner() : mRunning (false)
 {
     connect (&mProcess, SIGNAL (finished (int, QProcess::ExitStatus)),
         this, SLOT (finished (int, QProcess::ExitStatus)));
+
+    mProfile.blank();
 }
 
 CSMDoc::Runner::~Runner()
@@ -33,7 +35,15 @@ void CSMDoc::Runner::start (bool delayed)
         path.prepend(QString("./"));
 #endif
 
-        mProcess.start (path);
+        QStringList arguments;
+        arguments << "--skip-menu";
+
+        if (mProfile.mFlags & ESM::DebugProfile::Flag_BypassNewGame)
+            arguments << "--new-game=0";
+        else
+            arguments << "--new-game=1";
+
+        mProcess.start (path, arguments);
     }
 
     mRunning = true;
@@ -54,6 +64,11 @@ void CSMDoc::Runner::stop()
 bool CSMDoc::Runner::isRunning() const
 {
     return mRunning;
+}
+
+void CSMDoc::Runner::configure (const ESM::DebugProfile& profile)
+{
+    mProfile = profile;
 }
 
 void CSMDoc::Runner::finished (int exitCode, QProcess::ExitStatus exitStatus)

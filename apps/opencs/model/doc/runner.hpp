@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QProcess>
 
+#include <components/esm/debugprofile.hpp>
+
 namespace CSMDoc
 {
     class Runner : public QObject
@@ -12,6 +14,7 @@ namespace CSMDoc
 
             QProcess mProcess;
             bool mRunning;
+            ESM::DebugProfile mProfile;
 
         public:
 
@@ -28,6 +31,8 @@ namespace CSMDoc
             /// \note Running state is entered when the start function is called. This
             /// is not necessarily identical to the moment the child process is started.
             bool isRunning() const;
+
+            void configure (const ESM::DebugProfile& profile);
 
         signals:
 
