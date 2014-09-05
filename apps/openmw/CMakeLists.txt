@@ -1,17 +1,20 @@
 # local files
 
-
-
+if (NOT ANDROID)
 set(GAME
     main.cpp
-#ifdef ANDROID
-android_main.c
-#endif
     engine.cpp
 )
+else()
+set(GAME
+    main.cpp
+    android_main.c
+    engine.cpp
+)
+endif()
 
 
-if(NOT WIN32 OR NOT ANDROID)
+if(NOT WIN32 AND NOT ANDROID)
     set(GAME ${GAME} crashcatcher.cpp)
 endif()
 
@@ -93,10 +96,11 @@ add_openmw_dir (mwbase
 
 # Main executable
 if (ANDROID)
-set(BOOST_COMPONENTS system filesystem program_options thread wave atomic)
+    set(BOOST_COMPONENTS system filesystem program_options thread wave atomic)
 else ()
-set(BOOST_COMPONENTS system filesystem program_options thread wave)
+    set(BOOST_COMPONENTS system filesystem program_options thread wave)
 endif ()
+
 if(WIN32)
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
 endif(WIN32)
@@ -111,14 +115,11 @@ add_executable(openmw
     ${APPLE_BUNDLE_RESOURCES}
 )
 else ()
-
 add_library(openmw SHARED
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
     ${OPENMW_FILES}
     ${GAME} ${GAME_HEADER}
-    ${APPLE_BUNDLE_RESOURCES}
 )
-
 endif ()
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
@@ -142,23 +143,20 @@ target_link_libraries(openmw
 )
 
 if (ANDROID)
-
-
 target_link_libraries(openmw
-${OGRE_STATIC_PLUGINS} 
-EGL
-android
-log
-dl  
-MyGUI.OgrePlatform
-MyGUIEngineStatic
-Plugin_StrangeButtonStatic
-cpufeatures
-BulletCollision
-BulletDynamics
-LinearMath 
+    ${OGRE_STATIC_PLUGINS} 
+    EGL
+    android
+    log
+    dl  
+    MyGUI.OgrePlatform
+    MyGUIEngineStatic
+    Plugin_StrangeButtonStatic
+    cpufeatures
+    BulletCollision
+    BulletDynamics
+    LinearMath 
 )
-
 endif (ANDROID)
 
 if (USE_SYSTEM_TINYXML)

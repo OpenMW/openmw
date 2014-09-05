@@ -1,5 +1,5 @@
-#ifndef COMPONENTS_FILES_LINUXPATH_H
-#define COMPONENTS_FILES_LINUXPATH_H
+#ifndef COMPONENTS_FILES_ANDROIDPATH_H
+#define COMPONENTS_FILES_ANDROIDPATH_H
 
 #if defined(__ANDROID__)
 
@@ -42,16 +42,11 @@ struct AndroidPath
      */
     boost::filesystem::path getCachePath() const;
 
-    /**
-     * \brief Gets the path of the installed Morrowind version if there is one.
-     */
-    boost::filesystem::path getInstallPath() const;
-
     std::string mName;
 };
 
 } /* namespace Files */
 
-#endif /* defined(__linux__) || defined(__FreeBSD__) */
+#endif /* defined(__Android__) */
 
-#endif /* COMPONENTS_FILES_LINUXPATH_H */
+#endif /* COMPONENTS_FILES_ANDROIDPATH_H */

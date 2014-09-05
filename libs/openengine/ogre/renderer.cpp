@@ -1,5 +1,4 @@
 #include "renderer.hpp"
-#include "fader.hpp"
 
 #include <SDL.h>
 
@@ -27,9 +26,6 @@ using namespace OEngine::Render;
 
 void OgreRenderer::cleanup()
 {
-    delete mFader;
-    mFader = NULL;
-
     if (mWindow)
         Ogre::Root::getSingleton().destroyRenderTarget(mWindow);
     mWindow = NULL;
@@ -46,7 +42,6 @@ void OgreRenderer::cleanup()
 
 void OgreRenderer::update(float dt)
 {
-    mFader->update(dt);
 }
 
 void OgreRenderer::screenshot(const std::string &file)
@@ -138,7 +133,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
       settings.window_x, // width, in pixels
       settings.window_y, // height, in pixels
       SDL_WINDOW_SHOWN
-        | (settings.fullscreen ? SDL_WINDOW_FULLSCREEN : 0) | SDL_WINDOW_RESIZABLE 
+        | (settings.fullscreen ? SDL_WINDOW_FULLSCREEN : 0) | SDL_WINDOW_RESIZABLE
     );
 
     SFO::SDLWindowHelper helper(mSDLWindow, settings.window_x, settings.window_y, title, settings.fullscreen, params);
@@ -160,8 +155,6 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
                     Ogre::TU_WRITE_ONLY);
 
     mScene = mRoot->createSceneManager(ST_GENERIC);
-
-    mFader = new Fader(mScene);
 
     mCamera = mScene->createCamera("cam");
 

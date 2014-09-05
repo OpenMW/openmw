@@ -55,11 +55,16 @@ endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 include(OpenMWMacros)
 
 if (ANDROID)
-set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
+    set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
 endif (ANDROID)
 
 if (NOT ANDROID)
-ADD_DEFINITIONS(-DNOT_ANDROID)
+    ADD_DEFINITIONS(-DNOT_ANDROID)
+endif()
+
+
+if (ANDROID)
+    ADD_DEFINITIONS(-DANDROID)
 endif()
 
 
@@ -245,7 +250,7 @@ if(OGRE_STATIC)
 if (ANDROID)
     add_static_ogre_plugin(RenderSystem_GLES2)
 else ()
-add_static_ogre_plugin(RenderSystem_GL)
+    add_static_ogre_plugin(RenderSystem_GL)
 endif ()
 
     if(WIN32)

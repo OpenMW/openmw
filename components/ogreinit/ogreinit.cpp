@@ -83,7 +83,7 @@ namespace OgreInit
     #ifdef ENABLE_PLUGIN_GL
     , mGLPlugin(NULL)
     #endif
-  #ifdef ENABLE_PLUGIN_GLES2
+    #ifdef ENABLE_PLUGIN_GLES2
     , mGLES2Plugin(NULL)
     #endif
     
@@ -96,19 +96,18 @@ namespace OgreInit
     {
 
         #ifdef NOT_ANDROID
-    
         // Set up logging first
         new Ogre::LogManager;
         Ogre::Log *log = Ogre::LogManager::getSingleton().createLog(logPath);
 
-    #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
         // Use custom listener only on Windows
         log->addListener(new LogListener(logPath));
-    #endif
+        #endif
 
         // Disable logging to cout/cerr
         log->setDebugOutputEnabled(false);
-    #endif
+        #endif
         mRoot = new Ogre::Root("", "", "");
 
         #if defined(ENABLE_PLUGIN_GL) || (ENABLE_PLUGIN_GLES2) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
@@ -141,12 +140,11 @@ namespace OgreInit
         delete mGLPlugin;
         mGLPlugin = NULL;
         #endif
-    #ifdef ENABLE_PLUGIN_GLES2
+        #ifdef ENABLE_PLUGIN_GLES2
         delete mGLES2Plugin;
         mGLES2Plugin = NULL;
-        #endif
-        
-    #ifdef ENABLE_PLUGIN_Direct3D9
+        #endif   
+        #ifdef ENABLE_PLUGIN_Direct3D9
         delete mD3D9Plugin;
         mD3D9Plugin = NULL;
         #endif
@@ -170,12 +168,11 @@ namespace OgreInit
         mGLPlugin = new Ogre::GLPlugin();
         mRoot->installPlugin(mGLPlugin);
         #endif
-   #ifdef ENABLE_PLUGIN_GLES2
+        #ifdef ENABLE_PLUGIN_GLES2
         mGLES2Plugin = new Ogre::GLES2Plugin();
         mRoot->installPlugin(mGLES2Plugin);
-        #endif
-          
-   #ifdef ENABLE_PLUGIN_Direct3D9
+        #endif       
+        #ifdef ENABLE_PLUGIN_Direct3D9
         mD3D9Plugin = new Ogre::D3D9Plugin();
         mRoot->installPlugin(mD3D9Plugin);
         #endif

@@ -9,8 +9,7 @@
     #include <components/files/linuxpath.hpp>
     namespace Files { typedef LinuxPath TargetPathType; }
 #else
-
- #include <components/files/androidpath.hpp>
+    #include <components/files/androidpath.hpp>
     namespace Files { typedef AndroidPath TargetPathType; }
 #endif
 #elif defined(__WIN32) || defined(__WINDOWS__) || defined(_WIN32)
@@ -51,6 +50,7 @@ struct FixedPath
      *
      * \param [in] application_name - Name of the application
      */
+#ifdef NOT_ADNROID
     FixedPath(const std::string& application_name)
         : mPath(application_name + "/")
         , mUserConfigPath(mPath.getUserConfigPath())
@@ -62,7 +62,18 @@ struct FixedPath
         , mCachePath(mPath.getCachePath())
     {
     }
-
+#else
+    FixedPath(const std::string& application_name)
+        : mPath(application_name + "/")
+        , mUserConfigPath(mPath.getUserConfigPath())
+        , mUserDataPath(mPath.getUserDataPath())
+        , mGlobalConfigPath(mPath.getGlobalConfigPath())
+        , mLocalPath(mPath.getLocalPath())
+        , mGlobalDataPath(mPath.getGlobalDataPath())
+        , mCachePath(mPath.getCachePath())
+    {
+    }
+#endif
     /**
      * \brief Return path pointing to the user local configuration directory.
      */
@@ -92,11 +103,12 @@ struct FixedPath
         return mLocalPath;
     }
 
+#ifndef NOT_ANDROID
     const boost::filesystem::path& getInstallPath() const
     {
         return mInstallPath;
     }
-
+#endif
     const boost::filesystem::path& getGlobalDataPath() const
     {
         return mGlobalDataPath;

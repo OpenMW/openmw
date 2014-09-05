@@ -7,11 +7,7 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <boost/filesystem/fstream.hpp>
-/*bool flag=false;
- #ifdef ENABLE_PLUGIN_GLES2
-  flag=true;  
-#endif
-*/
+
 
 namespace
 {
@@ -58,34 +54,23 @@ LinuxPath::LinuxPath(const std::string& application_name)
 
 boost::filesystem::path LinuxPath::getUserConfigPath() const
 {
-
     return getEnv("XDG_CONFIG_HOME", getUserHome() / ".config") / mName;
-
-
-
 }
 
 boost::filesystem::path LinuxPath::getUserDataPath() const
 {
-
-  
-  return getEnv("XDG_DATA_HOME", getUserHome() / ".local/share") / mName;
-
-
+    return getEnv("XDG_DATA_HOME", getUserHome() / ".local/share") / mName;
 }
 
 boost::filesystem::path LinuxPath::getCachePath() const
 {
-
-  return getEnv("XDG_CACHE_HOME", getUserHome() / ".cache") / mName;
+    return getEnv("XDG_CACHE_HOME", getUserHome() / ".cache") / mName;
 }
 
 boost::filesystem::path LinuxPath::getGlobalConfigPath() const
 {
-
-  boost::filesystem::path globalPath("/etc/");
-    
-return globalPath / mName;
+    boost::filesystem::path globalPath("/etc/");
+    return globalPath / mName;
 }
 
 boost::filesystem::path LinuxPath::getLocalPath() const
@@ -95,10 +80,8 @@ boost::filesystem::path LinuxPath::getLocalPath() const
 
 boost::filesystem::path LinuxPath::getGlobalDataPath() const
 {
-
-  boost::filesystem::path globalDataPath("/usr/share/games/");
-    
-return globalDataPath / mName;
+    boost::filesystem::path globalDataPath("/usr/share/games/");
+    return globalDataPath / mName;
 }
 
 boost::filesystem::path LinuxPath::getInstallPath() const

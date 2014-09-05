@@ -10,7 +10,6 @@
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include "osx_utils.h"
 #endif
-//bool flag1=false;
 
 namespace SFO
 {
@@ -41,28 +40,19 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 		//required to make OGRE play nice with our window
 		params.insert(std::make_pair("macAPI", "cocoa"));
 		params.insert(std::make_pair("macAPICocoaUseNSView", "true"));
-
 		winHandle  = Ogre::StringConverter::toString(WindowContentViewHandle(wmInfo));
 		break;
-
-#elif ANDROID
-             case SDL_SYSWM_ANDROID:
+#elif ANDROID           
+        case SDL_SYSWM_ANDROID:
 		winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.android.window);
 		winHandleSurface = Ogre::StringConverter::toString((unsigned long)wmInfo.info.android.surface);
-             
+         
 		break;
-
  #else
-
 	case SDL_SYSWM_X11:
 		winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.x11.window);
 		break;
-
-     
 #endif
-
-  
-
 	default:
 		throw std::runtime_error("Unexpected WM!");
 		break;
@@ -70,10 +60,11 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 
 	/// \todo externalWindowHandle is deprecated according to the source code. Figure out a way to get parentWindowHandle
 	/// to work properly. On Linux/X11 it causes an occasional GLXBadDrawable error.
+
 #ifdef ANDROID	
-params.insert(std::make_pair("externalSurface",  winHandleSurface));
+        params.insert(std::make_pair("externalSurface",  winHandleSurface));
 #endif
-params.insert(std::make_pair("externalWindowHandle",  winHandle));
+        params.insert(std::make_pair("externalWindowHandle",  winHandle));
 
 	mWindow = Ogre::Root::getSingleton().createRenderWindow(title, w, h, fullscreen, &params);
 }
