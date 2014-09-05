@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QTextDocument>
 
 #include <components/esm/debugprofile.hpp>
 
@@ -19,6 +20,7 @@ namespace CSMDoc
             ESM::DebugProfile mProfile;
             std::string mStartupInstruction;
             QTemporaryFile *mStartup;
+            QTextDocument mLog;
 
         public:
 
@@ -39,6 +41,8 @@ namespace CSMDoc
             void configure (const ESM::DebugProfile& profile,
                 const std::string& startupInstruction);
 
+            QTextDocument *getLog();
+
         signals:
 
             void runStateChanged();
@@ -46,6 +50,8 @@ namespace CSMDoc
         private slots:
 
             void finished (int exitCode, QProcess::ExitStatus exitStatus);
+
+            void readyReadStandardOutput();
     };
 
     class Operation;

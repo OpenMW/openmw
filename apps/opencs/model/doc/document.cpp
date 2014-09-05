@@ -2399,6 +2399,11 @@ void CSMDoc::Document::stopRunning()
     mRunner.stop();
 }
 
+QTextDocument *CSMDoc::Document::getRunLog()
+{
+    return mRunner.getLog();
+}
+
 void CSMDoc::Document::runStateChanged()
 {
     emit stateChanged (getState(), this);

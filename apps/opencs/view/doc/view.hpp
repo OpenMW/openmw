@@ -201,6 +201,8 @@ namespace CSVDoc
 
             void addDebugProfilesSubView();
 
+            void addRunLogSubView();
+
             void toggleShowStatusBar (bool show);
 
             void loadErrorLog();

@@ -11,6 +11,11 @@ CSMDoc::Runner::Runner() : mRunning (false), mStartup (0)
     connect (&mProcess, SIGNAL (finished (int, QProcess::ExitStatus)),
         this, SLOT (finished (int, QProcess::ExitStatus)));
 
+    connect (&mProcess, SIGNAL (readyReadStandardOutput()),
+        this, SLOT (readyReadStandardOutput()));
+
+    mProcess.setProcessChannelMode (QProcess::MergedChannels);
+
     mProfile.blank();
 }
 
@@ -34,6 +39,8 @@ void CSMDoc::Runner::start (bool delayed)
 
     if (!delayed)
     {
+        mLog.clear();
+
         QString path = "openmw";
 #ifdef Q_OS_WIN
         path.append(QString(".exe"));
@@ -105,6 +112,17 @@ void CSMDoc::Runner::finished (int exitCode, QProcess::ExitStatus exitStatus)
 {
     mRunning = false;
     emit runStateChanged();
+}
+
+QTextDocument *CSMDoc::Runner::getLog()
+{
+    return &mLog;
+}
+
+void CSMDoc::Runner::readyReadStandardOutput()
+{
+    mLog.setPlainText (
+        mLog.toPlainText() + QString::fromUtf8 (mProcess.readAllStandardOutput()));
 }
 
 

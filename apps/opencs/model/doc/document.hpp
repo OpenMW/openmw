@@ -122,6 +122,8 @@ namespace CSMDoc
 
             void stopRunning();
 
+            QTextDocument *getRunLog();
+
         signals:
 
             void stateChanged (int state, CSMDoc::Document *document);

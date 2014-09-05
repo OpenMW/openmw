@@ -22,6 +22,8 @@
 #include "operations.hpp"
 #include "subview.hpp"
 #include "globaldebugprofilemenu.hpp"
+#include "runlogsubview.hpp"
+#include "subviewfactoryimp.hpp"
 
 void CSVDoc::View::closeEvent (QCloseEvent *event)
 {
@@ -258,6 +260,10 @@ void CSVDoc::View::setupDebugMenu()
     mStopDebug = new QAction (tr ("Shutdown OpenMW"), this);
     connect (mStopDebug, SIGNAL (triggered()), this, SLOT (stop()));
     debug->addAction (mStopDebug);
+
+    QAction *runLog = new QAction (tr ("Run Log"), this);
+    connect (runLog, SIGNAL (triggered()), this, SLOT (addRunLogSubView()));
+    debug->addAction (runLog);
 }
 
 void CSVDoc::View::setupUi()
@@ -332,6 +338,8 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
 
     CSVWorld::addSubViewFactories (mSubViewFactory);
     CSVTools::addSubViewFactories (mSubViewFactory);
+
+    mSubViewFactory.add (CSMWorld::UniversalId::Type_RunLog, new SubViewFactory<RunLogSubView>);
 
     connect (mOperations, SIGNAL (abortOperation (int)), this, SLOT (abortOperation (int)));
 }
@@ -581,6 +589,11 @@ void CSVDoc::View::addVideosSubView()
 void CSVDoc::View::addDebugProfilesSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_DebugProfiles);
+}
+
+void CSVDoc::View::addRunLogSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_RunLog);
 }
 
 void CSVDoc::View::abortOperation (int type)

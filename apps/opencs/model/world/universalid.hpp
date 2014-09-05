@@ -121,7 +121,8 @@ namespace CSMWorld
                 Type_Videos,
                 Type_Video,
                 Type_DebugProfiles,
-                Type_DebugProfile
+                Type_DebugProfile,
+                Type_RunLog
             };
 
             enum { NumberOfTypes = Type_DebugProfile+1 };
