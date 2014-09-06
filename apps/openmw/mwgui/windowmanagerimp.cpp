@@ -23,6 +23,8 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/cellstore.hpp"
 
+#include "../mwmechanics/npcstats.hpp"
+
 #include "../mwsound/soundmanagerimp.hpp"
 
 #include "console.hpp"
@@ -1442,6 +1444,10 @@ namespace MWGui
     void WindowManager::updatePlayer()
     {
         mInventoryWindow->updatePlayer();
+
+        const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        if (player.getClass().getNpcStats(player).isWerewolf())
+            forceHide((GuiWindow)(MWGui::GW_Inventory | MWGui::GW_Magic));
     }
 
     void WindowManager::setKeyFocusWidget(MyGUI::Widget *widget)
@@ -1531,6 +1537,8 @@ namespace MWGui
         mSelectedSpell.clear();
 
         mCustomMarkers.clear();
+
+        mForceHidden = GW_None;
 
         mGuiModes.clear();
         MWBase::Environment::get().getInputManager()->changeInputMode(false);
