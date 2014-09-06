@@ -222,7 +222,6 @@ namespace
         { CSMWorld::UniversalId::Type_Race, CSMWorld::ColumnBase::Display_Race },
         { CSMWorld::UniversalId::Type_Skill, CSMWorld::ColumnBase::Display_Skill },
         { CSMWorld::UniversalId::Type_Class, CSMWorld::ColumnBase::Display_Class },
-        { CSMWorld::UniversalId::Type_Class, CSMWorld::ColumnBase::Display_Class },
         { CSMWorld::UniversalId::Type_Faction, CSMWorld::ColumnBase::Display_Faction },
         { CSMWorld::UniversalId::Type_Sound, CSMWorld::ColumnBase::Display_Sound },
         { CSMWorld::UniversalId::Type_Region, CSMWorld::ColumnBase::Display_Region },

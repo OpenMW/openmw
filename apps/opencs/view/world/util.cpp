@@ -173,6 +173,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_Skill:
         case CSMWorld::ColumnBase::Display_Script:
         case CSMWorld::ColumnBase::Display_Race:
+        case CSMWorld::ColumnBase::Display_Region:
         case CSMWorld::ColumnBase::Display_Class:
         case CSMWorld::ColumnBase::Display_Faction:
         case CSMWorld::ColumnBase::Display_Miscellaneous:
