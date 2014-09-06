@@ -1307,12 +1307,15 @@ namespace MWMechanics
                 + ((50 - disposition)  * fFightDispMult))
                 + bias;
 
-        if (target.getClass().getNpcStats(target).isWerewolf() ||
-                (target == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
-                 MWBase::Environment::get().getWorld()->getGlobalInt("pcknownwerewolf")))
+        if (ptr.getClass().isNpc() && target.getClass().isNpc())
         {
-            const ESM::GameSetting * iWerewolfFightMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("iWerewolfFightMod");
-            fight += iWerewolfFightMod->getInt();
+            if (target.getClass().getNpcStats(target).isWerewolf() ||
+                    (target == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                     MWBase::Environment::get().getWorld()->getGlobalInt("pcknownwerewolf")))
+            {
+                const ESM::GameSetting * iWerewolfFightMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("iWerewolfFightMod");
+                fight += iWerewolfFightMod->getInt();
+            }
         }
 
         return (fight >= 100);

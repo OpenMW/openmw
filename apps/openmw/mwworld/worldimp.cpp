@@ -2344,6 +2344,9 @@ namespace MWWorld
                 if (*it == actor)
                     continue;
 
+                if (!it->getClass().isNpc())
+                    continue;
+
                 if (getLOS(*it, actor) && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, *it))
                 {
                     detected = true;
