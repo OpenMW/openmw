@@ -269,15 +269,18 @@ namespace MWMechanics
         case ESM::MagicEffect::RestoreFatigue:
             if (effect.mRange == ESM::RT_Self)
             {
+                int priority = 1;
+                if (effect.mEffectID == ESM::MagicEffect::RestoreHealth)
+                    priority = 10;
                 const DynamicStat<float>& current = actor.getClass().getCreatureStats(actor).
                         getDynamic(effect.mEffectID - ESM::MagicEffect::RestoreHealth);
                 float toHeal = (effect.mMagnMin + effect.mMagnMax)/2.f * effect.mDuration;
                 // Effect doesn't heal more than we need, *or* we are below 1/2 health
                 if (current.getModified() - current.getCurrent() > toHeal
                         || current.getCurrent() < current.getModified()*0.5)
-                    return 10000.f;
+                    return 10000.f * priority;
                 else
-                    return -10000.f; // Save for later
+                    return -10000.f * priority; // Save for later
             }
             break;
 
