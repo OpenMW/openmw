@@ -46,7 +46,7 @@ enum PartReferenceType
 // Reference to body parts
 struct PartReference
 {
-    unsigned char mPart; // declared values [0, 26]
+    unsigned char mPart; // possible values [0, 26]
     std::string mMale, mFemale;
 };
 

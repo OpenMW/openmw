@@ -80,14 +80,13 @@ struct NPC
              mPersonality,
              mLuck;
 
-        // mSkill cang grow up to 200, it must be unsigned
+        // mSkill can grow up to 200, it must be unsigned
         unsigned char mSkills[Skill::Length];
 
-        // reputation values does not
-        char mUnknown1;
+        char mFactionID;
         unsigned short mHealth, mMana, mFatigue;
         signed char mDisposition, mReputation, mRank;
-        char mUnknown2;
+        char mUnknown;
         int mGold;
     }; // 52 bytes
 
@@ -95,7 +94,7 @@ struct NPC
     {
         short mLevel;
         // see above
-        signed char mReputation, mDisposition, mRank;
+        signed char mDisposition, mReputation, mRank;
         char mUnknown1, mUnknown2, mUnknown3;
         int mGold;
     }; // 12 bytes
