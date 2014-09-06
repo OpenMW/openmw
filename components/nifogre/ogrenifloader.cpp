@@ -1258,7 +1258,7 @@ public:
 
 ObjectScenePtr Loader::createObjects(Ogre::SceneNode *parentNode, std::string name, const std::string &group)
 {
-    ObjectScenePtr scene = ObjectScenePtr (new ObjectScene(parentNode->getCreator()));;
+    ObjectScenePtr scene = ObjectScenePtr (new ObjectScene(parentNode->getCreator()));
 
     Misc::StringUtils::toLower(name);
     NIFObjectLoader::load(parentNode, scene, name, group);

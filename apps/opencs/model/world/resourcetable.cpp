@@ -86,7 +86,7 @@ bool CSMWorld::ResourceTable::setData ( const QModelIndex &index, const QVariant
 
 Qt::ItemFlags CSMWorld::ResourceTable::flags (const QModelIndex & index) const
 {
-    return Qt::ItemIsSelectable | Qt::ItemIsEnabled;;
+    return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
 QModelIndex CSMWorld::ResourceTable::index (int row, int column, const QModelIndex& parent)

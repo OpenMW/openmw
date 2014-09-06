@@ -27,22 +27,22 @@ namespace MWGui
         getWidget(mNameWidget, "NameText");
         getWidget(button, "NameButton");
         adjustButtonSize(button);
-        button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onNameClicked);;
+        button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onNameClicked);
 
         getWidget(mRaceWidget, "RaceText");
         getWidget(button, "RaceButton");
         adjustButtonSize(button);
-        button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onRaceClicked);;
+        button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onRaceClicked);
 
         getWidget(mClassWidget, "ClassText");
         getWidget(button, "ClassButton");
         adjustButtonSize(button);
-        button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onClassClicked);;
+        button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onClassClicked);
 
         getWidget(mBirthSignWidget, "SignText");
         getWidget(button, "SignButton");
         adjustButtonSize(button);
-        button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBirthSignClicked);;
+        button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBirthSignClicked);
 
         // Setup dynamic stats
         getWidget(mHealth, "Health");

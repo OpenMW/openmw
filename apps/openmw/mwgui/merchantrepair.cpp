@@ -69,7 +69,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
             std::string name = iter->getClass().getName(*iter)
                     + " - " + boost::lexical_cast<std::string>(price)
                     + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                    .find("sgp")->getString();;
+                    .find("sgp")->getString();
 
 
             MyGUI::Button* button =

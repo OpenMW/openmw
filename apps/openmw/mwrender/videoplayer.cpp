@@ -1065,7 +1065,7 @@ void VideoState::deinit()
             this->format_ctx->pb->buffer = NULL;
 
             av_free(this->format_ctx->pb);
-            this->format_ctx->pb = NULL;;
+            this->format_ctx->pb = NULL;
         }
         avformat_close_input(&this->format_ctx);
     }
