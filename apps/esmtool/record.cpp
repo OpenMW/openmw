@@ -992,7 +992,6 @@ void Record<ESM::NPC>::print()
         std::cout << "  Level: " << mData.mNpdt12.mLevel << std::endl;
         std::cout << "  Reputation: " << (int)mData.mNpdt12.mReputation << std::endl;
         std::cout << "  Disposition: " << (int)mData.mNpdt12.mDisposition << std::endl;
-        std::cout << "  Faction: " << (int)mData.mNpdt52.mFactionID << std::endl;
         std::cout << "  Rank: " << (int)mData.mNpdt12.mRank << std::endl;
         std::cout << "  Unknown1: "
                   << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown1) << std::endl;
@@ -1007,6 +1006,7 @@ void Record<ESM::NPC>::print()
         std::cout << "  Reputation: " << (int)mData.mNpdt52.mReputation << std::endl;
         std::cout << "  Disposition: " << (int)mData.mNpdt52.mDisposition << std::endl;
         std::cout << "  Rank: " << (int)mData.mNpdt52.mRank << std::endl;
+        std::cout << "  FactionID: " << (int)mData.mNpdt52.mFactionID << std::endl;
 
         std::cout << "  Attributes:" << std::endl;
         std::cout << "    Strength: " << (int)mData.mNpdt52.mStrength << std::endl;
