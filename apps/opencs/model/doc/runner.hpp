@@ -1,6 +1,9 @@
 #ifndef CSM_DOC_RUNNER_H
 #define CSM_DOC_RUNNER_H
 
+#include <vector>
+#include <string>
+
 #include <QObject>
 #include <QProcess>
 #include <QTextDocument>
@@ -18,6 +21,7 @@ namespace CSMDoc
             QProcess mProcess;
             bool mRunning;
             ESM::DebugProfile mProfile;
+            std::vector<std::string> mContentFiles;
             std::string mStartupInstruction;
             QTemporaryFile *mStartup;
             QTextDocument mLog;
@@ -39,6 +43,7 @@ namespace CSMDoc
             bool isRunning() const;
 
             void configure (const ESM::DebugProfile& profile,
+                const std::vector<std::string>& contentFiles,
                 const std::string& startupInstruction);
 
             QTextDocument *getLog();

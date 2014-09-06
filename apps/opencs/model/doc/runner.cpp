@@ -75,6 +75,12 @@ void CSMDoc::Runner::start (bool delayed)
 
         arguments << ("--script-run="+mStartup->fileName());
 
+        for (std::vector<std::string>::const_iterator iter (mContentFiles.begin());
+            iter!=mContentFiles.end(); ++iter)
+        {
+            arguments << QString::fromUtf8 (("--content="+*iter).c_str());
+        }
+
         mProcess.start (path, arguments);
     }
 
@@ -102,9 +108,10 @@ bool CSMDoc::Runner::isRunning() const
 }
 
 void CSMDoc::Runner::configure (const ESM::DebugProfile& profile,
-    const std::string& startupInstruction)
+    const std::vector<std::string>& contentFiles, const std::string& startupInstruction)
 {
     mProfile = profile;
+    mContentFiles = contentFiles;
     mStartupInstruction = startupInstruction;
 }
 

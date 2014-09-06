@@ -2375,7 +2375,13 @@ bool CSMDoc::Document::isBlacklisted (const CSMWorld::UniversalId& id)
 void CSMDoc::Document::startRunning (const std::string& profile,
     const std::string& startupInstruction)
 {
-    mRunner.configure (getData().getDebugProfiles().getRecord (profile).get(),
+    std::vector<std::string> contentFiles;
+
+    for (std::vector<boost::filesystem::path>::const_iterator iter (mContentFiles.begin());
+        iter!=mContentFiles.end(); ++iter)
+        contentFiles.push_back (iter->filename().string());
+
+    mRunner.configure (getData().getDebugProfiles().getRecord (profile).get(), contentFiles,
         startupInstruction);
 
     int state = getState();
