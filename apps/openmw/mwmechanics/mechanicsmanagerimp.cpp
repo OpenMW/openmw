@@ -664,11 +664,6 @@ namespace MWMechanics
         return mActors.countDeaths (id);
     }
 
-    void MechanicsManager::killDeadActors()
-    {
-        mActors.killDeadActors();
-    }
-
     void MechanicsManager::getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
         float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange)
     {
@@ -1319,5 +1314,22 @@ namespace MWMechanics
         }
 
         return (fight >= 100);
+    }
+
+    void MechanicsManager::keepPlayerAlive()
+    {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        CreatureStats& stats = player.getClass().getCreatureStats(player);
+        if (stats.isDead())
+        {
+            MWMechanics::DynamicStat<float> stat (stats.getHealth());
+
+            if (stat.getModified()<1)
+            {
+                stat.setModified(1, 0);
+                stats.setHealth(stat);
+            }
+            stats.resurrect();
+        }
     }
 }

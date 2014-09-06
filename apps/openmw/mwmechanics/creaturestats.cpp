@@ -188,16 +188,10 @@ namespace MWMechanics
 
         if (index==0 && mDynamic[index].getCurrent()<1)
         {
-            if (!mDead)
-                mDied = true;
-
             mDead = true;
 
-            if (mDied)
-                // Must increase death count immediately. There are scripts that use getDeadCount as reaction to onDeath
-                // and rely on the increased value.
-                // Would be more appropriate to use a killActor(actor) function, but we don't have access to the Ptr in CreatureStats.
-                MWBase::Environment::get().getMechanicsManager()->killDeadActors();
+            if (MWBase::Environment::get().getWorld()->getGodModeState())
+                MWBase::Environment::get().getMechanicsManager()->keepPlayerAlive();
         }
     }
 
@@ -240,6 +234,11 @@ namespace MWMechanics
     bool CreatureStats::isDead() const
     {
         return mDead;
+    }
+
+    void CreatureStats::notifyDied()
+    {
+        mDied = true;
     }
 
     bool CreatureStats::hasDied() const

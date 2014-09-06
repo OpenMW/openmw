@@ -64,8 +64,11 @@ void Script::load(ESMReader &esm)
     }
 
     // Script mData
-    mScriptData.resize(mData.mScriptDataSize);
-    esm.getHNExact(&mScriptData[0], mScriptData.size(), "SCDT");
+    if (esm.isNextSub("SCDT"))
+    {
+        mScriptData.resize(mData.mScriptDataSize);
+        esm.getHExact(&mScriptData[0], mScriptData.size());
+    }
 
     // Script text
     mScriptText = esm.getHNOString("SCTX");

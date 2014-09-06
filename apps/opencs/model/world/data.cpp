@@ -186,7 +186,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
 
     mJournalInfos.addColumn (new StringIdColumn<Info> (true));
     mJournalInfos.addColumn (new RecordStateColumn<Info>);
-    mJournalInfos.addColumn (new FixedRecordTypeColumn<Info> (UniversalId::Type_Journal));
+    mJournalInfos.addColumn (new FixedRecordTypeColumn<Info> (UniversalId::Type_JournalInfo));
     mJournalInfos.addColumn (new TopicColumn<Info> (true));
     mJournalInfos.addColumn (new QuestStatusTypeColumn<Info>);
     mJournalInfos.addColumn (new QuestIndexColumn<Info>);

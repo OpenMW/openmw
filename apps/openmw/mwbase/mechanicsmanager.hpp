@@ -198,9 +198,8 @@ namespace MWBase
             ///             making it more likely for the function to return true.
             virtual bool isAggressive (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, int bias=0, bool ignoreDistance=false) = 0;
 
-            /// Usually done once a frame, but can be invoked manually in time-critical situations.
-            /// This will increase the death count for any actors that were killed.
-            virtual void killDeadActors() = 0;
+            /// Resurrects the player if necessary
+            virtual void keepPlayerAlive() = 0;
     };
 }
 
