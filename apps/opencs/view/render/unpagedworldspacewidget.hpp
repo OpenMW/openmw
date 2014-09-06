@@ -60,6 +60,8 @@ namespace CSVRender
 
             virtual void referenceAdded (const QModelIndex& index, int start, int end);
 
+            virtual std::string getStartupInstruction();
+
         private slots:
 
             void cellDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);

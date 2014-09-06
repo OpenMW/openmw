@@ -20,6 +20,7 @@
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetoolrun.hpp"
 
 #include "tablebottombox.hpp"
 #include "creator.hpp"
@@ -120,6 +121,9 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
 
         toolbar->addTool (controlVisibilityTool);
     }
+
+    CSVWidget::SceneToolRun *runTool = widget->makeRunTool (toolbar);
+    toolbar->addTool (runTool);
 
     return toolbar;
 }

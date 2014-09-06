@@ -42,6 +42,8 @@ namespace CSVRender
 
             virtual void referenceAdded (const QModelIndex& index, int start, int end);
 
+            virtual std::string getStartupInstruction();
+
         public:
 
             PagedWorldspaceWidget (QWidget *parent, CSMDoc::Document& document);

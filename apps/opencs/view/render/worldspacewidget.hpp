@@ -18,6 +18,7 @@ namespace CSVWidget
     class SceneToolMode;
     class SceneToolToggle;
     class SceneToolbar;
+    class SceneToolRun;
 }
 
 namespace CSVRender
@@ -30,6 +31,8 @@ namespace CSVRender
             CSVRender::NavigationFree mFree;
             CSVRender::NavigationOrbit mOrbit;
             CSVWidget::SceneToolToggle *mSceneElements;
+            CSVWidget::SceneToolRun *mRun;
+            CSMDoc::Document& mDocument;
 
         public:
 
@@ -60,6 +63,10 @@ namespace CSVRender
             CSVWidget::SceneToolToggle *makeSceneVisibilitySelector (
                 CSVWidget::SceneToolbar *parent);
 
+            /// \attention The created tool is not added to the toolbar (via addTool). Doing
+            /// that is the responsibility of the calling function.
+            CSVWidget::SceneToolRun *makeRunTool (CSVWidget::SceneToolbar *parent);
+
             void selectDefaultNavigationMode();
 
             static dropType getDropType(const std::vector<CSMWorld::UniversalId>& data);
@@ -77,8 +84,6 @@ namespace CSVRender
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle *tool);
 
-            const CSMDoc::Document& mDocument;
-
         private:
 
             void dragEnterEvent(QDragEnterEvent *event);
@@ -86,6 +91,8 @@ namespace CSVRender
             void dropEvent(QDropEvent* event);
 
             void dragMoveEvent(QDragMoveEvent *event);
+
+            virtual std::string getStartupInstruction() = 0;
 
         private slots:
 
@@ -103,6 +110,8 @@ namespace CSVRender
             virtual void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end) = 0;
 
             virtual void referenceAdded (const QModelIndex& index, int start, int end) = 0;
+
+            virtual void runRequest (const std::string& profile);
 
         protected slots:
 

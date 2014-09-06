@@ -1,6 +1,8 @@
 
 #include "worldspacewidget.hpp"
 
+#include <algorithm>
+
 #include <OgreSceneNode.h>
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
@@ -8,14 +10,16 @@
 #include <QtGui/qevent.h>
 
 #include "../../model/world/universalid.hpp"
+#include "../../model/world/idtable.hpp"
 
 #include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetoolrun.hpp"
 
 #include "elements.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-: SceneWidget (parent), mDocument(document)
+: SceneWidget (parent), mDocument(document), mRun (0)
 {
     setAcceptDrops(true);
 
@@ -112,6 +116,44 @@ CSVWidget::SceneToolToggle *CSVRender::WorldspaceWidget::makeSceneVisibilitySele
     return mSceneElements;
 }
 
+CSVWidget::SceneToolRun *CSVRender::WorldspaceWidget::makeRunTool (
+    CSVWidget::SceneToolbar *parent)
+{
+    CSMWorld::IdTable& debugProfiles = dynamic_cast<CSMWorld::IdTable&> (
+        *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_DebugProfiles));
+
+    std::vector<std::string> profiles;
+
+    int idColumn = debugProfiles.findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+    int stateColumn = debugProfiles.findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
+    int defaultColumn = debugProfiles.findColumnIndex (
+        CSMWorld::Columns::ColumnId_DefaultProfile);
+
+    int size = debugProfiles.rowCount();
+
+    for (int i=0; i<size; ++i)
+    {
+        int state = debugProfiles.data (debugProfiles.index (i, stateColumn)).toInt();
+
+        bool default_ = debugProfiles.data (debugProfiles.index (i, defaultColumn)).toInt();
+
+        if (state!=CSMWorld::RecordBase::State_Deleted && default_)
+            profiles.push_back (
+                debugProfiles.data (debugProfiles.index (i, idColumn)).
+                toString().toUtf8().constData());
+    }
+
+    std::sort (profiles.begin(), profiles.end());
+
+    mRun = new CSVWidget::SceneToolRun (parent, "Run OpenMW from the current camera position",
+        ":door.png", ":faction.png", profiles);
+
+    connect (mRun, SIGNAL (runRequest (const std::string&)),
+        this, SLOT (runRequest (const std::string&)));
+
+    return mRun;
+}
+
 CSVRender::WorldspaceWidget::dropType CSVRender::WorldspaceWidget::getDropType (
     const std::vector< CSMWorld::UniversalId >& data)
 {
@@ -199,6 +241,11 @@ void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
     {
         emit dataDropped(mime->getData());
     } //not handling drops from different documents at the moment
+}
+
+void CSVRender::WorldspaceWidget::runRequest (const std::string& profile)
+{
+    mDocument.startRunning (profile, getStartupInstruction());
 }
 
 void CSVRender::WorldspaceWidget::elementSelectionChanged()

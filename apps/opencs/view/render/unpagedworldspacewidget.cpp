@@ -1,7 +1,10 @@
 
 #include "unpagedworldspacewidget.hpp"
 
+#include <sstream>
+
 #include <OgreColourValue.h>
+#include <OgreCamera.h>
 
 #include <QtGui/qevent.h>
 
@@ -147,6 +150,20 @@ void CSVRender::UnpagedWorldspaceWidget::referenceAdded (const QModelIndex& pare
     if (mCell.get())
         if (mCell.get()->referenceAdded (parent, start, end))
             flagAsModified();
+}
+
+std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()
+{
+    Ogre::Vector3 position = getCamera()->getPosition();
+
+    std::ostringstream stream;
+
+    stream
+        << "player->positionCell "
+        << position.x << ", " << position.y << ", " << position.z
+        << ", 0, \"" << mCellId << "\"";
+
+    return stream.str();
 }
 
 CSVRender::WorldspaceWidget::dropRequirments CSVRender::UnpagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::dropType type) const

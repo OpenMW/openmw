@@ -14,6 +14,7 @@ namespace CSVWidget
             enum Type
             {
                 Type_TopMode, // top level button for mode selector panel
+                Type_TopAction, // top level button that triggers an action
                 Type_Mode, // mode button
                 Type_Toggle
             };

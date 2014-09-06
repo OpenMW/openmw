@@ -3,8 +3,8 @@
 
 #include "scenetoolbar.hpp"
 
-CSVWidget::SceneTool::SceneTool (SceneToolbar *parent)
-: PushButton (PushButton::Type_TopMode, "", parent)
+CSVWidget::SceneTool::SceneTool (SceneToolbar *parent, Type type)
+: PushButton (type, "", parent)
 {
     setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
     setIconSize (QSize (parent->getIconSize(), parent->getIconSize()));

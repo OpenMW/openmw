@@ -20,6 +20,10 @@ void CSVWidget::PushButton::setExtendedToolTip()
 
             break;
 
+        case Type_TopAction:
+
+            break;
+
         case Type_Mode:
 
             tooltip +=

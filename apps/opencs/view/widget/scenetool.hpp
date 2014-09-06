@@ -14,7 +14,7 @@ namespace CSVWidget
 
         public:
 
-            SceneTool (SceneToolbar *parent);
+            SceneTool (SceneToolbar *parent, Type type = Type_TopMode);
 
             virtual void showPanel (const QPoint& position) = 0;
 
