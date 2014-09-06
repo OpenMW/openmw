@@ -68,6 +68,26 @@ std::vector< CSMWorld::UniversalId > CSMWorld::TableMimeData::getData() const
     return mUniversalId;
 }
 
+std::vector< CSMWorld::UniversalId > CSMWorld::TableMimeData::getRefTypeData() const
+{
+    std::vector<CSMWorld::UniversalId> ref_data;
+
+    std::vector<CSMWorld::UniversalId>::const_iterator it = mUniversalId.begin();
+    for(; it != mUniversalId.end(); ++it)
+    {
+        if(isReferencable(it->getType()))
+        {
+            // change the type
+            ref_data.push_back(CSMWorld::UniversalId(
+                        CSMWorld::UniversalId::Type_Referenceable, it->getId()));
+        }
+        else
+            ref_data.push_back(*it);
+    }
+
+    return ref_data;
+}
+
 bool CSMWorld::TableMimeData::isReferencable(CSMWorld::ColumnBase::Display type) const
 {
 return (  type == CSMWorld::ColumnBase::Display_Activator
@@ -221,7 +241,6 @@ namespace
     {
         { CSMWorld::UniversalId::Type_Race, CSMWorld::ColumnBase::Display_Race },
         { CSMWorld::UniversalId::Type_Skill, CSMWorld::ColumnBase::Display_Skill },
-        { CSMWorld::UniversalId::Type_Class, CSMWorld::ColumnBase::Display_Class },
         { CSMWorld::UniversalId::Type_Class, CSMWorld::ColumnBase::Display_Class },
         { CSMWorld::UniversalId::Type_Faction, CSMWorld::ColumnBase::Display_Faction },
         { CSMWorld::UniversalId::Type_Sound, CSMWorld::ColumnBase::Display_Sound },

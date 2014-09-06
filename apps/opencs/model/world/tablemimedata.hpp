@@ -43,6 +43,9 @@ namespace CSMWorld
 
             std::vector<UniversalId> getData() const;
 
+            // change Id type to Type_Referenceable where possible
+            std::vector<UniversalId> getRefTypeData() const;
+
             bool holdsType(UniversalId::Type type) const;
 
             bool holdsType(CSMWorld::ColumnBase::Display type) const;

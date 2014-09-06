@@ -39,7 +39,7 @@ void CSVFilter::FilterBox::dropEvent (QDropEvent* event)
     if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
         return;
 
-    std::vector<CSMWorld::UniversalId> data = mime->getData();
+    std::vector<CSMWorld::UniversalId> data = mime->getRefTypeData();
 
     emit recordDropped(data, event->proposedAction());
 }
