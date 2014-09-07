@@ -33,3 +33,22 @@ void CSVWidget::SceneToolRun::showPanel (const QPoint& position)
     if (mCurrentIndex!=-1)
         emit runRequest (mProfiles[mCurrentIndex]);
 }
+
+void CSVWidget::SceneToolRun::removeProfile (const std::string& profile)
+{
+    std::pair<std::vector<std::string>::iterator, std::vector<std::string>::iterator>
+        result = std::equal_range (mProfiles.begin(), mProfiles.end(), profile);
+
+    if (result.first!=result.second)
+    {
+        mProfiles.erase (result.first);
+
+        if (mCurrentIndex>=static_cast<int> (mProfiles.size()))
+            --mCurrentIndex;
+
+        if (mCurrentIndex==-1)
+            updateIcon();
+
+        adjustToolTips();
+    }
+}

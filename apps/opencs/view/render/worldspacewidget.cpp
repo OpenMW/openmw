@@ -42,6 +42,14 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
         this, SLOT (referenceAboutToBeRemoved (const QModelIndex&, int, int)));
     connect (references, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (referenceAdded (const QModelIndex&, int, int)));
+
+    QAbstractItemModel *debugProfiles =
+        document.getData().getTableModel (CSMWorld::UniversalId::Type_DebugProfiles);
+
+    connect (debugProfiles, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+        this, SLOT (debugProfileDataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (debugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
+        this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
 }
 
 void CSVRender::WorldspaceWidget::selectNavigationMode (const std::string& mode)
@@ -246,6 +254,53 @@ void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
 void CSVRender::WorldspaceWidget::runRequest (const std::string& profile)
 {
     mDocument.startRunning (profile, getStartupInstruction());
+}
+
+void CSVRender::WorldspaceWidget::debugProfileDataChanged (const QModelIndex& topLeft,
+    const QModelIndex& bottomRight)
+{
+    if (!mRun)
+        return;
+
+    CSMWorld::IdTable& debugProfiles = dynamic_cast<CSMWorld::IdTable&> (
+        *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_DebugProfiles));
+
+    int idColumn = debugProfiles.findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+    int stateColumn = debugProfiles.findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
+
+    for (int i=topLeft.row(); i<=bottomRight.row(); ++i)
+    {
+        int state = debugProfiles.data (debugProfiles.index (i, stateColumn)).toInt();
+
+        // As of version 0.33 this case can not happen because debug profiles exist only in
+        // project or session scope, which means they will never be in deleted state. But we
+        // are adding the code for the sake of completeness and to avoid surprises if debug
+        // profile ever get extended to content scope.
+        if (state==CSMWorld::RecordBase::State_Deleted)
+            mRun->removeProfile (debugProfiles.data (
+                debugProfiles.index (i, idColumn)).toString().toUtf8().constData());
+    }
+}
+
+void CSVRender::WorldspaceWidget::debugProfileAboutToBeRemoved (const QModelIndex& parent,
+    int start, int end)
+{
+    if (parent.isValid())
+        return;
+
+    if (!mRun)
+        return;
+
+    CSMWorld::IdTable& debugProfiles = dynamic_cast<CSMWorld::IdTable&> (
+        *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_DebugProfiles));
+
+    int idColumn = debugProfiles.findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+
+    for (int i=start; i<=end; ++i)
+    {
+        mRun->removeProfile (debugProfiles.data (
+            debugProfiles.index (i, idColumn)).toString().toUtf8().constData());
+    }
 }
 
 void CSVRender::WorldspaceWidget::elementSelectionChanged()

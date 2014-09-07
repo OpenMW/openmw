@@ -31,6 +31,8 @@ namespace CSVWidget
 
             virtual void showPanel (const QPoint& position);
 
+            void removeProfile (const std::string& profile);
+
         signals:
 
             void runRequest (const std::string& profile);

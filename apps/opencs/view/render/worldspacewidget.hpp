@@ -113,6 +113,12 @@ namespace CSVRender
 
             virtual void runRequest (const std::string& profile);
 
+            void debugProfileDataChanged (const QModelIndex& topLeft,
+                const QModelIndex& bottomRight);
+
+            void debugProfileAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+
         protected slots:
 
             void elementSelectionChanged();
