@@ -340,6 +340,7 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
         }
 
+        MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
         store.setSelectedEnchantItem(it);
 
         updateSpells();
