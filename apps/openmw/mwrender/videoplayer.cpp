@@ -81,15 +81,16 @@ int  swr_convert(int *s, uint8_t** output, int outs, const uint8_t** input, int 
 }
 int * swr_alloc_set_opts(int *s, int64_t outc, AVSampleFormat outf, int outr,
     int64_t inc, AVSampleFormat inf, int inr, int o, void* l) {
-    if(inf == AV_SAMPLE_FMT_FLTP) { s = new int(1); }
+    if(inf == AV_SAMPLE_FMT_FLTP) {
+        s = new int(1);
+    } else {
+        throw std::runtime_error(
+            std::string("Unsupported sample format: ")+ av_get_sample_fmt_name(inf));
+    }
     return s;
 }
 void  swr_free(int **s) { delete *s; *s = NULL; }
 #define SwrContext int
-#undef AV_SAMPLE_FMT_U8P
-#define AV_SAMPLE_FMT_U8P 0
-#undef AV_SAMPLE_FMT_S16P
-#define AV_SAMPLE_FMT_S16P 1
 #endif
 
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
