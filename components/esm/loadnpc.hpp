@@ -80,10 +80,12 @@ struct NPC
              mPersonality,
              mLuck;
 
-        char mSkills[Skill::Length];
-        char mReputation;
+        // mSkill can grow up to 200, it must be unsigned
+        unsigned char mSkills[Skill::Length];
+
+        char mFactionID;
         unsigned short mHealth, mMana, mFatigue;
-        char mDisposition, mFactionID, mRank;
+        signed char mDisposition, mReputation, mRank;
         char mUnknown;
         int mGold;
     }; // 52 bytes
@@ -91,9 +93,10 @@ struct NPC
     struct NPDTstruct12
     {
         short mLevel;
-        char mDisposition, mReputation, mRank;
+        // see above
+        signed char mDisposition, mReputation, mRank;
         char mUnknown1, mUnknown2, mUnknown3;
-        int mGold; // ?? not certain
+        int mGold;
     }; // 12 bytes
 
     struct Dest
@@ -103,7 +106,7 @@ struct NPC
     };
     #pragma pack(pop)
 
-    char mNpdtType;
+    unsigned char mNpdtType;
     NPDTstruct52 mNpdt52;
     NPDTstruct12 mNpdt12; //for autocalculated characters
 

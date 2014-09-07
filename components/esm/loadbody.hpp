@@ -49,10 +49,10 @@ struct BodyPart
 
     struct BYDTstruct
     {
-        char mPart;
-        char mVampire;
-        char mFlags;
-        char mType;
+        unsigned char mPart; // mesh part
+        unsigned char mVampire; // boolean
+        unsigned char mFlags;
+        unsigned char mType; // mesh type
     };
 
     BYDTstruct mData;
