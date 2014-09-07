@@ -277,8 +277,7 @@ namespace MWClass
             break;
         }
 
-        // I think this should be random, since attack1-3 animations don't have an attack strength like NPCs do
-        float damage = min + (max - min) * ::rand()/(RAND_MAX+1.0);
+        float damage = min + (max - min) * stats.getAttackStrength();
 
         if (!weapon.isEmpty())
         {

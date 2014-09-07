@@ -960,6 +960,15 @@ bool CharacterController::updateWeaponState()
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
         if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && mHitState != CharState_KnockDown)
         {
+            float attackStrength = complete;
+            if (!mPtr.getClass().isNpc())
+            {
+                // most creatures don't actually have an attack wind-up animation, so use a uniform random value
+                // (even some creatures that can use weapons don't have a wind-up animation either, e.g. Rieklings)
+                // Note: vanilla MW uses a random value for *all* non-player actors, but we probably don't need to go that far.
+                attackStrength = std::min(1.f, 0.1f + std::rand() / float(RAND_MAX));
+            }
+
             if(mAttackType != "shoot")
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -974,15 +983,15 @@ bool CharacterController::updateWeaponState()
                 else
                 {
                     std::string sound = "SwishM";
-                    if(complete < 0.5f)
+                    if(attackStrength < 0.5f)
                         sndMgr->playSound3D(mPtr, sound, 1.0f, 0.8f); //Weak attack
-                    else if(complete < 1.0f)
+                    else if(attackStrength < 1.0f)
                         sndMgr->playSound3D(mPtr, sound, 1.0f, 1.0f); //Medium attack
                     else
                         sndMgr->playSound3D(mPtr, sound, 1.0f, 1.2f); //Strong attack
                 }
             }
-            stats.setAttackStrength(complete);
+            stats.setAttackStrength(attackStrength);
 
             mAnimation->disable(mCurrentWeapon);
             mAnimation->play(mCurrentWeapon, Priority_Weapon,
