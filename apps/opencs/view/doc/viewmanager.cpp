@@ -174,15 +174,15 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
 
     bool continueWithClose = true;
 
-    if (iter!=mViews.end())
+    if (iter!=mViews.end()) // found view in mViews
     {
         bool last = countViews (view->getDocument())<=1;
 
-        if (last)
+        if (last) // only this view for the document
             continueWithClose = notifySaveOnClose (view);
         else
         {
-            (*iter)->deleteLater();
+            (*iter)->deleteLater(); // there are other views, delete this one
             mViews.erase (iter);
 
             updateIndices();
@@ -343,6 +343,37 @@ void CSVDoc::ViewManager::onExitWarningHandler (int state, CSMDoc::Document *doc
 
 void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
 {
-    if (notifySaveOnClose (view))
-        QApplication::instance()->exit();
+    // close the current view first
+    if(!closeRequest(view))
+        return; // don't exit the application
+    else
+    {
+        view->deleteLater(); // ok to close the current view
+        view->setVisible(false);
+        std::vector<View *>::iterator iter = std::find (mViews.begin(), mViews.end(), view);
+        if (iter!=mViews.end())
+        {
+            mViews.erase (iter);
+            updateIndices();
+        }
+
+        // attempt to close all other views
+        while(!mViews.empty())
+        {
+            // raise the window
+            mViews.back()->activateWindow();
+            mViews.back()->raise();
+            // attempt to close it
+            if (!closeRequest(mViews.back()))
+                return;
+            else
+            {
+                mViews.back()->deleteLater();
+                mViews.back()->setVisible(false);
+                mViews.pop_back();
+                updateIndices();
+            }
+        }
+    }
+    QApplication::instance()->exit();
 }
