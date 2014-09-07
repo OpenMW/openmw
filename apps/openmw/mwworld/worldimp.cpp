@@ -578,13 +578,29 @@ namespace MWWorld
 
         std::string lowerCaseName = Misc::StringUtils::lowerCase(name);
 
-        // active cells
+        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
+            iter!=mWorldScene->getActiveCells().end(); ++iter)
+        {
+            // TODO: caching still doesn't work efficiently here (only works for the one CellStore that the reference is in)
+            CellStore* cellstore = *iter;
+            Ptr ptr = mCells.getPtr (lowerCaseName, *cellstore, false);
+
+            if (!ptr.isEmpty())
+                return ptr;
+        }
+
+        if (!activeOnly)
+        {
+            ret = mCells.getPtr (lowerCaseName);
+            if (!ret.isEmpty())
+                return ret;
+        }
+
         for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
             CellStore* cellstore = *iter;
-            Ptr ptr = mCells.getPtr (lowerCaseName, *cellstore, true);
-
+            Ptr ptr = cellstore->searchInContainer(lowerCaseName);
             if (!ptr.isEmpty())
                 return ptr;
         }
@@ -592,14 +608,7 @@ namespace MWWorld
         Ptr ptr = mPlayer->getPlayer().getClass()
             .getContainerStore(mPlayer->getPlayer()).search(lowerCaseName);
 
-        if (!ptr.isEmpty())
-            return ptr;
-
-        if (!activeOnly)
-        {
-            ret = mCells.getPtr (lowerCaseName);
-        }
-        return ret;
+        return ptr;
     }
 
     Ptr World::getPtr (const std::string& name, bool activeOnly)
