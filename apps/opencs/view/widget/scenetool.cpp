@@ -1,6 +1,8 @@
 
 #include "scenetool.hpp"
 
+#include <QMouseEvent>
+
 #include "scenetoolbar.hpp"
 
 CSVWidget::SceneTool::SceneTool (SceneToolbar *parent, Type type)
@@ -13,7 +15,20 @@ CSVWidget::SceneTool::SceneTool (SceneToolbar *parent, Type type)
     connect (this, SIGNAL (clicked()), this, SLOT (openRequest()));
 }
 
+void CSVWidget::SceneTool::activate() {}
+
+void CSVWidget::SceneTool::mouseReleaseEvent (QMouseEvent *event)
+{
+    if (getType()==Type_TopAction && event->button()==Qt::RightButton)
+        showPanel (parentWidget()->mapToGlobal (pos()));
+    else
+        PushButton::mouseReleaseEvent (event);
+}
+
 void CSVWidget::SceneTool::openRequest()
 {
-    showPanel (parentWidget()->mapToGlobal (pos()));
+    if (getType()==Type_TopAction)
+        activate();
+    else
+        showPanel (parentWidget()->mapToGlobal (pos()));
 }

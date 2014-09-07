@@ -30,6 +30,11 @@ CSVWidget::SceneToolRun::SceneToolRun (SceneToolbar *parent, const QString& tool
 
 void CSVWidget::SceneToolRun::showPanel (const QPoint& position)
 {
+
+}
+
+void CSVWidget::SceneToolRun::activate()
+{
     if (mCurrentIndex!=-1)
         emit runRequest (mProfiles[mCurrentIndex]);
 }

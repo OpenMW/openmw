@@ -92,3 +92,8 @@ QString CSVWidget::PushButton::getBaseToolTip() const
 {
     return mToolTip;
 }
+
+CSVWidget::PushButton::Type CSVWidget::PushButton::getType() const
+{
+    return mType;
+}

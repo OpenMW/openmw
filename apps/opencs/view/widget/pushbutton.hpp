@@ -51,6 +51,8 @@ namespace CSVWidget
 
             /// Return tooltip used at construction (without any button-specific modifications)
             QString getBaseToolTip() const;
+
+            Type getType() const;
     };
 }
 

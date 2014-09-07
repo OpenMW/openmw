@@ -18,6 +18,14 @@ namespace CSVWidget
 
             virtual void showPanel (const QPoint& position) = 0;
 
+            /// This function will only called for buttons of type Type_TopAction. The default
+            /// implementation is empty.
+            virtual void activate();
+
+        protected:
+
+            void mouseReleaseEvent (QMouseEvent *event);
+
         private slots:
 
             void openRequest();
