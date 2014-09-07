@@ -84,7 +84,7 @@ int * swr_alloc_set_opts(int *s, int64_t outc, AVSampleFormat outf, int outr,
     if(inf == AV_SAMPLE_FMT_FLTP) { s = new int(1); }
     return s;
 }
-void  swr_free(int **s) { delete *s; }
+void  swr_free(int **s) { delete *s; *s = NULL; }
 #define SwrContext int
 #undef AV_SAMPLE_FMT_U8P
 #define AV_SAMPLE_FMT_U8P 0
