@@ -174,15 +174,15 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
 
     bool continueWithClose = true;
 
-    if (iter!=mViews.end()) // found view in mViews
+    if (iter!=mViews.end())
     {
         bool last = countViews (view->getDocument())<=1;
 
-        if (last) // only this view for the document
+        if (last)
             continueWithClose = notifySaveOnClose (view);
         else
         {
-            (*iter)->deleteLater(); // there are other views, delete this one
+            (*iter)->deleteLater();
             mViews.erase (iter);
 
             updateIndices();
@@ -345,10 +345,10 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
 {
     // close the current view first
     if(!closeRequest(view))
-        return; // don't exit the application
+        return;
     else
     {
-        view->deleteLater(); // ok to close the current view
+        view->deleteLater();
         view->setVisible(false);
         std::vector<View *>::iterator iter = std::find (mViews.begin(), mViews.end(), view);
         if (iter!=mViews.end())
@@ -363,7 +363,6 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
             // raise the window
             mViews.back()->activateWindow();
             mViews.back()->raise();
-            // attempt to close it
             if (!closeRequest(mViews.back()))
                 return;
             else
