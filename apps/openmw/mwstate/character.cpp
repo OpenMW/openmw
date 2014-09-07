@@ -14,9 +14,6 @@
 
 #include <components/misc/stringops.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-
 bool MWState::operator< (const Slot& left, const Slot& right)
 {
     return left.mTimeStamp<right.mTimeStamp;
