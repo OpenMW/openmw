@@ -26,7 +26,6 @@ namespace MWGui
     TravelWindow::TravelWindow() :
         WindowBase("openmw_travel_window.layout")
         , mCurrentY(0)
-        , mLastPos(0)
     {
         setCoord(0, 0, 450, 300);
 

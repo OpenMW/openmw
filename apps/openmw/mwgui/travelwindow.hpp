@@ -39,7 +39,7 @@ namespace MWGui
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
             void addDestination(const std::string& name, ESM::Position pos, bool interior);
             void clearDestinations();
-            int mLastPos,mCurrentY;
+            int mCurrentY;
 
             static const int sLineHeight;
 
