@@ -6,6 +6,10 @@
 
 #include "scenetool.hpp"
 
+class QFrame;
+class QTableWidget;
+class QModelIndex;
+
 namespace CSVWidget
 {
     class SceneToolRun : public SceneTool
@@ -17,12 +21,16 @@ namespace CSVWidget
             QString mToolTip;
             QString mIcon;
             QString mIconDisabled;
+            QFrame *mPanel;
+            QTableWidget *mTable;
 
         private:
 
             void adjustToolTips();
 
             void updateIcon();
+
+            void updatePanel();
 
         public:
 
@@ -33,7 +41,13 @@ namespace CSVWidget
 
             virtual void activate();
 
+            /// \attention This function does not remove the profile from the profile selection
+            /// panel.
             void removeProfile (const std::string& profile);
+
+        private slots:
+
+            void clicked (const QModelIndex& index);
 
         signals:
 
