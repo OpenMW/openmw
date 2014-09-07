@@ -198,6 +198,7 @@ namespace MWGui
         void onMapDoubleClicked(MyGUI::Widget* sender);
         void onNoteEditOk();
         void onNoteEditDelete();
+        void onNoteEditDeleteConfirm();
         void onNoteDoubleClicked(MyGUI::Widget* sender);
         void globalMapUpdatePlayer();
 

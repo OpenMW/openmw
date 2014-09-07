@@ -17,6 +17,7 @@
 #include "../components/esm/globalmap.hpp"
 
 #include "widgets.hpp"
+#include "confirmationdialog.hpp"
 
 namespace
 {
@@ -567,6 +568,15 @@ namespace MWGui
     }
 
     void MapWindow::onNoteEditDelete()
+    {
+        ConfirmationDialog* confirmation = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
+        confirmation->open("#{sDeleteNote}", "#{sYes}", "#{sNo}");
+        confirmation->eventCancelClicked.clear();
+        confirmation->eventOkClicked.clear();
+        confirmation->eventOkClicked += MyGUI::newDelegate(this, &MapWindow::onNoteEditDeleteConfirm);
+    }
+
+    void MapWindow::onNoteEditDeleteConfirm()
     {
         mCustomMarkers.deleteMarker(mEditingMarker);
 
