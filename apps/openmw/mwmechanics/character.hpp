@@ -147,6 +147,7 @@ class CharacterController
     CharacterState mMovementState;
     std::string mCurrentMovement;
     float mMovementSpeed;
+    bool mHasMovedInXY;
     bool mMovementAnimationControlled;
 
     CharacterState mDeathState;

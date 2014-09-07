@@ -580,6 +580,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mIdleState(CharState_None)
     , mMovementState(CharState_None)
     , mMovementSpeed(0.0f)
+    , mHasMovedInXY(false)
     , mMovementAnimationControlled(true)
     , mDeathState(CharState_None)
     , mHitState(CharState_None)
@@ -794,6 +795,7 @@ bool CharacterController::updateWeaponState()
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         if(cls.getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run)
+            && mHasMovedInXY
             && !MWBase::Environment::get().getWorld()->isSwimming(mPtr)
             && mWeaponType == WeapType_None)
         {
@@ -1249,11 +1251,12 @@ void CharacterController::update(float duration)
         CharacterState idlestate = CharState_SpecialIdle;
         bool forcestateupdate = false;
 
-        isrunning = isrunning && std::abs(vec[0])+std::abs(vec[1]) > 0.0f;
+        mHasMovedInXY = std::abs(vec[0])+std::abs(vec[1]) > 0.0f;
+        isrunning = isrunning && mHasMovedInXY;
 
 
         // advance athletics
-        if(std::abs(vec[0])+std::abs(vec[1]) > 0.0f && mPtr.getRefData().getHandle() == "player")
+        if(mHasMovedInXY && mPtr.getRefData().getHandle() == "player")
         {
             if(inwater)
             {
