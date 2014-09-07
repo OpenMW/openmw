@@ -32,11 +32,6 @@ namespace MWGui
         ///Returns the visibility state of the window
         virtual bool isVisible();
         void center();
-
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_WindowBase eventDone;
     };
 
 

@@ -79,6 +79,11 @@ namespace MWGui
         */
         EventHandle_Void eventBack;
 
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_WindowBase eventDone;
+
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
@@ -108,6 +113,11 @@ namespace MWGui
             signature : void method()\n
         */
         EventHandle_Void eventBack;
+
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_WindowBase eventDone;
 
     protected:
         void onSelectClass(MyGUI::ListBox* _sender, size_t _index);
@@ -238,6 +248,11 @@ namespace MWGui
         std::string getTextInput() const { return mTextEdit->getCaption(); }
         void setTextInput(const std::string &text) { mTextEdit->setCaption(text); }
 
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_WindowBase eventDone;
+
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
 
@@ -267,6 +282,11 @@ namespace MWGui
             signature : void method()\n
         */
         EventHandle_Void eventBack;
+
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_WindowBase eventDone;
 
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
