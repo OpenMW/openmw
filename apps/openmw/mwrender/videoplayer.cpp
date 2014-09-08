@@ -52,46 +52,12 @@ extern "C"
         #include <libavutil/channel_layout.h>
     #endif
 
+    // From version 54.56 binkaudio encoding format changed from S16 to FLTP. See:
+    // https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d
+    // http://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
     // WARNING: avcodec versions up to 54.54.100 potentially crashes on Windows 64bit.
+    #include <libswresample/swresample.h>
 }
-
-// From version 54.56 binkaudio encoding format changed from S16 to FLTP. See:
-// https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d
-// http://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
-#ifdef HAVE_LIBSWRESAMPLE
-extern "C" {
-#include <libswresample/swresample.h>
-}
-#else
-/* nasty hack to support FLTP, but no other formats, on systems without libswresample */
-int  swr_init(int *n) { return 1; }
-int  swr_convert(int *s, uint8_t** output, int outs, const uint8_t** input, int ins) {
-    uint8_t *stream = *output;
-    float *outputStream = (float *)&stream[0];
-    float* inputChannel0 = (float *)input[0];
-    float* inputChannel1 = (float *)input[1];
-    float sample0, sample1 = 0;
-    for (int i = 0 ; i < ins ; ++i) {
-        sample0 = *inputChannel0++;
-        sample1 = *inputChannel1++;
-        outputStream[i*2] = sample0;
-        outputStream[i*2+1] = sample1;
-    }
-    return ins;
-}
-int * swr_alloc_set_opts(int *s, int64_t outc, AVSampleFormat outf, int outr,
-    int64_t inc, AVSampleFormat inf, int inr, int o, void* l) {
-    if(inf == AV_SAMPLE_FMT_FLTP) {
-        s = new int(1);
-    } else {
-        throw std::runtime_error(
-            std::string("Unsupported sample format: ")+ av_get_sample_fmt_name(inf));
-    }
-    return s;
-}
-void  swr_free(int **s) { delete *s; *s = NULL; }
-#define SwrContext int
-#endif
 
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
 #define MAX_VIDEOQ_SIZE (5 * 256 * 1024)
