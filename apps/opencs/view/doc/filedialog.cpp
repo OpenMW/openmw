@@ -115,7 +115,7 @@ void CSVDoc::FileDialog::buildOpenFileView()
     connect (mSelector, SIGNAL (signalAddonFileSelected (int)), this, SLOT (slotUpdateAcceptButton (int)));
     connect (mSelector, SIGNAL (signalAddonFileUnselected (int)), this, SLOT (slotUpdateAcceptButton (int)));
 
-    connect (ui.projectButtonBox, SIGNAL (accepted()), this, SLOT (slotOpenFile()), Qt::UniqueConnection);
+    connect (ui.projectButtonBox, SIGNAL (accepted()), this, SLOT (slotOpenFile()));
 }
 
 void CSVDoc::FileDialog::slotUpdateAcceptButton (int)
@@ -162,6 +162,11 @@ void CSVDoc::FileDialog::slotRejected()
 void CSVDoc::FileDialog::slotNewFile()
 {
     emit signalCreateNewFile (mAdjusterWidget->getPath());
+
+    mFileWidget->disconnect();
+    mSelector->disconnect();
+    ui.projectButtonBox->disconnect();
+    close();
 }
 
 void CSVDoc::FileDialog::slotOpenFile()
@@ -171,4 +176,8 @@ void CSVDoc::FileDialog::slotOpenFile()
     mAdjusterWidget->setName (file->filePath(), !file->isGameFile());
 
     emit signalOpenFiles (mAdjusterWidget->getPath());
+
+    mSelector->disconnect();
+    ui.projectButtonBox->disconnect();
+    close();
 }
