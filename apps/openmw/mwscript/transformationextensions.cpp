@@ -463,25 +463,26 @@ namespace MWScript
                     Interpreter::Type_Float zRot = runtime[0].mFloat;
                     runtime.pop();
 
-                    int cx,cy;
-                    MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
-                    MWWorld::CellStore* store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
-                    if(store)
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    MWWorld::CellStore* store = NULL;
+                    if (player.getCell()->isExterior())
                     {
-                        ESM::Position pos;
-                        pos.pos[0] = x;
-                        pos.pos[1] = y;
-                        pos.pos[2] = z;
-                        pos.rot[0] = pos.rot[1] = 0;
-                        pos.rot[2]  = zRot;
-                        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
-                        ref.getPtr().getCellRef().setPosition(pos);
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
+                        int cx,cy;
+                        MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
+                        store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
                     }
                     else
-                    {
-                        throw std::runtime_error ("unknown cell");
-                    }
+                        store = player.getCell();
+
+                    ESM::Position pos;
+                    pos.pos[0] = x;
+                    pos.pos[1] = y;
+                    pos.pos[2] = z;
+                    pos.rot[0] = pos.rot[1] = 0;
+                    pos.rot[2]  = zRot;
+                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
+                    ref.getPtr().getCellRef().setPosition(pos);
+                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
                 }
         };
 
