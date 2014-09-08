@@ -463,6 +463,8 @@ namespace MWClass
 
         if(getCreatureStats(ptr).isDead())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
+        if(ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat())
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
