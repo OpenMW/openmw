@@ -716,6 +716,7 @@ bool CharacterController::updateCreatureState()
                              0.0f, 0);
             mUpperBodyState = UpperCharState_StartToMinAttack;
         }
+        stats.setAttackingOrSpell(false);
     }
 
     bool animPlaying = mAnimation->getInfo(mCurrentWeapon);
