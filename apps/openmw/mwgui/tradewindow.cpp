@@ -436,6 +436,10 @@ namespace MWGui
         }
         catch (std::bad_cast&)
         {
+            if (_sender->getCaption().empty())
+                mTotalBalance->setCaption("0");
+            else
+                mTotalBalance->setCaption(boost::lexical_cast<std::string>(std::abs(mCurrentBalance)));
         }
     }
 
@@ -460,16 +464,19 @@ namespace MWGui
 
         mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + boost::lexical_cast<std::string>(playerGold));
 
+        std::string balanceCaption;
         if (mCurrentBalance > 0)
         {
             mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalSold}");
-            mTotalBalance->setCaption(boost::lexical_cast<std::string>(mCurrentBalance));
+            balanceCaption = boost::lexical_cast<std::string>(mCurrentBalance);
         }
         else
         {
             mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalCost}");
-            mTotalBalance->setCaption(boost::lexical_cast<std::string>(-mCurrentBalance));
+            balanceCaption = boost::lexical_cast<std::string>(-mCurrentBalance);
         }
+        if (balanceCaption != mTotalBalance->getCaption().asUTF8()) // Don't reset text cursor if text doesn't need to be changed
+            mTotalBalance->setCaption(balanceCaption);
 
         mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + boost::lexical_cast<std::string>(getMerchantGold()));
     }
