@@ -115,7 +115,7 @@ void CSVDoc::FileDialog::buildOpenFileView()
     connect (mSelector, SIGNAL (signalAddonFileSelected (int)), this, SLOT (slotUpdateAcceptButton (int)));
     connect (mSelector, SIGNAL (signalAddonFileUnselected (int)), this, SLOT (slotUpdateAcceptButton (int)));
 
-    connect (ui.projectButtonBox, SIGNAL (accepted()), this, SLOT (slotOpenFile()));
+    connect (ui.projectButtonBox, SIGNAL (accepted()), this, SLOT (slotOpenFile()), Qt::UniqueConnection);
 }
 
 void CSVDoc::FileDialog::slotUpdateAcceptButton (int)
