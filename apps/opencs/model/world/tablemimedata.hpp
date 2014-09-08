@@ -59,8 +59,8 @@ namespace CSMWorld
 
             static CSMWorld::ColumnBase::Display convertEnums(CSMWorld::UniversalId::Type type);
 
+            static bool isReferencable(CSMWorld::UniversalId::Type type);
         private:
-            bool isReferencable(CSMWorld::UniversalId::Type type) const;
             bool isReferencable(CSMWorld::ColumnBase::Display type) const;
 
     };
