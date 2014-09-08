@@ -871,7 +871,6 @@ namespace MWScript
             {
                 MWBase::World* world = MWBase::Environment::get().getWorld();
                 world->goToJail();
-                MWBase::Environment::get().getWorld()->getPlayer().recordCrimeId();
             }
         };
 

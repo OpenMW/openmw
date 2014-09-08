@@ -143,6 +143,7 @@ namespace MWWorld
             bool mTeleportEnabled;
             bool mLevitationEnabled;
             bool mGoToJail;
+            int mDaysInPrison;
 
             float feetToGameUnits(float feet);
 
