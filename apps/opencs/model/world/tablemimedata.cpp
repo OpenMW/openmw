@@ -68,26 +68,6 @@ std::vector< CSMWorld::UniversalId > CSMWorld::TableMimeData::getData() const
     return mUniversalId;
 }
 
-std::vector< CSMWorld::UniversalId > CSMWorld::TableMimeData::getRefTypeData() const
-{
-    std::vector<CSMWorld::UniversalId> ref_data;
-
-    std::vector<CSMWorld::UniversalId>::const_iterator it = mUniversalId.begin();
-    for(; it != mUniversalId.end(); ++it)
-    {
-        if(isReferencable(it->getType()))
-        {
-            // change the type
-            ref_data.push_back(CSMWorld::UniversalId(
-                        CSMWorld::UniversalId::Type_Referenceable, it->getId()));
-        }
-        else
-            ref_data.push_back(*it);
-    }
-
-    return ref_data;
-}
-
 bool CSMWorld::TableMimeData::isReferencable(CSMWorld::ColumnBase::Display type) const
 {
 return (  type == CSMWorld::ColumnBase::Display_Activator
@@ -111,7 +91,7 @@ return (  type == CSMWorld::ColumnBase::Display_Activator
        || type == CSMWorld::ColumnBase::Display_Static
        || type == CSMWorld::ColumnBase::Display_Weapon);
 }
-bool CSMWorld::TableMimeData::isReferencable(CSMWorld::UniversalId::Type type) const
+bool CSMWorld::TableMimeData::isReferencable(CSMWorld::UniversalId::Type type)
 {
      return (  type == CSMWorld::UniversalId::Type_Activator
             || type == CSMWorld::UniversalId::Type_Potion
