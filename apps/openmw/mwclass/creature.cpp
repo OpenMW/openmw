@@ -516,9 +516,7 @@ namespace MWClass
 
     bool Creature::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        /// \todo We don't want tooltips for Creatures in combat mode.
-
-        return true;
+        return !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat();
     }
 
     float Creature::getSpeed(const MWWorld::Ptr &ptr) const
