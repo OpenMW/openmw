@@ -973,7 +973,7 @@ namespace MWWorld
         if (facedHandle.empty())
             return MWWorld::Ptr();
 
-        return searchPtrViaHandle(facedHandle);
+        return getPtrViaHandle(facedHandle);
     }
 
     std::pair<MWWorld::Ptr,Ogre::Vector3> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
