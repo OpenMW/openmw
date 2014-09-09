@@ -912,6 +912,7 @@ bool CharacterController::updateWeaponState()
             else if(mWeaponType == WeapType_PickProbe)
             {
                 MWWorld::Ptr item = *weapon;
+                // TODO: this will only work for the player, and needs to be fixed if NPCs should ever use lockpicks/probes.
                 MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getFacedObject();
                 std::string resultMessage, resultSound;
 
