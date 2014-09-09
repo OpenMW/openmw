@@ -571,8 +571,7 @@ namespace MWClass
             {
                 healthdmg = true;
                 // GLOB instead of GMST because it gets updated during a quest
-                const MWWorld::Store<ESM::Global> &glob = world->getStore().get<ESM::Global>();
-                damage *= glob.find("WerewolfClawMult")->mValue.getFloat();
+                damage *= world->getGlobalFloat("werewolfclawmult");
             }
             if(healthdmg)
                 damage *= store.find("fHandtoHandHealthPer")->getFloat();

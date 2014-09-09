@@ -389,8 +389,8 @@ namespace MWWorld
         std::map<std::string, ESM::Variant> globals;
         // vanilla Morrowind does not define dayspassed.
         globals["dayspassed"] = ESM::Variant(1); // but the addons start counting at 1 :(
-        globals["WerewolfClawMult"] = ESM::Variant(1.f);
-        globals["PCKnownWerewolf"] = ESM::Variant(0);
+        globals["werewolfclawmult"] = ESM::Variant(25.f);
+        globals["pcknownwerewolf"] = ESM::Variant(0);
 
         for (std::map<std::string, ESM::Variant>::iterator it = gmst.begin(); it != gmst.end(); ++it)
         {
