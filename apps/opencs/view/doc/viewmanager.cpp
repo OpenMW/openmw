@@ -195,7 +195,7 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
 // NOTE: This method assumes that it is called only if the last document
 void CSVDoc::ViewManager::removeDocAndView (CSMDoc::Document *document)
 {
-    for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
+    for (std::vector<View *>::iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
     {
         // the first match should also be the only match
         if((*iter)->getDocument() == document)
