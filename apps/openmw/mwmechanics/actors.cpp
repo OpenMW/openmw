@@ -989,6 +989,9 @@ namespace MWMechanics
             CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
             NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
 
+            if (player.getClass().getNpcStats(player).isWerewolf())
+                return;
+
             if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue && !creatureStats.getAiSequence().isInCombat())
             {
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
