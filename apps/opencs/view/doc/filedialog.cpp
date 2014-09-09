@@ -18,7 +18,7 @@
 #include "adjusterwidget.hpp"
 
 CSVDoc::FileDialog::FileDialog(QWidget *parent) :
-    QDialog(parent), mSelector (0), mFileWidget (0), mAdjusterWidget (0)
+    QDialog(parent), mSelector (0), mFileWidget (0), mAdjusterWidget (0), mDialogBuilt(false)
 {
     ui.setupUi (this);
     resize(400, 400);
@@ -70,11 +70,15 @@ void CSVDoc::FileDialog::showDialog (ContentAction action)
 
     mAdjusterWidget->setFilenameCheck (mAction == ContentAction_New);
 
-    //connections common to both dialog view flavors
-    connect (mSelector, SIGNAL (signalCurrentGamefileIndexChanged (int)),
-             this, SLOT (slotUpdateAcceptButton (int)));
+    if(!mDialogBuilt)
+    {
+        //connections common to both dialog view flavors
+        connect (mSelector, SIGNAL (signalCurrentGamefileIndexChanged (int)),
+                 this, SLOT (slotUpdateAcceptButton (int)));
 
-    connect (ui.projectButtonBox, SIGNAL (rejected()), this, SLOT (slotRejected()));
+        connect (ui.projectButtonBox, SIGNAL (rejected()), this, SLOT (slotRejected()));
+        mDialogBuilt = true;
+    }
 
     show();
     raise();
@@ -85,37 +89,41 @@ void CSVDoc::FileDialog::buildNewFileView()
 {
     setWindowTitle(tr("Create a new addon"));
 
-   QPushButton* createButton = ui.projectButtonBox->button (QDialogButtonBox::Ok);
-   createButton->setText ("Create");
-   createButton->setEnabled (false);
+    QPushButton* createButton = ui.projectButtonBox->button (QDialogButtonBox::Ok);
+    createButton->setText ("Create");
+    createButton->setEnabled (false);
 
-    mFileWidget = new FileWidget (this);
+    if(!mFileWidget)
+    {
+        mFileWidget = new FileWidget (this);
 
-    mFileWidget->setType (true);
-    mFileWidget->extensionLabelIsVisible(true);
+        mFileWidget->setType (true);
+        mFileWidget->extensionLabelIsVisible(true);
+
+        connect (mFileWidget, SIGNAL (nameChanged (const QString&, bool)),
+            mAdjusterWidget, SLOT (setName (const QString&, bool)));
+
+        connect (mFileWidget, SIGNAL (nameChanged(const QString &, bool)),
+                this, SLOT (slotUpdateAcceptButton(const QString &, bool)));
+
+        connect (ui.projectButtonBox, SIGNAL (accepted()), this, SLOT (slotNewFile()));
+    }
 
     ui.projectGroupBoxLayout->insertWidget (0, mFileWidget);
-
-    connect (mFileWidget, SIGNAL (nameChanged (const QString&, bool)),
-        mAdjusterWidget, SLOT (setName (const QString&, bool)));
-
-    connect (mFileWidget, SIGNAL (nameChanged(const QString &, bool)),
-            this, SLOT (slotUpdateAcceptButton(const QString &, bool)));
-
-    connect (ui.projectButtonBox, SIGNAL (accepted()), this, SLOT (slotNewFile()));
 }
 
 void CSVDoc::FileDialog::buildOpenFileView()
 {
     setWindowTitle(tr("Open"));
     ui.projectGroupBox->setTitle (QString(""));
-
     ui.projectButtonBox->button(QDialogButtonBox::Ok)->setEnabled (false);
 
-    connect (mSelector, SIGNAL (signalAddonFileSelected (int)), this, SLOT (slotUpdateAcceptButton (int)));
-    connect (mSelector, SIGNAL (signalAddonFileUnselected (int)), this, SLOT (slotUpdateAcceptButton (int)));
-
-    connect (ui.projectButtonBox, SIGNAL (accepted()), this, SLOT (slotOpenFile()));
+    if(!mDialogBuilt)
+    {
+        connect (mSelector, SIGNAL (signalAddonFileSelected (int)), this, SLOT (slotUpdateAcceptButton (int)));
+        connect (mSelector, SIGNAL (signalAddonFileUnselected (int)), this, SLOT (slotUpdateAcceptButton (int)));
+        connect (ui.projectButtonBox, SIGNAL (accepted()), this, SLOT (slotOpenFile()));
+    }
 }
 
 void CSVDoc::FileDialog::slotUpdateAcceptButton (int)
@@ -162,10 +170,6 @@ void CSVDoc::FileDialog::slotRejected()
 void CSVDoc::FileDialog::slotNewFile()
 {
     emit signalCreateNewFile (mAdjusterWidget->getPath());
-
-    mFileWidget->disconnect();
-    mSelector->disconnect();
-    ui.projectButtonBox->disconnect();
     close();
 }
 
@@ -176,8 +180,5 @@ void CSVDoc::FileDialog::slotOpenFile()
     mAdjusterWidget->setName (file->filePath(), !file->isGameFile());
 
     emit signalOpenFiles (mAdjusterWidget->getPath());
-
-    mSelector->disconnect();
-    ui.projectButtonBox->disconnect();
     close();
 }
