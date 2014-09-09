@@ -192,6 +192,12 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
     return continueWithClose;
 }
 
+void CSVDoc::ViewManager::removeDocument (CSMDoc::Document *document)
+{
+    if(document)
+        mDocumentManager.removeDocument(document);
+}
+
 bool CSVDoc::ViewManager::notifySaveOnClose (CSVDoc::View *view)
 {
     bool result = true;
@@ -349,8 +355,7 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
     else
     {
         CSMDoc::Document * document = view->getDocument();
-        if(document)
-            mDocumentManager.removeDocument(document);
+        removeDocument(document);
         view->setVisible(false);
 
         // attempt to close all other documents
@@ -364,8 +369,7 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
             else
             {
                 document = mViews.back()->getDocument();
-                if(document)
-                    mDocumentManager.removeDocument(document);
+                removeDocument(document);
                 mViews.back()->setVisible(false);
                 mViews.pop_back();
             }
