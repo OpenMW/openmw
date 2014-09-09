@@ -27,7 +27,7 @@ void CSVDoc::View::closeEvent (QCloseEvent *event)
     else
     {
         // closeRequest() returns true if last document
-        mViewManager.removeDocument(mDocument);
+        mViewManager.removeDocAndView(mDocument);
     }
 }
 

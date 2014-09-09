@@ -55,7 +55,7 @@ namespace CSVDoc
             ///< Return number of views for \a document.
 
             bool closeRequest (View *view);
-            void removeDocument (CSMDoc::Document *document);
+            void removeDocAndView (CSMDoc::Document *document);
 
         signals:
 

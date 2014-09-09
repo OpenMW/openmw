@@ -172,7 +172,7 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
 {
     std::vector<View *>::iterator iter = std::find (mViews.begin(), mViews.end(), view);
 
-    bool continueWithClose = true;
+    bool continueWithClose = false;
 
     if (iter!=mViews.end())
     {
@@ -192,10 +192,22 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
     return continueWithClose;
 }
 
-void CSVDoc::ViewManager::removeDocument (CSMDoc::Document *document)
+// NOTE: This method assumes that it is called only if the last document
+void CSVDoc::ViewManager::removeDocAndView (CSMDoc::Document *document)
 {
-    if(document)
-        mDocumentManager.removeDocument(document);
+    for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
+    {
+        // the first match should also be the only match
+        if((*iter)->getDocument() == document)
+        {
+            mDocumentManager.removeDocument(document);
+            (*iter)->deleteLater();
+            mViews.erase (iter);
+
+            updateIndices();
+            return;
+        }
+    }
 }
 
 bool CSVDoc::ViewManager::notifySaveOnClose (CSVDoc::View *view)
@@ -354,14 +366,23 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
         return;
     else
     {
+        // don't bother closing views or updating indicies, but remove from mViews
         CSMDoc::Document * document = view->getDocument();
-        removeDocument(document);
-        view->setVisible(false);
+        std::vector<View *> remainingViews;
+        for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
+        {
+            if(document == (*iter)->getDocument())
+                (*iter)->setVisible(false);
+            else
+                remainingViews.push_back(*iter);
+        }
+        mDocumentManager.removeDocument(document);
+        mViews = remainingViews;
 
         // attempt to close all other documents
         while(!mViews.empty())
         {
-            // raise the window
+            // raise the window to alert the user
             mViews.back()->activateWindow();
             mViews.back()->raise();
             if (!notifySaveOnClose(mViews.back()))
@@ -369,9 +390,16 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
             else
             {
                 document = mViews.back()->getDocument();
-                removeDocument(document);
-                mViews.back()->setVisible(false);
-                mViews.pop_back();
+                remainingViews.clear();
+                for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
+                {
+                    if(document == (*iter)->getDocument())
+                        (*iter)->setVisible(false);
+                    else
+                        remainingViews.push_back(*iter);
+                }
+                mDocumentManager.removeDocument(document);
+                mViews = remainingViews;
             }
         }
     }
