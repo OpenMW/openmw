@@ -18,6 +18,7 @@
 #include "../mwbase/inputmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -429,14 +430,13 @@ namespace MWScript
         if (id.empty())
             ref2 = getReferenceImp();
         else
-            ref2 = MWBase::Environment::get().getWorld()->searchPtr(id, true);
+            ref2 = MWBase::Environment::get().getWorld()->getPtr(id, false);
 
-        // If either actor is in a non-active cell, return a large value (just like vanilla)
-        if (ref2.isEmpty())
-            return std::numeric_limits<float>().max();
+        const MWWorld::Ptr ref = MWBase::Environment::get().getWorld()->getPtr(name, false);
 
-        const MWWorld::Ptr ref = MWBase::Environment::get().getWorld()->searchPtr(name, true);
-        if (ref.isEmpty())
+        // If the objects are in different worldspaces, return a large value (just like vanilla)
+        if (ref.getCell()->isExterior() ^ ref2.getCell()->isExterior()
+            || (!ref.getCell()->isExterior() && !ref2.getCell()->isExterior() && ref.getCell() != ref2.getCell()))
             return std::numeric_limits<float>().max();
 
         double diff[3];
