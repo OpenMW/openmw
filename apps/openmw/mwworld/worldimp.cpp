@@ -259,7 +259,8 @@ namespace MWWorld
         mWeatherManager = 0;
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
-        MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);
+        if (!mStartupScript.empty())
+            MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);
     }
 
     void World::clear()
