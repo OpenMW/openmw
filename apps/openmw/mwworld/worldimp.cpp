@@ -953,9 +953,27 @@ namespace MWWorld
 
     MWWorld::Ptr World::getFacedObject()
     {
-        if (mFacedHandle.empty())
+        std::string facedHandle;
+
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode() &&
+                MWBase::Environment::get().getWindowManager()->isConsoleMode())
+            getFacedHandle(facedHandle, getMaxActivationDistance() * 50, false);
+        else
+        {
+            float telekinesisRangeBonus =
+                    mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
+                    .get(ESM::MagicEffect::Telekinesis).getMagnitude();
+            telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
+
+            float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
+
+            getFacedHandle(facedHandle, activationDistance);
+        }
+
+        if (facedHandle.empty())
             return MWWorld::Ptr();
-        return searchPtrViaHandle(mFacedHandle);
+
+        return searchPtrViaHandle(facedHandle);
     }
 
     std::pair<MWWorld::Ptr,Ogre::Vector3> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
@@ -1503,8 +1521,6 @@ namespace MWWorld
             Vector3 sun = mRendering->getSkyManager()->getRealSunPos();
             mRendering->getSkyManager()->setGlare(!mPhysics->castRay(Ogre::Vector3(p[0], p[1], p[2]), sun));
         }
-
-        updateFacedHandle ();
     }
 
     void World::getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer)
@@ -1532,24 +1548,6 @@ namespace MWWorld
             facedHandle = "";
         else
             facedHandle = results.front().second;
-    }
-
-    void World::updateFacedHandle ()
-    {
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode() &&
-                MWBase::Environment::get().getWindowManager()->isConsoleMode())
-            getFacedHandle(mFacedHandle, getMaxActivationDistance() * 50, false);
-        else
-        {
-            float telekinesisRangeBonus =
-                    mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
-                    .get(ESM::MagicEffect::Telekinesis).getMagnitude();
-            telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
-
-            float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
-
-            getFacedHandle(mFacedHandle, activationDistance);
-        }
     }
 
     bool World::isCellExterior() const

@@ -88,8 +88,6 @@ namespace MWGui
                 || (MWBase::Environment::get().getWindowManager()->getMode() == GM_Container)
                 || (MWBase::Environment::get().getWindowManager()->getMode() == GM_Inventory)))
             {
-                mFocusObject = MWBase::Environment::get().getWorld()->getFacedObject();
-
                 if (mFocusObject.isEmpty ())
                     return;
 

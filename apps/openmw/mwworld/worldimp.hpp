@@ -91,7 +91,6 @@ namespace MWWorld
             Ptr getPtrViaHandle (const std::string& handle, CellStore& cellStore);
 
             int mActivationDistanceOverride;
-            std::string mFacedHandle;
 
             std::string mStartupScript;
 
@@ -112,7 +111,6 @@ namespace MWWorld
 
             void updateWindowManager ();
             void performUpdateSceneQueries ();
-            void updateFacedHandle ();
             void getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer=true);
 
             float getMaxActivationDistance ();
