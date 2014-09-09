@@ -516,7 +516,7 @@ namespace MWClass
 
     bool Creature::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        return !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat();
+        return !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat() || getCreatureStats(ptr).isDead();
     }
 
     float Creature::getSpeed(const MWWorld::Ptr &ptr) const

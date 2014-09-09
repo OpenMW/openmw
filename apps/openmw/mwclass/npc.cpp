@@ -1061,7 +1061,7 @@ namespace MWClass
 
     bool Npc::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        return !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat();
+        return !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat() || getCreatureStats(ptr).isDead();
     }
 
     MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::Ptr& ptr) const
