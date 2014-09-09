@@ -113,7 +113,7 @@ namespace MWWorld
             void updateWindowManager ();
             void performUpdateSceneQueries ();
             void updateFacedHandle ();
-            void getFacedHandle(std::string& facedHandle, float maxDistance);
+            void getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer=true);
 
             float getMaxActivationDistance ();
             float getNpcActivationDistance ();
