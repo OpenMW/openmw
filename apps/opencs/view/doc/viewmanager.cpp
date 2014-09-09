@@ -343,36 +343,33 @@ void CSVDoc::ViewManager::onExitWarningHandler (int state, CSMDoc::Document *doc
 
 void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
 {
-    // close the current view first
-    if(!closeRequest(view))
+    // close the current document first
+    if(!notifySaveOnClose(view))
         return;
     else
     {
-        view->deleteLater();
+        CSMDoc::Document * document = view->getDocument();
+        if(document)
+            mDocumentManager.removeDocument(document);
         view->setVisible(false);
-        std::vector<View *>::iterator iter = std::find (mViews.begin(), mViews.end(), view);
-        if (iter!=mViews.end())
-        {
-            mViews.erase (iter);
-            updateIndices();
-        }
 
-        // attempt to close all other views
+        // attempt to close all other documents
         while(!mViews.empty())
         {
             // raise the window
             mViews.back()->activateWindow();
             mViews.back()->raise();
-            if (!closeRequest(mViews.back()))
+            if (!notifySaveOnClose(mViews.back()))
                 return;
             else
             {
-                mViews.back()->deleteLater();
+                document = mViews.back()->getDocument();
+                if(document)
+                    mDocumentManager.removeDocument(document);
                 mViews.back()->setVisible(false);
                 mViews.pop_back();
-                updateIndices();
             }
         }
     }
-    QApplication::instance()->exit();
+    // Editor exits (via a signal) when the last document is deleted
 }
