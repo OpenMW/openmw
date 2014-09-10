@@ -9,6 +9,8 @@
 
 #include <components/compiler/locals.hpp>
 
+#include <components/esm/cellid.hpp>
+
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -435,8 +437,7 @@ namespace MWScript
         const MWWorld::Ptr ref = MWBase::Environment::get().getWorld()->getPtr(name, false);
 
         // If the objects are in different worldspaces, return a large value (just like vanilla)
-        if (ref.getCell()->isExterior() ^ ref2.getCell()->isExterior()
-            || (!ref.getCell()->isExterior() && !ref2.getCell()->isExterior() && ref.getCell() != ref2.getCell()))
+        if (ref.getCell()->getCell()->getCellId().mWorldspace != ref2.getCell()->getCell()->getCellId().mWorldspace)
             return std::numeric_limits<float>().max();
 
         double diff[3];
