@@ -364,17 +364,17 @@ void CSVDoc::ViewManager::onExitWarningHandler (int state, CSMDoc::Document *doc
     }
 }
 
-void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
+bool CSVDoc::ViewManager::removeDocument (CSVDoc::View *view)
 {
-    // close the current document first
     if(!notifySaveOnClose(view))
-        return;
+        return false;
     else
     {
         // don't bother closing views or updating indicies, but remove from mViews
         CSMDoc::Document * document = view->getDocument();
         std::vector<View *> remainingViews;
-        for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
+        std::vector<View *>::const_iterator iter = mViews.begin();
+        for (; iter!=mViews.end(); ++iter)
         {
             if(document == (*iter)->getDocument())
                 (*iter)->setVisible(false);
@@ -383,30 +383,21 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
         }
         mDocumentManager.removeDocument(document);
         mViews = remainingViews;
+    }
+    return true;
+}
 
-        // attempt to close all other documents
-        while(!mViews.empty())
-        {
-            // raise the window to alert the user
-            mViews.back()->activateWindow();
-            mViews.back()->raise();
-            if (!notifySaveOnClose(mViews.back()))
-                return;
-            else
-            {
-                document = mViews.back()->getDocument();
-                remainingViews.clear();
-                for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
-                {
-                    if(document == (*iter)->getDocument())
-                        (*iter)->setVisible(false);
-                    else
-                        remainingViews.push_back(*iter);
-                }
-                mDocumentManager.removeDocument(document);
-                mViews = remainingViews;
-            }
-        }
+void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
+{
+    if(!removeDocument(view)) // close the current document first
+        return;
+
+    while(!mViews.empty()) // attempt to close all other documents
+    {
+        mViews.back()->activateWindow();
+        mViews.back()->raise(); // raise the window to alert the user
+        if(!removeDocument(mViews.back()))
+            return;
     }
     // Editor exits (via a signal) when the last document is deleted
 }
