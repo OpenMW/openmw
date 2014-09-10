@@ -114,8 +114,20 @@ void CSVSettings::Dialog::show()
         setViewValues();
     }
 
-    QPoint screenCenter = QApplication::desktop()->screenGeometry().center();
-
-    move (screenCenter - geometry().center());
+    QWidget *currView = QApplication::activeWindow();
+    if(currView)
+    {
+        // place at the center of the window with focus
+        QSize size = currView->size();
+        move(currView->geometry().x()+(size.width() - frameGeometry().width())/2,
+             currView->geometry().y()+(size.height() - frameGeometry().height())/2);
+    }
+    else
+    {
+        // something's gone wrong, place at the center of the screen
+        QPoint screenCenter = QApplication::desktop()->screenGeometry().center();
+        move(screenCenter - QPoint(frameGeometry().width()/2,
+                                   frameGeometry().height()/2));
+    }
     QWidget::show();
 }
