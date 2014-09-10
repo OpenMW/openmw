@@ -228,13 +228,18 @@ bool CSVDoc::ViewManager::notifySaveOnClose (CSVDoc::View *view)
 
 bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (CSVDoc::View *view)
 {
-    QMessageBox messageBox;
+    emit closeMessageBox();
+
+    QMessageBox messageBox(view);
     CSMDoc::Document *document = view->getDocument();
 
     messageBox.setText ("The document has been modified.");
     messageBox.setInformativeText ("Do you want to save your changes?");
     messageBox.setStandardButtons (QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     messageBox.setDefaultButton (QMessageBox::Save);
+    messageBox.setWindowModality (Qt::NonModal);
+    messageBox.hide();
+    messageBox.show();
 
     bool retVal = true;
 
