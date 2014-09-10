@@ -448,12 +448,12 @@ void CSVWorld::Table::tableSizeUpdate()
             size = rows;
     }
 
-    tableSizeChanged (size, deleted, modified);
+    emit tableSizeChanged (size, deleted, modified);
 }
 
 void CSVWorld::Table::selectionSizeUpdate()
 {
-    selectionSizeChanged (selectionModel()->selectedRows().size());
+    emit selectionSizeChanged (selectionModel()->selectedRows().size());
 }
 
 void CSVWorld::Table::requestFocus (const std::string& id)
@@ -467,6 +467,8 @@ void CSVWorld::Table::requestFocus (const std::string& id)
 void CSVWorld::Table::recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter)
 {
     mProxyModel->setFilter (filter);
+    tableSizeUpdate();
+    selectionSizeUpdate();
 }
 
 void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
