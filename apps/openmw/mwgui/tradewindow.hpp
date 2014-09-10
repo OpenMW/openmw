@@ -28,8 +28,6 @@ namespace MWGui
 
             void startTrade(const MWWorld::Ptr& actor);
 
-            void onFrame(float frameDuration);
-
             void borrowItem (int index, size_t count);
             void returnItem (int index, size_t count);
 
@@ -71,14 +69,6 @@ namespace MWGui
             int mCurrentBalance;
             int mCurrentMerchantOffer;
 
-            enum BalanceButtonsState {
-                BBS_None,
-                BBS_Increase,
-                BBS_Decrease
-            } mBalanceButtonsState;
-            /// pause before next balance change will trigger while user holds +/- button pressed
-            float mBalanceChangePause;
-
             void sellToNpc(const MWWorld::Ptr& item, int count, bool boughtItem); ///< only used for adjusting the gold balance
             void buyFromNpc(const MWWorld::Ptr& item, int count, bool soldItem); ///< only used for adjusting the gold balance
 
@@ -93,6 +83,9 @@ namespace MWGui
             void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
             void onBalanceButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
             void onBalanceEdited(MyGUI::EditBox* _sender);
+            void onRepeatClick(MyGUI::Widget* widget, MyGUI::ControllerItem* controller);
+
+            void addRepeatController(MyGUI::Widget* widget);
 
             void onIncreaseButtonTriggered();
             void onDecreaseButtonTriggered();
