@@ -5,57 +5,15 @@
 
 #include <stdexcept>
 
+extern "C" {
 #ifndef HAVE_LIBSWRESAMPLE
 /* FIXME: remove this section once libswresample is available on all platforms */
-
-int swr_convert(
-        AVAudioResampleContext *avr,
-        uint8_t** output,
-        int out_samples,
-        const uint8_t** input,
-        int in_samples)
-{
-    // FIXME: potential performance hit
-    int out_plane_size = 0;
-    int in_plane_size = 0;
-    return avresample_convert(avr, output, out_plane_size, out_samples,
-                              (uint8_t **)input, in_plane_size, in_samples);
-}
-
-AVAudioResampleContext * swr_alloc_set_opts(
-        AVAudioResampleContext *avr,
-        int64_t out_ch_layout,
-        AVSampleFormat out_fmt,
-        int out_rate,
-        int64_t in_ch_layout,
-        AVSampleFormat in_fmt,
-        int in_rate,
-        int o,
-        void* l)
-{
-    avr = avresample_alloc_context();
-    if(!avr)
-        return 0;
-
-    if ((av_opt_set_int(avr, "out_channel_layout", out_ch_layout, 0) < 0) ||
-        (av_opt_set_int(avr, "out_sample_fmt",     out_fmt,       0) < 0) ||
-        (av_opt_set_int(avr, "out_sample_rate",    out_rate,      0) < 0) ||
-        (av_opt_set_int(avr, "in_channel_layout",  in_ch_layout,  0) < 0) ||
-        (av_opt_set_int(avr, "in_sample_fmt",      in_fmt,        0) < 0) ||
-        (av_opt_set_int(avr, "in_sample_rate",     in_rate,       0) < 0))
-    {
-        return 0;
-    }
-
-    if(avresample_open(avr) < 0)
-        return 0;
-    else
-        return avr;
-}
-
-void  swr_free(AVAudioResampleContext **avr) { avresample_free(avr); }
-int  swr_init(AVAudioResampleContext *avr) { return 1; }
+int  swr_init(AVAudioResampleContext *avr);
+void  swr_free(AVAudioResampleContext **avr);
+int swr_convert( AVAudioResampleContext *avr, uint8_t** output, int out_samples, const uint8_t** input, int in_samples);
+AVAudioResampleContext * swr_alloc_set_opts( AVAudioResampleContext *avr, int64_t out_ch_layout, AVSampleFormat out_fmt, int out_rate, int64_t in_ch_layout, AVSampleFormat in_fmt, int in_rate, int o, void* l);
 #endif
+}
 
 namespace MWSound
 {
@@ -398,6 +356,12 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
             fail(std::string("Couldn't allocate SwrContext"));
         if(swr_init(mSwr) < 0)
             fail(std::string("Couldn't initialize SwrContext"));
+
+// FIXME: debug output
+//#if 0
+        std::cout << "channel_layout: " + std::to_string((*mStream)->codec->channel_layout) << std::endl;
+        std::cout << "in_channels: " + std::to_string((*mStream)->codec->channels) << std::endl;
+//#endif
     }
 }
 
