@@ -174,19 +174,19 @@ namespace MWGui
 
     void ContainerWindow::onItemSelected(int index)
     {
+        if (mDragAndDrop->mIsOnDragAndDrop)
+        {
+            if (!dynamic_cast<PickpocketItemModel*>(mModel))
+                dropItem();
+            return;
+        }
+
         const ItemStack& item = mSortModel->getItem(index);
 
         // We can't take a conjured item from a container (some NPC we're pickpocketing, a box, etc)
         if (item.mBase.getCellRef().getRefId().size() > 6 && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage1}");
-            return;
-        }
-
-        if (mDragAndDrop->mIsOnDragAndDrop)
-        {
-            if (!dynamic_cast<PickpocketItemModel*>(mModel))
-                dropItem();
             return;
         }
 
