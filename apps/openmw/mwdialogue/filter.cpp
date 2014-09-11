@@ -249,7 +249,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             float ratio = mActor.getClass().getCreatureStats (mActor).getHealth().getCurrent() /
                 mActor.getClass().getCreatureStats (mActor).getHealth().getModified();
 
-            return select.selectCompare (ratio);
+            return select.selectCompare (static_cast<int>(ratio*100));
         }
 
         default:
