@@ -70,7 +70,7 @@ option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 
 # Apps and tools
-option(BUILD_BSATOOL "build BSA extractor" OFF)
+option(BUILD_BSATOOL "build BSA extractor" ON)
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
 option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
