@@ -99,6 +99,8 @@ namespace MWWorld
 
             std::string mStartCell;
 
+            std::map<std::string, bool> mBoundID;
+
             void updateWeather(float duration);
             int getDaysPerMonth (int month) const;
 
@@ -307,6 +309,9 @@ namespace MWWorld
             virtual void modRegion(const std::string &regionid, const std::vector<char> &chances);
 
             virtual float getTimeScaleFactor() const;
+
+            virtual bool isBoundItemID(const std::string &id);
+            ///< \return Whether or not the specified id refers to a bound item.
 
             virtual void changeToInteriorCell (const std::string& cellName,
                 const ESM::Position& position);

@@ -191,6 +191,29 @@ namespace MWWorld
         mGlobalVariables.fill (mStore);
 
         mWorldScene = new Scene(*mRendering, mPhysics);
+
+        // Build a list of known bound item ID's
+        const MWWorld::Store<ESM::GameSetting> &gameSettings = mStore.get<ESM::GameSetting>();
+
+        for (MWWorld::Store<ESM::GameSetting>::iterator currentIteration = gameSettings.begin(); currentIteration != gameSettings.end(); ++currentIteration)
+        {
+            const ESM::GameSetting &currentSetting = *currentIteration;
+            try
+            {
+                std::string currentGMSTID = currentSetting.mId;
+                std::transform(currentGMSTID.begin(), currentGMSTID.end(), currentGMSTID.begin(), ::tolower);
+
+                // Don't bother checking this GMST if it's not a sMagicBound* one.
+                if (currentGMSTID.find("smagicbound") != 0)
+                    continue;
+
+                std::string currentGMSTValue = currentSetting.getString();
+                std::transform(currentGMSTValue.begin(), currentGMSTValue.end(), currentGMSTValue.begin(), ::tolower);
+
+                mBoundID[currentGMSTValue] = true;
+            }
+            catch(...){}
+        }
     }
 
     void World::startNewGame (bool bypass)
@@ -877,6 +900,16 @@ namespace MWWorld
     float World::getTimeScaleFactor() const
     {
         return mGlobalVariables["timescale"].getFloat();
+    }
+
+    bool World::isBoundItemID(const std::string &id)
+    {
+        std::string id_temp = id;
+        std::transform(id_temp.begin(), id_temp.end(), id_temp.begin(), ::tolower);
+
+        if (mBoundID.count(id_temp) != 0)
+            return true;
+        return false;
     }
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
@@ -2501,7 +2534,7 @@ namespace MWWorld
         if (!selectedSpell.empty())
         {
             const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
-	    
+
 	    // A power can be used once per 24h
 	    if (spell->mData.mType == ESM::Spell::ST_Power)
 	        stats.getSpells().usePower(spell->mId);

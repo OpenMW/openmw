@@ -2,6 +2,10 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
 
 namespace MWGui
 {
@@ -15,6 +19,9 @@ namespace MWGui
     {
         if (base.getClass().getEnchantment(base) != "")
             mFlags |= Flag_Enchanted;
+
+        if (MWBase::Environment::get().getWorld()->isBoundItemID(base.getCellRef().getRefId()))
+            mFlags |= Flag_Bound;
     }
 
     ItemStack::ItemStack()
