@@ -15,7 +15,7 @@ set(LAUNCHER
     utils/textinputdialog.cpp
     utils/lineedit.cpp
 
-    ${CMAKE_SOURCE_DIR}/files/launcher/launcher.rc
+    ${CMAKE_SOURCE_DIR}/files/windows/launcher.rc
 )
 if(NOT WIN32)
     LIST(APPEND LAUNCHER unshieldthread.cpp)
