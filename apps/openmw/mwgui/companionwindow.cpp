@@ -41,14 +41,21 @@ CompanionWindow::CompanionWindow(DragAndDrop *dragAndDrop, MessageBoxManager* ma
 
 void CompanionWindow::onItemSelected(int index)
 {
+    const ItemStack& item = mSortModel->getItem(index);
+
+    // We can't take conjured items from a companion NPC
+    if (item.mBase.getCellRef().getRefId().size() > 6 && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
+    {
+        MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
+        return;
+    }
+
     if (mDragAndDrop->mIsOnDragAndDrop)
     {
         mDragAndDrop->drop(mModel, mItemView);
         updateEncumbranceBar();
         return;
     }
-
-    const ItemStack& item = mSortModel->getItem(index);
 
     MWWorld::Ptr object = item.mBase;
     int count = item.mCount;

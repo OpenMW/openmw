@@ -189,7 +189,7 @@ namespace MWGui
 
         if (mTrading)
         {
-            // Can't give bound items to a merchant
+            // Can't give cojured items to a merchant
             if (item.mBase.getCellRef().getRefId().size() > 6 && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
             {
                 MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);

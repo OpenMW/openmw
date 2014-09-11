@@ -113,8 +113,7 @@ namespace MWGui
         std::string sound = mItem.mBase.getClass().getDownSoundId(mItem.mBase);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
-        // We can't drop a conjured item to the ground; the target container should always be the source container though if it's somehow not on your
-        // person and you're trying to take it, this would display the wrong message. (Dropping rather than taking).
+        // We can't drop a conjured item to the ground; the target container should always be the source container
         if (mItem.mBase.getCellRef().getRefId().size() > 6 && mItem.mBase.getCellRef().getRefId().substr(0,6) == "bound_" && targetModel != mSourceModel)
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
@@ -175,14 +174,21 @@ namespace MWGui
 
     void ContainerWindow::onItemSelected(int index)
     {
+        const ItemStack& item = mSortModel->getItem(index);
+
+        // We can't take a conjured item from a container (some NPC we're pickpocketing, a box, etc)
+        if (item.mBase.getCellRef().getRefId().size() > 6 && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage1}");
+            return;
+        }
+
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
             if (!dynamic_cast<PickpocketItemModel*>(mModel))
                 dropItem();
             return;
         }
-
-        const ItemStack& item = mSortModel->getItem(index);
 
         MWWorld::Ptr object = item.mBase;
         int count = item.mCount;
