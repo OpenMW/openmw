@@ -213,6 +213,11 @@ void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
     tool->addButton (":armor.png", Element_Pathgrid, ":armor.png", "Pathgrid");
 }
 
+CSMDoc::Document& CSVRender::WorldspaceWidget::getDocument()
+{
+    return mDocument;
+}
+
 void CSVRender::WorldspaceWidget::dragEnterEvent (QDragEnterEvent* event)
 {
     event->accept();

@@ -85,6 +85,8 @@ namespace CSVRender
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle *tool);
 
+            CSMDoc::Document& getDocument();
+
         private:
 
             void dragEnterEvent(QDragEnterEvent *event);

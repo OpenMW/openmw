@@ -98,10 +98,10 @@ bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld:
         return false;
 
     mCellId = data.begin()->getId();
+    mCell.reset (new Cell (getDocument().getData(), getSceneManager(), mCellId));
+
     update();
     emit cellChanged(*data.begin());
-
-    /// \todo replace mCell
 
     return true;
 }
