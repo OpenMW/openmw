@@ -343,6 +343,11 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
 
     if(mOutputSampleFormat != AV_SAMPLE_FMT_NONE)
     {
+// FIXME: debug output
+//#if 0
+        std::cout << "channel_layout: " + std::to_string((*mStream)->codec->channel_layout) << std::endl;
+        std::cout << "in_channels: " + std::to_string((*mStream)->codec->channels) << std::endl;
+//#endif
         mSwr = swr_alloc_set_opts(mSwr,                      // SwrContext
                           (*mStream)->codec->channel_layout, // output ch layout
                           mOutputSampleFormat,               // output sample format
@@ -357,11 +362,6 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
         if(swr_init(mSwr) < 0)
             fail(std::string("Couldn't initialize SwrContext"));
 
-// FIXME: debug output
-//#if 0
-        std::cout << "channel_layout: " + std::to_string((*mStream)->codec->channel_layout) << std::endl;
-        std::cout << "in_channels: " + std::to_string((*mStream)->codec->channels) << std::endl;
-//#endif
     }
 }
 
