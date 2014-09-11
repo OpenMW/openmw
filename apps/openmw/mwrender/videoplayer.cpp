@@ -53,68 +53,66 @@ extern "C"
     #endif
 
     // WARNING: avcodec versions up to 54.54.100 potentially crashes on Windows 64bit.
-}
 
-// From version 54.56 binkaudio encoding format changed from S16 to FLTP. See:
-// https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d
-// http://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
-extern "C" {
-#ifdef HAVE_LIBSWRESAMPLE
-#include <libswresample/swresample.h>
-#else
-/* nasty hack for systems without libswresample */
-#include <libavresample/avresample.h>
-#include <libavutil/opt.h>
+    // From version 54.56 binkaudio encoding format changed from S16 to FLTP. See:
+    // https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d
+    // http://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
+    #ifdef HAVE_LIBSWRESAMPLE
+    #include <libswresample/swresample.h>
+    #else
+    #include <libavresample/avresample.h>
+    #include <libavutil/opt.h>
+    /* FIXME: remove this section once libswresample is available on all platforms */
 
-int swr_convert(
-        AVAudioResampleContext *avr,
-        uint8_t** output,
-        int out_samples,
-        const uint8_t** input,
-        int in_samples)
-{
-    // FIXME: potential performance hit
-    int out_plane_size = 0;
-    int in_plane_size = 0;
-    return avresample_convert(avr, output, out_plane_size, out_samples,
-                              (uint8_t **)input, in_plane_size, in_samples);
-}
-
-AVAudioResampleContext * swr_alloc_set_opts(
-        AVAudioResampleContext *avr,
-        int64_t out_ch_layout,
-        AVSampleFormat out_fmt,
-        int out_rate,
-        int64_t in_ch_layout,
-        AVSampleFormat in_fmt,
-        int in_rate,
-        int o,
-        void* l)
-{
-    avr = avresample_alloc_context();
-    if(!avr)
-        return 0;
-
-    if ((av_opt_set_int(avr, "out_channel_layout", out_ch_layout, 0) < 0) ||
-        (av_opt_set_int(avr, "out_sample_fmt",     out_fmt,       0) < 0) ||
-        (av_opt_set_int(avr, "out_sample_rate",    out_rate,      0) < 0) ||
-        (av_opt_set_int(avr, "in_channel_layout",  in_ch_layout,  0) < 0) ||
-        (av_opt_set_int(avr, "in_sample_fmt",      in_fmt,        0) < 0) ||
-        (av_opt_set_int(avr, "in_sample_rate",     in_rate,       0) < 0))
+    int swr_convert(
+            AVAudioResampleContext *avr,
+            uint8_t** output,
+            int out_samples,
+            const uint8_t** input,
+            int in_samples)
     {
-        return 0;
+        // FIXME: potential performance hit
+        int out_plane_size = 0;
+        int in_plane_size = 0;
+        return avresample_convert(avr, output, out_plane_size, out_samples,
+                                  (uint8_t **)input, in_plane_size, in_samples);
     }
 
-    if(avresample_open(avr) < 0)
-        return 0;
-    else
-        return avr;
-}
+    AVAudioResampleContext * swr_alloc_set_opts(
+            AVAudioResampleContext *avr,
+            int64_t out_ch_layout,
+            AVSampleFormat out_fmt,
+            int out_rate,
+            int64_t in_ch_layout,
+            AVSampleFormat in_fmt,
+            int in_rate,
+            int o,
+            void* l)
+    {
+        avr = avresample_alloc_context();
+        if(!avr)
+            return 0;
 
-void  swr_free(AVAudioResampleContext **avr) { avresample_free(avr); }
-int  swr_init(AVAudioResampleContext *avr) { return 1; }
-#define SwrContext AVAudioResampleContext
-#endif
+        if ((av_opt_set_int(avr, "out_channel_layout", out_ch_layout, 0) < 0) ||
+            (av_opt_set_int(avr, "out_sample_fmt",     out_fmt,       0) < 0) ||
+            (av_opt_set_int(avr, "out_sample_rate",    out_rate,      0) < 0) ||
+            (av_opt_set_int(avr, "in_channel_layout",  in_ch_layout,  0) < 0) ||
+            (av_opt_set_int(avr, "in_sample_fmt",      in_fmt,        0) < 0) ||
+            (av_opt_set_int(avr, "in_sample_rate",     in_rate,       0) < 0))
+        {
+            return 0;
+        }
+
+        if(avresample_open(avr) < 0)
+            return 0;
+        else
+            return avr;
+    }
+
+    void  swr_free(AVAudioResampleContext **avr) { avresample_free(avr); }
+    int  swr_init(AVAudioResampleContext *avr) { return 1; }
+    #define SwrContext AVAudioResampleContext
+    #endif
 }
 
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
