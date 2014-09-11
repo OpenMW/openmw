@@ -78,6 +78,7 @@ option(BUILD_OPENCS "build OpenMW Construction Set" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock frameworks" OFF)
 option(BUILD_NIFTEST "build nif file tester" OFF)
+option(BUILD_MYGUI_PLUGIN "build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
 
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
@@ -103,32 +104,32 @@ cmake_minimum_required(VERSION 2.6)
 
 # source directory: libs
 
-set(LIBDIR ${CMAKE_SOURCE_DIR}/libs)
+set(LIBS_DIR ${CMAKE_SOURCE_DIR}/libs)
 
 set(OENGINE_OGRE
-  ${LIBDIR}/openengine/ogre/renderer.cpp
-  ${LIBDIR}/openengine/ogre/lights.cpp
-  ${LIBDIR}/openengine/ogre/selectionbuffer.cpp
-  ${LIBDIR}/openengine/ogre/imagerotate.cpp
+  ${LIBS_DIR}/openengine/ogre/renderer.cpp
+  ${LIBS_DIR}/openengine/ogre/lights.cpp
+  ${LIBS_DIR}/openengine/ogre/selectionbuffer.cpp
+  ${LIBS_DIR}/openengine/ogre/imagerotate.cpp
 )
 
 set(OENGINE_GUI
-  ${LIBDIR}/openengine/gui/loglistener.cpp
-  ${LIBDIR}/openengine/gui/manager.cpp
-  ${LIBDIR}/openengine/gui/layout.hpp
+  ${LIBS_DIR}/openengine/gui/loglistener.cpp
+  ${LIBS_DIR}/openengine/gui/manager.cpp
+  ${LIBS_DIR}/openengine/gui/layout.hpp
 )
 
 set(OENGINE_BULLET
-    ${LIBDIR}/openengine/bullet/BtOgre.cpp
-    ${LIBDIR}/openengine/bullet/BtOgreExtras.h
-    ${LIBDIR}/openengine/bullet/BtOgreGP.h
-    ${LIBDIR}/openengine/bullet/BtOgrePG.h
-    ${LIBDIR}/openengine/bullet/physic.cpp
-    ${LIBDIR}/openengine/bullet/physic.hpp
-    ${LIBDIR}/openengine/bullet/BulletShapeLoader.cpp
-    ${LIBDIR}/openengine/bullet/BulletShapeLoader.h
-    ${LIBDIR}/openengine/bullet/trace.cpp
-    ${LIBDIR}/openengine/bullet/trace.h
+    ${LIBS_DIR}/openengine/bullet/BtOgre.cpp
+    ${LIBS_DIR}/openengine/bullet/BtOgreExtras.h
+    ${LIBS_DIR}/openengine/bullet/BtOgreGP.h
+    ${LIBS_DIR}/openengine/bullet/BtOgrePG.h
+    ${LIBS_DIR}/openengine/bullet/physic.cpp
+    ${LIBS_DIR}/openengine/bullet/physic.hpp
+    ${LIBS_DIR}/openengine/bullet/BulletShapeLoader.cpp
+    ${LIBS_DIR}/openengine/bullet/BulletShapeLoader.h
+    ${LIBS_DIR}/openengine/bullet/trace.cpp
+    ${LIBS_DIR}/openengine/bullet/trace.h
 
 )
 
@@ -261,7 +262,7 @@ include_directories("."
     ${MYGUI_INCLUDE_DIRS}
     ${MYGUI_PLATFORM_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
-    ${LIBDIR}
+    ${LIBS_DIR}
 )
 
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
@@ -333,8 +334,10 @@ add_subdirectory(files/mygui)
 
 if (APPLE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${APP_BUNDLE_DIR}/Contents/MacOS")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${APP_BUNDLE_DIR}/Contents/MacOS")
 else (APPLE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
 endif (APPLE)
 
 # Other files
@@ -379,6 +382,7 @@ IF(NOT WIN32 AND NOT APPLE)
     # Linux building
     # Paths
     SET(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
+    SET(LIBDIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Where to install libraries")
     SET(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
     SET(DATADIR "${DATAROOTDIR}/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
     SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
@@ -405,6 +409,9 @@ IF(NOT WIN32 AND NOT APPLE)
     IF(BUILD_NIFTEST)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/niftest" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_NIFTEST)
+    if(BUILD_MYGUI_PLUGIN)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Plugin_MyGUI_OpenMW_Resources.so" DESTINATION "${LIBDIR}" )
+    ENDIF(BUILD_MYGUI_PLUGIN)
 
     # Install licenses
     INSTALL(FILES "docs/license/DejaVu Font License.txt" DESTINATION "${LICDIR}" )
@@ -454,6 +461,9 @@ if(WIN32)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/opencs.exe" DESTINATION ".")
         INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION ".")
     ENDIF(BUILD_OPENCS)
+    if(BUILD_MYGUI_PLUGIN)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/Plugin_MyGUI_OpenMW_Resources.dll" DESTINATION ".")
+    ENDIF(BUILD_MYGUI_PLUGIN)
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
@@ -520,6 +530,10 @@ add_subdirectory (extern/sdl4ogre)
 
 # Components
 add_subdirectory (components)
+
+if (BUILD_MYGUI_PLUGIN)
+    add_subdirectory(libs/mygui_resource_plugin)
+endif()
 
 #Testing
 if (BUILD_NIFTEST)
