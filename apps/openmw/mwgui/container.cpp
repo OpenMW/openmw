@@ -113,6 +113,14 @@ namespace MWGui
         std::string sound = mItem.mBase.getClass().getDownSoundId(mItem.mBase);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
+        // We can't drop a conjured item to the ground; the target container should always be the source container though if it's somehow not on your
+        // person and you're trying to take it, this would display the wrong message. (Dropping rather than taking).
+        if (mItem.mBase.getCellRef().getRefId().size() > 6 && mItem.mBase.getCellRef().getRefId().substr(0,6) == "bound_" && targetModel != mSourceModel)
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
+            return;
+        }
+
         // If item is dropped where it was taken from, we don't need to do anything -
         // otherwise, do the transfer
         if (targetModel != mSourceModel)

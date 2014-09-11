@@ -183,21 +183,20 @@ namespace MWGui
         MWWorld::Ptr object = item.mBase;
         int count = item.mCount;
 
-        // Bound items may not be moved
-        if (item.mBase.getCellRef().getRefId().size() > 6
-                && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
-        {
-            MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
-            return;
-        }
-
         bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
         if (MyGUI::InputManager::getInstance().isControlPressed())
             count = 1;
 
         if (mTrading)
         {
+            // Can't give bound items to a merchant
+            if (item.mBase.getCellRef().getRefId().size() > 6 && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
+            {
+                MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog9}");
+                return;
+            }
+
             // check if merchant accepts item
             int services = MWBase::Environment::get().getWindowManager()->getTradeWindow()->getMerchantServices();
             if (!object.getClass().canSell(object, services))
