@@ -240,14 +240,14 @@ void CSVRender::PagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::
     }
 }
 
-CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::dropType type) const
+CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::DropType type) const
 {
     switch (type)
     {
-        case cellsExterior:
+        case Type_CellsExterior:
             return canHandle;
 
-        case cellsInterior:
+        case Type_CellsInterior:
             return needUnpaged;
 
         default:

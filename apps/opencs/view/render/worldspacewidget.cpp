@@ -162,54 +162,26 @@ CSVWidget::SceneToolRun *CSVRender::WorldspaceWidget::makeRunTool (
     return mRun;
 }
 
-CSVRender::WorldspaceWidget::dropType CSVRender::WorldspaceWidget::getDropType (
+CSVRender::WorldspaceWidget::DropType CSVRender::WorldspaceWidget::getDropType (
     const std::vector< CSMWorld::UniversalId >& data)
 {
-    dropType output = notCells;
-    bool firstIteration = true;
+    DropType output = Type_Other;
 
-    for (unsigned i = 0; i < data.size(); ++i)
+    for (std::vector<CSMWorld::UniversalId>::const_iterator iter (data.begin());
+        iter!=data.end(); ++iter)
     {
-        if (data[i].getType() == CSMWorld::UniversalId::Type_Cell ||
-                data[i].getType() == CSMWorld::UniversalId::Type_Cell_Missing)
+        DropType type = Type_Other;
+
+        if (iter->getType()==CSMWorld::UniversalId::Type_Cell ||
+            iter->getType()==CSMWorld::UniversalId::Type_Cell_Missing)
         {
-            if (*(data[i].getId().begin()) == '#') //exterior
-            {
-                if (firstIteration)
-                {
-                    output = cellsExterior;
-                    firstIteration = false;
-                    continue;
-                }
-
-                if (output == cellsInterior)
-                {
-                    output = cellsMixed;
-                    break;
-                } else {
-                    output = cellsInterior;
-                }
-            } else //interior
-            {
-                if (firstIteration)
-                {
-                    output = cellsInterior;
-                    firstIteration = false;
-                    continue;
-                }
-
-                if (output == cellsExterior)
-                {
-                    output = cellsMixed;
-                    break;
-                } else {
-                    output = cellsInterior;
-                }
-            }
-        } else {
-            output = notCells;
-            break;
+            type = iter->getId().substr (0, 1)=="#" ? Type_CellsExterior : Type_CellsInterior;
         }
+
+        if (iter==data.begin())
+            output = type;
+        else if  (output!=type) // mixed types -> ignore
+            return Type_Other;
     }
 
     return output;

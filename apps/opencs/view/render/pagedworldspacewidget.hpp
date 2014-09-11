@@ -59,7 +59,7 @@ namespace CSVRender
 
             virtual void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
 
-            virtual dropRequirments getDropRequirements(dropType type) const;
+            virtual dropRequirments getDropRequirements(DropType type) const;
 
             /// \attention The created tool is not added to the toolbar (via addTool). Doing
             /// that is the responsibility of the calling function.

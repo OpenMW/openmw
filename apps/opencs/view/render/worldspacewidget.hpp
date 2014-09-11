@@ -36,12 +36,11 @@ namespace CSVRender
 
         public:
 
-            enum dropType
+            enum DropType
             {
-                cellsMixed,
-                cellsInterior,
-                cellsExterior,
-                notCells
+                Type_CellsInterior,
+                Type_CellsExterior,
+                Type_Other
             };
 
             enum dropRequirments
@@ -69,9 +68,9 @@ namespace CSVRender
 
             void selectDefaultNavigationMode();
 
-            static dropType getDropType(const std::vector<CSMWorld::UniversalId>& data);
+            static DropType getDropType(const std::vector<CSMWorld::UniversalId>& data);
 
-            virtual dropRequirments getDropRequirements(dropType type) const = 0;
+            virtual dropRequirments getDropRequirements(DropType type) const = 0;
 
             virtual void useViewHint (const std::string& hint);
             ///< Default-implementation: ignored.

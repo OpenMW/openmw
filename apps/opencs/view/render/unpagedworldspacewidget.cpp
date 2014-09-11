@@ -166,14 +166,14 @@ std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()
     return stream.str();
 }
 
-CSVRender::WorldspaceWidget::dropRequirments CSVRender::UnpagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::dropType type) const
+CSVRender::WorldspaceWidget::dropRequirments CSVRender::UnpagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::DropType type) const
 {
     switch(type)
     {
-        case cellsInterior:
+        case Type_CellsInterior:
             return canHandle;
 
-        case cellsExterior:
+        case Type_CellsExterior:
             return needPaged;
 
         default:
