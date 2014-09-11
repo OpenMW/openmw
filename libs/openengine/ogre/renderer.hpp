@@ -108,7 +108,7 @@ namespace OEngine
             void update(float dt);
 
             /// Write a screenshot to file
-            void screenshot(const std::string &file);
+            void screenshot(const std::string &file, const std::string& imageFormat);
 
             float getFPS();
 

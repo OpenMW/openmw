@@ -498,7 +498,14 @@ namespace MWInput
 
     void InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
+        // HACK: to make Morrowind's default keybinding for the console work without printing an extra "^" upon closing
+        // This assumes that SDL_TextInput events always come *after* the key event
+        // (which is somewhat reasonable, and hopefully true for all SDL platforms)
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
+        if (mInputBinder->getKeyBinding(mInputBinder->getControl(A_Console), ICS::Control::INCREASE)
+                == arg.keysym.sym
+                && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Console)
+            SDL_StopTextInput();
 
         bool consumed = false;
         if (kc != OIS::KC_UNASSIGNED)
@@ -873,7 +880,7 @@ namespace MWInput
         defaultKeyBindings[A_ToggleWeapon] = SDL_GetKeyFromScancode(SDL_SCANCODE_F);
         defaultKeyBindings[A_ToggleSpell] = SDL_GetKeyFromScancode(SDL_SCANCODE_R);
         defaultKeyBindings[A_QuickKeysMenu] = SDL_GetKeyFromScancode(SDL_SCANCODE_F1);
-        defaultKeyBindings[A_Console] = SDL_GetKeyFromScancode(SDL_SCANCODE_F2);
+        defaultKeyBindings[A_Console] = SDL_GetKeyFromScancode(SDL_SCANCODE_GRAVE);
         defaultKeyBindings[A_Run] = SDL_GetKeyFromScancode(SDL_SCANCODE_LSHIFT);
         defaultKeyBindings[A_Sneak] = SDL_GetKeyFromScancode(SDL_SCANCODE_LCTRL);
         defaultKeyBindings[A_AutoMove] = SDL_GetKeyFromScancode(SDL_SCANCODE_Q);
@@ -894,7 +901,7 @@ namespace MWInput
         defaultKeyBindings[A_QuickKey10] = SDL_GetKeyFromScancode(SDL_SCANCODE_0);
         defaultKeyBindings[A_Screenshot] = SDL_GetKeyFromScancode(SDL_SCANCODE_F12);
         defaultKeyBindings[A_ToggleHUD] = SDL_GetKeyFromScancode(SDL_SCANCODE_F11);
-        defaultKeyBindings[A_AlwaysRun] = SDL_GetKeyFromScancode(SDL_SCANCODE_Y);
+        defaultKeyBindings[A_AlwaysRun] = SDL_GetKeyFromScancode(SDL_SCANCODE_CAPSLOCK);
         defaultKeyBindings[A_QuickSave] = SDL_GetKeyFromScancode(SDL_SCANCODE_F5);
         defaultKeyBindings[A_QuickLoad] = SDL_GetKeyFromScancode(SDL_SCANCODE_F9);
 

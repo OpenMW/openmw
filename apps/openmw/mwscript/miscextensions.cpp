@@ -148,7 +148,7 @@ namespace MWScript
 
                     // Instantly reset door to closed state
                     // This is done when using Lock in scripts, but not when using Lock spells.
-                    if (ptr.getTypeName() == typeid(ESM::Door).name())
+                    if (ptr.getTypeName() == typeid(ESM::Door).name() && !ptr.getCellRef().getTeleport())
                     {
                         MWBase::Environment::get().getWorld()->activateDoor(ptr, 0);
                         MWBase::Environment::get().getWorld()->localRotateObject(ptr, 0, 0, 0);
@@ -871,7 +871,6 @@ namespace MWScript
             {
                 MWBase::World* world = MWBase::Environment::get().getWorld();
                 world->goToJail();
-                MWBase::Environment::get().getWorld()->getPlayer().recordCrimeId();
             }
         };
 

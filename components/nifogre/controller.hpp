@@ -89,6 +89,9 @@ namespace NifOgre
         {
             if(mDeltaInput)
             {
+                if (mStopTime - mStartTime == 0.f)
+                    return 0.f;
+
                 mDeltaCount += value*mFrequency;
                 if(mDeltaCount < mStartTime)
                     mDeltaCount = mStopTime - std::fmod(mStartTime - mDeltaCount,

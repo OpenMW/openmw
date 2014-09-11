@@ -44,7 +44,7 @@ void OgreRenderer::update(float dt)
 {
 }
 
-void OgreRenderer::screenshot(const std::string &file)
+void OgreRenderer::screenshot(const std::string &file, const std::string& imageFormat)
 {
     /*  Since Ogre uses narrow character interfaces, it does not support
         Unicode paths on Windows. Therefore we had to implement screenshot
@@ -65,7 +65,7 @@ void OgreRenderer::screenshot(const std::string &file)
     );
     mWindow->copyContentsToMemory(image.getPixelBox());
 
-    Ogre::DataStreamPtr stream = image.encode("png");
+    Ogre::DataStreamPtr stream = image.encode(imageFormat);
     Ogre::MemoryDataStream *mem = dynamic_cast<Ogre::MemoryDataStream *>(stream.get());
     if (mem != 0) { // likely
         const char *ptr = reinterpret_cast<char *>(mem->getCurrentPtr());

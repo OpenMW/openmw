@@ -1120,7 +1120,11 @@ namespace MWMechanics
                 {
                     updateActor(iter->first, duration);
 
-                    if (MWBase::Environment::get().getMechanicsManager()->isAIActive())
+                    // AI processing is only done within distance of 7168 units to the player. Note the "AI distance" slider doesn't affect this
+                    // (it only does some throttling for targets beyond the "AI distance", so doesn't give any guarantees as to whether AI will be enabled or not)
+                    if (MWBase::Environment::get().getMechanicsManager()->isAIActive() &&
+                            Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(iter->first.getRefData().getPosition().pos))
+                                    <= 7168*7168)
                     {
                         if (timerUpdateAITargets == 0)
                         {

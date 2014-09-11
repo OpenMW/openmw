@@ -74,7 +74,7 @@ namespace MWClass
         if(!model.empty())
             physics.addObject(ptr,ref->mBase->mData.mFlags & ESM::Light::Carry);
 
-        if (!ref->mBase->mSound.empty())
+        if (!ref->mBase->mSound.empty() && !(ref->mBase->mData.mFlags & ESM::Light::OffDefault))
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0,
                                                                       MWBase::SoundManager::Play_TypeSfx,
                                                                       MWBase::SoundManager::Play_Loop);

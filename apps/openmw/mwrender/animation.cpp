@@ -873,10 +873,13 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
             mStates[groupname] = state;
 
             NifOgre::TextKeyMap::const_iterator textkey(textkeys.lower_bound(state.mTime));
-            while(textkey != textkeys.end() && textkey->first <= state.mTime)
+            if (state.mPlaying)
             {
-                handleTextKey(state, groupname, textkey, textkeys);
-                ++textkey;
+                while(textkey != textkeys.end() && textkey->first <= state.mTime)
+                {
+                    handleTextKey(state, groupname, textkey, textkeys);
+                    ++textkey;
+                }
             }
 
             if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
@@ -887,7 +890,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
                 if(state.mTime >= state.mLoopStopTime)
                     break;
 
-                textkey = textkeys.lower_bound(state.mTime);
+                NifOgre::TextKeyMap::const_iterator textkey(textkeys.lower_bound(state.mTime));
                 while(textkey != textkeys.end() && textkey->first <= state.mTime)
                 {
                     handleTextKey(state, groupname, textkey, textkeys);

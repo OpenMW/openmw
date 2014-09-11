@@ -22,6 +22,7 @@
 #include "tradeitemmodel.hpp"
 #include "countdialog.hpp"
 #include "dialogue.hpp"
+#include "controllers.hpp"
 
 namespace
 {
@@ -44,8 +45,6 @@ namespace MWGui
     TradeWindow::TradeWindow()
         : WindowBase("openmw_trade_window.layout")
         , mCurrentBalance(0)
-        , mBalanceButtonsState(BBS_None)
-        , mBalanceChangePause(0.0)
         , mItemToSell(-1)
         , mTradeModel(NULL)
         , mSortModel(NULL)
@@ -240,21 +239,6 @@ namespace MWGui
         }
     }
 
-    void TradeWindow::onFrame(float frameDuration)
-    {
-        if (!mMainWidget->getVisible() || mBalanceButtonsState == BBS_None)
-            return;
-
-        mBalanceChangePause -= frameDuration;
-        if (mBalanceChangePause < 0.0) {
-            mBalanceChangePause += sBalanceChangeInterval;
-            if (mBalanceButtonsState == BBS_Increase)
-                onIncreaseButtonTriggered();
-            else if (mBalanceButtonsState == BBS_Decrease)
-                onDecreaseButtonTriggered();
-        }
-    }
-
     void TradeWindow::onOfferButtonClicked(MyGUI::Widget* _sender)
     {
         TradeItemModel* playerItemModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
@@ -407,23 +391,38 @@ namespace MWGui
         updateLabels();
     }
 
+    void TradeWindow::addRepeatController(MyGUI::Widget *widget)
+    {
+        MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(Controllers::ControllerRepeatClick::getClassTypeName());
+        Controllers::ControllerRepeatClick* controller = item->castType<Controllers::ControllerRepeatClick>();
+        controller->eventRepeatClick += MyGUI::newDelegate(this, &TradeWindow::onRepeatClick);
+        controller->setRepeat(sBalanceChangeInitialPause, sBalanceChangeInterval);
+        MyGUI::ControllerManager::getInstance().addItem(widget, controller);
+    }
+
     void TradeWindow::onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
     {
-        mBalanceButtonsState = BBS_Increase;
-        mBalanceChangePause = sBalanceChangeInitialPause;
+        addRepeatController(_sender);
         onIncreaseButtonTriggered();
     }
 
     void TradeWindow::onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
     {
-        mBalanceButtonsState = BBS_Decrease;
-        mBalanceChangePause = sBalanceChangeInitialPause;
+        addRepeatController(_sender);
         onDecreaseButtonTriggered();
+    }
+
+    void TradeWindow::onRepeatClick(MyGUI::Widget* widget, MyGUI::ControllerItem* controller)
+    {
+        if (widget == mIncreaseButton)
+            onIncreaseButtonTriggered();
+        else if (widget == mDecreaseButton)
+            onDecreaseButtonTriggered();
     }
 
     void TradeWindow::onBalanceButtonReleased(MyGUI::Widget *_sender, int _left, int _top, MyGUI::MouseButton _id)
     {
-        mBalanceButtonsState = BBS_None;
+        MyGUI::ControllerManager::getInstance().removeItem(_sender);
     }
 
     void TradeWindow::onBalanceEdited(MyGUI::EditBox *_sender)
@@ -436,6 +435,10 @@ namespace MWGui
         }
         catch (std::bad_cast&)
         {
+            if (_sender->getCaption().empty())
+                mTotalBalance->setCaption("0");
+            else
+                mTotalBalance->setCaption(boost::lexical_cast<std::string>(std::abs(mCurrentBalance)));
         }
     }
 
@@ -460,16 +463,19 @@ namespace MWGui
 
         mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + boost::lexical_cast<std::string>(playerGold));
 
+        std::string balanceCaption;
         if (mCurrentBalance > 0)
         {
             mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalSold}");
-            mTotalBalance->setCaption(boost::lexical_cast<std::string>(mCurrentBalance));
+            balanceCaption = boost::lexical_cast<std::string>(mCurrentBalance);
         }
         else
         {
             mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalCost}");
-            mTotalBalance->setCaption(boost::lexical_cast<std::string>(-mCurrentBalance));
+            balanceCaption = boost::lexical_cast<std::string>(-mCurrentBalance);
         }
+        if (balanceCaption != mTotalBalance->getCaption().asUTF8()) // Don't reset text cursor if text doesn't need to be changed
+            mTotalBalance->setCaption(balanceCaption);
 
         mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + boost::lexical_cast<std::string>(getMerchantGold()));
     }

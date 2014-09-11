@@ -434,7 +434,8 @@ namespace MWMechanics
             
             if (mSaidGreeting == Greet_None)
             {
-                if ((playerDistSqr <= helloDistance*helloDistance) && MWBase::Environment::get().getWorld()->getLOS(player, actor)
+                if ((playerDistSqr <= helloDistance*helloDistance) &&
+                        !player.getClass().getCreatureStats(player).isDead() && MWBase::Environment::get().getWorld()->getLOS(player, actor)
                     && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
                     mGreetingTimer++;
                 

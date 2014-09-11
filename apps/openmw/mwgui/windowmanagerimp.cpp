@@ -848,7 +848,6 @@ namespace MWGui
         mHud->onFrame(frameDuration);
 
         mTrainingWindow->onFrame (frameDuration);
-        mTradeWindow->onFrame(frameDuration);
 
         mTrainingWindow->checkReferenceAvailable();
         mDialogueWindow->checkReferenceAvailable();

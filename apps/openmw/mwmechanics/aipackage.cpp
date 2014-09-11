@@ -97,7 +97,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
             MWWorld::Ptr door = getNearbyDoor(actor);
             if(door != MWWorld::Ptr()) // NOTE: checks interior cells only
             {
-                if(door.getCellRef().getTrap().empty() && door.getClass().getDoorState(door) == 0) { //Open the door if untrapped
+                if(!door.getCellRef().getTeleport() && door.getCellRef().getTrap().empty() && door.getClass().getDoorState(door) == 0) { //Open the door if untrapped
                     MWBase::Environment::get().getWorld()->activateDoor(door, 1);
                 }
             }

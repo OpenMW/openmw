@@ -259,10 +259,6 @@ namespace MWWorld
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
-        // CellChanged events should not trigger when crossing exterior cell borders
-        // TODO: check worldspace
-        bool cellChanged = !mCurrentCell || !mCurrentCell->isExterior();
-
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
 
@@ -362,7 +358,7 @@ namespace MWWorld
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();
 
-        mCellChanged = cellChanged;
+        mCellChanged = true;
     }
 
     //We need the ogre renderer and a scene node.

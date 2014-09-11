@@ -149,7 +149,7 @@ namespace MWWorld
       mActivationDistanceOverride (activationDistanceOverride),
       mFallback(fallbackMap), mTeleportEnabled(true), mLevitationEnabled(true),
       mGodMode(false), mContentFiles (contentFiles),
-      mGoToJail(false),
+      mGoToJail(false), mDaysInPrison(0),
       mStartCell (startCell), mStartupScript(startupScript)
     {
         mPhysics = new PhysicsSystem(renderer);
@@ -259,7 +259,8 @@ namespace MWWorld
         mWeatherManager = 0;
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
-        MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);
+        if (!mStartupScript.empty())
+            MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);
     }
 
     void World::clear()
@@ -2798,8 +2799,19 @@ namespace MWWorld
     {
         if (!mGoToJail)
         {
-            // Save for next update, since the player should be able to read the dialog text first
+            // Reset bounty and forget the crime now, but don't change cell yet (the player should be able to read the dialog text first)
             mGoToJail = true;
+
+            MWWorld::Ptr player = getPlayerPtr();
+
+            int bounty = player.getClass().getNpcStats(player).getBounty();
+            player.getClass().getNpcStats(player).setBounty(0);
+            mPlayer->recordCrimeId();
+            confiscateStolenItems(player);
+
+            int iDaysinPrisonMod = getStore().get<ESM::GameSetting>().find("iDaysinPrisonMod")->getInt();
+            mDaysInPrison = std::max(1, bounty / iDaysinPrisonMod);
+
             return;
         }
         else
@@ -2810,13 +2822,8 @@ namespace MWWorld
 
             MWWorld::Ptr player = getPlayerPtr();
             teleportToClosestMarker(player, "prisonmarker");
-            int bounty = player.getClass().getNpcStats(player).getBounty();
-            player.getClass().getNpcStats(player).setBounty(0);
-            confiscateStolenItems(player);
 
-            int iDaysinPrisonMod = getStore().get<ESM::GameSetting>().find("iDaysinPrisonMod")->getInt();
-            int days = std::max(1, bounty / iDaysinPrisonMod);
-
+            int days = mDaysInPrison;
             advanceTime(days * 24);
             for (int i=0; i<days*24; ++i)
                 MWBase::Environment::get().getMechanicsManager ()->rest (true);

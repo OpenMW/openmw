@@ -509,7 +509,7 @@ void OMW::Engine::screenshot()
     int shotCount = 0;
 
     const std::string& screenshotPath = mCfgMgr.getUserDataPath().string();
-
+    std::string format = Settings::Manager::getString("screenshot format", "General");
     // Find the first unused filename with a do-while
     std::ostringstream stream;
     do
@@ -518,11 +518,11 @@ void OMW::Engine::screenshot()
         stream.str("");
         stream.clear();
 
-        stream << screenshotPath << "screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << ".png";
+        stream << screenshotPath << "screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << "." << format;
 
     } while (boost::filesystem::exists(stream.str()));
 
-    mOgre->screenshot(stream.str());
+    mOgre->screenshot(stream.str(), format);
 }
 
 void OMW::Engine::setCompileAll (bool all)
