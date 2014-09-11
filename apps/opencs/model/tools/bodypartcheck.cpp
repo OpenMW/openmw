@@ -27,16 +27,13 @@ void CSMTools::BodyPartCheckStage::perform ( int stage, Messages &messages )
 
     // Check BYDT
 
-    if ( bodyPart.mData.mPart < 0 || bodyPart.mData.mPart > 14 )
+    if (bodyPart.mData.mPart > 14 )
         messages.push_back(std::make_pair( id, bodyPart.mId + " has out of range part value." ));
 
-    if ( bodyPart.mData.mVampire < 0 )
-        messages.push_back(std::make_pair( id, bodyPart.mId + " has negative vampire flag." ));
-
-    if ( bodyPart.mData.mFlags < 0 || bodyPart.mData.mFlags > 3 )
+    if (bodyPart.mData.mFlags > 3 )
         messages.push_back(std::make_pair( id, bodyPart.mId + " has out of range flags value." ));
 
-    if ( bodyPart.mData.mType < 0 || bodyPart.mData.mType > 2 )
+    if (bodyPart.mData.mType > 2 )
         messages.push_back(std::make_pair( id, bodyPart.mId + " has out of range type value." ));
 
     // Check MODL
