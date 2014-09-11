@@ -324,6 +324,9 @@ namespace MWClass
 
     void Door::setDoorState (const MWWorld::Ptr &ptr, int state) const
     {
+        if (ptr.getCellRef().getTeleport())
+            throw std::runtime_error("load doors can't be moved");
+
         ensureCustomData(ptr);
         DoorCustomData& customData = dynamic_cast<DoorCustomData&>(*ptr.getRefData().getCustomData());
         customData.mDoorState = state;

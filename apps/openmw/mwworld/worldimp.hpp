@@ -477,6 +477,7 @@ namespace MWWorld
 
             /// update movement state of a non-teleport door as specified
             /// @param state see MWClass::setDoorState
+            /// @note throws an exception when invoked on a teleport door
             virtual void activateDoor(const MWWorld::Ptr& door, int state);
 
             virtual bool getPlayerStandingOn (const MWWorld::Ptr& object); ///< @return true if the player is standing on \a object
