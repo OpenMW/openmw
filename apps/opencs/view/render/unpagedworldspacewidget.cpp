@@ -89,13 +89,21 @@ void CSVRender::UnpagedWorldspaceWidget::cellRowsAboutToBeRemoved (const QModelI
         emit closeRequest();
 }
 
-void CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::UniversalId >& data)
+bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld::UniversalId>& data, DropType type)
 {
+    if (WorldspaceWidget::handleDrop (data, type))
+        return true;
+
+    if (type!=Type_CellsInterior)
+        return false;
+
     mCellId = data.begin()->getId();
     update();
     emit cellChanged(*data.begin());
 
     /// \todo replace mCell
+
+    return true;
 }
 
 void CSVRender::UnpagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
@@ -168,6 +176,11 @@ std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()
 
 CSVRender::WorldspaceWidget::dropRequirments CSVRender::UnpagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::DropType type) const
 {
+    dropRequirments requirements = WorldspaceWidget::getDropRequirements (type);
+
+    if (requirements!=ignored)
+        return requirements;
+
     switch(type)
     {
         case Type_CellsInterior:

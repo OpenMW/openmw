@@ -70,12 +70,14 @@ namespace CSVRender
 
             static DropType getDropType(const std::vector<CSMWorld::UniversalId>& data);
 
-            virtual dropRequirments getDropRequirements(DropType type) const = 0;
+            virtual dropRequirments getDropRequirements(DropType type) const;
 
             virtual void useViewHint (const std::string& hint);
             ///< Default-implementation: ignored.
 
-            virtual void handleDrop(const std::vector<CSMWorld::UniversalId>& data) = 0;
+            /// \return Drop handled?
+            virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
+                DropType type);
 
             virtual unsigned int getElementMask() const;
 

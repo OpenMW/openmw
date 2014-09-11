@@ -220,8 +220,15 @@ std::pair< int, int > CSVRender::PagedWorldspaceWidget::getCoordinatesFromId (co
     return std::make_pair(x, y);
 }
 
-void CSVRender::PagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::UniversalId >& data)
+bool CSVRender::PagedWorldspaceWidget::handleDrop (
+    const std::vector< CSMWorld::UniversalId >& data, DropType type)
 {
+    if (WorldspaceWidget::handleDrop (data, type))
+        return true;
+
+    if (type!=Type_CellsExterior)
+        return false;
+
     bool selectionChanged = false;
     for (unsigned i = 0; i < data.size(); ++i)
     {
@@ -238,10 +245,17 @@ void CSVRender::PagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::
 
         emit cellSelectionChanged(mSelection);
     }
+
+    return true;
 }
 
 CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::DropType type) const
 {
+    dropRequirments requirements = WorldspaceWidget::getDropRequirements (type);
+
+    if (requirements!=ignored)
+        return requirements;
+
     switch (type)
     {
         case Type_CellsExterior:

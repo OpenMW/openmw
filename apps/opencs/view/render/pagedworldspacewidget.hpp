@@ -57,7 +57,9 @@ namespace CSVRender
 
             void setCellSelection (const CSMWorld::CellSelection& selection);
 
-            virtual void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
+            /// \return Drop handled?
+            virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
+                DropType type);
 
             virtual dropRequirments getDropRequirements(DropType type) const;
 

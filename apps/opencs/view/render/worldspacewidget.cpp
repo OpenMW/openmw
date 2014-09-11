@@ -187,6 +187,18 @@ CSVRender::WorldspaceWidget::DropType CSVRender::WorldspaceWidget::getDropType (
     return output;
 }
 
+CSVRender::WorldspaceWidget::dropRequirments
+    CSVRender::WorldspaceWidget::getDropRequirements (DropType type) const
+{
+    return ignored;
+}
+
+bool CSVRender::WorldspaceWidget::handleDrop (const std::vector<CSMWorld::UniversalId>& data,
+    DropType type)
+{
+    return false;
+}
+
 unsigned int CSVRender::WorldspaceWidget::getElementMask() const
 {
     return mSceneElements->getSelection();
