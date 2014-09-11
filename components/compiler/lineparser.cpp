@@ -307,7 +307,7 @@ namespace Compiler
 
                         std::vector<Interpreter::Type_Code> code;
                         optionals = mExprParser.parseArguments (argumentType, scanner, code);
-                        mCode.insert (mCode.begin(), code.begin(), code.end());
+                        mCode.insert (mCode.end(), code.begin(), code.end());
                         extensions->generateInstructionCode (keyword, mCode, mLiterals,
                             mExplicit, optionals);
                     }
