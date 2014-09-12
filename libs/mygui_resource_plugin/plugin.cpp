@@ -25,39 +25,6 @@ namespace MyGUIPlugin
         MYGUI_RTTI_DERIVED(MWScrollBar)
     };
 
-    // Dummy - not properly supportable without bringing in the whole ESM store
-    class MWSkill : public MyGUI::Widget
-    {
-        MYGUI_RTTI_DERIVED( MWSkill )
-    };
-    class MWAttribute : public MyGUI::Widget
-    {
-        MYGUI_RTTI_DERIVED( MWAttribute )
-    };
-    class MWSpell : public MyGUI::Widget
-    {
-        MYGUI_RTTI_DERIVED( MWSpell )
-    };
-    class MWEffectList : public MyGUI::Widget
-    {
-        MYGUI_RTTI_DERIVED( MWEffectList )
-    };
-    class MWSpellEffect : public MyGUI::Widget
-    {
-        MYGUI_RTTI_DERIVED( MWSpellEffect )
-    };
-    class MWDynamicStat : public MyGUI::Widget
-    {
-        MYGUI_RTTI_DERIVED( MWDynamicStat )
-    };
-
-    // Dummy - runtime use only
-    class ExposedWindow : public MyGUI::Window
-    {
-        MYGUI_RTTI_DERIVED( ExposedWindow )
-    };
-
-
     const std::string& ResourcePlugin::getName() const
     {
         static const std::string name = "OpenMW resource plugin";
