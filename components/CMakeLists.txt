@@ -92,7 +92,7 @@ add_component_dir (ogreinit
     )
 
 add_component_dir (widgets
-    box
+    box imagebutton
     )
 
 add_component_dir (fontloader

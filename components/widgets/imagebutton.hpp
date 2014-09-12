@@ -3,7 +3,7 @@
 
 #include <MyGUI_ImageBox.h>
 
-namespace MWGui
+namespace Gui
 {
 
     /**

@@ -15,9 +15,10 @@
 #include <boost/function.hpp>
 #include "boost/lexical_cast.hpp"
 
+#include <components/widgets/imagebutton.hpp>
+
 #include "bookpage.hpp"
 #include "windowbase.hpp"
-#include "imagebutton.hpp"
 #include "journalviewmodel.hpp"
 #include "journalbooks.hpp"
 #include "list.hpp"
@@ -82,7 +83,7 @@ namespace
 
         void adviseButtonClick (char const * name, void (JournalWindowImpl::*Handler) (MyGUI::Widget* _sender))
         {
-            getWidget <MWGui::ImageButton> (name) ->
+            getWidget <Gui::ImageButton> (name) ->
                 eventMouseButtonClick += newDelegate(this, Handler);
         }
 
@@ -146,12 +147,12 @@ namespace
             adjustButton(ShowActiveBTN, true);
             adjustButton(JournalBTN);
 
-            MWGui::ImageButton* optionsButton = getWidget<MWGui::ImageButton>(OptionsBTN);
+            Gui::ImageButton* optionsButton = getWidget<Gui::ImageButton>(OptionsBTN);
             if (optionsButton->getWidth() == 0)
             {
                 // If tribunal is not installed (-> no options button), we still want the Topics button available,
                 // so place it where the options button would have been
-                MWGui::ImageButton* topicsButton = getWidget<MWGui::ImageButton>(TopicsBTN);
+                Gui::ImageButton* topicsButton = getWidget<Gui::ImageButton>(TopicsBTN);
                 topicsButton->detachFromWidget();
                 topicsButton->attachToWidget(optionsButton->getParent());
                 topicsButton->setPosition(optionsButton->getPosition());
@@ -159,7 +160,7 @@ namespace
                 topicsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &JournalWindowImpl::notifyOptions);
             }
 
-            MWGui::ImageButton* nextButton = getWidget<MWGui::ImageButton>(NextPageBTN);
+            Gui::ImageButton* nextButton = getWidget<Gui::ImageButton>(NextPageBTN);
             if (nextButton->getSize().width == 64)
             {
                 // english button has a 7 pixel wide strip of garbage on its right edge
@@ -182,7 +183,7 @@ namespace
 
         void adjustButton (char const * name, bool optional = false)
         {
-            MWGui::ImageButton* button = getWidget<MWGui::ImageButton>(name);
+            Gui::ImageButton* button = getWidget<Gui::ImageButton>(name);
 
             MyGUI::IntSize diff = button->getSize() - button->getRequestedSize(!optional);
             button->setSize(button->getRequestedSize(!optional));

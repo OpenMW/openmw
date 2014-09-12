@@ -4,10 +4,14 @@
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_Window.h>
 
 #include <components/bsa/resources.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/fontloader/fontloader.hpp>
+
+#include <components/widgets/imagebutton.hpp>
+#include <components/widgets/box.hpp>
 
 #include <OgreTextureManager.h>
 #include <OgreHardwarePixelBuffer.h>
@@ -45,6 +49,12 @@ namespace MyGUIPlugin
     class MWDynamicStat : public MyGUI::Widget
     {
         MYGUI_RTTI_DERIVED( MWDynamicStat )
+    };
+
+    // Dummy - runtime use only
+    class ExposedWindow : public MyGUI::Window
+    {
+        MYGUI_RTTI_DERIVED( ExposedWindow )
     };
 
 
@@ -114,6 +124,13 @@ namespace MyGUIPlugin
     void ResourcePlugin::registerWidgets()
     {
         MyGUI::FactoryManager::getInstance().registerFactory<MWScrollBar>("Widget");
+
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::ImageButton>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::HBox>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::VBox>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedTextBox>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedEditBox>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedButton>("Widget");
     }
 
     void ResourcePlugin::createTransparentBGTexture()

@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/widgets/box.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -190,7 +192,7 @@ namespace MWGui
 
         mSleeping = canRest;
 
-        dynamic_cast<Widgets::Box*>(mMainWidget)->notifyChildrenSizeChanged();
+        dynamic_cast<Gui::Box*>(mMainWidget)->notifyChildrenSizeChanged();
         center();
     }
 

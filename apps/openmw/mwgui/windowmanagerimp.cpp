@@ -18,6 +18,8 @@
 
 #include <components/fontloader/fontloader.hpp>
 
+#include <components/widgets/box.hpp>
+
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 
@@ -161,12 +163,12 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWList>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::HBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::VBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedTextBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedEditBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedButton>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::HBox>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::VBox>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedTextBox>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedEditBox>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedButton>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::ImageButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");

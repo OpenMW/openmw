@@ -2,7 +2,7 @@
 
 #include <OgreTextureManager.h>
 
-namespace MWGui
+namespace Gui
 {
 
     void ImageButton::setPropertyOverride(const std::string &_key, const std::string &_value)

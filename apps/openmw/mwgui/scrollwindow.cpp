@@ -13,7 +13,7 @@
 
 namespace
 {
-    void adjustButton (MWGui::ImageButton* button)
+    void adjustButton (Gui::ImageButton* button)
     {
         MyGUI::IntSize diff = button->getSize() - button->getRequestedSize();
         button->setSize(button->getRequestedSize());
