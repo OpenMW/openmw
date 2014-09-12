@@ -5,6 +5,15 @@ extern "C"
 #  include <stdint.h>
 #endif
 
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+// From libavutil version 52.2.0 and onward the declaration of
+// AV_CH_LAYOUT_* is removed from libavcodec/avcodec.h and moved to
+// libavutil/channel_layout.h
+#if AV_VERSION_INT(52, 2, 0) <= AV_VERSION_INT(LIBAVUTIL_VERSION_MAJOR, \
+    LIBAVUTIL_VERSION_MINOR, LIBAVUTIL_VERSION_MICRO)
+    #include <libavutil/channel_layout.h>
+#endif
 #include <libavresample/avresample.h>
 #include <libavutil/opt.h>
 
