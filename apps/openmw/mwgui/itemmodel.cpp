@@ -21,7 +21,7 @@ namespace MWGui
         if (base.getClass().getEnchantment(base) != "")
             mFlags |= Flag_Enchanted;
 
-        static std::map<std::string, bool> boundItemIDCache;
+        static std::set<std::string> boundItemIDCache;
 
         // If this is empty then we haven't executed the GMST cache logic yet; or there isn't any sMagicBound* GMST's for some reason
         if (boundItemIDCache.empty())
@@ -43,7 +43,7 @@ namespace MWGui
                 std::string currentGMSTValue = currentSetting.getString();
                 Misc::StringUtils::toLower(currentGMSTValue);
 
-                boundItemIDCache[currentGMSTValue] = true;
+                boundItemIDCache.insert(currentGMSTValue);
             }
         }
 
