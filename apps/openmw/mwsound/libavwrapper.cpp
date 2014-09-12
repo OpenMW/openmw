@@ -1,9 +1,7 @@
 #ifndef HAVE_LIBSWRESAMPLE
 extern "C"
 {
-#ifdef _MSC_VER
-#  include <stdint.h>
-#endif
+#include <stdint.h>
 
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
