@@ -345,7 +345,7 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
     {
 // FIXME: debug output
 //#if 0
-        printf("channel_layout: %" PRIu64 "\n",(*mStream)->codec->channel_layout);
+        printf("channel_layout: %d\n",(int)(*mStream)->codec->channel_layout);
         printf("in_channels: %d\n",(*mStream)->codec->channels);
 //#endif
         mSwr = swr_alloc_set_opts(mSwr,                      // SwrContext
