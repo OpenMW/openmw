@@ -70,13 +70,13 @@ option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 
 # Apps and tools
-option(BUILD_BSATOOL "build BSA extractor" OFF)
+option(BUILD_BSATOOL "build BSA extractor" ON)
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
 option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
 option(BUILD_OPENCS "build OpenMW Construction Set" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
-option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock frameworks" OFF)
+option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest and GMock frameworks" OFF)
 option(BUILD_NIFTEST "build nif file tester" OFF)
 
 # OS X deployment
