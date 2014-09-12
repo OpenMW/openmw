@@ -200,6 +200,7 @@ namespace MWGui
         void onNoteEditDelete();
         void onNoteEditDeleteConfirm();
         void onNoteDoubleClicked(MyGUI::Widget* sender);
+        void onChangeCoord(MyGUI::Widget* sender);
         void globalMapUpdatePlayer();
 
         MyGUI::ScrollView* mGlobalMap;

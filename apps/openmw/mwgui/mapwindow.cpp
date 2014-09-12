@@ -14,6 +14,9 @@
 
 #include "../mwrender/globalmap.hpp"
 
+#include "../mwgui/container.hpp"
+#include "../mwgui/itemview.hpp"
+
 #include "../components/esm/globalmap.hpp"
 
 #include "widgets.hpp"
@@ -537,6 +540,9 @@ namespace MWGui
         getWidget(mPlayerArrowLocal, "CompassLocal");
         getWidget(mPlayerArrowGlobal, "CompassGlobal");
 
+        // Seems to be called when the map window is resized at all regardless of local or world map view
+        mLocalMap->eventChangeCoord += MyGUI::newDelegate(this, &MapWindow::onChangeCoord);
+
         mGlobalMap->setVisible (false);
 
         getWidget(mButton, "WorldButton");
@@ -630,6 +636,21 @@ namespace MWGui
         mEditNoteDialog.setVisible(true);
         mEditNoteDialog.showDeleteButton(false);
         mEditNoteDialog.setText("");
+    }
+
+    void MapWindow::onChangeCoord(MyGUI::Widget* sender)
+    {
+        static MyGUI::IntCoord lastCoordinates = sender->getCoord();
+        MyGUI::IntCoord currentCoordinates = sender->getCoord();
+
+        MyGUI::IntPoint currentViewPortCenter = MyGUI::IntPoint(currentCoordinates.width / 2, currentCoordinates.height / 2);
+        MyGUI::IntPoint lastViewPortCenter = MyGUI::IntPoint(lastCoordinates.width / 2, lastCoordinates.height / 2);
+        MyGUI::IntPoint viewPortCenterDiff = currentViewPortCenter - lastViewPortCenter;
+
+        mLocalMap->setViewOffset(mLocalMap->getViewOffset() + viewPortCenterDiff);
+        mGlobalMap->setViewOffset(mGlobalMap->getViewOffset() + viewPortCenterDiff);
+
+        lastCoordinates = currentCoordinates;
     }
 
     void MapWindow::renderGlobalMap(Loading::Listener* loadingListener)
