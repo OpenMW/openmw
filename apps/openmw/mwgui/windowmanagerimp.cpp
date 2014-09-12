@@ -909,6 +909,7 @@ namespace MWGui
     void WindowManager::setPlayerDir(const float x, const float y)
     {
         mMap->setPlayerDir(x,y);
+        mMap->setGlobalMapPlayerDir(x, y);
         mHud->setPlayerDir(x,y);
     }
 

@@ -754,10 +754,6 @@ namespace MWGui
 
     void MapWindow::globalMapUpdatePlayer ()
     {
-        Ogre::Quaternion orient = MWBase::Environment::get().getWorld ()->getPlayerPtr().getRefData ().getBaseNode ()->_getDerivedOrientation ();
-        Ogre::Vector2 dir (orient.yAxis ().x, orient.yAxis().y);
-        float globalPlayerArrowAngle = std::atan2(dir.x, dir.y);
-
         // For interiors, position is set by WindowManager via setGlobalMapPlayerPosition
         if (MWBase::Environment::get().getWorld ()->isCellExterior ())
         {
@@ -775,14 +771,6 @@ namespace MWGui
             MyGUI::IntPoint viewoffs(0.5*viewsize.width - worldX, 0.5*viewsize.height - worldY);
             mGlobalMap->setViewOffset(viewoffs);
         }
-        else
-            globalPlayerArrowAngle -= M_PI/2; // If we're indoors, apparently the angle is +90 degrees off.
-
-        // Always rotate the global map compass
-        MyGUI::ISubWidget* main = mPlayerArrowGlobal->getSubWidgetMain();
-        MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
-        rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
-        rotatingSubskin->setAngle(globalPlayerArrowAngle);
     }
 
     void MapWindow::notifyPlayerUpdate ()
@@ -803,6 +791,15 @@ namespace MWGui
         MyGUI::IntSize viewsize = mGlobalMap->getSize();
         MyGUI::IntPoint viewoffs(0.5*viewsize.width - x, 0.5*viewsize.height - y);
         mGlobalMap->setViewOffset(viewoffs);
+    }
+
+    void MapWindow::setGlobalMapPlayerDir(const float x, const float y)
+    {
+        MyGUI::ISubWidget* main = mPlayerArrowGlobal->getSubWidgetMain();
+        MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
+        rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
+        float angle = std::atan2(x,y);
+        rotatingSubskin->setAngle(angle);
     }
 
     void MapWindow::clear()
