@@ -220,9 +220,6 @@ namespace MWBase
             virtual int getMonth() const = 0;
             virtual int getYear() const = 0;
 
-            virtual bool isBoundItemID(const std::string &id) = 0;
-            /// \return Returns whether or not the id refers to a bound item.
-
             virtual std::string getMonthName (int month = -1) const = 0;
             ///< Return name of month (-1: current month)
 

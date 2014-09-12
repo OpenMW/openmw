@@ -310,9 +310,6 @@ namespace MWWorld
 
             virtual float getTimeScaleFactor() const;
 
-            virtual bool isBoundItemID(const std::string &id);
-            ///< \return Whether or not the specified id refers to a bound item.
-
             virtual void changeToInteriorCell (const std::string& cellName,
                 const ESM::Position& position);
             ///< Move to interior cell.
