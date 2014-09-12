@@ -531,8 +531,9 @@ add_subdirectory (extern/sdl4ogre)
 # Components
 add_subdirectory (components)
 
+# Plugins
 if (BUILD_MYGUI_PLUGIN)
-    add_subdirectory(libs/mygui_resource_plugin)
+    add_subdirectory(plugins/mygui_resource_plugin)
 endif()
 
 #Testing
