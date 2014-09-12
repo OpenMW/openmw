@@ -99,8 +99,6 @@ namespace MWWorld
 
             std::string mStartCell;
 
-            std::map<std::string, bool> mBoundID;
-
             void updateWeather(float duration);
             int getDaysPerMonth (int month) const;
 
