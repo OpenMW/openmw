@@ -14,9 +14,6 @@
 
 #include "../mwrender/globalmap.hpp"
 
-#include "../mwgui/container.hpp"
-#include "../mwgui/itemview.hpp"
-
 #include "../components/esm/globalmap.hpp"
 
 #include "widgets.hpp"
