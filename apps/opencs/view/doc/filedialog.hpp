@@ -37,6 +37,7 @@ namespace CSVDoc
         ContentAction mAction;
         FileWidget *mFileWidget;
         AdjusterWidget *mAdjusterWidget;
+        bool mDialogBuilt;
 
     public:
 

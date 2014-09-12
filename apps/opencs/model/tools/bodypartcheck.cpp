@@ -26,7 +26,6 @@ void CSMTools::BodyPartCheckStage::perform ( int stage, Messages &messages )
     CSMWorld::UniversalId id( CSMWorld::UniversalId::Type_BodyPart, bodyPart.mId );
 
     // Check BYDT
-
     if (bodyPart.mData.mPart > 14 )
         messages.push_back(std::make_pair( id, bodyPart.mId + " has out of range part value." ));
 
