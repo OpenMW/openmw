@@ -91,6 +91,14 @@ add_component_dir (ogreinit
     ogreinit ogreplugin
     )
 
+add_component_dir (widgets
+    box
+    )
+
+add_component_dir (fontloader
+    fontloader
+    )
+
 add_component_dir (version
     version
     )

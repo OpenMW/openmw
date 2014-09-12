@@ -3,9 +3,14 @@
 
 #include <MyGUI_Plugin.h>
 
-namespace MyGUI
+namespace MyGUIPlugin
 {
 
+    /**
+     * @brief MyGUI plugin used to register Morrowind resources, custom widgets used in OpenMW, and load Morrowind fonts.
+     * @paragraph The plugin isn't used in OpenMW itself, but it is useful with the standalone MyGUI tools. To use it,
+     *            change EditorPlugin.xml in Media/Tools/LayoutEditor/EditorPlugin.xml and add an entry for this plugin.
+     */
     class ResourcePlugin : public MyGUI::IPlugin
     {
         /*!	Get the name of the plugin.
@@ -30,6 +35,11 @@ namespace MyGUI
         /*!	Perform the final plugin uninstallation sequence
         */
         virtual void uninstall();
+
+    private:
+        void registerResources();
+        void registerWidgets();
+        void createTransparentBGTexture();
     };
 
 }

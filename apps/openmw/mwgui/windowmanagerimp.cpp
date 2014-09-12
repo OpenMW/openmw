@@ -16,6 +16,8 @@
 
 #include <extern/sdl4ogre/sdlcursormanager.hpp>
 
+#include <components/fontloader/fontloader.hpp>
+
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 
@@ -63,7 +65,6 @@
 #include "inventorywindow.hpp"
 #include "bookpage.hpp"
 #include "itemview.hpp"
-#include "fontloader.hpp"
 #include "videowidget.hpp"
 #include "backgroundimage.hpp"
 #include "itemwidget.hpp"
@@ -149,7 +150,7 @@ namespace MWGui
         mGui = mGuiManager->getGui();
 
         // Load fonts
-        FontLoader fontLoader (encoding);
+        Gui::FontLoader fontLoader (encoding);
         fontLoader.loadAllFonts(exportFonts);
 
         //Register own widgets with MyGUI

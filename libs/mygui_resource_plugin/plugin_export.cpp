@@ -1,11 +1,11 @@
 #include "plugin.hpp"
 #include "MyGUI_PluginManager.h"
 
-MyGUI::ResourcePlugin* plugin_item = nullptr;
+MyGUIPlugin::ResourcePlugin* plugin_item = nullptr;
 
 extern "C" MYGUI_EXPORT_DLL void dllStartPlugin(void)
 {
-    plugin_item = new MyGUI::ResourcePlugin();
+    plugin_item = new MyGUIPlugin::ResourcePlugin();
     MyGUI::PluginManager::getInstance().installPlugin(plugin_item);
 }
 

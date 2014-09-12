@@ -123,7 +123,7 @@ namespace
 
 }
 
-namespace MWGui
+namespace Gui
 {
 
     FontLoader::FontLoader(ToUTF8::FromType encoding)
