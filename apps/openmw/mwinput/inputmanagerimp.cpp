@@ -554,9 +554,10 @@ namespace MWInput
         }
 
         setPlayerControlsEnabled(!guiMode);
-        mInputBinder->mousePressed (arg, id);
 
-
+        // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
+        if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings)
+            mInputBinder->mousePressed (arg, id);
     }
 
     void InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
