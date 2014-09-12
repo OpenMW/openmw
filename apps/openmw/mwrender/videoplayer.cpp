@@ -488,6 +488,8 @@ public:
             fail(std::string("Unsupported sample format: ")+
                  av_get_sample_fmt_name(mAVStream->codec->sample_fmt));
 
+        int64_t ch_layout = mAVStream->codec->channel_layout;
+
         if(mAVStream->codec->channel_layout == AV_CH_LAYOUT_MONO)
             *chans = MWSound::ChannelConfig_Mono;
         else if(mAVStream->codec->channel_layout == AV_CH_LAYOUT_STEREO)
@@ -502,9 +504,15 @@ public:
         {
             /* Unknown channel layout. Try to guess. */
             if(mAVStream->codec->channels == 1)
+            {
                 *chans = MWSound::ChannelConfig_Mono;
+                ch_layout = AV_CH_LAYOUT_MONO;
+            }
             else if(mAVStream->codec->channels == 2)
+            {
                 *chans = MWSound::ChannelConfig_Stereo;
+                ch_layout = AV_CH_LAYOUT_STEREO;
+            }
             else
             {
                 std::stringstream sstr("Unsupported raw channel count: ");
@@ -531,15 +539,15 @@ public:
 
         if(mOutputSampleFormat != AV_SAMPLE_FMT_NONE)
         {
-            mSwr = swr_alloc_set_opts(mSwr,                     // SwrContext
-                              mAVStream->codec->channel_layout, // output ch layout
-                              mOutputSampleFormat,              // output sample format
-                              mAVStream->codec->sample_rate,    // output sample rate
-                              mAVStream->codec->channel_layout, // input ch layout
-                              mAVStream->codec->sample_fmt,     // input sample format
-                              mAVStream->codec->sample_rate,    // input sample rate
-                              0,                                // logging level offset
-                              NULL);                            // log context
+            mSwr = swr_alloc_set_opts(mSwr,                  // SwrContext
+                              ch_layout,                     // output ch layout
+                              mOutputSampleFormat,           // output sample format
+                              mAVStream->codec->sample_rate, // output sample rate
+                              ch_layout,                     // input ch layout
+                              mAVStream->codec->sample_fmt,  // input sample format
+                              mAVStream->codec->sample_rate, // input sample rate
+                              0,                             // logging level offset
+                              NULL);                         // log context
             if(!mSwr)
                 fail(std::string("Couldn't allocate SwrContext"));
             if(swr_init(mSwr) < 0)

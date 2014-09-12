@@ -300,6 +300,8 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
         fail(std::string("Unsupported sample format: ")+
              av_get_sample_fmt_name((*mStream)->codec->sample_fmt));
 
+    int64_t ch_layout = (*mStream)->codec->channel_layout;
+
     if((*mStream)->codec->channel_layout == AV_CH_LAYOUT_MONO)
         *chans = ChannelConfig_Mono;
     else if((*mStream)->codec->channel_layout == AV_CH_LAYOUT_STEREO)
@@ -314,9 +316,15 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
     {
         /* Unknown channel layout. Try to guess. */
         if((*mStream)->codec->channels == 1)
+        {
             *chans = ChannelConfig_Mono;
+            ch_layout = AV_CH_LAYOUT_MONO;
+        }
         else if((*mStream)->codec->channels == 2)
+        {
             *chans = ChannelConfig_Stereo;
+            ch_layout = AV_CH_LAYOUT_STEREO;
+        }
         else
         {
             std::stringstream sstr("Unsupported raw channel count: ");
@@ -343,20 +351,15 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
 
     if(mOutputSampleFormat != AV_SAMPLE_FMT_NONE)
     {
-// FIXME: debug output
-//#if 0
-        printf("channel_layout: %d\n",(int)(*mStream)->codec->channel_layout);
-        printf("in_channels: %d\n",(*mStream)->codec->channels);
-//#endif
-        mSwr = swr_alloc_set_opts(mSwr,                      // SwrContext
-                          (*mStream)->codec->channel_layout, // output ch layout
-                          mOutputSampleFormat,               // output sample format
-                          (*mStream)->codec->sample_rate,    // output sample rate
-                          (*mStream)->codec->channel_layout, // input ch layout
-                          (*mStream)->codec->sample_fmt,     // input sample format
-                          (*mStream)->codec->sample_rate,    // input sample rate
-                          0,                                 // logging level offset
-                          NULL);                             // log context
+        mSwr = swr_alloc_set_opts(mSwr,                   // SwrContext
+                          ch_layout,                      // output ch layout
+                          mOutputSampleFormat,            // output sample format
+                          (*mStream)->codec->sample_rate, // output sample rate
+                          ch_layout,                      // input ch layout
+                          (*mStream)->codec->sample_fmt,  // input sample format
+                          (*mStream)->codec->sample_rate, // input sample rate
+                          0,                              // logging level offset
+                          NULL);                          // log context
         if(!mSwr)
             fail(std::string("Couldn't allocate SwrContext"));
         if(swr_init(mSwr) < 0)
