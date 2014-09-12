@@ -1,6 +1,6 @@
 #include "imagebutton.hpp"
 
-#include <OgreTextureManager.h>
+#include <MyGUI_RenderManager.h>
 
 namespace Gui
 {
@@ -44,8 +44,8 @@ namespace Gui
 
     MyGUI::IntSize ImageButton::getRequestedSize(bool logError)
     {
-        Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().getByName(mImageNormal);
-        if (texture.isNull())
+        MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture(mImageNormal);
+        if (!texture)
         {
             if (logError)
                 std::cerr << "ImageButton: can't find " << mImageNormal << std::endl;
