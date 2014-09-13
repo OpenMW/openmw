@@ -6,7 +6,8 @@
 
 #include "operation.hpp"
 
-CSMDoc::Runner::Runner() : mRunning (false), mStartup (0)
+CSMDoc::Runner::Runner (const boost::filesystem::path& projectPath)
+: mRunning (false), mStartup (0), mProjectPath (projectPath)
 {
     connect (&mProcess, SIGNAL (finished (int, QProcess::ExitStatus)),
         this, SLOT (finished (int, QProcess::ExitStatus)));
@@ -73,13 +74,19 @@ void CSMDoc::Runner::start (bool delayed)
         else
             arguments << "--new-game=1";
 
-        arguments << ("--script-run="+mStartup->fileName());
+        arguments << ("--script-run="+mStartup->fileName());;
+
+        arguments <<
+            QString::fromUtf8 (("--data="+mProjectPath.parent_path().string()).c_str());
 
         for (std::vector<std::string>::const_iterator iter (mContentFiles.begin());
             iter!=mContentFiles.end(); ++iter)
         {
             arguments << QString::fromUtf8 (("--content="+*iter).c_str());
         }
+
+        arguments
+            << QString::fromUtf8 (("--content="+mProjectPath.filename().string()).c_str());
 
         mProcess.start (path, arguments);
     }

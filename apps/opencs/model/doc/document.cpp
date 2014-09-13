@@ -2211,7 +2211,8 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
   mTools (*this), mResDir(resDir),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
-  mSaving (*this, mProjectPath, encoding)
+  mSaving (*this, mProjectPath, encoding),
+  mRunner (mProjectPath)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");

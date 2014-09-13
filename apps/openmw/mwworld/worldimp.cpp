@@ -174,8 +174,9 @@ namespace MWWorld
 
         gameContentLoader.addLoader(".esm", &esmLoader);
         gameContentLoader.addLoader(".esp", &esmLoader);
-        gameContentLoader.addLoader(".omwgame", &omwLoader);
-        gameContentLoader.addLoader(".omwaddon", &omwLoader);
+        gameContentLoader.addLoader(".omwgame", &esmLoader);
+        gameContentLoader.addLoader(".omwaddon", &esmLoader);
+        gameContentLoader.addLoader(".project", &esmLoader);
 
         loadContentFiles(fileCollections, contentFiles, gameContentLoader);
 
@@ -2435,7 +2436,7 @@ namespace MWWorld
         if (!selectedSpell.empty())
         {
             const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
-	    
+
 	    // A power can be used once per 24h
 	    if (spell->mData.mType == ESM::Spell::ST_Power)
 	        stats.getSpells().usePower(spell->mId);
