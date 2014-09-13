@@ -9,14 +9,15 @@ namespace MWGui
 {
     namespace Controllers
     {
-        class ControllerRepeatClick :
+        // Should be removed when upgrading to MyGUI 3.2.2 (current git), it has ControllerRepeatClick
+        class ControllerRepeatEvent :
             public MyGUI::ControllerItem
         {
-            MYGUI_RTTI_DERIVED( ControllerRepeatClick )
+            MYGUI_RTTI_DERIVED( ControllerRepeatEvent )
 
         public:
-            ControllerRepeatClick();
-            virtual ~ControllerRepeatClick();
+            ControllerRepeatEvent();
+            virtual ~ControllerRepeatEvent();
 
             void setRepeat(float init, float step);
             void setEnabled(bool enable);

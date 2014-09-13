@@ -298,6 +298,7 @@ namespace MWGui
         };
         typedef MWDynamicStat* MWDynamicStatPtr;
 
+        // Should be removed when upgrading to MyGUI 3.2.2 (current git), it has ScrollBar autorepeat support
         class MWScrollBar : public MyGUI::ScrollBar
         {
             MYGUI_RTTI_DERIVED(MWScrollBar)

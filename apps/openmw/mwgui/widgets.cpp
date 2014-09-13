@@ -617,8 +617,8 @@ namespace MWGui
         void MWScrollBar::onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
         {
             mIsIncreasing = false;
-            MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(MWGui::Controllers::ControllerRepeatClick::getClassTypeName());
-            MWGui::Controllers::ControllerRepeatClick* controller = item->castType<MWGui::Controllers::ControllerRepeatClick>();
+            MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(MWGui::Controllers::ControllerRepeatEvent::getClassTypeName());
+            MWGui::Controllers::ControllerRepeatEvent* controller = item->castType<MWGui::Controllers::ControllerRepeatEvent>();
             controller->eventRepeatClick += newDelegate(this, &MWScrollBar::repeatClick);
             controller->setEnabled(mEnableRepeat);
             controller->setRepeat(mRepeatTriggerTime, mRepeatStepTime);
@@ -633,8 +633,8 @@ namespace MWGui
         void MWScrollBar::onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
         {
             mIsIncreasing = true;
-            MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(MWGui::Controllers::ControllerRepeatClick::getClassTypeName());
-            MWGui::Controllers::ControllerRepeatClick* controller = item->castType<MWGui::Controllers::ControllerRepeatClick>();
+            MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(MWGui::Controllers::ControllerRepeatEvent::getClassTypeName());
+            MWGui::Controllers::ControllerRepeatEvent* controller = item->castType<MWGui::Controllers::ControllerRepeatEvent>();
             controller->eventRepeatClick += newDelegate(this, &MWScrollBar::repeatClick);
             controller->setEnabled(mEnableRepeat);
             controller->setRepeat(mRepeatTriggerTime, mRepeatStepTime);
