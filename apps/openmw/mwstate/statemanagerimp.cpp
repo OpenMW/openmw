@@ -159,7 +159,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         profile.mContentFiles = world.getContentFiles();
 
-        profile.mPlayerName = player.getClass().getName (player);
+        profile.mPlayerName = player.get<ESM::NPC>()->mBase->mName;
         profile.mPlayerLevel = player.getClass().getNpcStats (player).getLevel();
 
         std::string classId = player.get<ESM::NPC>()->mBase->mClass;
@@ -438,7 +438,7 @@ void MWState::StateManager::deleteGame(const MWState::Character *character, cons
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
 {
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    std::string name = player.getClass().getName(player);
+    std::string name = player.get<ESM::NPC>()->mBase->mName;
 
     return mCharacterManager.getCurrentCharacter (create, name);
 }
