@@ -80,7 +80,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     boost::program_options::options_description desc("Syntax: opencs <options>\nAllowed options");
 
     desc.add_options()
-    ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
+    ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken()->composing())
     ("data-local", boost::program_options::value<std::string>()->default_value(""))
     ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
     ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))

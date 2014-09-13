@@ -105,7 +105,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("help", "print help message")
         ("version", "print version information and quit")
         ("data", bpo::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")
-            ->multitoken(), "set data directories (later directories have higher priority)")
+            ->multitoken()->composing(), "set data directories (later directories have higher priority)")
 
         ("data-local", bpo::value<std::string>()->default_value(""),
             "set local data directory (highest priority)")
