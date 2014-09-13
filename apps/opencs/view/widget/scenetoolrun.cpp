@@ -1,6 +1,8 @@
 
 #include "scenetoolrun.hpp"
 
+#include <iterator>
+
 #include <QFrame>
 #include <QTableWidget>
 #include <QHBoxLayout>
@@ -11,11 +13,11 @@ void CSVWidget::SceneToolRun::adjustToolTips()
 {
     QString toolTip = mToolTip;
 
-    if (mCurrentIndex==-1)
+    if (mSelected==mProfiles.end())
         toolTip += "<p>No debug profile selected (function disabled)";
     else
     {
-        toolTip += "<p>Debug profile: " + QString::fromUtf8 (mProfiles[mCurrentIndex].c_str());
+        toolTip += "<p>Debug profile: " + QString::fromUtf8 (mSelected->c_str());
         toolTip += "<p>(right click to switch to a different profile)";
     }
 
@@ -24,16 +26,19 @@ void CSVWidget::SceneToolRun::adjustToolTips()
 
 void CSVWidget::SceneToolRun::updateIcon()
 {
-    setIcon (QIcon (mCurrentIndex==-1 ? mIconDisabled : mIcon));
+    setIcon (QIcon (mSelected==mProfiles.end() ? mIconDisabled : mIcon));
 }
 
 void CSVWidget::SceneToolRun::updatePanel()
 {
     mTable->setRowCount (mProfiles.size());
 
-    for (int i=0; i<static_cast<int> (mProfiles.size()); ++i)
+    int i = 0;
+
+    for (std::set<std::string>::const_iterator iter (mProfiles.begin()); iter!=mProfiles.end();
+        ++iter, ++i)
     {
-        mTable->setItem (i, 0, new QTableWidgetItem (QString::fromUtf8 (mProfiles[i].c_str())));
+        mTable->setItem (i, 0, new QTableWidgetItem (QString::fromUtf8 (iter->c_str())));
 
         mTable->setItem (i, 1, new QTableWidgetItem (
             QApplication::style()->standardIcon (QStyle::SP_TitleBarCloseButton), ""));
@@ -42,8 +47,8 @@ void CSVWidget::SceneToolRun::updatePanel()
 
 CSVWidget::SceneToolRun::SceneToolRun (SceneToolbar *parent, const QString& toolTip,
     const QString& icon, const QString& iconDisabled, const std::vector<std::string>& profiles)
-: SceneTool (parent, Type_TopAction), mProfiles (profiles),
-  mCurrentIndex (profiles.empty() ? -1 : 0), mToolTip (toolTip), mIcon (icon),
+: SceneTool (parent, Type_TopAction), mProfiles (profiles.begin(), profiles.end()),
+  mSelected (mProfiles.begin()), mToolTip (toolTip), mIcon (icon),
   mIconDisabled (iconDisabled)
 {
     updateIcon();
@@ -80,24 +85,46 @@ void CSVWidget::SceneToolRun::showPanel (const QPoint& position)
 
 void CSVWidget::SceneToolRun::activate()
 {
-    if (mCurrentIndex!=-1)
-        emit runRequest (mProfiles[mCurrentIndex]);
+    if (mSelected!=mProfiles.end())
+        emit runRequest (*mSelected);
 }
 
 void CSVWidget::SceneToolRun::removeProfile (const std::string& profile)
 {
-    std::pair<std::vector<std::string>::iterator, std::vector<std::string>::iterator>
-        result = std::equal_range (mProfiles.begin(), mProfiles.end(), profile);
+    std::set<std::string>::iterator iter = mProfiles.find (profile);
 
-    if (result.first!=result.second)
+    if (iter!=mProfiles.end())
     {
-        mProfiles.erase (result.first);
+        if (iter==mSelected)
+        {
+            if (iter!=mProfiles.begin())
+                --mSelected;
+            else
+                ++mSelected;
+        }
 
-        if (mCurrentIndex>=static_cast<int> (mProfiles.size()))
-            --mCurrentIndex;
+        mProfiles.erase (iter);
 
-        if (mCurrentIndex==-1)
+        if (mSelected==mProfiles.end())
             updateIcon();
+
+        adjustToolTips();
+    }
+}
+
+void CSVWidget::SceneToolRun::addProfile (const std::string& profile)
+{
+    std::set<std::string>::iterator iter = mProfiles.find (profile);
+
+    if (iter==mProfiles.end())
+    {
+        mProfiles.insert (profile);
+
+        if (mSelected==mProfiles.end())
+        {
+            mSelected = mProfiles.begin();
+            updateIcon();
+        }
 
         adjustToolTips();
     }
@@ -108,14 +135,17 @@ void CSVWidget::SceneToolRun::clicked (const QModelIndex& index)
     if (index.column()==0)
     {
         // select profile
-        mCurrentIndex = index.row();
+        mSelected = mProfiles.begin();
+        std::advance (mSelected, index.row());
         mPanel->hide();
         adjustToolTips();
     }
     else if (index.column()==1)
     {
         // remove profile from list
-        removeProfile (mProfiles.at (index.row()));
+        std::set<std::string>::iterator iter = mProfiles.begin();
+        std::advance (iter, index.row());
+        removeProfile (*iter);
         updatePanel();
     }
 }

@@ -1,7 +1,7 @@
 #ifndef CSV_WIDGET_SCENETOOLRUN_H
 #define CSV_WIDGET_SCENETOOLRUN_H
 
-#include <vector>
+#include <set>
 #include <string>
 
 #include "scenetool.hpp"
@@ -16,8 +16,8 @@ namespace CSVWidget
     {
             Q_OBJECT
 
-            std::vector<std::string> mProfiles;
-            int mCurrentIndex;
+            std::set<std::string> mProfiles;
+            std::set<std::string>::iterator mSelected;
             QString mToolTip;
             QString mIcon;
             QString mIconDisabled;
@@ -44,6 +44,12 @@ namespace CSVWidget
             /// \attention This function does not remove the profile from the profile selection
             /// panel.
             void removeProfile (const std::string& profile);
+
+            /// \attention This function doe not add the profile to the profile selection
+            /// panel. This only happens when the panel is re-opened.
+            ///
+            /// \note Adding profiles that are already listed is a no-op.
+            void addProfile (const std::string& profile);
 
         private slots:
 
