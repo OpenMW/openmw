@@ -503,7 +503,7 @@ namespace MWInput
         // (which is somewhat reasonable, and hopefully true for all SDL platforms)
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
         if (mInputBinder->getKeyBinding(mInputBinder->getControl(A_Console), ICS::Control::INCREASE)
-                == arg.keysym.sym
+                == arg.keysym.scancode
                 && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Console)
             SDL_StopTextInput();
 
@@ -870,41 +870,41 @@ namespace MWInput
     {
         // using hardcoded key defaults is inevitable, if we want the configuration files to stay valid
         // across different versions of OpenMW (in the case where another input action is added)
-        std::map<int, int> defaultKeyBindings;
+        std::map<int, SDL_Scancode> defaultKeyBindings;
 
         //Gets the Keyvalue from the Scancode; gives the button in the same place reguardless of keyboard format
-        defaultKeyBindings[A_Activate] = SDL_GetKeyFromScancode(SDL_SCANCODE_SPACE);
-        defaultKeyBindings[A_MoveBackward] = SDL_GetKeyFromScancode(SDL_SCANCODE_S);
-        defaultKeyBindings[A_MoveForward] = SDL_GetKeyFromScancode(SDL_SCANCODE_W);
-        defaultKeyBindings[A_MoveLeft] = SDL_GetKeyFromScancode(SDL_SCANCODE_A);
-        defaultKeyBindings[A_MoveRight] = SDL_GetKeyFromScancode(SDL_SCANCODE_D);
-        defaultKeyBindings[A_ToggleWeapon] = SDL_GetKeyFromScancode(SDL_SCANCODE_F);
-        defaultKeyBindings[A_ToggleSpell] = SDL_GetKeyFromScancode(SDL_SCANCODE_R);
-        defaultKeyBindings[A_QuickKeysMenu] = SDL_GetKeyFromScancode(SDL_SCANCODE_F1);
-        defaultKeyBindings[A_Console] = SDL_GetKeyFromScancode(SDL_SCANCODE_GRAVE);
-        defaultKeyBindings[A_Run] = SDL_GetKeyFromScancode(SDL_SCANCODE_LSHIFT);
-        defaultKeyBindings[A_Sneak] = SDL_GetKeyFromScancode(SDL_SCANCODE_LCTRL);
-        defaultKeyBindings[A_AutoMove] = SDL_GetKeyFromScancode(SDL_SCANCODE_Q);
-        defaultKeyBindings[A_Jump] = SDL_GetKeyFromScancode(SDL_SCANCODE_E);
-        defaultKeyBindings[A_Journal] = SDL_GetKeyFromScancode(SDL_SCANCODE_J);
-        defaultKeyBindings[A_Rest] = SDL_GetKeyFromScancode(SDL_SCANCODE_T);
-        defaultKeyBindings[A_GameMenu] = SDL_GetKeyFromScancode(SDL_SCANCODE_ESCAPE);
-        defaultKeyBindings[A_TogglePOV] = SDL_GetKeyFromScancode(SDL_SCANCODE_TAB);
-        defaultKeyBindings[A_QuickKey1] = SDL_GetKeyFromScancode(SDL_SCANCODE_1);
-        defaultKeyBindings[A_QuickKey2] = SDL_GetKeyFromScancode(SDL_SCANCODE_2);
-        defaultKeyBindings[A_QuickKey3] = SDL_GetKeyFromScancode(SDL_SCANCODE_3);
-        defaultKeyBindings[A_QuickKey4] = SDL_GetKeyFromScancode(SDL_SCANCODE_4);
-        defaultKeyBindings[A_QuickKey5] = SDL_GetKeyFromScancode(SDL_SCANCODE_5);
-        defaultKeyBindings[A_QuickKey6] = SDL_GetKeyFromScancode(SDL_SCANCODE_6);
-        defaultKeyBindings[A_QuickKey7] = SDL_GetKeyFromScancode(SDL_SCANCODE_7);
-        defaultKeyBindings[A_QuickKey8] = SDL_GetKeyFromScancode(SDL_SCANCODE_8);
-        defaultKeyBindings[A_QuickKey9] = SDL_GetKeyFromScancode(SDL_SCANCODE_9);
-        defaultKeyBindings[A_QuickKey10] = SDL_GetKeyFromScancode(SDL_SCANCODE_0);
-        defaultKeyBindings[A_Screenshot] = SDL_GetKeyFromScancode(SDL_SCANCODE_F12);
-        defaultKeyBindings[A_ToggleHUD] = SDL_GetKeyFromScancode(SDL_SCANCODE_F11);
-        defaultKeyBindings[A_AlwaysRun] = SDL_GetKeyFromScancode(SDL_SCANCODE_CAPSLOCK);
-        defaultKeyBindings[A_QuickSave] = SDL_GetKeyFromScancode(SDL_SCANCODE_F5);
-        defaultKeyBindings[A_QuickLoad] = SDL_GetKeyFromScancode(SDL_SCANCODE_F9);
+        defaultKeyBindings[A_Activate] = SDL_SCANCODE_SPACE;
+        defaultKeyBindings[A_MoveBackward] = SDL_SCANCODE_S;
+        defaultKeyBindings[A_MoveForward] = SDL_SCANCODE_W;
+        defaultKeyBindings[A_MoveLeft] = SDL_SCANCODE_A;
+        defaultKeyBindings[A_MoveRight] = SDL_SCANCODE_D;
+        defaultKeyBindings[A_ToggleWeapon] = SDL_SCANCODE_F;
+        defaultKeyBindings[A_ToggleSpell] = SDL_SCANCODE_R;
+        defaultKeyBindings[A_QuickKeysMenu] = SDL_SCANCODE_F1;
+        defaultKeyBindings[A_Console] = SDL_SCANCODE_GRAVE;
+        defaultKeyBindings[A_Run] = SDL_SCANCODE_LSHIFT;
+        defaultKeyBindings[A_Sneak] = SDL_SCANCODE_LCTRL;
+        defaultKeyBindings[A_AutoMove] = SDL_SCANCODE_Q;
+        defaultKeyBindings[A_Jump] = SDL_SCANCODE_E;
+        defaultKeyBindings[A_Journal] = SDL_SCANCODE_J;
+        defaultKeyBindings[A_Rest] = SDL_SCANCODE_T;
+        defaultKeyBindings[A_GameMenu] = SDL_SCANCODE_ESCAPE;
+        defaultKeyBindings[A_TogglePOV] = SDL_SCANCODE_TAB;
+        defaultKeyBindings[A_QuickKey1] = SDL_SCANCODE_1;
+        defaultKeyBindings[A_QuickKey2] = SDL_SCANCODE_2;
+        defaultKeyBindings[A_QuickKey3] = SDL_SCANCODE_3;
+        defaultKeyBindings[A_QuickKey4] = SDL_SCANCODE_4;
+        defaultKeyBindings[A_QuickKey5] = SDL_SCANCODE_5;
+        defaultKeyBindings[A_QuickKey6] = SDL_SCANCODE_6;
+        defaultKeyBindings[A_QuickKey7] = SDL_SCANCODE_7;
+        defaultKeyBindings[A_QuickKey8] = SDL_SCANCODE_8;
+        defaultKeyBindings[A_QuickKey9] = SDL_SCANCODE_9;
+        defaultKeyBindings[A_QuickKey10] = SDL_SCANCODE_0;
+        defaultKeyBindings[A_Screenshot] = SDL_SCANCODE_F12;
+        defaultKeyBindings[A_ToggleHUD] = SDL_SCANCODE_F11;
+        defaultKeyBindings[A_AlwaysRun] = SDL_SCANCODE_CAPSLOCK;
+        defaultKeyBindings[A_QuickSave] = SDL_SCANCODE_F5;
+        defaultKeyBindings[A_QuickLoad] = SDL_SCANCODE_F9;
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = SDL_BUTTON_RIGHT;
@@ -926,14 +926,14 @@ namespace MWInput
             }
 
             if (!controlExists || force ||
-                    ( mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) == SDLK_UNKNOWN
+                    ( mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) == SDL_SCANCODE_UNKNOWN
                       && mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS
                       ))
             {
                 clearAllBindings (control);
 
                 if (defaultKeyBindings.find(i) != defaultKeyBindings.end())
-                    mInputBinder->addKeyBinding(control, static_cast<SDL_Keycode>(defaultKeyBindings[i]), ICS::Control::INCREASE);
+                    mInputBinder->addKeyBinding(control, defaultKeyBindings[i], ICS::Control::INCREASE);
                 else if (defaultMouseButtonBindings.find(i) != defaultMouseButtonBindings.end())
                     mInputBinder->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
             }
@@ -992,8 +992,8 @@ namespace MWInput
 
         ICS::Control* c = mInputBinder->getChannel (action)->getAttachedControls ().front().control;
 
-        if (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE) != SDLK_UNKNOWN)
-            return mInputBinder->keyCodeToString (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE));
+        if (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE) != SDL_SCANCODE_UNKNOWN)
+            return mInputBinder->scancodeToString (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE));
         else if (mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
             return "#{sMouse} " + boost::lexical_cast<std::string>(mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE));
         else
@@ -1054,10 +1054,10 @@ namespace MWInput
     }
 
     void InputManager::keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-        , SDL_Keycode key, ICS::Control::ControlChangingDirection direction)
+        , SDL_Scancode key, ICS::Control::ControlChangingDirection direction)
     {
         //Disallow binding escape key
-        if(key==SDLK_ESCAPE)
+        if(key==SDL_SCANCODE_ESCAPE)
             return;
 
         clearAllBindings(control);
@@ -1108,7 +1108,7 @@ namespace MWInput
     void InputManager::clearAllBindings (ICS::Control* control)
     {
         // right now we don't really need multiple bindings for the same action, so remove all others first
-        if (mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) != SDLK_UNKNOWN)
+        if (mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) != SDL_SCANCODE_UNKNOWN)
             mInputBinder->removeKeyBinding (mInputBinder->getKeyBinding (control, ICS::Control::INCREASE));
         if (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
             mInputBinder->removeMouseButtonBinding (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE));

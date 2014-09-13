@@ -424,7 +424,7 @@ namespace ICS
 				control.SetAttribute( "axisBindable", "false" );
 			}
 
-			if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::INCREASE) != SDLK_UNKNOWN)
+            if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::INCREASE) != SDL_SCANCODE_UNKNOWN)
 			{
 				TiXmlElement keyBinder( "KeyBinder" );
 
@@ -434,7 +434,7 @@ namespace ICS
 				control.InsertEndChild(keyBinder);
 			}
 
-			if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::DECREASE) != SDLK_UNKNOWN)
+            if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::DECREASE) != SDL_SCANCODE_UNKNOWN)
 			{
 				TiXmlElement keyBinder( "KeyBinder" );
 
@@ -801,14 +801,13 @@ namespace ICS
 		mDetectingBindingControl = NULL;
 	}
 
-	std::string InputControlSystem::keyCodeToString(SDL_Keycode key)
+    std::string InputControlSystem::scancodeToString(SDL_Scancode key)
 	{
-        return std::string(SDL_GetKeyName(key));
-	}
-
-	SDL_Keycode InputControlSystem::stringToKeyCode(std::string key)
-	{
-        return SDL_GetKeyFromName(key.c_str());
+        SDL_Keycode code = SDL_GetKeyFromScancode(key);
+        if (code == SDLK_UNKNOWN)
+            return std::string(SDL_GetScancodeName(key));
+        else
+            return std::string(SDL_GetKeyName(code));
 	}
 
     void InputControlSystem::adjustMouseRegion(Uint16 width, Uint16 height)
