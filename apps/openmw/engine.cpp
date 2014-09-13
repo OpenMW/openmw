@@ -339,8 +339,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
 
-    //addResourcesDirectory(mResDir);
-
     addResourcesDirectory(mCfgMgr.getCachePath ().string());
 
     addResourcesDirectory(mResDir / "mygui");
