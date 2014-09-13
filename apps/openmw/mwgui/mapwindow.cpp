@@ -537,6 +537,9 @@ namespace MWGui
         getWidget(mPlayerArrowLocal, "CompassLocal");
         getWidget(mPlayerArrowGlobal, "CompassGlobal");
 
+        mLastScrollWindowCoordinates = mLocalMap->getCoord();
+        mLocalMap->eventChangeCoord += MyGUI::newDelegate(this, &MapWindow::onChangeScrollWindowCoord);
+
         mGlobalMap->setVisible (false);
 
         getWidget(mButton, "WorldButton");
@@ -630,6 +633,20 @@ namespace MWGui
         mEditNoteDialog.setVisible(true);
         mEditNoteDialog.showDeleteButton(false);
         mEditNoteDialog.setText("");
+    }
+
+    void MapWindow::onChangeScrollWindowCoord(MyGUI::Widget* sender)
+    {
+        MyGUI::IntCoord currentCoordinates = sender->getCoord();
+
+        MyGUI::IntPoint currentViewPortCenter = MyGUI::IntPoint(currentCoordinates.width / 2, currentCoordinates.height / 2);
+        MyGUI::IntPoint lastViewPortCenter = MyGUI::IntPoint(mLastScrollWindowCoordinates.width / 2, mLastScrollWindowCoordinates.height / 2);
+        MyGUI::IntPoint viewPortCenterDiff = currentViewPortCenter - lastViewPortCenter;
+
+        mLocalMap->setViewOffset(mLocalMap->getViewOffset() + viewPortCenterDiff);
+        mGlobalMap->setViewOffset(mGlobalMap->getViewOffset() + viewPortCenterDiff);
+
+        mLastScrollWindowCoordinates = currentCoordinates;
     }
 
     void MapWindow::renderGlobalMap(Loading::Listener* loadingListener)

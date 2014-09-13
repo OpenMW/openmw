@@ -200,6 +200,7 @@ namespace MWGui
         void onNoteEditDelete();
         void onNoteEditDeleteConfirm();
         void onNoteDoubleClicked(MyGUI::Widget* sender);
+        void onChangeScrollWindowCoord(MyGUI::Widget* sender);
         void globalMapUpdatePlayer();
 
         MyGUI::ScrollView* mGlobalMap;
@@ -210,6 +211,8 @@ namespace MWGui
         MyGUI::Button* mButton;
         MyGUI::IntPoint mLastDragPos;
         bool mGlobal;
+
+        MyGUI::IntCoord mLastScrollWindowCoordinates;
 
         // Markers on global map
         typedef std::pair<int, int> CellId;
