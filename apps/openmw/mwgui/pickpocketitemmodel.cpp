@@ -45,11 +45,8 @@ namespace MWGui
             const ItemStack& item = mSourceModel->getItem(i);
 
             // Bound items may not be stolen
-            if (item.mBase.getCellRef().getRefId().size() > 6
-                    && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
-            {
+            if (item.mFlags & ItemStack::Flag_Bound)
                 continue;
-            }
 
             if (std::find(mHiddenItems.begin(), mHiddenItems.end(), item) == mHiddenItems.end()
                     && item.mType != ItemStack::Type_Equipped)
