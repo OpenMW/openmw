@@ -161,8 +161,6 @@ namespace MWGui
     virtual MWGui::SpellWindow* getSpellWindow();
     virtual MWGui::Console* getConsole();
 
-    virtual MyGUI::Gui* getGui() const;
-
     virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount);
 
     ///< Set value for the given ID.

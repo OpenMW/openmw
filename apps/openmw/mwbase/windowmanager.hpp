@@ -145,8 +145,6 @@ namespace MWBase
             virtual MWGui::SpellWindow* getSpellWindow() = 0;
             virtual MWGui::Console* getConsole() = 0;
 
-            virtual MyGUI::Gui* getGui() const = 0;
-
             virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount) = 0;
 
             /// Set value for the given ID.

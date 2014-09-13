@@ -149,7 +149,6 @@ namespace MWGui
     {
         // Set up the GUI system
         mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
-        mGui = mGuiManager->getGui();
 
         // Load fonts
         Gui::FontLoader fontLoader (encoding);
@@ -272,7 +271,7 @@ namespace MWGui
         trackWindow(mCompanionWindow, "companion");
         mScreenFader = new ScreenFader();
 
-        mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"Overlay");
+        mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"Overlay");
 
         mHud->setVisible(mHudEnabled);
 
@@ -1206,8 +1205,6 @@ namespace MWGui
         mTriangleCount = triangleCount;
         mBatchCount = batchCount;
     }
-
-    MyGUI::Gui* WindowManager::getGui() const { return mGui; }
 
     MWGui::DialogueWindow* WindowManager::getDialogueWindow() { return mDialogueWindow;  }
     MWGui::ContainerWindow* WindowManager::getContainerWindow() { return mContainerWindow; }
