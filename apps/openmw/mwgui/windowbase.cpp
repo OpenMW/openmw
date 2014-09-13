@@ -96,11 +96,16 @@ void NoDrop::onFrame(float dt)
     if (mTransparent)
     {
         mWidget->setNeedMouseFocus(false); // Allow click-through
-        mWidget->setAlpha(std::max(0.13f, mWidget->getAlpha() - dt*5));
+        setAlpha(std::max(0.13f, mWidget->getAlpha() - dt*5));
     }
     else
     {
         mWidget->setNeedMouseFocus(true);
-        mWidget->setAlpha(std::min(1.0f, mWidget->getAlpha() + dt*5));
+        setAlpha(std::min(1.0f, mWidget->getAlpha() + dt*5));
     }
+}
+
+void NoDrop::setAlpha(float alpha)
+{
+    mWidget->setAlpha(alpha);
 }
