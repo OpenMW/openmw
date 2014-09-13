@@ -270,11 +270,7 @@ namespace MWMechanics
     {
         if (mDead)
         {
-            if (mDynamic[0].getCurrent()<1)
-            {
-                mDynamic[0].setModified(mDynamic[0].getModified(), 1);
-                mDynamic[0].setCurrent(1);
-            }
+            mDynamic[0].setCurrent(mDynamic[0].getModified());
             if (mDynamic[0].getCurrent()>=1)
                 mDead = false;
         }
