@@ -138,7 +138,7 @@ namespace MWGui
         mFilterMagic->setStateSelected(false);
         mFilterMisc->setStateSelected(false);
 
-        static_cast<MyGUI::Button*>(_sender)->setStateSelected(true);
+        _sender->castType<MyGUI::Button>()->setStateSelected(true);
 
         mItemView->update();
     }

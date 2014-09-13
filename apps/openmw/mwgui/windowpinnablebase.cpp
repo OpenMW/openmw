@@ -7,7 +7,7 @@ namespace MWGui
     WindowPinnableBase::WindowPinnableBase(const std::string& parLayout)
       : WindowBase(parLayout), mPinned(false)
     {
-        ExposedWindow* window = static_cast<ExposedWindow*>(mMainWidget);
+        ExposedWindow* window = mMainWidget->castType<ExposedWindow>();
         mPinButton = window->getSkinWidget ("Button");
 
         mPinButton->eventMouseButtonClick += MyGUI::newDelegate(this, &WindowPinnableBase::onPinButtonClicked);

@@ -66,7 +66,7 @@ namespace MWGui
             mSkillWidgetMap.insert(std::pair<int, MyGUI::TextBox*>(i, (MyGUI::TextBox*)NULL));
         }
 
-        MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
+        MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
         t->eventWindowChangeCoord += MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
     }
 
@@ -90,7 +90,7 @@ namespace MWGui
 
     void StatsWindow::setBar(const std::string& name, const std::string& tname, int val, int max)
     {
-        MyGUI::ProgressPtr pt;
+        MyGUI::ProgressBar* pt;
         getWidget(pt, name);
         pt->setProgressRange(max);
         pt->setProgressPosition(val);
@@ -102,7 +102,7 @@ namespace MWGui
 
     void StatsWindow::setPlayerName(const std::string& playerName)
     {
-        static_cast<MyGUI::Window*>(mMainWidget)->setCaption(playerName);
+        mMainWidget->castType<MyGUI::Window>()->setCaption(playerName);
         adjustWindowCaption();
     }
 

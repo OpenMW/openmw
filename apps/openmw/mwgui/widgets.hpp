@@ -122,8 +122,8 @@ namespace MWGui
 
             ESM::Skill::SkillEnum mSkillId;
             SkillValue mValue;
-            MyGUI::Widget* mSkillNameWidget;
-            MyGUI::Widget* mSkillValueWidget;
+            MyGUI::TextBox* mSkillNameWidget;
+            MyGUI::TextBox* mSkillValueWidget;
         };
         typedef MWSkill* MWSkillPtr;
 
@@ -162,8 +162,8 @@ namespace MWGui
 
             int mId;
             AttributeValue mValue;
-            MyGUI::Widget* mAttributeNameWidget;
-            MyGUI::Widget* mAttributeValueWidget;
+            MyGUI::TextBox* mAttributeNameWidget;
+            MyGUI::TextBox* mAttributeValueWidget;
         };
         typedef MWAttribute* MWAttributePtr;
 
@@ -293,7 +293,7 @@ namespace MWGui
 
             int mValue, mMax;
             MyGUI::TextBox* mTextWidget;
-            MyGUI::ProgressPtr mBarWidget;
+            MyGUI::ProgressBar* mBarWidget;
             MyGUI::TextBox* mBarTextWidget;
         };
         typedef MWDynamicStat* MWDynamicStatPtr;

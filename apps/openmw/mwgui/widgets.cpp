@@ -59,18 +59,18 @@ namespace MWGui
             {
                 if (mSkillId == ESM::Skill::Length)
                 {
-                    static_cast<MyGUI::TextBox*>(mSkillNameWidget)->setCaption("");
+                    mSkillNameWidget->setCaption("");
                 }
                 else
                 {
                     const std::string &name = MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Skill::sSkillNameIds[mSkillId], "");
-                    static_cast<MyGUI::TextBox*>(mSkillNameWidget)->setCaption(name);
+                    mSkillNameWidget->setCaption(name);
                 }
             }
             if (mSkillValueWidget)
             {
                 SkillValue::Type modified = mValue.getModified(), base = mValue.getBase();
-                static_cast<MyGUI::TextBox*>(mSkillValueWidget)->setCaption(boost::lexical_cast<std::string>(modified));
+                mSkillValueWidget->setCaption(boost::lexical_cast<std::string>(modified));
                 if (modified > base)
                     mSkillValueWidget->_setWidgetState("increased");
                 else if (modified < base)
@@ -145,7 +145,7 @@ namespace MWGui
             {
                 if (mId < 0 || mId >= 8)
                 {
-                    static_cast<MyGUI::TextBox*>(mAttributeNameWidget)->setCaption("");
+                    mAttributeNameWidget->setCaption("");
                 }
                 else
                 {
@@ -160,13 +160,13 @@ namespace MWGui
                         "sAttributeLuck"
                     };
                     const std::string &name = MWBase::Environment::get().getWindowManager()->getGameSettingString(attributes[mId], "");
-                    static_cast<MyGUI::TextBox*>(mAttributeNameWidget)->setCaption(name);
+                    mAttributeNameWidget->setCaption(name);
                 }
             }
             if (mAttributeValueWidget)
             {
                 int modified = mValue.getModified(), base = mValue.getBase();
-                static_cast<MyGUI::TextBox*>(mAttributeValueWidget)->setCaption(boost::lexical_cast<std::string>(modified));
+                mAttributeValueWidget->setCaption(boost::lexical_cast<std::string>(modified));
                 if (modified > base)
                     mAttributeValueWidget->_setWidgetState("increased");
                 else if (modified < base)
@@ -256,9 +256,9 @@ namespace MWGui
 
                 const ESM::Spell *spell = store.get<ESM::Spell>().search(mId);
                 if (spell)
-                    static_cast<MyGUI::TextBox*>(mSpellNameWidget)->setCaption(spell->mName);
+                    mSpellNameWidget->setCaption(spell->mName);
                 else
-                    static_cast<MyGUI::TextBox*>(mSpellNameWidget)->setCaption("");
+                    mSpellNameWidget->setCaption("");
             }
         }
 
@@ -310,7 +310,7 @@ namespace MWGui
             // ... then adjust the size for all widgets
             for (std::vector<MyGUI::Widget*>::iterator it = effects.begin(); it != effects.end(); ++it)
             {
-                effect = static_cast<MWSpellEffectPtr>(*it);
+                effect = (*it)->castType<MWSpellEffect>();
                 bool needcenter = center && (maxwidth > effect->getRequestedWidth());
                 int diff = maxwidth - effect->getRequestedWidth();
                 if (needcenter)
@@ -470,7 +470,7 @@ namespace MWGui
                 }
             }
 
-            static_cast<MyGUI::TextBox*>(mTextWidget)->setCaptionWithReplacing(spellLine);
+            mTextWidget->setCaptionWithReplacing(spellLine);
             mRequestedWidth = mTextWidget->getTextSize().width + 24;
 
             mImageWidget->setImageTexture(Misc::ResourceHelpers::correctIconPath(magicEffect->mIcon));
@@ -515,13 +515,13 @@ namespace MWGui
             {
                 std::stringstream out;
                 out << mValue << "/" << mMax;
-                static_cast<MyGUI::TextBox*>(mBarTextWidget)->setCaption(out.str().c_str());
+                mBarTextWidget->setCaption(out.str().c_str());
             }
         }
         void MWDynamicStat::setTitle(const std::string& text)
         {
             if (mTextWidget)
-                static_cast<MyGUI::TextBox*>(mTextWidget)->setCaption(text);
+                mTextWidget->setCaption(text);
         }
 
         MWDynamicStat::~MWDynamicStat()
