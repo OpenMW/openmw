@@ -180,6 +180,7 @@ namespace MWGui
         void cellExplored(int x, int y);
 
         void setGlobalMapPlayerPosition (float worldX, float worldY);
+        void setGlobalMapPlayerDir(const float x, const float y);
 
         virtual void open();
 
