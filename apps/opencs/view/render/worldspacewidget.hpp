@@ -40,7 +40,8 @@ namespace CSVRender
             {
                 Type_CellsInterior,
                 Type_CellsExterior,
-                Type_Other
+                Type_Other,
+                Type_DebugProfile
             };
 
             enum dropRequirments

@@ -177,6 +177,8 @@ CSVRender::WorldspaceWidget::DropType CSVRender::WorldspaceWidget::getDropType (
         {
             type = iter->getId().substr (0, 1)=="#" ? Type_CellsExterior : Type_CellsInterior;
         }
+        else if (iter->getType()==CSMWorld::UniversalId::Type_DebugProfile)
+            type = Type_DebugProfile;
 
         if (iter==data.begin())
             output = type;
@@ -190,12 +192,27 @@ CSVRender::WorldspaceWidget::DropType CSVRender::WorldspaceWidget::getDropType (
 CSVRender::WorldspaceWidget::dropRequirments
     CSVRender::WorldspaceWidget::getDropRequirements (DropType type) const
 {
+    if (type==Type_DebugProfile)
+        return canHandle;
+
     return ignored;
 }
 
 bool CSVRender::WorldspaceWidget::handleDrop (const std::vector<CSMWorld::UniversalId>& data,
     DropType type)
 {
+    if (type==Type_DebugProfile)
+    {
+        if (mRun)
+        {
+            for (std::vector<CSMWorld::UniversalId>::const_iterator iter (data.begin());
+                iter!=data.end(); ++iter)
+                mRun->addProfile (iter->getId());
+        }
+
+        return true;
+    }
+
     return false;
 }
 
