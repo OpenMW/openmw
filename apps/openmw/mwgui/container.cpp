@@ -114,7 +114,7 @@ namespace MWGui
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
         // We can't drop a conjured item to the ground; the target container should always be the source container
-        if (mItem.mBase.getCellRef().getRefId().size() > 6 && mItem.mBase.getCellRef().getRefId().substr(0,6) == "bound_" && targetModel != mSourceModel)
+        if (mItem.mFlags & ItemStack::Flag_Bound && targetModel != mSourceModel)
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
             return;
@@ -184,7 +184,7 @@ namespace MWGui
         const ItemStack& item = mSortModel->getItem(index);
 
         // We can't take a conjured item from a container (some NPC we're pickpocketing, a box, etc)
-        if (item.mBase.getCellRef().getRefId().size() > 6 && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
+        if (item.mFlags & ItemStack::Flag_Bound)
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage1}");
             return;

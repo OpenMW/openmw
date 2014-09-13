@@ -51,7 +51,7 @@ void CompanionWindow::onItemSelected(int index)
     const ItemStack& item = mSortModel->getItem(index);
 
     // We can't take conjured items from a companion NPC
-    if (item.mBase.getCellRef().getRefId().size() > 6 && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
+    if (item.mFlags & ItemStack::Flag_Bound)
     {
         MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
         return;
