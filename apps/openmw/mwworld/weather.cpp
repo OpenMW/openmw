@@ -702,9 +702,13 @@ void WeatherManager::changeWeather(const std::string& region, const unsigned int
 
     mRegionOverrides[Misc::StringUtils::lowerCase(region)] = weather;
 
-    std::string playerRegion = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell()->mRegion;
-    if (Misc::StringUtils::ciEqual(region, playerRegion))
-        setWeather(weather);
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    if (player.isInCell())
+    {
+        std::string playerRegion = player.getCell()->getCell()->mRegion;
+        if (Misc::StringUtils::ciEqual(region, playerRegion))
+            setWeather(weather);
+    }
 }
 
 void WeatherManager::modRegion(const std::string &regionid, const std::vector<char> &chances)
