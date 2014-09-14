@@ -65,7 +65,7 @@ add_openmw_dir (mwworld
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader omwloader actiontrap cellreflist projectilemanager cellref
+    contentloader esmloader actiontrap cellreflist projectilemanager cellref
     )
 
 add_openmw_dir (mwclass
@@ -110,7 +110,7 @@ if (NOT ANDROID)
         ${APPLE_BUNDLE_RESOURCES}
     )
 else ()
-    add_library(openmw 
+    add_library(openmw
         SHARED
         ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
         ${OPENMW_FILES}
@@ -140,18 +140,18 @@ target_link_libraries(openmw
 
 if (ANDROID)
     target_link_libraries(openmw
-        ${OGRE_STATIC_PLUGINS} 
+        ${OGRE_STATIC_PLUGINS}
         EGL
         android
         log
-        dl  
+        dl
         MyGUI.OgrePlatform
         MyGUIEngineStatic
         Plugin_StrangeButtonStatic
         cpufeatures
         BulletCollision
         BulletDynamics
-        LinearMath 
+        LinearMath
     )
 endif (ANDROID)
 
