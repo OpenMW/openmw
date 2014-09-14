@@ -719,7 +719,10 @@ namespace MWWorld
         }
 
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
-            act->setScale(node->getScale().x);
+        {
+            // NOTE: Ignoring Npc::adjustScale (race height) on purpose. This is a bug in MW and must be replicated for compatibility reasons
+            act->setScale(ptr.getCellRef().getScale());
+        }
     }
 
     bool PhysicsSystem::toggleCollisionMode()
