@@ -275,7 +275,7 @@ namespace MWMechanics
     void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer)
     {
         CreatureStats& creatureStats = actor1.getClass().getCreatureStats(actor1);
-        
+
         if (actor2.getClass().getCreatureStats(actor2).isDead()
                 || actor1.getClass().getCreatureStats(actor1).isDead())
             return;
@@ -296,7 +296,7 @@ namespace MWMechanics
 
         bool aggressive;
 
-        if (againstPlayer) 
+        if (againstPlayer)
         {
             // followers with high fight should not engage in combat with the player (e.g. bm_bear_black_summon)
             const std::list<MWWorld::Ptr>& followers = getActorsFollowing(actor2);
@@ -1096,7 +1096,7 @@ namespace MWMechanics
     void Actors::update (float duration, bool paused)
     {
         if(!paused)
-        {            
+        {
             static float timerUpdateAITargets = 0;
 
             // target lists get updated once every 1.0 sec
@@ -1207,12 +1207,13 @@ namespace MWMechanics
             // check if we still have any player enemies to switch music
             static bool isBattleMusic = false;
 
-            if (isBattleMusic && hostilesCount == 0) 
+            if (isBattleMusic && hostilesCount == 0 && !(player.getClass().getCreatureStats(player).isDead() &&
+            MWBase::Environment::get().getSoundManager()->isMusicPlaying()))
             {
                 MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
                 isBattleMusic = false;
             }
-            else if (!isBattleMusic && hostilesCount > 0) 
+            else if (!isBattleMusic && hostilesCount > 0)
             {
                 MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Battle"));
                 isBattleMusic = true;
