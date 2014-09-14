@@ -181,6 +181,8 @@ class CharacterController
     bool updateCreatureState();
     void updateIdleStormState();
 
+    void castSpell(const std::string& spellid);
+
     void updateVisibility();
 
     void playDeath(float startpoint, CharacterState death);

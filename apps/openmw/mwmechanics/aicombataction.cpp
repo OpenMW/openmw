@@ -292,6 +292,9 @@ namespace MWMechanics
         case ESM::MagicEffect::CurePoison:
             return 1001.f * numEffectsToCure(actor, ESM::MagicEffect::Poison);
 
+        case ESM::MagicEffect::DisintegrateArmor: // TODO: check if actor is wearing armor
+        case ESM::MagicEffect::DisintegrateWeapon: // TODO: check if actor is wearing weapon
+
         default:
             break;
         }
