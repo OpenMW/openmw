@@ -169,11 +169,8 @@ namespace MWGui
                     continue;
 
                 // Bound items may not be bought
-                if (item.mBase.getCellRef().getRefId().size() > 6
-                        && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
-                {
+                if (item.mFlags & ItemStack::Flag_Bound)
                     continue;
-                }
 
                 // don't show equipped items
                 if(mMerchant.getClass().hasInventoryStore(mMerchant))

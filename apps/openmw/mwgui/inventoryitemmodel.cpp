@@ -62,7 +62,7 @@ void InventoryItemModel::removeItem (const ItemStack& item, size_t count)
 MWWorld::Ptr InventoryItemModel::moveItem(const ItemStack &item, size_t count, ItemModel *otherModel)
 {
     // Can't move conjured items: This is a general fix that also takes care of issues with taking conjured items via the 'Take All' button.
-    if (item.mBase.getCellRef().getRefId().size() > 6 && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
+    if (item.mFlags & ItemStack::Flag_Bound)
         return MWWorld::Ptr();
 
     bool setNewOwner = false;
