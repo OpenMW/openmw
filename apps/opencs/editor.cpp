@@ -259,21 +259,32 @@ int CS::Editor::run()
 
 std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 {
-    // TODO: setting
-    Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName("OpenGL Rendering Subsystem"));
+    std::string rendersystem = mUserSettings.settingValue("Video/render system").toStdString();
+    Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName(rendersystem));
+    std::cout << "editor: render system " + rendersystem << std::endl; // FIXME: debug
 
     Ogre::Root::getSingleton().initialise(false);
 
     // Create a hidden background window to keep resources
     Ogre::NameValuePairList params;
     params.insert(std::make_pair("title", ""));
-    params.insert(std::make_pair("FSAA", "0"));
-    params.insert(std::make_pair("vsync", "false"));
+
+    std::string antialiasing = mUserSettings.settingValue("Video/antialiasing").toStdString();
+    if(antialiasing == "MSAA 16")     antialiasing = "16";
+    else if(antialiasing == "MSAA 8") antialiasing = "8";
+    else if(antialiasing == "MSAA 4") antialiasing = "4";
+    else if(antialiasing == "MSAA 2") antialiasing = "2";
+    else                              antialiasing = "0";
+    params.insert(std::make_pair("FSAA", antialiasing));
+
+    std::string vsync = mUserSettings.settingValue("Video/vsync").toStdString() == "true" ? "true" : "false";
+    params.insert(std::make_pair("vsync", vsync));
     params.insert(std::make_pair("hidden", "true"));
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     params.insert(std::make_pair("macAPI", "cocoa"));
 #endif
-    Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, false, &params);
+    bool fullscreen = mUserSettings.settingValue("Video/fullscreen").toStdString() == "true" ? true : false;
+    Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, fullscreen, &params);
     hiddenWindow->setActive(false);
 
     sh::OgrePlatform* platform =
@@ -286,7 +297,16 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     std::auto_ptr<sh::Factory> factory (new sh::Factory (platform));
 
-    factory->setCurrentLanguage (sh::Language_GLSL); /// \todo make this configurable
+    std::string shLang = mUserSettings.settingValue("Shiny/language").toStdString();
+    enum sh::Language lang;
+    if(shLang == "CG")          lang = sh::Language_CG;
+    else if(shLang == "HLSL")   lang = sh::Language_HLSL;
+    else if(shLang == "GLSL")   lang = sh::Language_GLSL;
+    else if(shLang == "GLSLES") lang = sh::Language_GLSLES;
+    else if(shLang == "Count")  lang = sh::Language_Count;
+    else                        lang = sh::Language_None;
+
+    factory->setCurrentLanguage (lang);
     factory->setWriteSourceCache (true);
     factory->setReadSourceCache (true);
     factory->setReadMicrocodeCache (true);

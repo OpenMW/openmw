@@ -33,6 +33,7 @@ namespace CSMSettings {
         const Files::ConfigurationManager& mCfgMgr;
 
         QSettings *mSettingDefinitions;
+        QSettings *mSettingCfgDefinitions;
         QList <Setting *> mSettings;
 
     public:

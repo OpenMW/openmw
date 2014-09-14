@@ -4,10 +4,13 @@
 #include <QFile>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/settings/settings.hpp>
+
 #include <boost/version.hpp>
 
 #include "setting.hpp"
 #include "support.hpp"
+#include <QTextCodec>
 #include <QDebug>
 
 /**
@@ -26,17 +29,66 @@ namespace boost
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
 
+/*
+ * FIXME: temporary notes
+ *
+ * - CSVSettings::Dialog::Dialog is the settings window
+ * - provide a hard coded default if not found in config file
+ * - provide tooltips
+ * - save/cancel option (or auto-save?)
+ * - opencs.ini: where all these settings are saved
+ *   . error if can't create file (directory permissions) or save file (file permissions)
+ * - settings.cfg: where Graphics default settings come from (read only)
+ *   . warning if neither default or user cfg not found or not readable (file permissions)
+ * - openmw.cfg: not used
+ *
+ * - Tabbed view similar to OpenMW or Launcher
+ *   . Video Settings
+ *   . Display Settngs
+ *   . Misc Settings
+ *
+ * - Video settings: tick box for "Use the video settings from OpenMW" (default,
+ *   individual settings greyed out)
+ *   . CS::Editor::setupGraphics()
+ *   . the defaults should be the initial setting when unticked, unless previous user
+ *     settings were found
+ *   # OpenGL/Direct3D9 Rendering Subsystem
+ *   # Vsync
+ *   # FSAA (antialiasing)
+ *   # GLSL/CG shader language
+ *   . other shiny options
+ *   . screen number
+ *   # full screen / windowed (resolution) <- replace already existing
+ *
+ * - Display Settings
+ *   . text only / icon + text <- replace already existing
+ *   . limit the number of subviews per top level view
+ *   . option to reuse subviews
+ *   . v/w/dialoguesubview min width 325
+ *   . filter pattern syntax
+ *
+ * - misc
+ *   . v/r/scenewidget mFastFactor(4)
+ *   . v/r/scenewidget far clip distance
+ *   . v/r/scenewidget start timer 20
+ *   . v/r/scenewidget shortcut
+ *   . v/d/adjusterwidget error
+ *   . v/r/navigation factor /= 2
+ *   . v/w/table redirect extended action
+ */
+
 CSMSettings::UserSettings *CSMSettings::UserSettings::mUserSettingsInstance = 0;
 
 CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
-: mCfgMgr (configurationManager)
+    : mCfgMgr (configurationManager)
+    , mSettingDefinitions(NULL)
+    , mSettingCfgDefinitions(NULL)
 {
     assert(!mUserSettingsInstance);
     mUserSettingsInstance = this;
 
-    mSettingDefinitions = 0;
-
     buildSettingModelDefaults();
+    mSettingCfgDefinitions = new QSettings(QSettings::IniFormat, QSettings::UserScope, "");
 }
 
 void CSMSettings::UserSettings::buildSettingModelDefaults()
@@ -276,6 +328,8 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
 CSMSettings::UserSettings::~UserSettings()
 {
+    delete mSettingDefinitions;
+    delete mSettingCfgDefinitions;
     mUserSettingsInstance = 0;
 }
 
@@ -305,6 +359,54 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 
     mSettingDefinitions = new QSettings
         (QSettings::IniFormat, QSettings::UserScope, "opencs", QString(), this);
+
+    // if user setting (opencs.ini) exists
+    //   if readable, then check whether the option to use settings.cfg video settings should be used is set
+    //     use the config settings from settings.cfg
+    //   else if video config found
+    //     use the config settings from opencs.ini
+    // if any of the config option is not found, use hard coded default in this file
+    //
+
+    // Create the settings manager and load default settings file
+    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/settings-default.cfg";
+    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/settings-default.cfg";
+
+    Settings::Manager settings;
+    // prefer local
+    if (boost::filesystem::exists(localdefault))
+        settings.loadDefault(localdefault);
+    else if (boost::filesystem::exists(globaldefault))
+        settings.loadDefault(globaldefault);
+    else
+        std::cerr<< "No default settings file found! Make sure the file \"settings-default.cfg\" was properly installed."<< std::endl;
+
+    // load user settings if they exist, otherwise just load the default settings as user settings
+    const std::string settingspath = mCfgMgr.getUserConfigPath().string() + "/settings.cfg";
+    if (boost::filesystem::exists(settingspath))
+        settings.loadUser(settingspath);
+    else if (boost::filesystem::exists(localdefault))
+        settings.loadUser(localdefault);
+    else if (boost::filesystem::exists(globaldefault))
+        settings.loadUser(globaldefault);
+
+    std::string renderSystem = settings.getString("render system", "Video");
+    std::cout << "user settings: render system " + renderSystem << std::endl; // FIXME: debug
+
+    if(renderSystem == "")
+    {
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        renderSystem = "Direct3D9 Rendering Subsystem";
+#else
+        renderSystem = "OpenGL Rendering Subsystem";
+#endif
+    }
+    mSettingCfgDefinitions->setValue("Video/render system", renderSystem.c_str());
+    // Force shiny language based on render system
+    if(renderSystem == "Direct3D9 Rendering Subsystem")
+        mSettingDefinitions->setValue("Shiny/language", "CG");
+    else
+        mSettingDefinitions->setValue("Shiny/language", "GLSL");
 }
 
 bool CSMSettings::UserSettings::hasSettingDefinitions
@@ -326,10 +428,25 @@ void CSMSettings::UserSettings::saveDefinitions() const
 
 QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
 {
-    if (!mSettingDefinitions->contains (settingKey))
-        return QString();
+    QStringList defs;
 
-    QStringList defs = mSettingDefinitions->value (settingKey).toStringList();
+    // check if video settings are overriden
+    if(settingKey.contains(QRegExp("^\\b(Video)", Qt::CaseInsensitive)) &&
+            mSettingDefinitions->value("Video/override settings.cfg") == "true")
+    {
+        std::cout << "user settings: override " << std::endl; // FIXME: debug
+        if (!mSettingCfgDefinitions->contains (settingKey))
+            return QString();
+        else
+            defs = mSettingCfgDefinitions->value (settingKey).toStringList();
+    }
+    else
+    {
+        if (!mSettingDefinitions->contains (settingKey))
+            return QString();
+
+        defs = mSettingDefinitions->value (settingKey).toStringList();
+    }
 
     if (defs.isEmpty())
         return QString();
@@ -386,7 +503,6 @@ void CSMSettings::UserSettings::removeSetting
         removeIterator++;
     }
 }
-
 
 CSMSettings::SettingPageMap CSMSettings::UserSettings::settingPageMap() const
 {
