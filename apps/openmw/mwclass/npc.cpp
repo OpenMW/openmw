@@ -640,10 +640,12 @@ namespace MWClass
 
         bool wasDead = getCreatureStats(ptr).isDead();
 
-        getCreatureStats(ptr).setAttacked(true);
+        if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
+        {
+            getCreatureStats(ptr).setAttacked(true);
 
-        if (!attacker.isEmpty())
             MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+        }
 
         if(!successful)
         {
