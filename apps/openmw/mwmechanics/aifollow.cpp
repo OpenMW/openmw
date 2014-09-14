@@ -45,7 +45,9 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 {
     MWWorld::Ptr target = getTarget();
 
-    if (target.isEmpty())
+    if (target.isEmpty() || !target.getRefData().getCount() || !target.getRefData().isEnabled()  // Really we should be checking whether the target is currently registered
+                                                                                                 // with the MechanicsManager
+            )
         return true; //Target doesn't exist
 
     // Only the player can be actively followed. AiFollow packages with targets other than the player

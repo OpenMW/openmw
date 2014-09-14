@@ -28,7 +28,10 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
 
     actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
-    if(target == MWWorld::Ptr())
+    if(target == MWWorld::Ptr() ||
+        !target.getRefData().getCount() || !target.getRefData().isEnabled()  // Really we should be checking whether the target is currently registered
+                                                                            // with the MechanicsManager
+            )
         return true;   //Target doesn't exist
 
     //Set the target desition from the actor
