@@ -98,6 +98,10 @@ void CSVDoc::View::setupViewMenu()
     mShowStatusBar = new QAction (tr ("Show Status Bar"), this);
     mShowStatusBar->setCheckable (true);
     connect (mShowStatusBar, SIGNAL (toggled (bool)), this, SLOT (toggleShowStatusBar (bool)));
+    std::string showStatusBar =
+        CSMSettings::UserSettings::instance().settingValue("Display/show statusbar").toStdString();
+    if(showStatusBar == "true")
+        mShowStatusBar->setChecked(true);
     view->addAction (mShowStatusBar);
 
     QAction *filters = new QAction (tr ("Filters"), this);
