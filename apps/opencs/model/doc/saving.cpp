@@ -23,6 +23,9 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::DebugProfile> > (
         mDocument.getData().getDebugProfiles(), mState, CSMWorld::Scope_Project));
 
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Script> > (
+        mDocument.getData().getScripts(), mState, CSMWorld::Scope_Project));
+
     appendStage (new CloseSaveStage (mState));
 
     // save content file

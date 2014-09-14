@@ -110,7 +110,11 @@ void Script::save(ESMWriter &esm) const
 
         mVarNames.clear();
         mScriptData.clear();
-        mScriptText = "Begin " + mId + "\n\nEnd " + mId + "\n";
+
+        if (mId.find ("::")!=std::string::npos)
+            mScriptText = "Begin \"" + mId + "\"\n\nEnd " + mId + "\n";
+        else
+            mScriptText = "Begin " + mId + "\n\nEnd " + mId + "\n";
     }
 
 }

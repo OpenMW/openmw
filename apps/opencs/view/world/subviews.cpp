@@ -33,7 +33,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Factions,
         CSMWorld::UniversalId::Type_Races,
         CSMWorld::UniversalId::Type_Sounds,
-        CSMWorld::UniversalId::Type_Scripts,
         CSMWorld::UniversalId::Type_Regions,
         CSMWorld::UniversalId::Type_Birthsigns,
         CSMWorld::UniversalId::Type_Spells,
@@ -89,6 +88,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     // Other stuff (combined record tables)
     manager.add (CSMWorld::UniversalId::Type_RegionMap, new CSVDoc::SubViewFactory<RegionMapSubView>);
 
+    manager.add (CSMWorld::UniversalId::Type_Scene, new CSVDoc::SubViewFactory<SceneSubView>);
+
+    // More other stuff
     manager.add (CSMWorld::UniversalId::Type_Filters,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView,
         CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> >);
@@ -97,7 +99,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<TableSubView,
         CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> >);
 
-    manager.add (CSMWorld::UniversalId::Type_Scene, new CSVDoc::SubViewFactory<SceneSubView>);
+    manager.add (CSMWorld::UniversalId::Type_Scripts,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GenericCreator,
+            CSMWorld::Scope_Project | CSMWorld::Scope_Content> >);
 
     // Dialogue subviews
     static const CSMWorld::UniversalId::Type sTableTypes2[] =
