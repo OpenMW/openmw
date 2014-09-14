@@ -46,7 +46,7 @@ namespace MyGUIPlugin
 
         boost::program_options::options_description desc("Allowed options");
         desc.add_options()
-        ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
+        ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken()->composing())
         ("data-local", boost::program_options::value<std::string>()->default_value(""))
         ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
         ("fallback-archive", boost::program_options::value<std::vector<std::string> >()->
