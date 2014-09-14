@@ -1449,6 +1449,7 @@ namespace MWGui
             forceHide((GuiWindow)(MWGui::GW_Inventory | MWGui::GW_Magic));
     }
 
+    // Remove this method for MyGUI 3.2.2
     void WindowManager::setKeyFocusWidget(MyGUI::Widget *widget)
     {
         if (widget == NULL)

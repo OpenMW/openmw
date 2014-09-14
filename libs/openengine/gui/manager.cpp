@@ -23,6 +23,7 @@ namespace MyGUI
  *  As of MyGUI 3.2.0, MyGUI::OgreDataManager::isDataExist is unnecessarily complex
  *  this override fixes the resulting performance issue.
  */
+// Remove for MyGUI 3.2.2
 class FixedOgreDataManager : public MyGUI::OgreDataManager
 {
 public:

@@ -213,6 +213,7 @@ namespace MWGui
 
     void SaveGameDialog::accept(bool reallySure)
     {
+        // Remove for MyGUI 3.2.2
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
 
         if (mSaving)

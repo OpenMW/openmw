@@ -23,6 +23,7 @@ void WindowBase::setVisible(bool visible)
         close();
 
     // This is needed as invisible widgets can retain key focus.
+    // Remove for MyGUI 3.2.2
     if (!visible)
     {
         MyGUI::Widget* keyFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
