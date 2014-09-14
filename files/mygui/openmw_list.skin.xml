@@ -5,7 +5,7 @@
     <!-- Horizontal Scrollbar -->
 
     <Skin name="MW_HScroll" size="90 14">
-        <Property key="TrackRangeMargins" value="14 14"/>
+        <Property key="TrackRangeMargins" value="20 19"/>
         <Property key="MinTrackSize" value="14"/>
         <Property key="VerticalAlignment" value="false"/>
         <Property key="MoveToClick" value="true"/>
@@ -35,7 +35,7 @@
     </Skin>
 
     <Skin name="MW_ScrollTrackH" size="16 16" texture="textures\tx_menubook_bookmark.dds">
-        <BasisSkin type="TileRect" offset="6 0 3 16" align="Stretch">
+        <BasisSkin type="TileRect" offset="0 0 16 16" align="Stretch">
             <State name="normal" offset="70 22 16 16">
                 <Property key="TileSize" value="16 16"/>
                 <Property key="TileH" value="true"/>
@@ -47,7 +47,7 @@
     <!-- Vertical Scrollbar -->
 
     <Skin name="MW_VScroll" size="14 90">
-        <Property key="TrackRangeMargins" value="14 14"/>
+        <Property key="TrackRangeMargins" value="20 19"/>
         <Property key="MinTrackSize" value="14"/>
         <Property key="MoveToClick" value="true"/>
 
@@ -79,7 +79,8 @@
     </Skin>
 
     <Skin name="MW_ScrollTrackV" size="16 16" texture="textures\tx_menubook_bookmark.dds">
-        <BasisSkin type="TileRect" offset="0 7 16 3" align="Stretch">
+        <Property key="MinTrackSize" value="14"/>
+        <BasisSkin type="TileRect" offset="0 0 16 16" align="Stretch">
             <State name="normal" offset="68 19 16 16">
                 <Property key="TileSize" value="16 16"/>
                 <Property key="TileH" value="true"/>
