@@ -91,6 +91,14 @@ add_component_dir (ogreinit
     ogreinit ogreplugin
     )
 
+add_component_dir (widgets
+    box imagebutton
+    )
+
+add_component_dir (fontloader
+    fontloader
+    )
+
 add_component_dir (version
     version
     )
@@ -111,6 +119,12 @@ if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
     QT4_WRAP_UI(ESM_UI_HDR ${ESM_UI})
    QT4_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
 endif(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
+
+if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" AND NOT APPLE)
+        add_definitions(-fPIC)
+    endif()
+endif ()
 
 include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 

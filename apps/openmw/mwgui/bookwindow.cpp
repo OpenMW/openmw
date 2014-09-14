@@ -193,7 +193,7 @@ namespace MWGui
         }
     }
 
-    void BookWindow::adjustButton (MWGui::ImageButton* button)
+    void BookWindow::adjustButton (Gui::ImageButton* button)
     {
         MyGUI::IntSize diff = button->getSize() - button->getRequestedSize();
         button->setSize(button->getRequestedSize());

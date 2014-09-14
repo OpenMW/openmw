@@ -370,10 +370,10 @@ namespace MWGui
 
     void SettingsWindow::onShaderModeToggled(MyGUI::Widget* _sender)
     {
-        std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
+        std::string val = _sender->castType<MyGUI::Button>()->getCaption();
         val = hlslGlsl();
 
-        static_cast<MyGUI::Button*>(_sender)->setCaption(val);
+        _sender->castType<MyGUI::Button>()->setCaption(val);
 
         Settings::Manager::setString("shader mode", "General", val);
 
@@ -483,7 +483,7 @@ namespace MWGui
     {
         int actionId = *_sender->getUserData<int>();
 
-        static_cast<MyGUI::Button*>(_sender)->setCaptionWithReplacing("#{sNone}");
+        _sender->castType<MyGUI::Button>()->setCaptionWithReplacing("#{sNone}");
 
         MWBase::Environment::get().getWindowManager ()->staticMessageBox ("#{sControlsMenu3}");
         MWBase::Environment::get().getWindowManager ()->disallowMouse();

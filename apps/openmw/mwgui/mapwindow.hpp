@@ -171,6 +171,8 @@ namespace MWGui
 
         void setCellName(const std::string& cellName);
 
+        virtual void setAlpha(float alpha);
+
         void renderGlobalMap(Loading::Listener* loadingListener);
 
         // adds the marker to the global map

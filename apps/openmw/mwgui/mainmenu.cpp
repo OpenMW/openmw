@@ -4,6 +4,8 @@
 
 #include <components/version/version.hpp>
 
+#include <components/widgets/imagebutton.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -16,7 +18,6 @@
 
 #include "savegamedialog.hpp"
 #include "confirmationdialog.hpp"
-#include "imagebutton.hpp"
 #include "backgroundimage.hpp"
 #include "videowidget.hpp"
 
@@ -249,7 +250,7 @@ namespace MWGui
         {
             if (mButtons.find(*it) == mButtons.end())
             {
-                MWGui::ImageButton* button = mButtonBox->createWidget<MWGui::ImageButton>
+                Gui::ImageButton* button = mButtonBox->createWidget<Gui::ImageButton>
                         ("ImageBox", MyGUI::IntCoord(0, curH, 0, 0), MyGUI::Align::Default);
                 button->setProperty("ImageHighlighted", "textures\\menu_" + *it + "_over.dds");
                 button->setProperty("ImageNormal", "textures\\menu_" + *it + ".dds");
@@ -262,7 +263,7 @@ namespace MWGui
 
         // Start by hiding all buttons
         int maxwidth = 0;
-        for (std::map<std::string, MWGui::ImageButton*>::iterator it = mButtons.begin(); it != mButtons.end(); ++it)
+        for (std::map<std::string, Gui::ImageButton*>::iterator it = mButtons.begin(); it != mButtons.end(); ++it)
         {
             it->second->setVisible(false);
             MyGUI::IntSize requested = it->second->getRequestedSize();
@@ -274,7 +275,7 @@ namespace MWGui
         for (std::vector<std::string>::iterator it = buttons.begin(); it != buttons.end(); ++it)
         {
             assert(mButtons.find(*it) != mButtons.end());
-            MWGui::ImageButton* button = mButtons[*it];
+            Gui::ImageButton* button = mButtons[*it];
             button->setVisible(true);
 
             MyGUI::IntSize requested = button->getRequestedSize();

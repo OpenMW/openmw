@@ -154,7 +154,7 @@ namespace MWGui
 
         void MWList::onItemSelected(MyGUI::Widget* _sender)
         {
-            std::string name = static_cast<MyGUI::Button*>(_sender)->getCaption();
+            std::string name = _sender->castType<MyGUI::Button>()->getCaption();
             int id = *_sender->getUserData<int>();
             eventItemSelected(name, id);
             eventWidgetSelected(_sender);

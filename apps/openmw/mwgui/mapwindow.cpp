@@ -862,6 +862,15 @@ namespace MWGui
         }
     }
 
+    void MapWindow::setAlpha(float alpha)
+    {
+        NoDrop::setAlpha(alpha);
+        // can't allow showing map with partial transparency, as the fog of war will also go transparent
+        // and reveal parts of the map you shouldn't be able to see
+        for (std::vector<MyGUI::ImageBox*>::iterator it = mMapWidgets.begin(); it != mMapWidgets.end(); ++it)
+            (*it)->setVisible(alpha == 1);
+    }
+
     // -------------------------------------------------------------------
 
     EditNoteDialog::EditNoteDialog()

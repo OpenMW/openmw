@@ -138,7 +138,7 @@ namespace MWGui
         mFilterMagic->setStateSelected(false);
         mFilterMisc->setStateSelected(false);
 
-        static_cast<MyGUI::Button*>(_sender)->setStateSelected(true);
+        _sender->castType<MyGUI::Button>()->setStateSelected(true);
 
         mItemView->update();
     }
@@ -393,8 +393,8 @@ namespace MWGui
 
     void TradeWindow::addRepeatController(MyGUI::Widget *widget)
     {
-        MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(Controllers::ControllerRepeatClick::getClassTypeName());
-        Controllers::ControllerRepeatClick* controller = item->castType<Controllers::ControllerRepeatClick>();
+        MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(Controllers::ControllerRepeatEvent::getClassTypeName());
+        Controllers::ControllerRepeatEvent* controller = item->castType<Controllers::ControllerRepeatEvent>();
         controller->eventRepeatClick += MyGUI::newDelegate(this, &TradeWindow::onRepeatClick);
         controller->setRepeat(sBalanceChangeInitialPause, sBalanceChangeInterval);
         MyGUI::ControllerManager::getInstance().addItem(widget, controller);

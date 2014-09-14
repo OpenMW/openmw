@@ -3,7 +3,7 @@
 
 #include <components/to_utf8/to_utf8.hpp>
 
-namespace MWGui
+namespace Gui
 {
 
 

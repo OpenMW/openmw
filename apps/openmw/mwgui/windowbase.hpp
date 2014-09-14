@@ -55,6 +55,7 @@ namespace MWGui
         NoDrop(DragAndDrop* drag, MyGUI::Widget* widget);
 
         void onFrame(float dt);
+        virtual void setAlpha(float alpha);
 
     private:
         MyGUI::Widget* mWidget;
