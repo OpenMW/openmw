@@ -836,10 +836,6 @@
     </Skin>
 
     <Skin name="MW_Dialog" size="256 54">
-        <Property key="FontName" value="Default"/>
-        <Property key="TextAlign" value="Center"/>
-        <Property key="TextColour" value="0.8 0.8 0.8"/>
-
         <Child type="Widget" skin="BlackBG" offset="4 4 248 46" align="Stretch" name="Client"/>
 
         <!-- Outer borders -->

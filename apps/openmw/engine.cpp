@@ -341,8 +341,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
 
-    //addResourcesDirectory(mResDir);
-
     addResourcesDirectory(mCfgMgr.getCachePath ().string());
 
     addResourcesDirectory(mResDir / "mygui");
@@ -369,7 +367,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
-    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v1.xml").string();
+    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v2.xml").string();
     bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
     MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, mGrab);
     mEnvironment.setInputManager (input);

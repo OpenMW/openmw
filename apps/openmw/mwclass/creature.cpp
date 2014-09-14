@@ -329,7 +329,8 @@ namespace MWClass
     {
         // NOTE: 'object' and/or 'attacker' may be empty.
 
-        getCreatureStats(ptr).setAttacked(true);
+        if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
+            getCreatureStats(ptr).setAttacked(true);
 
         // Self defense
         if ((canWalk(ptr) || canFly(ptr) || canSwim(ptr)) // No retaliation for totally static creatures

@@ -148,7 +148,7 @@ void CompanionWindow::onMessageBoxButtonClicked(int button)
     if (button == 0)
     {
         mPtr.getRefData().getLocals().setVarByInt(mPtr.getClass().getScript(mPtr),
-            "minimumProfit", mPtr.getClass().getNpcStats(mPtr).getProfit());
+            "minimumprofit", mPtr.getClass().getNpcStats(mPtr).getProfit());
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);
         MWBase::Environment::get().getDialogueManager()->startDialogue (mPtr);

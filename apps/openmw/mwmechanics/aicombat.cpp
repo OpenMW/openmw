@@ -180,7 +180,9 @@ namespace MWMechanics
         if (target.isEmpty())
             return false;
 
-        if(target.getClass().getCreatureStats(target).isDead())
+        if(!target.getRefData().getCount() || !target.getRefData().isEnabled()  // Really we should be checking whether the target is currently registered
+                                                                                // with the MechanicsManager
+                || target.getClass().getCreatureStats(target).isDead())
             return true;
 
         const MWWorld::Class& actorClass = actor.getClass();

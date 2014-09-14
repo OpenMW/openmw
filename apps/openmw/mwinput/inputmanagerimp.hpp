@@ -108,7 +108,7 @@ namespace MWInput
             , ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction);
 
         virtual void keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-            , SDL_Keycode key, ICS::Control::ControlChangingDirection direction);
+            , SDL_Scancode key, ICS::Control::ControlChangingDirection direction);
 
         virtual void mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
             , unsigned int button, ICS::Control::ControlChangingDirection direction);
