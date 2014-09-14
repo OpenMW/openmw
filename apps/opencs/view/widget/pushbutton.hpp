@@ -14,6 +14,7 @@ namespace CSVWidget
             enum Type
             {
                 Type_TopMode, // top level button for mode selector panel
+                Type_TopAction, // top level button that triggers an action
                 Type_Mode, // mode button
                 Type_Toggle
             };
@@ -50,6 +51,8 @@ namespace CSVWidget
 
             /// Return tooltip used at construction (without any button-specific modifications)
             QString getBaseToolTip() const;
+
+            Type getType() const;
     };
 }
 

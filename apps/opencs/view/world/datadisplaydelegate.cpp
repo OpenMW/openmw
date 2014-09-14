@@ -6,11 +6,11 @@
 
 CSVWorld::DataDisplayDelegate::DataDisplayDelegate(const ValueList &values,
                                                    const IconList &icons,
-                                                   QUndoStack &undoStack,
+                                                   CSMDoc::Document& document,
                                                    const QString &pageName,
                                                    const QString &settingName,
                                                    QObject *parent)
-    : EnumDelegate (values, undoStack, parent), mDisplayMode (Mode_TextOnly),
+    : EnumDelegate (values, document, parent), mDisplayMode (Mode_TextOnly),
       mIcons (icons), mIconSize (QSize(16, 16)), mIconLeftOffset(3),
       mTextLeftOffset(8), mSettingKey (pageName + '/' + settingName)
 {
@@ -126,8 +126,6 @@ void CSVWorld::DataDisplayDelegate::updateDisplayMode (const QString &mode)
 
 CSVWorld::DataDisplayDelegate::~DataDisplayDelegate()
 {
-    mIcons.clear();
-    mPixmaps.clear();
 }
 
 void CSVWorld::DataDisplayDelegateFactory::add (int enumValue, QString enumName, QString iconFilename)
@@ -137,11 +135,10 @@ void CSVWorld::DataDisplayDelegateFactory::add (int enumValue, QString enumName,
 
 }
 
-CSVWorld::CommandDelegate *CSVWorld::DataDisplayDelegateFactory::makeDelegate (QUndoStack& undoStack,
-    QObject *parent) const
+CSVWorld::CommandDelegate *CSVWorld::DataDisplayDelegateFactory::makeDelegate (
+    CSMDoc::Document& document, QObject *parent) const
 {
-
-    return new DataDisplayDelegate (mValues, mIcons, undoStack, "", "", parent);
+    return new DataDisplayDelegate (mValues, mIcons, document, "", "", parent);
 }
 
 

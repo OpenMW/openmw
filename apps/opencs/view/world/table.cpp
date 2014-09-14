@@ -179,7 +179,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
                 mModel->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
             CommandDelegate *delegate = CommandDelegateFactoryCollection::get().makeDelegate (display,
-                mDocument.getUndoStack(), this);
+                mDocument, this);
 
             mDelegates.push_back (delegate);
             setItemDelegateForColumn (i, delegate);

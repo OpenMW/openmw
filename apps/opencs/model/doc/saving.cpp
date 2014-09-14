@@ -17,7 +17,14 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
 
     appendStage (new WriteHeaderStage (mDocument, mState, true));
 
-    appendStage (new WriteFilterStage (mDocument, mState, CSMFilter::Filter::Scope_Project));
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Filter> > (
+        mDocument.getData().getFilters(), mState, CSMWorld::Scope_Project));
+
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::DebugProfile> > (
+        mDocument.getData().getDebugProfiles(), mState, CSMWorld::Scope_Project));
+
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Script> > (
+        mDocument.getData().getScripts(), mState, CSMWorld::Scope_Project));
 
     appendStage (new CloseSaveStage (mState));
 

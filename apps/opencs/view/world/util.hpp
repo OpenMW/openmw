@@ -51,7 +51,8 @@ namespace CSVWorld
 
             virtual ~CommandDelegateFactory();
 
-            virtual CommandDelegate *makeDelegate (QUndoStack& undoStack, QObject *parent) const = 0;
+            virtual CommandDelegate *makeDelegate (CSMDoc::Document& document, QObject *parent)
+                const = 0;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
     };
 
@@ -77,7 +78,7 @@ namespace CSVWorld
             ///
             /// This function must not be called more than once per value of \a display.
 
-            CommandDelegate *makeDelegate (CSMWorld::ColumnBase::Display display, QUndoStack& undoStack,
+            CommandDelegate *makeDelegate (CSMWorld::ColumnBase::Display display, CSMDoc::Document& document,
                 QObject *parent) const;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
             ///
@@ -110,19 +111,21 @@ namespace CSVWorld
     {
             Q_OBJECT
 
-            QUndoStack& mUndoStack;
+            CSMDoc::Document& mDocument;
             bool mEditLock;
 
         protected:
 
             QUndoStack& getUndoStack() const;
 
+            CSMDoc::Document& getDocument() const;
+
             virtual void setModelDataImp (QWidget *editor, QAbstractItemModel *model,
                 const QModelIndex& index) const;
 
         public:
 
-            CommandDelegate (QUndoStack& undoStack, QObject *parent);
+            CommandDelegate (CSMDoc::Document& document, QObject *parent);
 
             virtual void setModelData (QWidget *editor, QAbstractItemModel *model,
                 const QModelIndex& index) const;

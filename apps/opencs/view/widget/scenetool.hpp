@@ -14,9 +14,17 @@ namespace CSVWidget
 
         public:
 
-            SceneTool (SceneToolbar *parent);
+            SceneTool (SceneToolbar *parent, Type type = Type_TopMode);
 
             virtual void showPanel (const QPoint& position) = 0;
+
+            /// This function will only called for buttons of type Type_TopAction. The default
+            /// implementation is empty.
+            virtual void activate();
+
+        protected:
+
+            void mouseReleaseEvent (QMouseEvent *event);
 
         private slots:
 

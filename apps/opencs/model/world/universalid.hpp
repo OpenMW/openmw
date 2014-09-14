@@ -119,10 +119,13 @@ namespace CSMWorld
                 Type_Textures,
                 Type_Texture,
                 Type_Videos,
-                Type_Video
+                Type_Video,
+                Type_DebugProfiles,
+                Type_DebugProfile,
+                Type_RunLog
             };
 
-            enum { NumberOfTypes = Type_BodyPart+1 };
+            enum { NumberOfTypes = Type_DebugProfile+1 };
 
         private:
 

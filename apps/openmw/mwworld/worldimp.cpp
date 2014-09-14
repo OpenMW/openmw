@@ -51,7 +51,6 @@
 
 #include "contentloader.hpp"
 #include "esmloader.hpp"
-#include "omwloader.hpp"
 
 using namespace Ogre;
 
@@ -170,12 +169,12 @@ namespace MWWorld
 
         GameContentLoader gameContentLoader(*listener);
         EsmLoader esmLoader(mStore, mEsm, encoder, *listener);
-        OmwLoader omwLoader(*listener);
 
         gameContentLoader.addLoader(".esm", &esmLoader);
         gameContentLoader.addLoader(".esp", &esmLoader);
-        gameContentLoader.addLoader(".omwgame", &omwLoader);
-        gameContentLoader.addLoader(".omwaddon", &omwLoader);
+        gameContentLoader.addLoader(".omwgame", &esmLoader);
+        gameContentLoader.addLoader(".omwaddon", &esmLoader);
+        gameContentLoader.addLoader(".project", &esmLoader);
 
         loadContentFiles(fileCollections, contentFiles, gameContentLoader);
 

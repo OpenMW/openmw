@@ -105,7 +105,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("help", "print help message")
         ("version", "print version information and quit")
         ("data", bpo::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")
-            ->multitoken(), "set data directories (later directories have higher priority)")
+            ->multitoken()->composing(), "set data directories (later directories have higher priority)")
 
         ("data-local", bpo::value<std::string>()->default_value(""),
             "set local data directory (highest priority)")
@@ -152,6 +152,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
         ("skip-menu", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "skip main menu on game startup")
+
+        ("new-game", bpo::value<bool>()->implicit_value(true)
+            ->default_value(false), "run new game sequence (ignored if skip-menu=0)")
 
         ("fs-strict", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "strict file system handling (no case folding)")
@@ -256,7 +259,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     // startup-settings
     engine.setCell(variables["start"].as<std::string>());
-    engine.setSkipMenu (variables["skip-menu"].as<bool>());
+    engine.setSkipMenu (variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
+    if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
+        std::cerr << "new-game used without skip-menu -> ignoring it" << std::endl;
 
     // scripts
     engine.setCompileAll(variables["script-all"].as<bool>());

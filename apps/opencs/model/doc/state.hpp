@@ -8,12 +8,13 @@ namespace CSMDoc
         State_Modified = 1,
         State_Locked = 2,
         State_Operation = 4,
+        State_Running = 8,
 
-        State_Saving = 8,
-        State_Verifying = 16,
-        State_Compiling = 32, // not implemented yet
-        State_Searching = 64, // not implemented yet
-        State_Loading = 128   // pseudo-state; can not be encountered in a loaded document
+        State_Saving = 16,
+        State_Verifying = 32,
+        State_Compiling = 64, // not implemented yet
+        State_Searching = 128, // not implemented yet
+        State_Loading = 256   // pseudo-state; can not be encountered in a loaded document
     };
 }
 

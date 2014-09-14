@@ -165,7 +165,6 @@ namespace CSMWorld
             ColumnId_Rank = 152,
             ColumnId_Gender = 153,
             ColumnId_PcRank = 154,
-            ColumnId_Scope = 155,
             ColumnId_ReferenceableId = 156,
             ColumnId_CombatState = 157,
             ColumnId_MagicState = 158,
@@ -175,6 +174,9 @@ namespace CSMWorld
             ColumnId_BodyPartType = 162,
             ColumnId_MeshType = 163,
             ColumnId_OwnerGlobal = 164,
+            ColumnId_DefaultProfile = 165,
+            ColumnId_BypassNewGame = 166,
+            ColumnId_GlobalProfile = 167,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

@@ -81,7 +81,13 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                 mMagicEffects.load (esm);
             } else if (n.val == ESM::REC_SKIL) {
                 mSkills.load (esm);
-            } else {
+            }
+            else if (n.val==ESM::REC_FILT || ESM::REC_DBGP)
+            {
+                // ignore project file only records
+                esm.skipRecord();
+            }
+            else {
                 std::stringstream error;
                 error << "Unknown record: " << n.toString();
                 throw std::runtime_error(error.str());

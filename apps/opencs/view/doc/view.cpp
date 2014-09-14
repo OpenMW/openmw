@@ -12,6 +12,8 @@
 #include "../../model/doc/document.hpp"
 #include "../../model/settings/usersettings.hpp"
 
+#include "../../model/world/idtable.hpp"
+
 #include "../world/subviews.hpp"
 
 #include "../tools/subviews.hpp"
@@ -19,6 +21,9 @@
 #include "viewmanager.hpp"
 #include "operations.hpp"
 #include "subview.hpp"
+#include "globaldebugprofilemenu.hpp"
+#include "runlogsubview.hpp"
+#include "subviewfactoryimp.hpp"
 
 void CSVDoc::View::closeEvent (QCloseEvent *event)
 {
@@ -232,6 +237,35 @@ void CSVDoc::View::setupAssetsMenu()
     assets->addAction (videos);
 }
 
+void CSVDoc::View::setupDebugMenu()
+{
+    QMenu *debug = menuBar()->addMenu (tr ("Debug"));
+
+    QAction *profiles = new QAction (tr ("Debug Profiles"), this);
+    connect (profiles, SIGNAL (triggered()), this, SLOT (addDebugProfilesSubView()));
+    debug->addAction (profiles);
+
+    debug->addSeparator();
+
+    mGlobalDebugProfileMenu = new GlobalDebugProfileMenu (
+        &dynamic_cast<CSMWorld::IdTable&> (*mDocument->getData().getTableModel (
+        CSMWorld::UniversalId::Type_DebugProfiles)), this);
+
+    connect (mGlobalDebugProfileMenu, SIGNAL (triggered (const std::string&)),
+        this, SLOT (run (const std::string&)));
+
+    QAction *runDebug = debug->addMenu (mGlobalDebugProfileMenu);
+    runDebug->setText (tr ("Run OpenMW"));
+
+    mStopDebug = new QAction (tr ("Shutdown OpenMW"), this);
+    connect (mStopDebug, SIGNAL (triggered()), this, SLOT (stop()));
+    debug->addAction (mStopDebug);
+
+    QAction *runLog = new QAction (tr ("Run Log"), this);
+    connect (runLog, SIGNAL (triggered()), this, SLOT (addRunLogSubView()));
+    debug->addAction (runLog);
+}
+
 void CSVDoc::View::setupUi()
 {
     setupFileMenu();
@@ -241,6 +275,7 @@ void CSVDoc::View::setupUi()
     setupMechanicsMenu();
     setupCharacterMenu();
     setupAssetsMenu();
+    setupDebugMenu();
 }
 
 void CSVDoc::View::updateTitle()
@@ -261,6 +296,7 @@ void CSVDoc::View::updateTitle()
 void CSVDoc::View::updateActions()
 {
     bool editing = !(mDocument->getState() & CSMDoc::State_Locked);
+    bool running = mDocument->getState() & CSMDoc::State_Running;
 
     for (std::vector<QAction *>::iterator iter (mEditingActions.begin()); iter!=mEditingActions.end(); ++iter)
         (*iter)->setEnabled (editing);
@@ -268,8 +304,11 @@ void CSVDoc::View::updateActions()
     mUndo->setEnabled (editing & mDocument->getUndoStack().canUndo());
     mRedo->setEnabled (editing & mDocument->getUndoStack().canRedo());
 
-    mSave->setEnabled (!(mDocument->getState() & CSMDoc::State_Saving));
+    mSave->setEnabled (!(mDocument->getState() & CSMDoc::State_Saving) && !running);
     mVerify->setEnabled (!(mDocument->getState() & CSMDoc::State_Verifying));
+
+    mGlobalDebugProfileMenu->updateActions (running);
+    mStopDebug->setEnabled (running);
 }
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
@@ -295,8 +334,12 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
 
     setupUi();
 
+    updateActions();
+
     CSVWorld::addSubViewFactories (mSubViewFactory);
     CSVTools::addSubViewFactories (mSubViewFactory);
+
+    mSubViewFactory.add (CSMWorld::UniversalId::Type_RunLog, new SubViewFactory<RunLogSubView>);
 
     connect (mOperations, SIGNAL (abortOperation (int)), this, SLOT (abortOperation (int)));
 }
@@ -543,6 +586,16 @@ void CSVDoc::View::addVideosSubView()
     addSubView (CSMWorld::UniversalId::Type_Videos);
 }
 
+void CSVDoc::View::addDebugProfilesSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_DebugProfiles);
+}
+
+void CSVDoc::View::addRunLogSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_RunLog);
+}
+
 void CSVDoc::View::abortOperation (int type)
 {
     mDocument->abortOperation (type);
@@ -587,4 +640,14 @@ void CSVDoc::View::toggleShowStatusBar (bool show)
 void CSVDoc::View::loadErrorLog()
 {
     addSubView (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_LoadErrorLog, 0));
+}
+
+void CSVDoc::View::run (const std::string& profile, const std::string& startupInstruction)
+{
+    mDocument->startRunning (profile, startupInstruction);
+}
+
+void CSVDoc::View::stop()
+{
+    mDocument->stopRunning();
 }

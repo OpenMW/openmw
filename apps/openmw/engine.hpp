@@ -95,6 +95,7 @@ namespace OMW
             Translation::Storage mTranslationDataStorage;
             std::vector<std::string> mScriptBlacklist;
             bool mScriptBlacklistUse;
+            bool mNewGame;
 
             Nif::Cache mNifCache;
 
@@ -157,7 +158,11 @@ namespace OMW
             /// Disable or enable all sounds
             void setSoundUsage(bool soundUsage);
 
-            void setSkipMenu (bool skipMenu);
+            /// Skip main menu and go directly into the game
+            ///
+            /// \param newGame Start a new game instead off dumping the player into the game
+            /// (ignored if !skipMenu).
+            void setSkipMenu (bool skipMenu, bool newGame);
 
             void setGrabMouse(bool grab) { mGrab = grab; }
 

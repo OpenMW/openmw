@@ -501,6 +501,47 @@ namespace CSMWorld
     };
 
     template<typename ESXRecordT>
+    struct FlagColumn2 : public Column<ESXRecordT>
+    {
+        int mMask;
+        bool mInverted;
+
+        FlagColumn2 (int columnId, int mask, bool inverted = false)
+        : Column<ESXRecordT> (columnId, ColumnBase::Display_Boolean), mMask (mask),
+          mInverted (inverted)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            bool flag = (record.get().mFlags & mMask)!=0;
+
+            if (mInverted)
+                flag = !flag;
+
+            return flag;
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            int flags = record2.mFlags & ~mMask;
+
+            if ((data.toInt()!=0)!=mInverted)
+                flags |= mMask;
+
+            record2.mFlags = flags;
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
     struct WeightHeightColumn : public Column<ESXRecordT>
     {
         bool mMale;
@@ -766,8 +807,18 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ScriptColumn : public Column<ESXRecordT>
     {
-        ScriptColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_ScriptText, ColumnBase::Display_Script, 0) {}
+        enum Type
+        {
+            Type_File, // regular script record
+            Type_Lines, // console context
+            Type_Info // dialogue context (not implemented yet)
+        };
+
+        ScriptColumn (Type type)
+        : Column<ESXRecordT> (Columns::ColumnId_ScriptText,
+            type==Type_File ? ColumnBase::Display_Script : ColumnBase::Display_ScriptLines,
+            type==Type_File ? 0 : ColumnBase::Flag_Dialogue)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1221,36 +1272,6 @@ namespace CSMWorld
         virtual bool isEditable() const
         {
             return true;
-        }
-    };
-
-    template<typename ESXRecordT>
-    struct ScopeColumn : public Column<ESXRecordT>
-    {
-        ScopeColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_Scope, ColumnBase::Display_Integer, 0)
-        {}
-
-        virtual QVariant get (const Record<ESXRecordT>& record) const
-        {
-            return static_cast<int> (record.get().mScope);
-        }
-
-        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
-        {
-            ESXRecordT record2 = record.get();
-            record2.mScope = static_cast<CSMFilter::Filter::Scope> (data.toInt());
-            record.setModified (record2);
-        }
-
-        virtual bool isEditable() const
-        {
-            return true;
-        }
-
-        virtual bool isUserEditable() const
-        {
-            return false;
         }
     };
 

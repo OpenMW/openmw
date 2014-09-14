@@ -40,7 +40,7 @@ namespace CSVWorld
     public:
         explicit DataDisplayDelegate (const ValueList & values,
                                       const IconList & icons,
-                                      QUndoStack& undoStack,
+                                      CSMDoc::Document& document,
                                       const QString &pageName,
                                       const QString &settingName,
                                       QObject *parent);
@@ -82,7 +82,7 @@ namespace CSVWorld
 
     public:
 
-        virtual CommandDelegate *makeDelegate (QUndoStack& undoStack, QObject *parent) const;
+        virtual CommandDelegate *makeDelegate (CSMDoc::Document& document, QObject *parent) const;
         ///< The ownership of the returned CommandDelegate is transferred to the caller.
 
     protected:

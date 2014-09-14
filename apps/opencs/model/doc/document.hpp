@@ -18,6 +18,7 @@
 #include "state.hpp"
 #include "saving.hpp"
 #include "blacklist.hpp"
+#include "runner.hpp"
 
 class QAbstractItemModel;
 
@@ -54,6 +55,7 @@ namespace CSMDoc
             Saving mSaving;
             boost::filesystem::path mResDir;
             Blacklist mBlacklist;
+            Runner mRunner;
 
             // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is connected to a slot, that is
             // using other member variables.  Unfortunately this connection is cut only in the QObject destructor, which is way too late.
@@ -115,6 +117,13 @@ namespace CSMDoc
 
             bool isBlacklisted (const CSMWorld::UniversalId& id) const;
 
+            void startRunning (const std::string& profile,
+                const std::string& startupInstruction = "");
+
+            void stopRunning();
+
+            QTextDocument *getRunLog();
+
         signals:
 
             void stateChanged (int state, CSMDoc::Document *document);
@@ -128,7 +137,9 @@ namespace CSMDoc
             void reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
                 int type);
 
-            void operationDone (int type);
+            void operationDone (int type, bool failed);
+
+            void runStateChanged();
 
         public slots:
 

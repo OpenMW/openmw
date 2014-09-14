@@ -20,6 +20,10 @@ void CSVWidget::PushButton::setExtendedToolTip()
 
             break;
 
+        case Type_TopAction:
+
+            break;
+
         case Type_Mode:
 
             tooltip +=
@@ -87,4 +91,9 @@ bool CSVWidget::PushButton::hasKeepOpen() const
 QString CSVWidget::PushButton::getBaseToolTip() const
 {
     return mToolTip;
+}
+
+CSVWidget::PushButton::Type CSVWidget::PushButton::getType() const
+{
+    return mType;
 }

@@ -172,7 +172,6 @@ namespace CSMWorld
             { ColumnId_Rank, "Rank" },
             { ColumnId_Gender, "Gender" },
             { ColumnId_PcRank, "PC Rank" },
-            { ColumnId_Scope, "Scope" },
             { ColumnId_ReferenceableId, "Referenceable ID" },
             { ColumnId_CombatState, "Combat" },
             { ColumnId_MagicState, "Magic" },
@@ -182,6 +181,9 @@ namespace CSMWorld
             { ColumnId_BodyPartType, "Bodypart Type" },
             { ColumnId_MeshType, "Mesh Type" },
             { ColumnId_OwnerGlobal, "Owner Global" },
+            { ColumnId_DefaultProfile, "Default Profile" },
+            { ColumnId_BypassNewGame, "Bypass New Game" },
+            { ColumnId_GlobalProfile, "Global Profile" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },

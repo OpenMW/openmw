@@ -100,7 +100,8 @@ namespace CSMWorld
             Display_SoundRes,
             Display_Texture,
             Display_Video,
-            Display_Colour
+            Display_Colour,
+            Display_ScriptLines // console context
         };
 
         int mColumnId;

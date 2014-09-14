@@ -20,6 +20,7 @@
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetoolrun.hpp"
 
 #include "tablebottombox.hpp"
 #include "creator.hpp"
@@ -121,6 +122,9 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
         toolbar->addTool (controlVisibilityTool);
     }
 
+    CSVWidget::SceneToolRun *runTool = widget->makeRunTool (toolbar);
+    toolbar->addTool (runTool);
+
     return toolbar;
 }
 
@@ -194,10 +198,12 @@ void CSVWorld::SceneSubView::handleDrop (const std::vector< CSMWorld::UniversalI
     CSVRender::UnpagedWorldspaceWidget* unPagedNewWidget = NULL;
     CSVWidget::SceneToolbar* toolbar = NULL;
 
-    switch (mScene->getDropRequirements(CSVRender::WorldspaceWidget::getDropType(data)))
+    CSVRender::WorldspaceWidget::DropType type = CSVRender::WorldspaceWidget::getDropType (data);
+
+    switch (mScene->getDropRequirements (type))
     {
         case CSVRender::WorldspaceWidget::canHandle:
-            mScene->handleDrop(data);
+            mScene->handleDrop (data, type);
             break;
 
         case CSVRender::WorldspaceWidget::needPaged:
@@ -205,7 +211,7 @@ void CSVWorld::SceneSubView::handleDrop (const std::vector< CSMWorld::UniversalI
             toolbar = makeToolbar(pagedNewWidget, widget_Paged);
             makeConnections(pagedNewWidget);
             replaceToolbarAndWorldspace(pagedNewWidget, toolbar);
-            mScene->handleDrop(data);
+            mScene->handleDrop (data, type);
             break;
 
         case CSVRender::WorldspaceWidget::needUnpaged:
