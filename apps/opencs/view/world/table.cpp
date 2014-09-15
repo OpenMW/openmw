@@ -54,6 +54,42 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
     ///  \todo add menu items for select all and clear selection
 
+    {
+        // Feature #1226 "Request UniversalId editing from table columns".
+        
+        if ( mGotoRefUid )
+        {
+            delete mGotoRefUid;
+
+            mGotoRefUid = 0;
+        }
+
+        int currRow = rowAt( event->y() ),
+            currCol = columnAt( event->x() );
+
+        currRow = mProxyModel->mapToSource(mProxyModel->index( currRow, 0 )).row();
+
+        CSMWorld::ColumnBase::Display colType =
+            static_cast<CSMWorld::ColumnBase::Display>(
+                mModel->headerData(
+                    currCol,
+                    Qt::Horizontal,
+                    CSMWorld::ColumnBase::Role_Display ).toInt());
+
+        QString cellData = mModel->data(mModel->index( currRow, currCol )).toString();
+        CSMWorld::UniversalId::Type colUidType = CSMWorld::TableMimeData::convertEnums( colType );
+
+        if (    !cellData.isEmpty()
+                && colUidType != CSMWorld::UniversalId::Type::Type_None )
+        {
+            menu.addAction( mGotoRefAction );
+            menu.addSeparator();
+
+            mGotoRefUid =
+                new CSMWorld::UniversalId( colUidType, cellData.toUtf8().constData() );
+        }
+    }
+
     if (!mEditLock && !(mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
     {
         if (selectedRows.size()==1)
@@ -218,6 +254,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     mMoveDownAction = new QAction (tr ("Move Down"), this);
     connect (mMoveDownAction, SIGNAL (triggered()), this, SLOT (moveDownRecord()));
     addAction (mMoveDownAction);
+    
+    mGotoRefAction = new QAction( tr("Go to Reference"), this );
+    connect( mGotoRefAction, SIGNAL(triggered()), this, SLOT(gotoReference()) );
+    addAction( mGotoRefAction );
 
     mViewAction = new QAction (tr ("View"), this);
     connect (mViewAction, SIGNAL (triggered()), this, SLOT (viewRecord()));
@@ -362,6 +402,11 @@ void CSVWorld::Table::moveDownRecord()
                 dynamic_cast<CSMWorld::IdTable&> (*mModel), row, newOrder));
         }
     }
+}
+
+void CSVWorld::Table::gotoReference()
+{
+    emit editRequest( *mGotoRefUid, std::string() );
 }
 
 void CSVWorld::Table::viewRecord()

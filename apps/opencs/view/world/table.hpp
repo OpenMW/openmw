@@ -45,6 +45,7 @@ namespace CSVWorld
             QAction *mMoveUpAction;
             QAction *mMoveDownAction;
             QAction *mViewAction;
+            QAction *mGotoRefAction;
             QAction *mPreviewAction;
             QAction *mExtendedDeleteAction;
             QAction *mExtendedRevertAction;
@@ -52,6 +53,8 @@ namespace CSVWorld
             CSMWorld::IdTableBase *mModel;
             int mRecordStatusDisplay;
             CSMWorld::CommandDispatcher *mDispatcher;
+
+            CSMWorld::UniversalId *mGotoRefUid = 0;
 
         private:
 
@@ -92,6 +95,8 @@ namespace CSVWorld
             void cloneRequest(const CSMWorld::UniversalId&);
 
         private slots:
+
+            void gotoReference();
 
             void editRecord();
 
