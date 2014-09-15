@@ -67,6 +67,7 @@ Nolan Poe (nopoe)
 Paul McElroy (Greendogo)
 Pieter van der Kloet (pvdk)
 Radu-Marius Popovici (rpopovici)
+Robert MacGregor (Ragora)
 Roman Melnik (Kromgart)
 Roman Proskuryakov (humbug)
 sandstranger
