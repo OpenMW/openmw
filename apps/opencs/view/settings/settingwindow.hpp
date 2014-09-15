@@ -18,7 +18,7 @@ namespace CSVSettings {
 
     typedef QList <Page *> PageList;
 
-    class SettingWindow : public QMainWindow
+    class SettingWindow : public QTabWidget
     {
         Q_OBJECT
 

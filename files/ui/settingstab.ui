@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TabWidget</class>
+ <widget class="QTabWidget" name="TabWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>User Settings</string>
+  </property>
+  <property name="currentIndex">
+   <number>0</number>
+  </property>
+  <widget class="QWidget" name="VideoSettings">
+   <attribute name="title">
+    <string>Video Settings</string>
+   </attribute>
+   <widget class="QWidget" name="layoutWidget_Screen">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>181</y>
+      <width>351</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout_Screen">
+     <item row="1" column="1">
+      <widget class="QRadioButton" name="radioButton_standard_res">
+       <property name="text">
+        <string>Standard:</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup</string>
+       </attribute>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_Resolution">
+       <property name="text">
+        <string>Resolution</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="2">
+      <widget class="QCheckBox" name="checkBox_fullscreen">
+       <property name="text">
+        <string>Full Screen</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QRadioButton" name="radioButton_custom_res">
+       <property name="text">
+        <string>Custom;</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup</string>
+       </attribute>
+      </widget>
+     </item>
+     <item row="1" column="2" colspan="2">
+      <widget class="QComboBox" name="comboBox_std_window_size">
+       <property name="minimumSize">
+        <size>
+         <width>180</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QSpinBox" name="spinBox_x">
+       <property name="maximumSize">
+        <size>
+         <width>186</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QSpinBox" name="spinBox_y"/>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="renderGroup">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>8</y>
+      <width>371</width>
+      <height>153</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Render System</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="displayGroup">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>165</y>
+      <width>371</width>
+      <height>99</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Display</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>21</x>
+      <y>26</y>
+      <width>351</width>
+      <height>125</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0" colspan="2">
+      <widget class="QCheckBox" name="checkBox_override">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Use Render System Settings from OpenMW</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_RenderingSubsystem">
+       <property name="text">
+        <string>Rendering Subsystem</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="comboBox_rendersystem">
+       <property name="editable">
+        <bool>false</bool>
+       </property>
+       <item>
+        <property name="text">
+         <string>OpenGL Rendering Subsystem</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Direct3D9 Rendering Subsystem</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QCheckBox" name="checkBox_vsync">
+       <property name="text">
+        <string>Vertical Sync</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_Antialiasing">
+       <property name="text">
+        <string>Antialiasing</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QComboBox" name="comboBox_antialiasing">
+       <item>
+        <property name="text">
+         <string>Off</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>MSAA 2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>MSAA 4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>MSAA 8</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>MSAA 8 (Quality)</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_ShaderLanguage">
+       <property name="text">
+        <string>Shader Language</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QComboBox" name="comboBox_shaderlanguage">
+       <item>
+        <property name="text">
+         <string>HLSL</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CG</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <zorder>renderGroup</zorder>
+   <zorder>layoutWidget</zorder>
+   <zorder>displayGroup</zorder>
+   <zorder>layoutWidget_Screen</zorder>
+  </widget>
+  <widget class="QWidget" name="DisplaySetttings">
+   <attribute name="title">
+    <string>Display Settings</string>
+   </attribute>
+   <widget class="QWidget" name="layoutWidget2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>351</width>
+      <height>116</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout_Subview">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_MaxSubviews">
+       <property name="text">
+        <string>Max Number of Subviews</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_MinSubviewWidth">
+       <property name="text">
+        <string>Min Subview Width</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QCheckBox" name="checkBox_reuse_subview">
+       <property name="text">
+        <string>Reuse Subviews</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="comboBox_show_icon">
+       <item>
+        <property name="text">
+         <string>Text Only</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Text + Icon</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QSpinBox" name="spinBox_max_subviews"/>
+     </item>
+     <item row="2" column="1">
+      <widget class="QSpinBox" name="spinBox_min_subview_width">
+       <property name="minimum">
+        <number>325</number>
+       </property>
+       <property name="maximum">
+        <number>20000</number>
+       </property>
+       <property name="singleStep">
+        <number>5</number>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_ShowIcon">
+       <property name="text">
+        <string>Show Icon</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>371</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>GroupBox</string>
+    </property>
+   </widget>
+   <zorder>groupBox</zorder>
+   <zorder>layoutWidget2</zorder>
+  </widget>
+  <widget class="QWidget" name="MiscSettings">
+   <attribute name="title">
+    <string>Misc Settings</string>
+   </attribute>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
+</ui>

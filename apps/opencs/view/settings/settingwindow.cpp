@@ -9,7 +9,7 @@
 #include "view.hpp"
 
 CSVSettings::SettingWindow::SettingWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QTabWidget(parent)
 {}
 
 void CSVSettings::SettingWindow::createPages()

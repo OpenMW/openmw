@@ -28,7 +28,7 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     setupDataFiles (config.first);
 
     CSMSettings::UserSettings::instance().loadSettings ("opencs.ini");
-    mSettings.setModel (CSMSettings::UserSettings::instance());
+    //mSettings.setModel (CSMSettings::UserSettings::instance());
 
     ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
 
@@ -189,7 +189,7 @@ void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
         files.push_back(path.toUtf8().constData());
     }
 
-    files.push_back(mFileDialog.filename().toUtf8().constData());
+    files.push_back (savePath);
 
     mDocumentManager.addDocument (files, savePath, true);
 

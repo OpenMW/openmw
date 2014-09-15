@@ -40,6 +40,8 @@ CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& conf
     mUserSettingsInstance = this;
 
     buildSettingModelDefaults();
+
+    // for overriding opencs.ini settings with those from settings.cfg
     mSettingCfgDefinitions = new QSettings(QSettings::IniFormat, QSettings::UserScope, "", QString(), this);
 }
 
