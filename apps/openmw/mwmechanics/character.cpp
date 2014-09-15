@@ -690,10 +690,51 @@ void CharacterController::updateIdleStormState()
     }
 }
 
+void CharacterController::castSpell(const std::string &spellid)
+{
+    static const std::string schools[] = {
+        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+    };
+
+    const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+    const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
+    const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
+
+    const ESM::MagicEffect *effect;
+    effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
+
+    const ESM::Static* castStatic;
+    if (!effect->mCasting.empty())
+        castStatic = store.get<ESM::Static>().find (effect->mCasting);
+    else
+        castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
+
+    mAnimation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex);
+
+    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+    if(!effect->mCastSound.empty())
+        sndMgr->playSound3D(mPtr, effect->mCastSound, 1.0f, 1.0f);
+    else
+        sndMgr->playSound3D(mPtr, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
+}
+
 bool CharacterController::updateCreatureState()
 {
     const MWWorld::Class &cls = mPtr.getClass();
     CreatureStats &stats = cls.getCreatureStats(mPtr);
+
+    WeaponType weapType = WeapType_None;
+    if(stats.getDrawState() == DrawState_Weapon)
+        weapType = WeapType_HandToHand;
+    else if (stats.getDrawState() == DrawState_Spell)
+        weapType = WeapType_Spell;
+
+    if (weapType != mWeaponType)
+    {
+        mWeaponType = weapType;
+        if (mAnimation->isPlaying(mCurrentWeapon))
+            mAnimation->disable(mCurrentWeapon);
+    }
 
     if(stats.getAttackingOrSpell())
     {
@@ -715,7 +756,18 @@ bool CharacterController::updateCreatureState()
                              1, "start", "stop",
                              0.0f, 0);
             mUpperBodyState = UpperCharState_StartToMinAttack;
+
+            if (weapType == WeapType_Spell)
+            {
+                const std::string spellid = stats.getSpells().getSelectedSpell();
+                if (!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
+                {
+                    castSpell(spellid);
+                    MWBase::Environment::get().getWorld()->castSpell(mPtr);
+                }
+            }
         }
+
         stats.setAttackingOrSpell(false);
     }
 
@@ -854,9 +906,7 @@ bool CharacterController::updateWeaponState()
 
                 if(!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
                 {
-                    static const std::string schools[] = {
-                        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-                    };
+                    castSpell(spellid);
 
                     const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
                     const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
@@ -864,15 +914,7 @@ bool CharacterController::updateWeaponState()
                     const ESM::MagicEffect *effect;
                     effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
 
-                    const ESM::Static* castStatic;
-                    if (!effect->mCasting.empty())
-                        castStatic = store.get<ESM::Static>().find (effect->mCasting);
-                    else
-                        castStatic = store.get<ESM::Static>().find ("VFX_DefaultCast");
-
-                    mAnimation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex);
-
-                    castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
+                    const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
                     if (mAnimation->getNode("Left Hand"))
                     {
                         mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Left Hand", effect->mParticle);
@@ -896,12 +938,6 @@ bool CharacterController::updateWeaponState()
                                      weapSpeed, mAttackType+" start", mAttackType+" stop",
                                      0.0f, 0);
                     mUpperBodyState = UpperCharState_CastingSpell;
-
-                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                    if(!effect->mCastSound.empty())
-                        sndMgr->playSound3D(mPtr, effect->mCastSound, 1.0f, 1.0f);
-                    else
-                        sndMgr->playSound3D(mPtr, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
                 }
                 if (inv.getSelectedEnchantItem() != inv.end())
                 {

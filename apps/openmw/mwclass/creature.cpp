@@ -209,6 +209,9 @@ namespace MWClass
         const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         MWMechanics::CreatureStats &stats = getCreatureStats(ptr);
 
+        if (stats.getDrawState() != MWMechanics::DrawState_Weapon)
+            return;
+
         // Get the weapon used (if hand-to-hand, weapon = inv.end())
         MWWorld::Ptr weapon;
         if (ptr.getClass().hasInventoryStore(ptr))
