@@ -189,7 +189,7 @@ void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
         files.push_back(path.toUtf8().constData());
     }
 
-    files.push_back(mFileDialog.filename().toUtf8().constData());
+    files.push_back (savePath);
 
     mDocumentManager.addDocument (files, savePath, true);
 
