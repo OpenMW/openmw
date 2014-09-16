@@ -164,7 +164,6 @@ CSVSettings::SettingsDialog::SettingsDialog(QTabWidget *parent)
     spinBox_y->setMaximum(res.height());
 
     connect(comboBox_rendersystem, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged(const QString&)));
-    connect(checkBox_fullscreen, SIGNAL(stateChanged(int)), this, SLOT(slotFullScreenChanged(int)));
     connect(radioButton_standard_res, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
 }
 
@@ -172,27 +171,6 @@ void CSVSettings::SettingsDialog::rendererChanged()
 {
     comboBox_antialiasing->clear();
     comboBox_antialiasing->addItems(getAvailableOptions(QString("FSAA")));
-}
-
-void CSVSettings::SettingsDialog::slotFullScreenChanged(int state)
-{
-    if (state == Qt::Checked) {
-        label_Resolution->setEnabled(false);
-        radioButton_standard_res->setEnabled(false);
-        radioButton_custom_res->setEnabled(false);
-        comboBox_std_window_size->setEnabled(false);
-        spinBox_x->setEnabled(false);
-        spinBox_y->setEnabled(false);
-    }
-    else
-    {
-        label_Resolution->setEnabled(true);
-        radioButton_standard_res->setEnabled(true);
-        radioButton_custom_res->setEnabled(true);
-        comboBox_std_window_size->setEnabled(true);
-        spinBox_x->setEnabled(true);
-        spinBox_y->setEnabled(true);
-    }
 }
 
 // FIXME: what to do with updating window size
@@ -254,17 +232,6 @@ void CSVSettings::SettingsDialog::setViewValues()
         comboBox_std_window_size->setCurrentIndex(index);
 
     slotStandardToggled(radioButton_standard_res->isChecked() ? true : false);
-
-    if(CSMSettings::UserSettings::instance().settingValue("Video/fullscreen") == "true")
-    {
-        checkBox_fullscreen->setChecked(true);
-        slotFullScreenChanged(Qt::Checked);
-    }
-    else
-    {
-        checkBox_fullscreen->setChecked(false);
-        slotFullScreenChanged(Qt::Unchecked);
-    }
 }
 
 void CSVSettings::SettingsDialog::closeEvent (QCloseEvent *event)

@@ -37,7 +37,6 @@ namespace CSVSettings {
 
         void show();
         void rendererChanged();
-        void slotFullScreenChanged(int state);
         void slotStandardToggled(bool checked);
     };
 }
