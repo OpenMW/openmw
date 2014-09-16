@@ -1,16 +1,19 @@
 #ifndef CSV_WORLD_GENERICCREATOR_H
 #define CSV_WORLD_GENERICCREATOR_H
 
+#include <memory>
+
+#include "../../model/world/universalid.hpp"
+
+#include "creator.hpp"
+
 class QString;
 class QPushButton;
 class QLineEdit;
 class QHBoxLayout;
 class QComboBox;
 class QLabel;
-
-#include "creator.hpp"
-
-#include "../../model/world/universalid.hpp"
+class QUndoCommand;
 
 namespace CSMWorld
 {
@@ -56,7 +59,11 @@ namespace CSVWorld
 
             virtual std::string getId() const;
 
+            /// \note This function is not called in case of a clone operation.
             virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
+
+            virtual void pushCommand (std::auto_ptr<QUndoCommand> command,
+                const std::string& id);
 
             CSMWorld::Data& getData() const;
 
