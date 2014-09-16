@@ -1277,15 +1277,7 @@ void CharacterController::update(float duration)
 
         //Ogre::Vector3 vec = cls.getMovementVector(mPtr);
         Ogre::Vector3 vec(cls.getMovementSettings(mPtr).mPosition);
-        if(vec.z > 0.0f) // to avoid slow-down when jumping
-        {
-            Ogre::Vector2 vecXY = Ogre::Vector2(vec.x, vec.y);
-            vecXY.normalise();
-            vec.x = vecXY.x;
-            vec.y = vecXY.y;
-        }
-        else
-            vec.normalise();
+        vec.normalise();
 
         if(mHitState != CharState_None && mJumpState == JumpState_None)
             vec = Ogre::Vector3(0.0f);
@@ -1383,28 +1375,24 @@ void CharacterController::update(float duration)
             mJumpState = JumpState_Falling;
 
             // This is a guess. All that seems to be known is that "While the player is in the
-            // air, fJumpMoveBase and fJumpMoveMult governs air control." Assuming Acrobatics
-            // plays a role, this makes the most sense.
-            float mult = 0.0f;
-            if(cls.isNpc())
-            {
-                const NpcStats &stats = cls.getNpcStats(mPtr);
-                static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->getFloat();
-                static const float fJumpMoveMult = gmst.find("fJumpMoveMult")->getFloat();
+            // air, fJumpMoveBase and fJumpMoveMult governs air control". What does fJumpMoveMult do?
+            static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->getFloat();
 
-                mult = fJumpMoveBase +
-                       (stats.getSkill(ESM::Skill::Acrobatics).getModified()/100.0f *
-                        fJumpMoveMult);
-            }
-
-            vec.x *= mult;
-            vec.y *= mult;
+            vec.x *= fJumpMoveBase;
+            vec.y *= fJumpMoveBase;
             vec.z  = 0.0f;
         }
         else if(vec.z > 0.0f && mJumpState == JumpState_None)
         {
             // Started a jump.
-            vec.z = cls.getJump(mPtr);
+            float z = cls.getJump(mPtr);
+            if(vec.x == 0 && vec.y == 0)
+                vec = Ogre::Vector3(0.0f, 0.0f, z);
+            else
+            {
+                Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
+                vec = Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
+            }
 
             // advance acrobatics
             if (mPtr.getRefData().getHandle() == "player")

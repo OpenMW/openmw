@@ -299,18 +299,20 @@ namespace MWWorld
                 // not in water nor can fly, so need to deal with gravity
                 if(!physicActor->getOnGround()) // if current OnGround status is false, must be falling or jumping
                 {
-                    // If falling, add part of the incoming velocity with the current inertia
-                    // TODO: but we could be jumping up?
-                    velocity = velocity * time + physicActor->getInertialForce();
-
-                    // avoid getting infinite inertia in air
+                    // If falling or jumping up, add part of the incoming velocity with the current inertia,
+                    // but don't allow increasing inertia beyond actor's speed (except on the initial jump impulse)
                     float actorSpeed = ptr.getClass().getSpeed(ptr);
-                    float speedXY = Ogre::Vector2(velocity.x, velocity.y).length();
-                    if (speedXY > actorSpeed) 
+                    float cap = std::max(actorSpeed, Ogre::Vector2(physicActor->getInertialForce().x, physicActor->getInertialForce().y).length());
+                    Ogre::Vector3 newVelocity = velocity + physicActor->getInertialForce();
+                    if (Ogre::Vector2(newVelocity.x, newVelocity.y).squaredLength() > cap*cap)
                     {
-                        velocity.x *= actorSpeed / speedXY;
-                        velocity.y *= actorSpeed / speedXY;
+                        velocity = newVelocity;
+                        float speedXY = Ogre::Vector2(velocity.x, velocity.y).length();
+                        velocity.x *= cap / speedXY;
+                        velocity.y *= cap / speedXY;
                     }
+                    else
+                        velocity = newVelocity;
                 }
                 inertia = velocity; // NOTE: velocity is for z axis only in this code block
 
