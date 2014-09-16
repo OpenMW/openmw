@@ -1,37 +1,17 @@
 #include "settingsdialog.hpp"
 
-#include <QListWidgetItem>
-#include <QApplication>
-#include <QWidget>
-#include <QStackedWidget>
-#include <QtGui>
-
-#include "../../model/settings/usersettings.hpp"
-
-//#include "ui_settingstab.h"
-
-#include "page.hpp"
-
-#include <QApplication>
-
-#include <QSplitter>
-
-#include <QTreeView>
-#include <QListView>
-#include <QTableView>
-
-#include <QStandardItemModel>
-#include <QStandardItem>
+#include <boost/math/common_factor.hpp>
 #include <OgreRoot.h>
 
-#include <boost/math/common_factor.hpp>
-#include <QMessageBox>
-//#include <QTranslator>
 #include <QDesktopWidget>
+
+#include <components/contentselector/model/naturalsort.hpp>
+#include "../../model/settings/usersettings.hpp"
 
 namespace
 {
-// copied from launcher
+// copied from the launcher & adapted
+
 QString getAspect(int x, int y)
 {
     int gcd = boost::math::gcd (x, y);
@@ -61,34 +41,20 @@ QRect getMaximumResolution()
 
 QString getCurrentResolution()
 {
-    QString result;
-
     Ogre::ConfigOptionMap& renderOpt =
             Ogre::Root::getSingleton().getRenderSystem()->getConfigOptions();
     Ogre::ConfigOptionMap::iterator it = renderOpt.begin();
-    for(;it != renderOpt.end(); ++it)
+    for(; it != renderOpt.end(); ++it)
     {
         if(it->first == "Video Mode" )
         {
-            QRegExp re("^(\\d+) x (\\d+)");
+            QRegExp re("^(\\d+ x \\d+)");
             int pos = re.indexIn(it->second.currentValue.c_str(), 0);
             if (pos > -1)
-            {
-                QString aspect = getAspect(re.cap(1).toInt(), re.cap(2).toInt());
-                result = re.cap(1) + QString(" x ") + re.cap(2);
-                if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10"))
-                {
-                    //result.append(QObject::tr("\t(Wide ") + aspect + ")");
-
-                }
-                else if (aspect == QLatin1String("4:3"))
-                {
-                    //result.append(QObject::tr("\t(Standard 4:3)"));
-                }
-            }
+                return re.cap(1);
         }
     }
-    return result;
+    return QString(); // found nothing
 }
 
 QStringList getAvailableResolutions()
@@ -104,15 +70,8 @@ QStringList getAvailableResolutions()
         {
             if(it->second.possibleValues.empty())
             {
-                QMessageBox msgBox;
-                msgBox.setWindowTitle(QObject::tr("Error retrieving rendering device"));
-                msgBox.setIcon(QMessageBox::Critical);
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setText(QObject::tr("<br><b>Ogre Rendering Device empty<./b><br><br>"));
-                msgBox.exec();
-                return result;
+                return result;  // FIXME: add error message
             }
-            //std::cout << "rd current: " << it->second.currentValue << std::endl; // FIXME: debug
             // Store Available Rendering Devices
             std::vector<std::string>::iterator iter = it->second.possibleValues.begin();
             for(;iter != it->second.possibleValues.end(); ++iter)
@@ -124,19 +83,13 @@ QStringList getAvailableResolutions()
         {
             if(it->second.possibleValues.empty())
             {
-                QMessageBox msgBox;
-                msgBox.setWindowTitle(QObject::tr("Error receiving resolutions"));
-                msgBox.setIcon(QMessageBox::Critical);
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setText(QObject::tr("<br><b>Ogre Video Modes empty.</b><br><br>"));
-                msgBox.exec();
-                return result;
+                return result;  // FIXME: add error message
             }
             // FIXME: how to default to the current value?
             std::cout << "vm current: " << it->second.currentValue << std::endl; // FIXME: debug
             // Store Available Resolutions
             std::vector<std::string>::iterator iter = it->second.possibleValues.begin();
-            for(;iter != it->second.possibleValues.end(); ++iter)
+            for(; iter != it->second.possibleValues.end(); ++iter)
             {
                 // extract x and y values
                 QRegExp re("^(\\d+) x (\\d+)");
@@ -160,10 +113,46 @@ QStringList getAvailableResolutions()
     return result;
 }
 
+QStringList getAvailableOptions(const QString &key)
+{
+    QStringList result;
+
+    Ogre::ConfigOptionMap& renderOpt =
+        Ogre::Root::getSingleton().getRenderSystem()->getConfigOptions();
+    Ogre::ConfigOptionMap::iterator it = renderOpt.begin();
+
+    uint row = 0;
+    for(; it != renderOpt.end(); ++it, ++row)
+    {
+        Ogre::StringVector::iterator opt_it = it->second.possibleValues.begin();
+        uint idx = 0;
+
+        for(; opt_it != it->second.possibleValues.end(); ++opt_it, ++idx)
+        {
+            if(strcmp (key.toStdString().c_str(), it->first.c_str()) == 0)
+            {
+                result << ((key == "FSAA") ? QString("MSAA ") : QString(""))
+                    + QString::fromStdString((*opt_it).c_str()).simplified();
+            }
+        }
+    }
+
+    // Sort ascending
+    qSort(result.begin(), result.end(), naturalSortLessThanCI);
+
+    // Replace the zero option with Off
+    int index = result.indexOf("MSAA 0");
+
+    if(index != -1)
+        result.replace(index, QObject::tr("Off"));
+
+    return result;
+}
+
 }
 
 CSVSettings::SettingsDialog::SettingsDialog(QTabWidget *parent)
-    : /*mStackedWidget (0), mDebugMode (false),*/ QTabWidget (parent)
+    : /*mDebugMode (false),*/ QTabWidget (parent)
 {
     setObjectName("User Settings");
 
@@ -174,97 +163,61 @@ CSVSettings::SettingsDialog::SettingsDialog(QTabWidget *parent)
     spinBox_x->setMaximum(res.width());
     spinBox_y->setMaximum(res.height());
 
-    //connect (mPageListWidget,
-             //SIGNAL (currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
-             //this,
-             //SLOT (slotChangePage (QListWidgetItem*, QListWidgetItem*)));
+    connect(comboBox_rendersystem, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged(const QString&)));
+    connect(checkBox_fullscreen, SIGNAL(stateChanged(int)), this, SLOT(slotFullScreenChanged(int)));
+    connect(radioButton_standard_res, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
 }
 
-// FIXME: don't need this one, as we don't use pages
-void CSVSettings::SettingsDialog::slotChangePage
-                                (QListWidgetItem *cur, QListWidgetItem *prev)
+void CSVSettings::SettingsDialog::rendererChanged()
 {
-   //mStackedWidget->changePage
-                    //(mPageListWidget->row (cur), mPageListWidget->row (prev));
-
-   layout()->activate();
-   setFixedSize(minimumSizeHint());
+    comboBox_antialiasing->clear();
+    comboBox_antialiasing->addItems(getAvailableOptions(QString("FSAA")));
 }
 
-// FIXME: don't need this one since we use setupUi
-void CSVSettings::SettingsDialog::setupDialog()
+void CSVSettings::SettingsDialog::slotFullScreenChanged(int state)
 {
-    //create central widget with it's layout and immediate children
-    QWidget *centralWidget = new QGroupBox (this);
-
-    centralWidget->setLayout (new QHBoxLayout());
-    centralWidget->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Preferred);
-    //setCentralWidget (centralWidget);
-    //setDockOptions (QMainWindow::AllowNestedDocks);
-
-    buildPageListWidget (centralWidget);
-    buildStackedWidget (centralWidget);
-}
-
-void CSVSettings::SettingsDialog::buildPages()
-{
-#if 0
-    SettingWindow::createPages ();
-
-    QFontMetrics fm (QApplication::font());
-
-    foreach (Page *page, SettingWindow::pages())
-    {
-        QString pageName = page->objectName();
-
-        //int textWidth = fm.width(pageName);
-
-        //new QListWidgetItem (pageName, mPageListWidget);
-        //mPageListWidget->setFixedWidth (textWidth + 50);
-
-        //mStackedWidget->addWidget (&dynamic_cast<QWidget &>(*(page)));
+    if (state == Qt::Checked) {
+        label_Resolution->setEnabled(false);
+        radioButton_standard_res->setEnabled(false);
+        radioButton_custom_res->setEnabled(false);
+        comboBox_std_window_size->setEnabled(false);
+        spinBox_x->setEnabled(false);
+        spinBox_y->setEnabled(false);
     }
-
-    //resize (mStackedWidget->sizeHint());
-#endif
-}
-
-void CSVSettings::SettingsDialog::buildPageListWidget (QWidget *centralWidget)
-{
-    //mPageListWidget = new QListWidget (centralWidget);
-    //mPageListWidget->setMinimumWidth(50);
-    //mPageListWidget->setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Expanding);
-
-    //mPageListWidget->setSelectionBehavior (QAbstractItemView::SelectItems);
-
-    //centralWidget->layout()->addWidget(mPageListWidget);
-}
-
-void CSVSettings::SettingsDialog::buildStackedWidget (QWidget *centralWidget)
-{
-    //mStackedWidget = new ResizeableStackedWidget (centralWidget);
-
-    //centralWidget->layout()->addWidget (mStackedWidget);
-}
-
-void CSVSettings::SettingsDialog::closeEvent (QCloseEvent *event)
-{
-    //SettingWindow::closeEvent() must be called first to ensure
-    //model is updated
-    //SettingWindow::closeEvent (event);
-
-    //saveSettings();
-}
-
-void CSVSettings::SettingsDialog::show()
-{
-    //if (pages().isEmpty())
+    else
     {
-        //buildPages();
-        //setViewValues();
+        label_Resolution->setEnabled(true);
+        radioButton_standard_res->setEnabled(true);
+        radioButton_custom_res->setEnabled(true);
+        comboBox_std_window_size->setEnabled(true);
+        spinBox_x->setEnabled(true);
+        spinBox_y->setEnabled(true);
     }
+}
 
-    if(CSMSettings::UserSettings::instance().settingValue("Video/use settings.cfg").toStdString() == "true")
+// FIXME: what to do with updating window size
+void CSVSettings::SettingsDialog::slotStandardToggled(bool checked)
+{
+    if (checked)
+    {
+        comboBox_std_window_size->setEnabled(true);
+        spinBox_x->setEnabled(false);
+        spinBox_y->setEnabled(false);
+    }
+    else
+    {
+        comboBox_std_window_size->setEnabled(false);
+        spinBox_x->setEnabled(true);
+        spinBox_y->setEnabled(true);
+    }
+}
+
+void CSVSettings::SettingsDialog::setViewValues()
+{
+    //rendererChanged(Ogre::Root::getSingleton().getRenderSystemByName(renderer.toStdString()));
+    rendererChanged(); // setup antialiasing options
+
+    if(CSMSettings::UserSettings::instance().settingValue("Video/use settings.cfg") == "true")
     {
         label_RenderingSubsystem->setEnabled(false);
         comboBox_rendersystem->setEnabled(false);
@@ -278,20 +231,16 @@ void CSVSettings::SettingsDialog::show()
     else
         checkBox_override->setChecked(false);
 
-    if(CSMSettings::UserSettings::instance().settingValue("Video/fullscreen").toStdString() == "true")
+    if(CSMSettings::UserSettings::instance().settingValue("Window Size/Width") != "")
     {
-        checkBox_fullscreen->setChecked(true);
-
-        label_Resolution->setEnabled(false);
-        radioButton_standard_res->setEnabled(false);
-        radioButton_custom_res->setEnabled(false);
-        comboBox_std_window_size->setEnabled(false);
-        spinBox_x->setEnabled(false);
-        spinBox_y->setEnabled(false);
+        spinBox_x->setValue(
+            CSMSettings::UserSettings::instance().settingValue("Window Size/Width").toInt());
     }
-    else
+
+    if(CSMSettings::UserSettings::instance().settingValue("Window Size/Height") != "")
     {
-        checkBox_fullscreen->setChecked(false);
+        spinBox_y->setValue(
+            CSMSettings::UserSettings::instance().settingValue("Window Size/Height").toInt());
     }
 
     // update display resolution combo box
@@ -303,6 +252,33 @@ void CSVSettings::SettingsDialog::show()
                                                    Qt::MatchStartsWith);
     if(index != -1)
         comboBox_std_window_size->setCurrentIndex(index);
+
+    slotStandardToggled(radioButton_standard_res->isChecked() ? true : false);
+
+    if(CSMSettings::UserSettings::instance().settingValue("Video/fullscreen") == "true")
+    {
+        checkBox_fullscreen->setChecked(true);
+        slotFullScreenChanged(Qt::Checked);
+    }
+    else
+    {
+        checkBox_fullscreen->setChecked(false);
+        slotFullScreenChanged(Qt::Unchecked);
+    }
+}
+
+void CSVSettings::SettingsDialog::closeEvent (QCloseEvent *event)
+{
+    //SettingWindow::closeEvent() must be called first to ensure
+    //model is updated
+    //SettingWindow::closeEvent (event);
+
+    //saveSettings();
+}
+
+void CSVSettings::SettingsDialog::show()
+{
+    setViewValues();
 
     // place the widget and make it visible
     QWidget *currView = QApplication::activeWindow();

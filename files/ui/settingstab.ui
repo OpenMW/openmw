@@ -212,31 +212,6 @@
      </item>
      <item row="4" column="1">
       <widget class="QComboBox" name="comboBox_antialiasing">
-       <item>
-        <property name="text">
-         <string>Off</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>MSAA 2</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>MSAA 4</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>MSAA 8</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>MSAA 8 (Quality)</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item row="1" column="0" colspan="2">
