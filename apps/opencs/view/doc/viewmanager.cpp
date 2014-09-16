@@ -172,7 +172,7 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
 {
     std::vector<View *>::iterator iter = std::find (mViews.begin(), mViews.end(), view);
 
-    bool continueWithClose = true;
+    bool continueWithClose = false;
 
     if (iter!=mViews.end())
     {
@@ -190,6 +190,24 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
     }
 
     return continueWithClose;
+}
+
+// NOTE: This method assumes that it is called only if the last document
+void CSVDoc::ViewManager::removeDocAndView (CSMDoc::Document *document)
+{
+    for (std::vector<View *>::iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
+    {
+        // the first match should also be the only match
+        if((*iter)->getDocument() == document)
+        {
+            mDocumentManager.removeDocument(document);
+            (*iter)->deleteLater();
+            mViews.erase (iter);
+
+            updateIndices();
+            return;
+        }
+    }
 }
 
 bool CSVDoc::ViewManager::notifySaveOnClose (CSVDoc::View *view)
@@ -210,13 +228,19 @@ bool CSVDoc::ViewManager::notifySaveOnClose (CSVDoc::View *view)
 
 bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (CSVDoc::View *view)
 {
-    QMessageBox messageBox;
+    emit closeMessageBox();
+
+    QMessageBox messageBox(view);
     CSMDoc::Document *document = view->getDocument();
 
+    messageBox.setWindowTitle (document->getSavePath().filename().string().c_str());
     messageBox.setText ("The document has been modified.");
     messageBox.setInformativeText ("Do you want to save your changes?");
     messageBox.setStandardButtons (QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     messageBox.setDefaultButton (QMessageBox::Save);
+    messageBox.setWindowModality (Qt::NonModal);
+    messageBox.hide();
+    messageBox.show();
 
     bool retVal = true;
 
@@ -341,8 +365,40 @@ void CSVDoc::ViewManager::onExitWarningHandler (int state, CSMDoc::Document *doc
     }
 }
 
+bool CSVDoc::ViewManager::removeDocument (CSVDoc::View *view)
+{
+    if(!notifySaveOnClose(view))
+        return false;
+    else
+    {
+        // don't bother closing views or updating indicies, but remove from mViews
+        CSMDoc::Document * document = view->getDocument();
+        std::vector<View *> remainingViews;
+        std::vector<View *>::const_iterator iter = mViews.begin();
+        for (; iter!=mViews.end(); ++iter)
+        {
+            if(document == (*iter)->getDocument())
+                (*iter)->setVisible(false);
+            else
+                remainingViews.push_back(*iter);
+        }
+        mDocumentManager.removeDocument(document);
+        mViews = remainingViews;
+    }
+    return true;
+}
+
 void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
 {
-    if (notifySaveOnClose (view))
-        QApplication::instance()->exit();
+    if(!removeDocument(view)) // close the current document first
+        return;
+
+    while(!mViews.empty()) // attempt to close all other documents
+    {
+        mViews.back()->activateWindow();
+        mViews.back()->raise(); // raise the window to alert the user
+        if(!removeDocument(mViews.back()))
+            return;
+    }
+    // Editor exits (via a signal) when the last document is deleted
 }

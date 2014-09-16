@@ -17,7 +17,7 @@ CSVDoc::FileWidget::FileWidget (QWidget *parent) : QWidget (parent), mAddon (fal
     QHBoxLayout *layout = new QHBoxLayout (this);
 
     mInput = new QLineEdit (this);
-    mInput->setValidator (new QRegExpValidator(QRegExp("^[a-zA-Z0-9\\s]*$")));
+    mInput->setValidator (new QRegExpValidator(QRegExp("^[a-zA-Z0-9_-\\s]*$")));
 
     layout->addWidget (mInput, 1);
 

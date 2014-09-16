@@ -13,7 +13,9 @@ CSVFilter::RecordFilterBox::RecordFilterBox (CSMWorld::Data& data, QWidget *pare
 
     layout->setContentsMargins (0, 0, 0, 0);
 
-    layout->addWidget (new QLabel ("Record Filter", this));
+    QLabel *label = new QLabel("Record Filter", this);
+    label->setIndent(2);
+    layout->addWidget (label);
 
     mEdit = new EditWidget (data, this);
 
