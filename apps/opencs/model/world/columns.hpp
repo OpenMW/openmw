@@ -178,6 +178,7 @@ namespace CSMWorld
             ColumnId_BypassNewGame = 166,
             ColumnId_GlobalProfile = 167,
             ColumnId_RefNumCounter = 168,
+            ColumnId_RefNum = 169,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

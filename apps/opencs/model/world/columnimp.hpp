@@ -1944,6 +1944,43 @@ namespace CSMWorld
         {
             return true;
         }
+
+        virtual bool isUserEditable() const
+        {
+            return false;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct RefNumColumn : public Column<ESXRecordT>
+    {
+        RefNumColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_RefNum, ColumnBase::Display_Integer, 0)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int> (record.get().mRefNum.mIndex);
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mRefNum.mIndex = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+
+        virtual bool isUserEditable() const
+        {
+            return false;
+        }
     };
 }
 
