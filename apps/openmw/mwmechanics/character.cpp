@@ -258,6 +258,8 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     }
 
     const WeaponInfo *weap = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(mWeaponType));
+    if (!mPtr.getClass().hasInventoryStore(mPtr))
+        weap = sWeaponTypeListEnd;
 
     if(force || idle != mIdleState)
     {
