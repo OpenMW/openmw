@@ -668,10 +668,10 @@ void CharacterController::updateIdleStormState()
         mAnimation->getInfo("idlestorm", &complete);
 
         if (complete == 0)
-            mAnimation->play("idlestorm", Priority_Torch, MWRender::Animation::Group_RightArm, false,
+            mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::Group_RightArm, false,
                              1.0f, "start", "loop start", 0.0f, 0);
         else if (complete == 1)
-            mAnimation->play("idlestorm", Priority_Torch, MWRender::Animation::Group_RightArm, false,
+            mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::Group_RightArm, false,
                              1.0f, "loop start", "loop stop", 0.0f, ~0ul);
     }
     else
@@ -682,7 +682,7 @@ void CharacterController::updateIdleStormState()
             {
                 if (mAnimation->getCurrentTime("idlestorm") < mAnimation->getTextKeyTime("idlestorm: loop stop"))
                 {
-                    mAnimation->play("idlestorm", Priority_Torch, MWRender::Animation::Group_RightArm, true,
+                    mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::Group_RightArm, true,
                                      1.0f, "loop stop", "stop", 0.0f, 0);
                 }
             }
