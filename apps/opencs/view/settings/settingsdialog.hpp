@@ -1,7 +1,7 @@
 #ifndef CSVSETTINGS_SETTINGSDIALOG_H
 #define CSVSETTINGS_SETTINGSDIALOG_H
 
-#include "settingwindow.hpp"
+//#include "settingwindow.hpp"
 //#include "resizeablestackedwidget.hpp"
 #include <QStandardItem>
 
@@ -11,11 +11,17 @@
 //class QListWidget;
 class QListWidgetItem;
 
+#if 0
+namespace Ui {
+    class TabWidget;
+}
+#endif
+
 namespace CSVSettings {
 
     //class Page;
 
-    class SettingsDialog : public SettingWindow, private Ui::TabWidget
+    class SettingsDialog : public QTabWidget, private Ui::TabWidget
     {
         Q_OBJECT
 
@@ -25,7 +31,7 @@ namespace CSVSettings {
 
     public:
 
-        /*explicit*/ SettingsDialog (QMainWindow *parent = 0);
+        /*explicit*/ SettingsDialog (QTabWidget *parent = 0);
 
         ///Enables setting debug mode.  When the dialog opens, a page is created
         ///which displays the SettingModel's contents in a Tree view.

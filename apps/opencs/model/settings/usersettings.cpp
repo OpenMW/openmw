@@ -377,8 +377,9 @@ QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
     QStringList defs;
 
     // check if video settings are overriden
-    if(settingKey.contains(QRegExp("^\\b(Video)", Qt::CaseInsensitive)) &&
-            mSettingDefinitions->value("Video/use settings.cfg") == "true")
+    if(settingKey.contains(QRegExp("^Video\\b", Qt::CaseInsensitive)) &&
+       mSettingDefinitions->value("Video/use settings.cfg") == "true" &&
+       settingKey.contains(QRegExp("^Video/\\brender|antialiasing|vsync|fullscreen\\b", Qt::CaseInsensitive)))
     {
         if (!mSettingCfgDefinitions->contains (settingKey))
             return QString();

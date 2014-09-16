@@ -283,8 +283,10 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     params.insert(std::make_pair("macAPI", "cocoa"));
 #endif
+    // FIXME: don't apply the fullscreen here, apply to the editor window
     bool fullscreen = mUserSettings.settingValue("Video/fullscreen").toStdString() == "true" ? true : false;
-    Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, fullscreen, &params);
+    //Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, fullscreen, &params);
+    Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, false, &params);
     hiddenWindow->setActive(false);
 
     sh::OgrePlatform* platform =

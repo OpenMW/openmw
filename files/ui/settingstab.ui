@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>313</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,13 +24,13 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>181</y>
+      <y>188</y>
       <width>351</width>
-      <height>71</height>
+      <height>81</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_Screen">
-     <item row="1" column="1">
+     <item row="2" column="1">
       <widget class="QRadioButton" name="radioButton_standard_res">
        <property name="text">
         <string>Standard:</string>
@@ -43,7 +43,7 @@
        </attribute>
       </widget>
      </item>
-     <item row="1" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="label_Resolution">
        <property name="text">
         <string>Resolution</string>
@@ -57,7 +57,7 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
+     <item row="3" column="1">
       <widget class="QRadioButton" name="radioButton_custom_res">
        <property name="text">
         <string>Custom;</string>
@@ -67,17 +67,7 @@
        </attribute>
       </widget>
      </item>
-     <item row="1" column="2" colspan="2">
-      <widget class="QComboBox" name="comboBox_std_window_size">
-       <property name="minimumSize">
-        <size>
-         <width>180</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
+     <item row="3" column="2">
       <widget class="QSpinBox" name="spinBox_x">
        <property name="maximumSize">
         <size>
@@ -87,8 +77,31 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="3">
+     <item row="3" column="3">
       <widget class="QSpinBox" name="spinBox_y"/>
+     </item>
+     <item row="2" column="2" colspan="2">
+      <widget class="QComboBox" name="comboBox_std_window_size">
+       <property name="minimumSize">
+        <size>
+         <width>180</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="4">
+      <widget class="Line" name="line_2">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>2</height>
+        </size>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -98,7 +111,7 @@
       <x>10</x>
       <y>8</y>
       <width>371</width>
-      <height>153</height>
+      <height>156</height>
      </rect>
     </property>
     <property name="title">
@@ -109,9 +122,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>165</y>
+      <y>170</y>
       <width>371</width>
-      <height>99</height>
+      <height>108</height>
      </rect>
     </property>
     <property name="title">
@@ -121,21 +134,15 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>21</x>
+      <x>20</x>
       <y>26</y>
       <width>351</width>
-      <height>125</height>
+      <height>129</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0" colspan="2">
       <widget class="QCheckBox" name="checkBox_override">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>22</height>
-        </size>
-       </property>
        <property name="text">
         <string>Use Render System Settings from OpenMW</string>
        </property>
@@ -144,14 +151,14 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="label_RenderingSubsystem">
        <property name="text">
         <string>Rendering Subsystem</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
+     <item row="2" column="1">
       <widget class="QComboBox" name="comboBox_rendersystem">
        <property name="editable">
         <bool>false</bool>
@@ -168,21 +175,42 @@
        </item>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QCheckBox" name="checkBox_vsync">
-       <property name="text">
-        <string>Vertical Sync</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="label_Antialiasing">
        <property name="text">
         <string>Antialiasing</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="3" column="0">
+      <widget class="QCheckBox" name="checkBox_vsync">
+       <property name="text">
+        <string>Vertical Sync</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_ShaderLanguage">
+       <property name="text">
+        <string>Shader Language</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QComboBox" name="comboBox_shaderlanguage">
+       <item>
+        <property name="text">
+         <string>HLSL</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>CG</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="4" column="1">
       <widget class="QComboBox" name="comboBox_antialiasing">
        <item>
         <property name="text">
@@ -211,25 +239,20 @@
        </item>
       </widget>
      </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_ShaderLanguage">
-       <property name="text">
-        <string>Shader Language</string>
+     <item row="1" column="0" colspan="2">
+      <widget class="Line" name="line">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>2</height>
+        </size>
        </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QComboBox" name="comboBox_shaderlanguage">
-       <item>
-        <property name="text">
-         <string>HLSL</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>CG</string>
-        </property>
-       </item>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(215, 215, 215);</string>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
       </widget>
      </item>
     </layout>

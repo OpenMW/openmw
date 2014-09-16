@@ -98,9 +98,7 @@ opencs_units_noqt (view/tools
     )
 
 opencs_units (view/settings
-    settingwindow
     settingsdialog
-    page
     view
     booleanview
     textview
