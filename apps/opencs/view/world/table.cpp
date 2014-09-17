@@ -55,15 +55,8 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
     ///  \todo add menu items for select all and clear selection
 
     {
-        // Feature #1226 "Request UniversalId editing from table columns".
+        // Request UniversalId editing from table columns.
         
-        if ( mGotoRefUid )
-        {
-            delete mGotoRefUid;
-
-            mGotoRefUid = 0;
-        }
-
         int currRow = rowAt( event->y() ),
             currCol = columnAt( event->x() );
 
@@ -82,11 +75,11 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
         if (    !cellData.isEmpty()
                 && colUidType != CSMWorld::UniversalId::Type::Type_None )
         {
-            menu.addAction( mGotoRefAction );
-            menu.addSeparator();
+            mEditCellAction->setText(tr("Edit '").append(cellData).append("'"));
 
-            mGotoRefUid =
-                new CSMWorld::UniversalId( colUidType, cellData.toUtf8().constData() );
+            menu.addAction( mEditCellAction );
+
+            mEditCellId = CSMWorld::UniversalId( colUidType, cellData.toUtf8().constData() );
         }
     }
 
@@ -255,9 +248,9 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (mMoveDownAction, SIGNAL (triggered()), this, SLOT (moveDownRecord()));
     addAction (mMoveDownAction);
     
-    mGotoRefAction = new QAction( tr("Go to Reference"), this );
-    connect( mGotoRefAction, SIGNAL(triggered()), this, SLOT(gotoReference()) );
-    addAction( mGotoRefAction );
+    mEditCellAction = new QAction( tr("Edit Cell"), this );
+    connect( mEditCellAction, SIGNAL(triggered()), this, SLOT(editCell()) );
+    addAction( mEditCellAction );
 
     mViewAction = new QAction (tr ("View"), this);
     connect (mViewAction, SIGNAL (triggered()), this, SLOT (viewRecord()));
@@ -404,9 +397,9 @@ void CSVWorld::Table::moveDownRecord()
     }
 }
 
-void CSVWorld::Table::gotoReference()
+void CSVWorld::Table::editCell()
 {
-    emit editRequest( *mGotoRefUid, std::string() );
+    emit editRequest( mEditCellId, std::string() );
 }
 
 void CSVWorld::Table::viewRecord()
