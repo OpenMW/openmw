@@ -260,6 +260,10 @@ public:
               float speedmult, const std::string &start, const std::string &stop,
               float startpoint, size_t loops);
 
+    /** Adjust the speed multiplier of an already playing animation.
+     */
+    void adjustSpeedMult (const std::string& groupname, float speedmult);
+
     /** Returns true if the named animation group is playing. */
     bool isPlaying(const std::string &groupname) const;
 

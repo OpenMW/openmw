@@ -258,6 +258,8 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     }
 
     const WeaponInfo *weap = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(mWeaponType));
+    if (!mPtr.getClass().hasInventoryStore(mPtr))
+        weap = sWeaponTypeListEnd;
 
     if(force || idle != mIdleState)
     {
@@ -308,7 +310,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             }
         }
 
-        if(mJumpState == JumpState_Falling)
+        if(mJumpState == JumpState_InAir)
         {
             int mode = ((jump == mCurrentJump) ? 2 : 1);
 
@@ -414,7 +416,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                     speedmult = mMovementSpeed / vel;
                 }
                 else if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
-                    speedmult = 1.f; // TODO: should get a speed mult depending on the current turning speed
+                    speedmult = 1.f; // adjusted each frame
                 else if (mMovementSpeed > 0.0f)
                 {
                     // The first person anims don't have any velocity to calculate a speed multiplier from.
@@ -590,6 +592,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
+    , mTurnAnimationThreshold(0)
 {
     if(!mAnimation)
         return;
@@ -666,10 +669,10 @@ void CharacterController::updateIdleStormState()
         mAnimation->getInfo("idlestorm", &complete);
 
         if (complete == 0)
-            mAnimation->play("idlestorm", Priority_Torch, MWRender::Animation::Group_RightArm, false,
+            mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::Group_RightArm, false,
                              1.0f, "start", "loop start", 0.0f, 0);
         else if (complete == 1)
-            mAnimation->play("idlestorm", Priority_Torch, MWRender::Animation::Group_RightArm, false,
+            mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::Group_RightArm, false,
                              1.0f, "loop start", "loop stop", 0.0f, ~0ul);
     }
     else
@@ -680,7 +683,7 @@ void CharacterController::updateIdleStormState()
             {
                 if (mAnimation->getCurrentTime("idlestorm") < mAnimation->getTextKeyTime("idlestorm: loop stop"))
                 {
-                    mAnimation->play("idlestorm", Priority_Torch, MWRender::Animation::Group_RightArm, true,
+                    mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::Group_RightArm, true,
                                      1.0f, "loop stop", "stop", 0.0f, 0);
                 }
             }
@@ -1273,17 +1276,8 @@ void CharacterController::update(float duration)
             }
         }
 
-        //Ogre::Vector3 vec = cls.getMovementVector(mPtr);
         Ogre::Vector3 vec(cls.getMovementSettings(mPtr).mPosition);
-        if(vec.z > 0.0f) // to avoid slow-down when jumping
-        {
-            Ogre::Vector2 vecXY = Ogre::Vector2(vec.x, vec.y);
-            vecXY.normalise();
-            vec.x = vecXY.x;
-            vec.y = vecXY.y;
-        }
-        else
-            vec.normalise();
+        vec.normalise();
 
         if(mHitState != CharState_None && mJumpState == JumpState_None)
             vec = Ogre::Vector3(0.0f);
@@ -1377,32 +1371,28 @@ void CharacterController::update(float duration)
                 cls.getCreatureStats(mPtr).land();
             }
 
-            forcestateupdate = (mJumpState != JumpState_Falling);
-            mJumpState = JumpState_Falling;
+            forcestateupdate = (mJumpState != JumpState_InAir);
+            mJumpState = JumpState_InAir;
 
             // This is a guess. All that seems to be known is that "While the player is in the
-            // air, fJumpMoveBase and fJumpMoveMult governs air control." Assuming Acrobatics
-            // plays a role, this makes the most sense.
-            float mult = 0.0f;
-            if(cls.isNpc())
-            {
-                const NpcStats &stats = cls.getNpcStats(mPtr);
-                static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->getFloat();
-                static const float fJumpMoveMult = gmst.find("fJumpMoveMult")->getFloat();
+            // air, fJumpMoveBase and fJumpMoveMult governs air control". What does fJumpMoveMult do?
+            static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->getFloat();
 
-                mult = fJumpMoveBase +
-                       (stats.getSkill(ESM::Skill::Acrobatics).getModified()/100.0f *
-                        fJumpMoveMult);
-            }
-
-            vec.x *= mult;
-            vec.y *= mult;
+            vec.x *= fJumpMoveBase;
+            vec.y *= fJumpMoveBase;
             vec.z  = 0.0f;
         }
         else if(vec.z > 0.0f && mJumpState == JumpState_None)
         {
             // Started a jump.
-            vec.z = cls.getJump(mPtr);
+            float z = cls.getJump(mPtr);
+            if(vec.x == 0 && vec.y == 0)
+                vec = Ogre::Vector3(0.0f, 0.0f, z);
+            else
+            {
+                Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
+                vec = Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
+            }
 
             // advance acrobatics
             if (mPtr.getRefData().getHandle() == "player")
@@ -1418,7 +1408,7 @@ void CharacterController::update(float duration)
             fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
             cls.getCreatureStats(mPtr).setFatigue(fatigue);
         }
-        else if(mJumpState == JumpState_Falling)
+        else if(mJumpState == JumpState_InAir)
         {
             forcestateupdate = true;
             mJumpState = JumpState_Landing;
@@ -1491,6 +1481,15 @@ void CharacterController::update(float duration)
             }
         }
 
+        mTurnAnimationThreshold -= duration;
+        if (movestate == CharState_TurnRight || movestate == CharState_TurnLeft)
+            mTurnAnimationThreshold = 0.05;
+        else if (movestate == CharState_None && (mMovementState == CharState_TurnRight || mMovementState == CharState_TurnLeft)
+                 && mTurnAnimationThreshold > 0)
+        {
+            movestate = mMovementState;
+        }
+
         if (onground)
             cls.getCreatureStats(mPtr).land();
 
@@ -1521,6 +1520,12 @@ void CharacterController::update(float duration)
         if (inJump)
             mMovementAnimationControlled = false;
 
+        if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
+        {
+            if (duration > 0)
+                mAnimation->adjustSpeedMult(mCurrentMovement, std::min(1.5f, std::abs(rot.z) / duration / Ogre::Math::PI));
+        }
+
         if (!mSkipAnim)
         {
             rot *= Ogre::Math::RadiansToDegrees(1.0f);
@@ -1539,7 +1544,9 @@ void CharacterController::update(float duration)
             world->queueMovement(mPtr, Ogre::Vector3(0.0f));
 
         movement = vec;
-        cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = cls.getMovementSettings(mPtr).mPosition[2] = 0;
+        cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = 0;
+        // Can't reset jump state (mPosition[2]) here; we don't know for sure whether the PhysicSystem will actually handle it in this frame
+        // due to the fixed minimum timestep used for the physics update. It will be reset in PhysicSystem::move once the jump is handled.
     }
     else if(cls.getCreatureStats(mPtr).isDead())
     {

@@ -914,6 +914,13 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
     }
 }
 
+void Animation::adjustSpeedMult(const std::string &groupname, float speedmult)
+{
+    AnimStateMap::iterator state(mStates.find(groupname));
+    if(state != mStates.end())
+        state->second.mSpeedMult = speedmult;
+}
+
 bool Animation::isPlaying(const std::string &groupname) const
 {
     AnimStateMap::const_iterator state(mStates.find(groupname));

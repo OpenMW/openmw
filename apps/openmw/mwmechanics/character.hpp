@@ -32,6 +32,7 @@ enum Priority {
     Priority_Weapon,
     Priority_Knockdown,
     Priority_Torch,
+    Priority_Storm,
 
     Priority_Death,
 
@@ -129,7 +130,7 @@ enum UpperBodyCharacterState {
 
 enum JumpingState {
     JumpState_None,
-    JumpState_Falling,
+    JumpState_InAir,
     JumpState_Landing
 };
 
@@ -169,6 +170,8 @@ class CharacterController
     // counted for skill increase
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
+
+    float mTurnAnimationThreshold; // how long to continue playing turning animation after actor stopped turning
 
     std::string mAttackType; // slash, chop or thrust
     void determineAttackType();
