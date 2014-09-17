@@ -416,7 +416,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                     speedmult = mMovementSpeed / vel;
                 }
                 else if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
-                    speedmult = 1.f; // TODO: should get a speed mult depending on the current turning speed
+                    speedmult = 1.f; // adjusted each frame
                 else if (mMovementSpeed > 0.0f)
                 {
                     // The first person anims don't have any velocity to calculate a speed multiplier from.
@@ -592,6 +592,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
+    , mTurnAnimationThreshold(0)
 {
     if(!mAnimation)
         return;
@@ -1480,6 +1481,15 @@ void CharacterController::update(float duration)
             }
         }
 
+        mTurnAnimationThreshold -= duration;
+        if (movestate == CharState_TurnRight || movestate == CharState_TurnLeft)
+            mTurnAnimationThreshold = 0.05;
+        else if (movestate == CharState_None && (mMovementState == CharState_TurnRight || mMovementState == CharState_TurnLeft)
+                 && mTurnAnimationThreshold > 0)
+        {
+            movestate = mMovementState;
+        }
+
         if (onground)
             cls.getCreatureStats(mPtr).land();
 
@@ -1509,6 +1519,12 @@ void CharacterController::update(float duration)
         refreshCurrentAnims(idlestate, movestate, forcestateupdate);
         if (inJump)
             mMovementAnimationControlled = false;
+
+        if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
+        {
+            if (duration > 0)
+                mAnimation->adjustSpeedMult(mCurrentMovement, std::min(1.5f, std::abs(rot.z) / duration / Ogre::Math::PI));
+        }
 
         if (!mSkipAnim)
         {
