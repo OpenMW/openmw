@@ -592,6 +592,16 @@ endif()
 
 if (WIN32)
   if (MSVC)
+    if (MULTITHREADED_BUILD)
+        set( MT_BUILD "/MP")
+    endif (MULTITHREADED_BUILD)
+
+    foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+        string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+        set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "$(SolutionDir)$(Configuration)\" )
+        set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "$(ProjectDir)$(Configuration)\" )
+    endforeach( OUTPUTCONFIG )
+
     if (USE_DEBUG_CONSOLE)
       set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
       set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
@@ -655,31 +665,42 @@ if (WIN32)
 
     # boost::wave has a few issues with signed / unsigned conversions, so we suppress those here
     set(SHINY_WARNINGS "${WARNINGS} /wd4245")
-    set_target_properties(shiny PROPERTIES COMPILE_FLAGS ${SHINY_WARNINGS})
+    set_target_properties(shiny PROPERTIES COMPILE_FLAGS "${SHINY_WARNINGS} ${MT_BUILD}")
     # there's an unreferenced local variable in the ogre platform, suppress it
     set(SHINY_OGRE_WARNINGS "${WARNINGS} /wd4101")
-    set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS ${SHINY_OGRE_WARNINGS})
-    set_target_properties(sdl4ogre PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS "${SHINY_OGRE_WARNINGS} ${MT_BUILD}")
+    set_target_properties(sdl4ogre PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     # oics uses tinyxml, which has an initialized but unused variable
     set(OICS_WARNINGS "${WARNINGS} /wd4189")
-    set_target_properties(oics PROPERTIES COMPILE_FLAGS ${OICS_WARNINGS})
-    set_target_properties(components PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    set_target_properties(oics PROPERTIES COMPILE_FLAGS "${OICS_WARNINGS} ${MT_BUILD}")
+    set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     if (BUILD_LAUNCHER)
-        set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})
+        set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     endif (BUILD_LAUNCHER)
-    set_target_properties(openmw PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     if (BUILD_BSATOOL)
-        set_target_properties(bsatool PROPERTIES COMPILE_FLAGS ${WARNINGS})
+        set_target_properties(bsatool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     endif (BUILD_BSATOOL)
     if (BUILD_ESMTOOL)
-        set_target_properties(esmtool PROPERTIES COMPILE_FLAGS ${WARNINGS})
+        set_target_properties(esmtool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     endif (BUILD_ESMTOOL)
     if (BUILD_OPENCS)
-        set_target_properties(opencs PROPERTIES COMPILE_FLAGS ${WARNINGS})
+        set_target_properties(opencs PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     endif (BUILD_OPENCS)
     if (BUILD_MWINIIMPORTER)
-        set_target_properties(mwiniimport PROPERTIES COMPILE_FLAGS ${WARNINGS})
+        set_target_properties(mwiniimport PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     endif (BUILD_MWINIIMPORTER)
+
+    set( OMW_CFLAGS "/DWIN32_LEAN_AND_MEAN ${MT_BUILD}" )
+
+    string( TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE )
+
+    # Debug builds need /bigobj
+    if ( CMAKE_BUILD_TYPE STREQUAL "DEBUG" OR CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO" )
+        set( OMW_CFLAGS "${OMW_CFLAGS} /bigobj" )
+    endif ( CMAKE_BUILD_TYPE STREQUAL "DEBUG" OR CMAKE_BUILD_TYPE STREQUAL "RELWITHDEBINFO" )
+
+    set_property( TARGET openmw APPEND_STRING PROPERTY COMPILE_FLAGS " ${OMW_CFLAGS}" )
   endif(MSVC)
 
   # Same for MinGW
