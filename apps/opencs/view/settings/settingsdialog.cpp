@@ -39,7 +39,7 @@ QRect getMaximumResolution()
     return max;
 }
 
-QString getCurrentResolution()
+QString getCurrentOgreResolution()
 {
     Ogre::ConfigOptionMap& renderOpt =
             Ogre::Root::getSingleton().getRenderSystem()->getConfigOptions();
@@ -152,7 +152,7 @@ QStringList getAvailableOptions(const QString &key)
 }
 
 CSVSettings::SettingsDialog::SettingsDialog(QTabWidget *parent)
-    : /*mDebugMode (false),*/ QTabWidget (parent)
+    : QTabWidget (parent)
 {
     setObjectName("User Settings");
 
@@ -163,7 +163,7 @@ CSVSettings::SettingsDialog::SettingsDialog(QTabWidget *parent)
     spinBox_x->setMaximum(res.width());
     spinBox_y->setMaximum(res.height());
 
-    connect(comboBox_rendersystem, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged(const QString&)));
+    connect(comboBox_rendersystem, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged()));
     connect(radioButton_standard_res, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
 }
 
@@ -195,7 +195,7 @@ void CSVSettings::SettingsDialog::setViewValues()
     //rendererChanged(Ogre::Root::getSingleton().getRenderSystemByName(renderer.toStdString()));
     rendererChanged(); // setup antialiasing options
 
-    if(CSMSettings::UserSettings::instance().settingValue("Video/use settings.cfg") == "true")
+    if(mModel->settingValue("Video/use settings.cfg") == "true")
     {
         label_RenderingSubsystem->setEnabled(false);
         comboBox_rendersystem->setEnabled(false);
@@ -209,29 +209,105 @@ void CSVSettings::SettingsDialog::setViewValues()
     else
         checkBox_override->setChecked(false);
 
-    if(CSMSettings::UserSettings::instance().settingValue("Window Size/Width") != "")
-    {
-        spinBox_x->setValue(
-            CSMSettings::UserSettings::instance().settingValue("Window Size/Width").toInt());
-    }
+    if(mModel->settingValue("Window Size/Width") != "")
+        spinBox_x->setValue(mModel->settingValue("Window Size/Width").toInt());
 
-    if(CSMSettings::UserSettings::instance().settingValue("Window Size/Height") != "")
-    {
-        spinBox_y->setValue(
-            CSMSettings::UserSettings::instance().settingValue("Window Size/Height").toInt());
-    }
+    if(mModel->settingValue("Window Size/Height") != "")
+        spinBox_y->setValue(mModel->settingValue("Window Size/Height").toInt());
 
     // update display resolution combo box
-    // FIXME: update opencs window size
     comboBox_std_window_size->clear();
     comboBox_std_window_size->addItems(getAvailableResolutions());
-    int index = comboBox_std_window_size->findData(getCurrentResolution(),
+
+    QString currRes = mModel->settingValue("Window Size/Width") + " x " +
+                      mModel->settingValue("Window Size/Height");
+
+    int index = comboBox_std_window_size->findData(currRes,
                                                    Qt::DisplayRole,
                                                    Qt::MatchStartsWith);
     if(index != -1)
+    {
+        // show the values in ini file
         comboBox_std_window_size->setCurrentIndex(index);
+        slotStandardToggled(true);
+    }
+    else
+    {
+        // show what's in Ogre instead
+        index = comboBox_std_window_size->findData(getCurrentOgreResolution(),
+                                                   Qt::DisplayRole,
+                                                   Qt::MatchStartsWith);
+        if(index != -1)
+            comboBox_std_window_size->setCurrentIndex(index);
 
-    slotStandardToggled(radioButton_standard_res->isChecked() ? true : false);
+        radioButton_custom_res->setChecked(true);
+        slotStandardToggled(false);
+    }
+}
+
+void CSVSettings::SettingsDialog::saveSettings()
+{
+#if 0
+    //setting the definition in the model automatically syncs with the file
+    foreach (const Page *page, mPages)
+    {
+        foreach (const View *view, page->views())
+        {
+            if (!view->serializable())
+                continue;
+
+            mModel->setDefinitions (view->viewKey(), view->selectedValues());
+        }
+    }
+#endif
+    mModel->saveDefinitions();
+}
+
+void CSVSettings::SettingsDialog::createConnections
+                                    (const QList <CSMSettings::Setting *> &list)
+{
+#if 0
+    foreach (const CSMSettings::Setting *setting, list)
+    {
+        View *masterView = findView (setting->page(), setting->name());
+
+        CSMSettings::Connector *connector =
+                                new CSMSettings::Connector (masterView, this);
+
+        connect (masterView,
+                 SIGNAL (viewUpdated(const QString &, const QStringList &)),
+                 connector,
+                 SLOT (slotUpdateSlaves())
+                 );
+
+        const CSMSettings::ProxyValueMap &proxyMap = setting->proxyLists();
+
+        foreach (const QString &key, proxyMap.keys())
+        {
+            QStringList keyPair = key.split('/');
+
+            if (keyPair.size() != 2)
+                continue;
+
+            View *slaveView = findView (keyPair.at(0), keyPair.at(1));
+
+            if (!slaveView)
+            {
+                qWarning () << "Unable to create connection for view "
+                            << key;
+                continue;
+            }
+
+            QList <QStringList> proxyList = proxyMap.value (key);
+            connector->addSlaveView (slaveView, proxyList);
+
+            connect (slaveView,
+                     SIGNAL (viewUpdated(const QString &, const QStringList &)),
+                    connector,
+                     SLOT (slotUpdateMaster()));
+        }
+    }
+#endif
 }
 
 void CSVSettings::SettingsDialog::closeEvent (QCloseEvent *event)
@@ -239,8 +315,9 @@ void CSVSettings::SettingsDialog::closeEvent (QCloseEvent *event)
     //SettingWindow::closeEvent() must be called first to ensure
     //model is updated
     //SettingWindow::closeEvent (event);
+    QApplication::focusWidget()->clearFocus();
 
-    //saveSettings();
+    saveSettings();
 }
 
 void CSVSettings::SettingsDialog::show()

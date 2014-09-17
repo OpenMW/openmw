@@ -8,6 +8,7 @@
 #include <QMdiArea>
 #include <QDockWidget>
 #include <QtGui/QApplication>
+#include <QDesktopWidget>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/settings/usersettings.hpp"
@@ -325,7 +326,14 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     QString height = CSMSettings::UserSettings::instance().settingValue
                                     ("Window Size/Height");
 
-    resize (width.toInt(), height.toInt());
+    // trick to get the window decorations and their sizes
+    show();
+    hide();
+    resize (width.toInt() - (frameGeometry().width() - geometry().width()),
+            height.toInt() - (frameGeometry().height() - geometry().height()));
+    // start at the centre of the screen
+    QPoint screenCenter = QApplication::desktop()->screenGeometry().center();
+    move(screenCenter - QPoint(frameGeometry().width()/2, frameGeometry().height()/2));
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
