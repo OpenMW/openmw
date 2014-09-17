@@ -5,7 +5,6 @@
 
 #include <QDesktopWidget>
 
-#include <components/contentselector/model/naturalsort.hpp>
 #include "../../model/settings/usersettings.hpp"
 
 namespace
@@ -49,12 +48,33 @@ QString getCurrentOgreResolution()
         if(it->first == "Video Mode" )
         {
             QRegExp re("^(\\d+ x \\d+)");
-            int pos = re.indexIn(it->second.currentValue.c_str(), 0);
-            if (pos > -1)
+            if (re.indexIn(it->second.currentValue.c_str(), 0) > -1)
                 return re.cap(1);
         }
     }
     return QString(); // found nothing
+}
+
+bool customCompare(const QString &s1, const QString &s2)
+{
+    int x1, x2, y1, y2;
+    QRegExp re("^(\\d+) x (\\d+)");
+
+    if(re.indexIn(s1) > -1)
+    {
+        x1 = re.cap(1).toInt();
+        y1 = re.cap(2).toInt();
+    }
+    if(re.indexIn(s2) > -1)
+    {
+        x2 = re.cap(1).toInt();
+        y2 = re.cap(2).toInt();
+    }
+
+    if(x1 == x2)
+        return y1 > y2;
+    else
+        return x1 > x2;
 }
 
 QStringList getAvailableResolutions()
@@ -93,8 +113,7 @@ QStringList getAvailableResolutions()
             {
                 // extract x and y values
                 QRegExp re("^(\\d+) x (\\d+)");
-                int pos = re.indexIn((*iter).c_str(), 0);
-                if (pos > -1)
+                if(re.indexIn((*iter).c_str(), 0) > -1)
                 {
                     QString aspect = getAspect(re.cap(1).toInt(), re.cap(2).toInt());
                     QString resolution = re.cap(1) + QString(" x ") + re.cap(2);
@@ -110,42 +129,7 @@ QStringList getAvailableResolutions()
         }
     }
     result.removeDuplicates();
-    return result;
-}
-
-QStringList getAvailableOptions(const QString &key)
-{
-    QStringList result;
-
-    Ogre::ConfigOptionMap& renderOpt =
-        Ogre::Root::getSingleton().getRenderSystem()->getConfigOptions();
-    Ogre::ConfigOptionMap::iterator it = renderOpt.begin();
-
-    uint row = 0;
-    for(; it != renderOpt.end(); ++it, ++row)
-    {
-        Ogre::StringVector::iterator opt_it = it->second.possibleValues.begin();
-        uint idx = 0;
-
-        for(; opt_it != it->second.possibleValues.end(); ++opt_it, ++idx)
-        {
-            if(strcmp (key.toStdString().c_str(), it->first.c_str()) == 0)
-            {
-                result << ((key == "FSAA") ? QString("MSAA ") : QString(""))
-                    + QString::fromStdString((*opt_it).c_str()).simplified();
-            }
-        }
-    }
-
-    // Sort ascending
-    qSort(result.begin(), result.end(), naturalSortLessThanCI);
-
-    // Replace the zero option with Off
-    int index = result.indexOf("MSAA 0");
-
-    if(index != -1)
-        result.replace(index, QObject::tr("Off"));
-
+    qStableSort(result.begin(), result.end(), customCompare);
     return result;
 }
 
@@ -163,17 +147,75 @@ CSVSettings::SettingsDialog::SettingsDialog(QTabWidget *parent)
     spinBox_x->setMaximum(res.width());
     spinBox_y->setMaximum(res.height());
 
-    connect(comboBox_rendersystem, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged()));
+    connect(checkBox_override, SIGNAL(toggled(bool)), this, SLOT(slotOverrideToggled(bool)));
+    connect(comboBox_rendersystem, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(slotRendererChanged(const QString&)));
     connect(radioButton_standard_res, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
+
+    connect(comboBox_std_window_size, SIGNAL(mouseReleased()), this, SLOT(slotStandardClicked()));
+    connect(spinBox_x, SIGNAL(mouseReleased()), this, SLOT(slotCustomClicked()));
+    connect(spinBox_y, SIGNAL(mouseReleased()), this, SLOT(slotCustomClicked()));
 }
 
-void CSVSettings::SettingsDialog::rendererChanged()
+void CSVSettings::SettingsDialog::slotStandardClicked()
+{
+    std::cout << "click" << std::endl;
+    if(!radioButton_standard_res->isChecked())
+        radioButton_standard_res->toggle();
+}
+
+void CSVSettings::SettingsDialog::slotCustomClicked()
+{
+    std::cout << "click" << std::endl;
+    if(radioButton_standard_res->isChecked())
+        radioButton_standard_res->toggle();
+}
+
+void CSVSettings::SettingsDialog::slotRendererChanged(const QString &renderer)
 {
     comboBox_antialiasing->clear();
-    comboBox_antialiasing->addItems(getAvailableOptions(QString("FSAA")));
+    comboBox_antialiasing->addItems(mModel->getOgreOptions(QString("FSAA"), renderer));
+
+    comboBox_shaderlanguage->clear();
+    comboBox_shaderlanguage->addItems(mModel->getShaderLanguageByRenderer(renderer));
+
+    if(mModel->settingValue("Video/use settings.cfg") == "true")
+    {
+        label_RenderingSubsystem->setEnabled(false);
+        comboBox_rendersystem->setEnabled(false);
+        label_Antialiasing->setEnabled(false);
+        comboBox_antialiasing->setEnabled(false);
+        checkBox_vsync->setEnabled(false);
+        label_ShaderLanguage->setEnabled(false);
+        comboBox_shaderlanguage->setEnabled(false);
+    }
+    else
+        checkBox_override->setChecked(false);
 }
 
-// FIXME: what to do with updating window size
+void CSVSettings::SettingsDialog::slotOverrideToggled(bool checked)
+{
+    if(checked)
+    {
+        label_RenderingSubsystem->setEnabled(false);
+        comboBox_rendersystem->setEnabled(false);
+        label_Antialiasing->setEnabled(false);
+        comboBox_antialiasing->setEnabled(false);
+        checkBox_vsync->setEnabled(false);
+        label_ShaderLanguage->setEnabled(false);
+        comboBox_shaderlanguage->setEnabled(false);
+    }
+    else
+    {
+        label_RenderingSubsystem->setEnabled(true);
+        comboBox_rendersystem->setEnabled(true);
+        label_Antialiasing->setEnabled(true);
+        comboBox_antialiasing->setEnabled(true);
+        checkBox_vsync->setEnabled(true);
+        label_ShaderLanguage->setEnabled(true);
+        comboBox_shaderlanguage->setEnabled(true);
+    }
+}
+
 void CSVSettings::SettingsDialog::slotStandardToggled(bool checked)
 {
     if (checked)
@@ -192,22 +234,28 @@ void CSVSettings::SettingsDialog::slotStandardToggled(bool checked)
 
 void CSVSettings::SettingsDialog::setViewValues()
 {
-    //rendererChanged(Ogre::Root::getSingleton().getRenderSystemByName(renderer.toStdString()));
-    rendererChanged(); // setup antialiasing options
+    int index = -1;
 
-    if(mModel->settingValue("Video/use settings.cfg") == "true")
-    {
-        label_RenderingSubsystem->setEnabled(false);
-        comboBox_rendersystem->setEnabled(false);
-        label_Antialiasing->setEnabled(false);
-        comboBox_antialiasing->setEnabled(false);
-        checkBox_vsync->setEnabled(false);
-        label_ShaderLanguage->setEnabled(false);
-        comboBox_shaderlanguage->setEnabled(false);
+    // initialised in the constructor
+    slotOverrideToggled(checkBox_override->isChecked());
 
-    }
-    else
-        checkBox_override->setChecked(false);
+    // Ogre initialised earlier
+    slotRendererChanged(Ogre::Root::getSingleton().getRenderSystem()->getName().c_str());
+
+    // antialiasing
+    QString antialiasing = mModel->settingValue("Video/antialiasing");
+    index = comboBox_antialiasing->findData(antialiasing, Qt::DisplayRole);
+    if(index != -1)
+        comboBox_antialiasing->setCurrentIndex(index);
+
+    // vsync
+    checkBox_vsync->setChecked(mModel->settingValue("Video/vsync") == "true");
+
+    // shader lang
+    QString shaderlang = mModel->settingValue("Shader/language");
+    index = comboBox_shaderlanguage->findData(shaderlang, Qt::DisplayRole);
+    if(index != -1)
+        comboBox_shaderlanguage->setCurrentIndex(index);
 
     if(mModel->settingValue("Window Size/Width") != "")
         spinBox_x->setValue(mModel->settingValue("Window Size/Width").toInt());
@@ -222,9 +270,7 @@ void CSVSettings::SettingsDialog::setViewValues()
     QString currRes = mModel->settingValue("Window Size/Width") + " x " +
                       mModel->settingValue("Window Size/Height");
 
-    int index = comboBox_std_window_size->findData(currRes,
-                                                   Qt::DisplayRole,
-                                                   Qt::MatchStartsWith);
+    index = comboBox_std_window_size->findData(currRes, Qt::DisplayRole, Qt::MatchStartsWith);
     if(index != -1)
     {
         // show the values in ini file
@@ -234,9 +280,7 @@ void CSVSettings::SettingsDialog::setViewValues()
     else
     {
         // show what's in Ogre instead
-        index = comboBox_std_window_size->findData(getCurrentOgreResolution(),
-                                                   Qt::DisplayRole,
-                                                   Qt::MatchStartsWith);
+        index = comboBox_std_window_size->findData(getCurrentOgreResolution(), Qt::DisplayRole, Qt::MatchStartsWith);
         if(index != -1)
             comboBox_std_window_size->setCurrentIndex(index);
 
@@ -260,6 +304,55 @@ void CSVSettings::SettingsDialog::saveSettings()
         }
     }
 #endif
+    std::cout << "closeEvent" << std::endl;
+
+    // override
+    if(checkBox_override->isChecked())
+        mModel->setDefinitions("Video/use settings.cfg", QStringList("true"));
+    else
+        mModel->setDefinitions("Video/use settings.cfg", QStringList("false"));
+
+    // render system
+    mModel->setDefinitions("Video/render system",
+                           QStringList(comboBox_rendersystem->currentText()));
+
+    // vsync
+    if(checkBox_vsync->isChecked())
+        mModel->setDefinitions("Video/vsync", QStringList("true"));
+    else
+        mModel->setDefinitions("Video/vsync", QStringList("false"));
+
+    // antialiasing
+    mModel->setDefinitions("Video/antialiasing",
+                           QStringList(comboBox_antialiasing->currentText()));
+#if 0
+    QRegExp reAA("^\\D*(\\d+)\\D*");
+    if(reAA.indexIn(comboBox_antialiasing->currentText()) > -1)
+        mModel->setDefinitions("Video/antialiasing", QStringList(reAA.cap(1)));
+#endif
+
+    // shader lang
+    mModel->setDefinitions("Shader/language",
+                           QStringList(comboBox_shaderlanguage->currentText()));
+
+    // window size
+    if(radioButton_standard_res->isChecked())
+    {
+        QRegExp re("^(\\d+) x (\\d+)");
+        if(re.indexIn(comboBox_std_window_size->currentText()) > -1)
+        {
+            mModel->setDefinitions("Window Size/Width", QStringList(re.cap(1)));
+            mModel->setDefinitions("Window Size/Height", QStringList(re.cap(2)));
+        }
+    }
+    else
+    {
+        mModel->setDefinitions("Window Size/Width",
+                               QStringList(QString::number(spinBox_x->value())));
+        mModel->setDefinitions("Window Size/Height",
+                               QStringList(QString::number(spinBox_y->value())));
+    }
+
     mModel->saveDefinitions();
 }
 

@@ -48,7 +48,10 @@ namespace CSVSettings {
 
         void show();
 
-        void rendererChanged();
+        void slotStandardClicked();
+        void slotCustomClicked();
+        void slotRendererChanged(const QString &renderer);
+        void slotOverrideToggled(bool checked);
         void slotStandardToggled(bool checked);
     };
 }

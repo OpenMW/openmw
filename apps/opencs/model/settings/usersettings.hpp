@@ -76,6 +76,9 @@ namespace CSMSettings {
         ///Save any unsaved changes in the QSettings object
         void saveDefinitions() const;
 
+        QStringList getShaderLanguageByRenderer(const QString &renderer);
+        QStringList getOgreOptions(const QString &key, const QString &renderer);
+
     private:
 
         void buildSettingModelDefaults();

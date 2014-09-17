@@ -297,7 +297,7 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     std::auto_ptr<sh::Factory> factory (new sh::Factory (platform));
 
-    std::string shLang = mUserSettings.settingValue("Shiny/language").toStdString();
+    std::string shLang = mUserSettings.settingValue("Shader/language").toStdString();
     enum sh::Language lang;
     if(shLang == "CG")          lang = sh::Language_CG;
     else if(shLang == "HLSL")   lang = sh::Language_HLSL;

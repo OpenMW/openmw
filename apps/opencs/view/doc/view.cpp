@@ -32,6 +32,14 @@ void CSVDoc::View::closeEvent (QCloseEvent *event)
         event->ignore();
     else
     {
+        // save window size first
+        CSMSettings::UserSettings::instance().setDefinitions(
+                "Window Size/Width",
+                QStringList(QString::number(frameGeometry().width())));
+        CSMSettings::UserSettings::instance().setDefinitions(
+                "Window Size/Height",
+                QStringList(QString::number(frameGeometry().height())));
+        CSMSettings::UserSettings::instance().saveDefinitions();
         // closeRequest() returns true if last document
         mViewManager.removeDocAndView(mDocument);
     }

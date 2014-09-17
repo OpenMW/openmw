@@ -5,8 +5,11 @@
 
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
+#include <components/contentselector/model/naturalsort.hpp>
 
 #include <boost/version.hpp>
+
+#include <OgreRoot.h>
 
 #include "setting.hpp"
 #include "support.hpp"
@@ -344,15 +347,74 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 #endif
     }
     mSettingCfgDefinitions->setValue("Video/render system", renderSystem.c_str());
-    // force shiny language based on render system
+    // force shader language based on render system
     if(renderSystem == "Direct3D9 Rendering Subsystem")
-        mSettingDefinitions->setValue("Shiny/language", "CG");
+        mSettingDefinitions->setValue("Shader/language", "CG");
     else
-        mSettingDefinitions->setValue("Shiny/language", "GLSL");
+        mSettingDefinitions->setValue("Shader/language", "GLSL");
 
     // check if override entry exists (default: override)
     if(!mSettingDefinitions->childGroups().contains("Video", Qt::CaseInsensitive))
         mSettingDefinitions->setValue("Video/use settings.cfg", "true");
+}
+
+QStringList CSMSettings::UserSettings::getOgreOptions(const QString &key, const QString &renderer)
+{
+    QStringList result;
+
+    Ogre::ConfigOptionMap& renderOpt =
+        //Ogre::Root::getSingleton().getRenderSystem()->getConfigOptions();
+    Ogre::Root::getSingleton().getRenderSystemByName(renderer.toStdString())->getConfigOptions();
+    Ogre::ConfigOptionMap::iterator it = renderOpt.begin();
+
+    uint row = 0;
+    for(; it != renderOpt.end(); ++it, ++row)
+    {
+        Ogre::StringVector::iterator opt_it = it->second.possibleValues.begin();
+        uint idx = 0;
+
+        for(; opt_it != it->second.possibleValues.end(); ++opt_it, ++idx)
+        {
+            if(strcmp (key.toStdString().c_str(), it->first.c_str()) == 0)
+            {
+                result << ((key == "FSAA") ? QString("MSAA ") : QString(""))
+                    + QString::fromStdString((*opt_it).c_str()).simplified();
+            }
+        }
+    }
+
+    // Sort ascending
+    qSort(result.begin(), result.end(), naturalSortLessThanCI);
+
+    // Replace the zero option with Off
+    int index = result.indexOf("MSAA 0");
+
+    if(index != -1)
+        result.replace(index, QObject::tr("Off"));
+
+    return result;
+}
+
+QStringList CSMSettings::UserSettings::getShaderLanguageByRenderer(const QString &renderer)
+{
+    QStringList result;
+
+    if(renderer == "Direct3D9 Rendering Subsystem")
+    {
+        result.append("CG");
+        result.append("HLSL");
+        result.append("None");
+    }
+    else if(renderer == "OpenGL Rendering Subsystem")
+    {
+        result.append("GLSL");
+        result.append("GLSLES");
+        result.append("None");
+    }
+    else
+        result.append("None");
+
+    return result;
 }
 
 bool CSMSettings::UserSettings::hasSettingDefinitions
