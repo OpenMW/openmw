@@ -8,7 +8,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actionequip.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadmgef.hpp>
@@ -291,6 +291,38 @@ namespace MWMechanics
             return 1001.f * numEffectsToCure(actor, ESM::MagicEffect::Paralyze);
         case ESM::MagicEffect::CurePoison:
             return 1001.f * numEffectsToCure(actor, ESM::MagicEffect::Poison);
+
+        case ESM::MagicEffect::DisintegrateArmor: // TODO: check if actor is wearing armor
+        case ESM::MagicEffect::DisintegrateWeapon: // TODO: check if actor is wearing weapon
+            break;
+
+        case ESM::MagicEffect::DamageAttribute:
+        case ESM::MagicEffect::DrainAttribute:
+            if (!target.isEmpty() && target.getClass().getCreatureStats(target).getAttribute(effect.mAttribute).getModified() <= 0)
+                return 0.f;
+            {
+                const float attributePriorities[ESM::Attribute::Length] = {
+                    1.f, // Strength
+                    0.5, // Intelligence
+                    0.6, // Willpower
+                    0.7, // Agility
+                    0.5, // Speed
+                    0.8, // Endurance
+                    0.7, // Personality
+                    0.3 // Luck
+                };
+                if (effect.mAttribute >= 0 && effect.mAttribute < ESM::Attribute::Length)
+                    rating *= attributePriorities[effect.mAttribute];
+            }
+            break;
+
+        case ESM::MagicEffect::DamageSkill:
+        case ESM::MagicEffect::DrainSkill:
+            if (target.isEmpty() || !target.getClass().isNpc())
+                return 0.f;
+            if (target.getClass().getNpcStats(target).getSkill(effect.mSkill).getModified() <= 0)
+                return 0.f;
+            break;
 
         default:
             break;

@@ -30,22 +30,28 @@ darkf
 Dmitry Shkurskiy (endorph)
 Douglas Diniz (Dgdiniz)
 Douglas Mencken (dougmencken)
+dreamer-dead
 Edmondo Tommasina (edmondo)
 Eduard Cot (trombonecot)
 Eli2
 Emanuel Guével (potatoesmaster)
+eroen
 Fil Krynicki (filkry)
+Gašper Sedej
 gugus/gus
 Hallfaer Tuilinn
 Jacob Essex (Yacoby)
 Jannik Heller (scrawl)
 Jason Hooks (jhooks)
+jeaye
 Jeffrey Haines (Jyby)
 Joel Graff (graffy)
 John Blomberg (fstp)
+Jordan Ayers
 Jordan Milne
 Julien Voisin (jvoisin/ap0)
 Karl-Felix Glatzer (k1ll)
+Kevin Poitra (PuppyKevin)
 Lars Söderberg (Lazaroth)
 lazydev
 Leon Saunders (emoose)
@@ -61,16 +67,23 @@ Michael Hogan (Xethik)
 Michael Mc Donnell
 Michael Papageorgiou (werdanith)
 Michał Bień (Glorf)
+Miroslav Puda (pakanek)
+MiroslavR
 Nathan Jeffords (blunted2night)
 Nikolay Kasyanov (corristo)
+nobrakal
 Nolan Poe (nopoe)
 Paul McElroy (Greendogo)
 Pieter van der Kloet (pvdk)
 Radu-Marius Popovici (rpopovici)
+riothamus
+Robert MacGregor (Ragora)
+Rohit Nirmal
 Roman Melnik (Kromgart)
 Roman Proskuryakov (humbug)
 sandstranger
 Sandy Carter (bwrsandman)
+Scott Howard
 Sebastian Wick (swick)
 Sergey Shambir
 sir_herrbatka
@@ -80,6 +93,7 @@ Sylvain Thesnieres (Garvek)
 Thomas Luppi (Digmaster)
 Tom Mason (wheybags)
 Torben Leif Carrington (TorbenC)
+Vincent Heuken
 
 Packagers:
 Alexander Olofsson (Ace) - Windows
@@ -124,11 +138,12 @@ Sadler
 Artwork:
 Necrod - OpenMW Logo
 Mickey Lyle (raevol) - Wordpress Theme
-Okulo - OpenMW Editor Icons
+Okulo, SirHerrbatka, crysthala - OpenMW Editor Icons
 
 Inactive Contributors:
 Ardekantur
 Armin Preiml
+Berulacks
 Carl Maxwell
 Diggory Hardy
 Dmitry Marakasov (AMDmi3)

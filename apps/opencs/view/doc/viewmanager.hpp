@@ -41,6 +41,7 @@ namespace CSVDoc
             bool notifySaveOnClose (View *view = 0);
             bool showModifiedDocumentMessageBox (View *view);
             bool showSaveInProgressMessageBox (View *view);
+            bool removeDocument(View *view);
 
         public:
 
@@ -55,6 +56,7 @@ namespace CSVDoc
             ///< Return number of views for \a document.
 
             bool closeRequest (View *view);
+            void removeDocAndView (CSMDoc::Document *document);
 
         signals:
 

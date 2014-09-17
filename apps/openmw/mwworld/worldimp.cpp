@@ -162,7 +162,6 @@ namespace MWWorld
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
-        // NOTE: We might need to reserve one more for the running game / save.
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
@@ -2502,9 +2501,9 @@ namespace MWWorld
         {
             const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
 
-	    // A power can be used once per 24h
-	    if (spell->mData.mType == ESM::Spell::ST_Power)
-	        stats.getSpells().usePower(spell->mId);
+            // A power can be used once per 24h
+            if (spell->mData.mType == ESM::Spell::ST_Power)
+                stats.getSpells().usePower(spell->mId);
 
             cast.cast(spell);
         }
