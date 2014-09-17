@@ -162,7 +162,6 @@ namespace MWWorld
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
-        // NOTE: We might need to reserve one more for the running game / save.
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
