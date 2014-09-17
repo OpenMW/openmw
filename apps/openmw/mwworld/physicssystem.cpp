@@ -23,6 +23,7 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/movement.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -296,6 +297,7 @@ namespace MWWorld
             else
             {
                 velocity = Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) * movement;
+
                 // not in water nor can fly, so need to deal with gravity
                 if(!physicActor->getOnGround()) // if current OnGround status is false, must be falling or jumping
                 {
@@ -333,6 +335,7 @@ namespace MWWorld
                     }
                 }
             }
+            ptr.getClass().getMovementSettings(ptr).mPosition[2] = 0;
 
             // Now that we have the effective movement vector, apply wind forces to it
             if (MWBase::Environment::get().getWorld()->isInStorm())

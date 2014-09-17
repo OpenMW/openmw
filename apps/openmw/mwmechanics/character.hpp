@@ -130,7 +130,7 @@ enum UpperBodyCharacterState {
 
 enum JumpingState {
     JumpState_None,
-    JumpState_Falling,
+    JumpState_InAir,
     JumpState_Landing
 };
 

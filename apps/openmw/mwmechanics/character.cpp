@@ -310,7 +310,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             }
         }
 
-        if(mJumpState == JumpState_Falling)
+        if(mJumpState == JumpState_InAir)
         {
             int mode = ((jump == mCurrentJump) ? 2 : 1);
 
@@ -1275,7 +1275,6 @@ void CharacterController::update(float duration)
             }
         }
 
-        //Ogre::Vector3 vec = cls.getMovementVector(mPtr);
         Ogre::Vector3 vec(cls.getMovementSettings(mPtr).mPosition);
         vec.normalise();
 
@@ -1371,8 +1370,8 @@ void CharacterController::update(float duration)
                 cls.getCreatureStats(mPtr).land();
             }
 
-            forcestateupdate = (mJumpState != JumpState_Falling);
-            mJumpState = JumpState_Falling;
+            forcestateupdate = (mJumpState != JumpState_InAir);
+            mJumpState = JumpState_InAir;
 
             // This is a guess. All that seems to be known is that "While the player is in the
             // air, fJumpMoveBase and fJumpMoveMult governs air control". What does fJumpMoveMult do?
@@ -1408,7 +1407,7 @@ void CharacterController::update(float duration)
             fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
             cls.getCreatureStats(mPtr).setFatigue(fatigue);
         }
-        else if(mJumpState == JumpState_Falling)
+        else if(mJumpState == JumpState_InAir)
         {
             forcestateupdate = true;
             mJumpState = JumpState_Landing;
@@ -1529,7 +1528,9 @@ void CharacterController::update(float duration)
             world->queueMovement(mPtr, Ogre::Vector3(0.0f));
 
         movement = vec;
-        cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = cls.getMovementSettings(mPtr).mPosition[2] = 0;
+        cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = 0;
+        // Can't reset jump state (mPosition[2]) here; we don't know for sure whether the PhysicSystem will actually handle it in this frame
+        // due to the fixed minimum timestep used for the physics update. It will be reset in PhysicSystem::move once the jump is handled.
     }
     else if(cls.getCreatureStats(mPtr).isDead())
     {
