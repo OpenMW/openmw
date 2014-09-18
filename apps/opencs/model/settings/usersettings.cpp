@@ -371,21 +371,22 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 
 QStringList CSMSettings::UserSettings::getOgreRenderers()
 {
-    QStringList result;
+    if(mOgreRenderers.empty())
+    {
+        Ogre::RenderSystemList renderers = Ogre::Root::getSingleton().getAvailableRenderers();
+        Ogre::RenderSystemList::iterator it = renderers.begin();
+        for(; it != renderers.end(); ++it)
+            mOgreRenderers.append((*it)->getName().c_str());
+    }
 
-    Ogre::RenderSystemList renderers = Ogre::Root::getSingleton().getAvailableRenderers();
-    Ogre::RenderSystemList::iterator it = renderers.begin();
-    for(; it != renderers.end(); ++it)
-        result.append((*it)->getName().c_str());
-
-    return result;
+    return mOgreRenderers;
 }
 
 QStringList CSMSettings::UserSettings::getOgreOptions(const QString &key, const QString &renderer)
 {
     QStringList result;
 
-    Ogre::RenderSystem *rend = Ogre::Root::getSingleton().getRenderSystem();
+    Ogre::RenderSystem *rend = Ogre::Root::getSingleton().getRenderSystemByName(renderer.toStdString());
     if(!rend)
         return result;
 

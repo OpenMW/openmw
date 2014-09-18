@@ -35,6 +35,8 @@ namespace CSMSettings {
         QSettings *mSettingDefinitions;
         QSettings *mSettingCfgDefinitions;
         QList <Setting *> mSettings;
+        QStringList mOgreRenderers;
+
 
     public:
 

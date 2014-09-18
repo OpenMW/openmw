@@ -14,7 +14,7 @@
    <string>User Settings</string>
   </property>
   <property name="currentIndex">
-   <number>0</number>
+   <number>1</number>
   </property>
   <widget class="QWidget" name="VideoSettings">
    <attribute name="title">
@@ -76,18 +76,7 @@
       </widget>
      </item>
      <item row="5" column="1">
-      <widget class="QComboBox" name="cmbShaderLang">
-       <item>
-        <property name="text">
-         <string>GLSL</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>CG</string>
-        </property>
-       </item>
-      </widget>
+      <widget class="QComboBox" name="cmbShaderLang"/>
      </item>
      <item row="4" column="1">
       <widget class="QComboBox" name="cmbAntiAlias"/>
@@ -110,78 +99,6 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="layoutWidget_Window">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>188</y>
-      <width>351</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout_Window">
-     <item row="1" column="3">
-      <widget class="QSpinBox" name="sbHeight">
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="QSpinBox" name="sbWidth">
-       <property name="maximumSize">
-        <size>
-         <width>186</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2" colspan="2">
-      <widget class="QComboBox" name="cmbStdWinSize">
-       <property name="minimumSize">
-        <size>
-         <width>180</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QRadioButton" name="rbCustWinSize">
-       <property name="text">
-        <string>Custom:</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">buttonGroup</string>
-       </attribute>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLabel" name="label_Resolution">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QRadioButton" name="rbStdWinSize">
-       <property name="text">
-        <string>Standard:</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">buttonGroup</string>
-       </attribute>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QGroupBox" name="displayGroup_Render">
     <property name="geometry">
      <rect>
@@ -195,23 +112,22 @@
      <string>Render System</string>
     </property>
    </widget>
-   <widget class="QGroupBox" name="displayGroup_Window">
+   <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>170</y>
+      <x>9</x>
+      <y>169</y>
       <width>371</width>
-      <height>81</height>
+      <height>101</height>
      </rect>
     </property>
     <property name="title">
-     <string>Window Size</string>
+     <string>Shader</string>
     </property>
    </widget>
    <zorder>displayGroup_Render</zorder>
    <zorder>layoutWidget_Render</zorder>
-   <zorder>displayGroup_Window</zorder>
-   <zorder>layoutWidget_Window</zorder>
+   <zorder>groupBox</zorder>
   </widget>
   <widget class="QWidget" name="DisplaySetttings">
    <attribute name="title">
@@ -229,7 +145,7 @@
     <property name="title">
      <string>Display Format</string>
     </property>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -298,9 +214,9 @@
     <property name="geometry">
      <rect>
       <x>9</x>
-      <y>140</y>
+      <y>160</y>
       <width>371</width>
-      <height>111</height>
+      <height>101</height>
      </rect>
     </property>
     <property name="title">
@@ -311,7 +227,7 @@
     <property name="geometry">
      <rect>
       <x>21</x>
-      <y>160</y>
+      <y>180</y>
       <width>351</width>
       <height>71</height>
      </rect>
@@ -363,11 +279,56 @@
      </item>
     </layout>
    </widget>
+   <widget class="QGroupBox" name="displayGroup_Window">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>191</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Window Size</string>
+    </property>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>171</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="0">
+       <widget class="QSpinBox" name="sbWidth">
+        <property name="maximumSize">
+         <size>
+          <width>186</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="sbHeight">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
    <widget class="QCheckBox" name="cbStatusBar">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>110</y>
+      <x>240</x>
+      <y>120</y>
       <width>102</width>
       <height>17</height>
      </rect>
@@ -376,16 +337,31 @@
      <string>Show Status Bar</string>
     </property>
    </widget>
+   <zorder>displayGroup_Window</zorder>
+   <zorder>displayGroup_DisplayFormat</zorder>
+   <zorder>displayGroup_Subviews</zorder>
+   <zorder>layoutWidget2</zorder>
+   <zorder>cbStatusBar</zorder>
   </widget>
   <widget class="QWidget" name="MiscSettings">
    <attribute name="title">
     <string>Misc Settings</string>
    </attribute>
+   <widget class="QComboBox" name="cmbStdWinSize">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>100</y>
+      <width>69</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="buttonGroup"/>
- </buttongroups>
 </ui>

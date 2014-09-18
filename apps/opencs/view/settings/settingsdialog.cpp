@@ -154,7 +154,7 @@ CSVSettings::SettingsDialog::SettingsDialog(QTabWidget *parent)
 
     connect(cbOverride, SIGNAL(toggled(bool)), this, SLOT(slotOverrideToggled(bool)));
     connect(cmbRenderSys, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(slotRendererChanged(const QString&)));
-    connect(rbStdWinSize, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
+    //connect(rbStdWinSize, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
 
     // to update the checkbox on the view menu
     connect(cbStatusBar, SIGNAL(toggled(bool)), this, SIGNAL (toggleStatusBar(bool)));
@@ -167,9 +167,9 @@ bool CSVSettings::SettingsDialog::eventFilter(QObject *target, QEvent *event)
     {
         if (!item->isEnabled() && (event->type() == QEvent::MouseButtonRelease))
         {
-            rbCustWinSize->setChecked(false);
-            rbStdWinSize->setChecked(true);
-            slotStandardToggled(true);
+            //rbCustWinSize->setChecked(false);
+            //rbStdWinSize->setChecked(true);
+            //slotStandardToggled(true);
 
             return false;
         }
@@ -178,9 +178,9 @@ bool CSVSettings::SettingsDialog::eventFilter(QObject *target, QEvent *event)
     {
         if (!item->isEnabled() && (event->type() == QEvent::MouseButtonPress))
         {
-            rbStdWinSize->setChecked(false);
-            rbCustWinSize->setChecked(true);
-            slotStandardToggled(false);
+            //rbStdWinSize->setChecked(false);
+            //rbCustWinSize->setChecked(true);
+            //slotStandardToggled(false);
 
             return false;
         }
@@ -307,7 +307,7 @@ void CSVSettings::SettingsDialog::setViewValues()
         if(index != -1)
             cmbStdWinSize->setCurrentIndex(index);
 
-        rbCustWinSize->setChecked(true);
+        //rbCustWinSize->setChecked(true);
         slotStandardToggled(false);
     }
 
@@ -369,11 +369,11 @@ void CSVSettings::SettingsDialog::saveSettings()
 #endif
 
     // shader lang
-    mModel->setDefinitions("Shader/language",
+    mModel->setDefinitions("General/shader mode",
                            QStringList(cmbShaderLang->currentText().toLower()));
 
     // window size
-    if(rbStdWinSize->isChecked())
+    if(0) //rbStdWinSize->isChecked())
     {
         QRegExp re("^(\\d+) x (\\d+)");
         if(re.indexIn(cmbStdWinSize->currentText()) > -1)
