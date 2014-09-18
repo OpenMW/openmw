@@ -745,29 +745,55 @@ bool CharacterController::updateCreatureState()
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
 
-            // These are unique animations and not linked to movement type. Just pick one randomly.
-            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 3; // [0, 2]
-            if (roll == 0)
-                mCurrentWeapon = "attack1";
-            else if (roll == 1)
-                mCurrentWeapon = "attack2";
-            else
-                mCurrentWeapon = "attack3";
-
-            mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                             MWRender::Animation::Group_All, true,
-                             1, "start", "stop",
-                             0.0f, 0);
-            mUpperBodyState = UpperCharState_StartToMinAttack;
-
+            std::string startKey = "start";
+            std::string stopKey = "stop";
             if (weapType == WeapType_Spell)
             {
                 const std::string spellid = stats.getSpells().getSelectedSpell();
                 if (!spellid.empty() && MWBase::Environment::get().getWorld()->startSpellCast(mPtr))
                 {
                     castSpell(spellid);
-                    MWBase::Environment::get().getWorld()->castSpell(mPtr);
+
+                    if (!mAnimation->hasAnimation("spellcast"))
+                        MWBase::Environment::get().getWorld()->castSpell(mPtr); // No "release" text key to use, so cast immediately
+                    else
+                    {
+                        const ESM::Spell *spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellid);
+                        const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
+
+                        switch(effectentry.mRange)
+                        {
+                            case 0: mAttackType = "self"; break;
+                            case 1: mAttackType = "touch"; break;
+                            case 2: mAttackType = "target"; break;
+                        }
+
+                        startKey = mAttackType + " " + startKey;
+                        stopKey = mAttackType + " " + stopKey;
+                        mCurrentWeapon = "spellcast";
+                    }
                 }
+                else
+                    mCurrentWeapon = "";
+            }
+            if (weapType != WeapType_Spell || !mAnimation->hasAnimation("spellcast")) // Not all creatures have a dedicated spellcast animation
+            {
+                int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 3; // [0, 2]
+                if (roll == 0)
+                    mCurrentWeapon = "attack1";
+                else if (roll == 1)
+                    mCurrentWeapon = "attack2";
+                else
+                    mCurrentWeapon = "attack3";
+            }
+
+            if (!mCurrentWeapon.empty())
+            {
+                mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                                 MWRender::Animation::Group_All, true,
+                                 1, startKey, stopKey,
+                                 0.0f, 0);
+                mUpperBodyState = UpperCharState_StartToMinAttack;
             }
         }
 

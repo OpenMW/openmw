@@ -805,7 +805,25 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
         attachArrow();
 
     else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release")
-        MWBase::Environment::get().getWorld()->castSpell(mPtr);
+    {
+        // Make sure this key is actually for the RangeType we are casting. The flame atronach has
+        // the same animation for all range types, so there are 3 "release" keys on the same time, one for each range type.
+        // FIXME: This logic should really be in the CharacterController
+        const std::string& spellid = mPtr.getClass().getCreatureStats(mPtr).getSpells().getSelectedSpell();
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellid);
+        const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
+        int range = 0;
+        if (evt.compare(off, len, "self release") == 0)
+            range = 0;
+        else if (evt.compare(off, len, "touch release") == 0)
+            range = 1;
+        else if (evt.compare(off, len, "target release") == 0)
+            range = 2;
+        if (effectentry.mRange == range)
+        {
+            MWBase::Environment::get().getWorld()->castSpell(mPtr);
+        }
+    }
 
     else if (groupname == "shield" && evt.compare(off, len, "block hit") == 0)
         mPtr.getClass().block(mPtr);
