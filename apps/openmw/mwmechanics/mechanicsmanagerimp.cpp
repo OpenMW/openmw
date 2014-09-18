@@ -1120,7 +1120,10 @@ namespace MWMechanics
             ptr.getClass().getCreatureStats(ptr).friendlyHit();
 
             if (ptr.getClass().getCreatureStats(ptr).getFriendlyHits() < 4)
+            {
+                MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
                 return;
+            }
         }
 
         // Attacking peaceful NPCs is a crime

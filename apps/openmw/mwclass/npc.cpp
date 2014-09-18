@@ -388,6 +388,8 @@ namespace MWClass
 
             data->mNpcStats.setGoldPool(gold);
 
+            data->mNpcStats.setNeedRecalcDynamicStats(false);
+
             // store
             ptr.getRefData().setCustomData (data.release());
 

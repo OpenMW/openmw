@@ -83,6 +83,8 @@ namespace MWClass
             customData.mSpawnActorId = placed.getClass().getCreatureStats(placed).getActorId();
             customData.mSpawn = false;
         }
+        else
+            customData.mSpawn = false;
     }
 
     void CreatureLevList::ensureCustomData(const MWWorld::Ptr &ptr) const

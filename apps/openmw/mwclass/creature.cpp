@@ -129,6 +129,8 @@ namespace MWClass
 
             data->mCreatureStats.setGoldPool(ref->mBase->mData.mGold);
 
+            data->mCreatureStats.setNeedRecalcDynamicStats(false);
+
             // store
             ptr.getRefData().setCustomData(data.release());
 

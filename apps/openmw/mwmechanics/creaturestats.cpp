@@ -378,6 +378,11 @@ namespace MWMechanics
          return false;
     }
 
+    void CreatureStats::setNeedRecalcDynamicStats(bool val)
+    {
+        mRecalcDynamicStats = val;
+    }
+
     void CreatureStats::setKnockedDown(bool value)
     {
         mKnockdown = value;

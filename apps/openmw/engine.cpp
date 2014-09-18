@@ -109,11 +109,11 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         {
             if (!paused)
             {
-                // global scripts
-                MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
-
                 // local scripts
                 executeLocalScripts();
+
+                // global scripts
+                MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
 
                 MWBase::Environment::get().getWorld()->markCellAsUnchanged();
             }
