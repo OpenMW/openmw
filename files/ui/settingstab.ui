@@ -20,104 +20,6 @@
    <attribute name="title">
     <string>Video Settings</string>
    </attribute>
-   <widget class="QWidget" name="layoutWidget_Screen">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>188</y>
-      <width>351</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout_Screen">
-     <item row="1" column="3">
-      <widget class="ClickSpinBox" name="spinBox_y">
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="ClickSpinBox" name="spinBox_x">
-       <property name="maximumSize">
-        <size>
-         <width>186</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2" colspan="2">
-      <widget class="ClickComboBox" name="comboBox_std_window_size">
-       <property name="minimumSize">
-        <size>
-         <width>180</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QRadioButton" name="radioButton_custom_res">
-       <property name="text">
-        <string>Custom:</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">buttonGroup</string>
-       </attribute>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLabel" name="label_Resolution">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QRadioButton" name="radioButton_standard_res">
-       <property name="text">
-        <string>Standard:</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">buttonGroup</string>
-       </attribute>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QGroupBox" name="renderGroup">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>8</y>
-      <width>371</width>
-      <height>156</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Render System</string>
-    </property>
-   </widget>
-   <widget class="QGroupBox" name="displayGroup">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>170</y>
-      <width>371</width>
-      <height>81</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Window Size</string>
-    </property>
-   </widget>
    <widget class="QWidget" name="layoutWidget_Render">
     <property name="geometry">
      <rect>
@@ -129,7 +31,7 @@
     </property>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0" colspan="2">
-      <widget class="QCheckBox" name="checkBox_override">
+      <widget class="QCheckBox" name="cbOverride">
        <property name="text">
         <string>Use Render System Settings from OpenMW</string>
        </property>
@@ -139,14 +41,14 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="label_RenderingSubsystem">
+      <widget class="QLabel" name="labRenderSys">
        <property name="text">
         <string>Rendering Subsystem</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QComboBox" name="comboBox_rendersystem">
+      <widget class="QComboBox" name="cmbRenderSys">
        <property name="editable">
         <bool>false</bool>
        </property>
@@ -163,28 +65,28 @@
       </widget>
      </item>
      <item row="4" column="0">
-      <widget class="QLabel" name="label_Antialiasing">
+      <widget class="QLabel" name="labAntiAlias">
        <property name="text">
         <string>Antialiasing</string>
        </property>
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QCheckBox" name="checkBox_vsync">
+      <widget class="QCheckBox" name="cbVsync">
        <property name="text">
         <string>Vertical Sync</string>
        </property>
       </widget>
      </item>
      <item row="5" column="0">
-      <widget class="QLabel" name="label_ShaderLanguage">
+      <widget class="QLabel" name="labShaderLang">
        <property name="text">
         <string>Shader Language</string>
        </property>
       </widget>
      </item>
      <item row="5" column="1">
-      <widget class="QComboBox" name="comboBox_shaderlanguage">
+      <widget class="QComboBox" name="cmbShaderLang">
        <item>
         <property name="text">
          <string>GLSL</string>
@@ -198,7 +100,7 @@
       </widget>
      </item>
      <item row="4" column="1">
-      <widget class="QComboBox" name="comboBox_antialiasing"/>
+      <widget class="QComboBox" name="cmbAntiAlias"/>
      </item>
      <item row="1" column="0" colspan="2">
       <widget class="Line" name="line">
@@ -218,10 +120,108 @@
      </item>
     </layout>
    </widget>
-   <zorder>renderGroup</zorder>
+   <widget class="QWidget" name="layoutWidget_Window">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>188</y>
+      <width>351</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout_Window">
+     <item row="1" column="3">
+      <widget class="QSpinBox" name="sbHeight">
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QSpinBox" name="sbWidth">
+       <property name="maximumSize">
+        <size>
+         <width>186</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2" colspan="2">
+      <widget class="QComboBox" name="cmbStdWinSize">
+       <property name="minimumSize">
+        <size>
+         <width>180</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QRadioButton" name="rbCustWinSize">
+       <property name="text">
+        <string>Custom:</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup</string>
+       </attribute>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLabel" name="label_Resolution">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QRadioButton" name="rbStdWinSize">
+       <property name="text">
+        <string>Standard:</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup</string>
+       </attribute>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="displayGroup_Render">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>8</y>
+      <width>371</width>
+      <height>156</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Render System</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="displayGroup_Window">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>170</y>
+      <width>371</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Window Size</string>
+    </property>
+   </widget>
+   <zorder>displayGroup_Render</zorder>
    <zorder>layoutWidget_Render</zorder>
-   <zorder>displayGroup</zorder>
-   <zorder>layoutWidget_Screen</zorder>
+   <zorder>displayGroup_Window</zorder>
+   <zorder>layoutWidget_Window</zorder>
   </widget>
   <widget class="QWidget" name="DisplaySetttings">
    <attribute name="title">
@@ -360,18 +360,6 @@
    </attribute>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>ClickSpinBox</class>
-   <extends>QSpinBox</extends>
-   <header>clickspinbox.hpp</header>
-  </customwidget>
-  <customwidget>
-   <class>ClickComboBox</class>
-   <extends>QComboBox</extends>
-   <header>clickcombobox.hpp</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
  <buttongroups>

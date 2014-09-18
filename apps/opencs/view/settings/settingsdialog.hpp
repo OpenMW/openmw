@@ -36,6 +36,8 @@ namespace CSVSettings {
         /// Settings are written on close
         void closeEvent (QCloseEvent *event);
 
+        bool eventFilter(QObject *target, QEvent *event);
+
     private:
 
         ///sets the defined values for the views that have been created
@@ -48,8 +50,8 @@ namespace CSVSettings {
 
         void show();
 
-        void slotStandardClicked();
-        void slotCustomClicked();
+        //void slotStandardClicked();
+        //void slotCustomClicked();
         void slotRendererChanged(const QString &renderer);
         void slotOverrideToggled(bool checked);
         void slotStandardToggled(bool checked);

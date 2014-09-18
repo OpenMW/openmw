@@ -109,8 +109,6 @@ opencs_units (view/settings
     rangeview
     resizeablestackedwidget
     spinbox
-    clickspinbox
-    clickcombobox
     )
 
 opencs_units_noqt (view/settings
@@ -168,7 +166,7 @@ qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
 qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
 qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} view/settings)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if(APPLE)
     set (OPENCS_MAC_ICON ${CMAKE_SOURCE_DIR}/files/mac/opencs.icns)
