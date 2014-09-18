@@ -151,7 +151,8 @@ void CompanionWindow::onMessageBoxButtonClicked(int button)
             "minimumprofit", mPtr.getClass().getNpcStats(mPtr).getProfit());
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);
-        MWBase::Environment::get().getDialogueManager()->startDialogue (mPtr);
+        // Important for Calvus' contract script to work properly
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
     }
 }
 
