@@ -67,6 +67,8 @@ namespace CSVWorld
 
             CSMWorld::Data& getData() const;
 
+            QUndoStack& getUndoStack();
+
             const CSMWorld::UniversalId& getCollectionId() const;
 
             std::string getNamespace() const;

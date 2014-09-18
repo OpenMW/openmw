@@ -61,6 +61,11 @@ CSMWorld::Data& CSVWorld::GenericCreator::getData() const
     return mData;
 }
 
+QUndoStack& CSVWorld::GenericCreator::getUndoStack()
+{
+    return mUndoStack;
+}
+
 const CSMWorld::UniversalId& CSVWorld::GenericCreator::getCollectionId() const
 {
     return mListId;

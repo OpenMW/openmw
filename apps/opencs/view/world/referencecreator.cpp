@@ -23,6 +23,41 @@ void CSVWorld::ReferenceCreator::configureCreateCommand (CSMWorld::CreateCommand
     command.addValue (index, mCell->text());
 }
 
+void CSVWorld::ReferenceCreator::pushCommand (std::auto_ptr<QUndoCommand> command,
+    const std::string& id)
+{
+    // get the old count
+    std::string cellId = mCell->text().toUtf8().constData();
+
+    CSMWorld::IdTable& cellTable = dynamic_cast<CSMWorld::IdTable&> (
+        *getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
+
+    int countColumn = cellTable.findColumnIndex (CSMWorld::Columns::ColumnId_RefNumCounter);
+
+    QModelIndex countIndex = cellTable.getModelIndex (cellId, countColumn);
+
+    int count = cellTable.data (countIndex).toInt();
+
+    // command for setting the refnum in the newly created reference
+    CSMWorld::IdTable& referenceTable = dynamic_cast<CSMWorld::IdTable&> (
+        *getData().getTableModel (CSMWorld::UniversalId::Type_References));
+
+    int refNumColumn = referenceTable.findColumnIndex (CSMWorld::Columns::ColumnId_RefNum);
+
+    std::auto_ptr<CSMWorld::ModifyCommand> setRefNum (new CSMWorld::ModifyCommand
+        (referenceTable, referenceTable.getModelIndex (id, refNumColumn), count));
+
+    // command for incrementing counter
+    std::auto_ptr<CSMWorld::ModifyCommand> increment (new CSMWorld::ModifyCommand
+        (cellTable, countIndex, count+1));
+
+    getUndoStack().beginMacro (command->text());
+    GenericCreator::pushCommand (command, id);
+    getUndoStack().push (setRefNum.release());
+    getUndoStack().push (increment.release());
+    getUndoStack().endMacro();
+}
+
 CSVWorld::ReferenceCreator::ReferenceCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id)
 : GenericCreator (data, undoStack, id)

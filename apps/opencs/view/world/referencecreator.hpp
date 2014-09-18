@@ -20,12 +20,15 @@ namespace CSVWorld
 
             virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
 
+            virtual void pushCommand (std::auto_ptr<QUndoCommand> command,
+                const std::string& id);
+
         public:
 
             ReferenceCreator (CSMWorld::Data& data, QUndoStack& undoStack,
                 const CSMWorld::UniversalId& id);
 
-            virtual void cloneMode(const std::string& originId, 
+            virtual void cloneMode(const std::string& originId,
                                    const CSMWorld::UniversalId::Type type);
 
             virtual void reset();
