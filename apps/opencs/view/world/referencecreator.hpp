@@ -23,6 +23,9 @@ namespace CSVWorld
             virtual void pushCommand (std::auto_ptr<QUndoCommand> command,
                 const std::string& id);
 
+            /// Return next available RefNum for the cell the creator is currently operating on
+            int getRefNumCount() const;
+
         public:
 
             ReferenceCreator (CSMWorld::Data& data, QUndoStack& undoStack,

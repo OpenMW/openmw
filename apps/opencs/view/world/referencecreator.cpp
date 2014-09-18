@@ -16,11 +16,19 @@ std::string CSVWorld::ReferenceCreator::getId() const
 
 void CSVWorld::ReferenceCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const
 {
-    int index =
+    // Set cellID
+    int cellIdColumn =
         dynamic_cast<CSMWorld::IdTable&> (*getData().getTableModel (getCollectionId())).
         findColumnIndex (CSMWorld::Columns::ColumnId_Cell);
 
-    command.addValue (index, mCell->text());
+    command.addValue (cellIdColumn, mCell->text());
+
+    // Set RefNum
+    int refNumColumn = dynamic_cast<CSMWorld::IdTable&> (
+        *getData().getTableModel (CSMWorld::UniversalId::Type_References)).
+        findColumnIndex (CSMWorld::Columns::ColumnId_RefNum);
+
+    command.addValue (refNumColumn, getRefNumCount());
 }
 
 void CSVWorld::ReferenceCreator::pushCommand (std::auto_ptr<QUndoCommand> command,
@@ -38,24 +46,28 @@ void CSVWorld::ReferenceCreator::pushCommand (std::auto_ptr<QUndoCommand> comman
 
     int count = cellTable.data (countIndex).toInt();
 
-    // command for setting the refnum in the newly created reference
-    CSMWorld::IdTable& referenceTable = dynamic_cast<CSMWorld::IdTable&> (
-        *getData().getTableModel (CSMWorld::UniversalId::Type_References));
-
-    int refNumColumn = referenceTable.findColumnIndex (CSMWorld::Columns::ColumnId_RefNum);
-
-    std::auto_ptr<CSMWorld::ModifyCommand> setRefNum (new CSMWorld::ModifyCommand
-        (referenceTable, referenceTable.getModelIndex (id, refNumColumn), count));
-
     // command for incrementing counter
     std::auto_ptr<CSMWorld::ModifyCommand> increment (new CSMWorld::ModifyCommand
         (cellTable, countIndex, count+1));
 
     getUndoStack().beginMacro (command->text());
     GenericCreator::pushCommand (command, id);
-    getUndoStack().push (setRefNum.release());
     getUndoStack().push (increment.release());
     getUndoStack().endMacro();
+}
+
+int CSVWorld::ReferenceCreator::getRefNumCount() const
+{
+    std::string cellId = mCell->text().toUtf8().constData();
+
+    CSMWorld::IdTable& cellTable = dynamic_cast<CSMWorld::IdTable&> (
+        *getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
+
+    int countColumn = cellTable.findColumnIndex (CSMWorld::Columns::ColumnId_RefNumCounter);
+
+    QModelIndex countIndex = cellTable.getModelIndex (cellId, countColumn);
+
+    return cellTable.data (countIndex).toInt();
 }
 
 CSVWorld::ReferenceCreator::ReferenceCreator (CSMWorld::Data& data, QUndoStack& undoStack,
