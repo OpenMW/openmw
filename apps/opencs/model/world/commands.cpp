@@ -10,13 +10,12 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
                                         const QVariant& new_, QUndoCommand* parent)
 : QUndoCommand (parent), mModel (model), mIndex (index), mNew (new_)
 {
-    mOld = mModel.data (mIndex, Qt::EditRole);
-
     setText ("Modify " + mModel.headerData (mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
 }
 
 void CSMWorld::ModifyCommand::redo()
 {
+    mOld = mModel.data (mIndex, Qt::EditRole);
     mModel.setData (mIndex, mNew);
 }
 
