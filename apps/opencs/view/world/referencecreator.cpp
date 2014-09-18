@@ -82,7 +82,9 @@ void CSVWorld::ReferenceCreator::reset()
 
 std::string CSVWorld::ReferenceCreator::getErrors() const
 {
-    std::string errors = GenericCreator::getErrors();
+    // We are ignoring errors coming from GenericCreator here, because the ID of the new
+    // record is internal and requires neither user input nor verification.
+    std::string errors;
 
     if (mCloneMode)
     {
