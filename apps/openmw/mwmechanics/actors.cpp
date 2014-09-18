@@ -397,8 +397,14 @@ namespace MWMechanics
         int agility      = creatureStats.getAttribute(ESM::Attribute::Agility).getModified();
         int endurance    = creatureStats.getAttribute(ESM::Attribute::Endurance).getModified();
 
-        double magickaFactor =
-            creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).getMagnitude() * 0.1 + 1;
+        float base = 1.f;
+        if (ptr.getCellRef().getRefId() == "player")
+            base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fPCbaseMagickaMult")->getFloat();
+        else
+            base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCbaseMagickaMult")->getFloat();
+
+        double magickaFactor = base +
+            creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).getMagnitude() * 0.1;
 
         DynamicStat<float> magicka = creatureStats.getMagicka();
         float diff = (static_cast<int>(magickaFactor*intelligence)) - magicka.getBase();
