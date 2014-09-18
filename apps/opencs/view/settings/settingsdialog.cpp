@@ -309,6 +309,17 @@ void CSVSettings::SettingsDialog::setViewValues()
 
     // status bar
     cbStatusBar->setChecked(mModel->settingValue("Display/show statusbar") == "true");
+
+    // display format
+    QString recStat = mModel->settingValue("Display Format/Record Status Display");
+    index = cmbRecStatus->findData(recStat, Qt::DisplayRole);
+    if(index != -1)
+        cmbRecStatus->setCurrentIndex(index);
+
+    QString refIdType = mModel->settingValue("Display Format/Referenceable ID Type Display");
+    index = cmbRefIdType->findData(refIdType, Qt::DisplayRole);
+    if(index != -1)
+        cmbRefIdType->setCurrentIndex(index);
 }
 
 void CSVSettings::SettingsDialog::saveSettings()
@@ -380,6 +391,12 @@ void CSVSettings::SettingsDialog::saveSettings()
         mModel->setDefinitions("Display/show statusbar", QStringList("true"));
     else
         mModel->setDefinitions("Display/show statusbar", QStringList("false"));
+
+    // display format
+    mModel->setDefinitions("Display Format/Record Status Display",
+                           QStringList(cmbRecStatus->currentText()));
+    mModel->setDefinitions("Display Format/Referenceable ID Type Display",
+                           QStringList(cmbRefIdType->currentText()));
 
     mModel->saveDefinitions();
 }

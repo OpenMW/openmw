@@ -227,24 +227,88 @@
    <attribute name="title">
     <string>Display Settings</string>
    </attribute>
-   <widget class="QGroupBox" name="groupBox">
+   <widget class="QGroupBox" name="displayGroup_DisplayFormat">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>10</y>
       <width>371</width>
-      <height>71</height>
+      <height>81</height>
      </rect>
     </property>
     <property name="title">
-     <string/>
+     <string>Display Format</string>
     </property>
+    <widget class="QWidget" name="">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>351</width>
+       <height>48</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="labRecStatus">
+        <property name="text">
+         <string>Record Status:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cmbRecStatus">
+        <item>
+         <property name="text">
+          <string>Text Only</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Icon Only</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Icon and Text</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="labRefIdType">
+        <property name="text">
+         <string>Referenceable ID Type:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="cmbRefIdType">
+        <item>
+         <property name="text">
+          <string>Text Only</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Icon Only</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Icon and Text</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </widget>
-   <widget class="QGroupBox" name="groupBox_2">
+   <widget class="QGroupBox" name="displayGroup_Subviews">
     <property name="geometry">
      <rect>
       <x>9</x>
-      <y>110</y>
+      <y>140</y>
       <width>371</width>
       <height>111</height>
      </rect>
@@ -253,51 +317,11 @@
      <string>Subviews</string>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>21</x>
-      <y>20</y>
-      <width>351</width>
-      <height>45</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_ShowIcon">
-       <property name="text">
-        <string>Display Format:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="comboBox_show_icon">
-       <item>
-        <property name="text">
-         <string>Text Only</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Text + Icon</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QCheckBox" name="cbStatusBar">
-       <property name="text">
-        <string>Show Status Bar</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QWidget" name="layoutWidget2">
     <property name="geometry">
      <rect>
       <x>21</x>
-      <y>130</y>
+      <y>160</y>
       <width>351</width>
       <height>71</height>
      </rect>
@@ -349,10 +373,19 @@
      </item>
     </layout>
    </widget>
-   <zorder>groupBox_2</zorder>
-   <zorder>groupBox</zorder>
-   <zorder>layoutWidget</zorder>
-   <zorder>layoutWidget2</zorder>
+   <widget class="QCheckBox" name="cbStatusBar">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>110</y>
+      <width>102</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Show Status Bar</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QWidget" name="MiscSettings">
    <attribute name="title">
