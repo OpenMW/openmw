@@ -74,6 +74,8 @@ namespace CSVDoc
 
             void exitApplication (CSVDoc::View *view);
 
+            void toggleStatusBar(bool checked);
+
         private slots:
 
             void documentStateChanged (int state, CSMDoc::Document *document);

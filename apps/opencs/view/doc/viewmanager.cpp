@@ -140,6 +140,10 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
 
     mViews.push_back (view);
 
+    std::string showStatusBar =
+        CSMSettings::UserSettings::instance().settingValue("Display/show statusbar").toStdString();
+
+    view->toggleStatusBar (showStatusBar == "true");
     view->show();
 
     connect (view, SIGNAL (newGameRequest ()), this, SIGNAL (newGameRequest()));
@@ -386,6 +390,13 @@ bool CSVDoc::ViewManager::removeDocument (CSVDoc::View *view)
         mViews = remainingViews;
     }
     return true;
+}
+
+void CSVDoc::ViewManager::toggleStatusBar(bool checked)
+{
+    // NOTE: below only required if status bar change is to be applied to existing
+    //for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
+        //(*iter)->toggleStatusBar(checked);
 }
 
 void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)

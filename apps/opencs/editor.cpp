@@ -55,6 +55,8 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
     connect (&mStartup, SIGNAL (editConfig()), this, SLOT (showSettings ()));
 
+    connect (&mSettings, SIGNAL (toggleStatusBar(bool)), &mViewManager, SLOT (toggleStatusBar(bool)));
+
     connect (&mFileDialog, SIGNAL(signalOpenFiles (const boost::filesystem::path&)),
              this, SLOT(openFiles (const boost::filesystem::path&)));
 

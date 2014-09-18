@@ -106,6 +106,8 @@ namespace CSVDoc
 
             void updateProgress (int current, int max, int type, int threads);
 
+            void toggleStatusBar(bool checked);
+
             Operations *getOperations() const;
 
             /// Function called by view manager when user preferences are updated

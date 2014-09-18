@@ -40,6 +40,7 @@ void CSVDoc::View::closeEvent (QCloseEvent *event)
                 "Window Size/Height",
                 QStringList(QString::number(frameGeometry().height())));
         CSMSettings::UserSettings::instance().saveDefinitions();
+
         // closeRequest() returns true if last document
         mViewManager.removeDocAndView(mDocument);
     }
@@ -442,6 +443,14 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
         view->useHint (hint);
 
     view->setStatusBar (mShowStatusBar->isChecked());
+// NOTE: only required if show status bar setting should be applied to existing
+// window
+#if 0
+    std::string showStatusBar =
+        CSMSettings::UserSettings::instance().settingValue("Display/show statusbar").toStdString();
+
+    view->setStatusBar (showStatusBar == "true");
+#endif
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
@@ -660,6 +669,11 @@ void CSVDoc::View::toggleShowStatusBar (bool show)
         if (CSVDoc::SubView *subView = dynamic_cast<CSVDoc::SubView *> (view))
             subView->setStatusBar (show);
     }
+}
+
+void CSVDoc::View::toggleStatusBar(bool checked)
+{
+    mShowStatusBar->setChecked(checked);
 }
 
 void CSVDoc::View::loadErrorLog()

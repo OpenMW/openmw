@@ -155,6 +155,9 @@ CSVSettings::SettingsDialog::SettingsDialog(QTabWidget *parent)
     connect(cbOverride, SIGNAL(toggled(bool)), this, SLOT(slotOverrideToggled(bool)));
     connect(cmbRenderSys, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(slotRendererChanged(const QString&)));
     connect(rbStdWinSize, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
+
+    // to update the checkbox on the view menu
+    connect(cbStatusBar, SIGNAL(toggled(bool)), this, SIGNAL (toggleStatusBar(bool)));
 }
 
 bool CSVSettings::SettingsDialog::eventFilter(QObject *target, QEvent *event)
@@ -295,13 +298,17 @@ void CSVSettings::SettingsDialog::setViewValues()
     else
     {
         // show what's in Ogre instead
-        index = cmbStdWinSize->findData(getCurrentOgreResolution(), Qt::DisplayRole, Qt::MatchStartsWith);
+        index = cmbStdWinSize->findData(getCurrentOgreResolution(),
+                                        Qt::DisplayRole, Qt::MatchStartsWith);
         if(index != -1)
             cmbStdWinSize->setCurrentIndex(index);
 
         rbCustWinSize->setChecked(true);
         slotStandardToggled(false);
     }
+
+    // status bar
+    cbStatusBar->setChecked(mModel->settingValue("Display/show statusbar") == "true");
 }
 
 void CSVSettings::SettingsDialog::saveSettings()
@@ -367,6 +374,12 @@ void CSVSettings::SettingsDialog::saveSettings()
         mModel->setDefinitions("Window Size/Height",
                                QStringList(QString::number(sbHeight->value())));
     }
+
+    // status bar
+    if(cbStatusBar->isChecked())
+        mModel->setDefinitions("Display/show statusbar", QStringList("true"));
+    else
+        mModel->setDefinitions("Display/show statusbar", QStringList("false"));
 
     mModel->saveDefinitions();
 }

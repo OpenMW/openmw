@@ -55,6 +55,10 @@ namespace CSVSettings {
         void slotRendererChanged(const QString &renderer);
         void slotOverrideToggled(bool checked);
         void slotStandardToggled(bool checked);
+
+    signals:
+
+        void toggleStatusBar(bool checked);
     };
 }
 #endif // CSVSETTINGS_SETTINGSDIALOG_H
