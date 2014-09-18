@@ -93,7 +93,7 @@ QStringList getAvailableResolutions()
                 return result;  // FIXME: add error message
             }
             // Store Available Rendering Devices
-            std::vector<std::string>::iterator iter = it->second.possibleValues.begin();
+            Ogre::StringVector::iterator iter = it->second.possibleValues.begin();
             for(;iter != it->second.possibleValues.end(); ++iter)
             {
                 std::cout << "rd: " << *iter << std::endl; // FIXME: debug
@@ -108,7 +108,7 @@ QStringList getAvailableResolutions()
             // FIXME: how to default to the current value?
             std::cout << "vm current: " << it->second.currentValue << std::endl; // FIXME: debug
             // Store Available Resolutions
-            std::vector<std::string>::iterator iter = it->second.possibleValues.begin();
+            Ogre::StringVector::iterator iter = it->second.possibleValues.begin();
             for(; iter != it->second.possibleValues.end(); ++iter)
             {
                 // extract x and y values
@@ -202,7 +202,7 @@ void CSVSettings::SettingsDialog::slotRendererChanged(const QString &renderer)
         cmbRenderSys->setEnabled(false);
         labAntiAlias->setEnabled(false);
         cmbAntiAlias->setEnabled(false);
-        cbVsync->setEnabled(false);
+        //cbVsync->setEnabled(false);
         labShaderLang->setEnabled(false);
         cmbShaderLang->setEnabled(false);
     }
@@ -218,7 +218,7 @@ void CSVSettings::SettingsDialog::slotOverrideToggled(bool checked)
         cmbRenderSys->setEnabled(false);
         labAntiAlias->setEnabled(false);
         cmbAntiAlias->setEnabled(false);
-        cbVsync->setEnabled(false);
+        //cbVsync->setEnabled(false);
         labShaderLang->setEnabled(false);
         cmbShaderLang->setEnabled(false);
     }
@@ -228,7 +228,7 @@ void CSVSettings::SettingsDialog::slotOverrideToggled(bool checked)
         cmbRenderSys->setEnabled(true);
         labAntiAlias->setEnabled(true);
         cmbAntiAlias->setEnabled(true);
-        cbVsync->setEnabled(true);
+        //cbVsync->setEnabled(true);
         labShaderLang->setEnabled(true);
         cmbShaderLang->setEnabled(true);
     }
@@ -257,8 +257,10 @@ void CSVSettings::SettingsDialog::setViewValues()
     // initialised in the constructor
     slotOverrideToggled(cbOverride->isChecked());
 
-    // Ogre initialised earlier
-    slotRendererChanged(Ogre::Root::getSingleton().getRenderSystem()->getName().c_str());
+    // Ogre renderer
+    cmbRenderSys->clear();
+    cmbRenderSys->addItems(mModel->getOgreRenderers());
+    //slotRendererChanged(Ogre::Root::getSingleton().getRenderSystem()->getName().c_str());
 
     // antialiasing
     QString antialiasing = mModel->settingValue("Video/antialiasing");
@@ -267,10 +269,12 @@ void CSVSettings::SettingsDialog::setViewValues()
         cmbAntiAlias->setCurrentIndex(index);
 
     // vsync
-    cbVsync->setChecked(mModel->settingValue("Video/vsync") == "true");
+    //cbVsync->setChecked(mModel->settingValue("Video/vsync") == "true");
+    cbVsync->setChecked(false); // disable vsync option for now
+    cbVsync->setEnabled(false); // disable vsync option for now
 
     // shader lang
-    QString shaderlang = mModel->settingValue("Shader/language");
+    QString shaderlang = mModel->settingValue("General/shader mode");
     index = cmbShaderLang->findData(shaderlang, Qt::DisplayRole);
     if(index != -1)
         cmbShaderLang->setCurrentIndex(index);
@@ -366,7 +370,7 @@ void CSVSettings::SettingsDialog::saveSettings()
 
     // shader lang
     mModel->setDefinitions("Shader/language",
-                           QStringList(cmbShaderLang->currentText()));
+                           QStringList(cmbShaderLang->currentText().toLower()));
 
     // window size
     if(rbStdWinSize->isChecked())

@@ -52,16 +52,6 @@
        <property name="editable">
         <bool>false</bool>
        </property>
-       <item>
-        <property name="text">
-         <string>OpenGL Rendering Subsystem</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Direct3D9 Rendering Subsystem</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item row="4" column="0">

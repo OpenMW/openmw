@@ -347,24 +347,49 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 #endif
     }
     mSettingCfgDefinitions->setValue("Video/render system", renderSystem.c_str());
+
+    std::string currShader = settings.getString("shader mode", "General");
+    // can't call Ogre::Root at this point as it hasn't been initialised
+    QString rend = renderSystem.c_str();
+    bool openGL = rend.contains(QRegExp("^OpenGL", Qt::CaseInsensitive));
+    bool glES = rend.contains(QRegExp("^OpenGL ES", Qt::CaseInsensitive));
+
     // force shader language based on render system
-    if(renderSystem == "Direct3D9 Rendering Subsystem")
-        mSettingDefinitions->setValue("Shader/language", "CG");
-    else
-        mSettingDefinitions->setValue("Shader/language", "GLSL");
+    if(currShader == ""
+            || (openGL && currShader == "hlsl")
+            || (!openGL && currShader == "glsl")
+            || (glES && currShader != "glsles"))
+    {
+        QString shader = openGL ? (glES ? "glsles" : "glsl") : "hlsl";
+        mSettingDefinitions->setValue("General/shader mode", shader);
+    }
 
     // check if override entry exists (default: override)
     if(!mSettingDefinitions->childGroups().contains("Video", Qt::CaseInsensitive))
         mSettingDefinitions->setValue("Video/use settings.cfg", "true");
 }
 
+QStringList CSMSettings::UserSettings::getOgreRenderers()
+{
+    QStringList result;
+
+    Ogre::RenderSystemList renderers = Ogre::Root::getSingleton().getAvailableRenderers();
+    Ogre::RenderSystemList::iterator it = renderers.begin();
+    for(; it != renderers.end(); ++it)
+        result.append((*it)->getName().c_str());
+
+    return result;
+}
+
 QStringList CSMSettings::UserSettings::getOgreOptions(const QString &key, const QString &renderer)
 {
     QStringList result;
 
-    Ogre::ConfigOptionMap& renderOpt =
-        //Ogre::Root::getSingleton().getRenderSystem()->getConfigOptions();
-    Ogre::Root::getSingleton().getRenderSystemByName(renderer.toStdString())->getConfigOptions();
+    Ogre::RenderSystem *rend = Ogre::Root::getSingleton().getRenderSystem();
+    if(!rend)
+        return result;
+
+    Ogre::ConfigOptionMap& renderOpt = rend->getConfigOptions();
     Ogre::ConfigOptionMap::iterator it = renderOpt.begin();
 
     uint row = 0;
@@ -400,19 +425,11 @@ QStringList CSMSettings::UserSettings::getShaderLanguageByRenderer(const QString
     QStringList result;
 
     if(renderer == "Direct3D9 Rendering Subsystem")
-    {
-        result.append("CG");
         result.append("HLSL");
-        result.append("None");
-    }
     else if(renderer == "OpenGL Rendering Subsystem")
-    {
         result.append("GLSL");
+    else if(renderer.contains(QRegExp("^OpenGL ES", Qt::CaseInsensitive)))
         result.append("GLSLES");
-        result.append("None");
-    }
-    else
-        result.append("None");
 
     return result;
 }

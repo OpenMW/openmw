@@ -299,14 +299,12 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     std::auto_ptr<sh::Factory> factory (new sh::Factory (platform));
 
-    std::string shLang = mUserSettings.settingValue("Shader/language").toStdString();
+    std::string shLang = mUserSettings.settingValue("General/shader mode").toStdString();
     enum sh::Language lang;
-    if(shLang == "CG")          lang = sh::Language_CG;
-    else if(shLang == "HLSL")   lang = sh::Language_HLSL;
-    else if(shLang == "GLSL")   lang = sh::Language_GLSL;
-    else if(shLang == "GLSLES") lang = sh::Language_GLSLES;
-    else if(shLang == "Count")  lang = sh::Language_Count;
-    else                        lang = sh::Language_None;
+    if(shLang == "glsl")        lang = sh::Language_GLSL;
+    else if(shLang == "glsles") lang = sh::Language_GLSLES;
+    else if(shLang == "hlsl")   lang = sh::Language_HLSL;
+    else                        lang = sh::Language_CG;
 
     factory->setCurrentLanguage (lang);
     factory->setWriteSourceCache (true);
