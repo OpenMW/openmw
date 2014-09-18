@@ -320,7 +320,7 @@ namespace MWMechanics
         }
         else //is creature
         {
-            weaptype = WeapType_HandToHand; //doesn't matter, should only reflect if it is melee or distant weapon
+            weaptype = actorClass.getCreatureStats(actor).getDrawState() == DrawState_Spell ? WeapType_Spell : WeapType_HandToHand;
             weapRange = 150.0f; //TODO: use true attack range (the same problem in Creature::hit)
         }
 
