@@ -92,6 +92,7 @@ namespace MWMechanics
         void setAttackStrength(float value);
 
         bool needToRecalcDynamicStats();
+        void setNeedRecalcDynamicStats(bool val);
 
         void addToFallHeight(float height);
 
