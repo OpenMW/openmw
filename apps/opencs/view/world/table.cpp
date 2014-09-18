@@ -62,7 +62,7 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
         currRow = mProxyModel->mapToSource(mProxyModel->index( currRow, 0 )).row();
 
-        CSMWorld::ColumnBase::Display colType =
+        CSMWorld::ColumnBase::Display colDisplay =
             static_cast<CSMWorld::ColumnBase::Display>(
                 mModel->headerData(
                     currCol,
@@ -70,16 +70,16 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
                     CSMWorld::ColumnBase::Role_Display ).toInt());
 
         QString cellData = mModel->data(mModel->index( currRow, currCol )).toString();
-        CSMWorld::UniversalId::Type colUidType = CSMWorld::TableMimeData::convertEnums( colType );
+        CSMWorld::UniversalId::Type colType = CSMWorld::TableMimeData::convertEnums( colDisplay );
 
         if (    !cellData.isEmpty()
-                && colUidType != CSMWorld::UniversalId::Type::Type_None )
+                && colType != CSMWorld::UniversalId::Type::Type_None )
         {
             mEditCellAction->setText(tr("Edit '").append(cellData).append("'"));
 
             menu.addAction( mEditCellAction );
 
-            mEditCellId = CSMWorld::UniversalId( colUidType, cellData.toUtf8().constData() );
+            mEditCellId = CSMWorld::UniversalId( colType, cellData.toUtf8().constData() );
         }
     }
 
