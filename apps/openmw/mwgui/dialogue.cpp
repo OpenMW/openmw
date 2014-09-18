@@ -509,7 +509,7 @@ namespace MWGui
         const MyGUI::Colour linkHot    (223/255.f, 201/255.f, 159/255.f);
         const MyGUI::Colour linkNormal (150/255.f, 50/255.f, 30/255.f);
         const MyGUI::Colour linkActive (243/255.f, 237/255.f, 221/255.f);
-        for (std::map<std::string, int>::reverse_iterator it = mChoices.rbegin(); it != mChoices.rend(); ++it)
+        for (std::vector<std::pair<std::string, int> >::iterator it = mChoices.begin(); it != mChoices.end(); ++it)
         {
             Choice* link = new Choice(it->second);
             mLinks.push_back(link);
@@ -600,7 +600,7 @@ namespace MWGui
 
     void DialogueWindow::addChoice(const std::string& choice, int id)
     {
-        mChoices[choice] = id;
+        mChoices.push_back(std::make_pair(choice, id));
         updateHistory();
     }
 

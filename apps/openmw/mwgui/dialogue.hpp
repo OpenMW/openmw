@@ -161,7 +161,7 @@ namespace MWGui
         bool mGoodbye;
 
         std::vector<DialogueText*> mHistoryContents;
-        std::map<std::string, int> mChoices;
+        std::vector<std::pair<std::string, int> > mChoices;
 
         std::vector<Link*> mLinks;
         std::map<std::string, Link*> mTopicLinks;
