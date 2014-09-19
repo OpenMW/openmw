@@ -92,16 +92,7 @@ namespace MWGui
         mDraggedWidget = baseWidget;
         baseWidget->setItem(mItem.mBase);
         baseWidget->setNeedMouseFocus(false);
-
-        // text widget that shows item count
-        // TODO: move to ItemWidget
-        MyGUI::TextBox* text = baseWidget->createWidget<MyGUI::TextBox>("SandBrightText",
-            MyGUI::IntCoord(0, 14, 32, 18), MyGUI::Align::Default, std::string("Label"));
-        text->setTextAlign(MyGUI::Align::Right);
-        text->setNeedMouseFocus(false);
-        text->setTextShadow(true);
-        text->setTextShadowColour(MyGUI::Colour(0,0,0));
-        text->setCaption(ItemView::getCountString(count));
+        baseWidget->setCount(count);
 
         sourceView->update();
 

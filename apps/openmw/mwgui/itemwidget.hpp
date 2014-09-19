@@ -29,6 +29,9 @@ namespace MWGui
             Magic
         };
 
+        /// Set count to be displayed in a textbox over the item
+        void setCount(int count);
+
         /// \a ptr may be empty
         void setItem (const MWWorld::Ptr& ptr, ItemState state = None);
 
@@ -42,6 +45,7 @@ namespace MWGui
 
         MyGUI::ImageBox* mItem;
         MyGUI::ImageBox* mFrame;
+        MyGUI::TextBox* mText;
     };
 
 }

@@ -203,12 +203,7 @@ namespace MWGui
             ingredient->setUserString("ToolTipType", "ItemPtr");
             ingredient->setUserData(item);
 
-            MyGUI::TextBox* text = ingredient->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, 14, 32, 18), MyGUI::Align::Default, std::string("Label"));
-            text->setTextAlign(MyGUI::Align::Right);
-            text->setNeedMouseFocus(false);
-            text->setTextShadow(true);
-            text->setTextShadowColour(MyGUI::Colour(0,0,0));
-            text->setCaption(ItemView::getCountString(ingredient->getUserData<MWWorld::Ptr>()->getRefData().getCount()));
+            ingredient->setCount(ingredient->getUserData<MWWorld::Ptr>()->getRefData().getCount());
         }
 
         mItemView->update();
