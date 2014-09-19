@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Skin">
+<MyGUI type="Skin" version="3.2.1">
 
     <!-- HTML colour: #DDC79E -->
     <Skin name="NormalText" size="16 16">
@@ -17,12 +17,12 @@
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
     </Skin>
 
-    <!-- HTML colour: #BF9959 -->
     <Skin name="SandText" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
-        <Property key="TextColour" value="0.75 0.6 0.35"/>
-        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
+        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
+            <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
+        </BasisSkin>
     </Skin>
 
     <Skin name="SandTextC" size="16 16">

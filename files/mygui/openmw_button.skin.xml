@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Skin">
+<MyGUI type="Skin" version="3.2.1">
     <!-- Button graphics -->
     <Skin name="BTN_Top" size="128 4" texture="textures\menu_button_frame_top.dds">
         <BasisSkin type="TileRect" offset="0 0 128 4" align="HStretch">
@@ -60,7 +60,7 @@
     </Skin>
 
     <!-- Button widget -->
-    <Skin name="MW_Button" size="136 24">
+    <Skin name="MW_Button" size="136 24" version="3.2.1">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Center"/>
 
@@ -74,14 +74,14 @@
         <Child type="Widget" skin="BTN_BottomRight" offset="132 20 4 4" align="Bottom Right"/>
 
         <BasisSkin type="SimpleText" offset="4 4 128 16" align="Stretch">
-            <State name="disabled" colour="0.6 0.56 0.45" shift="0"/>
-            <State name="normal" colour="0.75 0.6 0.35" shift="0"/>
-            <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
-            <State name="pushed" colour="1 1 1" shift="0"/>
-            <State name="disabled_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="normal_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="highlighted_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="pushed_checked" colour="0.33 0.38 0.67" shift="0"/>
+            <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
+            <State name="highlighted" colour="#{fontcolour=normal_over}" shift="0"/>
+            <State name="pushed" colour="#{fontcolour=normal_pressed}" shift="0"/>
+            <State name="disabled_checked" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal_checked" colour="#{fontcolour=active}" shift="0"/>
+            <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
+            <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
         </BasisSkin>
    </Skin>
 </MyGUI>
