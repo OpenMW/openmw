@@ -50,15 +50,12 @@ namespace MWMechanics
             TEffectsContainer mEffects;
             int mValue;
 
-            std::set<EffectKey> listEffects() const;
-            ///< List all effects shared by at least two ingredients.
-
             void applyTools (int flags, float& value) const;
 
             void updateEffects();
 
             const ESM::Potion *getRecord() const;
-            ///< Return existing recrod for created potion (may return 0)
+            ///< Return existing record for created potion (may return 0)
 
             void removeIngredients();
             ///< Remove selected ingredients from alchemist's inventory, cleanup selected ingredients and
@@ -74,6 +71,10 @@ namespace MWMechanics
             ///< Return chance of success.
 
             int countIngredients() const;
+
+            TEffectsIterator beginEffects() const;
+
+            TEffectsIterator endEffects() const;
 
         public:
 
@@ -94,6 +95,9 @@ namespace MWMechanics
             void clear();
             ///< Remove alchemist, tools and ingredients.
 
+            std::set<EffectKey> listEffects() const;
+            ///< List all effects shared by at least two ingredients.
+
             int addIngredient (const MWWorld::Ptr& ingredient);
             ///< Add ingredient into the next free slot.
             ///
@@ -102,10 +106,6 @@ namespace MWMechanics
 
             void removeIngredient (int index);
             ///< Remove ingredient from slot (calling this function on an empty slot is a no-op).
-
-            TEffectsIterator beginEffects() const;
-
-            TEffectsIterator endEffects() const;
 
             std::string getPotionName() const;
             ///< Return the name of the potion that would be created when calling create (if a record for such

@@ -2,16 +2,34 @@
 
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_TextBox.h>
+
+#include <boost/lexical_cast.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwworld/class.hpp"
+
+namespace
+{
+    std::string getCountString(int count)
+    {
+        if (count == 1)
+            return "";
+        if (count > 9999)
+            return boost::lexical_cast<std::string>(int(count/1000.f)) + "k";
+        else
+            return boost::lexical_cast<std::string>(count);
+    }
+}
 
 namespace MWGui
 {
 
     ItemWidget::ItemWidget()
         : mItem(NULL)
+        , mFrame(NULL)
+        , mText(NULL)
     {
 
     }
@@ -29,8 +47,18 @@ namespace MWGui
         assignWidget(mFrame, "Frame");
         if (mFrame)
             mFrame->setNeedMouseFocus(false);
+        assignWidget(mText, "Text");
+        if (mText)
+            mText->setNeedMouseFocus(false);
 
         Base::initialiseOverride();
+    }
+
+    void ItemWidget::setCount(int count)
+    {
+        if (!mText)
+            return;
+        mText->setCaption(getCountString(count));
     }
 
     void ItemWidget::setIcon(const std::string &icon)

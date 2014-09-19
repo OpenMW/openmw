@@ -322,6 +322,10 @@
     <Resource type="ResourceLayout" name="MW_ItemIcon" version="3.2.0">
         <Widget type="Widget" skin="" position="0 0 42 42" name="Root">
             <Widget type="ImageBox" skin="ImageBox" position="0 0 42 42" align="Stretch" name="Frame">
+                <Widget type="TextBox" skin="SandBrightText" position="5 19 32 18" align="Right Bottom" name="Text">
+                    <Property key="TextAlign" value="Right"/>
+                    <Property key="TextShadow" value="true"/>
+                </Widget>
                 <Widget type="ImageBox" skin="ImageBox" position="5 5 32 32" align="Stretch" name="Item"/>
             </Widget>
         </Widget>
@@ -338,6 +342,10 @@
     <Resource type="ResourceLayout" name="MW_ItemIconBox" version="3.2.0">
         <Widget type="Widget" skin="" position="0 0 50 50" name="Root">
             <Widget type="ImageBox" skin="ImageBox" position="4 4 42 42" align="Center" name="Frame">
+                <Widget type="TextBox" skin="SandBrightText" position="5 19 32 18" align="Right Bottom" name="Text">
+                    <Property key="TextAlign" value="Right"/>
+                    <Property key="TextShadow" value="true"/>
+                </Widget>
                 <Widget type="ImageBox" skin="ImageBox" position="5 5 32 32" align="Center" name="Item"/>
             </Widget>
 

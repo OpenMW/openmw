@@ -17,16 +17,6 @@
 namespace MWGui
 {
 
-std::string ItemView::getCountString(int count)
-{
-    if (count == 1)
-        return "";
-    if (count > 9999)
-        return boost::lexical_cast<std::string>(int(count/1000.f)) + "k";
-    else
-        return boost::lexical_cast<std::string>(count);
-}
-
 ItemView::ItemView()
     : mModel(NULL)
     , mScrollView(NULL)
@@ -123,19 +113,10 @@ void ItemView::update()
         if (item.mType == ItemStack::Type_Equipped)
             state = ItemWidget::Equip;
         itemWidget->setItem(item.mBase, state);
+        itemWidget->setCount(item.mCount);
 
         itemWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemView::onSelectedItem);
         itemWidget->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheel);
-
-        // text widget that shows item count
-        // TODO: move to ItemWidget
-        MyGUI::TextBox* text = itemWidget->createWidget<MyGUI::TextBox>("SandBrightText",
-            MyGUI::IntCoord(5, 19, 32, 18), MyGUI::Align::Default, std::string("Label"));
-        text->setTextAlign(MyGUI::Align::Right);
-        text->setNeedMouseFocus(false);
-        text->setTextShadow(true);
-        text->setTextShadowColour(MyGUI::Colour(0,0,0));
-        text->setCaption(getCountString(item.mCount));
     }
 
     layoutWidgets();
