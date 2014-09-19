@@ -26,6 +26,7 @@ namespace MWMechanics
     {
             MWWorld::Ptr mWatched;
             NpcStats mWatchedStats;
+            bool mWatchedStatsEmpty;
             bool mUpdatePlayer;
             bool mClassSelected;
             bool mRaceSelected;

@@ -288,7 +288,7 @@ namespace MWMechanics
     }
 
     MechanicsManager::MechanicsManager()
-    : mUpdatePlayer (true), mClassSelected (false),
+    : mWatchedStatsEmpty (true), mUpdatePlayer (true), mClassSelected (false),
       mRaceSelected (false), mAI(true)
     {
         //buildPlayer no longer here, needs to be done explicitely after all subsystems are up and running
@@ -350,7 +350,7 @@ namespace MWMechanics
             const MWMechanics::NpcStats &stats = mWatched.getClass().getNpcStats(mWatched);
             for(int i = 0;i < ESM::Attribute::Length;++i)
             {
-                if(stats.getAttribute(i) != mWatchedStats.getAttribute(i))
+                if(stats.getAttribute(i) != mWatchedStats.getAttribute(i) || mWatchedStatsEmpty)
                 {
                     std::stringstream attrname;
                     attrname << "AttribVal"<<(i+1);
@@ -360,19 +360,19 @@ namespace MWMechanics
                 }
             }
 
-            if(stats.getHealth() != mWatchedStats.getHealth())
+            if(stats.getHealth() != mWatchedStats.getHealth() || mWatchedStatsEmpty)
             {
                 static const std::string hbar("HBar");
                 mWatchedStats.setHealth(stats.getHealth());
                 winMgr->setValue(hbar, stats.getHealth());
             }
-            if(stats.getMagicka() != mWatchedStats.getMagicka())
+            if(stats.getMagicka() != mWatchedStats.getMagicka() || mWatchedStatsEmpty)
             {
                 static const std::string mbar("MBar");
                 mWatchedStats.setMagicka(stats.getMagicka());
                 winMgr->setValue(mbar, stats.getMagicka());
             }
-            if(stats.getFatigue() != mWatchedStats.getFatigue())
+            if(stats.getFatigue() != mWatchedStats.getFatigue() || mWatchedStatsEmpty)
             {
                 static const std::string fbar("FBar");
                 mWatchedStats.setFatigue(stats.getFatigue());
@@ -398,7 +398,7 @@ namespace MWMechanics
             //Loop over ESM::Skill::SkillEnum
             for(int i = 0; i < ESM::Skill::Length; ++i)
             {
-                if(stats.getSkill(i) != mWatchedStats.getSkill(i))
+                if(stats.getSkill(i) != mWatchedStats.getSkill(i) || mWatchedStatsEmpty)
                 {
                     update = true;
                     mWatchedStats.getSkill(i) = stats.getSkill(i);
@@ -410,6 +410,8 @@ namespace MWMechanics
                 winMgr->updateSkillArea();
 
             winMgr->setValue("level", stats.getLevel());
+
+            mWatchedStatsEmpty = false;
 
             // Update the equipped weapon icon
             MWWorld::InventoryStore& inv = mWatched.getClass().getInventoryStore(mWatched);
