@@ -69,7 +69,7 @@ boost::filesystem::path LinuxPath::getCachePath() const
 
 boost::filesystem::path LinuxPath::getGlobalConfigPath() const
 {
-    boost::filesystem::path globalPath("/etc/");
+    boost::filesystem::path globalPath(INSTALL_PREFIX "/etc/");
     return globalPath / mName;
 }
 
@@ -80,7 +80,7 @@ boost::filesystem::path LinuxPath::getLocalPath() const
 
 boost::filesystem::path LinuxPath::getGlobalDataPath() const
 {
-    boost::filesystem::path globalDataPath("/usr/share/games/");
+    boost::filesystem::path globalDataPath(INSTALL_PREFIX "/share/games/");
     return globalDataPath / mName;
 }
 
