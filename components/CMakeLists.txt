@@ -57,6 +57,7 @@ add_component_dir (misc
     utf8stream stringops resourcehelpers
     )
 
+add_definitions(-DINSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 add_component_dir (files
     linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
     constrainedfiledatastream lowlevelfile

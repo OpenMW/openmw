@@ -401,7 +401,7 @@ IF(NOT WIN32 AND NOT APPLE)
     SET(DATADIR "${DATAROOTDIR}/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
     SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
     SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
-    SET(SYSCONFDIR "/etc/openmw" CACHE PATH "Set config dir")
+    SET(SYSCONFDIR "${CMAKE_INSTALL_PREFIX}/etc/openmw" CACHE PATH "Set config dir")
 
     # Install binaries
     INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
