@@ -115,10 +115,10 @@ Lukasz Gromanowski (lgro) - English News Writer
 Mickey Lyle (raevol) - Release Manager
 Pithorn - Chinese News Writer
 sir_herrbatka - Polish News Writer
-
+Dawid Lakomy (Vedyimyn) - Polish News Writer
 
 Website:
-Lukasz Gromanowski (lgro) - Website Administrator
+Lukasz Gromanowski (Lgro) - Website Administrator
 Ryan Sardonic (Wry) - Wiki Editor
 sir_herrbatka - Forum Administrator
 
