@@ -99,7 +99,7 @@ namespace MWGui
     WindowManager(const Compiler::Extensions& extensions, int fpsLevel,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
-                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts);
+                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap);
     virtual ~WindowManager();
 
     void initUI();
@@ -438,9 +438,15 @@ namespace MWGui
     unsigned int mTriangleCount;
     unsigned int mBatchCount;
 
+    std::map<std::string, std::string> mFallbackMap;
+
     /**
-     * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,
-     * so this method will retrieve the GMST with the name \a _tag and place the result in \a _result
+     * Called when MyGUI tries to retrieve a tag's value. Tags must be denoted in #{tag} notation and will be replaced upon setting a user visible text/property.
+     * Supported syntax:
+     * #{GMSTName}: retrieves String value of the GMST called GMSTName
+     * #{sCell=CellID}: retrieves translated name of the given CellID (used only by some Morrowind localisations, in others cell ID is == cell name)
+     * #{fontcolour=FontColourName}: retrieves the value of the fallback setting "FontColor_color_<FontColourName>" from openmw.cfg,
+     *                              in the format "r g b a", float values in range 0-1.
      */
     void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
 

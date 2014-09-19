@@ -78,7 +78,7 @@ namespace MWGui
     WindowManager::WindowManager(
         const Compiler::Extensions& extensions, int fpsLevel, OEngine::Render::OgreRenderer *ogre,
             const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
-            Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts)
+            Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap)
       : mConsoleOnlyScripts(consoleOnlyScripts)
       , mGuiManager(NULL)
       , mRendering(ogre)
@@ -146,9 +146,12 @@ namespace MWGui
       , mTriangleCount(0)
       , mBatchCount(0)
       , mCurrentModals()
+      , mFallbackMap(fallbackMap)
     {
         // Set up the GUI system
         mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
+
+        MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
         // Load fonts
         Gui::FontLoader fontLoader (encoding);
@@ -181,8 +184,6 @@ namespace MWGui
 
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::ResourceManager::getInstance().load("core.xml");
-
-        MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
         mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow ());
 
@@ -990,9 +991,29 @@ namespace MWGui
         std::string tokenToFind = "sCell=";
         size_t tokenLength = tokenToFind.length();
 
+        std::string fontcolour = "fontcolour=";
+        size_t fontcolourLength = fontcolour.length();
+
         if (tag.substr(0, tokenLength) == tokenToFind)
         {
             _result = mTranslationDataStorage.translateCellName(tag.substr(tokenLength));
+        }
+        else if (tag.substr(0, fontcolourLength) == fontcolour)
+        {
+            std::string fallbackName = "FontColor_color_" + tag.substr(fontcolourLength);
+            std::map<std::string, std::string>::const_iterator it = mFallbackMap.find(fallbackName);
+            if (it == mFallbackMap.end())
+                throw std::runtime_error("Unknown fallback name: " + fallbackName);
+            std::string str = it->second;
+
+            std::string ret[3];
+            unsigned int j=0;
+            for(unsigned int i=0;i<str.length();++i){
+                if(str[i]==',') j++;
+                else if (str[i] != ' ') ret[j]+=str[i];
+            }
+            MyGUI::Colour col (MyGUI::utility::parseInt(ret[0])/255.f,MyGUI::utility::parseInt(ret[1])/255.f,MyGUI::utility::parseInt(ret[2])/255.f);
+            _result = col.print();
         }
         else
         {
