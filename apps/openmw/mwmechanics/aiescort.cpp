@@ -27,7 +27,7 @@ namespace MWMechanics
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
-        mMaxDist = 470;
+        mMaxDist = 450;
 
         // The CS Help File states that if a duration is given, the AI package will run for that long
         // BUT if a location is givin, it "trumps" the duration so it will simply escort to that location.
@@ -40,7 +40,7 @@ namespace MWMechanics
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
-        mMaxDist = 470;
+        mMaxDist = 450;
 
         // The CS Help File states that if a duration is given, the AI package will run for that long
         // BUT if a location is given, it "trumps" the duration so it will simply escort to that location.
@@ -93,14 +93,14 @@ namespace MWMechanics
         {
             if(pathTo(actor,ESM::Pathgrid::Point(mX,mY,mZ),duration)) //Returns true on path complete
                 return true;
-            mMaxDist = 470;
+            mMaxDist = 450;
         }
         else
         {
             // Stop moving if the player is to far away
             MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle3", 0, 1);
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-            mMaxDist = 330;
+            mMaxDist = 250;
         }
 
         return false;
