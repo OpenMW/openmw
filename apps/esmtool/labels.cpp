@@ -787,6 +787,10 @@ std::string magicEffectFlags(int flags)
     if (flags & ESM::MagicEffect::NonRecastable) properties += "NonRecastable ";
     if (flags & ESM::MagicEffect::Unreflectable) properties += "Unreflectable ";
     if (flags & ESM::MagicEffect::CasterLinked) properties += "CasterLinked ";
+    if (flags & ESM::MagicEffect::AllowSpellmaking) properties += "AllowSpellmaking ";
+    if (flags & ESM::MagicEffect::AllowEnchanting) properties += "AllowEnchanting ";
+    if (flags & ESM::MagicEffect::NegativeLight) properties += "NegativeLight ";
+
     if (flags & 0xFFFC0000) properties += "Invalid ";
     properties += str(boost::format("(0x%08X)") % flags);
     return properties;
