@@ -7,10 +7,7 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/range/adaptor/filtered.hpp>
-#include <boost/range/algorithm/copy.hpp>
 
 #include <OgreUTFString.h>
 #include <OgreResourceGroupManager.h>
