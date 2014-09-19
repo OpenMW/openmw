@@ -5,7 +5,6 @@
                 <Property key="FontName" value="Default"/>
                 <Property key="TextAlign" value="Left Top"/>
                 <Property key="TextColour" value="0 0 0"/>
-                <!--Property key="Pointer" value="beam" /-->
                 <BasisSkin type="EditText" offset="0 0 10 10" align="Stretch"/>
         </Skin>
 
