@@ -306,6 +306,9 @@ float MWMechanics::Alchemy::getChance() const
     const CreatureStats& creatureStats = mAlchemist.getClass().getCreatureStats (mAlchemist);
     const NpcStats& npcStats = mAlchemist.getClass().getNpcStats (mAlchemist);
 
+    if (beginEffects() == endEffects())
+        return 0.f;
+
     return
         (npcStats.getSkill (ESM::Skill::Alchemy).getModified() +
         0.1 * creatureStats.getAttribute (1).getModified()
@@ -450,7 +453,7 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
     if (name.empty() && getPotionName().empty())
         return Result_NoName;
 
-    if (beginEffects()==endEffects())
+    if (listEffects().empty())
         return Result_NoEffects;
 
     if (getChance()<std::rand()/static_cast<double> (RAND_MAX)*100)

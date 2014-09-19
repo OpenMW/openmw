@@ -8,6 +8,8 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwmechanics/magiceffects.hpp"
+
 #include "../mwworld/class.hpp"
 
 #include "inventoryitemmodel.hpp"
@@ -211,12 +213,21 @@ namespace MWGui
 
         mItemView->update();
 
-        std::vector<ESM::ENAMstruct> effects;
-        ESM::EffectList list;
-        list.mList = effects;
-        for (MWMechanics::Alchemy::TEffectsIterator it = mAlchemy.beginEffects (); it != mAlchemy.endEffects (); ++it)
+        std::set<MWMechanics::EffectKey> effectIds = mAlchemy.listEffects();
+        Widgets::SpellEffectList list;
+        for (std::set<MWMechanics::EffectKey>::iterator it = effectIds.begin(); it != effectIds.end(); ++it)
         {
-            list.mList.push_back(*it);
+            Widgets::SpellEffectParams params;
+            params.mEffectID = it->mId;
+            const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(it->mId);
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
+                params.mSkill = it->mArg;
+            else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
+                params.mAttribute = it->mArg;
+            params.mIsConstant = true;
+            params.mNoTarget = true;
+
+            list.push_back(params);
         }
 
         while (mEffectsBox->getChildCount())
@@ -226,8 +237,7 @@ namespace MWGui
         Widgets::MWEffectListPtr effectsWidget = mEffectsBox->createWidget<Widgets::MWEffectList>
             ("MW_StatName", coord, MyGUI::Align::Left | MyGUI::Align::Top);
 
-        Widgets::SpellEffectList _list = Widgets::MWEffectList::effectListFromESM(&list);
-        effectsWidget->setEffectList(_list);
+        effectsWidget->setEffectList(list);
 
         std::vector<MyGUI::Widget*> effectItems;
         effectsWidget->createEffectWidgets(effectItems, mEffectsBox, coord, false, 0);
