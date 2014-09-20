@@ -9,6 +9,7 @@ namespace ESM
 
 void InventoryList::load(ESMReader &esm)
 {
+    mList.clear();
     ContItem ci;
     while (esm.isNextSub("NPCO"))
     {

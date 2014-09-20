@@ -22,6 +22,8 @@ void Script::load(ESMReader &esm)
     mData = data.mData;
     mId = data.mName.toString();
 
+    mVarNames.clear();
+
     // List of local variables
     if (esm.isNextSub("SCVR"))
     {

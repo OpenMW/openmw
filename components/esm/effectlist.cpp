@@ -7,6 +7,7 @@ namespace ESM {
 
 void EffectList::load(ESMReader &esm)
 {
+    mList.clear();
     ENAMstruct s;
     while (esm.isNextSub("ENAM")) {
         esm.getHT(s, 24);
