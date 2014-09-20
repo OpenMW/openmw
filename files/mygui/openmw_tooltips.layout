@@ -83,10 +83,11 @@
             </Widget>
         </Widget>
 
-        <!-- Health tooltip -->
+        <!-- Health/Magicka/Fatigue tooltip -->
         <Widget type="HBox" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="HealthToolTip">
             <Property key="AutoResize" value="true"/>
             <Property key="Padding" value="8"/>
+            <Property key="Spacing" value="8"/>
 
             <Widget type="VBox">
                 <UserString key="VStretch" value="true"/>
@@ -109,7 +110,7 @@
             <Property key="Padding" value="8"/>
 
             <Widget type="HBox">
-                <Property key="Spacing" value="4"/>
+                <Property key="Spacing" value="8"/>
                 <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="AttributeImage"/>
 
                 <Widget type="AutoSizedEditBox" skin="NormalText" position="44 8 252 32" align="Left Top" name="AttributeName">
@@ -131,6 +132,7 @@
 
             <Widget type="HBox">
                 <UserString key="HStretch" value="true"/>
+                <Property key="Spacing" value="8"/>
                 <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="SkillImage"/>
 
                 <Widget type="VBox">
@@ -177,6 +179,7 @@
 
             <Widget type="HBox">
                 <UserString key="HStretch" value="true"/>
+                <Property key="Spacing" value="8"/>
 
                 <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="SkillNoProgressImage"/>
 
@@ -236,6 +239,7 @@
 
             <Widget type="HBox">
                 <UserString key="HStretch" value="true"/>
+                <Property key="Spacing" value="8"/>
 
                 <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="MagicEffectImage"/>
 
