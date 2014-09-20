@@ -27,6 +27,9 @@ namespace CSVWorld
             InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,
                 const CSMWorld::UniversalId& id);
 
+            virtual void cloneMode (const std::string& originId,
+                const CSMWorld::UniversalId::Type type);
+
             virtual void reset();
 
             virtual std::string getErrors() const;
