@@ -1063,11 +1063,11 @@ class NIFObjectLoader
 
     static void createObjects(const Nif::NIFFilePtr& nif, const std::string &name, const std::string &group,
                               Ogre::SceneNode *sceneNode, const Nif::Node *node,
-                              ObjectScenePtr scene, int flags, int animflags, int partflags)
+                              ObjectScenePtr scene, int flags, int animflags, int partflags, bool isRootCollisionNode=false)
     {
         // Do not create objects for the collision shape (includes all children)
         if(node->recType == Nif::RC_RootCollisionNode)
-            return;
+            isRootCollisionNode = true;
 
         // Marker objects: just skip the entire node branch
         /// \todo don't do this in the editor
@@ -1120,20 +1120,23 @@ class NIFObjectLoader
         if(!node->controller.empty())
             createNodeControllers(nif, name, node->controller, scene, animflags);
 
-        if(node->recType == Nif::RC_NiCamera)
+        if (!isRootCollisionNode)
         {
-            /* Ignored */
-        }
+            if(node->recType == Nif::RC_NiCamera)
+            {
+                /* Ignored */
+            }
 
-        if(node->recType == Nif::RC_NiTriShape && !(flags&0x80000000))
-        {
-            createEntity(name, group, sceneNode->getCreator(), scene, node, flags, animflags);
-        }
+            if(node->recType == Nif::RC_NiTriShape && !(flags&0x80000000))
+            {
+                createEntity(name, group, sceneNode->getCreator(), scene, node, flags, animflags);
+            }
 
-        if((node->recType == Nif::RC_NiAutoNormalParticles ||
-            node->recType == Nif::RC_NiRotatingParticles) && !(flags&0x40000000))
-        {
-            createParticleSystem(name, group, sceneNode, scene, node, flags, partflags, animflags);
+            if((node->recType == Nif::RC_NiAutoNormalParticles ||
+                node->recType == Nif::RC_NiRotatingParticles) && !(flags&0x40000000))
+            {
+                createParticleSystem(name, group, sceneNode, scene, node, flags, partflags, animflags);
+            }
         }
 
         const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
@@ -1143,7 +1146,7 @@ class NIFObjectLoader
             for(size_t i = 0;i < children.length();i++)
             {
                 if(!children[i].empty())
-                    createObjects(nif, name, group, sceneNode, children[i].getPtr(), scene, flags, animflags, partflags);
+                    createObjects(nif, name, group, sceneNode, children[i].getPtr(), scene, flags, animflags, partflags, isRootCollisionNode);
             }
         }
     }
