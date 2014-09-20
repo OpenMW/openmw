@@ -136,6 +136,7 @@ namespace MWGui
                     float min,max;
                     getSettingMinMax(scroll, min, max);
                     float value = Settings::Manager::getFloat(getSettingName(current), getSettingCategory(current));
+                    value = std::max(min, std::min(value, max));
                     value = (value-min)/(max-min);
 
                     scroll->setScrollPosition( value * (scroll->getScrollRange()-1));
