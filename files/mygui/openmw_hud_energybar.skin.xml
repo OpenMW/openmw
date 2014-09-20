@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Skin">
+<MyGUI type="Skin" version="3.2.1">
     <!-- Energy bar frame graphics -->
     <Skin name="HUD_Bar_Top" size="64 2" texture="textures\menu_small_energy_bar_top.dds">
         <BasisSkin type="MainSkin" offset="0 0 64 2">
@@ -20,19 +20,19 @@
 
     <!-- Progress bar track, various colors -->
     <Skin name="MW_BarTrack_Red" size="4 8" texture="textures\menu_bar_gray.dds" >
-        <Property key="Colour" value="0.8274 0.2431 0.129"/>
+        <Property key="Colour" value="#{fontcolour=health}"/>
         <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
     </Skin>
     <Skin name="MW_BarTrack_Green" size="4 8" texture="textures\menu_bar_gray.dds" >
-        <Property key="Colour" value="0 0.6823 0.2745"/>
+        <Property key="Colour" value="#{fontcolour=fatigue}"/>
         <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
     </Skin>
     <Skin name="MW_BarTrack_Blue" size="4 8" texture="textures\menu_bar_gray.dds" >
-        <Property key="Colour" value="0.2470 0.3176 0.7411"/>
+        <Property key="Colour" value="#{fontcolour=magic}"/>
         <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
@@ -44,7 +44,35 @@
         </BasisSkin>
     </Skin>
 
-    <!-- Main energy bar widget definitions. There's one for each color.-->
+
+    <Skin name="MW_BarTrack_Magic" size="4 8" texture="textures\menu_bar_gray.dds" >
+        <Property key="Colour" value="#{fontcolour=magic_fill}"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
+        </BasisSkin>
+    </Skin>
+
+    <Skin name="MW_BarTrack_Weapon" size="4 8" texture="textures\menu_bar_gray.dds" >
+        <Property key="Colour" value="#{fontcolour=weapon_fill}"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
+        </BasisSkin>
+    </Skin>
+
+    <Skin name="MW_EnergyBar_Magic" size="64 12">
+        <Property key="TrackSkin" value="MW_BarTrack_Magic"/>
+        <Property key="TrackWidth" value="1"/>
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
+        <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
+    </Skin>
+    <Skin name="MW_EnergyBar_Weapon" size="64 12">
+        <Property key="TrackSkin" value="MW_BarTrack_Weapon"/>
+        <Property key="TrackWidth" value="1"/>
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
+        <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
+    </Skin>
 
     <Skin name="MW_EnergyBar_Red" size="64 12">
         <Property key="TrackSkin" value="MW_BarTrack_Red"/>

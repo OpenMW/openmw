@@ -446,7 +446,9 @@ namespace MWGui
      * #{GMSTName}: retrieves String value of the GMST called GMSTName
      * #{sCell=CellID}: retrieves translated name of the given CellID (used only by some Morrowind localisations, in others cell ID is == cell name)
      * #{fontcolour=FontColourName}: retrieves the value of the fallback setting "FontColor_color_<FontColourName>" from openmw.cfg,
-     *                              in the format "r g b a", float values in range 0-1.
+     *                              in the format "r g b a", float values in range 0-1. Useful for "Colour" and "TextColour" properties in skins.
+     * #{fontcolourhtml=FontColourName}: retrieves the value of the fallback setting "FontColor_color_<FontColourName>" from openmw.cfg,
+     *                              in the format "#xxxxxx" where x are hexadecimal numbers. Useful in an EditBox's caption to change the color of following text.
      */
     void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
 

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Skin">
+<MyGUI type="Skin" version="3.2.1">
 
     <!-- Text edit widget -->
 
     <Skin name="MW_TextEditClient" size="10 10">
+        <Property key="TextColour" value="#{fontcolour=normal}"/>
 
         <BasisSkin type="EditText" offset="0 0 10 10" align="Stretch"/>
 
@@ -20,7 +21,7 @@
 
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left VCenter"/>
-        <Property key="TextColour" value="0.75 0.6 0.35"/>
+        <Property key="TextColour" value="#{fontcolour=normal}"/>
 
         <Child type="TextBox" skin="MW_TextEditClient" offset="4 1 502 18" align="Stretch" name="Client"/>
 
@@ -32,7 +33,7 @@
 
         <Property key="TextAlign" value="Left Top"/>
 
-        <Property key="TextColour" value="0.75 0.6 0.35"/>
+        <Property key="TextColour" value="#{fontcolour=normal}"/>
 
         <Child type="TextBox" skin="MW_TextEditClient" offset="2 2 490 18" align="Stretch" name="Client"/>
 
@@ -49,7 +50,7 @@
 
         <Property key="TextAlign" value="Left Top"/>
 
-        <Property key="TextColour" value="0.75 0.6 0.35"/>
+        <Property key="TextColour" value="#{fontcolour=normal}"/>
 
         <Child type="TextBox" skin="MW_TextEditClient" offset="2 2 490 18" align="Stretch" name="Client"/>
 

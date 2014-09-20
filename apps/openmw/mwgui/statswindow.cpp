@@ -505,30 +505,30 @@ namespace MWGui
 
                 std::string text;
 
-                text += std::string("#DDC79E") + faction->mName;
+                text += std::string("#{fontcolourhtml=header}") + faction->mName;
 
                 if (expelled.find(it->first) != expelled.end())
-                    text += "\n#BF9959#{sExpelled}";
+                    text += "\n#{fontcolourhtml=normal}#{sExpelled}";
                 else
                 {
                     int rank = it->second;
                     rank = std::max(0, std::min(9, rank));
-                    text += std::string("\n#BF9959") + faction->mRanks[rank];
+                    text += std::string("\n#{fontcolourhtml=normal}") + faction->mRanks[rank];
 
                     if (rank < 9)
                     {
                         // player doesn't have max rank yet
-                        text += std::string("\n\n#DDC79E#{sNextRank} ") + faction->mRanks[rank+1];
+                        text += std::string("\n\n#{fontcolourhtml=header}#{sNextRank} ") + faction->mRanks[rank+1];
 
                         ESM::RankData rankData = faction->mData.mRankData[rank+1];
                         const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[0]);
                         const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[1]);
 
-                        text += "\n#BF9959#{" + attr1->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute1)
+                        text += "\n#{fontcolourhtml=normal}#{" + attr1->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute1)
                                 + ", #{" + attr2->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute2);
 
-                        text += "\n\n#DDC79E#{sFavoriteSkills}";
-                        text += "\n#BF9959";
+                        text += "\n\n#{fontcolourhtml=header}#{sFavoriteSkills}";
+                        text += "\n#{fontcolourhtml=normal}";
                         bool firstSkill = true;
                         for (int i=0; i<7; ++i)
                         {

@@ -5,14 +5,12 @@
         <Widget type="EditBox" skin="MW_TextEditClient" position="10 10 490 20" align="Left Top Stretch" name="message">
             <Property key="FontName" value="Default"/>
             <Property key="TextAlign" value="Center"/>
-            <Property key="TextColour" value="0.75 0.6 0.35"/>
             <Property key="Static" value="true"/>
             <Property key="WordWrap" value="true"/>
             <Property key="MultiLine" value="1"/>
             <Property key="VisibleVScroll" value="1"/>
         </Widget>
         <Widget type="Widget" skin="" position="0 0 500 400" align="Stretch" name="buttons">
-            <!-- Widget type="Button" skin="MW_Button" position="0 0 30 18" name="somefunnybutton" / -->
         </Widget>
     </Widget>
 </MyGUI>

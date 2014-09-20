@@ -870,10 +870,9 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
 
 void RenderingManager::setMenuTransparency(float val)
 {
-    Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName("transparent.png");
-    std::vector<Ogre::uint32> buffer;
+    Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName("transparent.png"); std::vector<Ogre::uint32> buffer;
     buffer.resize(1);
-    buffer[0] = (int(255*val) << 24);
+    buffer[0] = (int(255*val) << 24) | (255 << 16) | (255 << 8) | 255;
     memcpy(tex->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], 1*4);
     tex->getBuffer()->unlock();
 }

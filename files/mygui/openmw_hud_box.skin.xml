@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Skin">
+<MyGUI type="Skin" version="3.2.1">
 
     <!-- The 'box' frame that surrounds various HUD items and other elements -->
 

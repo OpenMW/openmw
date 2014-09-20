@@ -2,12 +2,20 @@
 
 <MyGUI type="Skin" version="3.2.1">
 
-    <!-- HTML colour: #DDC79E -->
+<!--
+
+Unknown colors from Morrowind.ini:
+color_focus=80,80,80 # ????
+color_misc=0,205,205 # ????
+
+-->
+
     <Skin name="NormalText" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
-        <Property key="TextColour" value="0.87 0.78 0.62"/>
-        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
+        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
+            <State name="normal" colour="#{fontcolour=header}" shift="0"/>
+        </BasisSkin>
     </Skin>
 
     <Skin name="NumFPS" size="16 16">
@@ -25,35 +33,37 @@
         </BasisSkin>
     </Skin>
 
-    <Skin name="SandTextC" size="16 16">
-        <Property key="FontName" value="Default"/>
-        <Property key="TextAlign" value="Top HCenter"/>
-        <Property key="TextColour" value="0.75 0.6 0.35"/>
-        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
-    </Skin>
-
     <Skin name="SandTextVCenter" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left VCenter"/>
-        <Property key="TextColour" value="0.75 0.6 0.35"/>
-        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
+        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
+            <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
+        </BasisSkin>
     </Skin>
 
     <Skin name="SandTextRight" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Right Bottom"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
-            <State name="normal" colour="0.75 0.6 0.35"/>
-            <State name="increased" colour="0.757 0.679 0.539"/>
-            <State name="decreased" colour="0.785 0.363 0.308"/>
+            <State name="normal" colour="#{fontcolour=normal}"/>
+            <State name="increased" colour="#{fontcolour=positive}"/>
+            <State name="decreased" colour="#{fontcolour=negative}"/>
         </BasisSkin>
     </Skin>
 
     <Skin name="SandBrightText" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
-        <Property key="TextColour" value="0.85 0.76 0.60"/>
-        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
+        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
+            <State name="normal" colour="#{fontcolour=header}" shift="0"/>
+        </BasisSkin>
+    </Skin>
+
+    <Skin name="CountText" size="16 16">
+        <Property key="FontName" value="Default"/>
+        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
+            <State name="normal" colour="#{fontcolour=count}" shift="0"/>
+        </BasisSkin>
     </Skin>
 
     <Skin name="MW_StatNameC" size="200 18">
@@ -64,14 +74,14 @@
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Top HCenter"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
-            <State name="disabled" colour="0.6 0.56 0.45" shift="0"/>
-            <State name="normal" colour="0.75 0.6 0.35" shift="0"/>
-            <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
-            <State name="pushed" colour="1 1 1" shift="0"/>
-            <State name="disabled_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="normal_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="highlighted_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="pushed_checked" colour="0.33 0.38 0.67" shift="0"/>
+            <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
+            <State name="highlighted" colour="#{fontcolour=normal_over}" shift="0"/>
+            <State name="pushed" colour="#{fontcolour=normal_pressed}" shift="0"/>
+            <State name="disabled_checked" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal_checked" colour="#{fontcolour=active}" shift="0"/>
+            <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
+            <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
         </BasisSkin>
     </Skin>
 
@@ -79,29 +89,14 @@
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
-            <State name="disabled" colour="0.6 0.56 0.45" shift="0"/>
-            <State name="normal" colour="0.75 0.6 0.35" shift="0"/>
-            <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
-            <State name="pushed" colour="1 1 1" shift="0"/>
-            <State name="disabled_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="normal_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="highlighted_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="pushed_checked" colour="0.33 0.38 0.67" shift="0"/>
-        </BasisSkin>
-    </Skin>
-
-    <Skin name="SpellText" size="16 16">
-        <Property key="FontName" value="Default"/>
-        <Property key="TextAlign" value="Left Bottom"/>
-        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
-            <State name="disabled" colour="0.6 0.56 0.45" shift="0"/>
-            <State name="normal" colour="0.75 0.6 0.35" shift="0"/>
-            <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
-            <State name="pushed" colour="1 1 1" shift="0"/>
-            <State name="disabled_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="normal_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="highlighted_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="pushed_checked" colour="0.33 0.38 0.67" shift="0"/>
+            <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
+            <State name="highlighted" colour="#{fontcolour=normal_over}" shift="0"/>
+            <State name="pushed" colour="#{fontcolour=normal_pressed}" shift="0"/>
+            <State name="disabled_checked" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal_checked" colour="#{fontcolour=active}" shift="0"/>
+            <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
+            <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
         </BasisSkin>
     </Skin>
 
@@ -109,14 +104,14 @@
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
-            <State name="disabled" colour="0.6 0.56 0.45" shift="0"/>
-            <State name="normal" colour="0.6 0.56 0.45" shift="0"/>
-            <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
-            <State name="pushed" colour="1 1 1" shift="0"/>
-            <State name="disabled_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="normal_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="highlighted_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="pushed_checked" colour="0.33 0.38 0.67" shift="0"/>
+            <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="highlighted" colour="#{fontcolour=disabled_over}" shift="0"/>
+            <State name="pushed" colour="#{fontcolour=disabled_pressed}" shift="0"/>
+            <State name="disabled_checked" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal_checked" colour="#{fontcolour=active}" shift="0"/>
+            <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
+            <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
         </BasisSkin>
     </Skin>
 

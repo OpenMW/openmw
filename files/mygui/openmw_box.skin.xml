@@ -3,7 +3,7 @@
 <!-- This file defines the box you see around many GUI elements, such
 as around the sections of the stats window, or around popup info windows -->
 
-<MyGUI type="Skin">
+<MyGUI type="Skin" version="3.2.1">
     <!-- Box borders -->
     <Skin name="IB_T" size="512 2" texture="textures\menu_thin_border_top.dds">
         <BasisSkin type="TileRect" offset="0 0 512 2" align="HStretch">

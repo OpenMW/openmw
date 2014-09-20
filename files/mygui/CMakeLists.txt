@@ -5,6 +5,7 @@ set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
 
 set(MYGUI_FILES
     black.png
+    white.png
     core.skin
     core.xml
     openmw_alchemy_window.layout

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Skin">
+<MyGUI type="Skin" version="3.2.1">
 
     <!-- Horizontal Scrollbar -->
 
@@ -99,26 +99,26 @@
     <Skin name="HeaderText" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Center"/>
-        <Property key="TextColour" value="0.82 0.74 0.58"/>
+        <Property key="TextColour" value="#{fontcolour=header}"/>
 
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
     </Skin>
 
-    <!-- list and multilist skins -->
+    <!-- list skin -->
 
     <Skin name="MW_ListLine" size="5 5">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left VCenter"/>
 
         <BasisSkin type="SimpleText" offset="2 0 1 5" align="Stretch">
-            <State name="disabled" colour="0.70 0.57 0.33" shift="0"/>
-            <State name="normal" colour="0.70 0.57 0.33" shift="0"/>
-            <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
-            <State name="pushed" colour="1 1 1" shift="0"/>
-            <State name="disabled_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="normal_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="highlighted_checked" colour="0.33 0.38 0.67" shift="0"/>
-            <State name="pushed_checked" colour="0.33 0.38 0.67" shift="0"/>
+            <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
+            <State name="highlighted" colour="#{fontcolour=normal_over}" shift="0"/>
+            <State name="pushed" colour="#{fontcolour=normal_pressed}" shift="0"/>
+            <State name="disabled_checked" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal_checked" colour="#{fontcolour=active}" shift="0"/>
+            <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
+            <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
         </BasisSkin>
     </Skin>
 
