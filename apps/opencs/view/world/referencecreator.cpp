@@ -126,6 +126,14 @@ void CSVWorld::ReferenceCreator::cellChanged()
 void CSVWorld::ReferenceCreator::cloneMode(const std::string& originId,
                                            const CSMWorld::UniversalId::Type type)
 {
+    CSMWorld::IdTable& referenceTable = dynamic_cast<CSMWorld::IdTable&> (
+        *getData().getTableModel (CSMWorld::UniversalId::Type_References));
+
+    int cellIdColumn = referenceTable.findColumnIndex (CSMWorld::Columns::ColumnId_Cell);
+
+    mCell->setText (
+        referenceTable.data (referenceTable.getModelIndex (originId, cellIdColumn)).toString());
+
     CSVWorld::GenericCreator::cloneMode(originId, type);
     cellChanged(); //otherwise ok button will remain disabled
 }
