@@ -1116,6 +1116,8 @@ namespace MWMechanics
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
+            int hostilesCount = 0; // need to know this to play Battle music
+
              // AI and magic effects update
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
@@ -1125,6 +1127,8 @@ namespace MWMechanics
 
                     // AI processing is only done within distance of 7168 units to the player. Note the "AI distance" slider doesn't affect this
                     // (it only does some throttling for targets beyond the "AI distance", so doesn't give any guarantees as to whether AI will be enabled or not)
+                    // This distance could be made configurable later, but the setting must be marked with a big warning:
+                    // using higher values will make a quest in Bloodmoon harder or impossible to complete (bug #1876)
                     if (MWBase::Environment::get().getMechanicsManager()->isAIActive() &&
                             Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(iter->first.getRefData().getPosition().pos))
                                     <= 7168*7168)
@@ -1147,6 +1151,12 @@ namespace MWMechanics
 
                         if (iter->first != player)
                             iter->first.getClass().getCreatureStats(iter->first).getAiSequence().execute(iter->first, duration);
+
+                        CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
+                        if(!stats.isDead())
+                        {
+                            if (stats.getAiSequence().isInCombat()) hostilesCount++;
+                        }
                     }
 
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())
@@ -1189,19 +1199,6 @@ namespace MWMechanics
                 { //Turn off KnockedOutOneframe
                     stats.setKnockedDownOneFrame(false);
                     stats.setKnockedDownOverOneFrame(true);
-                }
-            }
-
-            int hostilesCount = 0; // need to know this to play Battle music
-
-            for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
-            {
-                const MWWorld::Class &cls = iter->first.getClass();
-                CreatureStats &stats = cls.getCreatureStats(iter->first);
-
-                if(!stats.isDead())
-                {
-                    if (stats.getAiSequence().isInCombat()) hostilesCount++;
                 }
             }
 
