@@ -105,23 +105,23 @@ Kenny Armstrong (artorius) - Fedora Linux
 Nikolay Kasyanov (corristo) - Mac OS X
 Sandy Carter (bwrsandman) - Arch Linux
 
-
 Public Relations and Translations:
 Alex McKibben (WeirdSexy) - Podcaster
 Artem Kotsynyak (greye) - Russian News Writer
 Jim Clauwaert (Zedd) - Public Outreach
 Julien Voisin (jvoisin/ap0) - French News Writer
+Okulo - English News Writer
+Nekochan - English News Writer
 Lukasz Gromanowski (lgro) - English News Writer
 Mickey Lyle (raevol) - Release Manager
 Pithorn - Chinese News Writer
 sir_herrbatka - Polish News Writer
-
+Dawid Lakomy (Vedyimyn) - Polish News Writer
 
 Website:
-Lukasz Gromanowski (lgro) - Website Administrator
+Lukasz Gromanowski (Lgro) - Website Administrator
 Ryan Sardonic (Wry) - Wiki Editor
 sir_herrbatka - Forum Administrator
-
 
 Formula Research:
 Hrnchamd
@@ -133,7 +133,6 @@ modred11
 Myckel
 natirips
 Sadler
-
 
 Artwork:
 Necrod - OpenMW Logo
