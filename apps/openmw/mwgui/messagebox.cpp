@@ -210,6 +210,7 @@ namespace MWGui
         getWidget(mButtonsWidget, "buttons");
 
         mMessageWidget->setOverflowToTheLeft(true);
+        mMessageWidget->setSize(400, mMessageWidget->getHeight());
         mMessageWidget->setCaptionWithReplacing(message);
 
         MyGUI::IntSize textSize = mMessageWidget->getTextSize();
