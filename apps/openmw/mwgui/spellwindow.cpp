@@ -157,7 +157,7 @@ namespace MWGui
         for (std::vector<std::string>::const_iterator it = powers.begin(); it != powers.end(); ++it)
         {
             const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(*it);
-            MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>("SpellText",
+            MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>("SandTextButton",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setCaption(spell->mName);
             t->setTextAlign(MyGUI::Align::Left);
@@ -177,7 +177,7 @@ namespace MWGui
         for (std::vector<std::string>::const_iterator it = spellList.begin(); it != spellList.end(); ++it)
         {
             const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(*it);
-            MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>("SpellText",
+            MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>("SandTextButton",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setCaption(spell->mName);
             t->setTextAlign(MyGUI::Align::Left);
@@ -188,7 +188,7 @@ namespace MWGui
             t->setStateSelected(*it == MWBase::Environment::get().getWindowManager()->getSelectedSpell());
 
             // cost / success chance
-            MyGUI::Button* costChance = mSpellView->createWidget<MyGUI::Button>("SpellText",
+            MyGUI::Button* costChance = mSpellView->createWidget<MyGUI::Button>("SandTextButton",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             std::string cost = boost::lexical_cast<std::string>(spell->mData.mCost);
             std::string chance = boost::lexical_cast<std::string>(int(MWMechanics::getSpellSuccessChance(*it, player)));
@@ -224,7 +224,7 @@ namespace MWGui
                 }
             }
 
-            MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>(equipped ? "SpellText" : "SpellTextUnequipped",
+            MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>(equipped ? "SandTextButton" : "SpellTextUnequipped",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setCaption(item.getClass().getName(item));
             t->setTextAlign(MyGUI::Align::Left);
@@ -238,7 +238,7 @@ namespace MWGui
 
 
             // cost / charge
-            MyGUI::Button* costCharge = mSpellView->createWidget<MyGUI::Button>(equipped ? "SpellText" : "SpellTextUnequipped",
+            MyGUI::Button* costCharge = mSpellView->createWidget<MyGUI::Button>(equipped ? "SandTextButton" : "SpellTextUnequipped",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
 
             float enchantCost = enchant->mData.mCost;

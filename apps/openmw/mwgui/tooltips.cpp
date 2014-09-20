@@ -654,7 +654,7 @@ namespace MWGui
         std::string text;
 
         text += sign->mName;
-        text += "\n#BF9959" + sign->mDescription;
+        text += "\n#{fontcolourhtml=normal}" + sign->mDescription;
 
         std::vector<std::string> abilities, powers, spells;
 
@@ -694,13 +694,13 @@ namespace MWGui
             {
                 if (it == categories[category].spells.begin())
                 {
-                    text += std::string("\n#DDC79E") + std::string("#{") + categories[category].label + "}";
+                    text += std::string("\n#{fontcolourhtml=header}") + std::string("#{") + categories[category].label + "}";
                 }
 
                 const std::string &spellId = *it;
 
                 const ESM::Spell *spell = store.get<ESM::Spell>().find(spellId);
-                text += "\n#BF9959" + spell->mName;
+                text += "\n#{fontcolourhtml=normal}" + spell->mName;
             }
         }
 

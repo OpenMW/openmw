@@ -7,7 +7,6 @@
         <Widget type="EditBox" skin="MW_TextEditClient" position="16 8 268 130" name="Message" align="Center Top">
             <Property key="FontName" value="Default"/>
             <Property key="TextAlign" value="Top HCenter"/>
-            <Property key="TextColour" value="0.75 0.6 0.35"/>
             <Property key="Static" value="true"/>
             <Property key="WordWrap" value="true"/>
             <Property key="MultiLine" value="true"/>

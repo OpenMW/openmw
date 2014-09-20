@@ -1,10 +1,13 @@
 #include "journalbooks.hpp"
 
+#include <MyGUI_LanguageManager.h>
+
 namespace
 {
-    const MyGUI::Colour linkHot    (0.40f, 0.40f, 0.80f);
-    const MyGUI::Colour linkNormal (0.20f, 0.20f, 0.60f);
-    const MyGUI::Colour linkActive (0.50f, 0.50f, 1.00f);
+    MyGUI::Colour getTextColour (const std::string& type)
+    {
+        return MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=" + type + "}"));
+    }
 
     struct AddContent
     {
@@ -27,6 +30,10 @@ namespace
         void operator () (intptr_t topicId, size_t begin, size_t end)
         {
             MWGui::BookTypesetter::Style* style = mBodyStyle;
+
+            static const MyGUI::Colour linkHot    (getTextColour("journal_link_over"));
+            static const MyGUI::Colour linkNormal (getTextColour("journal_link"));
+            static const MyGUI::Colour linkActive (getTextColour("journal_link_pressed"));
 
             if (topicId)
                 style = mTypesetter->createHotStyle (mBodyStyle, linkNormal, linkHot, linkActive, topicId);
@@ -132,22 +139,6 @@ namespace
             mTypesetter->sectionBreak (10);
         }
     };
-
-    struct AddTopicLink : AddContent
-    {
-        AddTopicLink (MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* style) :
-            AddContent (typesetter, style)
-        {
-        }
-
-        void operator () (MWGui::JournalViewModel::TopicId topicId, MWGui::JournalViewModel::Utf8Span name)
-        {
-            MWGui::BookTypesetter::Style* link = mTypesetter->createHotStyle (mBodyStyle, MyGUI::Colour::Black, linkHot, linkActive, topicId);
-
-            mTypesetter->write (link, name);
-            mTypesetter->lineBreak ();
-        }
-    };
 }
 
 namespace MWGui
@@ -242,7 +233,11 @@ book JournalBooks::createTopicIndexBook ()
 
         sprintf (buffer, "( %c )", ch);
 
-        BookTypesetter::Style* style = typesetter->createHotStyle (body, MyGUI::Colour::Black, linkHot, linkActive, ch);
+        MyGUI::Colour linkHot (getTextColour("journal_topic_over"));
+        MyGUI::Colour linkActive (getTextColour("journal_topic_pressed"));
+        MyGUI::Colour linkNormal (getTextColour("journal_topic"));
+
+        BookTypesetter::Style* style = typesetter->createHotStyle (body, linkNormal, linkHot, linkActive, ch);
 
         if (i == 13)
             typesetter->sectionBreak ();

@@ -63,7 +63,7 @@
                     <Property key="NeedMouse" value="false"/>
                 </Widget>
             </Widget>
-            <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="0 36 36 6" align="Left Bottom" name="WeapStatus">
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Weapon" position="0 36 36 6" align="Left Bottom" name="WeapStatus">
                 <Property key="NeedMouse" value="false"/>
             </Widget>
         </Widget>
@@ -74,7 +74,7 @@
                 <Widget type="ItemWidget" skin="MW_ItemIcon" position="-3 -3 42 42" align="Left Top" name="SpellImage"/>
                 <Property key="NeedMouse" value="false"/>
             </Widget>
-            <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="0 36 36 6" align="Left Bottom" name="SpellStatus">
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Magic" position="0 36 36 6" align="Left Bottom" name="SpellStatus">
                 <Property key="NeedMouse" value="false"/>
             </Widget>
         </Widget>

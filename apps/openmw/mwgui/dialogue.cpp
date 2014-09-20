@@ -25,6 +25,16 @@
 
 #include "journalbooks.hpp" // to_utf8_span
 
+namespace
+{
+
+    MyGUI::Colour getTextColour (const std::string& type)
+    {
+        return MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=" + type + "}"));
+    }
+
+}
+
 namespace MWGui
 {
 
@@ -102,7 +112,7 @@ namespace MWGui
 
     void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
-        BookTypesetter::Style* title = typesetter->createStyle("", MyGUI::Colour(223/255.f, 201/255.f, 159/255.f));
+        BookTypesetter::Style* title = typesetter->createStyle("", getTextColour("header"));
         typesetter->sectionBreak(9);
         if (mTitle != "")
             typesetter->write(title, to_utf8_span(mTitle.c_str()));
@@ -146,14 +156,14 @@ namespace MWGui
 
         if (hyperLinks.size() && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
         {
-            BookTypesetter::Style* style = typesetter->createStyle("", MyGUI::Colour(202/255.f, 165/255.f, 96/255.f));
+            BookTypesetter::Style* style = typesetter->createStyle("", getTextColour("normal"));
             size_t formatted = 0; // points to the first character that is not laid out yet
             for (std::map<Range, intptr_t>::iterator it = hyperLinks.begin(); it != hyperLinks.end(); ++it)
             {
                 intptr_t topicId = it->second;
-                const MyGUI::Colour linkHot    (143/255.f, 155/255.f, 218/255.f);
-                const MyGUI::Colour linkNormal (112/255.f, 126/255.f, 207/255.f);
-                const MyGUI::Colour linkActive (175/255.f, 184/255.f, 228/255.f);
+                const MyGUI::Colour linkHot    (getTextColour("link_over"));
+                const MyGUI::Colour linkNormal (getTextColour("link"));
+                const MyGUI::Colour linkActive (getTextColour("link_pressed"));
                 BookTypesetter::Style* hotStyle = typesetter->createHotStyle (style, linkNormal, linkHot, linkActive, topicId);
                 if (formatted < it->first.first)
                     typesetter->write(style, formatted, it->first.first);
@@ -185,11 +195,11 @@ namespace MWGui
 
     void Response::addTopicLink(BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const
     {
-        BookTypesetter::Style* style = typesetter->createStyle("", MyGUI::Colour(202/255.f, 165/255.f, 96/255.f));
+        BookTypesetter::Style* style = typesetter->createStyle("", getTextColour("normal"));
 
-        const MyGUI::Colour linkHot    (143/255.f, 155/255.f, 218/255.f);
-        const MyGUI::Colour linkNormal (112/255.f, 126/255.f, 207/255.f);
-        const MyGUI::Colour linkActive (175/255.f, 184/255.f, 228/255.f);
+        const MyGUI::Colour linkHot    (getTextColour("link_over"));
+        const MyGUI::Colour linkNormal (getTextColour("link"));
+        const MyGUI::Colour linkActive (getTextColour("link_pressed"));
 
         if (topicId)
             style = typesetter->createHotStyle (style, linkNormal, linkHot, linkActive, topicId);
@@ -203,7 +213,7 @@ namespace MWGui
 
     void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
-        BookTypesetter::Style* title = typesetter->createStyle("", MyGUI::Colour(223/255.f, 201/255.f, 159/255.f));
+        BookTypesetter::Style* title = typesetter->createStyle("", getTextColour("notify"));
         typesetter->sectionBreak(9);
         typesetter->write(title, to_utf8_span(mText.c_str()));
     }
@@ -506,9 +516,9 @@ namespace MWGui
 
         typesetter->sectionBreak(9);
         // choices
-        const MyGUI::Colour linkHot    (223/255.f, 201/255.f, 159/255.f);
-        const MyGUI::Colour linkNormal (150/255.f, 50/255.f, 30/255.f);
-        const MyGUI::Colour linkActive (243/255.f, 237/255.f, 221/255.f);
+        const MyGUI::Colour linkHot    (getTextColour("answer_over"));
+        const MyGUI::Colour linkNormal (getTextColour("answer"));
+        const MyGUI::Colour linkActive (getTextColour("answer_pressed"));
         for (std::vector<std::pair<std::string, int> >::iterator it = mChoices.begin(); it != mChoices.end(); ++it)
         {
             Choice* link = new Choice(it->second);
@@ -621,8 +631,7 @@ namespace MWGui
             dispositionVisible = true;
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr));
-            mDispositionText->eraseText(0, mDispositionText->getTextLength());
-            mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100")+"#B29154");
+            mDispositionText->setCaption(boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100"));
         }
 
         bool dispositionWasVisible = mDispositionBar->getVisible();
@@ -666,8 +675,7 @@ namespace MWGui
                     + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()));
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(disp);
-            mDispositionText->eraseText(0, mDispositionText->getTextLength());
-            mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(disp)+std::string("/100")+"#B29154");
+            mDispositionText->setCaption(boost::lexical_cast<std::string>(disp)+std::string("/100"));
         }
     }
 }

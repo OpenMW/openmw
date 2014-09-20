@@ -114,7 +114,7 @@ namespace MyGUIPlugin
         std::vector<Ogre::uint32> buffer;
         buffer.resize(1);
         const float val = 0.7;
-        buffer[0] = (int(255*val) << 24);
+        buffer[0] = (int(255*val) << 24) | (255 << 16) | (255 << 8) | 255;
         memcpy(tex->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], 1*4);
         tex->getBuffer()->unlock();
     }

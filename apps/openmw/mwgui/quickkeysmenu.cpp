@@ -600,7 +600,7 @@ namespace MWGui
         for (std::vector<std::string>::const_iterator it = powers.begin(); it != powers.end(); ++it)
         {
             const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(*it);
-            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>("SpellText",
+            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>("SandTextButton",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setCaption(spell->mName);
             t->setTextAlign(MyGUI::Align::Left);
@@ -617,7 +617,7 @@ namespace MWGui
         for (std::vector<std::string>::const_iterator it = spellList.begin(); it != spellList.end(); ++it)
         {
             const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(*it);
-            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>("SpellText",
+            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>("SandTextButton",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setCaption(spell->mName);
             t->setTextAlign(MyGUI::Align::Left);
@@ -648,7 +648,7 @@ namespace MWGui
                 }
             }
 
-            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>(equipped ? "SpellText" : "SpellTextUnequipped",
+            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>(equipped ? "SandTextButton" : "SpellTextUnequipped",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setCaption(item.getClass().getName(item));
             t->setTextAlign(MyGUI::Align::Left);
