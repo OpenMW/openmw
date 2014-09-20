@@ -284,20 +284,6 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
         // write references
         if (references!=mState.getSubRecords().end())
         {
-            // first pass: find highest RefNum
-            int lastRefNum = -1;
-
-            for (std::vector<int>::const_iterator iter (references->second.begin());
-                iter!=references->second.end(); ++iter)
-            {
-                const CSMWorld::Record<CSMWorld::CellRef>& ref =
-                    mDocument.getData().getReferences().getRecord (*iter);
-
-                if (ref.get().mRefNum.mContentFile==0 && ref.get().mRefNum.mIndex>lastRefNum)
-                    lastRefNum = ref.get().mRefNum.mIndex;
-            }
-
-            // second pass: write
             for (std::vector<int>::const_iterator iter (references->second.begin());
                 iter!=references->second.end(); ++iter)
             {
@@ -307,20 +293,7 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                 if (ref.mState==CSMWorld::RecordBase::State_Modified ||
                     ref.mState==CSMWorld::RecordBase::State_ModifiedOnly)
                 {
-                    if (ref.get().mRefNum.mContentFile==-2)
-                    {
-                        if (lastRefNum>=0xffffff)
-                            throw std::runtime_error (
-                                "RefNums exhausted in cell: " + cell.get().mId);
-
-                        ESM::CellRef ref2 = ref.get();
-                        ref2.mRefNum.mContentFile = 0;
-                        ref2.mRefNum.mIndex = ++lastRefNum;
-
-                        ref2.save (mState.getWriter());
-                    }
-                    else
-                        ref.get().save (mState.getWriter());
+                    ref.get().save (mState.getWriter());
                 }
                 else if (ref.mState==CSMWorld::RecordBase::State_Deleted)
                 {

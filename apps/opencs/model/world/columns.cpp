@@ -184,6 +184,8 @@ namespace CSMWorld
             { ColumnId_DefaultProfile, "Default Profile" },
             { ColumnId_BypassNewGame, "Bypass New Game" },
             { ColumnId_GlobalProfile, "Global Profile" },
+            { ColumnId_RefNumCounter, "RefNum Counter" },
+            { ColumnId_RefNum, "RefNum" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },

@@ -200,6 +200,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorWater, ESM::Cell::HasWater));
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorSky, ESM::Cell::QuasiEx));
     mCells.addColumn (new RegionColumn<Cell>);
+    mCells.addColumn (new RefNumCounterColumn<Cell>);
 
     mEnchantments.addColumn (new StringIdColumn<ESM::Enchantment>);
     mEnchantments.addColumn (new RecordStateColumn<ESM::Enchantment>);
@@ -251,6 +252,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRefs.addColumn (new KeyColumn<CellRef>);
     mRefs.addColumn (new TrapColumn<CellRef>);
     mRefs.addColumn (new OwnerGlobalColumn<CellRef>);
+    mRefs.addColumn (new RefNumColumn<CellRef>);
 
     mFilters.addColumn (new StringIdColumn<ESM::Filter>);
     mFilters.addColumn (new RecordStateColumn<ESM::Filter>);

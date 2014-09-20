@@ -1,16 +1,18 @@
 #ifndef CSV_WORLD_GENERICCREATOR_H
 #define CSV_WORLD_GENERICCREATOR_H
 
+#include <memory>
+
+#include "../../model/world/universalid.hpp"
+
+#include "creator.hpp"
+
 class QString;
 class QPushButton;
 class QLineEdit;
 class QHBoxLayout;
 class QComboBox;
 class QLabel;
-
-#include "creator.hpp"
-
-#include "../../model/world/universalid.hpp"
 
 namespace CSMWorld
 {
@@ -56,9 +58,17 @@ namespace CSVWorld
 
             virtual std::string getId() const;
 
+            /// Allow subclasses to add additional data to \a command.
             virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
 
+            /// Allow subclasses to wrap the create command together with additional commands
+            /// into a macro.
+            virtual void pushCommand (std::auto_ptr<CSMWorld::CreateCommand> command,
+                const std::string& id);
+
             CSMWorld::Data& getData() const;
+
+            QUndoStack& getUndoStack();
 
             const CSMWorld::UniversalId& getCollectionId() const;
 

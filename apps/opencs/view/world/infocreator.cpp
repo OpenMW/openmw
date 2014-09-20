@@ -53,6 +53,22 @@ CSVWorld::InfoCreator::InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     connect (mTopic, SIGNAL (textChanged (const QString&)), this, SLOT (topicChanged()));
 }
 
+void CSVWorld::InfoCreator::cloneMode (const std::string& originId,
+    const CSMWorld::UniversalId::Type type)
+{
+    CSMWorld::IdTable& infoTable =
+        dynamic_cast<CSMWorld::IdTable&> (*getData().getTableModel (getCollectionId()));
+
+    int topicColumn = infoTable.findColumnIndex (
+        getCollectionId().getType()==CSMWorld::UniversalId::Type_TopicInfos ?
+        CSMWorld::Columns::ColumnId_Topic : CSMWorld::Columns::ColumnId_Journal);
+
+    mTopic->setText (
+        infoTable.data (infoTable.getModelIndex (originId, topicColumn)).toString());
+
+    GenericCreator::cloneMode (originId, type);
+}
+
 void CSVWorld::InfoCreator::reset()
 {
     mTopic->setText ("");

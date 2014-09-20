@@ -50,9 +50,20 @@ std::string CSVWorld::GenericCreator::getId() const
 
 void CSVWorld::GenericCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const {}
 
+void CSVWorld::GenericCreator::pushCommand (std::auto_ptr<CSMWorld::CreateCommand> command,
+    const std::string& id)
+{
+    mUndoStack.push (command.release());
+}
+
 CSMWorld::Data& CSVWorld::GenericCreator::getData() const
 {
     return mData;
+}
+
+QUndoStack& CSVWorld::GenericCreator::getUndoStack()
+{
+    return mUndoStack;
 }
 
 const CSMWorld::UniversalId& CSVWorld::GenericCreator::getCollectionId() const
@@ -173,23 +184,22 @@ void CSVWorld::GenericCreator::create()
     {
         std::string id = getId();
 
+        std::auto_ptr<CSMWorld::CreateCommand> command;
+
         if (mCloneMode)
         {
-            std::auto_ptr<CSMWorld::CloneCommand> command (new CSMWorld::CloneCommand (
+            command.reset (new CSMWorld::CloneCommand (
                 dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel(mListId)), mClonedId, id, mClonedType));
-
-            mUndoStack.push(command.release());
-
         }
         else
         {
-            std::auto_ptr<CSMWorld::CreateCommand> command (new CSMWorld::CreateCommand (
-            dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)), id));
+            command.reset (new CSMWorld::CreateCommand (
+                dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)), id));
 
-            configureCreateCommand (*command);
-
-            mUndoStack.push (command.release());
         }
+
+        configureCreateCommand (*command);
+        pushCommand (command, id);
 
         emit done();
         emit requestFocus(id);
