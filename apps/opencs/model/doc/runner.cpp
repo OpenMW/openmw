@@ -1,6 +1,8 @@
 
 #include "runner.hpp"
 
+#include <QApplication>
+#include <QDir>
 #include <QTemporaryFile>
 #include <QTextStream>
 
@@ -47,7 +49,10 @@ void CSMDoc::Runner::start (bool delayed)
         path.append(QString(".exe"));
 #elif defined(Q_OS_MAC)
         QDir dir(QCoreApplication::applicationDirPath());
-        path = dir.absoluteFilePath(name);
+        dir.cdUp();
+        dir.cdUp();
+        dir.cdUp();
+        path = dir.absoluteFilePath(path.prepend("OpenMW.app/Contents/MacOS/"));
 #else
         path.prepend(QString("./"));
 #endif
