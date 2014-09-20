@@ -31,7 +31,7 @@ void CSVWorld::ReferenceCreator::configureCreateCommand (CSMWorld::CreateCommand
     command.addValue (refNumColumn, getRefNumCount());
 }
 
-void CSVWorld::ReferenceCreator::pushCommand (std::auto_ptr<QUndoCommand> command,
+void CSVWorld::ReferenceCreator::pushCommand (std::auto_ptr<CSMWorld::CreateCommand> command,
     const std::string& id)
 {
     // get the old count
@@ -98,11 +98,6 @@ std::string CSVWorld::ReferenceCreator::getErrors() const
     // record is internal and requires neither user input nor verification.
     std::string errors;
 
-    if (mCloneMode)
-    {
-        return errors;
-    }
-
     std::string cell = mCell->text().toUtf8().constData();
 
     if (cell.empty())
@@ -126,12 +121,6 @@ std::string CSVWorld::ReferenceCreator::getErrors() const
 void CSVWorld::ReferenceCreator::cellChanged()
 {
     update();
-}
-
-void CSVWorld::ReferenceCreator::toggleWidgets(bool active)
-{
-    CSVWorld::GenericCreator::toggleWidgets(active);
-    mCell->setEnabled(active);
 }
 
 void CSVWorld::ReferenceCreator::cloneMode(const std::string& originId,

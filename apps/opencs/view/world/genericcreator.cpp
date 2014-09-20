@@ -50,7 +50,7 @@ std::string CSVWorld::GenericCreator::getId() const
 
 void CSVWorld::GenericCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const {}
 
-void CSVWorld::GenericCreator::pushCommand (std::auto_ptr<QUndoCommand> command,
+void CSVWorld::GenericCreator::pushCommand (std::auto_ptr<CSMWorld::CreateCommand> command,
     const std::string& id)
 {
     mUndoStack.push (command.release());
@@ -184,7 +184,7 @@ void CSVWorld::GenericCreator::create()
     {
         std::string id = getId();
 
-        std::auto_ptr<QUndoCommand> command;
+        std::auto_ptr<CSMWorld::CreateCommand> command;
 
         if (mCloneMode)
         {
@@ -196,9 +196,9 @@ void CSVWorld::GenericCreator::create()
             command.reset (new CSMWorld::CreateCommand (
                 dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)), id));
 
-            configureCreateCommand (dynamic_cast<CSMWorld::CreateCommand&> (*command));
         }
 
+        configureCreateCommand (*command);
         pushCommand (command, id);
 
         emit done();

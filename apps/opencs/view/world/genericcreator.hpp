@@ -13,7 +13,6 @@ class QLineEdit;
 class QHBoxLayout;
 class QComboBox;
 class QLabel;
-class QUndoCommand;
 
 namespace CSMWorld
 {
@@ -59,10 +58,12 @@ namespace CSVWorld
 
             virtual std::string getId() const;
 
-            /// \note This function is not called in case of a clone operation.
+            /// Allow subclasses to add additional data to \a command.
             virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
 
-            virtual void pushCommand (std::auto_ptr<QUndoCommand> command,
+            /// Allow subclasses to wrap the create command together with additional commands
+            /// into a macro.
+            virtual void pushCommand (std::auto_ptr<CSMWorld::CreateCommand> command,
                 const std::string& id);
 
             CSMWorld::Data& getData() const;
