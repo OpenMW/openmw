@@ -15,6 +15,14 @@ AVAudioResampleContext * swr_alloc_set_opts( AVAudioResampleContext *avr, int64_
 #endif
 }
 
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
+#define IS_NOTEQ_NOPTS_VAL(x) ((uint64_t)x != AV_NOPTS_VALUE)
+#define IS_NOTEQ_NOPTS_VAL_PTR(x) (*(uint64_t*)x != AV_NOPTS_VALUE)
+#else
+#define IS_NOTEQ_NOPTS_VAL(x) ((int64_t)x != AV_NOPTS_VALUE)
+#define IS_NOTEQ_NOPTS_VAL_PTR(x) (*(int64_t*)x != AV_NOPTS_VALUE)
+#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
+
 namespace MWSound
 {
 
@@ -69,7 +77,7 @@ bool FFmpeg_Decoder::getNextPacket()
         /* Check if the packet belongs to this stream */
         if(stream_idx == mPacket.stream_index)
         {
-            if(mPacket.pts != AV_NOPTS_VALUE)
+            if(IS_NOTEQ_NOPTS_VAL(mPacket.pts))
                 mNextPts = av_q2d((*mStream)->time_base)*mPacket.pts;
             return true;
         }
