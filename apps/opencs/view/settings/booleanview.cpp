@@ -20,8 +20,19 @@ CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
 
         switch (setting->type())
         {
-        case CSMSettings::Type_CheckBox:
-            button = new QCheckBox (value, this);
+        case CSMSettings::Type_CheckBox: {
+                if(mButtons.empty()) // show only one for checkboxes
+                {
+                    button = new QCheckBox (value, this);
+                    button->setChecked (setting->defaultValues().at(0) == "true" ? true : false);
+
+                    // special visual treatment option for checkboxes
+                    if(setting->specialValueText() != "") {
+                        Frame::setTitle("");
+                        button->setText(setting->specialValueText());
+                    }
+                }
+            }
         break;
 
         case CSMSettings::Type_RadioButton:
@@ -32,14 +43,17 @@ CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
         break;
         }
 
-        connect (button, SIGNAL (clicked (bool)),
-                this, SLOT (slotToggled (bool)));
+        if(setting->type() != CSMSettings::Type_CheckBox || mButtons.empty())
+        {
+            connect (button, SIGNAL (clicked (bool)),
+                    this, SLOT (slotToggled (bool)));
 
-        button->setObjectName (value);
+            button->setObjectName (value);
 
-        addWidget (button);
+            addWidget (button);
 
-        mButtons[value] = button;
+            mButtons[value] = button;
+        }
     }
 }
 

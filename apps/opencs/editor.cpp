@@ -314,10 +314,10 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     factory->loadAllFiles();
 
-    sh::Factory::getInstance().setGlobalSetting ("fog", "true");
+    sh::Factory::getInstance().setGlobalSetting ("fog", mUserSettings.settingValue("shader/fog").toStdString() == "true" ? "true" : "false");
 
-    sh::Factory::getInstance().setGlobalSetting ("shadows", "false");
-    sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", "false");
+    sh::Factory::getInstance().setGlobalSetting ("shadows", mUserSettings.settingValue("shader/shadows").toStdString() == "true" ? "true" : "false");
+    sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", mUserSettings.settingValue("shader/shadows_pssm").toStdString() == "true" ? "true" : "false");
 
     sh::Factory::getInstance ().setGlobalSetting ("render_refraction", "false");
 

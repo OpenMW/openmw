@@ -53,12 +53,108 @@ UserSettings::UserSettings (const Files::ConfigurationManager& configurationMana
 
 void UserSettings::buildSettingModelDefaults()
 {
-    QString section;
+    QString page;
 
-    section = "Window Size";
+    page = "Shader";
     {
-        Setting *width = createSetting (Type_LineEdit, section, "Width");
-        Setting *height = createSetting (Type_LineEdit, section, "Height");
+        QString section = "Group1";
+
+        Setting *fog = createSetting (Type_CheckBox, page, "fog");
+        fog->setDeclaredValues(QStringList() << "true" << "false");
+        fog->setDefaultValue("true");
+        fog->setEditorSetting(true);
+        fog->setSpecialValueText("Enable Fog");
+        fog->setWidgetWidth(15);
+        fog->setColumnSpan (2);
+        fog->setViewLocation(1, 1);
+
+        Setting *shadows = createSetting (Type_CheckBox, page, "shadows");
+        shadows->setDeclaredValues(QStringList() << "true" << "false");
+        shadows->setDefaultValue("false");
+        shadows->setEditorSetting(true);
+        shadows->setSpecialValueText("Enable Shadows");
+        shadows->setWidgetWidth(15);
+        //shadows->setColumnSpan (2);
+        shadows->setViewLocation(2, 1);
+
+        Setting *shadows_pssm = createSetting (Type_CheckBox, page, "shadows_pssm");
+        shadows_pssm->setDeclaredValues(QStringList() << "true" << "false");
+        shadows_pssm->setDefaultValue("false");
+        shadows_pssm->setEditorSetting(true);
+        shadows_pssm->setSpecialValueText("Enable PSSM Shadows");
+        shadows_pssm->setWidgetWidth(15);
+        //shadows_pssm->setColumnSpan (2);
+        shadows_pssm->setViewLocation(3, 1);
+
+        // FIXME: add option to put label elsewhere (i.e. no frame text)
+        Setting *numLights = createSetting (Type_SpinBox, page, "num lights");
+        numLights->setDefaultValue(8);
+        numLights->setEditorSetting(true);
+        numLights->setColumnSpan (2);
+        numLights->setMinimum (0);
+        numLights->setMaximum (100); // FIXME: not sure what the max value should be
+        numLights->setWidgetWidth (15);
+        numLights->setSpecialValueText ("Nothing!"); // text to display when value is 0
+        numLights->setViewLocation(4, 1);
+
+        Setting *simpleWater = createSetting (Type_CheckBox, page, "simple_water");
+        simpleWater->setDeclaredValues(QStringList() << "true" << "false");
+        simpleWater->setDefaultValue("false");
+        simpleWater->setEditorSetting(true);
+        simpleWater->setSpecialValueText("Enable Simple Water");
+        simpleWater->setWidgetWidth(15);
+        simpleWater->setColumnSpan (2);
+        simpleWater->setViewLocation(2, 4);
+
+        Setting *waterEnabled = createSetting (Type_DoubleSpinBox, page, "waterEnabled");
+        waterEnabled->setDefaultValue(0.00);
+        waterEnabled->setEditorSetting(true);
+        //waterEnabled->setColumnSpan (2);
+        waterEnabled->setMinimum (0);
+        waterEnabled->setMaximum (100.00); // FIXME: not sure what the max value should be
+        waterEnabled->setWidgetWidth (15);
+        waterEnabled->setViewLocation(3, 4);
+
+        Setting *waterLevel = createSetting (Type_DoubleSpinBox, page, "waterLevel");
+        waterLevel->setDefaultValue(0.00);
+        waterLevel->setEditorSetting(true);
+        //waterLevel->setColumnSpan (2);
+        waterLevel->setMinimum (0);
+        waterLevel->setMaximum (100.00); // FIXME: not sure what the max value should be
+        waterLevel->setWidgetWidth (15);
+        waterLevel->setViewLocation(4, 4);
+
+        Setting *waterTimer = createSetting (Type_DoubleSpinBox, page, "waterTimer");
+        waterTimer->setDefaultValue(0.00);
+        waterTimer->setEditorSetting(true);
+        //waterTimer->setColumnSpan (2);
+        waterTimer->setMinimum (0);
+        waterTimer->setMaximum (100.00); // FIXME: not sure what the max value should be
+        waterTimer->setWidgetWidth (15);
+        waterTimer->setViewLocation(5, 4);
+
+#if 0
+    sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", "false");
+
+    sh::Factory::getInstance ().setGlobalSetting ("render_refraction", "false");
+
+    sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
+
+
+
+sh::Factory::getInstance ().setSharedParameter ("windDir_windSpeed", sh::makeProperty<sh::Vector3>(new sh::Vector3(0.5, -0.8, 0.2)));
+sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(1, 0.6)));
+sh::Factory::getInstance ().setGlobalSetting ("refraction", Settings::Manager::getBool("refraction", "Water") ? "true" : "false");
+sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
+sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh::Vector4> (new sh::Vector4(0,0,0,0)));
+#endif
+    }
+
+#if 0
+    page = "Window Size";
+    {
+        Setting *width = createSetting (Type_LineEdit, page, "Width");
+        Setting *height = createSetting (Type_LineEdit, page, "Height");
 
         width->setWidgetWidth (5);
         height->setWidgetWidth (8);
@@ -75,7 +171,7 @@ void UserSettings::buildSettingModelDefaults()
         /*
          *Create the proxy setting for predefined values
          */
-        Setting *preDefined = createSetting (Type_ComboBox, section,
+        Setting *preDefined = createSetting (Type_ComboBox, page,
                                              "Pre-Defined");
 
         preDefined->setDeclaredValues (QStringList() << "640 x 480"
@@ -94,7 +190,7 @@ void UserSettings::buildSettingModelDefaults()
                              );
     }
 
-    section = "Display Format";
+    page = "Display Format";
     {
         QString defaultValue = "Icon and Text";
 
@@ -102,10 +198,10 @@ void UserSettings::buildSettingModelDefaults()
                             << defaultValue << "Icon Only" << "Text Only";
 
         Setting *rsd = createSetting (Type_RadioButton,
-                                      section, "Record Status Display");
+                                      page, "Record Status Display");
 
         Setting *ritd = createSetting (Type_RadioButton,
-                                      section, "Referenceable ID Type Display");
+                                      page, "Referenceable ID Type Display");
 
         rsd->setDeclaredValues (values);
         ritd->setDeclaredValues (values);
@@ -113,8 +209,9 @@ void UserSettings::buildSettingModelDefaults()
         rsd->setEditorSetting (true);
         ritd->setEditorSetting (true);
     }
+#endif
 
-    section = "Proxy Selection Test";
+    page = "Proxy Selection Test";
     {
         /******************************************************************
         * There are three types of values:
@@ -142,30 +239,30 @@ void UserSettings::buildSettingModelDefaults()
         //create setting objects, specifying the basic widget type,
         //the page name, and the view name
 
-        Setting *masterBoolean = createSetting (Type_RadioButton, section,
+        Setting *masterBoolean = createSetting (Type_RadioButton, page,
                                                 "Master Proxy");
 
-        Setting *slaveBoolean = createSetting (Type_CheckBox, section,
+        Setting *slaveBoolean = createSetting (Type_CheckBox, page,
                                                 "Proxy Checkboxes");
 
-        Setting *slaveSingleText = createSetting (Type_LineEdit, section,
+        Setting *slaveSingleText = createSetting (Type_LineEdit, page,
                                                 "Proxy TextBox 1");
 
-        Setting *slaveMultiText = createSetting (Type_LineEdit, section,
+        Setting *slaveMultiText = createSetting (Type_LineEdit, page,
                                                 "ProxyTextBox 2");
 
-        Setting *slaveAlphaSpinbox = createSetting (Type_SpinBox, section,
+        Setting *slaveAlphaSpinbox = createSetting (Type_SpinBox, page,
                                                 "Alpha Spinbox");
 
-        Setting *slaveIntegerSpinbox = createSetting (Type_SpinBox, section,
+        Setting *slaveIntegerSpinbox = createSetting (Type_SpinBox, page,
                                                 "Int Spinbox");
 
         Setting *slaveDoubleSpinbox = createSetting (Type_DoubleSpinBox,
-                                                section, "Double Spinbox");
+                                                page, "Double Spinbox");
 
-        Setting *slaveSlider = createSetting (Type_Slider, section, "Slider");
+        Setting *slaveSlider = createSetting (Type_Slider, page, "Slider");
 
-        Setting *slaveDial = createSetting (Type_Dial, section, "Dial");
+        Setting *slaveDial = createSetting (Type_Dial, page, "Dial");
 
         //set declared values for selected views
         masterBoolean->setDeclaredValues (QStringList()
@@ -366,7 +463,7 @@ void UserSettings::loadSettings (const QString &fileName)
             || (glES && currShader != "glsles"))
     {
         QString shader = openGL ? (glES ? "glsles" : "glsl") : "hlsl";
-        mSettingDefinitions->setValue("General/shader mode", shader);
+        mSettingDefinitions->setValue("shader mode", shader); //no group means "General" group
     }
 
     // check if override entry exists (default: override)

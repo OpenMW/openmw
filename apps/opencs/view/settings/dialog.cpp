@@ -326,8 +326,8 @@ void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
         model()->setDefinitions("Video/antialiasing", QStringList(reAA.cap(1)));
 #endif
 
-    // shader lang
-    model()->setDefinitions("General/shader mode",
+    // shader lang (no group means "General" group)
+    model()->setDefinitions("shader mode",
                            QStringList(cmbShaderLang->currentText().toLower()));
 
     // window size
