@@ -335,6 +335,8 @@ namespace MWClass
                 data->mNpcStats.setLevel(ref->mBase->mNpdt52.mLevel);
                 data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt52.mDisposition);
                 data->mNpcStats.setReputation(ref->mBase->mNpdt52.mReputation);
+
+                data->mNpcStats.setNeedRecalcDynamicStats(false);
             }
             else
             {
@@ -349,6 +351,8 @@ namespace MWClass
 
                 autoCalculateAttributes(ref->mBase, data->mNpcStats);
                 autoCalculateSkills(ref->mBase, data->mNpcStats, ptr);
+
+                data->mNpcStats.setNeedRecalcDynamicStats(true);
             }
 
             // race powers
@@ -387,8 +391,6 @@ namespace MWClass
                                        MWBase::Environment::get().getWorld()->getStore());
 
             data->mNpcStats.setGoldPool(gold);
-
-            data->mNpcStats.setNeedRecalcDynamicStats(false);
 
             // store
             ptr.getRefData().setCustomData (data.release());
