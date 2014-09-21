@@ -32,6 +32,16 @@ extern "C"
     #include <libavformat/avformat.h>
     #include <libswscale/swscale.h>
 
+
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
+#define IS_NOTEQ_NOPTS_VAL(x) ((uint64_t)x != AV_NOPTS_VALUE)
+#define IS_NOTEQ_NOPTS_VAL_PTR(x) (*(uint64_t*)x != AV_NOPTS_VALUE)
+#else
+#define IS_NOTEQ_NOPTS_VAL(x) ((int64_t)x != AV_NOPTS_VALUE)
+#define IS_NOTEQ_NOPTS_VAL_PTR(x) (*(int64_t*)x != AV_NOPTS_VALUE)
+#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
+
+
     #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
     #define av_frame_alloc  avcodec_alloc_frame
     #endif
@@ -219,8 +229,11 @@ void PacketQueue::put(AVPacket *pkt)
     if(!pkt1) throw std::bad_alloc();
     pkt1->pkt = *pkt;
     pkt1->next = NULL;
-
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
     if(pkt1->pkt.destruct == NULL)
+#else
+    if(pkt1->pkt.buf == NULL)
+#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
     {
         if(av_dup_packet(&pkt1->pkt) < 0)
         {
@@ -425,7 +438,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 return -1;
 
             /* if update, update the audio clock w/pts */
-            if((uint64_t)pkt->pts != AV_NOPTS_VALUE)
+            if(IS_NOTEQ_NOPTS_VAL(pkt->pts))
                 mAudioClock = av_q2d(mAVStream->time_base)*pkt->pts;
         }
     }
@@ -820,6 +833,8 @@ double VideoState::synchronize_video(AVFrame *src_frame, double pts)
  * a frame at the time it is allocated.
  */
 static uint64_t global_video_pkt_pts = static_cast<uint64_t>(AV_NOPTS_VALUE);
+
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
 static int our_get_buffer(struct AVCodecContext *c, AVFrame *pic)
 {
     int ret = avcodec_default_get_buffer(c, pic);
@@ -833,7 +848,16 @@ static void our_release_buffer(struct AVCodecContext *c, AVFrame *pic)
     if(pic) av_freep(&pic->opaque);
     avcodec_default_release_buffer(c, pic);
 }
-
+#else
+static int our_get_buffer2(struct AVCodecContext *c, AVFrame *pic, int flags = AV_GET_BUFFER_FLAG_REF)
+{
+    int ret = avcodec_default_get_buffer2(c, pic, flags);
+    uint64_t *pts = (uint64_t*)av_malloc(sizeof(uint64_t));
+    *pts = global_video_pkt_pts;
+    pic->opaque = pts;
+    return ret;
+}
+#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
 
 void VideoState::video_thread_loop(VideoState *self)
 {
@@ -856,9 +880,9 @@ void VideoState::video_thread_loop(VideoState *self)
             throw std::runtime_error("Error decoding video frame");
 
         pts = 0;
-        if((uint64_t)packet->dts != AV_NOPTS_VALUE)
+        if(IS_NOTEQ_NOPTS_VAL(packet->dts))
             pts = packet->dts;
-        else if(pFrame->opaque && *(uint64_t*)pFrame->opaque != AV_NOPTS_VALUE)
+        else if(pFrame->opaque && IS_NOTEQ_NOPTS_VAL_PTR(pFrame->opaque))
             pts = *(uint64_t*)pFrame->opaque;
         pts *= av_q2d((*self->video_st)->time_base);
 
@@ -959,6 +983,9 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
     // Get a pointer to the codec context for the video stream
     codecCtx = pFormatCtx->streams[stream_index]->codec;
     codec = avcodec_find_decoder(codecCtx->codec_id);
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(56,1,0)
+    codecCtx->refcounted_frames = 1;
+#endif /* LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(56,1,0) */
     if(!codec || (avcodec_open2(codecCtx, codec, NULL) < 0))
     {
         fprintf(stderr, "Unsupported codec!\n");
@@ -984,9 +1011,12 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         this->video_st = pFormatCtx->streams + stream_index;
 
         this->frame_last_delay = 40e-3;
-
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
         codecCtx->get_buffer = our_get_buffer;
         codecCtx->release_buffer = our_release_buffer;
+#else
+        codecCtx->get_buffer2 = our_get_buffer2;
+#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
         this->video_thread = boost::thread(video_thread_loop, this);
         this->refresh_thread = boost::thread(video_refresh, this);
         break;
