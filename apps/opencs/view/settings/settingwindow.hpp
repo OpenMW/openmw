@@ -50,7 +50,6 @@ namespace CSVSettings {
         ///sets the defined values for the views that have been created
         void setViewValues();
 
-        void buildTabPage(Page* tab);
         CSMSettings::UserSettings *model() { return mModel; }
 
     private:

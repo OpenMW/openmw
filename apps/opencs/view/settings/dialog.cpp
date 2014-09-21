@@ -1,26 +1,11 @@
 #include "dialog.hpp"
 
-//#include <QListWidgetItem>
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QWidget>
-//#include <QStackedWidget>
-//#include <QtGui>
 
 #include "../../model/settings/usersettings.hpp"
-
 #include "page.hpp"
-
-//#include <QApplication>
-
-//#include <QSplitter>
-
-//#include <QTreeView>
-//#include <QListView>
-//#include <QTableView>
-
-#include <QStandardItemModel>
-#include <QStandardItem>
 
 #include <OgreRoot.h>
 #include <boost/math/common_factor.hpp>
@@ -170,14 +155,6 @@ CSVSettings::Dialog::Dialog(QTabWidget *parent)
     connect(cbStatusBar, SIGNAL(toggled(bool)), this, SIGNAL (toggleStatusBar(bool)));
 
     setupDialog();
-
-#if 0
-    // FIXME: delete - don't need this for tabs
-    connect (mPageListWidget,
-             SIGNAL (currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
-             this,
-             SLOT (slotChangePage (QListWidgetItem*, QListWidgetItem*)));
-#endif
 }
 
 void CSVSettings::Dialog::slotRendererChanged(const QString &renderer)
@@ -226,33 +203,8 @@ void CSVSettings::Dialog::slotOverrideToggled(bool checked)
     }
 }
 
-#if 0
-// FIXME: delete - not required for tabs
-void CSVSettings::Dialog::slotChangePage
-                                (QListWidgetItem *cur, QListWidgetItem *prev)
-{
-   mStackedWidget->changePage
-                    (mPageListWidget->row (cur), mPageListWidget->row (prev));
-
-   layout()->activate();
-   setFixedSize(minimumSizeHint());
-}
-#endif
-
 void CSVSettings::Dialog::setupDialog()
 {
-#if 0
-    //create central widget with it's layout and immediate children
-    QWidget *centralWidget = new QGroupBox (this);
-
-    centralWidget->setLayout (new QHBoxLayout());
-    centralWidget->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Preferred);
-    setCentralWidget (centralWidget);
-    setDockOptions (QMainWindow::AllowNestedDocks);
-
-    buildPageListWidget (centralWidget);
-    buildStackedWidget (centralWidget);
-#endif
 }
 
 void CSVSettings::Dialog::buildPages()
@@ -332,50 +284,16 @@ void CSVSettings::Dialog::buildPages()
 
     SettingWindow::createPages ();
 
-    //QFontMetrics fm (QApplication::font());
-
     foreach (Page *page, SettingWindow::pages())
     {
         QString pageName = page->objectName();
-
-        //int textWidth = fm.width(pageName);
-
         // each page is added as a tab to Ui::TabWiget
         addTab(page, page->objectName());
 
         // add section and views to the page
-        buildTabPage(page);
         page->showWidgets();
-
-        //new QListWidgetItem (pageName, mPageListWidget);
-        //mPageListWidget->setFixedWidth (textWidth + 50);
-
-        //mStackedWidget->addWidget (&dynamic_cast<QWidget &>(*(page)));
     }
-
-    //resize (mStackedWidget->sizeHint());
 }
-
-#if 0
-// FIXME: delete - not required, using tabs instead
-void CSVSettings::Dialog::buildPageListWidget (QWidget *centralWidget)
-{
-    mPageListWidget = new QListWidget (centralWidget);
-    mPageListWidget->setMinimumWidth(50);
-    mPageListWidget->setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Expanding);
-
-    mPageListWidget->setSelectionBehavior (QAbstractItemView::SelectItems);
-
-    centralWidget->layout()->addWidget(mPageListWidget);
-}
-
-void CSVSettings::Dialog::buildStackedWidget (QWidget *centralWidget)
-{
-    mStackedWidget = new ResizeableStackedWidget (centralWidget);
-
-    centralWidget->layout()->addWidget (mStackedWidget);
-}
-#endif
 
 void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
 {
@@ -441,8 +359,6 @@ void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
                            QStringList(cmbRecStatus->currentText()));
     model()->setDefinitions("Display Format/Referenceable ID Type Display",
                            QStringList(cmbRefIdType->currentText()));
-
-    std::cout << "closeEvent" << std::endl;
 
     saveSettings();
 }

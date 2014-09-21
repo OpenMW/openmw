@@ -2,12 +2,7 @@
 #define CSVSETTINGS_DIALOG_H
 
 #include "settingwindow.hpp"
-//#include "resizeablestackedwidget.hpp"
 #include <QStandardItem>
-
-//class QStackedWidget;
-//class QListWidget;
-//class QListWidgetItem;
 
 #include "ui_settingstab.h"
 
@@ -41,8 +36,6 @@ namespace CSVSettings {
     private:
 
         void buildPages();
-        //void buildPageListWidget (QWidget *centralWidget);
-        //void buildStackedWidget (QWidget *centralWidget);
 
     public slots:
 
@@ -50,7 +43,6 @@ namespace CSVSettings {
 
     private slots:
 
-        //void slotChangePage (QListWidgetItem *, QListWidgetItem *); // FIXME: delete
         void slotOverrideToggled(bool checked);
         void slotRendererChanged(const QString &renderer);
 
