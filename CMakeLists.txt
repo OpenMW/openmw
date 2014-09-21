@@ -221,6 +221,9 @@ IF(BOOST_STATIC)
 endif()
 
 find_package(OGRE REQUIRED)
+if (${OGRE_VERSION} VERSION_LESS "1.9")
+    message(FATAL_ERROR "OpenMW requires Ogre 1.9 or later, please install the latest stable version from http://ogre3d.org")
+endif()
 
 find_package(MyGUI REQUIRED)
 if (${MYGUI_VERSION} VERSION_LESS "3.2.1")

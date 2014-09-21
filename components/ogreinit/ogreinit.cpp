@@ -216,7 +216,8 @@ namespace OgreInit
         Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mRoot);
         Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
         Files::loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
-        Files::loadOgrePlugin(pluginDir, "Plugin_ParticleFX", *mRoot);
+        if (!Files::loadOgrePlugin(pluginDir, "Plugin_ParticleFX", *mRoot))
+            throw std::runtime_error("Required Plugin_ParticleFX for Ogre not found!");
     }
 
     void OgreInit::loadParticleFactories()

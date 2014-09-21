@@ -133,7 +133,7 @@ namespace MWMechanics
 
             blockerStats.setBlock(true);
 
-            if (blocker.getClass().isNpc())
+            if (blocker.getCellRef().getRefId() == "player")
                 blocker.getClass().skillUsageSucceeded(blocker, ESM::Skill::Block, 0);
 
             return true;

@@ -66,11 +66,8 @@ namespace MWGui
 
         // Temporarily turn off VSync, we want to do actual loading rather than waiting for the screen to sync.
         // Threaded loading would be even better, of course - especially because some drivers force VSync to on and we can't change it.
-        // In Ogre 1.8, the swapBuffers argument is useless and setVSyncEnabled is bugged with GLX, nothing we can do :/
         mVSyncWasEnabled = mWindow->isVSyncEnabled();
-        #if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
         mWindow->setVSyncEnabled(false);
-        #endif
 
         bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
                 == MWBase::StateManager::State_NoGame);
@@ -113,10 +110,7 @@ namespace MWGui
     void LoadingScreen::loadingOff()
     {
         // Re-enable vsync now.
-        // In Ogre 1.8, the swapBuffers argument is useless and setVSyncEnabled is bugged with GLX, nothing we can do :/
-        #if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
         mWindow->setVSyncEnabled(mVSyncWasEnabled);
-        #endif
 
         setVisible(false);
 

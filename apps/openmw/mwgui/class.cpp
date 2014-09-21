@@ -17,9 +17,6 @@ namespace MWGui
     GenerateClassResultDialog::GenerateClassResultDialog()
       : WindowModal("openmw_chargen_generate_class_result.layout")
     {
-        // Centre dialog
-        center();
-
         setText("ReflectT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sMessageQuestionAnswer1", ""));
 
         getWidget(mClassImage, "ClassImage");
@@ -34,6 +31,8 @@ namespace MWGui
         getWidget(okButton, "OKButton");
         okButton->setCaptionWithReplacing("#{sMessageQuestionAnswer2}");
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onOkClicked);
+
+        center();
     }
 
     std::string GenerateClassResultDialog::getClassId() const
@@ -46,6 +45,8 @@ namespace MWGui
         mCurrentClassId = classId;
         mClassImage->setImageTexture(std::string("textures\\levelup\\") + mCurrentClassId + ".dds");
         mClassName->setCaption(MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mCurrentClassId)->mName);
+
+        center();
     }
 
     // widget controls
