@@ -93,9 +93,18 @@ void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
 {
     if (const ESM::Script *script = mStore.get<ESM::Script>().find (scriptName))
     {
-        ptr.getRefData().setLocals (*script);
+        try
+        {
+            ptr.getRefData().setLocals (*script);
 
-        mScripts.push_back (std::make_pair (scriptName, ptr));
+            mScripts.push_back (std::make_pair (scriptName, ptr));
+        }
+        catch (const std::exception& exception)
+        {
+            std::cerr
+                << "failed to add local script " << scriptName
+                << " because an exception has been thrown: " << exception.what() << std::endl;
+        }
     }
 }
 
