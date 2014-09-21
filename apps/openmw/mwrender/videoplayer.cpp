@@ -983,9 +983,9 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
     // Get a pointer to the codec context for the video stream
     codecCtx = pFormatCtx->streams[stream_index]->codec;
     codec = avcodec_find_decoder(codecCtx->codec_id);
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(56,1,0)
     codecCtx->refcounted_frames = 1;
-#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
+#endif /* LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(56,1,0) */
     if(!codec || (avcodec_open2(codecCtx, codec, NULL) < 0))
     {
         fprintf(stderr, "Unsupported codec!\n");
