@@ -294,15 +294,6 @@ namespace MWGui
             newState = true;
         }
 
-        if (_sender == mVSyncButton)
-        {
-            // Ogre::Window::setVSyncEnabled is bugged in 1.8
-#if OGRE_VERSION < (1 << 16 | 9 << 8 | 0)
-            MWBase::Environment::get().getWindowManager()->
-                messageBox("VSync will be applied after a restart", std::vector<std::string>());
-#endif
-        }
-
         if (_sender == mShadersButton)
         {
             if (newState == false)
