@@ -69,7 +69,7 @@ bool FFmpeg_Decoder::getNextPacket()
         /* Check if the packet belongs to this stream */
         if(stream_idx == mPacket.stream_index)
         {
-            if((uint64_t)mPacket.pts != AV_NOPTS_VALUE)
+            if(mPacket.pts != AV_NOPTS_VALUE)
                 mNextPts = av_q2d((*mStream)->time_base)*mPacket.pts;
             return true;
         }
