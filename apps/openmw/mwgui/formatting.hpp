@@ -32,7 +32,6 @@ namespace MWGui
                 {
                     Event_None = -2,
                     Event_EOF = -1,
-                    Event_LastText = 0,
                     Event_BrTag,
                     Event_PTag,
                     Event_ImgTag,

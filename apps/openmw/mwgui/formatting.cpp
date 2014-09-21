@@ -50,8 +50,12 @@ namespace MWGui
             while (1)
             {
                 ++mIndex;
+
                 if (mIndex >= mText.size())
+                {
+                    flushBuffer();
                     return Event_EOF;
+                }
 
                 char ch = mText[mIndex];
                 if (ch == '<')
@@ -102,11 +106,7 @@ namespace MWGui
                     }
                 }
 
-                if (mIndex == mText.size() - 1)
-                {
-                    flushBuffer();
-                    return Event_LastText;
-                }
+
             }
         }
 
@@ -133,7 +133,7 @@ namespace MWGui
 
             while (!tag.empty())
             {
-                int sepPos = tag.find('=');
+                size_t sepPos = tag.find('=');
                 if (sepPos == std::string::npos)
                     return;
 
@@ -188,8 +188,9 @@ namespace MWGui
 
             BookTextParser parser(markup);
             BookTextParser::Events event;
-            while ((event = parser.next()) != BookTextParser::Event_EOF)
+            for (;;)
             {
+                event = parser.next();
                 if (event == BookTextParser::Event_BrTag || event == BookTextParser::Event_PTag)
                     continue;
 
@@ -203,6 +204,9 @@ namespace MWGui
                     TextElement elem(paper, pag, mTextStyle, plainText);
                     elem.paginate();
                 }
+
+                if (event == BookTextParser::Event_EOF)
+                    break;
 
                 switch (event)
                 {
