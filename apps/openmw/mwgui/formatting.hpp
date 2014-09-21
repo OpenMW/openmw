@@ -2,6 +2,7 @@
 #define MWGUI_FORMATTING_H
 
 #include <MyGUI.h>
+#include <map>
 
 namespace MWGui
 {
@@ -21,6 +22,44 @@ namespace MWGui
             std::string mFont;
             int mTextSize;
             MyGUI::Align mTextAlign;
+        };
+
+        class BookTextParser
+        {
+            public:
+                typedef std::map<std::string, std::string> Attributes;
+                enum Events
+                {
+                    Event_None = -2,
+                    Event_EOF = -1,
+                    Event_LastText = 0,
+                    Event_BrTag,
+                    Event_PTag,
+                    Event_ImgTag,
+                    Event_DivTag,
+                    Event_FontTag
+                };
+
+                BookTextParser(const std::string & text);
+                void registerTag(const std::string & tag, Events type);
+                std::string getReadyText();
+
+                Events next();
+                void flushBuffer();
+                const Attributes & getAttributes() const;
+                void parseTag(std::string tag);
+
+            private:
+                int mIndex;
+                std::string mText;
+                std::string mReadyText;
+
+                bool mIgnoreNewlineTags;
+                bool mIgnoreLineEndings;
+                Attributes mAttributes;
+                std::string mTag;
+                std::map<std::string, Events> mTagTypes;
+                std::string mBuffer;
         };
 
         class Paginator
@@ -62,12 +101,13 @@ namespace MWGui
         class BookFormatter
         {
             public:
-                Paginator::Pages markupToWidget(MyGUI::Widget * parent, std::string utf8Text, const int pageWidth, const int pageHeight);
-                Paginator::Pages markupToWidget(MyGUI::Widget * parent, std::string utf8Text);
+                Paginator::Pages markupToWidget(MyGUI::Widget * parent, const std::string & markup, const int pageWidth, const int pageHeight);
+                Paginator::Pages markupToWidget(MyGUI::Widget * parent, const std::string & markup);
 
             protected:
-                void parseDiv(std::string tag);
-                void parseFont(std::string tag);
+                void handleImg(const BookTextParser::Attributes & attr);
+                void handleDiv(const BookTextParser::Attributes & attr);
+                void handleFont(const BookTextParser::Attributes & attr);
             private:
                 TextStyle mTextStyle;
         };
@@ -75,18 +115,14 @@ namespace MWGui
         class GraphicElement
         {
             public:
-                GraphicElement(MyGUI::Widget * parent, Paginator & pag, const TextStyle & style);
+                GraphicElement(MyGUI::Widget * parent, Paginator & pag);
                 virtual int getHeight() = 0;
                 virtual void paginate();
                 virtual int pageSplit();
 
             protected:
-                int currentFontHeight() const;
-                float widthForCharGlyph(MyGUI::Char unicodeChar) const;
-
                 MyGUI::Widget * mParent;
                 Paginator & mPaginator;
-                TextStyle mStyle;
         };
 
         class TextElement : public GraphicElement
@@ -96,13 +132,15 @@ namespace MWGui
                 virtual int getHeight();
                 virtual int pageSplit();
             private:
+                int currentFontHeight() const;
+                TextStyle mStyle;
                 MyGUI::EditBox * mEditBox;
         };
 
         class ImageElement : public GraphicElement
         {
             public:
-                ImageElement(MyGUI::Widget * parent, Paginator & pag, const TextStyle & style, const std::string & tag);
+                ImageElement(MyGUI::Widget * parent, Paginator & pag, const std::string & src, int width, int height);
                 virtual int getHeight();
                 virtual int pageSplit();
 
