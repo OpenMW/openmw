@@ -32,9 +32,12 @@ namespace boost
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
 
-CSMSettings::UserSettings *CSMSettings::UserSettings::mUserSettingsInstance = 0;
+namespace CSMSettings
+{
 
-CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
+UserSettings *UserSettings::mUserSettingsInstance = 0;
+
+UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
     : mCfgMgr (configurationManager)
     , mSettingDefinitions(NULL)
     , mSettingCfgDefinitions(NULL)
@@ -48,9 +51,138 @@ CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& conf
     mSettingCfgDefinitions = new QSettings(QSettings::IniFormat, QSettings::UserScope, "", QString(), this);
 }
 
-void CSMSettings::UserSettings::buildSettingModelDefaults()
+/*
+ * Original Design:
+ *
+ *
+ *   QGridLayout      QGroupBox
+ *        ^              ^
+ *        |              |
+ *        |      1       |
+ *  SettingLayout......Frame
+ *                      ^ ^              QMainWindow
+ *                      | |                   ^              QObject
+ *                     /   \                  |                 ^
+ *                    /     \                 |                 |
+ *                   /       \ 0..n           |                 |         0..n
+ *                View......Page........SettingWindow......UserSettings......Setting
+ *                 ^ 0..n                     ^
+ *                 |                          |
+ *                 |                          |
+ *             ListView,                      |
+ *             TextView, etc                  |
+ *                                            |
+ *                                            |
+ *      QStackedWidget      QListWidget.....Dialog
+ *            ^                :
+ *            |                :
+ *            |                :
+ *  ResizeableStackedWidget.....
+ *
+ *
+ *  When a Page is created with a list of Views, the Views are added to the Frame.
+ *
+ *  Editor ctor
+ *      -> Dialog ctor
+ *             -> SettingWindow ctor
+ *             -> SettingWindow::setModel()
+ *      -> Dialog::setupDialog()
+ *             -> buildPageListWidget
+ *             -> buildStackedWidget
+ *
+ *  Editor::showSettings()
+ *      -> Dialog::show()
+ *      -> Dialog::buildPages()    <-- [first time only]
+ *             -> SettingWindow::createPages()
+ *                    -> Page ctor
+ *                    -> Page::setupViews()
+ *                    -> Page::addView()
+ *                    -> Frame::addWidget()
+ *                           -> SettingLayout::addWidget()
+ *             -> [add page widgets to the stack]
+ *
+ */
+/*
+ * Modified Design:
+ *
+ *      +----------------------------------------+
+ *      |+---------+---------+---------+         |
+ *      ||         |         |         |         |
+ *      ||         +----------------------------+|
+ *      ||                                      ||
+ *      ||  +--------------------------------+  ||
+ *      ||  |                                |  ||
+ *      ||  |   View           View          |  ||
+ *      ||  |   View           View          |  ||
+ *      ||  |                                |  ||
+ *      ||  +---- Section -------------------+  ||
+ *      ||                                      ||
+ *      ||  +--------------------------------+  ||
+ *      ||  |                                |  ||
+ *      ||  | +-------------+                |  ||
+ *      ||  | | View/Frame  |                |  ||
+ *      ||  | +-------------+                |  ||
+ *      ||  |                                |  ||
+ *      ||  +---- Section -------------------+  ||
+ *      ||                                      ||
+ *      ||                                      ||
+ *      |+-------------- Page ------------------+|
+ *      +---------- SettingWindow ---------------+
+ *
+ *
+ *
+ *   QGridLayout      QGroupBox
+ *        ^              ^
+ *        |              |
+ *        |      1       |
+ *  SettingLayout......Frame
+ *                      ^ ^               QTabWidget
+ *                      | |                  ^               QObject
+ *                     /   \                 |                  ^
+ *                    /     \                |                  |
+ *                   /       \ 0..n          |                  |         0..n
+ *                View......Page........SettingWindow......UserSettings......Setting
+ *                 ^ 0..n                    ^
+ *                 |                         |
+ *                 |          Ui::TabWidget  |
+ *             ListView,               ^     |
+ *             TextView, etc           |     |
+ *                                      \    |
+ *                                       \   |
+ *                                        \  |
+ *                                        Dialog
+ *
+ *
+ *
+ *
+ *
+ *   View/Page is still used to uniquely identify a setting (i.e. Section is for
+ *   visual presentation only).  This means all views on a page should be unique
+ *   (as before)
+ *
+ *
+ *  Editor ctor
+ *      -> Dialog ctor
+ *             -> SettingWindow ctor
+ *             -> SettingWindow::setModel()
+ *      -> Dialog::setupDialog()   <-- [no longer required]
+ *
+ *  Editor::showSettings()
+ *      -> Dialog::show()
+ *      -> Dialog::buildPages()   <-- [first time only]
+ *             -> SettingWindow::createPages()
+ *                    -> Page ctor
+ *                    -> Page::setupViews()
+ *                    -> Page::addView()
+ *                    -> Frame::addWidget()
+ *                           -> SettingLayout::addWidget()
+ *             -> [add pages to tabs then call showWidgets()]
+ */
+void UserSettings::buildSettingModelDefaults()
 {
-    QString section = "Window Size";
+    QString section;
+
+    section = "Window Size";
     {
         Setting *width = createSetting (Type_LineEdit, section, "Width");
         Setting *height = createSetting (Type_LineEdit, section, "Height");
@@ -283,12 +415,12 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         }
 }
 
-CSMSettings::UserSettings::~UserSettings()
+UserSettings::~UserSettings()
 {
     mUserSettingsInstance = 0;
 }
 
-void CSMSettings::UserSettings::loadSettings (const QString &fileName)
+void UserSettings::loadSettings (const QString &fileName)
 {
     QString userFilePath = QString::fromUtf8
                                 (mCfgMgr.getUserConfigPath().string().c_str());
@@ -369,7 +501,7 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
         mSettingDefinitions->setValue("Video/use settings.cfg", "true");
 }
 
-QStringList CSMSettings::UserSettings::getOgreRenderers()
+QStringList UserSettings::getOgreRenderers()
 {
     if(mOgreRenderers.empty())
     {
@@ -382,7 +514,7 @@ QStringList CSMSettings::UserSettings::getOgreRenderers()
     return mOgreRenderers;
 }
 
-QStringList CSMSettings::UserSettings::getOgreOptions(const QString &key, const QString &renderer)
+QStringList UserSettings::getOgreOptions(const QString &key, const QString &renderer)
 {
     QStringList result;
 
@@ -421,7 +553,7 @@ QStringList CSMSettings::UserSettings::getOgreOptions(const QString &key, const 
     return result;
 }
 
-QStringList CSMSettings::UserSettings::getShaderLanguageByRenderer(const QString &renderer)
+QStringList UserSettings::getShaderLanguageByRenderer(const QString &renderer)
 {
     QStringList result;
 
@@ -435,24 +567,22 @@ QStringList CSMSettings::UserSettings::getShaderLanguageByRenderer(const QString
     return result;
 }
 
-bool CSMSettings::UserSettings::hasSettingDefinitions
-                                                (const QString &viewKey) const
+bool UserSettings::hasSettingDefinitions (const QString &viewKey) const
 {
     return (mSettingDefinitions->contains (viewKey));
 }
 
-void CSMSettings::UserSettings::setDefinitions
-                                (const QString &key, const QStringList &list)
+void UserSettings::setDefinitions (const QString &key, const QStringList &list)
 {
     mSettingDefinitions->setValue (key, list);
 }
 
-void CSMSettings::UserSettings::saveDefinitions() const
+void UserSettings::saveDefinitions() const
 {
     mSettingDefinitions->sync();
 }
 
-QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
+QString UserSettings::settingValue (const QString &settingKey)
 {
     QStringList defs;
 
@@ -480,22 +610,20 @@ QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
     return defs.at(0);
 }
 
-CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
+UserSettings& UserSettings::instance()
 {
     assert(mUserSettingsInstance);
     return *mUserSettingsInstance;
 }
 
-void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
-                                                    const QStringList &list)
+void UserSettings::updateUserSetting(const QString &settingKey, const QStringList &list)
 {
     mSettingDefinitions->setValue (settingKey ,list);
 
     emit userSettingUpdated (settingKey, list);
 }
 
-CSMSettings::Setting *CSMSettings::UserSettings::findSetting
-                        (const QString &pageName, const QString &settingName)
+Setting *UserSettings::findSetting (const QString &pageName, const QString &settingName)
 {
     foreach (Setting *setting, mSettings)
     {
@@ -508,8 +636,7 @@ CSMSettings::Setting *CSMSettings::UserSettings::findSetting
     return 0;
 }
 
-void CSMSettings::UserSettings::removeSetting
-                        (const QString &pageName, const QString &settingName)
+void UserSettings::removeSetting (const QString &pageName, const QString &settingName)
 {
     if (mSettings.isEmpty())
         return;
@@ -530,7 +657,7 @@ void CSMSettings::UserSettings::removeSetting
     }
 }
 
-CSMSettings::SettingPageMap CSMSettings::UserSettings::settingPageMap() const
+SettingPageMap UserSettings::settingPageMap() const
 {
     SettingPageMap pageMap;
 
@@ -540,8 +667,8 @@ CSMSettings::SettingPageMap CSMSettings::UserSettings::settingPageMap() const
     return pageMap;
 }
 
-CSMSettings::Setting *CSMSettings::UserSettings::createSetting
-        (CSMSettings::SettingType typ, const QString &page, const QString &name)
+Setting *UserSettings::createSetting
+        (SettingType typ, const QString &page, const QString &name)
 {
     //get list of all settings for the current setting name
     if (findSetting (page, name))
@@ -560,10 +687,12 @@ CSMSettings::Setting *CSMSettings::UserSettings::createSetting
     return setting;
 }
 
-QStringList CSMSettings::UserSettings::definitions (const QString &viewKey) const
+QStringList UserSettings::definitions (const QString &viewKey) const
 {
     if (mSettingDefinitions->contains (viewKey))
         return mSettingDefinitions->value (viewKey).toStringList();
 
     return QStringList();
+}
+
 }

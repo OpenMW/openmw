@@ -145,7 +145,7 @@
     <property name="title">
      <string>Display Format</string>
     </property>
-    <widget class="QWidget" name="layoutWidget">
+    <widget class="QWidget" name="layoutWidget_DisplayFormat">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -223,7 +223,7 @@
      <string>Subviews</string>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget2">
+   <widget class="QWidget" name="layoutWidget_Subviews">
     <property name="geometry">
      <rect>
       <x>21</x>
@@ -291,37 +291,73 @@
     <property name="title">
      <string>Window Size</string>
     </property>
-    <widget class="QWidget" name="layoutWidget">
+    <widget class="QStackedWidget" name="stackedWidget">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>20</y>
        <width>171</width>
-       <height>22</height>
+       <height>21</height>
       </rect>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="0">
-       <widget class="QSpinBox" name="sbWidth">
-        <property name="maximumSize">
-         <size>
-          <width>186</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QSpinBox" name="sbHeight">
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="page">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="displayGroup_WindowSize">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>171</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QSpinBox" name="sbWidth">
+          <property name="maximumSize">
+           <size>
+            <width>186</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QSpinBox" name="sbHeight">
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_2">
+      <widget class="QComboBox" name="cmbStdWinSize">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>171</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
     </widget>
    </widget>
    <widget class="QCheckBox" name="cbStatusBar">
@@ -340,26 +376,8 @@
    <zorder>displayGroup_Window</zorder>
    <zorder>displayGroup_DisplayFormat</zorder>
    <zorder>displayGroup_Subviews</zorder>
-   <zorder>layoutWidget2</zorder>
+   <zorder>displayGroup_WindowSize</zorder>
    <zorder>cbStatusBar</zorder>
-  </widget>
-  <widget class="QWidget" name="MiscSettings">
-   <attribute name="title">
-    <string>Misc Settings</string>
-   </attribute>
-   <widget class="QComboBox" name="cmbStdWinSize">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>100</y>
-      <width>69</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
   </widget>
  </widget>
  <resources/>

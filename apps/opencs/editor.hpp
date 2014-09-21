@@ -26,7 +26,7 @@
 #include "view/doc/filedialog.hpp"
 #include "view/doc/newgame.hpp"
 
-#include "view/settings/settingsdialog.hpp"
+#include "view/settings/dialog.hpp"
 
 namespace OgreInit
 {
@@ -46,7 +46,7 @@ namespace CS
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
             CSVDoc::NewGameDialogue mNewGame;
-            CSVSettings::SettingsDialog mSettings;
+            CSVSettings::Dialog mSettings;
             CSVDoc::FileDialog mFileDialog;
             boost::filesystem::path mLocal;
             boost::filesystem::path mResources;
