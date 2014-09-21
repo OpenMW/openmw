@@ -289,6 +289,7 @@ namespace MWWorld
         mGodMode = false;
         mSky = true;
         mTeleportEnabled = true;
+        mLevitationEnabled = true;
 
         mGlobalVariables.fill (mStore);
     }
