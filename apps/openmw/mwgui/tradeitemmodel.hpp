@@ -30,7 +30,8 @@ namespace MWGui
         void returnItemBorrowedFromUs (ModelIndex itemIndex, ItemModel* source, size_t count);
 
         /// Permanently transfers items that were borrowed to us from another model to this model
-        void transferItems ();
+        /// @param transferFrom the actor that lent us the items
+        void transferItems (const MWWorld::Ptr& transferFrom);
         /// Aborts trade
         void abort();
 
