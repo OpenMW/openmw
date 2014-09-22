@@ -302,6 +302,8 @@ void CSVSettings::Dialog::buildPages()
     // subview
     if(model()->hasSettingDefinitions("SubView/minimum width"))
         sbMinSubViewWidth->setValue(model()->settingValue("SubView/minimum width").toInt());
+    else
+        sbMinSubViewWidth->setValue(325);
 
     SettingWindow::createPages ();
 
