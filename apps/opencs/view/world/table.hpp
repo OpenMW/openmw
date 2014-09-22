@@ -8,6 +8,7 @@
 
 #include "../../model/filter/node.hpp"
 #include "../../model/world/columnbase.hpp"
+#include "../../model/world/universalid.hpp"
 #include "dragrecordtable.hpp"
 
 class QUndoStack;
@@ -21,7 +22,6 @@ namespace CSMDoc
 namespace CSMWorld
 {
     class Data;
-    class UniversalId;
     class IdTableProxyModel;
     class IdTableBase;
     class CommandDispatcher;
@@ -45,6 +45,7 @@ namespace CSVWorld
             QAction *mMoveUpAction;
             QAction *mMoveDownAction;
             QAction *mViewAction;
+            QAction *mEditCellAction;
             QAction *mPreviewAction;
             QAction *mExtendedDeleteAction;
             QAction *mExtendedRevertAction;
@@ -52,6 +53,8 @@ namespace CSVWorld
             CSMWorld::IdTableBase *mModel;
             int mRecordStatusDisplay;
             CSMWorld::CommandDispatcher *mDispatcher;
+
+            CSMWorld::UniversalId mEditCellId;
 
         private:
 
@@ -92,6 +95,8 @@ namespace CSVWorld
             void cloneRequest(const CSMWorld::UniversalId&);
 
         private slots:
+
+            void editCell();
 
             void editRecord();
 
