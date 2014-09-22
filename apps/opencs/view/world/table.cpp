@@ -56,7 +56,7 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
     {
         // Request UniversalId editing from table columns.
-        
+
         int currRow = rowAt( event->y() ),
             currCol = columnAt( event->x() );
 
@@ -73,7 +73,7 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
         CSMWorld::UniversalId::Type colType = CSMWorld::TableMimeData::convertEnums( colDisplay );
 
         if (    !cellData.isEmpty()
-                && colType != CSMWorld::UniversalId::Type::Type_None )
+                && colType != CSMWorld::UniversalId::Type_None )
         {
             mEditCellAction->setText(tr("Edit '").append(cellData).append("'"));
 
@@ -247,7 +247,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     mMoveDownAction = new QAction (tr ("Move Down"), this);
     connect (mMoveDownAction, SIGNAL (triggered()), this, SLOT (moveDownRecord()));
     addAction (mMoveDownAction);
-    
+
     mEditCellAction = new QAction( tr("Edit Cell"), this );
     connect( mEditCellAction, SIGNAL(triggered()), this, SLOT(editCell()) );
     addAction( mEditCellAction );
