@@ -202,10 +202,8 @@ namespace MWGui
                     // hack: prevent newlines at the end of the book possibly creating unnecessary pages
                     if (event == BookTextParser::Event_EOF)
                     {
-                        while (plainText[plainText.size()-1] == '\n')
-                        {
+                        while (plainText.size() && plainText[plainText.size()-1] == '\n')
                             plainText.erase(plainText.end()-1);
-                        }
                     }
 #endif
 
