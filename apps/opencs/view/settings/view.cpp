@@ -22,6 +22,9 @@ CSVSettings::View::View(CSMSettings::Setting *setting,
     setObjectName (setting->name());
     buildView();
     buildModel (setting);
+    // apply stylesheet to view's frame if exists
+    if(setting->styleSheet() != "")
+        Frame::setStyleSheet (setting->styleSheet());
 }
 
 void CSVSettings::View::buildModel (const CSMSettings::Setting *setting)

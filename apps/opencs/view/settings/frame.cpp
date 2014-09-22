@@ -14,7 +14,11 @@ CSVSettings::Frame::Frame (bool isVisible, const QString &title,
     mVisibleBoxStyle = styleSheet();
 
     if (!isVisible)
+    {
+        // must be Page, not a View
         setStyleSheet (sInvisibleBoxStyle);
+        mLayout->setContentsMargins(10, 15, 10, 15);
+    }
 
     setLayout (mLayout);
 }

@@ -127,6 +127,7 @@ void CSVSettings::RangeView::buildSpinBox (CSMSettings::Setting *setting)
     mRangeWidget->setProperty ("prefix", setting->prefix());
     mRangeWidget->setProperty ("suffix", setting->suffix());
     mRangeWidget->setProperty ("wrapping", setting->wrapping());
+    dynamic_cast<QAbstractSpinBox *> (mRangeWidget)->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
 
 }
 

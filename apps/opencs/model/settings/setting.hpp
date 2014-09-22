@@ -83,6 +83,9 @@ namespace CSMSettings
         void setSection (const QString &value);
         QString section() const;
 
+        void setStyleSheet (const QString &value);
+        QString styleSheet() const;
+
         void setPrefix (const QString &value);
         QString prefix() const;
 

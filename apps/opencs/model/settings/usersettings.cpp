@@ -66,6 +66,7 @@ void UserSettings::buildSettingModelDefaults()
         fog->setSpecialValueText("Enable Fog");
         fog->setWidgetWidth(15);
         fog->setColumnSpan (2);
+        fog->setStyleSheet ("QGroupBox { border: 0px; }");
         fog->setViewLocation(1, 1);
 
         Setting *shadows = createSetting (Type_CheckBox, page, "shadows");
@@ -75,6 +76,7 @@ void UserSettings::buildSettingModelDefaults()
         shadows->setSpecialValueText("Enable Shadows");
         shadows->setWidgetWidth(15);
         //shadows->setColumnSpan (2);
+        shadows->setStyleSheet ("QGroupBox { border: 0px; }");
         shadows->setViewLocation(2, 1);
 
         Setting *shadows_pssm = createSetting (Type_CheckBox, page, "shadows_pssm");
@@ -84,6 +86,7 @@ void UserSettings::buildSettingModelDefaults()
         shadows_pssm->setSpecialValueText("Enable PSSM Shadows");
         shadows_pssm->setWidgetWidth(15);
         //shadows_pssm->setColumnSpan (2);
+        shadows_pssm->setStyleSheet ("QGroupBox { border: 0px; }");
         shadows_pssm->setViewLocation(3, 1);
 
         // FIXME: add option to put label elsewhere (i.e. no frame text)
@@ -93,7 +96,7 @@ void UserSettings::buildSettingModelDefaults()
         numLights->setColumnSpan (2);
         numLights->setMinimum (0);
         numLights->setMaximum (100); // FIXME: not sure what the max value should be
-        numLights->setWidgetWidth (15);
+        numLights->setWidgetWidth (10);
         numLights->setSpecialValueText ("Nothing!"); // text to display when value is 0
         numLights->setViewLocation(4, 1);
 
@@ -104,6 +107,7 @@ void UserSettings::buildSettingModelDefaults()
         simpleWater->setSpecialValueText("Enable Simple Water");
         simpleWater->setWidgetWidth(15);
         simpleWater->setColumnSpan (2);
+        simpleWater->setStyleSheet ("QGroupBox { border: 0px; }");
         simpleWater->setViewLocation(2, 4);
 
         Setting *waterEnabled = createSetting (Type_DoubleSpinBox, page, "waterEnabled");
@@ -112,7 +116,7 @@ void UserSettings::buildSettingModelDefaults()
         //waterEnabled->setColumnSpan (2);
         waterEnabled->setMinimum (0);
         waterEnabled->setMaximum (100.00); // FIXME: not sure what the max value should be
-        waterEnabled->setWidgetWidth (15);
+        waterEnabled->setWidgetWidth (10);
         waterEnabled->setViewLocation(3, 4);
 
         Setting *waterLevel = createSetting (Type_DoubleSpinBox, page, "waterLevel");
@@ -121,7 +125,7 @@ void UserSettings::buildSettingModelDefaults()
         //waterLevel->setColumnSpan (2);
         waterLevel->setMinimum (0);
         waterLevel->setMaximum (100.00); // FIXME: not sure what the max value should be
-        waterLevel->setWidgetWidth (15);
+        waterLevel->setWidgetWidth (10);
         waterLevel->setViewLocation(4, 4);
 
         Setting *waterTimer = createSetting (Type_DoubleSpinBox, page, "waterTimer");
@@ -130,8 +134,16 @@ void UserSettings::buildSettingModelDefaults()
         //waterTimer->setColumnSpan (2);
         waterTimer->setMinimum (0);
         waterTimer->setMaximum (100.00); // FIXME: not sure what the max value should be
-        waterTimer->setWidgetWidth (15);
+        waterTimer->setWidgetWidth (10);
         waterTimer->setViewLocation(5, 4);
+
+        Setting *text = createSetting (Type_Undefined, page, "text");
+        text->setSpecialValueText("This is a test"); // hack to place text labels
+        text->setEditorSetting(false);
+        text->setSerializable (false);
+        //text->setColumnSpan (1);
+        text->setWidgetWidth (15);
+        text->setViewLocation(5, 1);
 
 #if 0
     sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", "false");
