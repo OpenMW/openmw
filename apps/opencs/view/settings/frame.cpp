@@ -16,7 +16,8 @@ CSVSettings::Frame::Frame (bool isVisible, const QString &title,
     if (!isVisible)
     {
         // must be Page, not a View
-        setStyleSheet (sInvisibleBoxStyle);
+        //setStyleSheet (sInvisibleBoxStyle);
+        setStyleSheet("QGroupBox { border:0px; }");
         mLayout->setContentsMargins(10, 15, 10, 15);
     }
 

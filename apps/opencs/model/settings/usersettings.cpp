@@ -66,7 +66,7 @@ void UserSettings::buildSettingModelDefaults()
         fog->setSpecialValueText("Enable Fog");
         fog->setWidgetWidth(15);
         fog->setColumnSpan (2);
-        fog->setStyleSheet ("QGroupBox { border: 0px; }");
+        fog->setStyleSheet ("QGroupBox { border: 0px; spacing: 5; }");
         fog->setViewLocation(1, 1);
 
         Setting *shadows = createSetting (Type_CheckBox, page, "shadows");
@@ -75,7 +75,7 @@ void UserSettings::buildSettingModelDefaults()
         shadows->setEditorSetting(true);
         shadows->setSpecialValueText("Enable Shadows");
         shadows->setWidgetWidth(15);
-        //shadows->setColumnSpan (2);
+        shadows->setColumnSpan (2);
         shadows->setStyleSheet ("QGroupBox { border: 0px; }");
         shadows->setViewLocation(2, 1);
 
@@ -85,65 +85,121 @@ void UserSettings::buildSettingModelDefaults()
         shadows_pssm->setEditorSetting(true);
         shadows_pssm->setSpecialValueText("Enable PSSM Shadows");
         shadows_pssm->setWidgetWidth(15);
-        //shadows_pssm->setColumnSpan (2);
-        shadows_pssm->setStyleSheet ("QGroupBox { border: 0px; }");
+        shadows_pssm->setColumnSpan (2);
+        shadows_pssm->setStyleSheet ("QGroupBox { border: 0px; spacing: 5; }");
         shadows_pssm->setViewLocation(3, 1);
 
-        // FIXME: add option to put label elsewhere (i.e. no frame text)
         Setting *numLights = createSetting (Type_SpinBox, page, "num lights");
         numLights->setDefaultValue(8);
         numLights->setEditorSetting(true);
-        numLights->setColumnSpan (2);
+        numLights->setColumnSpan (1);
         numLights->setMinimum (0);
         numLights->setMaximum (100); // FIXME: not sure what the max value should be
         numLights->setWidgetWidth (10);
         numLights->setSpecialValueText ("Nothing!"); // text to display when value is 0
-        numLights->setViewLocation(4, 1);
+        numLights->setViewLocation(4, 2);
+        Setting *nlText = createSetting (Type_Undefined, page, "nlText");
+        nlText->setSpecialValueText("Num Lights"); // hack to place text labels
+        nlText->setEditorSetting(false);
+        nlText->setSerializable (false);
+        nlText->setColumnSpan (1);
+        nlText->setWidgetWidth (10);
+        nlText->setViewLocation(4, 1);
+
+        Setting *renderRefraction = createSetting (Type_CheckBox, page, "renderRefraction");
+        renderRefraction->setDeclaredValues(QStringList() << "true" << "false");
+        renderRefraction->setDefaultValue("false");
+        renderRefraction->setEditorSetting(true);
+        renderRefraction->setSpecialValueText("Enable Render Refraction");
+        renderRefraction->setWidgetWidth(20);
+        renderRefraction->setColumnSpan (2);
+        renderRefraction->setStyleSheet ("QGroupBox { border: 0px; }");
+        renderRefraction->setViewLocation(5, 1);
+
+        Setting *viewproj_fix = createSetting (Type_CheckBox, page, "viewproj_fix");
+        viewproj_fix->setDeclaredValues(QStringList() << "true" << "false");
+        viewproj_fix->setDefaultValue("false");
+        viewproj_fix->setEditorSetting(true);
+        viewproj_fix->setSpecialValueText("View Proj Fix");
+        viewproj_fix->setWidgetWidth(20);
+        viewproj_fix->setColumnSpan (2);
+        viewproj_fix->setStyleSheet ("QGroupBox { border: 0px; }");
+        viewproj_fix->setViewLocation(6, 1);
 
         Setting *simpleWater = createSetting (Type_CheckBox, page, "simple_water");
         simpleWater->setDeclaredValues(QStringList() << "true" << "false");
         simpleWater->setDefaultValue("false");
         simpleWater->setEditorSetting(true);
         simpleWater->setSpecialValueText("Enable Simple Water");
-        simpleWater->setWidgetWidth(15);
-        simpleWater->setColumnSpan (2);
+        simpleWater->setWidgetWidth(25);
+        simpleWater->setColumnSpan (3);
         simpleWater->setStyleSheet ("QGroupBox { border: 0px; }");
-        simpleWater->setViewLocation(2, 4);
+        simpleWater->setViewLocation(1, 5);
 
         Setting *waterEnabled = createSetting (Type_DoubleSpinBox, page, "waterEnabled");
         waterEnabled->setDefaultValue(0.00);
         waterEnabled->setEditorSetting(true);
-        //waterEnabled->setColumnSpan (2);
+        waterEnabled->setColumnSpan (1);
         waterEnabled->setMinimum (0);
         waterEnabled->setMaximum (100.00); // FIXME: not sure what the max value should be
         waterEnabled->setWidgetWidth (10);
-        waterEnabled->setViewLocation(3, 4);
+        //waterEnabled->setStyleSheet("QGroupBox { border:2px; padding 2px; margin: 2px;} QGroupBox::title { text: \"test\" }");
+        waterEnabled->setViewLocation(2, 6);
+        Setting *weText = createSetting (Type_Undefined, page, "weText");
+        weText->setSpecialValueText("Water Enabled");
+        weText->setEditorSetting(false);
+        weText->setSerializable (false);
+        weText->setColumnSpan (1);
+        weText->setWidgetWidth (10);
+        weText->setViewLocation(2, 5);
 
         Setting *waterLevel = createSetting (Type_DoubleSpinBox, page, "waterLevel");
         waterLevel->setDefaultValue(0.00);
         waterLevel->setEditorSetting(true);
-        //waterLevel->setColumnSpan (2);
+        waterLevel->setColumnSpan (1);
         waterLevel->setMinimum (0);
         waterLevel->setMaximum (100.00); // FIXME: not sure what the max value should be
         waterLevel->setWidgetWidth (10);
-        waterLevel->setViewLocation(4, 4);
+        waterLevel->setViewLocation(3, 6);
+        Setting *wlText = createSetting (Type_Undefined, page, "wlText");
+        wlText->setSpecialValueText("Water Level"); // hack to place text labels
+        wlText->setEditorSetting(false);
+        wlText->setSerializable (false);
+        wlText->setColumnSpan (1);
+        wlText->setWidgetWidth (10);
+        wlText->setViewLocation(3, 5);
 
         Setting *waterTimer = createSetting (Type_DoubleSpinBox, page, "waterTimer");
         waterTimer->setDefaultValue(0.00);
         waterTimer->setEditorSetting(true);
-        //waterTimer->setColumnSpan (2);
+        waterTimer->setColumnSpan (1);
         waterTimer->setMinimum (0);
         waterTimer->setMaximum (100.00); // FIXME: not sure what the max value should be
         waterTimer->setWidgetWidth (10);
-        waterTimer->setViewLocation(5, 4);
+        waterTimer->setViewLocation(4, 6);
+        Setting *wtText = createSetting (Type_Undefined, page, "wtText");
+        wtText->setSpecialValueText("Water Timer"); // hack to place text labels
+        wtText->setEditorSetting(false);
+        wtText->setSerializable (false);
+        wtText->setColumnSpan (1);
+        wtText->setWidgetWidth (10);
+        wtText->setViewLocation(4, 5);
 
-        Setting *text = createSetting (Type_Undefined, page, "text");
-        text->setSpecialValueText("This is a test"); // hack to place text labels
-        text->setEditorSetting(false);
-        text->setSerializable (false);
-        //text->setColumnSpan (1);
-        text->setWidgetWidth (15);
-        text->setViewLocation(5, 1);
+
+        Setting *spaceText = createSetting (Type_Undefined, page, "spaceText");
+        spaceText->setSpecialValueText(" ");
+        spaceText->setEditorSetting(false);
+        spaceText->setSerializable (false);
+        spaceText->setColumnSpan (1);
+        spaceText->setWidgetWidth (5);
+        spaceText->setViewLocation(3, 4);
+        Setting *spaceText2 = createSetting (Type_Undefined, page, "spaceText2");
+        spaceText2->setSpecialValueText(" ");
+        spaceText2->setEditorSetting(false);
+        spaceText2->setSerializable (false);
+        spaceText2->setColumnSpan (1);
+        spaceText2->setWidgetWidth (5);
+        spaceText2->setViewLocation(3, 7);
 
 #if 0
     sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", "false");

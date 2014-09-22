@@ -122,7 +122,7 @@
      </rect>
     </property>
     <property name="title">
-     <string>Shader</string>
+     <string>title</string>
     </property>
    </widget>
    <zorder>displayGroup_Render</zorder>

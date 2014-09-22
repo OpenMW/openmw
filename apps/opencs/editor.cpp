@@ -263,7 +263,6 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 {
     std::string rendersystem = mUserSettings.settingValue("Video/render system").toStdString();
     Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName(rendersystem));
-    std::cout << "editor: render system " + rendersystem << std::endl; // FIXME: debug
 
     Ogre::Root::getSingleton().initialise(false);
 
@@ -300,6 +299,7 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
     std::auto_ptr<sh::Factory> factory (new sh::Factory (platform));
 
     std::string shLang = mUserSettings.settingValue("General/shader mode").toStdString();
+    //std::string shLang = mUserSettings.getShaderLanguageByRenderer(rendersystem.c_str()).at(0).toStdString();
     enum sh::Language lang;
     if(shLang == "glsl")        lang = sh::Language_GLSL;
     else if(shLang == "glsles") lang = sh::Language_GLSLES;
@@ -314,16 +314,23 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     factory->loadAllFiles();
 
-    sh::Factory::getInstance().setGlobalSetting ("fog", mUserSettings.settingValue("shader/fog").toStdString() == "true" ? "true" : "false");
+    sh::Factory::getInstance().setGlobalSetting ("fog",
+        mUserSettings.settingValue("shader/fog").toStdString());
 
-    sh::Factory::getInstance().setGlobalSetting ("shadows", mUserSettings.settingValue("shader/shadows").toStdString() == "true" ? "true" : "false");
-    sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", mUserSettings.settingValue("shader/shadows_pssm").toStdString() == "true" ? "true" : "false");
+    sh::Factory::getInstance().setGlobalSetting ("shadows",
+        mUserSettings.settingValue("shader/shadows").toStdString());
 
-    sh::Factory::getInstance ().setGlobalSetting ("render_refraction", "false");
+    sh::Factory::getInstance().setGlobalSetting ("shadows_pssm",
+        mUserSettings.settingValue("shader/shadows_pssm").toStdString());
 
-    sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
+    sh::Factory::getInstance ().setGlobalSetting ("render_refraction",
+        mUserSettings.settingValue("shader/render_refraction").toStdString());
 
-    sh::Factory::getInstance ().setGlobalSetting ("num_lights", "8");
+    sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix",
+        mUserSettings.settingValue("shader/viewproj_fix").toStdString());
+
+    sh::Factory::getInstance ().setGlobalSetting ("num_lights",
+        mUserSettings.settingValue("shader/num_lights").toStdString());
 
     /// \todo add more configurable shiny settings
 
