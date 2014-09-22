@@ -142,7 +142,7 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QSpinBox" name="spinBox_min_subview_width">
+      <widget class="QSpinBox" name="sbMinSubViewWidth">
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
@@ -260,10 +260,10 @@
      <string>Show Status Bar</string>
     </property>
    </widget>
+   <zorder>displayGroup_Subviews</zorder>
    <zorder>layoutWidget_Subviews</zorder>
    <zorder>displayGroup_Window</zorder>
    <zorder>displayGroup_DisplayFormat</zorder>
-   <zorder>displayGroup_Subviews</zorder>
    <zorder>cbStatusBar</zorder>
   </widget>
   <widget class="QWidget" name="VideoSettings">
@@ -387,7 +387,7 @@
   <tabstop>sbHeight</tabstop>
   <tabstop>cbStatusBar</tabstop>
   <tabstop>spinBox_max_subviews</tabstop>
-  <tabstop>spinBox_min_subview_width</tabstop>
+  <tabstop>sbMinSubViewWidth</tabstop>
   <tabstop>checkBox_reuse_subview</tabstop>
   <tabstop>cbOverride</tabstop>
   <tabstop>cmbRenderSys</tabstop>

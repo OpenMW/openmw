@@ -299,6 +299,12 @@ void CSVSettings::Dialog::buildPages()
     if(index != -1)
         cmbRefIdType->setCurrentIndex(index);
 
+    // subview
+    if(model()->hasSettingDefinitions("SubView/minimum width"))
+        sbMinSubViewWidth->setValue(model()->settingValue("SubView/minimum width").toInt());
+    else
+        sbMinSubViewWidth->setValue(325);
+
     SettingWindow::createPages ();
 
     foreach (Page *page, SettingWindow::pages())
@@ -376,6 +382,9 @@ void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
                            QStringList(cmbRecStatus->currentText()));
     model()->setDefinitions("Display Format/Referenceable ID Type Display",
                            QStringList(cmbRefIdType->currentText()));
+    // subview
+    model()->setDefinitions("SubView/minimum width",
+                           QStringList(QString::number(sbMinSubViewWidth->value())));
 
     saveSettings();
 }
