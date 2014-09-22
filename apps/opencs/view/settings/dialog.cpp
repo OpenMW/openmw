@@ -154,7 +154,28 @@ CSVSettings::Dialog::Dialog(QTabWidget *parent)
     // to update the checkbox on the view menu
     connect(cbStatusBar, SIGNAL(toggled(bool)), this, SIGNAL (toggleStatusBar(bool)));
 
+    displayGroup_Window->installEventFilter(this);
+
     setupDialog();
+}
+
+bool CSVSettings::Dialog::eventFilter(QObject *target, QEvent *event)
+{
+    if (event->type() == QEvent::MouseButtonDblClick)
+    {
+        if(stackedWidget->currentWidget() == page_1)
+        {
+            stackedWidget->setCurrentWidget(page_2);
+            return false;
+        }
+        else if(stackedWidget->currentWidget() == page_2)
+        {
+            stackedWidget->setCurrentWidget(page_1);
+            return false;
+        }
+    }
+
+    return QTabWidget::eventFilter(target, event);
 }
 
 void CSVSettings::Dialog::slotRendererChanged(const QString &renderer)
@@ -254,7 +275,6 @@ void CSVSettings::Dialog::buildPages()
     {
         // show the values in ini file
         cmbStdWinSize->setCurrentIndex(index);
-        //slotStandardToggled(true);
     }
     else
     {
@@ -263,9 +283,6 @@ void CSVSettings::Dialog::buildPages()
                                         Qt::DisplayRole, Qt::MatchStartsWith);
         if(index != -1)
             cmbStdWinSize->setCurrentIndex(index);
-
-        //rbCustWinSize->setChecked(true);
-        //slotStandardToggled(false);
     }
 
     // status bar
@@ -331,7 +348,7 @@ void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
                            QStringList(cmbShaderLang->currentText().toLower()));
 
     // window size
-    if(0) //rbStdWinSize->isChecked())
+    if(page_2->isEnabled())
     {
         QRegExp re("^(\\d+) x (\\d+)");
         if(re.indexIn(cmbStdWinSize->currentText()) > -1)
@@ -339,9 +356,9 @@ void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
             model()->setDefinitions("Window Size/Width", QStringList(re.cap(1)));
             model()->setDefinitions("Window Size/Height", QStringList(re.cap(2)));
         }
-    //}
-    //else
-    //{
+    }
+    else
+    {
         model()->setDefinitions("Window Size/Width",
                                QStringList(QString::number(sbWidth->value())));
         model()->setDefinitions("Window Size/Height",

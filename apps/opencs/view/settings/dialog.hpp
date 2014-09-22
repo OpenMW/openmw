@@ -33,6 +33,8 @@ namespace CSVSettings {
 
         void setupDialog();
 
+        bool eventFilter(QObject *target, QEvent *event);
+
     private:
 
         void buildPages();

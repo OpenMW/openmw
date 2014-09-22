@@ -14,121 +14,8 @@
    <string>User Settings</string>
   </property>
   <property name="currentIndex">
-   <number>1</number>
+   <number>0</number>
   </property>
-  <widget class="QWidget" name="VideoSettings">
-   <attribute name="title">
-    <string>Video Settings</string>
-   </attribute>
-   <widget class="QWidget" name="layoutWidget_Render">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>26</y>
-      <width>351</width>
-      <height>129</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0" colspan="2">
-      <widget class="QCheckBox" name="cbOverride">
-       <property name="text">
-        <string>Use Render System Settings from OpenMW</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="labRenderSys">
-       <property name="text">
-        <string>Rendering Subsystem</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QComboBox" name="cmbRenderSys">
-       <property name="editable">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="labAntiAlias">
-       <property name="text">
-        <string>Antialiasing</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QCheckBox" name="cbVsync">
-       <property name="text">
-        <string>Vertical Sync</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="labShaderLang">
-       <property name="text">
-        <string>Shader Language</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QComboBox" name="cmbShaderLang"/>
-     </item>
-     <item row="4" column="1">
-      <widget class="QComboBox" name="cmbAntiAlias"/>
-     </item>
-     <item row="1" column="0" colspan="2">
-      <widget class="Line" name="line">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>2</height>
-        </size>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(215, 215, 215);</string>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QGroupBox" name="displayGroup_Render">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>8</y>
-      <width>371</width>
-      <height>156</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Render System</string>
-    </property>
-   </widget>
-   <widget class="QGroupBox" name="groupBox">
-    <property name="geometry">
-     <rect>
-      <x>9</x>
-      <y>169</y>
-      <width>371</width>
-      <height>101</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>title</string>
-    </property>
-   </widget>
-   <zorder>displayGroup_Render</zorder>
-   <zorder>layoutWidget_Render</zorder>
-   <zorder>groupBox</zorder>
-  </widget>
   <widget class="QWidget" name="DisplaySetttings">
    <attribute name="title">
     <string>Display Settings</string>
@@ -284,7 +171,7 @@
      <rect>
       <x>10</x>
       <y>100</y>
-      <width>191</width>
+      <width>201</width>
       <height>51</height>
      </rect>
     </property>
@@ -299,14 +186,14 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>171</width>
-       <height>21</height>
+       <width>181</width>
+       <height>22</height>
       </rect>
      </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="page">
+     <widget class="QWidget" name="page_1">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -315,7 +202,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>171</width>
+         <width>181</width>
          <height>22</height>
         </rect>
        </property>
@@ -344,15 +231,15 @@
       </widget>
      </widget>
      <widget class="QWidget" name="page_2">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <widget class="QComboBox" name="cmbStdWinSize">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>171</width>
+         <width>181</width>
          <height>22</height>
         </rect>
        </property>
@@ -373,13 +260,142 @@
      <string>Show Status Bar</string>
     </property>
    </widget>
+   <zorder>layoutWidget_Subviews</zorder>
    <zorder>displayGroup_Window</zorder>
    <zorder>displayGroup_DisplayFormat</zorder>
    <zorder>displayGroup_Subviews</zorder>
-   <zorder>displayGroup_WindowSize</zorder>
    <zorder>cbStatusBar</zorder>
   </widget>
+  <widget class="QWidget" name="VideoSettings">
+   <attribute name="title">
+    <string>Video Settings</string>
+   </attribute>
+   <widget class="QWidget" name="layoutWidget_Render">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>26</y>
+      <width>351</width>
+      <height>129</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0" colspan="2">
+      <widget class="QCheckBox" name="cbOverride">
+       <property name="text">
+        <string>Use Render System Settings from OpenMW</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="labRenderSys">
+       <property name="text">
+        <string>Rendering Subsystem</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="cmbRenderSys">
+       <property name="editable">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="labAntiAlias">
+       <property name="text">
+        <string>Antialiasing</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QCheckBox" name="cbVsync">
+       <property name="text">
+        <string>Vertical Sync</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="labShaderLang">
+       <property name="text">
+        <string>Shader Language</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QComboBox" name="cmbShaderLang"/>
+     </item>
+     <item row="4" column="1">
+      <widget class="QComboBox" name="cmbAntiAlias"/>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="Line" name="line">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>2</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(215, 215, 215);</string>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="displayGroup_Render">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>8</y>
+      <width>371</width>
+      <height>156</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Render System</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>9</x>
+      <y>169</y>
+      <width>371</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>title</string>
+    </property>
+   </widget>
+   <zorder>displayGroup_Render</zorder>
+   <zorder>layoutWidget_Render</zorder>
+   <zorder>groupBox</zorder>
+  </widget>
  </widget>
+ <tabstops>
+  <tabstop>cmbRecStatus</tabstop>
+  <tabstop>cmbRefIdType</tabstop>
+  <tabstop>sbWidth</tabstop>
+  <tabstop>sbHeight</tabstop>
+  <tabstop>cbStatusBar</tabstop>
+  <tabstop>spinBox_max_subviews</tabstop>
+  <tabstop>spinBox_min_subview_width</tabstop>
+  <tabstop>checkBox_reuse_subview</tabstop>
+  <tabstop>cbOverride</tabstop>
+  <tabstop>cmbRenderSys</tabstop>
+  <tabstop>cbVsync</tabstop>
+  <tabstop>cmbAntiAlias</tabstop>
+  <tabstop>cmbShaderLang</tabstop>
+  <tabstop>cmbStdWinSize</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
