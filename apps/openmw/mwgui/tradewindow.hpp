@@ -72,6 +72,8 @@ namespace MWGui
             void sellToNpc(const MWWorld::Ptr& item, int count, bool boughtItem); ///< only used for adjusting the gold balance
             void buyFromNpc(const MWWorld::Ptr& item, int count, bool soldItem); ///< only used for adjusting the gold balance
 
+            void updateOffer();
+
             void onItemSelected (int index);
             void sellItem (MyGUI::Widget* sender, int count);
 

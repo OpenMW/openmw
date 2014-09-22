@@ -480,24 +480,38 @@ namespace MWGui
         mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + boost::lexical_cast<std::string>(getMerchantGold()));
     }
 
+    void TradeWindow::updateOffer()
+    {
+        TradeItemModel* playerTradeModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
+
+        int merchantOffer = 0;
+
+        std::vector<ItemStack> playerBorrowed = playerTradeModel->getItemsBorrowedToUs();
+        for (std::vector<ItemStack>::const_iterator it = playerBorrowed.begin(); it != playerBorrowed.end(); ++it)
+        {
+            merchantOffer -= MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(it->mBase, it->mCount), true);
+        }
+
+        std::vector<ItemStack> merchantBorrowed = mTradeModel->getItemsBorrowedToUs();
+        for (std::vector<ItemStack>::const_iterator it = merchantBorrowed.begin(); it != merchantBorrowed.end(); ++it)
+        {
+            merchantOffer += MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(it->mBase, it->mCount), false);
+        }
+
+        int diff = merchantOffer - mCurrentMerchantOffer;
+        mCurrentMerchantOffer = merchantOffer;
+        mCurrentBalance += diff;
+        updateLabels();
+    }
+
     void TradeWindow::sellToNpc(const MWWorld::Ptr& item, int count, bool boughtItem)
     {
-        int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(item, count), boughtItem);
-
-        mCurrentBalance += diff;
-        mCurrentMerchantOffer += diff;
-
-        updateLabels();
+        updateOffer();
     }
 
     void TradeWindow::buyFromNpc(const MWWorld::Ptr& item, int count, bool soldItem)
     {
-        int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(item, count), !soldItem);
-
-        mCurrentBalance -= diff;
-        mCurrentMerchantOffer -= diff;
-
-        updateLabels();
+        updateOffer();
     }
 
     void TradeWindow::onReferenceUnavailable()
