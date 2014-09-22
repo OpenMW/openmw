@@ -197,6 +197,18 @@ namespace MWGui
                     if (plainText[plainText.size()-1] == '\n')
                         plainText.erase(plainText.end()-1);
 
+#if (MYGUI_VERSION < MYGUI_DEFINE_VERSION(3, 2, 2))
+                    // splitting won't be fully functional until 3.2.2 (see TextElement::pageSplit())
+                    // hack: prevent newlines at the end of the book possibly creating unnecessary pages
+                    if (event == BookTextParser::Event_EOF)
+                    {
+                        while (plainText[plainText.size()-1] == '\n')
+                        {
+                            plainText.erase(plainText.end()-1);
+                        }
+                    }
+#endif
+
                     TextElement elem(paper, pag, mTextStyle, plainText);
                     elem.paginate();
                 }
