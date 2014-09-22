@@ -6,7 +6,6 @@
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
-#include "../../model/settings/usersettings.hpp"
 
 #include "../filter/filterbox.hpp"
 #include "table.hpp"
@@ -34,13 +33,6 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     QWidget *widget = new QWidget;
 
     widget->setLayout (layout);
-
-    int minWidth = 325;
-    if(CSMSettings::UserSettings::instance().hasSettingDefinitions("SubView/minimum width"))
-        minWidth = CSMSettings::UserSettings::instance().settingValue("SubView/minimum width").toInt();
-    else
-        CSMSettings::UserSettings::instance().setDefinitions("SubView/minimum width", (QStringList() << "minWidth"));
-    widget->setMinimumWidth(minWidth);
 
     setWidget (widget);
 

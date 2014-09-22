@@ -442,6 +442,13 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     if (!hint.empty())
         view->useHint (hint);
 
+    int minWidth = 325; // default value if none found
+    if(CSMSettings::UserSettings::instance().hasSettingDefinitions("SubView/minimum width"))
+        minWidth = CSMSettings::UserSettings::instance().settingValue("SubView/minimum width").toInt();
+    else
+        CSMSettings::UserSettings::instance().setDefinitions("SubView/minimum width", (QStringList() << "minWidth"));
+    view->setMinimumWidth(minWidth);
+
     view->setStatusBar (mShowStatusBar->isChecked());
 // NOTE: only required if show status bar setting should be applied to existing
 // window

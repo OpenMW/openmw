@@ -27,7 +27,6 @@
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/doc/document.hpp"
 #include "../../model/world/commands.hpp"
-#include "../../model/settings/usersettings.hpp"
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
@@ -393,12 +392,6 @@ void CSVWorld::EditWidget::remake(int row)
 
     mWidgetMapper->setCurrentModelIndex(mTable->index(row, 0));
 
-    int minWidth = 325;
-    if(CSMSettings::UserSettings::instance().hasSettingDefinitions("SubView/minimum width"))
-        minWidth = CSMSettings::UserSettings::instance().settingValue("SubView/minimum width").toInt();
-    else
-        CSMSettings::UserSettings::instance().setDefinitions("SubView/minimum width", (QStringList() << "minWidth"));
-    this->setMinimumWidth(minWidth);
     this->setWidget(mMainWidget);
     this->setWidgetResizable(true);
 }

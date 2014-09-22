@@ -8,8 +8,6 @@
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
 
-#include "../../model/settings/usersettings.hpp"
-
 CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : SubView (id)
 {
@@ -42,13 +40,6 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
     QWidget *widget = new QWidget;
 
     widget->setLayout (layout);
-
-    int minWidth = 325;
-    if(CSMSettings::UserSettings::instance().hasSettingDefinitions("SubView/minimum width"))
-        minWidth = CSMSettings::UserSettings::instance().settingValue("SubView/minimum width").toInt();
-    else
-        CSMSettings::UserSettings::instance().setDefinitions("SubView/minimum width", (QStringList() << "minWidth"));
-    widget->setMinimumWidth(minWidth);
 
     setWidget (widget);
 

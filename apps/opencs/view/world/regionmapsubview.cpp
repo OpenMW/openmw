@@ -2,20 +2,12 @@
 #include "regionmapsubview.hpp"
 
 #include "regionmap.hpp"
-#include "../../model/settings/usersettings.hpp"
 
 CSVWorld::RegionMapSubView::RegionMapSubView (CSMWorld::UniversalId universalId,
     CSMDoc::Document& document)
 : CSVDoc::SubView (universalId)
 {
     mRegionMap = new RegionMap (universalId, document, this);
-
-    int minWidth = 325;
-    if(CSMSettings::UserSettings::instance().hasSettingDefinitions("SubView/minimum width"))
-        minWidth = CSMSettings::UserSettings::instance().settingValue("SubView/minimum width").toInt();
-    else
-        CSMSettings::UserSettings::instance().setDefinitions("SubView/minimum width", (QStringList() << "minWidth"));
-    mRegionMap->setMinimumWidth(minWidth);
 
     setWidget (mRegionMap);
 
