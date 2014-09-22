@@ -57,12 +57,10 @@ add_component_dir (misc
     utf8stream stringops resourcehelpers
     )
 
-add_definitions(-DGLOBAL_DATA_PATH="${CMAKE_INSTALL_PREFIX}/share/games/")
-if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr")
-    add_definitions(-DGLOBAL_CONFIG_PATH="/etc/")
-else()
-    add_definitions(-DGLOBAL_CONFIG_PATH="${CMAKE_INSTALL_PREFIX}/etc/")
-endif()
+IF(NOT WIN32 AND NOT APPLE)
+    add_definitions(-DGLOBAL_DATA_PATH="${GLOBAL_DATA_PATH}")
+    add_definitions(-DGLOBAL_CONFIG_PATH="${GLOBAL_CONFIG_PATH}")
+ENDIF()
 add_component_dir (files
     linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
     constrainedfiledatastream lowlevelfile
