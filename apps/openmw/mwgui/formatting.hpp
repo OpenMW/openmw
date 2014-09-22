@@ -49,7 +49,7 @@ namespace MWGui
                 void parseTag(std::string tag);
 
             private:
-                int mIndex;
+                size_t mIndex;
                 std::string mText;
                 std::string mReadyText;
 

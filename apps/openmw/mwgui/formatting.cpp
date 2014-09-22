@@ -21,7 +21,7 @@ namespace MWGui
     {
         /* BookTextParser */
         BookTextParser::BookTextParser(const std::string & text)
-            : mIndex(-1), mText(text), mIgnoreNewlineTags(true), mIgnoreLineEndings(true)
+            : mIndex(0), mText(text), mIgnoreNewlineTags(true), mIgnoreLineEndings(true)
         {
             MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
             mText = Interpreter::fixDefinesBook(mText, interpreterContext);
@@ -47,16 +47,8 @@ namespace MWGui
 
         BookTextParser::Events BookTextParser::next()
         {
-            while (1)
+            while (mIndex < mText.size())
             {
-                ++mIndex;
-
-                if (mIndex >= mText.size())
-                {
-                    flushBuffer();
-                    return Event_EOF;
-                }
-
                 char ch = mText[mIndex];
                 if (ch == '<')
                 {
@@ -93,6 +85,7 @@ namespace MWGui
                             mIgnoreNewlineTags = false;
                         }
 
+                        ++mIndex;
                         return type;
                     }
                 }
@@ -106,8 +99,11 @@ namespace MWGui
                     }
                 }
 
-
+                ++mIndex;
             }
+
+            flushBuffer();
+            return Event_EOF;
         }
 
         void BookTextParser::flushBuffer()
