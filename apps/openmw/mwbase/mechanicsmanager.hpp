@@ -138,6 +138,9 @@ namespace MWBase
             /// @return was it illegal, and someone saw you doing it?
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed) = 0;
 
+            /// @return is \a ptr allowed to take/use \a item or is it a crime?
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim) = 0;
+
             enum PersuasionType
             {
                 PT_Admire,
