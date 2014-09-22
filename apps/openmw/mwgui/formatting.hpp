@@ -81,8 +81,6 @@ namespace MWGui
 
                 void setStartTop(int top) { mStartTop = top; }
                 void setCurrentTop(int top) { mCurrentTop = top; }
-                void modifyStartTop(int mod) { mStartTop += mod; }
-                void modifyCurrentTop(int mod) { mCurrentTop += mod; }
 
                 Paginator & operator<<(const Page & page)
                 {

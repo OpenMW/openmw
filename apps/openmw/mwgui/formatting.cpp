@@ -233,7 +233,8 @@ namespace MWGui
             }
 
             // insert last page
-            pag << Paginator::Page(pag.getStartTop(), pag.getStartTop() + pag.getPageHeight());
+            if (pag.getStartTop() != pag.getCurrentTop())
+                pag << Paginator::Page(pag.getStartTop(), pag.getStartTop() + pag.getPageHeight());
 
             paper->setSize(paper->getWidth(), pag.getCurrentTop());
 
@@ -301,7 +302,7 @@ namespace MWGui
                 mPaginator.setStartTop(newStartTop);
             }
 
-            mPaginator.modifyCurrentTop(getHeight());
+            mPaginator.setCurrentTop(newTop);
         }
 
         int GraphicElement::pageSplit()
