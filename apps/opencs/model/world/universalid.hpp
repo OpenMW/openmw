@@ -122,10 +122,12 @@ namespace CSMWorld
                 Type_Video,
                 Type_DebugProfiles,
                 Type_DebugProfile,
+                Type_SoundGens,
+                Type_SoundGen,
                 Type_RunLog
             };
 
-            enum { NumberOfTypes = Type_DebugProfile+1 };
+            enum { NumberOfTypes = Type_RunLog+1 };
 
         private:
 

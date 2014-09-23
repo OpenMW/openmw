@@ -539,6 +539,16 @@ CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfiles()
     return mDebugProfiles;
 }
 
+const CSMWorld::IdCollection<ESM::SoundGenerator>& CSMWorld::Data::getSoundGens() const
+{
+    return mSoundGens;
+}
+
+CSMWorld::IdCollection<ESM::SoundGenerator>& CSMWorld::Data::getSoundGens()
+{
+    return mSoundGens;
+}
+
 const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) const
 {
     return mResourcesManager.get (id.getType());
@@ -625,6 +635,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         case ESM::REC_SPEL: mSpells.load (*mReader, mBase); break;
         case ESM::REC_ENCH: mEnchantments.load (*mReader, mBase); break;
         case ESM::REC_BODY: mBodyParts.load (*mReader, mBase); break;
+        case ESM::REC_SNDG: mSoundGens.load (*mReader, mBase); break;
 
         case ESM::REC_CELL:
         {
@@ -775,6 +786,7 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getCells().searchId (id)!=-1 ||
         getEnchantments().searchId (id)!=-1 ||
         getBodyParts().searchId (id)!=-1 ||
+        getSoundGens().searchId (id)!=-1 ||
         getReferenceables().searchId (id)!=-1;
 }
 
@@ -795,6 +807,7 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mCells) +
         count (state, mEnchantments) +
         count (state, mBodyParts) +
+        count (state, mSoundGens) +
         count (state, mReferenceables);
 }
 
@@ -837,6 +850,7 @@ std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
     appendIds (ids, mCells, listDeleted);
     appendIds (ids, mEnchantments, listDeleted);
     appendIds (ids, mBodyParts, listDeleted);
+    appendIds (ids, mSoundGens, listDeleted);
     appendIds (ids, mReferenceables, listDeleted);
 
     std::sort (ids.begin(), ids.end());
