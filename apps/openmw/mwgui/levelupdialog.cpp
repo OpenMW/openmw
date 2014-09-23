@@ -5,6 +5,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/fallback.hpp"
@@ -191,6 +192,9 @@ namespace MWGui
         setAttributeValues();
 
         center();
+
+        // Play LevelUp Music
+        MWBase::Environment::get().getSoundManager()->streamMusic("Special/MW_Triumph.mp3");
     }
 
     void LevelupDialog::onOkButtonClicked(MyGUI::Widget* sender)
