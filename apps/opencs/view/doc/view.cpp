@@ -322,8 +322,11 @@ void CSVDoc::View::updateSubViewIndicies(SubView *view)
 
     if(mSubViews.size() == 1)
     {
-        mSubViews.at(0)->setTitleBarWidget(new QWidget(this));
-        updateTitle(mSubViews.at(0)->getUniversalId().getTypeName().c_str());
+        if(!mSubViews.at(0)->isFloating())
+        {
+            mSubViews.at(0)->setTitleBarWidget(new QWidget(this));
+            updateTitle(mSubViews.at(0)->getUniversalId().getTypeName().c_str());
+        }
     }
     else
     {
@@ -471,7 +474,8 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     if(std::find(referenceables.begin(), referenceables.end(), id.getType()) != referenceables.end())
     {
         view = mSubViewFactory.makeSubView (CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, id.getId()), *mDocument);
-    } else
+    }
+    else
     {
         view = mSubViewFactory.makeSubView (id, *mDocument);
     }
@@ -488,17 +492,6 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
         userSettings.setDefinitions("SubView/minimum width", (QStringList() << QString(minWidth)));
     view->setMinimumWidth(minWidth);
 
-#if 0
-    if(mSubViews.size() == 1) // remove subview title and add to the main window
-    {
-        updateTitle(id.getTypeName().c_str());
-        // FIXME: search area broken
-        view->setTitleBarWidget(new QWidget(this));
-    }
-    else
-#endif
-        updateSubViewIndicies();
-
     view->setStatusBar (mShowStatusBar->isChecked());
 // NOTE: only required if show status bar setting should be applied to existing
 // window
@@ -510,6 +503,8 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
 #endif
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
+
+    updateSubViewIndicies();
 
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&, const std::string&)));
