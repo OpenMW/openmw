@@ -314,20 +314,37 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     factory->loadAllFiles();
 
-    sh::Factory::getInstance().setGlobalSetting ("fog",
-        mUserSettings.settingValue("shader/fog").toStdString());
+    std::string fog("true"); // default if setting does not exist
+    if(mUserSettings.hasSettingDefinitions("Shader/fog"))
+        fog = mUserSettings.settingValue("Shader/fog").toStdString();
+    else
+        mUserSettings.setDefinitions("Shader/fog", (QStringList() << QString(fog.c_str())));
+    sh::Factory::getInstance().setGlobalSetting ("fog", fog);
 
-    sh::Factory::getInstance().setGlobalSetting ("shadows",
-        mUserSettings.settingValue("shader/shadows").toStdString());
+    std::string shadows("false");
+    if(mUserSettings.hasSettingDefinitions("Shader/shadows"))
+        shadows = mUserSettings.settingValue("Shader/shadows").toStdString();
+    else
+        mUserSettings.setDefinitions("Shader/shadows", (QStringList() << QString(shadows.c_str())));
+    sh::Factory::getInstance().setGlobalSetting ("shadows", shadows);
 
-    sh::Factory::getInstance().setGlobalSetting ("shadows_pssm",
-        mUserSettings.settingValue("shader/shadows_pssm").toStdString());
+    std::string shadows_pssm("false");
+    if(mUserSettings.hasSettingDefinitions("Shader/shadows_pssm"))
+        shadows_pssm = mUserSettings.settingValue("Shader/shadows_pssm").toStdString();
+    else
+        mUserSettings.setDefinitions("Shader/shadows_pssm", (QStringList() << QString(shadows_pssm.c_str())));
+    sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", shadows_pssm);
 
-    sh::Factory::getInstance ().setGlobalSetting ("render_refraction",
-        mUserSettings.settingValue("shader/render_refraction").toStdString());
 
-    sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix",
-        mUserSettings.settingValue("shader/viewproj_fix").toStdString());
+    std::string render_refraction("false");
+    if(mUserSettings.hasSettingDefinitions("Shader/render_refraction"))
+        render_refraction = mUserSettings.settingValue("Shader/render_refraction").toStdString();
+    else
+        mUserSettings.setDefinitions("Shader/render_refraction", (QStringList() << QString(render_refraction.c_str())));
+    sh::Factory::getInstance ().setGlobalSetting ("render_refraction", render_refraction);
+
+    // internal setting - may be switched on or off by the use of shader configurations
+    sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
 
     sh::Factory::getInstance ().setGlobalSetting ("num_lights",
         mUserSettings.settingValue("shader/num_lights").toStdString());

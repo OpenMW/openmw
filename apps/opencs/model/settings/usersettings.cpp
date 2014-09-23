@@ -59,36 +59,6 @@ void UserSettings::buildSettingModelDefaults()
     {
         QString section = "Group1";
 
-        Setting *fog = createSetting (Type_CheckBox, page, "fog");
-        fog->setDeclaredValues(QStringList() << "true" << "false");
-        fog->setDefaultValue("true");
-        fog->setEditorSetting(true);
-        fog->setSpecialValueText("Enable Fog");
-        fog->setWidgetWidth(15);
-        fog->setColumnSpan (2);
-        fog->setStyleSheet ("QGroupBox { border: 0px; spacing: 5; }");
-        fog->setViewLocation(1, 1);
-
-        Setting *shadows = createSetting (Type_CheckBox, page, "shadows");
-        shadows->setDeclaredValues(QStringList() << "true" << "false");
-        shadows->setDefaultValue("false");
-        shadows->setEditorSetting(true);
-        shadows->setSpecialValueText("Enable Shadows");
-        shadows->setWidgetWidth(15);
-        shadows->setColumnSpan (2);
-        shadows->setStyleSheet ("QGroupBox { border: 0px; }");
-        shadows->setViewLocation(2, 1);
-
-        Setting *shadows_pssm = createSetting (Type_CheckBox, page, "shadows_pssm");
-        shadows_pssm->setDeclaredValues(QStringList() << "true" << "false");
-        shadows_pssm->setDefaultValue("false");
-        shadows_pssm->setEditorSetting(true);
-        shadows_pssm->setSpecialValueText("Enable PSSM Shadows");
-        shadows_pssm->setWidgetWidth(15);
-        shadows_pssm->setColumnSpan (2);
-        shadows_pssm->setStyleSheet ("QGroupBox { border: 0px; spacing: 5; }");
-        shadows_pssm->setViewLocation(3, 1);
-
         Setting *numLights = createSetting (Type_SpinBox, page, "num lights");
         numLights->setDefaultValue(8);
         numLights->setEditorSetting(true);
@@ -97,34 +67,15 @@ void UserSettings::buildSettingModelDefaults()
         numLights->setMaximum (100); // FIXME: not sure what the max value should be
         numLights->setWidgetWidth (10);
         numLights->setSpecialValueText ("Nothing!"); // text to display when value is 0
-        numLights->setViewLocation(4, 2);
+        numLights->setViewLocation(1, 2);
         Setting *nlText = createSetting (Type_Undefined, page, "nlText");
         nlText->setSpecialValueText("Num Lights"); // hack to place text labels
         nlText->setEditorSetting(false);
         nlText->setSerializable (false);
         nlText->setColumnSpan (1);
         nlText->setWidgetWidth (10);
-        nlText->setViewLocation(4, 1);
+        nlText->setViewLocation(1, 1);
 
-        Setting *renderRefraction = createSetting (Type_CheckBox, page, "renderRefraction");
-        renderRefraction->setDeclaredValues(QStringList() << "true" << "false");
-        renderRefraction->setDefaultValue("false");
-        renderRefraction->setEditorSetting(true);
-        renderRefraction->setSpecialValueText("Enable Render Refraction");
-        renderRefraction->setWidgetWidth(20);
-        renderRefraction->setColumnSpan (2);
-        renderRefraction->setStyleSheet ("QGroupBox { border: 0px; }");
-        renderRefraction->setViewLocation(5, 1);
-
-        Setting *viewproj_fix = createSetting (Type_CheckBox, page, "viewproj_fix");
-        viewproj_fix->setDeclaredValues(QStringList() << "true" << "false");
-        viewproj_fix->setDefaultValue("false");
-        viewproj_fix->setEditorSetting(true);
-        viewproj_fix->setSpecialValueText("View Proj Fix");
-        viewproj_fix->setWidgetWidth(20);
-        viewproj_fix->setColumnSpan (2);
-        viewproj_fix->setStyleSheet ("QGroupBox { border: 0px; }");
-        viewproj_fix->setViewLocation(6, 1);
 
         Setting *simpleWater = createSetting (Type_CheckBox, page, "simple_water");
         simpleWater->setDeclaredValues(QStringList() << "true" << "false");
