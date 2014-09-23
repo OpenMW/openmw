@@ -128,9 +128,12 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QSpinBox" name="spinBox_max_subviews">
+      <widget class="QSpinBox" name="sbMaxSubViews">
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="minimum">
+        <number>1</number>
        </property>
       </widget>
      </item>
@@ -386,7 +389,7 @@
   <tabstop>sbWidth</tabstop>
   <tabstop>sbHeight</tabstop>
   <tabstop>cbStatusBar</tabstop>
-  <tabstop>spinBox_max_subviews</tabstop>
+  <tabstop>sbMaxSubViews</tabstop>
   <tabstop>sbMinSubViewWidth</tabstop>
   <tabstop>checkBox_reuse_subview</tabstop>
   <tabstop>cbOverride</tabstop>

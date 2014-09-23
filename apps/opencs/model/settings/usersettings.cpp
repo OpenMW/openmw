@@ -202,18 +202,8 @@ void UserSettings::buildSettingModelDefaults()
         spaceText2->setViewLocation(3, 7);
 
 #if 0
-    sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", "false");
-
-    sh::Factory::getInstance ().setGlobalSetting ("render_refraction", "false");
-
-    sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
-
-
-
 sh::Factory::getInstance ().setSharedParameter ("windDir_windSpeed", sh::makeProperty<sh::Vector3>(new sh::Vector3(0.5, -0.8, 0.2)));
 sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(1, 0.6)));
-sh::Factory::getInstance ().setGlobalSetting ("refraction", Settings::Manager::getBool("refraction", "Water") ? "true" : "false");
-sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
 sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh::Vector4> (new sh::Vector4(0,0,0,0)));
 #endif
     }

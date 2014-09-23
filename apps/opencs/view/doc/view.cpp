@@ -297,7 +297,7 @@ void CSVDoc::View::setupUi()
     setupDebugMenu();
 }
 
-void CSVDoc::View::updateTitle()
+void CSVDoc::View::updateTitle(const std::string subview)
 {
     std::ostringstream stream;
 
@@ -309,7 +309,35 @@ void CSVDoc::View::updateTitle()
     if (mViewTotal>1)
         stream << " [" << (mViewIndex+1) << "/" << mViewTotal << "]";
 
+    if (subview != "")
+        stream << " - " << subview;
+
     setWindowTitle (stream.str().c_str());
+}
+
+void CSVDoc::View::updateSubViewIndicies(SubView *view)
+{
+    if(view && mSubViews.contains(view))
+        mSubViews.removeOne(view);
+
+    if(mSubViews.size() == 1)
+    {
+        mSubViews.at(0)->setTitleBarWidget(new QWidget(this));
+        updateTitle(mSubViews.at(0)->getUniversalId().getTypeName().c_str());
+    }
+    else
+    {
+        updateTitle();
+        if(mSubViews.size() > 1)
+        {
+            foreach(SubView * sb, mSubViews)
+            {
+                QWidget * tb = sb->titleBarWidget();
+                if(tb) delete tb;
+                sb->setTitleBarWidget(0);
+            }
+        }
+    }
 }
 
 void CSVDoc::View::updateActions()
@@ -421,11 +449,20 @@ void CSVDoc::View::updateProgress (int current, int max, int type, int threads)
 
 void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::string& hint)
 {
-    /// \todo add an user setting for limiting the number of sub views per top level view. Automatically open a new top level view if this
-    /// number is exceeded
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
 
-    /// \todo if the sub view limit setting is one, the sub view title bar should be hidden and the text in the main title bar adjusted
-    /// accordingly
+    int maxSubView = 3;
+    if(userSettings.hasSettingDefinitions("SubView/max subviews"))
+        maxSubView = userSettings.settingValue("SubView/max subviews").toInt();
+    else
+        userSettings.setDefinitions("SubView/max subviews", (QStringList() << QString(maxSubView)));
+
+    if(mSubViews.size() >= maxSubView) // create a new top level view
+    {
+        mViewManager.addView(mDocument, id, hint);
+
+        return;
+    }
 
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
@@ -439,15 +476,28 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
         view = mSubViewFactory.makeSubView (id, *mDocument);
     }
     assert(view);
+    view->setParent(this);
+    mSubViews.append(view); // only after assert
     if (!hint.empty())
         view->useHint (hint);
 
-    int minWidth = 325; // default value if none found
-    if(CSMSettings::UserSettings::instance().hasSettingDefinitions("SubView/minimum width"))
-        minWidth = CSMSettings::UserSettings::instance().settingValue("SubView/minimum width").toInt();
+    int minWidth = 325; // default value to use if none found
+    if(userSettings.hasSettingDefinitions("SubView/minimum width"))
+        minWidth = userSettings.settingValue("SubView/minimum width").toInt();
     else
-        CSMSettings::UserSettings::instance().setDefinitions("SubView/minimum width", (QStringList() << "minWidth"));
+        userSettings.setDefinitions("SubView/minimum width", (QStringList() << QString(minWidth)));
     view->setMinimumWidth(minWidth);
+
+#if 0
+    if(mSubViews.size() == 1) // remove subview title and add to the main window
+    {
+        updateTitle(id.getTypeName().c_str());
+        // FIXME: search area broken
+        view->setTitleBarWidget(new QWidget(this));
+    }
+    else
+#endif
+        updateSubViewIndicies();
 
     view->setStatusBar (mShowStatusBar->isChecked());
 // NOTE: only required if show status bar setting should be applied to existing

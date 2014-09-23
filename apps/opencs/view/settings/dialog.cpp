@@ -305,6 +305,11 @@ void CSVSettings::Dialog::buildPages()
     else
         sbMinSubViewWidth->setValue(325);
 
+    if(model()->hasSettingDefinitions("SubView/max subviews"))
+        sbMaxSubViews->setValue(model()->settingValue("SubView/max subview").toInt());
+    else
+        sbMaxSubViews->setValue(3);
+
     SettingWindow::createPages ();
 
     foreach (Page *page, SettingWindow::pages())
@@ -385,6 +390,8 @@ void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
     // subview
     model()->setDefinitions("SubView/minimum width",
                            QStringList(QString::number(sbMinSubViewWidth->value())));
+    model()->setDefinitions("SubView/max subviews",
+                           QStringList(QString::number(sbMaxSubViews->value())));
 
     saveSettings();
 }

@@ -18,11 +18,14 @@ namespace CSMWorld
 
 namespace CSVDoc
 {
+    class View;
+
     class SubView : public QDockWidget
     {
             Q_OBJECT
 
             CSMWorld::UniversalId mUniversalId;
+            View *mParent;
 
             // not implemented
             SubView (const SubView&);
@@ -43,6 +46,12 @@ namespace CSVDoc
 
             virtual void useHint (const std::string& hint);
             ///< Default implementation: ignored
+
+            void setParent(View *parent) { mParent = parent; }
+
+        private:
+
+            void closeEvent (QCloseEvent *event);
 
         signals:
 
