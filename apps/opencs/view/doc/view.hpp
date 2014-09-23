@@ -187,6 +187,8 @@ namespace CSVDoc
 
             void addBodyPartsSubView();
 
+            void addSoundGensSubView();
+
             void addMeshesSubView();
 
             void addIconsSubView();

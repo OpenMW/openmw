@@ -215,6 +215,10 @@ void CSVDoc::View::setupAssetsMenu()
     connect (sounds, SIGNAL (triggered()), this, SLOT (addSoundsSubView()));
     assets->addAction (sounds);
 
+    QAction *soundGens = new QAction (tr ("Sound Generators"), this);
+    connect (soundGens, SIGNAL (triggered()), this, SLOT (addSoundGensSubView()));
+    assets->addAction (soundGens);
+
     assets->addSeparator(); // resources follow here
 
     QAction *meshes = new QAction (tr ("Meshes"), this);
@@ -559,6 +563,11 @@ void CSVDoc::View::addEnchantmentsSubView()
 void CSVDoc::View::addBodyPartsSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_BodyParts);
+}
+
+void CSVDoc::View::addSoundGensSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_SoundGens);
 }
 
 void CSVDoc::View::addMeshesSubView()
