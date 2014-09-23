@@ -34,17 +34,21 @@ namespace MWGui
             void adjustButton(Gui::ImageButton* button);
 
         private:
+            typedef std::pair<int, int> Page;
+            typedef std::vector<Page> Pages;
+
             Gui::ImageButton* mCloseButton;
             Gui::ImageButton* mTakeButton;
             Gui::ImageButton* mNextPageButton;
             Gui::ImageButton* mPrevPageButton;
+
             MyGUI::TextBox* mLeftPageNumber;
             MyGUI::TextBox* mRightPageNumber;
             MyGUI::Widget* mLeftPage;
             MyGUI::Widget* mRightPage;
 
             unsigned int mCurrentPage; // 0 is first page
-            std::vector<MyGUI::Widget*> mPages;
+            Pages mPages;
 
             MWWorld::Ptr mBook;
 
