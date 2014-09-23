@@ -651,6 +651,9 @@ if (WIN32)
         4251 # class 'XXXX' needs to have dll-interface to be used by clients of class 'YYYY'
         4275 # non dll-interface struct 'XXXX' used as base for dll-interface class 'YYYY'
 
+        # caused by boost
+        4191 # 'type cast' : unsafe conversion (1.56, thread_primitives.hpp, normally off)
+
         # OpenMW specific warnings
         4099 # Type mismatch, declared class or struct is defined with other type
         4100 # Unreferenced formal parameter (-Wunused-parameter)
@@ -694,7 +697,9 @@ if (WIN32)
         set_target_properties(esmtool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     endif (BUILD_ESMTOOL)
     if (BUILD_OPENCS)
-        set_target_properties(opencs PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+        # QT triggers an informational warning that the object layout may differ when compiled with /vd2
+        set(OPENCS_WARNINGS "${WARNINGS} ${MT_BUILD} /wd4435")
+        set_target_properties(opencs PROPERTIES COMPILE_FLAGS ${OPENCS_WARNINGS})
     endif (BUILD_OPENCS)
     if (BUILD_MWINIIMPORTER)
         set_target_properties(mwiniimport PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")

@@ -311,7 +311,7 @@ namespace Compiler
                         extensions->generateInstructionCode (keyword, mCode, mLiterals,
                             mExplicit, optionals);
                     }
-                    catch (const SourceException& exception)
+                    catch (const SourceException&)
                     {
                         // Ignore argument exceptions for positioncell.
                         /// \todo add option to disable this
