@@ -208,6 +208,57 @@ sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh
 #endif
     }
 
+    page = "Scene";
+    {
+        Setting *fastFactor = createSetting (Type_SpinBox, page, "fast factor");
+        fastFactor->setDefaultValue(4);
+        fastFactor->setEditorSetting(false);
+        fastFactor->setColumnSpan (1);
+        fastFactor->setMinimum (1); // FIXME: this function appears to be broken
+        fastFactor->setMaximum (100); // FIXME: not sure what the max value should be
+        fastFactor->setWidgetWidth (10);
+        fastFactor->setViewLocation(1, 2);
+        Setting *ffText = createSetting (Type_Undefined, page, "ffText");
+        ffText->setSpecialValueText("Fast Factor"); // hack to place text labels
+        ffText->setEditorSetting(false);
+        ffText->setSerializable (false);
+        ffText->setColumnSpan (1);
+        ffText->setWidgetWidth (10);
+        ffText->setViewLocation(1, 1);
+
+        Setting *farClipDist = createSetting (Type_SpinBox, page, "far clip distance");
+        farClipDist->setDefaultValue(300000);
+        farClipDist->setEditorSetting(false);
+        farClipDist->setColumnSpan (1);
+        farClipDist->setMinimum (0);
+        farClipDist->setMaximum (1000000); // FIXME: not sure what the max value should be
+        farClipDist->setWidgetWidth (10);
+        farClipDist->setViewLocation(2, 2);
+        Setting *fcText = createSetting (Type_Undefined, page, "fcText");
+        fcText->setSpecialValueText("Far Clip Distance"); // hack to place text labels
+        fcText->setEditorSetting(false);
+        fcText->setSerializable (false);
+        fcText->setColumnSpan (1);
+        fcText->setWidgetWidth (10);
+        fcText->setViewLocation(2, 1);
+
+        Setting *timerStart = createSetting (Type_SpinBox, page, "timer start");
+        timerStart->setDefaultValue(20);
+        timerStart->setEditorSetting(false);
+        timerStart->setColumnSpan (1);
+        timerStart->setMinimum (0);
+        timerStart->setMaximum (100); // FIXME: not sure what the max value should be
+        timerStart->setWidgetWidth (10);
+        timerStart->setViewLocation(3, 2);
+        Setting *tsText = createSetting (Type_Undefined, page, "tsText");
+        tsText->setSpecialValueText("Timer Start"); // hack to place text labels
+        tsText->setEditorSetting(false);
+        tsText->setSerializable (false);
+        tsText->setColumnSpan (1);
+        tsText->setWidgetWidth (10);
+        tsText->setViewLocation(3, 1);
+    }
+
 #if 0
     page = "Window Size";
     {

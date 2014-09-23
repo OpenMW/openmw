@@ -13,6 +13,7 @@
 #include <OgreViewport.h>
 
 #include "../widget/scenetoolmode.hpp"
+#include "../../model/settings/usersettings.hpp"
 
 #include "navigation.hpp"
 #include "lighting.hpp"
@@ -27,7 +28,7 @@ namespace CSVRender
         , mKeyForward (false), mKeyBackward (false), mKeyLeft (false), mKeyRight (false)
         , mKeyRollLeft (false), mKeyRollRight (false)
         , mFast (false), mDragging (false), mMod1 (false)
-        , mFastFactor (4) /// \todo make this configurable
+        , mFastFactor (4)
         , mDefaultAmbient (0, 0, 0, 0), mHasDefaultAmbient (false)
     {
         setAttribute(Qt::WA_PaintOnScreen);
@@ -44,7 +45,20 @@ namespace CSVRender
         mCamera->setPosition (300, 0, 0);
         mCamera->lookAt (0, 0, 0);
         mCamera->setNearClipDistance (0.1);
-        mCamera->setFarClipDistance (300000); ///< \todo make this configurable
+
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+        int farClipDist = 300000;
+        if(userSettings.hasSettingDefinitions("Scene/far clip distance"))
+            farClipDist = userSettings.settingValue("Scene/far clip distance").toInt();
+        else
+            userSettings.setDefinitions("Scene/far clip distance", (QStringList() << QString(farClipDist)));
+        mCamera->setFarClipDistance (farClipDist);
+
+        if(userSettings.hasSettingDefinitions("Scene/fast factor"))
+            mFastFactor = userSettings.settingValue("Scene/fast factor").toInt();
+        else
+            userSettings.setDefinitions("Scene/fast factor", (QStringList() << QString(mFastFactor)));
+
         mCamera->roll (Ogre::Degree (90));
 
         setLighting (&mLightingDay);
@@ -52,7 +66,13 @@ namespace CSVRender
         QTimer *timer = new QTimer (this);
 
         connect (timer, SIGNAL (timeout()), this, SLOT (update()));
-        timer->start (20); ///< \todo make this configurable
+
+        int timerStart = 20;
+        if(userSettings.hasSettingDefinitions("Scene/timer start"))
+            timerStart = userSettings.settingValue("Scene/timer start").toInt();
+        else
+            userSettings.setDefinitions("Scene/timer start", (QStringList() << QString(timerStart)));
+        timer->start (timerStart);
 
         /// \todo make shortcut configurable
         QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
