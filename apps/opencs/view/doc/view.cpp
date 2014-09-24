@@ -455,11 +455,8 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     bool isReferenceable = std::find(referenceables.begin(), referenceables.end(), id.getType()) != referenceables.end();
 
     // User setting to reuse sub views (on a per top level view basis)
-    bool reuse = true;
-    if(userSettings.hasSettingDefinitions("SubView/reuse"))
-        reuse = userSettings.settingValue("SubView/reuse").toStdString() == "true" ? true : false;
-    else
-        userSettings.setDefinitions("SubView/reuse", (QStringList() << QString(reuse ? "true" : "false")));
+    bool reuse =
+        userSettings.setting("SubView/reuse", (QStringList() << QString("true"))) == "true" ? true : false;
     if(reuse)
     {
         foreach(SubView *sb, mSubViews)
@@ -478,12 +475,8 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     //
     // If the sub view limit setting is one, the sub view title bar is hidden and the
     // text in the main title bar is adjusted accordingly
-    int maxSubView = 3;
-    if(userSettings.hasSettingDefinitions("SubView/max subviews"))
-        maxSubView = userSettings.settingValue("SubView/max subviews").toInt();
-    else
-        userSettings.setDefinitions("SubView/max subviews", (QStringList() << QString(maxSubView)));
-
+    int maxSubView =
+        userSettings.setting("SubView/max subviews", (QStringList() << QString("3"))).toInt();
     if(mSubViews.size() >= maxSubView) // create a new top level view
     {
         mViewManager.addView(mDocument, id, hint);
@@ -506,11 +499,8 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     if (!hint.empty())
         view->useHint (hint);
 
-    int minWidth = 325; // default value to use if none found
-    if(userSettings.hasSettingDefinitions("SubView/minimum width"))
-        minWidth = userSettings.settingValue("SubView/minimum width").toInt();
-    else
-        userSettings.setDefinitions("SubView/minimum width", (QStringList() << QString(minWidth)));
+    int minWidth =
+        userSettings.setting("SubView/minimum width", (QStringList() << QString("325"))).toInt();
     view->setMinimumWidth(minWidth);
 
     view->setStatusBar (mShowStatusBar->isChecked());

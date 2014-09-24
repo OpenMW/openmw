@@ -1,7 +1,7 @@
 #ifndef CSVSETTINGS_SETTINGWINDOW_HPP
 #define CSVSETTINGS_SETTINGWINDOW_HPP
 
-#include <QTabWidget>
+#include <QMainWindow>
 #include <QList>
 
 #include "../../model/settings/support.hpp"
@@ -18,7 +18,7 @@ namespace CSVSettings {
 
     typedef QList <Page *> PageList;
 
-    class SettingWindow : public QTabWidget
+    class SettingWindow : public QMainWindow
     {
         Q_OBJECT
 
@@ -26,7 +26,7 @@ namespace CSVSettings {
         CSMSettings::UserSettings *mModel;
 
     public:
-        explicit SettingWindow(QTabWidget *parent = 0);
+        explicit SettingWindow(QWidget *parent = 0);
 
         ///retrieve a reference to a view based on it's page and setting name
         View *findView (const QString &pageName, const QString &setting);
@@ -49,8 +49,6 @@ namespace CSVSettings {
 
         ///sets the defined values for the views that have been created
         void setViewValues();
-
-        CSMSettings::UserSettings *model() { return mModel; }
 
     private:
 

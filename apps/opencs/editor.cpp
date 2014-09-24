@@ -314,40 +314,19 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     factory->loadAllFiles();
 
-    bool shaders = true; // default if setting does not exist
-    if(mUserSettings.hasSettingDefinitions("Objects/shaders"))
-        shaders = mUserSettings.settingValue("Objects/shaders").toStdString() == "true" ? true : false;
-    else
-        mUserSettings.setDefinitions("Objects/shaders", (QStringList() << QString(shaders ? "true" : "false")));
+    bool shaders = mUserSettings.setting("Objects/shaders", (QStringList() << QString("true"))) == "true" ? true : false;
     sh::Factory::getInstance ().setShadersEnabled (shaders);
 
-    std::string fog("true");
-    if(mUserSettings.hasSettingDefinitions("Shader/fog"))
-        fog = mUserSettings.settingValue("Shader/fog").toStdString();
-    else
-        mUserSettings.setDefinitions("Shader/fog", (QStringList() << QString(fog.c_str())));
+    std::string fog = mUserSettings.setting("Shader/fog", (QStringList() << QString("true"))).toStdString();
     sh::Factory::getInstance().setGlobalSetting ("fog", fog);
 
-    std::string shadows("false");
-    if(mUserSettings.hasSettingDefinitions("Shader/shadows"))
-        shadows = shaders? mUserSettings.settingValue("Shader/shadows").toStdString() : "false";
-    else
-        mUserSettings.setDefinitions("Shader/shadows", (QStringList() << QString(shadows.c_str())));
+    std::string shadows = mUserSettings.setting("Shader/shadows", (QStringList() << QString("false"))).toStdString();
     sh::Factory::getInstance().setGlobalSetting ("shadows", shadows);
 
-    std::string shadows_pssm("false");
-    if(mUserSettings.hasSettingDefinitions("Shader/shadows_pssm"))
-        shadows_pssm = mUserSettings.settingValue("Shader/shadows_pssm").toStdString();
-    else
-        mUserSettings.setDefinitions("Shader/shadows_pssm", (QStringList() << QString(shadows_pssm.c_str())));
+    std::string shadows_pssm = mUserSettings.setting("Shader/shadows_pssm", (QStringList() << QString("false"))).toStdString();
     sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", shadows_pssm);
 
-
-    std::string render_refraction("false");
-    if(mUserSettings.hasSettingDefinitions("Shader/render_refraction"))
-        render_refraction = mUserSettings.settingValue("Shader/render_refraction").toStdString();
-    else
-        mUserSettings.setDefinitions("Shader/render_refraction", (QStringList() << QString(render_refraction.c_str())));
+    std::string render_refraction = mUserSettings.setting("Shader/render_refraction", (QStringList() << QString("false"))).toStdString();
     sh::Factory::getInstance ().setGlobalSetting ("render_refraction", render_refraction);
 
     // internal setting - may be switched on or off by the use of shader configurations

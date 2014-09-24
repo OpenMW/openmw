@@ -142,7 +142,6 @@ set (OPENCS_RES ${CMAKE_SOURCE_DIR}/files/opencs/resources.qrc
 set (OPENCS_UI
     ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     ${CMAKE_SOURCE_DIR}/files/ui/filedialog.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/settingstab.ui
     )
 
 source_group (opencs FILES ${OPENCS_SRC} ${OPENCS_HDR})

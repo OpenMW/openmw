@@ -2,23 +2,28 @@
 #define CSVSETTINGS_DIALOG_H
 
 #include "settingwindow.hpp"
+#include "resizeablestackedwidget.hpp"
 #include <QStandardItem>
 
-#include "ui_settingstab.h"
+class QStackedWidget;
+class QListWidget;
+class QListWidgetItem;
 
 namespace CSVSettings {
 
     class Page;
 
-    class Dialog : public SettingWindow, private Ui::TabWidget
+    class Dialog : public SettingWindow
     {
         Q_OBJECT
 
+        QListWidget *mPageListWidget;
+        ResizeableStackedWidget *mStackedWidget;
         bool mDebugMode;
 
     public:
 
-        explicit Dialog (QTabWidget *parent = 0);
+        explicit Dialog (QMainWindow *parent = 0);
 
         ///Enables setting debug mode.  When the dialog opens, a page is created
         ///which displays the SettingModel's contents in a Tree view.
@@ -29,11 +34,13 @@ namespace CSVSettings {
         /// Settings are written on close
         void closeEvent (QCloseEvent *event);
 
-        bool eventFilter(QObject *target, QEvent *event);
+        void setupDialog();
 
     private:
 
         void buildPages();
+        void buildPageListWidget (QWidget *centralWidget);
+        void buildStackedWidget (QWidget *centralWidget);
 
     public slots:
 
@@ -41,8 +48,7 @@ namespace CSVSettings {
 
     private slots:
 
-        void slotOverrideToggled(bool checked);
-        void slotRendererChanged(const QString &renderer);
+        void slotChangePage (QListWidgetItem *, QListWidgetItem *);
     };
 }
 #endif // CSVSETTINGS_DIALOG_H

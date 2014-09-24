@@ -57,8 +57,6 @@ void UserSettings::buildSettingModelDefaults()
 
     page = "Objects";
     {
-        QString section = "Group1";
-
         Setting *numLights = createSetting (Type_SpinBox, page, "num lights");
         numLights->setDefaultValue(8);
         numLights->setEditorSetting(true);
@@ -112,7 +110,6 @@ void UserSettings::buildSettingModelDefaults()
         timerStart->setViewLocation(3, 2);
     }
 
-#if 0
     page = "Window Size";
     {
         Setting *width = createSetting (Type_LineEdit, page, "Width");
@@ -151,7 +148,6 @@ void UserSettings::buildSettingModelDefaults()
                              QStringList() << "480" << "600" << "768" << "900"
                              );
     }
-#endif
 
     page = "Display Format";
     {
@@ -497,6 +493,20 @@ QStringList UserSettings::getShaderLanguageByRenderer(const QString &renderer)
         result.append("GLSLES");
 
     return result;
+}
+
+// if the key is not found create one with a defaut value
+QString UserSettings::setting(const QString &viewKey, const QStringList &list)
+{
+    if(mSettingDefinitions->contains(viewKey))
+        return settingValue(viewKey);
+    else if(!list.empty())
+    {
+        mSettingDefinitions->setValue (viewKey, list);
+        return list.at(0);
+    }
+
+    return QString();
 }
 
 bool UserSettings::hasSettingDefinitions (const QString &viewKey) const

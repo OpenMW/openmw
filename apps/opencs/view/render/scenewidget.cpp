@@ -47,17 +47,11 @@ namespace CSVRender
         mCamera->setNearClipDistance (0.1);
 
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-        int farClipDist = 300000;
-        if(userSettings.hasSettingDefinitions("Scene/far clip distance"))
-            farClipDist = userSettings.settingValue("Scene/far clip distance").toInt();
-        else
-            userSettings.setDefinitions("Scene/far clip distance", (QStringList() << QString(farClipDist)));
+
+        int farClipDist = userSettings.setting("Scene/far clip distance", (QStringList() << QString("300000"))).toInt();
         mCamera->setFarClipDistance (farClipDist);
 
-        if(userSettings.hasSettingDefinitions("Scene/fast factor"))
-            mFastFactor = userSettings.settingValue("Scene/fast factor").toInt();
-        else
-            userSettings.setDefinitions("Scene/fast factor", (QStringList() << QString(mFastFactor)));
+        mFastFactor = userSettings.setting("Scene/fast factor", (QStringList() << QString("4"))).toInt();
 
         mCamera->roll (Ogre::Degree (90));
 
@@ -67,11 +61,7 @@ namespace CSVRender
 
         connect (timer, SIGNAL (timeout()), this, SLOT (update()));
 
-        int timerStart = 20;
-        if(userSettings.hasSettingDefinitions("Scene/timer start"))
-            timerStart = userSettings.settingValue("Scene/timer start").toInt();
-        else
-            userSettings.setDefinitions("Scene/timer start", (QStringList() << QString(timerStart)));
+        int timerStart = userSettings.setting("Scene/timer start", (QStringList() << QString("20"))).toInt();
         timer->start (timerStart);
 
         /// \todo make shortcut configurable

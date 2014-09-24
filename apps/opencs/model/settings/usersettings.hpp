@@ -81,6 +81,7 @@ namespace CSMSettings {
         QStringList getShaderLanguageByRenderer(const QString &renderer);
         QStringList getOgreOptions(const QString &key, const QString &renderer);
         QStringList getOgreRenderers();
+        QString setting(const QString &viewKey, const QStringList &list = QStringList());
 
     private:
 

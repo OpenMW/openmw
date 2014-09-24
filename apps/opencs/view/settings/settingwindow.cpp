@@ -1,16 +1,15 @@
-#include "settingwindow.hpp"
-
 #include <QApplication>
 #include <QDebug>
 
 #include "../../model/settings/setting.hpp"
 #include "../../model/settings/connector.hpp"
 #include "../../model/settings/usersettings.hpp"
+#include "settingwindow.hpp"
 #include "page.hpp"
 #include "view.hpp"
 
-CSVSettings::SettingWindow::SettingWindow(QTabWidget *parent)
-    : QTabWidget(parent)
+CSVSettings::SettingWindow::SettingWindow(QWidget *parent)
+    : QMainWindow(parent)
 {}
 
 void CSVSettings::SettingWindow::createPages()
@@ -20,7 +19,7 @@ void CSVSettings::SettingWindow::createPages()
     QList <CSMSettings::Setting *> connectedSettings;
 
     foreach (const QString &pageName, pageMap.keys())
-    {
+    {        
         QList <CSMSettings::Setting *> pageSettings = pageMap.value (pageName);
 
         mPages.append (new Page (pageName, pageSettings, this));
