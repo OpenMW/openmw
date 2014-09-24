@@ -14,8 +14,6 @@ namespace CSVSettings {
     {
         Q_OBJECT
 
-        //QListWidget *mPageListWidget;
-        //ResizeableStackedWidget *mStackedWidget;
         bool mDebugMode;
 
     public:

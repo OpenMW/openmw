@@ -9,7 +9,7 @@
 #include <cassert>
 
 #include "../../model/doc/document.hpp"
-#include "../../model/settings/usersettings.hpp"
+
 #include "../../model/world/cellselection.hpp"
 
 #include "../filter/filterbox.hpp"
