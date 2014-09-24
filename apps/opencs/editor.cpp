@@ -314,7 +314,14 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     factory->loadAllFiles();
 
-    std::string fog("true"); // default if setting does not exist
+    bool shaders = true; // default if setting does not exist
+    if(mUserSettings.hasSettingDefinitions("Objects/shaders"))
+        shaders = mUserSettings.settingValue("Objects/shaders").toStdString() == "true" ? true : false;
+    else
+        mUserSettings.setDefinitions("Objects/shaders", (QStringList() << QString(shaders ? "true" : "false")));
+    sh::Factory::getInstance ().setShadersEnabled (shaders);
+
+    std::string fog("true");
     if(mUserSettings.hasSettingDefinitions("Shader/fog"))
         fog = mUserSettings.settingValue("Shader/fog").toStdString();
     else
@@ -323,7 +330,7 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     std::string shadows("false");
     if(mUserSettings.hasSettingDefinitions("Shader/shadows"))
-        shadows = mUserSettings.settingValue("Shader/shadows").toStdString();
+        shadows = shaders? mUserSettings.settingValue("Shader/shadows").toStdString() : "false";
     else
         mUserSettings.setDefinitions("Shader/shadows", (QStringList() << QString(shadows.c_str())));
     sh::Factory::getInstance().setGlobalSetting ("shadows", shadows);
@@ -347,7 +354,7 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
     sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
 
     sh::Factory::getInstance ().setGlobalSetting ("num_lights",
-        mUserSettings.settingValue("shader/num_lights").toStdString());
+        mUserSettings.settingValue("Objects/num_lights").toStdString());
 
     /// \todo add more configurable shiny settings
 

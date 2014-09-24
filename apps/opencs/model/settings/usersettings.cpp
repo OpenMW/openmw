@@ -55,7 +55,7 @@ void UserSettings::buildSettingModelDefaults()
 {
     QString page;
 
-    page = "Shader";
+    page = "Objects";
     {
         QString section = "Group1";
 
@@ -66,96 +66,17 @@ void UserSettings::buildSettingModelDefaults()
         numLights->setMinimum (0);
         numLights->setMaximum (100); // FIXME: not sure what the max value should be
         numLights->setWidgetWidth (10);
-        numLights->setSpecialValueText ("Nothing!"); // text to display when value is 0
         numLights->setViewLocation(1, 2);
-        Setting *nlText = createSetting (Type_Undefined, page, "nlText");
-        nlText->setSpecialValueText("Num Lights"); // hack to place text labels
-        nlText->setEditorSetting(false);
-        nlText->setSerializable (false);
-        nlText->setColumnSpan (1);
-        nlText->setWidgetWidth (10);
-        nlText->setViewLocation(1, 1);
 
-
-        Setting *simpleWater = createSetting (Type_CheckBox, page, "simple_water");
-        simpleWater->setDeclaredValues(QStringList() << "true" << "false");
-        simpleWater->setDefaultValue("false");
-        simpleWater->setEditorSetting(true);
-        simpleWater->setSpecialValueText("Enable Simple Water");
-        simpleWater->setWidgetWidth(25);
-        simpleWater->setColumnSpan (3);
-        simpleWater->setStyleSheet ("QGroupBox { border: 0px; }");
-        simpleWater->setViewLocation(1, 5);
-
-        Setting *waterEnabled = createSetting (Type_DoubleSpinBox, page, "waterEnabled");
-        waterEnabled->setDefaultValue(0.00);
-        waterEnabled->setEditorSetting(true);
-        waterEnabled->setColumnSpan (1);
-        waterEnabled->setMinimum (0);
-        waterEnabled->setMaximum (100.00); // FIXME: not sure what the max value should be
-        waterEnabled->setWidgetWidth (10);
-        waterEnabled->setViewLocation(2, 6);
-        Setting *weText = createSetting (Type_Undefined, page, "weText");
-        weText->setSpecialValueText("Water Enabled");
-        weText->setEditorSetting(false);
-        weText->setSerializable (false);
-        weText->setColumnSpan (1);
-        weText->setWidgetWidth (10);
-        weText->setViewLocation(2, 5);
-
-        Setting *waterLevel = createSetting (Type_DoubleSpinBox, page, "waterLevel");
-        waterLevel->setDefaultValue(0.00);
-        waterLevel->setEditorSetting(true);
-        waterLevel->setColumnSpan (1);
-        waterLevel->setMinimum (0);
-        waterLevel->setMaximum (100.00); // FIXME: not sure what the max value should be
-        waterLevel->setWidgetWidth (10);
-        waterLevel->setViewLocation(3, 6);
-        Setting *wlText = createSetting (Type_Undefined, page, "wlText");
-        wlText->setSpecialValueText("Water Level");
-        wlText->setEditorSetting(false);
-        wlText->setSerializable (false);
-        wlText->setColumnSpan (1);
-        wlText->setWidgetWidth (10);
-        wlText->setViewLocation(3, 5);
-
-        Setting *waterTimer = createSetting (Type_DoubleSpinBox, page, "waterTimer");
-        waterTimer->setDefaultValue(0.00);
-        waterTimer->setEditorSetting(true);
-        waterTimer->setColumnSpan (1);
-        waterTimer->setMinimum (0);
-        waterTimer->setMaximum (100.00); // FIXME: not sure what the max value should be
-        waterTimer->setWidgetWidth (10);
-        waterTimer->setViewLocation(4, 6);
-        Setting *wtText = createSetting (Type_Undefined, page, "wtText");
-        wtText->setSpecialValueText("Water Timer");
-        wtText->setEditorSetting(false);
-        wtText->setSerializable (false);
-        wtText->setColumnSpan (1);
-        wtText->setWidgetWidth (10);
-        wtText->setViewLocation(4, 5);
-
-
-        Setting *spaceText = createSetting (Type_Undefined, page, "spaceText");
-        spaceText->setSpecialValueText(" ");
-        spaceText->setEditorSetting(false);
-        spaceText->setSerializable (false);
-        spaceText->setColumnSpan (1);
-        spaceText->setWidgetWidth (5);
-        spaceText->setViewLocation(3, 4);
-        Setting *spaceText2 = createSetting (Type_Undefined, page, "spaceText2");
-        spaceText2->setSpecialValueText(" ");
-        spaceText2->setEditorSetting(false);
-        spaceText2->setSerializable (false);
-        spaceText2->setColumnSpan (1);
-        spaceText2->setWidgetWidth (5);
-        spaceText2->setViewLocation(3, 7);
-
-#if 0
-sh::Factory::getInstance ().setSharedParameter ("windDir_windSpeed", sh::makeProperty<sh::Vector3>(new sh::Vector3(0.5, -0.8, 0.2)));
-sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(1, 0.6)));
-sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh::Vector4> (new sh::Vector4(0,0,0,0)));
-#endif
+        Setting *shaders = createSetting (Type_CheckBox, page, "shaders");
+        shaders->setDeclaredValues(QStringList() << "true" << "false");
+        shaders->setDefaultValue("true");
+        shaders->setEditorSetting(true);
+        shaders->setSpecialValueText("Enable Shaders");
+        shaders->setWidgetWidth(25);
+        shaders->setColumnSpan (3);
+        shaders->setStyleSheet ("QGroupBox { border: 0px; }");
+        shaders->setViewLocation(2, 1);
     }
 
     page = "Scene";
@@ -171,13 +92,6 @@ sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh
         fastFactor->setMaximum (100); // FIXME: not sure what the max value should be
         fastFactor->setWidgetWidth (10);
         fastFactor->setViewLocation(1, 2);
-        Setting *ffText = createSetting (Type_Undefined, page, "ffText");
-        ffText->setSpecialValueText("Fast Factor"); // hack to place text labels
-        ffText->setEditorSetting(false);
-        ffText->setSerializable (false);
-        ffText->setColumnSpan (1);
-        ffText->setWidgetWidth (10);
-        ffText->setViewLocation(1, 1);
 
         Setting *farClipDist = createSetting (Type_SpinBox, page, "far clip distance");
         farClipDist->setDefaultValue(300000);
@@ -187,13 +101,6 @@ sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh
         farClipDist->setMaximum (1000000); // FIXME: not sure what the max value should be
         farClipDist->setWidgetWidth (10);
         farClipDist->setViewLocation(2, 2);
-        Setting *fcText = createSetting (Type_Undefined, page, "fcText");
-        fcText->setSpecialValueText("Far Clip Distance");
-        fcText->setEditorSetting(false);
-        fcText->setSerializable (false);
-        fcText->setColumnSpan (1);
-        fcText->setWidgetWidth (10);
-        fcText->setViewLocation(2, 1);
 
         Setting *timerStart = createSetting (Type_SpinBox, page, "timer start");
         timerStart->setDefaultValue(20);
@@ -203,13 +110,6 @@ sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh
         timerStart->setMaximum (100); // FIXME: not sure what the max value should be
         timerStart->setWidgetWidth (10);
         timerStart->setViewLocation(3, 2);
-        Setting *tsText = createSetting (Type_Undefined, page, "tsText");
-        tsText->setSpecialValueText("Timer Start");
-        tsText->setEditorSetting(false);
-        tsText->setSerializable (false);
-        tsText->setColumnSpan (1);
-        tsText->setWidgetWidth (10);
-        tsText->setViewLocation(3, 1);
     }
 
 #if 0
@@ -251,6 +151,7 @@ sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh
                              QStringList() << "480" << "600" << "768" << "900"
                              );
     }
+#endif
 
     page = "Display Format";
     {
@@ -271,7 +172,6 @@ sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh
         rsd->setEditorSetting (true);
         ritd->setEditorSetting (true);
     }
-#endif
 
     page = "Proxy Selection Test";
     {

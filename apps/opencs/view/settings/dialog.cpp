@@ -87,27 +87,12 @@ QStringList getAvailableResolutions()
     Ogre::ConfigOptionMap::iterator it = renderOpt.begin();
     for(;it != renderOpt.end(); ++it)
     {
-        if(it->first == "Rendering Device" )
-        {
-            if(it->second.possibleValues.empty())
-            {
-                return result;  // FIXME: add error message
-            }
-            // Store Available Rendering Devices
-            Ogre::StringVector::iterator iter = it->second.possibleValues.begin();
-            for(;iter != it->second.possibleValues.end(); ++iter)
-            {
-                std::cout << "rd: " << *iter << std::endl; // FIXME: debug
-            }
-        }
         if(it->first == "Video Mode" )
         {
             if(it->second.possibleValues.empty())
             {
                 return result;  // FIXME: add error message
             }
-            // FIXME: how to default to the current value?
-            std::cout << "vm current: " << it->second.currentValue << std::endl; // FIXME: debug
             // Store Available Resolutions
             Ogre::StringVector::iterator iter = it->second.possibleValues.begin();
             for(; iter != it->second.possibleValues.end(); ++iter)
@@ -138,7 +123,7 @@ QStringList getAvailableResolutions()
 
 
 CSVSettings::Dialog::Dialog(QTabWidget *parent)
-    : /*mStackedWidget (0),*/ mDebugMode (false), SettingWindow (parent)
+    : mDebugMode (false), SettingWindow (parent)
 {
     setObjectName(QString::fromUtf8 ("User Settings"));
 
@@ -151,12 +136,8 @@ CSVSettings::Dialog::Dialog(QTabWidget *parent)
 
     connect(cbOverride, SIGNAL(toggled(bool)), this, SLOT(slotOverrideToggled(bool)));
     connect(cmbRenderSys, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(slotRendererChanged(const QString&)));
-    // to update the checkbox on the view menu
-    connect(cbStatusBar, SIGNAL(toggled(bool)), this, SIGNAL (toggleStatusBar(bool)));
 
     displayGroup_Window->installEventFilter(this);
-
-    setupDialog();
 }
 
 bool CSVSettings::Dialog::eventFilter(QObject *target, QEvent *event)
@@ -185,19 +166,6 @@ void CSVSettings::Dialog::slotRendererChanged(const QString &renderer)
 
     cmbShaderLang->clear();
     cmbShaderLang->addItems(model()->getShaderLanguageByRenderer(renderer));
-
-    if(model()->settingValue("Video/use settings.cfg") == "true")
-    {
-        labRenderSys->setEnabled(false);
-        cmbRenderSys->setEnabled(false);
-        labAntiAlias->setEnabled(false);
-        cmbAntiAlias->setEnabled(false);
-        //cbVsync->setEnabled(false);
-        labShaderLang->setEnabled(false);
-        cmbShaderLang->setEnabled(false);
-    }
-    else
-        cbOverride->setChecked(false);
 }
 
 void CSVSettings::Dialog::slotOverrideToggled(bool checked)
@@ -208,7 +176,6 @@ void CSVSettings::Dialog::slotOverrideToggled(bool checked)
         cmbRenderSys->setEnabled(false);
         labAntiAlias->setEnabled(false);
         cmbAntiAlias->setEnabled(false);
-        //cbVsync->setEnabled(false);
         labShaderLang->setEnabled(false);
         cmbShaderLang->setEnabled(false);
     }
@@ -218,14 +185,9 @@ void CSVSettings::Dialog::slotOverrideToggled(bool checked)
         cmbRenderSys->setEnabled(true);
         labAntiAlias->setEnabled(true);
         cmbAntiAlias->setEnabled(true);
-        //cbVsync->setEnabled(true);
         labShaderLang->setEnabled(true);
         cmbShaderLang->setEnabled(true);
     }
-}
-
-void CSVSettings::Dialog::setupDialog()
-{
 }
 
 void CSVSettings::Dialog::buildPages()
@@ -238,18 +200,12 @@ void CSVSettings::Dialog::buildPages()
     // Ogre renderer
     cmbRenderSys->clear();
     cmbRenderSys->addItems(model()->getOgreRenderers());
-    //slotRendererChanged(Ogre::Root::getSingleton().getRenderSystem()->getName().c_str());
 
     // antialiasing
     QString antialiasing = model()->settingValue("Video/antialiasing");
     index = cmbAntiAlias->findData(antialiasing, Qt::DisplayRole);
     if(index != -1)
         cmbAntiAlias->setCurrentIndex(index);
-
-    // vsync
-    //cbVsync->setChecked(model()->settingValue("Video/vsync") == "true");
-    cbVsync->setChecked(false); // disable vsync option for now
-    cbVsync->setEnabled(false); // disable vsync option for now
 
     // shader lang
     QString shaderlang = model()->settingValue("General/shader mode");
@@ -287,17 +243,6 @@ void CSVSettings::Dialog::buildPages()
 
     // status bar
     cbStatusBar->setChecked(model()->settingValue("Display/show statusbar") == "true");
-
-    // display format
-    QString recStat = model()->settingValue("Display Format/Record Status Display");
-    index = cmbRecStatus->findData(recStat, Qt::DisplayRole);
-    if(index != -1)
-        cmbRecStatus->setCurrentIndex(index);
-
-    QString refIdType = model()->settingValue("Display Format/Referenceable ID Type Display");
-    index = cmbRefIdType->findData(refIdType, Qt::DisplayRole);
-    if(index != -1)
-        cmbRefIdType->setCurrentIndex(index);
 
     // subview
     if(model()->hasSettingDefinitions("SubView/minimum width"))
@@ -341,20 +286,9 @@ void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
     model()->setDefinitions("Video/render system",
                            QStringList(cmbRenderSys->currentText()));
 
-    // vsync
-    if(cbVsync->isChecked())
-        model()->setDefinitions("Video/vsync", QStringList("true"));
-    else
-        model()->setDefinitions("Video/vsync", QStringList("false"));
-
     // antialiasing
     model()->setDefinitions("Video/antialiasing",
                            QStringList(cmbAntiAlias->currentText()));
-#if 0
-    QRegExp reAA("^\\D*(\\d+)\\D*");
-    if(reAA.indexIn(cmbAntiAlias->currentText()) > -1)
-        model()->setDefinitions("Video/antialiasing", QStringList(reAA.cap(1)));
-#endif
 
     // shader lang (no group means "General" group)
     model()->setDefinitions("shader mode",
@@ -384,11 +318,6 @@ void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
     else
         model()->setDefinitions("Display/show statusbar", QStringList("false"));
 
-    // display format
-    model()->setDefinitions("Display Format/Record Status Display",
-                           QStringList(cmbRecStatus->currentText()));
-    model()->setDefinitions("Display Format/Referenceable ID Type Display",
-                           QStringList(cmbRefIdType->currentText()));
     // subview
     model()->setDefinitions("SubView/minimum width",
                            QStringList(QString::number(sbMinSubViewWidth->value())));

@@ -376,9 +376,6 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     hide();
     resize (width.toInt() - (frameGeometry().width() - geometry().width()),
             height.toInt() - (frameGeometry().height() - geometry().height()));
-    // start at the centre of the screen
-    QPoint screenCenter = QApplication::desktop()->screenGeometry().center();
-    move(screenCenter - QPoint(frameGeometry().width()/2, frameGeometry().height()/2));
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
@@ -517,14 +514,6 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     view->setMinimumWidth(minWidth);
 
     view->setStatusBar (mShowStatusBar->isChecked());
-// NOTE: only required if show status bar setting should be applied to existing
-// window
-#if 0
-    std::string showStatusBar =
-        CSMSettings::UserSettings::instance().settingValue("Display/show statusbar").toStdString();
-
-    view->setStatusBar (showStatusBar == "true");
-#endif
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 

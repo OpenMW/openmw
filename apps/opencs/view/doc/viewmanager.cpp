@@ -401,13 +401,6 @@ bool CSVDoc::ViewManager::removeDocument (CSVDoc::View *view)
     return true;
 }
 
-void CSVDoc::ViewManager::toggleStatusBar(bool checked)
-{
-    // NOTE: below only required if status bar change is to be applied to existing
-    //for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
-        //(*iter)->toggleStatusBar(checked);
-}
-
 void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
 {
     if(!removeDocument(view)) // close the current document first

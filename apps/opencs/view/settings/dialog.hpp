@@ -31,8 +31,6 @@ namespace CSVSettings {
         /// Settings are written on close
         void closeEvent (QCloseEvent *event);
 
-        void setupDialog();
-
         bool eventFilter(QObject *target, QEvent *event);
 
     private:
@@ -47,10 +45,6 @@ namespace CSVSettings {
 
         void slotOverrideToggled(bool checked);
         void slotRendererChanged(const QString &renderer);
-
-    signals:
-
-        void toggleStatusBar(bool checked); // FIXME: maybe not needed
     };
 }
 #endif // CSVSETTINGS_DIALOG_H
