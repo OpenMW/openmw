@@ -306,7 +306,7 @@ void CSVSettings::Dialog::buildPages()
         sbMinSubViewWidth->setValue(325);
 
     if(model()->hasSettingDefinitions("SubView/max subviews"))
-        sbMaxSubViews->setValue(model()->settingValue("SubView/max subview").toInt());
+        sbMaxSubViews->setValue(model()->settingValue("SubView/max subviews").toInt());
     else
         sbMaxSubViews->setValue(3);
 

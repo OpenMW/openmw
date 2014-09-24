@@ -94,7 +94,6 @@ void UserSettings::buildSettingModelDefaults()
         waterEnabled->setMinimum (0);
         waterEnabled->setMaximum (100.00); // FIXME: not sure what the max value should be
         waterEnabled->setWidgetWidth (10);
-        //waterEnabled->setStyleSheet("QGroupBox { border:2px; padding 2px; margin: 2px;} QGroupBox::title { text: \"test\" }");
         waterEnabled->setViewLocation(2, 6);
         Setting *weText = createSetting (Type_Undefined, page, "weText");
         weText->setSpecialValueText("Water Enabled");
@@ -113,7 +112,7 @@ void UserSettings::buildSettingModelDefaults()
         waterLevel->setWidgetWidth (10);
         waterLevel->setViewLocation(3, 6);
         Setting *wlText = createSetting (Type_Undefined, page, "wlText");
-        wlText->setSpecialValueText("Water Level"); // hack to place text labels
+        wlText->setSpecialValueText("Water Level");
         wlText->setEditorSetting(false);
         wlText->setSerializable (false);
         wlText->setColumnSpan (1);
@@ -129,7 +128,7 @@ void UserSettings::buildSettingModelDefaults()
         waterTimer->setWidgetWidth (10);
         waterTimer->setViewLocation(4, 6);
         Setting *wtText = createSetting (Type_Undefined, page, "wtText");
-        wtText->setSpecialValueText("Water Timer"); // hack to place text labels
+        wtText->setSpecialValueText("Water Timer");
         wtText->setEditorSetting(false);
         wtText->setSerializable (false);
         wtText->setColumnSpan (1);
@@ -165,7 +164,10 @@ sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh
         fastFactor->setDefaultValue(4);
         fastFactor->setEditorSetting(false);
         fastFactor->setColumnSpan (1);
-        fastFactor->setMinimum (1); // FIXME: this function appears to be broken
+        // FIXME: setMinimum or setSpecialVlueText appears to be broken, possibly due
+        // to there being an empty string default for special value text.
+        fastFactor->setMinimum (1);
+        fastFactor->setSpecialValueText("1"); // workaround for above
         fastFactor->setMaximum (100); // FIXME: not sure what the max value should be
         fastFactor->setWidgetWidth (10);
         fastFactor->setViewLocation(1, 2);
@@ -186,7 +188,7 @@ sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh
         farClipDist->setWidgetWidth (10);
         farClipDist->setViewLocation(2, 2);
         Setting *fcText = createSetting (Type_Undefined, page, "fcText");
-        fcText->setSpecialValueText("Far Clip Distance"); // hack to place text labels
+        fcText->setSpecialValueText("Far Clip Distance");
         fcText->setEditorSetting(false);
         fcText->setSerializable (false);
         fcText->setColumnSpan (1);
@@ -202,7 +204,7 @@ sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh
         timerStart->setWidgetWidth (10);
         timerStart->setViewLocation(3, 2);
         Setting *tsText = createSetting (Type_Undefined, page, "tsText");
-        tsText->setSpecialValueText("Timer Start"); // hack to place text labels
+        tsText->setSpecialValueText("Timer Start");
         tsText->setEditorSetting(false);
         tsText->setSerializable (false);
         tsText->setColumnSpan (1);
