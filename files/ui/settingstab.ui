@@ -161,7 +161,7 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QCheckBox" name="checkBox_reuse_subview">
+      <widget class="QCheckBox" name="cbReuseSubView">
        <property name="text">
         <string>Reuse Subviews</string>
        </property>
@@ -391,7 +391,7 @@
   <tabstop>cbStatusBar</tabstop>
   <tabstop>sbMaxSubViews</tabstop>
   <tabstop>sbMinSubViewWidth</tabstop>
-  <tabstop>checkBox_reuse_subview</tabstop>
+  <tabstop>cbReuseSubView</tabstop>
   <tabstop>cbOverride</tabstop>
   <tabstop>cmbRenderSys</tabstop>
   <tabstop>cbVsync</tabstop>

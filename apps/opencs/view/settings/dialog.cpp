@@ -310,6 +310,8 @@ void CSVSettings::Dialog::buildPages()
     else
         sbMaxSubViews->setValue(3);
 
+    cbReuseSubView->setChecked(model()->settingValue("SubView/reuse") == "true");
+
     SettingWindow::createPages ();
 
     foreach (Page *page, SettingWindow::pages())
@@ -392,6 +394,11 @@ void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
                            QStringList(QString::number(sbMinSubViewWidth->value())));
     model()->setDefinitions("SubView/max subviews",
                            QStringList(QString::number(sbMaxSubViews->value())));
+
+    if(cbReuseSubView->isChecked())
+        model()->setDefinitions("SubView/reuse", QStringList("true"));
+    else
+        model()->setDefinitions("SubView/reuse", QStringList("false"));
 
     saveSettings();
 }

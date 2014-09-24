@@ -454,6 +454,33 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
 {
     CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
 
+    const std::vector<CSMWorld::UniversalId::Type> referenceables(CSMWorld::UniversalId::listReferenceableTypes());
+    bool isReferenceable = std::find(referenceables.begin(), referenceables.end(), id.getType()) != referenceables.end();
+
+    // User setting to reuse sub views (on a per top level view basis)
+    bool reuse = true;
+    if(userSettings.hasSettingDefinitions("SubView/reuse"))
+        reuse = userSettings.settingValue("SubView/reuse").toStdString() == "true" ? true : false;
+    else
+        userSettings.setDefinitions("SubView/reuse", (QStringList() << QString(reuse ? "true" : "false")));
+    if(reuse)
+    {
+        foreach(SubView *sb, mSubViews)
+        {
+            if((isReferenceable && (CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, id.getId()) == CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, sb->getUniversalId().getId())))
+                || (!isReferenceable && (id == sb->getUniversalId())))
+            {
+                sb->setFocus(Qt::OtherFocusReason); // FIXME: focus not quite working
+                return;
+            }
+        }
+    }
+
+    // User setting for limiting the number of sub views per top level view.
+    // Automatically open a new top level view if this number is exceeded
+    //
+    // If the sub view limit setting is one, the sub view title bar is hidden and the
+    // text in the main title bar is adjusted accordingly
     int maxSubView = 3;
     if(userSettings.hasSettingDefinitions("SubView/max subviews"))
         maxSubView = userSettings.settingValue("SubView/max subviews").toInt();
@@ -467,9 +494,6 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
         return;
     }
 
-    /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
-
-    const std::vector<CSMWorld::UniversalId::Type> referenceables(CSMWorld::UniversalId::listReferenceableTypes());
     SubView *view = NULL;
     if(std::find(referenceables.begin(), referenceables.end(), id.getType()) != referenceables.end())
     {
