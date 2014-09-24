@@ -19,6 +19,7 @@
 #include <components/fontloader/fontloader.hpp>
 
 #include <components/widgets/box.hpp>
+#include <components/widgets/tags.hpp>
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -991,50 +992,13 @@ namespace MWGui
         std::string tokenToFind = "sCell=";
         size_t tokenLength = tokenToFind.length();
 
-        std::string fontcolour = "fontcolour=";
-        size_t fontcolourLength = fontcolour.length();
-
-        std::string fontcolourhtml = "fontcolourhtml=";
-        size_t fontcolourhtmlLength = fontcolourhtml.length();
-
         if (tag.compare(0, tokenLength, tokenToFind) == 0)
         {
             _result = mTranslationDataStorage.translateCellName(tag.substr(tokenLength));
         }
-        else if (tag.compare(0, fontcolourLength, fontcolour) == 0)
+        else if (Gui::replaceTag(tag, _result, mFallbackMap))
         {
-            std::string fallbackName = "FontColor_color_" + tag.substr(fontcolourLength);
-            std::map<std::string, std::string>::const_iterator it = mFallbackMap.find(fallbackName);
-            if (it == mFallbackMap.end())
-                throw std::runtime_error("Unknown fallback name: " + fallbackName);
-            std::string str = it->second;
-
-            std::string ret[3];
-            unsigned int j=0;
-            for(unsigned int i=0;i<str.length();++i){
-                if(str[i]==',') j++;
-                else if (str[i] != ' ') ret[j]+=str[i];
-            }
-            MyGUI::Colour col (MyGUI::utility::parseInt(ret[0])/255.f,MyGUI::utility::parseInt(ret[1])/255.f,MyGUI::utility::parseInt(ret[2])/255.f);
-            _result = col.print();
-        }
-        else if (tag.compare(0, fontcolourhtmlLength, fontcolourhtml) == 0)
-        {
-            std::string fallbackName = "FontColor_color_" + tag.substr(fontcolourhtmlLength);
-            std::map<std::string, std::string>::const_iterator it = mFallbackMap.find(fallbackName);
-            if (it == mFallbackMap.end())
-                throw std::runtime_error("Unknown fallback name: " + fallbackName);
-            std::string str = it->second;
-
-            std::string ret[3];
-            unsigned int j=0;
-            for(unsigned int i=0;i<str.length();++i){
-                if(str[i]==',') j++;
-                else if (str[i] != ' ') ret[j]+=str[i];
-            }
-            std::stringstream html;
-            html << "#" << std::hex << MyGUI::utility::parseInt(ret[0]) << MyGUI::utility::parseInt(ret[1]) << MyGUI::utility::parseInt(ret[2]);
-            _result = html.str();
+            return;
         }
         else
         {
