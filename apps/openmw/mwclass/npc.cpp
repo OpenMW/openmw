@@ -1127,6 +1127,9 @@ namespace MWClass
     {
         MWMechanics::NpcStats& stats = getNpcStats (ptr);
 
+        if (stats.isWerewolf())
+            return;
+
         MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
         const ESM::Class *class_ =
