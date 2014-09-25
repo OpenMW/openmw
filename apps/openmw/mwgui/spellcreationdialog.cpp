@@ -522,7 +522,7 @@ namespace MWGui
         updateEffectsView ();
     }
 
-    void EffectEditorBase::setWidgets (Widgets::MWList *availableEffectsList, MyGUI::ScrollView *usedEffectsView)
+    void EffectEditorBase::setWidgets (Gui::MWList *availableEffectsList, MyGUI::ScrollView *usedEffectsView)
     {
         mAvailableEffectsList = availableEffectsList;
         mUsedEffectsView = usedEffectsView;

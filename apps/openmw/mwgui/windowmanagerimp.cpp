@@ -165,7 +165,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWEffectList>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWList>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::MWList>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::HBox>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::VBox>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedTextBox>("Widget");

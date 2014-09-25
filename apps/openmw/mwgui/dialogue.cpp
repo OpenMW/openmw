@@ -3,6 +3,8 @@
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <components/widgets/list.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -17,7 +19,6 @@
 #include "../mwdialogue/dialoguemanagerimp.hpp"
 
 #include "widgets.hpp"
-#include "list.hpp"
 #include "tradewindow.hpp"
 #include "spellbuyingwindow.hpp"
 #include "travelwindow.hpp"

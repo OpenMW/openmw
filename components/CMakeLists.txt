@@ -96,7 +96,7 @@ add_component_dir (ogreinit
     )
 
 add_component_dir (widgets
-    box imagebutton tags
+    box imagebutton tags list
     )
 
 add_component_dir (fontloader

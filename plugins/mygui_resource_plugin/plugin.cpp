@@ -14,6 +14,7 @@
 #include <components/widgets/imagebutton.hpp>
 #include <components/widgets/box.hpp>
 #include <components/widgets/tags.hpp>
+#include <components/widgets/list.hpp>
 
 #include <OgreTextureManager.h>
 #include <OgreHardwarePixelBuffer.h>
@@ -142,6 +143,7 @@ namespace MyGUIPlugin
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedTextBox>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedEditBox>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedButton>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::MWList>("Widget");
     }
 
     void ResourcePlugin::createTransparentBGTexture()
