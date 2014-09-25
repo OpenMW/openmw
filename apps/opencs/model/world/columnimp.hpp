@@ -1982,6 +1982,88 @@ namespace CSMWorld
             return false;
         }
     };
+
+    template<typename ESXRecordT>
+    struct SoundColumn : public Column<ESXRecordT>
+    {
+        SoundColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Sound, ColumnBase::Display_Sound)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mSound.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mSound = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct CreatureColumn : public Column<ESXRecordT>
+    {
+        CreatureColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Creature, ColumnBase::Display_Creature)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mCreature.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mCreature = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct SoundGeneratorTypeColumn : public Column<ESXRecordT>
+    {
+        SoundGeneratorTypeColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_SoundGeneratorType, ColumnBase::Display_SoundGeneratorType)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int> (record.get().mType);
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mType = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
 }
 
 #endif

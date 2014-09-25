@@ -224,6 +224,9 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mSoundGens.addColumn (new StringIdColumn<ESM::SoundGenerator>);
     mSoundGens.addColumn (new RecordStateColumn<ESM::SoundGenerator>);
     mSoundGens.addColumn (new FixedRecordTypeColumn<ESM::SoundGenerator> (UniversalId::Type_SoundGen));
+    mSoundGens.addColumn (new CreatureColumn<ESM::SoundGenerator>);
+    mSoundGens.addColumn (new SoundColumn<ESM::SoundGenerator>);
+    mSoundGens.addColumn (new SoundGeneratorTypeColumn<ESM::SoundGenerator>);
 
     mRefs.addColumn (new StringIdColumn<CellRef> (true));
     mRefs.addColumn (new RecordStateColumn<CellRef>);

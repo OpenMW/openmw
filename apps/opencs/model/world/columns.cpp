@@ -186,6 +186,8 @@ namespace CSMWorld
             { ColumnId_GlobalProfile, "Global Profile" },
             { ColumnId_RefNumCounter, "RefNum Counter" },
             { ColumnId_RefNum, "RefNum" },
+            { ColumnId_Creature, "Creature" },
+            { ColumnId_SoundGeneratorType, "Sound Generator Type" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
@@ -327,6 +329,12 @@ namespace
         "Skin", "Clothing", "Armour", 0
     };
 
+    static const char *sSoundGeneratorType[] =
+    {
+        "Left Foot", "Right Foot", "Swim Left", "Swim Right", "Moan", "Roar", "Scream",
+        "Land", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -347,6 +355,7 @@ namespace
             case CSMWorld::Columns::ColumnId_EnchantmentType: return sEnchantmentTypes;
             case CSMWorld::Columns::ColumnId_BodyPartType: return sBodyPartTypes;
             case CSMWorld::Columns::ColumnId_MeshType: return sMeshTypes;
+            case CSMWorld::Columns::ColumnId_SoundGeneratorType: return sSoundGeneratorType;
 
             default: return 0;
         }
