@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Skin" version="3.2.1">
+<MyGUI type="Resource" version="1.1">
 
     <!-- Text edit widget -->
 
-    <Skin name="MW_TextEditClient" size="10 10">
+    <Resource type="ResourceSkin" name="MW_TextEditClient" size="10 10">
         <Property key="TextColour" value="#{fontcolour=normal}"/>
 
         <BasisSkin type="EditText" offset="0 0 10 10" align="Stretch"/>
 
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_TextEdit" size="512 20">
+    <Resource type="ResourceSkin" name="MW_TextEdit" size="512 20">
 
         <!-- Borders -->
 
@@ -25,9 +25,9 @@
 
         <Child type="TextBox" skin="MW_TextEditClient" offset="4 1 502 18" align="Stretch" name="Client"/>
 
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_TextBoxEdit" size="512 20">
+    <Resource type="ResourceSkin" name="MW_TextBoxEdit" size="512 20">
 
         <Property key="FontName" value="Default"/>
 
@@ -39,9 +39,9 @@
 
         <Child type="MWScrollBar" skin="MW_VScroll" offset="494 3 14 14" align="Right VStretch" name="VScroll"/>
 
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_TextBoxEditWithBorder" size="512 20">
+    <Resource type="ResourceSkin" name="MW_TextBoxEditWithBorder" size="512 20">
 
         <!-- Borders -->
         <Child type="Widget" skin="MW_Box" offset="0 0 512 20" align="Stretch"/>
@@ -56,6 +56,6 @@
 
         <Child type="MWScrollBar" skin="MW_VScroll" offset="494 3 14 14" align="Right VStretch" name="VScroll"/>
 
-    </Skin>
+    </Resource>
 
 </MyGUI>

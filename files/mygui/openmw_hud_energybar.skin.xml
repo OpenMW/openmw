@@ -1,109 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Skin" version="3.2.1">
+<MyGUI type="Resource" version="1.1">
     <!-- Energy bar frame graphics -->
-    <Skin name="HUD_Bar_Top" size="64 2" texture="textures\menu_small_energy_bar_top.dds">
+    <Resource type="ResourceSkin" name="HUD_Bar_Top" size="64 2" texture="textures\menu_small_energy_bar_top.dds">
         <BasisSkin type="MainSkin" offset="0 0 64 2">
             <State name="normal" offset="0 0 64 2"/>
         </BasisSkin>
-    </Skin>
-    <Skin name="HUD_Bar_Bottom" size="64 2" texture="textures\menu_small_energy_bar_bottom.dds">
+    </Resource>
+    <Resource type="ResourceSkin" name="HUD_Bar_Bottom" size="64 2" texture="textures\menu_small_energy_bar_bottom.dds">
         <BasisSkin type="MainSkin" offset="0 0 64 2">
             <State name="normal" offset="0 0 64 2"/>
         </BasisSkin>
-    </Skin>
-    <Skin name="HUD_Bar_Side" size="2 8" texture="textures\menu_small_energy_bar_vert.dds">
+    </Resource>
+    <Resource type="ResourceSkin" name="HUD_Bar_Side" size="2 8" texture="textures\menu_small_energy_bar_vert.dds">
         <BasisSkin type="MainSkin" offset="0 0 2 8">
             <State name="normal" offset="0 0 2 8"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
     <!-- Progress bar track, various colors -->
-    <Skin name="MW_BarTrack_Red" size="4 8" texture="textures\menu_bar_gray.dds" >
+    <Resource type="ResourceSkin" name="MW_BarTrack_Red" size="4 8" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=health}"/>
         <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
-    </Skin>
-    <Skin name="MW_BarTrack_Green" size="4 8" texture="textures\menu_bar_gray.dds" >
+    </Resource>
+    <Resource type="ResourceSkin" name="MW_BarTrack_Green" size="4 8" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=fatigue}"/>
         <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
-    </Skin>
-    <Skin name="MW_BarTrack_Blue" size="4 8" texture="textures\menu_bar_gray.dds" >
+    </Resource>
+    <Resource type="ResourceSkin" name="MW_BarTrack_Blue" size="4 8" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=magic}"/>
         <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
-    </Skin>
-    <Skin name="MW_BarTrack_Yellow" size="4 8" texture="textures\menu_bar_gray.dds" >
+    </Resource>
+    <Resource type="ResourceSkin" name="MW_BarTrack_Yellow" size="4 8" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="1 1 0"/>
         <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
 
-    <Skin name="MW_BarTrack_Magic" size="4 8" texture="textures\menu_bar_gray.dds" >
+    <Resource type="ResourceSkin" name="MW_BarTrack_Magic" size="4 8" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=magic_fill}"/>
         <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_BarTrack_Weapon" size="4 8" texture="textures\menu_bar_gray.dds" >
+    <Resource type="ResourceSkin" name="MW_BarTrack_Weapon" size="4 8" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=weapon_fill}"/>
         <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_EnergyBar_Magic" size="64 12">
+    <Resource type="ResourceSkin" name="MW_EnergyBar_Magic" size="64 12">
         <Property key="TrackSkin" value="MW_BarTrack_Magic"/>
         <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
-    </Skin>
-    <Skin name="MW_EnergyBar_Weapon" size="64 12">
+    </Resource>
+    <Resource type="ResourceSkin" name="MW_EnergyBar_Weapon" size="64 12">
         <Property key="TrackSkin" value="MW_BarTrack_Weapon"/>
         <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_EnergyBar_Red" size="64 12">
+    <Resource type="ResourceSkin" name="MW_EnergyBar_Red" size="64 12">
         <Property key="TrackSkin" value="MW_BarTrack_Red"/>
         <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_EnergyBar_Green" size="64 12">
+    <Resource type="ResourceSkin" name="MW_EnergyBar_Green" size="64 12">
         <Property key="TrackSkin" value="MW_BarTrack_Green"/>
         <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_EnergyBar_Blue" size="64 12">
+    <Resource type="ResourceSkin" name="MW_EnergyBar_Blue" size="64 12">
         <Property key="TrackSkin" value="MW_BarTrack_Blue"/>
         <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_EnergyBar_Yellow" size="64 12">
+    <Resource type="ResourceSkin" name="MW_EnergyBar_Yellow" size="64 12">
         <Property key="TrackSkin" value="MW_BarTrack_Yellow"/>
         <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
-    </Skin>
+    </Resource>
 
 </MyGUI>
