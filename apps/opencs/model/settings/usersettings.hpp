@@ -35,7 +35,6 @@ namespace CSMSettings {
         QSettings *mSettingDefinitions;
         QSettings *mSettingCfgDefinitions;
         QList <Setting *> mSettings;
-        QStringList mOgreRenderers;
 
 
     public:
@@ -78,9 +77,6 @@ namespace CSMSettings {
         ///Save any unsaved changes in the QSettings object
         void saveDefinitions() const;
 
-        QStringList getShaderLanguageByRenderer(const QString &renderer);
-        QStringList getOgreOptions(const QString &key, const QString &renderer);
-        QStringList getOgreRenderers();
         QString setting(const QString &viewKey, const QStringList &list = QStringList());
 
     private:

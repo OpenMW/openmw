@@ -2,7 +2,7 @@
 #include "support.hpp"
 
 CSMSettings::Setting::Setting(SettingType typ, const QString &settingName,
-                             const QString &pageName, const QString &section)
+                             const QString &pageName)
     : mIsEditorSetting (false)
 {
     buildDefaultSetting();
@@ -17,7 +17,6 @@ CSMSettings::Setting::Setting(SettingType typ, const QString &settingName,
     setProperty (Property_SettingType, QVariant (settingType).toString());
     setProperty (Property_Page, pageName);
     setProperty (Property_Name, settingName);
-    setProperty (Property_Section, section);
 }
 
 void CSMSettings::Setting::buildDefaultSetting()
@@ -193,16 +192,6 @@ void CSMSettings::Setting::setPage (const QString &value)
 QString CSMSettings::Setting::page() const
 {
     return property (Property_Page).at(0);
-}
-
-void CSMSettings::Setting::setSection (const QString &value)
-{
-    setProperty (Property_Section, value);
-}
-
-QString CSMSettings::Setting::section() const
-{
-    return property (Property_Section).at(0);
 }
 
 void CSMSettings::Setting::setStyleSheet (const QString &value)

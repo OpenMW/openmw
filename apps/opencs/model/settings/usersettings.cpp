@@ -5,11 +5,7 @@
 
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
-#include <components/contentselector/model/naturalsort.hpp>
-
 #include <boost/version.hpp>
-
-#include <OgreRoot.h>
 
 #include "setting.hpp"
 #include "support.hpp"
@@ -32,12 +28,9 @@ namespace boost
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
 
-namespace CSMSettings
-{
+CSMSettings::UserSettings *CSMSettings::UserSettings::mUserSettingsInstance = 0;
 
-UserSettings *UserSettings::mUserSettingsInstance = 0;
-
-UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
+    CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
     : mCfgMgr (configurationManager)
     , mSettingDefinitions(NULL)
     , mSettingCfgDefinitions(NULL)
@@ -51,13 +44,13 @@ UserSettings::UserSettings (const Files::ConfigurationManager& configurationMana
     mSettingCfgDefinitions = new QSettings(QSettings::IniFormat, QSettings::UserScope, "", QString(), this);
 }
 
-void UserSettings::buildSettingModelDefaults()
+void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
-    QString page;
+    QString section;
 
-    page = "Objects";
+    section = "Objects";
     {
-        Setting *numLights = createSetting (Type_SpinBox, page, "num lights");
+        Setting *numLights = createSetting (Type_SpinBox, section, "num lights");
         numLights->setDefaultValue(8);
         numLights->setEditorSetting(true);
         numLights->setColumnSpan (1);
@@ -66,7 +59,7 @@ void UserSettings::buildSettingModelDefaults()
         numLights->setWidgetWidth (10);
         numLights->setViewLocation(1, 2);
 
-        Setting *shaders = createSetting (Type_CheckBox, page, "shaders");
+        Setting *shaders = createSetting (Type_CheckBox, section, "shaders");
         shaders->setDeclaredValues(QStringList() << "true" << "false");
         shaders->setDefaultValue("true");
         shaders->setEditorSetting(true);
@@ -77,9 +70,9 @@ void UserSettings::buildSettingModelDefaults()
         shaders->setViewLocation(2, 1);
     }
 
-    page = "Scene";
+    section = "Scene";
     {
-        Setting *fastFactor = createSetting (Type_SpinBox, page, "fast factor");
+        Setting *fastFactor = createSetting (Type_SpinBox, section, "fast factor");
         fastFactor->setDefaultValue(4);
         fastFactor->setEditorSetting(false);
         fastFactor->setColumnSpan (1);
@@ -91,7 +84,7 @@ void UserSettings::buildSettingModelDefaults()
         fastFactor->setWidgetWidth (10);
         fastFactor->setViewLocation(1, 2);
 
-        Setting *farClipDist = createSetting (Type_SpinBox, page, "far clip distance");
+        Setting *farClipDist = createSetting (Type_SpinBox, section, "far clip distance");
         farClipDist->setDefaultValue(300000);
         farClipDist->setEditorSetting(false);
         farClipDist->setColumnSpan (1);
@@ -100,7 +93,7 @@ void UserSettings::buildSettingModelDefaults()
         farClipDist->setWidgetWidth (10);
         farClipDist->setViewLocation(2, 2);
 
-        Setting *timerStart = createSetting (Type_SpinBox, page, "timer start");
+        Setting *timerStart = createSetting (Type_SpinBox, section, "timer start");
         timerStart->setDefaultValue(20);
         timerStart->setEditorSetting(false);
         timerStart->setColumnSpan (1);
@@ -110,10 +103,43 @@ void UserSettings::buildSettingModelDefaults()
         timerStart->setViewLocation(3, 2);
     }
 
-    page = "Window Size";
+    section = "SubView";
     {
-        Setting *width = createSetting (Type_LineEdit, page, "Width");
-        Setting *height = createSetting (Type_LineEdit, page, "Height");
+        Setting *maxSubView = createSetting (Type_SpinBox, section, "max subviews");
+        maxSubView->setDefaultValue(3);
+        maxSubView->setEditorSetting(false);
+        maxSubView->setColumnSpan (1);
+        maxSubView->setMinimum (1);
+        maxSubView->setSpecialValueText("1"); // workaround for setMinimum
+        maxSubView->setMaximum (100); // FIXME: not sure what the max value should be
+        maxSubView->setWidgetWidth (10);
+        maxSubView->setViewLocation(1, 2);
+
+        Setting *minWidth = createSetting (Type_SpinBox, section, "minimum width");
+        minWidth->setDefaultValue(325);
+        minWidth->setEditorSetting(false);
+        minWidth->setColumnSpan (1);
+        minWidth->setMinimum (50);
+        maxSubView->setSpecialValueText("50"); // workaround for setMinimum
+        minWidth->setMaximum (10000); // FIXME: not sure what the max value should be
+        minWidth->setWidgetWidth (10);
+        minWidth->setViewLocation(2, 2);
+
+        Setting *reuse = createSetting (Type_CheckBox, section, "reuse");
+        reuse->setDeclaredValues(QStringList() << "true" << "false");
+        reuse->setDefaultValue("true");
+        reuse->setEditorSetting(true);
+        reuse->setSpecialValueText("Reuse SubView");
+        reuse->setWidgetWidth(25);
+        reuse->setColumnSpan (3);
+        reuse->setStyleSheet ("QGroupBox { border: 0px; }");
+        reuse->setViewLocation(3, 2);
+    }
+
+    section = "Window Size";
+    {
+        Setting *width = createSetting (Type_LineEdit, section, "Width");
+        Setting *height = createSetting (Type_LineEdit, section, "Height");
 
         width->setWidgetWidth (5);
         height->setWidgetWidth (8);
@@ -130,7 +156,7 @@ void UserSettings::buildSettingModelDefaults()
         /*
          *Create the proxy setting for predefined values
          */
-        Setting *preDefined = createSetting (Type_ComboBox, page,
+        Setting *preDefined = createSetting (Type_ComboBox, section,
                                              "Pre-Defined");
 
         preDefined->setDeclaredValues (QStringList() << "640 x 480"
@@ -149,7 +175,7 @@ void UserSettings::buildSettingModelDefaults()
                              );
     }
 
-    page = "Display Format";
+    section = "Display Format";
     {
         QString defaultValue = "Icon and Text";
 
@@ -157,10 +183,10 @@ void UserSettings::buildSettingModelDefaults()
                             << defaultValue << "Icon Only" << "Text Only";
 
         Setting *rsd = createSetting (Type_RadioButton,
-                                      page, "Record Status Display");
+                                      section, "Record Status Display");
 
         Setting *ritd = createSetting (Type_RadioButton,
-                                      page, "Referenceable ID Type Display");
+                                      section, "Referenceable ID Type Display");
 
         rsd->setDeclaredValues (values);
         ritd->setDeclaredValues (values);
@@ -169,7 +195,7 @@ void UserSettings::buildSettingModelDefaults()
         ritd->setEditorSetting (true);
     }
 
-    page = "Proxy Selection Test";
+    section = "Proxy Selection Test";
     {
         /******************************************************************
         * There are three types of values:
@@ -197,30 +223,30 @@ void UserSettings::buildSettingModelDefaults()
         //create setting objects, specifying the basic widget type,
         //the page name, and the view name
 
-        Setting *masterBoolean = createSetting (Type_RadioButton, page,
+        Setting *masterBoolean = createSetting (Type_RadioButton, section,
                                                 "Master Proxy");
 
-        Setting *slaveBoolean = createSetting (Type_CheckBox, page,
+        Setting *slaveBoolean = createSetting (Type_CheckBox, section,
                                                 "Proxy Checkboxes");
 
-        Setting *slaveSingleText = createSetting (Type_LineEdit, page,
+        Setting *slaveSingleText = createSetting (Type_LineEdit, section,
                                                 "Proxy TextBox 1");
 
-        Setting *slaveMultiText = createSetting (Type_LineEdit, page,
+        Setting *slaveMultiText = createSetting (Type_LineEdit, section,
                                                 "ProxyTextBox 2");
 
-        Setting *slaveAlphaSpinbox = createSetting (Type_SpinBox, page,
+        Setting *slaveAlphaSpinbox = createSetting (Type_SpinBox, section,
                                                 "Alpha Spinbox");
 
-        Setting *slaveIntegerSpinbox = createSetting (Type_SpinBox, page,
+        Setting *slaveIntegerSpinbox = createSetting (Type_SpinBox, section,
                                                 "Int Spinbox");
 
         Setting *slaveDoubleSpinbox = createSetting (Type_DoubleSpinBox,
-                                                page, "Double Spinbox");
+                                                section, "Double Spinbox");
 
-        Setting *slaveSlider = createSetting (Type_Slider, page, "Slider");
+        Setting *slaveSlider = createSetting (Type_Slider, section, "Slider");
 
-        Setting *slaveDial = createSetting (Type_Dial, page, "Dial");
+        Setting *slaveDial = createSetting (Type_Dial, section, "Dial");
 
         //set declared values for selected views
         masterBoolean->setDeclaredValues (QStringList()
@@ -343,12 +369,12 @@ void UserSettings::buildSettingModelDefaults()
         }
 }
 
-UserSettings::~UserSettings()
+CSMSettings::UserSettings::~UserSettings()
 {
     mUserSettingsInstance = 0;
 }
 
-void UserSettings::loadSettings (const QString &fileName)
+void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 {
     QString userFilePath = QString::fromUtf8
                                 (mCfgMgr.getUserConfigPath().string().c_str());
@@ -375,128 +401,13 @@ void UserSettings::loadSettings (const QString &fileName)
     mSettingDefinitions = new QSettings
         (QSettings::IniFormat, QSettings::UserScope, "opencs", QString(), this);
 
-    // prepare to use the settings from settings.cfg
-    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/settings-default.cfg";
-    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/settings-default.cfg";
-
-    Settings::Manager settings;
-    // prefer local
-    if (boost::filesystem::exists(localdefault))
-        settings.loadDefault(localdefault);
-    else if (boost::filesystem::exists(globaldefault))
-        settings.loadDefault(globaldefault);
-    else
-        std::cerr<< "No default settings file found! Make sure the file \"settings-default.cfg\" was properly installed."<< std::endl;
-
-    // load user settings if they exist, otherwise just load the default settings as user settings
-    const std::string settingspath = mCfgMgr.getUserConfigPath().string() + "/settings.cfg";
-    if (boost::filesystem::exists(settingspath))
-        settings.loadUser(settingspath);
-    else if (boost::filesystem::exists(localdefault))
-        settings.loadUser(localdefault);
-    else if (boost::filesystem::exists(globaldefault))
-        settings.loadUser(globaldefault);
-
-    std::string renderSystem = settings.getString("render system", "Video");
-    if(renderSystem == "")
-    {
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-        renderSystem = "Direct3D9 Rendering Subsystem";
-#else
-        renderSystem = "OpenGL Rendering Subsystem";
-#endif
-    }
-    mSettingCfgDefinitions->setValue("Video/render system", renderSystem.c_str());
-
-    std::string currShader = settings.getString("shader mode", "General");
-    // can't call Ogre::Root at this point as it hasn't been initialised
-    QString rend = renderSystem.c_str();
-    bool openGL = rend.contains(QRegExp("^OpenGL", Qt::CaseInsensitive));
-    bool glES = rend.contains(QRegExp("^OpenGL ES", Qt::CaseInsensitive));
-
-    // force shader language based on render system
-    if(currShader == ""
-            || (openGL && currShader == "hlsl")
-            || (!openGL && currShader == "glsl")
-            || (glES && currShader != "glsles"))
-    {
-        QString shader = openGL ? (glES ? "glsles" : "glsl") : "hlsl";
-        mSettingDefinitions->setValue("shader mode", shader); //no group means "General" group
-    }
-
     // check if override entry exists (default: disabled)
     if(!mSettingDefinitions->childGroups().contains("Video", Qt::CaseInsensitive))
         mSettingDefinitions->setValue("Video/use settings.cfg", "false");
 }
 
-QStringList UserSettings::getOgreRenderers()
-{
-    if(mOgreRenderers.empty())
-    {
-        Ogre::RenderSystemList renderers = Ogre::Root::getSingleton().getAvailableRenderers();
-        Ogre::RenderSystemList::iterator it = renderers.begin();
-        for(; it != renderers.end(); ++it)
-            mOgreRenderers.append((*it)->getName().c_str());
-    }
-
-    return mOgreRenderers;
-}
-
-QStringList UserSettings::getOgreOptions(const QString &key, const QString &renderer)
-{
-    QStringList result;
-
-    Ogre::RenderSystem *rend = Ogre::Root::getSingleton().getRenderSystemByName(renderer.toStdString());
-    if(!rend)
-        return result;
-
-    Ogre::ConfigOptionMap& renderOpt = rend->getConfigOptions();
-    Ogre::ConfigOptionMap::iterator it = renderOpt.begin();
-
-    uint row = 0;
-    for(; it != renderOpt.end(); ++it, ++row)
-    {
-        Ogre::StringVector::iterator opt_it = it->second.possibleValues.begin();
-        uint idx = 0;
-
-        for(; opt_it != it->second.possibleValues.end(); ++opt_it, ++idx)
-        {
-            if(strcmp (key.toStdString().c_str(), it->first.c_str()) == 0)
-            {
-                result << ((key == "FSAA") ? QString("MSAA ") : QString(""))
-                    + QString::fromStdString((*opt_it).c_str()).simplified();
-            }
-        }
-    }
-
-    // Sort ascending
-    qSort(result.begin(), result.end(), naturalSortLessThanCI);
-
-    // Replace the zero option with Off
-    int index = result.indexOf("MSAA 0");
-
-    if(index != -1)
-        result.replace(index, QObject::tr("Off"));
-
-    return result;
-}
-
-QStringList UserSettings::getShaderLanguageByRenderer(const QString &renderer)
-{
-    QStringList result;
-
-    if(renderer == "Direct3D9 Rendering Subsystem")
-        result.append("HLSL");
-    else if(renderer == "OpenGL Rendering Subsystem")
-        result.append("GLSL");
-    else if(renderer.contains(QRegExp("^OpenGL ES", Qt::CaseInsensitive)))
-        result.append("GLSLES");
-
-    return result;
-}
-
 // if the key is not found create one with a defaut value
-QString UserSettings::setting(const QString &viewKey, const QStringList &list)
+QString CSMSettings::UserSettings::setting(const QString &viewKey, const QStringList &list)
 {
     if(mSettingDefinitions->contains(viewKey))
         return settingValue(viewKey);
@@ -509,22 +420,23 @@ QString UserSettings::setting(const QString &viewKey, const QStringList &list)
     return QString();
 }
 
-bool UserSettings::hasSettingDefinitions (const QString &viewKey) const
+bool CSMSettings::UserSettings::hasSettingDefinitions (const QString &viewKey) const
 {
     return (mSettingDefinitions->contains (viewKey));
 }
 
-void UserSettings::setDefinitions (const QString &key, const QStringList &list)
+void CSMSettings::UserSettings::setDefinitions
+                                (const QString &key, const QStringList &list)
 {
     mSettingDefinitions->setValue (key, list);
 }
 
-void UserSettings::saveDefinitions() const
+void CSMSettings::UserSettings::saveDefinitions() const
 {
     mSettingDefinitions->sync();
 }
 
-QString UserSettings::settingValue (const QString &settingKey)
+QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
 {
     QStringList defs;
 
@@ -552,20 +464,22 @@ QString UserSettings::settingValue (const QString &settingKey)
     return defs.at(0);
 }
 
-UserSettings& UserSettings::instance()
+CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
 {
     assert(mUserSettingsInstance);
     return *mUserSettingsInstance;
 }
 
-void UserSettings::updateUserSetting(const QString &settingKey, const QStringList &list)
+void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
+                                                    const QStringList &list)
 {
     mSettingDefinitions->setValue (settingKey ,list);
 
     emit userSettingUpdated (settingKey, list);
 }
 
-Setting *UserSettings::findSetting (const QString &pageName, const QString &settingName)
+CSMSettings::Setting *CSMSettings::UserSettings::findSetting
+                        (const QString &pageName, const QString &settingName)
 {
     foreach (Setting *setting, mSettings)
     {
@@ -578,7 +492,8 @@ Setting *UserSettings::findSetting (const QString &pageName, const QString &sett
     return 0;
 }
 
-void UserSettings::removeSetting (const QString &pageName, const QString &settingName)
+void CSMSettings::UserSettings::removeSetting
+                        (const QString &pageName, const QString &settingName)
 {
     if (mSettings.isEmpty())
         return;
@@ -599,7 +514,7 @@ void UserSettings::removeSetting (const QString &pageName, const QString &settin
     }
 }
 
-SettingPageMap UserSettings::settingPageMap() const
+CSMSettings::SettingPageMap CSMSettings::UserSettings::settingPageMap() const
 {
     SettingPageMap pageMap;
 
@@ -609,8 +524,8 @@ SettingPageMap UserSettings::settingPageMap() const
     return pageMap;
 }
 
-Setting *UserSettings::createSetting
-        (SettingType typ, const QString &page, const QString &name)
+CSMSettings::Setting *CSMSettings::UserSettings::createSetting
+        (CSMSettings::SettingType typ, const QString &page, const QString &name)
 {
     //get list of all settings for the current setting name
     if (findSetting (page, name))
@@ -629,12 +544,10 @@ Setting *UserSettings::createSetting
     return setting;
 }
 
-QStringList UserSettings::definitions (const QString &viewKey) const
+QStringList CSMSettings::UserSettings::definitions (const QString &viewKey) const
 {
     if (mSettingDefinitions->contains (viewKey))
         return mSettingDefinitions->value (viewKey).toStringList();
 
     return QStringList();
-}
-
 }

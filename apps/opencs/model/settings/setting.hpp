@@ -30,7 +30,7 @@ namespace CSMSettings
     public:
 
         explicit Setting(SettingType typ, const QString &settingName,
-                         const QString &pageName, const QString &section = QString());
+                         const QString &pageName);
 
         void addProxy (const Setting *setting, const QStringList &vals);
         void addProxy (const Setting *setting, const QList <QStringList> &list);
@@ -79,9 +79,6 @@ namespace CSMSettings
 
         void setPage (const QString &value);
         QString page() const;
-
-        void setSection (const QString &value);
-        QString section() const;
 
         void setStyleSheet (const QString &value);
         QString styleSheet() const;
