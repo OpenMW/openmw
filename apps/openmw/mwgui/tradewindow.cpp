@@ -324,12 +324,12 @@ namespace MWGui
             const MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
             const MWMechanics::CreatureStats &playerStats = player.getClass().getCreatureStats(player);
 
-            float a1 = std::min(player.getClass().getSkill(player, ESM::Skill::Mercantile), 100);
-            float b1 = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
-            float c1 = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-            float d1 = std::min(mPtr.getClass().getSkill(mPtr, ESM::Skill::Mercantile), 100);
-            float e1 = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
-            float f1 = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
+            float a1 = player.getClass().getSkill(player, ESM::Skill::Mercantile);
+            float b1 = 0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified();
+            float c1 = 0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified();
+            float d1 = mPtr.getClass().getSkill(mPtr, ESM::Skill::Mercantile);
+            float e1 = 0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified();
+            float f1 = 0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified();
 
             float pcTerm = (clampedDisposition - 50 + a1 + b1 + c1) * playerStats.getFatigueTerm();
             float npcTerm = (d1 + e1 + f1) * sellerStats.getFatigueTerm();
@@ -352,7 +352,15 @@ namespace MWGui
             }
 
             //skill use!
-            player.getClass().skillUsageSucceeded(player, ESM::Skill::Mercantile, 0);
+            float skillGain = 0.f;
+            int finalPrice = std::abs(mCurrentBalance);
+            int initialMerchantOffer = std::abs(mCurrentMerchantOffer);
+            if (!buying && (finalPrice > initialMerchantOffer) && finalPrice > 0)
+                skillGain = int(100 * (finalPrice - initialMerchantOffer) / float(finalPrice));
+            else if (buying && (finalPrice < initialMerchantOffer) && initialMerchantOffer > 0)
+                skillGain = int(100 * (initialMerchantOffer - finalPrice) / float(initialMerchantOffer));
+
+            player.getClass().skillUsageSucceeded(player, ESM::Skill::Mercantile, 0, skillGain);
         }
 
         int iBarterSuccessDisposition = gmst.find("iBarterSuccessDisposition")->getInt();

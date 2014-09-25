@@ -1123,7 +1123,7 @@ namespace MWClass
         return cast.cast(id);
     }
 
-    void Npc::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const
+    void Npc::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor) const
     {
         MWMechanics::NpcStats& stats = getNpcStats (ptr);
 
@@ -1137,7 +1137,7 @@ namespace MWClass
                 ref->mBase->mClass
             );
 
-        stats.useSkill (skill, *class_, usageType);
+        stats.useSkill (skill, *class_, usageType, extraFactor);
     }
 
     float Npc::getArmorRating (const MWWorld::Ptr& ptr) const

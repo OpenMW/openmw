@@ -231,7 +231,7 @@ namespace MWWorld
             ///
             /// (default implementation: ignore and return false)
 
-            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const;
+            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const;
             ///< Inform actor \a ptr that a skill use has succeeded.
             ///
             /// (default implementations: throws an exception)
