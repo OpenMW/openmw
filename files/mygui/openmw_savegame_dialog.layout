@@ -65,13 +65,12 @@
                 <UserString key="VStretch" value="true"/>
             </Widget>
 
-            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
-                <Property key="Caption" value="#{sCancel}"/>
-            </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton">
                 <Property key="Caption" value="#{sOk}"/>
             </Widget>
-
+            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
+                <Property key="Caption" value="#{sCancel}"/>
+            </Widget>
         </Widget>
 
 
