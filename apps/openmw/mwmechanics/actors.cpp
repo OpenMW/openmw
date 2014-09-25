@@ -1175,13 +1175,25 @@ namespace MWMechanics
                 iter->second->updateContinuousVfx();
 
             // Animation/movement update
+            CharacterController* playerCharacter = NULL;
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
                             ESM::MagicEffect::Paralyze).getMagnitude() > 0)
                     iter->second->skipAnim();
+
+                // Handle player last, in case a cell transition occurs by casting a teleportation spell
+                // (would invalidate the iterator)
+                if (iter->first.getCellRef().getRefId() == "player")
+                {
+                    playerCharacter = iter->second;
+                    continue;
+                }
                 iter->second->update(duration);
             }
+
+            if (playerCharacter)
+                playerCharacter->update(duration);
 
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
