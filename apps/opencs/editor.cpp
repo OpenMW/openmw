@@ -278,8 +278,7 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
     else                              antialiasing = "0";
     params.insert(std::make_pair("FSAA", antialiasing));
 
-    std::string vsync = mUserSettings.settingValue("Video/vsync").toStdString() == "true" ? "true" : "false";
-    params.insert(std::make_pair("vsync", vsync));
+    params.insert(std::make_pair("vsync", "false"));
     params.insert(std::make_pair("hidden", "true"));
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     params.insert(std::make_pair("macAPI", "cocoa"));

@@ -424,9 +424,9 @@ void UserSettings::loadSettings (const QString &fileName)
         mSettingDefinitions->setValue("shader mode", shader); //no group means "General" group
     }
 
-    // check if override entry exists (default: override)
+    // check if override entry exists (default: disabled)
     if(!mSettingDefinitions->childGroups().contains("Video", Qt::CaseInsensitive))
-        mSettingDefinitions->setValue("Video/use settings.cfg", "true");
+        mSettingDefinitions->setValue("Video/use settings.cfg", "false");
 }
 
 QStringList UserSettings::getOgreRenderers()
