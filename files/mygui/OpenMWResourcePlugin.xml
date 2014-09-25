@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI>
+	<MyGUI type="Widgets">
+		<!-- New widget class definitions -->
+		<Widget name="VBox">
+			<Property key="DefaultSkin" value=""/>
+			<Property key="Skin" value="" group="Plugin" name="VBox"/>
+			<Property key="Parent" value="true"/>
+			<Property key="Child" value="true"/>
+			<Parameter key="Spacing" value="1 int"/>
+			<Parameter key="Padding" value="1 int"/>
+			<Parameter key="AutoResize" value="Bool"/>
+		</Widget>
+		<Widget name="HBox">
+			<Property key="DefaultSkin" value=""/>
+			<Property key="Skin" value="" group="Plugin" name="HBox"/>
+			<Property key="Parent" value="true"/>
+			<Property key="Child" value="true"/>
+			<Parameter key="Spacing" value="1 int"/>
+			<Parameter key="Padding" value="1 int"/>
+			<Parameter key="AutoResize" value="Bool"/>
+		</Widget>
+	</MyGUI>
+	<MyGUI type="Plugin">
+		<Plugin>
+			<Source>./Plugin_MyGUI_OpenMW_Resources</Source>
+			<Source build="Debug">./Plugin_MyGUI_OpenMW_Resources_d</Source>
+		</Plugin>
+	</MyGUI>
+</MyGUI>
