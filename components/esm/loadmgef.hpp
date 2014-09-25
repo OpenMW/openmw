@@ -14,6 +14,8 @@ struct MagicEffect
 {
     static unsigned int sRecordId;
 
+    std::string mId;
+
     enum Flags
     {
         // Originally fixed flags (HardcodedFlags array consists of just these)
@@ -95,6 +97,8 @@ struct MagicEffect
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 
+     /// Set record to default state (does not touch the ID/index).
+    void blank();
 
     enum Effects
     {
