@@ -12,7 +12,7 @@
             <Property key="TextAlign" value="Right"/>
         </Widget>
 
-        <Widget type="EditBox" skin="MW_TextEdit" position="520 30 52 24" name="ItemEdit" align="Right Top">
+        <Widget type="NumericEditBox" skin="MW_TextEdit" position="520 30 52 24" name="ItemEdit" align="Right Top">
             <Property key="TextAlign" value="Center"/>
         </Widget>
 

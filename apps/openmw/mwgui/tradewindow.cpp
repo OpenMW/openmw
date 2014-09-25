@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/widgets/numericeditbox.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -86,7 +88,7 @@ namespace MWGui
         mDecreaseButton->eventMouseButtonPressed += MyGUI::newDelegate(this, &TradeWindow::onDecreaseButtonPressed);
         mDecreaseButton->eventMouseButtonReleased += MyGUI::newDelegate(this, &TradeWindow::onBalanceButtonReleased);
 
-        mTotalBalance->eventEditTextChange += MyGUI::newDelegate(this, &TradeWindow::onBalanceEdited);
+        mTotalBalance->eventValueChanged += MyGUI::newDelegate(this, &TradeWindow::onBalanceValueChanged);
 
         setCoord(400, 0, 400, 300);
     }
@@ -433,21 +435,14 @@ namespace MWGui
         MyGUI::ControllerManager::getInstance().removeItem(_sender);
     }
 
-    void TradeWindow::onBalanceEdited(MyGUI::EditBox *_sender)
+    void TradeWindow::onBalanceValueChanged(int value)
     {
-        try
-        {
-            unsigned int count = boost::lexical_cast<unsigned int>(_sender->getCaption());
-            mCurrentBalance = count * (mCurrentBalance >= 0 ? 1 : -1);
-            updateLabels();
-        }
-        catch (std::bad_cast&)
-        {
-            if (_sender->getCaption().empty())
-                mTotalBalance->setCaption("0");
-            else
-                mTotalBalance->setCaption(boost::lexical_cast<std::string>(std::abs(mCurrentBalance)));
-        }
+        // Entering a "-" sign inverts the buying/selling state
+        mCurrentBalance = (mCurrentBalance >= 0 ? 1 : -1) * value;
+        updateLabels();
+
+        if (value != std::abs(value))
+            mTotalBalance->setValue(std::abs(value));
     }
 
     void TradeWindow::onIncreaseButtonTriggered()
@@ -471,19 +466,16 @@ namespace MWGui
 
         mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + boost::lexical_cast<std::string>(playerGold));
 
-        std::string balanceCaption;
         if (mCurrentBalance > 0)
         {
             mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalSold}");
-            balanceCaption = boost::lexical_cast<std::string>(mCurrentBalance);
         }
         else
         {
             mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalCost}");
-            balanceCaption = boost::lexical_cast<std::string>(-mCurrentBalance);
         }
-        if (balanceCaption != mTotalBalance->getCaption().asUTF8()) // Don't reset text cursor if text doesn't need to be changed
-            mTotalBalance->setCaption(balanceCaption);
+
+        mTotalBalance->setValue(std::abs(mCurrentBalance));
 
         mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + boost::lexical_cast<std::string>(getMerchantGold()));
     }

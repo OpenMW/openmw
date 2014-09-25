@@ -18,7 +18,7 @@
 
 #include <components/fontloader/fontloader.hpp>
 
-#include <components/widgets/box.hpp>
+#include <components/widgets/widgets.hpp>
 #include <components/widgets/tags.hpp>
 
 #include "../mwbase/inputmanager.hpp"
@@ -165,13 +165,6 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWEffectList>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::MWList>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::HBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::VBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedTextBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedEditBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedButton>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::ImageButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
@@ -179,6 +172,7 @@ namespace MWGui
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
         ItemWidget::registerComponents();
+        Gui::registerAllWidgets();
 
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatEvent>("Controller");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerFollowMouse>("Controller");

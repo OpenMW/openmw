@@ -3,6 +3,11 @@
 
 #include "windowbase.hpp"
 
+namespace Gui
+{
+    class NumericEditBox;
+}
+
 namespace MWGui
 {
     class CountDialog : public WindowModal
@@ -22,7 +27,7 @@ namespace MWGui
 
         private:
             MyGUI::ScrollBar* mSlider;
-            MyGUI::EditBox* mItemEdit;
+            Gui::NumericEditBox* mItemEdit;
             MyGUI::TextBox* mItemText;
             MyGUI::TextBox* mLabelText;
             MyGUI::Button* mOkButton;
@@ -30,7 +35,7 @@ namespace MWGui
 
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onOkButtonClicked(MyGUI::Widget* _sender);
-            void onEditTextChange(MyGUI::EditBox* _sender);
+            void onEditValueChanged(int value);
             void onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position);
             void onEnterKeyPressed(MyGUI::EditBox* _sender);
     };

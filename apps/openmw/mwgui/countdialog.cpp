@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/widgets/numericeditbox.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -19,7 +21,7 @@ namespace MWGui
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CountDialog::onCancelButtonClicked);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CountDialog::onOkButtonClicked);
-        mItemEdit->eventEditTextChange += MyGUI::newDelegate(this, &CountDialog::onEditTextChange);
+        mItemEdit->eventValueChanged += MyGUI::newDelegate(this, &CountDialog::onEditValueChanged);
         mSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &CountDialog::onSliderMoved);
         // make sure we read the enter key being pressed to accept multiple items
         mItemEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &CountDialog::onEnterKeyPressed);
@@ -46,7 +48,10 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mItemEdit);
 
         mSlider->setScrollPosition(maxCount-1);
-        mItemEdit->setCaption(boost::lexical_cast<std::string>(maxCount));
+
+        mItemEdit->setMinValue(1);
+        mItemEdit->setMaxValue(maxCount);
+        mItemEdit->setValue(maxCount);
     }
 
     void CountDialog::cancel() //Keeping this here as I don't know if anything else relies on it.
@@ -80,30 +85,13 @@ namespace MWGui
         setVisible(false);
     }
 
-    void CountDialog::onEditTextChange(MyGUI::EditBox* _sender)
+    void CountDialog::onEditValueChanged(int value)
     {
-        if (_sender->getCaption() == "")
-            return;
-
-        unsigned int count;
-        try
-        {
-            count = boost::lexical_cast<unsigned int>(_sender->getCaption());
-        }
-        catch (std::bad_cast&)
-        {
-            count = 1;
-        }
-        if (count > mSlider->getScrollRange())
-        {
-            count = mSlider->getScrollRange();
-        }
-        mSlider->setScrollPosition(count-1);
-        onSliderMoved(mSlider, count-1);
+        mSlider->setScrollPosition(value-1);
     }
 
     void CountDialog::onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position)
     {
-        mItemEdit->setCaption(boost::lexical_cast<std::string>(_position+1));
+        mItemEdit->setValue(_position+1);
     }
 }
