@@ -326,7 +326,8 @@ namespace MWRender
         mOverlayTexture->getBuffer()->blit(tex->getBuffer(), srcBox, destBox);
 
         if (srcBox.left == destBox.left && srcBox.right == destBox.right
-                && srcBox.top == destBox.top && srcBox.bottom == destBox.bottom)
+                && srcBox.top == destBox.top && srcBox.bottom == destBox.bottom
+                && int(image.getWidth()) == mWidth && int(image.getHeight()) == mHeight)
             mOverlayImage = image;
         else
             mOverlayTexture->convertToImage(mOverlayImage);
