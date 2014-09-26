@@ -86,6 +86,7 @@ set(MYGUI_FILES
     DejaVuLGCSansMono.ttf
     markers.png
     ../launcher/images/openmw.png
+    OpenMWResourcePlugin.xml
 )
 
 

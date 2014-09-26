@@ -671,8 +671,6 @@ namespace MWGui
         // Centre dialog
         center();
 
-        setText("LabelT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sSpecializationMenu1", ""));
-
         getWidget(mSpecialization0, "Specialization0");
         getWidget(mSpecialization1, "Specialization1");
         getWidget(mSpecialization2, "Specialization2");
@@ -694,7 +692,6 @@ namespace MWGui
 
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
-        cancelButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sCancel", ""));
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onCancelClicked);
     }
 
@@ -737,8 +734,6 @@ namespace MWGui
         // Centre dialog
         center();
 
-        setText("LabelT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sAttributesMenu1", ""));
-
         for (int i = 0; i < 8; ++i)
         {
             Widgets::MWAttributePtr attribute;
@@ -752,7 +747,6 @@ namespace MWGui
 
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
-        cancelButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sCancel", ""));
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectAttributeDialog::onCancelClicked);
     }
 
@@ -787,11 +781,6 @@ namespace MWGui
     {
         // Centre dialog
         center();
-
-        setText("LabelT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sSkillsMenu1", ""));
-        setText("CombatLabelT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sSpecializationCombat", ""));
-        setText("MagicLabelT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sSpecializationMagic", ""));
-        setText("StealthLabelT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sSpecializationStealth", ""));
 
         for(int i = 0; i < 9; i++)
         {
@@ -849,7 +838,6 @@ namespace MWGui
 
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
-        cancelButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sCancel", ""));
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSkillDialog::onCancelClicked);
     }
 

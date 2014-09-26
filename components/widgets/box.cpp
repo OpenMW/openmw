@@ -8,7 +8,7 @@ namespace Gui
         MyGUI::Widget * parent = w->getParent();
         if (parent != 0)
         {
-            if (mExpandDirection == MyGUI::Align::Left)
+            if (mExpandDirection.isLeft())
             {
                 int hdiff = getRequestedSize ().width - w->getSize().width;
                 w->setPosition(w->getPosition() - MyGUI::IntPoint(hdiff, 0));

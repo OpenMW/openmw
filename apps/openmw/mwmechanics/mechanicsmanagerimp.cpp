@@ -1128,9 +1128,21 @@ namespace MWMechanics
             }
         }
 
-        // Attacking peaceful NPCs is a crime
+        // Attacking an NPC that is already in combat with any other NPC is not a crime
+        AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+        bool isFightingNpc = false;
+        for (std::list<AiPackage*>::const_iterator it = seq.begin(); it != seq.end(); ++it)
+        {
+            if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+            {
+                MWWorld::Ptr target = static_cast<AiCombat*>(*it)->getTarget();
+                if (!target.isEmpty() && target.getClass().isNpc())
+                    isFightingNpc = true;
+            }
+        }
+
         if (ptr.getClass().isNpc() && !attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker)
-                && !isAggressive(ptr, attacker))
+                && !isAggressive(ptr, attacker) && !isFightingNpc)
             commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
         if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)

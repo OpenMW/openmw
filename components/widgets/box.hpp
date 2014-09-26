@@ -12,6 +12,8 @@ namespace Gui
     class AutoSizedWidget
     {
     public:
+        AutoSizedWidget() : mExpandDirection(MyGUI::Align::Right) {}
+
         virtual MyGUI::IntSize getRequestedSize() = 0;
 
     protected:

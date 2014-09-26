@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Skin" version="3.2.1">
+<MyGUI type="Resource" version="1.1">
 
 <!--
 
@@ -10,38 +10,38 @@ color_misc=0,205,205 # ????
 
 -->
 
-    <Skin name="NormalText" size="16 16">
+    <Resource type="ResourceSkin" name="NormalText" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
             <State name="normal" colour="#{fontcolour=header}" shift="0"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
-    <Skin name="NumFPS" size="16 16">
+    <Resource type="ResourceSkin" name="NumFPS" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="HCenter Bottom"/>
         <Property key="TextColour" value="1 1 1"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="SandText" size="16 16">
+    <Resource type="ResourceSkin" name="SandText" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
             <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
-    <Skin name="SandTextVCenter" size="16 16">
+    <Resource type="ResourceSkin" name="SandTextVCenter" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left VCenter"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
             <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
-    <Skin name="SandTextRight" size="16 16">
+    <Resource type="ResourceSkin" name="SandTextRight" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Right Bottom"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
@@ -49,28 +49,28 @@ color_misc=0,205,205 # ????
             <State name="increased" colour="#{fontcolour=positive}"/>
             <State name="decreased" colour="#{fontcolour=negative}"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
-    <Skin name="SandBrightText" size="16 16">
+    <Resource type="ResourceSkin" name="SandBrightText" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
             <State name="normal" colour="#{fontcolour=header}" shift="0"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
-    <Skin name="CountText" size="16 16">
+    <Resource type="ResourceSkin" name="CountText" size="16 16">
         <Property key="FontName" value="Default"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
             <State name="normal" colour="#{fontcolour=count}" shift="0"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_StatNameC" size="200 18">
+    <Resource type="ResourceSkin" name="MW_StatNameC" size="200 18">
         <Child type="TextBoxC" skin="SandText" offset="0 0 200 18" align="Left HStretch" name="StatName"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="SandTextButtonC" size="16 16">
+    <Resource type="ResourceSkin" name="SandTextButtonC" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Top HCenter"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
@@ -83,9 +83,9 @@ color_misc=0,205,205 # ????
             <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
             <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
-    <Skin name="SandTextButton" size="16 16">
+    <Resource type="ResourceSkin" name="SandTextButton" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
@@ -98,9 +98,9 @@ color_misc=0,205,205 # ????
             <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
             <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
-    <Skin name="SpellTextUnequipped" size="16 16">
+    <Resource type="ResourceSkin" name="SpellTextUnequipped" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
@@ -113,49 +113,49 @@ color_misc=0,205,205 # ????
             <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
             <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_StatNameButtonC" size="200 18">
+    <Resource type="ResourceSkin" name="MW_StatNameButtonC" size="200 18">
         <Child type="Button" skin="SandTextButtonC" offset="0 0 200 18" align="Left HStretch" name="StatNameButton"/>
-    </Skin>
+    </Resource>
 
 
 
-    <Skin name="MW_StatNameValueButton" size="200 18">
+    <Resource type="ResourceSkin" name="MW_StatNameValueButton" size="200 18">
         <Child type="Button" skin="SandText" offset="0 0 160 18" align="Left HStretch" name="StatNameButton"/>
         <Child type="Button" skin="SandTextRight" offset="160 0 40 18" align="Right Top" name="StatValueButton"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_EffectImage" size="200 24">
+    <Resource type="ResourceSkin" name="MW_EffectImage" size="200 24">
         <Child type="ImageBox" skin="ImageBox" offset="4 4 16 16" align="Left Top" name="Image"/>
         <Child type="TextBox" skin="SandText" offset="24 0 176 20" align="VCenter HStretch" name="Text"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_ChargeBar" size="204 18">
+    <Resource type="ResourceSkin" name="MW_ChargeBar" size="204 18">
         <Child type="ProgressBar" skin="MW_Progress_Red" offset="0 0 204 18" align="Right Top Stretch" name="Bar"/>
         <Child type="TextBox" skin="ProgressText" offset="0 0 204 18" align="Right Top Stretch" name="BarText"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_ChargeBar_Blue" size="204 18">
+    <Resource type="ResourceSkin" name="MW_ChargeBar_Blue" size="204 18">
         <Child type="ProgressBar" skin="MW_Progress_Blue" offset="0 0 204 18" align="Right Top Stretch" name="Bar"/>
         <Child type="TextBox" skin="ProgressText" offset="0 2 204 18" align="Right Top Stretch" name="BarText"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_DynamicStat_Red" size="204 18">
+    <Resource type="ResourceSkin" name="MW_DynamicStat_Red" size="204 18">
         <Child type="TextBox" skin="SandText" offset="0 0 100 18" align="Left Top" name="Text"/>
         <Child type="ProgressBar" skin="MW_Progress_Red" offset="74 0 130 18" align="Right Top" name="Bar"/>
         <Child type="TextBox" skin="ProgressText" offset="74 0 130 18" align="Right Top" name="BarText"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_DynamicStat_Blue" size="204 18">
+    <Resource type="ResourceSkin" name="MW_DynamicStat_Blue" size="204 18">
         <Child type="TextBox" skin="SandText" offset="0 0 100 18" align="Left Top" name="Text"/>
         <Child type="ProgressBar" skin="MW_Progress_Blue" offset="74 0 130 18" align="Right Top" name="Bar"/>
         <Child type="TextBox" skin="ProgressText" offset="74 0 130 18" align="Right Top" name="BarText"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_DynamicStat_Green" size="204 18">
+    <Resource type="ResourceSkin" name="MW_DynamicStat_Green" size="204 18">
         <Child type="TextBox" skin="SandText" offset="0 0 100 18" align="Left Top" name="Text"/>
         <Child type="ProgressBar" skin="MW_Progress_Green" offset="74 0 130 18" align="Right Top" name="Bar"/>
         <Child type="TextBox" skin="ProgressText" offset="74 0 130 18" align="Right Top" name="BarText"/>
-    </Skin>
+    </Resource>
 </MyGUI>

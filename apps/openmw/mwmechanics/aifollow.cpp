@@ -50,11 +50,6 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
             )
         return true; //Target doesn't exist
 
-    // Only the player can be actively followed. AiFollow packages with targets other than the player
-    // are only used for defining combat alliances, since NPCs will defend whoever they are following or being followed by.
-    if (target != MWBase::Environment::get().getWorld()->getPlayerPtr())
-        return false;
-
     actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor

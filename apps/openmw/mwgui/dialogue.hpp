@@ -8,14 +8,14 @@
 
 #include "keywordsearch.hpp"
 
+namespace Gui
+{
+    class MWList;
+}
+
 namespace MWGui
 {
     class WindowManager;
-
-    namespace Widgets
-    {
-        class MWList;
-    }
 }
 
 /*
@@ -169,7 +169,7 @@ namespace MWGui
         KeywordSearchT mKeywordSearch;
 
         BookPage* mHistory;
-        Widgets::MWList*   mTopicsList;
+        Gui::MWList*   mTopicsList;
         MyGUI::ScrollBar* mScrollBar;
         MyGUI::Progress* mDispositionBar;
         MyGUI::EditBox*     mDispositionText;

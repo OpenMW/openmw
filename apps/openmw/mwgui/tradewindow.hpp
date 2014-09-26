@@ -3,10 +3,9 @@
 
 #include "container.hpp"
 
-namespace MyGUI
+namespace Gui
 {
-  class Gui;
-  class Widget;
+    class NumericEditBox;
 }
 
 namespace MWGui
@@ -54,7 +53,7 @@ namespace MWGui
             MyGUI::Button* mIncreaseButton;
             MyGUI::Button* mDecreaseButton;
             MyGUI::TextBox* mTotalBalanceLabel;
-            MyGUI::EditBox* mTotalBalance;
+            Gui::NumericEditBox* mTotalBalance;
 
             MyGUI::Widget* mBottomPane;
 
@@ -84,7 +83,7 @@ namespace MWGui
             void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
             void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
             void onBalanceButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
-            void onBalanceEdited(MyGUI::EditBox* _sender);
+            void onBalanceValueChanged(int value);
             void onRepeatClick(MyGUI::Widget* widget, MyGUI::ControllerItem* controller);
 
             void addRepeatController(MyGUI::Widget* widget);
