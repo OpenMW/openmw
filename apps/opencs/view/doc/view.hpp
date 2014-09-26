@@ -189,6 +189,8 @@ namespace CSVDoc
 
             void addSoundGensSubView();
 
+            void addMagicEffectsSubView();
+
             void addMeshesSubView();
 
             void addIconsSubView();

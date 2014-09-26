@@ -160,6 +160,10 @@ void CSVDoc::View::setupMechanicsMenu()
     QAction *enchantments = new QAction (tr ("Enchantments"), this);
     connect (enchantments, SIGNAL (triggered()), this, SLOT (addEnchantmentsSubView()));
     mechanics->addAction (enchantments);
+
+    QAction *effects = new QAction (tr ("Magic Effects"), this);
+    connect (effects, SIGNAL (triggered()), this, SLOT (addMagicEffectsSubView()));
+    mechanics->addAction (effects);
 }
 
 void CSVDoc::View::setupCharacterMenu()
@@ -588,6 +592,11 @@ void CSVDoc::View::addMusicsSubView()
 void CSVDoc::View::addSoundsResSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_SoundsRes);
+}
+
+void CSVDoc::View::addMagicEffectsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_MagicEffects);
 }
 
 void CSVDoc::View::addTexturesSubView()

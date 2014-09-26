@@ -26,6 +26,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     manager.add (CSMWorld::UniversalId::Type_Skills,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, NullCreatorFactory>);
 
+    manager.add (CSMWorld::UniversalId::Type_MagicEffects,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, NullCreatorFactory>);
+
     static const CSMWorld::UniversalId::Type sTableTypes[] =
     {
         CSMWorld::UniversalId::Type_Globals,
@@ -128,6 +131,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
             CreatorFactory<GenericCreator> > (false));
 
     manager.add (CSMWorld::UniversalId::Type_Skill,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, NullCreatorFactory > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_MagicEffect,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, NullCreatorFactory > (false));
 
     manager.add (CSMWorld::UniversalId::Type_Gmst,
