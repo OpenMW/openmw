@@ -319,12 +319,11 @@ namespace MWGui
             markerWidget->setUserString("ToolTipType", "Layout");
             markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
             markerWidget->setUserString("Caption_TextOneLine", MyGUI::TextIterator::toTagsString(marker.mNote));
-            markerWidget->setColour(MyGUI::Colour(1.0,0.3,0.3));
             markerWidget->setNormalColour(MyGUI::Colour(1.0,0.3,0.3));
             markerWidget->setHoverColour(MyGUI::Colour(1.0,0.5,0.5));
             markerWidget->setUserData(marker);
             markerWidget->setNeedMouseFocus(true);
-            markerWidget->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &LocalMapBase::onCustomMarkerDoubleClicked);
+            customMarkerCreated(markerWidget);
             mCustomMarkerWidgets.push_back(markerWidget);
         }
         redraw();
@@ -411,6 +410,7 @@ namespace MWGui
             // Used by tooltips to not show the tooltip if marker is hidden by fog of war
             markerWidget->setUserString("IsMarker", "true");
             markerWidget->setUserData(markerPos);
+            doorMarkerCreated(markerWidget);
 
             mDoorMarkerWidgets.push_back(markerWidget);
         }
@@ -753,6 +753,8 @@ namespace MWGui
         markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
         markerWidget->setUserString("Caption_TextOneLine", name);
         markerWidget->setDepth(Global_MarkerLayer);
+        markerWidget->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
+        markerWidget->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
         ++_counter;
 
         CellId cell;
@@ -926,6 +928,19 @@ namespace MWGui
         // and reveal parts of the map you shouldn't be able to see
         for (std::vector<MyGUI::ImageBox*>::iterator it = mMapWidgets.begin(); it != mMapWidgets.end(); ++it)
             (*it)->setVisible(alpha == 1);
+    }
+
+    void MapWindow::customMarkerCreated(MyGUI::Widget *marker)
+    {
+        marker->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
+        marker->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
+        marker->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &MapWindow::onCustomMarkerDoubleClicked);
+    }
+
+    void MapWindow::doorMarkerCreated(MyGUI::Widget *marker)
+    {
+        marker->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
+        marker->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
     }
 
     // -------------------------------------------------------------------

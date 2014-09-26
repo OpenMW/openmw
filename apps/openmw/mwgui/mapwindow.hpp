@@ -119,7 +119,8 @@ namespace MWGui
         virtual void notifyPlayerUpdate() {}
         virtual void notifyMapChanged() {}
 
-        virtual void onCustomMarkerDoubleClicked(MyGUI::Widget* sender) {}
+        virtual void customMarkerCreated(MyGUI::Widget* marker) {}
+        virtual void doorMarkerCreated(MyGUI::Widget* marker) {}
 
         void updateMagicMarkers();
         void addDetectionMarkers(int type);
@@ -199,6 +200,7 @@ namespace MWGui
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onWorldButtonClicked(MyGUI::Widget* _sender);
         void onMapDoubleClicked(MyGUI::Widget* sender);
+        void onCustomMarkerDoubleClicked(MyGUI::Widget* sender);
         void onNoteEditOk();
         void onNoteEditDelete();
         void onNoteEditDeleteConfirm();
@@ -235,7 +237,9 @@ namespace MWGui
 
         virtual void onPinToggled();
         virtual void onTitleDoubleClicked();
-        virtual void onCustomMarkerDoubleClicked(MyGUI::Widget* sender);
+
+        virtual void doorMarkerCreated(MyGUI::Widget* marker);
+        virtual void customMarkerCreated(MyGUI::Widget *marker);
 
         virtual void notifyPlayerUpdate();
 
