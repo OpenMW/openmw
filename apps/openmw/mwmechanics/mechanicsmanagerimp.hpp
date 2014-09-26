@@ -120,7 +120,8 @@ namespace MWMechanics
                                       OffenseType type, int arg=0);
             virtual void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0);
-            virtual void actorAttacked (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
+            /// @return false if the attack was considered a "friendly hit" and forgiven
+            virtual bool actorAttacked (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, int count);
             /// Utility to check if opening (i.e. unlocking) this object is illegal and calling commitCrime if so

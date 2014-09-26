@@ -644,11 +644,13 @@ namespace MWClass
 
         bool wasDead = getCreatureStats(ptr).isDead();
 
+        // Note OnPcHitMe is not set for friendly hits.
+        bool setOnPcHitMe = true;
         if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
         {
             getCreatureStats(ptr).setAttacked(true);
 
-            MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+            setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
         if(!successful)
@@ -663,7 +665,7 @@ namespace MWClass
         if(!object.isEmpty())
             getCreatureStats(ptr).setLastHitObject(object.getClass().getId(object));
 
-        if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
+        if(setOnPcHitMe && !attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
         {
             const std::string &script = ptr.getClass().getScript(ptr);
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */

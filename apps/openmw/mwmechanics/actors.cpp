@@ -323,8 +323,9 @@ namespace MWMechanics
         for (std::list<MWWorld::Ptr>::const_iterator it = followers.begin(); it != followers.end(); ++it)
         {
             // need to check both ways since player doesn't use AI packages
-            if (creatureStats2.getAiSequence().isInCombat(*it)
+            if ((creatureStats2.getAiSequence().isInCombat(*it)
                     || it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(actor2))
+                    && !creatureStats.getAiSequence().isInCombat(*it))
                 aggressive = true;
         }
 
@@ -335,6 +336,9 @@ namespace MWMechanics
             {
                 MWWorld::Ptr followTarget = dynamic_cast<MWMechanics::AiFollow*>(*it)->getTarget();
                 if (followTarget.isEmpty())
+                    continue;
+
+                if (creatureStats.getAiSequence().isInCombat(followTarget))
                     continue;
 
                 // need to check both ways since player doesn't use AI packages

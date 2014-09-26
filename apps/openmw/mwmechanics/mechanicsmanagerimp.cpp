@@ -1111,10 +1111,10 @@ namespace MWMechanics
         }
     }
 
-    void MechanicsManager::actorAttacked(const MWWorld::Ptr &ptr, const MWWorld::Ptr &attacker)
+    bool MechanicsManager::actorAttacked(const MWWorld::Ptr &ptr, const MWWorld::Ptr &attacker)
     {
         if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
-            return;
+            return false;
 
         std::list<MWWorld::Ptr> followers = getActorsFollowing(attacker);
         if (std::find(followers.begin(), followers.end(), ptr) != followers.end())
@@ -1124,7 +1124,7 @@ namespace MWMechanics
             if (ptr.getClass().getCreatureStats(ptr).getFriendlyHits() < 4)
             {
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
-                return;
+                return false;
             }
         }
 
@@ -1153,6 +1153,8 @@ namespace MWMechanics
             // Note: accidental or collateral damage attacks are ignored.
             startCombat(ptr, attacker);
         }
+
+        return true;
     }
 
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)
