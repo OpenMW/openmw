@@ -675,10 +675,12 @@ namespace MWGui
         float worldX, worldY;
         mGlobalMapRender->cellTopLeftCornerToImageSpace (x, y, worldX, worldY);
 
+        int markerSize = 12;
+        int offset = mGlobalMapRender->getCellSize()/2 - markerSize/2;
         MyGUI::IntCoord widgetCoord(
-                    worldX * mGlobalMapRender->getWidth()+6,
-                    worldY * mGlobalMapRender->getHeight()+6,
-                    12, 12);
+                    worldX * mGlobalMapRender->getWidth()+offset,
+                    worldY * mGlobalMapRender->getHeight()+offset,
+                    markerSize, markerSize);
 
         static int _counter=0;
         MyGUI::Button* markerWidget = mGlobalMapOverlay->createWidget<MyGUI::Button>("ButtonImage",
