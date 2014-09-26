@@ -77,7 +77,7 @@ const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(co
 
     foreach (const EsmFile *file, mFiles)
     {
-        if (name == file->fileProperty (fp).toString())
+        if (name.compare(file->fileProperty (fp).toString(), Qt::CaseInsensitive) == 0)
             return file;
     }
     return 0;
@@ -120,7 +120,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
         {
             //compare filenames only.  Multiple instances
             //of the filename (with different paths) is not relevant here.
-            depFound = (dependency->fileName() == fileName);
+            depFound = (dependency->fileName().compare(fileName, Qt::CaseInsensitive) == 0);
 
             if (!depFound)
                 continue;
@@ -299,7 +299,7 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const
 
             foreach (EsmFile *file, mFiles)
             {
-                if (file->gameFiles().contains(fileName))
+                if (file->gameFiles().contains(fileName, Qt::CaseInsensitive))
                 {
                     QModelIndex idx = indexFromItem(file);
                     emit dataChanged(idx, idx);
@@ -500,7 +500,7 @@ void ContentSelectorModel::ContentModel::sortFiles()
             //dependencies appear.
             for (int j = i + 1; j < fileCount; j++)
             {
-                if (gamefiles.contains(mFiles.at(j)->fileName()))
+                if (gamefiles.contains(mFiles.at(j)->fileName(), Qt::CaseInsensitive))
                 {
                         mFiles.move(j, i);
 
@@ -589,7 +589,7 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString &filepath, 
             QFileInfo fileInfo(filepath);
             QString filename = fileInfo.fileName();
 
-            if (downstreamFile->gameFiles().contains(filename))
+            if (downstreamFile->gameFiles().contains(filename, Qt::CaseInsensitive))
             {
                 if (mCheckStates.contains(downstreamFile->filePath()))
                     mCheckStates[downstreamFile->filePath()] = Qt::Unchecked;
