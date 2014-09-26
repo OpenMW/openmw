@@ -62,7 +62,6 @@ void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap
 
     FallbackMap *map = boost::any_cast<FallbackMap>(&v);
 
-    std::map<std::string,std::string>::iterator mapIt;
     for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); ++it)
     {
         int sep = it->find(",");
@@ -76,7 +75,7 @@ void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap
         std::string key(it->substr(0,sep));
         std::string value(it->substr(sep+1));
 
-        if((mapIt = map->mMap.find(key)) == map->mMap.end())
+        if(map->mMap.find(key) == map->mMap.end())
         {
             map->mMap.insert(std::make_pair (key,value));
         }

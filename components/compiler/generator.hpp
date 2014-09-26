@@ -89,8 +89,6 @@ namespace Compiler
 
         void jumpOnZero (CodeContainer& code, int offset);
 
-        void jumpOnNonZero (CodeContainer& code, int offset);
-
         void compare (CodeContainer& code, char op, char valueType1, char valueType2);
 
         void menuMode (CodeContainer& code);

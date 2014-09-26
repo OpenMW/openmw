@@ -120,11 +120,6 @@ namespace MWMechanics
         return mSpells;
     }
 
-    void CreatureStats::setSpells(const Spells &spells)
-    {
-        mSpells = spells;
-    }
-
     ActiveSpells &CreatureStats::getActiveSpells()
     {
         return mActiveSpells;
@@ -198,11 +193,6 @@ namespace MWMechanics
     void CreatureStats::setLevel(int level)
     {
         mLevel = level;
-    }
-
-    void CreatureStats::setActiveSpells(const ActiveSpells &active)
-    {
-        mActiveSpells = active;
     }
 
     void CreatureStats::modifyMagicEffects(const MagicEffects &effects)
@@ -536,7 +526,6 @@ namespace MWMechanics
 
         mLastRestock = MWWorld::TimeStamp(state.mTradeTime);
         mGoldPool = state.mGoldPool;
-        mFallHeight = state.mFallHeight;
 
         mDead = state.mDead;
         mDied = state.mDied;

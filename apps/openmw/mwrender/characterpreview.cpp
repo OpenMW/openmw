@@ -281,9 +281,9 @@ namespace MWRender
     RaceSelectionPreview::RaceSelectionPreview()
         : CharacterPreview(MWBase::Environment::get().getWorld()->getPlayerPtr(),
             512, 512, "CharacterHeadPreview", Ogre::Vector3(0, 6, -35), Ogre::Vector3(0,125,0))
+        , mBase (*mCharacter.get<ESM::NPC>()->mBase)
         , mRef(&mBase)
     {
-        mBase = *mCharacter.get<ESM::NPC>()->mBase;
         mCharacter = MWWorld::Ptr(&mRef, NULL);
     }
 

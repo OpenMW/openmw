@@ -276,7 +276,6 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const
         case Qt::CheckStateRole:
         {
             int checkValue = value.toInt();
-            bool success = false;
             bool setState = false;
             if ((checkValue==Qt::Checked) && !isChecked(file->filePath()))
             {

@@ -268,8 +268,6 @@ namespace MWWorld
         loadingListener->setLabel(loadingExteriorText);
 
         CellStoreCollection::iterator active = mActiveCells.begin();
-
-        active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
             if ((*active)->getCell()->isExterior())
@@ -414,12 +412,9 @@ namespace MWWorld
 
         std::cout << "Changing to interior\n";
 
-        // remove active
-        CellStoreCollection::iterator active = mActiveCells.begin();
-
         // unload
         int current = 0;
-        active = mActiveCells.begin();
+        CellStoreCollection::iterator active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
             unloadCell (active++);

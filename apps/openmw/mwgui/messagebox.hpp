@@ -34,7 +34,6 @@ namespace MWGui
             void clear();
 
             bool removeMessageBox (MessageBox *msgbox);
-            void setMessageBoxSpeed (int speed);
 
             int readPressedButton ();
 

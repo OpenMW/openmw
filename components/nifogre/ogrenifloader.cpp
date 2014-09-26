@@ -1048,7 +1048,7 @@ class NIFObjectLoader
                 {
                     std::string::const_iterator last = str.end();
                     do {
-                        last--;
+                        --last;
                     } while(last != str.begin() && ::isspace(*last));
                     nextpos = std::distance(str.begin(), ++last);
                 }

@@ -393,7 +393,6 @@ namespace MWGui
         if (mCurrentRaceId.empty())
             return;
 
-        Widgets::MWSpellPtr spellPowerWidget;
         const int lineHeight = 18;
         MyGUI::IntCoord coord(0, 0, mSpellPowerList->getWidth(), 18);
 
@@ -405,7 +404,7 @@ namespace MWGui
         for (int i = 0; it != end; ++it)
         {
             const std::string &spellpower = *it;
-            spellPowerWidget = mSpellPowerList->createWidget<Widgets::MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + boost::lexical_cast<std::string>(i));
+            Widgets::MWSpellPtr spellPowerWidget = mSpellPowerList->createWidget<Widgets::MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + boost::lexical_cast<std::string>(i));
             spellPowerWidget->setSpellId(spellpower);
             spellPowerWidget->setUserString("ToolTipType", "Spell");
             spellPowerWidget->setUserString("Spell", spellpower);

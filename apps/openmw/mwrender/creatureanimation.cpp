@@ -150,7 +150,7 @@ void CreatureWeaponAnimation::updatePart(NifOgre::ObjectScenePtr& scene, int slo
     }
 
     std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(scene->mControllers.begin());
-    for(;ctrl != scene->mControllers.end();ctrl++)
+    for(;ctrl != scene->mControllers.end();++ctrl)
     {
         if(ctrl->getSource().isNull())
         {

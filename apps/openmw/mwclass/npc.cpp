@@ -1188,13 +1188,6 @@ namespace MWClass
                 + shield;
     }
 
-
-    void Npc::adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const
-    {
-        y = 0;
-        x = 0;
-    }
-
     void Npc::adjustScale(const MWWorld::Ptr &ptr, float &scale) const
     {
         MWWorld::LiveCellRef<ESM::NPC> *ref =

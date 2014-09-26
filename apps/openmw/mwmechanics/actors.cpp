@@ -1232,14 +1232,14 @@ namespace MWMechanics
             }
 
             static float sneakTimer = 0.f; // times update of sneak icon
-            static float sneakSkillTimer = 0.f; // times sneak skill progress from "avoid notice"
 
             // if player is in sneak state see if anyone detects him
             if (player.getClass().getCreatureStats(player).getMovementFlag(MWMechanics::CreatureStats::Flag_Sneak))
             {
+                static float sneakSkillTimer = 0.f; // times sneak skill progress from "avoid notice"
+
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
                 const int radius = esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt();
-                bool detected = false;
 
                 static float fSneakUseDelay = esmStore.get<ESM::GameSetting>().find("fSneakUseDelay")->getFloat();
 
@@ -1250,6 +1250,8 @@ namespace MWMechanics
                 {
                     // Set when an NPC is within line of sight and distance, but is still unaware. Used for skill progress.
                     bool avoidedNotice = false;
+
+                    bool detected = false;
 
                     for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
                     {
@@ -1418,7 +1420,7 @@ namespace MWMechanics
     std::list<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actor)
     {
         std::list<MWWorld::Ptr> list;
-        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
+        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
         {
             const MWWorld::Class &cls = iter->first.getClass();
             CreatureStats &stats = cls.getCreatureStats(iter->first);
@@ -1450,7 +1452,7 @@ namespace MWMechanics
         getObjectsInRange(position,
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fAlarmRadius")->getFloat(),
             neighbors); //only care about those within the alarm disance
-        for(std::vector<MWWorld::Ptr>::iterator iter(neighbors.begin());iter != neighbors.end();iter++)
+        for(std::vector<MWWorld::Ptr>::iterator iter(neighbors.begin());iter != neighbors.end();++iter)
         {
             const MWWorld::Class &cls = iter->getClass();
             CreatureStats &stats = cls.getCreatureStats(*iter);

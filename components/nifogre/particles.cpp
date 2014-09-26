@@ -130,8 +130,8 @@ public:
 
     NifEmitter(Ogre::ParticleSystem *psys)
       : Ogre::ParticleEmitter(psys)
+      , mEmitterBones(Ogre::any_cast<NiNodeHolder>(psys->getUserObjectBindings().getUserAny()).mBones)
     {
-        mEmitterBones = Ogre::any_cast<NiNodeHolder>(psys->getUserObjectBindings().getUserAny()).mBones;
         assert (!mEmitterBones.empty());
         Ogre::TagPoint* tag = static_cast<Ogre::TagPoint*>(mParent->getParentNode());
         mParticleBone = static_cast<Ogre::Bone*>(tag->getParent());

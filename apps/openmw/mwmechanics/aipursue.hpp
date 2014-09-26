@@ -41,8 +41,6 @@ namespace MWMechanics
         private:
 
             int mTargetActorId; // The actor to pursue
-            int mCellX;
-            int mCellY;
     };
 }
 #endif

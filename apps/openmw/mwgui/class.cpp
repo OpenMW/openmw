@@ -277,7 +277,6 @@ namespace MWGui
 
     InfoBoxDialog::InfoBoxDialog()
         : WindowModal("openmw_infobox.layout")
-        , mCurrentButton(-1)
     {
         getWidget(mTextBox, "TextBox");
         getWidget(mText, "Text");
@@ -306,7 +305,6 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(*it);
         }
         this->mButtons.clear();
-        mCurrentButton = -1;
 
         // TODO: The buttons should be generated from a template in the layout file, ie. cloning an existing widget
         MyGUI::Button* button;
@@ -336,11 +334,6 @@ namespace MWGui
         center();
     }
 
-    int InfoBoxDialog::getChosenButton() const
-    {
-        return mCurrentButton;
-    }
-
     void InfoBoxDialog::onButtonClicked(MyGUI::Widget* _sender)
     {
         std::vector<MyGUI::Button*>::const_iterator end = mButtons.end();
@@ -349,7 +342,6 @@ namespace MWGui
         {
             if (*it == _sender)
             {
-                mCurrentButton = i;
                 eventButtonSelected(i);
                 return;
             }

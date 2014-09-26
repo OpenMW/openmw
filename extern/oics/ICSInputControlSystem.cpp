@@ -120,8 +120,6 @@ namespace ICS
 
 					if(type == "bezier")
 					{
-						float step = 0.1;
-
 						float startX = FromString<float>(xmlInterval->Attribute("startX"));
 						float startY = FromString<float>(xmlInterval->Attribute("startY"));
 						float midX = FromString<float>(xmlInterval->Attribute("midX"));
@@ -129,7 +127,7 @@ namespace ICS
 						float endX = FromString<float>(xmlInterval->Attribute("endX"));
 						float endY = FromString<float>(xmlInterval->Attribute("endY"));
 
-						step = FromString<float>(xmlInterval->Attribute("step"));
+                        float step = FromString<float>(xmlInterval->Attribute("step"));
 
 						ICS_LOG("Applying Bezier filter to channel [number="
 							+ ToString<int>(ch) + ", startX=" 
@@ -334,7 +332,7 @@ namespace ICS
 
 		TiXmlElement Controller( "Controller" );
 
-		for(std::vector<Channel*>::const_iterator o = mChannels.begin() ; o != mChannels.end(); o++)
+        for(std::vector<Channel*>::const_iterator o = mChannels.begin() ; o != mChannels.end(); ++o)
 		{
 			ICS::IntervalList intervals = (*o)->getIntervals();
 			
@@ -371,14 +369,14 @@ namespace ICS
 						ChannelFilter.InsertEndChild(XMLInterval);
 					}
 					
-					interval++;
+                    ++interval;
 				}
 
 				Controller.InsertEndChild(ChannelFilter);
 			}
 		}
 
-		for(std::vector<Control*>::const_iterator o = mControls.begin() ; o != mControls.end(); o++)
+        for(std::vector<Control*>::const_iterator o = mControls.begin() ; o != mControls.end(); ++o)
 		{
 			TiXmlElement control( "Control" );
 
@@ -687,13 +685,13 @@ namespace ICS
 					control.InsertEndChild(binder);
 				}
 
-				it++;
+                ++it;
 			}
 
 
 			std::list<Channel*> channels = (*o)->getAttachedChannels();
 			for(std::list<Channel*>::iterator it = channels.begin() ;
-				it != channels.end() ; it++)
+                it != channels.end() ; ++it)
 			{
 				TiXmlElement binder( "Channel" );
 

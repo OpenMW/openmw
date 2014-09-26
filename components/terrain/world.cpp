@@ -15,6 +15,8 @@ World::World(Ogre::SceneManager* sceneMgr,
     , mShaders(shaders)
     , mAlign(align)
     , mCache(storage->getCellVertices())
+    , mShadows(false)
+    , mSplitShadows(false)
 {
 }
 

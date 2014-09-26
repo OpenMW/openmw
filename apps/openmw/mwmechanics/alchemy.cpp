@@ -27,6 +27,11 @@
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
 
+MWMechanics::Alchemy::Alchemy()
+    : mValue(0)
+{
+}
+
 std::set<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
 {
     std::map<EffectKey, int> effects;

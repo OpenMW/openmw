@@ -113,11 +113,6 @@ namespace Gui
             Base::setPropertyOverride(_key, _value);
     }
 
-    bool MWList::hasItem(const std::string& name)
-    {
-        return (std::find(mItems.begin(), mItems.end(), name) != mItems.end());
-    }
-
     unsigned int MWList::getItemCount()
     {
         return mItems.size();

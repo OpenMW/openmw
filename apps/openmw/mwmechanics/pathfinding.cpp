@@ -283,13 +283,6 @@ namespace MWMechanics
         return Ogre::Radian(Ogre::Math::ACos(directionY / directionResult) * sgn(Ogre::Math::ASin(directionX / directionResult))).valueDegrees();
     }
 
-    // Used by AiCombat, use Euclidean distance
-    float PathFinder::getDistToNext(float x, float y, float z)
-    {
-        ESM::Pathgrid::Point nextPoint = *mPath.begin();
-        return distance(nextPoint, x, y, z);
-    }
-
     bool PathFinder::checkWaypoint(float x, float y, float z)
     {
         if(mPath.empty())

@@ -1348,12 +1348,6 @@ namespace MWGui
         return mSubtitlesEnabled;
     }
 
-    void WindowManager::toggleHud ()
-    {
-        mHudEnabled = !mHudEnabled;
-        mHud->setVisible (mHudEnabled);
-    }
-
     bool WindowManager::toggleGui()
     {
         mGuiEnabled = !mGuiEnabled;
@@ -1669,7 +1663,7 @@ namespace MWGui
 
     WindowModal* WindowManager::getCurrentModal() const
     {
-        if(mCurrentModals.size() > 0)
+        if(!mCurrentModals.empty())
             return mCurrentModals.top();
         else
             return NULL;
@@ -1679,7 +1673,7 @@ namespace MWGui
     {
         // Only remove the top if it matches the current pointer. A lot of things hide their visibility before showing it,
         //so just popping the top would cause massive issues.
-        if(mCurrentModals.size() > 0)
+        if(!mCurrentModals.empty())
             if(input == mCurrentModals.top())
                 mCurrentModals.pop();
     }

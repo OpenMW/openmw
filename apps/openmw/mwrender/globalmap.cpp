@@ -106,13 +106,13 @@ namespace MWRender
                             if (land)
                             {
                                 const float landHeight = land->mLandData->mHeights[vertexY * ESM::Land::LAND_SIZE + vertexX];
-                                const float mountainHeight = 15000.f;
-                                const float hillHeight = 2500.f;
 
                                 if (landHeight >= 0)
                                 {
+                                    const float hillHeight = 2500.f;
                                     if (landHeight >= hillHeight)
                                     {
+                                        const float mountainHeight = 15000.f;
                                         float factor = std::min(1.f, float(landHeight-hillHeight)/mountainHeight);
                                         r = (hillColour.r * (1-factor) + mountainColour.r * factor) * 255;
                                         g = (hillColour.g * (1-factor) + mountainColour.g * factor) * 255;

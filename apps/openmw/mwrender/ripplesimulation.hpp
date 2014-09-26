@@ -41,6 +41,9 @@ public:
     void updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
 
 private:
+    RippleSimulation(const RippleSimulation&);
+    RippleSimulation& operator=(const RippleSimulation&);
+
     std::vector<Emitter> mEmitters;
 
     Ogre::RenderTexture* mRenderTargets[4];

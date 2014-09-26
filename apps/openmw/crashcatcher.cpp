@@ -127,7 +127,6 @@ static int (*cc_user_info)(char*, char*);
 static void gdb_info(pid_t pid)
 {
     char respfile[64];
-    char cmd_buf[128];
     FILE *f;
     int fd;
 
@@ -156,6 +155,7 @@ static void gdb_info(pid_t pid)
         fclose(f);
 
         /* Run gdb and print process info. */
+        char cmd_buf[128];
         snprintf(cmd_buf, sizeof(cmd_buf), "gdb --quiet --batch --command=%s", respfile);
         printf("Executing: %s\n", cmd_buf);
         fflush(stdout);

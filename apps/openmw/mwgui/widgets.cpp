@@ -225,11 +225,10 @@ namespace MWGui
             const ESM::Spell *spell = store.get<ESM::Spell>().search(mId);
             MYGUI_ASSERT(spell, "spell with id '" << mId << "' not found");
 
-            MWSpellEffectPtr effect = NULL;
             std::vector<ESM::ENAMstruct>::const_iterator end = spell->mEffects.mList.end();
             for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != end; ++it)
             {
-                effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
+                MWSpellEffectPtr effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
                 SpellEffectParams params;
                 params.mEffectID = it->mEffectID;
                 params.mSkill = it->mSkill;
@@ -563,22 +562,6 @@ namespace MWGui
                 mWidgetEnd->eventMouseButtonPressed += MyGUI::newDelegate(this, &MWScrollBar::onIncreaseButtonPressed);
                 mWidgetEnd->eventMouseButtonReleased += MyGUI::newDelegate(this, &MWScrollBar::onIncreaseButtonReleased);
             }
-        }
-
-        void MWScrollBar::setEnableRepeat(bool enable)
-        {
-            mEnableRepeat = enable;
-        }
-
-        bool MWScrollBar::getEnableRepeat()
-        {
-            return mEnableRepeat;
-        }
-
-        void MWScrollBar::getRepeat(float &trigger, float &step)
-        {
-            trigger = mRepeatTriggerTime;
-            step = mRepeatStepTime;
         }
 
         void MWScrollBar::setRepeat(float trigger, float step)

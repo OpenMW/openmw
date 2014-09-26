@@ -139,11 +139,6 @@ namespace MWGui
         return false;
     }
 
-    void MessageBoxManager::setMessageBoxSpeed (int speed)
-    {
-        mMessageBoxSpeed = speed;
-    }
-
     int MessageBoxManager::readPressedButton ()
     {
         int pressed = mLastButtonPressed;
@@ -218,7 +213,6 @@ namespace MWGui
         MyGUI::IntSize gameWindowSize = MyGUI::RenderManager::getInstance().getViewSize();
 
         int biggestButtonWidth = 0;
-        int buttonWidth = 0;
         int buttonsWidth = 0;
         int buttonsHeight = 0;
         int buttonHeight = 0;
@@ -241,7 +235,7 @@ namespace MWGui
             if (buttonsWidth != 0)
                 buttonsWidth += buttonLeftPadding;
 
-            buttonWidth = button->getTextSize().width + 2*buttonPadding;
+            int buttonWidth = button->getTextSize().width + 2*buttonPadding;
             buttonsWidth += buttonWidth;
 
             buttonHeight = button->getTextSize().height + 2*buttonPadding;
