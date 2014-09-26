@@ -259,8 +259,15 @@ int CS::Editor::run()
 
 std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 {
-    std::string rendersystem = mUserSettings.settingValue("Video/render system").toStdString();
-    Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName(rendersystem));
+    std::string renderer =
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        "Direct3D9 Rendering Subsystem";
+#else
+        "OpenGL Rendering Subsystem";
+#endif
+    std::string renderSystem = mUserSettings.setting("Video/render system", QStringList() << renderer.c_str()).toStdString();
+
+    Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName(renderSystem));
 
     Ogre::Root::getSingleton().initialise(false);
 
@@ -295,8 +302,21 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     std::auto_ptr<sh::Factory> factory (new sh::Factory (platform));
 
-    std::string shLang = mUserSettings.settingValue("General/shader mode").toStdString();
-    //std::string shLang = mUserSettings.getShaderLanguageByRenderer(rendersystem.c_str()).at(0).toStdString();
+    QString shLang = mUserSettings.settingValue("General/shader mode");
+    QString rend = renderSystem.c_str();
+    bool openGL = rend.contains(QRegExp("^OpenGL", Qt::CaseInsensitive));
+    bool glES = rend.contains(QRegExp("^OpenGL ES", Qt::CaseInsensitive));
+
+    // force shader language based on render system
+    if(shLang == ""
+            || (openGL && shLang == "hlsl")
+            || (!openGL && shLang == "glsl")
+            || (glES && shLang != "glsles"))
+    {
+        shLang = openGL ? (glES ? "glsles" : "glsl") : "hlsl";
+        //no group means "General" group in the "ini" file standard
+        mUserSettings.setDefinitions("shader mode", (QStringList() << shLang));
+    }
     enum sh::Language lang;
     if(shLang == "glsl")        lang = sh::Language_GLSL;
     else if(shLang == "glsles") lang = sh::Language_GLSLES;
@@ -316,6 +336,7 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     std::string fog = mUserSettings.setting("Shader/fog", (QStringList() << QString("true"))).toStdString();
     sh::Factory::getInstance().setGlobalSetting ("fog", fog);
+
 
     std::string shadows = mUserSettings.setting("Shader/shadows", (QStringList() << QString("false"))).toStdString();
     sh::Factory::getInstance().setGlobalSetting ("shadows", shadows);
