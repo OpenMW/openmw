@@ -221,7 +221,7 @@ namespace MWGui
 
         // Markers on global map
         typedef std::pair<int, int> CellId;
-        std::vector<CellId> mMarkers;
+        std::set<CellId> mMarkers;
 
         // Cells that should be explored in the next frame (i.e. their map revealed on the global map)
         // We can't do this immediately, because the map update is not immediate either (see mNeedMapUpdate in scene.cpp)

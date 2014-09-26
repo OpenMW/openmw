@@ -734,33 +734,32 @@ namespace MWGui
 
     void MapWindow::addVisitedLocation(const std::string& name, int x, int y)
     {
-        float worldX, worldY;
-        mGlobalMapRender->cellTopLeftCornerToImageSpace (x, y, worldX, worldY);
-
-        int markerSize = 12;
-        int offset = mGlobalMapRender->getCellSize()/2 - markerSize/2;
-        MyGUI::IntCoord widgetCoord(
-                    worldX * mGlobalMapRender->getWidth()+offset,
-                    worldY * mGlobalMapRender->getHeight()+offset,
-                    markerSize, markerSize);
-
-        static int _counter=0;
-        MyGUI::Widget* markerWidget = mGlobalMap->createWidget<MyGUI::Widget>("MarkerButton",
-            widgetCoord, MyGUI::Align::Default);
-        markerWidget->setNeedMouseFocus(true);
-        markerWidget->setColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal}")));
-        markerWidget->setUserString("ToolTipType", "Layout");
-        markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
-        markerWidget->setUserString("Caption_TextOneLine", name);
-        markerWidget->setDepth(Global_MarkerLayer);
-        markerWidget->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
-        markerWidget->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
-        ++_counter;
-
         CellId cell;
         cell.first = x;
         cell.second = y;
-        mMarkers.push_back(cell);
+        if (mMarkers.insert(cell).second)
+        {
+            float worldX, worldY;
+            mGlobalMapRender->cellTopLeftCornerToImageSpace (x, y, worldX, worldY);
+
+            int markerSize = 12;
+            int offset = mGlobalMapRender->getCellSize()/2 - markerSize/2;
+            MyGUI::IntCoord widgetCoord(
+                        worldX * mGlobalMapRender->getWidth()+offset,
+                        worldY * mGlobalMapRender->getHeight()+offset,
+                        markerSize, markerSize);
+
+            MyGUI::Widget* markerWidget = mGlobalMap->createWidget<MyGUI::Widget>("MarkerButton",
+                widgetCoord, MyGUI::Align::Default);
+            markerWidget->setNeedMouseFocus(true);
+            markerWidget->setColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal}")));
+            markerWidget->setUserString("ToolTipType", "Layout");
+            markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
+            markerWidget->setUserString("Caption_TextOneLine", name);
+            markerWidget->setDepth(Global_MarkerLayer);
+            markerWidget->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
+            markerWidget->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
+        }
     }
 
     void MapWindow::cellExplored(int x, int y)
@@ -912,7 +911,7 @@ namespace MWGui
 
             mGlobalMapRender->read(map);
 
-            for (std::vector<ESM::GlobalMap::CellId>::iterator it = map.mMarkers.begin(); it != map.mMarkers.end(); ++it)
+            for (std::set<ESM::GlobalMap::CellId>::iterator it = map.mMarkers.begin(); it != map.mMarkers.end(); ++it)
             {
                 const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(it->first, it->second);
                 if (cell && !cell->mName.empty())
