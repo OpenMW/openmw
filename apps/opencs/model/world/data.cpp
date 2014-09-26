@@ -71,7 +71,6 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mGmsts.addColumn (new StringIdColumn<ESM::GameSetting>);
     mGmsts.addColumn (new RecordStateColumn<ESM::GameSetting>);
     mGmsts.addColumn (new FixedRecordTypeColumn<ESM::GameSetting> (UniversalId::Type_Gmst));
-    mGmsts.addColumn (new FixedRecordTypeColumn<ESM::GameSetting> (UniversalId::Type_Gmst));
     mGmsts.addColumn (new VarTypeColumn<ESM::GameSetting> (ColumnBase::Display_GmstVarType));
     mGmsts.addColumn (new VarValueColumn<ESM::GameSetting>);
 
@@ -228,6 +227,10 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mSoundGens.addColumn (new SoundColumn<ESM::SoundGenerator>);
     mSoundGens.addColumn (new SoundGeneratorTypeColumn<ESM::SoundGenerator>);
 
+    mMagicEffects.addColumn (new StringIdColumn<ESM::MagicEffect>);
+    mMagicEffects.addColumn (new RecordStateColumn<ESM::MagicEffect>);
+    mMagicEffects.addColumn (new FixedRecordTypeColumn<ESM::MagicEffect> (UniversalId::Type_MagicEffect));
+
     mRefs.addColumn (new StringIdColumn<CellRef> (true));
     mRefs.addColumn (new RecordStateColumn<CellRef>);
     mRefs.addColumn (new FixedRecordTypeColumn<CellRef> (UniversalId::Type_Reference));
@@ -299,6 +302,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new IdTable (&mEnchantments), UniversalId::Type_Enchantment);
     addModel (new IdTable (&mBodyParts), UniversalId::Type_BodyPart);
     addModel (new IdTable (&mSoundGens), UniversalId::Type_SoundGen);
+    addModel (new IdTable (&mMagicEffects), UniversalId::Type_MagicEffect);
     addModel (new IdTable (&mReferenceables, IdTable::Feature_Preview),
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs, IdTable::Feature_ViewCell | IdTable::Feature_Preview), UniversalId::Type_Reference);
@@ -557,6 +561,16 @@ CSMWorld::IdCollection<ESM::SoundGenerator>& CSMWorld::Data::getSoundGens()
     return mSoundGens;
 }
 
+const CSMWorld::IdCollection<ESM::MagicEffect>& CSMWorld::Data::getMagicEffects() const
+{
+    return mMagicEffects;
+}
+
+CSMWorld::IdCollection<ESM::MagicEffect>& CSMWorld::Data::getMagicEffects()
+{
+    return mMagicEffects;
+}
+
 const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) const
 {
     return mResourcesManager.get (id.getType());
@@ -644,6 +658,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         case ESM::REC_ENCH: mEnchantments.load (*mReader, mBase); break;
         case ESM::REC_BODY: mBodyParts.load (*mReader, mBase); break;
         case ESM::REC_SNDG: mSoundGens.load (*mReader, mBase); break;
+        case ESM::REC_MGEF: mMagicEffects.load (*mReader, mBase); break;
 
         case ESM::REC_CELL:
         {
@@ -795,6 +810,7 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getEnchantments().searchId (id)!=-1 ||
         getBodyParts().searchId (id)!=-1 ||
         getSoundGens().searchId (id)!=-1 ||
+        getMagicEffects().searchId (id)!=-1 ||
         getReferenceables().searchId (id)!=-1;
 }
 
@@ -816,6 +832,7 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mEnchantments) +
         count (state, mBodyParts) +
         count (state, mSoundGens) +
+        count (state, mMagicEffects) +
         count (state, mReferenceables);
 }
 
@@ -859,6 +876,7 @@ std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
     appendIds (ids, mEnchantments, listDeleted);
     appendIds (ids, mBodyParts, listDeleted);
     appendIds (ids, mSoundGens, listDeleted);
+    appendIds (ids, mMagicEffects, listDeleted);
     appendIds (ids, mReferenceables, listDeleted);
 
     std::sort (ids.begin(), ids.end());

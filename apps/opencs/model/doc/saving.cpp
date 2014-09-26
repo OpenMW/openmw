@@ -75,6 +75,9 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::SoundGenerator> >
         (mDocument.getData().getSoundGens(), mState));
 
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::MagicEffect> >
+        (mDocument.getData().getMagicEffects(), mState));
+
     appendStage (new WriteDialogueCollectionStage (mDocument, mState, false));
 
     appendStage (new WriteDialogueCollectionStage (mDocument, mState, true));

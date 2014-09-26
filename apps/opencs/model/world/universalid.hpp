@@ -124,6 +124,8 @@ namespace CSMWorld
                 Type_DebugProfile,
                 Type_SoundGens,
                 Type_SoundGen,
+                Type_MagicEffects,
+                Type_MagicEffect,
                 Type_RunLog
             };
 
