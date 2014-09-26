@@ -76,9 +76,9 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         fastFactor->setDefaultValue(4);
         fastFactor->setEditorSetting(false);
         fastFactor->setColumnSpan (1);
-        // FIXME: setMinimum or setSpecialVlueText appears to be broken, possibly due
+        // FIXME: setMinimum or setSpecialValueText appears to be broken, possibly due
         // to there being an empty string default for special value text.
-        fastFactor->setMinimum (1);
+        //fastFactor->setMinimum (1);
         fastFactor->setSpecialValueText("1"); // workaround for above
         fastFactor->setMaximum (100); // FIXME: not sure what the max value should be
         fastFactor->setWidgetWidth (10);
@@ -109,7 +109,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         maxSubView->setDefaultValue(3);
         maxSubView->setEditorSetting(false);
         maxSubView->setColumnSpan (1);
-        maxSubView->setMinimum (1);
+        //maxSubView->setMinimum (1);
         maxSubView->setSpecialValueText("1"); // workaround for setMinimum
         maxSubView->setMaximum (100); // FIXME: not sure what the max value should be
         maxSubView->setWidgetWidth (10);
@@ -119,8 +119,8 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         minWidth->setDefaultValue(325);
         minWidth->setEditorSetting(false);
         minWidth->setColumnSpan (1);
-        minWidth->setMinimum (50);
-        maxSubView->setSpecialValueText("50"); // workaround for setMinimum
+        //minWidth->setMinimum (50);
+        minWidth->setSpecialValueText("50"); // workaround for setMinimum
         minWidth->setMaximum (10000); // FIXME: not sure what the max value should be
         minWidth->setWidgetWidth (10);
         minWidth->setViewLocation(2, 2);
