@@ -26,15 +26,55 @@ namespace
 
     const int cellSize = 8192;
 
-    enum WidgetDepth
+    enum LocalMapWidgetDepth
     {
-        CompassLayer = 0,
-        MarkerAboveFogLayer = 1,
-        FogLayer = 2,
-        MarkerLayer = 3,
-        MapLayer = 4
+        Local_CompassLayer = 0,
+        Local_MarkerAboveFogLayer = 1,
+        Local_FogLayer = 2,
+        Local_MarkerLayer = 3,
+        Local_MapLayer = 4
     };
 
+    enum GlobalMapWidgetDepth
+    {
+        Global_CompassLayer = 0,
+        Global_MarkerLayer = 1,
+        Global_ExploreOverlayLayer = 2,
+        Global_MapLayer = 3
+    };
+
+
+    /// @brief A widget that changes its color when hovered.
+    class MarkerWidget: public MyGUI::Widget
+    {
+        MYGUI_RTTI_DERIVED(MarkerWidget)
+
+    public:
+        void setNormalColour(const MyGUI::Colour& colour)
+        {
+            mNormalColour = colour;
+            setColour(colour);
+        }
+
+        void setHoverColour(const MyGUI::Colour& colour)
+        {
+            mHoverColour = colour;
+        }
+
+    private:
+        MyGUI::Colour mNormalColour;
+        MyGUI::Colour mHoverColour;
+
+        void onMouseLostFocus(MyGUI::Widget* _new)
+        {
+            setColour(mNormalColour);
+        }
+
+        void onMouseSetFocus(MyGUI::Widget* _old)
+        {
+            setColour(mHoverColour);
+        }
+    };
 }
 
 namespace MWGui
@@ -140,7 +180,7 @@ namespace MWGui
         mLocalMap = widget;
         mCompass = compass;
 
-        mCompass->setDepth(CompassLayer);
+        mCompass->setDepth(Local_CompassLayer);
         mCompass->setNeedMouseFocus(false);
 
         // create 3x3 map widgets, 512x512 each, holding a 1024x1024 texture each
@@ -151,12 +191,12 @@ namespace MWGui
                 MyGUI::ImageBox* map = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
                     MyGUI::IntCoord(mx*widgetSize, my*widgetSize, widgetSize, widgetSize),
                     MyGUI::Align::Top | MyGUI::Align::Left);
-                map->setDepth(MapLayer);
+                map->setDepth(Local_MapLayer);
 
                 MyGUI::ImageBox* fog = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
                     MyGUI::IntCoord(mx*widgetSize, my*widgetSize, widgetSize, widgetSize),
                     MyGUI::Align::Top | MyGUI::Align::Left);
-                fog->setDepth(FogLayer);
+                fog->setDepth(Local_FogLayer);
 
                 map->setNeedMouseFocus(false);
                 fog->setNeedMouseFocus(false);
@@ -273,15 +313,17 @@ namespace MWGui
             MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
                                         widgetPos.top - 4,
                                         8, 8);
-            MyGUI::Button* markerWidget = mLocalMap->createWidget<MyGUI::Button>("ButtonImage",
+            MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("MarkerButton",
                 widgetCoord, MyGUI::Align::Default);
-            markerWidget->setDepth(MarkerAboveFogLayer);
-            markerWidget->setImageResource("DoorMarker");
+            markerWidget->setDepth(Local_MarkerAboveFogLayer);
             markerWidget->setUserString("ToolTipType", "Layout");
             markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
             markerWidget->setUserString("Caption_TextOneLine", MyGUI::TextIterator::toTagsString(marker.mNote));
             markerWidget->setColour(MyGUI::Colour(1.0,0.3,0.3));
+            markerWidget->setNormalColour(MyGUI::Colour(1.0,0.3,0.3));
+            markerWidget->setHoverColour(MyGUI::Colour(1.0,0.5,0.5));
             markerWidget->setUserData(marker);
+            markerWidget->setNeedMouseFocus(true);
             markerWidget->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &LocalMapBase::onCustomMarkerDoubleClicked);
             mCustomMarkerWidgets.push_back(markerWidget);
         }
@@ -357,10 +399,12 @@ namespace MWGui
                                         widgetPos.top - 4,
                                         8, 8);
             ++counter;
-            MyGUI::Button* markerWidget = mLocalMap->createWidget<MyGUI::Button>("ButtonImage",
+            MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("MarkerButton",
                 widgetCoord, MyGUI::Align::Default);
-            markerWidget->setDepth(MarkerLayer);
-            markerWidget->setImageResource("DoorMarker");
+            markerWidget->setNormalColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal}")));
+            markerWidget->setHoverColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal_over}")));
+            markerWidget->setDepth(Local_MarkerLayer);
+            markerWidget->setNeedMouseFocus(true);
             markerWidget->setUserString("ToolTipType", "Layout");
             markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
             markerWidget->setUserString("Caption_TextOneLine", marker.name);
@@ -458,7 +502,7 @@ namespace MWGui
             ++counter;
             MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
                 widgetCoord, MyGUI::Align::Default);
-            markerWidget->setDepth(MarkerAboveFogLayer);
+            markerWidget->setDepth(Local_MarkerAboveFogLayer);
             markerWidget->setImageTexture(markerTexture);
             markerWidget->setUserString("IsMarker", "true");
             markerWidget->setUserData(markerPos);
@@ -503,7 +547,7 @@ namespace MWGui
                                         8, 8);
             MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
                 widgetCoord, MyGUI::Align::Default);
-            markerWidget->setDepth(MarkerAboveFogLayer);
+            markerWidget->setDepth(Local_MarkerAboveFogLayer);
             markerWidget->setImageTexture("textures\\menu_map_smark.dds");
             markerWidget->setUserString("IsMarker", "true");
             markerWidget->setUserData(markerPos);
@@ -523,7 +567,18 @@ namespace MWGui
         , mGlobalMap(0)
         , mGlobalMapRender(0)
         , mEditNoteDialog()
+        , mEventBoxGlobal(NULL)
+        , mEventBoxLocal(NULL)
+        , mGlobalMapImage(NULL)
+        , mGlobalMapOverlay(NULL)
     {
+        static bool registered = false;
+        if (!registered)
+        {
+            MyGUI::FactoryManager::getInstance().registerFactory<MarkerWidget>("Widget");
+            registered = true;
+        }
+
         mEditNoteDialog.setVisible(false);
         mEditNoteDialog.eventOkClicked += MyGUI::newDelegate(this, &MapWindow::onNoteEditOk);
         mEditNoteDialog.eventDeleteClicked += MyGUI::newDelegate(this, &MapWindow::onNoteEditDelete);
@@ -537,6 +592,11 @@ namespace MWGui
         getWidget(mPlayerArrowLocal, "CompassLocal");
         getWidget(mPlayerArrowGlobal, "CompassGlobal");
 
+        mPlayerArrowGlobal->setDepth(Global_CompassLayer);
+        mPlayerArrowGlobal->setNeedMouseFocus(false);
+        mGlobalMapImage->setDepth(Global_MapLayer);
+        mGlobalMapOverlay->setDepth(Global_ExploreOverlayLayer);
+
         mLastScrollWindowCoordinates = mLocalMap->getCoord();
         mLocalMap->eventChangeCoord += MyGUI::newDelegate(this, &MapWindow::onChangeScrollWindowCoord);
 
@@ -549,6 +609,8 @@ namespace MWGui
         getWidget(mEventBoxGlobal, "EventBoxGlobal");
         mEventBoxGlobal->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
         mEventBoxGlobal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
+        mEventBoxGlobal->setDepth(Global_ExploreOverlayLayer);
+
         getWidget(mEventBoxLocal, "EventBoxLocal");
         mEventBoxLocal->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
         mEventBoxLocal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
@@ -683,20 +745,15 @@ namespace MWGui
                     markerSize, markerSize);
 
         static int _counter=0;
-        MyGUI::Button* markerWidget = mGlobalMapOverlay->createWidget<MyGUI::Button>("ButtonImage",
+        MyGUI::Widget* markerWidget = mGlobalMap->createWidget<MyGUI::Widget>("MarkerButton",
             widgetCoord, MyGUI::Align::Default);
-        markerWidget->setImageResource("DoorMarker");
+        markerWidget->setNeedMouseFocus(true);
+        markerWidget->setColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal}")));
         markerWidget->setUserString("ToolTipType", "Layout");
         markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
         markerWidget->setUserString("Caption_TextOneLine", name);
+        markerWidget->setDepth(Global_MarkerLayer);
         ++_counter;
-
-        markerWidget = mEventBoxGlobal->createWidget<MyGUI::Button>("",
-            widgetCoord, MyGUI::Align::Default);
-        markerWidget->setNeedMouseFocus (true);
-        markerWidget->setUserString("ToolTipType", "Layout");
-        markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
-        markerWidget->setUserString("Caption_TextOneLine", name);
 
         CellId cell;
         cell.first = x;
@@ -829,8 +886,6 @@ namespace MWGui
 
         while (mEventBoxGlobal->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mEventBoxGlobal->getChildAt(0));
-        while (mGlobalMapOverlay->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(mGlobalMapOverlay->getChildAt(0));
     }
 
     void MapWindow::write(ESM::ESMWriter &writer, Loading::Listener& progress)

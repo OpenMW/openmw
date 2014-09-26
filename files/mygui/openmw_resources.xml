@@ -25,36 +25,10 @@
         </Group>
     </Resource>
 
-    <Resource type="ResourceImageSet" name="DoorMarker">
-        <Group name="States" texture="markers.png" size="8 8">
-            <Index name="disabled">
-                <Frame point="8 0"/>
-            </Index>
-            <Index name="normal">
-                <Frame point="8 0"/>
-            </Index>
-            <Index name="highlighted">
-                <Frame point="0 0"/>
-            </Index>
-            <Index name="pushed">
-                <Frame point="0 0"/>
-            </Index>
-        </Group>
-    </Resource>
-
-
-
-    <!-- Skins -->
-
-    <Resource type="ResourceLayout" name="ButtonImage" version="3.2.0">
-        <Widget type="Widget" skin="Default" position="20 20 16 16" name="Root">
-            <Property key="TextAlign" value="Center"/>
-            <Property key="FontName" value="Default"/>
-            <Property key="ModeImage" value="true"/>
-            <Widget type="ImageBox" skin="ImageBox" position="0 0 16 16" align="Stretch" name="Image">
-                <Property key="NeedMouse" value="false"/>
-            </Widget>
-        </Widget>
+    <Resource type="ResourceSkin" name="MarkerButton" size="8 8" texture="textures\door_icon.dds">
+        <BasisSkin type="MainSkin" offset="0 0 8 8" align="Stretch">
+            <State name="normal" offset="0 0 8 8"/>
+        </BasisSkin>
     </Resource>
 
     <Resource type="ResourceLayout" name="TabControl" version="3.2.0">
