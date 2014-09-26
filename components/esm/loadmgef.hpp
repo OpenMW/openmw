@@ -252,6 +252,8 @@ struct MagicEffect
 
         Length
     };
+
+    static std::string indexToId (int index);
 };
 }
 #endif

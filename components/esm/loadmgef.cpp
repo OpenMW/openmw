@@ -1,6 +1,7 @@
 #include "loadmgef.hpp"
 
 #include <stdexcept>
+#include <sstream>
 
 #include <boost/lexical_cast.hpp>
 
@@ -192,8 +193,7 @@ void MagicEffect::load(ESMReader &esm)
 {
   esm.getHNT(mIndex, "INDX");
 
-    if (mIndex>=0 && mIndex<Length)
-        mId = sIds[mIndex];
+    mId = indexToId (mIndex);
 
   esm.getHNT(mData, "MEDT", 36);
   if (esm.getFormat() == 0)
@@ -563,5 +563,30 @@ MagicEffect::MagnitudeDisplayType MagicEffect::getMagnitudeDisplayType() const {
         mHitSound.clear();
         mAreaSound.clear();
         mDescription.clear();
+    }
+
+    std::string MagicEffect::indexToId (int index)
+    {
+        std::ostringstream stream;
+
+        if (index!=-1)
+        {
+            stream << "#";
+
+            if (index<100)
+            {
+                stream << "0";
+
+                if (index<10)
+                    stream << "0";
+            }
+
+            stream << index;
+
+            if (index>=0 && index<Length)
+                stream << sIds[index];
+        }
+
+        return stream.str();
     }
 }
