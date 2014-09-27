@@ -199,6 +199,8 @@ namespace MWGui
 
             BookTextParser parser(markup);
             BookTextParser::Events event;
+
+            bool brBeforeLastTag = false;
             for (;;)
             {
                 event = parser.next();
@@ -206,11 +208,26 @@ namespace MWGui
                     continue;
 
                 std::string plainText = parser.getReadyText();
-                if (!plainText.empty())
+                if (plainText.empty())
+                    brBeforeLastTag = false;
+                else
                 {
-                    // if there's a newline at the end of the box caption, remove it
-                    if (plainText[plainText.size()-1] == '\n')
-                        plainText.erase(plainText.end()-1);
+                    // Each block of text (between two tags / boundary and tag) will be displayed in a separate editbox widget,
+                    // which means an additonal linebreak will be created.
+                    // ^ This is not the case in vanilla MW (though having multiple tags in one line seems to result in undefined behavior).
+                    // We must deal with linebreaks around tags appropriately.
+                    {
+                        bool brAtStart = (plainText[0] == '\n');
+                        bool brAtEnd = (plainText[plainText.size()-1] == '\n');
+
+                        if (!brBeforeLastTag && brAtStart)
+                            plainText.erase(plainText.begin());
+
+                        if (plainText.size() && brAtEnd)
+                            plainText.erase(plainText.end()-1);
+
+                        brBeforeLastTag = brAtEnd;
+                    }
 
 #if (MYGUI_VERSION < MYGUI_DEFINE_VERSION(3, 2, 2))
                     // splitting won't be fully functional until 3.2.2 (see TextElement::pageSplit())
@@ -222,8 +239,11 @@ namespace MWGui
                     }
 #endif
 
-                    TextElement elem(paper, pag, mTextStyle, plainText);
-                    elem.paginate();
+                    if (!plainText.empty())
+                    {
+                        TextElement elem(paper, pag, mTextStyle, plainText);
+                        elem.paginate();
+                    }
                 }
 
                 if (event == BookTextParser::Event_EOF)
