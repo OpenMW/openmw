@@ -40,15 +40,18 @@ namespace MWGui
                 };
 
                 BookTextParser(const std::string & text);
-                void registerTag(const std::string & tag, Events type);
-                std::string getReadyText();
 
                 Events next();
-                void flushBuffer();
+
                 const Attributes & getAttributes() const;
-                void parseTag(std::string tag);
+                std::string getReadyText() const;
+                bool isClosingTag() const;
 
             private:
+                void registerTag(const std::string & tag, Events type);
+                void flushBuffer();
+                void parseTag(std::string tag);
+
                 size_t mIndex;
                 std::string mText;
                 std::string mReadyText;
@@ -57,6 +60,7 @@ namespace MWGui
                 bool mIgnoreLineEndings;
                 Attributes mAttributes;
                 std::string mTag;
+                bool mClosingTag;
                 std::map<std::string, Events> mTagTypes;
                 std::string mBuffer;
         };
@@ -101,11 +105,12 @@ namespace MWGui
                 Paginator::Pages markupToWidget(MyGUI::Widget * parent, const std::string & markup, const int pageWidth, const int pageHeight);
                 Paginator::Pages markupToWidget(MyGUI::Widget * parent, const std::string & markup);
 
-            protected:
-                void handleImg(const BookTextParser::Attributes & attr);
+            private:
+                void resetFontProperties();
+
                 void handleDiv(const BookTextParser::Attributes & attr);
                 void handleFont(const BookTextParser::Attributes & attr);
-            private:
+
                 TextStyle mTextStyle;
         };
 

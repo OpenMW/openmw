@@ -21,7 +21,7 @@ namespace MWGui
     {
         /* BookTextParser */
         BookTextParser::BookTextParser(const std::string & text)
-            : mIndex(0), mText(text), mIgnoreNewlineTags(true), mIgnoreLineEndings(true)
+            : mIndex(0), mText(text), mIgnoreNewlineTags(true), mIgnoreLineEndings(true), mClosingTag(false)
         {
             MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
             mText = Interpreter::fixDefinesBook(mText, interpreterContext);
@@ -40,7 +40,7 @@ namespace MWGui
             mTagTypes[tag] = type;
         }
 
-        std::string BookTextParser::getReadyText()
+        std::string BookTextParser::getReadyText() const
         {
             return mReadyText;
         }
@@ -117,12 +117,27 @@ namespace MWGui
             return mAttributes;
         }
 
+        bool BookTextParser::isClosingTag() const
+        {
+            return mClosingTag;
+        }
+
         void BookTextParser::parseTag(std::string tag)
         {
             size_t tagNameEndPos = tag.find(' ');
+            mAttributes.clear();
             mTag = tag.substr(0, tagNameEndPos);
             Misc::StringUtils::toLower(mTag);
-            mAttributes.clear();
+            if (mTag.empty())
+                return;
+
+            mClosingTag = (mTag[0] == '/');
+            if (mClosingTag)
+            {
+                mTag.erase(mTag.begin());
+                return;
+            }
+
             if (tagNameEndPos == std::string::npos)
                 return;
             tag.erase(0, tagNameEndPos+1);
@@ -232,7 +247,10 @@ namespace MWGui
                         break;
                     }
                     case BookTextParser::Event_FontTag:
-                        handleFont(parser.getAttributes());
+                        if (parser.isClosingTag())
+                            resetFontProperties();
+                        else
+                            handleFont(parser.getAttributes());
                         break;
                     case BookTextParser::Event_DivTag:
                         handleDiv(parser.getAttributes());
@@ -254,6 +272,13 @@ namespace MWGui
         Paginator::Pages BookFormatter::markupToWidget(MyGUI::Widget * parent, const std::string & markup)
         {
             return markupToWidget(parent, markup, parent->getWidth(), parent->getHeight());
+        }
+
+        void BookFormatter::resetFontProperties()
+        {
+            MyGUI::Align align = mTextStyle.mTextAlign;
+            mTextStyle = TextStyle();
+            mTextStyle.mTextAlign = align;
         }
 
         void BookFormatter::handleDiv(const BookTextParser::Attributes & attr)
