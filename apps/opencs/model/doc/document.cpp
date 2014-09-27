@@ -2023,6 +2023,7 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sFloats[i];
+        gmst.blank();
         gmst.mValue.setType (ESM::VT_Float);
         addOptionalGmst (gmst);
     }
@@ -2031,6 +2032,7 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sIntegers[i];
+        gmst.blank();
         gmst.mValue.setType (ESM::VT_Int);
         addOptionalGmst (gmst);
     }
@@ -2039,6 +2041,7 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sStrings[i];
+        gmst.blank();
         gmst.mValue.setType (ESM::VT_String);
         gmst.mValue.setString ("<no text>");
         addOptionalGmst (gmst);
@@ -2059,12 +2062,26 @@ void CSMDoc::Document::addOptionalGlobals()
     {
         ESM::Global global;
         global.mId = sGlobals[i];
+        global.blank();
         global.mValue.setType (ESM::VT_Long);
 
         if (i==0)
             global.mValue.setInteger (1); // dayspassed starts counting at 1
 
         addOptionalGlobal (global);
+    }
+}
+
+void CSMDoc::Document::addOptionalMagicEffects()
+{
+    for (int i=ESM::MagicEffect::SummonFabricant; i<=ESM::MagicEffect::SummonCreature05; ++i)
+    {
+        ESM::MagicEffect effect;
+        effect.mIndex = i;
+        effect.mId = ESM::MagicEffect::indexToId (i);
+        effect.blank();
+
+        addOptionalMagicEffect (effect);
     }
 }
 
@@ -2087,6 +2104,17 @@ void CSMDoc::Document::addOptionalGlobal (const ESM::Global& global)
         record.mBase = global;
         record.mState = CSMWorld::RecordBase::State_BaseOnly;
         getData().getGlobals().appendRecord (record);
+    }
+}
+
+void CSMDoc::Document::addOptionalMagicEffect (const ESM::MagicEffect& magicEffect)
+{
+    if (getData().getMagicEffects().searchId (magicEffect.mId)==-1)
+    {
+        CSMWorld::Record<ESM::MagicEffect> record;
+        record.mBase = magicEffect;
+        record.mState = CSMWorld::RecordBase::State_BaseOnly;
+        getData().getMagicEffects().appendRecord (record);
     }
 }
 
@@ -2260,6 +2288,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
     addOptionalGmsts();
     addOptionalGlobals();
+    addOptionalMagicEffects();
 
     connect (&mUndoStack, SIGNAL (cleanChanged (bool)), this, SLOT (modificationStateChanged (bool)));
 
