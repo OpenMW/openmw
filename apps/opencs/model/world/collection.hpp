@@ -7,7 +7,6 @@
 #include <cctype>
 #include <stdexcept>
 #include <functional>
-#include <iostream>
 
 #include <QVariant>
 
@@ -432,27 +431,18 @@ namespace CSMWorld
 
         const Record<ESXRecordT>& record2 = dynamic_cast<const Record<ESXRecordT>&> (record);
 
-        std::pair<std::map<std::string, int>::iterator, bool> insertResult =
-            mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (IdAccessorT().getId (record2.get())),
-                                           index));
+        mRecords.insert (mRecords.begin()+index, record2);
 
-        if(!insertResult.second) // duplicate index found, replace the current record
-        {
-            std::cerr << "Duplicate record found, using new: " + IdAccessorT().getId(record2.get()) << std::endl;
-            replace(insertResult.first->second, record2);
-            return;
-        }
-
-        // else update the index except for the record to be inserted
         if (index<static_cast<int> (mRecords.size())-1)
         {
-            std::string id = IdAccessorT().getId(record2.get());
-            for (std::map<std::string, int>::iterator iter (mIndex.begin()); iter!=mIndex.end(); ++iter)
-                 if (iter->second > index || (iter->second == index && iter->first != id))
+            for (std::map<std::string, int>::iterator iter (mIndex.begin()); iter!=mIndex.end();
+                ++iter)
+                 if (iter->second>=index)
                      ++(iter->second);
         }
 
-        mRecords.insert (mRecords.begin()+index, record2);
+        mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (IdAccessorT().getId (
+            record2.get())), index));
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
