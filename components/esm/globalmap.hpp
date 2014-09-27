@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_ESM_GLOBALMAP_H
 
 #include <vector>
+#include <set>
 
 namespace ESM
 {
@@ -26,7 +27,7 @@ namespace ESM
         std::vector<char> mImageData;
 
         typedef std::pair<int, int> CellId;
-        std::vector<CellId> mMarkers;
+        std::set<CellId> mMarkers;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

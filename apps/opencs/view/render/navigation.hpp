@@ -20,6 +20,7 @@ namespace CSVRender
 
         public:
 
+            Navigation();
             virtual ~Navigation();
 
             void setFastModeFactor (float factor);

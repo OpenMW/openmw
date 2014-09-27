@@ -188,11 +188,6 @@ void Moon::setPhase(const Moon::Phase& phase)
     mPhase = phase;
 }
 
-Moon::Phase Moon::getPhase() const
-{
-    return mPhase;
-}
-
 unsigned int Moon::getPhaseInt() const
 {
     if      (mPhase == Moon::Phase_New)              return 0;
@@ -418,7 +413,6 @@ void SkyManager::updateRain(float dt)
 
     // Spawn new rain
     float rainFrequency = mRainFrequency;
-    float startHeight = 700;
     if (mRainEnabled)
     {
         mRainTimer += dt;
@@ -434,6 +428,7 @@ void SkyManager::updateRain(float dt)
 
             // Create a separate node to control the offset, since a node with setInheritOrientation(false) will still
             // consider the orientation of the parent node for its position, just not for its orientation
+            float startHeight = 700;
             Ogre::SceneNode* offsetNode = sceneNode->createChildSceneNode(Ogre::Vector3(xOffs,yOffs,startHeight));
 
             NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(offsetNode, mRainEffect);
@@ -751,16 +746,6 @@ void SkyManager::setLightningStrength(const float factor)
     }
     else
         mLightning->setVisible(false);
-}
-void SkyManager::setLightningEnabled(bool enabled)
-{
-    /// \todo
-}
-
-void SkyManager::setLightningDirection(const Ogre::Vector3& dir)
-{
-    if (!mCreated) return;
-    mLightning->setDirection (dir);
 }
 
 void SkyManager::setMasserFade(const float fade)

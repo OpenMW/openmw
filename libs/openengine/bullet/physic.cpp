@@ -735,10 +735,6 @@ namespace Physic
         }
     }
 
-    void PhysicEngine::emptyEventLists(void)
-    {
-    }
-
     std::pair<std::string,float> PhysicEngine::rayTest(const btVector3 &from, const btVector3 &to, bool raycastingObjectOnly, bool ignoreHeightMap, Ogre::Vector3* normal)
     {
         std::string name = "";

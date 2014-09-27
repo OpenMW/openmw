@@ -80,7 +80,7 @@ namespace ICS
 			{
 				return it->first;
 			}
-			it++;
+            ++it;
 		}
 
         return SDL_SCANCODE_UNKNOWN;

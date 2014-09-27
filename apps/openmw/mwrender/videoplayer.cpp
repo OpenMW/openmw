@@ -864,7 +864,6 @@ void VideoState::video_thread_loop(VideoState *self)
     AVPacket pkt1, *packet = &pkt1;
     int frameFinished;
     AVFrame *pFrame;
-    double pts;
 
     pFrame = av_frame_alloc();
 
@@ -879,7 +878,7 @@ void VideoState::video_thread_loop(VideoState *self)
         if(avcodec_decode_video2((*self->video_st)->codec, pFrame, &frameFinished, packet) < 0)
             throw std::runtime_error("Error decoding video frame");
 
-        pts = 0;
+        double pts = 0;
         if(IS_NOTEQ_NOPTS_VAL(packet->dts))
             pts = packet->dts;
         else if(pFrame->opaque && IS_NOTEQ_NOPTS_VAL_PTR(pFrame->opaque))
@@ -1230,11 +1229,6 @@ int VideoPlayer::getVideoHeight()
     if (mState)
         height = mState->mTexture->getHeight();
     return height;
-}
-
-void VideoPlayer::stopVideo ()
-{
-    close();
 }
 
 void VideoPlayer::close()

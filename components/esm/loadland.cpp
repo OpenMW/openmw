@@ -19,14 +19,14 @@ void Land::LandData::save(ESMWriter &esm)
         offsets.mUnk1 = mUnk1;
         offsets.mUnk2 = mUnk2;
 
-        float prevY = mHeights[0], prevX;
+        float prevY = mHeights[0];
         int number = 0; // avoid multiplication
         for (int i = 0; i < LAND_SIZE; ++i) {
             float diff = (mHeights[number] - prevY) / HEIGHT_SCALE;
             offsets.mHeightData[number] =
                 (diff >= 0) ? (int8_t) (diff + 0.5) : (int8_t) (diff - 0.5);
 
-            prevX = prevY = mHeights[number];
+            float prevX = prevY = mHeights[number];
             ++number;
 
             for (int j = 1; j < LAND_SIZE; ++j) {

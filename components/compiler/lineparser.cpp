@@ -57,7 +57,7 @@ namespace Compiler
         Literals& literals, std::vector<Interpreter::Type_Code>& code, bool allowExpression)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals), mCode (code),
        mState (BeginState), mExprParser (errorHandler, context, locals, literals),
-       mAllowExpression (allowExpression), mButtons(0), mType(0)
+       mAllowExpression (allowExpression), mButtons(0), mType(0), mReferenceMember(false)
     {}
 
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
@@ -295,8 +295,6 @@ namespace Compiler
                         mExplicit.clear();
                     }
 
-                    int optionals = 0;
-
                     try
                     {
                         // workaround for broken positioncell instructions.
@@ -306,7 +304,7 @@ namespace Compiler
                             errorDowngrade.reset (new ErrorDowngrade (getErrorHandler()));
 
                         std::vector<Interpreter::Type_Code> code;
-                        optionals = mExprParser.parseArguments (argumentType, scanner, code);
+                        int optionals = mExprParser.parseArguments (argumentType, scanner, code);
                         mCode.insert (mCode.end(), code.begin(), code.end());
                         extensions->generateInstructionCode (keyword, mCode, mLiterals,
                             mExplicit, optionals);

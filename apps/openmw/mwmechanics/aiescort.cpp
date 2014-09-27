@@ -54,6 +54,7 @@ namespace MWMechanics
         , mCellY(std::numeric_limits<int>::max())
         , mCellId(escort->mCellId)
         , mRemainingDuration(escort->mRemainingDuration)
+        , mMaxDist(450)
     {
     }
 

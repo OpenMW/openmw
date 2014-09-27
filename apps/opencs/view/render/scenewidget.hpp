@@ -80,8 +80,6 @@ namespace CSVRender
 
             void updateOgreWindow();
 
-            int getFastFactor() const;
-
             void setLighting (Lighting *lighting);
             ///< \attention The ownership of \a lighting is not transferred to *this.
 

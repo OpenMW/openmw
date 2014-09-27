@@ -222,7 +222,6 @@ namespace MWGui
 
     virtual void showCrosshair(bool show);
     virtual bool getSubtitlesEnabled();
-    virtual void toggleHud();
 
     /// Turn visibility of *all* GUI elements on or off (HUD and all windows, except the console)
     virtual bool toggleGui();

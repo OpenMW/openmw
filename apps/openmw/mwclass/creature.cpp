@@ -338,11 +338,12 @@ namespace MWClass
             getCreatureStats(ptr).setAttacked(true);
 
         // Self defense
+        bool setOnPcHitMe = true; // Note OnPcHitMe is not set for friendly hits.
         if ((canWalk(ptr) || canFly(ptr) || canSwim(ptr)) // No retaliation for totally static creatures
                                                               // (they have no movement or attacks anyway)
             && !attacker.isEmpty())
         {
-            MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+            setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
         if(!successful)
@@ -357,7 +358,7 @@ namespace MWClass
         if(!object.isEmpty())
             getCreatureStats(ptr).setLastHitObject(object.getClass().getId(object));
 
-        if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
+        if(setOnPcHitMe && !attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
         {
             const std::string &script = ptr.get<ESM::Creature>()->mBase->mScript;
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */

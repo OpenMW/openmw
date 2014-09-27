@@ -45,7 +45,7 @@ namespace
         LogListener(const std::string &path)
             : file((bfs::path(path)))
         {
-            memset(buffer, sizeof(buffer), 0);
+            memset(buffer, 0, sizeof(buffer));
         }
 
         void timestamp()

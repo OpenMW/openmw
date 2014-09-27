@@ -93,7 +93,6 @@ public:
 
     MWRender::Camera* getCamera() const;
 
-    void toggleLight();
     bool toggleRenderMode(int mode);
 
     void removeCell (MWWorld::CellStore *store);
@@ -156,8 +155,6 @@ public:
     OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; }
 
     float getTerrainHeightAt (Ogre::Vector3 worldPos);
-
-    Shadows* getShadows();
 
     void notifyWorldSpaceChanged();
 

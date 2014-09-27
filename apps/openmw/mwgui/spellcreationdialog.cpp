@@ -39,6 +39,7 @@ namespace MWGui
     EditEffectDialog::EditEffectDialog()
         : WindowModal("openmw_edit_effect.layout")
         , mEditing(false)
+        , mMagicEffect(NULL)
     {
         getWidget(mCancelButton, "CancelButton");
         getWidget(mOkButton, "OkButton");
@@ -181,7 +182,7 @@ namespace MWGui
         {
             mAreaBox->setPosition(mAreaBox->getPosition().left, curY);
             mAreaBox->setVisible (true);
-            curY += mAreaBox->getSize().height;
+            //curY += mAreaBox->getSize().height;
         }
     }
 

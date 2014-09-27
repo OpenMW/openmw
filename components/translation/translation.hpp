@@ -9,6 +9,7 @@ namespace Translation
     class Storage
     {
     public:
+        Storage();
 
         void loadTranslationData(const Files::Collections& dataFileCollections,
                                  const std::string& esmFileName);

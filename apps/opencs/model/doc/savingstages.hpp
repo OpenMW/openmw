@@ -103,11 +103,6 @@ namespace CSMDoc
         if (state==CSMWorld::RecordBase::State_Modified ||
             state==CSMWorld::RecordBase::State_ModifiedOnly)
         {
-            std::string type;
-            for (int i=0; i<4; ++i)
-                /// \todo make endianess agnostic (change ESMWriter interface?)
-                type += reinterpret_cast<const char *> (&mCollection.getRecord (stage).mModified.sRecordId)[i];
-
             mState.getWriter().startRecord (mCollection.getRecord (stage).mModified.sRecordId);
             mState.getWriter().writeHNCString ("NAME", mCollection.getId (stage));
             mCollection.getRecord (stage).mModified.save (mState.getWriter());

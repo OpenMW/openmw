@@ -521,7 +521,7 @@ float Animation::getVelocity(const std::string &groupname) const
 {
     /* Look in reverse; last-inserted source has priority. */
     AnimSourceList::const_reverse_iterator animsrc(mAnimSources.rbegin());
-    for(;animsrc != mAnimSources.rend();animsrc++)
+    for(;animsrc != mAnimSources.rend();++animsrc)
     {
         const NifOgre::TextKeyMap &keys = (*animsrc)->mTextKeys;
         if(findGroupStart(keys, groupname) != keys.end())
@@ -831,8 +831,7 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
 
 void Animation::changeGroups(const std::string &groupname, int groups)
 {
-    AnimStateMap::iterator stateiter = mStates.begin();
-    stateiter = mStates.find(groupname);
+    AnimStateMap::iterator stateiter = mStates.find(groupname);
     if(stateiter != mStates.end())
     {
         if(stateiter->second.mGroups != groups)

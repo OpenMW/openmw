@@ -15,6 +15,7 @@ namespace bfs = boost::filesystem;
 
 MwIniImporter::MwIniImporter()
     : mVerbose(false)
+    , mEncoding(ToUTF8::WINDOWS_1250)
 {
     const char *map[][2] =
     {
@@ -709,8 +710,7 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::string& filenam
             continue;
         }
 
-        multistrmap::iterator it;
-        if((it = map.find(key)) == map.end()) {
+        if(map.find(key) == map.end()) {
             map.insert( std::make_pair (key, std::vector<std::string>() ) );
         }
         map[key].push_back(value);
@@ -746,8 +746,7 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const std::string& filenam
         std::string key(line.substr(0,pos));
         std::string value(line.substr(pos+1));
 
-        multistrmap::iterator it;
-        if((it = map.find(key)) == map.end()) {
+        if(map.find(key) == map.end()) {
             map.insert( std::make_pair (key, std::vector<std::string>() ) );
         }
         map[key].push_back(value);

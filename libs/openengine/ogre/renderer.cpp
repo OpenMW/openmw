@@ -83,11 +83,6 @@ void OgreRenderer::screenshot(const std::string &file, const std::string& imageF
     }
 }
 
-float OgreRenderer::getFPS()
-{
-    return mWindow->getLastFPS();
-}
-
 void OgreRenderer::configure(const std::string &logPath,
                             const std::string& renderSystem,
                              const std::string& rttMode

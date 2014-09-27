@@ -11,6 +11,11 @@ float CSVRender::Navigation::getFactor (bool mouse) const
     return factor;
 }
 
+CSVRender::Navigation::Navigation()
+    : mFastModeFactor(1)
+{
+}
+
 CSVRender::Navigation::~Navigation() {}
 
 void CSVRender::Navigation::setFastModeFactor (float factor)

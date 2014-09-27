@@ -64,7 +64,7 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor,float duration
     // Make all nearby actors also avoid the door
     std::vector<MWWorld::Ptr> actors;
     MWBase::Environment::get().getMechanicsManager()->getActorsInRange(Ogre::Vector3(pos.pos[0],pos.pos[1],pos.pos[2]),100,actors);
-    for(std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); it++) {
+    for(std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); ++it) {
         if(*it != MWBase::Environment::get().getWorld()->getPlayerPtr()) { //Not the player
             MWMechanics::AiSequence& seq = it->getClass().getCreatureStats(*it).getAiSequence();
             if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) { //Only add it once

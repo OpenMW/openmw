@@ -40,7 +40,6 @@ namespace MWMechanics
         bool mTalkedTo;
         bool mAlarmed;
         bool mAttacked;
-        bool mHostile;
         bool mAttackingOrSpell;
         bool mKnockdown;
         bool mKnockdownOneFrame;
@@ -137,10 +136,6 @@ namespace MWMechanics
         void setFatigue(const DynamicStat<float> &value);
 
         void setDynamic (int index, const DynamicStat<float> &value);
-
-        void setSpells(const Spells &spells);
-
-        void setActiveSpells(const ActiveSpells &active);
 
         /// Set Modifier for each magic effect according to \a effects. Does not touch Base values.
         void modifyMagicEffects(const MagicEffects &effects);

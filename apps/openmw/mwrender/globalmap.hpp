@@ -26,8 +26,10 @@ namespace MWRender
 
         void render(Loading::Listener* loadingListener);
 
-        int getWidth() { return mWidth; }
-        int getHeight() { return mHeight; }
+        int getWidth() const { return mWidth; }
+        int getHeight() const { return mHeight; }
+
+        int getCellSize() const { return mCellSize; }
 
         void worldPosToImageSpace(float x, float z, float& imageX, float& imageY);
 
@@ -45,6 +47,8 @@ namespace MWRender
 
     private:
         std::string mCacheDir;
+
+        int mCellSize;
 
         std::vector< std::pair<int,int> > mExploredCells;
 

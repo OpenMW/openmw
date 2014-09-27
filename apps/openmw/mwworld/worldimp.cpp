@@ -1315,7 +1315,7 @@ namespace MWWorld
 
         const PtrVelocityList &results = mPhysics->applyQueuedMovement(duration);
         PtrVelocityList::const_iterator player(results.end());
-        for(PtrVelocityList::const_iterator iter(results.begin());iter != results.end();iter++)
+        for(PtrVelocityList::const_iterator iter(results.begin());iter != results.end();++iter)
         {
             if(iter->first.getRefData().getHandle() == "player")
             {

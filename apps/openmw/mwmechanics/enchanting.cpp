@@ -166,16 +166,15 @@ namespace MWMechanics
 
         float enchantmentCost = 0;
         int effectsLeftCnt = mEffects.size();
-        float baseCost, magnitudeCost, areaCost;
-        int magMin, magMax, area;
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
-            baseCost = (store.get<ESM::MagicEffect>().find(it->mEffectID))->mData.mBaseCost;
+            float baseCost = (store.get<ESM::MagicEffect>().find(it->mEffectID))->mData.mBaseCost;
             // To reflect vanilla behavior
-            magMin = (it->mMagnMin == 0) ? 1 : it->mMagnMin;
-            magMax = (it->mMagnMax == 0) ? 1 : it->mMagnMax;
-            area = (it->mArea == 0) ? 1 : it->mArea;
+            int magMin = (it->mMagnMin == 0) ? 1 : it->mMagnMin;
+            int magMax = (it->mMagnMax == 0) ? 1 : it->mMagnMax;
+            int area = (it->mArea == 0) ? 1 : it->mArea;
 
+            float magnitudeCost = 0;
             if (mCastStyle == ESM::Enchantment::ConstantEffect)
             {
                 magnitudeCost = (magMin + magMax) * baseCost * 2.5;
@@ -187,7 +186,7 @@ namespace MWMechanics
                     magnitudeCost *= 1.5;
             }
 
-            areaCost = area * 0.025 * baseCost;
+            float areaCost = area * 0.025 * baseCost;
             if (it->mRange == ESM::RT_Target)
                 areaCost *= 1.5;
 

@@ -186,13 +186,3 @@ PSSMShadowCameraSetup* Shadows::getPSSMSetup()
 {
     return mPSSMSetup;
 }
-
-float Shadows::getShadowFar() const
-{
-    return mShadowFar;
-}
-
-float Shadows::getFadeStart() const
-{
-    return mFadeStart;
-}

@@ -617,7 +617,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    runtime.push (MWBase::Environment::get().getWorld()->getPlayerStandingOn(ptr));
+                    runtime.push (MWBase::Environment::get().getWorld()->getPlayerCollidingWith(ptr));
                 }
         };
 
@@ -629,7 +629,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    runtime.push (MWBase::Environment::get().getWorld()->getActorStandingOn(ptr));
+                    runtime.push (MWBase::Environment::get().getWorld()->getActorCollidingWith(ptr));
                 }
         };
 

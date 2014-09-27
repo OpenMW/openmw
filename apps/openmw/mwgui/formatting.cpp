@@ -183,10 +183,9 @@ namespace MWGui
             paper->setNeedMouseFocus(false);
 
             BookTextParser parser(markup);
-            BookTextParser::Events event;
             for (;;)
             {
-                event = parser.next();
+                BookTextParser::Events event = parser.next();
                 if (event == BookTextParser::Event_BrTag || event == BookTextParser::Event_PTag)
                     continue;
 

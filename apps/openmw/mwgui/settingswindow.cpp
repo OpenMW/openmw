@@ -362,8 +362,7 @@ namespace MWGui
 
     void SettingsWindow::onShaderModeToggled(MyGUI::Widget* _sender)
     {
-        std::string val = _sender->castType<MyGUI::Button>()->getCaption();
-        val = hlslGlsl();
+        std::string val = hlslGlsl();
 
         _sender->castType<MyGUI::Button>()->setCaption(val);
 

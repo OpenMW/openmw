@@ -480,12 +480,6 @@ namespace MWScript
             mActivationHandled = true;
     }
 
-    void InterpreterContext::clearActivation()
-    {
-        mActivated = MWWorld::Ptr();
-        mActivationHandled = false;
-    }
-
     float InterpreterContext::getSecondsPassed() const
     {
         return MWBase::Environment::get().getFrameDuration();

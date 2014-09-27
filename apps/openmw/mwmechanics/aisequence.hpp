@@ -98,10 +98,6 @@ namespace MWMechanics
                 @param actor The actor that owns this AiSequence **/
             void stack (const AiPackage& package, const MWWorld::Ptr& actor);
 
-            /// Add \a package to the end of the sequence
-            /** Executed after all other packages have been completed **/
-            void queue (const AiPackage& package);
-
             /// Return the current active package.
             /** If there is no active package, it will throw an exception **/
             AiPackage* getActivePackage();

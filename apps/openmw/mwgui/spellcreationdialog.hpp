@@ -158,8 +158,6 @@ namespace MWGui
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPriceLabel;
 
-        Widgets::MWEffectList* mUsedEffectsList;
-
         ESM::Spell mSpell;
 
     };
