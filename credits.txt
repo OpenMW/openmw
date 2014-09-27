@@ -110,8 +110,7 @@ Alex McKibben (WeirdSexy) - Podcaster
 Artem Kotsynyak (greye) - Russian News Writer
 Jim Clauwaert (Zedd) - Public Outreach
 Julien Voisin (jvoisin/ap0) - French News Writer
-Okulo - English News Writer
-Nekochan - English News Writer
+Tom Koenderink (Okulo) - English News Writer
 Lukasz Gromanowski (lgro) - English News Writer
 Mickey Lyle (raevol) - Release Manager
 Pithorn - Chinese News Writer
@@ -137,7 +136,7 @@ Sadler
 Artwork:
 Necrod - OpenMW Logo
 Mickey Lyle (raevol) - Wordpress Theme
-Okulo, SirHerrbatka, crysthala - OpenMW Editor Icons
+Tom Koenderink (Okulo), SirHerrbatka, crysthala - OpenMW Editor Icons
 
 Inactive Contributors:
 Ardekantur
@@ -156,6 +155,7 @@ Kingpix
 Lordrea
 Michal Sciubidlo
 Nicolay Korslund
+Nekochan
 pchan3
 penguinroad
 psi29a

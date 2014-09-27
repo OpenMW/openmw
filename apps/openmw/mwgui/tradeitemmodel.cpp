@@ -119,7 +119,7 @@ namespace MWGui
         return mBorrowedToUs;
     }
 
-    void TradeItemModel::transferItems()
+    void TradeItemModel::transferItems(const MWWorld::Ptr& transferFrom)
     {
         std::vector<ItemStack>::iterator it = mBorrowedToUs.begin();
         for (; it != mBorrowedToUs.end(); ++it)
@@ -135,9 +135,11 @@ namespace MWGui
             if (i == sourceModel->getItemCount())
                 throw std::runtime_error("The borrowed item disappeared");
 
-            // reset owner while copying, but only for items bought by the player
-            bool setNewOwner = (mMerchant.isEmpty());
             const ItemStack& item = sourceModel->getItem(i);
+
+            bool setNewOwner = Misc::StringUtils::ciEqual(item.mBase.getCellRef().getOwner(), transferFrom.getCellRef().getRefId())
+                    || item.mBase.getCellRef().getOwner().empty();
+
             // copy the borrowed items to our model
             copyItem(item, it->mCount, setNewOwner);
             // then remove them from the source model

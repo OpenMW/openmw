@@ -168,6 +168,9 @@ namespace Physic
         std::string mMesh;
         std::string mName;
         PhysicEngine *mEngine;
+
+        PhysicActor(const PhysicActor&);
+        PhysicActor& operator=(const PhysicActor&);
     };
 
 
@@ -273,11 +276,6 @@ namespace Physic
         void stepSimulation(double deltaT);
 
         /**
-         * Empty events lists
-         */
-        void emptyEventLists(void);
-
-        /**
          * Create a debug rendering. It is called by setDebgRenderingMode if it's not created yet.
          * Important Note: this will crash if the Render is not yet initialise!
          */
@@ -352,6 +350,10 @@ namespace Physic
         BtOgre::DebugDrawer* mDebugDrawer;
         bool isDebugCreated;
         bool mDebugActive;
+
+    private:
+        PhysicEngine(const PhysicEngine&);
+        PhysicEngine& operator=(const PhysicEngine&);
     };
 
 

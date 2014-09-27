@@ -410,15 +410,18 @@ void NpcAnimation::updateParts()
     // Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
     static std::map< std::pair<std::string,int>,std::vector<const ESM::BodyPart*> > sRaceMapping;
 
-    static const int Flag_Female      = 1<<0;
-    static const int Flag_FirstPerson = 1<<1;
-
     bool isWerewolf = (mNpcType == Type_Werewolf);
     int flags = (isWerewolf ? -1 : 0);
     if(!mNpc->isMale())
+    {
+        static const int Flag_Female      = 1<<0;
         flags |= Flag_Female;
+    }
     if(mViewMode == VM_FirstPerson)
+    {
+        static const int Flag_FirstPerson = 1<<1;
         flags |= Flag_FirstPerson;
+    }
 
     std::string race = (isWerewolf ? "werewolf" : Misc::StringUtils::lowerCase(mNpc->mRace));
     std::pair<std::string, int> thisCombination = std::make_pair(race, flags);
@@ -604,7 +607,7 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
         if (mObjectParts[i].isNull())
             continue;
         std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i]->mControllers.begin());
-        for(;ctrl != mObjectParts[i]->mControllers.end();ctrl++)
+        for(;ctrl != mObjectParts[i]->mControllers.end();++ctrl)
             ctrl->update();
 
         Ogre::Entity *ent = mObjectParts[i]->mSkelBase;
@@ -678,7 +681,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     }
 
     std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type]->mControllers.begin());
-    for(;ctrl != mObjectParts[type]->mControllers.end();ctrl++)
+    for(;ctrl != mObjectParts[type]->mControllers.end();++ctrl)
     {
         if(ctrl->getSource().isNull())
         {
@@ -715,7 +718,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
 
     const char *ext = (mViewMode == VM_FirstPerson) ? ".1st" : "";
     std::vector<ESM::PartReference>::const_iterator part(parts.begin());
-    for(;part != parts.end();part++)
+    for(;part != parts.end();++part)
     {
         const ESM::BodyPart *bodypart = 0;
         if(!mNpc->isMale() && !part->mFemale.empty())

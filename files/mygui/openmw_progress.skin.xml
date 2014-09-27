@@ -1,94 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Skin" version="3.2.1">
+<MyGUI type="Resource" version="1.1">
     <!-- Progress bar track, various colors -->
-    <Skin name="MW_Track_Red" size="16 16" texture="textures\menu_bar_gray.dds" >
+    <Resource type="ResourceSkin" name="MW_Track_Red" size="16 16" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=health}"/>
         <BasisSkin type="MainSkin" offset="0 0 16 16" align="Stretch">
             <State name="normal" offset="0 0 16 16"/>
         </BasisSkin>
-    </Skin>
-    <Skin name="MW_Track_Blue" size="2 14" texture="textures\menu_bar_gray.dds" >
+    </Resource>
+    <Resource type="ResourceSkin" name="MW_Track_Blue" size="2 14" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=magic}"/>
         <BasisSkin type="MainSkin" offset="0 0 16 16" align="Stretch">
             <State name="normal" offset="0 0 16 16"/>
         </BasisSkin>
-    </Skin>
-    <Skin name="MW_Track_Green" size="2 14" texture="textures\menu_bar_gray.dds" >
+    </Resource>
+    <Resource type="ResourceSkin" name="MW_Track_Green" size="2 14" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=fatigue}"/>
         <BasisSkin type="MainSkin" offset="0 0 16 16" align="Stretch">
             <State name="normal" offset="0 0 16 16"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
     <!-- Lighter variants (only uses top half of the gradient) -->
-    <Skin name="MW_BigTrack_Progress_Red_Small" size="16 8" texture="textures\menu_bar_gray.dds" >
+    <Resource type="ResourceSkin" name="MW_BigTrack_Progress_Red_Small" size="16 8" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="1 0 0"/>
         <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
-    </Skin>
-    <Skin name="MW_BigTrack_Progress_Blue_Small" size="16 8" texture="textures\menu_bar_gray.dds" >
+    </Resource>
+    <Resource type="ResourceSkin" name="MW_BigTrack_Progress_Blue_Small" size="16 8" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="0.3 0.3 1"/>
         <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
-    </Skin>
-    <Skin name="MW_BigTrack_Progress_Green_Small" size="16 8" texture="textures\menu_bar_gray.dds" >
+    </Resource>
+    <Resource type="ResourceSkin" name="MW_BigTrack_Progress_Green_Small" size="16 8" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="0.298 0.784 0.780"/>
         <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
 
-    <Skin name="ProgressText" size="16 16">
+    <Resource type="ResourceSkin" name="ProgressText" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Top HCenter"/>
         <Property key="TextColour" value="#{fontcolour=normal}"/>
         <Property key="TextShadow" value="true"/>
 
         <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
-    </Skin>
+    </Resource>
 
     <!-- Main energy bar widget definitions. There's one for each color.-->
 
-    <Skin name="MW_Progress_Red" size="64 12">
+    <Resource type="ResourceSkin" name="MW_Progress_Red" size="64 12">
         <Property key="TrackSkin" value="MW_Track_Red"/>
         <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_Progress_Green" size="64 12">
+    <Resource type="ResourceSkin" name="MW_Progress_Green" size="64 12">
         <Property key="TrackSkin" value="MW_Track_Green"/>
         <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_Progress_Blue" size="64 12">
+    <Resource type="ResourceSkin" name="MW_Progress_Blue" size="64 12">
         <Property key="TrackSkin" value="MW_Track_Blue"/>
         <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_Progress_LightBlue" size="64 6">
+    <Resource type="ResourceSkin" name="MW_Progress_LightBlue" size="64 6">
         <Property key="TrackSkin" value="MW_BigTrack_Progress_Blue_Small"/>
         <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 6" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 2" align="Stretch" name="Client"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_Progress_Drowning" size="64 6">
+    <Resource type="ResourceSkin" name="MW_Progress_Drowning" size="64 6">
         <Child type="Widget" skin="MW_BigTrack_Progress_Red_Small" offset="0 0 64 6" align="Stretch"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_ProgressScroll_Loading" size="64 6">
+    <Resource type="ResourceSkin" name="MW_ProgressScroll_Loading" size="64 6">
         <Property key="TrackWidth" value="1"/>
         <Property key="TrackRangeMargins" value="0 0"/>
         <Property key="MinTrackSize" value="1"/>
@@ -99,5 +99,5 @@
         <Child type="Button" skin="MW_BigTrack_Progress_Green_Small" offset="0 0 1 6" align="Left VStretch" name="Track"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 6" align="Stretch"/>
-    </Skin>
+    </Resource>
 </MyGUI>

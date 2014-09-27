@@ -277,7 +277,6 @@ namespace MWGui
 
     InfoBoxDialog::InfoBoxDialog()
         : WindowModal("openmw_infobox.layout")
-        , mCurrentButton(-1)
     {
         getWidget(mTextBox, "TextBox");
         getWidget(mText, "Text");
@@ -306,7 +305,6 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(*it);
         }
         this->mButtons.clear();
-        mCurrentButton = -1;
 
         // TODO: The buttons should be generated from a template in the layout file, ie. cloning an existing widget
         MyGUI::Button* button;
@@ -336,11 +334,6 @@ namespace MWGui
         center();
     }
 
-    int InfoBoxDialog::getChosenButton() const
-    {
-        return mCurrentButton;
-    }
-
     void InfoBoxDialog::onButtonClicked(MyGUI::Widget* _sender)
     {
         std::vector<MyGUI::Button*>::const_iterator end = mButtons.end();
@@ -349,7 +342,6 @@ namespace MWGui
         {
             if (*it == _sender)
             {
-                mCurrentButton = i;
                 eventButtonSelected(i);
                 return;
             }
@@ -671,8 +663,6 @@ namespace MWGui
         // Centre dialog
         center();
 
-        setText("LabelT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sSpecializationMenu1", ""));
-
         getWidget(mSpecialization0, "Specialization0");
         getWidget(mSpecialization1, "Specialization1");
         getWidget(mSpecialization2, "Specialization2");
@@ -694,7 +684,6 @@ namespace MWGui
 
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
-        cancelButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sCancel", ""));
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onCancelClicked);
     }
 
@@ -737,8 +726,6 @@ namespace MWGui
         // Centre dialog
         center();
 
-        setText("LabelT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sAttributesMenu1", ""));
-
         for (int i = 0; i < 8; ++i)
         {
             Widgets::MWAttributePtr attribute;
@@ -752,7 +739,6 @@ namespace MWGui
 
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
-        cancelButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sCancel", ""));
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectAttributeDialog::onCancelClicked);
     }
 
@@ -787,11 +773,6 @@ namespace MWGui
     {
         // Centre dialog
         center();
-
-        setText("LabelT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sSkillsMenu1", ""));
-        setText("CombatLabelT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sSpecializationCombat", ""));
-        setText("MagicLabelT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sSpecializationMagic", ""));
-        setText("StealthLabelT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sSpecializationStealth", ""));
 
         for(int i = 0; i < 9; i++)
         {
@@ -849,7 +830,6 @@ namespace MWGui
 
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
-        cancelButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sCancel", ""));
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSkillDialog::onCancelClicked);
     }
 

@@ -21,7 +21,6 @@ namespace MWRender
         void update();
 
         void close();
-        void stopVideo();
 
         bool isPlaying();
 
@@ -32,9 +31,6 @@ namespace MWRender
 
     private:
         VideoState* mState;
-
-        int mWidth;
-        int mHeight;
     };
 }
 

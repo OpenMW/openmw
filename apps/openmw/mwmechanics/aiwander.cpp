@@ -686,15 +686,14 @@ namespace MWMechanics
     }
 
     AiWander::AiWander (const ESM::AiSequence::AiWander* wander)
+        : mDistance(wander->mData.mDistance)
+        , mDuration(wander->mData.mDuration)
+        , mStartTime(MWWorld::TimeStamp(wander->mStartTime))
+        , mTimeOfDay(wander->mData.mTimeOfDay)
+        , mRepeat(wander->mData.mShouldRepeat)
     {
-        mDistance = wander->mData.mDistance;
-        mDuration = wander->mData.mDuration;
-        mStartTime = MWWorld::TimeStamp(wander->mStartTime);
-        mTimeOfDay = wander->mData.mTimeOfDay;
         for (int i=0; i<8; ++i)
             mIdle.push_back(wander->mData.mIdle[i]);
-
-        mRepeat = wander->mData.mShouldRepeat;
 
         init();
     }

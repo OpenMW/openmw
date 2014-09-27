@@ -5,13 +5,13 @@
 
             <!-- Label -->
             <Widget type="TextBox" skin="HeaderText" position="0 0 447 18" name="LabelT" align="HCenter Top">
-                <Property key="Caption" value="Choose a Skill"/>
+                <Property key="Caption" value="#{sSkillsMenu1}"/>
                 <Property key="TextAlign" value="HCenter Top"/>
             </Widget>
 
             <!-- Combat list -->
             <Widget type="TextBox" skin="HeaderText" position="0 32 154 18" name="CombatLabelT" align="Left Top">
-                <Property key="Caption" value="Combat"/>
+                <Property key="Caption" value="#{sSpecializationCombat}"/>
                 <Property key="TextAlign" value="Left Top"/>
             </Widget>
             <Widget type="MWSkill" skin="MW_StatNameButton" position="0 50 154 18" name="CombatSkill0" align="Left Top"/>
@@ -26,7 +26,7 @@
 
             <!-- Magic list -->
             <Widget type="TextBox" skin="HeaderText" position="158 32 154 18" name="MagicLabelT" align="Left Top">
-                <Property key="Caption" value="Magic"/>
+                <Property key="Caption" value="#{sSpecializationMagic}"/>
                 <Property key="TextAlign" value="Left Top"/>
             </Widget>
             <Widget type="MWSkill" skin="MW_StatNameButton" position="158 50 154 18" name="MagicSkill0" align="Left Top"/>
@@ -41,7 +41,7 @@
 
             <!-- Stealth list -->
             <Widget type="TextBox" skin="HeaderText" position="316 32 131 18" name="StealthLabelT" align="Left Top">
-                <Property key="Caption" value="Stealth"/>
+                <Property key="Caption" value="#{sSpecializationStealth}"/>
                 <Property key="TextAlign" value="Left Top"/>
             </Widget>
             <Widget type="MWSkill" skin="MW_StatNameButton" position="316 50 131 18" name="StealthSkill0" align="Left Top"/>
@@ -57,7 +57,7 @@
             <!-- Dialog buttons -->
             <Widget type="AutoSizedButton" skin="MW_Button" position="381 218 66 21" name="CancelButton">
                 <Property key="ExpandDirection" value="Left"/>
-                <Property key="Caption" value="Cancel"/>
+                <Property key="Caption" value="#{sCancel}"/>
             </Widget>
 
         </Widget>

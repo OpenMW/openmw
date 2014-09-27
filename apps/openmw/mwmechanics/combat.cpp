@@ -193,13 +193,11 @@ namespace MWMechanics
             return;
         }
 
-        float damage = 0.0f;
-
         float fDamageStrengthBase = gmst.find("fDamageStrengthBase")->getFloat();
         float fDamageStrengthMult = gmst.find("fDamageStrengthMult")->getFloat();
 
         const unsigned char* attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
-        damage = attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength()); // Bow/crossbow damage
+        float damage = attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength()); // Bow/crossbow damage
         if (weapon != projectile)
         {
             // Arrow/bolt damage

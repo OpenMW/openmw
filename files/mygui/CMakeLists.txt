@@ -84,8 +84,8 @@ set(MYGUI_FILES
     openmw_screen_fader.layout
     openmw_edit_note.layout
     DejaVuLGCSansMono.ttf
-    markers.png
     ../launcher/images/openmw.png
+    OpenMWResourcePlugin.xml
 )
 
 

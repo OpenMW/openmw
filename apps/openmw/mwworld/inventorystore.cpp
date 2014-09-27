@@ -73,15 +73,14 @@ MWWorld::InventoryStore::InventoryStore()
 }
 
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
-: ContainerStore (store)
+ : ContainerStore (store)
  , mSelectedEnchantItem(end())
+ , mMagicEffects(store.mMagicEffects)
+ , mFirstAutoEquip(store.mFirstAutoEquip)
+ , mListener(store.mListener)
+ , mUpdatesEnabled(store.mUpdatesEnabled)
+ , mPermanentMagicEffectMagnitudes(store.mPermanentMagicEffectMagnitudes)
 {
-    mMagicEffects = store.mMagicEffects;
-    mFirstAutoEquip = store.mFirstAutoEquip;
-    mListener = store.mListener;
-    mUpdatesEnabled = store.mUpdatesEnabled;
-
-    mPermanentMagicEffectMagnitudes = store.mPermanentMagicEffectMagnitudes;
     copySlots (store);
 }
 
@@ -218,8 +217,6 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 // Equipping weapons is handled by AiCombat. Anything else (lockpicks, probes) can't be used by NPCs anyway (yet)
                 continue;
 
-            bool use = false;
-
             if (slots_.at (*iter2)!=end())
             {
                 Ptr old = *slots_.at (*iter2);
@@ -227,6 +224,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
                 // check skill
                 int oldSkill = old.getClass().getEquipmentSkill (old);
 
+                bool use = false;
                 if (testSkill!=-1 && oldSkill==-1)
                     use = true;
                 else if (testSkill!=-1 && oldSkill!=-1 && testSkill!=oldSkill)

@@ -24,7 +24,6 @@ namespace MWGui
         void setButtons(ButtonList &buttons);
 
         virtual void open();
-        int getChosenButton() const;
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
@@ -41,7 +40,6 @@ namespace MWGui
 
         void fitToText(MyGUI::TextBox* widget);
         void layoutVertically(MyGUI::Widget* widget, int margin);
-        int mCurrentButton;
         MyGUI::Widget* mTextBox;
         MyGUI::TextBox* mText;
         MyGUI::Widget* mButtonBar;

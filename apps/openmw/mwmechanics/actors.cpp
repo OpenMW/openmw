@@ -323,8 +323,9 @@ namespace MWMechanics
         for (std::list<MWWorld::Ptr>::const_iterator it = followers.begin(); it != followers.end(); ++it)
         {
             // need to check both ways since player doesn't use AI packages
-            if (creatureStats2.getAiSequence().isInCombat(*it)
+            if ((creatureStats2.getAiSequence().isInCombat(*it)
                     || it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(actor2))
+                    && !creatureStats.getAiSequence().isInCombat(*it))
                 aggressive = true;
         }
 
@@ -335,6 +336,9 @@ namespace MWMechanics
             {
                 MWWorld::Ptr followTarget = dynamic_cast<MWMechanics::AiFollow*>(*it)->getTarget();
                 if (followTarget.isEmpty())
+                    continue;
+
+                if (creatureStats.getAiSequence().isInCombat(followTarget))
                     continue;
 
                 // need to check both ways since player doesn't use AI packages
@@ -1175,13 +1179,25 @@ namespace MWMechanics
                 iter->second->updateContinuousVfx();
 
             // Animation/movement update
+            CharacterController* playerCharacter = NULL;
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
                             ESM::MagicEffect::Paralyze).getMagnitude() > 0)
                     iter->second->skipAnim();
+
+                // Handle player last, in case a cell transition occurs by casting a teleportation spell
+                // (would invalidate the iterator)
+                if (iter->first.getCellRef().getRefId() == "player")
+                {
+                    playerCharacter = iter->second;
+                    continue;
+                }
                 iter->second->update(duration);
             }
+
+            if (playerCharacter)
+                playerCharacter->update(duration);
 
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
@@ -1220,14 +1236,14 @@ namespace MWMechanics
             }
 
             static float sneakTimer = 0.f; // times update of sneak icon
-            static float sneakSkillTimer = 0.f; // times sneak skill progress from "avoid notice"
 
             // if player is in sneak state see if anyone detects him
             if (player.getClass().getCreatureStats(player).getMovementFlag(MWMechanics::CreatureStats::Flag_Sneak))
             {
+                static float sneakSkillTimer = 0.f; // times sneak skill progress from "avoid notice"
+
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
                 const int radius = esmStore.get<ESM::GameSetting>().find("fSneakUseDist")->getInt();
-                bool detected = false;
 
                 static float fSneakUseDelay = esmStore.get<ESM::GameSetting>().find("fSneakUseDelay")->getFloat();
 
@@ -1238,6 +1254,8 @@ namespace MWMechanics
                 {
                     // Set when an NPC is within line of sight and distance, but is still unaware. Used for skill progress.
                     bool avoidedNotice = false;
+
+                    bool detected = false;
 
                     for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
                     {
@@ -1406,7 +1424,7 @@ namespace MWMechanics
     std::list<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actor)
     {
         std::list<MWWorld::Ptr> list;
-        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
+        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
         {
             const MWWorld::Class &cls = iter->first.getClass();
             CreatureStats &stats = cls.getCreatureStats(iter->first);
@@ -1438,7 +1456,7 @@ namespace MWMechanics
         getObjectsInRange(position,
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fAlarmRadius")->getFloat(),
             neighbors); //only care about those within the alarm disance
-        for(std::vector<MWWorld::Ptr>::iterator iter(neighbors.begin());iter != neighbors.end();iter++)
+        for(std::vector<MWWorld::Ptr>::iterator iter(neighbors.begin());iter != neighbors.end();++iter)
         {
             const MWWorld::Class &cls = iter->getClass();
             CreatureStats &stats = cls.getCreatureStats(*iter);

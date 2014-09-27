@@ -107,7 +107,7 @@ bool MWMechanics::NpcStats::isSameFaction (const NpcStats& npcStats) const
 }
 
 float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& class_, int usageType,
-    int level) const
+    int level, float extraFactor) const
 {
     if (level<0)
         level = static_cast<int> (getSkill (skillIndex).getBase());
@@ -130,6 +130,8 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
         if (skillFactor==0)
             return 0;
     }
+
+    skillFactor *= extraFactor;
 
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -167,7 +169,7 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
     return 1.0 / ((level+1) * (1.0/skillFactor) * typeFactor * specialisationFactor);
 }
 
-void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType)
+void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType, float extraFactor)
 {
     // Don't increase skills as a werewolf
     if(mIsWerewolf)
@@ -175,7 +177,7 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
 
     MWMechanics::SkillValue& value = getSkill (skillIndex);
 
-    value.setProgress(value.getProgress() + getSkillGain (skillIndex, class_, usageType));
+    value.setProgress(value.getProgress() + getSkillGain (skillIndex, class_, usageType, -1, extraFactor));
 
     if (value.getProgress()>=1)
     {

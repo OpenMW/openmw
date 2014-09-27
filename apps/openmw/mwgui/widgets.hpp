@@ -307,9 +307,6 @@ namespace MWGui
             MWScrollBar();
             virtual ~MWScrollBar();
 
-            void setEnableRepeat(bool enable);
-            bool getEnableRepeat();
-            void getRepeat(float &trigger, float &step);
             void setRepeat(float trigger, float step);
 
         protected:

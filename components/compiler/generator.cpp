@@ -105,11 +105,6 @@ namespace
         code.push_back (Compiler::Generator::segment5 (17));
     }
 
-    void opFloatToInt1 (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (18));
-    }
-
     void opSquareRoot (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (19));
@@ -599,16 +594,6 @@ namespace Compiler
         void jumpOnZero (CodeContainer& code, int offset)
         {
             opSkipOnNonZero (code);
-
-            if (offset<0)
-                --offset; // compensate for skip instruction
-
-            jump (code, offset);
-        }
-
-        void jumpOnNonZero (CodeContainer& code, int offset)
-        {
-            opSkipOnZero (code);
 
             if (offset<0)
                 --offset; // compensate for skip instruction

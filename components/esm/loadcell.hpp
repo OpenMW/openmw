@@ -104,7 +104,6 @@ struct Cell
   CellRefTracker mLeasedRefs;
   MovedCellRefTracker mMovedRefs;
 
-  void preLoad(ESMReader &esm);
   void postLoad(ESMReader &esm);
 
   // This method is left in for compatibility with esmtool. Parsing moved references currently requires

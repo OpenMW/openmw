@@ -2,6 +2,7 @@
 #define OPENMW_MYGUI_RESOURCE_PLUGIN_H
 
 #include <MyGUI_Plugin.h>
+#include <MyGUI_UString.h>
 
 namespace MyGUIPlugin
 {
@@ -40,6 +41,10 @@ namespace MyGUIPlugin
         void registerResources();
         void registerWidgets();
         void createTransparentBGTexture();
+
+        void onRetrieveTag(const MyGUI::UString& tag, MyGUI::UString& out);
+
+        std::map<std::string, std::string> mFallbackMap;
     };
 
 }

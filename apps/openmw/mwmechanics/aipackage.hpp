@@ -69,7 +69,6 @@ namespace MWMechanics
             PathFinder mPathFinder;
             ObstacleCheck mObstacleCheck;
 
-            float mDoorCheckDuration;
             float mTimer;
             float mStuckTimer;
 

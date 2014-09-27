@@ -43,13 +43,12 @@ namespace MWScript
         mParser.reset();
         mErrorHandler.reset();
 
-        bool Success = true;
-
         if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
         {
             if (mVerbose)
                 std::cout << "compiling script: " << name << std::endl;
 
+            bool Success = true;
             try
             {
                 std::istringstream input (script->mScriptText);

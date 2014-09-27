@@ -36,7 +36,8 @@ namespace MWGui
                 Misc::StringUtils::toLower(currentGMSTID);
 
                 // Don't bother checking this GMST if it's not a sMagicBound* one.
-                if (currentGMSTID.find("smagicbound") != 0)
+                const std::string& toFind = "smagicbound";
+                if (currentGMSTID.compare(0, toFind.length(), toFind) != 0)
                     continue;
 
                 // All sMagicBound* GMST's should be of type string

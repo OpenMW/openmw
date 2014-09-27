@@ -1,37 +1,30 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 600 128" name="_Main">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout" version="3.2.0">
+    <Widget type="Window" skin="MW_Dialog" position="0 0 600 128" layer="Windows" name="_Main">
         <Property key="Visible" value="false"/>
-
-        <Widget type="TextBox" skin="SandText" position="4 4 592 24" name="LabelText" align="Left Top HStretch">
+        <Widget type="TextBox" skin="SandText" position="4 4 592 24" align="Left Top HStretch" name="LabelText">
             <Property key="TextAlign" value="Center"/>
         </Widget>
-
-        <Widget type="TextBox" skin="SandText" position="4 30 507 24" name="ItemText" align="Left Top HStretch">
+        <Widget type="TextBox" skin="SandText" position="4 30 521 24" align="Left Top HStretch" name="ItemText">
             <Property key="TextAlign" value="Right"/>
         </Widget>
-
-        <Widget type="EditBox" skin="MW_TextEdit" position="520 30 52 24" name="ItemEdit" align="Right Top">
+        <Widget type="NumericEditBox" skin="MW_TextEdit" position="535 30 50 24" align="Right Top" name="ItemEdit">
             <Property key="TextAlign" value="Center"/>
         </Widget>
-
-        <Widget type="MWScrollBar" skin="MW_HScroll" position="28 60 544 18" name="CountSlider" align="Left Top HStretch">
+        <Widget type="MWScrollBar" skin="MW_HScroll" position="7 61 578 18" align="Left Top HStretch" name="CountSlider">
             <Property key="MoveToClick" value="true"/>
         </Widget>
-
-
-        <Widget type="HBox" position="0 86 572 24" align="Right Bottom">
-            <Widget type="Widget">
+        <Widget type="HBox" skin="" position="0 88 585 24" align="Right Bottom">
+            <Widget type="Widget" skin="" position="0 12 0 0">
                 <UserString key="HStretch" value="true"/>
             </Widget>
-            <Widget type="AutoSizedButton" skin="MW_Button" position="417 90 60 24" name="CancelButton" align="Right Top">
-                <Property key="Caption" value="#{sCancel}"/>
-            </Widget>
-            <Widget type="AutoSizedButton" skin="MW_Button" position="512 90 60 24" name="OkButton" align="Right Top">
+            <Widget type="AutoSizedButton" skin="MW_Button" position="4 0 53 24" align="Right Top" name="OkButton">
                 <Property key="Caption" value="#{sOk}"/>
             </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" position="61 0 78 24" align="Right Top" name="CancelButton">
+                <Property key="Caption" value="#{sCancel}"/>
+            </Widget>
         </Widget>
-
     </Widget>
+    <CodeGeneratorSettings/>
 </MyGUI>

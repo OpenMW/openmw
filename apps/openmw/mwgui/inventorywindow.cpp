@@ -278,14 +278,14 @@ namespace MWGui
         if (item.mType == ItemStack::Type_Barter)
         {
             // this was an item borrowed to us by the merchant
-            MWBase::Environment::get().getWindowManager()->getTradeWindow()->returnItem(mSelectedItem, count);
             mTradeModel->returnItemBorrowedToUs(mSelectedItem, count);
+            MWBase::Environment::get().getWindowManager()->getTradeWindow()->returnItem(mSelectedItem, count);
         }
         else
         {
             // borrow item to the merchant
-            MWBase::Environment::get().getWindowManager()->getTradeWindow()->borrowItem(mSelectedItem, count);
             mTradeModel->borrowItemFromUs(mSelectedItem, count);
+            MWBase::Environment::get().getWindowManager()->getTradeWindow()->borrowItem(mSelectedItem, count);
         }
 
         mItemView->update();

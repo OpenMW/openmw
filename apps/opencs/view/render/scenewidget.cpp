@@ -361,11 +361,6 @@ namespace CSVRender
         }
     }
 
-    int SceneWidget::getFastFactor() const
-    {
-        return mFast ? mFastFactor : 1;
-    }
-
     void SceneWidget::setLighting (Lighting *lighting)
     {
         if (mLighting)

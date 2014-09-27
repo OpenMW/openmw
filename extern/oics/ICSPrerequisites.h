@@ -77,7 +77,7 @@ namespace ICS
 	{
 		std::stringstream ss(Text);
 		T result;
-		return ss >> result ? true : false;
+        return (ss >> result) ? true : false;
 	}
 
 	// from http://www.cplusplus.com/forum/articles/9645/
@@ -95,7 +95,7 @@ namespace ICS
 	{											//character array as argument
 		std::stringstream ss(Text);
 		T result;
-		return ss >> result ? result : 0;
+        return (ss >> result) ? result : 0;
 	}
 
 	class InputControlSystem;

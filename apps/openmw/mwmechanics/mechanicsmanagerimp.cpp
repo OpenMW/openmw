@@ -1111,10 +1111,10 @@ namespace MWMechanics
         }
     }
 
-    void MechanicsManager::actorAttacked(const MWWorld::Ptr &ptr, const MWWorld::Ptr &attacker)
+    bool MechanicsManager::actorAttacked(const MWWorld::Ptr &ptr, const MWWorld::Ptr &attacker)
     {
         if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
-            return;
+            return false;
 
         std::list<MWWorld::Ptr> followers = getActorsFollowing(attacker);
         if (std::find(followers.begin(), followers.end(), ptr) != followers.end())
@@ -1124,13 +1124,25 @@ namespace MWMechanics
             if (ptr.getClass().getCreatureStats(ptr).getFriendlyHits() < 4)
             {
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
-                return;
+                return false;
             }
         }
 
-        // Attacking peaceful NPCs is a crime
+        // Attacking an NPC that is already in combat with any other NPC is not a crime
+        AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+        bool isFightingNpc = false;
+        for (std::list<AiPackage*>::const_iterator it = seq.begin(); it != seq.end(); ++it)
+        {
+            if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+            {
+                MWWorld::Ptr target = static_cast<AiCombat*>(*it)->getTarget();
+                if (!target.isEmpty() && target.getClass().isNpc())
+                    isFightingNpc = true;
+            }
+        }
+
         if (ptr.getClass().isNpc() && !attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker)
-                && !isAggressive(ptr, attacker))
+                && !isAggressive(ptr, attacker) && !isFightingNpc)
             commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
         if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)
@@ -1141,6 +1153,8 @@ namespace MWMechanics
             // Note: accidental or collateral damage attacks are ignored.
             startCombat(ptr, attacker);
         }
+
+        return true;
     }
 
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)

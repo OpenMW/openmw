@@ -3,6 +3,8 @@
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <components/widgets/list.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -17,7 +19,6 @@
 #include "../mwdialogue/dialoguemanagerimp.hpp"
 
 #include "widgets.hpp"
-#include "list.hpp"
 #include "tradewindow.hpp"
 #include "spellbuyingwindow.hpp"
 #include "travelwindow.hpp"
@@ -124,10 +125,10 @@ namespace MWGui
         // We need this copy for when @# hyperlinks are replaced
         std::string text = mText;
 
-        size_t pos_begin, pos_end;
+        size_t pos_end;
         for(;;)
         {
-            pos_begin = text.find('@');
+            size_t pos_begin = text.find('@');
             if (pos_begin != std::string::npos)
                 pos_end = text.find('#', pos_begin);
 

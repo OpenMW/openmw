@@ -31,9 +31,11 @@ void AiSequence::copy (const AiSequence& sequence)
 
 AiSequence::AiSequence() : mDone (false), mLastAiPackage(-1) {}
 
-AiSequence::AiSequence (const AiSequence& sequence) : mDone (false)
+AiSequence::AiSequence (const AiSequence& sequence)
 {
     copy (sequence);
+    mDone = sequence.mDone;
+    mLastAiPackage = sequence.mLastAiPackage;
 }
 
 AiSequence& AiSequence::operator= (const AiSequence& sequence)
@@ -43,6 +45,7 @@ AiSequence& AiSequence::operator= (const AiSequence& sequence)
         clear();
         copy (sequence);
         mDone = sequence.mDone;
+        mLastAiPackage = sequence.mLastAiPackage;
     }
 
     return *this;
@@ -118,33 +121,6 @@ bool AiSequence::isInCombat(const MWWorld::Ptr &actor) const
         }
     }
     return false;
-}
-
-bool AiSequence::canAddTarget(const ESM::Position& actorPos, float distToTarget) const
-{
-    bool firstCombatFound = false;
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
-    for(std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
-    {
-        if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
-        {
-            firstCombatFound = true;
-
-            const AiCombat *combat = static_cast<const AiCombat *>(*it);
-            if (combat->getTarget() != player ) return false; // only 1 non-player target allowed
-            else
-            {
-                // add new target only if current target (player) is farther
-                const ESM::Position &targetPos = combat->getTarget().getRefData().getPosition();
-
-                float distToCurrTarget = (Ogre::Vector3(targetPos.pos) - Ogre::Vector3(actorPos.pos)).length();
-                return (distToCurrTarget > distToTarget);
-            }
-        }
-        else if (firstCombatFound) break; // assumes combat packages go one-by-one in packages list
-    }
-    return true;
 }
 
 void AiSequence::stopCombat()
@@ -293,11 +269,6 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
 
     if(mPackages.empty())
         mPackages.push_front (package.clone());
-}
-
-void AiSequence::queue (const AiPackage& package)
-{
-    mPackages.push_back (package.clone());
 }
 
 AiPackage* MWMechanics::AiSequence::getActivePackage()

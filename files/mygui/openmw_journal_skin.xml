@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Skin" version="3.2.1">
-    <Skin name="MW_BookClient" size="10 10">
+<MyGUI type="Resource" version="1.1">
+    <Resource type="ResourceSkin" name="MW_BookClient" size="10 10">
             <Property key="FontName" value="Default"/>
             <Property key="TextAlign" value="Left Top"/>
             <Property key="TextColour" value="0 0 0"/>
             <BasisSkin type="EditText" offset="0 0 10 10" align="Stretch"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_BookPage" size="0 0 50 50">
+    <Resource type="ResourceSkin" name="MW_BookPage" size="0 0 50 50">
             <BasisSkin type="PageDisplay"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_QuestList" size="516 516" align="Left Top">
+    <Resource type="ResourceSkin" name="MW_QuestList" size="516 516" align="Left Top">
 
         <Property key="ListItemSkin" value="MW_QuestLink"/>
 
         <Child type="Widget" skin="" offset="3 3 510 510" align="Top Left Stretch" name="Client"/>
 
-    </Skin>
+    </Resource>
 
-    <Skin name="MW_QuestLink" size="5 5">
+    <Resource type="ResourceSkin" name="MW_QuestLink" size="5 5">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left VCenter"/>
 
@@ -32,5 +32,5 @@
             <State name="highlighted_checked" colour="#{fontcolour=journal_topic_pressed}" shift="0"/>
             <State name="pushed_checked" colour="#{fontcolour=journal_topic_pressed}" shift="0"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 </MyGUI>

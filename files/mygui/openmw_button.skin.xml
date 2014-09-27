@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Skin" version="3.2.1">
+<MyGUI type="Resource" version="1.1">
     <!-- Button graphics -->
-    <Skin name="BTN_Top" size="128 4" texture="textures\menu_button_frame_top.dds">
+    <Resource type="ResourceSkin" name="BTN_Top" size="128 4" texture="textures\menu_button_frame_top.dds">
         <BasisSkin type="TileRect" offset="0 0 128 4" align="HStretch">
             <State name="normal" offset="0 0 128 4">
                 <Property key="TileSize" value="128 4"/>
@@ -10,8 +10,8 @@
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
-    </Skin>
-    <Skin name="BTN_Bottom" size="128 4" texture="textures\menu_button_frame_bottom.dds">
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_Bottom" size="128 4" texture="textures\menu_button_frame_bottom.dds">
         <BasisSkin type="TileRect" offset="0 0 128 4" align="HStretch">
             <State name="normal" offset="0 0 128 4">
                 <Property key="TileSize" value="128 4"/>
@@ -19,8 +19,8 @@
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
-    </Skin>
-    <Skin name="BTN_Left" size="4 16" texture="textures\menu_button_frame_left.dds">
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_Left" size="4 16" texture="textures\menu_button_frame_left.dds">
         <BasisSkin type="TileRect" offset="0 0 4 16" align="VStretch">
             <State name="normal" offset="0 0 4 16">
                 <Property key="TileSize" value="4 16"/>
@@ -28,8 +28,8 @@
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
-    </Skin>
-    <Skin name="BTN_Right" size="4 16" texture="textures\menu_button_frame_right.dds">
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_Right" size="4 16" texture="textures\menu_button_frame_right.dds">
         <BasisSkin type="TileRect" offset="0 0 4 16" align="VStretch">
             <State name="normal" offset="0 0 4 16">
                 <Property key="TileSize" value="4 16"/>
@@ -37,30 +37,30 @@
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
-    </Skin>
-    <Skin name="BTN_TopLeft" size="4 4" texture="textures\menu_button_frame_top_left_corner.dds">
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_TopLeft" size="4 4" texture="textures\menu_button_frame_top_left_corner.dds">
         <BasisSkin type="MainSkin" offset="0 0 4 4">
             <State name="normal" offset="0 0 4 4"/>
         </BasisSkin>
-    </Skin>
-    <Skin name="BTN_TopRight" size="4 4" texture="textures\menu_button_frame_top_right_corner.dds">
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_TopRight" size="4 4" texture="textures\menu_button_frame_top_right_corner.dds">
         <BasisSkin type="MainSkin" offset="0 0 4 4">
             <State name="normal" offset="0 0 4 4"/>
         </BasisSkin>
-    </Skin>
-    <Skin name="BTN_BottomLeft" size="4 4" texture="textures\menu_button_frame_bottom_left_corner.dds">
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_BottomLeft" size="4 4" texture="textures\menu_button_frame_bottom_left_corner.dds">
         <BasisSkin type="MainSkin" offset="0 0 4 4">
             <State name="normal" offset="0 0 4 4"/>
         </BasisSkin>
-    </Skin>
-    <Skin name="BTN_BottomRight" size="4 4" texture="textures\menu_button_frame_bottom_right_corner.dds">
+    </Resource>
+    <Resource type="ResourceSkin" name="BTN_BottomRight" size="4 4" texture="textures\menu_button_frame_bottom_right_corner.dds">
         <BasisSkin type="MainSkin" offset="0 0 4 4">
             <State name="normal" offset="0 0 4 4"/>
         </BasisSkin>
-    </Skin>
+    </Resource>
 
     <!-- Button widget -->
-    <Skin name="MW_Button" size="136 24" version="3.2.1">
+    <Resource type="ResourceSkin" name="MW_Button" size="136 24" version="3.2.1">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Center"/>
 
@@ -83,5 +83,5 @@
             <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
             <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
         </BasisSkin>
-   </Skin>
+   </Resource>
 </MyGUI>

@@ -50,7 +50,7 @@ namespace CSVWorld
         virtual void paint (QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
         /// pass a QSize defining height / width of icon. Default is QSize (16,16).
-        void setIconSize (const QSize icon);
+        void setIconSize (const QSize& icon);
 
         /// offset the horizontal position of the icon from the left edge of the cell.  Default is 3 pixels.
         void setIconLeftOffset (int offset);
