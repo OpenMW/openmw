@@ -181,6 +181,8 @@ namespace CSMWorld
             ColumnId_RefNum = 169,
             ColumnId_Creature = 170,
             ColumnId_SoundGeneratorType = 171,
+            ColumnId_AllowSpellmaking = 172,
+            ColumnId_AllowEnchanting = 173,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

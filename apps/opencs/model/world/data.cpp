@@ -231,6 +231,14 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mMagicEffects.addColumn (new RecordStateColumn<ESM::MagicEffect>);
     mMagicEffects.addColumn (new FixedRecordTypeColumn<ESM::MagicEffect> (UniversalId::Type_MagicEffect));
 
+    mMagicEffects.addColumn (new FlagColumn<ESM::MagicEffect> (
+        Columns::ColumnId_AllowSpellmaking, ESM::MagicEffect::AllowSpellmaking));
+    mMagicEffects.addColumn (new FlagColumn<ESM::MagicEffect> (
+        Columns::ColumnId_AllowEnchanting, ESM::MagicEffect::AllowEnchanting));
+    mMagicEffects.addColumn (new FlagColumn<ESM::MagicEffect> (
+        Columns::ColumnId_NegativeLight, ESM::MagicEffect::NegativeLight));
+    mMagicEffects.addColumn (new DescriptionColumn<ESM::MagicEffect>);
+
     mRefs.addColumn (new StringIdColumn<CellRef> (true));
     mRefs.addColumn (new RecordStateColumn<CellRef>);
     mRefs.addColumn (new FixedRecordTypeColumn<CellRef> (UniversalId::Type_Reference));

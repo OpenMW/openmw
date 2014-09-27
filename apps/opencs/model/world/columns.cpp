@@ -188,6 +188,8 @@ namespace CSMWorld
             { ColumnId_RefNum, "RefNum" },
             { ColumnId_Creature, "Creature" },
             { ColumnId_SoundGeneratorType, "Sound Generator Type" },
+            { ColumnId_AllowSpellmaking, "Allow Spellmaking" },
+            { ColumnId_AllowEnchanting, "Allow Enchanting" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
