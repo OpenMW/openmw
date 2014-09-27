@@ -2201,6 +2201,18 @@ void CSMDoc::Document::createBase()
 
         getData().getTopics().add (record);
     }
+
+    for (int i=0; i<ESM::MagicEffect::Length; ++i)
+    {
+        ESM::MagicEffect record;
+
+        record.mIndex = i;
+        record.mId = ESM::MagicEffect::indexToId (i);
+
+        record.blank();
+
+        getData().getMagicEffects().add (record);
+    }
 }
 
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
