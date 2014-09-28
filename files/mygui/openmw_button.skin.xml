@@ -84,4 +84,34 @@
             <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
         </BasisSkin>
    </Resource>
+
+    <!-- Button widget, 4 px padding on the right -->
+    <Resource type="ResourceSkin" name="MW_Button_RightPadding" size="140 24" version="3.2.1">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Center"/>
+
+        <!-- padding -->
+        <Child type="Widget" skin="" offset="136 0 4 24" align="Right VStretch"/>
+
+        <Child type="Widget" skin="BTN_Left" offset="0 4 4 16" align="VStretch Left"/>
+        <Child type="Widget" skin="BTN_Right" offset="132 4 4 16" align="VStretch Right"/>
+        <Child type="Widget" skin="BTN_Top" offset="4 0 128 4" align="HStretch Top"/>
+        <Child type="Widget" skin="BTN_Bottom" offset="4 20 128 4" align="HStretch Bottom"/>
+        <Child type="Widget" skin="BTN_TopLeft" offset="0 0 4 4" align="Top Left"/>
+        <Child type="Widget" skin="BTN_TopRight" offset="132 0 4 4" align="Top Right"/>
+        <Child type="Widget" skin="BTN_BottomLeft" offset="0 20 4 4" align="Bottom Left"/>
+        <Child type="Widget" skin="BTN_BottomRight" offset="132 20 4 4" align="Bottom Right"/>
+        <Child type="Widget" skin="BTN_BottomRight" offset="132 20 4 4" align="Bottom Right"/>
+
+        <BasisSkin type="SimpleText" offset="4 4 128 16" align="Stretch">
+            <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
+            <State name="highlighted" colour="#{fontcolour=normal_over}" shift="0"/>
+            <State name="pushed" colour="#{fontcolour=normal_pressed}" shift="0"/>
+            <State name="disabled_checked" colour="#{fontcolour=disabled}" shift="0"/>
+            <State name="normal_checked" colour="#{fontcolour=active}" shift="0"/>
+            <State name="highlighted_checked" colour="#{fontcolour=active_over}" shift="0"/>
+            <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
+        </BasisSkin>
+   </Resource>
 </MyGUI>
