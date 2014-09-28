@@ -40,7 +40,7 @@ using namespace Ogre;
 namespace
 {
 
-void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>& map)
+void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>& map, btDynamicsWorld* dynamicsWorld)
 {
     for (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>::iterator it = map.begin();
          it != map.end(); ++it)
@@ -79,6 +79,9 @@ void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Phys
             compound->getChildShape(shapeIt->second)->setLocalScaling(BtOgre::Convert::toBullet(bone->_getDerivedScale()));
             compound->updateChildTransform(shapeIt->second, trans);
         }
+
+        // needed because we used btDynamicsWorld::setForceUpdateAllAabbs(false)
+        dynamicsWorld->updateSingleAabb(it->first);
     }
 }
 
@@ -670,11 +673,18 @@ namespace MWWorld
         const Ogre::Vector3 &position = node->getPosition();
 
         if(OEngine::Physic::RigidBody *body = mEngine->getRigidBody(handle))
+        {
             body->getWorldTransform().setOrigin(btVector3(position.x,position.y,position.z));
+            mEngine->mDynamicsWorld->updateSingleAabb(body);
+        }
 
         if(OEngine::Physic::RigidBody *body = mEngine->getRigidBody(handle, true))
+        {
             body->getWorldTransform().setOrigin(btVector3(position.x,position.y,position.z));
+            mEngine->mDynamicsWorld->updateSingleAabb(body);
+        }
 
+        // Actors update their AABBs every frame (DISABLE_DEACTIVATION), so no need to do it manually
         if(OEngine::Physic::PhysicActor *physact = mEngine->getCharacter(handle))
             physact->setPosition(position);
     }
@@ -696,6 +706,7 @@ namespace MWWorld
                 body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
             else
                 mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, node->getPosition(), rotation);
+            mEngine->mDynamicsWorld->updateSingleAabb(body);
         }
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle, true))
         {
@@ -703,6 +714,7 @@ namespace MWWorld
                 body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
             else
                 mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, node->getPosition(), rotation);
+            mEngine->mDynamicsWorld->updateSingleAabb(body);
         }
     }
 
@@ -864,8 +876,8 @@ namespace MWWorld
 
     void PhysicsSystem::stepSimulation(float dt)
     {
-        animateCollisionShapes(mEngine->mAnimatedShapes);
-        animateCollisionShapes(mEngine->mAnimatedRaycastingShapes);
+        animateCollisionShapes(mEngine->mAnimatedShapes, mEngine->mDynamicsWorld);
+        animateCollisionShapes(mEngine->mAnimatedRaycastingShapes, mEngine->mDynamicsWorld);
 
         mEngine->stepSimulation(dt);
     }
