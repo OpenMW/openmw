@@ -48,10 +48,10 @@ namespace CSVRender
 
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
 
-        int farClipDist = userSettings.setting("Scene/far clip distance", (QStringList() << QString("300000"))).toInt();
+        int farClipDist = userSettings.setting("Scene/far clip distance", QString("300000")).toInt();
         mCamera->setFarClipDistance (farClipDist);
 
-        mFastFactor = userSettings.setting("Scene/fast factor", (QStringList() << QString("4"))).toInt();
+        mFastFactor = userSettings.setting("Scene/fast factor", QString("4")).toInt();
 
         mCamera->roll (Ogre::Degree (90));
 
@@ -61,7 +61,7 @@ namespace CSVRender
 
         connect (timer, SIGNAL (timeout()), this, SLOT (update()));
 
-        int timerStart = userSettings.setting("Scene/timer start", (QStringList() << QString("20"))).toInt();
+        int timerStart = userSettings.setting("Scene/timer start", QString("20")).toInt();
         timer->start (timerStart);
 
         /// \todo make shortcut configurable

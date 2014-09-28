@@ -265,7 +265,7 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 #else
         "OpenGL Rendering Subsystem";
 #endif
-    std::string renderSystem = mUserSettings.setting("Video/render system", QStringList() << renderer.c_str()).toStdString();
+    std::string renderSystem = mUserSettings.setting("Video/render system", renderer.c_str()).toStdString();
 
     Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName(renderSystem));
 
@@ -331,27 +331,27 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     factory->loadAllFiles();
 
-    bool shaders = mUserSettings.setting("Objects/shaders", (QStringList() << QString("true"))) == "true" ? true : false;
+    bool shaders = mUserSettings.setting("Objects/shaders", QString("true")) == "true" ? true : false;
     sh::Factory::getInstance ().setShadersEnabled (shaders);
 
-    std::string fog = mUserSettings.setting("Shader/fog", (QStringList() << QString("true"))).toStdString();
+    std::string fog = mUserSettings.setting("Shader/fog", QString("true")).toStdString();
     sh::Factory::getInstance().setGlobalSetting ("fog", fog);
 
 
-    std::string shadows = mUserSettings.setting("Shader/shadows", (QStringList() << QString("false"))).toStdString();
+    std::string shadows = mUserSettings.setting("Shader/shadows", QString("false")).toStdString();
     sh::Factory::getInstance().setGlobalSetting ("shadows", shadows);
 
-    std::string shadows_pssm = mUserSettings.setting("Shader/shadows_pssm", (QStringList() << QString("false"))).toStdString();
+    std::string shadows_pssm = mUserSettings.setting("Shader/shadows_pssm", QString("false")).toStdString();
     sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", shadows_pssm);
 
-    std::string render_refraction = mUserSettings.setting("Shader/render_refraction", (QStringList() << QString("false"))).toStdString();
+    std::string render_refraction = mUserSettings.setting("Shader/render_refraction", QString("false")).toStdString();
     sh::Factory::getInstance ().setGlobalSetting ("render_refraction", render_refraction);
 
     // internal setting - may be switched on or off by the use of shader configurations
     sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
 
-    sh::Factory::getInstance ().setGlobalSetting ("num_lights",
-        mUserSettings.settingValue("Objects/num_lights").toStdString());
+    std::string num_lights = mUserSettings.setting("Objects/num_lights", QString("8")).toStdString();
+    sh::Factory::getInstance ().setGlobalSetting ("num_lights", num_lights);
 
     /// \todo add more configurable shiny settings
 

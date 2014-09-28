@@ -77,7 +77,7 @@ namespace CSMSettings {
         ///Save any unsaved changes in the QSettings object
         void saveDefinitions() const;
 
-        QString setting(const QString &viewKey, const QStringList &list = QStringList());
+        QString setting(const QString &viewKey, const QString &value = QString());
 
     private:
 

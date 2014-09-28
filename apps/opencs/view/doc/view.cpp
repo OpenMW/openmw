@@ -456,7 +456,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
 
     // User setting to reuse sub views (on a per top level view basis)
     bool reuse =
-        userSettings.setting("SubView/reuse", (QStringList() << QString("true"))) == "true" ? true : false;
+        userSettings.setting("SubView/reuse", QString("true")) == "true" ? true : false;
     if(reuse)
     {
         foreach(SubView *sb, mSubViews)
@@ -475,8 +475,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     //
     // If the sub view limit setting is one, the sub view title bar is hidden and the
     // text in the main title bar is adjusted accordingly
-    int maxSubView =
-        userSettings.setting("SubView/max subviews", (QStringList() << QString("3"))).toInt();
+    int maxSubView = userSettings.setting("SubView/max subviews", QString("256")).toInt();
     if(mSubViews.size() >= maxSubView) // create a new top level view
     {
         mViewManager.addView(mDocument, id, hint);
@@ -499,8 +498,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     if (!hint.empty())
         view->useHint (hint);
 
-    int minWidth =
-        userSettings.setting("SubView/minimum width", (QStringList() << QString("325"))).toInt();
+    int minWidth = userSettings.setting("SubView/minimum width", QString("325")).toInt();
     view->setMinimumWidth(minWidth);
 
     view->setStatusBar (mShowStatusBar->isChecked());

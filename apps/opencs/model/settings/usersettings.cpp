@@ -50,11 +50,11 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
     section = "Objects";
     {
-        Setting *numLights = createSetting (Type_SpinBox, section, "num lights");
+        Setting *numLights = createSetting (Type_SpinBox, section, "num_lights");
         numLights->setDefaultValue(8);
         numLights->setEditorSetting(true);
         numLights->setColumnSpan (1);
-        numLights->setMinimum (0);
+        numLights->setMinimum (2);
         numLights->setMaximum (100); // FIXME: not sure what the max value should be
         numLights->setWidgetWidth (10);
         numLights->setViewLocation(1, 2);
@@ -74,19 +74,16 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
     {
         Setting *fastFactor = createSetting (Type_SpinBox, section, "fast factor");
         fastFactor->setDefaultValue(4);
-        fastFactor->setEditorSetting(false);
+        fastFactor->setEditorSetting(true);
         fastFactor->setColumnSpan (1);
-        // FIXME: setMinimum or setSpecialValueText appears to be broken, possibly due
-        // to there being an empty string default for special value text.
-        //fastFactor->setMinimum (1);
-        fastFactor->setSpecialValueText("1"); // workaround for above
+        fastFactor->setMinimum (1);
         fastFactor->setMaximum (100); // FIXME: not sure what the max value should be
         fastFactor->setWidgetWidth (10);
         fastFactor->setViewLocation(1, 2);
 
         Setting *farClipDist = createSetting (Type_SpinBox, section, "far clip distance");
         farClipDist->setDefaultValue(300000);
-        farClipDist->setEditorSetting(false);
+        farClipDist->setEditorSetting(true);
         farClipDist->setColumnSpan (1);
         farClipDist->setMinimum (0);
         farClipDist->setMaximum (1000000); // FIXME: not sure what the max value should be
@@ -95,7 +92,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         Setting *timerStart = createSetting (Type_SpinBox, section, "timer start");
         timerStart->setDefaultValue(20);
-        timerStart->setEditorSetting(false);
+        timerStart->setEditorSetting(true);
         timerStart->setColumnSpan (1);
         timerStart->setMinimum (0);
         timerStart->setMaximum (100); // FIXME: not sure what the max value should be
@@ -106,12 +103,11 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
     section = "SubView";
     {
         Setting *maxSubView = createSetting (Type_SpinBox, section, "max subviews");
-        maxSubView->setDefaultValue(3);
+        maxSubView->setDefaultValue(256);
         maxSubView->setEditorSetting(false);
         maxSubView->setColumnSpan (1);
-        //maxSubView->setMinimum (1);
-        maxSubView->setSpecialValueText("1"); // workaround for setMinimum
-        maxSubView->setMaximum (100); // FIXME: not sure what the max value should be
+        maxSubView->setMinimum (1);
+        maxSubView->setMaximum (256); // FIXME: not sure what the max value should be
         maxSubView->setWidgetWidth (10);
         maxSubView->setViewLocation(1, 2);
 
@@ -119,8 +115,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         minWidth->setDefaultValue(325);
         minWidth->setEditorSetting(false);
         minWidth->setColumnSpan (1);
-        //minWidth->setMinimum (50);
-        minWidth->setSpecialValueText("50"); // workaround for setMinimum
+        minWidth->setMinimum (50);
         minWidth->setMaximum (10000); // FIXME: not sure what the max value should be
         minWidth->setWidgetWidth (10);
         minWidth->setViewLocation(2, 2);
@@ -128,7 +123,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         Setting *reuse = createSetting (Type_CheckBox, section, "reuse");
         reuse->setDeclaredValues(QStringList() << "true" << "false");
         reuse->setDefaultValue("true");
-        reuse->setEditorSetting(true);
+        reuse->setEditorSetting(false);
         reuse->setSpecialValueText("Reuse SubView");
         reuse->setWidgetWidth(25);
         reuse->setColumnSpan (3);
@@ -147,8 +142,8 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         width->setDefaultValues (QStringList() << "1024");
         height->setDefaultValues (QStringList() << "768");
 
-        width->setEditorSetting (true);
-        height->setEditorSetting (true);
+        width->setEditorSetting (false);
+        height->setEditorSetting (false);
 
         height->setViewLocation (2,2);
         width->setViewLocation (2,1);
@@ -191,8 +186,8 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         rsd->setDeclaredValues (values);
         ritd->setDeclaredValues (values);
 
-        rsd->setEditorSetting (true);
-        ritd->setEditorSetting (true);
+        rsd->setEditorSetting (false);
+        ritd->setEditorSetting (false);
     }
 
     section = "Proxy Selection Test";
@@ -407,14 +402,14 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 }
 
 // if the key is not found create one with a defaut value
-QString CSMSettings::UserSettings::setting(const QString &viewKey, const QStringList &list)
+QString CSMSettings::UserSettings::setting(const QString &viewKey, const QString &value)
 {
     if(mSettingDefinitions->contains(viewKey))
         return settingValue(viewKey);
-    else if(!list.empty())
+    else if(value != QString())
     {
-        mSettingDefinitions->setValue (viewKey, list);
-        return list.at(0);
+        mSettingDefinitions->setValue (viewKey, QStringList() << value);
+        return value;
     }
 
     return QString();
