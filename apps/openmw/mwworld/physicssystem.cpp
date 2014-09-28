@@ -385,7 +385,6 @@ namespace MWWorld
                     if(tracer.mFraction >= 1.0f)
                     {
                         newPosition = tracer.mEndPos; // ok to move, so set newPosition
-                        remainingTime *= (1.0f-tracer.mFraction); // FIXME: remainingTime is no longer used so don't set it?
                         break;
                     }
                     else
@@ -406,7 +405,6 @@ namespace MWWorld
                     // precision can be lost due to any math Bullet does internally). Since we
                     // aren't performing any collision detection, we want to reject the next
                     // position, so that we don't slowly move inside another object.
-                    remainingTime *= (1.0f-tracer.mFraction); // FIXME: remainingTime is no longer used so don't set it?
                     break;
                 }
 

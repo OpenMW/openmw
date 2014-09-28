@@ -197,8 +197,17 @@ namespace Gui
             MyGUI::IntCoord widgetCoord;
             widgetCoord.left = curX;
             widgetCoord.top = mPadding + (getSize().height-mPadding*2 - height) / 2;
-            int width = sizes[i].second ? sizes[i].first.width + (getSize().width-mPadding*2 - total_width)/h_stretched_count
-                                        : sizes[i].first.width;
+
+            int width = 0;
+            if (sizes[i].second)
+            {
+                if (h_stretched_count == 0)
+                    throw std::logic_error("unexpected");
+                width = sizes[i].first.width + (getSize().width-mPadding*2 - total_width)/h_stretched_count;
+            }
+            else
+                width = sizes[i].first.width;
+
             widgetCoord.width = width;
             widgetCoord.height = height;
             w->setCoord(widgetCoord);
@@ -334,8 +343,17 @@ namespace Gui
             MyGUI::IntCoord widgetCoord;
             widgetCoord.top = curY;
             widgetCoord.left = mPadding + (getSize().width-mPadding*2 - width) / 2;
-            int height = sizes[i].second ? sizes[i].first.height + (getSize().height-mPadding*2 - total_height)/v_stretched_count
-                                        : sizes[i].first.height;
+
+            int height = 0;
+            if (sizes[i].second)
+            {
+                if (v_stretched_count == 0)
+                    throw std::logic_error("unexpected");
+                height = sizes[i].first.height + (getSize().height-mPadding*2 - total_height)/v_stretched_count;
+            }
+            else
+                height = sizes[i].first.height;
+
             widgetCoord.height = height;
             widgetCoord.width = width;
             w->setCoord(widgetCoord);

@@ -1045,7 +1045,7 @@ namespace MWWorld
 
         CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL; // currCell == NULL should only happen for player, during initial startup
         bool isPlayer = ptr == mPlayer->getPlayer();
-        bool haveToMove = isPlayer || mWorldScene->isCellActive(*currCell);
+        bool haveToMove = isPlayer || (currCell && mWorldScene->isCellActive(*currCell));
 
         if (currCell != newCell)
         {
