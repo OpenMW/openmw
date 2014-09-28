@@ -397,4 +397,10 @@ namespace CSVRender
         else if (mode=="bright")
             setLighting (&mLightingBright);
     }
+
+    void SceneWidget::updateUserSetting (const QString &key, const QStringList &list)
+    {
+        if(key.contains(QRegExp("^\\b(Objects|Shader|Scene)", Qt::CaseInsensitive)))
+            flagAsModified();
+    }
 }

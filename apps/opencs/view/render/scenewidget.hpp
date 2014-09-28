@@ -110,6 +110,10 @@ namespace CSVRender
             LightingNight mLightingNight;
             LightingBright mLightingBright;
 
+        public slots:
+
+            void updateUserSetting (const QString &key, const QStringList &list);
+
         private slots:
 
             void update();
