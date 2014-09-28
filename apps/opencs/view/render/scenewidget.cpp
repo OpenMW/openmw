@@ -412,7 +412,7 @@ namespace CSVRender
         if(key.contains(QRegExp("^\\b(Objects|Shader|Scene)", Qt::CaseInsensitive)))
             flagAsModified();
 
-        if(key == "Objects/far clip distance" && !list.empty())
+        if(key == "Scene/far clip distance" && !list.empty())
         {
             if(mCamera->getFarClipDistance() != list.at(0).toFloat())
                 mCamera->setFarClipDistance(list.at(0).toFloat());

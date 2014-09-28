@@ -56,7 +56,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         numLights->setDefaultValue(8);
         numLights->setEditorSetting(true);
         numLights->setColumnSpan (1);
-        numLights->setMinimum (2);
+        numLights->setMinimum (0);
         numLights->setMaximum (100); // FIXME: not sure what the max value should be
         numLights->setWidgetWidth (10);
         numLights->setViewLocation(1, 2);
@@ -79,6 +79,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         fastFactor->setEditorSetting(true);
         fastFactor->setColumnSpan (1);
         fastFactor->setMinimum (1);
+        fastFactor->setSpecialValueText ("1"); // FIXME: workaround
         fastFactor->setMaximum (100); // FIXME: not sure what the max value should be
         fastFactor->setWidgetWidth (10);
         fastFactor->setViewLocation(1, 2);
@@ -109,6 +110,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         maxSubView->setEditorSetting(true);
         maxSubView->setColumnSpan (1);
         maxSubView->setMinimum (1);
+        maxSubView->setSpecialValueText ("1");
         maxSubView->setMaximum (256); // FIXME: not sure what the max value should be
         maxSubView->setWidgetWidth (10);
         maxSubView->setViewLocation(1, 2);
@@ -118,6 +120,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         minWidth->setEditorSetting(true);
         minWidth->setColumnSpan (1);
         minWidth->setMinimum (50);
+        minWidth->setSpecialValueText ("50");
         minWidth->setMaximum (10000); // FIXME: not sure what the max value should be
         minWidth->setWidgetWidth (10);
         minWidth->setViewLocation(2, 2);
