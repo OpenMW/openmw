@@ -415,34 +415,17 @@ namespace CSVRender
         // minimise unnecessary ogre window creation by updating only when there is a change
         if(key == "Video/antialiasing")
         {
-            std::string result;
-
-            Ogre::ConfigOptionMap& renderOpt =
-                    Ogre::Root::getSingleton().getRenderSystem()->getConfigOptions();
-
-            Ogre::ConfigOptionMap::iterator it = renderOpt.begin();
-
-            for(; it != renderOpt.end(); ++it)
-            {
-                if(it->first == "FSAA")
-                    result = it->second.currentValue;
-            }
-
-            QString antialiasing = "0";
+            unsigned int aa = mWindow->getFSAA();
+            unsigned int antialiasing = 0;
             if(!list.empty())
             {
-                antialiasing = list.at(0);
-
-                if(antialiasing == "MSAA 16")     antialiasing = "16";
-                else if(antialiasing == "MSAA 8") antialiasing = "8";
-                else if(antialiasing == "MSAA 4") antialiasing = "4";
-                else if(antialiasing == "MSAA 2") antialiasing = "2";
+                if(list.at(0) == "MSAA 16")     antialiasing = 16;
+                else if(list.at(0) == "MSAA 8") antialiasing = 8;
+                else if(list.at(0) == "MSAA 4") antialiasing = 4;
+                else if(list.at(0) == "MSAA 2") antialiasing = 2;
             }
-
-            if(result != antialiasing.toStdString())
-            {
+            if(aa != antialiasing)
                 updateOgreWindow();
-            }
         }
     }
 }
