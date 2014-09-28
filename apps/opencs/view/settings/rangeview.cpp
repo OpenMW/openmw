@@ -129,8 +129,8 @@ void CSVSettings::RangeView::buildSpinBox (CSMSettings::Setting *setting)
     mRangeWidget->setProperty ("wrapping", setting->wrapping());
     dynamic_cast<QAbstractSpinBox *> (mRangeWidget)->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
 
-    if(setting->type()  == CSMSettings::Type_SpinBox)
-        dynamic_cast<QSpinBox *> (mRangeWidget)->setValue (setting->defaultValues().at(0).toInt()); // FIXME: can there be more than one?
+    if(setting->type()  == CSMSettings::Type_SpinBox && setting->declaredValues().isEmpty())
+        dynamic_cast<QSpinBox *> (mRangeWidget)->setValue (setting->defaultValues().at(0).toInt());
 }
 
 void CSVSettings::RangeView::slotUpdateView (int value)

@@ -192,6 +192,17 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         ritd->setEditorSetting (true);
     }
 
+    section = "Video";
+    {
+        QString defaultValue = "None";
+        QStringList values = QStringList()
+                        << defaultValue << "MSAA 2" << "MSAA 4" << "MSAA 8" << "MSAA 16";
+        Setting *antialiasing = createSetting (Type_SpinBox, section, "antialiasing");
+        antialiasing->setDeclaredValues (values);
+        antialiasing->setEditorSetting (true);
+        antialiasing->setWidgetWidth(15);
+    }
+
     section = "Proxy Selection Test";
     {
         /******************************************************************
@@ -483,7 +494,7 @@ void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
         sh::Factory::getInstance ().setShadersEnabled (list.at(0) == "true" ? true : false);
     }
 
-    emit userSettingUpdated (settingKey, list); // TODO: isn't this circular?
+    emit userSettingUpdated (settingKey, list);
 }
 
 CSMSettings::Setting *CSMSettings::UserSettings::findSetting

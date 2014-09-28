@@ -128,7 +128,16 @@ namespace CSVRender
 
         params.insert(std::make_pair("externalWindowHandle",  windowHandle.str()));
         params.insert(std::make_pair("title", windowTitle.str()));
-        params.insert(std::make_pair("FSAA", "0")); // TODO setting
+
+        std::string antialiasing =
+            CSMSettings::UserSettings::instance().settingValue("Video/antialiasing").toStdString();
+        if(antialiasing == "MSAA 16")     antialiasing = "16";
+        else if(antialiasing == "MSAA 8") antialiasing = "8";
+        else if(antialiasing == "MSAA 4") antialiasing = "4";
+        else if(antialiasing == "MSAA 2") antialiasing = "2";
+        else                              antialiasing = "0";
+        params.insert(std::make_pair("FSAA", antialiasing));
+
         params.insert(std::make_pair("vsync", "false")); // TODO setting
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
         params.insert(std::make_pair("macAPI", "cocoa"));
@@ -402,5 +411,38 @@ namespace CSVRender
     {
         if(key.contains(QRegExp("^\\b(Objects|Shader|Scene)", Qt::CaseInsensitive)))
             flagAsModified();
+
+        // minimise unnecessary ogre window creation by updating only when there is a change
+        if(key == "Video/antialiasing")
+        {
+            std::string result;
+
+            Ogre::ConfigOptionMap& renderOpt =
+                    Ogre::Root::getSingleton().getRenderSystem()->getConfigOptions();
+
+            Ogre::ConfigOptionMap::iterator it = renderOpt.begin();
+
+            for(; it != renderOpt.end(); ++it)
+            {
+                if(it->first == "FSAA")
+                    result = it->second.currentValue;
+            }
+
+            QString antialiasing = "0";
+            if(!list.empty())
+            {
+                antialiasing = list.at(0);
+
+                if(antialiasing == "MSAA 16")     antialiasing = "16";
+                else if(antialiasing == "MSAA 8") antialiasing = "8";
+                else if(antialiasing == "MSAA 4") antialiasing = "4";
+                else if(antialiasing == "MSAA 2") antialiasing = "2";
+            }
+
+            if(result != antialiasing.toStdString())
+            {
+                updateOgreWindow();
+            }
+        }
     }
 }
