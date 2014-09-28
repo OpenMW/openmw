@@ -72,6 +72,7 @@
 #include "backgroundimage.hpp"
 #include "itemwidget.hpp"
 #include "screenfader.hpp"
+#include "debugwindow.hpp"
 
 namespace MWGui
 {
@@ -120,6 +121,7 @@ namespace MWGui
       , mVideoBackground(NULL)
       , mVideoWidget(NULL)
       , mScreenFader(NULL)
+      , mDebugWindow(NULL)
       , mTranslationDataStorage (translationDataStorage)
       , mCharGen(NULL)
       , mInputBlocker(NULL)
@@ -266,6 +268,7 @@ namespace MWGui
         mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
         trackWindow(mCompanionWindow, "companion");
         mScreenFader = new ScreenFader();
+        mDebugWindow = new DebugWindow();
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"Overlay");
 
@@ -357,6 +360,7 @@ namespace MWGui
         delete mRecharge;
         delete mCompanionWindow;
         delete mScreenFader;
+        delete mDebugWindow;
 
         cleanupGarbage();
 
@@ -859,6 +863,8 @@ namespace MWGui
         mCompanionWindow->onFrame();
 
         mScreenFader->update(frameDuration);
+
+        mDebugWindow->onFrame(frameDuration);
     }
 
     void WindowManager::changeCell(MWWorld::CellStore* cell)
@@ -1747,6 +1753,11 @@ namespace MWGui
                 _data = text;
         }
         SDL_free(text);
+    }
+
+    void WindowManager::toggleDebugWindow()
+    {
+        mDebugWindow->setVisible(!mDebugWindow->isVisible());
     }
 
 }

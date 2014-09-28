@@ -279,6 +279,9 @@ namespace MWInput
             case A_ToggleHUD:
                 MWBase::Environment::get().getWindowManager()->toggleGui();
                 break;
+            case A_ToggleDebug:
+                MWBase::Environment::get().getWindowManager()->toggleDebugWindow();
+                break;
             case A_QuickSave:
                 quickSave();
                 break;
@@ -902,6 +905,7 @@ namespace MWInput
         defaultKeyBindings[A_QuickKey10] = SDL_SCANCODE_0;
         defaultKeyBindings[A_Screenshot] = SDL_SCANCODE_F12;
         defaultKeyBindings[A_ToggleHUD] = SDL_SCANCODE_F11;
+        defaultKeyBindings[A_ToggleDebug] = SDL_SCANCODE_F10;
         defaultKeyBindings[A_AlwaysRun] = SDL_SCANCODE_CAPSLOCK;
         defaultKeyBindings[A_QuickSave] = SDL_SCANCODE_F5;
         defaultKeyBindings[A_QuickLoad] = SDL_SCANCODE_F9;

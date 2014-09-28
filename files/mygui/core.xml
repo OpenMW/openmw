@@ -22,6 +22,7 @@
         <List file="openmw_dialogue_window_skin.xml" />
         <List file="openmw_scroll_skin.xml" />
         <List file="openmw_settings.xml" />
+        <List file="openmw_debug_window.skin.xml" />
     </MyGUI>
 </MyGUI>
 

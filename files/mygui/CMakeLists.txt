@@ -83,6 +83,8 @@ set(MYGUI_FILES
     openmw_recharge_dialog.layout
     openmw_screen_fader.layout
     openmw_edit_note.layout
+    openmw_debug_window.layout
+    openmw_debug_window.skin.xml
     DejaVuLGCSansMono.ttf
     ../launcher/images/openmw.png
     OpenMWResourcePlugin.xml
