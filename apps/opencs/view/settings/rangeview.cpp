@@ -36,8 +36,11 @@ CSVSettings::RangeView::RangeView (CSMSettings::Setting *setting,
         break;
     }
 
-    mRangeWidget->setFixedWidth (widgetWidth (setting->widgetWidth()));
-    mRangeWidget->setObjectName (setting->name());
+    if(mRangeWidget)
+    {
+        mRangeWidget->setFixedWidth (widgetWidth (setting->widgetWidth()));
+        mRangeWidget->setObjectName (setting->name());
+    }
 
     addWidget (mRangeWidget);
 }
@@ -75,13 +78,16 @@ void CSVSettings::RangeView::buildSlider (CSMSettings::Setting *setting)
         break;
     }
 
-    mRangeWidget->setProperty ("minimum", setting->minimum());
-    mRangeWidget->setProperty ("maximum", setting->maximum());
-    mRangeWidget->setProperty ("tracking", false);
-    mRangeWidget->setProperty ("singleStep", setting->singleStep());
+    if(mRangeWidget)
+    {
+        mRangeWidget->setProperty ("minimum", setting->minimum());
+        mRangeWidget->setProperty ("maximum", setting->maximum());
+        mRangeWidget->setProperty ("tracking", false);
+        mRangeWidget->setProperty ("singleStep", setting->singleStep());
 
-    connect (mRangeWidget, SIGNAL (valueChanged (int)),
-             this, SLOT (slotUpdateView (int)));
+        connect (mRangeWidget, SIGNAL (valueChanged (int)),
+                 this, SLOT (slotUpdateView (int)));
+    }
 }
 
 void CSVSettings::RangeView::buildSpinBox (CSMSettings::Setting *setting)

@@ -43,7 +43,7 @@ CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
         break;
         }
 
-        if(mType != CSMSettings::Type_CheckBox || mButtons.empty())
+        if(button && (mType != CSMSettings::Type_CheckBox || mButtons.empty()))
         {
             connect (button, SIGNAL (clicked (bool)),
                     this, SLOT (slotToggled (bool)));
