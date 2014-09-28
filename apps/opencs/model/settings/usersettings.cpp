@@ -12,6 +12,8 @@
 #include <QTextCodec>
 #include <QDebug>
 
+#include <extern/shiny/Main/Factory.hpp>
+
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */
@@ -104,7 +106,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
     {
         Setting *maxSubView = createSetting (Type_SpinBox, section, "max subviews");
         maxSubView->setDefaultValue(256);
-        maxSubView->setEditorSetting(false);
+        maxSubView->setEditorSetting(true);
         maxSubView->setColumnSpan (1);
         maxSubView->setMinimum (1);
         maxSubView->setMaximum (256); // FIXME: not sure what the max value should be
@@ -113,7 +115,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         Setting *minWidth = createSetting (Type_SpinBox, section, "minimum width");
         minWidth->setDefaultValue(325);
-        minWidth->setEditorSetting(false);
+        minWidth->setEditorSetting(true);
         minWidth->setColumnSpan (1);
         minWidth->setMinimum (50);
         minWidth->setMaximum (10000); // FIXME: not sure what the max value should be
@@ -123,7 +125,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         Setting *reuse = createSetting (Type_CheckBox, section, "reuse");
         reuse->setDeclaredValues(QStringList() << "true" << "false");
         reuse->setDefaultValue("true");
-        reuse->setEditorSetting(false);
+        reuse->setEditorSetting(true);
         reuse->setSpecialValueText("Reuse SubView");
         reuse->setWidgetWidth(25);
         reuse->setColumnSpan (3);
@@ -142,8 +144,8 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         width->setDefaultValues (QStringList() << "1024");
         height->setDefaultValues (QStringList() << "768");
 
-        width->setEditorSetting (false);
-        height->setEditorSetting (false);
+        width->setEditorSetting (true);
+        height->setEditorSetting (true);
 
         height->setViewLocation (2,2);
         width->setViewLocation (2,1);
@@ -186,8 +188,8 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         rsd->setDeclaredValues (values);
         ritd->setDeclaredValues (values);
 
-        rsd->setEditorSetting (false);
-        ritd->setEditorSetting (false);
+        rsd->setEditorSetting (true);
+        ritd->setEditorSetting (true);
     }
 
     section = "Proxy Selection Test";
@@ -470,7 +472,18 @@ void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
 {
     mSettingDefinitions->setValue (settingKey ,list);
 
-    emit userSettingUpdated (settingKey, list);
+    if(settingKey == "Objects/num_lights"
+            && mSettingDefinitions->value(settingKey).toString() != list.at(0))
+    {
+        sh::Factory::getInstance ().setGlobalSetting ("num_lights", list.at(0).toStdString());
+    }
+    else if(settingKey == "Objects/shaders"
+            && mSettingDefinitions->value(settingKey).toString() != list.at(0))
+    {
+        sh::Factory::getInstance ().setShadersEnabled (list.at(0) == "true" ? true : false);
+    }
+
+    emit userSettingUpdated (settingKey, list); // TODO: isn't this circular?
 }
 
 CSMSettings::Setting *CSMSettings::UserSettings::findSetting
