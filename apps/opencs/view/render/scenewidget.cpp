@@ -48,7 +48,7 @@ namespace CSVRender
 
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
 
-        int farClipDist = userSettings.setting("Scene/far clip distance", QString("300000")).toInt();
+        float farClipDist = userSettings.setting("Scene/far clip distance", QString("300000")).toFloat();
         mCamera->setFarClipDistance (farClipDist);
 
         mFastFactor = userSettings.setting("Scene/fast factor", QString("4")).toInt();
@@ -411,6 +411,12 @@ namespace CSVRender
     {
         if(key.contains(QRegExp("^\\b(Objects|Shader|Scene)", Qt::CaseInsensitive)))
             flagAsModified();
+
+        if(key == "Objects/far clip distance" && !list.empty())
+        {
+            if(mCamera->getFarClipDistance() != list.at(0).toFloat())
+                mCamera->setFarClipDistance(list.at(0).toFloat());
+        }
 
         // minimise unnecessary ogre window creation by updating only when there is a change
         if(key == "Video/antialiasing")

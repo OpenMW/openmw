@@ -83,7 +83,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         fastFactor->setWidgetWidth (10);
         fastFactor->setViewLocation(1, 2);
 
-        Setting *farClipDist = createSetting (Type_SpinBox, section, "far clip distance");
+        Setting *farClipDist = createSetting (Type_DoubleSpinBox, section, "far clip distance");
         farClipDist->setDefaultValue(300000);
         farClipDist->setEditorSetting(true);
         farClipDist->setColumnSpan (1);
@@ -483,15 +483,13 @@ void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
 {
     mSettingDefinitions->setValue (settingKey ,list);
 
-    if(settingKey == "Objects/num_lights"
-            && mSettingDefinitions->value(settingKey).toString() != list.at(0))
+    if(settingKey == "Objects/num_lights" && !list.empty())
     {
         sh::Factory::getInstance ().setGlobalSetting ("num_lights", list.at(0).toStdString());
     }
-    else if(settingKey == "Objects/shaders"
-            && mSettingDefinitions->value(settingKey).toString() != list.at(0))
+    else if(settingKey == "Objects/shaders" && !list.empty())
     {
-        sh::Factory::getInstance ().setShadersEnabled (list.at(0) == "true" ? true : false);
+        sh::Factory::getInstance ().setShadersEnabled (list.at(0).toStdString() == "true" ? true : false);
     }
 
     emit userSettingUpdated (settingKey, list);
