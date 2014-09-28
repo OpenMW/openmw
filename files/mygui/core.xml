@@ -15,12 +15,12 @@
         <List file="openmw_progress.skin.xml" />
         <List file="openmw_hud_energybar.skin.xml" />
         <List file="openmw_hud_box.skin.xml" />
-        <List file="openmw_mainmenu_skin.xml" />
+        <List file="openmw_mainmenu.skin.xml" />
         <List file="openmw_console.skin.xml" />
-        <List file="openmw_journal_skin.xml" />
-        <List file="openmw_map_window_skin.xml" />
-        <List file="openmw_dialogue_window_skin.xml" />
-        <List file="openmw_scroll_skin.xml" />
+        <List file="openmw_journal.skin.xml" />
+        <List file="openmw_map_window.skin.xml" />
+        <List file="openmw_dialogue_window.skin.xml" />
+        <List file="openmw_scroll.skin.xml" />
         <List file="openmw_settings.xml" />
         <List file="openmw_debug_window.skin.xml" />
     </MyGUI>

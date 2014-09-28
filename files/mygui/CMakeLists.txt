@@ -28,7 +28,7 @@ set(MYGUI_FILES
     openmw_container_window.layout
     openmw_count_window.layout
     openmw_dialogue_window.layout
-    openmw_dialogue_window_skin.xml
+    openmw_dialogue_window.skin.xml
     openmw_edit.skin.xml
     openmw_font.xml
     openmw_hud_box.skin.xml
@@ -38,19 +38,19 @@ set(MYGUI_FILES
     openmw_interactive_messagebox.layout
     openmw_inventory_window.layout
     openmw_journal.layout
-    openmw_journal_skin.xml
+    openmw_journal.skin.xml
     openmw_layers.xml
     openmw_list.skin.xml
     openmw_mainmenu.layout
-    openmw_mainmenu_skin.xml
+    openmw_mainmenu.skin.xml
     openmw_map_window.layout
-    openmw_map_window_skin.xml
+    openmw_map_window.skin.xml
     openmw_messagebox.layout
     openmw_pointer.xml
     openmw_progress.skin.xml
     openmw_resources.xml
     openmw_scroll.layout
-    openmw_scroll_skin.xml
+    openmw_scroll.skin.xml
     openmw_settings_window.layout
     openmw_settings.xml
     openmw_spell_window.layout
