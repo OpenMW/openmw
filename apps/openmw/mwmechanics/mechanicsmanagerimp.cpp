@@ -567,12 +567,12 @@ namespace MWMechanics
         const MWMechanics::NpcStats &playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-        static float fDispRaceMod = gmst.find("fDispRaceMod")->getFloat();
+        static const float fDispRaceMod = gmst.find("fDispRaceMod")->getFloat();
         if (Misc::StringUtils::ciEqual(npc->mBase->mRace, player->mBase->mRace))
             x += fDispRaceMod;
 
-        static float fDispPersonalityMult = gmst.find("fDispPersonalityMult")->getFloat();
-        static float fDispPersonalityBase = gmst.find("fDispPersonalityBase")->getFloat();
+        static const float fDispPersonalityMult = gmst.find("fDispPersonalityMult")->getFloat();
+        static const float fDispPersonalityBase = gmst.find("fDispPersonalityBase")->getFloat();
         x += fDispPersonalityMult * (playerStats.getAttribute(ESM::Attribute::Personality).getModified() - fDispPersonalityBase);
 
         float reaction = 0;
@@ -610,20 +610,20 @@ namespace MWMechanics
             rank = 0;
         }
 
-        static float fDispFactionRankMult = gmst.find("fDispFactionRankMult")->getFloat();
-        static float fDispFactionRankBase = gmst.find("fDispFactionRankBase")->getFloat();
-        static float fDispFactionMod = gmst.find("fDispFactionMod")->getFloat();
+        static const float fDispFactionRankMult = gmst.find("fDispFactionRankMult")->getFloat();
+        static const float fDispFactionRankBase = gmst.find("fDispFactionRankBase")->getFloat();
+        static const float fDispFactionMod = gmst.find("fDispFactionMod")->getFloat();
         x += (fDispFactionRankMult * rank
             + fDispFactionRankBase)
             * fDispFactionMod * reaction;
 
-        static float fDispCrimeMod = gmst.find("fDispCrimeMod")->getFloat();
-        static float fDispDiseaseMod = gmst.find("fDispDiseaseMod")->getFloat();
+        static const float fDispCrimeMod = gmst.find("fDispCrimeMod")->getFloat();
+        static const float fDispDiseaseMod = gmst.find("fDispDiseaseMod")->getFloat();
         x -= fDispCrimeMod * playerStats.getBounty();
         if (playerStats.hasCommonDisease() || playerStats.hasBlightDisease())
             x += fDispDiseaseMod;
 
-        static float fDispWeaponDrawn = gmst.find("fDispWeaponDrawn")->getFloat();
+        static const float fDispWeaponDrawn = gmst.find("fDispWeaponDrawn")->getFloat();
         if (playerStats.getDrawState() == MWMechanics::DrawState_Weapon)
             x += fDispWeaponDrawn;
 

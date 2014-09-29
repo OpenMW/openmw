@@ -475,8 +475,8 @@ namespace MWMechanics
 
         // restore fatigue
         const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-        static float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat ();
-        static float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat ();
+        static const float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat ();
+        static const float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat ();
 
         float x = fFatigueReturnBase + fFatigueReturnMult * endurance;
 
