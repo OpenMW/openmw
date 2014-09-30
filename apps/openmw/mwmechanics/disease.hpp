@@ -8,6 +8,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/spells.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
 namespace MWMechanics
@@ -25,6 +26,8 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                     "fDiseaseXferChance")->getFloat();
 
+        MagicEffects& actorEffects = actor.getClass().getCreatureStats(actor).getMagicEffects();
+
         Spells& spells = carrier.getClass().getCreatureStats(carrier).getSpells();
         for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
@@ -35,18 +38,15 @@ namespace MWMechanics
 
             float resist = 0.f;
             if (spells.hasCorprusEffect(spell))
-                resist = 1.f - 0.01 * (actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::ResistCorprusDisease).getMagnitude()
-                                        - actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::WeaknessToCorprusDisease).getMagnitude());
+                resist = getEffectResistanceAttribute(ESM::MagicEffect::Corprus,&actorEffects);
             else if (spell->mData.mType == ESM::Spell::ST_Disease)
-                resist = 1.f - 0.01 * (actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::ResistCommonDisease).getMagnitude()
-                                        - actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::WeaknessToCommonDisease).getMagnitude());
+                resist = actorEffects.getCommonDiseaseResistance();
             else if (spell->mData.mType == ESM::Spell::ST_Blight)
-                resist = 1.f - 0.01 * (actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::ResistBlightDisease).getMagnitude()
-                                        - actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::WeaknessToBlightDisease).getMagnitude());
+                resist = actorEffects.getBlightDiseaseResistance();
             else
                 continue;
 
-            int x = fDiseaseXferChance * 100 * resist;
+            int x = fDiseaseXferChance * (100.f - resist);
             float roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 10000; // [0, 9999]
 
             if (roll < x)

@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include <components/esm/effectlist.hpp>
+#include <components/esm/loadmgef.hpp>
 #include <components/esm/magiceffects.hpp>
 
 namespace MWMechanics
@@ -213,5 +214,17 @@ namespace MWMechanics
         {
             mCollection[EffectKey(it->first)].setBase(it->second);
         }
+    }
+
+    float MagicEffects::getCommonDiseaseResistance() const
+    {
+        return (get(ESM::MagicEffect::ResistCommonDisease).getMagnitude() -
+                get(ESM::MagicEffect::WeaknessToCommonDisease).getMagnitude());
+    }
+
+    float MagicEffects::getBlightDiseaseResistance() const
+    {
+        return (get(ESM::MagicEffect::ResistBlightDisease).getMagnitude() -
+                get(ESM::MagicEffect::WeaknessToBlightDisease).getMagnitude());
     }
 }

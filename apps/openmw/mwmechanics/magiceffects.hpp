@@ -112,6 +112,9 @@ namespace MWMechanics
 
             static MagicEffects diff (const MagicEffects& prev, const MagicEffects& now);
             ///< Return changes from \a prev to \a now.
+
+            float getCommonDiseaseResistance() const;
+            float getBlightDiseaseResistance() const;
     };
 }
 
