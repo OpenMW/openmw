@@ -1,7 +1,6 @@
 #include "renderingmanager.hpp"
 
 #include <cassert>
-#include <iostream>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>

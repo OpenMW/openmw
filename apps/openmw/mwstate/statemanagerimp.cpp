@@ -1,8 +1,6 @@
 
 #include "statemanagerimp.hpp"
 
-#include <iostream>
-
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/cellid.hpp>

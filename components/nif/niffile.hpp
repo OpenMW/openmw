@@ -5,20 +5,7 @@
 
 #include <stdexcept>
 #include <vector>
-<<<<<<< HEAD
-#include <cassert>
-#include <typeinfo>
 #include <iostream>
-
-#include <boost/weak_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/detail/endian.hpp>
-
-#include <stdint.h>
-=======
-#include <iostream>
->>>>>>> master
 
 #include "record.hpp"
 

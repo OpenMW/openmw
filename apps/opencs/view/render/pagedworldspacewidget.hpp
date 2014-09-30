@@ -60,7 +60,6 @@ namespace CSVRender
 
             void displayCellCoord(bool display);
 
-
             /// \return Drop handled?
             virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
                 DropType type);

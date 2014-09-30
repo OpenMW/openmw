@@ -107,7 +107,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().getByName("CellBillboardTexture" + iter->getId(mWorldspace));
             if (texture.isNull())
             {
-                texture = Ogre::TextureManager::getSingleton().createManual("CellBillboardTexture" + iter->getId(mWorldspace), 
+                texture = Ogre::TextureManager::getSingleton().createManual("CellBillboardTexture" + iter->getId(mWorldspace),
                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                     Ogre::TEX_TYPE_2D, 1024, 1024, 5, Ogre::PF_X8R8G8B8, Ogre::TU_DEFAULT);
 

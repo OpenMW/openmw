@@ -1,7 +1,6 @@
 
 #include "containerstore.hpp"
 
-#include <iostream>
 #include <cassert>
 #include <typeinfo>
 #include <stdexcept>

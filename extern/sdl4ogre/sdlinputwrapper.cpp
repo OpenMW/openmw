@@ -4,7 +4,6 @@
 #include <OgrePlatform.h>
 #include <OgreRoot.h>
 
-#include <iostream>
 
 namespace SFO
 {
