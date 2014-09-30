@@ -190,6 +190,17 @@ namespace CSMWorld
             { ColumnId_SoundGeneratorType, "Sound Generator Type" },
             { ColumnId_AllowSpellmaking, "Allow Spellmaking" },
             { ColumnId_AllowEnchanting, "Allow Enchanting" },
+            { ColumnId_BaseCost, "Base Cost" },
+            { ColumnId_School, "School" },
+            { ColumnId_Particle, "Particle" },
+            { ColumnId_CastingObject, "Casting Object" },
+            { ColumnId_HitObject, "Hit Object" },
+            { ColumnId_AreaObject, "Area Object" },
+            { ColumnId_BoltObject, "Bolt Object" },
+            { ColumnId_CastingSound, "Casting Sound" },
+            { ColumnId_HitSound, "Hit Sound" },
+            { ColumnId_AreaSound, "Area Sound" },
+            { ColumnId_BoltSound, "Bolt Sound" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
@@ -337,6 +348,11 @@ namespace
         "Land", 0
     };
 
+    static const char *sSchools[] =
+    {
+        "Alteration", "Conjuration", "Destruction", "Illusion", "Mysticism", "Restoration", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -358,6 +374,7 @@ namespace
             case CSMWorld::Columns::ColumnId_BodyPartType: return sBodyPartTypes;
             case CSMWorld::Columns::ColumnId_MeshType: return sMeshTypes;
             case CSMWorld::Columns::ColumnId_SoundGeneratorType: return sSoundGeneratorType;
+            case CSMWorld::Columns::ColumnId_School: return sSchools;
 
             default: return 0;
         }

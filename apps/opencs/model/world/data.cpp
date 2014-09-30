@@ -230,7 +230,18 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mMagicEffects.addColumn (new StringIdColumn<ESM::MagicEffect>);
     mMagicEffects.addColumn (new RecordStateColumn<ESM::MagicEffect>);
     mMagicEffects.addColumn (new FixedRecordTypeColumn<ESM::MagicEffect> (UniversalId::Type_MagicEffect));
-
+    mMagicEffects.addColumn (new SchoolColumn<ESM::MagicEffect>);
+    mMagicEffects.addColumn (new BaseCostColumn<ESM::MagicEffect>);
+    mMagicEffects.addColumn (new EffectTextureColumn<ESM::MagicEffect> (Columns::ColumnId_Icon));
+    mMagicEffects.addColumn (new EffectTextureColumn<ESM::MagicEffect> (Columns::ColumnId_Particle));
+    mMagicEffects.addColumn (new EffectObjectColumn<ESM::MagicEffect> (Columns::ColumnId_CastingObject));
+    mMagicEffects.addColumn (new EffectObjectColumn<ESM::MagicEffect> (Columns::ColumnId_HitObject));
+    mMagicEffects.addColumn (new EffectObjectColumn<ESM::MagicEffect> (Columns::ColumnId_AreaObject));
+    mMagicEffects.addColumn (new EffectObjectColumn<ESM::MagicEffect> (Columns::ColumnId_BoltObject));
+    mMagicEffects.addColumn (new EffectSoundColumn<ESM::MagicEffect> (Columns::ColumnId_CastingSound));
+    mMagicEffects.addColumn (new EffectSoundColumn<ESM::MagicEffect> (Columns::ColumnId_HitSound));
+    mMagicEffects.addColumn (new EffectSoundColumn<ESM::MagicEffect> (Columns::ColumnId_AreaSound));
+    mMagicEffects.addColumn (new EffectSoundColumn<ESM::MagicEffect> (Columns::ColumnId_BoltSound));
     mMagicEffects.addColumn (new FlagColumn<ESM::MagicEffect> (
         Columns::ColumnId_AllowSpellmaking, ESM::MagicEffect::AllowSpellmaking));
     mMagicEffects.addColumn (new FlagColumn<ESM::MagicEffect> (

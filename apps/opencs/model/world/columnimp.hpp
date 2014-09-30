@@ -1,7 +1,9 @@
 #ifndef CSM_WOLRD_COLUMNIMP_H
 #define CSM_WOLRD_COLUMNIMP_H
 
+#include <cassert>
 #include <sstream>
+#include <stdexcept>
 
 #include <boost/lexical_cast.hpp>
 
@@ -2064,6 +2066,205 @@ namespace CSMWorld
         }
     };
 
+    template<typename ESXRecordT>
+    struct BaseCostColumn : public Column<ESXRecordT>
+    {
+        BaseCostColumn() : Column<ESXRecordT> (Columns::ColumnId_BaseCost, ColumnBase::Display_Float) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mData.mBaseCost;
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+            record2.mData.mBaseCost = data.toFloat();
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct SchoolColumn : public Column<ESXRecordT>
+    {
+        SchoolColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_School, ColumnBase::Display_School)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mData.mSchool;
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mData.mSchool = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct EffectTextureColumn : public Column<ESXRecordT>
+    {
+        EffectTextureColumn (Columns::ColumnId columnId)
+        : Column<ESXRecordT> (columnId, ColumnBase::Display_Texture)
+        {
+            assert (this->mColumnId==Columns::ColumnId_Icon ||
+                this->mColumnId==Columns::ColumnId_Particle);
+        }
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (
+                (this->mColumnId==Columns::ColumnId_Icon ?
+                record.get().mIcon : record.get().mParticle).c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            (this->mColumnId==Columns::ColumnId_Icon ?
+                record2.mIcon : record2.mParticle)
+                = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct EffectObjectColumn : public Column<ESXRecordT>
+    {
+        EffectObjectColumn (Columns::ColumnId columnId)
+        : Column<ESXRecordT> (columnId, columnId==Columns::ColumnId_BoltObject ? ColumnBase::Display_Weapon : ColumnBase::Display_Static)
+        {
+            assert (this->mColumnId==Columns::ColumnId_CastingObject ||
+                this->mColumnId==Columns::ColumnId_HitObject ||
+                this->mColumnId==Columns::ColumnId_AreaObject ||
+                this->mColumnId==Columns::ColumnId_BoltObject);
+        }
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            const std::string *string = 0;
+
+            switch (this->mColumnId)
+            {
+                case Columns::ColumnId_CastingObject: string = &record.get().mCasting; break;
+                case Columns::ColumnId_HitObject: string = &record.get().mHit; break;
+                case Columns::ColumnId_AreaObject: string = &record.get().mArea; break;
+                case Columns::ColumnId_BoltObject: string = &record.get().mBolt; break;
+            }
+
+            if (!string)
+                throw std::logic_error ("Unsupported column ID");
+
+            return QString::fromUtf8 (string->c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            std::string *string = 0;
+
+            ESXRecordT record2 = record.get();
+
+            switch (this->mColumnId)
+            {
+                case Columns::ColumnId_CastingObject: string = &record2.mCasting; break;
+                case Columns::ColumnId_HitObject: string = &record2.mHit; break;
+                case Columns::ColumnId_AreaObject: string = &record2.mArea; break;
+                case Columns::ColumnId_BoltObject: string = &record2.mBolt; break;
+            }
+
+            if (!string)
+                throw std::logic_error ("Unsupported column ID");
+
+            *string = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct EffectSoundColumn : public Column<ESXRecordT>
+    {
+        EffectSoundColumn (Columns::ColumnId columnId)
+        : Column<ESXRecordT> (columnId, ColumnBase::Display_Sound)
+        {
+            assert (this->mColumnId==Columns::ColumnId_CastingSound ||
+                this->mColumnId==Columns::ColumnId_HitSound ||
+                this->mColumnId==Columns::ColumnId_AreaSound ||
+                this->mColumnId==Columns::ColumnId_BoltSound);
+        }
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            const std::string *string = 0;
+
+            switch (this->mColumnId)
+            {
+                case Columns::ColumnId_CastingSound: string = &record.get().mCastSound; break;
+                case Columns::ColumnId_HitSound: string = &record.get().mHitSound; break;
+                case Columns::ColumnId_AreaSound: string = &record.get().mAreaSound; break;
+                case Columns::ColumnId_BoltSound: string = &record.get().mBoltSound; break;
+            }
+
+            if (!string)
+                throw std::logic_error ("Unsupported column ID");
+
+            return QString::fromUtf8 (string->c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            std::string *string = 0;
+
+            ESXRecordT record2 = record.get();
+
+            switch (this->mColumnId)
+            {
+                case Columns::ColumnId_CastingSound: string = &record2.mCastSound; break;
+                case Columns::ColumnId_HitSound: string = &record2.mHitSound; break;
+                case Columns::ColumnId_AreaSound: string = &record2.mAreaSound; break;
+                case Columns::ColumnId_BoltSound: string = &record2.mBoltSound; break;
+            }
+
+            if (!string)
+                throw std::logic_error ("Unsupported column ID");
+
+            *string = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
 }
 
 #endif
