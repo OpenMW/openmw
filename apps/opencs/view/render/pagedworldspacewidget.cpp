@@ -138,7 +138,10 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             }
 
             Ogre::BillboardSet* mySet = getSceneManager()->createBillboardSet("CellBillboardSet" + iter->getId(mWorldspace));
-            //Ogre::Billboard* myBillboard = mySet->createBillboard(Ogre::Vector3(0, 0, 0));
+            // FIXME: myBillboard is currently not used but will be required later
+            // for manipulating the billboard (e.g. mouse events).  Ignore compiler
+            // warnings for now.
+            Ogre::Billboard* myBillboard = mySet->createBillboard(Ogre::Vector3(0, 0, 0));
             mySet->setDefaultDimensions(4000, 2000);
             mySet->setMaterial(material);
             mySet->setRenderQueueGroup(mySet->getRenderQueueGroup() + 1); // render the bilboard on top
