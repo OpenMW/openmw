@@ -93,9 +93,11 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             Ogre::SceneNode* billboardNode = getSceneManager()->getRootSceneNode()->createChildSceneNode("CellBillboardNode" + iter->getId(mWorldspace));
             billboardNode->setPosition(8192 * iter->getX() + 4096, 8192 * iter->getY() + 4096, 0);
 
-            QImage image(QSize(1024, 1024), QImage::Format::Format_RGB888);
+            QImage image(QSize(1024, 1024), QImage::Format_RGB888);
             QPainter painter(&image);
-            std::string text = std::to_string(iter->getX()) + ";" + std::to_string(iter->getY());
+            std::stringstream ss;
+            ss << iter->getX() << ";" << iter->getY();
+            std::string text = ss.str();
             QFont font = painter.font();
             font.setPointSize(256);
             painter.setFont(font);
@@ -113,8 +115,8 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
 
                 int w = 1024;
                 int h = 1024;
-                Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream((void*)image.constBits(), w*h*Ogre::PixelUtil::getNumElemBytes(Ogre::PixelFormat::PF_R8G8B8), false));
-                texture->loadRawData(stream, w, h, Ogre::PixelFormat::PF_R8G8B8);
+                Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream((void*)image.constBits(), w*h*Ogre::PixelUtil::getNumElemBytes(Ogre::PF_R8G8B8), false));
+                texture->loadRawData(stream, w, h, Ogre::PF_R8G8B8);
                 texture->load();
             }
 
