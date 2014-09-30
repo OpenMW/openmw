@@ -123,6 +123,7 @@ public:
 
     void setWaterHeight(const float height);
     bool toggleWater();
+    bool toggleWorld();
 
     /// Updates object rendering after cell change
     /// \param old Object reference in previous cell
@@ -266,6 +267,8 @@ private:
     MWRender::LocalMap* mLocalMap;
 
     MWRender::Shadows* mShadows;
+
+    bool mRenderWorld;
 };
 
 }

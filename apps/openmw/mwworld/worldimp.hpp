@@ -180,6 +180,7 @@ namespace MWWorld
             virtual void setWaterHeight(const float height);
 
             virtual bool toggleWater();
+            virtual bool toggleWorld();
 
             virtual void adjustSky();
 

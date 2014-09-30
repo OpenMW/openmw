@@ -63,6 +63,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     , mPhysicsEngine(engine)
     , mTerrain(NULL)
     , mEffectManager(NULL)
+    , mRenderWorld(true)
 {
     mActors = new MWRender::Actors(mRendering, this);
     mObjects = new MWRender::Objects(mRendering);
@@ -230,6 +231,15 @@ void RenderingManager::removeWater ()
 bool RenderingManager::toggleWater()
 {
     return mWater->toggle();
+}
+
+bool RenderingManager::toggleWorld()
+{
+    mRenderWorld = !mRenderWorld;
+
+    int visibilityMask = mRenderWorld ? ~int(0) : 0;
+    mRendering.getViewport()->setVisibilityMask(visibilityMask);
+    return mRenderWorld;
 }
 
 void RenderingManager::cellAdded (MWWorld::CellStore *store)

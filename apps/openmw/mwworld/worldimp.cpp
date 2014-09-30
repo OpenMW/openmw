@@ -1663,6 +1663,11 @@ namespace MWWorld
         return mRendering->toggleWater();
     }
 
+    bool World::toggleWorld()
+    {
+        return mRendering->toggleWorld();
+    }
+
     void World::PCDropped (const Ptr& item)
     {
         std::string script = item.getClass().getScript(item);
