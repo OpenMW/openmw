@@ -40,7 +40,7 @@
 
     SH_START_PROGRAM
     {
-        shOutputColour(0).xyz = shSample(animatedTexture, UV * 15).xyz * float3(1.0, 1.0, 1.0);
+        shOutputColour(0).xyz = shSample(animatedTexture, UV * float2(15.0, 15.0)).xyz * float3(1.0, 1.0, 1.0);
         shOutputColour(0).w = 0.7;
         
 #if FOG
