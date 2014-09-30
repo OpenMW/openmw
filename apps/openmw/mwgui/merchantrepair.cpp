@@ -10,6 +10,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -67,7 +69,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
             std::string name = iter->getClass().getName(*iter)
                     + " - " + boost::lexical_cast<std::string>(price)
                     + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                    .find("sgp")->getString();;
+                    .find("sgp")->getString();
 
 
             MyGUI::Button* button =
@@ -91,7 +93,10 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onRepairButtonClick);
         }
     }
+    // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+    mList->setVisibleVScroll(false);
     mList->setCanvasSize (MyGUI::IntSize(mList->getWidth(), std::max(mList->getHeight(), currentY)));
+    mList->setVisibleVScroll(true);
 
     mGoldLabel->setCaptionWithReplacing("#{sGold}: "
         + boost::lexical_cast<std::string>(playerGold));
@@ -117,16 +122,23 @@ void MerchantRepair::exit()
 
 void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 {
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
     // repair
     MWWorld::Ptr item = *sender->getUserData<MWWorld::Ptr>();
     item.getCellRef().setCharge(item.getClass().getItemMaxHealth(item));
+
+    player.getClass().getContainerStore(player).restack(item);
 
     MWBase::Environment::get().getSoundManager()->playSound("Repair",1,1);
 
     int price = boost::lexical_cast<int>(sender->getUserString("Price"));
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
     player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+
+    // add gold to NPC trading gold pool
+    MWMechanics::CreatureStats& actorStats = mActor.getClass().getCreatureStats(mActor);
+    actorStats.setGoldPool(actorStats.getGoldPool() + price);
 
     startRepair(mActor);
 }

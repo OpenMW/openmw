@@ -101,6 +101,11 @@ namespace MWBase
             virtual void stopSay(const MWWorld::Ptr &reference=MWWorld::Ptr()) = 0;
             ///< Stop an actor speaking
 
+            virtual float getSaySoundLoudness(const MWWorld::Ptr& reference) const = 0;
+            ///< Check the currently playing say sound for this actor
+            /// and get an average loudness value (scale [0,1]) at the current time position.
+            /// If the actor is not saying anything, returns 0.
+
             virtual SoundPtr playTrack(const MWSound::DecoderPtr& decoder, PlayType type) = 0;
             ///< Play a 2D audio track, using a custom decoder
 

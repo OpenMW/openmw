@@ -22,6 +22,9 @@ namespace MWMechanics
 {
     static const int COUNT_BEFORE_RESET = 200; // TODO: maybe no longer needed
     static const float DOOR_CHECK_INTERVAL = 1.5f;
+    static const float REACTION_INTERVAL = 0.25f;
+    static const int GREETING_SHOULD_START = 4; //how many reaction intervals should pass before NPC can greet player
+    static const int GREETING_SHOULD_END = 10;
 
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
@@ -32,6 +35,8 @@ namespace MWMechanics
 
     void AiWander::init()
     {
+        // NOTE: mDistance and mDuration must be set already
+
         mCellX = std::numeric_limits<int>::max();
         mCellY = std::numeric_limits<int>::max();
         mXCell = 0;
@@ -43,7 +48,8 @@ namespace MWMechanics
         mReaction = 0;
         mRotate = false;
         mTargetAngle = 0;
-        mSaidGreeting = false;
+        mSaidGreeting = Greet_None;
+        mGreetingTimer = 0;
         mHasReturnPosition = false;
         mReturnPosition = Ogre::Vector3(0,0,0);
 
@@ -221,14 +227,14 @@ namespace MWMechanics
         }
 
         mReaction += duration;
-        if(mReaction < 0.25f) // FIXME: hard coded constant
+        if(mReaction < REACTION_INTERVAL)
         {
             return false;
         }
         else
             mReaction = 0;
 
-        // NOTE: everything below get updated every 0.25 seconds
+        // NOTE: everything below get updated every REACTION_INTERVAL seconds
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         if(mDuration)
@@ -400,14 +406,18 @@ namespace MWMechanics
                     static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
                             .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
 
-                    if (roll < fVoiceIdleOdds && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos)) < 1500*1500)
+                    // Only say Idle voices when player is in LOS
+                    // A bit counterintuitive, likely vanilla did this to reduce the appearance of
+                    // voices going through walls?
+                    if (roll < fVoiceIdleOdds && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos)) < 1500*1500
+                            && MWBase::Environment::get().getWorld()->getLOS(player, actor))
                         MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
                 }
             }
         }
 
         // Allow interrupting a walking actor to trigger a greeting
-        if(mIdleNow || (mWalking && !mObstacleCheck.isNormalState() && mDistance))
+        if(mIdleNow || mWalking)
         {
             // Play a random voice greeting if the player gets too close
             int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
@@ -421,9 +431,26 @@ namespace MWMechanics
             Ogre::Vector3 playerPos(player.getRefData().getPosition().pos);
             Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
             float playerDistSqr = playerPos.squaredDistance(actorPos);
-
-            if(playerDistSqr <= helloDistance*helloDistance)
+            
+            if (mSaidGreeting == Greet_None)
             {
+                if ((playerDistSqr <= helloDistance*helloDistance) &&
+                        !player.getClass().getCreatureStats(player).isDead() && MWBase::Environment::get().getWorld()->getLOS(player, actor)
+                    && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
+                    mGreetingTimer++;
+                
+                if (mGreetingTimer >= GREETING_SHOULD_START)
+                {
+                    mSaidGreeting = Greet_InProgress;
+                    MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
+                    mGreetingTimer = 0;
+                }
+            }
+            
+            if(mSaidGreeting == Greet_InProgress)
+            {
+                mGreetingTimer++;
+                
                 if(mWalking)
                 {
                     stopWalking(actor);
@@ -449,31 +476,25 @@ namespace MWMechanics
                         mRotate = true;
                     }
                 }
-            }
-
-            if (!mSaidGreeting)
-            {
-                // TODO: check if actor is aware / has line of sight
-                if (playerDistSqr <= helloDistance*helloDistance
-                        // Only play a greeting if the player is not moving
-                        && Ogre::Vector3(player.getClass().getMovementSettings(player).mPosition).squaredLength() == 0)
+                
+                if (mGreetingTimer >= GREETING_SHOULD_END)
                 {
-                    mSaidGreeting = true;
-                    MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
+                    mSaidGreeting = Greet_Done;
+                    mGreetingTimer = 0;
                 }
             }
-            else
+            
+            if (mSaidGreeting == MWMechanics::AiWander::Greet_Done)
             {
                 static float fGreetDistanceReset = MWBase::Environment::get().getWorld()->getStore()
                         .get<ESM::GameSetting>().find("fGreetDistanceReset")->getFloat();
 
-                if (playerDistSqr >= fGreetDistanceReset*fGreetDistanceReset * iGreetDistanceMultiplier*iGreetDistanceMultiplier)
-                    mSaidGreeting = false;
+                if (playerDistSqr >= fGreetDistanceReset*fGreetDistanceReset)
+                    mSaidGreeting = Greet_None;
             }
 
             // Check if idle animation finished
-            // FIXME: don't stay forever
-            if(!checkIdle(actor, mPlayedIdle) && playerDistSqr > helloDistance*helloDistance)
+            if(!checkIdle(actor, mPlayedIdle) && (playerDistSqr > helloDistance*helloDistance || mSaidGreeting == MWMechanics::AiWander::Greet_Done))
             {
                 mPlayedIdle = 0;
                 mIdleNow = false;
@@ -665,17 +686,16 @@ namespace MWMechanics
     }
 
     AiWander::AiWander (const ESM::AiSequence::AiWander* wander)
+        : mDistance(wander->mData.mDistance)
+        , mDuration(wander->mData.mDuration)
+        , mStartTime(MWWorld::TimeStamp(wander->mStartTime))
+        , mTimeOfDay(wander->mData.mTimeOfDay)
+        , mRepeat(wander->mData.mShouldRepeat)
     {
-        init();
-
-        mDistance = wander->mData.mDistance;
-        mDuration = wander->mData.mDuration;
-        mStartTime = MWWorld::TimeStamp(wander->mStartTime);
-        mTimeOfDay = wander->mData.mTimeOfDay;
         for (int i=0; i<8; ++i)
             mIdle.push_back(wander->mData.mIdle[i]);
 
-        mRepeat = wander->mData.mShouldRepeat;
+        init();
     }
 }
 

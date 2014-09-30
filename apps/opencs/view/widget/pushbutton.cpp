@@ -4,9 +4,9 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 
-void CSVWidget::PushButton::setExtendedToolTip (const QString& text)
+void CSVWidget::PushButton::setExtendedToolTip()
 {
-    QString tooltip = text;
+    QString tooltip = mToolTip;
 
     if (tooltip.isEmpty())
         tooltip = "(Tool tip not implemented yet)";
@@ -20,11 +20,25 @@ void CSVWidget::PushButton::setExtendedToolTip (const QString& text)
 
             break;
 
+        case Type_TopAction:
+
+            break;
+
         case Type_Mode:
 
             tooltip +=
                 "<p>(left click to activate,"
                 "<br>shift-left click to activate and keep panel open)";
+
+            break;
+
+        case Type_Toggle:
+
+            tooltip += "<p>(left click to ";
+            tooltip += isChecked() ? "disable" : "enable";
+            tooltip += "<p>shift-left click to ";
+            tooltip += isChecked() ? "disable" : "enable";
+            tooltip += " and keep panel open)";
 
             break;
     }
@@ -42,11 +56,8 @@ void CSVWidget::PushButton::keyPressEvent (QKeyEvent *event)
 
 void CSVWidget::PushButton::keyReleaseEvent (QKeyEvent *event)
 {
-    if (event->key()==Qt::Key_Return || event->key()==Qt::Key_Enter)
-    {
+    if (event->key()==Qt::Key_Space)
         mKeepOpen = event->modifiers() & Qt::ShiftModifier;
-        emit clicked();
-    }
 
     QPushButton::keyReleaseEvent (event);
 }
@@ -61,15 +72,15 @@ CSVWidget::PushButton::PushButton (const QIcon& icon, Type type, const QString& 
     QWidget *parent)
 : QPushButton (icon, "", parent), mKeepOpen (false), mType (type), mToolTip (tooltip)
 {
-    setCheckable (type==Type_Mode);
-    setExtendedToolTip (tooltip);
+    setCheckable (type==Type_Mode || type==Type_Toggle);
+    setExtendedToolTip();
 }
 
 CSVWidget::PushButton::PushButton (Type type, const QString& tooltip, QWidget *parent)
 : QPushButton (parent), mKeepOpen (false), mType (type), mToolTip (tooltip)
 {
-    setCheckable (type==Type_Mode);
-    setExtendedToolTip (tooltip);
+    setCheckable (type==Type_Mode || type==Type_Toggle);
+    setExtendedToolTip();
 }
 
 bool CSVWidget::PushButton::hasKeepOpen() const
@@ -80,4 +91,9 @@ bool CSVWidget::PushButton::hasKeepOpen() const
 QString CSVWidget::PushButton::getBaseToolTip() const
 {
     return mToolTip;
+}
+
+CSVWidget::PushButton::Type CSVWidget::PushButton::getType() const
+{
+    return mType;
 }

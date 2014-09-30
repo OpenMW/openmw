@@ -58,7 +58,7 @@ void Cell::load(ESMReader &esm, bool saveContext)
 
 void Cell::loadCell(ESMReader &esm, bool saveContext)
 {
-    mNAM0 = 0;
+    mRefNumCounter = 0;
 
     if (mData.mFlags & Interior)
     {
@@ -92,7 +92,7 @@ void Cell::loadCell(ESMReader &esm, bool saveContext)
         esm.getHNOT(mMapColor, "NAM5");
     }
     if (esm.isNextSub("NAM0")) {
-        esm.getHT(mNAM0);
+        esm.getHT(mRefNumCounter);
     }
 
     if (saveContext) {
@@ -111,11 +111,6 @@ void Cell::loadData(ESMReader &esm)
     }
 
     esm.getHNT(mData, "DATA", 12);
-}
-
-void Cell::preLoad(ESMReader &esm) //Can't be "load" because it conflicts with function in esmtool
-{
-    this->load(esm, false);
 }
 
 void Cell::postLoad(ESMReader &esm)
@@ -150,8 +145,8 @@ void Cell::save(ESMWriter &esm) const
             esm.writeHNT("NAM5", mMapColor);
     }
 
-    if (mNAM0 != 0)
-        esm.writeHNT("NAM0", mNAM0);
+    if (mRefNumCounter != 0)
+        esm.writeHNT("NAM0", mRefNumCounter);
 }
 
 void Cell::restore(ESMReader &esm, int iCtx) const
@@ -220,7 +215,7 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
         mWater = 0;
         mWaterInt = false;
         mMapColor = 0;
-        mNAM0 = 0;
+        mRefNumCounter = 0;
 
         mData.mFlags = 0;
         mData.mX = 0;

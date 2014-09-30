@@ -1,6 +1,7 @@
 #include "document.hpp"
 
 #include <cassert>
+#include <fstream>
 #include <iostream>
 
 #include <boost/filesystem.hpp>
@@ -2206,28 +2207,32 @@ void CSMDoc::Document::createBase()
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     const std::vector< boost::filesystem::path >& files, bool new_,
     const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
-    ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager)
+    ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
+    const std::vector<std::string>& blacklistedScripts)
 : mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
-  mTools (mData), mResDir(resDir),
+  mTools (*this), mResDir(resDir),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
-  mSaving (*this, mProjectPath, encoding)
+  mSaving (*this, mProjectPath, encoding),
+  mRunner (mProjectPath)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
 
     if (!boost::filesystem::exists (mProjectPath))
     {
-        boost::filesystem::path locCustomFiltersPath (configuration.getUserDataPath());
-        locCustomFiltersPath /= "defaultfilters";
+        boost::filesystem::path customFiltersPath (configuration.getUserDataPath());
+        customFiltersPath /= "defaultfilters";
 
-        if (boost::filesystem::exists (locCustomFiltersPath))
+        std::ofstream destination (mProjectPath.string().c_str(), std::ios::binary);
+
+        if (boost::filesystem::exists (customFiltersPath))
         {
-            boost::filesystem::copy_file (locCustomFiltersPath, mProjectPath);
+            destination << std::ifstream(customFiltersPath.c_str(), std::ios::binary).rdbuf();
         }
         else
         {
-            boost::filesystem::copy_file (mResDir / "defaultfilters", mProjectPath);
+            destination << std::ifstream(std::string(mResDir.string() + "/defaultfilters").c_str(), std::ios::binary).rdbuf();
         }
     }
 
@@ -2240,20 +2245,24 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
             createBase();
     }
 
+    mBlacklist.add (CSMWorld::UniversalId::Type_Script, blacklistedScripts);
+
     addOptionalGmsts();
     addOptionalGlobals();
 
     connect (&mUndoStack, SIGNAL (cleanChanged (bool)), this, SLOT (modificationStateChanged (bool)));
 
     connect (&mTools, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
-    connect (&mTools, SIGNAL (done (int)), this, SLOT (operationDone (int)));
+    connect (&mTools, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
 
     connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
-    connect (&mSaving, SIGNAL (done (int)), this, SLOT (operationDone (int)));
+    connect (&mSaving, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
 
     connect (
         &mSaving, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)),
         this, SLOT (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)));
+
+    connect (&mRunner, SIGNAL (runStateChanged()), this, SLOT (runStateChanged()));
 }
 
 CSMDoc::Document::~Document()
@@ -2274,6 +2283,9 @@ int CSMDoc::Document::getState() const
 
     if (mSaving.isRunning())
         state |= State_Locked | State_Saving | State_Operation;
+
+    if (mRunner.isRunning())
+        state |= State_Locked | State_Running;
 
     if (int operations = mTools.getRunningOperations())
         state |= State_Locked | State_Operation | operations;
@@ -2339,7 +2351,7 @@ void CSMDoc::Document::reportMessage (const CSMWorld::UniversalId& id, const std
     std::cout << message << std::endl;
 }
 
-void CSMDoc::Document::operationDone (int type)
+void CSMDoc::Document::operationDone (int type, bool failed)
 {
     emit stateChanged (getState(), this);
 }
@@ -2357,6 +2369,55 @@ CSMWorld::Data& CSMDoc::Document::getData()
 CSMTools::ReportModel *CSMDoc::Document::getReport (const CSMWorld::UniversalId& id)
 {
     return mTools.getReport (id);
+}
+
+bool CSMDoc::Document::isBlacklisted (const CSMWorld::UniversalId& id)
+    const
+{
+    return mBlacklist.isBlacklisted (id);
+}
+
+void CSMDoc::Document::startRunning (const std::string& profile,
+    const std::string& startupInstruction)
+{
+    std::vector<std::string> contentFiles;
+
+    for (std::vector<boost::filesystem::path>::const_iterator iter (mContentFiles.begin());
+        iter!=mContentFiles.end(); ++iter)
+        contentFiles.push_back (iter->filename().string());
+
+    mRunner.configure (getData().getDebugProfiles().getRecord (profile).get(), contentFiles,
+        startupInstruction);
+
+    int state = getState();
+
+    if (state & State_Modified)
+    {
+        // need to save first
+        mRunner.start (true);
+
+        new SaveWatcher (&mRunner, &mSaving); // no, that is not a memory leak. Qt is weird.
+
+        if (!(state & State_Saving))
+            save();
+    }
+    else
+        mRunner.start();
+}
+
+void CSMDoc::Document::stopRunning()
+{
+    mRunner.stop();
+}
+
+QTextDocument *CSMDoc::Document::getRunLog()
+{
+    return mRunner.getLog();
+}
+
+void CSMDoc::Document::runStateChanged()
+{
+    emit stateChanged (getState(), this);
 }
 
 void CSMDoc::Document::progress (int current, int max, int type)

@@ -51,7 +51,6 @@
 
 #include "contentloader.hpp"
 #include "esmloader.hpp"
-#include "omwloader.hpp"
 
 using namespace Ogre;
 
@@ -148,8 +147,8 @@ namespace MWWorld
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (activationDistanceOverride),
       mFallback(fallbackMap), mTeleportEnabled(true), mLevitationEnabled(true),
-      mFacedDistance(FLT_MAX), mGodMode(false), mContentFiles (contentFiles),
-      mGoToJail(false),
+      mGodMode(false), mContentFiles (contentFiles),
+      mGoToJail(false), mDaysInPrison(0),
       mStartCell (startCell), mStartupScript(startupScript)
     {
         mPhysics = new PhysicsSystem(renderer);
@@ -163,19 +162,18 @@ namespace MWWorld
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
-        // NOTE: We might need to reserve one more for the running game / save.
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
 
         GameContentLoader gameContentLoader(*listener);
         EsmLoader esmLoader(mStore, mEsm, encoder, *listener);
-        OmwLoader omwLoader(*listener);
 
         gameContentLoader.addLoader(".esm", &esmLoader);
         gameContentLoader.addLoader(".esp", &esmLoader);
-        gameContentLoader.addLoader(".omwgame", &omwLoader);
-        gameContentLoader.addLoader(".omwaddon", &omwLoader);
+        gameContentLoader.addLoader(".omwgame", &esmLoader);
+        gameContentLoader.addLoader(".omwaddon", &esmLoader);
+        gameContentLoader.addLoader(".project", &esmLoader);
 
         loadContentFiles(fileCollections, contentFiles, gameContentLoader);
 
@@ -211,9 +209,9 @@ namespace MWWorld
             // set new game mark
             mGlobalVariables["chargenstate"].setInteger (1);
             mGlobalVariables["pcrace"].setInteger (3);
-
-            MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
         }
+        else
+            mGlobalVariables["chargenstate"].setInteger (-1);
 
         if (bypass && !mStartCell.empty())
         {
@@ -259,7 +257,8 @@ namespace MWWorld
         mWeatherManager = 0;
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
-        MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);
+        if (!mStartupScript.empty())
+            MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);
     }
 
     void World::clear()
@@ -290,7 +289,7 @@ namespace MWWorld
         mGodMode = false;
         mSky = true;
         mTeleportEnabled = true;
-        mFacedDistance = FLT_MAX;
+        mLevitationEnabled = true;
 
         mGlobalVariables.fill (mStore);
     }
@@ -304,7 +303,8 @@ namespace MWWorld
             +mProjectileManager->countSavedGameRecords()
             +1 // player record
             +1 // weather record
-            +1; // actorId counter
+            +1 // actorId counter
+            +1; // levitation/teleport enabled state
     }
 
     void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -320,66 +320,111 @@ namespace MWWorld
         MWMechanics::CreatureStats::writeActorIdCounter(writer);
         progress.increaseProgress();
 
+        mStore.write (writer, progress); // dynamic Store must be written (and read) before Cells, so that
+                                         // references to custom made records will be recognized
         mCells.write (writer, progress);
-        mStore.write (writer, progress);
         mGlobalVariables.write (writer, progress);
         mPlayer->write (writer, progress);
         mWeatherManager->write (writer, progress);
         mProjectileManager->write (writer, progress);
+
+        writer.startRecord(ESM::REC_ENAB);
+        writer.writeHNT("TELE", mTeleportEnabled);
+        writer.writeHNT("LEVT", mLevitationEnabled);
+        writer.endRecord(ESM::REC_ENAB);
+        progress.increaseProgress();
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type,
         const std::map<int, int>& contentFileMap)
     {
-        if (type == ESM::REC_ACTC)
+        switch (type)
         {
-            MWMechanics::CreatureStats::readActorIdCounter(reader);
-            return;
-        }
-
-        if (!mStore.readRecord (reader, type) &&
-            !mGlobalVariables.readRecord (reader, type) &&
-            !mPlayer->readRecord (reader, type) &&
-            !mWeatherManager->readRecord (reader, type) &&
-            !mCells.readRecord (reader, type, contentFileMap) &&
-            !mProjectileManager->readRecord (reader, type))
-        {
-            throw std::runtime_error ("unknown record in saved game");
+            case ESM::REC_ACTC:
+                MWMechanics::CreatureStats::readActorIdCounter(reader);
+                return;
+            case ESM::REC_ENAB:
+                reader.getHNT(mTeleportEnabled, "TELE");
+                reader.getHNT(mLevitationEnabled, "LEVT");
+                return;
+            default:
+                if (!mStore.readRecord (reader, type) &&
+                    !mGlobalVariables.readRecord (reader, type) &&
+                    !mPlayer->readRecord (reader, type) &&
+                    !mWeatherManager->readRecord (reader, type) &&
+                    !mCells.readRecord (reader, type, contentFileMap) &&
+                    !mProjectileManager->readRecord (reader, type))
+                {
+                    throw std::runtime_error ("unknown record in saved game");
+                }
+                break;
         }
     }
 
     void World::ensureNeededRecords()
     {
-        if (!mStore.get<ESM::GameSetting>().search("sCompanionShare"))
+        std::map<std::string, ESM::Variant> gmst;
+        // Companion (tribunal)
+        gmst["sCompanionShare"] = ESM::Variant("Companion Share");
+        gmst["sCompanionWarningMessage"] = ESM::Variant("Warning message");
+        gmst["sCompanionWarningButtonOne"] = ESM::Variant("Button 1");
+        gmst["sCompanionWarningButtonTwo"] = ESM::Variant("Button 2");
+        gmst["sCompanionShare"] = ESM::Variant("Companion Share");
+        gmst["sProfitValue"] = ESM::Variant("Profit Value");
+        gmst["sTeleportDisabled"] = ESM::Variant("Teleport disabled");
+        gmst["sLevitateDisabled"] = ESM::Variant("Levitate disabled");
+
+        // Missing in unpatched MW 1.0
+        gmst["sDifficulty"] = ESM::Variant("Difficulty");
+        gmst["fDifficultyMult"] = ESM::Variant(5.f);
+        gmst["sAuto_Run"] = ESM::Variant("Auto Run");
+        gmst["sServiceRefusal"] = ESM::Variant("Service Refusal");
+        gmst["sNeedOneSkill"] = ESM::Variant("Need one skill");
+        gmst["sNeedTwoSkills"] = ESM::Variant("Need two skills");
+        gmst["sEasy"] = ESM::Variant("Easy");
+        gmst["sHard"] = ESM::Variant("Hard");
+        gmst["sDeleteNote"] = ESM::Variant("Delete Note");
+        gmst["sEditNote"] = ESM::Variant("Edit Note");
+        gmst["sAdmireSuccess"] = ESM::Variant("Admire Success");
+        gmst["sAdmireFail"] = ESM::Variant("Admire Fail");
+        gmst["sIntimidateSuccess"] = ESM::Variant("Intimidate Success");
+        gmst["sIntimidateFail"] = ESM::Variant("Intimidate Fail");
+        gmst["sTauntSuccess"] = ESM::Variant("Taunt Success");
+        gmst["sTauntFail"] = ESM::Variant("Taunt Fail");
+        gmst["sBribeSuccess"] = ESM::Variant("Bribe Success");
+        gmst["sBribeFail"] = ESM::Variant("Bribe Fail");
+
+        // Werewolf (BM)
+        gmst["fWereWolfRunMult"] = ESM::Variant(1.f);
+        gmst["fWereWolfSilverWeaponDamageMult"] = ESM::Variant(1.f);
+
+
+        std::map<std::string, ESM::Variant> globals;
+        // vanilla Morrowind does not define dayspassed.
+        globals["dayspassed"] = ESM::Variant(1); // but the addons start counting at 1 :(
+        globals["werewolfclawmult"] = ESM::Variant(25.f);
+        globals["pcknownwerewolf"] = ESM::Variant(0);
+
+        for (std::map<std::string, ESM::Variant>::iterator it = gmst.begin(); it != gmst.end(); ++it)
         {
-            ESM::GameSetting sCompanionShare;
-            sCompanionShare.mId = "sCompanionShare";
-            ESM::Variant value;
-            value.setType(ESM::VT_String);
-            value.setString("Companion Share");
-            sCompanionShare.mValue = value;
-            mStore.insertStatic(sCompanionShare);
+            if (!mStore.get<ESM::GameSetting>().search(it->first))
+            {
+                ESM::GameSetting setting;
+                setting.mId = it->first;
+                setting.mValue = it->second;
+                mStore.insertStatic(setting);
+            }
         }
-        if (!mStore.get<ESM::Global>().search("dayspassed"))
+
+        for (std::map<std::string, ESM::Variant>::iterator it = globals.begin(); it != globals.end(); ++it)
         {
-            // vanilla Morrowind does not define dayspassed.
-            ESM::Global dayspassed;
-            dayspassed.mId = "dayspassed";
-            ESM::Variant value;
-            value.setType(ESM::VT_Long);
-            value.setInteger(1); // but the addons start counting at 1 :(
-            dayspassed.mValue = value;
-            mStore.insertStatic(dayspassed);
-        }
-        if (!mStore.get<ESM::GameSetting>().search("fWereWolfRunMult"))
-        {
-            ESM::GameSetting fWereWolfRunMult;
-            fWereWolfRunMult.mId = "fWereWolfRunMult";
-            ESM::Variant value;
-            value.setType(ESM::VT_Float);
-            value.setFloat(1.f);
-            fWereWolfRunMult.mValue = value;
-            mStore.insertStatic(fWereWolfRunMult);
+            if (!mStore.get<ESM::Global>().search(it->first))
+            {
+                ESM::Global setting;
+                setting.mId = it->first;
+                setting.mValue = it->second;
+                mStore.insertStatic(setting);
+            }
         }
     }
 
@@ -546,13 +591,29 @@ namespace MWWorld
 
         std::string lowerCaseName = Misc::StringUtils::lowerCase(name);
 
-        // active cells
+        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
+            iter!=mWorldScene->getActiveCells().end(); ++iter)
+        {
+            // TODO: caching still doesn't work efficiently here (only works for the one CellStore that the reference is in)
+            CellStore* cellstore = *iter;
+            Ptr ptr = mCells.getPtr (lowerCaseName, *cellstore, false);
+
+            if (!ptr.isEmpty())
+                return ptr;
+        }
+
+        if (!activeOnly)
+        {
+            ret = mCells.getPtr (lowerCaseName);
+            if (!ret.isEmpty())
+                return ret;
+        }
+
         for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
             CellStore* cellstore = *iter;
-            Ptr ptr = mCells.getPtr (lowerCaseName, *cellstore, true);
-
+            Ptr ptr = cellstore->searchInContainer(lowerCaseName);
             if (!ptr.isEmpty())
                 return ptr;
         }
@@ -560,14 +621,7 @@ namespace MWWorld
         Ptr ptr = mPlayer->getPlayer().getClass()
             .getContainerStore(mPlayer->getPlayer()).search(lowerCaseName);
 
-        if (!ptr.isEmpty())
-            return ptr;
-
-        if (!activeOnly)
-        {
-            ret = mCells.getPtr (lowerCaseName);
-        }
-        return ret;
+        return ptr;
     }
 
     Ptr World::getPtr (const std::string& name, bool activeOnly)
@@ -840,6 +894,8 @@ namespace MWWorld
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
+        mPhysics->clearQueuedMovement();
+
         if (mCurrentWorldSpace != cellName)
         {
             // changed worldspace
@@ -855,6 +911,8 @@ namespace MWWorld
 
     void World::changeToExteriorCell (const ESM::Position& position)
     {
+        mPhysics->clearQueuedMovement();
+
         if (mCurrentWorldSpace != "sys::default") // FIXME
         {
             // changed worldspace
@@ -908,9 +966,27 @@ namespace MWWorld
 
     MWWorld::Ptr World::getFacedObject()
     {
-        if (mFacedHandle.empty())
+        std::string facedHandle;
+
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode() &&
+                MWBase::Environment::get().getWindowManager()->isConsoleMode())
+            getFacedHandle(facedHandle, getMaxActivationDistance() * 50, false);
+        else
+        {
+            float telekinesisRangeBonus =
+                    mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
+                    .get(ESM::MagicEffect::Telekinesis).getMagnitude();
+            telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
+
+            float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
+
+            getFacedHandle(facedHandle, activationDistance);
+        }
+
+        if (facedHandle.empty())
             return MWWorld::Ptr();
-        return searchPtrViaHandle(mFacedHandle);
+
+        return getPtrViaHandle(facedHandle);
     }
 
     std::pair<MWWorld::Ptr,Ogre::Vector3> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
@@ -1123,6 +1199,9 @@ namespace MWWorld
 
         ptr.getRefData().setPosition(pos);
 
+        if(ptr.getRefData().getBaseNode() == 0)
+            return;
+
         if (ptr.getClass().isActor())
             mWorldScene->updateObjectRotation(ptr);
         else
@@ -1131,24 +1210,24 @@ namespace MWWorld
 
     void World::localRotateObject (const Ptr& ptr, float x, float y, float z)
     {
+        LocalRotation rot = ptr.getRefData().getLocalRotation();
+        rot.rot[0]=Ogre::Degree(x).valueRadians();
+        rot.rot[1]=Ogre::Degree(y).valueRadians();
+        rot.rot[2]=Ogre::Degree(z).valueRadians();
+
+        wrap(rot.rot[0]);
+        wrap(rot.rot[1]);
+        wrap(rot.rot[2]);
+
+        ptr.getRefData().setLocalRotation(rot);
+
         if (ptr.getRefData().getBaseNode() != 0)
         {
-            LocalRotation rot = ptr.getRefData().getLocalRotation();
-            rot.rot[0]=Ogre::Degree(x).valueRadians();
-            rot.rot[1]=Ogre::Degree(y).valueRadians();
-            rot.rot[2]=Ogre::Degree(z).valueRadians();
-
-            wrap(rot.rot[0]);
-            wrap(rot.rot[1]);
-            wrap(rot.rot[2]);
-
-            ptr.getRefData().setLocalRotation(rot);
-
             mWorldScene->updateObjectLocalRotation(ptr);
         }
     }
 
-    void World::adjustPosition(const Ptr &ptr)
+    void World::adjustPosition(const Ptr &ptr, bool force)
     {
         ESM::Position pos (ptr.getRefData().getPosition());
 
@@ -1167,7 +1246,7 @@ namespace MWWorld
 
         ptr.getRefData().setPosition(pos);
 
-        if (!isFlying(ptr))
+        if (force || !isFlying(ptr))
         {
             Ogre::Vector3 traced = mPhysics->traceDown(ptr, 200);
             if (traced.z < pos.pos[2])
@@ -1236,7 +1315,7 @@ namespace MWWorld
 
         const PtrVelocityList &results = mPhysics->applyQueuedMovement(duration);
         PtrVelocityList::const_iterator player(results.end());
-        for(PtrVelocityList::const_iterator iter(results.begin());iter != results.end();iter++)
+        for(PtrVelocityList::const_iterator iter(results.begin());iter != results.end();++iter)
         {
             if(iter->first.getRefData().getHandle() == "player")
             {
@@ -1281,7 +1360,8 @@ namespace MWWorld
                 bool reached = (targetRot == 90.f && it->second) || targetRot == 0.f;
 
                 /// \todo should use convexSweepTest here
-                std::vector<std::string> collisions = mPhysics->getCollisions(it->first);
+                std::vector<std::string> collisions = mPhysics->getCollisions(it->first, OEngine::Physic::CollisionType_Actor
+                                                                              , OEngine::Physic::CollisionType_Actor);
                 for (std::vector<std::string>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
                 {
                     MWWorld::Ptr ptr = getPtrViaHandle(*cit);
@@ -1297,7 +1377,6 @@ namespace MWWorld
                         // we need to undo the rotation
                         localRotateObject(it->first, 0, 0, oldRot);
                         reached = false;
-                        //break; //Removed in case multiple actors are touching
                     }
                 }
 
@@ -1455,65 +1534,33 @@ namespace MWWorld
             Vector3 sun = mRendering->getSkyManager()->getRealSunPos();
             mRendering->getSkyManager()->setGlare(!mPhysics->castRay(Ogre::Vector3(p[0], p[1], p[2]), sun));
         }
-
-        updateFacedHandle ();
     }
 
-    void World::updateFacedHandle ()
+    void World::getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer)
     {
-        float telekinesisRangeBonus =
-                mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
-                .get(ESM::MagicEffect::Telekinesis).mMagnitude;
-        telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
+        maxDistance += mRendering->getCameraDistance();
 
-        float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
-        activationDistance += mRendering->getCameraDistance();
-
-        // send new query
-        // figure out which object we want to test against
         std::vector < std::pair < float, std::string > > results;
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            results = mPhysics->getFacedHandles(x, y, activationDistance);
-            if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
-                results = mPhysics->getFacedHandles(x, y, getMaxActivationDistance ()*50);
+            results = mPhysics->getFacedHandles(x, y, maxDistance);
         }
         else
         {
-            results = mPhysics->getFacedHandles(activationDistance);
+            results = mPhysics->getFacedHandles(maxDistance);
         }
 
-        // ignore the player and other things we're not interested in
-        std::vector < std::pair < float, std::string > >::iterator it = results.begin();
-        while (it != results.end())
-        {
-            if ((*it).second.find("HeightField") != std::string::npos) // Don't attempt to getPtrViaHandle on terrain
-            {
-                ++it;
-                continue;
-            }
-
-            if (getPtrViaHandle((*it).second) == mPlayer->getPlayer() ) // not interested in player (unless you want to talk to yourself)
-            {
-                it = results.erase(it);
-            }
-            else
-                ++it;
-        }
+        if (ignorePlayer &&
+                !results.empty() && results.front().second == "player")
+            results.erase(results.begin());
 
         if (results.empty()
                 || results.front().second.find("HeightField") != std::string::npos) // Blocked by terrain
-        {
-            mFacedHandle = "";
-            mFacedDistance = FLT_MAX;
-        }
+            facedHandle = "";
         else
-        {
-            mFacedHandle = results.front().second;
-            mFacedDistance = results.front().first;
-        }
+            facedHandle = results.front().second;
     }
 
     bool World::isCellExterior() const
@@ -1554,11 +1601,6 @@ namespace MWWorld
         mWeatherManager->modRegion(regionid, chances);
     }
 
-    OEngine::Render::Fader* World::getFader()
-    {
-        return mRendering->getFader();
-    }
-
     Ogre::Vector2 World::getNorthVector (CellStore* cell)
     {
         MWWorld::CellRefList<ESM::Static>& statics = cell->get<ESM::Static>();
@@ -1596,9 +1638,14 @@ namespace MWWorld
         }
     }
 
-    void World::getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
+    void World::worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
     {
-        mRendering->getInteriorMapPosition(position, nX, nY, x, y);
+        mRendering->worldToInteriorMapPosition(position, nX, nY, x, y);
+    }
+
+    Ogre::Vector2 World::interiorMapToWorldPosition(float nX, float nY, int x, int y)
+    {
+        return mRendering->interiorMapToWorldPosition(nX, nY, x, y);
     }
 
     bool World::isPositionExplored (float nX, float nY, int x, int y, bool interior)
@@ -1717,6 +1764,7 @@ namespace MWWorld
         localRotation.rot[2] = 0;
         dropped.getRefData().setLocalRotation(localRotation);
         dropped.getCellRef().setPosition(pos);
+        dropped.getCellRef().unsetRefNum();
 
         if (mWorldScene->isCellActive(*cell)) {
             if (dropped.getRefData().isEnabled()) {
@@ -1779,7 +1827,7 @@ namespace MWWorld
     World::isFlying(const MWWorld::Ptr &ptr) const
     {
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-        bool isParalyzed = (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).mMagnitude > 0);
+        bool isParalyzed = (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0);
 
         if(!ptr.getClass().isActor())
             return false;
@@ -1790,7 +1838,7 @@ namespace MWWorld
         if (ptr.getClass().canFly(ptr))
             return !isParalyzed;
 
-        if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).mMagnitude > 0
+        if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).getMagnitude() > 0
                 && isLevitationEnabled())
             return true;
 
@@ -1808,7 +1856,7 @@ namespace MWWorld
             return false;
 
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-        if(stats.getMagicEffects().get(ESM::MagicEffect::SlowFall).mMagnitude > 0)
+        if(stats.getMagicEffects().get(ESM::MagicEffect::SlowFall).getMagnitude() > 0)
             return true;
 
         return false;
@@ -1983,27 +2031,72 @@ namespace MWWorld
         mDoorStates[door] = state;
     }
 
-    void World::activateDoor(const Ptr &door, bool open)
+    void World::activateDoor(const Ptr &door, int state)
     {
-        int state = open ? 1 : 2;
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;
+        if (state == 0)
+            mDoorStates.erase(door);
     }
 
     bool World::getPlayerStandingOn (const MWWorld::Ptr& object)
     {
-        MWWorld::Ptr player = mPlayer->getPlayer();
-        if (!mPhysEngine->getCharacter("player")->getOnGround())
-            return false;
-        btVector3 from (player.getRefData().getPosition().pos[0], player.getRefData().getPosition().pos[1], player.getRefData().getPosition().pos[2]);
-        btVector3 to = from - btVector3(0,0,5);
-        std::pair<std::string, float> result = mPhysEngine->rayTest(from, to);
-        return result.first == object.getRefData().getBaseNode()->getName();
+        MWWorld::Ptr player = getPlayerPtr();
+        return mPhysics->isActorStandingOn(player, object);
     }
 
     bool World::getActorStandingOn (const MWWorld::Ptr& object)
     {
-        return mPhysEngine->isAnyActorStandingOn(object.getRefData().getBaseNode()->getName());
+        std::vector<std::string> actors;
+        mPhysics->getActorsStandingOn(object, actors);
+        return !actors.empty();
+    }
+
+    bool World::getPlayerCollidingWith (const MWWorld::Ptr& object)
+    {
+        MWWorld::Ptr player = getPlayerPtr();
+        return mPhysics->isActorCollidingWith(player, object);
+    }
+
+    bool World::getActorCollidingWith (const MWWorld::Ptr& object)
+    {
+        std::vector<std::string> actors;
+        mPhysics->getActorsCollidingWith(object, actors);
+        return !actors.empty();
+    }
+
+    void World::hurtStandingActors(const Ptr &object, float healthPerSecond)
+    {
+        std::vector<std::string> actors;
+        mPhysics->getActorsStandingOn(object, actors);
+        for (std::vector<std::string>::iterator it = actors.begin(); it != actors.end(); ++it)
+        {
+            MWWorld::Ptr actor = searchPtrViaHandle(*it); // Collision events are from the last frame, actor might no longer exist
+            if (actor.isEmpty())
+                continue;
+
+            MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+            MWMechanics::DynamicStat<float> health = stats.getHealth();
+            health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
+            stats.setHealth(health);
+        }
+    }
+
+    void World::hurtCollidingActors(const Ptr &object, float healthPerSecond)
+    {
+        std::vector<std::string> actors;
+        mPhysics->getActorsCollidingWith(object, actors);
+        for (std::vector<std::string>::iterator it = actors.begin(); it != actors.end(); ++it)
+        {
+            MWWorld::Ptr actor = searchPtrViaHandle(*it); // Collision events are from the last frame, actor might no longer exist
+            if (actor.isEmpty())
+                continue;
+
+            MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+            MWMechanics::DynamicStat<float> health = stats.getHealth();
+            health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
+            stats.setHealth(health);
+        }
     }
 
     float World::getWindSpeed()
@@ -2110,8 +2203,8 @@ namespace MWWorld
     void World::enableActorCollision(const MWWorld::Ptr& actor, bool enable)
     {
         OEngine::Physic::PhysicActor *physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
-
-        physicActor->enableCollisionBody(enable);
+        if (physicActor)
+            physicActor->enableCollisionBody(enable);
     }
 
     bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)
@@ -2248,6 +2341,34 @@ namespace MWWorld
                 windowManager->unsetForceHide(MWGui::GW_Inventory);
                 windowManager->unsetForceHide(MWGui::GW_Magic);
             }
+
+            // Witnesses of the player's transformation will make them a globally known werewolf
+            std::vector<MWWorld::Ptr> closeActors;
+            MWBase::Environment::get().getMechanicsManager()->getActorsInRange(Ogre::Vector3(actor.getRefData().getPosition().pos),
+                                                                               getStore().get<ESM::GameSetting>().search("fAlarmRadius")->getFloat(),
+                                                                               closeActors);
+
+            bool detected = false;
+            for (std::vector<MWWorld::Ptr>::const_iterator it = closeActors.begin(); it != closeActors.end(); ++it)
+            {
+                if (*it == actor)
+                    continue;
+
+                if (!it->getClass().isNpc())
+                    continue;
+
+                if (getLOS(*it, actor) && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, *it))
+                {
+                    detected = true;
+                    break;
+                }
+            }
+
+            if (detected)
+            {
+                windowManager->messageBox("#{sWerewolfAlarmMessage}");
+                setGlobalInt("pcknownwerewolf", 1);
+            }
         }
     }
 
@@ -2340,8 +2461,49 @@ namespace MWWorld
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        // TODO: this only works for the player
-        MWWorld::Ptr target = getFacedObject();
+        // Get the target to use for "on touch" effects
+        MWWorld::Ptr target;
+        float distance = 192.f; // ??
+
+        if (actor == getPlayerPtr())
+        {
+            // For the player, use camera to aim
+            std::string facedHandle;
+            getFacedHandle(facedHandle, distance);
+            if (!facedHandle.empty())
+                target = getPtrViaHandle(facedHandle);
+        }
+        else
+        {
+            // For NPCs use facing direction from Head node
+            Ogre::Vector3 origin(actor.getRefData().getPosition().pos);
+            MWRender::Animation *anim = mRendering->getAnimation(actor);
+            if(anim != NULL)
+            {
+                Ogre::Node *node = anim->getNode("Head");
+                if (node == NULL)
+                    node = anim->getNode("Bip01 Head");
+                if(node != NULL)
+                    origin += node->_getDerivedPosition();
+            }
+            Ogre::Quaternion orient;
+            orient = Ogre::Quaternion(Ogre::Radian(actor.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
+                    Ogre::Quaternion(Ogre::Radian(actor.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X);
+            Ogre::Vector3 direction = orient.yAxis();
+            Ogre::Vector3 dest = origin + direction * distance;
+
+
+            std::vector<std::pair<float, std::string> > collisions = mPhysEngine->rayTest2(btVector3(origin.x, origin.y, origin.z), btVector3(dest.x, dest.y, dest.z));
+            for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end(); ++cIt)
+            {
+                MWWorld::Ptr collided = getPtrViaHandle(cIt->second);
+                if (collided != actor)
+                {
+                    target = collided;
+                    break;
+                }
+            }
+        }
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
 
@@ -2352,10 +2514,10 @@ namespace MWWorld
         if (!selectedSpell.empty())
         {
             const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
-	    
-	    // A power can be used once per 24h
-	    if (spell->mData.mType == ESM::Spell::ST_Power)
-	        stats.getSpells().usePower(spell->mId);
+
+            // A power can be used once per 24h
+            if (spell->mData.mType == ESM::Spell::ST_Power)
+                stats.getSpells().usePower(spell->mId);
 
             cast.cast(spell);
         }
@@ -2543,11 +2705,11 @@ namespace MWWorld
         const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
         float dist=0;
         if (type == World::Detect_Creature)
-            dist = effects.get(ESM::MagicEffect::DetectAnimal).mMagnitude;
+            dist = effects.get(ESM::MagicEffect::DetectAnimal).getMagnitude();
         else if (type == World::Detect_Key)
-            dist = effects.get(ESM::MagicEffect::DetectKey).mMagnitude;
+            dist = effects.get(ESM::MagicEffect::DetectKey).getMagnitude();
         else if (type == World::Detect_Enchantment)
-            dist = effects.get(ESM::MagicEffect::DetectEnchantment).mMagnitude;
+            dist = effects.get(ESM::MagicEffect::DetectEnchantment).getMagnitude();
 
         if (!dist)
             return;
@@ -2585,8 +2747,14 @@ namespace MWWorld
         float fCrimeGoldDiscountMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->getFloat();
         float fCrimeGoldTurnInMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldTurnInMult")->getFloat();
 
-        int discount = bounty*fCrimeGoldDiscountMult;
+        int discount = bounty * fCrimeGoldDiscountMult;
         int turnIn = bounty * fCrimeGoldTurnInMult;
+
+        if (bounty > 0)
+        {
+            discount = std::max(1, discount);
+            turnIn = std::max(1, turnIn);
+        }
 
         mGlobalVariables["pchascrimegold"].setInteger((bounty <= playerGold) ? 1 : 0);
 
@@ -2643,8 +2811,19 @@ namespace MWWorld
     {
         if (!mGoToJail)
         {
-            // Save for next update, since the player should be able to read the dialog text first
+            // Reset bounty and forget the crime now, but don't change cell yet (the player should be able to read the dialog text first)
             mGoToJail = true;
+
+            MWWorld::Ptr player = getPlayerPtr();
+
+            int bounty = player.getClass().getNpcStats(player).getBounty();
+            player.getClass().getNpcStats(player).setBounty(0);
+            mPlayer->recordCrimeId();
+            confiscateStolenItems(player);
+
+            int iDaysinPrisonMod = getStore().get<ESM::GameSetting>().find("iDaysinPrisonMod")->getInt();
+            mDaysInPrison = std::max(1, bounty / iDaysinPrisonMod);
+
             return;
         }
         else
@@ -2655,13 +2834,8 @@ namespace MWWorld
 
             MWWorld::Ptr player = getPlayerPtr();
             teleportToClosestMarker(player, "prisonmarker");
-            int bounty = player.getClass().getNpcStats(player).getBounty();
-            player.getClass().getNpcStats(player).setBounty(0);
-            confiscateStolenItems(player);
 
-            int iDaysinPrisonMod = getStore().get<ESM::GameSetting>().find("iDaysinPrisonMod")->getInt();
-            int days = std::max(1, bounty / iDaysinPrisonMod);
-
+            int days = mDaysInPrison;
             advanceTime(days * 24);
             for (int i=0; i<days*24; ++i)
                 MWBase::Environment::get().getMechanicsManager ()->rest (true);
@@ -2859,5 +3033,32 @@ namespace MWWorld
         }
         if (!interpreterContext.hasActivationBeenHandled())
             interpreterContext.executeActivation(object, actor);
+    }
+
+    struct ResetActorsFunctor
+    {
+        bool operator() (Ptr ptr)
+        {
+            // Can't reset actors that were moved to a different cell, because we don't know what cell they came from.
+            // This could be fixed once we properly track actor cell changes, but may not be desirable behaviour anyhow.
+            if (ptr.getClass().isActor() && ptr.getCellRef().getRefNum().mContentFile != -1)
+            {
+                const ESM::Position& origPos = ptr.getCellRef().getPosition();
+                MWBase::Environment::get().getWorld()->moveObject(ptr, origPos.pos[0], origPos.pos[1], origPos.pos[2]);
+                MWBase::Environment::get().getWorld()->rotateObject(ptr, origPos.rot[0], origPos.rot[1], origPos.rot[2]);
+                ptr.getClass().adjustPosition(ptr, false);
+            }
+            return true;
+        }
+    };
+    void World::resetActors()
+    {
+        for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
+            iter!=mWorldScene->getActiveCells().end(); ++iter)
+        {
+            CellStore* cellstore = *iter;
+            ResetActorsFunctor functor;
+            cellstore->forEach(functor);
+        }
     }
 }

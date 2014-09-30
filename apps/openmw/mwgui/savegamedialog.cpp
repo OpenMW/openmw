@@ -37,10 +37,11 @@ namespace MWGui
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onOkButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onCancelButtonClicked);
         mDeleteButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SaveGameDialog::onDeleteButtonClicked);
-        mCharacterSelection->eventComboChangePosition += MyGUI::newDelegate(this, &SaveGameDialog::onCharacterSelected);
+        mCharacterSelection->eventComboAccept += MyGUI::newDelegate(this, &SaveGameDialog::onCharacterSelected);
         mSaveList->eventListChangePosition += MyGUI::newDelegate(this, &SaveGameDialog::onSlotSelected);
         mSaveList->eventListMouseItemActivate += MyGUI::newDelegate(this, &SaveGameDialog::onSlotMouseClick);
         mSaveList->eventListSelectAccept += MyGUI::newDelegate(this, &SaveGameDialog::onSlotActivated);
+        mSaveList->eventKeyButtonPressed += MyGUI::newDelegate(this, &SaveGameDialog::onKeyButtonPressed);
         mSaveNameEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &SaveGameDialog::onEditSelectAccept);
         mSaveNameEdit->eventEditTextChange += MyGUI::newDelegate(this, &SaveGameDialog::onSaveNameChanged);
     }
@@ -212,6 +213,7 @@ namespace MWGui
 
     void SaveGameDialog::accept(bool reallySure)
     {
+        // Remove for MyGUI 3.2.2
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
 
         if (mSaving)
@@ -245,6 +247,12 @@ namespace MWGui
             assert (mCurrentCharacter && mCurrentSlot);
             MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot);
         }
+    }
+
+    void SaveGameDialog::onKeyButtonPressed(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char character)
+    {
+        if (key == MyGUI::KeyCode::Delete && mCurrentSlot)
+            confirmDeleteSave();
     }
 
     void SaveGameDialog::onOkButtonClicked(MyGUI::Widget *sender)

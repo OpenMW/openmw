@@ -136,6 +136,7 @@ namespace MWGui
                     float min,max;
                     getSettingMinMax(scroll, min, max);
                     float value = Settings::Manager::getFloat(getSettingName(current), getSettingCategory(current));
+                    value = std::max(min, std::min(value, max));
                     value = (value-min)/(max-min);
 
                     scroll->setScrollPosition( value * (scroll->getScrollRange()-1));
@@ -157,6 +158,8 @@ namespace MWGui
     {
         configureWidgets(mMainWidget);
 
+        setTitle("#{sOptions}");
+
         getWidget(mOkButton, "OkButton");
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mFullscreenButton, "FullscreenButton");
@@ -174,6 +177,7 @@ namespace MWGui
         getWidget(mControlsBox, "ControlsBox");
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mRefractionButton, "RefractionButton");
+        getWidget(mDifficultySlider, "DifficultySlider");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mShaderModeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShaderModeToggled);
@@ -227,6 +231,10 @@ namespace MWGui
         MyGUI::TextBox* fovText;
         getWidget(fovText, "FovText");
         fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("field of view", "General"))) + ")");
+
+        MyGUI::TextBox* diffText;
+        getWidget(diffText, "DifficultyText");
+        diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
@@ -284,15 +292,6 @@ namespace MWGui
         {
             _sender->castType<MyGUI::Button>()->setCaption(on);
             newState = true;
-        }
-
-        if (_sender == mVSyncButton)
-        {
-            // Ogre::Window::setVSyncEnabled is bugged in 1.8
-#if OGRE_VERSION < (1 << 16 | 9 << 8 | 0)
-            MWBase::Environment::get().getWindowManager()->
-                messageBox("VSync will be applied after a restart", std::vector<std::string>());
-#endif
         }
 
         if (_sender == mShadersButton)
@@ -363,10 +362,9 @@ namespace MWGui
 
     void SettingsWindow::onShaderModeToggled(MyGUI::Widget* _sender)
     {
-        std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
-        val = hlslGlsl();
+        std::string val = hlslGlsl();
 
-        static_cast<MyGUI::Button*>(_sender)->setCaption(val);
+        _sender->castType<MyGUI::Button>()->setCaption(val);
 
         Settings::Manager::setString("shader mode", "General", val);
 
@@ -405,6 +403,12 @@ namespace MWGui
                     MyGUI::TextBox* fovText;
                     getWidget(fovText, "FovText");
                     fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int(value)) + ")");
+                }
+                if (scroller == mDifficultySlider)
+                {
+                    MyGUI::TextBox* diffText;
+                    getWidget(diffText, "DifficultyText");
+                    diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(value)) + ")");
                 }
             }
             else
@@ -460,14 +464,17 @@ namespace MWGui
             curH += h;
         }
 
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mControlsBox->setVisibleVScroll(false);
         mControlsBox->setCanvasSize (mControlsBox->getWidth(), std::max(curH, mControlsBox->getHeight()));
+        mControlsBox->setVisibleVScroll(true);
     }
 
     void SettingsWindow::onRebindAction(MyGUI::Widget* _sender)
     {
         int actionId = *_sender->getUserData<int>();
 
-        static_cast<MyGUI::Button*>(_sender)->setCaptionWithReplacing("#{sNone}");
+        _sender->castType<MyGUI::Button>()->setCaptionWithReplacing("#{sNone}");
 
         MWBase::Environment::get().getWindowManager ()->staticMessageBox ("#{sControlsMenu3}");
         MWBase::Environment::get().getWindowManager ()->disallowMouse();

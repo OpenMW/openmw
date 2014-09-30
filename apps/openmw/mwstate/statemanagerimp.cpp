@@ -134,12 +134,12 @@ void MWState::StateManager::newGame (bool bypass)
 {
     cleanup();
 
-    MWBase::Environment::get().getWorld()->startNewGame (bypass);
-
     if (!bypass)
         MWBase::Environment::get().getWindowManager()->setNewGame (true);
-    else
-        MWBase::Environment::get().getWorld()->setGlobalInt ("chargenstate", -1);
+
+    MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
+
+    MWBase::Environment::get().getWorld()->startNewGame (bypass);
 
     mState = State_Running;
 }
@@ -161,7 +161,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         profile.mContentFiles = world.getContentFiles();
 
-        profile.mPlayerName = player.getClass().getName (player);
+        profile.mPlayerName = player.get<ESM::NPC>()->mBase->mName;
         profile.mPlayerLevel = player.getClass().getNpcStats (player).getLevel();
 
         std::string classId = player.get<ESM::NPC>()->mBase->mClass;
@@ -353,6 +353,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_ACTC:
                 case ESM::REC_PROJ:
                 case ESM::REC_MPRJ:
+                case ESM::REC_ENAB:
 
                     MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
                     break;
@@ -365,6 +366,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_GMAP:
                 case ESM::REC_KEYS:
                 case ESM::REC_ASPL:
+                case ESM::REC_MARK:
 
                     MWBase::Environment::get().getWindowManager()->readRecord(reader, n.val);
                     break;
@@ -377,7 +379,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 default:
 
                     // ignore invalid records
-                    /// \todo log error
+                    std::cerr << "Ignoring unknown record: " << n.name << std::endl;
                     reader.skipRecord();
             }
             listener.increaseProgress();
@@ -402,6 +404,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
 
         // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
         MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false);
+
+        MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
 
         // Do not trigger erroneous cellChanged events
         MWBase::Environment::get().getWorld()->markCellAsUnchanged();
@@ -437,7 +441,7 @@ void MWState::StateManager::deleteGame(const MWState::Character *character, cons
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
 {
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    std::string name = player.getClass().getName(player);
+    std::string name = player.get<ESM::NPC>()->mBase->mName;
 
     return mCharacterManager.getCurrentCharacter (create, name);
 }

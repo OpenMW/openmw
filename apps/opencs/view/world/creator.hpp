@@ -1,8 +1,13 @@
 #ifndef CSV_WORLD_CREATOR_H
 #define CSV_WORLD_CREATOR_H
 
+#include <memory>
+
 #include <QWidget>
+
 #include "../../model/world/universalid.hpp"
+
+#include "../../model/world/scope.hpp"
 
 class QUndoStack;
 
@@ -31,6 +36,9 @@ namespace CSVWorld
             virtual void setEditLock (bool locked) = 0;
 
             virtual void toggleWidgets(bool active = true) = 0;
+
+            /// Default implementation: Throw an exception if scope!=Scope_Content.
+            virtual void setScope (unsigned int scope);
 
         signals:
 
@@ -68,7 +76,7 @@ namespace CSVWorld
             /// \note The function always returns 0.
     };
 
-    template<class CreatorT>
+    template<class CreatorT, unsigned int scope = CSMWorld::Scope_Content>
     class CreatorFactory : public CreatorFactoryBase
     {
         public:
@@ -81,11 +89,15 @@ namespace CSVWorld
             /// records should be provided.
     };
 
-    template<class CreatorT>
-    Creator *CreatorFactory<CreatorT>::makeCreator (CSMWorld::Data& data, QUndoStack& undoStack,
+    template<class CreatorT, unsigned int scope>
+    Creator *CreatorFactory<CreatorT, scope>::makeCreator (CSMWorld::Data& data, QUndoStack& undoStack,
         const CSMWorld::UniversalId& id) const
     {
-        return new CreatorT (data, undoStack, id);
+        std::auto_ptr<CreatorT> creator (new CreatorT (data, undoStack, id));
+
+        creator->setScope (scope);
+
+        return creator.release();
     }
 }
 

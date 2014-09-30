@@ -12,6 +12,8 @@
 
 #include "../mwbase/windowmanager.hpp"
 
+#include "mapwindow.hpp"
+
 #include <MyGUI_KeyCode.h>
 #include <MyGUI_Types.h>
 
@@ -86,6 +88,7 @@ namespace MWGui
   class CompanionWindow;
   class VideoWidget;
   class WindowModal;
+  class ScreenFader;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -96,7 +99,7 @@ namespace MWGui
     WindowManager(const Compiler::Extensions& extensions, int fpsLevel,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
-                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding);
+                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap);
     virtual ~WindowManager();
 
     void initUI();
@@ -157,8 +160,6 @@ namespace MWGui
     virtual MWGui::TravelWindow* getTravelWindow();
     virtual MWGui::SpellWindow* getSpellWindow();
     virtual MWGui::Console* getConsole();
-
-    virtual MyGUI::Gui* getGui() const;
 
     virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount);
 
@@ -221,7 +222,6 @@ namespace MWGui
 
     virtual void showCrosshair(bool show);
     virtual bool getSubtitlesEnabled();
-    virtual void toggleHud();
 
     /// Turn visibility of *all* GUI elements on or off (HUD and all windows, except the console)
     virtual bool toggleGui();
@@ -324,6 +324,15 @@ namespace MWGui
 
     virtual void pinWindow (MWGui::GuiWindow window);
 
+    /// Fade the screen in, over \a time seconds
+    virtual void fadeScreenIn(const float time);
+    /// Fade the screen out to black, over \a time seconds
+    virtual void fadeScreenOut(const float time);
+    /// Fade the screen to a specified percentage of black, over \a time seconds
+    virtual void fadeScreenTo(const int percent, const float time);
+    /// Darken the screen by \a factor (1.0 = no darkening). Works independently from screen fading.
+    virtual void setScreenFactor (float factor);
+
   private:
     bool mConsoleOnlyScripts;
 
@@ -334,6 +343,9 @@ namespace MWGui
     std::string mSelectedSpell;
 
     std::stack<WindowModal*> mCurrentModals;
+
+    // Markers placed manually by the player. Must be shared between both map views (the HUD map and the map window).
+    CustomMarkerCollection mCustomMarkers;
 
     OEngine::GUI::MyGUIManager *mGuiManager;
     OEngine::Render::OgreRenderer *mRendering;
@@ -373,6 +385,7 @@ namespace MWGui
     CompanionWindow* mCompanionWindow;
     MyGUI::ImageBox* mVideoBackground;
     VideoWidget* mVideoWidget;
+    ScreenFader* mScreenFader;
 
     Translation::Storage& mTranslationDataStorage;
     Cursor* mSoftwareCursor;
@@ -424,9 +437,17 @@ namespace MWGui
     unsigned int mTriangleCount;
     unsigned int mBatchCount;
 
+    std::map<std::string, std::string> mFallbackMap;
+
     /**
-     * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,
-     * so this method will retrieve the GMST with the name \a _tag and place the result in \a _result
+     * Called when MyGUI tries to retrieve a tag's value. Tags must be denoted in #{tag} notation and will be replaced upon setting a user visible text/property.
+     * Supported syntax:
+     * #{GMSTName}: retrieves String value of the GMST called GMSTName
+     * #{sCell=CellID}: retrieves translated name of the given CellID (used only by some Morrowind localisations, in others cell ID is == cell name)
+     * #{fontcolour=FontColourName}: retrieves the value of the fallback setting "FontColor_color_<FontColourName>" from openmw.cfg,
+     *                              in the format "r g b a", float values in range 0-1. Useful for "Colour" and "TextColour" properties in skins.
+     * #{fontcolourhtml=FontColourName}: retrieves the value of the fallback setting "FontColor_color_<FontColourName>" from openmw.cfg,
+     *                              in the format "#xxxxxx" where x are hexadecimal numbers. Useful in an EditBox's caption to change the color of following text.
      */
     void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
 
@@ -437,6 +458,9 @@ namespace MWGui
     void onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char);
 
     void sizeVideo(int screenWidth, int screenHeight);
+
+    void onClipboardChanged(const std::string& _type, const std::string& _data);
+    void onClipboardRequested(const std::string& _type, std::string& _data);
   };
 }
 

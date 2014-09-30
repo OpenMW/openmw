@@ -8,6 +8,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 namespace MWMechanics
 {
@@ -16,7 +17,7 @@ namespace MWMechanics
     CreatureStats::CreatureStats()
         : mLevel (0), mDead (false), mDied (false), mMurdered(false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
-          mAttacked (false), mHostile (false),
+          mAttacked (false),
           mAttackingOrSpell(false),
           mIsWerewolf(false),
           mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mKnockdownOneFrame(false),
@@ -119,11 +120,6 @@ namespace MWMechanics
         return mSpells;
     }
 
-    void CreatureStats::setSpells(const Spells &spells)
-    {
-        mSpells = spells;
-    }
-
     ActiveSpells &CreatureStats::getActiveSpells()
     {
         return mActiveSpells;
@@ -187,10 +183,10 @@ namespace MWMechanics
 
         if (index==0 && mDynamic[index].getCurrent()<1)
         {
-            if (!mDead)
-                mDied = true;
-
             mDead = true;
+
+            if (MWBase::Environment::get().getWorld()->getGodModeState())
+                MWBase::Environment::get().getMechanicsManager()->keepPlayerAlive();
         }
     }
 
@@ -199,18 +195,13 @@ namespace MWMechanics
         mLevel = level;
     }
 
-    void CreatureStats::setActiveSpells(const ActiveSpells &active)
+    void CreatureStats::modifyMagicEffects(const MagicEffects &effects)
     {
-        mActiveSpells = active;
-    }
-
-    void CreatureStats::setMagicEffects(const MagicEffects &effects)
-    {
-        if (effects.get(ESM::MagicEffect::FortifyMaximumMagicka).mMagnitude
-                != mMagicEffects.get(ESM::MagicEffect::FortifyMaximumMagicka).mMagnitude)
+        if (effects.get(ESM::MagicEffect::FortifyMaximumMagicka).getModifier()
+                != mMagicEffects.get(ESM::MagicEffect::FortifyMaximumMagicka).getModifier())
             mRecalcDynamicStats = true;
 
-        mMagicEffects = effects;
+        mMagicEffects.setModifiers(effects);
     }
 
     void CreatureStats::setAttackingOrSpell(bool attackingOrSpell)
@@ -233,6 +224,11 @@ namespace MWMechanics
     bool CreatureStats::isDead() const
     {
         return mDead;
+    }
+
+    void CreatureStats::notifyDied()
+    {
+        mDied = true;
     }
 
     bool CreatureStats::hasDied() const
@@ -264,11 +260,7 @@ namespace MWMechanics
     {
         if (mDead)
         {
-            if (mDynamic[0].getCurrent()<1)
-            {
-                mDynamic[0].setModified(mDynamic[0].getModified(), 1);
-                mDynamic[0].setCurrent(1);
-            }
+            mDynamic[0].setCurrent(mDynamic[0].getModified());
             if (mDynamic[0].getCurrent()>=1)
                 mDead = false;
         }
@@ -324,16 +316,6 @@ namespace MWMechanics
         mAttacked = attacked;
     }
 
-    bool CreatureStats::isHostile() const
-    {
-        return mHostile;
-    }
-
-    void CreatureStats::setHostile (bool hostile)
-    {
-        mHostile = hostile;
-    }
-
     bool CreatureStats::getCreatureTargetted() const
     {
         MWWorld::Ptr targetPtr;
@@ -349,7 +331,7 @@ namespace MWMechanics
         float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                         (getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         evasion *= getFatigueTerm();
-        evasion += mMagicEffects.get(ESM::MagicEffect::Sanctuary).mMagnitude;
+        evasion += mMagicEffects.get(ESM::MagicEffect::Sanctuary).getMagnitude();
 
         return evasion;
     }
@@ -384,6 +366,11 @@ namespace MWMechanics
              return true;
          }
          return false;
+    }
+
+    void CreatureStats::setNeedRecalcDynamicStats(bool val)
+    {
+        mRecalcDynamicStats = val;
     }
 
     void CreatureStats::setKnockedDown(bool value)
@@ -499,7 +486,6 @@ namespace MWMechanics
         state.mTalkedTo = mTalkedTo;
         state.mAlarmed = mAlarmed;
         state.mAttacked = mAttacked;
-        state.mHostile = mHostile;
         state.mAttackingOrSpell = mAttackingOrSpell;
         // TODO: rewrite. does this really need 3 separate bools?
         state.mKnockdown = mKnockdown;
@@ -520,6 +506,7 @@ namespace MWMechanics
         mSpells.writeState(state.mSpells);
         mActiveSpells.writeState(state.mActiveSpells);
         mAiSequence.writeState(state.mAiSequence);
+        mMagicEffects.writeState(state.mMagicEffects);
 
         state.mSummonedCreatureMap = mSummonedCreatures;
         state.mSummonGraveyard = mSummonGraveyard;
@@ -539,7 +526,6 @@ namespace MWMechanics
 
         mLastRestock = MWWorld::TimeStamp(state.mTradeTime);
         mGoldPool = state.mGoldPool;
-        mFallHeight = state.mFallHeight;
 
         mDead = state.mDead;
         mDied = state.mDied;
@@ -548,7 +534,6 @@ namespace MWMechanics
         mTalkedTo = state.mTalkedTo;
         mAlarmed = state.mAlarmed;
         mAttacked = state.mAttacked;
-        mHostile = state.mHostile;
         mAttackingOrSpell = state.mAttackingOrSpell;
         // TODO: rewrite. does this really need 3 separate bools?
         mKnockdown = state.mKnockdown;
@@ -569,6 +554,7 @@ namespace MWMechanics
         mSpells.readState(state.mSpells);
         mActiveSpells.readState(state.mActiveSpells);
         mAiSequence.readState(state.mAiSequence);
+        mMagicEffects.readState(state.mMagicEffects);
 
         mSummonedCreatures = state.mSummonedCreatureMap;
         mSummonGraveyard = state.mSummonGraveyard;

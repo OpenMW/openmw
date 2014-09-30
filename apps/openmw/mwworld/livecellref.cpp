@@ -30,8 +30,18 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
         {
             if (const ESM::Script* script = MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().search (scriptId))
             {
-                mData.setLocals (*script);
-                mData.getLocals().read (state.mLocals, scriptId);
+                try
+                {
+                    mData.setLocals (*script);
+                    mData.getLocals().read (state.mLocals, scriptId);
+                }
+                catch (const std::exception& exception)
+                {
+                    std::cerr
+                        << "failed to load state for local script " << scriptId
+                        << " because an exception has been thrown: " << exception.what()
+                        << std::endl;
+                }
             }
         }
     }

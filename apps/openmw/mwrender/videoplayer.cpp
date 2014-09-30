@@ -26,18 +26,31 @@ typedef SSIZE_T ssize_t;
 namespace MWRender
 {
 
-#ifdef OPENMW_USE_FFMPEG
-
 extern "C"
 {
     #include <libavcodec/avcodec.h>
     #include <libavformat/avformat.h>
     #include <libswscale/swscale.h>
 
-    // From libavformat version 55.0.100 and onward the declaration of av_gettime() is removed from libavformat/avformat.h and moved
-    // to libavutil/time.h
+
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
+#define IS_NOTEQ_NOPTS_VAL(x) ((uint64_t)x != AV_NOPTS_VALUE)
+#define IS_NOTEQ_NOPTS_VAL_PTR(x) (*(uint64_t*)x != AV_NOPTS_VALUE)
+#else
+#define IS_NOTEQ_NOPTS_VAL(x) ((int64_t)x != AV_NOPTS_VALUE)
+#define IS_NOTEQ_NOPTS_VAL_PTR(x) (*(int64_t*)x != AV_NOPTS_VALUE)
+#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
+
+
+    #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
+    #define av_frame_alloc  avcodec_alloc_frame
+    #endif
+
+    // From libavformat version 55.0.100 and onward the declaration of av_gettime() is
+    // removed from libavformat/avformat.h and moved to libavutil/time.h
     // https://github.com/FFmpeg/FFmpeg/commit/06a83505992d5f49846c18507a6c3eb8a47c650e
-    #if AV_VERSION_INT(55, 0, 100) <= AV_VERSION_INT(LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO)
+    #if AV_VERSION_INT(55, 0, 100) <= AV_VERSION_INT(LIBAVFORMAT_VERSION_MAJOR, \
+        LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO)
         #include <libavutil/time.h>
     #endif
 
@@ -48,30 +61,25 @@ extern "C"
         LIBAVUTIL_VERSION_MINOR, LIBAVUTIL_VERSION_MICRO)
         #include <libavutil/channel_layout.h>
     #endif
-}
 
-#ifdef _WIN32
-    // Decide whether to play binkaudio.
-    #include <libavcodec/version.h>
-    // libavcodec versions 54.10.100 (or maybe earlier) to 54.54.100 potentially crashes Windows 64bit.
-    // From version 54.56 or higher, there's no sound due to the encoding format changing from S16 to FLTP
-    // (see https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d and
-    // http://git.videolan.org/?p=ffmpeg.git;a=commitdiff;h=3049d5b9b32845c86aa5588bb3352bdeb2edfdb2;hp=43c6b45a53a186a187f7266e4d6bd3c2620519f1),
-    // but does not crash (or at least no known crash).
-    #if (LIBAVCODEC_VERSION_MAJOR > 54)
-        #define FFMPEG_PLAY_BINKAUDIO
+    // WARNING: avcodec versions up to 54.54.100 potentially crashes on Windows 64bit.
+
+    // From version 54.56 binkaudio encoding format changed from S16 to FLTP. See:
+    // https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d
+    // http://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
+    #ifdef HAVE_LIBSWRESAMPLE
+    #include <libswresample/swresample.h>
     #else
-        #ifdef _WIN64
-            #if ((LIBAVCODEC_VERSION_MAJOR == 54) && (LIBAVCODEC_VERSION_MINOR >= 55))
-                #define FFMPEG_PLAY_BINKAUDIO
-            #endif
-        #else
-            #if ((LIBAVCODEC_VERSION_MAJOR == 54) && (LIBAVCODEC_VERSION_MINOR >= 10))
-                #define FFMPEG_PLAY_BINKAUDIO
-            #endif
-        #endif
+    /* FIXME: remove this section once libswresample is available on all platforms */
+    #include <libavresample/avresample.h>
+    #include <libavutil/opt.h>
+    #define SwrContext AVAudioResampleContext
+    int  swr_init(AVAudioResampleContext *avr);
+    void  swr_free(AVAudioResampleContext **avr);
+    int swr_convert( AVAudioResampleContext *avr, uint8_t** output, int out_samples, const uint8_t** input, int in_samples);
+    AVAudioResampleContext * swr_alloc_set_opts( AVAudioResampleContext *avr, int64_t out_ch_layout, AVSampleFormat out_fmt, int out_rate, int64_t in_ch_layout, AVSampleFormat in_fmt, int in_rate, int o, void* l);
     #endif
-#endif
+}
 
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
 #define MAX_VIDEOQ_SIZE (5 * 256 * 1024)
@@ -221,8 +229,11 @@ void PacketQueue::put(AVPacket *pkt)
     if(!pkt1) throw std::bad_alloc();
     pkt1->pkt = *pkt;
     pkt1->next = NULL;
-
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
     if(pkt1->pkt.destruct == NULL)
+#else
+    if(pkt1->pkt.buf == NULL)
+#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
     {
         if(av_dup_packet(&pkt1->pkt) < 0)
         {
@@ -319,6 +330,12 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     VideoState *mVideoState;
     AVStream *mAVStream;
 
+    SwrContext *mSwr;
+    enum AVSampleFormat mOutputSampleFormat;
+    uint8_t *mDataBuf;
+    uint8_t **mFrameData;
+    int mDataBufLen;
+
     AutoAVPacket mPacket;
     AVFrame *mFrame;
     ssize_t mFramePos;
@@ -385,6 +402,28 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 if(!got_frame || frame->nb_samples <= 0)
                     continue;
 
+                if(mSwr)
+                {
+                    if(!mDataBuf || mDataBufLen < frame->nb_samples)
+                    {
+                        av_freep(&mDataBuf);
+                        if(av_samples_alloc(&mDataBuf, NULL, mAVStream->codec->channels,
+                                            frame->nb_samples, mOutputSampleFormat, 0) < 0)
+                            break;
+                        else
+                            mDataBufLen = frame->nb_samples;
+                    }
+
+                    if(swr_convert(mSwr, (uint8_t**)&mDataBuf, frame->nb_samples,
+                        (const uint8_t**)frame->extended_data, frame->nb_samples) < 0)
+                    {
+                        break;
+                    }
+                    mFrameData = &mDataBuf;
+                }
+                else
+                    mFrameData = &frame->data[0];
+
                 mAudioClock += (double)frame->nb_samples /
                                (double)mAVStream->codec->sample_rate;
 
@@ -399,7 +438,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 return -1;
 
             /* if update, update the audio clock w/pts */
-            if((uint64_t)pkt->pts != AV_NOPTS_VALUE)
+            if(IS_NOTEQ_NOPTS_VAL(pkt->pts))
                 mAudioClock = av_q2d(mAVStream->time_base)*pkt->pts;
         }
     }
@@ -422,7 +461,7 @@ public:
     MovieAudioDecoder(VideoState *is)
       : mVideoState(is)
       , mAVStream(*is->audio_st)
-      , mFrame(avcodec_alloc_frame())
+      , mFrame(av_frame_alloc())
       , mFramePos(0)
       , mFrameSize(0)
       , mAudioClock(0.0)
@@ -431,10 +470,17 @@ public:
       /* Correct audio only if larger error than this */
       , mAudioDiffThreshold(2.0 * 0.050/* 50 ms */)
       , mAudioDiffAvgCount(0)
+      , mSwr(0)
+      , mOutputSampleFormat(AV_SAMPLE_FMT_NONE)
+      , mDataBuf(NULL)
+      , mFrameData(NULL)
+      , mDataBufLen(0)
     { }
     virtual ~MovieAudioDecoder()
     {
         av_freep(&mFrame);
+        swr_free(&mSwr);
+        av_freep(&mDataBuf);
     }
 
     void getInfo(int *samplerate, MWSound::ChannelConfig *chans, MWSound::SampleType * type)
@@ -445,9 +491,17 @@ public:
             *type = MWSound::SampleType_Int16;
         else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLT)
             *type = MWSound::SampleType_Float32;
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8P)
+            *type = MWSound::SampleType_UInt8;
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16P)
+            *type = MWSound::SampleType_Int16;
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
+            *type = MWSound::SampleType_Float32;
         else
             fail(std::string("Unsupported sample format: ")+
                  av_get_sample_fmt_name(mAVStream->codec->sample_fmt));
+
+        int64_t ch_layout = mAVStream->codec->channel_layout;
 
         if(mAVStream->codec->channel_layout == AV_CH_LAYOUT_MONO)
             *chans = MWSound::ChannelConfig_Mono;
@@ -463,9 +517,15 @@ public:
         {
             /* Unknown channel layout. Try to guess. */
             if(mAVStream->codec->channels == 1)
+            {
                 *chans = MWSound::ChannelConfig_Mono;
+                ch_layout = AV_CH_LAYOUT_MONO;
+            }
             else if(mAVStream->codec->channels == 2)
+            {
                 *chans = MWSound::ChannelConfig_Stereo;
+                ch_layout = AV_CH_LAYOUT_STEREO;
+            }
             else
             {
                 std::stringstream sstr("Unsupported raw channel count: ");
@@ -482,6 +542,30 @@ public:
         }
 
         *samplerate = mAVStream->codec->sample_rate;
+
+        if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8P)
+            mOutputSampleFormat = AV_SAMPLE_FMT_U8;
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16P)
+            mOutputSampleFormat = AV_SAMPLE_FMT_S16;
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
+            mOutputSampleFormat = AV_SAMPLE_FMT_FLT;
+
+        if(mOutputSampleFormat != AV_SAMPLE_FMT_NONE)
+        {
+            mSwr = swr_alloc_set_opts(mSwr,                  // SwrContext
+                              ch_layout,                     // output ch layout
+                              mOutputSampleFormat,           // output sample format
+                              mAVStream->codec->sample_rate, // output sample rate
+                              ch_layout,                     // input ch layout
+                              mAVStream->codec->sample_fmt,  // input sample format
+                              mAVStream->codec->sample_rate, // input sample rate
+                              0,                             // logging level offset
+                              NULL);                         // log context
+            if(!mSwr)
+                fail(std::string("Couldn't allocate SwrContext"));
+            if(swr_init(mSwr) < 0)
+                fail(std::string("Couldn't initialize SwrContext"));
+        }
     }
 
     size_t read(char *stream, size_t len)
@@ -502,7 +586,8 @@ public:
                 }
 
                 mFramePos = std::min<ssize_t>(mFrameSize, sample_skip);
-                sample_skip -= mFramePos;
+                if(sample_skip > 0 || mFrameSize > -sample_skip)
+                    sample_skip -= mFramePos;
                 continue;
             }
 
@@ -510,7 +595,7 @@ public:
             if(mFramePos >= 0)
             {
                 len1 = std::min<size_t>(len1, mFrameSize-mFramePos);
-                memcpy(stream, mFrame->data[0]+mFramePos, len1);
+                memcpy(stream, mFrameData[0]+mFramePos, len1);
             }
             else
             {
@@ -521,29 +606,29 @@ public:
 
                 /* add samples by copying the first sample*/
                 if(n == 1)
-                    memset(stream, *mFrame->data[0], len1);
+                    memset(stream, *mFrameData[0], len1);
                 else if(n == 2)
                 {
-                    const int16_t val = *((int16_t*)mFrame->data[0]);
+                    const int16_t val = *((int16_t*)mFrameData[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
                         *((int16_t*)(stream+nb)) = val;
                 }
                 else if(n == 4)
                 {
-                    const int32_t val = *((int32_t*)mFrame->data[0]);
+                    const int32_t val = *((int32_t*)mFrameData[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
                         *((int32_t*)(stream+nb)) = val;
                 }
                 else if(n == 8)
                 {
-                    const int64_t val = *((int64_t*)mFrame->data[0]);
+                    const int64_t val = *((int64_t*)mFrameData[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
                         *((int64_t*)(stream+nb)) = val;
                 }
                 else
                 {
                     for(size_t nb = 0;nb < len1;nb += n)
-                        memcpy(stream+nb, mFrame->data[0], n);
+                        memcpy(stream+nb, mFrameData[0], n);
                 }
             }
 
@@ -748,6 +833,8 @@ double VideoState::synchronize_video(AVFrame *src_frame, double pts)
  * a frame at the time it is allocated.
  */
 static uint64_t global_video_pkt_pts = static_cast<uint64_t>(AV_NOPTS_VALUE);
+
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
 static int our_get_buffer(struct AVCodecContext *c, AVFrame *pic)
 {
     int ret = avcodec_default_get_buffer(c, pic);
@@ -761,18 +848,26 @@ static void our_release_buffer(struct AVCodecContext *c, AVFrame *pic)
     if(pic) av_freep(&pic->opaque);
     avcodec_default_release_buffer(c, pic);
 }
-
+#else
+static int our_get_buffer2(struct AVCodecContext *c, AVFrame *pic, int flags = AV_GET_BUFFER_FLAG_REF)
+{
+    int ret = avcodec_default_get_buffer2(c, pic, flags);
+    uint64_t *pts = (uint64_t*)av_malloc(sizeof(uint64_t));
+    *pts = global_video_pkt_pts;
+    pic->opaque = pts;
+    return ret;
+}
+#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
 
 void VideoState::video_thread_loop(VideoState *self)
 {
     AVPacket pkt1, *packet = &pkt1;
     int frameFinished;
     AVFrame *pFrame;
-    double pts;
 
-    pFrame = avcodec_alloc_frame();
+    pFrame = av_frame_alloc();
 
-    self->rgbaFrame = avcodec_alloc_frame();
+    self->rgbaFrame = av_frame_alloc();
     avpicture_alloc((AVPicture*)self->rgbaFrame, PIX_FMT_RGBA, (*self->video_st)->codec->width, (*self->video_st)->codec->height);
 
     while(self->videoq.get(packet, self) >= 0)
@@ -783,10 +878,10 @@ void VideoState::video_thread_loop(VideoState *self)
         if(avcodec_decode_video2((*self->video_st)->codec, pFrame, &frameFinished, packet) < 0)
             throw std::runtime_error("Error decoding video frame");
 
-        pts = 0;
-        if((uint64_t)packet->dts != AV_NOPTS_VALUE)
+        double pts = 0;
+        if(IS_NOTEQ_NOPTS_VAL(packet->dts))
             pts = packet->dts;
-        else if(pFrame->opaque && *(uint64_t*)pFrame->opaque != AV_NOPTS_VALUE)
+        else if(pFrame->opaque && IS_NOTEQ_NOPTS_VAL_PTR(pFrame->opaque))
             pts = *(uint64_t*)pFrame->opaque;
         pts *= av_q2d((*self->video_st)->time_base);
 
@@ -887,6 +982,9 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
     // Get a pointer to the codec context for the video stream
     codecCtx = pFormatCtx->streams[stream_index]->codec;
     codec = avcodec_find_decoder(codecCtx->codec_id);
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(56,1,0)
+    codecCtx->refcounted_frames = 1;
+#endif /* LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(56,1,0) */
     if(!codec || (avcodec_open2(codecCtx, codec, NULL) < 0))
     {
         fprintf(stderr, "Unsupported codec!\n");
@@ -912,9 +1010,12 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         this->video_st = pFormatCtx->streams + stream_index;
 
         this->frame_last_delay = 40e-3;
-
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
         codecCtx->get_buffer = our_get_buffer;
         codecCtx->release_buffer = our_release_buffer;
+#else
+        codecCtx->get_buffer2 = our_get_buffer2;
+#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
         this->video_thread = boost::thread(video_thread_loop, this);
         this->refresh_thread = boost::thread(video_refresh, this);
         break;
@@ -994,12 +1095,8 @@ void VideoState::init(const std::string& resourceName)
 
     this->external_clock_base = av_gettime();
 
-#if !defined(_WIN32) || defined(FFMPEG_PLAY_BINKAUDIO)
     if(audio_index >= 0)
         this->stream_open(audio_index, this->format_ctx);
-#else
-    std::cout<<"FFmpeg sound disabled for \""+resourceName+"\""<<std::endl;
-#endif
 
     if(video_index >= 0)
     {
@@ -1067,32 +1164,11 @@ void VideoState::deinit()
             this->format_ctx->pb->buffer = NULL;
 
             av_free(this->format_ctx->pb);
-            this->format_ctx->pb = NULL;;
+            this->format_ctx->pb = NULL;
         }
         avformat_close_input(&this->format_ctx);
     }
 }
-
-#else // defined OPENMW_USE_FFMPEG
-
-class VideoState
-{
-public:
-    VideoState() { }
-
-    void init(const std::string& resourceName)
-    {
-        throw std::runtime_error("FFmpeg not supported, cannot play \""+resourceName+"\"");
-    }
-    void deinit() { }
-
-    void close() { }
-
-    bool update()
-    { return false; }
-};
-
-#endif // defined OPENMW_USE_FFMPEG
 
 
 VideoPlayer::VideoPlayer()
@@ -1153,11 +1229,6 @@ int VideoPlayer::getVideoHeight()
     if (mState)
         height = mState->mTexture->getHeight();
     return height;
-}
-
-void VideoPlayer::stopVideo ()
-{
-    close();
 }
 
 void VideoPlayer::close()

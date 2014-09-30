@@ -14,6 +14,7 @@ namespace Ogre
     class Camera;
     class SceneManager;
     class RenderWindow;
+    class Viewport;
 }
 
 namespace CSVWidget
@@ -41,6 +42,8 @@ namespace CSVRender
             CSVWidget::SceneToolMode *makeLightingSelector (CSVWidget::SceneToolbar *parent);
             ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
             /// is the responsibility of the calling function.
+
+            virtual void setVisibilityMask (unsigned int mask);
 
         protected:
 
@@ -77,14 +80,13 @@ namespace CSVRender
 
             void updateOgreWindow();
 
-            int getFastFactor() const;
-
             void setLighting (Lighting *lighting);
             ///< \attention The ownership of \a lighting is not transferred to *this.
 
             Ogre::Camera*	    mCamera;
             Ogre::SceneManager* mSceneMgr;
             Ogre::RenderWindow* mWindow;
+            Ogre::Viewport *mViewport;
 
             Navigation *mNavigation;
             Lighting *mLighting;

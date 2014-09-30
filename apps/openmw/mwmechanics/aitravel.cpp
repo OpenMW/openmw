@@ -1,5 +1,7 @@
 #include "aitravel.hpp"
 
+#include <OgreVector3.h>
+
 #include <components/esm/aisequence.hpp>
 
 #include "../mwbase/world.hpp"
@@ -44,6 +46,8 @@ namespace MWMechanics
 
         actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
 
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+
         MWWorld::Ptr player = world->getPlayerPtr();
         if(cell->mData.mX != player.getCell()->getCell()->mData.mX)
         {
@@ -67,6 +71,12 @@ namespace MWMechanics
                 return false;
             }
         }
+
+        // Maximum travel distance for vanilla compatibility.
+        // Was likely meant to prevent NPCs walking into non-loaded exterior cells, but for some reason is used in interior cells as well.
+        // We can make this configurable at some point, but the default *must* be the below value. Anything else will break shoddily-written content (*cough* MW *cough*) in bizarre ways.
+        if (Ogre::Vector3(mX, mY, mZ).squaredDistance(Ogre::Vector3(pos.pos)) > 7168*7168)
+            return false;
 
         bool cellChange = cell->mData.mX != mCellX || cell->mData.mY != mCellY;
         if(!mPathFinder.isPathConstructed() || cellChange)

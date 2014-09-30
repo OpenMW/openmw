@@ -142,6 +142,34 @@ void MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container)
     remove(ptr, ptr.getRefData().getCount()-1, container);
 }
 
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::Ptr& item)
+{
+    MWWorld::ContainerStoreIterator retval = end();
+    for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
+    {
+        if (item == *iter)
+        {
+            retval = iter;
+            break;
+        }
+    }
+
+    if (retval == end())
+        throw std::runtime_error("item is not from this container");
+
+    for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
+    {
+        if (stacks(*iter, item))
+        {
+            iter->getRefData().setCount(iter->getRefData().getCount() + item.getRefData().getCount());
+            item.getRefData().setCount(0);
+            retval = iter;
+            break;
+        }
+    }
+    return retval;
+}
+
 bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 {
     const MWWorld::Class& cls1 = ptr1.getClass();
@@ -228,6 +256,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     pos.pos[1] = 0;
     pos.pos[2] = 0;
     item.getCellRef().setPosition(pos);
+    item.getCellRef().unsetRefNum(); // destroy link to content file
 
     std::string script = item.getClass().getScript(item);
     if(script != "")
@@ -673,7 +702,8 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& state)
     for (std::vector<std::pair<ESM::LightState, int> >::const_iterator iter (state.mLights.begin());
         iter!=state.mLights.end(); ++iter)
     {
-        getState (lights, iter->first);
+        int slot = iter->second;
+        setSlot (getState (lights, iter->first), slot);
     }
 
     mLevelledItemMap = state.mLevelledItemMap;

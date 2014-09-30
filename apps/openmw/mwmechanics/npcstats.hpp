@@ -19,9 +19,6 @@ namespace ESM
 namespace MWMechanics
 {
     /// \brief Additional stats for NPCs
-    ///
-    /// \note For technical reasons the spell list and the currently selected spell is also handled by
-    /// CreatureStats, even though they are actually NPC stats.
 
     class NpcStats : public CreatureStats
     {
@@ -51,8 +48,6 @@ namespace MWMechanics
             float mTimeToStartDrowning;
             /// time since last hit from drowning
             float mLastDrowningHit;
-
-            float mLevelHealthBonus;
 
         public:
 
@@ -86,12 +81,12 @@ namespace MWMechanics
             ///< Do *this and \a npcStats share a faction?
 
             float getSkillGain (int skillIndex, const ESM::Class& class_, int usageType = -1,
-                int level = -1) const;
+                int level = -1, float extraFactor=1.f) const;
             ///< \param usageType: Usage specific factor, specified in the respective skill record;
             /// -1: use a factor of 1.0 instead.
             /// \param level Level to base calculation on; -1: use current level.
 
-            void useSkill (int skillIndex, const ESM::Class& class_, int usageType = -1);
+            void useSkill (int skillIndex, const ESM::Class& class_, int usageType = -1, float extraFactor=1.f);
             ///< Increase skill by usage.
 
             void increaseSkill (int skillIndex, const ESM::Class& class_, bool preserveProgress);
@@ -104,7 +99,7 @@ namespace MWMechanics
 
             void updateHealth();
             ///< Calculate health based on endurance and strength.
-            ///  Called at character creation and at level up.
+            ///  Called at character creation.
 
             void flagAsUsed (const std::string& id);
 

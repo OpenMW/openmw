@@ -661,12 +661,14 @@ namespace Physic
     };
 
 
-    std::vector<std::string> PhysicEngine::getCollisions(const std::string& name)
+    std::vector<std::string> PhysicEngine::getCollisions(const std::string& name, int collisionGroup, int collisionMask)
     {
         RigidBody* body = getRigidBody(name);
         if (!body) // fall back to raycasting body if there is no collision body
             body = getRigidBody(name, true);
         ContactTestResultCallback callback;
+        callback.m_collisionFilterGroup = collisionGroup;
+        callback.m_collisionFilterMask = collisionMask;
         mDynamicsWorld->contactTest(body, callback);
         return callback.mResult;
     }
@@ -733,11 +735,7 @@ namespace Physic
         }
     }
 
-    void PhysicEngine::emptyEventLists(void)
-    {
-    }
-
-    std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly,bool ignoreHeightMap, Ogre::Vector3* normal)
+    std::pair<std::string,float> PhysicEngine::rayTest(const btVector3 &from, const btVector3 &to, bool raycastingObjectOnly, bool ignoreHeightMap, Ogre::Vector3* normal)
     {
         std::string name = "";
         float d = -1;
@@ -801,7 +799,7 @@ namespace Physic
             return std::make_pair(false, 1);
     }
 
-    std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(btVector3& from, btVector3& to)
+    std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(const btVector3& from, const btVector3& to)
     {
         MyRayResultCallback resultCallback1;
         resultCallback1.m_collisionFilterGroup = 0xff;
@@ -844,22 +842,6 @@ namespace Physic
             min = btVector3(0,0,0);
             max = btVector3(0,0,0);
         }
-    }
-
-    bool PhysicEngine::isAnyActorStandingOn (const std::string& objectName)
-    {
-        for (PhysicActorContainer::iterator it = mActorMap.begin(); it != mActorMap.end(); ++it)
-        {
-            if (!it->second->getOnGround())
-                continue;
-            Ogre::Vector3 pos = it->second->getPosition();
-            btVector3 from (pos.x, pos.y, pos.z);
-            btVector3 to = from - btVector3(0,0,5);
-            std::pair<std::string, float> result = rayTest(from, to);
-            if (result.first == objectName)
-                return true;
-        }
-        return false;
     }
 
 }

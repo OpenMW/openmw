@@ -93,6 +93,21 @@ namespace MWGui
         unborrowImpl(item, count, mBorrowedFromUs);
     }
 
+    void TradeItemModel::adjustEncumbrance(float &encumbrance)
+    {
+        for (std::vector<ItemStack>::iterator it = mBorrowedToUs.begin(); it != mBorrowedToUs.end(); ++it)
+        {
+            MWWorld::Ptr item = it->mBase;
+            encumbrance += item.getClass().getWeight(item) * it->mCount;
+        }
+        for (std::vector<ItemStack>::iterator it = mBorrowedFromUs.begin(); it != mBorrowedFromUs.end(); ++it)
+        {
+            MWWorld::Ptr item = it->mBase;
+            encumbrance -= item.getClass().getWeight(item) * it->mCount;
+        }
+        encumbrance = std::max(0.f, encumbrance);
+    }
+
     void TradeItemModel::abort()
     {
         mBorrowedFromUs.clear();
@@ -104,7 +119,7 @@ namespace MWGui
         return mBorrowedToUs;
     }
 
-    void TradeItemModel::transferItems()
+    void TradeItemModel::transferItems(const MWWorld::Ptr& transferFrom)
     {
         std::vector<ItemStack>::iterator it = mBorrowedToUs.begin();
         for (; it != mBorrowedToUs.end(); ++it)
@@ -120,9 +135,11 @@ namespace MWGui
             if (i == sourceModel->getItemCount())
                 throw std::runtime_error("The borrowed item disappeared");
 
-            // reset owner while copying, but only for items bought by the player
-            bool setNewOwner = (mMerchant.isEmpty());
             const ItemStack& item = sourceModel->getItem(i);
+
+            bool setNewOwner = Misc::StringUtils::ciEqual(item.mBase.getCellRef().getOwner(), transferFrom.getCellRef().getRefId())
+                    || item.mBase.getCellRef().getOwner().empty();
+
             // copy the borrowed items to our model
             copyItem(item, it->mCount, setNewOwner);
             // then remove them from the source model
@@ -154,11 +171,8 @@ namespace MWGui
                     continue;
 
                 // Bound items may not be bought
-                if (item.mBase.getCellRef().getRefId().size() > 6
-                        && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
-                {
+                if (item.mFlags & ItemStack::Flag_Bound)
                     continue;
-                }
 
                 // don't show equipped items
                 if(mMerchant.getClass().hasInventoryStore(mMerchant))

@@ -24,7 +24,7 @@ namespace MWGui
 
     EnchantingDialog::EnchantingDialog()
         : WindowBase("openmw_enchanting_dialog.layout")
-        , EffectEditorBase()
+        , EffectEditorBase(EffectEditorBase::Enchanting)
         , mItemSelectionDialog(NULL)
     {
         getWidget(mName, "NameEdit");
@@ -58,9 +58,6 @@ namespace MWGui
     void EnchantingDialog::open()
     {
         center();
-
-        setSoulGem(MWWorld::Ptr());
-        setItem(MWWorld::Ptr());
     }
 
     void EnchantingDialog::setSoulGem(const MWWorld::Ptr &gem)
@@ -78,7 +75,6 @@ namespace MWGui
             mSoulBox->setUserData(gem);
             mEnchanting.setSoulGem(gem);
         }
-        updateLabels();
     }
 
     void EnchantingDialog::setItem(const MWWorld::Ptr &item)
@@ -91,12 +87,12 @@ namespace MWGui
         }
         else
         {
+            mName->setCaption(item.getClass().getName(item));
             mItemBox->setItem(item);
             mItemBox->setUserString ("ToolTipType", "ItemPtr");
             mItemBox->setUserData(item);
             mEnchanting.setOldItem(item);
         }
-        updateLabels();
     }
 
     void EnchantingDialog::exit()
@@ -144,9 +140,17 @@ namespace MWGui
         mEnchanting.setSelfEnchanting(false);
         mEnchanting.setEnchanter(actor);
 
+        mBuyButton->setCaptionWithReplacing("#{sBuy}");
+
         mPtr = actor;
 
+        setSoulGem(MWWorld::Ptr());
+        setItem(MWWorld::Ptr());
+
         startEditing ();
+        mPrice->setVisible(true);
+        mPriceText->setVisible(true);
+        updateLabels();
     }
 
     void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
@@ -156,11 +160,13 @@ namespace MWGui
         mEnchanting.setSelfEnchanting(true);
         mEnchanting.setEnchanter(player);
 
+        mBuyButton->setCaptionWithReplacing("#{sCreate}");
+
         mPtr = player;
         startEditing();
-        mEnchanting.setSoulGem(soulgem);
 
         setSoulGem(soulgem);
+        setItem(MWWorld::Ptr());
 
         mPrice->setVisible(false);
         mPriceText->setVisible(false);
@@ -171,6 +177,16 @@ namespace MWGui
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
+        resetReference();
+    }
+
+    void EnchantingDialog::resetReference()
+    {
+        ReferenceInterface::resetReference();
+        setItem(MWWorld::Ptr());
+        setSoulGem(MWWorld::Ptr());
+        mPtr = MWWorld::Ptr();
+        mEnchanting.setEnchanter(MWWorld::Ptr());
     }
 
     void EnchantingDialog::onCancelButtonClicked(MyGUI::Widget* sender)
@@ -193,6 +209,7 @@ namespace MWGui
         else
         {
             setItem(MWWorld::Ptr());
+            updateLabels();
         }
     }
 
@@ -201,6 +218,7 @@ namespace MWGui
         mItemSelectionDialog->setVisible(false);
 
         setItem(item);
+        MWBase::Environment::get().getSoundManager()->playSound(item.getClass().getDownSoundId(item), 1, 1);
         mEnchanting.nextCastStyle();
         updateLabels();
     }
@@ -213,8 +231,8 @@ namespace MWGui
     void EnchantingDialog::onSoulSelected(MWWorld::Ptr item)
     {
         mItemSelectionDialog->setVisible(false);
-        mEnchanting.setSoulGem(item);
 
+        mEnchanting.setSoulGem(item);
         if(mEnchanting.getGemCharge()==0)
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage32}");
@@ -222,6 +240,8 @@ namespace MWGui
         }
 
         setSoulGem(item);
+        MWBase::Environment::get().getSoundManager()->playSound(item.getClass().getDownSoundId(item), 1, 1);
+        updateLabels();
     }
 
     void EnchantingDialog::onSoulCancel()
@@ -246,6 +266,7 @@ namespace MWGui
         else
         {
             setSoulGem(MWWorld::Ptr());
+            updateLabels();
         }
     }
 
@@ -299,7 +320,7 @@ namespace MWGui
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
-        if (mEnchanting.getEnchantPrice() > playerGold)
+        if (mPtr != player && mEnchanting.getEnchantPrice() > playerGold)
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;
@@ -321,7 +342,7 @@ namespace MWGui
                     MWBase::Environment::get().getMechanicsManager()->reportCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
                                                                                   item.getClass().getValue(item));
                     MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
-                    MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
+                    MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
                     return;
                 }
             }

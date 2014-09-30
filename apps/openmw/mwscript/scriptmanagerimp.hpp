@@ -48,11 +48,13 @@ namespace MWScript
             ScriptCollection mScripts;
             GlobalScripts mGlobalScripts;
             std::map<std::string, Compiler::Locals> mOtherLocals;
+            std::vector<std::string> mScriptBlacklist;
 
         public:
 
             ScriptManager (const MWWorld::ESMStore& store, bool verbose,
-                Compiler::Context& compilerContext, int warningsMode);
+                Compiler::Context& compilerContext, int warningsMode,
+                const std::vector<std::string>& scriptBlacklist);
 
             virtual void run (const std::string& name, Interpreter::Context& interpreterContext);
             ///< Run the script with the given name (compile first, if not compiled yet)
@@ -65,15 +67,10 @@ namespace MWScript
             ///< Compile all scripts
             /// \return count, success
 
-            virtual Compiler::Locals& getLocals (const std::string& name);
+            virtual const Compiler::Locals& getLocals (const std::string& name);
             ///< Return locals for script \a name.
 
             virtual GlobalScripts& getGlobalScripts();
-
-            virtual int getLocalIndex (const std::string& scriptId, const std::string& variable,
-                char type);
-            ///< Return index of the variable of the given name and type in the given script. Will
-            /// throw an exception, if there is no such script or variable or the type does not match.
     };
 }
 

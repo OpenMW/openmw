@@ -19,6 +19,7 @@
 #include <components/esm/loadweap.hpp>
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadstat.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <libs/openengine/ogre/lights.hpp>
 
@@ -72,6 +73,7 @@ Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
     , mNonAccumCtrl(NULL)
     , mAccumulate(0.0f)
     , mNullAnimationTimePtr(OGRE_NEW NullAnimationTime)
+    , mGlowLight(NULL)
 {
     for(size_t i = 0;i < sNumGroups;i++)
         mAnimationTimePtr[i].bind(OGRE_NEW AnimationTime(this));
@@ -79,6 +81,8 @@ Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
 
 Animation::~Animation()
 {
+    setLightEffect(0);
+
     mEffects.clear();
 
     mAnimSources.clear();
@@ -111,6 +115,11 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
 
     mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, mdlname) :
                                NifOgre::Loader::createObjectBase(mInsert, mdlname));
+
+    // Fast forward auto-play particles, which will have been set up as Emitting by the loader.
+    for (unsigned int i=0; i<mObjectRoot->mParticles.size(); ++i)
+        mObjectRoot->mParticles[i]->fastForward(1, 0.1);
+
     if(mObjectRoot->mSkelBase)
     {
         mSkelBase = mObjectRoot->mSkelBase;
@@ -469,7 +478,13 @@ float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::Node
     const std::string stop = groupname+": stop";
     float starttime = std::numeric_limits<float>::max();
     float stoptime = 0.0f;
-    // Have to find keys in reverse (see reset method)
+
+    // Pick the last Loop Stop key and the last Loop Start key.
+    // This is required because of broken text keys in AshVampire.nif.
+    // It has *two* WalkForward: Loop Stop keys at different times, the first one is used for stopping playback
+    // but the animation velocity calculation uses the second one.
+    // As result the animation velocity calculation is not correct, and this incorrect velocity must be replicated,
+    // because otherwise the Creature's Speed (dagoth uthol) would not be sufficient to move fast enough.
     NifOgre::TextKeyMap::const_reverse_iterator keyiter(keys.rbegin());
     while(keyiter != keys.rend())
     {
@@ -478,8 +493,18 @@ float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::Node
             starttime = keyiter->first;
             break;
         }
-        else if(keyiter->second == loopstop || keyiter->second == stop)
+        ++keyiter;
+    }
+    keyiter = keys.rbegin();
+    while(keyiter != keys.rend())
+    {
+        if (keyiter->second == stop)
             stoptime = keyiter->first;
+        else if (keyiter->second == loopstop)
+        {
+            stoptime = keyiter->first;
+            break;
+        }
         ++keyiter;
     }
 
@@ -498,7 +523,7 @@ float Animation::getVelocity(const std::string &groupname) const
 {
     /* Look in reverse; last-inserted source has priority. */
     AnimSourceList::const_reverse_iterator animsrc(mAnimSources.rbegin());
-    for(;animsrc != mAnimSources.rend();animsrc++)
+    for(;animsrc != mAnimSources.rend();++animsrc)
     {
         const NifOgre::TextKeyMap &keys = (*animsrc)->mTextKeys;
         if(findGroupStart(keys, groupname) != keys.end())
@@ -782,7 +807,25 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
         attachArrow();
 
     else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release")
-        MWBase::Environment::get().getWorld()->castSpell(mPtr);
+    {
+        // Make sure this key is actually for the RangeType we are casting. The flame atronach has
+        // the same animation for all range types, so there are 3 "release" keys on the same time, one for each range type.
+        // FIXME: This logic should really be in the CharacterController
+        const std::string& spellid = mPtr.getClass().getCreatureStats(mPtr).getSpells().getSelectedSpell();
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellid);
+        const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
+        int range = 0;
+        if (evt.compare(off, len, "self release") == 0)
+            range = 0;
+        else if (evt.compare(off, len, "touch release") == 0)
+            range = 1;
+        else if (evt.compare(off, len, "target release") == 0)
+            range = 2;
+        if (effectentry.mRange == range)
+        {
+            MWBase::Environment::get().getWorld()->castSpell(mPtr);
+        }
+    }
 
     else if (groupname == "shield" && evt.compare(off, len, "block hit") == 0)
         mPtr.getClass().block(mPtr);
@@ -790,8 +833,7 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
 
 void Animation::changeGroups(const std::string &groupname, int groups)
 {
-    AnimStateMap::iterator stateiter = mStates.begin();
-    stateiter = mStates.find(groupname);
+    AnimStateMap::iterator stateiter = mStates.find(groupname);
     if(stateiter != mStates.end())
     {
         if(stateiter->second.mGroups != groups)
@@ -850,10 +892,13 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
             mStates[groupname] = state;
 
             NifOgre::TextKeyMap::const_iterator textkey(textkeys.lower_bound(state.mTime));
-            while(textkey != textkeys.end() && textkey->first <= state.mTime)
+            if (state.mPlaying)
             {
-                handleTextKey(state, groupname, textkey, textkeys);
-                ++textkey;
+                while(textkey != textkeys.end() && textkey->first <= state.mTime)
+                {
+                    handleTextKey(state, groupname, textkey, textkeys);
+                    ++textkey;
+                }
             }
 
             if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
@@ -864,7 +909,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
                 if(state.mTime >= state.mLoopStopTime)
                     break;
 
-                textkey = textkeys.lower_bound(state.mTime);
+                NifOgre::TextKeyMap::const_iterator textkey(textkeys.lower_bound(state.mTime));
                 while(textkey != textkeys.end() && textkey->first <= state.mTime)
                 {
                     handleTextKey(state, groupname, textkey, textkeys);
@@ -886,6 +931,13 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
         // (see updatePosition, which would be called if the animation was playing)
         mAccumRoot->setPosition(-mNonAccumCtrl->getTranslation(state.mTime)*mAccumulate);
     }
+}
+
+void Animation::adjustSpeedMult(const std::string &groupname, float speedmult)
+{
+    AnimStateMap::iterator state(mStates.find(groupname));
+    if(state != mStates.end())
+        state->second.mSpeedMult = speedmult;
 }
 
 bool Animation::isPlaying(const std::string &groupname) const
@@ -1175,12 +1227,13 @@ void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
     mSkelBase->detachObjectFromBone(obj);
 }
 
-bool Animation::allowSwitchViewMode() const
+bool Animation::upperBodyReady() const
 {
     for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
     {
-        if(stateiter->second.mPriority > MWMechanics::Priority_Movement
+        if((stateiter->second.mPriority > MWMechanics::Priority_Movement
                 && stateiter->second.mPriority < MWMechanics::Priority_Torch)
+                || stateiter->second.mPriority == MWMechanics::Priority_Death)
             return false;
     }
     return true;
@@ -1193,13 +1246,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
         if (it->mLoop && loop && it->mEffectId == effectId && it->mBoneName == bonename)
             return;
 
-    // fix texture extension to .dds
-    if (texture.size() > 4)
-    {
-        texture[texture.size()-3] = 'd';
-        texture[texture.size()-2] = 'd';
-        texture[texture.size()-1] = 's';
-    }
+    std::string correctedTexture = Misc::ResourceHelpers::correctTexturePath(texture);
 
     EffectParams params;
     params.mModelName = model;
@@ -1257,7 +1304,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
                     for (int tex=0; tex<pass->getNumTextureUnitStates(); ++tex)
                     {
                         Ogre::TextureUnitState* tus = pass->getTextureUnitState(tex);
-                        tus->setTextureName("textures\\" + texture);
+                        tus->setTextureName(correctedTexture);
                     }
                 }
             }
@@ -1287,7 +1334,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
                     for (int tex=0; tex<pass->getNumTextureUnitStates(); ++tex)
                     {
                         Ogre::TextureUnitState* tus = pass->getTextureUnitState(tex);
-                        tus->setTextureName("textures\\" + texture);
+                        tus->setTextureName(correctedTexture);
                     }
                 }
             }
@@ -1382,6 +1429,37 @@ Ogre::Vector3 Animation::getEnchantmentColor(MWWorld::Ptr item)
     return result;
 }
 
+void Animation::setLightEffect(float effect)
+{
+    if (effect == 0)
+    {
+        if (mGlowLight)
+        {
+            mInsert->getCreator()->destroySceneNode(mGlowLight->getParentSceneNode());
+            mInsert->getCreator()->destroyLight(mGlowLight);
+            mGlowLight = NULL;
+        }
+    }
+    else
+    {
+        if (!mGlowLight)
+        {
+            mGlowLight = mInsert->getCreator()->createLight();
+
+            Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
+            for(size_t i = 0;i < mObjectRoot->mEntities.size();i++)
+            {
+                Ogre::Entity *ent = mObjectRoot->mEntities[i];
+                bounds.merge(ent->getBoundingBox());
+            }
+            mInsert->createChildSceneNode(bounds.getCenter())->attachObject(mGlowLight);
+        }
+        mGlowLight->setType(Ogre::Light::LT_POINT);
+        effect += 3;
+        mGlowLight->setAttenuation(1.0f / (0.03 * (0.5/effect)), 0, 0.5/effect, 0);
+    }
+}
+
 
 ObjectAnimation::ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model)
   : Animation(ptr, ptr.getRefData().getBaseNode())
@@ -1415,6 +1493,18 @@ ObjectAnimation::ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &mod
 void ObjectAnimation::addLight(const ESM::Light *light)
 {
     addExtraLight(mInsert->getCreator(), mObjectRoot, light);
+}
+
+void ObjectAnimation::removeParticles()
+{
+    for (unsigned int i=0; i<mObjectRoot->mParticles.size(); ++i)
+    {
+        // Don't destroyParticleSystem, the ParticleSystemController is still holding a pointer to it.
+        // Don't setVisible, this could conflict with a VisController.
+        // The following will remove all spawned particles, then set the speed factor to zero so that no new ones will be spawned.
+        mObjectRoot->mParticles[i]->setSpeedFactor(0.f);
+        mObjectRoot->mParticles[i]->clear();
+    }
 }
 
 

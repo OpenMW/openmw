@@ -244,6 +244,8 @@ namespace MWWorld
 
             mPlayer.load (player.mObject);
 
+            getPlayer().getClass().getCreatureStats(getPlayer()).getAiSequence().clear();
+
             MWBase::World& world = *MWBase::Environment::get().getWorld();
 
             try
@@ -253,6 +255,10 @@ namespace MWWorld
             catch (...)
             {
                 // Cell no longer exists. Place the player in a default cell.
+                ESM::Position pos = mPlayer.mData.getPosition();
+                MWBase::Environment::get().getWorld()->indexToPosition(0, 0, pos.pos[0], pos.pos[1], true);
+                pos.pos[2] = 0;
+                mPlayer.mData.setPosition(pos);
                 mCellStore = world.getExterior(0,0);
             }
 

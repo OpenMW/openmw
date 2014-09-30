@@ -52,6 +52,11 @@ namespace MWGui
         */
         EventHandle_Void eventBack;
 
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_WindowBase eventDone;
+
         void doRenderUpdate();
 
     protected:
@@ -100,7 +105,7 @@ namespace MWGui
 
         float mCurrentAngle;
 
-        MWRender::RaceSelectionPreview* mPreview;
+        std::auto_ptr<MWRender::RaceSelectionPreview> mPreview;
 
         bool mPreviewDirty;
     };

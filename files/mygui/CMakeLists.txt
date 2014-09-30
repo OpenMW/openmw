@@ -5,6 +5,7 @@ set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
 
 set(MYGUI_FILES
     black.png
+    white.png
     core.skin
     core.xml
     openmw_alchemy_window.layout
@@ -80,9 +81,11 @@ set(MYGUI_FILES
     openmw_companion_window.layout
     openmw_savegame_dialog.layout
     openmw_recharge_dialog.layout
+    openmw_screen_fader.layout
+    openmw_edit_note.layout
     DejaVuLGCSansMono.ttf
-    markers.png
     ../launcher/images/openmw.png
+    OpenMWResourcePlugin.xml
 )
 
 

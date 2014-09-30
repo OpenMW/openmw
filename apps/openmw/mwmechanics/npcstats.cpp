@@ -34,7 +34,6 @@ MWMechanics::NpcStats::NpcStats()
 , mProfit(0)
 , mTimeToStartDrowning(20.0)
 , mLastDrowningHit(0)
-, mLevelHealthBonus(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
 }
@@ -108,7 +107,7 @@ bool MWMechanics::NpcStats::isSameFaction (const NpcStats& npcStats) const
 }
 
 float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& class_, int usageType,
-    int level) const
+    int level, float extraFactor) const
 {
     if (level<0)
         level = static_cast<int> (getSkill (skillIndex).getBase());
@@ -131,6 +130,8 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
         if (skillFactor==0)
             return 0;
     }
+
+    skillFactor *= extraFactor;
 
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -168,7 +169,7 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
     return 1.0 / ((level+1) * (1.0/skillFactor) * typeFactor * specialisationFactor);
 }
 
-void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType)
+void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType, float extraFactor)
 {
     // Don't increase skills as a werewolf
     if(mIsWerewolf)
@@ -176,7 +177,7 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
 
     MWMechanics::SkillValue& value = getSkill (skillIndex);
 
-    value.setProgress(value.getProgress() + getSkillGain (skillIndex, class_, usageType));
+    value.setProgress(value.getProgress() + getSkillGain (skillIndex, class_, usageType, -1, extraFactor));
 
     if (value.getProgress()>=1)
     {
@@ -262,8 +263,7 @@ void MWMechanics::NpcStats::levelUp()
     // "When you gain a level, in addition to increasing three primary attributes, your Health
     // will automatically increase by 10% of your Endurance attribute. If you increased Endurance this level,
     // the Health increase is calculated from the increased Endurance"
-    mLevelHealthBonus += endurance * gmst.find("fLevelUpHealthEndMult")->getFloat();
-    updateHealth();
+    setHealth(getHealth().getBase() + endurance * gmst.find("fLevelUpHealthEndMult")->getFloat());
 
     setLevel(getLevel()+1);
 }
@@ -273,7 +273,7 @@ void MWMechanics::NpcStats::updateHealth()
     const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
     const int strength = getAttribute(ESM::Attribute::Strength).getBase();
 
-    setHealth(static_cast<int> (0.5 * (strength + endurance)) + mLevelHealthBonus);
+    setHealth(static_cast<int> (0.5 * (strength + endurance)));
 }
 
 int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const
@@ -497,7 +497,6 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
 
     state.mTimeToStartDrowning = mTimeToStartDrowning;
     state.mLastDrowningHit = mLastDrowningHit;
-    state.mLevelHealthBonus = mLevelHealthBonus;
 }
 
 void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
@@ -549,5 +548,4 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
 
     mTimeToStartDrowning = state.mTimeToStartDrowning;
     mLastDrowningHit = state.mLastDrowningHit;
-    mLevelHealthBonus = state.mLevelHealthBonus;
 }

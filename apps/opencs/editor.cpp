@@ -80,13 +80,17 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     boost::program_options::options_description desc("Syntax: opencs <options>\nAllowed options");
 
     desc.add_options()
-    ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
+    ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken()->composing())
     ("data-local", boost::program_options::value<std::string>()->default_value(""))
     ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
     ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))
     ("resources", boost::program_options::value<std::string>()->default_value("resources"))
     ("fallback-archive", boost::program_options::value<std::vector<std::string> >()->
-        default_value(std::vector<std::string>(), "fallback-archive")->multitoken());
+        default_value(std::vector<std::string>(), "fallback-archive")->multitoken())
+    ("script-blacklist", boost::program_options::value<std::vector<std::string> >()->default_value(std::vector<std::string>(), "")
+        ->multitoken(), "exclude specified script from the verifier (if the use of the blacklist is enabled)")
+    ("script-blacklist-use", boost::program_options::value<bool>()->implicit_value(true)
+        ->default_value(true), "enable script blacklisting");
 
     boost::program_options::notify(variables);
 
@@ -96,6 +100,10 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
         ToUTF8::calculateEncoding (variables["encoding"].as<std::string>()));
 
     mDocumentManager.setResourceDir (mResources = variables["resources"].as<std::string>());
+
+    if (variables["script-blacklist-use"].as<bool>())
+        mDocumentManager.setBlacklistedScripts (
+            variables["script-blacklist"].as<std::vector<std::string> >());
 
     mFsStrict = variables["fs-strict"].as<bool>();
 
@@ -181,7 +189,7 @@ void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
         files.push_back(path.toUtf8().constData());
     }
 
-    files.push_back(mFileDialog.filename().toUtf8().constData());
+    files.push_back (savePath);
 
     mDocumentManager.addDocument (files, savePath, true);
 

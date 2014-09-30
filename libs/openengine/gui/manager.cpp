@@ -23,6 +23,7 @@ namespace MyGUI
  *  As of MyGUI 3.2.0, MyGUI::OgreDataManager::isDataExist is unnecessarily complex
  *  this override fixes the resulting performance issue.
  */
+// Remove for MyGUI 3.2.2
 class FixedOgreDataManager : public MyGUI::OgreDataManager
 {
 public:
@@ -134,28 +135,6 @@ public:
             setRenderSystem(root->getRenderSystem());
         setRenderWindow(_window);
         setSceneManager(_scene);
-
-        // ADDED
-        sh::MaterialInstance* mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/NoTexture");
-        sh::Factory::getInstance()._ensureMaterial("MyGUI/NoTexture", "Default");
-        mVertexProgramNoTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
-                ->getVertexProgram()->_getBindingDelegate();
-
-        mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/OneTexture");
-        sh::Factory::getInstance()._ensureMaterial("MyGUI/OneTexture", "Default");
-        mVertexProgramOneTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
-                ->getVertexProgram()->_getBindingDelegate();
-
-        mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/NoTexture");
-        sh::Factory::getInstance()._ensureMaterial("MyGUI/NoTexture", "Default");
-        mFragmentProgramNoTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
-                ->getFragmentProgram()->_getBindingDelegate();
-
-        mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/OneTexture");
-        sh::Factory::getInstance()._ensureMaterial("MyGUI/OneTexture", "Default");
-        mFragmentProgramOneTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
-                ->getFragmentProgram()->_getBindingDelegate();
-
 
 
         MYGUI_PLATFORM_LOG(Info, getClassTypeName() << " successfully initialized");
@@ -359,6 +338,30 @@ public:
         }
     }
 
+    void initShaders()
+    {
+        // ADDED
+        sh::MaterialInstance* mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/NoTexture");
+        sh::Factory::getInstance()._ensureMaterial("MyGUI/NoTexture", "Default");
+        mVertexProgramNoTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
+                ->getVertexProgram()->_getBindingDelegate();
+
+        mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/OneTexture");
+        sh::Factory::getInstance()._ensureMaterial("MyGUI/OneTexture", "Default");
+        mVertexProgramOneTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
+                ->getVertexProgram()->_getBindingDelegate();
+
+        mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/NoTexture");
+        sh::Factory::getInstance()._ensureMaterial("MyGUI/NoTexture", "Default");
+        mFragmentProgramNoTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
+                ->getFragmentProgram()->_getBindingDelegate();
+
+        mat = sh::Factory::getInstance().getMaterialInstance("MyGUI/OneTexture");
+        sh::Factory::getInstance()._ensureMaterial("MyGUI/OneTexture", "Default");
+        mFragmentProgramOneTexture = static_cast<sh::OgreMaterial*>(mat->getMaterial())->getOgreTechniqueForConfiguration("Default")->getPass(0)
+                ->getFragmentProgram()->_getBindingDelegate();
+    }
+
     void doRender(IVertexBuffer* _buffer, ITexture* _texture, size_t _count)
     {
         if (getManualRender())
@@ -368,6 +371,8 @@ public:
         }
 
         // ADDED
+        if (!mVertexProgramNoTexture)
+            initShaders();
 
         if (_texture)
         {
@@ -633,23 +638,11 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
     mGui->initialise("");
 }
 
-void MyGUIManager::updateWindow (Ogre::RenderWindow *wnd)
-{
-    if (mShaderRenderManager)
-    {
-        mShaderRenderManager->setRenderWindow (wnd);
-        mShaderRenderManager->setActiveViewport(0);
-    }
-    else
-    {
-        mRenderManager->setRenderWindow (wnd);
-        mRenderManager->setActiveViewport(0);
-    }
-}
-
 void MyGUIManager::windowResized()
 {
+#ifndef ANDROID
     mRenderManager->setActiveViewport(0);
+#endif
 }
 
 void MyGUIManager::shutdown()

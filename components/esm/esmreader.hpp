@@ -83,7 +83,7 @@ public:
   //  indirectly to the load() method.
   int mIdx;
   void setIndex(const int index) {mIdx = index; mCtx.index = index;}
-  const int getIndex() {return mIdx;}
+  int getIndex() {return mIdx;}
 
   void setGlobalReaderList(std::vector<ESMReader> *list) {mGlobalReaderList = list;}
   std::vector<ESMReader> *getGlobalReaderList() {return mGlobalReaderList;}
@@ -215,9 +215,6 @@ public:
   // Skip the rest of this record. Assumes the name and header have
   // already been read
   void skipRecord();
-
-  // Skip an entire record, including the header (but not the name)
-  void skipHRecord();
 
   /* Read record header. This updatesleftFile BEYOND the data that
      follows the header, ie beyond the entire record. You should use

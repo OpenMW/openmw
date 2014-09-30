@@ -8,6 +8,8 @@ namespace ESM
 {
     struct ENAMstruct;
     struct EffectList;
+
+    struct MagicEffects;
 }
 
 namespace MWMechanics
@@ -28,12 +30,27 @@ namespace MWMechanics
 
     struct EffectParam
     {
-        // Note usually this would be int, but applying partial resistance might introduce decimal point.
-        float mMagnitude;
+    private:
+        // Note usually this would be int, but applying partial resistance might introduce a decimal point.
+        float mModifier;
+
+        int mBase;
+
+    public:
+        /// Get the total magnitude including base and modifier.
+        float getMagnitude() const;
+
+        void setModifier(float mod);
+        float getModifier() const;
+
+        /// Change mBase by \a diff
+        void modifyBase(int diff);
+        void setBase(int base);
+        int getBase() const;
 
         EffectParam();
 
-        EffectParam(float magnitude) : mMagnitude(magnitude) {}
+        EffectParam(float magnitude) : mModifier(magnitude), mBase(0) {}
 
         EffectParam& operator+= (const EffectParam& param);
 
@@ -77,7 +94,16 @@ namespace MWMechanics
 
             Collection::const_iterator end() const { return mCollection.end(); }
 
+            void readState (const ESM::MagicEffects& state);
+            void writeState (ESM::MagicEffects& state) const;
+
             void add (const EffectKey& key, const EffectParam& param);
+            void remove (const EffectKey& key);
+
+            void modifyBase (const EffectKey& key, int diff);
+
+            /// Copy Modifier values from \a effects, but keep original mBase values.
+            void setModifiers(const MagicEffects& effects);
 
             MagicEffects& operator+= (const MagicEffects& effects);
 

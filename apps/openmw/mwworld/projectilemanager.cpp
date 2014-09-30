@@ -20,6 +20,8 @@
 #include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwrender/effectmanager.hpp"
+#include "../mwrender/animation.hpp"
+#include "../mwrender/renderconst.hpp"
 
 #include "../mwsound/sound.hpp"
 
@@ -41,6 +43,9 @@ namespace MWWorld
             if(state.mObject->mControllers[i].getSource().isNull())
                 state.mObject->mControllers[i].setSource(Ogre::SharedPtr<MWRender::EffectAnimationTime> (new MWRender::EffectAnimationTime()));
         }
+
+        MWRender::Animation::setRenderProperties(state.mObject, MWRender::RV_Misc,
+                            MWRender::RQG_Main, MWRender::RQG_Alpha, 0.f, false, NULL);
     }
 
     void ProjectileManager::update(NifOgre::ObjectScenePtr object, float duration)
@@ -247,29 +252,23 @@ namespace MWWorld
                 if (obstacle == caster)
                     continue;
 
-                if (obstacle.isEmpty())
+                MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mId);
+
+                // Try to get a Ptr to the bow that was used. It might no longer exist.
+                MWWorld::Ptr bow = projectileRef.getPtr();
+                if (!caster.isEmpty())
                 {
-                    // Terrain
+                    MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
+                    MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                    if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
+                        bow = *invIt;
                 }
-                else if (obstacle.getClass().isActor())
-                {                    
-                    MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mId);
 
-                    // Try to get a Ptr to the bow that was used. It might no longer exist.
-                    MWWorld::Ptr bow = projectileRef.getPtr();
-                    if (!caster.isEmpty())
-                    {
-                        MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
-                        MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                        if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
-                            bow = *invIt;
-                    }
+                if (caster.isEmpty())
+                    caster = obstacle;
 
-                    if (caster.isEmpty())
-                        caster = obstacle;
+                MWMechanics::projectileHit(caster, obstacle, bow, projectileRef.getPtr(), pos + (newPos - pos) * cIt->first);
 
-                    MWMechanics::projectileHit(caster, obstacle, bow, projectileRef.getPtr(), pos + (newPos - pos) * cIt->first);
-                }
                 hit = true;
             }
             if (hit)

@@ -149,7 +149,7 @@ namespace ICS
 			{
 				return (InputControlSystem::NamedAxis)(it->first);
 			}
-			it++;
+			++it;
 		}
 
 		return /*NamedAxis::*/UNASSIGNED;
@@ -179,7 +179,7 @@ namespace ICS
 			{
 				return it->first;
 			}
-			it++;
+			++it;
 		}
 
 		return ICS_MAX_DEVICE_BUTTONS;

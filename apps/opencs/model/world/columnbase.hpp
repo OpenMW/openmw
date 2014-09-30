@@ -68,6 +68,7 @@ namespace CSMWorld
             Display_TopicInfo,
             Display_JournalInfo,
             Display_Scene,
+            Display_GlobalVariable,
             //CONCRETE TYPES ENDS HERE
 
             Display_Integer,
@@ -99,7 +100,8 @@ namespace CSMWorld
             Display_SoundRes,
             Display_Texture,
             Display_Video,
-            Display_Colour
+            Display_Colour,
+            Display_ScriptLines // console context
         };
 
         int mColumnId;

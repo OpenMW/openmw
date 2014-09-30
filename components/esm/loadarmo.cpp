@@ -9,6 +9,7 @@ namespace ESM
 
 void PartReferenceList::load(ESMReader &esm)
 {
+    mParts.clear();
     while (esm.isNextSub("INDX"))
     {
         PartReference pr;

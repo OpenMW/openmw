@@ -5,8 +5,7 @@
 
 #include "../world/record.hpp"
 #include "../world/idcollection.hpp"
-
-#include "../filter/filter.hpp"
+#include "../world/scope.hpp"
 
 #include "savingstate.hpp"
 
@@ -67,10 +66,12 @@ namespace CSMDoc
     {
             const CollectionT& mCollection;
             SavingState& mState;
+            CSMWorld::Scope mScope;
 
         public:
 
-            WriteCollectionStage (const CollectionT& collection, SavingState& state);
+            WriteCollectionStage (const CollectionT& collection, SavingState& state,
+                CSMWorld::Scope scope = CSMWorld::Scope_Content);
 
             virtual int setup();
             ///< \return number of steps
@@ -81,8 +82,8 @@ namespace CSMDoc
 
     template<class CollectionT>
     WriteCollectionStage<CollectionT>::WriteCollectionStage (const CollectionT& collection,
-        SavingState& state)
-    : mCollection (collection), mState (state)
+        SavingState& state, CSMWorld::Scope scope)
+    : mCollection (collection), mState (state), mScope (scope)
     {}
 
     template<class CollectionT>
@@ -94,16 +95,14 @@ namespace CSMDoc
     template<class CollectionT>
     void WriteCollectionStage<CollectionT>::perform (int stage, Messages& messages)
     {
+        if (CSMWorld::getScopeFromId (mCollection.getRecord (stage).get().mId)!=mScope)
+            return;
+
         CSMWorld::RecordBase::State state = mCollection.getRecord (stage).mState;
 
         if (state==CSMWorld::RecordBase::State_Modified ||
             state==CSMWorld::RecordBase::State_ModifiedOnly)
         {
-            std::string type;
-            for (int i=0; i<4; ++i)
-                /// \todo make endianess agnostic (change ESMWriter interface?)
-                type += reinterpret_cast<const char *> (&mCollection.getRecord (stage).mModified.sRecordId)[i];
-
             mState.getWriter().startRecord (mCollection.getRecord (stage).mModified.sRecordId);
             mState.getWriter().writeHNCString ("NAME", mCollection.getId (stage));
             mCollection.getRecord (stage).mModified.save (mState.getWriter());
@@ -151,20 +150,6 @@ namespace CSMDoc
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
-
-    class WriteFilterStage : public WriteCollectionStage<CSMWorld::IdCollection<CSMFilter::Filter> >
-    {
-            Document& mDocument;
-            CSMFilter::Filter::Scope mScope;
-
-        public:
-
-            WriteFilterStage (Document& document, SavingState& state, CSMFilter::Filter::Scope scope);
-
-            virtual void perform (int stage, Messages& messages);
-            ///< Messages resulting from this stage will be appended to \a messages.
-
-    };
 
     class CollectionReferencesStage : public Stage
     {

@@ -17,14 +17,9 @@
 
 #include "openal_output.hpp"
 #define SOUND_OUT "OpenAL"
-/* Set up the sound manager to use FFMPEG for input.
- * The OPENMW_USE_x macros are set in CMakeLists.txt.
-*/
-#ifdef OPENMW_USE_FFMPEG
 #include "ffmpeg_decoder.hpp"
 #ifndef SOUND_IN
 #define SOUND_IN "FFmpeg"
-#endif
 #endif
 
 
@@ -256,13 +251,28 @@ namespace MWSound
             const Ogre::Vector3 objpos(pos.pos);
 
             MWBase::SoundPtr sound = mOutput->playSound3D(filePath, objpos, 1.0f, basevol, 1.0f,
-                                                          20.0f, 1500.0f, Play_Normal|Play_TypeVoice, 0);
+                                                          20.0f, 1500.0f, Play_Normal|Play_TypeVoice, 0, true);
             mActiveSounds[sound] = std::make_pair(ptr, std::string("_say_sound"));
         }
         catch(std::exception &e)
         {
             std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
+    }
+
+    float SoundManager::getSaySoundLoudness(const MWWorld::Ptr &ptr) const
+    {
+        SoundMap::const_iterator snditer = mActiveSounds.begin();
+        while(snditer != mActiveSounds.end())
+        {
+            if(snditer->second.first == ptr && snditer->second.second == "_say_sound")
+                break;
+            ++snditer;
+        }
+        if (snditer == mActiveSounds.end())
+            return 0.f;
+
+        return snditer->first->getCurrentLoudness();
     }
 
     void SoundManager::say(const std::string& filename)

@@ -19,6 +19,10 @@
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
 
+#include "../widget/scenetooltoggle.hpp"
+
+#include "elements.hpp"
+
 void CSVRender::PagedWorldspaceWidget::displayCellCoord(bool display)
 {
     mDisplayCellCoord = display;
@@ -210,6 +214,20 @@ void CSVRender::PagedWorldspaceWidget::referenceAdded (const QModelIndex& parent
             flagAsModified();
 }
 
+std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
+{
+    Ogre::Vector3 position = getCamera()->getPosition();
+
+    std::ostringstream stream;
+
+    stream
+        << "player->position "
+        << position.x << ", " << position.y << ", " << position.z
+        << ", 0";
+
+    return stream.str();
+}
+
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
 : WorldspaceWidget(document, parent), mDocument(document), mWorldspace("std::default"), mDisplayCellCoord(true)
 {
@@ -283,8 +301,15 @@ std::pair< int, int > CSVRender::PagedWorldspaceWidget::getCoordinatesFromId (co
     return std::make_pair(x, y);
 }
 
-void CSVRender::PagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::UniversalId >& data)
+bool CSVRender::PagedWorldspaceWidget::handleDrop (
+    const std::vector< CSMWorld::UniversalId >& data, DropType type)
 {
+    if (WorldspaceWidget::handleDrop (data, type))
+        return true;
+
+    if (type!=Type_CellsExterior)
+        return false;
+
     bool selectionChanged = false;
     for (unsigned i = 0; i < data.size(); ++i)
     {
@@ -301,21 +326,53 @@ void CSVRender::PagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::
 
         emit cellSelectionChanged(mSelection);
     }
+
+    return true;
 }
 
-CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::dropType type) const
+CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::DropType type) const
 {
+    dropRequirments requirements = WorldspaceWidget::getDropRequirements (type);
+
+    if (requirements!=ignored)
+        return requirements;
+
     switch (type)
     {
-        case cellsExterior:
+        case Type_CellsExterior:
             return canHandle;
 
-        case cellsInterior:
+        case Type_CellsInterior:
             return needUnpaged;
 
         default:
             return ignored;
     }
+}
+
+
+unsigned int CSVRender::PagedWorldspaceWidget::getElementMask() const
+{
+    return WorldspaceWidget::getElementMask() | mControlElements->getSelection();
+}
+
+CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (
+    CSVWidget::SceneToolbar *parent)
+{
+    mControlElements = new CSVWidget::SceneToolToggle (parent,
+        "Controls & Guides Visibility", ":door.png");
+
+    mControlElements->addButton (":activator.png", Element_CellMarker, ":activator.png",
+        "Cell marker");
+    mControlElements->addButton (":armor.png", Element_CellArrow, ":armor.png", "Cell arrows");
+    mControlElements->addButton (":armor.png", Element_CellBorder, ":armor.png", "Cell border");
+
+    mControlElements->setSelection (0xffffffff);
+
+    connect (mControlElements, SIGNAL (selectionChanged()),
+        this, SLOT (elementSelectionChanged()));
+
+    return mControlElements;
 }
 
 void CSVRender::PagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,

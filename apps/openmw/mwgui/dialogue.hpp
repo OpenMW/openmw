@@ -8,14 +8,14 @@
 
 #include "keywordsearch.hpp"
 
+namespace Gui
+{
+    class MWList;
+}
+
 namespace MWGui
 {
     class WindowManager;
-
-    namespace Widgets
-    {
-        class MWList;
-    }
 }
 
 /*
@@ -152,6 +152,7 @@ namespace MWGui
 
     private:
         void updateOptions();
+        void restock();
 
         int mServices;
 
@@ -160,7 +161,7 @@ namespace MWGui
         bool mGoodbye;
 
         std::vector<DialogueText*> mHistoryContents;
-        std::map<std::string, int> mChoices;
+        std::vector<std::pair<std::string, int> > mChoices;
 
         std::vector<Link*> mLinks;
         std::map<std::string, Link*> mTopicLinks;
@@ -168,7 +169,7 @@ namespace MWGui
         KeywordSearchT mKeywordSearch;
 
         BookPage* mHistory;
-        Widgets::MWList*   mTopicsList;
+        Gui::MWList*   mTopicsList;
         MyGUI::ScrollBar* mScrollBar;
         MyGUI::Progress* mDispositionBar;
         MyGUI::EditBox*     mDispositionText;

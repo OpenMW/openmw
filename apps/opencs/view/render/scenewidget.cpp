@@ -64,19 +64,19 @@ namespace CSVRender
         CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent, "Lighting Mode");
 
         /// \todo replace icons
-        tool->addButton (":door.png", "day",
+        tool->addButton (":scenetoolbar/day", "day",
             "Day"
             "<ul><li>Cell specific ambient in interiors</li>"
             "<li>Low ambient in exteriors</li>"
             "<li>Strong directional light source/lir>"
             "<li>This mode closely resembles day time in-game</li></ul>");
-        tool->addButton (":GMST.png", "night",
+        tool->addButton (":scenetoolbar/night", "night",
             "Night"
             "<ul><li>Cell specific ambient in interiors</li>"
             "<li>Low ambient in exteriors</li>"
             "<li>Weak directional light source</li>"
             "<li>This mode closely resembles night time in-game</li></ul>");
-        tool->addButton (":Info.png", "bright",
+        tool->addButton (":scenetoolbar/bright", "bright",
             "Bright"
             "<ul><li>Maximum ambient</li>"
             "<li>Strong directional light source</li></ul>");
@@ -126,7 +126,9 @@ namespace CSVRender
 #endif
 
         mWindow = Ogre::Root::getSingleton().createRenderWindow(windowTitle.str(), this->width(), this->height(), false, &params);
-        mWindow->addViewport(mCamera)->setBackgroundColour(Ogre::ColourValue(0.3,0.3,0.3,1));
+
+        mViewport = mWindow->addViewport (mCamera);
+        mViewport->setBackgroundColour (Ogre::ColourValue (0.3,0.3,0.3,1));
 
         Ogre::Real aspectRatio = Ogre::Real(width()) / Ogre::Real(height());
         mCamera->setAspectRatio(aspectRatio);
@@ -139,6 +141,11 @@ namespace CSVRender
 
         if (mSceneMgr)
             Ogre::Root::getSingleton().destroySceneManager (mSceneMgr);
+    }
+
+    void SceneWidget::setVisibilityMask (unsigned int mask)
+    {
+        mViewport->setVisibilityMask (mask);
     }
 
     void SceneWidget::setNavigation (Navigation *navigation)
@@ -352,11 +359,6 @@ namespace CSVRender
             mUpdate = false;
             mWindow->update();
         }
-    }
-
-    int SceneWidget::getFastFactor() const
-    {
-        return mFast ? mFastFactor : 1;
     }
 
     void SceneWidget::setLighting (Lighting *lighting)

@@ -15,7 +15,6 @@
 #include <components/bsa/resources.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
-#include <components/nif/niffile.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bulletnifloader.hpp>
@@ -87,6 +86,11 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         // update input
         MWBase::Environment::get().getInputManager()->update(frametime, false);
 
+        // When the window is minimized, pause everything. Currently this *has* to be here to work around a MyGUI bug.
+        // If we are not currently rendering, then RenderItems will not be reused resulting in a memory leak upon changing widget textures.
+        if (!mOgre->getWindow()->isActive() || !mOgre->getWindow()->isVisible())
+            return true;
+
         // sound
         if (mUseSound)
             MWBase::Environment::get().getSoundManager()->update(frametime);
@@ -105,11 +109,11 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         {
             if (!paused)
             {
-                // global scripts
-                MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
-
                 // local scripts
                 executeLocalScripts();
+
+                // global scripts
+                MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
 
                 MWBase::Environment::get().getWorld()->markCellAsUnchanged();
             }
@@ -180,7 +184,9 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mEncoder(NULL)
   , mActivationDistanceOverride(-1)
   , mGrab(true)
-
+  , mScriptBlacklistUse (true)
+  , mExportFonts(false)
+  , mNewGame (false)
 {
     std::srand ( std::time(NULL) );
     MWClass::registerClasses();
@@ -263,9 +269,10 @@ void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
     mVerboseScripts = scriptsVerbosity;
 }
 
-void OMW::Engine::setSkipMenu (bool skipMenu)
+void OMW::Engine::setSkipMenu (bool skipMenu, bool newGame)
 {
     mSkipMenu = skipMenu;
+    mNewGame = newGame;
 }
 
 std::string OMW::Engine::loadSettings (Settings::Manager & settings)
@@ -314,8 +321,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mEnvironment.setStateManager (
         new MWState::StateManager (mCfgMgr.getUserDataPath() / "saves", mContentFiles.at (0)));
 
-    Nif::NIFFile::CacheLock cachelock;
-
     std::string renderSystem = settings.getString("render system", "Video");
     if (renderSystem == "")
     {
@@ -335,8 +340,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
-
-    //addResourcesDirectory(mResDir);
 
     addResourcesDirectory(mCfgMgr.getCachePath ().string());
 
@@ -364,14 +367,14 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
-    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v1.xml").string();
+    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v2.xml").string();
     bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
     MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, mGrab);
     mEnvironment.setInputManager (input);
 
     MWGui::WindowManager* window = new MWGui::WindowManager(
                 mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
-                mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding);
+                mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap);
     mEnvironment.setWindowManager (window);
 
     // Create sound system
@@ -406,7 +409,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mScriptContext->setExtensions (&mExtensions);
 
     mEnvironment.setScriptManager (new MWScript::ScriptManager (MWBase::Environment::get().getWorld()->getStore(),
-        mVerboseScripts, *mScriptContext, mWarningsMode));
+        mVerboseScripts, *mScriptContext, mWarningsMode,
+        mScriptBlacklistUse ? mScriptBlacklist : std::vector<std::string>()));
 
     // Create game mechanics system
     MWMechanics::MechanicsManager* mechanics = new MWMechanics::MechanicsManager;
@@ -470,7 +474,7 @@ void OMW::Engine::go()
     }
     else
     {
-        MWBase::Environment::get().getStateManager()->newGame (true);
+        MWBase::Environment::get().getStateManager()->newGame (!mNewGame);
     }
 
     // Start the main rendering loop
@@ -505,7 +509,7 @@ void OMW::Engine::screenshot()
     int shotCount = 0;
 
     const std::string& screenshotPath = mCfgMgr.getUserDataPath().string();
-
+    std::string format = Settings::Manager::getString("screenshot format", "General");
     // Find the first unused filename with a do-while
     std::ostringstream stream;
     do
@@ -514,11 +518,11 @@ void OMW::Engine::screenshot()
         stream.str("");
         stream.clear();
 
-        stream << screenshotPath << "screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << ".png";
+        stream << screenshotPath << "screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << "." << format;
 
     } while (boost::filesystem::exists(stream.str()));
 
-    mOgre->screenshot(stream.str());
+    mOgre->screenshot(stream.str(), format);
 }
 
 void OMW::Engine::setCompileAll (bool all)
@@ -564,4 +568,19 @@ void OMW::Engine::setActivationDistanceOverride (int distance)
 void OMW::Engine::setWarningsMode (int mode)
 {
     mWarningsMode = mode;
+}
+
+void OMW::Engine::setScriptBlacklist (const std::vector<std::string>& list)
+{
+    mScriptBlacklist = list;
+}
+
+void OMW::Engine::setScriptBlacklistUse (bool use)
+{
+    mScriptBlacklistUse = use;
+}
+
+void OMW::Engine::enableFontExport(bool exportFonts)
+{
+    mExportFonts = exportFonts;
 }

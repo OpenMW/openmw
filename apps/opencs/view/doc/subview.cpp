@@ -5,6 +5,7 @@ CSVDoc::SubView::SubView (const CSMWorld::UniversalId& id) : mUniversalId (id)
     /// \todo  add a button to the title bar that clones this sub view
 
     setWindowTitle (QString::fromUtf8 (mUniversalId.toString().c_str()));
+    setAttribute(Qt::WA_DeleteOnClose);
 }
 
 CSMWorld::UniversalId CSVDoc::SubView::getUniversalId() const

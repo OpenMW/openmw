@@ -30,22 +30,28 @@ darkf
 Dmitry Shkurskiy (endorph)
 Douglas Diniz (Dgdiniz)
 Douglas Mencken (dougmencken)
+dreamer-dead
 Edmondo Tommasina (edmondo)
 Eduard Cot (trombonecot)
 Eli2
 Emanuel Guével (potatoesmaster)
+eroen
 Fil Krynicki (filkry)
+Gašper Sedej
 gugus/gus
 Hallfaer Tuilinn
 Jacob Essex (Yacoby)
 Jannik Heller (scrawl)
 Jason Hooks (jhooks)
+jeaye
 Jeffrey Haines (Jyby)
 Joel Graff (graffy)
 John Blomberg (fstp)
+Jordan Ayers
 Jordan Milne
 Julien Voisin (jvoisin/ap0)
 Karl-Felix Glatzer (k1ll)
+Kevin Poitra (PuppyKevin)
 Lars Söderberg (Lazaroth)
 lazydev
 Leon Saunders (emoose)
@@ -54,28 +60,40 @@ Manuel Edelmann (vorenon)
 Marc Bouvier (CramitDeFrog)
 Marcin Hulist (Gohan)
 Mark Siewert (mark76)
+Marco Melletti (mellotanica)
 Mateusz Kołaczek (PL_kolek)
 megaton
 Michael Hogan (Xethik)
 Michael Mc Donnell
 Michael Papageorgiou (werdanith)
 Michał Bień (Glorf)
+Miroslav Puda (pakanek)
+MiroslavR
 Nathan Jeffords (blunted2night)
 Nikolay Kasyanov (corristo)
+nobrakal
 Nolan Poe (nopoe)
 Paul McElroy (Greendogo)
 Pieter van der Kloet (pvdk)
 Radu-Marius Popovici (rpopovici)
+riothamus
+Robert MacGregor (Ragora)
+Rohit Nirmal
 Roman Melnik (Kromgart)
 Roman Proskuryakov (humbug)
+sandstranger
 Sandy Carter (bwrsandman)
+Scott Howard
 Sebastian Wick (swick)
 Sergey Shambir
 sir_herrbatka
+Stefan Galowicz (bogglez)
+Stanislav Bobrov (Jiub)
 Sylvain Thesnieres (Garvek)
 Thomas Luppi (Digmaster)
 Tom Mason (wheybags)
 Torben Leif Carrington (TorbenC)
+Vincent Heuken
 
 Packagers:
 Alexander Olofsson (Ace) - Windows
@@ -87,23 +105,22 @@ Kenny Armstrong (artorius) - Fedora Linux
 Nikolay Kasyanov (corristo) - Mac OS X
 Sandy Carter (bwrsandman) - Arch Linux
 
-
 Public Relations and Translations:
 Alex McKibben (WeirdSexy) - Podcaster
 Artem Kotsynyak (greye) - Russian News Writer
 Jim Clauwaert (Zedd) - Public Outreach
 Julien Voisin (jvoisin/ap0) - French News Writer
+Tom Koenderink (Okulo) - English News Writer
 Lukasz Gromanowski (lgro) - English News Writer
 Mickey Lyle (raevol) - Release Manager
 Pithorn - Chinese News Writer
 sir_herrbatka - Polish News Writer
-
+Dawid Lakomy (Vedyimyn) - Polish News Writer
 
 Website:
-Lukasz Gromanowski (lgro) - Website Administrator
+Lukasz Gromanowski (Lgro) - Website Administrator
 Ryan Sardonic (Wry) - Wiki Editor
 sir_herrbatka - Forum Administrator
-
 
 Formula Research:
 Hrnchamd
@@ -116,15 +133,15 @@ Myckel
 natirips
 Sadler
 
-
 Artwork:
 Necrod - OpenMW Logo
 Mickey Lyle (raevol) - Wordpress Theme
-Okulo - OpenMW Editor Icons
+Tom Koenderink (Okulo), SirHerrbatka, crysthala - OpenMW Editor Icons
 
 Inactive Contributors:
 Ardekantur
 Armin Preiml
+Berulacks
 Carl Maxwell
 Diggory Hardy
 Dmitry Marakasov (AMDmi3)
@@ -138,6 +155,7 @@ Kingpix
 Lordrea
 Michal Sciubidlo
 Nicolay Korslund
+Nekochan
 pchan3
 penguinroad
 psi29a

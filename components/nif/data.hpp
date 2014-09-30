@@ -25,9 +25,8 @@
 #define OPENMW_COMPONENTS_NIF_DATA_HPP
 
 #include "controlled.hpp"
-
-#include <OgreQuaternion.h>
-#include <OgreVector3.h>
+#include "nifstream.hpp"
+#include "nifkey.hpp"
 
 namespace Nif
 {
@@ -211,7 +210,7 @@ public:
 class NiPosData : public Record
 {
 public:
-    Vector3KeyList mKeyList;
+    Vector3KeyMap mKeyList;
 
     void read(NIFStream *nif)
     {
@@ -222,7 +221,7 @@ public:
 class NiUVData : public Record
 {
 public:
-    FloatKeyList mKeyList[4];
+    FloatKeyMap mKeyList[4];
 
     void read(NIFStream *nif)
     {
@@ -234,7 +233,7 @@ public:
 class NiFloatData : public Record
 {
 public:
-    FloatKeyList mKeyList;
+    FloatKeyMap mKeyList;
 
     void read(NIFStream *nif)
     {
@@ -284,11 +283,11 @@ public:
 class NiColorData : public Record
 {
 public:
-    Vector4KeyList mKeyList;
+    Vector4KeyMap mKeyMap;
 
     void read(NIFStream *nif)
     {
-        mKeyList.read(nif);
+        mKeyMap.read(nif);
     }
 };
 
@@ -389,7 +388,7 @@ public:
 struct NiMorphData : public Record
 {
     struct MorphData {
-        FloatKeyList mData;
+        FloatKeyMap mData;
         std::vector<Ogre::Vector3> mVertices;
     };
     std::vector<MorphData> mMorphs;
@@ -412,11 +411,11 @@ struct NiMorphData : public Record
 
 struct NiKeyframeData : public Record
 {
-    QuaternionKeyList mRotations;
+    QuaternionKeyMap mRotations;
     //\FIXME mXYZ_Keys are read, but not used.
-    FloatKeyList mXYZ_Keys;
-    Vector3KeyList mTranslations;
-    FloatKeyList mScales;
+    FloatKeyMap mXYZ_Keys;
+    Vector3KeyMap mTranslations;
+    FloatKeyMap mScales;
 
     void read(NIFStream *nif)
     {

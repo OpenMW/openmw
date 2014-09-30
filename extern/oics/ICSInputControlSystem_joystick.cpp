@@ -192,7 +192,7 @@ namespace ICS
 				{
 					return it->first;
 				}
-				it++;
+                ++it;
 			}
 		}
 
@@ -210,7 +210,7 @@ namespace ICS
 				{
 					return it->first;
 				}
-				it++;
+                ++it;
 			}
 		}
 

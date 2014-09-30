@@ -3,9 +3,11 @@
 #include <boost/lexical_cast.hpp>
 
 #include <components/esm/quickkeys.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -226,12 +228,9 @@ namespace MWGui
             esmStore.get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
 
         std::string path = effect->mIcon;
-        int slashPos = path.find("\\");
+        int slashPos = path.rfind('\\');
         path.insert(slashPos+1, "b_");
-        path = std::string("icons\\") + path;
-        int pos = path.rfind(".");
-        path.erase(pos);
-        path.append(".dds");
+        path = Misc::ResourceHelpers::correctIconPath(path);
 
         button->setFrame("textures\\menu_icon_select_magic.dds", MyGUI::IntCoord(2, 2, 40, 40));
         button->setIcon(path);
@@ -295,12 +294,18 @@ namespace MWGui
                 return;
             store.setSelectedEnchantItem(store.end());
             MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
+            MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Spell);
         }
         else if (type == Type_Item)
         {
             MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
-
             MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
+            MWWorld::ContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            // change draw state only if the item is in player's right hand
+            if (rightHand != store.end() && item == *rightHand)
+            {
+                MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
+            }
         }
         else if (type == Type_MagicItem)
         {
@@ -324,6 +329,7 @@ namespace MWGui
             }
 
             store.setSelectedEnchantItem(it);
+            MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Spell);
         }
     }
 
@@ -594,7 +600,7 @@ namespace MWGui
         for (std::vector<std::string>::const_iterator it = powers.begin(); it != powers.end(); ++it)
         {
             const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(*it);
-            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>("SpellText",
+            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>("SandTextButton",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setCaption(spell->mName);
             t->setTextAlign(MyGUI::Align::Left);
@@ -611,7 +617,7 @@ namespace MWGui
         for (std::vector<std::string>::const_iterator it = spellList.begin(); it != spellList.end(); ++it)
         {
             const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(*it);
-            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>("SpellText",
+            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>("SandTextButton",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setCaption(spell->mName);
             t->setTextAlign(MyGUI::Align::Left);
@@ -642,7 +648,7 @@ namespace MWGui
                 }
             }
 
-            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>(equipped ? "SpellText" : "SpellTextUnequipped",
+            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>(equipped ? "SandTextButton" : "SpellTextUnequipped",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setCaption(item.getClass().getName(item));
             t->setTextAlign(MyGUI::Align::Left);
@@ -654,9 +660,10 @@ namespace MWGui
             mHeight += spellHeight;
         }
 
-
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mMagicList->setVisibleVScroll(false);
         mMagicList->setCanvasSize (mWidth, std::max(mMagicList->getHeight(), mHeight));
-
+        mMagicList->setVisibleVScroll(true);
     }
 
     void MagicSelectionDialog::addGroup(const std::string &label, const std::string& label2)

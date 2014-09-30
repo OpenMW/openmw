@@ -69,11 +69,8 @@ namespace MWMechanics
             PathFinder mPathFinder;
             ObstacleCheck mObstacleCheck;
 
-            float mDoorCheckDuration;
             float mTimer;
             float mStuckTimer;
-
-            MWWorld::Ptr mLastDoorChecked; //Used to ensure we don't try to CONSTANTLY open a door
 
             ESM::Position mStuckPos;
             ESM::Pathgrid::Point mPrevDest;

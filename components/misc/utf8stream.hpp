@@ -73,7 +73,7 @@ public:
         while (cur != eoc)
         {
             if ((*cur & 0xC0) != 0x80) // check continuation mark
-                return std::make_pair (sBadChar(), cur);;
+                return std::make_pair (sBadChar(), cur);
 
             chr = (chr << 6) | UnicodeChar ((*cur++) & 0x3F);
         }

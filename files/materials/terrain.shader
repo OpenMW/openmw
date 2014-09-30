@@ -175,7 +175,7 @@
 
             lightResult.xyz += lightDiffuse[@shIterator].xyz
                     * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(normal.xyz, lightDir), 0);
+                    * max(dot(normal.xyz, lightDir), 0.0);
 
 #if @shIterator == 0
             directionalResult = lightResult.xyz;
@@ -310,7 +310,7 @@ shUniform(float4, cameraPos) @shAutoConstant(cameraPos, camera_position)
 
 #if !IS_FIRST_PASS
 // Opacity the previous passes should have, i.e. 1 - (opacity of this pass)
-float previousAlpha = 1.f;
+float previousAlpha = 1.0;
 #endif
 
 
@@ -334,7 +334,7 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
 
         float4 albedo = float4(0,0,0,1);
 
-        float2 layerUV = float2(UV.x, 1.f-UV.y) * 16; // Reverse Y, required to get proper tangents
+        float2 layerUV = float2(UV.x, 1.0-UV.y) * 16.0; // Reverse Y, required to get proper tangents
         float2 thisLayerUV;
         float4 normalTex;
         float4 diffuseTex;
@@ -349,9 +349,9 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
 #if @shPropertyBool(use_normal_map_@shIterator)
         normalTex = shSample(normalMap@shIterator, thisLayerUV);
 #if @shIterator == 0 && IS_FIRST_PASS
-        TSnormal = normalize(normalTex.xyz * 2 - 1);
+        TSnormal = normalize(normalTex.xyz * 2.0 - 1.0);
 #else
-        TSnormal = shLerp(TSnormal, normalTex.xyz * 2 - 1, blendValues@shPropertyString(blendmap_component_@shIterator));
+        TSnormal = shLerp(TSnormal, normalTex.xyz * 2.0 - 1.0, blendValues@shPropertyString(blendmap_component_@shIterator));
 #endif
 #endif
 
@@ -361,7 +361,7 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
 
         diffuseTex = shSample(diffuseMap@shIterator, layerUV);
 #if !@shPropertyBool(use_specular_@shIterator)
-        diffuseTex.a = 0;
+        diffuseTex.a = 0.0;
 #endif
 
 #if @shIterator == 0
@@ -371,7 +371,7 @@ albedo = shLerp(albedo, diffuseTex, blendValues@shPropertyString(blendmap_compon
 #endif
 
 #if !IS_FIRST_PASS
-        previousAlpha *= 1.f-blendValues@shPropertyString(blendmap_component_@shIterator);
+        previousAlpha *= 1.0-blendValues@shPropertyString(blendmap_component_@shIterator);
 #endif
 
 
@@ -404,7 +404,7 @@ albedo = shLerp(albedo, diffuseTex, blendValues@shPropertyString(blendmap_compon
 
             lightResult.xyz += lightDiffuse[@shIterator].xyz
                     * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(normal.xyz, lightDir), 0);
+                    * max(dot(normal.xyz, lightDir), 0.0);
 #if @shIterator == 0
             float3 directionalResult = lightResult.xyz;
 #endif
@@ -444,10 +444,10 @@ albedo = shLerp(albedo, diffuseTex, blendValues@shPropertyString(blendmap_compon
         // Specular
         float3 light0Dir = normalize(lightPos0.xyz);
 
-        float NdotL = max(dot(normal, light0Dir), 0);
+        float NdotL = max(dot(normal, light0Dir), 0.0);
         float3 halfVec = normalize (light0Dir + eyeDir);
 
-        float3 specular = pow(max(dot(normal, halfVec), 0), 32) * lightSpec0;
+        float3 specular = pow(max(dot(normal, halfVec), 0.0), 32.0) * lightSpec0;
         shOutputColour(0).xyz += specular * (albedo.a) * shadow;
 #endif
 
@@ -465,9 +465,9 @@ albedo = shLerp(albedo, diffuseTex, blendValues@shPropertyString(blendmap_compon
         shOutputColour(0).xyz = max(shOutputColour(0).xyz, float3(0,0,0));
 
 #if IS_FIRST_PASS
-        shOutputColour(0).a = 1;
+        shOutputColour(0).a = 1.0;
 #else
-        shOutputColour(0).a = 1.f-previousAlpha;
+        shOutputColour(0).a = 1.0-previousAlpha;
 #endif
     }
 

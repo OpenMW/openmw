@@ -50,7 +50,7 @@ QVariant CSMWorld::ResourceTable::headerData (int section, Qt::Orientation orien
         return QVariant();
 
     if (role==ColumnBase::Role_Flags)
-        return ColumnBase::Flag_Table;
+        return section==0 ? ColumnBase::Flag_Table : 0;
 
     switch (section)
     {
@@ -86,7 +86,7 @@ bool CSMWorld::ResourceTable::setData ( const QModelIndex &index, const QVariant
 
 Qt::ItemFlags CSMWorld::ResourceTable::flags (const QModelIndex & index) const
 {
-    return Qt::ItemIsSelectable | Qt::ItemIsEnabled;;
+    return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
 QModelIndex CSMWorld::ResourceTable::index (int row, int column, const QModelIndex& parent)

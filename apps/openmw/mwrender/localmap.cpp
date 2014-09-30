@@ -98,6 +98,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
             return;
 
         Ogre::Image image;
+        tex->load();
         tex->convertToImage(image);
 
         Ogre::DataStreamPtr encoded = image.encode("tga");
@@ -137,6 +138,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
                     return;
 
                 Ogre::Image image;
+                tex->load();
                 tex->convertToImage(image);
 
                 fog->mFogTextures.push_back(ESM::FogTexture());
@@ -322,6 +324,7 @@ void LocalMap::createFogOfWar(const std::string& texturePrefix)
     buffer.resize(sFogOfWarResolution*sFogOfWarResolution, 0xFF000000);
 
     // upload to the texture
+    tex->load();
     memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
     tex->getBuffer()->unlock();
 
@@ -340,7 +343,9 @@ Ogre::TexturePtr LocalMap::createFogOfWarTexture(const std::string &texName)
                         sFogOfWarResolution, sFogOfWarResolution,
                         0,
                         PF_A8R8G8B8,
-                        TU_DYNAMIC_WRITE_ONLY);
+                        TU_DYNAMIC_WRITE_ONLY,
+                    this // ManualResourceLoader required if the texture contents are lost (due to lost devices nonsense that can occur with D3D)
+                    );
     }
 
     return tex;
@@ -426,7 +431,7 @@ void LocalMap::render(const float x, const float y,
     mRendering->getScene()->setAmbientLight(oldAmbient);
 }
 
-void LocalMap::getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y)
+void LocalMap::worldToInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y)
 {
     pos = rotatePoint(pos, Vector2(mBounds.getCenter().x, mBounds.getCenter().y), mAngle);
 
@@ -437,6 +442,18 @@ void LocalMap::getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, 
 
     nX = (pos.x - min.x - sSize*x)/sSize;
     nY = 1.0-(pos.y - min.y - sSize*y)/sSize;
+}
+
+Ogre::Vector2 LocalMap::interiorMapToWorldPosition (float nX, float nY, int x, int y)
+{
+    Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().y);
+    Ogre::Vector2 pos;
+
+    pos.x = sSize * (nX + x) + min.x;
+    pos.y = sSize * (1.0-nY + y) + min.y;
+
+    pos = rotatePoint(pos, Vector2(mBounds.getCenter().x, mBounds.getCenter().y), -mAngle);
+    return pos;
 }
 
 bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interior)
@@ -457,6 +474,30 @@ bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interi
     return alpha < 200;
 }
 
+void LocalMap::loadResource(Ogre::Resource* resource)
+{
+    std::string resourceName = resource->getName();
+    size_t pos = resourceName.find("_fog");
+    if (pos != std::string::npos)
+        resourceName = resourceName.substr(0, pos);
+    if (mBuffers.find(resourceName) == mBuffers.end())
+    {
+        // create a buffer to use for dynamic operations
+        std::vector<uint32> buffer;
+
+        // initialize to (0, 0, 0, 1)
+        buffer.resize(sFogOfWarResolution*sFogOfWarResolution, 0xFF000000);
+        mBuffers[resourceName] = buffer;
+    }
+
+    std::vector<uint32>& buffer = mBuffers[resourceName];
+
+    Ogre::Texture* tex = dynamic_cast<Ogre::Texture*>(resource);
+    tex->createInternalResources();
+    memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
+    tex->getBuffer()->unlock();
+}
+
 void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaternion& orientation)
 {
     if (sFogOfWarSkip != 0)
@@ -473,7 +514,7 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     Vector2 pos(position.x, position.y);
 
     if (mInterior)
-        getInteriorMapPosition(pos, u,v, x,y);
+        worldToInteriorMapPosition(pos, u,v, x,y);
 
     Vector3 playerdirection = mCameraRotNode->convertWorldToLocalOrientation(orientation).yAxis();
 
@@ -554,6 +595,8 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
                         ++i;
                     }
                 }
+
+                tex->load();
 
                 // copy to the texture
                 // NOTE: Could be optimized later. We actually only need to update the region that changed.

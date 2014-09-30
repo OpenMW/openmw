@@ -22,6 +22,11 @@
 
 namespace MWClass
 {
+    std::string Book::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Book>()->mBase->mId;
+    }
+
     void Book::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
@@ -139,8 +144,7 @@ namespace MWClass
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
+            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -198,7 +202,8 @@ namespace MWClass
 
     bool Book::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Books;
+        return (npcServices & ESM::NPC::Books)
+                || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
     float Book::getWeight(const MWWorld::Ptr &ptr) const

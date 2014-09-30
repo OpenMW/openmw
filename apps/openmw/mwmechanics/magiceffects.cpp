@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include <components/esm/effectlist.hpp>
+#include <components/esm/magiceffects.hpp>
 
 namespace MWMechanics
 {
@@ -40,18 +41,55 @@ namespace MWMechanics
         return left.mArg<right.mArg;
     }
 
-    EffectParam::EffectParam() : mMagnitude (0) {}
+    float EffectParam::getMagnitude() const
+    {
+        return mBase + mModifier;
+    }
+
+    void EffectParam::modifyBase(int diff)
+    {
+        mBase += diff;
+    }
+
+    int EffectParam::getBase() const
+    {
+        return mBase;
+    }
+
+    void EffectParam::setBase(int base)
+    {
+        mBase = base;
+    }
+
+    void EffectParam::setModifier(float mod)
+    {
+        mModifier = mod;
+    }
+
+    float EffectParam::getModifier() const
+    {
+        return mModifier;
+    }
+
+    EffectParam::EffectParam() : mModifier (0), mBase(0) {}
 
     EffectParam& EffectParam::operator+= (const EffectParam& param)
     {
-        mMagnitude += param.mMagnitude;
+        mModifier += param.mModifier;
+        mBase += param.mBase;
         return *this;
     }
 
     EffectParam& EffectParam::operator-= (const EffectParam& param)
     {
-        mMagnitude -= param.mMagnitude;
+        mModifier -= param.mModifier;
+        mBase -= param.mBase;
         return *this;
+    }
+
+    void MagicEffects::remove(const EffectKey &key)
+    {
+        mCollection.erase(key);
     }
 
     void MagicEffects::add (const EffectKey& key, const EffectParam& param)
@@ -65,6 +103,24 @@ namespace MWMechanics
         else
         {
             iter->second += param;
+        }
+    }
+
+    void MagicEffects::modifyBase(const EffectKey &key, int diff)
+    {
+        mCollection[key].modifyBase(diff);
+    }
+
+    void MagicEffects::setModifiers(const MagicEffects &effects)
+    {
+        for (Collection::iterator it = mCollection.begin(); it != mCollection.end(); ++it)
+        {
+            it->second.setModifier(effects.get(it->first).getModifier());
+        }
+
+        for (Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
+        {
+            mCollection[it->first].setModifier(it->second.getModifier());
         }
     }
 
@@ -136,5 +192,26 @@ namespace MWMechanics
         }
 
         return result;
+    }
+
+    void MagicEffects::writeState(ESM::MagicEffects &state) const
+    {
+        // Don't need to save Modifiers, they are recalculated every frame anyway.
+        for (Collection::const_iterator iter (begin()); iter!=end(); ++iter)
+        {
+            if (iter->second.getBase() != 0)
+            {
+                // Don't worry about mArg, never used by magic effect script instructions
+                state.mEffects.insert(std::make_pair(iter->first.mId, iter->second.getBase()));
+            }
+        }
+    }
+
+    void MagicEffects::readState(const ESM::MagicEffects &state)
+    {
+        for (std::map<int, int>::const_iterator it = state.mEffects.begin(); it != state.mEffects.end(); ++it)
+        {
+            mCollection[EffectKey(it->first)].setBase(it->second);
+        }
     }
 }

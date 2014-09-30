@@ -91,8 +91,6 @@ namespace MWWorld
             Ptr getPtrViaHandle (const std::string& handle, CellStore& cellStore);
 
             int mActivationDistanceOverride;
-            std::string mFacedHandle;
-            float mFacedDistance;
 
             std::string mStartupScript;
 
@@ -113,7 +111,7 @@ namespace MWWorld
 
             void updateWindowManager ();
             void performUpdateSceneQueries ();
-            void updateFacedHandle ();
+            void getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer=true);
 
             float getMaxActivationDistance ();
             float getNpcActivationDistance ();
@@ -143,6 +141,7 @@ namespace MWWorld
             bool mTeleportEnabled;
             bool mLevitationEnabled;
             bool mGoToJail;
+            int mDaysInPrison;
 
             float feetToGameUnits(float feet);
 
@@ -168,9 +167,6 @@ namespace MWWorld
 
             virtual void readRecord (ESM::ESMReader& reader, int32_t type,
                 const std::map<int, int>& contentFileMap);
-
-            virtual OEngine::Render::Fader* getFader();
-            ///< \todo remove this function. Rendering details should not be exposed.
 
             virtual CellStore *getExterior (int x, int y);
 
@@ -208,13 +204,16 @@ namespace MWWorld
             virtual bool isCellQuasiExterior() const;
 
             virtual Ogre::Vector2 getNorthVector (CellStore* cell);
-            ///< get north vector (OGRE coordinates) for given interior cell
+            ///< get north vector for given interior cell
 
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out);
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
-            virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
-            ///< see MWRender::LocalMap::getInteriorMapPosition
+            virtual void worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
+            ///< see MWRender::LocalMap::worldToInteriorMapPosition
+
+            virtual Ogre::Vector2 interiorMapToWorldPosition (float nX, float nY, int x, int y);
+            ///< see MWRender::LocalMap::interiorMapToWorldPosition
 
             virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
             ///< see MWRender::LocalMap::isPositionExplored
@@ -260,8 +259,9 @@ namespace MWWorld
             virtual Ptr searchPtrViaActorId (int actorId);
             ///< Search is limited to the active cells.
 
-            virtual void adjustPosition (const Ptr& ptr);
+            virtual void adjustPosition (const Ptr& ptr, bool force);
             ///< Adjust position after load to be on ground. Must be called after model load.
+            /// @param force do this even if the ptr is flying
 
             virtual void fixPosition (const Ptr& actor);
             ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
@@ -473,11 +473,22 @@ namespace MWWorld
             /// open or close a non-teleport door (depending on current state)
             virtual void activateDoor(const MWWorld::Ptr& door);
 
-            /// open or close a non-teleport door as specified
-            virtual void activateDoor(const MWWorld::Ptr& door, bool open);
+            /// update movement state of a non-teleport door as specified
+            /// @param state see MWClass::setDoorState
+            /// @note throws an exception when invoked on a teleport door
+            virtual void activateDoor(const MWWorld::Ptr& door, int state);
 
             virtual bool getPlayerStandingOn (const MWWorld::Ptr& object); ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::Ptr& object); ///< @return true if any actor is standing on \a object
+            virtual bool getPlayerCollidingWith(const MWWorld::Ptr& object); ///< @return true if the player is colliding with \a object
+            virtual bool getActorCollidingWith (const MWWorld::Ptr& object); ///< @return true if any actor is colliding with \a object
+            virtual void hurtStandingActors (const MWWorld::Ptr& object, float dmgPerSecond);
+            ///< Apply a health difference to any actors standing on \a object.
+            /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
+            virtual void hurtCollidingActors (const MWWorld::Ptr& object, float dmgPerSecond);
+            ///< Apply a health difference to any actors colliding with \a object.
+            /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
+
             virtual float getWindSpeed();
 
             virtual void getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);
@@ -600,6 +611,9 @@ namespace MWWorld
 
             /// @see MWWorld::WeatherManager::getStormDirection
             virtual Ogre::Vector3 getStormDirection() const;
+
+            /// Resets all actors in the current active cells to their original location within that cell.
+            virtual void resetActors();
     };
 }
 

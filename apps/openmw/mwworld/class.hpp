@@ -72,12 +72,6 @@ namespace MWWorld
 
         public:
 
-            /// NPC-stances.
-            enum Stance
-            {
-                Run, Sneak
-            };
-
             virtual ~Class();
 
             const std::string& getTypeName() const {
@@ -96,8 +90,9 @@ namespace MWWorld
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
-            virtual void adjustPosition(const MWWorld::Ptr& ptr) const;
+            virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) const;
             ///< Adjust position to stand on ground. Must be called post model load
+            /// @param force do this even if the ptr is flying
 
             virtual MWMechanics::CreatureStats& getCreatureStats (const Ptr& ptr) const;
             ///< Return creature stats or throw an exception, if class does not have creature stats
@@ -236,7 +231,7 @@ namespace MWWorld
             ///
             /// (default implementation: ignore and return false)
 
-            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const;
+            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const;
             ///< Inform actor \a ptr that a skill use has succeeded.
             ///
             /// (default implementations: throws an exception)
@@ -271,8 +266,6 @@ namespace MWWorld
             ///< @return the number of enchantment points available for possible enchanting
 
             virtual void adjustScale(const MWWorld::Ptr& ptr,float& scale) const;
-
-            virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
             virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
             ///< Determine whether or not \a item can be sold to an npc with the given \a npcServices

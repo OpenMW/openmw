@@ -19,6 +19,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <components/nifogre/ogrenifloader.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <extern/shiny/Platforms/Ogre/OgreMaterial.hpp>
 
@@ -187,11 +188,6 @@ void Moon::setPhase(const Moon::Phase& phase)
     mPhase = phase;
 }
 
-Moon::Phase Moon::getPhase() const
-{
-    return mPhase;
-}
-
 unsigned int Moon::getPhaseInt() const
 {
     if      (mPhase == Moon::Phase_New)              return 0;
@@ -294,7 +290,12 @@ void SkyManager::create()
 
     // Stars
     mAtmosphereNight = mRootNode->createChildSceneNode();
-    NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(mAtmosphereNight, "meshes\\sky_night_01.nif");
+    NifOgre::ObjectScenePtr objects;
+    if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("meshes\\sky_night_02.nif"))
+        objects = NifOgre::Loader::createObjects(mAtmosphereNight, "meshes\\sky_night_02.nif");
+    else
+        objects = NifOgre::Loader::createObjects(mAtmosphereNight, "meshes\\sky_night_01.nif");
+
     for(size_t i = 0, matidx = 0;i < objects->mEntities.size();i++)
     {
         Entity* night1_ent = objects->mEntities[i];
@@ -412,7 +413,6 @@ void SkyManager::updateRain(float dt)
 
     // Spawn new rain
     float rainFrequency = mRainFrequency;
-    float startHeight = 700;
     if (mRainEnabled)
     {
         mRainTimer += dt;
@@ -428,6 +428,7 @@ void SkyManager::updateRain(float dt)
 
             // Create a separate node to control the offset, since a node with setInheritOrientation(false) will still
             // consider the orientation of the parent node for its position, just not for its orientation
+            float startHeight = 700;
             Ogre::SceneNode* offsetNode = sceneNode->createChildSceneNode(Ogre::Vector3(xOffs,yOffs,startHeight));
 
             NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(offsetNode, mRainEffect);
@@ -584,13 +585,13 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 
     if (mClouds != weather.mCloudTexture)
     {
-        sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", "textures\\"+weather.mCloudTexture);
+        sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", Misc::ResourceHelpers::correctTexturePath(weather.mCloudTexture));
         mClouds = weather.mCloudTexture;
     }
 
     if (mNextClouds != weather.mNextCloudTexture)
     {
-        sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", "textures\\"+weather.mNextCloudTexture);
+        sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", Misc::ResourceHelpers::correctTexturePath(weather.mNextCloudTexture));
         mNextClouds = weather.mNextCloudTexture;
     }
 
@@ -745,16 +746,6 @@ void SkyManager::setLightningStrength(const float factor)
     }
     else
         mLightning->setVisible(false);
-}
-void SkyManager::setLightningEnabled(bool enabled)
-{
-    /// \todo
-}
-
-void SkyManager::setLightningDirection(const Ogre::Vector3& dir)
-{
-    if (!mCreated) return;
-    mLightning->setDirection (dir);
 }
 
 void SkyManager::setMasserFade(const float fade)

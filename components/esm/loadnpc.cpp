@@ -51,6 +51,7 @@ void NPC::load(ESMReader &esm)
     else
         mHasAI = false;
 
+    mTransport.clear();
     while (esm.isNextSub("DODT") || esm.isNextSub("DNAM")) {
         if (esm.retSubName() == 0x54444f44) { // DODT struct
             Dest dodt;

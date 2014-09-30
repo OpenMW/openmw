@@ -4,13 +4,14 @@
 
 #include <OgreVector3.h>
 
-#include <libs/openengine/ogre/fader.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
+
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -25,7 +26,6 @@ namespace MWGui
     TravelWindow::TravelWindow() :
         WindowBase("openmw_travel_window.layout")
         , mCurrentY(0)
-        , mLastPos(0)
     {
         setCoord(0, 0, 450, 300);
 
@@ -126,7 +126,10 @@ namespace MWGui
         }
 
         updateLabels();
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mDestinationsView->setVisibleVScroll(false);
         mDestinationsView->setCanvasSize (MyGUI::IntSize(mDestinationsView->getWidth(), std::max(mDestinationsView->getHeight(), mCurrentY)));
+        mDestinationsView->setVisibleVScroll(true);
     }
 
     void TravelWindow::onTravelButtonClick(MyGUI::Widget* _sender)
@@ -147,7 +150,11 @@ namespace MWGui
 
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(1);
+        // add gold to NPC trading gold pool
+        MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
+        npcStats.setGoldPool(npcStats.getGoldPool() + price);
+
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
         ESM::Position pos = *_sender->getUserData<ESM::Position>();
         std::string cellname = _sender->getUserString("Destination");
         bool interior = _sender->getUserString("interior") == "y";
@@ -164,14 +171,15 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->advanceTime(hours);
         }
 
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
+        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+
         // Teleports any followers, too.
         MWWorld::ActionTeleport action(interior ? cellname : "", pos);
         action.execute(player);
 
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0);
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(1);
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
     }
 
     void TravelWindow::onCancelButtonClicked(MyGUI::Widget* _sender)

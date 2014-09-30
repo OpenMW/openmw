@@ -10,6 +10,12 @@ namespace MWWorld
         return mCellRef.mRefNum;
     }
 
+    void CellRef::unsetRefNum()
+    {
+        mCellRef.mRefNum.mContentFile = -1;
+        mCellRef.mRefNum.mIndex = 0;
+    }
+
     std::string CellRef::getRefId() const
     {
         return mCellRef.mRefID;
@@ -86,6 +92,16 @@ namespace MWWorld
     std::string CellRef::getOwner() const
     {
         return mCellRef.mOwner;
+    }
+
+    std::string CellRef::getGlobalVariable() const
+    {
+        return mCellRef.mGlobalVariable;
+    }
+
+    int CellRef::getFactionRank() const
+    {
+        return mCellRef.mFactionRank;
     }
 
     void CellRef::setOwner(const std::string &owner)

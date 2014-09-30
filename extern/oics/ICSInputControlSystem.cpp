@@ -84,7 +84,7 @@ namespace ICS
 	            TiXmlElement* xmlChannel = xmlControl->FirstChildElement("Channel");    
 				while(xmlChannel)
 				{
-	                controlChannelCount = std::max(channelCount, FromString<size_t>(xmlChannel->Attribute("number")));
+					controlChannelCount = std::max(channelCount, FromString<size_t>(xmlChannel->Attribute("number"))+1);
 
 					xmlChannel = xmlChannel->NextSiblingElement("Channel");
 				}
@@ -120,8 +120,6 @@ namespace ICS
 
 					if(type == "bezier")
 					{
-						float step = 0.1;
-
 						float startX = FromString<float>(xmlInterval->Attribute("startX"));
 						float startY = FromString<float>(xmlInterval->Attribute("startY"));
 						float midX = FromString<float>(xmlInterval->Attribute("midX"));
@@ -129,7 +127,7 @@ namespace ICS
 						float endX = FromString<float>(xmlInterval->Attribute("endX"));
 						float endY = FromString<float>(xmlInterval->Attribute("endY"));
 
-						step = FromString<float>(xmlInterval->Attribute("step"));
+                        float step = FromString<float>(xmlInterval->Attribute("step"));
 
 						ICS_LOG("Applying Bezier filter to channel [number="
 							+ ToString<int>(ch) + ", startX=" 
@@ -334,7 +332,7 @@ namespace ICS
 
 		TiXmlElement Controller( "Controller" );
 
-		for(std::vector<Channel*>::const_iterator o = mChannels.begin() ; o != mChannels.end(); o++)
+        for(std::vector<Channel*>::const_iterator o = mChannels.begin() ; o != mChannels.end(); ++o)
 		{
 			ICS::IntervalList intervals = (*o)->getIntervals();
 			
@@ -371,14 +369,14 @@ namespace ICS
 						ChannelFilter.InsertEndChild(XMLInterval);
 					}
 					
-					interval++;
+                    ++interval;
 				}
 
 				Controller.InsertEndChild(ChannelFilter);
 			}
 		}
 
-		for(std::vector<Control*>::const_iterator o = mControls.begin() ; o != mControls.end(); o++)
+        for(std::vector<Control*>::const_iterator o = mControls.begin() ; o != mControls.end(); ++o)
 		{
 			TiXmlElement control( "Control" );
 
@@ -424,7 +422,7 @@ namespace ICS
 				control.SetAttribute( "axisBindable", "false" );
 			}
 
-			if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::INCREASE) != SDLK_UNKNOWN)
+            if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::INCREASE) != SDL_SCANCODE_UNKNOWN)
 			{
 				TiXmlElement keyBinder( "KeyBinder" );
 
@@ -434,7 +432,7 @@ namespace ICS
 				control.InsertEndChild(keyBinder);
 			}
 
-			if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::DECREASE) != SDLK_UNKNOWN)
+            if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::DECREASE) != SDL_SCANCODE_UNKNOWN)
 			{
 				TiXmlElement keyBinder( "KeyBinder" );
 
@@ -687,13 +685,13 @@ namespace ICS
 					control.InsertEndChild(binder);
 				}
 
-				it++;
+                ++it;
 			}
 
 
 			std::list<Channel*> channels = (*o)->getAttachedChannels();
 			for(std::list<Channel*>::iterator it = channels.begin() ;
-				it != channels.end() ; it++)
+                it != channels.end() ; ++it)
 			{
 				TiXmlElement binder( "Channel" );
 
@@ -801,14 +799,13 @@ namespace ICS
 		mDetectingBindingControl = NULL;
 	}
 
-	std::string InputControlSystem::keyCodeToString(SDL_Keycode key)
+    std::string InputControlSystem::scancodeToString(SDL_Scancode key)
 	{
-        return std::string(SDL_GetKeyName(key));
-	}
-
-	SDL_Keycode InputControlSystem::stringToKeyCode(std::string key)
-	{
-        return SDL_GetKeyFromName(key.c_str());
+        SDL_Keycode code = SDL_GetKeyFromScancode(key);
+        if (code == SDLK_UNKNOWN)
+            return std::string(SDL_GetScancodeName(key));
+        else
+            return std::string(SDL_GetKeyName(code));
 	}
 
     void InputControlSystem::adjustMouseRegion(Uint16 width, Uint16 height)

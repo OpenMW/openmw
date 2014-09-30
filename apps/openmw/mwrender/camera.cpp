@@ -26,7 +26,6 @@ namespace MWRender
       mNearest(30.f),
       mFurthest(800.f),
       mIsNearest(false),
-      mIsFurthest(false),
       mHeight(128.f),
       mCameraDistance(300.f),
       mDistanceAdjusted(false),
@@ -107,7 +106,7 @@ namespace MWRender
 
     void Camera::update(float duration, bool paused)
     {
-        if (mAnimation->allowSwitchViewMode())
+        if (mAnimation->upperBodyReady())
         {
             // Now process the view changes we queued earlier
             if (mVanityToggleQueued)
@@ -144,7 +143,7 @@ namespace MWRender
     {
         // Changing the view will stop all playing animations, so if we are playing
         // anything important, queue the view change for later
-        if (!mAnimation->allowSwitchViewMode() && !force)
+        if (!mAnimation->upperBodyReady() && !force)
         {
             mViewModeToggleQueued = true;
             return;
@@ -207,7 +206,7 @@ namespace MWRender
 
     void Camera::togglePreviewMode(bool enable)
     {
-        if (mFirstPersonView && !mAnimation->allowSwitchViewMode())
+        if (mFirstPersonView && !mAnimation->upperBodyReady())
             return;
 
         if(mPreviewMode == enable)
@@ -292,7 +291,6 @@ namespace MWRender
         if(mFirstPersonView && !mPreviewMode && !mVanity.enabled)
             return;
 
-        mIsFurthest = false;
         mIsNearest = false;
 
         Ogre::Vector3 v(0.f, 0.f, dist);
@@ -301,7 +299,6 @@ namespace MWRender
         }
         if (v.z >= mFurthest) {
             v.z = mFurthest;
-            mIsFurthest = true;
         } else if (!override && v.z < 10.f) {
             v.z = 10.f;
         } else if (override && v.z <= mNearest) {
@@ -388,10 +385,5 @@ namespace MWRender
     bool Camera::isNearest()
     {
         return mIsNearest;
-    }
-
-    bool Camera::isFurthest()
-    {
-        return mIsFurthest;
     }
 }

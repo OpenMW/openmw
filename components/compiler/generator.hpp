@@ -89,8 +89,6 @@ namespace Compiler
 
         void jumpOnZero (CodeContainer& code, int offset);
 
-        void jumpOnNonZero (CodeContainer& code, int offset);
-
         void compare (CodeContainer& code, char op, char valueType1, char valueType2);
 
         void menuMode (CodeContainer& code);
@@ -113,7 +111,7 @@ namespace Compiler
 
         void scriptRunning (CodeContainer& code);
 
-        void startScript (CodeContainer& code);
+        void startScript (CodeContainer& code, Literals& literals, const std::string& id);
 
         void stopScript (CodeContainer& code);
 

@@ -24,6 +24,7 @@
 
 #include <components/settings/settings.hpp>
 #include <components/terrain/defaultworld.hpp>
+#include <components/terrain/terraingrid.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -46,7 +47,6 @@
 #include "globalmap.hpp"
 #include "terrainstorage.hpp"
 #include "effectmanager.hpp"
-#include "terraingrid.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -114,13 +114,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 
     mFactory->loadAllFiles();
 
-    // Compressed textures with 0 mip maps are bugged in 1.8, so disable mipmap generator in that case
-    // ( https://ogre3d.atlassian.net/browse/OGRE-259 )
-#if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
     TextureManager::getSingleton().setDefaultNumMipmaps(Settings::Manager::getInt("num mipmaps", "General"));
-#else
-    TextureManager::getSingleton().setDefaultNumMipmaps(0);
-#endif
 
     // Set default texture filtering options
     TextureFilterOptions tfo;
@@ -211,11 +205,6 @@ MWRender::Objects& RenderingManager::getObjects(){
 }
 MWRender::Actors& RenderingManager::getActors(){
     return *mActors;
-}
-
-OEngine::Render::Fader* RenderingManager::getFader()
-{
-    return mRendering.getFader();
 }
 
 MWRender::Camera* RenderingManager::getCamera() const
@@ -345,8 +334,8 @@ void RenderingManager::update (float duration, bool paused)
 
     MWWorld::Ptr player = world->getPlayerPtr();
 
-    int blind = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
-    mRendering.getFader()->setFactor(std::max(0.f, 1.f-(blind / 100.f)));
+    int blind = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude();
+    MWBase::Environment::get().getWindowManager()->setScreenFactor(std::max(0.f, 1.f-(blind / 100.f)));
     setAmbientMode();
 
     // player position
@@ -586,24 +575,6 @@ void RenderingManager::configureAmbient(MWWorld::CellStore &mCell)
         sunEnable(false);
     }
 }
-// Switch through lighting modes.
-
-void RenderingManager::toggleLight()
-{
-    if (mAmbientMode==2)
-        mAmbientMode = 0;
-    else
-        ++mAmbientMode;
-
-    switch (mAmbientMode)
-    {
-        case 0: std::cout << "Setting lights to normal\n"; break;
-        case 1: std::cout << "Turning the lights up\n"; break;
-        case 2: std::cout << "Turning the lights to full\n"; break;
-    }
-
-    setAmbientMode();
-}
 
 void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
 {
@@ -617,7 +588,7 @@ void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
     mAmbientColor = colour;
 
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    int nightEye = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).mMagnitude;
+    int nightEye = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).getMagnitude();
     Ogre::ColourValue final = colour;
     final += Ogre::ColourValue(0.7,0.7,0.7,0) * std::min(1.f, (nightEye/100.f));
 
@@ -707,11 +678,6 @@ void RenderingManager::enableLights(bool sun)
     sunEnable(sun);
 }
 
-Shadows* RenderingManager::getShadows()
-{
-    return mShadows;
-}
-
 void RenderingManager::notifyWorldSpaceChanged()
 {
     mEffectManager->clear();
@@ -778,13 +744,6 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
                 || it->second == "resolution y"
                 || it->second == "fullscreen"))
             changeRes = true;
-        else if (it->first == "Video" && it->second == "vsync")
-        {
-            // setVSyncEnabled is bugged in 1.8
-#if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
-            mRendering.getWindow()->setVSyncEnabled(Settings::Manager::getBool("vsync", "Video"));
-#endif
-        }
         else if (it->second == "field of view" && it->first == "General")
             mRendering.setFov(Settings::Manager::getFloat("field of view", "General"));
         else if ((it->second == "texture filtering" && it->first == "General")
@@ -876,10 +835,9 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
 
 void RenderingManager::setMenuTransparency(float val)
 {
-    Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName("transparent.png");
-    std::vector<Ogre::uint32> buffer;
+    Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName("transparent.png"); std::vector<Ogre::uint32> buffer;
     buffer.resize(1);
-    buffer[0] = (int(255*val) << 24);
+    buffer[0] = (int(255*val) << 24) | (255 << 16) | (255 << 8) | 255;
     memcpy(tex->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], 1*4);
     tex->getBuffer()->unlock();
 }
@@ -951,9 +909,14 @@ void RenderingManager::setCameraDistance(float dist, bool adjust, bool override)
     }
 }
 
-void RenderingManager::getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
+void RenderingManager::worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
 {
-    return mLocalMap->getInteriorMapPosition (position, nX, nY, x, y);
+    return mLocalMap->worldToInteriorMapPosition (position, nX, nY, x, y);
+}
+
+Ogre::Vector2 RenderingManager::interiorMapToWorldPosition(float nX, float nY, int x, int y)
+{
+    return mLocalMap->interiorMapToWorldPosition(nX, nY, x, y);
 }
 
 bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, bool interior)
@@ -1051,7 +1014,7 @@ void RenderingManager::enableTerrain(bool enable)
                 mTerrain = new Terrain::DefaultWorld(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
                                                 Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY, 1, 64);
             else
-                mTerrain = new MWRender::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                mTerrain = new Terrain::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
                                                 Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY);
             mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
                                      Settings::Manager::getBool("split", "Shadows"));

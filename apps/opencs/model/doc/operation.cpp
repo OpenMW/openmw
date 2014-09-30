@@ -119,5 +119,5 @@ void CSMDoc::Operation::executeStage()
 
 void CSMDoc::Operation::operationDone()
 {
-    emit done (mType);
+    emit done (mType, mError);
 }

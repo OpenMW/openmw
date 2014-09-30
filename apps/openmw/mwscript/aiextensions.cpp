@@ -420,7 +420,6 @@ namespace MWScript
                     runtime.pop();
 
                     const MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
-                    std::string currentTargetId;
 
                     bool targetsAreEqual = false;
                     MWWorld::Ptr targetPtr;
@@ -457,7 +456,6 @@ namespace MWScript
                     MWWorld::Ptr actor = R()(runtime);
                     MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
                     creatureStats.getAiSequence().stopCombat();
-                    creatureStats.setHostile(false);
                 }
         };
 

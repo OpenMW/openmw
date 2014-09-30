@@ -33,8 +33,11 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mAlarmed = false;
     esm.getHNOT (mAlarmed, "ALRM");
 
-    mHostile = false;
-    esm.getHNOT (mHostile, "HOST");
+    mAttacked = false;
+    esm.getHNOT (mAttacked, "ATKD");
+
+    if (esm.isNextSub("HOST"))
+        esm.skipHSub(); // Hostile, no longer used
 
     mAttackingOrSpell = false;
     esm.getHNOT (mAttackingOrSpell, "ATCK");
@@ -83,6 +86,7 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mSpells.load(esm);
     mActiveSpells.load(esm);
     mAiSequence.load(esm);
+    mMagicEffects.load(esm);
 
     while (esm.isNextSub("SUMM"))
     {
@@ -142,8 +146,8 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mAlarmed)
         esm.writeHNT ("ALRM", mAlarmed);
 
-    if (mHostile)
-        esm.writeHNT ("HOST", mHostile);
+    if (mAttacked)
+        esm.writeHNT ("ATKD", mAttacked);
 
     if (mAttackingOrSpell)
         esm.writeHNT ("ATCK", mAttackingOrSpell);
@@ -193,6 +197,7 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     mSpells.save(esm);
     mActiveSpells.save(esm);
     mAiSequence.save(esm);
+    mMagicEffects.save(esm);
 
     for (std::map<int, int>::const_iterator it = mSummonedCreatureMap.begin(); it != mSummonedCreatureMap.end(); ++it)
     {

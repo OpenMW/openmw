@@ -19,6 +19,7 @@ namespace sh
 		virtual bool createConfiguration (const std::string& name, unsigned short lodIndex);
 
 		virtual bool isUnreferenced();
+		virtual void unreferenceTextures();
 		virtual void ensureLoaded();
 
 		virtual void removeAll ();

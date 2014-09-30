@@ -4,7 +4,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-ESM::NpcStats::Faction::Faction() : mExpelled (false), mRank (0), mReputation (0) {}
+ESM::NpcStats::Faction::Faction() : mExpelled (false), mRank (-1), mReputation (0) {}
 
 void ESM::NpcStats::load (ESMReader &esm)
 {
@@ -78,8 +78,9 @@ void ESM::NpcStats::load (ESMReader &esm)
     mLastDrowningHit = 0;
     esm.getHNOT (mLastDrowningHit, "DRLH");
 
-    mLevelHealthBonus = 0;
-    esm.getHNOT (mLevelHealthBonus, "LVLH");
+    // No longer used
+    float levelHealthBonus = 0;
+    esm.getHNOT (levelHealthBonus, "LVLH");
 
     mCrimeId = -1;
     esm.getHNOT (mCrimeId, "CRID");
@@ -98,7 +99,7 @@ void ESM::NpcStats::save (ESMWriter &esm) const
             esm.writeHNT ("FAEX", expelled);
         }
 
-        if (iter->second.mRank)
+        if (iter->second.mRank >= 0)
             esm.writeHNT ("FARA", iter->second.mRank);
 
         if (iter->second.mReputation)
@@ -147,9 +148,6 @@ void ESM::NpcStats::save (ESMWriter &esm) const
 
     if (mLastDrowningHit)
         esm.writeHNT ("DRLH", mLastDrowningHit);
-
-    if (mLevelHealthBonus)
-        esm.writeHNT ("LVLH", mLevelHealthBonus);
 
     if (mCrimeId != -1)
         esm.writeHNT ("CRID", mCrimeId);

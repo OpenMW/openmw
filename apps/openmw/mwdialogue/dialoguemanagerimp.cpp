@@ -266,7 +266,7 @@ namespace MWDialogue
             }
             catch (const std::exception& error)
             {
-                std::cerr << std::string ("Dialogue error: An exception has been thrown: ") + error.what();
+                std::cerr << std::string ("Dialogue error: An exception has been thrown: ") + error.what() << std::endl;
             }
         }
     }
@@ -290,6 +290,9 @@ namespace MWDialogue
             std::string title;
             if (dialogue.mType==ESM::Dialogue::Persuasion)
             {
+                // Determine GMST from dialogue topic. GMSTs are:
+                // sAdmireSuccess, sAdmireFail, sIntimidateSuccess, sIntimidateFail,
+                // sTauntSuccess, sTauntFail, sBribeSuccess, sBribeFail
                 std::string modifiedTopic = "s" + topic;
 
                 modifiedTopic.erase (std::remove (modifiedTopic.begin(), modifiedTopic.end(), ' '), modifiedTopic.end());
@@ -505,9 +508,10 @@ namespace MWDialogue
 
     void DialogueManager::askQuestion (const std::string& question, int choice)
     {
+        mIsInChoice = true;
+
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         win->addChoice(question, choice);
-        mIsInChoice = true;
     }
 
     void DialogueManager::goodbye()
@@ -725,10 +729,10 @@ namespace MWDialogue
     {
         std::vector<HyperTextToken> result;
         MyGUI::UString utext(text);
-        size_t pos_begin, pos_end, iteration_pos = 0;
+        size_t pos_end, iteration_pos = 0;
         for(;;)
         {
-            pos_begin = utext.find('@', iteration_pos);
+            size_t pos_begin = utext.find('@', iteration_pos);
             if (pos_begin != std::string::npos)
                 pos_end = utext.find('#', pos_begin);
 
@@ -754,12 +758,12 @@ namespace MWDialogue
     size_t RemovePseudoAsterisks(std::string& phrase)
     {
         size_t pseudoAsterisksCount = 0;
-        const char specialPseudoAsteriskCharacter = 127;
 
         if( !phrase.empty() )
         {
             std::string::reverse_iterator rit = phrase.rbegin();
 
+            const char specialPseudoAsteriskCharacter = 127;
             while( rit != phrase.rend() && *rit == specialPseudoAsteriskCharacter )
             {
                 pseudoAsterisksCount++;

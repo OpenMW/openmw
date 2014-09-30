@@ -4,8 +4,6 @@
 #include "sky.hpp"
 #include "debugging.hpp"
 
-#include <openengine/ogre/fader.hpp>
-
 #include <components/settings/settings.hpp>
 
 #include <boost/filesystem.hpp>
@@ -95,10 +93,7 @@ public:
 
     MWRender::Camera* getCamera() const;
 
-    void toggleLight();
     bool toggleRenderMode(int mode);
-
-    OEngine::Render::Fader* getFader();
 
     void removeCell (MWWorld::CellStore *store);
 
@@ -161,8 +156,6 @@ public:
 
     float getTerrainHeightAt (Ogre::Vector3 worldPos);
 
-    Shadows* getShadows();
-
     void notifyWorldSpaceChanged();
 
     void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
@@ -202,8 +195,11 @@ public:
 
     Ogre::Viewport* getViewport() { return mRendering.getViewport(); }
 
-    void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
-    ///< see MWRender::LocalMap::getInteriorMapPosition
+    void worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
+    ///< see MWRender::LocalMap::worldToInteriorMapPosition
+
+    Ogre::Vector2 interiorMapToWorldPosition (float nX, float nY, int x, int y);
+    ///< see MWRender::LocalMap::interiorMapToWorldPosition
 
     bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
     ///< see MWRender::LocalMap::isPositionExplored

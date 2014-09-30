@@ -66,15 +66,74 @@ std::string getVampireHead(const std::string& race, bool female)
 namespace MWRender
 {
 
+HeadAnimationTime::HeadAnimationTime(MWWorld::Ptr reference)
+    : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0), mValue(0), mEnabled(true)
+{
+    resetBlinkTimer();
+}
+
+void HeadAnimationTime::setEnabled(bool enabled)
+{
+    mEnabled = enabled;
+}
+
+void HeadAnimationTime::resetBlinkTimer()
+{
+    mBlinkTimer = -(2 + (std::rand() / double(RAND_MAX*1.0)) * 6);
+}
+
+void HeadAnimationTime::update(float dt)
+{
+    if (!mEnabled)
+        return;
+
+    if (MWBase::Environment::get().getSoundManager()->sayDone(mReference))
+    {
+        mBlinkTimer += dt;
+
+        float duration = mBlinkStop - mBlinkStart;
+
+        if (mBlinkTimer >= 0 && mBlinkTimer <= duration)
+        {
+            mValue = mBlinkStart + mBlinkTimer;
+        }
+        else
+            mValue = mBlinkStop;
+
+        if (mBlinkTimer > duration)
+            resetBlinkTimer();
+    }
+    else
+    {
+        mValue = mTalkStart +
+            (mTalkStop - mTalkStart) *
+            std::min(1.f, MWBase::Environment::get().getSoundManager()->getSaySoundLoudness(mReference)*2); // Rescale a bit (most voices are not very loud)
+    }
+}
+
 float HeadAnimationTime::getValue() const
 {
-    // TODO use time from text keys (Talk Start/Stop, Blink Start/Stop)
-    // TODO: Handle eye blinking
-    if (MWBase::Environment::get().getSoundManager()->sayDone(mReference))
-        return 0;
-    else
-        // TODO: Use the loudness of the currently playing sound
-        return 1;
+    return mValue;
+}
+
+void HeadAnimationTime::setTalkStart(float value)
+{
+    mTalkStart = value;
+}
+
+void HeadAnimationTime::setTalkStop(float value)
+{
+    mTalkStop = value;
+}
+
+void HeadAnimationTime::setBlinkStart(float value)
+{
+    mBlinkStart = value;
+}
+
+void HeadAnimationTime::setBlinkStop(float value)
+{
+    mBlinkStop = value;
 }
 
 static NpcAnimation::PartBoneMap createPartListMap()
@@ -241,7 +300,7 @@ void NpcAnimation::updateParts()
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
 
     NpcType curType = Type_Normal;
-    if (cls.getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).mMagnitude > 0)
+    if (cls.getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0)
         curType = Type_Vampire;
     if (cls.getNpcStats(mPtr).isWerewolf())
         curType = Type_Werewolf;
@@ -351,15 +410,18 @@ void NpcAnimation::updateParts()
     // Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
     static std::map< std::pair<std::string,int>,std::vector<const ESM::BodyPart*> > sRaceMapping;
 
-    static const int Flag_Female      = 1<<0;
-    static const int Flag_FirstPerson = 1<<1;
-
     bool isWerewolf = (mNpcType == Type_Werewolf);
     int flags = (isWerewolf ? -1 : 0);
     if(!mNpc->isMale())
+    {
+        static const int Flag_Female      = 1<<0;
         flags |= Flag_Female;
+    }
     if(mViewMode == VM_FirstPerson)
+    {
+        static const int Flag_FirstPerson = 1<<1;
         flags |= Flag_FirstPerson;
+    }
 
     std::string race = (isWerewolf ? "werewolf" : Misc::StringUtils::lowerCase(mNpc->mRace));
     std::pair<std::string, int> thisCombination = std::make_pair(race, flags);
@@ -493,6 +555,10 @@ NifOgre::ObjectScenePtr NpcAnimation::insertBoundedPart(const std::string &model
     std::for_each(objects->mEntities.begin(), objects->mEntities.end(), SetObjectGroup(group));
     std::for_each(objects->mParticles.begin(), objects->mParticles.end(), SetObjectGroup(group));
 
+    // Fast forward auto-play particles, which will have been set up as Emitting by the loader.
+    for (unsigned int i=0; i<objects->mParticles.size(); ++i)
+        objects->mParticles[i]->fastForward(1, 0.1);
+
     if(objects->mSkelBase)
     {
         Ogre::AnimationStateSet *aset = objects->mSkelBase->getAllAnimationStates();
@@ -515,6 +581,8 @@ NifOgre::ObjectScenePtr NpcAnimation::insertBoundedPart(const std::string &model
 Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 {
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
+
+    mHeadAnimationTime->update(timepassed);
 
     Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
     if(mViewMode == VM_FirstPerson)
@@ -539,7 +607,7 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
         if (mObjectParts[i].isNull())
             continue;
         std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i]->mControllers.begin());
-        for(;ctrl != mObjectParts[i]->mControllers.end();ctrl++)
+        for(;ctrl != mObjectParts[i]->mControllers.end();++ctrl)
             ctrl->update();
 
         Ogre::Entity *ent = mObjectParts[i]->mSkelBase;
@@ -613,14 +681,28 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     }
 
     std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type]->mControllers.begin());
-    for(;ctrl != mObjectParts[type]->mControllers.end();ctrl++)
+    for(;ctrl != mObjectParts[type]->mControllers.end();++ctrl)
     {
         if(ctrl->getSource().isNull())
         {
             ctrl->setSource(mNullAnimationTimePtr);
 
             if (type == ESM::PRT_Head)
+            {
                 ctrl->setSource(mHeadAnimationTime);
+                const NifOgre::TextKeyMap& keys = mObjectParts[type]->mTextKeys;
+                for (NifOgre::TextKeyMap::const_iterator it = keys.begin(); it != keys.end(); ++it)
+                {
+                    if (Misc::StringUtils::ciEqual(it->second, "talk: start"))
+                        mHeadAnimationTime->setTalkStart(it->first);
+                    if (Misc::StringUtils::ciEqual(it->second, "talk: stop"))
+                        mHeadAnimationTime->setTalkStop(it->first);
+                    if (Misc::StringUtils::ciEqual(it->second, "blink: start"))
+                        mHeadAnimationTime->setBlinkStart(it->first);
+                    if (Misc::StringUtils::ciEqual(it->second, "blink: stop"))
+                        mHeadAnimationTime->setBlinkStop(it->first);
+                }
+            }
             else if (type == ESM::PRT_Weapon)
                 ctrl->setSource(mWeaponAnimationTime);
         }
@@ -636,7 +718,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
 
     const char *ext = (mViewMode == VM_FirstPerson) ? ".1st" : "";
     std::vector<ESM::PartReference>::const_iterator part(parts.begin());
-    for(;part != parts.end();part++)
+    for(;part != parts.end();++part)
     {
         const ESM::BodyPart *bodypart = 0;
         if(!mNpc->isMale() && !part->mFemale.empty())
@@ -795,6 +877,11 @@ void NpcAnimation::setAlpha(float alpha)
                 applyAlpha(alpha, ent, mObjectParts[i]);
         }
     }
+}
+
+void NpcAnimation::enableHeadAnimation(bool enable)
+{
+    mHeadAnimationTime->setEnabled(enable);
 }
 
 void NpcAnimation::preRender(Ogre::Camera *camera)

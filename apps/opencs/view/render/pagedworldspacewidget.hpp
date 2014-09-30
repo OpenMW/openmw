@@ -18,6 +18,7 @@ namespace CSVRender
             CSMWorld::CellSelection mSelection;
             std::map<CSMWorld::CellCoordinates, Cell *> mCells;
             std::string mWorldspace;
+            CSVWidget::SceneToolToggle *mControlElements;
             bool mDisplayCellCoord;
 
         private:
@@ -42,6 +43,8 @@ namespace CSVRender
 
             virtual void referenceAdded (const QModelIndex& index, int start, int end);
 
+            virtual std::string getStartupInstruction();
+
         public:
 
             PagedWorldspaceWidget (QWidget *parent, CSMDoc::Document& document);
@@ -57,9 +60,19 @@ namespace CSVRender
 
             void displayCellCoord(bool display);
 
-            virtual void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
 
-            virtual dropRequirments getDropRequirements(dropType type) const;
+            /// \return Drop handled?
+            virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
+                DropType type);
+
+            virtual dropRequirments getDropRequirements(DropType type) const;
+
+            /// \attention The created tool is not added to the toolbar (via addTool). Doing
+            /// that is the responsibility of the calling function.
+            virtual CSVWidget::SceneToolToggle *makeControlVisibilitySelector (
+                CSVWidget::SceneToolbar *parent);
+
+            virtual unsigned int getElementMask() const;
 
         signals:
 

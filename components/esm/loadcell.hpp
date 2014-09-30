@@ -94,14 +94,16 @@ struct Cell
   float mWater; // Water level
   bool mWaterInt;
   int mMapColor;
-  int mNAM0;
+  // Counter for RefNums. This is only used during content file editing and has no impact on gameplay.
+  // It prevents overwriting previous refNums, even if they were deleted.
+  // as that would collide with refs when a content file is upgraded.
+  int mRefNumCounter;
 
   // References "leased" from another cell (i.e. a different cell
   //  introduced this ref, and it has been moved here by a plugin)
   CellRefTracker mLeasedRefs;
   MovedCellRefTracker mMovedRefs;
 
-  void preLoad(ESMReader &esm);
   void postLoad(ESMReader &esm);
 
   // This method is left in for compatibility with esmtool. Parsing moved references currently requires

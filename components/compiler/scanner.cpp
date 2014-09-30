@@ -343,17 +343,13 @@ namespace Compiler
             }
             else if (!(c=='"' && name.empty()))
             {
-                if (!(std::isalpha (c) || std::isdigit (c) || c=='_' || c=='`' ||
-                    /// \todo add an option to disable the following hack. Also, find out who is
-                    /// responsible for allowing it in the first place and meet up with that person in
-                    /// a dark alley.
-                    (c=='-' && !name.empty() && std::isalpha (mStream.peek()))))
+                if (!isStringCharacter (c))
                 {
                     putback (c);
                     break;
                 }
 
-                if (first && std::isdigit (c))
+                if (first && (std::isdigit (c) || c=='`' || c=='-'))
                     error = true;
             }
 
@@ -497,6 +493,17 @@ namespace Compiler
         cont = parser.parseSpecial (special, loc, *this);
 
         return true;
+    }
+
+    bool Scanner::isStringCharacter (char c, bool lookAhead)
+    {
+        return std::isalpha (c) || std::isdigit (c) || c=='_' ||
+            /// \todo disable this when doing more stricter compiling
+            c=='`' ||
+            /// \todo disable this when doing more stricter compiling. Also, find out who is
+            /// responsible for allowing it in the first place and meet up with that person in
+            /// a dark alley.
+            (c=='-' && (!lookAhead || isStringCharacter (mStream.peek(), false)));
     }
 
     bool Scanner::isWhitespace (char c)

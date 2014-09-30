@@ -21,7 +21,7 @@ CSVTools::ReportSubView::ReportSubView (const CSMWorld::UniversalId& id, CSMDoc:
     mTable->setSelectionMode (QAbstractItemView::ExtendedSelection);
 
     mIdTypeDelegate = CSVWorld::IdTypeDelegateFactory().makeDelegate (
-        document.getUndoStack(), this);
+        document, this);
 
     mTable->setItemDelegateForColumn (0, mIdTypeDelegate);
 

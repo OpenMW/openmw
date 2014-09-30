@@ -119,7 +119,11 @@ void Recharge::updateView()
 
         currentY += 32 + 4;
     }
+
+    // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+    mView->setVisibleVScroll(false);
     mView->setCanvasSize (MyGUI::IntSize(mView->getWidth(), std::max(mView->getHeight(), currentY)));
+    mView->setVisibleVScroll(true);
 }
 
 void Recharge::onCancel(MyGUI::Widget *sender)
@@ -165,6 +169,8 @@ void Recharge::onItemClicked(MyGUI::Widget *sender)
         item.getCellRef().setEnchantmentCharge(
             std::min(item.getCellRef().getEnchantmentCharge() + restored, static_cast<float>(enchantment->mData.mCharge)));
 
+        player.getClass().getContainerStore(player).restack(item);
+
         player.getClass().skillUsageSucceeded (player, ESM::Skill::Enchant, 0);
     }
 
@@ -175,6 +181,10 @@ void Recharge::onItemClicked(MyGUI::Widget *sender)
         std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage51")->getString();
         message = boost::str(boost::format(message) % gem.getClass().getName(gem));
         MWBase::Environment::get().getWindowManager()->messageBox(message);
+
+        // special case: readd Azura's Star
+        if (Misc::StringUtils::ciEqual(gem.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
+            player.getClass().getContainerStore(player).add("Misc_SoulGem_Azura", 1, player);
     }
 
     updateView();

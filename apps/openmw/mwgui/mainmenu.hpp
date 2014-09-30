@@ -3,10 +3,14 @@
 
 #include <openengine/gui/layout.hpp>
 
+namespace Gui
+{
+    class ImageButton;
+}
+
 namespace MWGui
 {
 
-    class ImageButton;
     class BackgroundImage;
     class SaveGameDialog;
     class VideoWidget;
@@ -39,7 +43,7 @@ namespace MWGui
             MyGUI::ImageBox* mVideoBackground;
             VideoWidget* mVideo; // For animated main menus
 
-            std::map<std::string, MWGui::ImageButton*> mButtons;
+            std::map<std::string, Gui::ImageButton*> mButtons;
 
             void onButtonClicked (MyGUI::Widget* sender);
             void onNewGameConfirmed();

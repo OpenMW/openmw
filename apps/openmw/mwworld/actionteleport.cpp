@@ -1,4 +1,3 @@
-
 #include "actionteleport.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -16,15 +15,19 @@ namespace MWWorld
 
     void ActionTeleport::executeImp (const Ptr& actor)
     {
-        MWBase::World* world = MWBase::Environment::get().getWorld();
-
         //find any NPC that is following the actor and teleport him too
         std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(actor);
         for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
         {
-            executeImp(*it);
+            teleport(*it);
         }
 
+        teleport(actor);
+    }
+
+    void ActionTeleport::teleport(const Ptr &actor)
+    {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
         if(actor == world->getPlayerPtr())
         {
             world->getPlayer().setTeleported(true);

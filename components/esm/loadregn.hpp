@@ -24,10 +24,11 @@ struct Region
 #pragma pack(1)
     struct WEATstruct
     {
-        // I guess these are probabilities
-        char mClear, mCloudy, mFoggy, mOvercast, mRain, mThunder, mAsh, mBlight,
+        // These are probabilities that add up to 100
+        unsigned char mClear, mCloudy, mFoggy, mOvercast, mRain, mThunder, mAsh, mBlight,
         // Unknown weather, probably snow and something. Only
         // present in file version 1.3.
+        // the engine uses mA as "snow" and mB as "blizard"
                 mA, mB;
     }; // 10 bytes
 
@@ -35,7 +36,7 @@ struct Region
     struct SoundRef
     {
         NAME32 mSound;
-        char mChance;
+        unsigned char mChance;
     }; // 33 bytes
 #pragma pack(pop)
 

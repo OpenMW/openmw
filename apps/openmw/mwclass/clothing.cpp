@@ -22,6 +22,11 @@
 
 namespace MWClass
 {
+    std::string Clothing::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Clothing>()->mBase->mId;
+    }
+
     void Clothing::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
@@ -193,8 +198,7 @@ namespace MWClass
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
+            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -288,7 +292,8 @@ namespace MWClass
 
     bool Clothing::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Clothing;
+        return (npcServices & ESM::NPC::Clothing)
+                || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
     float Clothing::getWeight(const MWWorld::Ptr &ptr) const

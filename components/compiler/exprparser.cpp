@@ -16,6 +16,7 @@
 #include "stringparser.hpp"
 #include "extensions.hpp"
 #include "context.hpp"
+#include "discardparser.hpp"
 
 namespace Compiler
 {
@@ -386,6 +387,9 @@ namespace Compiler
                     mExplicit.clear();
                     mRefOp = false;
 
+                    std::vector<Interpreter::Type_Code> ignore;
+                    parseArguments ("x", scanner, ignore);
+
                     mNextOperand = false;
                     return true;
                 }
@@ -401,6 +405,21 @@ namespace Compiler
                     mExplicit.clear();
                     mRefOp = false;
 
+                    mNextOperand = false;
+                    return true;
+                }
+                else if (keyword==Scanner::K_scriptrunning)
+                {
+                    start();
+
+                    mTokenLoc = loc;
+                    parseArguments ("c", scanner);
+
+                    Generator::scriptRunning (mCode);
+                    mOperands.push_back ('l');
+
+                    mExplicit.clear();
+                    mRefOp = false;
                     mNextOperand = false;
                     return true;
                 }
@@ -526,6 +545,9 @@ namespace Compiler
 
                 Generator::getDisabled (mCode, mLiterals, "");
                 mOperands.push_back ('l');
+
+                std::vector<Interpreter::Type_Code> ignore;
+                parseArguments ("x", scanner, ignore);
 
                 mNextOperand = false;
                 return true;
@@ -737,6 +759,7 @@ namespace Compiler
 
         ExprParser parser (getErrorHandler(), getContext(), mLocals, mLiterals, true);
         StringParser stringParser (getErrorHandler(), getContext(), mLiterals);
+        DiscardParser discardParser (getErrorHandler(), getContext());
 
         std::stack<std::vector<Interpreter::Type_Code> > stack;
 
@@ -771,11 +794,32 @@ namespace Compiler
                         ++optionalCount;
                 }
             }
+            else if (*iter=='X')
+            {
+                parser.reset();
+
+                parser.setOptional (true);
+
+                scanner.scan (parser);
+
+                if (parser.isEmpty())
+                    break;
+            }
+            else if (*iter=='z')
+            {
+                discardParser.reset();
+                discardParser.setOptional (true);
+
+                scanner.scan (discardParser);
+
+                if (discardParser.isEmpty())
+                    break;
+            }
             else
             {
                 parser.reset();
 
-                if (optional || *iter == 'X')
+                if (optional)
                     parser.setOptional (true);
 
                 scanner.scan (parser);
@@ -783,20 +827,17 @@ namespace Compiler
                 if (optional && parser.isEmpty())
                     break;
 
-                if (*iter != 'X')
-                {
-                    std::vector<Interpreter::Type_Code> tmp;
+                std::vector<Interpreter::Type_Code> tmp;
 
-                    char type = parser.append (tmp);
+                char type = parser.append (tmp);
 
-                    if (type!=*iter)
-                        Generator::convert (tmp, type, *iter);
+                if (type!=*iter)
+                    Generator::convert (tmp, type, *iter);
 
-                    stack.push (tmp);
+                stack.push (tmp);
 
-                    if (optional)
-                        ++optionalCount;
-                }
+                if (optional)
+                    ++optionalCount;
             }
         }
 

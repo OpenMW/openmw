@@ -81,12 +81,14 @@ void ActorTracer::doTrace(btCollisionObject *actor, const Ogre::Vector3 &start, 
         mFraction = newTraceCallback.m_closestHitFraction;
         mPlaneNormal = Ogre::Vector3(tracehitnormal.x(), tracehitnormal.y(), tracehitnormal.z());
         mEndPos = (end-start)*mFraction + start;
+        mHitObject = newTraceCallback.m_hitCollisionObject;
     }
     else
     {
         mEndPos = end;
         mPlaneNormal = Ogre::Vector3(0.0f, 0.0f, 1.0f);
         mFraction = 1.0f;
+        mHitObject = NULL;
     }
 }
 

@@ -1,5 +1,4 @@
 #include "renderer.hpp"
-#include "fader.hpp"
 
 #include <SDL.h>
 
@@ -27,9 +26,6 @@ using namespace OEngine::Render;
 
 void OgreRenderer::cleanup()
 {
-    delete mFader;
-    mFader = NULL;
-
     if (mWindow)
         Ogre::Root::getSingleton().destroyRenderTarget(mWindow);
     mWindow = NULL;
@@ -46,10 +42,9 @@ void OgreRenderer::cleanup()
 
 void OgreRenderer::update(float dt)
 {
-    mFader->update(dt);
 }
 
-void OgreRenderer::screenshot(const std::string &file)
+void OgreRenderer::screenshot(const std::string &file, const std::string& imageFormat)
 {
     /*  Since Ogre uses narrow character interfaces, it does not support
         Unicode paths on Windows. Therefore we had to implement screenshot
@@ -70,7 +65,7 @@ void OgreRenderer::screenshot(const std::string &file)
     );
     mWindow->copyContentsToMemory(image.getPixelBox());
 
-    Ogre::DataStreamPtr stream = image.encode("png");
+    Ogre::DataStreamPtr stream = image.encode(imageFormat);
     Ogre::MemoryDataStream *mem = dynamic_cast<Ogre::MemoryDataStream *>(stream.get());
     if (mem != 0) { // likely
         const char *ptr = reinterpret_cast<char *>(mem->getCurrentPtr());
@@ -86,11 +81,6 @@ void OgreRenderer::screenshot(const std::string &file)
             size -= chunk;
         }
     }
-}
-
-float OgreRenderer::getFPS()
-{
-    return mWindow->getLastFPS();
 }
 
 void OgreRenderer::configure(const std::string &logPath,
@@ -160,8 +150,6 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
                     Ogre::TU_WRITE_ONLY);
 
     mScene = mRoot->createSceneManager(ST_GENERIC);
-
-    mFader = new Fader(mScene);
 
     mCamera = mScene->createCamera("cam");
 

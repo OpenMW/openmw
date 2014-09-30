@@ -3,6 +3,8 @@
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <components/widgets/list.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -17,13 +19,22 @@
 #include "../mwdialogue/dialoguemanagerimp.hpp"
 
 #include "widgets.hpp"
-#include "list.hpp"
 #include "tradewindow.hpp"
 #include "spellbuyingwindow.hpp"
 #include "travelwindow.hpp"
 #include "bookpage.hpp"
 
 #include "journalbooks.hpp" // to_utf8_span
+
+namespace
+{
+
+    MyGUI::Colour getTextColour (const std::string& type)
+    {
+        return MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=" + type + "}"));
+    }
+
+}
 
 namespace MWGui
 {
@@ -102,7 +113,7 @@ namespace MWGui
 
     void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
-        BookTypesetter::Style* title = typesetter->createStyle("", MyGUI::Colour(223/255.f, 201/255.f, 159/255.f));
+        BookTypesetter::Style* title = typesetter->createStyle("", getTextColour("header"));
         typesetter->sectionBreak(9);
         if (mTitle != "")
             typesetter->write(title, to_utf8_span(mTitle.c_str()));
@@ -114,10 +125,10 @@ namespace MWGui
         // We need this copy for when @# hyperlinks are replaced
         std::string text = mText;
 
-        size_t pos_begin, pos_end;
+        size_t pos_end;
         for(;;)
         {
-            pos_begin = text.find('@');
+            size_t pos_begin = text.find('@');
             if (pos_begin != std::string::npos)
                 pos_end = text.find('#', pos_begin);
 
@@ -146,14 +157,14 @@ namespace MWGui
 
         if (hyperLinks.size() && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
         {
-            BookTypesetter::Style* style = typesetter->createStyle("", MyGUI::Colour(202/255.f, 165/255.f, 96/255.f));
+            BookTypesetter::Style* style = typesetter->createStyle("", getTextColour("normal"));
             size_t formatted = 0; // points to the first character that is not laid out yet
             for (std::map<Range, intptr_t>::iterator it = hyperLinks.begin(); it != hyperLinks.end(); ++it)
             {
                 intptr_t topicId = it->second;
-                const MyGUI::Colour linkHot    (143/255.f, 155/255.f, 218/255.f);
-                const MyGUI::Colour linkNormal (112/255.f, 126/255.f, 207/255.f);
-                const MyGUI::Colour linkActive (175/255.f, 184/255.f, 228/255.f);
+                const MyGUI::Colour linkHot    (getTextColour("link_over"));
+                const MyGUI::Colour linkNormal (getTextColour("link"));
+                const MyGUI::Colour linkActive (getTextColour("link_pressed"));
                 BookTypesetter::Style* hotStyle = typesetter->createHotStyle (style, linkNormal, linkHot, linkActive, topicId);
                 if (formatted < it->first.first)
                     typesetter->write(style, formatted, it->first.first);
@@ -185,11 +196,11 @@ namespace MWGui
 
     void Response::addTopicLink(BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const
     {
-        BookTypesetter::Style* style = typesetter->createStyle("", MyGUI::Colour(202/255.f, 165/255.f, 96/255.f));
+        BookTypesetter::Style* style = typesetter->createStyle("", getTextColour("normal"));
 
-        const MyGUI::Colour linkHot    (143/255.f, 155/255.f, 218/255.f);
-        const MyGUI::Colour linkNormal (112/255.f, 126/255.f, 207/255.f);
-        const MyGUI::Colour linkActive (175/255.f, 184/255.f, 228/255.f);
+        const MyGUI::Colour linkHot    (getTextColour("link_over"));
+        const MyGUI::Colour linkNormal (getTextColour("link"));
+        const MyGUI::Colour linkActive (getTextColour("link_pressed"));
 
         if (topicId)
             style = typesetter->createHotStyle (style, linkNormal, linkHot, linkActive, topicId);
@@ -203,7 +214,7 @@ namespace MWGui
 
     void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
-        BookTypesetter::Style* title = typesetter->createStyle("", MyGUI::Colour(223/255.f, 201/255.f, 159/255.f));
+        BookTypesetter::Style* title = typesetter->createStyle("", getTextColour("notify"));
         typesetter->sectionBreak(9);
         typesetter->write(title, to_utf8_span(mText.c_str()));
     }
@@ -266,15 +277,19 @@ namespace MWGui
         BookPage::ClickCallback callback = boost::bind (&DialogueWindow::notifyLinkClicked, this, _1);
         mHistory->adviseLinkClicked(callback);
 
-        static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
+        mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
     }
 
     void DialogueWindow::exit()
     {
         if ((!mEnabled || MWBase::Environment::get().getDialogueManager()->isInChoice())
                 && !mGoodbye)
-            return;
-        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+        {
+            // in choice, not allowed to escape, but give access to main menu to allow loading other saves
+            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+        }
+        else
+            MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
     }
 
     void DialogueWindow::onWindowResize(MyGUI::Window* _sender)
@@ -391,6 +406,31 @@ namespace MWGui
         mLinks.clear();
 
         updateOptions();
+
+        restock();
+    }
+
+    void DialogueWindow::restock()
+    {
+        MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
+        float delay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fBarterGoldResetDelay")->getFloat();
+
+        if (MWBase::Environment::get().getWorld()->getTimeStamp() >= sellerStats.getLastRestockTime() + delay)
+        {
+            sellerStats.setGoldPool(mPtr.getClass().getBaseGold(mPtr));
+
+            mPtr.getClass().restock(mPtr);
+
+            // Also restock any containers owned by this merchant, which are also available to buy in the trade window
+            std::vector<MWWorld::Ptr> itemSources;
+            MWBase::Environment::get().getWorld()->getContainersOwnedBy(mPtr, itemSources);
+            for (std::vector<MWWorld::Ptr>::iterator it = itemSources.begin(); it != itemSources.end(); ++it)
+            {
+                it->getClass().restock(*it);
+            }
+
+            sellerStats.setLastRestockTime(MWBase::Environment::get().getWorld()->getTimeStamp());
+        }
     }
 
     void DialogueWindow::setKeywords(std::list<std::string> keyWords)
@@ -477,10 +517,10 @@ namespace MWGui
 
         typesetter->sectionBreak(9);
         // choices
-        const MyGUI::Colour linkHot    (223/255.f, 201/255.f, 159/255.f);
-        const MyGUI::Colour linkNormal (150/255.f, 50/255.f, 30/255.f);
-        const MyGUI::Colour linkActive (243/255.f, 237/255.f, 221/255.f);
-        for (std::map<std::string, int>::reverse_iterator it = mChoices.rbegin(); it != mChoices.rend(); ++it)
+        const MyGUI::Colour linkHot    (getTextColour("answer_over"));
+        const MyGUI::Colour linkNormal (getTextColour("answer"));
+        const MyGUI::Colour linkActive (getTextColour("answer_pressed"));
+        for (std::vector<std::pair<std::string, int> >::iterator it = mChoices.begin(); it != mChoices.end(); ++it)
         {
             Choice* link = new Choice(it->second);
             mLinks.push_back(link);
@@ -571,7 +611,7 @@ namespace MWGui
 
     void DialogueWindow::addChoice(const std::string& choice, int id)
     {
-        mChoices[choice] = id;
+        mChoices.push_back(std::make_pair(choice, id));
         updateHistory();
     }
 
@@ -592,8 +632,7 @@ namespace MWGui
             dispositionVisible = true;
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr));
-            mDispositionText->eraseText(0, mDispositionText->getTextLength());
-            mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100")+"#B29154");
+            mDispositionText->setCaption(boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100"));
         }
 
         bool dispositionWasVisible = mDispositionBar->getVisible();
@@ -637,8 +676,7 @@ namespace MWGui
                     + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()));
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(disp);
-            mDispositionText->eraseText(0, mDispositionText->getTextLength());
-            mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(disp)+std::string("/100")+"#B29154");
+            mDispositionText->setCaption(boost::lexical_cast<std::string>(disp)+std::string("/100"));
         }
     }
 }

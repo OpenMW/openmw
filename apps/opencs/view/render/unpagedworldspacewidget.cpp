@@ -1,7 +1,10 @@
 
 #include "unpagedworldspacewidget.hpp"
 
+#include <sstream>
+
 #include <OgreColourValue.h>
+#include <OgreCamera.h>
 
 #include <QtGui/qevent.h>
 
@@ -10,6 +13,10 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/tablemimedata.hpp"
+
+#include "../widget/scenetooltoggle.hpp"
+
+#include "elements.hpp"
 
 void CSVRender::UnpagedWorldspaceWidget::update()
 {
@@ -23,6 +30,14 @@ void CSVRender::UnpagedWorldspaceWidget::update()
     /// \todo deal with mSunlight and mFog/mForDensity
 
     flagAsModified();
+}
+
+void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
+    CSVWidget::SceneToolToggle *tool)
+{
+    WorldspaceWidget::addVisibilitySelectorButtons (tool);
+
+    tool->addButton (":armor.png", Element_Fog, ":armor.png", "Fog");
 }
 
 CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document, QWidget* parent)
@@ -74,13 +89,21 @@ void CSVRender::UnpagedWorldspaceWidget::cellRowsAboutToBeRemoved (const QModelI
         emit closeRequest();
 }
 
-void CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::UniversalId >& data)
+bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld::UniversalId>& data, DropType type)
 {
+    if (WorldspaceWidget::handleDrop (data, type))
+        return true;
+
+    if (type!=Type_CellsInterior)
+        return false;
+
     mCellId = data.begin()->getId();
+    mCell.reset (new Cell (getDocument().getData(), getSceneManager(), mCellId));
+
     update();
     emit cellChanged(*data.begin());
 
-    /// \todo replace mCell
+    return true;
 }
 
 void CSVRender::UnpagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
@@ -137,14 +160,33 @@ void CSVRender::UnpagedWorldspaceWidget::referenceAdded (const QModelIndex& pare
             flagAsModified();
 }
 
-CSVRender::WorldspaceWidget::dropRequirments CSVRender::UnpagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::dropType type) const
+std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()
 {
+    Ogre::Vector3 position = getCamera()->getPosition();
+
+    std::ostringstream stream;
+
+    stream
+        << "player->positionCell "
+        << position.x << ", " << position.y << ", " << position.z
+        << ", 0, \"" << mCellId << "\"";
+
+    return stream.str();
+}
+
+CSVRender::WorldspaceWidget::dropRequirments CSVRender::UnpagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::DropType type) const
+{
+    dropRequirments requirements = WorldspaceWidget::getDropRequirements (type);
+
+    if (requirements!=ignored)
+        return requirements;
+
     switch(type)
     {
-        case cellsInterior:
+        case Type_CellsInterior:
             return canHandle;
 
-        case cellsExterior:
+        case Type_CellsExterior:
             return needPaged;
 
         default:

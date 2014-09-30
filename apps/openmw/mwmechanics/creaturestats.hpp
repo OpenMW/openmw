@@ -40,7 +40,6 @@ namespace MWMechanics
         bool mTalkedTo;
         bool mAlarmed;
         bool mAttacked;
-        bool mHostile;
         bool mAttackingOrSpell;
         bool mKnockdown;
         bool mKnockdownOneFrame;
@@ -92,6 +91,7 @@ namespace MWMechanics
         void setAttackStrength(float value);
 
         bool needToRecalcDynamicStats();
+        void setNeedRecalcDynamicStats(bool val);
 
         void addToFallHeight(float height);
 
@@ -137,11 +137,8 @@ namespace MWMechanics
 
         void setDynamic (int index, const DynamicStat<float> &value);
 
-        void setSpells(const Spells &spells);
-
-        void setActiveSpells(const ActiveSpells &active);
-
-        void setMagicEffects(const MagicEffects &effects);
+        /// Set Modifier for each magic effect according to \a effects. Does not touch Base values.
+        void modifyMagicEffects(const MagicEffects &effects);
 
         void setAttackingOrSpell(bool attackingOrSpell);
 
@@ -166,6 +163,8 @@ namespace MWMechanics
         ///< Return effective fatigue
 
         bool isDead() const;
+
+        void notifyDied();
 
         bool hasDied() const;
 
@@ -200,15 +199,13 @@ namespace MWMechanics
         bool getAttacked() const;
         void setAttacked (bool attacked);
 
-        bool isHostile() const;
-        void setHostile (bool hostile);
-
         bool getCreatureTargetted() const;
 
         float getEvasion() const;
 
         void setKnockedDown(bool value);
-        ///Returns true for the entire duration of the actor being knocked down
+        /// Returns true for the entire duration of the actor being knocked down or knocked out,
+        /// including transition animations (falling down & standing up)
         bool getKnockedDown() const;
         void setKnockedDownOneFrame(bool value);
         ///Returns true only for the first frame of the actor being knocked out; used for "onKnockedOut" command
@@ -229,7 +226,9 @@ namespace MWMechanics
             Flag_ForceRun = 1,
             Flag_ForceSneak = 2,
             Flag_Run = 4,
-            Flag_Sneak = 8
+            Flag_Sneak = 8,
+            Flag_ForceJump = 16,
+            Flag_ForceMoveJump = 32
         };
         enum Stance
         {

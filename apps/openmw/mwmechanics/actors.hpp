@@ -36,13 +36,15 @@ namespace MWMechanics
             void calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration);
             void calculateNpcStatModifiers (const MWWorld::Ptr& ptr);
 
-            void calculateRestoration (const MWWorld::Ptr& ptr, float duration, bool sleep);
+            void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
 
             void updateDrowning (const MWWorld::Ptr& ptr, float duration);
 
             void updateEquippedLight (const MWWorld::Ptr& ptr, float duration);
 
             void updateCrimePersuit (const MWWorld::Ptr& ptr, float duration);
+
+            void killDeadActors ();
 
         public:
 
@@ -56,7 +58,7 @@ namespace MWMechanics
 
             /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
             /// paused we may want to do it manually (after equipping permanent enchantment)
-            void updateMagicEffects (const MWWorld::Ptr& ptr) { adjustMagicEffects(ptr); }
+            void updateMagicEffects (const MWWorld::Ptr& ptr);
 
             void addActor (const MWWorld::Ptr& ptr, bool updateImmediately=false);
             ///< Register an actor for stats management
@@ -89,6 +91,8 @@ namespace MWMechanics
 
             void restoreDynamicStats(bool sleep);
             ///< If the player is sleeping, this should be called every hour.
+
+            void restoreDynamicStats(const MWWorld::Ptr& actor, bool sleep);
 
             int getHoursToRest(const MWWorld::Ptr& ptr) const;
             ///< Calculate how many hours the given actor needs to rest in order to be fully healed

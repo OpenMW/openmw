@@ -21,6 +21,8 @@
 #include "spellcasting.hpp"
 #include "autocalcspell.hpp"
 
+#include <limits.h>
+
 namespace
 {
     /// @return is \a ptr allowed to take/use \a item or is it a crime?
@@ -34,8 +36,17 @@ namespace
         if (!faction.empty() && ptr.getClass().isNpc())
         {
             const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
-            if (factions.find(Misc::StringUtils::lowerCase(faction)) == factions.end())
+            std::map<std::string, int>::const_iterator found = factions.find(Misc::StringUtils::lowerCase(faction));
+            if (found == factions.end()
+                    || found->second < item.getCellRef().getFactionRank())
                 isFactionOwned = true;
+        }
+
+        const std::string& globalVariable = item.getCellRef().getGlobalVariable();
+        if (!globalVariable.empty() && MWBase::Environment::get().getWorld()->getGlobalInt(Misc::StringUtils::lowerCase(globalVariable)) == 1)
+        {
+            isOwned = false;
+            isFactionOwned = false;
         }
 
         if (!item.getCellRef().getOwner().empty())
@@ -59,7 +70,7 @@ namespace MWMechanics
         // reset
         creatureStats.setLevel(player->mNpdt52.mLevel);
         creatureStats.getSpells().clear();
-        creatureStats.setMagicEffects(MagicEffects());
+        creatureStats.modifyMagicEffects(MagicEffects());
 
         for (int i=0; i<27; ++i)
             npcStats.getSkill (i).setBase (player->mNpdt52.mSkills[i]);
@@ -277,7 +288,7 @@ namespace MWMechanics
     }
 
     MechanicsManager::MechanicsManager()
-    : mUpdatePlayer (true), mClassSelected (false),
+    : mWatchedStatsEmpty (true), mUpdatePlayer (true), mClassSelected (false),
       mRaceSelected (false), mAI(true)
     {
         //buildPlayer no longer here, needs to be done explicitely after all subsystems are up and running
@@ -339,7 +350,7 @@ namespace MWMechanics
             const MWMechanics::NpcStats &stats = mWatched.getClass().getNpcStats(mWatched);
             for(int i = 0;i < ESM::Attribute::Length;++i)
             {
-                if(stats.getAttribute(i) != mWatchedStats.getAttribute(i))
+                if(stats.getAttribute(i) != mWatchedStats.getAttribute(i) || mWatchedStatsEmpty)
                 {
                     std::stringstream attrname;
                     attrname << "AttribVal"<<(i+1);
@@ -349,19 +360,19 @@ namespace MWMechanics
                 }
             }
 
-            if(stats.getHealth() != mWatchedStats.getHealth())
+            if(stats.getHealth() != mWatchedStats.getHealth() || mWatchedStatsEmpty)
             {
                 static const std::string hbar("HBar");
                 mWatchedStats.setHealth(stats.getHealth());
                 winMgr->setValue(hbar, stats.getHealth());
             }
-            if(stats.getMagicka() != mWatchedStats.getMagicka())
+            if(stats.getMagicka() != mWatchedStats.getMagicka() || mWatchedStatsEmpty)
             {
                 static const std::string mbar("MBar");
                 mWatchedStats.setMagicka(stats.getMagicka());
                 winMgr->setValue(mbar, stats.getMagicka());
             }
-            if(stats.getFatigue() != mWatchedStats.getFatigue())
+            if(stats.getFatigue() != mWatchedStats.getFatigue() || mWatchedStatsEmpty)
             {
                 static const std::string fbar("FBar");
                 mWatchedStats.setFatigue(stats.getFatigue());
@@ -387,7 +398,7 @@ namespace MWMechanics
             //Loop over ESM::Skill::SkillEnum
             for(int i = 0; i < ESM::Skill::Length; ++i)
             {
-                if(stats.getSkill(i) != mWatchedStats.getSkill(i))
+                if(stats.getSkill(i) != mWatchedStats.getSkill(i) || mWatchedStatsEmpty)
                 {
                     update = true;
                     mWatchedStats.getSkill(i) = stats.getSkill(i);
@@ -399,6 +410,8 @@ namespace MWMechanics
                 winMgr->updateSkillArea();
 
             winMgr->setValue("level", stats.getLevel());
+
+            mWatchedStatsEmpty = false;
 
             // Update the equipped weapon icon
             MWWorld::InventoryStore& inv = mWatched.getClass().getInventoryStore(mWatched);
@@ -604,7 +617,7 @@ namespace MWMechanics
         if (playerStats.getDrawState() == MWMechanics::DrawState_Weapon)
             x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispWeaponDrawn")->getFloat();
 
-        x += ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Charm).mMagnitude;
+        x += ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Charm).getMagnitude();
 
         int effective_disposition = std::max(0,std::min(int(x),100));//, normally clamped to [0..100] when used
         return effective_disposition;
@@ -652,7 +665,6 @@ namespace MWMechanics
     {
         return mActors.countDeaths (id);
     }
-
 
     void MechanicsManager::getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
         float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange)
@@ -859,6 +871,12 @@ namespace MWMechanics
 
     bool MechanicsManager::sleepInBed(const MWWorld::Ptr &ptr, const MWWorld::Ptr &bed)
     {
+        if (ptr.getClass().getNpcStats(ptr).isWerewolf())
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
+            return true;
+        }
+
         if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()) {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
             return true;
@@ -960,6 +978,9 @@ namespace MWMechanics
                 if (!it->getClass().isNpc())
                     continue;
 
+                if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
+                    continue;
+
                 // Will the witness report the crime?
                 if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
                 {
@@ -1058,6 +1079,9 @@ namespace MWMechanics
             if (*it != victim && type == OT_Assault)
                 aggression = iFightAttacking;
 
+            if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
+                continue;
+
             if (it->getClass().isClass(*it, "guard"))
             {
                 // Mark as Alarmed for dialogue
@@ -1087,6 +1111,52 @@ namespace MWMechanics
         }
     }
 
+    bool MechanicsManager::actorAttacked(const MWWorld::Ptr &ptr, const MWWorld::Ptr &attacker)
+    {
+        if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            return false;
+
+        std::list<MWWorld::Ptr> followers = getActorsFollowing(attacker);
+        if (std::find(followers.begin(), followers.end(), ptr) != followers.end())
+        {
+            ptr.getClass().getCreatureStats(ptr).friendlyHit();
+
+            if (ptr.getClass().getCreatureStats(ptr).getFriendlyHits() < 4)
+            {
+                MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
+                return false;
+            }
+        }
+
+        // Attacking an NPC that is already in combat with any other NPC is not a crime
+        AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+        bool isFightingNpc = false;
+        for (std::list<AiPackage*>::const_iterator it = seq.begin(); it != seq.end(); ++it)
+        {
+            if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+            {
+                MWWorld::Ptr target = static_cast<AiCombat*>(*it)->getTarget();
+                if (!target.isEmpty() && target.getClass().isNpc())
+                    isFightingNpc = true;
+            }
+        }
+
+        if (ptr.getClass().isNpc() && !attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker)
+                && !isAggressive(ptr, attacker) && !isFightingNpc)
+            commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
+
+        if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)
+                                    || attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
+        {
+            // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
+            // Note: accidental or collateral damage attacks are ignored.
+            startCombat(ptr, attacker);
+        }
+
+        return true;
+    }
+
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)
     {
         if (observer.getClass().getCreatureStats(observer).isDead())
@@ -1096,7 +1166,7 @@ namespace MWMechanics
 
         CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-        float invisibility = stats.getMagicEffects().get(ESM::MagicEffect::Invisibility).mMagnitude;
+        float invisibility = stats.getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude();
         if (invisibility > 0)
             return false;
 
@@ -1128,13 +1198,13 @@ namespace MWMechanics
         Ogre::Vector3 pos2 (observer.getRefData().getPosition().pos);
         float distTerm = fSneakDistBase + fSneakDistMult * pos1.distance(pos2);
 
-        float chameleon = stats.getMagicEffects().get(ESM::MagicEffect::Chameleon).mMagnitude;
+        float chameleon = stats.getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
         float x = sneakTerm * distTerm * stats.getFatigueTerm() + chameleon + invisibility;
 
         CreatureStats& observerStats = observer.getClass().getCreatureStats(observer);
         int obsAgility = observerStats.getAttribute(ESM::Attribute::Agility).getModified();
         int obsLuck = observerStats.getAttribute(ESM::Attribute::Luck).getModified();
-        float obsBlind = observerStats.getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
+        float obsBlind = observerStats.getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude();
         int obsSneak = observer.getClass().getSkill(observer, ESM::Skill::Sneak);
 
         float obsTerm = obsSneak + 0.2 * obsAgility + 0.1 * obsLuck - obsBlind;
@@ -1158,11 +1228,11 @@ namespace MWMechanics
 
     void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
     {
+        if (ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(target))
+            return;
         ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
         if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
         {
-            ptr.getClass().getCreatureStats(ptr).setHostile(true);
-
             // if guard starts combat with player, guards pursuing player should do the same
             if (ptr.getClass().isClass(ptr, "Guard"))
             {
@@ -1251,6 +1321,34 @@ namespace MWMechanics
                 + ((50 - disposition)  * fFightDispMult))
                 + bias;
 
+        if (ptr.getClass().isNpc() && target.getClass().isNpc())
+        {
+            if (target.getClass().getNpcStats(target).isWerewolf() ||
+                    (target == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                     MWBase::Environment::get().getWorld()->getGlobalInt("pcknownwerewolf")))
+            {
+                const ESM::GameSetting * iWerewolfFightMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("iWerewolfFightMod");
+                fight += iWerewolfFightMod->getInt();
+            }
+        }
+
         return (fight >= 100);
+    }
+
+    void MechanicsManager::keepPlayerAlive()
+    {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        CreatureStats& stats = player.getClass().getCreatureStats(player);
+        if (stats.isDead())
+        {
+            MWMechanics::DynamicStat<float> stat (stats.getHealth());
+
+            if (stat.getModified()<1)
+            {
+                stat.setModified(1, 0);
+                stats.setHealth(stat);
+            }
+            stats.resurrect();
+        }
     }
 }

@@ -25,6 +25,11 @@
 
 namespace MWClass
 {
+    std::string Armor::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Armor>()->mBase->mId;
+    }
+
     void Armor::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
@@ -152,15 +157,19 @@ namespace MWClass
 
         float iWeight = gmst.find (typeGmst)->getInt();
 
-        if (iWeight * gmst.find ("fLightMaxMod")->getFloat()>=
-            ref->mBase->mData.mWeight)
+        float epsilon = 5e-4;
+
+        if (ref->mBase->mData.mWeight == 0)
+            return ESM::Skill::Unarmored;
+
+        if (ref->mBase->mData.mWeight <= iWeight * gmst.find ("fLightMaxMod")->getFloat() + epsilon)
             return ESM::Skill::LightArmor;
 
-        if (iWeight * gmst.find ("fMedMaxMod")->getFloat()>=
-            ref->mBase->mData.mWeight)
+        if (ref->mBase->mData.mWeight <= iWeight * gmst.find ("fMedMaxMod")->getFloat() + epsilon)
             return ESM::Skill::MediumArmor;
 
-        return ESM::Skill::HeavyArmor;
+        else
+            return ESM::Skill::HeavyArmor;
     }
 
     int Armor::getValue (const MWWorld::Ptr& ptr) const
@@ -247,8 +256,7 @@ namespace MWClass
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
+            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -372,7 +380,8 @@ namespace MWClass
 
     bool Armor::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Armor;
+        return (npcServices & ESM::NPC::Armor)
+                || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
     float Armor::getWeight(const MWWorld::Ptr &ptr) const

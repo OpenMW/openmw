@@ -23,6 +23,7 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/movement.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -241,7 +242,9 @@ namespace MWWorld
         }
 
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
-                                  bool isFlying, float waterlevel, float slowFall, OEngine::Physic::PhysicEngine *engine)
+                                  bool isFlying, float waterlevel, float slowFall, OEngine::Physic::PhysicEngine *engine
+                                  , std::map<std::string, std::string>& collisionTracker
+                                  , std::map<std::string, std::string>& standingCollisionTracker)
         {
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
@@ -294,21 +297,24 @@ namespace MWWorld
             else
             {
                 velocity = Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) * movement;
+
                 // not in water nor can fly, so need to deal with gravity
                 if(!physicActor->getOnGround()) // if current OnGround status is false, must be falling or jumping
                 {
-                    // If falling, add part of the incoming velocity with the current inertia
-                    // TODO: but we could be jumping up?
-                    velocity = velocity * time + physicActor->getInertialForce();
-
-                    // avoid getting infinite inertia in air
+                    // If falling or jumping up, add part of the incoming velocity with the current inertia,
+                    // but don't allow increasing inertia beyond actor's speed (except on the initial jump impulse)
                     float actorSpeed = ptr.getClass().getSpeed(ptr);
-                    float speedXY = Ogre::Vector2(velocity.x, velocity.y).length();
-                    if (speedXY > actorSpeed) 
+                    float cap = std::max(actorSpeed, Ogre::Vector2(physicActor->getInertialForce().x, physicActor->getInertialForce().y).length());
+                    Ogre::Vector3 newVelocity = velocity + physicActor->getInertialForce();
+                    if (Ogre::Vector2(newVelocity.x, newVelocity.y).squaredLength() > cap*cap)
                     {
-                        velocity.x *= actorSpeed / speedXY;
-                        velocity.y *= actorSpeed / speedXY;
+                        velocity = newVelocity;
+                        float speedXY = Ogre::Vector2(velocity.x, velocity.y).length();
+                        velocity.x *= cap / speedXY;
+                        velocity.y *= cap / speedXY;
                     }
+                    else
+                        velocity = newVelocity;
                 }
                 inertia = velocity; // NOTE: velocity is for z axis only in this code block
 
@@ -318,12 +324,18 @@ namespace MWWorld
                     tracer.doTrace(colobj, position, position - Ogre::Vector3(0,0,2), engine); // check if down 2 possible
                     if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
                     {
+                        const btCollisionObject* standingOn = tracer.mHitObject;
+                        if (const OEngine::Physic::RigidBody* body = dynamic_cast<const OEngine::Physic::RigidBody*>(standingOn))
+                        {
+                            standingCollisionTracker[ptr.getRefData().getHandle()] = body->mName;
+                        }
                         isOnGround = true;
                         // if we're on the ground, don't try to fall any more
                         velocity.z = std::max(0.0f, velocity.z);
                     }
                 }
             }
+            ptr.getClass().getMovementSettings(ptr).mPosition[2] = 0;
 
             // Now that we have the effective movement vector, apply wind forces to it
             if (MWBase::Environment::get().getWorld()->isInStorm())
@@ -375,6 +387,14 @@ namespace MWWorld
                         newPosition = tracer.mEndPos; // ok to move, so set newPosition
                         remainingTime *= (1.0f-tracer.mFraction); // FIXME: remainingTime is no longer used so don't set it?
                         break;
+                    }
+                    else
+                    {
+                        const btCollisionObject* standingOn = tracer.mHitObject;
+                        if (const OEngine::Physic::RigidBody* body = dynamic_cast<const OEngine::Physic::RigidBody*>(standingOn))
+                        {
+                            collisionTracker[ptr.getRefData().getHandle()] = body->mName;
+                        }
                     }
                 }
                 else
@@ -597,9 +617,9 @@ namespace MWWorld
         }
     }
 
-    std::vector<std::string> PhysicsSystem::getCollisions(const Ptr &ptr)
+    std::vector<std::string> PhysicsSystem::getCollisions(const Ptr &ptr, int collisionGroup, int collisionMask)
     {
-        return mEngine->getCollisions(ptr.getRefData().getBaseNode()->getName());
+        return mEngine->getCollisions(ptr.getRefData().getBaseNode()->getName(), collisionGroup, collisionMask);
     }
 
     Ogre::Vector3 PhysicsSystem::traceDown(const MWWorld::Ptr &ptr, float maxHeight)
@@ -704,7 +724,10 @@ namespace MWWorld
         }
 
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
-            act->setScale(node->getScale().x);
+        {
+            // NOTE: Ignoring Npc::adjustScale (race height) on purpose. This is a bug in MW and must be replicated for compatibility reasons
+            act->setScale(ptr.getCellRef().getScale());
+        }
     }
 
     bool PhysicsSystem::toggleCollisionMode()
@@ -769,8 +792,19 @@ namespace MWWorld
         mMovementQueue.push_back(std::make_pair(ptr, movement));
     }
 
+    void PhysicsSystem::clearQueuedMovement()
+    {
+        mMovementQueue.clear();
+        mCollisions.clear();
+        mStandingCollisions.clear();
+    }
+
     const PtrVelocityList& PhysicsSystem::applyQueuedMovement(float dt)
     {
+        // Collision events are only tracked for a single frame, so reset first
+        mCollisions.clear();
+        mStandingCollisions.clear();
+
         mMovementResults.clear();
 
         mTimeAccum += dt;
@@ -790,7 +824,7 @@ namespace MWWorld
                 const MWMechanics::MagicEffects& effects = iter->first.getClass().getCreatureStats(iter->first).getMagicEffects();
 
                 bool waterCollision = false;
-                if (effects.get(ESM::MagicEffect::WaterWalking).mMagnitude
+                if (effects.get(ESM::MagicEffect::WaterWalking).getMagnitude()
                         && cell->hasWater()
                         && !world->isUnderwater(iter->first.getCell(),
                                                Ogre::Vector3(iter->first.getRefData().getPosition().pos)))
@@ -806,11 +840,11 @@ namespace MWWorld
                                                                 0xff, OEngine::Physic::CollisionType_Actor);
 
                 // 100 points of slowfall reduce gravity by 90% (this is just a guess)
-                float slowFall = 1-std::min(std::max(0.f, (effects.get(ESM::MagicEffect::SlowFall).mMagnitude / 100.f) * 0.9f), 0.9f);
+                float slowFall = 1-std::min(std::max(0.f, (effects.get(ESM::MagicEffect::SlowFall).getMagnitude() / 100.f) * 0.9f), 0.9f);
 
                 Ogre::Vector3 newpos = MovementSolver::move(iter->first, iter->second, mTimeAccum,
                                                             world->isFlying(iter->first),
-                                                            waterlevel, slowFall, mEngine);
+                                                            waterlevel, slowFall, mEngine, mCollisions, mStandingCollisions);
 
                 if (waterCollision)
                     mEngine->mDynamicsWorld->removeCollisionObject(&object);
@@ -837,4 +871,57 @@ namespace MWWorld
 
         mEngine->stepSimulation(dt);
     }
+
+    bool PhysicsSystem::isActorStandingOn(const Ptr &actor, const Ptr &object) const
+    {
+        const std::string& actorHandle = actor.getRefData().getHandle();
+        const std::string& objectHandle = object.getRefData().getHandle();
+
+        for (std::map<std::string, std::string>::const_iterator it = mStandingCollisions.begin();
+             it != mStandingCollisions.end(); ++it)
+        {
+            if (it->first == actorHandle && it->second == objectHandle)
+                return true;
+        }
+        return false;
+    }
+
+    void PhysicsSystem::getActorsStandingOn(const Ptr &object, std::vector<std::string> &out) const
+    {
+        const std::string& objectHandle = object.getRefData().getHandle();
+
+        for (std::map<std::string, std::string>::const_iterator it = mStandingCollisions.begin();
+             it != mStandingCollisions.end(); ++it)
+        {
+            if (it->second == objectHandle)
+                out.push_back(it->first);
+        }
+    }
+
+    bool PhysicsSystem::isActorCollidingWith(const Ptr &actor, const Ptr &object) const
+    {
+        const std::string& actorHandle = actor.getRefData().getHandle();
+        const std::string& objectHandle = object.getRefData().getHandle();
+
+        for (std::map<std::string, std::string>::const_iterator it = mCollisions.begin();
+             it != mCollisions.end(); ++it)
+        {
+            if (it->first == actorHandle && it->second == objectHandle)
+                return true;
+        }
+        return false;
+    }
+
+    void PhysicsSystem::getActorsCollidingWith(const Ptr &object, std::vector<std::string> &out) const
+    {
+        const std::string& objectHandle = object.getRefData().getHandle();
+
+        for (std::map<std::string, std::string>::const_iterator it = mCollisions.begin();
+             it != mCollisions.end(); ++it)
+        {
+            if (it->second == objectHandle)
+                out.push_back(it->first);
+        }
+    }
+
 }

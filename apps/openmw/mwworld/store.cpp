@@ -58,6 +58,7 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
             // merge new cell into old cell
             // push the new references on the list of references to manage (saveContext = true)
             oldcell->mData = cell.mData;
+            oldcell->mName = cell.mName; // merge name just to be sure (ID will be the same, but case could have been changed)
             oldcell->loadCell(esm, true);
         } else
         {
@@ -74,6 +75,7 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
         if (oldcell) {
             // merge new cell into old cell
             oldcell->mData = cell.mData;
+            oldcell->mName = cell.mName;
             oldcell->loadCell(esm, false);
 
             // handle moved ref (MVRF) subrecords

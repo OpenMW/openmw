@@ -131,7 +131,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mScripts.addColumn (new StringIdColumn<ESM::Script>);
     mScripts.addColumn (new RecordStateColumn<ESM::Script>);
     mScripts.addColumn (new FixedRecordTypeColumn<ESM::Script> (UniversalId::Type_Script));
-    mScripts.addColumn (new ScriptColumn<ESM::Script>);
+    mScripts.addColumn (new ScriptColumn<ESM::Script> (ScriptColumn<ESM::Script>::Type_File));
 
     mRegions.addColumn (new StringIdColumn<ESM::Region>);
     mRegions.addColumn (new RecordStateColumn<ESM::Region>);
@@ -186,7 +186,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
 
     mJournalInfos.addColumn (new StringIdColumn<Info> (true));
     mJournalInfos.addColumn (new RecordStateColumn<Info>);
-    mJournalInfos.addColumn (new FixedRecordTypeColumn<Info> (UniversalId::Type_Journal));
+    mJournalInfos.addColumn (new FixedRecordTypeColumn<Info> (UniversalId::Type_JournalInfo));
     mJournalInfos.addColumn (new TopicColumn<Info> (true));
     mJournalInfos.addColumn (new QuestStatusTypeColumn<Info>);
     mJournalInfos.addColumn (new QuestIndexColumn<Info>);
@@ -200,6 +200,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorWater, ESM::Cell::HasWater));
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorSky, ESM::Cell::QuasiEx));
     mCells.addColumn (new RegionColumn<Cell>);
+    mCells.addColumn (new RefNumCounterColumn<Cell>);
 
     mEnchantments.addColumn (new StringIdColumn<ESM::Enchantment>);
     mEnchantments.addColumn (new RecordStateColumn<ESM::Enchantment>);
@@ -250,13 +251,27 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRefs.addColumn (new LockLevelColumn<CellRef>);
     mRefs.addColumn (new KeyColumn<CellRef>);
     mRefs.addColumn (new TrapColumn<CellRef>);
+    mRefs.addColumn (new OwnerGlobalColumn<CellRef>);
+    mRefs.addColumn (new RefNumColumn<CellRef>);
 
-    mFilters.addColumn (new StringIdColumn<CSMFilter::Filter>);
-    mFilters.addColumn (new RecordStateColumn<CSMFilter::Filter>);
-    mFilters.addColumn (new FixedRecordTypeColumn<CSMFilter::Filter> (UniversalId::Type_Filter));
-    mFilters.addColumn (new FilterColumn<CSMFilter::Filter>);
-    mFilters.addColumn (new DescriptionColumn<CSMFilter::Filter>);
-    mFilters.addColumn (new ScopeColumn<CSMFilter::Filter>);
+    mFilters.addColumn (new StringIdColumn<ESM::Filter>);
+    mFilters.addColumn (new RecordStateColumn<ESM::Filter>);
+    mFilters.addColumn (new FixedRecordTypeColumn<ESM::Filter> (UniversalId::Type_Filter));
+    mFilters.addColumn (new FilterColumn<ESM::Filter>);
+    mFilters.addColumn (new DescriptionColumn<ESM::Filter>);
+
+    mDebugProfiles.addColumn (new StringIdColumn<ESM::DebugProfile>);
+    mDebugProfiles.addColumn (new RecordStateColumn<ESM::DebugProfile>);
+    mDebugProfiles.addColumn (new FixedRecordTypeColumn<ESM::DebugProfile> (UniversalId::Type_DebugProfile));
+    mDebugProfiles.addColumn (new FlagColumn2<ESM::DebugProfile> (
+        Columns::ColumnId_DefaultProfile, ESM::DebugProfile::Flag_Default));
+    mDebugProfiles.addColumn (new FlagColumn2<ESM::DebugProfile> (
+        Columns::ColumnId_BypassNewGame, ESM::DebugProfile::Flag_BypassNewGame));
+    mDebugProfiles.addColumn (new FlagColumn2<ESM::DebugProfile> (
+        Columns::ColumnId_GlobalProfile, ESM::DebugProfile::Flag_Global));
+    mDebugProfiles.addColumn (new DescriptionColumn<ESM::DebugProfile>);
+    mDebugProfiles.addColumn (new ScriptColumn<ESM::DebugProfile> (
+        ScriptColumn<ESM::DebugProfile>::Type_Lines));
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
@@ -280,17 +295,18 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs, IdTable::Feature_ViewCell | IdTable::Feature_Preview), UniversalId::Type_Reference);
     addModel (new IdTable (&mFilters), UniversalId::Type_Filter);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Mesh)),
+    addModel (new IdTable (&mDebugProfiles), UniversalId::Type_DebugProfile);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Meshes)),
         UniversalId::Type_Mesh);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Icon)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Icons)),
         UniversalId::Type_Icon);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Music)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Musics)),
         UniversalId::Type_Music);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_SoundRes)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_SoundsRes)),
         UniversalId::Type_SoundRes);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Texture)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Textures)),
         UniversalId::Type_Texture);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Video)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Videos)),
         UniversalId::Type_Video);
 }
 
@@ -483,12 +499,12 @@ CSMWorld::RefCollection& CSMWorld::Data::getReferences()
     return mRefs;
 }
 
-const CSMWorld::IdCollection<CSMFilter::Filter>& CSMWorld::Data::getFilters() const
+const CSMWorld::IdCollection<ESM::Filter>& CSMWorld::Data::getFilters() const
 {
     return mFilters;
 }
 
-CSMWorld::IdCollection<CSMFilter::Filter>& CSMWorld::Data::getFilters()
+CSMWorld::IdCollection<ESM::Filter>& CSMWorld::Data::getFilters()
 {
     return mFilters;
 }
@@ -513,9 +529,19 @@ CSMWorld::IdCollection<ESM::BodyPart>& CSMWorld::Data::getBodyParts()
     return mBodyParts;
 }
 
+const CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfiles() const
+{
+    return mDebugProfiles;
+}
+
+CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfiles()
+{
+    return mDebugProfiles;
+}
+
 const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) const
 {
-    return mResourcesManager.get (UniversalId::getParentType (id.getType()));
+    return mResourcesManager.get (id.getType());
 }
 
 QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& id)
@@ -581,6 +607,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
 
     ESM::NAME n = mReader->getRecName();
     mReader->getRecHeader();
+
+    bool unhandledRecord = false;
 
     switch (n.val)
     {
@@ -692,23 +720,37 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
 
         case ESM::REC_FILT:
 
-            if (mProject)
+            if (!mProject)
             {
-                mFilters.load (*mReader, mBase);
-                mFilters.setData (mFilters.getSize()-1,
-                    mFilters.findColumnIndex (CSMWorld::Columns::ColumnId_Scope),
-                    static_cast<int> (CSMFilter::Filter::Scope_Project));
+                unhandledRecord = true;
                 break;
             }
 
-            // fall through (filter record in a content file is an error with format 0)
+            mFilters.load (*mReader, mBase);
+            break;
+
+        case ESM::REC_DBGP:
+
+            if (!mProject)
+            {
+                unhandledRecord = true;
+                break;
+            }
+
+            mDebugProfiles.load (*mReader, mBase);
+            break;
 
         default:
 
-            messages.push_back (std::make_pair (UniversalId::Type_None,
-                "Unsupported record type: " + n.toString()));
+            unhandledRecord = true;
+    }
 
-            mReader->skipRecord();
+    if (unhandledRecord)
+    {
+        messages.push_back (std::make_pair (UniversalId::Type_None,
+            "Unsupported record type: " + n.toString()));
+
+        mReader->skipRecord();
     }
 
     return false;

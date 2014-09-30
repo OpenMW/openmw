@@ -37,11 +37,12 @@ namespace MWGui
         , mLastYSize(0)
         , mPreview(new MWRender::InventoryPreview(MWBase::Environment::get().getWorld ()->getPlayerPtr()))
         , mPreviewDirty(true)
+        , mPreviewResize(true)
         , mDragAndDrop(dragAndDrop)
         , mSelectedItem(-1)
         , mGuiMode(GM_Inventory)
     {
-        static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
+        mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 
         getWidget(mAvatar, "Avatar");
         getWidget(mAvatarImage, "AvatarImage");
@@ -91,8 +92,18 @@ namespace MWGui
         mTradeModel = new TradeItemModel(new InventoryItemModel(mPtr), MWWorld::Ptr());
         mSortModel = new SortFilterItemModel(mTradeModel);
         mItemView->setModel(mSortModel);
+
+        mPreview.reset(NULL);
+        mAvatarImage->setImageTexture("");
+        MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().getTexture("CharacterPreview");
+        if (tex)
+            MyGUI::RenderManager::getInstance().destroyTexture(tex);
+
         mPreview.reset(new MWRender::InventoryPreview(mPtr));
         mPreview->setup();
+
+        mPreviewDirty = true;
+        mPreviewResize = true;
     }
 
     void InventoryWindow::setGuiMode(GuiMode mode)
@@ -125,7 +136,7 @@ namespace MWGui
                              Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height);
 
         if (size.width != mMainWidget->getWidth() || size.height != mMainWidget->getHeight())
-            mPreviewDirty = true;
+            mPreviewResize = true;
 
         mMainWidget->setPosition(pos);
         mMainWidget->setSize(size);
@@ -172,21 +183,20 @@ namespace MWGui
         MWWorld::Ptr object = item.mBase;
         int count = item.mCount;
 
-        // Bound items may not be moved
-        if (item.mBase.getCellRef().getRefId().size() > 6
-                && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
-        {
-            MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
-            return;
-        }
-
         bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
         if (MyGUI::InputManager::getInstance().isControlPressed())
             count = 1;
 
         if (mTrading)
         {
+            // Can't give conjured items to a merchant
+            if (item.mFlags & ItemStack::Flag_Bound)
+            {
+                MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog9}");
+                return;
+            }
+
             // check if merchant accepts item
             int services = MWBase::Environment::get().getWindowManager()->getTradeWindow()->getMerchantServices();
             if (!object.getClass().canSell(object, services))
@@ -218,9 +228,6 @@ namespace MWGui
             else
                 dragItem (NULL, count);
         }
-
-        // item might have been unequipped
-        notifyContentChanged();
     }
 
     void InventoryWindow::ensureSelectedItemUnequipped()
@@ -258,6 +265,7 @@ namespace MWGui
     {
         ensureSelectedItemUnequipped();
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mTradeModel, mItemView, count);
+        notifyContentChanged();
     }
 
     void InventoryWindow::sellItem(MyGUI::Widget* sender, int count)
@@ -270,17 +278,18 @@ namespace MWGui
         if (item.mType == ItemStack::Type_Barter)
         {
             // this was an item borrowed to us by the merchant
-            MWBase::Environment::get().getWindowManager()->getTradeWindow()->returnItem(mSelectedItem, count);
             mTradeModel->returnItemBorrowedToUs(mSelectedItem, count);
+            MWBase::Environment::get().getWindowManager()->getTradeWindow()->returnItem(mSelectedItem, count);
         }
         else
         {
             // borrow item to the merchant
-            MWBase::Environment::get().getWindowManager()->getTradeWindow()->borrowItem(mSelectedItem, count);
             mTradeModel->borrowItemFromUs(mSelectedItem, count);
+            MWBase::Environment::get().getWindowManager()->getTradeWindow()->borrowItem(mSelectedItem, count);
         }
 
         mItemView->update();
+        notifyContentChanged();
     }
 
     void InventoryWindow::updateItemView()
@@ -333,7 +342,7 @@ namespace MWGui
         {
             mLastXSize = mMainWidget->getSize().width;
             mLastYSize = mMainWidget->getSize().height;
-            mPreviewDirty = true;
+            mPreviewResize = true;
         }
     }
 
@@ -358,12 +367,18 @@ namespace MWGui
 
         mItemView->update();
 
-        static_cast<MyGUI::Button*>(_sender)->setStateSelected(true);
+        _sender->castType<MyGUI::Button>()->setStateSelected(true);
     }
 
     void InventoryWindow::onPinToggled()
     {
         MWBase::Environment::get().getWindowManager()->setWeaponVisibility(!mPinned);
+    }
+
+    void InventoryWindow::onTitleDoubleClicked()
+    {
+        if (!mPinned)
+            MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Inventory);
     }
 
     void InventoryWindow::useItem(const MWWorld::Ptr &ptr)
@@ -403,9 +418,13 @@ namespace MWGui
         else
             mSkippedToEquip = ptr;
 
-        mItemView->update();
+        if (isVisible())
+        {
+            mItemView->update();
 
-        notifyContentChanged();
+            notifyContentChanged();
+        }
+        // else: will be updated in open()
     }
 
     void InventoryWindow::onAvatarClicked(MyGUI::Widget* _sender)
@@ -473,6 +492,7 @@ namespace MWGui
 
         float capacity = player.getClass().getCapacity(player);
         float encumbrance = player.getClass().getEncumbrance(player);
+        mTradeModel->adjustEncumbrance(encumbrance);
         mEncumbranceBar->setValue(encumbrance, capacity);
     }
 
@@ -491,16 +511,23 @@ namespace MWGui
 
     void InventoryWindow::doRenderUpdate ()
     {
-        if (mPreviewDirty)
+        mPreview->onFrame();
+        if (mPreviewResize)
         {
-            mPreviewDirty = false;
+            mPreviewResize = false;
             MyGUI::IntSize size = mAvatarImage->getSize();
-
-            mPreview->update (size.width, size.height);
+            mPreview->resize(size.width, size.height);
 
             mAvatarImage->setImageTexture("CharacterPreview");
             mAvatarImage->setImageCoord(MyGUI::IntCoord(0, 0, std::min(512, size.width), std::min(1024, size.height)));
             mAvatarImage->setImageTile(MyGUI::IntSize(std::min(512, size.width), std::min(1024, size.height)));
+        }
+        if (mPreviewDirty)
+        {
+            mPreviewDirty = false;
+            mPreview->update ();
+
+            mAvatarImage->setImageTexture("CharacterPreview");
 
             mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
                 + boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
@@ -514,6 +541,9 @@ namespace MWGui
         // update the spell window just in case new enchanted items were added to inventory
         if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
             MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+
+        MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(
+                    MWBase::Environment::get().getWorld()->getPlayerPtr());
 
         mPreviewDirty = true;
     }

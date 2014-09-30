@@ -5,6 +5,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 
@@ -24,7 +26,12 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
     const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mObjectId, false); //The target to follow
 
-    if(target == MWWorld::Ptr())
+    actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+
+    if(target == MWWorld::Ptr() ||
+        !target.getRefData().getCount() || !target.getRefData().isEnabled()  // Really we should be checking whether the target is currently registered
+                                                                            // with the MechanicsManager
+            )
         return true;   //Target doesn't exist
 
     //Set the target desition from the actor

@@ -4,8 +4,6 @@
 
 #include <components/nif/niffile.hpp>
 
-#include <libs/openengine/ogre/fader.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" /// FIXME
 #include "../mwbase/soundmanager.hpp"
@@ -86,7 +84,7 @@ namespace
 
                 updateObjectLocalRotation(ptr, mPhysics, mRendering);
                 MWBase::Environment::get().getWorld()->scaleObject (ptr, ptr.getCellRef().getScale());
-                ptr.getClass().adjustPosition (ptr);
+                ptr.getClass().adjustPosition (ptr, false);
             }
             catch (const std::exception& e)
             {
@@ -232,7 +230,7 @@ namespace MWWorld
             float z = Ogre::Radian(pos.rot[2]).valueDegrees();
             world->rotateObject(player, x, y, z);
 
-            player.getClass().adjustPosition(player);
+            player.getClass().adjustPosition(player, true);
         }
 
         MWBase::MechanicsManager *mechMgr =
@@ -261,8 +259,6 @@ namespace MWWorld
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
-        Nif::NIFFile::CacheLock cachelock;
-
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
 
@@ -272,26 +268,6 @@ namespace MWWorld
         loadingListener->setLabel(loadingExteriorText);
 
         CellStoreCollection::iterator active = mActiveCells.begin();
-
-        // get the number of cells to unload
-        int numUnload = 0;
-        while (active!=mActiveCells.end())
-        {
-            if ((*active)->getCell()->isExterior())
-            {
-                if (std::abs (X-(*active)->getCell()->getGridX())<=1 &&
-                    std::abs (Y-(*active)->getCell()->getGridY())<=1)
-                {
-                    // keep cells within the new 3x3 grid
-                    ++active;
-                    continue;
-                }
-            }
-            ++active;
-            ++numUnload;
-        }
-
-        active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
             if ((*active)->getCell()->isExterior())
@@ -405,21 +381,19 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
-        Nif::NIFFile::CacheLock lock;
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0.5);
-
-        Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
-        Loading::ScopedLoad load(loadingListener);
-
-        mRendering.enableTerrain(false);
-
-        std::string loadingInteriorText = "#{sLoadingMessage2}";
-        loadingListener->setLabel(loadingInteriorText);
-
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
         bool loadcell = (mCurrentCell == NULL);
         if(!loadcell)
             loadcell = *mCurrentCell != *cell;
+
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
+
+        Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+        std::string loadingInteriorText = "#{sLoadingMessage2}";
+        loadingListener->setLabel(loadingInteriorText);
+        Loading::ScopedLoad load(loadingListener);
+
+        mRendering.enableTerrain(false);
 
         if(!loadcell)
         {
@@ -431,27 +405,16 @@ namespace MWWorld
             float z = Ogre::Radian(position.rot[2]).valueDegrees();
             world->rotateObject(world->getPlayerPtr(), x, y, z);
 
-            world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr());
-            world->getFader()->fadeIn(0.5f);
+            world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr(), true);
+            MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
             return;
         }
 
         std::cout << "Changing to interior\n";
 
-        // remove active
-        CellStoreCollection::iterator active = mActiveCells.begin();
-
-        // count number of cells to unload
-        int numUnload = 0;
-        while (active!=mActiveCells.end())
-        {
-            ++active;
-            ++numUnload;
-        }
-
         // unload
         int current = 0;
-        active = mActiveCells.begin();
+        CellStoreCollection::iterator active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
             unloadCell (active++);
@@ -480,7 +443,7 @@ namespace MWWorld
         MWBase::Environment::get().getWorld()->adjustSky();
 
         mCellChanged = true;
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.5);
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position)

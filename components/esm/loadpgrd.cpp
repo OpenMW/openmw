@@ -27,6 +27,9 @@ void Pathgrid::load(ESMReader &esm)
     esm.getHNT(mData, "DATA", 12);
     mCell = esm.getHNString("NAME");
 
+    mPoints.clear();
+    mEdges.clear();
+
     // keep track of total connections so we can reserve edge vector size
     int edgeCount = 0;
 

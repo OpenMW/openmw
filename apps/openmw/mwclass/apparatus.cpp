@@ -21,6 +21,11 @@
 
 namespace MWClass
 {
+    std::string Apparatus::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Apparatus>()->mBase->mId;
+    }
+
     void Apparatus::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
@@ -127,8 +132,7 @@ namespace MWClass
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
+            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
         info.text = text;

@@ -115,6 +115,8 @@ namespace SFO
                     if (mWindowListener)
                         mWindowListener->windowClosed();
                     break;
+                case SDL_CLIPBOARDUPDATE:
+                    break; // We don't need this event, clipboard is retrieved on demand
                 default:
                     std::cerr << "Unhandled SDL event of type 0x" << std::hex << evt.type << std::endl;
                     break;

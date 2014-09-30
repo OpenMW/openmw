@@ -3,11 +3,8 @@
 
 namespace Compiler
 {
-    // constructor
-
-    ErrorHandler::ErrorHandler() : mWarnings (0), mErrors (0), mWarningsMode (1) {}
-
-    // destructor
+    ErrorHandler::ErrorHandler()
+    : mWarnings (0), mErrors (0), mWarningsMode (1), mDowngradeErrors (false) {}
 
     ErrorHandler::~ErrorHandler() {}
 
@@ -49,6 +46,12 @@ namespace Compiler
 
     void ErrorHandler::error (const std::string& message, const TokenLoc& loc)
     {
+        if (mDowngradeErrors)
+        {
+            warning (message, loc);
+            return;
+        }
+
         ++mErrors;
         report (message, loc, ErrorMessage);
     }
@@ -72,4 +75,21 @@ namespace Compiler
     {
         mWarningsMode = mode;
     }
+
+    void ErrorHandler::downgradeErrors (bool downgrade)
+    {
+        mDowngradeErrors = downgrade;
+    }
+
+
+    ErrorDowngrade::ErrorDowngrade (ErrorHandler& handler) : mHandler (handler)
+    {
+        mHandler.downgradeErrors (true);
+    }
+
+    ErrorDowngrade::~ErrorDowngrade()
+    {
+        mHandler.downgradeErrors (false);
+    }
+
 }

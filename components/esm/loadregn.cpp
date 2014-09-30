@@ -39,6 +39,7 @@ void Region::load(ESMReader &esm)
 
     esm.getHNT(mMapColor, "CNAM");
 
+    mSoundList.clear();
     while (esm.hasMoreSubs())
     {
         SoundRef sr;

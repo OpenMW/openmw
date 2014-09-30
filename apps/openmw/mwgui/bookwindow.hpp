@@ -5,7 +5,7 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include "imagebutton.hpp"
+#include <components/widgets/imagebutton.hpp>
 
 namespace MWGui
 {
@@ -31,20 +31,24 @@ namespace MWGui
 
             void updatePages();
             void clearPages();
-            void adjustButton(MWGui::ImageButton* button);
+            void adjustButton(Gui::ImageButton* button);
 
         private:
-            MWGui::ImageButton* mCloseButton;
-            MWGui::ImageButton* mTakeButton;
-            MWGui::ImageButton* mNextPageButton;
-            MWGui::ImageButton* mPrevPageButton;
+            typedef std::pair<int, int> Page;
+            typedef std::vector<Page> Pages;
+
+            Gui::ImageButton* mCloseButton;
+            Gui::ImageButton* mTakeButton;
+            Gui::ImageButton* mNextPageButton;
+            Gui::ImageButton* mPrevPageButton;
+
             MyGUI::TextBox* mLeftPageNumber;
             MyGUI::TextBox* mRightPageNumber;
             MyGUI::Widget* mLeftPage;
             MyGUI::Widget* mRightPage;
 
             unsigned int mCurrentPage; // 0 is first page
-            std::vector<MyGUI::Widget*> mPages;
+            Pages mPages;
 
             MWWorld::Ptr mBook;
 

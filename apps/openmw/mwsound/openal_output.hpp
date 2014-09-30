@@ -16,6 +16,12 @@ namespace MWSound
     class SoundManager;
     class Sound;
 
+    struct CachedSound
+    {
+        ALuint mALBuffer;
+        std::vector<float> mLoudnessVector;
+    };
+
     class OpenAL_Output : public Sound_Output
     {
         ALCdevice *mDevice;
@@ -25,7 +31,7 @@ namespace MWSound
         IDDq mFreeSources;
         IDDq mUnusedBuffers;
 
-        typedef std::map<std::string,ALuint> NameMap;
+        typedef std::map<std::string,CachedSound> NameMap;
         NameMap mBufferCache;
 
         typedef std::map<ALuint,ALuint> IDRefMap;
@@ -36,7 +42,7 @@ namespace MWSound
         typedef std::vector<Sound*> SoundVec;
         SoundVec mActiveSounds;
 
-        ALuint getBuffer(const std::string &fname);
+        const CachedSound& getBuffer(const std::string &fname);
         void bufferFinished(ALuint buffer);
 
         Environment mLastEnvironment;
@@ -49,7 +55,7 @@ namespace MWSound
         virtual MWBase::SoundPtr playSound(const std::string &fname, float vol, float basevol, float pitch, int flags, float offset);
         /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
         virtual MWBase::SoundPtr playSound3D(const std::string &fname, const Ogre::Vector3 &pos,
-                                             float vol, float basevol, float pitch, float min, float max, int flags, float offset);
+                                             float vol, float basevol, float pitch, float min, float max, int flags, float offset, bool extractLoudness=false);
         virtual MWBase::SoundPtr streamSound(DecoderPtr decoder, float volume, float pitch, int flags);
 
         virtual void updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3 &atdir, const Ogre::Vector3 &updir, Environment env);

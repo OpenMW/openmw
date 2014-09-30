@@ -10,6 +10,7 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/difficultyscaling.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -54,11 +55,24 @@ namespace MWMechanics
         if (!blocker.getClass().hasInventoryStore(blocker))
             return false;
 
-        if (blocker.getClass().getCreatureStats(blocker).getKnockedDown()
-                || blocker.getClass().getCreatureStats(blocker).getHitRecovery())
+        MWMechanics::CreatureStats& blockerStats = blocker.getClass().getCreatureStats(blocker);
+
+        if (blockerStats.getKnockedDown() // Used for both knockout or knockdown
+                || blockerStats.getHitRecovery()
+                || blockerStats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+            return false;
+
+        // Don't block when in spellcasting state (shield is equipped, but not visible)
+        if (blockerStats.getDrawState() == DrawState_Spell)
             return false;
 
         MWWorld::InventoryStore& inv = blocker.getClass().getInventoryStore(blocker);
+
+        // Don't block when in hand-to-hand combat (shield is equipped, but not visible)
+        if (blockerStats.getDrawState() == DrawState_Weapon &&
+                inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight) == inv.end())
+            return false;
+
         MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if (shield == inv.end() || shield->getTypeName() != typeid(ESM::Armor).name())
             return false;
@@ -70,17 +84,6 @@ namespace MWMechanics
         if (angle.valueDegrees() < gmst.find("fCombatBlockLeftAngle")->getFloat())
             return false;
         if (angle.valueDegrees() > gmst.find("fCombatBlockRightAngle")->getFloat())
-            return false;
-
-        MWMechanics::CreatureStats& blockerStats = blocker.getClass().getCreatureStats(blocker);
-
-        // Don't block when in spellcasting state (shield is equipped, but not visible)
-        if (blockerStats.getDrawState() == DrawState_Spell)
-            return false;
-
-        // Don't block when in hand-to-hand combat (shield is equipped, but not visible)
-        if (blockerStats.getDrawState() == DrawState_Weapon &&
-                inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight) == inv.end())
             return false;
 
         MWMechanics::CreatureStats& attackerStats = attacker.getClass().getCreatureStats(attacker);
@@ -130,7 +133,7 @@ namespace MWMechanics
 
             blockerStats.setBlock(true);
 
-            if (blocker.getClass().isNpc())
+            if (blocker.getCellRef().getRefId() == "player")
                 blocker.getClass().skillUsageSucceeded(blocker, ESM::Skill::Block, 0);
 
             return true;
@@ -141,14 +144,10 @@ namespace MWMechanics
     void resistNormalWeapon(const MWWorld::Ptr &actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr &weapon, float &damage)
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-        float resistance = std::min(100.f, stats.getMagicEffects().get(ESM::MagicEffect::ResistNormalWeapons).mMagnitude
-                - stats.getMagicEffects().get(ESM::MagicEffect::WeaknessToNormalWeapons).mMagnitude);
+        float resistance = std::min(100.f, stats.getMagicEffects().get(ESM::MagicEffect::ResistNormalWeapons).getMagnitude()
+                - stats.getMagicEffects().get(ESM::MagicEffect::WeaknessToNormalWeapons).getMagnitude());
 
-        float multiplier = 0;
-        if (resistance >= 0)
-            multiplier = 1 - resistance / 100.f;
-        else
-            multiplier = -(resistance-100) / 100.f;
+        float multiplier = 1.f - resistance / 100.f;
 
         if (!(weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Silver
               || weapon.get<ESM::Weapon>()->mBase->mData.mFlags & ESM::Weapon::Magical))
@@ -170,12 +169,12 @@ namespace MWMechanics
 
         MWMechanics::CreatureStats& attackerStats = attacker.getClass().getCreatureStats(attacker);
 
-        const MWWorld::Class &othercls = victim.getClass();
-        if(!othercls.isActor()) // Can't hit non-actors
+        if(victim.isEmpty() || !victim.getClass().isActor() || victim.getClass().getCreatureStats(victim).isDead())
+            // Can't hit non-actors or dead actors
+        {
+            reduceWeaponCondition(0.f, false, weapon, attacker);
             return;
-        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
-        if(otherstats.isDead()) // Can't hit dead actors
-            return;
+        }
 
         if(attacker.getRefData().getHandle() == "player")
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
@@ -190,16 +189,15 @@ namespace MWMechanics
         if((::rand()/(RAND_MAX+1.0)) > getHitChance(attacker, victim, skillValue)/100.0f)
         {
             victim.getClass().onHit(victim, 0.0f, false, projectile, attacker, false);
+            MWMechanics::reduceWeaponCondition(0.f, false, weapon, attacker);
             return;
         }
-
-        float damage = 0.0f;
 
         float fDamageStrengthBase = gmst.find("fDamageStrengthBase")->getFloat();
         float fDamageStrengthMult = gmst.find("fDamageStrengthMult")->getFloat();
 
         const unsigned char* attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
-        damage = attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength()); // Bow/crossbow damage
+        float damage = attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength()); // Bow/crossbow damage
         if (weapon != projectile)
         {
             // Arrow/bolt damage
@@ -210,16 +208,12 @@ namespace MWMechanics
         damage *= fDamageStrengthBase +
                 (attackerStats.getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult * 0.1);
 
+        adjustWeaponDamage(damage, weapon);
+        reduceWeaponCondition(damage, true, weapon, attacker);
+
         if(attacker.getRefData().getHandle() == "player")
             attacker.getClass().skillUsageSucceeded(attacker, weapskill, 0);
 
-        bool detected = MWBase::Environment::get().getMechanicsManager()->awarenessCheck(attacker, victim);
-        if(!detected)
-        {
-            damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
-            MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
-        }
         if (victim.getClass().getCreatureStats(victim).getKnockedDown())
             damage *= gmst.find("fCombatKODamageMult")->getFloat();
 
@@ -250,10 +244,94 @@ namespace MWMechanics
                           (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                           (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         hitchance *= stats.getFatigueTerm();
-        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).mMagnitude -
-                     mageffects.get(ESM::MagicEffect::Blind).mMagnitude;
+        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).getMagnitude() -
+                     mageffects.get(ESM::MagicEffect::Blind).getMagnitude();
         hitchance -= victim.getClass().getCreatureStats(victim).getEvasion();
         return hitchance;
     }
 
+    void applyElementalShields(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim)
+    {
+        for (int i=0; i<3; ++i)
+        {
+            float magnitude = victim.getClass().getCreatureStats(victim).getMagicEffects().get(ESM::MagicEffect::FireShield+i).getMagnitude();
+
+            if (!magnitude)
+                continue;
+
+            CreatureStats& attackerStats = attacker.getClass().getCreatureStats(attacker);
+            float saveTerm = attacker.getClass().getSkill(attacker, ESM::Skill::Destruction)
+                    + 0.2f * attackerStats.getAttribute(ESM::Attribute::Willpower).getModified()
+                    + 0.1f * attackerStats.getAttribute(ESM::Attribute::Luck).getModified();
+
+            int fatigueMax = attackerStats.getFatigue().getModified();
+            int fatigueCurrent = attackerStats.getFatigue().getCurrent();
+
+            float normalisedFatigue = fatigueMax==0 ? 1 : std::max (0.0f, static_cast<float> (fatigueCurrent)/fatigueMax);
+
+            saveTerm *= 1.25f * normalisedFatigue;
+
+            float roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            float x = std::max(0.f, saveTerm - roll);
+
+            int element = ESM::MagicEffect::FireDamage;
+            if (i == 1)
+                element = ESM::MagicEffect::ShockDamage;
+            if (i == 2)
+                element = ESM::MagicEffect::FrostDamage;
+
+            float elementResistance = MWMechanics::getEffectResistanceAttribute(element, &attackerStats.getMagicEffects());
+
+            x = std::min(100.f, x + elementResistance);
+
+            static const float fElementalShieldMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fElementalShieldMult")->getFloat();
+            x = fElementalShieldMult * magnitude * (1.f - 0.01f * x);
+
+            // Note swapped victim and attacker, since the attacker takes the damage here.
+            x = scaleDamage(x, victim, attacker);
+
+            MWMechanics::DynamicStat<float> health = attackerStats.getHealth();
+            health.setCurrent(health.getCurrent() - x);
+            attackerStats.setHealth(health);
+        }
+    }
+
+    void reduceWeaponCondition(float damage, bool hit, MWWorld::Ptr &weapon, const MWWorld::Ptr &attacker)
+    {
+        if (weapon.isEmpty())
+            return;
+
+        if (!hit)
+            damage = 0.f;
+
+        const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
+        if(weaphashealth)
+        {
+            int weaphealth = weapon.getClass().getItemHealth(weapon);
+
+            const float fWeaponDamageMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWeaponDamageMult")->getFloat();
+            float x = std::max(1.f, fWeaponDamageMult * damage);
+
+            weaphealth -= std::min(int(x), weaphealth);
+            weapon.getCellRef().setCharge(weaphealth);
+
+            // Weapon broken? unequip it
+            if (weaphealth == 0)
+                weapon = *attacker.getClass().getInventoryStore(attacker).unequipItem(weapon, attacker);
+        }
+    }
+
+    void adjustWeaponDamage(float &damage, const MWWorld::Ptr &weapon)
+    {
+        if (weapon.isEmpty())
+            return;
+
+        const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
+        if(weaphashealth)
+        {
+            int weaphealth = weapon.getClass().getItemHealth(weapon);
+            int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
+            damage *= (float(weaphealth) / weapmaxhealth);
+        }
+    }
 }

@@ -10,8 +10,6 @@
 #include "BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h"
 #include <boost/shared_ptr.hpp>
 
-
-
 class btRigidBody;
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
@@ -170,6 +168,9 @@ namespace Physic
         std::string mMesh;
         std::string mName;
         PhysicEngine *mEngine;
+
+        PhysicActor(const PhysicActor&);
+        PhysicActor& operator=(const PhysicActor&);
     };
 
 
@@ -275,11 +276,6 @@ namespace Physic
         void stepSimulation(double deltaT);
 
         /**
-         * Empty events lists
-         */
-        void emptyEventLists(void);
-
-        /**
          * Create a debug rendering. It is called by setDebgRenderingMode if it's not created yet.
          * Important Note: this will crash if the Render is not yet initialise!
          */
@@ -297,24 +293,22 @@ namespace Physic
 
         void setSceneManager(Ogre::SceneManager* sceneMgr);
 
-        bool isAnyActorStandingOn (const std::string& objectName);
-
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
          * If \a normal is non-NULL, the hit normal will be written there (if there is a hit)
          */
-        std::pair<std::string,float> rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly = true,
+        std::pair<std::string,float> rayTest(const btVector3& from,const btVector3& to,bool raycastingObjectOnly = true,
                                              bool ignoreHeightMap = false, Ogre::Vector3* normal = NULL);
 
         /**
          * Return all objects hit by a ray.
          */
-        std::vector< std::pair<float, std::string> > rayTest2(btVector3& from, btVector3& to);
+        std::vector< std::pair<float, std::string> > rayTest2(const btVector3 &from, const btVector3 &to);
 
         std::pair<bool, float> sphereCast (float radius, btVector3& from, btVector3& to);
         ///< @return (hit, relative distance)
 
-        std::vector<std::string> getCollisions(const std::string& name);
+        std::vector<std::string> getCollisions(const std::string& name, int collisionGroup, int collisionMask);
 
         // Get the nearest object that's inside the given object, filtering out objects of the
         // provided name
@@ -356,6 +350,10 @@ namespace Physic
         BtOgre::DebugDrawer* mDebugDrawer;
         bool isDebugCreated;
         bool mDebugActive;
+
+    private:
+        PhysicEngine(const PhysicEngine&);
+        PhysicEngine& operator=(const PhysicEngine&);
     };
 
 

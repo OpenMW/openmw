@@ -5,6 +5,7 @@
 
 #include "../doc/state.hpp"
 #include "../doc/operation.hpp"
+#include "../doc/document.hpp"
 
 #include "../world/data.hpp"
 #include "../world/universalid.hpp"
@@ -21,6 +22,7 @@
 #include "spellcheck.hpp"
 #include "referenceablecheck.hpp"
 #include "scriptcheck.hpp"
+#include "bodypartcheck.hpp"
 
 CSMDoc::Operation *CSMTools::Tools::get (int type)
 {
@@ -44,7 +46,7 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
         mVerifier = new CSMDoc::Operation (CSMDoc::State_Verifying, false);
 
         connect (mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
-        connect (mVerifier, SIGNAL (done (int)), this, SIGNAL (done (int)));
+        connect (mVerifier, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
         connect (mVerifier,
             SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)),
             this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, int)));
@@ -78,15 +80,23 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
 
         mVerifier->appendStage (new SpellCheckStage (mData.getSpells()));
 
-	mVerifier->appendStage (new ReferenceableCheckStage (mData.getReferenceables().getDataSet(), mData.getRaces(), mData.getClasses(), mData.getFactions()));
+        mVerifier->appendStage (new ReferenceableCheckStage (mData.getReferenceables().getDataSet(), mData.getRaces(), mData.getClasses(), mData.getFactions()));
 
-        mVerifier->appendStage (new ScriptCheckStage (mData));
+        mVerifier->appendStage (new ScriptCheckStage (mDocument));
+
+        mVerifier->appendStage(
+            new BodyPartCheckStage(
+                mData.getBodyParts(),
+                mData.getResources(
+                    CSMWorld::UniversalId( CSMWorld::UniversalId::Type_Meshes )),
+                mData.getRaces() ));
     }
 
     return mVerifier;
 }
 
-CSMTools::Tools::Tools (CSMWorld::Data& data) : mData (data), mVerifier (0), mNextReportNumber (0)
+CSMTools::Tools::Tools (CSMDoc::Document& document)
+: mDocument (document), mData (document.getData()), mVerifier (0), mNextReportNumber (0)
 {
     // index 0: load error log
     mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));

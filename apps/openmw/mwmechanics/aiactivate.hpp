@@ -35,8 +35,6 @@ namespace MWMechanics
 
         private:
             std::string mObjectId;
-            int mCellX;
-            int mCellY;
     };
 }
 #endif // GAME_MWMECHANICS_AIACTIVATE_H

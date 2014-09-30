@@ -43,6 +43,11 @@ namespace
 
 namespace MWClass
 {
+    std::string Container::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Container>()->mBase->mId;
+    }
+
     void Container::ensureCustomData (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCustomData())
@@ -235,8 +240,7 @@ namespace MWClass
             text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
+            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 

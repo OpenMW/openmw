@@ -1,5 +1,19 @@
+///Functions used to read raw binary data from .nif files
+
 #ifndef OPENMW_COMPONENTS_NIF_NIFSTREAM_HPP
 #define OPENMW_COMPONENTS_NIF_NIFSTREAM_HPP
+
+#include <stdint.h>
+#include <stdexcept>
+
+#include <OgreDataStream.h>
+#include <OgreVector2.h>
+#include <OgreVector3.h>
+#include <OgreVector4.h>
+#include <OgreMatrix3.h>
+#include <OgreQuaternion.h>
+
+#include "niftypes.hpp"
 
 namespace Nif
 {

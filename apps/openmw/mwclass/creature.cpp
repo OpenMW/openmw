@@ -9,6 +9,7 @@
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/disease.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/difficultyscaling.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -128,6 +129,8 @@ namespace MWClass
 
             data->mCreatureStats.setGoldPool(ref->mBase->mData.mGold);
 
+            data->mCreatureStats.setNeedRecalcDynamicStats(false);
+
             // store
             ptr.getRefData().setCustomData(data.release());
 
@@ -147,9 +150,9 @@ namespace MWClass
         return ref->mBase->mId;
     }
 
-    void Creature::adjustPosition(const MWWorld::Ptr& ptr) const
+    void Creature::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
     {
-        MWBase::Environment::get().getWorld()->adjustPosition(ptr);
+        MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
     }
 
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
@@ -208,6 +211,9 @@ namespace MWClass
         const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         MWMechanics::CreatureStats &stats = getCreatureStats(ptr);
 
+        if (stats.getDrawState() != MWMechanics::DrawState_Weapon)
+            return;
+
         // Get the weapon used (if hand-to-hand, weapon = inv.end())
         MWWorld::Ptr weapon;
         if (ptr.getClass().hasInventoryStore(ptr))
@@ -254,6 +260,7 @@ namespace MWClass
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
             victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, false);
+            MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
             return;
         }
 
@@ -275,12 +282,10 @@ namespace MWClass
             break;
         }
 
-        // I think this should be random, since attack1-3 animations don't have an attack strength like NPCs do
-        float damage = min + (max - min) * ::rand()/(RAND_MAX+1.0);
+        float damage = min + (max - min) * stats.getAttackStrength();
 
         if (!weapon.isEmpty())
         {
-            const bool weaphashealth = weapon.getClass().hasItemHealth(weapon);
             const unsigned char *attack = NULL;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
@@ -290,29 +295,11 @@ namespace MWClass
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust;
             if(attack)
             {
-                float weaponDamage = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
-                weaponDamage *= 0.5f + (stats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
-                if(weaphashealth)
-                {
-                    int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
-                    int weaphealth = weapon.getClass().getItemHealth(weapon);
-                    weaponDamage *= float(weaphealth) / weapmaxhealth;
-
-                    if (!MWBase::Environment::get().getWorld()->getGodModeState())
-                    {
-                        // Reduce weapon charge by at least one, but cap at 0
-                        weaphealth -= std::min(std::max(1,
-                                    (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weaphealth);
-
-                        weapon.getCellRef().setCharge(weaphealth);
-                    }
-
-                    // Weapon broken? unequip it
-                    if (weapon.getCellRef().getCharge() == 0)
-                        weapon = *getInventoryStore(ptr).unequipItem(weapon, ptr);
-                }
-
-                damage += weaponDamage;
+                damage = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
+                damage *= gmst.find("fDamageStrengthBase")->getFloat() +
+                        (stats.getAttribute(ESM::Attribute::Strength).getModified() * gmst.find("fDamageStrengthMult")->getFloat() * 0.1);
+                MWMechanics::adjustWeaponDamage(damage, weapon);
+                MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
             }
 
             // Apply "On hit" enchanted weapons
@@ -330,6 +317,8 @@ namespace MWClass
             }
         }
 
+        MWMechanics::applyElementalShields(ptr, victim);
+
         if (!weapon.isEmpty() && MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
             damage = 0;
 
@@ -345,13 +334,17 @@ namespace MWClass
     {
         // NOTE: 'object' and/or 'attacker' may be empty.
 
-        getCreatureStats(ptr).setAttacked(true);
+        if (!attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
+            getCreatureStats(ptr).setAttacked(true);
 
         // Self defense
-        if (!attacker.isEmpty() && !MWBase::Environment::get().getMechanicsManager()->isAggressive(ptr, attacker)
-                && (canWalk(ptr) || canFly(ptr) || canSwim(ptr))) // No retaliation for totally static creatures
-                                                                  // (they have no movement or attacks anyway)
-            MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, attacker);
+        bool setOnPcHitMe = true; // Note OnPcHitMe is not set for friendly hits.
+        if ((canWalk(ptr) || canFly(ptr) || canSwim(ptr)) // No retaliation for totally static creatures
+                                                              // (they have no movement or attacks anyway)
+            && !attacker.isEmpty())
+        {
+            setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+        }
 
         if(!successful)
         {
@@ -365,7 +358,7 @@ namespace MWClass
         if(!object.isEmpty())
             getCreatureStats(ptr).setLastHitObject(object.getClass().getId(object));
 
-        if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
+        if(setOnPcHitMe && !attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
         {
             const std::string &script = ptr.get<ESM::Creature>()->mBase->mScript;
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
@@ -376,23 +369,34 @@ namespace MWClass
         if (damage > 0.0f && !object.isEmpty())
             MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
 
+        if (damage < 0.001f)
+            damage = 0;
+
         if (damage > 0.f)
         {
-            // Check for knockdown
-            float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
-            float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
-                    * getGmst().iKnockDownOddsMult->getInt() * 0.01 + getGmst().iKnockDownOddsBase->getInt();
-            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-            if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
+            if (!attacker.isEmpty())
             {
-                getCreatureStats(ptr).setKnockedDown(true);
+                // Check for knockdown
+                float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
+                float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
+                        * getGmst().iKnockDownOddsMult->getInt() * 0.01 + getGmst().iKnockDownOddsBase->getInt();
+                int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
+                {
+                    getCreatureStats(ptr).setKnockedDown(true);
 
+                }
+                else
+                    getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
             }
-            else
-                getCreatureStats(ptr).setHitRecovery(true); // Is this supposed to always occur?
+
+            damage = std::max(1.f, damage);
 
             if(ishealth)
             {
+                if (!attacker.isEmpty())
+                    damage = scaleDamage(damage, attacker, ptr);
+
                 MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
                 float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
                 setActorHealth(ptr, health, attacker);
@@ -466,6 +470,8 @@ namespace MWClass
 
         if(getCreatureStats(ptr).isDead())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
+        if(ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat())
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
@@ -517,9 +523,7 @@ namespace MWClass
 
     bool Creature::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        /// \todo We don't want tooltips for Creatures in combat mode.
-
-        return true;
+        return !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat() || getCreatureStats(ptr).isDead();
     }
 
     float Creature::getSpeed(const MWWorld::Ptr &ptr) const
@@ -543,11 +547,11 @@ namespace MWClass
         float moveSpeed;
         if(normalizedEncumbrance >= 1.0f)
             moveSpeed = 0.0f;
-        else if(canFly(ptr) || (mageffects.get(ESM::MagicEffect::Levitate).mMagnitude > 0 &&
+        else if(canFly(ptr) || (mageffects.get(ESM::MagicEffect::Levitate).getMagnitude() > 0 &&
                 world->isLevitationEnabled()))
         {
             float flySpeed = 0.01f*(stats.getAttribute(ESM::Attribute::Speed).getModified() +
-                                    mageffects.get(ESM::MagicEffect::Levitate).mMagnitude);
+                                    mageffects.get(ESM::MagicEffect::Levitate).getMagnitude());
             flySpeed = gmst.fMinFlySpeed->getFloat() + flySpeed*(gmst.fMaxFlySpeed->getFloat() - gmst.fMinFlySpeed->getFloat());
             flySpeed *= 1.0f - gmst.fEncumberedMoveEffect->getFloat() * normalizedEncumbrance;
             flySpeed = std::max(0.0f, flySpeed);
@@ -558,7 +562,7 @@ namespace MWClass
             float swimSpeed = walkSpeed;
             if(running)
                 swimSpeed = runSpeed;
-            swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).mMagnitude;
+            swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude();
             swimSpeed *= gmst.fSwimRunBase->getFloat() + 0.01f*getSkill(ptr, ESM::Skill::Athletics) *
                                                     gmst.fSwimRunAthleticsMult->getFloat();
             moveSpeed = swimSpeed;
@@ -618,8 +622,8 @@ namespace MWClass
 
     float Creature::getArmorRating (const MWWorld::Ptr& ptr) const
     {
-        /// \todo add Shield magic effect magnitude here, controlled by a GMST (Vanilla vs MCP behaviour)
-        return 0.f;
+        // Note this is currently unused. Creatures do not use armor mitigation.
+        return getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).getMagnitude();
     }
 
     float Creature::getCapacity (const MWWorld::Ptr& ptr) const
@@ -634,9 +638,9 @@ namespace MWClass
 
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
 
-        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Feather)).mMagnitude;
+        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Feather)).getMagnitude();
 
-        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Burden)).mMagnitude;
+        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Burden)).getMagnitude();
 
         if (weight<0)
             weight = 0;

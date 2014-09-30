@@ -27,9 +27,9 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
         setObjectRoot(model, false);
         setRenderProperties(mObjectRoot, RV_Actors, RQG_Main, RQG_Alpha);
 
+        addAnimSource(model);
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))
             addAnimSource("meshes\\base_anim.nif");
-        addAnimSource(model);
     }
 }
 
@@ -47,9 +47,9 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr)
         setObjectRoot(model, false);
         setRenderProperties(mObjectRoot, RV_Actors, RQG_Main, RQG_Alpha);
 
+        addAnimSource(model);
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))
             addAnimSource("meshes\\base_anim.nif");
-        addAnimSource(model);
 
         mPtr.getClass().getInventoryStore(mPtr).setListener(this, mPtr);
 
@@ -150,7 +150,7 @@ void CreatureWeaponAnimation::updatePart(NifOgre::ObjectScenePtr& scene, int slo
     }
 
     std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(scene->mControllers.begin());
-    for(;ctrl != scene->mControllers.end();ctrl++)
+    for(;ctrl != scene->mControllers.end();++ctrl)
     {
         if(ctrl->getSource().isNull())
         {

@@ -17,6 +17,8 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
+#include "scriptedit.hpp"
+
 CSVWorld::NastyTableModelHack::NastyTableModelHack (QAbstractItemModel& model)
 : mModel (model)
 {}
@@ -78,15 +80,15 @@ void CSVWorld::CommandDelegateFactoryCollection::add (CSMWorld::ColumnBase::Disp
 }
 
 CSVWorld::CommandDelegate *CSVWorld::CommandDelegateFactoryCollection::makeDelegate (
-    CSMWorld::ColumnBase::Display display, QUndoStack& undoStack, QObject *parent) const
+    CSMWorld::ColumnBase::Display display, CSMDoc::Document& document, QObject *parent) const
 {
     std::map<CSMWorld::ColumnBase::Display, CommandDelegateFactory *>::const_iterator iter =
         mFactories.find (display);
 
     if (iter!=mFactories.end())
-        return iter->second->makeDelegate (undoStack, parent);
+        return iter->second->makeDelegate (document, parent);
 
-    return new CommandDelegate (undoStack, parent);
+    return new CommandDelegate (document, parent);
 }
 
 const CSVWorld::CommandDelegateFactoryCollection& CSVWorld::CommandDelegateFactoryCollection::get()
@@ -100,7 +102,12 @@ const CSVWorld::CommandDelegateFactoryCollection& CSVWorld::CommandDelegateFacto
 
 QUndoStack& CSVWorld::CommandDelegate::getUndoStack() const
 {
-    return mUndoStack;
+    return mDocument.getUndoStack();
+}
+
+CSMDoc::Document& CSVWorld::CommandDelegate::getDocument() const
+{
+    return mDocument;
 }
 
 void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemModel *model,
@@ -112,11 +119,11 @@ void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemM
     QVariant new_ = hack.getData();
 
     if (model->data (index)!=new_)
-        mUndoStack.push (new CSMWorld::ModifyCommand (*model, index, new_));
+        getUndoStack().push (new CSMWorld::ModifyCommand (*model, index, new_));
 }
 
-CSVWorld::CommandDelegate::CommandDelegate (QUndoStack& undoStack, QObject *parent)
-: QStyledItemDelegate (parent), mUndoStack (undoStack), mEditLock (false)
+CSVWorld::CommandDelegate::CommandDelegate (CSMDoc::Document& document, QObject *parent)
+: QStyledItemDelegate (parent), mDocument (document), mEditLock (false)
 {}
 
 void CSVWorld::CommandDelegate::setModelData (QWidget *editor, QAbstractItemModel *model,
@@ -162,8 +169,11 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             return new QDoubleSpinBox(parent);
 
         case CSMWorld::ColumnBase::Display_LongString:
-
-            return new QTextEdit(parent);
+        {
+            QPlainTextEdit *edit = new QPlainTextEdit(parent);
+            edit->setUndoRedoEnabled (false);
+            return edit;
+        }
 
         case CSMWorld::ColumnBase::Display_Boolean:
 
@@ -173,6 +183,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_Skill:
         case CSMWorld::ColumnBase::Display_Script:
         case CSMWorld::ColumnBase::Display_Race:
+        case CSMWorld::ColumnBase::Display_Region:
         case CSMWorld::ColumnBase::Display_Class:
         case CSMWorld::ColumnBase::Display_Faction:
         case CSMWorld::ColumnBase::Display_Miscellaneous:
@@ -183,8 +194,13 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_SoundRes:
         case CSMWorld::ColumnBase::Display_Texture:
         case CSMWorld::ColumnBase::Display_Video:
+        case CSMWorld::ColumnBase::Display_GlobalVariable:
 
             return new DropLineEdit(parent);
+
+        case CSMWorld::ColumnBase::Display_ScriptLines:
+
+            return new ScriptEdit (mDocument, ScriptHighlighter::Mode_Console, parent);
 
         default:
 

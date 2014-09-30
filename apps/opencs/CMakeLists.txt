@@ -1,15 +1,17 @@
-set (OPENCS_SRC main.cpp)
+set (OPENCS_SRC main.cpp
+    ${CMAKE_SOURCE_DIR}/files/windows/opencs.rc
+    )
 
 opencs_units (. editor)
 
 set (CMAKE_BUILD_TYPE DEBUG)
 
 opencs_units (model/doc
-    document operation saving documentmanager loader
+    document operation saving documentmanager loader runner
     )
 
 opencs_units_noqt (model/doc
-    stage savingstate savingstages
+    stage savingstate savingstages blacklist
     )
 
 opencs_hdrs_noqt (model/doc
@@ -24,7 +26,7 @@ opencs_units (model/world
 
 opencs_units_noqt (model/world
     universalid record commands columnbase scriptcontext cell refidcollection
-    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager
+    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     )
 
 opencs_hdrs_noqt (model/world
@@ -38,13 +40,13 @@ opencs_units (model/tools
 
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
-    birthsigncheck spellcheck referenceablecheck scriptcheck
+    birthsigncheck spellcheck referenceablecheck scriptcheck bodypartcheck
     )
 
 
 opencs_units (view/doc
     viewmanager view operations operation subview startup filedialog newgame
-    filewidget adjusterwidget loader
+    filewidget adjusterwidget loader globaldebugprofilemenu runlogsubview
     )
 
 
@@ -69,7 +71,7 @@ opencs_units_noqt (view/world
     )
 
 opencs_units (view/widget
-    scenetoolbar scenetool scenetoolmode pushbutton
+    scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun
     )
 
 opencs_units (view/render
@@ -80,6 +82,10 @@ opencs_units (view/render
 opencs_units_noqt (view/render
     navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
     lightingbright object cell
+    )
+
+opencs_hdrs_noqt (view/render
+    elements
     )
 
 
@@ -122,12 +128,8 @@ opencs_units_noqt (model/filter
     node unarynode narynode leafnode booleannode parser andnode ornode notnode textnode valuenode
     )
 
-opencs_hdrs_noqt (model/filter
-    filter
-    )
-
 opencs_units (view/filter
-    filtercreator filterbox recordfilterbox editwidget
+    filterbox recordfilterbox editwidget
     )
 
 set (OPENCS_US

@@ -9,6 +9,8 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "steering.hpp"
 #include "movement.hpp"
 
@@ -25,7 +27,7 @@ namespace MWMechanics
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
-        mMaxDist = 470;
+        mMaxDist = 450;
 
         // The CS Help File states that if a duration is given, the AI package will run for that long
         // BUT if a location is givin, it "trumps" the duration so it will simply escort to that location.
@@ -38,7 +40,7 @@ namespace MWMechanics
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
-        mMaxDist = 470;
+        mMaxDist = 450;
 
         // The CS Help File states that if a duration is given, the AI package will run for that long
         // BUT if a location is given, it "trumps" the duration so it will simply escort to that location.
@@ -52,6 +54,7 @@ namespace MWMechanics
         , mCellY(std::numeric_limits<int>::max())
         , mCellId(escort->mCellId)
         , mRemainingDuration(escort->mRemainingDuration)
+        , mMaxDist(450)
     {
     }
 
@@ -72,6 +75,9 @@ namespace MWMechanics
                 return true;
         }
 
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
+
         const MWWorld::Ptr follower = MWBase::Environment::get().getWorld()->getPtr(mActorId, false);
         const float* const leaderPos = actor.getRefData().getPosition().pos;
         const float* const followerPos = follower.getRefData().getPosition().pos;
@@ -88,14 +94,14 @@ namespace MWMechanics
         {
             if(pathTo(actor,ESM::Pathgrid::Point(mX,mY,mZ),duration)) //Returns true on path complete
                 return true;
-            mMaxDist = 470;
+            mMaxDist = 450;
         }
         else
         {
             // Stop moving if the player is to far away
             MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle3", 0, 1);
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-            mMaxDist = 330;
+            mMaxDist = 250;
         }
 
         return false;

@@ -3,8 +3,6 @@
 
 #include <cstdlib>
 
-#include <libs/openengine/ogre/fader.hpp>
-
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 #include <components/compiler/locals.hpp>
@@ -147,6 +145,14 @@ namespace MWScript
                     }
 
                     ptr.getClass().lock (ptr, lockLevel);
+
+                    // Instantly reset door to closed state
+                    // This is done when using Lock in scripts, but not when using Lock spells.
+                    if (ptr.getTypeName() == typeid(ESM::Door).name() && !ptr.getCellRef().getTeleport())
+                    {
+                        MWBase::Environment::get().getWorld()->activateDoor(ptr, 0);
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr, 0, 0, 0);
+                    }
                 }
         };
 
@@ -240,7 +246,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWorld()->getFader()->fadeIn(time);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenIn(time);
                 }
         };
 
@@ -253,7 +259,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWorld()->getFader()->fadeOut(time);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenOut(time);
                 }
         };
 
@@ -269,7 +275,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWorld()->getFader()->fadeTo(alpha, time);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenTo(alpha, time);
                 }
         };
 
@@ -350,7 +356,7 @@ namespace MWScript
                         key = ESM::MagicEffect::effectStringToId(effect);
 
                     runtime.push(ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(
-                                      MWMechanics::EffectKey(key)).mMagnitude > 0);
+                                      MWMechanics::EffectKey(key)).getMagnitude() > 0);
                 }
         };
 
@@ -603,6 +609,60 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpGetCollidingPc : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    runtime.push (MWBase::Environment::get().getWorld()->getPlayerCollidingWith(ptr));
+                }
+        };
+
+        template <class R>
+        class OpGetCollidingActor : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    runtime.push (MWBase::Environment::get().getWorld()->getActorCollidingWith(ptr));
+                }
+        };
+
+        template <class R>
+        class OpHurtStandingActor : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    float healthDiffPerSecond = runtime[0].mFloat;
+                    runtime.pop();
+
+                    MWBase::Environment::get().getWorld()->hurtStandingActors(ptr, healthDiffPerSecond);
+                }
+        };
+
+        template <class R>
+        class OpHurtCollidingActor : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    float healthDiffPerSecond = runtime[0].mFloat;
+                    runtime.pop();
+
+                    MWBase::Environment::get().getWorld()->hurtCollidingActors(ptr, healthDiffPerSecond);
+                }
+        };
+
         class OpGetWindSpeed : public Interpreter::Opcode0
         {
             public:
@@ -811,7 +871,6 @@ namespace MWScript
             {
                 MWBase::World* world = MWBase::Environment::get().getWorld();
                 world->goToJail();
-                MWBase::Environment::get().getWorld()->getPlayer().recordCrimeId();
             }
         };
 
@@ -959,6 +1018,14 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeGetStandingPcExplicit, new OpGetStandingPc<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetStandingActor, new OpGetStandingActor<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetStandingActorExplicit, new OpGetStandingActor<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetCollidingPc, new OpGetCollidingPc<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetCollidingPcExplicit, new OpGetCollidingPc<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetCollidingActor, new OpGetCollidingActor<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetCollidingActorExplicit, new OpGetCollidingActor<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeHurtStandingActor, new OpHurtStandingActor<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeHurtStandingActorExplicit, new OpHurtStandingActor<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeHurtCollidingActor, new OpHurtCollidingActor<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeHurtCollidingActorExplicit, new OpHurtCollidingActor<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetWindSpeed, new OpGetWindSpeed);
             interpreter.installSegment5 (Compiler::Misc::opcodeHitOnMe, new OpHitOnMe<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeHitOnMeExplicit, new OpHitOnMe<ExplicitRef>);

@@ -31,9 +31,11 @@ void AiSequence::copy (const AiSequence& sequence)
 
 AiSequence::AiSequence() : mDone (false), mLastAiPackage(-1) {}
 
-AiSequence::AiSequence (const AiSequence& sequence) : mDone (false)
+AiSequence::AiSequence (const AiSequence& sequence)
 {
     copy (sequence);
+    mDone = sequence.mDone;
+    mLastAiPackage = sequence.mLastAiPackage;
 }
 
 AiSequence& AiSequence::operator= (const AiSequence& sequence)
@@ -43,6 +45,7 @@ AiSequence& AiSequence::operator= (const AiSequence& sequence)
         clear();
         copy (sequence);
         mDone = sequence.mDone;
+        mLastAiPackage = sequence.mLastAiPackage;
     }
 
     return *this;
@@ -72,31 +75,52 @@ bool AiSequence::getCombatTarget(MWWorld::Ptr &targetActor) const
     return true;
 }
 
-bool AiSequence::canAddTarget(const ESM::Position& actorPos, float distToTarget) const
+std::list<AiPackage*>::const_iterator AiSequence::begin() const
 {
-    bool firstCombatFound = false;
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    return mPackages.begin();
+}
 
+std::list<AiPackage*>::const_iterator AiSequence::end() const
+{
+    return mPackages.end();
+}
+
+void AiSequence::erase(std::list<AiPackage*>::const_iterator package)
+{
+    // Not sure if manually terminated packages should trigger mDone, probably not?
+    for(std::list<AiPackage*>::iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+    {
+        if (package == it)
+        {
+            mPackages.erase(it);
+            return;
+        }
+    }
+    throw std::runtime_error("can't find package to erase");
+}
+
+bool AiSequence::isInCombat() const
+{
+    for(std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
+    {
+        if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+            return true;
+    }
+    return false;
+}
+
+bool AiSequence::isInCombat(const MWWorld::Ptr &actor) const
+{
     for(std::list<AiPackage*>::const_iterator it = mPackages.begin(); it != mPackages.end(); ++it)
     {
         if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
         {
-            firstCombatFound = true;
-
             const AiCombat *combat = static_cast<const AiCombat *>(*it);
-            if (combat->getTarget() != player ) return false; // only 1 non-player target allowed
-            else
-            {
-                // add new target only if current target (player) is farther
-                const ESM::Position &targetPos = combat->getTarget().getRefData().getPosition();
-
-                float distToCurrTarget = (Ogre::Vector3(targetPos.pos) - Ogre::Vector3(actorPos.pos)).length();
-                return (distToCurrTarget > distToTarget);
-            }
+            if (combat->getTarget() == actor)
+                return true;
         }
-        else if (firstCombatFound) break; // assumes combat packages go one-by-one in packages list
     }
-    return true;
+    return false;
 }
 
 void AiSequence::stopCombat()
@@ -211,6 +235,9 @@ void AiSequence::clear()
 
 void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
 {
+    if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        throw std::runtime_error("Can't add AI packages to player");
+
     if (package.getTypeId() == AiPackage::TypeIdCombat || package.getTypeId() == AiPackage::TypeIdPursue)
     {
         // Notify AiWander of our current position so we can return to it after combat finished
@@ -242,11 +269,6 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
 
     if(mPackages.empty())
         mPackages.push_front (package.clone());
-}
-
-void AiSequence::queue (const AiPackage& package)
-{
-    mPackages.push_back (package.clone());
 }
 
 AiPackage* MWMechanics::AiSequence::getActivePackage()

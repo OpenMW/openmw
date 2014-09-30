@@ -113,10 +113,10 @@ struct JournalViewModelImpl : JournalViewModel
 
                 utf8text = getText ();
 
-                size_t pos_begin, pos_end;
+                size_t pos_end = 0;
                 for(;;)
                 {
-                    pos_begin = utf8text.find('@');
+                    size_t pos_begin = utf8text.find('@');
                     if (pos_begin != std::string::npos)
                         pos_end = utf8text.find('#', pos_begin);
 
@@ -223,15 +223,6 @@ struct JournalViewModelImpl : JournalViewModel
         }
     }
 
-    void visitQuestName (QuestId questId, boost::function <void (Utf8Span)> visitor) const
-    {
-        MWDialogue::Quest const * quest = reinterpret_cast <MWDialogue::Quest const *> (questId);
-
-        std::string name = quest->getName ();
-
-        visitor (toUtf8Span (name));
-    }
-
     template <typename iterator_t>
     struct JournalEntryImpl : BaseEntry <iterator_t, JournalEntry>
     {
@@ -259,7 +250,7 @@ struct JournalViewModelImpl : JournalViewModel
                 os
                     << itr->mDayOfMonth << ' '
                     << MWBase::Environment::get().getWorld()->getMonthName (itr->mMonth)
-                    << " (" << dayStr << " " << (itr->mDay + 1) << ')';
+                    << " (" << dayStr << " " << (itr->mDay) << ')';
 
                 timestamp_buffer = os.str ();
             }
@@ -299,11 +290,6 @@ struct JournalViewModelImpl : JournalViewModel
             for(MWBase::Journal::TEntryIter i = journal->begin(); i != journal->end (); ++i)
                 visitor (JournalEntryImpl <MWBase::Journal::TEntryIter> (this, i));
         }
-    }
-
-    void visitTopics (boost::function <void (TopicId, Utf8Span)> visitor) const
-    {
-        throw std::runtime_error ("not implemented");
     }
 
     void visitTopicName (TopicId topicId, boost::function <void (Utf8Span)> visitor) const

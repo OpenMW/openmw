@@ -73,11 +73,6 @@ Rain Height Max=700 ?
 Rain Threshold=0.6 ?
 Max Raindrops=650 ?
 */
-
-    size_t offset = weather.mCloudTexture.find(".tga");
-    if (offset != std::string::npos)
-        weather.mCloudTexture.replace(offset, weather.mCloudTexture.length() - offset, ".dds");
-
     weather.mIsStorm = (name == "ashstorm" || name == "blight");
 
     mWeatherSettings[name] = weather;
@@ -707,9 +702,13 @@ void WeatherManager::changeWeather(const std::string& region, const unsigned int
 
     mRegionOverrides[Misc::StringUtils::lowerCase(region)] = weather;
 
-    std::string playerRegion = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell()->mRegion;
-    if (Misc::StringUtils::ciEqual(region, playerRegion))
-        setWeather(weather);
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    if (player.isInCell())
+    {
+        std::string playerRegion = player.getCell()->getCell()->mRegion;
+        if (Misc::StringUtils::ciEqual(region, playerRegion))
+            setWeather(weather);
+    }
 }
 
 void WeatherManager::modRegion(const std::string &regionid, const std::vector<char> &chances)

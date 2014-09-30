@@ -27,6 +27,11 @@
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
 
+MWMechanics::Alchemy::Alchemy()
+    : mValue(0)
+{
+}
+
 std::set<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
 {
     std::map<EffectKey, int> effects;
@@ -181,7 +186,13 @@ void MWMechanics::Alchemy::updateEffects()
             ESM::ENAMstruct effect;
             effect.mEffectID = iter->mId;
 
-            effect.mSkill = effect.mAttribute = iter->mArg; // somewhat hack-ish, but should work
+            effect.mAttribute = -1;
+            effect.mSkill = -1;
+
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
+                effect.mSkill = iter->mArg;
+            else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
+                effect.mAttribute = iter->mArg;
 
             effect.mRange = 0;
             effect.mArea = 0;
@@ -299,6 +310,9 @@ float MWMechanics::Alchemy::getChance() const
 {
     const CreatureStats& creatureStats = mAlchemist.getClass().getCreatureStats (mAlchemist);
     const NpcStats& npcStats = mAlchemist.getClass().getNpcStats (mAlchemist);
+
+    if (beginEffects() == endEffects())
+        return 0.f;
 
     return
         (npcStats.getSkill (ESM::Skill::Alchemy).getModified() +
@@ -444,7 +458,7 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
     if (name.empty() && getPotionName().empty())
         return Result_NoName;
 
-    if (beginEffects()==endEffects())
+    if (listEffects().empty())
         return Result_NoEffects;
 
     if (getChance()<std::rand()/static_cast<double> (RAND_MAX)*100)

@@ -2,12 +2,11 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <openengine/ogre/fader.hpp>
-
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -159,16 +158,19 @@ namespace MWGui
         // remove gold
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
+        // add gold to NPC trading gold pool
+        npcStats.setGoldPool(npcStats.getGoldPool() + price);
+
         // go back to game mode
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
+        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
 
         // advance time
         MWBase::Environment::get().getWorld ()->advanceTime (2);
         MWBase::Environment::get().getMechanicsManager()->rest(false);
         MWBase::Environment::get().getMechanicsManager()->rest(false);
 
-        MWBase::Environment::get().getWorld ()->getFader()->fadeOut(0.25);
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.25);
         mFadeTimeRemaining = 0.5;
     }
 
@@ -180,6 +182,6 @@ namespace MWGui
         mFadeTimeRemaining -= dt;
 
         if (mFadeTimeRemaining <= 0)
-            MWBase::Environment::get().getWorld ()->getFader()->fadeIn(0.25);
+            MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.25);
     }
 }

@@ -15,7 +15,7 @@ namespace MWGui
     class HUD : public OEngine::GUI::Layout, public LocalMapBase
     {
     public:
-        HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop);
+        HUD(CustomMarkerCollection& customMarkers, int fpsLevel, DragAndDrop* dragAndDrop);
         virtual ~HUD();
         void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
         void setFPS(float fps);
@@ -47,7 +47,6 @@ namespace MWGui
         void setCrosshairVisible(bool visible);
 
         void onFrame(float dt);
-        void onResChange(int width, int height);
 
         void setCellName(const std::string& cellName);
 
@@ -104,7 +103,7 @@ namespace MWGui
 
         SpellIcons* mSpellIcons;
 
-        MWWorld::Ptr mEnemy;
+        int mEnemyActorId;
         float mEnemyHealthTimer;
 
         bool  mIsDrowning;

@@ -40,6 +40,7 @@ namespace MWClass
                 const ESM::GameSetting *iKnockDownOddsBase;
                 const ESM::GameSetting *fDamageStrengthBase;
                 const ESM::GameSetting *fDamageStrengthMult;
+                const ESM::GameSetting *fCombatArmorMinMult;
             };
 
             static const GMST& getGmst();
@@ -54,7 +55,9 @@ namespace MWClass
 
             virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
 
-            virtual void adjustPosition(const MWWorld::Ptr& ptr) const;
+            virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) const;
+            ///< Adjust position to stand on ground. Must be called post model load
+            /// @param force do this even if the ptr is flying
 
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
@@ -133,10 +136,8 @@ namespace MWClass
 
             virtual void adjustScale (const MWWorld::Ptr &ptr, float &scale) const;
 
-            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const;
+            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const;
             ///< Inform actor \a ptr that a skill use has succeeded.
-
-            virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
             virtual bool isEssential (const MWWorld::Ptr& ptr) const;
             ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)

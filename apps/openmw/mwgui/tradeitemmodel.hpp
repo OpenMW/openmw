@@ -30,9 +30,14 @@ namespace MWGui
         void returnItemBorrowedFromUs (ModelIndex itemIndex, ItemModel* source, size_t count);
 
         /// Permanently transfers items that were borrowed to us from another model to this model
-        void transferItems ();
+        /// @param transferFrom the actor that lent us the items
+        void transferItems (const MWWorld::Ptr& transferFrom);
         /// Aborts trade
         void abort();
+
+        /// Adjusts the given encumbrance by adding weight for items that have been lent to us,
+        /// and removing weight for items we've lent to someone else.
+        void adjustEncumbrance (float& encumbrance);
 
         std::vector<ItemStack> getItemsBorrowedToUs();
 

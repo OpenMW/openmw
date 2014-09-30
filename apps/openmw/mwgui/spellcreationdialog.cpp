@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -37,6 +39,7 @@ namespace MWGui
     EditEffectDialog::EditEffectDialog()
         : WindowModal("openmw_edit_effect.layout")
         , mEditing(false)
+        , mMagicEffect(NULL)
     {
         getWidget(mCancelButton, "CancelButton");
         getWidget(mOkButton, "OkButton");
@@ -143,13 +146,7 @@ namespace MWGui
 
     void EditEffectDialog::setMagicEffect (const ESM::MagicEffect *effect)
     {
-        std::string icon = effect->mIcon;
-        icon[icon.size()-3] = 'd';
-        icon[icon.size()-2] = 'd';
-        icon[icon.size()-1] = 's';
-        icon = "icons\\" + icon;
-
-        mEffectImage->setImageTexture (icon);
+        mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(effect->mIcon));
 
         mEffectName->setCaptionWithReplacing("#{"+ESM::MagicEffect::effectIdToString  (effect->mIndex)+"}");
 
@@ -185,7 +182,7 @@ namespace MWGui
         {
             mAreaBox->setPosition(mAreaBox->getPosition().left, curY);
             mAreaBox->setVisible (true);
-            curY += mAreaBox->getSize().height;
+            //curY += mAreaBox->getSize().height;
         }
     }
 
@@ -291,7 +288,7 @@ namespace MWGui
 
     SpellCreationDialog::SpellCreationDialog()
         : WindowBase("openmw_spellcreation_dialog.layout")
-        , EffectEditorBase()
+        , EffectEditorBase(EffectEditorBase::Spellmaking)
     {
         getWidget(mNameEdit, "NameEdit");
         getWidget(mMagickaCost, "MagickaCost");
@@ -352,7 +349,13 @@ namespace MWGui
 
         mSpell.mName = mNameEdit->getCaption();
 
-        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, boost::lexical_cast<int>(mPriceLabel->getCaption()), player);
+        int price = boost::lexical_cast<int>(mPriceLabel->getCaption());
+
+        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+
+        // add gold to NPC trading gold pool
+        MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
+        npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
@@ -385,6 +388,14 @@ namespace MWGui
 
     void SpellCreationDialog::notifyEffectsChanged ()
     {
+        if (mEffects.empty())
+        {
+            mMagickaCost->setCaption("0");
+            mPriceLabel->setCaption("0");
+            mSuccessChance->setCaption("0");
+            return;
+        }
+
         float y = 0;
 
         const MWWorld::ESMStore &store =
@@ -392,7 +403,7 @@ namespace MWGui
 
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
-            float x = 0.5 * it->mMagnMin + it->mMagnMax;
+            float x = 0.5 * (it->mMagnMin + it->mMagnMax);
 
             const ESM::MagicEffect* effect =
                 store.get<ESM::MagicEffect>().find(it->mEffectID);
@@ -407,7 +418,7 @@ namespace MWGui
             y += x * fEffectCostMult;
             y = std::max(1.f,y);
 
-            if (effect->mData.mFlags & ESM::MagicEffect::CastTarget)
+            if (it->mRange == ESM::RT_Target)
                 y *= 1.5;
         }
 
@@ -434,10 +445,11 @@ namespace MWGui
     // ------------------------------------------------------------------------------------------------
 
 
-    EffectEditorBase::EffectEditorBase()
+    EffectEditorBase::EffectEditorBase(Type type)
         : mAddEffectDialog()
         , mSelectAttributeDialog(NULL)
         , mSelectSkillDialog(NULL)
+        , mType(type)
     {
         mAddEffectDialog.eventEffectAdded += MyGUI::newDelegate(this, &EffectEditorBase::onEffectAdded);
         mAddEffectDialog.eventEffectModified += MyGUI::newDelegate(this, &EffectEditorBase::onEffectModified);
@@ -472,6 +484,13 @@ namespace MWGui
             const std::vector<ESM::ENAMstruct>& list = spell->mEffects.mList;
             for (std::vector<ESM::ENAMstruct>::const_iterator it2 = list.begin(); it2 != list.end(); ++it2)
             {
+                const ESM::MagicEffect * effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(it2->mEffectID);
+
+                // skip effects that do not allow spellmaking/enchanting
+                int requiredFlags = (mType == Spellmaking) ? ESM::MagicEffect::AllowSpellmaking : ESM::MagicEffect::AllowEnchanting;
+                if (!(effect->mData.mFlags & requiredFlags))
+                    continue;
+
                 if (std::find(knownEffects.begin(), knownEffects.end(), it2->mEffectID) == knownEffects.end())
                     knownEffects.push_back(it2->mEffectID);
             }
@@ -504,7 +523,7 @@ namespace MWGui
         updateEffectsView ();
     }
 
-    void EffectEditorBase::setWidgets (Widgets::MWList *availableEffectsList, MyGUI::ScrollView *usedEffectsView)
+    void EffectEditorBase::setWidgets (Gui::MWList *availableEffectsList, MyGUI::ScrollView *usedEffectsView)
     {
         mAvailableEffectsList = availableEffectsList;
         mUsedEffectsView = usedEffectsView;
@@ -514,16 +533,24 @@ namespace MWGui
 
     void EffectEditorBase::onSelectAttribute ()
     {
-        mAddEffectDialog.setVisible(true);
+        const ESM::MagicEffect* effect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
+
+        mAddEffectDialog.newEffect(effect);
         mAddEffectDialog.setAttribute (mSelectAttributeDialog->getAttributeId());
+        mAddEffectDialog.setVisible(true);
         MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectAttributeDialog);
         mSelectAttributeDialog = 0;
     }
 
     void EffectEditorBase::onSelectSkill ()
     {
+        const ESM::MagicEffect* effect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
+
+        mAddEffectDialog.newEffect(effect);
+        mAddEffectDialog.setSkill (mSelectSkillDialog->getSkillId());
         mAddEffectDialog.setVisible(true);
-        mAddEffectDialog.setSkill (mSelectSkillDialog->getSkillId ());
         MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectSkillDialog);
         mSelectSkillDialog = 0;
     }
@@ -548,11 +575,10 @@ namespace MWGui
         }
 
         int buttonId = *sender->getUserData<int>();
-        short effectId = mButtonMapping[buttonId];
-
+        mSelectedKnownEffectId = mButtonMapping[buttonId];
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
-            if (it->mEffectID == effectId)
+            if (it->mEffectID == mSelectedKnownEffectId)
             {
                 MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
                 return;
@@ -560,9 +586,7 @@ namespace MWGui
         }
 
         const ESM::MagicEffect* effect =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
-
-        mAddEffectDialog.newEffect (effect);
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
 
         if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
         {
@@ -582,6 +606,7 @@ namespace MWGui
         }
         else
         {
+            mAddEffectDialog.newEffect(effect);
             mAddEffectDialog.setVisible(true);
         }
     }
@@ -637,7 +662,10 @@ namespace MWGui
             ++i;
         }
 
+        // Canvas size must be expressed with HScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mUsedEffectsView->setVisibleHScroll(false);
         mUsedEffectsView->setCanvasSize(size);
+        mUsedEffectsView->setVisibleHScroll(true);
 
         notifyEffectsChanged();
     }

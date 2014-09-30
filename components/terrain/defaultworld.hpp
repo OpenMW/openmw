@@ -70,9 +70,9 @@ namespace Terrain
 
     private:
         // Called from a background worker thread
-        Ogre::WorkQueue::Response* handleRequest(const Ogre::WorkQueue::Request* req, const Ogre::WorkQueue* srcQ);
+        virtual Ogre::WorkQueue::Response* handleRequest(const Ogre::WorkQueue::Request* req, const Ogre::WorkQueue* srcQ);
         // Called from the main thread
-        void handleResponse(const Ogre::WorkQueue::Response* res, const Ogre::WorkQueue* srcQ);
+        virtual void handleResponse(const Ogre::WorkQueue::Response* res, const Ogre::WorkQueue* srcQ);
         Ogre::uint16 mWorkQueueChannel;
 
         bool mVisible;
