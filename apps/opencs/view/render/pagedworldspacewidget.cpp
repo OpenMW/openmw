@@ -13,8 +13,8 @@
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 
-#include <QtGui/qevent.h>
-#include <Qt/qpainter.h>
+#include <QEvent>
+#include <QPainter>
 
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
@@ -138,7 +138,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             }
 
             Ogre::BillboardSet* mySet = getSceneManager()->createBillboardSet("CellBillboardSet" + iter->getId(mWorldspace));
-            Ogre::Billboard* myBillboard = mySet->createBillboard(Ogre::Vector3(0, 0, 0));
+            //Ogre::Billboard* myBillboard = mySet->createBillboard(Ogre::Vector3(0, 0, 0));
             mySet->setDefaultDimensions(4000, 2000);
             mySet->setMaterial(material);
             mySet->setRenderQueueGroup(mySet->getRenderQueueGroup() + 1); // render the bilboard on top
