@@ -387,7 +387,7 @@ namespace Physic
         mHeightFieldMap [name] = hf;
 
         mDynamicsWorld->addRigidBody(body,CollisionType_HeightMap,
-                                    CollisionType_World|CollisionType_Actor|CollisionType_Raycasting);
+                                    CollisionType_Actor|CollisionType_Raycasting);
     }
 
     void PhysicEngine::removeHeightField(int x, int y)
@@ -494,7 +494,7 @@ namespace Physic
         {
             assert (mCollisionObjectMap.find(name) == mCollisionObjectMap.end());
             mCollisionObjectMap[name] = body;
-            mDynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_Actor|CollisionType_HeightMap);
+            mDynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_Actor|CollisionType_HeightMap);
         }
         else
         {
