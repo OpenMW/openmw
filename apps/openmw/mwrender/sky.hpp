@@ -116,6 +116,9 @@ namespace MWRender
         SkyManager(Ogre::SceneNode* root, Ogre::Camera* pCamera);
         ~SkyManager();
 
+        /// Attach weather particle effects to this scene node (should be the Camera's parent node)
+        void attachToNode(Ogre::SceneNode* sceneNode);
+
         void update(float duration);
 
         void enable();

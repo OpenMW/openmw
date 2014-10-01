@@ -221,6 +221,8 @@ private:
     void setAmbientMode();
     void applyFog(bool underwater);
 
+    void attachCameraTo(const MWWorld::Ptr& ptr);
+
     void setMenuTransparency(float val);
 
     bool mSunEnabled;

@@ -312,7 +312,7 @@ void RenderingManager::updatePlayerPtr(const MWWorld::Ptr &ptr)
     if(mPlayerAnimation)
         mPlayerAnimation->updatePtr(ptr);
     if(mCamera->getHandle() == ptr.getRefData().getHandle())
-        mCamera->attachTo(ptr);
+        attachCameraTo(ptr);
 }
 
 void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
@@ -327,7 +327,7 @@ void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
         anim->rebuild();
         if(mCamera->getHandle() == ptr.getRefData().getHandle())
         {
-            mCamera->attachTo(ptr);
+            attachCameraTo(ptr);
             mCamera->setAnimation(anim);
         }
     }
@@ -869,7 +869,13 @@ void RenderingManager::getTriangleBatchCount(unsigned int &triangles, unsigned i
 void RenderingManager::setupPlayer(const MWWorld::Ptr &ptr)
 {
     ptr.getRefData().setBaseNode(mRendering.getScene()->getSceneNode("player"));
-    mCamera->attachTo(ptr);
+    attachCameraTo(ptr);
+}
+
+void RenderingManager::attachCameraTo(const MWWorld::Ptr &ptr)
+{
+    Ogre::SceneNode* cameraNode = mCamera->attachTo(ptr);
+    mSkyManager->attachToNode(cameraNode);
 }
 
 void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
