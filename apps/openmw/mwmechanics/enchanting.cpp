@@ -53,6 +53,9 @@ namespace MWMechanics
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
         ESM::Enchantment enchantment;
         enchantment.mData.mCharge = getGemCharge();
+        enchantment.mData.mAutocalc = 0;
+        enchantment.mData.mType = mCastStyle;
+        enchantment.mData.mCost = getEnchantPoints();
 
         store.remove(mSoulGemPtr, 1, player);
 
@@ -72,8 +75,6 @@ namespace MWMechanics
         {
             enchantment.mData.mCharge=0;
         }
-        enchantment.mData.mType = mCastStyle;
-        enchantment.mData.mCost = getEnchantPoints();
         enchantment.mEffects = mEffectList;
 
         // Apply the enchantment
