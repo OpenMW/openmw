@@ -38,15 +38,15 @@ namespace MWMechanics
 
             float resist = 0.f;
             if (spells.hasCorprusEffect(spell))
-                resist = getEffectResistanceAttribute(ESM::MagicEffect::Corprus,&actorEffects);
+                resist = 1.f - 0.01 * getEffectResistanceAttribute(ESM::MagicEffect::Corprus,&actorEffects);
             else if (spell->mData.mType == ESM::Spell::ST_Disease)
-                resist = actorEffects.getCommonDiseaseResistance();
+                resist = 1.f - 0.01 * actorEffects.getCommonDiseaseResistance();
             else if (spell->mData.mType == ESM::Spell::ST_Blight)
-                resist = actorEffects.getBlightDiseaseResistance();
+                resist = 1.f - 0.01 * actorEffects.getBlightDiseaseResistance();
             else
                 continue;
 
-            int x = fDiseaseXferChance * (100.f - resist);
+            int x = fDiseaseXferChance * 100 * resist;
             float roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 10000; // [0, 9999]
 
             if (roll < x)
