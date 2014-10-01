@@ -33,12 +33,22 @@ void CSVDoc::View::closeEvent (QCloseEvent *event)
     else
     {
         // save window size first
+        int width = 0;
+        int height = 0;
+
+#ifdef Q_WS_WIN
+        width = frameGeometry().width();
+        height = frameGeometry().height();
+#else
+        width = geometry().width();
+        height = geometry().height();
+#endif
         CSMSettings::UserSettings::instance().setDefinitions(
                 "Window Size/Width",
-                QStringList(QString::number(frameGeometry().width())));
+                QStringList(QString::number(width)));
         CSMSettings::UserSettings::instance().setDefinitions(
                 "Window Size/Height",
-                QStringList(QString::number(frameGeometry().height())));
+                QStringList(QString::number(height)));
         CSMSettings::UserSettings::instance().saveDefinitions();
 
         // closeRequest() returns true if last document
