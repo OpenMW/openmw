@@ -14,13 +14,13 @@
         float4x4 worldviewFixed = worldview;
 
 #if !SH_GLSL
-        worldviewFixed[0][3] = 0;
-        worldviewFixed[1][3] = 0;
-        worldviewFixed[2][3] = 0;
+        worldviewFixed[0][3] = 0.0;
+        worldviewFixed[1][3] = 0.0;
+        worldviewFixed[2][3] = 0.0;
 #else
-        worldviewFixed[3][0] = 0;
-        worldviewFixed[3][1] = 0;
-        worldviewFixed[3][2] = 0;
+        worldviewFixed[3][0] = 0.0;
+        worldviewFixed[3][1] = 0.0;
+        worldviewFixed[3][2] = 0.0;
 #endif
 
         shOutputPosition = shMatrixMult(proj, shMatrixMult(worldviewFixed, shInputPosition));
