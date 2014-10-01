@@ -26,8 +26,8 @@ namespace MWRender
       mNearest(30.f),
       mFurthest(800.f),
       mIsNearest(false),
-      mHeight(128.f),
-      mCameraDistance(300.f),
+      mHeight(124.f),
+      mCameraDistance(192.f),
       mDistanceAdjusted(false),
       mVanityToggleQueued(false),
       mViewModeToggleQueued(false)
