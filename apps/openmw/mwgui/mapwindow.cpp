@@ -159,8 +159,6 @@ namespace MWGui
         , mLocalMap(NULL)
         , mPrefix()
         , mChanged(true)
-        , mLastPositionX(0.0f)
-        , mLastPositionY(0.0f)
         , mLastDirectionX(0.0f)
         , mLastDirectionY(0.0f)
         , mCompass(NULL)
@@ -425,24 +423,24 @@ namespace MWGui
         mLocalMap->getParent()->_updateChilds();
     }
 
-    void LocalMapBase::setPlayerPos(const float x, const float y)
+    void LocalMapBase::setPlayerPos(int cellX, int cellY, const float nx, const float ny)
     {
         updateMagicMarkers();
 
-        if (x == mLastPositionX && y == mLastPositionY)
-            return;
-
         notifyPlayerUpdate ();
 
-        MyGUI::IntSize size = mLocalMap->getCanvasSize();
-        MyGUI::IntPoint middle = MyGUI::IntPoint((1/3.f + x/3.f)*size.width,(1/3.f + y/3.f)*size.height);
-        MyGUI::IntCoord viewsize = mLocalMap->getCoord();
-        MyGUI::IntPoint pos(0.5*viewsize.width - middle.left, 0.5*viewsize.height - middle.top);
-        mLocalMap->setViewOffset(pos);
+        MyGUI::IntPoint pos(widgetSize+nx*widgetSize-16, widgetSize+ny*widgetSize-16);
+        pos.left += (cellX - mCurX) * widgetSize;
+        pos.top -= (cellY - mCurY) * widgetSize;
 
-        mCompass->setPosition(MyGUI::IntPoint(widgetSize+x*widgetSize-16, widgetSize+y*widgetSize-16));
-        mLastPositionX = x;
-        mLastPositionY = y;
+        if (pos != mCompass->getPosition())
+        {
+            mCompass->setPosition(pos);
+            MyGUI::IntPoint middle (pos.left+16, pos.top+16);
+                    MyGUI::IntCoord viewsize = mLocalMap->getCoord();
+            MyGUI::IntPoint viewOffset(0.5*viewsize.width - middle.left, 0.5*viewsize.height - middle.top);
+            mLocalMap->setViewOffset(viewOffset);
+        }
     }
 
     void LocalMapBase::setPlayerDir(const float x, const float y)

@@ -183,7 +183,7 @@ namespace MWGui
     virtual void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
     virtual void changeCell(MWWorld::CellStore* cell); ///< change the active cell
-    virtual void setPlayerPos(const float x, const float y); ///< set player position in map space
+    virtual void setPlayerPos(int cellX, int cellY, const float x, const float y); ///< set player position in map space
     virtual void setPlayerDir(const float x, const float y); ///< set player view direction in map space
 
     virtual void setFocusObject(const MWWorld::Ptr& focus);

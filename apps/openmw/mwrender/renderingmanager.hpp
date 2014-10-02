@@ -183,7 +183,7 @@ public:
     ///< request the local map for a cell
 
     /// configure fog according to cell
-    void configureFog(MWWorld::CellStore &mCell);
+    void configureFog(const MWWorld::CellStore &mCell);
 
     /// configure fog manually
     void configureFog(const float density, const Ogre::ColourValue& colour);

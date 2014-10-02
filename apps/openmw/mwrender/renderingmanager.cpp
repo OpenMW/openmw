@@ -499,7 +499,7 @@ bool RenderingManager::toggleRenderMode(int mode)
     }
 }
 
-void RenderingManager::configureFog(MWWorld::CellStore &mCell)
+void RenderingManager::configureFog(const MWWorld::CellStore &mCell)
 {
     Ogre::ColourValue color;
     color.setAsABGR (mCell.getCell()->mAmbi.mFog);
@@ -510,7 +510,7 @@ void RenderingManager::configureFog(MWWorld::CellStore &mCell)
 void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)
 {
     mFogColour = colour;
-    float max = Settings::Manager::getFloat("max viewing distance", "Viewing distance");
+    float max = Settings::Manager::getFloat("viewing distance", "Viewing distance");
 
     if (density == 0)
     {
@@ -742,7 +742,7 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         {
             setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
         }
-        else if (it->second == "max viewing distance" && it->first == "Viewing distance")
+        else if (it->second == "viewing distance" && it->first == "Viewing distance")
         {
             if (!MWBase::Environment::get().getWorld()->isCellExterior() && !MWBase::Environment::get().getWorld()->isCellQuasiExterior()
                 && MWBase::Environment::get().getWorld()->getPlayerPtr().mCell)

@@ -177,7 +177,7 @@ namespace MWBase
             virtual void changeCell(MWWorld::CellStore* cell) = 0;
             ///< change the active cell
 
-            virtual void setPlayerPos(const float x, const float y) = 0;
+            virtual void setPlayerPos(int cellX, int cellY, const float x, const float y) = 0;
             ///< set player position in map space
 
             virtual void setPlayerDir(const float x, const float y) = 0;

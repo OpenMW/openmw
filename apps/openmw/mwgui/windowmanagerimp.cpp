@@ -880,9 +880,6 @@ namespace MWGui
                 mMap->addVisitedLocation ("#{sCell=" + name + "}", cell->getCell()->getGridX (), cell->getCell()->getGridY ());
 
             mMap->cellExplored (cell->getCell()->getGridX(), cell->getCell()->getGridY());
-
-            mMap->setCellPrefix("Cell");
-            mHud->setCellPrefix("Cell");
         }
         else
         {
@@ -900,14 +897,20 @@ namespace MWGui
 
     void WindowManager::setActiveMap(int x, int y, bool interior)
     {
+        if (!interior)
+        {
+            mMap->setCellPrefix("Cell");
+            mHud->setCellPrefix("Cell");
+        }
+
         mMap->setActiveCell(x,y, interior);
         mHud->setActiveCell(x,y, interior);
     }
 
-    void WindowManager::setPlayerPos(const float x, const float y)
+    void WindowManager::setPlayerPos(int cellX, int cellY, const float x, const float y)
     {
-        mMap->setPlayerPos(x,y);
-        mHud->setPlayerPos(x,y);
+        mMap->setPlayerPos(cellX, cellY, x, y);
+        mHud->setPlayerPos(cellX, cellY, x, y);
     }
 
     void WindowManager::setPlayerDir(const float x, const float y)

@@ -346,10 +346,10 @@
                             <Property key="Page" value="300"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Viewing distance"/>
-                            <UserString key="SettingName" value="max viewing distance"/>
+                            <UserString key="SettingName" value="viewing distance"/>
                             <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingMin" value="2000"/>
-                            <UserString key="SettingMax" value="5600"/>
+                            <UserString key="SettingMax" value="4600"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="4 178 332 18" align="Left Top">
                             <Property key="Caption" value="#{sNear}"/>
