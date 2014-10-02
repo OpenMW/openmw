@@ -226,11 +226,6 @@ namespace Physic
         // The actual physics solver
         solver = new btSequentialImpulseConstraintSolver;
 
-        //btOverlappingPairCache* pairCache = new btSortedOverlappingPairCache();
-        pairCache = new btSortedOverlappingPairCache();
-
-        //pairCache->setInternalGhostPairCallback( new btGhostPairCallback() );
-
         broadphase = new btDbvtBroadphase();
 
         // The world.
@@ -341,7 +336,6 @@ namespace Physic
         delete collisionConfiguration;
         delete dispatcher;
         delete broadphase;
-        delete pairCache;
         delete mShapeLoader;
 
         delete BulletShapeManager::getSingletonPtr();
