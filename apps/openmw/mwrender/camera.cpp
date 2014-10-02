@@ -197,7 +197,7 @@ namespace MWRender
     {
         // Changing the view will stop all playing animations, so if we are playing
         // anything important, queue the view change for later
-        if (!mPreviewMode)
+        if (isFirstPerson() && !mAnimation->upperBodyReady())
         {
             mVanityToggleQueued = true;
             return false;
