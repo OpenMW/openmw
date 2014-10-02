@@ -246,10 +246,7 @@ namespace MWMechanics
                               const ESM::Spell* spell, const MagicEffects* effects)
     {
         float resistance = getEffectResistance(effectId, actor, caster, spell, effects);
-        if (resistance >= 0)
-            return 1 - resistance / 100.f;
-        else
-            return -(resistance-100) / 100.f;
+        return 1 - resistance / 100.f;
     }
 
     /// Check if the given affect can be applied to the target. If \a castByPlayer, emits a message box on failure.
