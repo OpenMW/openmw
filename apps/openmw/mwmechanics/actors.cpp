@@ -1122,20 +1122,21 @@ namespace MWMechanics
 
             int hostilesCount = 0; // need to know this to play Battle music
 
+            // AI processing is only done within distance of 7168 units to the player. Note the "AI distance" slider doesn't affect this
+            // (it only does some throttling for targets beyond the "AI distance", so doesn't give any guarantees as to whether AI will be enabled or not)
+            // This distance could be made configurable later, but the setting must be marked with a big warning:
+            // using higher values will make a quest in Bloodmoon harder or impossible to complete (bug #1876)
+            const float sqrProcessingDistance = 7168*7168;
+
              // AI and magic effects update
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {
                     updateActor(iter->first, duration);
-
-                    // AI processing is only done within distance of 7168 units to the player. Note the "AI distance" slider doesn't affect this
-                    // (it only does some throttling for targets beyond the "AI distance", so doesn't give any guarantees as to whether AI will be enabled or not)
-                    // This distance could be made configurable later, but the setting must be marked with a big warning:
-                    // using higher values will make a quest in Bloodmoon harder or impossible to complete (bug #1876)
                     if (MWBase::Environment::get().getMechanicsManager()->isAIActive() &&
                             Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(iter->first.getRefData().getPosition().pos))
-                                    <= 7168*7168)
+                                    <= sqrProcessingDistance)
                     {
                         if (timerUpdateAITargets == 0)
                         {
@@ -1182,6 +1183,11 @@ namespace MWMechanics
             CharacterController* playerCharacter = NULL;
             for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
+                if (iter->first != player &&
+                        Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(iter->first.getRefData().getPosition().pos))
+                        > sqrProcessingDistance)
+                    continue;
+
                 if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
                             ESM::MagicEffect::Paralyze).getMagnitude() > 0)
                     iter->second->skipAnim();

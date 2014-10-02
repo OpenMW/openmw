@@ -139,6 +139,11 @@ namespace ICS
 		mControlsMouseButtonBinderMap[ button ] = controlMouseButtonBinderItem;
 	}
 
+	bool InputControlSystem::isMouseButtonBound(unsigned int button) const
+	{
+		return mControlsMouseButtonBinderMap.find(button) != mControlsMouseButtonBinderMap.end();
+	}
+
 	// get bindings
 	InputControlSystem::NamedAxis InputControlSystem::getMouseAxisBinding(Control* control, ICS::Control::ControlChangingDirection direction)
 	{

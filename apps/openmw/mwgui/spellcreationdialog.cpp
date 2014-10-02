@@ -422,12 +422,12 @@ namespace MWGui
                 y *= 1.5;
         }
 
-        mSpell.mData.mCost = int(y);
-
         ESM::EffectList effectList;
         effectList.mList = mEffects;
         mSpell.mEffects = effectList;
+        mSpell.mData.mCost = int(y);
         mSpell.mData.mType = ESM::Spell::ST_Spell;
+        mSpell.mData.mFlags = 0;
 
         mMagickaCost->setCaption(boost::lexical_cast<std::string>(int(y)));
 

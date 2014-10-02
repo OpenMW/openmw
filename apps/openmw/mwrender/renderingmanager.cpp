@@ -63,6 +63,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     , mPhysicsEngine(engine)
     , mTerrain(NULL)
     , mEffectManager(NULL)
+    , mRenderWorld(true)
 {
     mActors = new MWRender::Actors(mRendering, this);
     mObjects = new MWRender::Objects(mRendering);
@@ -232,6 +233,15 @@ bool RenderingManager::toggleWater()
     return mWater->toggle();
 }
 
+bool RenderingManager::toggleWorld()
+{
+    mRenderWorld = !mRenderWorld;
+
+    int visibilityMask = mRenderWorld ? ~int(0) : 0;
+    mRendering.getViewport()->setVisibilityMask(visibilityMask);
+    return mRenderWorld;
+}
+
 void RenderingManager::cellAdded (MWWorld::CellStore *store)
 {
     if (store->isExterior())
@@ -302,7 +312,7 @@ void RenderingManager::updatePlayerPtr(const MWWorld::Ptr &ptr)
     if(mPlayerAnimation)
         mPlayerAnimation->updatePtr(ptr);
     if(mCamera->getHandle() == ptr.getRefData().getHandle())
-        mCamera->attachTo(ptr);
+        attachCameraTo(ptr);
 }
 
 void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
@@ -317,7 +327,7 @@ void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
         anim->rebuild();
         if(mCamera->getHandle() == ptr.getRefData().getHandle())
         {
-            mCamera->attachTo(ptr);
+            attachCameraTo(ptr);
             mCamera->setAnimation(anim);
         }
     }
@@ -489,7 +499,7 @@ bool RenderingManager::toggleRenderMode(int mode)
     }
 }
 
-void RenderingManager::configureFog(MWWorld::CellStore &mCell)
+void RenderingManager::configureFog(const MWWorld::CellStore &mCell)
 {
     Ogre::ColourValue color;
     color.setAsABGR (mCell.getCell()->mAmbi.mFog);
@@ -500,7 +510,7 @@ void RenderingManager::configureFog(MWWorld::CellStore &mCell)
 void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)
 {
     mFogColour = colour;
-    float max = Settings::Manager::getFloat("max viewing distance", "Viewing distance");
+    float max = Settings::Manager::getFloat("viewing distance", "Viewing distance");
 
     if (density == 0)
     {
@@ -732,7 +742,7 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         {
             setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
         }
-        else if (it->second == "max viewing distance" && it->first == "Viewing distance")
+        else if (it->second == "viewing distance" && it->first == "Viewing distance")
         {
             if (!MWBase::Environment::get().getWorld()->isCellExterior() && !MWBase::Environment::get().getWorld()->isCellQuasiExterior()
                 && MWBase::Environment::get().getWorld()->getPlayerPtr().mCell)
@@ -859,7 +869,13 @@ void RenderingManager::getTriangleBatchCount(unsigned int &triangles, unsigned i
 void RenderingManager::setupPlayer(const MWWorld::Ptr &ptr)
 {
     ptr.getRefData().setBaseNode(mRendering.getScene()->getSceneNode("player"));
-    mCamera->attachTo(ptr);
+    attachCameraTo(ptr);
+}
+
+void RenderingManager::attachCameraTo(const MWWorld::Ptr &ptr)
+{
+    Ogre::SceneNode* cameraNode = mCamera->attachTo(ptr);
+    mSkyManager->attachToNode(cameraNode);
 }
 
 void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)

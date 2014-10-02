@@ -382,9 +382,7 @@ void SkyManager::clearRain()
     for (std::map<Ogre::SceneNode*, NifOgre::ObjectScenePtr>::iterator it = mRainModels.begin(); it != mRainModels.end();)
     {
         it->second.setNull();
-        Ogre::SceneNode* parent = it->first->getParentSceneNode();
         mSceneMgr->destroySceneNode(it->first);
-        mSceneMgr->destroySceneNode(parent);
         mRainModels.erase(it++);
     }
 }
@@ -402,9 +400,7 @@ void SkyManager::updateRain(float dt)
         if (pos.z < -minHeight)
         {
             it->second.setNull();
-            Ogre::SceneNode* parent = it->first->getParentSceneNode();
             mSceneMgr->destroySceneNode(it->first);
-            mSceneMgr->destroySceneNode(parent);
             mRainModels.erase(it++);
         }
         else
@@ -420,17 +416,20 @@ void SkyManager::updateRain(float dt)
         {
             mRainTimer = 0;
 
+            // TODO: handle rain settings from Morrowind.ini
             const float rangeRandom = 100;
             float xOffs = (std::rand()/(RAND_MAX+1.0)) * rangeRandom - (rangeRandom/2);
             float yOffs = (std::rand()/(RAND_MAX+1.0)) * rangeRandom - (rangeRandom/2);
-            Ogre::SceneNode* sceneNode = mCamera->getParentSceneNode()->createChildSceneNode();
-            sceneNode->setInheritOrientation(false);
 
             // Create a separate node to control the offset, since a node with setInheritOrientation(false) will still
             // consider the orientation of the parent node for its position, just not for its orientation
             float startHeight = 700;
-            Ogre::SceneNode* offsetNode = sceneNode->createChildSceneNode(Ogre::Vector3(xOffs,yOffs,startHeight));
+            Ogre::SceneNode* offsetNode = mParticleNode->createChildSceneNode(Ogre::Vector3(xOffs,yOffs,startHeight));
 
+            // Spawn a new rain object for each instance.
+            // TODO: this is inefficient. We could try to use an Ogre::ParticleSystem instead, but then we would need to make assumptions
+            // about the rain meshes being Quads and their dimensions.
+            // Or we could clone meshes into one vertex buffer manually.
             NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(offsetNode, mRainEffect);
             for (unsigned int i=0; i<objects->mEntities.size(); ++i)
             {
@@ -562,12 +561,6 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         }
         else
         {
-            if (!mParticleNode)
-            {
-                mParticleNode = mCamera->getParentSceneNode()->createChildSceneNode();
-                mParticleNode->setInheritOrientation(false);
-            }
-
             mParticle = NifOgre::Loader::createObjects(mParticleNode, mCurrentParticleEffect);
             for(size_t i = 0; i < mParticle->mParticles.size(); ++i)
             {
@@ -782,4 +775,17 @@ void SkyManager::setGlareEnabled (bool enabled)
     if (!mCreated || !mEnabled)
         return;
     mSunGlare->setVisible (mSunEnabled && enabled);
+}
+
+void SkyManager::attachToNode(SceneNode *sceneNode)
+{
+    if (!mParticleNode)
+    {
+        mParticleNode = sceneNode->createChildSceneNode();
+        mParticleNode->setInheritOrientation(false);
+    }
+    else
+    {
+        sceneNode->addChild(mParticleNode);
+    }
 }

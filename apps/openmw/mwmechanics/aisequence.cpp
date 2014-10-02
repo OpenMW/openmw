@@ -260,15 +260,14 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
 
     for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end(); ++it)
     {
-        if(mPackages.front()->getPriority() <= package.getPriority())
+        if((*it)->getPriority() <= package.getPriority())
         {
             mPackages.insert(it,package.clone());
             return;
         }
     }
 
-    if(mPackages.empty())
-        mPackages.push_front (package.clone());
+    mPackages.push_front (package.clone());
 }
 
 AiPackage* MWMechanics::AiSequence::getActivePackage()

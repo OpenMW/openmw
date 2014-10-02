@@ -490,7 +490,7 @@ namespace
                 unsigned int  & page = mStates.top ().mPage;
                 Book   book = mStates.top ().mBook;
 
-                if (page < book->pageCount () - 2)
+                if (page+2 < book->pageCount())
                 {
                     page += 2;
                     updateShowingPages ();

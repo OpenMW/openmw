@@ -180,6 +180,7 @@ namespace MWWorld
             virtual void setWaterHeight(const float height);
 
             virtual bool toggleWater();
+            virtual bool toggleWorld();
 
             virtual void adjustSky();
 
@@ -197,7 +198,7 @@ namespace MWWorld
             virtual LocalScripts& getLocalScripts();
 
             virtual bool hasCellChanged() const;
-            ///< Has the player moved to a different cell, since the last frame?
+            ///< Has the set of active cells changed, since the last frame?
 
             virtual bool isCellExterior() const;
 

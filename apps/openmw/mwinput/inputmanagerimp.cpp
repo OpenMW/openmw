@@ -936,9 +936,11 @@ namespace MWInput
             {
                 clearAllBindings (control);
 
-                if (defaultKeyBindings.find(i) != defaultKeyBindings.end())
+                if (defaultKeyBindings.find(i) != defaultKeyBindings.end()
+                        && !mInputBinder->isKeyBound(defaultKeyBindings[i]))
                     mInputBinder->addKeyBinding(control, defaultKeyBindings[i], ICS::Control::INCREASE);
-                else if (defaultMouseButtonBindings.find(i) != defaultMouseButtonBindings.end())
+                else if (defaultMouseButtonBindings.find(i) != defaultMouseButtonBindings.end()
+                         && !mInputBinder->isMouseButtonBound(defaultMouseButtonBindings[i]))
                     mInputBinder->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
             }
         }

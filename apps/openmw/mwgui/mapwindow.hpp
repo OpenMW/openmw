@@ -75,7 +75,7 @@ namespace MWGui
         void setCellPrefix(const std::string& prefix);
         void setActiveCell(const int x, const int y, bool interior=false);
         void setPlayerDir(const float x, const float y);
-        void setPlayerPos(const float x, const float y);
+        void setPlayerPos(int cellX, int cellY, const float nx, const float ny);
 
         void onFrame(float dt);
 
@@ -129,8 +129,6 @@ namespace MWGui
 
         float mMarkerUpdateTimer;
 
-        float mLastPositionX;
-        float mLastPositionY;
         float mLastDirectionX;
         float mLastDirectionY;
     };

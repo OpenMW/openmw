@@ -212,6 +212,7 @@ namespace Compiler
         const int opcodeFadeOut = 0x200013d;
         const int opcodeFadeTo = 0x200013e;
         const int opcodeToggleWater = 0x2000144;
+        const int opcodeToggleWorld = 0x20002f5;
         const int opcodeTogglePathgrid = 0x2000146;
         const int opcodeDontSaveObject = 0x2000153;
         const int opcodeToggleVanityMode = 0x2000174;

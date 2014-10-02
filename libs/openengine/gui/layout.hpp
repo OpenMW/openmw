@@ -42,6 +42,7 @@ namespace GUI
       MYGUI_ASSERT( ! _throw, "widget name '" << _name << "' in layout '" << mLayoutName << "' not found.");
     }
 
+  private:
     void initialise(const std::string & _layout,
                     MyGUI::Widget* _parent = nullptr)
     {
@@ -74,6 +75,7 @@ namespace GUI
       mListWindowRoot.clear();
     }
 
+  public:
     void setCoord(int x, int y, int w, int h)
     {
       mMainWidget->setCoord(x,y,w,h);
@@ -119,29 +121,6 @@ namespace GUI
       // NOTE: this assume that mMainWidget is of type Window.
       static_cast<MyGUI::Window*>(mMainWidget)->setCaptionWithReplacing(title);
       adjustWindowCaption();
-    }
-
-    void setState(const std::string& widget, const std::string& state)
-    {
-      MyGUI::Widget* pt;
-      getWidget(pt, widget);
-      pt->_setWidgetState(state);
-    }
-
-    void setTextColor(const std::string& name, float r, float g, float b)
-    {
-      MyGUI::Widget* pt;
-      getWidget(pt, name);
-      MyGUI::TextBox *st = dynamic_cast<MyGUI::TextBox*>(pt);
-      if(st != NULL)
-        st->setTextColour(MyGUI::Colour(b,g,r));
-    }
-
-    void setImage(const std::string& name, const std::string& imgName)
-    {
-      MyGUI::ImageBox* pt;
-      getWidget(pt, name);
-      pt->setImageTexture(imgName);
     }
 
     void adjustButtonSize(MyGUI::Button* button)
