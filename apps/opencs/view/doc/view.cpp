@@ -130,6 +130,10 @@ void CSVDoc::View::setupWorldMenu()
     connect (references, SIGNAL (triggered()), this, SLOT (addReferencesSubView()));
     world->addAction (references);
 
+    QAction *grid = new QAction (tr ("Pathgrid"), this);
+    connect (grid, SIGNAL (triggered()), this, SLOT (addPathgridSubView()));
+    world->addAction (grid);
+
     world->addSeparator(); // items that don't represent single record lists follow here
 
     QAction *regionMap = new QAction (tr ("Region Map"), this);
@@ -617,6 +621,11 @@ void CSVDoc::View::addDebugProfilesSubView()
 void CSVDoc::View::addRunLogSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_RunLog);
+}
+
+void CSVDoc::View::addPathgridSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Pathgrids);
 }
 
 void CSVDoc::View::abortOperation (int type)

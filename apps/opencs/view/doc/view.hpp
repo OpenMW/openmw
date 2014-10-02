@@ -207,6 +207,8 @@ namespace CSVDoc
 
             void addRunLogSubView();
 
+            void addPathgridSubView();
+
             void toggleShowStatusBar (bool show);
 
             void loadErrorLog();
