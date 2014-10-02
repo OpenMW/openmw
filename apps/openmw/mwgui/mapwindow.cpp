@@ -425,16 +425,14 @@ namespace MWGui
 
     void LocalMapBase::setPlayerPos(int cellX, int cellY, const float nx, const float ny)
     {
-        updateMagicMarkers();
-
-        notifyPlayerUpdate ();
-
         MyGUI::IntPoint pos(widgetSize+nx*widgetSize-16, widgetSize+ny*widgetSize-16);
         pos.left += (cellX - mCurX) * widgetSize;
         pos.top -= (cellY - mCurY) * widgetSize;
 
         if (pos != mCompass->getPosition())
         {
+            notifyPlayerUpdate ();
+
             mCompass->setPosition(pos);
             MyGUI::IntPoint middle (pos.left+16, pos.top+16);
                     MyGUI::IntCoord viewsize = mLocalMap->getCoord();
