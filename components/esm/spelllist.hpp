@@ -16,6 +16,9 @@ namespace ESM
     {
         std::vector<std::string> mList;
 
+        /// Is this spell ID in mList?
+        bool exists(const std::string& spell) const;
+
         void load(ESMReader &esm);
         void save(ESMWriter &esm) const;
     };

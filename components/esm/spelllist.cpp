@@ -20,4 +20,12 @@ void SpellList::save(ESMWriter &esm) const
     }
 }
 
+bool SpellList::exists(const std::string &spell) const
+{
+    for (std::vector<std::string>::const_iterator it = mList.begin(); it != mList.end(); ++it)
+        if (Misc::StringUtils::ciEqual(*it, spell))
+            return true;
+    return false;
+}
+
 }

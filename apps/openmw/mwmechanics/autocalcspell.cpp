@@ -72,7 +72,7 @@ namespace MWMechanics
             if (baseMagicka < iAutoSpellTimesCanCast * spell->mData.mCost)
                 continue;
 
-            if (race && std::find(race->mPowers.mList.begin(), race->mPowers.mList.end(), spell->mId) != race->mPowers.mList.end())
+            if (race && race->mPowers.exists(spell->mId))
                 continue;
 
             if (!attrSkillCheck(spell, actorSkills, actorAttributes))
