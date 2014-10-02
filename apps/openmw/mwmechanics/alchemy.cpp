@@ -133,7 +133,7 @@ void MWMechanics::Alchemy::updateEffects()
     std::set<EffectKey> effects (listEffects());
 
     // general alchemy factor
-    float x = getChance();
+    float x = getAlchemyFactor();
 
     x *= mTools[ESM::Apparatus::MortarPestle].get<ESM::Apparatus>()->mBase->mData.mQuality;
     x *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fPotionStrengthMult")->getFloat();
@@ -306,18 +306,15 @@ void MWMechanics::Alchemy::increaseSkill()
     mAlchemist.getClass().skillUsageSucceeded (mAlchemist, ESM::Skill::Alchemy, 0);
 }
 
-float MWMechanics::Alchemy::getChance() const
+float MWMechanics::Alchemy::getAlchemyFactor() const
 {
     const CreatureStats& creatureStats = mAlchemist.getClass().getCreatureStats (mAlchemist);
     const NpcStats& npcStats = mAlchemist.getClass().getNpcStats (mAlchemist);
 
-    if (beginEffects() == endEffects())
-        return 0.f;
-
     return
         (npcStats.getSkill (ESM::Skill::Alchemy).getModified() +
-        0.1 * creatureStats.getAttribute (1).getModified()
-        + 0.1 * creatureStats.getAttribute (7).getModified());
+        0.1 * creatureStats.getAttribute (ESM::Attribute::Intelligence).getModified()
+        + 0.1 * creatureStats.getAttribute (ESM::Attribute::Luck).getModified());
 }
 
 int MWMechanics::Alchemy::countIngredients() const
@@ -461,7 +458,14 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
     if (listEffects().empty())
         return Result_NoEffects;
 
-    if (getChance()<std::rand()/static_cast<double> (RAND_MAX)*100)
+    if (beginEffects() == endEffects())
+    {
+        // all effects were nullified due to insufficient skill
+        removeIngredients();
+        return Result_RandomFailure;
+    }
+
+    if (getAlchemyFactor()<std::rand()/static_cast<double> (RAND_MAX)*100)
     {
         removeIngredients();
         return Result_RandomFailure;
