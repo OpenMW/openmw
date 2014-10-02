@@ -53,6 +53,8 @@ struct Pathgrid
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
+
+    void blank();
 };
 }
 #endif

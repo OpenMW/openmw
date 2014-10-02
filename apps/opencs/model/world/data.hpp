@@ -38,6 +38,7 @@
 #include "refidcollection.hpp"
 #include "refcollection.hpp"
 #include "infocollection.hpp"
+#include "pathgrid.hpp"
 
 class QAbstractItemModel;
 
@@ -73,6 +74,7 @@ namespace CSMWorld
             IdCollection<ESM::Enchantment> mEnchantments;
             IdCollection<ESM::BodyPart> mBodyParts;
             IdCollection<ESM::MagicEffect> mMagicEffects;
+            IdCollection<Pathgrid> mPathgrids;
             IdCollection<ESM::DebugProfile> mDebugProfiles;
             IdCollection<ESM::SoundGenerator> mSoundGens;
             InfoCollection mTopicInfos;
@@ -206,6 +208,10 @@ namespace CSMWorld
             const IdCollection<ESM::MagicEffect>& getMagicEffects() const;
 
             IdCollection<ESM::MagicEffect>& getMagicEffects();
+
+            const IdCollection<Pathgrid>& getPathgrids() const;
+
+            IdCollection<Pathgrid>& getPathgrids();
 
             /// Throws an exception, if \a id does not match a resources list.
             const Resources& getResources (const UniversalId& id) const;

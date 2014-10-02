@@ -250,6 +250,10 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         Columns::ColumnId_NegativeLight, ESM::MagicEffect::NegativeLight));
     mMagicEffects.addColumn (new DescriptionColumn<ESM::MagicEffect>);
 
+    mPathgrids.addColumn (new StringIdColumn<Pathgrid>);
+    mPathgrids.addColumn (new RecordStateColumn<Pathgrid>);
+    mPathgrids.addColumn (new FixedRecordTypeColumn<Pathgrid> (UniversalId::Type_Pathgrid));
+
     mRefs.addColumn (new StringIdColumn<CellRef> (true));
     mRefs.addColumn (new RecordStateColumn<CellRef>);
     mRefs.addColumn (new FixedRecordTypeColumn<CellRef> (UniversalId::Type_Reference));
@@ -322,6 +326,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new IdTable (&mBodyParts), UniversalId::Type_BodyPart);
     addModel (new IdTable (&mSoundGens), UniversalId::Type_SoundGen);
     addModel (new IdTable (&mMagicEffects), UniversalId::Type_MagicEffect);
+    addModel (new IdTable (&mPathgrids), UniversalId::Type_Pathgrid);
     addModel (new IdTable (&mReferenceables, IdTable::Feature_Preview),
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs, IdTable::Feature_ViewCell | IdTable::Feature_Preview), UniversalId::Type_Reference);
@@ -590,6 +595,16 @@ CSMWorld::IdCollection<ESM::MagicEffect>& CSMWorld::Data::getMagicEffects()
     return mMagicEffects;
 }
 
+const CSMWorld::IdCollection<CSMWorld::Pathgrid>& CSMWorld::Data::getPathgrids() const
+{
+    return mPathgrids;
+}
+
+CSMWorld::IdCollection<CSMWorld::Pathgrid>& CSMWorld::Data::getPathgrids()
+{
+    return mPathgrids;
+}
+
 const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) const
 {
     return mResourcesManager.get (id.getType());
@@ -678,6 +693,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         case ESM::REC_BODY: mBodyParts.load (*mReader, mBase); break;
         case ESM::REC_SNDG: mSoundGens.load (*mReader, mBase); break;
         case ESM::REC_MGEF: mMagicEffects.load (*mReader, mBase); break;
+        case ESM::REC_PGRD: mPathgrids.load (*mReader, mBase); break;
 
         case ESM::REC_CELL:
         {
@@ -852,7 +868,8 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mBodyParts) +
         count (state, mSoundGens) +
         count (state, mMagicEffects) +
-        count (state, mReferenceables);
+        count (state, mReferenceables) +
+        count (state, mPathgrids);
 }
 
 void CSMWorld::Data::setDescription (const std::string& description)

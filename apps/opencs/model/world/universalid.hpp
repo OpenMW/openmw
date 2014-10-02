@@ -126,6 +126,8 @@ namespace CSMWorld
                 Type_SoundGen,
                 Type_MagicEffects,
                 Type_MagicEffect,
+                Type_Pathgrids,
+                Type_Pathgrid,
                 Type_RunLog
             };
 
