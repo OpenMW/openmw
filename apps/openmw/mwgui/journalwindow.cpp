@@ -4,7 +4,6 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/journal.hpp"
-#include "list.hpp"
 
 #include <sstream>
 #include <set>
@@ -16,12 +15,12 @@
 #include "boost/lexical_cast.hpp"
 
 #include <components/widgets/imagebutton.hpp>
+#include <components/widgets/list.hpp>
 
 #include "bookpage.hpp"
 #include "windowbase.hpp"
 #include "journalviewmodel.hpp"
 #include "journalbooks.hpp"
-#include "list.hpp"
 
 namespace
 {
@@ -111,10 +110,10 @@ namespace
             adviseButtonClick (ShowAllBTN,    &JournalWindowImpl::notifyShowAll   );
             adviseButtonClick (ShowActiveBTN, &JournalWindowImpl::notifyShowActive);
 
-            MWGui::Widgets::MWList* list = getWidget<MWGui::Widgets::MWList>(QuestsList);
+            Gui::MWList* list = getWidget<Gui::MWList>(QuestsList);
             list->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyQuestClicked);
 
-            MWGui::Widgets::MWList* topicsList = getWidget<MWGui::Widgets::MWList>(TopicsList);
+            Gui::MWList* topicsList = getWidget<Gui::MWList>(TopicsList);
             topicsList->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyTopicSelected);
 
             {
@@ -394,25 +393,13 @@ namespace
             popBook ();
         }
 
-        void showList (char const * listId, char const * pageId, Book book)
-        {
-            std::pair <int, int> size = book->getSize ();
-
-            getPage (pageId)->showPage (book, 0);
-
-            // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
-            getWidget <MyGUI::ScrollView> (listId)->setVisibleVScroll(false);
-            getWidget <MyGUI::ScrollView> (listId)->setCanvasSize (size.first, size.second);
-            getWidget <MyGUI::ScrollView> (listId)->setVisibleVScroll(true);
-        }
-
         void notifyIndexLinkClicked (MWGui::TypesetBook::InteractiveId character)
         {
             setVisible (LeftTopicIndex, false);
             setVisible (RightTopicIndex, false);
             setVisible (TopicsList, true);
 
-            MWGui::Widgets::MWList* list = getWidget<MWGui::Widgets::MWList>(TopicsList);
+            Gui::MWList* list = getWidget<Gui::MWList>(TopicsList);
             list->clear();
 
             AddNamesToList add(list);
@@ -435,9 +422,9 @@ namespace
 
         struct AddNamesToList
         {
-            AddNamesToList(MWGui::Widgets::MWList* list) : mList(list) {}
+            AddNamesToList(Gui::MWList* list) : mList(list) {}
 
-            MWGui::Widgets::MWList* mList;
+            Gui::MWList* mList;
             void operator () (const std::string& name)
             {
                 mList->addItem(name);
@@ -455,7 +442,7 @@ namespace
             setVisible (ShowAllBTN, !mAllQuests);
             setVisible (ShowActiveBTN, mAllQuests);
 
-            MWGui::Widgets::MWList* list = getWidget<MWGui::Widgets::MWList>(QuestsList);
+            Gui::MWList* list = getWidget<Gui::MWList>(QuestsList);
             list->clear();
 
             AddNamesToList add(list);

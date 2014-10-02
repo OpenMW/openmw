@@ -48,8 +48,6 @@ namespace MWGui
 
             void onResChange(int width, int height);
 
-            void clearHistory();
-
             // Print a message to the console. Messages may contain color
             // code, eg. "#FFFFFF this is white".
             void print(const std::string &msg);

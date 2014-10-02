@@ -574,24 +574,6 @@ void RenderingManager::configureAmbient(MWWorld::CellStore &mCell)
         sunEnable(false);
     }
 }
-// Switch through lighting modes.
-
-void RenderingManager::toggleLight()
-{
-    if (mAmbientMode==2)
-        mAmbientMode = 0;
-    else
-        ++mAmbientMode;
-
-    switch (mAmbientMode)
-    {
-        case 0: std::cout << "Setting lights to normal\n"; break;
-        case 1: std::cout << "Turning the lights up\n"; break;
-        case 2: std::cout << "Turning the lights to full\n"; break;
-    }
-
-    setAmbientMode();
-}
 
 void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
 {
@@ -693,11 +675,6 @@ void RenderingManager::enableLights(bool sun)
 {
     mObjects->enableLights();
     sunEnable(sun);
-}
-
-Shadows* RenderingManager::getShadows()
-{
-    return mShadows;
 }
 
 void RenderingManager::notifyWorldSpaceChanged()

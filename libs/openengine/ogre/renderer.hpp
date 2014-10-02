@@ -110,8 +110,6 @@ namespace OEngine
             /// Write a screenshot to file
             void screenshot(const std::string &file, const std::string& imageFormat);
 
-            float getFPS();
-
             void windowResized(int x, int y);
 
             /// Get the Root

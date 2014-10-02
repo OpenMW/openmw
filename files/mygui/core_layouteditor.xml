@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI>
     <MyGUI type="List">
+        <List file="OpenMWResourcePlugin.xml"/> <!-- Must be first -->
         <List file="core.skin"/>
         <List file="openmw_resources.xml"/>
         <List file="openmw_font.xml"/>

@@ -26,9 +26,6 @@ namespace Compiler
             void reportSeriousError (const std::string& message, const TokenLoc& loc);
             ///< Report the error and throw a exception.
 
-            void reportError (const std::string& message, const TokenLoc& loc);
-            ///< Report the error
-
             void reportWarning (const std::string& message, const TokenLoc& loc);
             ///< Report the warning without throwing an exception.
 

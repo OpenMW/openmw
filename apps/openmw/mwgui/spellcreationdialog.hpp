@@ -1,9 +1,10 @@
 #ifndef MWGUI_SPELLCREATION_H
 #define MWGUI_SPELLCREATION_H
 
+#include <components/widgets/list.hpp>
+
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
-#include "list.hpp"
 #include "widgets.hpp"
 
 namespace MWGui
@@ -97,7 +98,7 @@ namespace MWGui
     protected:
         std::map<int, short> mButtonMapping; // maps button ID to effect ID
 
-        Widgets::MWList* mAvailableEffectsList;
+        Gui::MWList* mAvailableEffectsList;
         MyGUI::ScrollView* mUsedEffectsView;
 
         EditEffectDialog mAddEffectDialog;
@@ -124,7 +125,7 @@ namespace MWGui
         void updateEffectsView();
 
         void startEditing();
-        void setWidgets (Widgets::MWList* availableEffectsList, MyGUI::ScrollView* usedEffectsView);
+        void setWidgets (Gui::MWList* availableEffectsList, MyGUI::ScrollView* usedEffectsView);
 
         virtual void notifyEffectsChanged () {}
 
@@ -156,8 +157,6 @@ namespace MWGui
         MyGUI::Button* mBuyButton;
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPriceLabel;
-
-        Widgets::MWEffectList* mUsedEffectsList;
 
         ESM::Spell mSpell;
 

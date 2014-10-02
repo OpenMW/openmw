@@ -5,16 +5,54 @@
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_Window.h>
+#include <MyGUI_LanguageManager.h>
 
 #include <components/bsa/resources.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/fontloader/fontloader.hpp>
 
-#include <components/widgets/imagebutton.hpp>
-#include <components/widgets/box.hpp>
+#include <components/widgets/tags.hpp>
+#include <components/widgets/widgets.hpp>
 
 #include <OgreTextureManager.h>
 #include <OgreHardwarePixelBuffer.h>
+
+//FIXME: code duplication
+namespace boost
+{
+struct FallbackMap {
+    std::map<std::string,std::string> mMap;
+};
+
+void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap*, int)
+{
+    if(v.empty())
+    {
+        v = boost::any(FallbackMap());
+    }
+
+    FallbackMap *map = boost::any_cast<FallbackMap>(&v);
+
+    for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); ++it)
+    {
+        int sep = it->find(",");
+        if(sep < 1 || sep == (int)it->length()-1)
+#if (BOOST_VERSION < 104200)
+            throw boost::program_options::validation_error("invalid value");
+#else
+            throw boost::program_options::validation_error(boost::program_options::validation_error::invalid_option_value);
+#endif
+
+        std::string key(it->substr(0,sep));
+        std::string value(it->substr(sep+1));
+
+        if(map->mMap.find(key) == map->mMap.end())
+        {
+            map->mMap.insert(std::make_pair (key,value));
+        }
+    }
+}
+}
 
 namespace MyGUIPlugin
 {
@@ -51,7 +89,9 @@ namespace MyGUIPlugin
         ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
         ("fallback-archive", boost::program_options::value<std::vector<std::string> >()->
             default_value(std::vector<std::string>(), "fallback-archive")->multitoken())
-        ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
+        ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))
+        ("fallback", boost::program_options::value<boost::FallbackMap>()->default_value(boost::FallbackMap(), "")
+            ->multitoken()->composing(), "fallback values");
 
         boost::program_options::notify(variables);
 
@@ -86,18 +126,15 @@ namespace MyGUIPlugin
 
         Gui::FontLoader loader(ToUTF8::calculateEncoding(encoding));
         loader.loadAllFonts(false);
+
+        mFallbackMap = variables["fallback"].as<boost::FallbackMap>().mMap;
     }
 
     void ResourcePlugin::registerWidgets()
     {
         MyGUI::FactoryManager::getInstance().registerFactory<MWScrollBar>("Widget");
 
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::ImageButton>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::HBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::VBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedTextBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedEditBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedButton>("Widget");
+        Gui::registerAllWidgets();
     }
 
     void ResourcePlugin::createTransparentBGTexture()
@@ -126,6 +163,8 @@ namespace MyGUIPlugin
         registerResources();
         registerWidgets();
         createTransparentBGTexture();
+
+        MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &ResourcePlugin::onRetrieveTag);
     }
 
     void ResourcePlugin::shutdown()
@@ -133,6 +172,12 @@ namespace MyGUIPlugin
         /// \todo cleanup
 
         MYGUI_LOGGING("OpenMW_Resource_Plugin", Info, "shutdown");
+    }
+
+    void ResourcePlugin::onRetrieveTag(const MyGUI::UString& tag, MyGUI::UString& out)
+    {
+        if (!Gui::replaceTag(tag, out, mFallbackMap))
+            out = tag;
     }
 
 }

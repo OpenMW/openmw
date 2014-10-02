@@ -103,7 +103,6 @@ namespace MWRender
         void setPhase(const Phase& phase);
         void setType(const Type& type);
 
-        Phase getPhase() const;
         unsigned int getPhaseInt() const;
 
     private:
@@ -169,8 +168,6 @@ namespace MWRender
         void secundaDisable();
 
         void setLightningStrength(const float factor);
-        void setLightningDirection(const Ogre::Vector3& dir);
-        void setLightningEnabled(bool enabled); ///< disable prior to map render
 
         void setGlare(const float glare);
         void setGlareEnabled(bool enabled);

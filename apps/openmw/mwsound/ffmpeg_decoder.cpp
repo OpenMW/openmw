@@ -83,7 +83,7 @@ bool FFmpeg_Decoder::getNextPacket()
 
 bool FFmpeg_Decoder::getAVAudioData()
 {
-    int got_frame, len;
+    int got_frame;
 
     if((*mStream)->codec->codec_type != AVMEDIA_TYPE_AUDIO)
         return false;
@@ -93,6 +93,7 @@ bool FFmpeg_Decoder::getAVAudioData()
             return false;
 
         /* Decode some data, and check for errors */
+        int len = 0;
         if((len=avcodec_decode_audio4((*mStream)->codec, mFrame, &got_frame, &mPacket)) < 0)
             return false;
 

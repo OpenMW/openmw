@@ -29,6 +29,7 @@ namespace MWRender
         , mWidth(0)
         , mHeight(0)
     {
+        mCellSize = Settings::Manager::getInt("global map cell size", "Map");
     }
 
     GlobalMap::~GlobalMap()
@@ -57,9 +58,8 @@ namespace MWRender
                 mMaxY = it->getGridY();
         }
 
-        int cellSize = 24;
-        mWidth = cellSize*(mMaxX-mMinX+1);
-        mHeight = cellSize*(mMaxY-mMinY+1);
+        mWidth = mCellSize*(mMaxX-mMinX+1);
+        mHeight = mCellSize*(mMaxY-mMinY+1);
 
         loadingListener->loadingOn();
         loadingListener->setLabel("Creating map");
@@ -90,29 +90,29 @@ namespace MWRender
                             land->loadData(mask);
                     }
 
-                    for (int cellY=0; cellY<cellSize; ++cellY)
+                    for (int cellY=0; cellY<mCellSize; ++cellY)
                     {
-                        for (int cellX=0; cellX<cellSize; ++cellX)
+                        for (int cellX=0; cellX<mCellSize; ++cellX)
                         {
-                            int vertexX = float(cellX)/float(cellSize) * ESM::Land::LAND_SIZE;
-                            int vertexY = float(cellY)/float(cellSize) * ESM::Land::LAND_SIZE;
+                            int vertexX = float(cellX)/float(mCellSize) * ESM::Land::LAND_SIZE;
+                            int vertexY = float(cellY)/float(mCellSize) * ESM::Land::LAND_SIZE;
 
 
-                            int texelX = (x-mMinX) * cellSize + cellX;
-                            int texelY = (mHeight-1) - ((y-mMinY) * cellSize + cellY);
+                            int texelX = (x-mMinX) * mCellSize + cellX;
+                            int texelY = (mHeight-1) - ((y-mMinY) * mCellSize + cellY);
 
                             unsigned char r,g,b;
 
                             if (land)
                             {
                                 const float landHeight = land->mLandData->mHeights[vertexY * ESM::Land::LAND_SIZE + vertexX];
-                                const float mountainHeight = 15000.f;
-                                const float hillHeight = 2500.f;
 
                                 if (landHeight >= 0)
                                 {
+                                    const float hillHeight = 2500.f;
                                     if (landHeight >= hillHeight)
                                     {
+                                        const float mountainHeight = 15000.f;
                                         float factor = std::min(1.f, float(landHeight-hillHeight)/mountainHeight);
                                         r = (hillColour.r * (1-factor) + mountainColour.r * factor) * 255;
                                         g = (hillColour.g * (1-factor) + mountainColour.g * factor) * 255;
@@ -197,11 +197,9 @@ namespace MWRender
 
     void GlobalMap::exploreCell(int cellX, int cellY)
     {
-        const int size = 24;
-
-        float originX = (cellX - mMinX) * size;
+        float originX = (cellX - mMinX) * mCellSize;
         // NB y + 1, because we want the top left corner, not bottom left where the origin of the cell is
-        float originY = mHeight - (cellY+1 - mMinY) * size;
+        float originY = mHeight - (cellY+1 - mMinY) * mCellSize;
 
         if (cellX > mMaxX || cellX < mMinX || cellY > mMaxY || cellY < mMinY)
             return;
@@ -213,17 +211,17 @@ namespace MWRender
         {
             mOverlayTexture->load();
             mOverlayTexture->getBuffer()->blit(localMapTexture->getBuffer(), Ogre::Image::Box(0,0,512,512),
-                         Ogre::Image::Box(originX,originY,originX+size,originY+size));
+                         Ogre::Image::Box(originX,originY,originX+mCellSize,originY+mCellSize));
 
             Ogre::Image backup;
             std::vector<Ogre::uchar> data;
-            data.resize(size*size*4, 0);
-            backup.loadDynamicImage(&data[0], size, size, Ogre::PF_A8B8G8R8);
+            data.resize(mCellSize*mCellSize*4, 0);
+            backup.loadDynamicImage(&data[0], mCellSize, mCellSize, Ogre::PF_A8B8G8R8);
 
             localMapTexture->getBuffer()->blitToMemory(Ogre::Image::Box(0,0,512,512), backup.getPixelBox());
 
-            for (int x=0; x<size; ++x)
-                for (int y=0; y<size; ++y)
+            for (int x=0; x<mCellSize; ++x)
+                for (int y=0; y<mCellSize; ++y)
                 {
                     assert (originX+x < mOverlayImage.getWidth());
                     assert (originY+y < mOverlayImage.getHeight());
@@ -292,7 +290,7 @@ namespace MWRender
         // If cell bounds of the currently loaded content and the loaded savegame do not match,
         // we need to resize source/dest boxes to accommodate
         // This means nonexisting cells will be dropped silently
-        int cellImageSizeDst = 24;
+        int cellImageSizeDst = mCellSize;
 
         // Completely off-screen? -> no need to blit anything
         if (bounds.mMaxX < mMinX
@@ -326,7 +324,8 @@ namespace MWRender
         mOverlayTexture->getBuffer()->blit(tex->getBuffer(), srcBox, destBox);
 
         if (srcBox.left == destBox.left && srcBox.right == destBox.right
-                && srcBox.top == destBox.top && srcBox.bottom == destBox.bottom)
+                && srcBox.top == destBox.top && srcBox.bottom == destBox.bottom
+                && int(image.getWidth()) == mWidth && int(image.getHeight()) == mHeight)
             mOverlayImage = image;
         else
             mOverlayTexture->convertToImage(mOverlayImage);

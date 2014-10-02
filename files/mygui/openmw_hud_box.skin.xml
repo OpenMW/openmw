@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Skin" version="3.2.1">
+<MyGUI type="Resource" version="1.1">
 
     <!-- The 'box' frame that surrounds various HUD items and other elements -->
 
-    <Skin name="HUD_Box" size="40 40">
+    <Resource type="ResourceSkin" name="HUD_Box" size="40 40">
 
         <!-- Borders -->
 
@@ -14,13 +14,13 @@
 
         <Child type="Widget" skin="BlackBG" offset="2 2 36 36" align="Stretch" name="Client"/>
 
-    </Skin>
+    </Resource>
 
-    <Skin name="HUD_Box_Transparent" size="40 40">
+    <Resource type="ResourceSkin" name="HUD_Box_Transparent" size="40 40">
         <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch" name="Client"/>
-    </Skin>
+    </Resource>
 
-    <Skin name="HUD_Box_NoTransp" size="40 40">
+    <Resource type="ResourceSkin" name="HUD_Box_NoTransp" size="40 40">
 
         <!-- Borders -->
 
@@ -30,6 +30,6 @@
 
         <Child type="Widget" skin="DialogBG" offset="2 2 36 36" align="Stretch" name="Client"/>
 
-    </Skin>
+    </Resource>
 
 </MyGUI>

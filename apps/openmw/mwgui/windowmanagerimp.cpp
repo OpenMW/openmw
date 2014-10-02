@@ -18,7 +18,8 @@
 
 #include <components/fontloader/fontloader.hpp>
 
-#include <components/widgets/box.hpp>
+#include <components/widgets/widgets.hpp>
+#include <components/widgets/tags.hpp>
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -71,6 +72,7 @@
 #include "backgroundimage.hpp"
 #include "itemwidget.hpp"
 #include "screenfader.hpp"
+#include "debugwindow.hpp"
 
 namespace MWGui
 {
@@ -119,6 +121,7 @@ namespace MWGui
       , mVideoBackground(NULL)
       , mVideoWidget(NULL)
       , mScreenFader(NULL)
+      , mDebugWindow(NULL)
       , mTranslationDataStorage (translationDataStorage)
       , mCharGen(NULL)
       , mInputBlocker(NULL)
@@ -164,13 +167,6 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWEffectList>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWList>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::HBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::VBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedTextBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedEditBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedButton>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::ImageButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
@@ -178,6 +174,7 @@ namespace MWGui
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
         ItemWidget::registerComponents();
+        Gui::registerAllWidgets();
 
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatEvent>("Controller");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerFollowMouse>("Controller");
@@ -271,6 +268,7 @@ namespace MWGui
         mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
         trackWindow(mCompanionWindow, "companion");
         mScreenFader = new ScreenFader();
+        mDebugWindow = new DebugWindow();
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"Overlay");
 
@@ -362,6 +360,7 @@ namespace MWGui
         delete mRecharge;
         delete mCompanionWindow;
         delete mScreenFader;
+        delete mDebugWindow;
 
         cleanupGarbage();
 
@@ -864,6 +863,8 @@ namespace MWGui
         mCompanionWindow->onFrame();
 
         mScreenFader->update(frameDuration);
+
+        mDebugWindow->onFrame(frameDuration);
     }
 
     void WindowManager::changeCell(MWWorld::CellStore* cell)
@@ -991,50 +992,13 @@ namespace MWGui
         std::string tokenToFind = "sCell=";
         size_t tokenLength = tokenToFind.length();
 
-        std::string fontcolour = "fontcolour=";
-        size_t fontcolourLength = fontcolour.length();
-
-        std::string fontcolourhtml = "fontcolourhtml=";
-        size_t fontcolourhtmlLength = fontcolourhtml.length();
-
         if (tag.compare(0, tokenLength, tokenToFind) == 0)
         {
             _result = mTranslationDataStorage.translateCellName(tag.substr(tokenLength));
         }
-        else if (tag.compare(0, fontcolourLength, fontcolour) == 0)
+        else if (Gui::replaceTag(tag, _result, mFallbackMap))
         {
-            std::string fallbackName = "FontColor_color_" + tag.substr(fontcolourLength);
-            std::map<std::string, std::string>::const_iterator it = mFallbackMap.find(fallbackName);
-            if (it == mFallbackMap.end())
-                throw std::runtime_error("Unknown fallback name: " + fallbackName);
-            std::string str = it->second;
-
-            std::string ret[3];
-            unsigned int j=0;
-            for(unsigned int i=0;i<str.length();++i){
-                if(str[i]==',') j++;
-                else if (str[i] != ' ') ret[j]+=str[i];
-            }
-            MyGUI::Colour col (MyGUI::utility::parseInt(ret[0])/255.f,MyGUI::utility::parseInt(ret[1])/255.f,MyGUI::utility::parseInt(ret[2])/255.f);
-            _result = col.print();
-        }
-        else if (tag.compare(0, fontcolourhtmlLength, fontcolourhtml) == 0)
-        {
-            std::string fallbackName = "FontColor_color_" + tag.substr(fontcolourhtmlLength);
-            std::map<std::string, std::string>::const_iterator it = mFallbackMap.find(fallbackName);
-            if (it == mFallbackMap.end())
-                throw std::runtime_error("Unknown fallback name: " + fallbackName);
-            std::string str = it->second;
-
-            std::string ret[3];
-            unsigned int j=0;
-            for(unsigned int i=0;i<str.length();++i){
-                if(str[i]==',') j++;
-                else if (str[i] != ' ') ret[j]+=str[i];
-            }
-            std::stringstream html;
-            html << "#" << std::hex << MyGUI::utility::parseInt(ret[0]) << MyGUI::utility::parseInt(ret[1]) << MyGUI::utility::parseInt(ret[2]);
-            _result = html.str();
+            return;
         }
         else
         {
@@ -1390,12 +1354,6 @@ namespace MWGui
         return mSubtitlesEnabled;
     }
 
-    void WindowManager::toggleHud ()
-    {
-        mHudEnabled = !mHudEnabled;
-        mHud->setVisible (mHudEnabled);
-    }
-
     bool WindowManager::toggleGui()
     {
         mGuiEnabled = !mGuiEnabled;
@@ -1711,7 +1669,7 @@ namespace MWGui
 
     WindowModal* WindowManager::getCurrentModal() const
     {
-        if(mCurrentModals.size() > 0)
+        if(!mCurrentModals.empty())
             return mCurrentModals.top();
         else
             return NULL;
@@ -1721,7 +1679,7 @@ namespace MWGui
     {
         // Only remove the top if it matches the current pointer. A lot of things hide their visibility before showing it,
         //so just popping the top would cause massive issues.
-        if(mCurrentModals.size() > 0)
+        if(!mCurrentModals.empty())
             if(input == mCurrentModals.top())
                 mCurrentModals.pop();
     }
@@ -1795,6 +1753,11 @@ namespace MWGui
                 _data = text;
         }
         SDL_free(text);
+    }
+
+    void WindowManager::toggleDebugWindow()
+    {
+        mDebugWindow->setVisible(!mDebugWindow->isVisible());
     }
 
 }

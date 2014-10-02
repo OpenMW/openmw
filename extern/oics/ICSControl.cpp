@@ -86,7 +86,7 @@ namespace ICS
         std::list<ControlListener*>::iterator pos = mListeners.begin();
         while (pos != mListeners.end())
         {
-            ((ControlListener* )(*pos))->controlChanged((Control*)this, this->getValue(), previousValue);
+            (*pos)->controlChanged((Control*)this, this->getValue(), previousValue);
             ++pos;
         }
     }
@@ -99,13 +99,13 @@ namespace ICS
 
 	void Control::update(float timeSinceLastFrame)
 	{
-		if(mPendingActions.size() > 0)
+        if(!mPendingActions.empty())
 		{
 			size_t timedActionsCount = 0;
 			
 			std::list<Control::ControlChangingDirection>::iterator cached_end = mPendingActions.end();
 			for(std::list<Control::ControlChangingDirection>::iterator it = mPendingActions.begin() ; 
-				it != cached_end ; it++)
+                it != cached_end ; ++it)
 			{
 				if( (*it) != Control::STOP )
 				{
@@ -115,7 +115,7 @@ namespace ICS
 			
 			float timeSinceLastFramePart = timeSinceLastFrame / std::max<size_t>(1, timedActionsCount);
 			for(std::list<Control::ControlChangingDirection>::iterator it = mPendingActions.begin() ; 
-				it != cached_end ; it++)
+                it != cached_end ; ++it)
 			{
 				if( (*it) != Control::STOP )
 				{

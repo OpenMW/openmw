@@ -289,6 +289,7 @@ namespace MWWorld
         mGodMode = false;
         mSky = true;
         mTeleportEnabled = true;
+        mLevitationEnabled = true;
 
         mGlobalVariables.fill (mStore);
     }
@@ -302,7 +303,8 @@ namespace MWWorld
             +mProjectileManager->countSavedGameRecords()
             +1 // player record
             +1 // weather record
-            +1; // actorId counter
+            +1 // actorId counter
+            +1; // levitation/teleport enabled state
     }
 
     void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -325,25 +327,37 @@ namespace MWWorld
         mPlayer->write (writer, progress);
         mWeatherManager->write (writer, progress);
         mProjectileManager->write (writer, progress);
+
+        writer.startRecord(ESM::REC_ENAB);
+        writer.writeHNT("TELE", mTeleportEnabled);
+        writer.writeHNT("LEVT", mLevitationEnabled);
+        writer.endRecord(ESM::REC_ENAB);
+        progress.increaseProgress();
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type,
         const std::map<int, int>& contentFileMap)
     {
-        if (type == ESM::REC_ACTC)
+        switch (type)
         {
-            MWMechanics::CreatureStats::readActorIdCounter(reader);
-            return;
-        }
-
-        if (!mStore.readRecord (reader, type) &&
-            !mGlobalVariables.readRecord (reader, type) &&
-            !mPlayer->readRecord (reader, type) &&
-            !mWeatherManager->readRecord (reader, type) &&
-            !mCells.readRecord (reader, type, contentFileMap) &&
-            !mProjectileManager->readRecord (reader, type))
-        {
-            throw std::runtime_error ("unknown record in saved game");
+            case ESM::REC_ACTC:
+                MWMechanics::CreatureStats::readActorIdCounter(reader);
+                return;
+            case ESM::REC_ENAB:
+                reader.getHNT(mTeleportEnabled, "TELE");
+                reader.getHNT(mLevitationEnabled, "LEVT");
+                return;
+            default:
+                if (!mStore.readRecord (reader, type) &&
+                    !mGlobalVariables.readRecord (reader, type) &&
+                    !mPlayer->readRecord (reader, type) &&
+                    !mWeatherManager->readRecord (reader, type) &&
+                    !mCells.readRecord (reader, type, contentFileMap) &&
+                    !mProjectileManager->readRecord (reader, type))
+                {
+                    throw std::runtime_error ("unknown record in saved game");
+                }
+                break;
         }
     }
 
@@ -1031,7 +1045,7 @@ namespace MWWorld
 
         CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL; // currCell == NULL should only happen for player, during initial startup
         bool isPlayer = ptr == mPlayer->getPlayer();
-        bool haveToMove = isPlayer || mWorldScene->isCellActive(*currCell);
+        bool haveToMove = isPlayer || (currCell && mWorldScene->isCellActive(*currCell));
 
         if (currCell != newCell)
         {
@@ -1295,13 +1309,15 @@ namespace MWWorld
 
     void World::doPhysics(float duration)
     {
+        mPhysics->stepSimulation(duration);
+
         processDoors(duration);
 
         mProjectileManager->update(duration);
 
         const PtrVelocityList &results = mPhysics->applyQueuedMovement(duration);
         PtrVelocityList::const_iterator player(results.end());
-        for(PtrVelocityList::const_iterator iter(results.begin());iter != results.end();iter++)
+        for(PtrVelocityList::const_iterator iter(results.begin());iter != results.end();++iter)
         {
             if(iter->first.getRefData().getHandle() == "player")
             {
@@ -1313,8 +1329,6 @@ namespace MWWorld
         }
         if(player != results.end())
             moveObjectImp(player->first, player->second.x, player->second.y, player->second.z);
-
-        mPhysics->stepSimulation(duration);
     }
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)

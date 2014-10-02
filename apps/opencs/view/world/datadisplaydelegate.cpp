@@ -38,7 +38,7 @@ void CSVWorld::DataDisplayDelegate::buildPixmaps ()
     }
 }
 
-void CSVWorld::DataDisplayDelegate::setIconSize(const QSize size)
+void CSVWorld::DataDisplayDelegate::setIconSize(const QSize& size)
 {
     mIconSize = size;
     buildPixmaps();

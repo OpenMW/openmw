@@ -220,7 +220,7 @@ namespace MWMechanics
         if (spell->mData.mFlags & ESM::Spell::F_Always)
             return 100.f;
 
-        float skillTerm;
+        float skillTerm = 0;
         if (effectiveSchool != -1)
             skillTerm = 2.f * actorSkills[mapSchoolToSkill(effectiveSchool)];
         else

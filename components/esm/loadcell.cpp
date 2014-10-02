@@ -113,11 +113,6 @@ void Cell::loadData(ESMReader &esm)
     esm.getHNT(mData, "DATA", 12);
 }
 
-void Cell::preLoad(ESMReader &esm) //Can't be "load" because it conflicts with function in esmtool
-{
-    this->load(esm, false);
-}
-
 void Cell::postLoad(ESMReader &esm)
 {
     // Save position of the cell references and move on

@@ -32,7 +32,7 @@ add_openmw_dir (mwinput
 add_openmw_dir (mwgui
     textinput widgets race class birth review windowmanagerimp console dialogue
     windowbase statswindow messagebox journalwindow charactercreation
-    mapwindow windowpinnablebase tooltips scrollwindow bookwindow list
+    mapwindow windowpinnablebase tooltips scrollwindow bookwindow
     formatting inventorywindow container hud countdialog tradewindow settingswindow
     confirmationdialog alchemywindow referenceinterface spellwindow mainmenu quickkeysmenu
     itemselection spellbuyingwindow loadingscreen levelupdialog waitdialog spellcreationdialog
@@ -40,7 +40,7 @@ add_openmw_dir (mwgui
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
     keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel controllers savegamedialog
-    recharge mode videowidget backgroundimage itemwidget screenfader
+    recharge mode videowidget backgroundimage itemwidget screenfader debugwindow
     )
 
 add_openmw_dir (mwdialogue

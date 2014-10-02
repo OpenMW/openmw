@@ -36,7 +36,6 @@ namespace MWRender
         float mNearest;
         float mFurthest;
         bool mIsNearest;
-        bool mIsFurthest;
 
         struct {
             bool enabled, allowed;
@@ -118,8 +117,6 @@ namespace MWRender
         bool isVanityOrPreviewModeEnabled();
 
         bool isNearest();
-
-        bool isFurthest();
     };
 }
 

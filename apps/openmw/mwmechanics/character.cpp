@@ -1611,7 +1611,7 @@ void CharacterController::update(float duration)
         if(mMovementAnimationControlled && mPtr.getClass().isActor())
             world->queueMovement(mPtr, moved);
     }
-    else if (mAnimation)
+    else
         mAnimation->updateEffects(duration);
     mSkipAnim = false;
 
@@ -1702,6 +1702,10 @@ bool CharacterController::kill()
 
     mIdleState = CharState_None;
     mCurrentIdle.clear();
+
+    // Play Death Music if it was the player dying
+    if(mPtr.getRefData().getHandle()=="player")
+        MWBase::Environment::get().getSoundManager()->streamMusic("Special/MW_Death.mp3");
 
     return true;
 }

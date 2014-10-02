@@ -89,6 +89,7 @@ namespace MWGui
   class VideoWidget;
   class WindowModal;
   class ScreenFader;
+  class DebugWindow;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -222,7 +223,6 @@ namespace MWGui
 
     virtual void showCrosshair(bool show);
     virtual bool getSubtitlesEnabled();
-    virtual void toggleHud();
 
     /// Turn visibility of *all* GUI elements on or off (HUD and all windows, except the console)
     virtual bool toggleGui();
@@ -334,6 +334,8 @@ namespace MWGui
     /// Darken the screen by \a factor (1.0 = no darkening). Works independently from screen fading.
     virtual void setScreenFactor (float factor);
 
+    virtual void toggleDebugWindow();
+
   private:
     bool mConsoleOnlyScripts;
 
@@ -387,6 +389,7 @@ namespace MWGui
     MyGUI::ImageBox* mVideoBackground;
     VideoWidget* mVideoWidget;
     ScreenFader* mScreenFader;
+    DebugWindow* mDebugWindow;
 
     Translation::Storage& mTranslationDataStorage;
     Cursor* mSoftwareCursor;

@@ -23,8 +23,6 @@ namespace MWRender
         void recreate();
 
         Ogre::PSSMShadowCameraSetup* getPSSMSetup();
-        float getShadowFar() const;
-        float getFadeStart() const;
 
     protected:
         OEngine::Render::OgreRenderer* mRendering;

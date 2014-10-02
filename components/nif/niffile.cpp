@@ -18,7 +18,7 @@ NIFFile::NIFFile(const std::string &name)
 
 NIFFile::~NIFFile()
 {
-    for (std::vector<Record*>::iterator it = records.begin() ; it != records.end(); it++)
+    for (std::vector<Record*>::iterator it = records.begin() ; it != records.end(); ++it)
     {
         delete *it;
     }

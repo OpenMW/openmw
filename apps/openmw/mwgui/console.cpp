@@ -155,11 +155,6 @@ namespace MWGui
         mCommandLine->setFontName(fntName);
     }
 
-    void Console::clearHistory()
-    {
-        mHistory->setCaption("");
-    }
-
     void Console::print(const std::string &msg)
     {
         mHistory->addText(msg);

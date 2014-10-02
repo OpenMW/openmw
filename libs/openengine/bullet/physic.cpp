@@ -97,6 +97,8 @@ namespace Physic
                 (0,0, mShape.get());
         mBody = new RigidBody(CI, name);
         mBody->mPlaceable = false;
+        mBody->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
+        mBody->setActivationState(DISABLE_DEACTIVATION);
 
         setPosition(position);
         setRotation(rotation);
@@ -233,6 +235,11 @@ namespace Physic
 
         // The world.
         mDynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
+
+        // Don't update AABBs of all objects every frame. Most objects in MW are static, so we don't need this.
+        // Should a "static" object ever be moved, we have to update its AABB manually using DynamicsWorld::updateSingleAabb.
+        mDynamicsWorld->setForceUpdateAllAabbs(false);
+
         mDynamicsWorld->setGravity(btVector3(0,0,-10));
 
         if(BulletShapeManager::getSingletonPtr() == NULL)
@@ -733,10 +740,6 @@ namespace Physic
         {
             return 0;
         }
-    }
-
-    void PhysicEngine::emptyEventLists(void)
-    {
     }
 
     std::pair<std::string,float> PhysicEngine::rayTest(const btVector3 &from, const btVector3 &to, bool raycastingObjectOnly, bool ignoreHeightMap, Ogre::Vector3* normal)

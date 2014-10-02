@@ -18,137 +18,143 @@
 
 std::string bodyPartLabel(int idx)
 {
-    const char *bodyPartLabels[] =  {
-        "Head",
-        "Hair",
-        "Neck",
-        "Cuirass",
-        "Groin",
-        "Skirt",
-        "Right Hand",
-        "Left Hand",
-        "Right Wrist",
-        "Left Wrist",
-        "Shield",
-        "Right Forearm",
-        "Left Forearm",
-        "Right Upperarm",
-        "Left Upperarm",
-        "Right Foot",
-        "Left Foot",
-        "Right Ankle",
-        "Left Ankle",
-        "Right Knee",
-        "Left Knee",
-        "Right Leg",
-        "Left Leg",
-        "Right Shoulder",
-        "Left Shoulder",
-        "Weapon",
-        "Tail"
-    };
-
     if (idx >= 0 && idx <= 26)
+    {
+        const char *bodyPartLabels[] =  {
+            "Head",
+            "Hair",
+            "Neck",
+            "Cuirass",
+            "Groin",
+            "Skirt",
+            "Right Hand",
+            "Left Hand",
+            "Right Wrist",
+            "Left Wrist",
+            "Shield",
+            "Right Forearm",
+            "Left Forearm",
+            "Right Upperarm",
+            "Left Upperarm",
+            "Right Foot",
+            "Left Foot",
+            "Right Ankle",
+            "Left Ankle",
+            "Right Knee",
+            "Left Knee",
+            "Right Leg",
+            "Left Leg",
+            "Right Shoulder",
+            "Left Shoulder",
+            "Weapon",
+            "Tail"
+        };
         return bodyPartLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string meshPartLabel(int idx)
 {
-    const char *meshPartLabels[] =  {
-        "Head",
-        "Hair",
-        "Neck",
-        "Chest",
-        "Groin",
-        "Hand",
-        "Wrist",
-        "Forearm",
-        "Upperarm",
-        "Foot",
-        "Ankle",
-        "Knee",
-        "Upper Leg",
-        "Clavicle",
-        "Tail"
-    };
-
     if (idx >= 0 && idx <= ESM::BodyPart::MP_Tail)
+    {
+        const char *meshPartLabels[] =  {
+            "Head",
+            "Hair",
+            "Neck",
+            "Chest",
+            "Groin",
+            "Hand",
+            "Wrist",
+            "Forearm",
+            "Upperarm",
+            "Foot",
+            "Ankle",
+            "Knee",
+            "Upper Leg",
+            "Clavicle",
+            "Tail"
+        };
         return meshPartLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string meshTypeLabel(int idx)
 {
-    const char *meshTypeLabels[] =  {
-        "Skin",
-        "Clothing",
-        "Armor"
-    };
-
     if (idx >= 0 && idx <= ESM::BodyPart::MT_Armor)
+    {
+        const char *meshTypeLabels[] =  {
+            "Skin",
+            "Clothing",
+            "Armor"
+        };
         return meshTypeLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string clothingTypeLabel(int idx)
 {
-    const char *clothingTypeLabels[] = {
-        "Pants",
-        "Shoes",
-        "Shirt",
-        "Belt",
-        "Robe",
-        "Right Glove",
-        "Left Glove",
-        "Skirt",
-        "Ring",
-        "Amulet"
-    };
-
     if (idx >= 0 && idx <= 9)
+    {
+        const char *clothingTypeLabels[] = {
+            "Pants",
+            "Shoes",
+            "Shirt",
+            "Belt",
+            "Robe",
+            "Right Glove",
+            "Left Glove",
+            "Skirt",
+            "Ring",
+            "Amulet"
+        };
         return clothingTypeLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string armorTypeLabel(int idx)
-{
-    const char *armorTypeLabels[] = {
-        "Helmet",
-        "Cuirass",
-        "Left Pauldron",
-        "Right Pauldron",
-        "Greaves",
-        "Boots",
-        "Left Gauntlet",
-        "Right Gauntlet",
-        "Shield",
-        "Left Bracer",
-        "Right Bracer"
-    };
-    
+{    
     if (idx >= 0 && idx <= 10)
+    {
+        const char *armorTypeLabels[] = {
+            "Helmet",
+            "Cuirass",
+            "Left Pauldron",
+            "Right Pauldron",
+            "Greaves",
+            "Boots",
+            "Left Gauntlet",
+            "Right Gauntlet",
+            "Shield",
+            "Left Bracer",
+            "Right Bracer"
+        };
         return armorTypeLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string dialogTypeLabel(int idx)
 {
-    const char *dialogTypeLabels[] = {
-        "Topic",
-        "Voice",
-        "Greeting",
-        "Persuasion",
-        "Journal"
-    };
-    
     if (idx >= 0 && idx <= 4)
+    {
+        const char *dialogTypeLabels[] = {
+            "Topic",
+            "Voice",
+            "Greeting",
+            "Persuasion",
+            "Journal"
+        };
         return dialogTypeLabels[idx];
+    }
     else if (idx == -1)
         return "Deleted";
     else
@@ -157,75 +163,79 @@ std::string dialogTypeLabel(int idx)
 
 std::string questStatusLabel(int idx)
 {
-    const char *questStatusLabels[] = {
-        "None",
-        "Name",
-        "Finished",
-        "Restart",
-        "Deleted"
-    };
-    
     if (idx >= 0 && idx <= 4)
+    {
+        const char *questStatusLabels[] = {
+            "None",
+            "Name",
+            "Finished",
+            "Restart",
+            "Deleted"
+        };
         return questStatusLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string creatureTypeLabel(int idx)
 {
-    const char *creatureTypeLabels[] = {
-        "Creature",
-        "Daedra",
-        "Undead",
-        "Humanoid",
-    };
-    
     if (idx >= 0 && idx <= 3)
+    {
+        const char *creatureTypeLabels[] = {
+            "Creature",
+            "Daedra",
+            "Undead",
+            "Humanoid",
+        };
         return creatureTypeLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string soundTypeLabel(int idx)
 {
-    const char *soundTypeLabels[] = {
-        "Left Foot",
-        "Right Foot",
-        "Swim Left",
-        "Swim Right",
-        "Moan",
-        "Roar",
-        "Scream",
-        "Land"
-    };
-    
     if (idx >= 0 && idx <= 7)
+    {
+        const char *soundTypeLabels[] = {
+            "Left Foot",
+            "Right Foot",
+            "Swim Left",
+            "Swim Right",
+            "Moan",
+            "Roar",
+            "Scream",
+            "Land"
+        };
         return soundTypeLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string weaponTypeLabel(int idx)
 {
-    const char *weaponTypeLabels[] = {
-        "Short Blade One Hand",
-        "Long Blade One Hand",
-        "Long Blade Two Hand",
-        "Blunt One Hand",
-        "Blunt Two Close",
-        "Blunt Two Wide",
-        "Spear Two Wide",
-        "Axe One Hand",
-        "Axe Two Hand",
-        "Marksman Bow",
-        "Marksman Crossbow",
-        "Marksman Thrown",
-        "Arrow",
-        "Bolt"
-    };
-    
     if (idx >= 0 && idx <= 13)
+    {
+        const char *weaponTypeLabels[] = {
+            "Short Blade One Hand",
+            "Long Blade One Hand",
+            "Long Blade Two Hand",
+            "Blunt One Hand",
+            "Blunt Two Close",
+            "Blunt Two Wide",
+            "Spear Two Wide",
+            "Axe One Hand",
+            "Axe Two Hand",
+            "Marksman Bow",
+            "Marksman Crossbow",
+            "Marksman Thrown",
+            "Arrow",
+            "Bolt"
+        };
         return weaponTypeLabels[idx];
+    }
     else
         return "Invalid";
 }
@@ -242,377 +252,397 @@ std::string aiTypeLabel(int type)
 
 std::string magicEffectLabel(int idx)
 {
-    const char* magicEffectLabels [] = {
-        "Water Breathing",
-        "Swift Swim",
-        "Water Walking",
-        "Shield",
-        "Fire Shield",
-        "Lightning Shield",
-        "Frost Shield",
-        "Burden",
-        "Feather",
-        "Jump",
-        "Levitate",
-        "SlowFall",
-        "Lock",
-        "Open",
-        "Fire Damage",
-        "Shock Damage",
-        "Frost Damage",
-        "Drain Attribute",
-        "Drain Health",
-        "Drain Magicka",
-        "Drain Fatigue",
-        "Drain Skill",
-        "Damage Attribute",
-        "Damage Health",
-        "Damage Magicka",
-        "Damage Fatigue",
-        "Damage Skill",
-        "Poison",
-        "Weakness to Fire",
-        "Weakness to Frost",
-        "Weakness to Shock",
-        "Weakness to Magicka",
-        "Weakness to Common Disease",
-        "Weakness to Blight Disease",
-        "Weakness to Corprus Disease",
-        "Weakness to Poison",
-        "Weakness to Normal Weapons",
-        "Disintegrate Weapon",
-        "Disintegrate Armor",
-        "Invisibility",
-        "Chameleon",
-        "Light",
-        "Sanctuary",
-        "Night Eye",
-        "Charm",
-        "Paralyze",
-        "Silence",
-        "Blind",
-        "Sound",
-        "Calm Humanoid",
-        "Calm Creature",
-        "Frenzy Humanoid",
-        "Frenzy Creature",
-        "Demoralize Humanoid",
-        "Demoralize Creature",
-        "Rally Humanoid",
-        "Rally Creature",
-        "Dispel",
-        "Soultrap",
-        "Telekinesis",
-        "Mark",
-        "Recall",
-        "Divine Intervention",
-        "Almsivi Intervention",
-        "Detect Animal",
-        "Detect Enchantment",
-        "Detect Key",
-        "Spell Absorption",
-        "Reflect",
-        "Cure Common Disease",
-        "Cure Blight Disease",
-        "Cure Corprus Disease",
-        "Cure Poison",
-        "Cure Paralyzation",
-        "Restore Attribute",
-        "Restore Health",
-        "Restore Magicka",
-        "Restore Fatigue",
-        "Restore Skill",
-        "Fortify Attribute",
-        "Fortify Health",
-        "Fortify Magicka",
-        "Fortify Fatigue",
-        "Fortify Skill",
-        "Fortify Maximum Magicka",
-        "Absorb Attribute",
-        "Absorb Health",
-        "Absorb Magicka",
-        "Absorb Fatigue",
-        "Absorb Skill",
-        "Resist Fire",
-        "Resist Frost",
-        "Resist Shock",
-        "Resist Magicka",
-        "Resist Common Disease",
-        "Resist Blight Disease",
-        "Resist Corprus Disease",
-        "Resist Poison",
-        "Resist Normal Weapons",
-        "Resist Paralysis",
-        "Remove Curse",
-        "Turn Undead",
-        "Summon Scamp",
-        "Summon Clannfear",
-        "Summon Daedroth",
-        "Summon Dremora",
-        "Summon Ancestral Ghost",
-        "Summon Skeletal Minion",
-        "Summon Bonewalker",
-        "Summon Greater Bonewalker",
-        "Summon Bonelord",
-        "Summon Winged Twilight",
-        "Summon Hunger",
-        "Summon Golden Saint",
-        "Summon Flame Atronach",
-        "Summon Frost Atronach",
-        "Summon Storm Atronach",
-        "Fortify Attack",
-        "Command Creature",
-        "Command Humanoid",
-        "Bound Dagger",
-        "Bound Longsword",
-        "Bound Mace",
-        "Bound Battle Axe",
-        "Bound Spear",
-        "Bound Longbow",
-        "EXTRA SPELL",
-        "Bound Cuirass",
-        "Bound Helm",
-        "Bound Boots",
-        "Bound Shield",
-        "Bound Gloves",
-        "Corprus",
-        "Vampirism",
-        "Summon Centurion Sphere",
-        "Sun Damage",
-        "Stunted Magicka",
-        "Summon Fabricant",
-        "sEffectSummonCreature01",
-        "sEffectSummonCreature02",
-        "sEffectSummonCreature03",
-        "sEffectSummonCreature04",
-        "sEffectSummonCreature05"
-    };
     if (idx >= 0 && idx <= 142)
+    {
+        const char* magicEffectLabels [] = {
+            "Water Breathing",
+            "Swift Swim",
+            "Water Walking",
+            "Shield",
+            "Fire Shield",
+            "Lightning Shield",
+            "Frost Shield",
+            "Burden",
+            "Feather",
+            "Jump",
+            "Levitate",
+            "SlowFall",
+            "Lock",
+            "Open",
+            "Fire Damage",
+            "Shock Damage",
+            "Frost Damage",
+            "Drain Attribute",
+            "Drain Health",
+            "Drain Magicka",
+            "Drain Fatigue",
+            "Drain Skill",
+            "Damage Attribute",
+            "Damage Health",
+            "Damage Magicka",
+            "Damage Fatigue",
+            "Damage Skill",
+            "Poison",
+            "Weakness to Fire",
+            "Weakness to Frost",
+            "Weakness to Shock",
+            "Weakness to Magicka",
+            "Weakness to Common Disease",
+            "Weakness to Blight Disease",
+            "Weakness to Corprus Disease",
+            "Weakness to Poison",
+            "Weakness to Normal Weapons",
+            "Disintegrate Weapon",
+            "Disintegrate Armor",
+            "Invisibility",
+            "Chameleon",
+            "Light",
+            "Sanctuary",
+            "Night Eye",
+            "Charm",
+            "Paralyze",
+            "Silence",
+            "Blind",
+            "Sound",
+            "Calm Humanoid",
+            "Calm Creature",
+            "Frenzy Humanoid",
+            "Frenzy Creature",
+            "Demoralize Humanoid",
+            "Demoralize Creature",
+            "Rally Humanoid",
+            "Rally Creature",
+            "Dispel",
+            "Soultrap",
+            "Telekinesis",
+            "Mark",
+            "Recall",
+            "Divine Intervention",
+            "Almsivi Intervention",
+            "Detect Animal",
+            "Detect Enchantment",
+            "Detect Key",
+            "Spell Absorption",
+            "Reflect",
+            "Cure Common Disease",
+            "Cure Blight Disease",
+            "Cure Corprus Disease",
+            "Cure Poison",
+            "Cure Paralyzation",
+            "Restore Attribute",
+            "Restore Health",
+            "Restore Magicka",
+            "Restore Fatigue",
+            "Restore Skill",
+            "Fortify Attribute",
+            "Fortify Health",
+            "Fortify Magicka",
+            "Fortify Fatigue",
+            "Fortify Skill",
+            "Fortify Maximum Magicka",
+            "Absorb Attribute",
+            "Absorb Health",
+            "Absorb Magicka",
+            "Absorb Fatigue",
+            "Absorb Skill",
+            "Resist Fire",
+            "Resist Frost",
+            "Resist Shock",
+            "Resist Magicka",
+            "Resist Common Disease",
+            "Resist Blight Disease",
+            "Resist Corprus Disease",
+            "Resist Poison",
+            "Resist Normal Weapons",
+            "Resist Paralysis",
+            "Remove Curse",
+            "Turn Undead",
+            "Summon Scamp",
+            "Summon Clannfear",
+            "Summon Daedroth",
+            "Summon Dremora",
+            "Summon Ancestral Ghost",
+            "Summon Skeletal Minion",
+            "Summon Bonewalker",
+            "Summon Greater Bonewalker",
+            "Summon Bonelord",
+            "Summon Winged Twilight",
+            "Summon Hunger",
+            "Summon Golden Saint",
+            "Summon Flame Atronach",
+            "Summon Frost Atronach",
+            "Summon Storm Atronach",
+            "Fortify Attack",
+            "Command Creature",
+            "Command Humanoid",
+            "Bound Dagger",
+            "Bound Longsword",
+            "Bound Mace",
+            "Bound Battle Axe",
+            "Bound Spear",
+            "Bound Longbow",
+            "EXTRA SPELL",
+            "Bound Cuirass",
+            "Bound Helm",
+            "Bound Boots",
+            "Bound Shield",
+            "Bound Gloves",
+            "Corprus",
+            "Vampirism",
+            "Summon Centurion Sphere",
+            "Sun Damage",
+            "Stunted Magicka",
+            "Summon Fabricant",
+            "sEffectSummonCreature01",
+            "sEffectSummonCreature02",
+            "sEffectSummonCreature03",
+            "sEffectSummonCreature04",
+            "sEffectSummonCreature05"
+        };
         return magicEffectLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string attributeLabel(int idx)
 {
-    const char* attributeLabels [] = {
-        "Strength",
-        "Intelligence",
-        "Willpower",
-        "Agility",
-        "Speed",
-        "Endurance",
-        "Personality",
-        "Luck"
-    };
     if (idx >= 0 && idx <= 7)
+    {
+        const char* attributeLabels [] = {
+            "Strength",
+            "Intelligence",
+            "Willpower",
+            "Agility",
+            "Speed",
+            "Endurance",
+            "Personality",
+            "Luck"
+        };
         return attributeLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string spellTypeLabel(int idx)
 {
-    const char* spellTypeLabels [] = {
-        "Spells",
-        "Abilities",
-        "Blight Disease",
-        "Disease",
-        "Curse",
-        "Powers"
-    };
     if (idx >= 0 && idx <= 5)
+    {
+        const char* spellTypeLabels [] = {
+            "Spells",
+            "Abilities",
+            "Blight Disease",
+            "Disease",
+            "Curse",
+            "Powers"
+        };
         return spellTypeLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string specializationLabel(int idx)
 {
-    const char* specializationLabels [] = {
-        "Combat",
-        "Magic",
-        "Stealth"
-    };
     if (idx >= 0 && idx <= 2)
+    {
+        const char* specializationLabels [] = {
+            "Combat",
+            "Magic",
+            "Stealth"
+        };
         return specializationLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string skillLabel(int idx)
 {
-    const char* skillLabels [] = {
-        "Block",
-        "Armorer",
-        "Medium Armor",
-        "Heavy Armor",
-        "Blunt Weapon",
-        "Long Blade",
-        "Axe",
-        "Spear",
-        "Athletics",
-        "Enchant",
-        "Destruction",
-        "Alteration",
-        "Illusion",
-        "Conjuration",
-        "Mysticism",
-        "Restoration",
-        "Alchemy",
-        "Unarmored",
-        "Security",
-        "Sneak",
-        "Acrobatics",
-        "Light Armor",
-        "Short Blade",
-        "Marksman",
-        "Mercantile",
-        "Speechcraft",
-        "Hand-to-hand"
-    };
     if (idx >= 0 && idx <= 26)
+    {
+        const char* skillLabels [] = {
+            "Block",
+            "Armorer",
+            "Medium Armor",
+            "Heavy Armor",
+            "Blunt Weapon",
+            "Long Blade",
+            "Axe",
+            "Spear",
+            "Athletics",
+            "Enchant",
+            "Destruction",
+            "Alteration",
+            "Illusion",
+            "Conjuration",
+            "Mysticism",
+            "Restoration",
+            "Alchemy",
+            "Unarmored",
+            "Security",
+            "Sneak",
+            "Acrobatics",
+            "Light Armor",
+            "Short Blade",
+            "Marksman",
+            "Mercantile",
+            "Speechcraft",
+            "Hand-to-hand"
+        };
         return skillLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string apparatusTypeLabel(int idx)
 {
-    const char* apparatusTypeLabels [] = {
-        "Mortar",
-        "Alembic",
-        "Calcinator",
-        "Retort",
-    };
     if (idx >= 0 && idx <= 3)
+    {
+        const char* apparatusTypeLabels [] = {
+            "Mortar",
+            "Alembic",
+            "Calcinator",
+            "Retort",
+        };
         return apparatusTypeLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string rangeTypeLabel(int idx)
 {
-    const char* rangeTypeLabels [] = {
-        "Self",
-        "Touch",
-        "Target"
-    };
     if (idx >= 0 && idx <= 2)
+    {
+        const char* rangeTypeLabels [] = {
+            "Self",
+            "Touch",
+            "Target"
+        };
         return rangeTypeLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string schoolLabel(int idx)
 {
-    const char* schoolLabels [] = {
-        "Alteration",
-        "Conjuration",
-        "Destruction",
-        "Illusion",
-        "Mysticism",
-        "Restoration"
-    };
     if (idx >= 0 && idx <= 5)
+    {
+        const char* schoolLabels [] = {
+            "Alteration",
+            "Conjuration",
+            "Destruction",
+            "Illusion",
+            "Mysticism",
+            "Restoration"
+        };
         return schoolLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string enchantTypeLabel(int idx)
 {
-    const char* enchantTypeLabels [] = {
-        "Cast Once",
-        "Cast When Strikes",
-        "Cast When Used",
-        "Constant Effect"
-    };
     if (idx >= 0 && idx <= 3)
+    {
+        const char* enchantTypeLabels [] = {
+            "Cast Once",
+            "Cast When Strikes",
+            "Cast When Used",
+            "Constant Effect"
+        };
         return enchantTypeLabels[idx];
+    }
     else
         return "Invalid";
 }
 
 std::string ruleFunction(int idx)
 {
-    std::string ruleFunctions[] = {
-        "Reaction Low",
-        "Reaction High",
-        "Rank Requirement",
-        "NPC? Reputation",
-        "Health Percent",
-        "Player Reputation",
-        "NPC Level",
-        "Player Health Percent",
-        "Player Magicka",
-        "Player Fatigue",
-        "Player Attribute Strength",
-        "Player Skill Block",
-        "Player Skill Armorer",
-        "Player Skill Medium Armor",
-        "Player Skill Heavy Armor",
-        "Player Skill Blunt Weapon",
-        "Player Skill Long Blade",
-        "Player Skill Axe",
-        "Player Skill Spear",
-        "Player Skill Athletics",
-        "Player Skill Enchant",
-        "Player Skill Destruction",
-        "Player Skill Alteration",
-        "Player Skill Illusion",
-        "Player Skill Conjuration",
-        "Player Skill Mysticism",
-        "Player SKill Restoration",
-        "Player Skill Alchemy",
-        "Player Skill Unarmored",
-        "Player Skill Security",
-        "Player Skill Sneak",
-        "Player Skill Acrobatics",
-        "Player Skill Light Armor",
-        "Player Skill Short Blade",
-        "Player Skill Marksman",
-        "Player Skill Mercantile",
-        "Player Skill Speechcraft",
-        "Player Skill Hand to Hand",
-        "Player Gender",
-        "Player Expelled from Faction",
-        "Player Diseased (Common)",
-        "Player Diseased (Blight)",
-        "Player Clothing Modifier",
-        "Player Crime Level",
-        "Player Same Sex",
-        "Player Same Race",
-        "Player Same Faction",
-        "Faction Rank Difference",
-        "Player Detected",
-        "Alarmed",
-        "Choice Selected",
-        "Player Attribute Intelligence",
-        "Player Attribute Willpower",
-        "Player Attribute Agility",
-        "Player Attribute Speed",
-        "Player Attribute Endurance",
-        "Player Attribute Personality",
-        "Player Attribute Luck",
-        "Player Diseased (Corprus)",
-        "Weather",
-        "Player is a Vampire",
-        "Player Level",
-        "Attacked",
-        "NPC Talked to Player",
-        "Player Health",
-        "Creature Target",
-        "Friend Hit",
-        "Fight",
-        "Hello",
-        "Alarm",
-        "Flee",
-        "Should Attack",
-        "Werewolf"
-    };
     if (idx >= 0 && idx <= 72)
+    {
+        std::string ruleFunctions[] = {
+            "Reaction Low",
+            "Reaction High",
+            "Rank Requirement",
+            "NPC? Reputation",
+            "Health Percent",
+            "Player Reputation",
+            "NPC Level",
+            "Player Health Percent",
+            "Player Magicka",
+            "Player Fatigue",
+            "Player Attribute Strength",
+            "Player Skill Block",
+            "Player Skill Armorer",
+            "Player Skill Medium Armor",
+            "Player Skill Heavy Armor",
+            "Player Skill Blunt Weapon",
+            "Player Skill Long Blade",
+            "Player Skill Axe",
+            "Player Skill Spear",
+            "Player Skill Athletics",
+            "Player Skill Enchant",
+            "Player Skill Destruction",
+            "Player Skill Alteration",
+            "Player Skill Illusion",
+            "Player Skill Conjuration",
+            "Player Skill Mysticism",
+            "Player SKill Restoration",
+            "Player Skill Alchemy",
+            "Player Skill Unarmored",
+            "Player Skill Security",
+            "Player Skill Sneak",
+            "Player Skill Acrobatics",
+            "Player Skill Light Armor",
+            "Player Skill Short Blade",
+            "Player Skill Marksman",
+            "Player Skill Mercantile",
+            "Player Skill Speechcraft",
+            "Player Skill Hand to Hand",
+            "Player Gender",
+            "Player Expelled from Faction",
+            "Player Diseased (Common)",
+            "Player Diseased (Blight)",
+            "Player Clothing Modifier",
+            "Player Crime Level",
+            "Player Same Sex",
+            "Player Same Race",
+            "Player Same Faction",
+            "Faction Rank Difference",
+            "Player Detected",
+            "Alarmed",
+            "Choice Selected",
+            "Player Attribute Intelligence",
+            "Player Attribute Willpower",
+            "Player Attribute Agility",
+            "Player Attribute Speed",
+            "Player Attribute Endurance",
+            "Player Attribute Personality",
+            "Player Attribute Luck",
+            "Player Diseased (Corprus)",
+            "Weather",
+            "Player is a Vampire",
+            "Player Level",
+            "Attacked",
+            "NPC Talked to Player",
+            "Player Health",
+            "Creature Target",
+            "Friend Hit",
+            "Fight",
+            "Hello",
+            "Alarm",
+            "Flee",
+            "Should Attack",
+            "Werewolf"
+        };
         return ruleFunctions[idx];
+    }
     else
         return "Invalid";
 }

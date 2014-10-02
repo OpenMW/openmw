@@ -22,6 +22,8 @@ namespace MWMechanics
     {
         public:
 
+            Alchemy();
+
             typedef std::vector<MWWorld::Ptr> TToolsContainer;
             typedef TToolsContainer::const_iterator TToolsIterator;
 

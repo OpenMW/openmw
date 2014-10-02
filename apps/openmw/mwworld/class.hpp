@@ -231,7 +231,7 @@ namespace MWWorld
             ///
             /// (default implementation: ignore and return false)
 
-            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const;
+            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const;
             ///< Inform actor \a ptr that a skill use has succeeded.
             ///
             /// (default implementations: throws an exception)
@@ -266,8 +266,6 @@ namespace MWWorld
             ///< @return the number of enchantment points available for possible enchanting
 
             virtual void adjustScale(const MWWorld::Ptr& ptr,float& scale) const;
-
-            virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
             virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
             ///< Determine whether or not \a item can be sold to an npc with the given \a npcServices

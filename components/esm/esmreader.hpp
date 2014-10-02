@@ -216,9 +216,6 @@ public:
   // already been read
   void skipRecord();
 
-  // Skip an entire record, including the header (but not the name)
-  void skipHRecord();
-
   /* Read record header. This updatesleftFile BEYOND the data that
      follows the header, ie beyond the entire record. You should use
      leftRec to orient yourself inside the record itself.

@@ -638,20 +638,6 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
     mGui->initialise("");
 }
 
-void MyGUIManager::updateWindow (Ogre::RenderWindow *wnd)
-{
-    if (mShaderRenderManager)
-    {
-        mShaderRenderManager->setRenderWindow (wnd);
-        mShaderRenderManager->setActiveViewport(0);
-    }
-    else
-    {
-        mRenderManager->setRenderWindow (wnd);
-        mRenderManager->setActiveViewport(0);
-    }
-}
-
 void MyGUIManager::windowResized()
 {
 #ifndef ANDROID
