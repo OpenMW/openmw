@@ -81,7 +81,6 @@ namespace MWGui
 
                         if (type == Event_ImgTag)
                         {
-                            mIgnoreLineEndings = false;
                             mIgnoreNewlineTags = false;
                         }
 
@@ -200,6 +199,7 @@ namespace MWGui
             BookTextParser parser(markup);
 
             bool brBeforeLastTag = false;
+            bool isPrevImg = false;
             for (;;)
             {
                 BookTextParser::Events event = parser.next();
@@ -212,21 +212,16 @@ namespace MWGui
                 else
                 {
                     // Each block of text (between two tags / boundary and tag) will be displayed in a separate editbox widget,
-                    // which means an additonal linebreak will be created.
-                    // ^ This is not the case in vanilla MW (though having multiple tags in one line seems to result in undefined behavior).
-                    // We must deal with linebreaks around tags appropriately.
-                    {
-                        bool brAtStart = (plainText[0] == '\n');
-                        bool brAtEnd = (plainText[plainText.size()-1] == '\n');
+                    // which means an additonal linebreak will be created between them.
+                    // ^ This is not what vanilla MW assumes, so we must deal with line breaks around tags appropriately.
+                    bool brAtStart = (plainText[0] == '\n');
+                    bool brAtEnd = (plainText[plainText.size()-1] == '\n');
 
-                        if (!brBeforeLastTag && brAtStart)
-                            plainText.erase(plainText.begin());
+                    if (brAtStart && !brBeforeLastTag && !isPrevImg)
+                        plainText.erase(plainText.begin());
 
-                        if (plainText.size() && brAtEnd)
-                            plainText.erase(plainText.end()-1);
-
-                        brBeforeLastTag = brAtEnd;
-                    }
+                    if (plainText.size() && brAtEnd)
+                        plainText.erase(plainText.end()-1);
 
 #if (MYGUI_VERSION < MYGUI_DEFINE_VERSION(3, 2, 2))
                     // splitting won't be fully functional until 3.2.2 (see TextElement::pageSplit())
@@ -238,15 +233,19 @@ namespace MWGui
                     }
 #endif
 
-                    if (!plainText.empty())
+                    if (!plainText.empty() || brBeforeLastTag || isPrevImg)
                     {
                         TextElement elem(paper, pag, mTextStyle, plainText);
                         elem.paginate();
                     }
+
+                    brBeforeLastTag = brAtEnd;
                 }
 
                 if (event == BookTextParser::Event_EOF)
                     break;
+
+                isPrevImg = (event == BookTextParser::Event_ImgTag);
 
                 switch (event)
                 {
