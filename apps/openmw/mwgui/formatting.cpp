@@ -235,7 +235,8 @@ namespace MWGui
 
                     if (!plainText.empty() || brBeforeLastTag || isPrevImg)
                     {
-                        TextElement elem(paper, pag, mTextStyle, plainText);
+                        TextElement elem(paper, pag, mBlockStyle,
+                                         mTextStyle, plainText);
                         elem.paginate();
                     }
 
@@ -260,7 +261,8 @@ namespace MWGui
                         int width = boost::lexical_cast<int>(attr.at("width"));
                         int height = boost::lexical_cast<int>(attr.at("height"));
 
-                        ImageElement elem(paper, pag, src, width, height);
+                        ImageElement elem(paper, pag, mBlockStyle,
+                                          src, width, height);
                         elem.paginate();
                         break;
                     }
@@ -294,9 +296,7 @@ namespace MWGui
 
         void BookFormatter::resetFontProperties()
         {
-            MyGUI::Align align = mTextStyle.mTextAlign;
             mTextStyle = TextStyle();
-            mTextStyle.mTextAlign = align;
         }
 
         void BookFormatter::handleDiv(const BookTextParser::Attributes & attr)
@@ -307,9 +307,9 @@ namespace MWGui
             std::string align = attr.at("align");
 
             if (Misc::StringUtils::ciEqual(align, "center"))
-                mTextStyle.mTextAlign = MyGUI::Align::HCenter;
+                mBlockStyle.mAlign = MyGUI::Align::HCenter;
             else if (Misc::StringUtils::ciEqual(align, "left"))
-                mTextStyle.mTextAlign = MyGUI::Align::Left;
+                mBlockStyle.mAlign = MyGUI::Align::Left;
         }
 
         void BookFormatter::handleFont(const BookTextParser::Attributes & attr)
@@ -321,7 +321,7 @@ namespace MWGui
                 ss << attr.at("color");
                 ss >> std::hex >> color;
 
-                mTextStyle.mColour = MyGUI::Colour(
+                mTextStyle.mColor = MyGUI::Colour(
                     (color>>16 & 0xFF) / 255.f,
                     (color>>8 & 0xFF) / 255.f,
                     (color & 0xFF) / 255.f);
@@ -340,8 +340,8 @@ namespace MWGui
         }
 
         /* GraphicElement */
-        GraphicElement::GraphicElement(MyGUI::Widget * parent, Paginator & pag)
-            : mParent(parent), mPaginator(pag)
+        GraphicElement::GraphicElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle)
+            : mParent(parent), mPaginator(pag), mBlockStyle(blockStyle)
         {
         }
 
@@ -364,10 +364,10 @@ namespace MWGui
         }
 
         /* TextElement */
-        TextElement::TextElement(MyGUI::Widget * parent, Paginator & pag,
-                                 const TextStyle & style, const std::string & text)
-            : GraphicElement(parent, pag),
-              mStyle(style)
+        TextElement::TextElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle,
+                                 const TextStyle & textStyle, const std::string & text)
+            : GraphicElement(parent, pag, blockStyle),
+              mTextStyle(textStyle)
         {
             MyGUI::EditBox* box = parent->createWidget<MyGUI::EditBox>("NormalText",
                 MyGUI::IntCoord(0, pag.getCurrentTop(), pag.getPageWidth(), 0), MyGUI::Align::Left | MyGUI::Align::Top,
@@ -377,9 +377,9 @@ namespace MWGui
             box->setProperty("WordWrap", "true");
             box->setProperty("NeedMouse", "false");
             box->setMaxTextLength(text.size());
-            box->setTextAlign(mStyle.mTextAlign);
-            box->setTextColour(mStyle.mColour);
-            box->setFontName(mStyle.mFont);
+            box->setTextAlign(mBlockStyle.mAlign);
+            box->setTextColour(mTextStyle.mColor);
+            box->setFontName(mTextStyle.mFont);
             box->setCaption(MyGUI::TextIterator::toTagsString(text));
             box->setSize(box->getSize().width, box->getTextSize().height);
             mEditBox = box;
@@ -387,7 +387,7 @@ namespace MWGui
 
         int TextElement::currentFontHeight() const
         {
-            std::string fontName(mStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mStyle.mFont);
+            std::string fontName(mTextStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mTextStyle.mFont);
             return MyGUI::FontManager::getInstance().getByName(fontName)->getDefaultHeight();
         }
 
@@ -419,13 +419,13 @@ namespace MWGui
         }
 
         /* ImageElement */
-        ImageElement::ImageElement(MyGUI::Widget * parent, Paginator & pag,
+        ImageElement::ImageElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle,
                                    const std::string & src, int width, int height)
-            : GraphicElement(parent, pag),
+            : GraphicElement(parent, pag, blockStyle),
               mImageHeight(height)
         {
             mImageBox = parent->createWidget<MyGUI::ImageBox> ("ImageBox",
-                MyGUI::IntCoord(0, pag.getCurrentTop(), width, mImageHeight), MyGUI::Align::Left | MyGUI::Align::Top,
+                MyGUI::IntCoord(0, pag.getCurrentTop(), width, mImageHeight), mBlockStyle.mAlign | MyGUI::Align::Top,
                 parent->getName() + boost::lexical_cast<std::string>(parent->getChildCount()));
 
             std::string image = Misc::ResourceHelpers::correctBookartPath(src, width, mImageHeight);

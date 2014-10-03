@@ -11,17 +11,25 @@ namespace MWGui
         struct TextStyle
         {
             TextStyle() :
-                mColour(0,0,0)
+                mColor(0,0,0)
                 , mFont("Default")
                 , mTextSize(16)
-                , mTextAlign(MyGUI::Align::Left | MyGUI::Align::Top)
             {
             }
 
-            MyGUI::Colour mColour;
+            MyGUI::Colour mColor;
             std::string mFont;
             int mTextSize;
-            MyGUI::Align mTextAlign;
+        };
+
+        struct BlockStyle
+        {
+            BlockStyle() :
+                mAlign(MyGUI::Align::Left | MyGUI::Align::Top)
+            {
+            }
+
+            MyGUI::Align mAlign;
         };
 
         class BookTextParser
@@ -112,12 +120,13 @@ namespace MWGui
                 void handleFont(const BookTextParser::Attributes & attr);
 
                 TextStyle mTextStyle;
+                BlockStyle mBlockStyle;
         };
 
         class GraphicElement
         {
             public:
-                GraphicElement(MyGUI::Widget * parent, Paginator & pag);
+                GraphicElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle);
                 virtual int getHeight() = 0;
                 virtual void paginate();
                 virtual int pageSplit();
@@ -125,24 +134,27 @@ namespace MWGui
             protected:
                 MyGUI::Widget * mParent;
                 Paginator & mPaginator;
+                BlockStyle mBlockStyle;
         };
 
         class TextElement : public GraphicElement
         {
             public:
-                TextElement(MyGUI::Widget * parent, Paginator & pag, const TextStyle & style, const std::string & text);
+                TextElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle,
+                            const TextStyle & textStyle, const std::string & text);
                 virtual int getHeight();
                 virtual int pageSplit();
             private:
                 int currentFontHeight() const;
-                TextStyle mStyle;
+                TextStyle mTextStyle;
                 MyGUI::EditBox * mEditBox;
         };
 
         class ImageElement : public GraphicElement
         {
             public:
-                ImageElement(MyGUI::Widget * parent, Paginator & pag, const std::string & src, int width, int height);
+                ImageElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle,
+                             const std::string & src, int width, int height);
                 virtual int getHeight();
                 virtual int pageSplit();
 
