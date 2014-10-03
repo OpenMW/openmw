@@ -1253,7 +1253,7 @@ namespace MWWorld
 
         if (force || !isFlying(ptr))
         {
-            Ogre::Vector3 traced = mPhysics->traceDown(ptr, 200);
+            Ogre::Vector3 traced = mPhysics->traceDown(ptr, 300);
             if (traced.z < pos.pos[2])
                 pos.pos[2] = traced.z;
         }
