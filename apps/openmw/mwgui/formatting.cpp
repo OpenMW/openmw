@@ -310,6 +310,8 @@ namespace MWGui
                 mBlockStyle.mAlign = MyGUI::Align::HCenter;
             else if (Misc::StringUtils::ciEqual(align, "left"))
                 mBlockStyle.mAlign = MyGUI::Align::Left;
+            else if (Misc::StringUtils::ciEqual(align, "right"))
+                mBlockStyle.mAlign = MyGUI::Align::Right;
         }
 
         void BookFormatter::handleFont(const BookTextParser::Attributes & attr)
@@ -424,8 +426,16 @@ namespace MWGui
             : GraphicElement(parent, pag, blockStyle),
               mImageHeight(height)
         {
+            int left = 0;
+            if (mBlockStyle.mAlign.isHCenter())
+                left += (pag.getPageWidth() - width) / 2;
+            else if (mBlockStyle.mAlign.isLeft())
+                left = 0;
+            else if (mBlockStyle.mAlign.isRight())
+                left += pag.getPageWidth() - width;
+
             mImageBox = parent->createWidget<MyGUI::ImageBox> ("ImageBox",
-                MyGUI::IntCoord(0, pag.getCurrentTop(), width, mImageHeight), mBlockStyle.mAlign | MyGUI::Align::Top,
+                MyGUI::IntCoord(left, pag.getCurrentTop(), width, mImageHeight), MyGUI::Align::Left | MyGUI::Align::Top,
                 parent->getName() + boost::lexical_cast<std::string>(parent->getChildCount()));
 
             std::string image = Misc::ResourceHelpers::correctBookartPath(src, width, mImageHeight);
