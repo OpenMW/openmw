@@ -11,13 +11,13 @@ namespace MWGui
         struct TextStyle
         {
             TextStyle() :
-                mColor(0,0,0)
+                mColour(0,0,0)
                 , mFont("Default")
                 , mTextSize(16)
             {
             }
 
-            MyGUI::Colour mColor;
+            MyGUI::Colour mColour;
             std::string mFont;
             int mTextSize;
         };

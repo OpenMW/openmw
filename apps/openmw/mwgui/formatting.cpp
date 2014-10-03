@@ -212,7 +212,7 @@ namespace MWGui
                 else
                 {
                     // Each block of text (between two tags / boundary and tag) will be displayed in a separate editbox widget,
-                    // which means an additonal linebreak will be created between them.
+                    // which means an additional linebreak will be created between them.
                     // ^ This is not what vanilla MW assumes, so we must deal with line breaks around tags appropriately.
                     bool brAtStart = (plainText[0] == '\n');
                     bool brAtEnd = (plainText[plainText.size()-1] == '\n');
@@ -323,7 +323,7 @@ namespace MWGui
                 ss << attr.at("color");
                 ss >> std::hex >> color;
 
-                mTextStyle.mColor = MyGUI::Colour(
+                mTextStyle.mColour = MyGUI::Colour(
                     (color>>16 & 0xFF) / 255.f,
                     (color>>8 & 0xFF) / 255.f,
                     (color & 0xFF) / 255.f);
@@ -380,7 +380,7 @@ namespace MWGui
             box->setProperty("NeedMouse", "false");
             box->setMaxTextLength(text.size());
             box->setTextAlign(mBlockStyle.mAlign);
-            box->setTextColour(mTextStyle.mColor);
+            box->setTextColour(mTextStyle.mColour);
             box->setFontName(mTextStyle.mFont);
             box->setCaption(MyGUI::TextIterator::toTagsString(text));
             box->setSize(box->getSize().width, box->getTextSize().height);
