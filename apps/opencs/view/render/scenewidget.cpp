@@ -13,6 +13,7 @@
 #include <OgreViewport.h>
 
 #include "../widget/scenetoolmode.hpp"
+#include "../../model/settings/usersettings.hpp"
 
 #include "navigation.hpp"
 #include "lighting.hpp"
@@ -27,7 +28,7 @@ namespace CSVRender
         , mKeyForward (false), mKeyBackward (false), mKeyLeft (false), mKeyRight (false)
         , mKeyRollLeft (false), mKeyRollRight (false)
         , mFast (false), mDragging (false), mMod1 (false)
-        , mFastFactor (4) /// \todo make this configurable
+        , mFastFactor (4)
         , mDefaultAmbient (0, 0, 0, 0), mHasDefaultAmbient (false)
     {
         setAttribute(Qt::WA_PaintOnScreen);
@@ -44,7 +45,14 @@ namespace CSVRender
         mCamera->setPosition (300, 0, 0);
         mCamera->lookAt (0, 0, 0);
         mCamera->setNearClipDistance (0.1);
-        mCamera->setFarClipDistance (300000); ///< \todo make this configurable
+
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+
+        float farClipDist = userSettings.setting("Scene/far clip distance", QString("300000")).toFloat();
+        mCamera->setFarClipDistance (farClipDist);
+
+        mFastFactor = userSettings.setting("Scene/fast factor", QString("4")).toInt();
+
         mCamera->roll (Ogre::Degree (90));
 
         setLighting (&mLightingDay);
@@ -52,7 +60,9 @@ namespace CSVRender
         QTimer *timer = new QTimer (this);
 
         connect (timer, SIGNAL (timeout()), this, SLOT (update()));
-        timer->start (20); ///< \todo make this configurable
+
+        int timerStart = userSettings.setting("Scene/timer start", QString("20")).toInt();
+        timer->start (timerStart);
 
         /// \todo make shortcut configurable
         QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
@@ -118,7 +128,16 @@ namespace CSVRender
 
         params.insert(std::make_pair("externalWindowHandle",  windowHandle.str()));
         params.insert(std::make_pair("title", windowTitle.str()));
-        params.insert(std::make_pair("FSAA", "0")); // TODO setting
+
+        std::string antialiasing =
+            CSMSettings::UserSettings::instance().settingValue("Video/antialiasing").toStdString();
+        if(antialiasing == "MSAA 16")     antialiasing = "16";
+        else if(antialiasing == "MSAA 8") antialiasing = "8";
+        else if(antialiasing == "MSAA 4") antialiasing = "4";
+        else if(antialiasing == "MSAA 2") antialiasing = "2";
+        else                              antialiasing = "0";
+        params.insert(std::make_pair("FSAA", antialiasing));
+
         params.insert(std::make_pair("vsync", "false")); // TODO setting
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
         params.insert(std::make_pair("macAPI", "cocoa"));
@@ -381,5 +400,33 @@ namespace CSVRender
             setLighting (&mLightingNight);
         else if (mode=="bright")
             setLighting (&mLightingBright);
+    }
+
+    void SceneWidget::updateUserSetting (const QString &key, const QStringList &list)
+    {
+        if(key.contains(QRegExp("^\\b(Objects|Shader|Scene)", Qt::CaseInsensitive)))
+            flagAsModified();
+
+        if(key == "Scene/far clip distance" && !list.empty())
+        {
+            if(mCamera->getFarClipDistance() != list.at(0).toFloat())
+                mCamera->setFarClipDistance(list.at(0).toFloat());
+        }
+
+        // minimise unnecessary ogre window creation by updating only when there is a change
+        if(key == "Video/antialiasing")
+        {
+            unsigned int aa = mWindow->getFSAA();
+            unsigned int antialiasing = 0;
+            if(!list.empty())
+            {
+                if(list.at(0) == "MSAA 16")     antialiasing = 16;
+                else if(list.at(0) == "MSAA 8") antialiasing = 8;
+                else if(list.at(0) == "MSAA 4") antialiasing = 4;
+                else if(list.at(0) == "MSAA 2") antialiasing = 2;
+            }
+            if(aa != antialiasing)
+                updateOgreWindow();
+        }
     }
 }

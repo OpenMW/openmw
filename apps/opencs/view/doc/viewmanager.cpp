@@ -9,6 +9,7 @@
 #include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/document.hpp"
 #include "../../model/world/columns.hpp"
+#include "../../model/world/universalid.hpp"
 
 #include "../world/util.hpp"
 #include "../world/enumdelegate.hpp"
@@ -140,6 +141,10 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
 
     mViews.push_back (view);
 
+    std::string showStatusBar =
+        CSMSettings::UserSettings::instance().settingValue("Display/show statusbar").toStdString();
+
+    view->toggleStatusBar (showStatusBar == "true");
     view->show();
 
     connect (view, SIGNAL (newGameRequest ()), this, SIGNAL (newGameRequest()));
@@ -153,6 +158,14 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
              SLOT (updateUserSetting (const QString &, const QStringList &)));
 
     updateIndices();
+
+    return view;
+}
+
+CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document, const CSMWorld::UniversalId& id, const std::string& hint)
+{
+    View* view = addView(document);
+    view->addSubView(id, hint);
 
     return view;
 }

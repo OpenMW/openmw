@@ -3,7 +3,7 @@
 #include <QWidget>
 
 const QString CSVSettings::Frame::sInvisibleBoxStyle =
-    QString::fromUtf8("Frame { border:2px; padding 2px; margin: 2px;}");
+    QString::fromUtf8("Frame { border:2px; padding: 2px; margin: 2px;}");
 
 CSVSettings::Frame::Frame (bool isVisible, const QString &title,
                                                                QWidget *parent)
@@ -14,7 +14,11 @@ CSVSettings::Frame::Frame (bool isVisible, const QString &title,
     mVisibleBoxStyle = styleSheet();
 
     if (!isVisible)
+    {
+        // must be Page, not a View
         setStyleSheet (sInvisibleBoxStyle);
+        mLayout->setContentsMargins(10, 15, 10, 15);
+    }
 
     setLayout (mLayout);
 }
