@@ -238,10 +238,31 @@ namespace MWWorld
                 physicActor->setOnGround(false);
                 return position;
             }
+            else
+            {
+                // Check if we actually found a valid spawn point (use an infinitely thin ray this time).
+                // Required for some broken door destinations in Morrowind.esm, where the spawn point
+                // intersects with other geometry if the actor's base is taken into account
+                btVector3 from = BtOgre::Convert::toBullet(position);
+                btVector3 to = from - btVector3(0,0,maxHeight);
 
-            physicActor->setOnGround(getSlope(tracer.mPlaneNormal) <= sMaxSlope);
+                btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
+                resultCallback1.m_collisionFilterGroup = 0xff;
+                resultCallback1.m_collisionFilterMask = OEngine::Physic::CollisionType_World|OEngine::Physic::CollisionType_HeightMap;
 
-            return tracer.mEndPos;
+                engine->mDynamicsWorld->rayTest(from, to, resultCallback1);
+                if (resultCallback1.hasHit() &&
+                        (BtOgre::Convert::toOgre(resultCallback1.m_hitPointWorld).distance(tracer.mEndPos) > 30
+                        || getSlope(tracer.mPlaneNormal) > sMaxSlope))
+                {
+                    physicActor->setOnGround(getSlope(BtOgre::Convert::toOgre(resultCallback1.m_hitNormalWorld)) <= sMaxSlope);
+                    return BtOgre::Convert::toOgre(resultCallback1.m_hitPointWorld) + Ogre::Vector3(0,0,1.f);
+                }
+
+                physicActor->setOnGround(getSlope(tracer.mPlaneNormal) <= sMaxSlope);
+
+                return tracer.mEndPos;
+            }
         }
 
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
