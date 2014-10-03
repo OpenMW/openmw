@@ -69,8 +69,7 @@ namespace MWMechanics
             void increaseSkill();
             ///< Increase alchemist's skill.
 
-            float getChance() const;
-            ///< Return chance of success.
+            float getAlchemyFactor() const;
 
             int countIngredients() const;
 

@@ -61,6 +61,11 @@ namespace ICS
 		mControlsKeyBinderMap[ key ] = controlKeyBinderItem;
 	}
 
+    bool InputControlSystem::isKeyBound(SDL_Scancode key) const
+    {
+        return mControlsKeyBinderMap.find(key) != mControlsKeyBinderMap.end();
+    }
+
     void InputControlSystem::removeKeyBinding(SDL_Scancode key)
 	{
 		ControlsKeyBinderMapType::iterator it = mControlsKeyBinderMap.find(key);

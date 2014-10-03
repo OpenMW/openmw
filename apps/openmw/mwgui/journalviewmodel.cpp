@@ -201,12 +201,23 @@ struct JournalViewModelImpl : JournalViewModel
 
         std::set<std::string> visitedQuests;
 
+        // Note that for purposes of the journal GUI, quests are identified by the name, not the ID, so several
+        // different quest IDs can end up in the same quest log. A quest log should be considered finished
+        // when any quest ID in that log is finished.
         for (MWBase::Journal::TQuestIter i = journal->questBegin (); i != journal->questEnd (); ++i)
         {
-            if (active_only && i->second.isFinished ())
+            const MWDialogue::Quest& quest = i->second;
+
+            bool isFinished = false;
+            for (MWBase::Journal::TQuestIter j = journal->questBegin (); j != journal->questEnd (); ++j)
+            {
+                if (quest.getName() == j->second.getName() && j->second.isFinished())
+                    isFinished = true;
+            }
+
+            if (active_only && isFinished)
                 continue;
 
-            const MWDialogue::Quest& quest = i->second;
             // Unfortunately Morrowind.esm has no quest names, since the quest book was added with tribunal.
             // Note that even with Tribunal, some quests still don't have quest names. I'm assuming those are not supposed
             // to appear in the quest book.

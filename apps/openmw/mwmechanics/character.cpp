@@ -1611,7 +1611,7 @@ void CharacterController::update(float duration)
         if(mMovementAnimationControlled && mPtr.getClass().isActor())
             world->queueMovement(mPtr, moved);
     }
-    else if (mAnimation)
+    else
         mAnimation->updateEffects(duration);
     mSkipAnim = false;
 

@@ -370,8 +370,8 @@ namespace MWGui
             MWBase::Environment::get().getDialogueManager()->applyDispositionChange(iBarterSuccessDisposition);
 
         // make the item transfer
-        mTradeModel->transferItems(player);
-        playerItemModel->transferItems(mPtr);
+        mTradeModel->transferItems();
+        playerItemModel->transferItems();
 
         // transfer the gold
         if (mCurrentBalance != 0)

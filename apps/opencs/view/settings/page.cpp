@@ -1,4 +1,7 @@
 #include "page.hpp"
+
+#include <QLabel>
+
 #include "view.hpp"
 #include "booleanview.hpp"
 #include "textview.hpp"
@@ -38,7 +41,18 @@ void CSVSettings::Page::setupViews
 void CSVSettings::Page::addView (CSMSettings::Setting *setting)
 {
     if (setting->viewType() == ViewType_Undefined)
-        return;
+    {
+        if(setting->specialValueText() != "")
+        {
+            // hack to put a label
+            addWidget(new QLabel(setting->specialValueText()),
+                setting->viewRow(), setting->viewColumn(),
+                setting->rowSpan(), setting->columnSpan());
+            return;
+        }
+        else
+            return;
+    }
 
     View *view = mViewFactories[setting->viewType()]->createView(setting, this);
 

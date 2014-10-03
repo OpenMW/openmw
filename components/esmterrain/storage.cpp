@@ -147,8 +147,8 @@ namespace ESMTerrain
         Ogre::Vector3 normal;
         Ogre::ColourValue color;
 
-        float vertY;
-        float vertX;
+        float vertY = 0;
+        float vertX = 0;
 
         float vertY_ = 0; // of current cell corner
         for (int cellY = startY; cellY < startY + std::ceil(size); ++cellY)

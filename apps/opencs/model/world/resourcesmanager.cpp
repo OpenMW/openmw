@@ -6,18 +6,20 @@
 void CSMWorld::ResourcesManager::addResources (const Resources& resources)
 {
     mResources.insert (std::make_pair (resources.getType(), resources));
+    mResources.insert (std::make_pair (UniversalId::getParentType (resources.getType()),
+        resources));
 }
 
 void CSMWorld::ResourcesManager::listResources()
 {
     static const char * const sMeshTypes[] = { "nif", 0 };
 
-    addResources (Resources ("meshes", UniversalId::Type_Meshes, sMeshTypes));
-    addResources (Resources ("icons", UniversalId::Type_Icons));
-    addResources (Resources ("music", UniversalId::Type_Musics));
-    addResources (Resources ("sound", UniversalId::Type_SoundsRes));
-    addResources (Resources ("textures", UniversalId::Type_Textures));
-    addResources (Resources ("videos", UniversalId::Type_Videos));
+    addResources (Resources ("meshes", UniversalId::Type_Mesh, sMeshTypes));
+    addResources (Resources ("icons", UniversalId::Type_Icon));
+    addResources (Resources ("music", UniversalId::Type_Music));
+    addResources (Resources ("sound", UniversalId::Type_SoundRes));
+    addResources (Resources ("textures", UniversalId::Type_Texture));
+    addResources (Resources ("videos", UniversalId::Type_Video));
 }
 
 const CSMWorld::Resources& CSMWorld::ResourcesManager::get (UniversalId::Type type) const

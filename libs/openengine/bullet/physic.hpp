@@ -50,21 +50,6 @@ namespace Physic
     };
 
     /**
-    *This is just used to be able to name objects.
-    */
-    class PairCachingGhostObject : public btPairCachingGhostObject
-    {
-    public:
-        PairCachingGhostObject(std::string name)
-            :btPairCachingGhostObject(),mName(name)
-        {
-        }
-        virtual ~PairCachingGhostObject(){}
-
-        std::string mName;
-    };
-
-    /**
      *This class is just an extension of normal btRigidBody in order to add extra info.
      *When bullet give back a btRigidBody, you can just do a static_cast to RigidBody,
      *so one never should use btRigidBody directly!
@@ -317,7 +302,6 @@ namespace Physic
                                                                  btCollisionObject *object);
 
         //Bullet Stuff
-        btOverlappingPairCache* pairCache;
         btBroadphaseInterface* broadphase;
         btDefaultCollisionConfiguration* collisionConfiguration;
         btSequentialImpulseConstraintSolver* solver;

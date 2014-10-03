@@ -8,6 +8,7 @@
 #include <QMdiArea>
 #include <QDockWidget>
 #include <QtGui/QApplication>
+#include <QDesktopWidget>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/settings/usersettings.hpp"
@@ -103,6 +104,10 @@ void CSVDoc::View::setupViewMenu()
     mShowStatusBar = new QAction (tr ("Show Status Bar"), this);
     mShowStatusBar->setCheckable (true);
     connect (mShowStatusBar, SIGNAL (toggled (bool)), this, SLOT (toggleShowStatusBar (bool)));
+    std::string showStatusBar =
+        CSMSettings::UserSettings::instance().settingValue("Display/show statusbar").toStdString();
+    if(showStatusBar == "true")
+        mShowStatusBar->setChecked(true);
     view->addAction (mShowStatusBar);
 
     QAction *filters = new QAction (tr ("Filters"), this);
@@ -283,7 +288,7 @@ void CSVDoc::View::setupUi()
     setupDebugMenu();
 }
 
-void CSVDoc::View::updateTitle()
+void CSVDoc::View::updateTitle(const std::string subview)
 {
     std::ostringstream stream;
 
@@ -295,7 +300,38 @@ void CSVDoc::View::updateTitle()
     if (mViewTotal>1)
         stream << " [" << (mViewIndex+1) << "/" << mViewTotal << "]";
 
+    if (subview != "")
+        stream << " - " << subview;
+
     setWindowTitle (stream.str().c_str());
+}
+
+void CSVDoc::View::updateSubViewIndicies(SubView *view)
+{
+    if(view && mSubViews.contains(view))
+        mSubViews.removeOne(view);
+
+    if(mSubViews.size() == 1)
+    {
+        if(!mSubViews.at(0)->isFloating())
+        {
+            mSubViews.at(0)->setTitleBarWidget(new QWidget(this));
+            updateTitle(mSubViews.at(0)->getUniversalId().getTypeName().c_str());
+        }
+    }
+    else
+    {
+        updateTitle();
+        if(mSubViews.size() > 1)
+        {
+            foreach(SubView * sb, mSubViews)
+            {
+                QWidget * tb = sb->titleBarWidget();
+                if(tb) delete tb;
+                sb->setTitleBarWidget(0);
+            }
+        }
+    }
 }
 
 void CSVDoc::View::updateActions()
@@ -326,7 +362,11 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     QString height = CSMSettings::UserSettings::instance().settingValue
                                     ("Window Size/Height");
 
-    resize (width.toInt(), height.toInt());
+    // trick to get the window decorations and their sizes
+    show();
+    hide();
+    resize (width.toInt() - (frameGeometry().width() - geometry().width()),
+            height.toInt() - (frameGeometry().height() - geometry().height()));
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
@@ -400,30 +440,63 @@ void CSVDoc::View::updateProgress (int current, int max, int type, int threads)
 
 void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::string& hint)
 {
-    /// \todo add an user setting for limiting the number of sub views per top level view. Automatically open a new top level view if this
-    /// number is exceeded
-
-    /// \todo if the sub view limit setting is one, the sub view title bar should be hidden and the text in the main title bar adjusted
-    /// accordingly
-
-    /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
 
     const std::vector<CSMWorld::UniversalId::Type> referenceables(CSMWorld::UniversalId::listReferenceableTypes());
+    bool isReferenceable = std::find(referenceables.begin(), referenceables.end(), id.getType()) != referenceables.end();
+
+    // User setting to reuse sub views (on a per top level view basis)
+    bool reuse =
+        userSettings.setting("SubView/reuse", QString("true")) == "true" ? true : false;
+    if(reuse)
+    {
+        foreach(SubView *sb, mSubViews)
+        {
+            if((isReferenceable && (CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, id.getId()) == CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, sb->getUniversalId().getId())))
+                || (!isReferenceable && (id == sb->getUniversalId())))
+            {
+                sb->setFocus(Qt::OtherFocusReason); // FIXME: focus not quite working
+                return;
+            }
+        }
+    }
+
+    // User setting for limiting the number of sub views per top level view.
+    // Automatically open a new top level view if this number is exceeded
+    //
+    // If the sub view limit setting is one, the sub view title bar is hidden and the
+    // text in the main title bar is adjusted accordingly
+    int maxSubView = userSettings.setting("SubView/max subviews", QString("256")).toInt();
+    if(mSubViews.size() >= maxSubView) // create a new top level view
+    {
+        mViewManager.addView(mDocument, id, hint);
+
+        return;
+    }
+
     SubView *view = NULL;
     if(std::find(referenceables.begin(), referenceables.end(), id.getType()) != referenceables.end())
     {
         view = mSubViewFactory.makeSubView (CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, id.getId()), *mDocument);
-    } else
+    }
+    else
     {
         view = mSubViewFactory.makeSubView (id, *mDocument);
     }
     assert(view);
+    view->setParent(this);
+    mSubViews.append(view); // only after assert
     if (!hint.empty())
         view->useHint (hint);
+
+    int minWidth = userSettings.setting("SubView/minimum width", QString("325")).toInt();
+    view->setMinimumWidth(minWidth);
 
     view->setStatusBar (mShowStatusBar->isChecked());
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
+
+    updateSubViewIndicies();
 
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&, const std::string&)));
@@ -640,6 +713,11 @@ void CSVDoc::View::toggleShowStatusBar (bool show)
         if (CSVDoc::SubView *subView = dynamic_cast<CSVDoc::SubView *> (view))
             subView->setStatusBar (show);
     }
+}
+
+void CSVDoc::View::toggleStatusBar(bool checked)
+{
+    mShowStatusBar->setChecked(checked);
 }
 
 void CSVDoc::View::loadErrorLog()

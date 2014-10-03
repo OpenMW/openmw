@@ -134,7 +134,6 @@ namespace MWRender
         Ogre::RenderTarget* mRenderTarget;
 
         bool mInterior;
-        int mCellX, mCellY;
         Ogre::AxisAlignedBox mBounds;
         std::string mInteriorName;
     };

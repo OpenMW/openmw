@@ -25,7 +25,7 @@ using namespace MWRender;
 using namespace Ogre;
 
 LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering) :
-    mInterior(false), mCellX(0), mCellY(0)
+    mInterior(false)
 {
     mRendering = rend;
     mRenderingManager = rendering;
@@ -522,10 +522,9 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     {
         x = std::ceil(pos.x / sSize)-1;
         y = std::ceil(pos.y / sSize)-1;
-        mCellX = x;
-        mCellY = y;
     }
-    MWBase::Environment::get().getWindowManager()->setActiveMap(x,y,mInterior);
+    else
+        MWBase::Environment::get().getWindowManager()->setActiveMap(x,y,mInterior);
 
     // convert from world coordinates to texture UV coordinates
     std::string texBaseName;
@@ -540,7 +539,7 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
         texBaseName = mInteriorName + "_";
     }
 
-    MWBase::Environment::get().getWindowManager()->setPlayerPos(u, v);
+    MWBase::Environment::get().getWindowManager()->setPlayerPos(x, y, u, v);
     MWBase::Environment::get().getWindowManager()->setPlayerDir(playerdirection.x, playerdirection.y);
 
     // explore radius (squared)

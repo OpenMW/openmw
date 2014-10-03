@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="VBox" skin="MW_Dialog" layer="Notification" position="0 0 0 0" name="_Main">
+    <Widget type="VBox" skin="HUD_Box" layer="Notification" position="0 0 0 0" name="_Main">
         <Property key="Padding" value="10"/>
         <Property key="AutoResize" value="true"/>
 

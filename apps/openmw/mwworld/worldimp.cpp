@@ -241,7 +241,7 @@ namespace MWWorld
                 pos.rot[0] = 0;
                 pos.rot[1] = 0;
                 pos.rot[2] = 0;
-                mWorldScene->changeToExteriorCell(pos);
+                mWorldScene->changeToExteriorCell(pos, true);
             }
         }
 
@@ -920,7 +920,7 @@ namespace MWWorld
             mRendering->notifyWorldSpaceChanged();
         }
         removeContainerScripts(getPlayerPtr());
-        mWorldScene->changeToExteriorCell(position);
+        mWorldScene->changeToExteriorCell(position, true);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
     }
 
@@ -1045,7 +1045,7 @@ namespace MWWorld
 
         CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL; // currCell == NULL should only happen for player, during initial startup
         bool isPlayer = ptr == mPlayer->getPlayer();
-        bool haveToMove = isPlayer || mWorldScene->isCellActive(*currCell);
+        bool haveToMove = isPlayer || (currCell && mWorldScene->isCellActive(*currCell));
 
         if (currCell != newCell)
         {
@@ -1057,9 +1057,10 @@ namespace MWWorld
                     changeToInteriorCell(Misc::StringUtils::lowerCase(newCell->getCell()->mName), pos);
                 else
                 {
-                    int cellX = newCell->getCell()->getGridX();
-                    int cellY = newCell->getCell()->getGridY();
-                    mWorldScene->changeCell(cellX, cellY, pos, false);
+                    if (mWorldScene->isCellActive(*newCell))
+                        mWorldScene->changePlayerCell(newCell, pos, false);
+                    else
+                        mWorldScene->changeToExteriorCell(pos, false);
                 }
                 addContainerScripts (getPlayerPtr(), newCell);
             }
@@ -1119,6 +1120,10 @@ namespace MWWorld
         {
             mRendering->moveObject(ptr, vec);
             mPhysics->moveObject (ptr);
+        }
+        if (isPlayer)
+        {
+            mWorldScene->playerMoved (vec);
         }
     }
 
@@ -1309,6 +1314,8 @@ namespace MWWorld
 
     void World::doPhysics(float duration)
     {
+        mPhysics->stepSimulation(duration);
+
         processDoors(duration);
 
         mProjectileManager->update(duration);
@@ -1327,8 +1334,6 @@ namespace MWWorld
         }
         if(player != results.end())
             moveObjectImp(player->first, player->second.x, player->second.y, player->second.z);
-
-        mPhysics->stepSimulation(duration);
     }
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
@@ -1565,7 +1570,7 @@ namespace MWWorld
 
     bool World::isCellExterior() const
     {
-        CellStore *currentCell = mWorldScene->getCurrentCell();
+        const CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
             return currentCell->getCell()->isExterior();
@@ -1575,7 +1580,7 @@ namespace MWWorld
 
     bool World::isCellQuasiExterior() const
     {
-        CellStore *currentCell = mWorldScene->getCurrentCell();
+        const CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
             if (!(currentCell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
@@ -1661,6 +1666,11 @@ namespace MWWorld
     bool World::toggleWater()
     {
         return mRendering->toggleWater();
+    }
+
+    bool World::toggleWorld()
+    {
+        return mRendering->toggleWorld();
     }
 
     void World::PCDropped (const Ptr& item)

@@ -16,6 +16,7 @@ namespace CSVSettings
         Q_OBJECT
 
         QMap <QString, QAbstractButton *> mButtons;
+        enum CSMSettings::SettingType mType;
 
     public:
         explicit BooleanView (CSMSettings::Setting *setting,

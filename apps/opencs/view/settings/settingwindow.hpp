@@ -36,8 +36,6 @@ namespace CSVSettings {
 
     protected:
 
-        virtual void closeEvent (QCloseEvent *event);
-
         ///construct the pages to be displayed in the dialog
         void createPages();
 

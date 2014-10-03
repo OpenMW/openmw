@@ -157,12 +157,11 @@ namespace MWGui
       , mMaxTime(0)
     {
         // defines
-        mBottomPadding = 20;
-        mNextBoxPadding = 20;
+        mBottomPadding = 48;
+        mNextBoxPadding = 4;
 
         getWidget(mMessageWidget, "message");
 
-        mMessageWidget->setOverflowToTheLeft(true);
         mMessageWidget->setCaptionWithReplacing(mMessage);
     }
 
@@ -178,7 +177,7 @@ namespace MWGui
 
     int MessageBox::getHeight ()
     {
-        return mMainWidget->getHeight()+mNextBoxPadding; // 20 is the padding between this and the next MessageBox
+        return mMainWidget->getHeight()+mNextBoxPadding;
     }
 
 
@@ -204,7 +203,6 @@ namespace MWGui
         getWidget(mMessageWidget, "message");
         getWidget(mButtonsWidget, "buttons");
 
-        mMessageWidget->setOverflowToTheLeft(true);
         mMessageWidget->setSize(400, mMessageWidget->getHeight());
         mMessageWidget->setCaptionWithReplacing(message);
 

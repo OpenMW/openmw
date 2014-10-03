@@ -12,16 +12,27 @@
 
 CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
                                        Page *parent)
-    : View (setting, parent)
+    : mType(setting->type()), View (setting, parent)
 {
     foreach (const QString &value, setting->declaredValues())
     {
         QAbstractButton *button = 0;
 
-        switch (setting->type())
+        switch (mType)
         {
-        case CSMSettings::Type_CheckBox:
-            button = new QCheckBox (value, this);
+        case CSMSettings::Type_CheckBox: {
+                if(mButtons.empty()) // show only one for checkboxes
+                {
+                    button = new QCheckBox (value, this);
+                    button->setChecked (setting->defaultValues().at(0) == "true" ? true : false);
+
+                    // special visual treatment option for checkboxes
+                    if(setting->specialValueText() != "") {
+                        Frame::setTitle("");
+                        button->setText(setting->specialValueText());
+                    }
+                }
+            }
         break;
 
         case CSMSettings::Type_RadioButton:
@@ -32,14 +43,17 @@ CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
         break;
         }
 
-        connect (button, SIGNAL (clicked (bool)),
-                this, SLOT (slotToggled (bool)));
+        if(button && (mType != CSMSettings::Type_CheckBox || mButtons.empty()))
+        {
+            connect (button, SIGNAL (clicked (bool)),
+                    this, SLOT (slotToggled (bool)));
 
-        button->setObjectName (value);
+            button->setObjectName (value);
 
-        addWidget (button);
+            addWidget (button);
 
-        mButtons[value] = button;
+            mButtons[value] = button;
+        }
     }
 }
 
@@ -53,8 +67,14 @@ void CSVSettings::BooleanView::slotToggled (bool state)
 
     foreach (QString key, mButtons.keys())
     {
-        if (mButtons.value(key)->isChecked())
-            values.append (key);
+        // checkbox values are true/false unlike radio buttons
+        if(mType == CSMSettings::Type_CheckBox)
+            values.append(mButtons.value(key)->isChecked() ? "true" : "false");
+        else
+        {
+            if (mButtons.value(key)->isChecked())
+                values.append (key);
+        }
     }
     setSelectedValues (values, false);
 

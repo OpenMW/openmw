@@ -123,6 +123,7 @@ public:
 
     void setWaterHeight(const float height);
     bool toggleWater();
+    bool toggleWorld();
 
     /// Updates object rendering after cell change
     /// \param old Object reference in previous cell
@@ -182,7 +183,7 @@ public:
     ///< request the local map for a cell
 
     /// configure fog according to cell
-    void configureFog(MWWorld::CellStore &mCell);
+    void configureFog(const MWWorld::CellStore &mCell);
 
     /// configure fog manually
     void configureFog(const float density, const Ogre::ColourValue& colour);
@@ -219,6 +220,8 @@ private:
 
     void setAmbientMode();
     void applyFog(bool underwater);
+
+    void attachCameraTo(const MWWorld::Ptr& ptr);
 
     void setMenuTransparency(float val);
 
@@ -266,6 +269,8 @@ private:
     MWRender::LocalMap* mLocalMap;
 
     MWRender::Shadows* mShadows;
+
+    bool mRenderWorld;
 };
 
 }

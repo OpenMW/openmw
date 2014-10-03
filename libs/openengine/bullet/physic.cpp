@@ -97,6 +97,8 @@ namespace Physic
                 (0,0, mShape.get());
         mBody = new RigidBody(CI, name);
         mBody->mPlaceable = false;
+        mBody->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
+        mBody->setActivationState(DISABLE_DEACTIVATION);
 
         setPosition(position);
         setRotation(rotation);
@@ -224,15 +226,15 @@ namespace Physic
         // The actual physics solver
         solver = new btSequentialImpulseConstraintSolver;
 
-        //btOverlappingPairCache* pairCache = new btSortedOverlappingPairCache();
-        pairCache = new btSortedOverlappingPairCache();
-
-        //pairCache->setInternalGhostPairCallback( new btGhostPairCallback() );
-
         broadphase = new btDbvtBroadphase();
 
         // The world.
         mDynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
+
+        // Don't update AABBs of all objects every frame. Most objects in MW are static, so we don't need this.
+        // Should a "static" object ever be moved, we have to update its AABB manually using DynamicsWorld::updateSingleAabb.
+        mDynamicsWorld->setForceUpdateAllAabbs(false);
+
         mDynamicsWorld->setGravity(btVector3(0,0,-10));
 
         if(BulletShapeManager::getSingletonPtr() == NULL)
@@ -334,7 +336,6 @@ namespace Physic
         delete collisionConfiguration;
         delete dispatcher;
         delete broadphase;
-        delete pairCache;
         delete mShapeLoader;
 
         delete BulletShapeManager::getSingletonPtr();
@@ -380,7 +381,7 @@ namespace Physic
         mHeightFieldMap [name] = hf;
 
         mDynamicsWorld->addRigidBody(body,CollisionType_HeightMap,
-                                    CollisionType_World|CollisionType_Actor|CollisionType_Raycasting);
+                                    CollisionType_Actor|CollisionType_Raycasting);
     }
 
     void PhysicEngine::removeHeightField(int x, int y)
@@ -487,7 +488,7 @@ namespace Physic
         {
             assert (mCollisionObjectMap.find(name) == mCollisionObjectMap.end());
             mCollisionObjectMap[name] = body;
-            mDynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_Actor|CollisionType_HeightMap);
+            mDynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_Actor|CollisionType_HeightMap);
         }
         else
         {

@@ -76,7 +76,7 @@ MWWorld::Ptr ContainerItemModel::copyItem (const ItemStack& item, size_t count, 
     const MWWorld::Ptr& source = mItemSources[mItemSources.size()-1];
     if (item.mBase.getContainerStore() == &source.getClass().getContainerStore(source))
         throw std::runtime_error("Item to copy needs to be from a different container!");
-    return *source.getClass().getContainerStore(source).add(item.mBase, count, source, setNewOwner);
+    return *source.getClass().getContainerStore(source).add(item.mBase, count, source);
 }
 
 void ContainerItemModel::removeItem (const ItemStack& item, size_t count)

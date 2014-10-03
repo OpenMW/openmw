@@ -259,20 +259,36 @@ int CS::Editor::run()
 
 std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 {
-    // TODO: setting
-    Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName("OpenGL Rendering Subsystem"));
+    std::string renderer =
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        "Direct3D9 Rendering Subsystem";
+#else
+        "OpenGL Rendering Subsystem";
+#endif
+    std::string renderSystem = mUserSettings.setting("Video/render system", renderer.c_str()).toStdString();
+
+    Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName(renderSystem));
 
     Ogre::Root::getSingleton().initialise(false);
 
     // Create a hidden background window to keep resources
     Ogre::NameValuePairList params;
     params.insert(std::make_pair("title", ""));
-    params.insert(std::make_pair("FSAA", "0"));
+
+    std::string antialiasing = mUserSettings.settingValue("Video/antialiasing").toStdString();
+    if(antialiasing == "MSAA 16")     antialiasing = "16";
+    else if(antialiasing == "MSAA 8") antialiasing = "8";
+    else if(antialiasing == "MSAA 4") antialiasing = "4";
+    else if(antialiasing == "MSAA 2") antialiasing = "2";
+    else                              antialiasing = "0";
+    params.insert(std::make_pair("FSAA", antialiasing));
+
     params.insert(std::make_pair("vsync", "false"));
     params.insert(std::make_pair("hidden", "true"));
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     params.insert(std::make_pair("macAPI", "cocoa"));
 #endif
+    // NOTE: fullscreen mode not supported (doesn't really make sense for opencs)
     Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, false, &params);
     hiddenWindow->setActive(false);
 
@@ -286,7 +302,28 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     std::auto_ptr<sh::Factory> factory (new sh::Factory (platform));
 
-    factory->setCurrentLanguage (sh::Language_GLSL); /// \todo make this configurable
+    QString shLang = mUserSettings.settingValue("General/shader mode");
+    QString rend = renderSystem.c_str();
+    bool openGL = rend.contains(QRegExp("^OpenGL", Qt::CaseInsensitive));
+    bool glES = rend.contains(QRegExp("^OpenGL ES", Qt::CaseInsensitive));
+
+    // force shader language based on render system
+    if(shLang == ""
+            || (openGL && shLang == "hlsl")
+            || (!openGL && shLang == "glsl")
+            || (glES && shLang != "glsles"))
+    {
+        shLang = openGL ? (glES ? "glsles" : "glsl") : "hlsl";
+        //no group means "General" group in the "ini" file standard
+        mUserSettings.setDefinitions("shader mode", (QStringList() << shLang));
+    }
+    enum sh::Language lang;
+    if(shLang == "glsl")        lang = sh::Language_GLSL;
+    else if(shLang == "glsles") lang = sh::Language_GLSLES;
+    else if(shLang == "hlsl")   lang = sh::Language_HLSL;
+    else                        lang = sh::Language_CG;
+
+    factory->setCurrentLanguage (lang);
     factory->setWriteSourceCache (true);
     factory->setReadSourceCache (true);
     factory->setReadMicrocodeCache (true);
@@ -294,16 +331,27 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     factory->loadAllFiles();
 
-    sh::Factory::getInstance().setGlobalSetting ("fog", "true");
+    bool shaders = mUserSettings.setting("Objects/shaders", QString("true")) == "true" ? true : false;
+    sh::Factory::getInstance ().setShadersEnabled (shaders);
 
-    sh::Factory::getInstance().setGlobalSetting ("shadows", "false");
-    sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", "false");
+    std::string fog = mUserSettings.setting("Shader/fog", QString("true")).toStdString();
+    sh::Factory::getInstance().setGlobalSetting ("fog", fog);
 
-    sh::Factory::getInstance ().setGlobalSetting ("render_refraction", "false");
 
+    std::string shadows = mUserSettings.setting("Shader/shadows", QString("false")).toStdString();
+    sh::Factory::getInstance().setGlobalSetting ("shadows", shadows);
+
+    std::string shadows_pssm = mUserSettings.setting("Shader/shadows_pssm", QString("false")).toStdString();
+    sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", shadows_pssm);
+
+    std::string render_refraction = mUserSettings.setting("Shader/render_refraction", QString("false")).toStdString();
+    sh::Factory::getInstance ().setGlobalSetting ("render_refraction", render_refraction);
+
+    // internal setting - may be switched on or off by the use of shader configurations
     sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
 
-    sh::Factory::getInstance ().setGlobalSetting ("num_lights", "8");
+    std::string num_lights = mUserSettings.setting("Objects/num_lights", QString("8")).toStdString();
+    sh::Factory::getInstance ().setGlobalSetting ("num_lights", num_lights);
 
     /// \todo add more configurable shiny settings
 
