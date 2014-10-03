@@ -50,7 +50,8 @@ namespace MWRender
 
     void Refraction::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
     {
-        mParentCamera->getParentSceneNode ()->needUpdate ();
+        if (mParentCamera->isAttached())
+            mParentCamera->getParentSceneNode ()->needUpdate ();
         mCamera->setOrientation(mParentCamera->getDerivedOrientation());
         mCamera->setPosition(mParentCamera->getDerivedPosition());
         mCamera->setNearClipDistance(mParentCamera->getNearClipDistance());

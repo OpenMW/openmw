@@ -256,6 +256,8 @@ namespace Compiler
             extensions.registerInstruction ("fadeto", "ff", opcodeFadeTo);
             extensions.registerInstruction ("togglewater", "", opcodeToggleWater);
             extensions.registerInstruction ("twa", "", opcodeToggleWater);
+            extensions.registerInstruction ("toggleworld", "", opcodeToggleWorld);
+            extensions.registerInstruction ("tw", "", opcodeToggleWorld);
             extensions.registerInstruction ("togglepathgrid", "", opcodeTogglePathgrid);
             extensions.registerInstruction ("tpg", "", opcodeTogglePathgrid);
             extensions.registerInstruction ("dontsaveobject", "", opcodeDontSaveObject);

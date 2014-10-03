@@ -73,38 +73,6 @@ namespace
             return NULL;
     }
 
-
-    // Ogre::AxisAlignedBox::distance is broken in 1.8.
-    Ogre::Real distance(const Ogre::AxisAlignedBox& box, const Ogre::Vector3& v)
-    {
-
-      if (box.contains(v))
-        return 0;
-      else
-      {
-          Ogre::Vector3 maxDist(0,0,0);
-        const Ogre::Vector3& minimum = box.getMinimum();
-        const Ogre::Vector3& maximum = box.getMaximum();
-
-        if (v.x < minimum.x)
-          maxDist.x = minimum.x - v.x;
-        else if (v.x > maximum.x)
-          maxDist.x = v.x - maximum.x;
-
-        if (v.y < minimum.y)
-          maxDist.y = minimum.y - v.y;
-        else if (v.y > maximum.y)
-          maxDist.y = v.y - maximum.y;
-
-        if (v.z < minimum.z)
-          maxDist.z = minimum.z - v.z;
-        else if (v.z > maximum.z)
-          maxDist.z = v.z - maximum.z;
-
-        return maxDist.length();
-      }
-    }
-
     // Create a 2D quad
     void makeQuad(Ogre::SceneManager* sceneMgr, float left, float top, float right, float bottom, Ogre::MaterialPtr material)
     {
@@ -270,7 +238,7 @@ bool QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
     if (mBounds.isNull())
         return true;
 
-    float dist = distance(mWorldBounds, cameraPos);
+    float dist = mWorldBounds.distance(cameraPos);
 
     // Make sure our scene node is attached
     if (!mSceneNode->isInSceneGraph())

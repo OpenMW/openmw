@@ -4,11 +4,15 @@
 #include <QFile>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/settings/settings.hpp>
 #include <boost/version.hpp>
 
 #include "setting.hpp"
 #include "support.hpp"
+#include <QTextCodec>
 #include <QDebug>
+
+#include <extern/shiny/Main/Factory.hpp>
 
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
@@ -28,20 +32,111 @@ namespace boost
 
 CSMSettings::UserSettings *CSMSettings::UserSettings::mUserSettingsInstance = 0;
 
-CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
-: mCfgMgr (configurationManager)
+    CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
+    : mCfgMgr (configurationManager)
+    , mSettingDefinitions(NULL)
+    , mSettingCfgDefinitions(NULL)
 {
     assert(!mUserSettingsInstance);
     mUserSettingsInstance = this;
 
-    mSettingDefinitions = 0;
-
     buildSettingModelDefaults();
+
+    // for overriding opencs.ini settings with those from settings.cfg
+    mSettingCfgDefinitions = new QSettings(QSettings::IniFormat, QSettings::UserScope, "", QString(), this);
 }
 
 void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
-    QString section = "Window Size";
+    QString section;
+
+    section = "Objects";
+    {
+        Setting *numLights = createSetting (Type_SpinBox, section, "num_lights");
+        numLights->setDefaultValue(8);
+        numLights->setEditorSetting(true);
+        numLights->setColumnSpan (1);
+        numLights->setMinimum (0);
+        numLights->setMaximum (100); // FIXME: not sure what the max value should be
+        numLights->setWidgetWidth (10);
+        numLights->setViewLocation(1, 2);
+
+        Setting *shaders = createSetting (Type_CheckBox, section, "shaders");
+        shaders->setDeclaredValues(QStringList() << "true" << "false");
+        shaders->setDefaultValue("true");
+        shaders->setEditorSetting(true);
+        shaders->setSpecialValueText("Enable Shaders");
+        shaders->setWidgetWidth(25);
+        shaders->setColumnSpan (3);
+        shaders->setStyleSheet ("QGroupBox { border: 0px; }");
+        shaders->setViewLocation(2, 1);
+    }
+
+    section = "Scene";
+    {
+        Setting *fastFactor = createSetting (Type_SpinBox, section, "fast factor");
+        fastFactor->setDefaultValue(4);
+        fastFactor->setEditorSetting(true);
+        fastFactor->setColumnSpan (1);
+        fastFactor->setMinimum (1);
+        fastFactor->setSpecialValueText ("1"); // FIXME: workaround
+        fastFactor->setMaximum (100); // FIXME: not sure what the max value should be
+        fastFactor->setWidgetWidth (10);
+        fastFactor->setViewLocation(1, 2);
+
+        Setting *farClipDist = createSetting (Type_DoubleSpinBox, section, "far clip distance");
+        farClipDist->setDefaultValue(300000);
+        farClipDist->setEditorSetting(true);
+        farClipDist->setColumnSpan (1);
+        farClipDist->setMinimum (0);
+        farClipDist->setMaximum (1000000); // FIXME: not sure what the max value should be
+        farClipDist->setWidgetWidth (10);
+        farClipDist->setViewLocation(2, 2);
+
+        Setting *timerStart = createSetting (Type_SpinBox, section, "timer start");
+        timerStart->setDefaultValue(20);
+        timerStart->setEditorSetting(true);
+        timerStart->setColumnSpan (1);
+        timerStart->setMinimum (0);
+        timerStart->setMaximum (100); // FIXME: not sure what the max value should be
+        timerStart->setWidgetWidth (10);
+        timerStart->setViewLocation(3, 2);
+    }
+
+    section = "SubView";
+    {
+        Setting *maxSubView = createSetting (Type_SpinBox, section, "max subviews");
+        maxSubView->setDefaultValue(256);
+        maxSubView->setEditorSetting(true);
+        maxSubView->setColumnSpan (1);
+        maxSubView->setMinimum (1);
+        maxSubView->setSpecialValueText ("1");
+        maxSubView->setMaximum (256); // FIXME: not sure what the max value should be
+        maxSubView->setWidgetWidth (10);
+        maxSubView->setViewLocation(1, 2);
+
+        Setting *minWidth = createSetting (Type_SpinBox, section, "minimum width");
+        minWidth->setDefaultValue(325);
+        minWidth->setEditorSetting(true);
+        minWidth->setColumnSpan (1);
+        minWidth->setMinimum (50);
+        minWidth->setSpecialValueText ("50");
+        minWidth->setMaximum (10000); // FIXME: not sure what the max value should be
+        minWidth->setWidgetWidth (10);
+        minWidth->setViewLocation(2, 2);
+
+        Setting *reuse = createSetting (Type_CheckBox, section, "reuse");
+        reuse->setDeclaredValues(QStringList() << "true" << "false");
+        reuse->setDefaultValue("true");
+        reuse->setEditorSetting(true);
+        reuse->setSpecialValueText("Reuse SubView");
+        reuse->setWidgetWidth(25);
+        reuse->setColumnSpan (3);
+        reuse->setStyleSheet ("QGroupBox { border: 0px; }");
+        reuse->setViewLocation(3, 2);
+    }
+
+    section = "Window Size";
     {
         Setting *width = createSetting (Type_LineEdit, section, "Width");
         Setting *height = createSetting (Type_LineEdit, section, "Height");
@@ -98,6 +193,17 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         rsd->setEditorSetting (true);
         ritd->setEditorSetting (true);
+    }
+
+    section = "Video";
+    {
+        QString defaultValue = "None";
+        QStringList values = QStringList()
+                        << defaultValue << "MSAA 2" << "MSAA 4" << "MSAA 8" << "MSAA 16";
+        Setting *antialiasing = createSetting (Type_SpinBox, section, "antialiasing");
+        antialiasing->setDeclaredValues (values);
+        antialiasing->setEditorSetting (true);
+        antialiasing->setWidgetWidth(15);
     }
 
     section = "Proxy Selection Test";
@@ -305,10 +411,27 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 
     mSettingDefinitions = new QSettings
         (QSettings::IniFormat, QSettings::UserScope, "opencs", QString(), this);
+
+    // check if override entry exists (default: disabled)
+    if(!mSettingDefinitions->childGroups().contains("Video", Qt::CaseInsensitive))
+        mSettingDefinitions->setValue("Video/use settings.cfg", "false");
 }
 
-bool CSMSettings::UserSettings::hasSettingDefinitions
-                                                (const QString &viewKey) const
+// if the key is not found create one with a defaut value
+QString CSMSettings::UserSettings::setting(const QString &viewKey, const QString &value)
+{
+    if(mSettingDefinitions->contains(viewKey))
+        return settingValue(viewKey);
+    else if(value != QString())
+    {
+        mSettingDefinitions->setValue (viewKey, QStringList() << value);
+        return value;
+    }
+
+    return QString();
+}
+
+bool CSMSettings::UserSettings::hasSettingDefinitions (const QString &viewKey) const
 {
     return (mSettingDefinitions->contains (viewKey));
 }
@@ -326,10 +449,25 @@ void CSMSettings::UserSettings::saveDefinitions() const
 
 QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
 {
-    if (!mSettingDefinitions->contains (settingKey))
-        return QString();
+    QStringList defs;
 
-    QStringList defs = mSettingDefinitions->value (settingKey).toStringList();
+    // check if video settings are overriden
+    if(settingKey.contains(QRegExp("^Video\\b", Qt::CaseInsensitive)) &&
+       mSettingDefinitions->value("Video/use settings.cfg") == "true" &&
+       settingKey.contains(QRegExp("^Video/\\brender|antialiasing|vsync|fullscreen\\b", Qt::CaseInsensitive)))
+    {
+        if (!mSettingCfgDefinitions->contains (settingKey))
+            return QString();
+        else
+            defs = mSettingCfgDefinitions->value (settingKey).toStringList();
+    }
+    else
+    {
+        if (!mSettingDefinitions->contains (settingKey))
+            return QString();
+
+        defs = mSettingDefinitions->value (settingKey).toStringList();
+    }
 
     if (defs.isEmpty())
         return QString();
@@ -347,6 +485,15 @@ void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
                                                     const QStringList &list)
 {
     mSettingDefinitions->setValue (settingKey ,list);
+
+    if(settingKey == "Objects/num_lights" && !list.empty())
+    {
+        sh::Factory::getInstance ().setGlobalSetting ("num_lights", list.at(0).toStdString());
+    }
+    else if(settingKey == "Objects/shaders" && !list.empty())
+    {
+        sh::Factory::getInstance ().setShadersEnabled (list.at(0).toStdString() == "true" ? true : false);
+    }
 
     emit userSettingUpdated (settingKey, list);
 }
@@ -386,7 +533,6 @@ void CSMSettings::UserSettings::removeSetting
         removeIterator++;
     }
 }
-
 
 CSMSettings::SettingPageMap CSMSettings::UserSettings::settingPageMap() const
 {

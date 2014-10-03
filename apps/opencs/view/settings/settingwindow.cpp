@@ -19,7 +19,7 @@ void CSVSettings::SettingWindow::createPages()
     QList <CSMSettings::Setting *> connectedSettings;
 
     foreach (const QString &pageName, pageMap.keys())
-    {        
+    {
         QList <CSMSettings::Setting *> pageSettings = pageMap.value (pageName);
 
         mPages.append (new Page (pageName, pageSettings, this));
@@ -129,7 +129,3 @@ void CSVSettings::SettingWindow::saveSettings()
     mModel->saveDefinitions();
 }
 
-void CSVSettings::SettingWindow::closeEvent (QCloseEvent *event)
-{
-    QApplication::focusWidget()->clearFocus();
-}

@@ -18,6 +18,11 @@ namespace CSVWorld
     class CommandDelegateFactoryCollection;
 }
 
+namespace CSMWorld
+{
+    class UniversalId;
+}
+
 namespace CSVDoc
 {
     class View;
@@ -51,6 +56,8 @@ namespace CSVDoc
 
             View *addView (CSMDoc::Document *document);
             ///< The ownership of the returned view is not transferred.
+
+            View *addView (CSMDoc::Document *document, const CSMWorld::UniversalId& id, const std::string& hint);
 
             int countViews (const CSMDoc::Document *document) const;
             ///< Return number of views for \a document.

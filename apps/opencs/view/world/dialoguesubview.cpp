@@ -392,7 +392,6 @@ void CSVWorld::EditWidget::remake(int row)
 
     mWidgetMapper->setCurrentModelIndex(mTable->index(row, 0));
 
-    this->setMinimumWidth(325); /// \todo replace hardcoded value with a user setting
     this->setWidget(mMainWidget);
     this->setWidgetResizable(true);
 }

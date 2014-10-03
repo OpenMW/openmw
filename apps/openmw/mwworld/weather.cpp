@@ -498,7 +498,8 @@ void WeatherManager::update(float duration)
                 else if (sound == 1) soundName = &mThunderSoundID1;
                 else if (sound == 2) soundName = &mThunderSoundID2;
                 else if (sound == 3) soundName = &mThunderSoundID3;
-                MWBase::Environment::get().getSoundManager()->playSound(*soundName, 1.0, 1.0);
+                if (soundName)
+                    MWBase::Environment::get().getSoundManager()->playSound(*soundName, 1.0, 1.0);
                 mThunderSoundDelay = 1000;
             }
 

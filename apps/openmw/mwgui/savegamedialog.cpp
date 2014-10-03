@@ -322,7 +322,8 @@ namespace MWGui
             if (i == pos)
                 mCurrentSlot = &*it;
         }
-        assert(mCurrentSlot && "Can't find selected slot");
+        if (!mCurrentSlot)
+            throw std::runtime_error("Can't find selected slot");
 
         std::stringstream text;
         time_t time = mCurrentSlot->mTimeStamp;

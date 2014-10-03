@@ -40,7 +40,7 @@ using namespace Ogre;
 namespace
 {
 
-void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>& map)
+void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>& map, btDynamicsWorld* dynamicsWorld)
 {
     for (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>::iterator it = map.begin();
          it != map.end(); ++it)
@@ -79,6 +79,9 @@ void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Phys
             compound->getChildShape(shapeIt->second)->setLocalScaling(BtOgre::Convert::toBullet(bone->_getDerivedScale()));
             compound->updateChildTransform(shapeIt->second, trans);
         }
+
+        // needed because we used btDynamicsWorld::setForceUpdateAllAabbs(false)
+        dynamicsWorld->updateSingleAabb(it->first);
     }
 }
 
@@ -283,8 +286,9 @@ namespace MWWorld
              */
 
             OEngine::Physic::ActorTracer tracer;
-            bool wasOnGround = false;
-            bool isOnGround = false;
+            bool isOnGround = physicActor->getOnGround();
+            if (movement.z > 0.f)
+                isOnGround = false;
             Ogre::Vector3 inertia(0.0f);
             Ogre::Vector3 velocity;
 
@@ -317,23 +321,6 @@ namespace MWWorld
                         velocity = newVelocity;
                 }
                 inertia = velocity; // NOTE: velocity is for z axis only in this code block
-
-                if(!(movement.z > 0.0f)) // falling or moving horizontally (or stationary?) check if we're on ground now
-                {
-                    wasOnGround = physicActor->getOnGround(); // store current state
-                    tracer.doTrace(colobj, position, position - Ogre::Vector3(0,0,2), engine); // check if down 2 possible
-                    if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
-                    {
-                        const btCollisionObject* standingOn = tracer.mHitObject;
-                        if (const OEngine::Physic::RigidBody* body = dynamic_cast<const OEngine::Physic::RigidBody*>(standingOn))
-                        {
-                            standingCollisionTracker[ptr.getRefData().getHandle()] = body->mName;
-                        }
-                        isOnGround = true;
-                        // if we're on the ground, don't try to fall any more
-                        velocity.z = std::max(0.0f, velocity.z);
-                    }
-                }
             }
             ptr.getClass().getMovementSettings(ptr).mPosition[2] = 0;
 
@@ -385,7 +372,6 @@ namespace MWWorld
                     if(tracer.mFraction >= 1.0f)
                     {
                         newPosition = tracer.mEndPos; // ok to move, so set newPosition
-                        remainingTime *= (1.0f-tracer.mFraction); // FIXME: remainingTime is no longer used so don't set it?
                         break;
                     }
                     else
@@ -406,7 +392,6 @@ namespace MWWorld
                     // precision can be lost due to any math Bullet does internally). Since we
                     // aren't performing any collision detection, we want to reject the next
                     // position, so that we don't slowly move inside another object.
-                    remainingTime *= (1.0f-tracer.mFraction); // FIXME: remainingTime is no longer used so don't set it?
                     break;
                 }
 
@@ -438,12 +423,22 @@ namespace MWWorld
                 }
             }
 
-            if(isOnGround || wasOnGround)
+            if (!(inertia.z > 0.f) && !(newPosition.z < waterlevel || isFlying))
             {
-                tracer.doTrace(colobj, newPosition, newPosition - Ogre::Vector3(0,0,sStepSize+2.0f), engine);
+                Ogre::Vector3 from = newPosition;
+                Ogre::Vector3 to = newPosition - (isOnGround ?
+                             Ogre::Vector3(0,0,sStepSize+2.f) : Ogre::Vector3(0,0,2.f));
+                tracer.doTrace(colobj, from, to, engine);
                 if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
                 {
+                    const btCollisionObject* standingOn = tracer.mHitObject;
+                    if (const OEngine::Physic::RigidBody* body = dynamic_cast<const OEngine::Physic::RigidBody*>(standingOn))
+                    {
+                        standingCollisionTracker[ptr.getRefData().getHandle()] = body->mName;
+                    }
+
                     newPosition.z = tracer.mEndPos.z + 1.0f;
+
                     isOnGround = true;
                 }
                 else
@@ -672,11 +667,18 @@ namespace MWWorld
         const Ogre::Vector3 &position = node->getPosition();
 
         if(OEngine::Physic::RigidBody *body = mEngine->getRigidBody(handle))
+        {
             body->getWorldTransform().setOrigin(btVector3(position.x,position.y,position.z));
+            mEngine->mDynamicsWorld->updateSingleAabb(body);
+        }
 
         if(OEngine::Physic::RigidBody *body = mEngine->getRigidBody(handle, true))
+        {
             body->getWorldTransform().setOrigin(btVector3(position.x,position.y,position.z));
+            mEngine->mDynamicsWorld->updateSingleAabb(body);
+        }
 
+        // Actors update their AABBs every frame (DISABLE_DEACTIVATION), so no need to do it manually
         if(OEngine::Physic::PhysicActor *physact = mEngine->getCharacter(handle))
             physact->setPosition(position);
     }
@@ -698,6 +700,7 @@ namespace MWWorld
                 body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
             else
                 mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, node->getPosition(), rotation);
+            mEngine->mDynamicsWorld->updateSingleAabb(body);
         }
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle, true))
         {
@@ -705,6 +708,7 @@ namespace MWWorld
                 body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
             else
                 mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, node->getPosition(), rotation);
+            mEngine->mDynamicsWorld->updateSingleAabb(body);
         }
     }
 
@@ -866,8 +870,8 @@ namespace MWWorld
 
     void PhysicsSystem::stepSimulation(float dt)
     {
-        animateCollisionShapes(mEngine->mAnimatedShapes);
-        animateCollisionShapes(mEngine->mAnimatedRaycastingShapes);
+        animateCollisionShapes(mEngine->mAnimatedShapes, mEngine->mDynamicsWorld);
+        animateCollisionShapes(mEngine->mAnimatedRaycastingShapes, mEngine->mDynamicsWorld);
 
         mEngine->stepSimulation(dt);
     }

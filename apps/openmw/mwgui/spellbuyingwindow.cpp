@@ -100,6 +100,15 @@ namespace MWGui
             if (spell->mData.mType!=ESM::Spell::ST_Spell)
                 continue; // don't try to sell diseases, curses or powers
 
+            if (actor.getClass().isNpc())
+            {
+                const ESM::Race* race =
+                        MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(
+                        actor.get<ESM::NPC>()->mBase->mRace);
+                if (race->mPowers.exists(spell->mId))
+                    continue;
+            }
+
             if (playerHasSpell(iter->first))
                 continue;
 

@@ -71,6 +71,14 @@ namespace CSMWorld
 
             record.load (reader);
 
+            if (index==-1)
+            {
+                std::string newId = IdAccessorT().getId(record);
+                int newIndex = this->searchId(newId);
+                if (newIndex != -1 && id != newId)
+                    index = newIndex;
+            }
+
             load (record, base, index);
         }
     }

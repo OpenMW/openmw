@@ -194,6 +194,16 @@ QString CSMSettings::Setting::page() const
     return property (Property_Page).at(0);
 }
 
+void CSMSettings::Setting::setStyleSheet (const QString &value)
+{
+    setProperty (Property_StyleSheet, value);
+}
+
+QString CSMSettings::Setting::styleSheet() const
+{
+    return property (Property_StyleSheet).at(0);
+}
+
 void CSMSettings::Setting::setPrefix (const QString &value)
 {
     setProperty (Property_Prefix, value);

@@ -290,6 +290,17 @@ namespace MWScript
                 }
         };
 
+        class OpToggleWorld : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    runtime.getContext().report(MWBase::Environment::get().getWorld()->toggleWorld() ? "World -> On"
+                                                                                                     : "World -> Off");
+                }
+        };
+
         class OpDontSaveObject : public Interpreter::Opcode0
         {
             public:
@@ -979,6 +990,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeFadeTo, new OpFadeTo);
             interpreter.installSegment5 (Compiler::Misc::opcodeTogglePathgrid, new OpTogglePathgrid);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleWater, new OpToggleWater);
+            interpreter.installSegment5 (Compiler::Misc::opcodeToggleWorld, new OpToggleWorld);
             interpreter.installSegment5 (Compiler::Misc::opcodeDontSaveObject, new OpDontSaveObject);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleVanityMode, new OpToggleVanityMode);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetPcSleep, new OpGetPcSleep);

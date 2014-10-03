@@ -119,9 +119,11 @@ namespace ICS
         //bool sliderMoved(const OIS::JoyStickEvent &evt, int index);
 
         void addKeyBinding(Control* control, SDL_Scancode key, Control::ControlChangingDirection direction);
+        bool isKeyBound(SDL_Scancode key) const;
 		void addMouseAxisBinding(Control* control, NamedAxis axis, Control::ControlChangingDirection direction);
 		void addMouseButtonBinding(Control* control, unsigned int button, Control::ControlChangingDirection direction);
-		void addJoystickAxisBinding(Control* control, int deviceId, int axis, Control::ControlChangingDirection direction);
+        bool isMouseButtonBound(unsigned int button) const;
+        void addJoystickAxisBinding(Control* control, int deviceId, int axis, Control::ControlChangingDirection direction);
 		void addJoystickButtonBinding(Control* control, int deviceId, unsigned int button, Control::ControlChangingDirection direction);
 		void addJoystickPOVBinding(Control* control, int deviceId, int index, POVAxis axis, Control::ControlChangingDirection direction);
 		void addJoystickSliderBinding(Control* control, int deviceId, int index, Control::ControlChangingDirection direction);

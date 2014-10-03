@@ -80,6 +80,9 @@ namespace CSMSettings
         void setPage (const QString &value);
         QString page() const;
 
+        void setStyleSheet (const QString &value);
+        QString styleSheet() const;
+
         void setPrefix (const QString &value);
         QString prefix() const;
 

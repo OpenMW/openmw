@@ -562,12 +562,11 @@ namespace MWGui
 
         MyGUI::Button* byeButton;
         getWidget(byeButton, "ByeButton");
-        if(MWBase::Environment::get().getDialogueManager()->isInChoice() && !mGoodbye) {
-            byeButton->setEnabled(false);
-        }
-        else {
-            byeButton->setEnabled(true);
-        }
+        bool goodbyeEnabled = !MWBase::Environment::get().getDialogueManager()->isInChoice() || mGoodbye;
+        byeButton->setEnabled(goodbyeEnabled);
+
+        bool topicsEnabled = !MWBase::Environment::get().getDialogueManager()->isInChoice() && !mGoodbye;
+        mTopicsList->setEnabled(topicsEnabled);
     }
 
     void DialogueWindow::notifyLinkClicked (TypesetBook::InteractiveId link)
@@ -657,7 +656,6 @@ namespace MWGui
     {
         mLinks.push_back(new Goodbye());
         mGoodbye = true;
-        mTopicsList->setEnabled(false);
         mEnabled = false;
         updateHistory();
     }

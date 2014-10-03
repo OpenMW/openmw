@@ -33,7 +33,7 @@
 
     <Resource type="ResourceLayout" name="TabControl" version="3.2.0">
         <Widget type="Widget" skin="" position="5 5 89 60" name="Root">
-            <UserString key="ButtonSkin" value="MW_Button"/>
+            <UserString key="ButtonSkin" value="MW_Button_RightPadding"/>
             <Widget type="Widget" skin="MW_Box" position="0 28 89 32" align="Left Top Stretch">
                 <Widget type="Widget" skin="" position="4 4 81 28" align="Left Top Stretch" name="TabItem"/>
             </Widget>
@@ -46,7 +46,7 @@
 
     <Resource type="ResourceLayout" name="TabControlInner" version="3.2.0">
         <Widget type="Widget" skin="" position="0 5 89 60" name="Root">
-            <UserString key="ButtonSkin" value="MW_Button"/>
+            <UserString key="ButtonSkin" value="MW_Button_RightPadding"/>
             <Widget type="Widget" skin="" position="0 28 89 32" align="Left Top Stretch" name="TabItem"/>
 
             <Widget type="Widget" skin="" position="0 0 89 23" align="HStretch Top" name="HeaderPlace">

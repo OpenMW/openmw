@@ -33,7 +33,9 @@ namespace CSMSettings {
         const Files::ConfigurationManager& mCfgMgr;
 
         QSettings *mSettingDefinitions;
+        QSettings *mSettingCfgDefinitions;
         QList <Setting *> mSettings;
+
 
     public:
 
@@ -74,6 +76,8 @@ namespace CSMSettings {
 
         ///Save any unsaved changes in the QSettings object
         void saveDefinitions() const;
+
+        QString setting(const QString &viewKey, const QString &value = QString());
 
     private:
 

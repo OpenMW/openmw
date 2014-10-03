@@ -41,12 +41,11 @@ namespace MWGui
 
         getWidget(mHeadRotate, "HeadRotate");
 
-        // Mouse wheel step is hardcoded to 50 in MyGUI 3.2 ("FIXME").
-        // Give other steps the same value to accomodate.
         mHeadRotate->setScrollRange(1000);
         mHeadRotate->setScrollPosition(500);
         mHeadRotate->setScrollViewPage(50);
         mHeadRotate->setScrollPage(50);
+        mHeadRotate->setScrollWheelPage(50);
         mHeadRotate->eventScrollChangePosition += MyGUI::newDelegate(this, &RaceDialog::onHeadRotate);
 
         // Set up next/previous buttons

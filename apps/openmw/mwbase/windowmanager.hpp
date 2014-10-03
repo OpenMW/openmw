@@ -177,7 +177,7 @@ namespace MWBase
             virtual void changeCell(MWWorld::CellStore* cell) = 0;
             ///< change the active cell
 
-            virtual void setPlayerPos(const float x, const float y) = 0;
+            virtual void setPlayerPos(int cellX, int cellY, const float x, const float y) = 0;
             ///< set player position in map space
 
             virtual void setPlayerDir(const float x, const float y) = 0;
@@ -337,6 +337,8 @@ namespace MWBase
             virtual void fadeScreenTo(const int percent, const float time) = 0;
             /// Darken the screen by \a factor (1.0 = no darkening). Works independently from screen fading.
             virtual void setScreenFactor (float factor) = 0;
+
+            virtual void toggleDebugWindow() = 0;
     };
 }
 

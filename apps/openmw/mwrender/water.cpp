@@ -74,7 +74,8 @@ CubeReflection::~CubeReflection ()
 
 void CubeReflection::update ()
 {
-    mParentCamera->getParentSceneNode ()->needUpdate ();
+    if (mParentCamera->isAttached())
+        mParentCamera->getParentSceneNode ()->needUpdate ();
     mCamera->setPosition(mParentCamera->getDerivedPosition());
 }
 
@@ -133,7 +134,8 @@ void PlaneReflection::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::St
 
 void PlaneReflection::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
 {
-    mParentCamera->getParentSceneNode ()->needUpdate ();
+    if (mParentCamera->isAttached())
+        mParentCamera->getParentSceneNode ()->needUpdate ();
     mCamera->setOrientation(mParentCamera->getDerivedOrientation());
     mCamera->setPosition(mParentCamera->getDerivedPosition());
     mCamera->setNearClipDistance(mParentCamera->getNearClipDistance());

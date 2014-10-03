@@ -5,7 +5,7 @@
 #include <components/nif/niffile.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp" /// FIXME
+#include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -117,6 +117,28 @@ namespace MWWorld
         }
     }
 
+    void Scene::getGridCenter(int &cellX, int &cellY)
+    {
+        int maxX = std::numeric_limits<int>().min();
+        int maxY = std::numeric_limits<int>().min();
+        int minX = std::numeric_limits<int>().max();
+        int minY = std::numeric_limits<int>().max();
+        CellStoreCollection::iterator iter = mActiveCells.begin();
+        while (iter!=mActiveCells.end())
+        {
+            assert ((*iter)->getCell()->isExterior());
+            int x = (*iter)->getCell()->getGridX();
+            int y = (*iter)->getCell()->getGridY();
+            maxX = std::max(x, maxX);
+            maxY = std::max(y, maxY);
+            minX = std::min(x, minX);
+            minY = std::min(y, minY);
+            ++iter;
+        }
+        cellX = (minX + maxX) / 2;
+        cellY = (minY + maxY) / 2;
+    }
+
     void Scene::update (float duration, bool paused)
     {
         if (mNeedMapUpdate)
@@ -126,6 +148,13 @@ namespace MWWorld
             for (CellStoreCollection::iterator active = mActiveCells.begin(); active!=mActiveCells.end(); ++active)
                 mRendering.requestMap(*active);
             mNeedMapUpdate = false;
+
+            if (mCurrentCell->isExterior())
+            {
+                int cellX, cellY;
+                getGridCenter(cellX, cellY);
+                MWBase::Environment::get().getWindowManager()->setActiveMap(cellX,cellY,false);
+            }
         }
 
         mRendering.update (duration, paused);
@@ -213,41 +242,6 @@ namespace MWWorld
         MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
     }
 
-    void Scene::playerCellChange(CellStore *cell, const ESM::Position& pos, bool adjustPlayerPos)
-    {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
-        MWWorld::Ptr old = world->getPlayerPtr();
-        world->getPlayer().setCell(cell);
-
-        MWWorld::Ptr player = world->getPlayerPtr();
-        mRendering.updatePlayerPtr(player);
-
-        if (adjustPlayerPos) {
-            world->moveObject(player, pos.pos[0], pos.pos[1], pos.pos[2]);
-
-            float x = Ogre::Radian(pos.rot[0]).valueDegrees();
-            float y = Ogre::Radian(pos.rot[1]).valueDegrees();
-            float z = Ogre::Radian(pos.rot[2]).valueDegrees();
-            world->rotateObject(player, x, y, z);
-
-            player.getClass().adjustPosition(player, true);
-        }
-
-        MWBase::MechanicsManager *mechMgr =
-            MWBase::Environment::get().getMechanicsManager();
-
-        mechMgr->updateCell(old, player);
-        mechMgr->watchActor(player);
-
-        mRendering.updateTerrain();
-
-        // Delay the map update until scripts have been given a chance to run.
-        // If we don't do this, objects that should be disabled will still appear on the map.
-        mNeedMapUpdate = true;
-
-        MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
-    }
-
     void Scene::changeToVoid()
     {
         CellStoreCollection::iterator active = mActiveCells.begin();
@@ -257,7 +251,28 @@ namespace MWWorld
         mCurrentCell = NULL;
     }
 
-    void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
+    void Scene::playerMoved(const Ogre::Vector3 &pos)
+    {
+        if (!mCurrentCell || !mCurrentCell->isExterior())
+            return;
+
+        // figure out the center of the current cell grid (*not* necessarily mCurrentCell, which is the cell the player is in)
+        int cellX, cellY;
+        getGridCenter(cellX, cellY);
+        float centerX, centerY;
+        MWBase::Environment::get().getWorld()->indexToPosition(cellX, cellY, centerX, centerY, true);
+        const float maxDistance = 8192/2 + 1024; // 1/2 cell size + threshold
+        float distance = std::max(std::abs(centerX-pos.x), std::abs(centerY-pos.y));
+        if (distance > maxDistance)
+        {
+            int newX, newY;
+            MWBase::Environment::get().getWorld()->positionToIndex(pos.x, pos.y, newX, newY);
+            changeCellGrid(newX, newY);
+            mRendering.updateTerrain();
+        }
+    }
+
+    void Scene::changeCellGrid (int X, int Y)
     {
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
@@ -286,6 +301,7 @@ namespace MWWorld
         int refsToLoad = 0;
         // get the number of refs to load
         for (int x=X-1; x<=X+1; ++x)
+        {
             for (int y=Y-1; y<=Y+1; ++y)
             {
                 CellStoreCollection::iterator iter = mActiveCells.begin();
@@ -304,11 +320,13 @@ namespace MWWorld
                 if (iter==mActiveCells.end())
                     refsToLoad += MWBase::Environment::get().getWorld()->getExterior(x, y)->count();
             }
+        }
 
         loadingListener->setProgressRange(refsToLoad);
 
         // Load cells
         for (int x=X-1; x<=X+1; ++x)
+        {
             for (int y=Y-1; y<=Y+1; ++y)
             {
                 CellStoreCollection::iterator iter = mActiveCells.begin();
@@ -331,32 +349,47 @@ namespace MWWorld
                     loadCell (cell, loadingListener);
                 }
             }
-
-        // find current cell
-        CellStoreCollection::iterator iter = mActiveCells.begin();
-
-        while (iter!=mActiveCells.end())
-        {
-            assert ((*iter)->getCell()->isExterior());
-
-            if (X==(*iter)->getCell()->getGridX() &&
-                Y==(*iter)->getCell()->getGridY())
-                break;
-
-            ++iter;
         }
 
-        assert (iter!=mActiveCells.end());
-
-        mCurrentCell = *iter;
-
-        // adjust player
-        playerCellChange (mCurrentCell, position, adjustPlayerPos);
-
-        // Sky system
-        MWBase::Environment::get().getWorld()->adjustSky();
+        CellStore* current = MWBase::Environment::get().getWorld()->getExterior(X,Y);
+        MWBase::Environment::get().getWindowManager()->changeCell(current);
 
         mCellChanged = true;
+
+        // Delay the map update until scripts have been given a chance to run.
+        // If we don't do this, objects that should be disabled will still appear on the map.
+        mNeedMapUpdate = true;
+    }
+
+    void Scene::changePlayerCell(CellStore *cell, const ESM::Position &pos, bool adjustPlayerPos)
+    {
+        mCurrentCell = cell;
+
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWWorld::Ptr old = world->getPlayerPtr();
+        world->getPlayer().setCell(cell);
+
+        MWWorld::Ptr player = world->getPlayerPtr();
+        mRendering.updatePlayerPtr(player);
+
+        if (adjustPlayerPos) {
+            world->moveObject(player, pos.pos[0], pos.pos[1], pos.pos[2]);
+
+            float x = Ogre::Radian(pos.rot[0]).valueDegrees();
+            float y = Ogre::Radian(pos.rot[1]).valueDegrees();
+            float z = Ogre::Radian(pos.rot[2]).valueDegrees();
+            world->rotateObject(player, x, y, z);
+
+            player.getClass().adjustPosition(player, true);
+        }
+
+        MWBase::MechanicsManager *mechMgr =
+            MWBase::Environment::get().getMechanicsManager();
+
+        mechMgr->updateCell(old, player);
+        mechMgr->watchActor(player);
+
+        MWBase::Environment::get().getWorld()->adjustSky();
     }
 
     //We need the ogre renderer and a scene node.
@@ -427,33 +460,39 @@ namespace MWWorld
         // Load cell.
         std::cout << "cellName: " << cell->getCell()->mName << std::endl;
 
-        //Loading Interior loading text
-
         loadCell (cell, loadingListener);
 
-        mCurrentCell = cell;
+        changePlayerCell(cell, position, true);
 
         // adjust fog
         mRendering.configureFog(*mCurrentCell);
-
-        // adjust player
-        playerCellChange (mCurrentCell, position);
 
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();
 
         mCellChanged = true;
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
+
+        MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
+
+        // Delay the map update until scripts have been given a chance to run.
+        // If we don't do this, objects that should be disabled will still appear on the map.
+        mNeedMapUpdate = true;
     }
 
-    void Scene::changeToExteriorCell (const ESM::Position& position)
+    void Scene::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos)
     {
         int x = 0;
         int y = 0;
 
         MWBase::Environment::get().getWorld()->positionToIndex (position.pos[0], position.pos[1], x, y);
 
-        changeCell (x, y, position, true);
+        changeCellGrid(x, y);
+
+        CellStore* current = MWBase::Environment::get().getWorld()->getExterior(x, y);
+        changePlayerCell(current, position, adjustPlayerPos);
+
+        mRendering.updateTerrain();
     }
 
     CellStore* Scene::getCurrentCell ()
