@@ -14,14 +14,22 @@ namespace MWGui
                 mColour(0,0,0)
                 , mFont("Default")
                 , mTextSize(16)
-                , mTextAlign(MyGUI::Align::Left | MyGUI::Align::Top)
             {
             }
 
             MyGUI::Colour mColour;
             std::string mFont;
             int mTextSize;
-            MyGUI::Align mTextAlign;
+        };
+
+        struct BlockStyle
+        {
+            BlockStyle() :
+                mAlign(MyGUI::Align::Left | MyGUI::Align::Top)
+            {
+            }
+
+            MyGUI::Align mAlign;
         };
 
         class BookTextParser
@@ -40,15 +48,18 @@ namespace MWGui
                 };
 
                 BookTextParser(const std::string & text);
-                void registerTag(const std::string & tag, Events type);
-                std::string getReadyText();
 
                 Events next();
-                void flushBuffer();
+
                 const Attributes & getAttributes() const;
-                void parseTag(std::string tag);
+                std::string getReadyText() const;
+                bool isClosingTag() const;
 
             private:
+                void registerTag(const std::string & tag, Events type);
+                void flushBuffer();
+                void parseTag(std::string tag);
+
                 size_t mIndex;
                 std::string mText;
                 std::string mReadyText;
@@ -57,6 +68,7 @@ namespace MWGui
                 bool mIgnoreLineEndings;
                 Attributes mAttributes;
                 std::string mTag;
+                bool mClosingTag;
                 std::map<std::string, Events> mTagTypes;
                 std::string mBuffer;
         };
@@ -101,18 +113,20 @@ namespace MWGui
                 Paginator::Pages markupToWidget(MyGUI::Widget * parent, const std::string & markup, const int pageWidth, const int pageHeight);
                 Paginator::Pages markupToWidget(MyGUI::Widget * parent, const std::string & markup);
 
-            protected:
-                void handleImg(const BookTextParser::Attributes & attr);
+            private:
+                void resetFontProperties();
+
                 void handleDiv(const BookTextParser::Attributes & attr);
                 void handleFont(const BookTextParser::Attributes & attr);
-            private:
+
                 TextStyle mTextStyle;
+                BlockStyle mBlockStyle;
         };
 
         class GraphicElement
         {
             public:
-                GraphicElement(MyGUI::Widget * parent, Paginator & pag);
+                GraphicElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle);
                 virtual int getHeight() = 0;
                 virtual void paginate();
                 virtual int pageSplit();
@@ -120,24 +134,27 @@ namespace MWGui
             protected:
                 MyGUI::Widget * mParent;
                 Paginator & mPaginator;
+                BlockStyle mBlockStyle;
         };
 
         class TextElement : public GraphicElement
         {
             public:
-                TextElement(MyGUI::Widget * parent, Paginator & pag, const TextStyle & style, const std::string & text);
+                TextElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle,
+                            const TextStyle & textStyle, const std::string & text);
                 virtual int getHeight();
                 virtual int pageSplit();
             private:
                 int currentFontHeight() const;
-                TextStyle mStyle;
+                TextStyle mTextStyle;
                 MyGUI::EditBox * mEditBox;
         };
 
         class ImageElement : public GraphicElement
         {
             public:
-                ImageElement(MyGUI::Widget * parent, Paginator & pag, const std::string & src, int width, int height);
+                ImageElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle,
+                             const std::string & src, int width, int height);
                 virtual int getHeight();
                 virtual int pageSplit();
 
