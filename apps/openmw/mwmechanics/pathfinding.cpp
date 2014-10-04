@@ -283,19 +283,18 @@ namespace MWMechanics
         return;
     }
 
-    float PathFinder::getZAngleToNext(float x, float y) const
+    Ogre::Radian PathFinder::getZAngleToNext(float x, float y) const
     {
         // This should never happen (programmers should have an if statement checking
         // mIsPathConstructed that prevents this call if otherwise).
         if(mPath.empty())
-            return 0.;
+            return Ogre::Radian(0.);
 
         const ESM::Pathgrid::Point &nextPoint = *mPath.begin();
         float directionX = nextPoint.mX - x;
         float directionY = nextPoint.mY - y;
-        float directionResult = sqrt(directionX * directionX + directionY * directionY);
 
-        return Ogre::Radian(Ogre::Math::ACos(directionY / directionResult) * sgn(Ogre::Math::ASin(directionX / directionResult))).valueDegrees();
+        return Ogre::Math::ATan2(directionY, directionX);
     }
 
     bool PathFinder::checkWaypoint(float x, float y, float z)

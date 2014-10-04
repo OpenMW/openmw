@@ -111,7 +111,7 @@ namespace MWMechanics
 
             // the z rotation angle (degrees) we want to reach
             // used every frame when mRotate is true
-            float mTargetAngle;
+            Ogre::Radian mTargetAngle;
             bool mRotate;
             float mReaction; // update some actions infrequently
     };

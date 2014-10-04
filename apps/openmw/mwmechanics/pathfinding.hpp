@@ -45,7 +45,7 @@ namespace MWMechanics
             bool checkWaypoint(float x, float y, float z);
             ///< \Returns true if a way point was reached
 
-            float getZAngleToNext(float x, float y) const;
+            Ogre::Radian getZAngleToNext(float x, float y) const;
 
             bool isPathConstructed() const
             {

@@ -26,13 +26,7 @@
 
 namespace
 {
-    static float sgn(Ogre::Radian a)
-    {
-        if(a.valueDegrees() > 0)
-            return 1.0;
-        return -1.0;
-    }
-
+    
     //chooses an attack depending on probability to avoid uniformity
     ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement);
 
@@ -41,16 +35,15 @@ namespace
     Ogre::Vector3 AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const Ogre::Vector3& vLastTargetPos, 
         float duration, int weapType, float strength);
 
-    float getZAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f)
+    Ogre::Radian getZAngleToDir(const Ogre::Vector3& dir)
     {
-        float len = (dirLen > 0.0f)? dirLen : dir.length();
-        return Ogre::Radian( Ogre::Math::ACos(dir.y / len) * sgn(Ogre::Math::ASin(dir.x / len)) ).valueDegrees();
+        return Ogre::Math::ATan2(dir.x,dir.y);
     }
 
-    float getXAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f)
+    Ogre::Radian getXAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f)
     {
         float len = (dirLen > 0.0f)? dirLen : dir.length();
-        return Ogre::Radian(-Ogre::Math::ASin(dir.z / len)).valueDegrees();
+        return -Ogre::Math::ASin(dir.z / len);
     }
 
 
@@ -434,18 +427,18 @@ namespace MWMechanics
             // getXAngleToDir determines vertical angle to target:
             // if actor can move along z-axis it will control movement dir
             // if can't - it will control correct aiming.
-            // note: in getZAngleToDir if we preserve dir.z then horizontal angle can be inaccurate
+            // note: in getZAngleToDir if we preserve dir.z then horizontal angle can be inaccurate <- solved by using atan2
             if (distantCombat)
             {
                 Ogre::Vector3 vAimDir = AimDirToMovingTarget(actor, target, mLastTargetPos, tReaction, weaptype, mStrength);
                 mLastTargetPos = vTargetPos;
-                mMovement.mRotation[0] = getXAngleToDir(vAimDir);
-                mMovement.mRotation[2] = getZAngleToDir(Ogre::Vector3(vAimDir.x, vAimDir.y, 0));
+                mMovement.mRotation[0] = getXAngleToDir(vAimDir).valueDegrees();
+                mMovement.mRotation[2] = getZAngleToDir(vAimDir).valueDegrees();
             }
             else
             {
-                mMovement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
-                mMovement.mRotation[2] = getZAngleToDir(Ogre::Vector3(vDirToTarget.x, vDirToTarget.y, 0));
+                mMovement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget).valueDegrees();
+                mMovement.mRotation[2] = getZAngleToDir(vDirToTarget).valueDegrees();
             }
 
             // (not quite attack dist while following)
@@ -504,8 +497,8 @@ namespace MWMechanics
             if(preferShortcut)
             {
                 if (canMoveByZ)
-                    mMovement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
-                mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
+                    mMovement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget).valueDegrees();
+                mMovement.mRotation[2] = getZAngleToDir(vDirToTarget).valueDegrees();
                 mForceNoShortcut = false;
                 mShortcutFailPos.pos[0] = mShortcutFailPos.pos[1] = mShortcutFailPos.pos[2] = 0;
                 mPathFinder.clearPath();
@@ -536,7 +529,7 @@ namespace MWMechanics
                     // if current actor pos is closer to target then last point of path (excluding target itself) then go straight on target
                     if(distToTarget <= (vTargetPos - vBeforeTarget).length())
                     {
-                        mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
+                        mMovement.mRotation[2] = getZAngleToDir(vDirToTarget).valueDegrees();
                         preferShortcut = true;
                     }
                 }
@@ -545,9 +538,9 @@ namespace MWMechanics
                 if(!preferShortcut)
                 {
                     if(!mPathFinder.getPath().empty())
-                        mMovement.mRotation[2] = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+                        mMovement.mRotation[2] = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]).valueDegrees();
                     else
-                        mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
+                        mMovement.mRotation[2] = getZAngleToDir(vDirToTarget).valueDegrees();
                 }
             }
 
@@ -608,7 +601,7 @@ namespace MWMechanics
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
             // change the angle a bit, too
             if(mPathFinder.isPathConstructed())
-                zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+                zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1]) );
 
             if(mFollowTarget)
                 mFollowTarget = false;

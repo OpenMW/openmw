@@ -103,7 +103,7 @@ namespace MWMechanics
             return true;
         }
 
-        zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+        zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]) );
         movement.mPosition[1] = 1;
 
         return false;
