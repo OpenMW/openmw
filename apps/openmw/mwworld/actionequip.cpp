@@ -3,7 +3,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 
 #include <components/compiler/locals.hpp>
 
@@ -85,19 +84,6 @@ namespace MWWorld
                 else
                     invStore.equip(*slot, it, actor);
             }
-        }
-
-        std::string sound;
-
-        if (object.getTypeName() == typeid(ESM::Light).name())
-        {
-            sound = object.get<ESM::Light>()->mBase->mSound;
-        }
-        if (!sound.empty())
-        {
-            MWBase::Environment::get().getSoundManager()->playSound(sound, 1.0f, 1.0f,
-                                                                      MWBase::SoundManager::Play_TypeSfx,
-                                                                      MWBase::SoundManager::Play_Loop);
         }
     }
 }
