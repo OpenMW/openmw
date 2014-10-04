@@ -57,22 +57,37 @@ namespace
         if(!grid || grid->mPoints.empty())
             return std::pair<int, bool> (-1, false);
 
-        float distanceBetween = distanceSquared(grid->mPoints[0], pos);
-        int closestIndex = 0;
-        int closestReachableIndex = 0;
+        //initialize with the only reachable point known.
+        float closestReachableDistance =  distanceSquared(grid->mPoints[start], pos);
+        int closestReachableIndex = start;
+        
+        
+        float closestOverallDistance = closestReachableDistance;
+        int closestOverallIndex = start;
+
+        // iterate over all points in the grid to find the closest reachable and closest overall
         // TODO: if this full scan causes performance problems mapping pathgrid
         //       points to a quadtree may help
-        for(unsigned int counter = 1; counter < grid->mPoints.size(); counter++)
+        for(unsigned int counter = 0; counter < grid->mPoints.size(); counter++)
         {
+            if( counter == start )
+                continue; // skip start since it was used to initialize
+
             float potentialDistBetween = distanceSquared(grid->mPoints[counter], pos);
-            if(potentialDistBetween < distanceBetween)
+
+            if(potentialDistBetween < closestReachableDistance)
             {
-                // found a closer one
-                distanceBetween = potentialDistBetween;
-                closestIndex = counter;
                 if (cell->isPointConnected(start, counter))
                 {
+                    //found a closer reachable point
+                    closestReachableDistance = potentialDistBetween;
                     closestReachableIndex = counter;
+                }
+                if(potentialDistBetween < closestOverallDistance)
+                {
+                    // found a totally closer point
+                    closestOverallDistance = potentialDistBetween;
+                    closestOverallIndex = counter;
                 }
             }
         }
@@ -83,7 +98,7 @@ namespace
             //closestReachableIndex = -1; // couldn't find anyting other than start
 
         return std::pair<int, bool>
-            (closestReachableIndex, closestReachableIndex == closestIndex);
+            (closestReachableIndex, closestReachableIndex == closestOverallIndex);
     }
 
 }
