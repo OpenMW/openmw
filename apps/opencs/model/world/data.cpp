@@ -59,8 +59,8 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 }
 
 CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
-: mEncoder (encoding), mRefs (mCells), mResourcesManager (resourcesManager), mReader (0),
-  mDialogue (0)
+: mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
+  mResourcesManager (resourcesManager), mReader (0), mDialogue (0)
 {
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
     mGlobals.addColumn (new RecordStateColumn<ESM::Global>);
@@ -595,12 +595,12 @@ CSMWorld::IdCollection<ESM::MagicEffect>& CSMWorld::Data::getMagicEffects()
     return mMagicEffects;
 }
 
-const CSMWorld::IdCollection<CSMWorld::Pathgrid>& CSMWorld::Data::getPathgrids() const
+const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& CSMWorld::Data::getPathgrids() const
 {
     return mPathgrids;
 }
 
-CSMWorld::IdCollection<CSMWorld::Pathgrid>& CSMWorld::Data::getPathgrids()
+CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& CSMWorld::Data::getPathgrids()
 {
     return mPathgrids;
 }
