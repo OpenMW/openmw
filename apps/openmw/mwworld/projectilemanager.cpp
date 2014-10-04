@@ -153,7 +153,8 @@ namespace MWWorld
             Ogre::Vector3 pos(it->mNode->getPosition());
             Ogre::Vector3 newPos = pos + direction * duration * speed;
 
-            it->mSound->setPosition(newPos);
+            if (it->mSound.get())
+                it->mSound->setPosition(newPos);
 
             it->mNode->setPosition(newPos);
 
