@@ -65,16 +65,14 @@ namespace MWMechanics
       , mPrevY(0)
       , mDistSameSpot(-1) // avoid calculating it each time
       , mWalkState(State_Norm)
-      , mStuckDuration(0)
-      , mEvadeDuration(0)
+      , mStateDuration(0)
     {
     }
 
     void ObstacleCheck::clear()
     {
         mWalkState = State_Norm;
-        mStuckDuration = 0;
-        mEvadeDuration = 0;
+        mStateDuration = 0;
     }
 
     bool ObstacleCheck::isNormalState() const
@@ -120,6 +118,9 @@ namespace MWMechanics
         // update position
         mPrevX = pos.pos[0];
         mPrevY = pos.pos[1];
+        
+        // time spent in current state (irrelevant for State_Norm)
+        mStateDuration += duration;
 
         switch(mWalkState)
         {
@@ -128,26 +129,28 @@ namespace MWMechanics
                 if(!samePosition)
                     break;
                 else
+                {
+                    mStateDuration = 0;
                     mWalkState = State_CheckStuck;
+                }
             }
                 /* FALL THROUGH */
             case State_CheckStuck:
             {
                 if(!samePosition)
                 {
+                    mStateDuration = 0;
                     mWalkState = State_Norm;
-                    mStuckDuration = 0;
                     break;
                 }
                 else
                 {
-                    mStuckDuration += duration;
                     // consider stuck only if position unchanges for a period
-                    if(mStuckDuration < DURATION_SAME_SPOT)
+                    if(mStateDuration < DURATION_SAME_SPOT)
                         break; // still checking, note duration added to timer
                     else
                     {
-                        mStuckDuration = 0;
+                        mStateDuration = 0;
                         mWalkState = State_Evade;
                     }
                 }
@@ -155,14 +158,13 @@ namespace MWMechanics
                 /* FALL THROUGH */
             case State_Evade:
             {
-                mEvadeDuration += duration;
-                if(mEvadeDuration < DURATION_TO_EVADE)
+                if(mStateDuration < DURATION_TO_EVADE)
                     return true;
                 else
                 {
                     // tried to evade, assume all is ok and start again
                     mWalkState = State_Norm;
-                    mEvadeDuration = 0;
+                    mStateDuration = 0;
                 }
             }
             /* NO DEFAULT CASE */

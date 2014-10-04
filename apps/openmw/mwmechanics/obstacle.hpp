@@ -54,8 +54,8 @@ namespace MWMechanics
             };
             WalkState mWalkState;
 
-            float mStuckDuration; // accumulate time here while in same spot
-            float mEvadeDuration;
+            float mStateDuration; // accumulate time here while in same spot or evading, set to zero if state changes
+
             float mDistSameSpot; // take account of actor's speed
     };
 }
