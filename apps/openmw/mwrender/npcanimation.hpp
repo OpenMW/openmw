@@ -51,7 +51,7 @@ public:
 class NpcAnimation : public Animation, public WeaponAnimation, public MWWorld::InventoryStoreListener
 {
 public:
-    virtual void equipmentChanged() { updateParts(); }
+    virtual void equipmentChanged(const MWWorld::Ptr& actor, const MWWorld::Ptr& item, InventoryStoreListener::State state);
     virtual void permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound);
 
 public:
@@ -97,6 +97,8 @@ private:
     Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
+    bool mUnequipping;
+    bool mFirstEquip;
 
     void updateNpcBase();
 
@@ -114,10 +116,6 @@ private:
 
     void applyAlpha(float alpha, Ogre::Entity* ent, NifOgre::ObjectScenePtr scene);
 
-    /**
-     * Implementation of MWWorld::InventoryStoreListener equipmentChanged method
-     */
-    void equipmentChanged (const MWWorld::Ptr& actor, const MWWorld::Ptr& item, InventoryStoreListener::State state);
 public:
     /**
      * @param ptr

@@ -186,7 +186,9 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mShowCarriedLeft(true),
     mFirstPersonOffset(0.f, 0.f, 0.f),
     mAlpha(1.f),
-    mNpcType(Type_Normal)
+    mNpcType(Type_Normal),
+    mUnequipping(false),
+    mFirstEquip(true)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -928,31 +930,78 @@ void NpcAnimation::applyAlpha(float alpha, Ogre::Entity *ent, NifOgre::ObjectSce
     }
 }
 
-void NpcAnimation::equipmentChanged (const MWWorld::Ptr& actor, const MWWorld::Ptr& item, InventoryStoreListener::State state)
+void NpcAnimation::equipmentChanged(const MWWorld::Ptr& actor, const MWWorld::Ptr& item, InventoryStoreListener::State state)
 {
-    if (actor.getRefData().getHandle() == "player" && !item.isEmpty())
+    if (actor.getRefData().getHandle() == "player")
     {
         std::string soundId;
 
-        if (item.getTypeName() == typeid(ESM::Light).name())
-        {
-            soundId = item.get<ESM::Light>()->mBase->mSound;
-        }
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
 
-        if (!soundId.empty())
+        if (state == InventoryStoreListener::EQUIP
+            || state == InventoryStoreListener::UNEQUIP)
         {
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-
-            if (state == InventoryStoreListener::EQUIPPED)
+            if (item.getTypeName() == typeid(ESM::Light).name())
             {
-                sndMgr->playSound3D(mPtr, soundId, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
-                    MWBase::SoundManager::Play_Loop);
+                soundId = item.get<ESM::Light>()->mBase->mSound;
             }
-            else if (state == InventoryStoreListener::UNEQUIPPED)
+
+            if (!soundId.empty())
             {
-                sndMgr->stopSound3D(mPtr, soundId);
+                if (state == InventoryStoreListener::EQUIP)
+                {
+                    sndMgr->playSound3D(mPtr, soundId, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
+                        MWBase::SoundManager::Play_Loop);
+                }
+                else
+                {
+                    sndMgr->stopSound3D(mPtr, soundId);
+                }
             }
         }
+        else if (state == InventoryStoreListener::AUTOEQUIP)
+        {
+            const MWWorld::Class &cls = mPtr.getClass();
+            MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
+            for (int i = MWWorld::InventoryStore::Slot_Helmet; i < MWWorld::InventoryStore::Slots; ++i)
+            {
+                MWWorld::ContainerStoreIterator store = inv.getSlot(i);
+
+                if (store != inv.end() && store->getTypeName() == typeid(ESM::Light).name())
+                {
+                    soundId = store->get<ESM::Light>()->mBase->mSound;
+                }
+
+                if (!soundId.empty())
+                {
+                    sndMgr->playSound3D(mPtr, soundId, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
+                        MWBase::SoundManager::Play_Loop);
+                }
+            }
+        }
+    }
+
+    /**
+     * AUTOEQUIP is triggered just after setting listener (ie. when game is loaded from savegame),
+     * but not all things are initialized yet, so we have to check it (mFirstEquip variable)
+     * and skip one call to updateParts() method.
+     *
+     * Also call to updateParts() method will be called only once if inventory.unequipAll()
+     * was called (mUnequipping == true).
+     */
+    if (state == InventoryStoreListener::UNEQUIPALL_BEGIN)
+        mUnequipping = true;
+    else if (state == InventoryStoreListener::UNEQUIPALL_END)
+        mUnequipping = false;
+
+    if (!mUnequipping && !mFirstEquip)
+    {
+        updateParts();
+    }
+
+    if (mFirstEquip && state == InventoryStoreListener::AUTOEQUIP)
+    {
+        mFirstEquip = false;
     }
 }
 

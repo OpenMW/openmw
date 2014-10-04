@@ -22,10 +22,11 @@ namespace MWWorld
     public:
         enum State
         {
-          EQUIPPED,
-          AUTOEQUIPPED,
-          UNEQUIPPED,
-          ALL_UNEQUIPPED
+          EQUIP,
+          AUTOEQUIP,
+          UNEQUIP,
+          UNEQUIPALL_BEGIN,
+          UNEQUIPALL_END
         };
 
         /**
