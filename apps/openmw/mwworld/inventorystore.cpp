@@ -146,7 +146,8 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
 
     flagAsModified();
 
-    fireEquipmentChangedEvent();
+    fireEquipmentChangedEvent(actor, *iterator, InventoryStoreListener::EQUIPPED);
+
     updateMagicEffects(actor);
 }
 
@@ -157,7 +158,7 @@ void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
     for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
         unequipSlot(slot, actor);
     mUpdatesEnabled = true;
-    fireEquipmentChangedEvent();
+    fireEquipmentChangedEvent(actor, MWWorld::Ptr(), InventoryStoreListener::ALL_UNEQUIPPED);
     updateMagicEffects(actor);
 }
 
@@ -286,7 +287,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     if (changed)
     {
         mSlots.swap (slots_);
-        fireEquipmentChangedEvent();
+        fireEquipmentChangedEvent(actor, MWWorld::Ptr(), InventoryStoreListener::AUTOEQUIPPED);
         updateMagicEffects(actor);
         flagAsModified();
     }
@@ -519,7 +520,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
             }
         }
 
-        fireEquipmentChangedEvent();
+        fireEquipmentChangedEvent(actor, *it, InventoryStoreListener::UNEQUIPPED);
         updateMagicEffects(actor);
 
         return retval;
@@ -546,12 +547,12 @@ void MWWorld::InventoryStore::setListener(InventoryStoreListener *listener, cons
     updateMagicEffects(actor);
 }
 
-void MWWorld::InventoryStore::fireEquipmentChangedEvent()
+void MWWorld::InventoryStore::fireEquipmentChangedEvent(const MWWorld::Ptr& actor, const MWWorld::Ptr& item, InventoryStoreListener::State state)
 {
     if (!mUpdatesEnabled)
         return;
     if (mListener)
-        mListener->equipmentChanged();
+        mListener->equipmentChanged(actor, item, state);
 }
 
 void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisitor &visitor)

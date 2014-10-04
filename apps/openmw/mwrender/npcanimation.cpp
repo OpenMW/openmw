@@ -928,4 +928,32 @@ void NpcAnimation::applyAlpha(float alpha, Ogre::Entity *ent, NifOgre::ObjectSce
     }
 }
 
+void NpcAnimation::equipmentChanged (const MWWorld::Ptr& actor, const MWWorld::Ptr& item, InventoryStoreListener::State state)
+{
+    if (actor.getRefData().getHandle() == "player" && !item.isEmpty())
+    {
+        std::string soundId;
+
+        if (item.getTypeName() == typeid(ESM::Light).name())
+        {
+            soundId = item.get<ESM::Light>()->mBase->mSound;
+        }
+
+        if (!soundId.empty())
+        {
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+
+            if (state == InventoryStoreListener::EQUIPPED)
+            {
+                sndMgr->playSound3D(mPtr, soundId, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
+                    MWBase::SoundManager::Play_Loop);
+            }
+            else if (state == InventoryStoreListener::UNEQUIPPED)
+            {
+                sndMgr->stopSound3D(mPtr, soundId);
+            }
+        }
+    }
+}
+
 }

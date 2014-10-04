@@ -20,10 +20,18 @@ namespace MWWorld
     class InventoryStoreListener
     {
     public:
+        enum State
+        {
+          EQUIPPED,
+          AUTOEQUIPPED,
+          UNEQUIPPED,
+          ALL_UNEQUIPPED
+        };
+
         /**
          * Fired when items are equipped or unequipped
          */
-        virtual void equipmentChanged () {}
+        virtual void equipmentChanged (const MWWorld::Ptr& /*actor*/, const MWWorld::Ptr& /*item*/, State /*state*/) {}
 
         /**
          * @param effect
@@ -109,7 +117,7 @@ namespace MWWorld
             void updateMagicEffects(const Ptr& actor);
             void updateRechargingItems();
 
-            void fireEquipmentChangedEvent();
+            void fireEquipmentChangedEvent(const MWWorld::Ptr& actor, const MWWorld::Ptr& item, InventoryStoreListener::State state);
 
             virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
             ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).

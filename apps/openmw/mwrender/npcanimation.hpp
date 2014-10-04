@@ -114,6 +114,10 @@ private:
 
     void applyAlpha(float alpha, Ogre::Entity* ent, NifOgre::ObjectScenePtr scene);
 
+    /**
+     * Implementation of MWWorld::InventoryStoreListener equipmentChanged method
+     */
+    void equipmentChanged (const MWWorld::Ptr& actor, const MWWorld::Ptr& item, InventoryStoreListener::State state);
 public:
     /**
      * @param ptr
