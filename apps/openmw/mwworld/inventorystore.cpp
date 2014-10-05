@@ -68,6 +68,7 @@ MWWorld::InventoryStore::InventoryStore()
  , mUpdatesEnabled (true)
  , mFirstAutoEquip(true)
  , mListener(NULL)
+ , mRechargingItemsUpToDate(false)
 {
     initSlots (mSlots);
 }
@@ -80,6 +81,7 @@ MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
  , mListener(store.mListener)
  , mUpdatesEnabled(store.mUpdatesEnabled)
  , mPermanentMagicEffectMagnitudes(store.mPermanentMagicEffectMagnitudes)
+ , mRechargingItemsUpToDate(false)
 {
     copySlots (store);
 }
@@ -90,6 +92,7 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStor
     mMagicEffects = store.mMagicEffects;
     mFirstAutoEquip = store.mFirstAutoEquip;
     mPermanentMagicEffectMagnitudes = store.mPermanentMagicEffectMagnitudes;
+    mRechargingItemsUpToDate = false;
     ContainerStore::operator= (store);
     mSlots.clear();
     copySlots (store);
@@ -109,8 +112,6 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
         if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()) || (type == typeid(ESM::Weapon).name()))
             autoEquip(actorPtr);
     }
-
-    updateRechargingItems();
 
     return retVal;
 }
@@ -485,8 +486,6 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
         mSelectedEnchantItem = end();
     }
 
-    updateRechargingItems();
-
     return retCount;
 }
 
@@ -606,6 +605,11 @@ void MWWorld::InventoryStore::updateRechargingItems()
 
 void MWWorld::InventoryStore::rechargeItems(float duration)
 {
+    if (!mRechargingItemsUpToDate)
+    {
+        updateRechargingItems();
+        mRechargingItemsUpToDate = true;
+    }
     for (TRechargingItems::iterator it = mRechargingItems.begin(); it != mRechargingItems.end(); ++it)
     {
         if (it->first->getCellRef().getEnchantmentCharge() == -1
