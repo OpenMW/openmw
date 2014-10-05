@@ -47,7 +47,8 @@ namespace Physic
         CollisionType_Actor = 1<<1, //<Collide sith actors
         CollisionType_HeightMap = 1<<2, //<collide with heightmap
         CollisionType_Raycasting = 1<<3,
-        CollisionType_Projectile = 1<<4
+        CollisionType_Projectile = 1<<4,
+        CollisionType_Water = 1<<5
     };
 
     /**
@@ -131,9 +132,20 @@ namespace Physic
             return mBody;
         }
 
+
+        /// Sets whether this actor should be able to collide with the water surface
+        void setCanWaterWalk(bool waterWalk);
+
+        /// Sets whether this actor has been walking on the water surface in the last frame
+        void setWalkingOnWater(bool walkingOnWater);
+        bool isWalkingOnWater() const;
+
     private:
-        void disableCollisionBody();
-        void enableCollisionBody();
+        /// Removes then re-adds the collision body to the dynamics world
+        void updateCollisionMask();
+
+        bool mCanWaterWalk;
+        bool mWalkingOnWater;
 
         boost::shared_ptr<btCollisionShape> mShape;
 

@@ -1660,6 +1660,7 @@ namespace MWWorld
 
     void World::setWaterHeight(const float height)
     {
+        mPhysics->setWaterHeight(height);
         mRendering->setWaterHeight(height);
     }
 
@@ -3070,5 +3071,13 @@ namespace MWWorld
             ResetActorsFunctor functor;
             cellstore->forEach(functor);
         }
+    }
+
+    bool World::isWalkingOnWater(const Ptr &actor)
+    {
+        OEngine::Physic::PhysicActor* physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
+        if (physicActor && physicActor->isWalkingOnWater())
+            return true;
+        return false;
     }
 }
