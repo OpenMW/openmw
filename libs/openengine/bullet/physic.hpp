@@ -46,7 +46,8 @@ namespace Physic
         CollisionType_World = 1<<0, //<Collide with world objects
         CollisionType_Actor = 1<<1, //<Collide sith actors
         CollisionType_HeightMap = 1<<2, //<collide with heightmap
-        CollisionType_Raycasting = 1<<3 //Still used?
+        CollisionType_Raycasting = 1<<3,
+        CollisionType_Projectile = 1<<4
     };
 
     /**
@@ -288,7 +289,7 @@ namespace Physic
         /**
          * Return all objects hit by a ray.
          */
-        std::vector< std::pair<float, std::string> > rayTest2(const btVector3 &from, const btVector3 &to);
+        std::vector< std::pair<float, std::string> > rayTest2(const btVector3 &from, const btVector3 &to, int filterGroup=0xff);
 
         std::pair<bool, float> sphereCast (float radius, btVector3& from, btVector3& to);
         ///< @return (hit, relative distance)

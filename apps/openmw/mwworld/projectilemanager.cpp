@@ -164,7 +164,8 @@ namespace MWWorld
             // TODO: use a proper btRigidBody / btGhostObject?
             btVector3 from(pos.x, pos.y, pos.z);
             btVector3 to(newPos.x, newPos.y, newPos.z);
-            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to);
+
+            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to, OEngine::Physic::CollisionType_Projectile);
             bool hit=false;
 
             for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end() && !hit; ++cIt)
@@ -240,7 +241,7 @@ namespace MWWorld
             // TODO: use a proper btRigidBody / btGhostObject?
             btVector3 from(pos.x, pos.y, pos.z);
             btVector3 to(newPos.x, newPos.y, newPos.z);
-            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to);
+            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to, OEngine::Physic::CollisionType_Projectile);
             bool hit=false;
 
             for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end() && !hit; ++cIt)

@@ -104,7 +104,7 @@ namespace Physic
         setRotation(rotation);
 
         mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor,
-            CollisionType_Actor|CollisionType_World|CollisionType_HeightMap);
+            CollisionType_Actor|CollisionType_World|CollisionType_HeightMap|CollisionType_Projectile);
     }
 
     PhysicActor::~PhysicActor()
@@ -189,7 +189,7 @@ namespace Physic
     {
         mEngine->mDynamicsWorld->removeRigidBody(mBody);
         mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor,
-            CollisionType_Actor|CollisionType_World|CollisionType_HeightMap);
+            CollisionType_Actor|CollisionType_World|CollisionType_HeightMap|CollisionType_Projectile);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -381,7 +381,7 @@ namespace Physic
         mHeightFieldMap [name] = hf;
 
         mDynamicsWorld->addRigidBody(body,CollisionType_HeightMap,
-                                    CollisionType_Actor|CollisionType_Raycasting);
+                                    CollisionType_Actor|CollisionType_Raycasting|CollisionType_Projectile);
     }
 
     void PhysicEngine::removeHeightField(int x, int y)
@@ -494,7 +494,7 @@ namespace Physic
         {
             assert (mRaycastingObjectMap.find(name) == mRaycastingObjectMap.end());
             mRaycastingObjectMap[name] = body;
-            mDynamicsWorld->addRigidBody(body,CollisionType_Raycasting,CollisionType_Raycasting);
+            mDynamicsWorld->addRigidBody(body,CollisionType_Raycasting,CollisionType_Raycasting|CollisionType_Projectile);
         }
 
         return body;
@@ -800,10 +800,10 @@ namespace Physic
             return std::make_pair(false, 1);
     }
 
-    std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(const btVector3& from, const btVector3& to)
+    std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(const btVector3& from, const btVector3& to, int filterGroup)
     {
         MyRayResultCallback resultCallback1;
-        resultCallback1.m_collisionFilterGroup = 0xff;
+        resultCallback1.m_collisionFilterGroup = filterGroup;
         resultCallback1.m_collisionFilterMask = CollisionType_Raycasting|CollisionType_Actor|CollisionType_HeightMap;
         mDynamicsWorld->rayTest(from, to, resultCallback1);
         std::vector< std::pair<float, const btCollisionObject*> > results = resultCallback1.results;
