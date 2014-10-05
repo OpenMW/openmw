@@ -334,6 +334,9 @@ namespace MWGui
     /// Darken the screen by \a factor (1.0 = no darkening). Works independently from screen fading.
     virtual void setScreenFactor (float factor);
 
+    virtual void activateHitOverlay();
+    virtual void setWerewolfOverlay(bool set);
+
     virtual void toggleDebugWindow();
 
   private:
@@ -388,6 +391,8 @@ namespace MWGui
     CompanionWindow* mCompanionWindow;
     MyGUI::ImageBox* mVideoBackground;
     VideoWidget* mVideoWidget;
+    ScreenFader* mWerewolfFader;
+    ScreenFader* mHitFader;
     ScreenFader* mScreenFader;
     DebugWindow* mDebugWindow;
 
@@ -400,6 +405,8 @@ namespace MWGui
 
     bool mCrosshairEnabled;
     bool mSubtitlesEnabled;
+    bool mHitFaderEnabled;
+    bool mWerewolfOverlayEnabled;
     bool mHudEnabled;
     bool mGuiEnabled;
     bool mCursorVisible;

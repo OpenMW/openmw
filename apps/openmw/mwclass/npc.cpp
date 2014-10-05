@@ -778,6 +778,9 @@ namespace MWClass
                 sndMgr->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
             float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
             setActorHealth(ptr, health, attacker);
+
+            if (ptr.getRefData().getHandle() == "player")
+                MWBase::Environment::get().getWindowManager()->activateHitOverlay();
         }
         else
         {

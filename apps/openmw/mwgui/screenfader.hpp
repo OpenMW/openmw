@@ -1,15 +1,42 @@
 #ifndef OPENMW_MWGUI_SCREENFADER_H
 #define OPENMW_MWGUI_SCREENFADER_H
 
+#include <deque>
+
+#include <boost/shared_ptr.hpp>
+
 #include "windowbase.hpp"
 
 namespace MWGui
 {
+    class ScreenFader;
+
+    class FadeOp
+    {
+    public:
+        typedef boost::shared_ptr<FadeOp> Ptr;
+
+        FadeOp(ScreenFader * fader, float time, float targetAlpha);
+
+        bool isRunning();
+
+        void start();
+        void update(float dt);
+        void finish();
+
+    private:
+        ScreenFader * mFader;
+        float mRemainingTime;
+        float mTargetTime;
+        float mTargetAlpha;
+        float mStartAlpha;
+        bool mRunning;
+    };
 
     class ScreenFader : public WindowBase
     {
     public:
-        ScreenFader();
+        ScreenFader(const std::string & texturePath);
 
         void update(float dt);
 
@@ -18,27 +45,24 @@ namespace MWGui
         void fadeTo(const int percent, const float time);
 
         void setFactor (float factor);
+        void setRepeat(bool repeat);
+
+        void queue(float time, float targetAlpha);
+        void clearQueue();
+
+        void notifyAlphaChanged(float alpha);
+        void notifyOperationFinished();
+        float getCurrentAlpha();
 
     private:
-        enum FadingMode
-        {
-            FadingMode_In,
-            FadingMode_Out
-        };
-
         void applyAlpha();
 
-        FadingMode mMode;
-
-        float mRemainingTime;
-        float mTargetTime;
-        float mTargetAlpha;
         float mCurrentAlpha;
-        float mStartAlpha;
-
         float mFactor;
-    };
 
+        bool mRepeat; // repeat queued operations without removing them
+        std::deque<FadeOp::Ptr> mQueue;
+    };
 }
 
 #endif

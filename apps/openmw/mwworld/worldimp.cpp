@@ -2352,6 +2352,8 @@ namespace MWWorld
                 windowManager->unsetForceHide(MWGui::GW_Magic);
             }
 
+            windowManager->setWerewolfOverlay(werewolf);
+
             // Witnesses of the player's transformation will make them a globally known werewolf
             std::vector<MWWorld::Ptr> closeActors;
             MWBase::Environment::get().getMechanicsManager()->getActorsInRange(Ogre::Vector3(actor.getRefData().getPosition().pos),
