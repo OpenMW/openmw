@@ -77,7 +77,9 @@ namespace CSVRender
 
         protected:
 
-            virtual void updateOverlay(bool toggleOverlay = false);
+            virtual void updateOverlay();
+
+            virtual void mouseReleaseEvent (QMouseEvent *event);
 
         signals:
 

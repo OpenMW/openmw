@@ -59,7 +59,9 @@ namespace CSVRender
             void setDefaultAmbient (const Ogre::ColourValue& colour);
             ///< \note The actual ambient colour may differ based on lighting settings.
 
-            virtual void updateOverlay(bool toggleOverlay = false);
+            virtual void updateOverlay();
+
+            virtual void mouseReleaseEvent (QMouseEvent *event);
 
         private:
             void paintEvent(QPaintEvent* e);
@@ -77,8 +79,6 @@ namespace CSVRender
             void leaveEvent (QEvent *event);
 
             void mouseMoveEvent (QMouseEvent *event);
-
-            void mouseReleaseEvent (QMouseEvent *event);
 
             void updateOgreWindow();
 

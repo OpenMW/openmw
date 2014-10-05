@@ -11,20 +11,16 @@
 #include <OgreEntity.h>
 #include <OgreViewport.h>
 #include <OgreRoot.h>
-#include "OgreHardwarePixelBuffer.h"
+#include <OgreHardwarePixelBuffer.h>
 
 namespace CSVRender
 {
-
-static const int sMargin = 5; // margin around overlay text in pixels
 
 // Things to do:
 // - configurable font size in pixels (automatically calulate everything else from it)
 // - configurable texture to use
 // - configurable toggle key to enable/disable the text overlays (currntly fixed 'm')
 // - try material script
-// - setup common resources such as font in a central place, so that they are not
-//   repeated for each text overlay (also destroy once)
 // - decide whether to use QPaint
 
 // http://www.ogre3d.org/tikiwiki/tiki-index.php?page=ObjectTextDisplay
@@ -32,7 +28,7 @@ static const int sMargin = 5; // margin around overlay text in pixels
 // http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Creating+dynamic+textures
 // http://www.ogre3d.org/tikiwiki/ManualObject
 TextOverlay::TextOverlay(const Ogre::MovableObject* obj, const Ogre::Camera* camera, const  Ogre::String& id)
-    : mOverlay(0), mCaption(""), mEnabled(false), mCamera(camera), mObj(obj), mId(id), mOnScreen(false)
+    : mOverlay(0), mCaption(""), mEnabled(true), mCamera(camera), mObj(obj), mId(id), mOnScreen(false)
     , mFontHeight(16) // FIXME: make this configurable
 {
     if(id == "" || !camera || !obj)
@@ -120,7 +116,7 @@ TextOverlay::TextOverlay(const Ogre::MovableObject* obj, const Ogre::Camera* cam
     mElement->setMetricsMode(Ogre::GMM_RELATIVE);
     mElement->setDimensions(1.0, 1.0);
     mElement->setMetricsMode(Ogre::GMM_PIXELS);
-    mElement->setPosition(sMargin*2, sMargin*1.3); // 1.3 & 2 = fudge factor
+    mElement->setPosition(2*fontHeight()/3, 1.3*fontHeight()/3); // 1.3 & 2 = fudge factor
 
     mElement->setFontName("DejaVuLGC");
     mElement->setCharHeight(fontHeight()); // NOTE: seems that this is required as well as font->setTrueTypeSize()
@@ -214,11 +210,21 @@ TextOverlay::~TextOverlay()
 
 void TextOverlay::enable(bool enable)
 {
+    if(enable == mContainer->isVisible())
+        return;
+
     mEnabled = enable;
     if (enable)
-        mOverlay->show();
+        mContainer->show();
     else
-        mOverlay->hide();
+        mContainer->hide();
+
+    Ogre::Root::getSingleton().renderOneFrame();
+}
+
+bool TextOverlay::isEnabled()
+{
+    return mEnabled;
 }
 
 void TextOverlay::setCaption(const Ogre::String& text)
@@ -287,15 +293,27 @@ void TextOverlay::update(bool toggleOverlay)
     float viewportWidth = std::max(overlayMgr.getViewportWidth(), 1); // zero at the start
     float viewportHeight = std::max(overlayMgr.getViewportHeight(), 1); // zero at the start
 
-    float relTextWidth = (2*sMargin + textWidth() + sMargin) / viewportWidth; // 2 = fudge factor
-    float relTextHeight = (sMargin + fontHeight() + sMargin) / viewportHeight;
+    int width = 2*fontHeight()/3 + textWidth() + fontHeight()/3; // 2 = fudge factor
+    int height = fontHeight()/3 + fontHeight() + fontHeight()/3;
+
+    float relTextWidth = width / viewportWidth;
+    float relTextHeight = height / viewportHeight;
+
+    float posX = 1 - (min_x + max_x + relTextWidth)/2;
+    float posY = 1 - max_y - (relTextHeight-fontHeight()/3/viewportHeight);
 
     mContainer->setMetricsMode(Ogre::GMM_RELATIVE);
-    mContainer->setPosition(1-(min_x + max_x + relTextWidth)/2, 1-max_y-(relTextHeight-sMargin/viewportHeight));
-
+    mContainer->setPosition(posX, posY);
     mContainer->setDimensions(relTextWidth, relTextHeight);
 
+    mPos = QRect(posX*viewportWidth, posY*viewportHeight, width, height);
+
     Ogre::Root::getSingleton().renderOneFrame();
+}
+
+QRect TextOverlay::container()
+{
+    return mPos;
 }
 
 }

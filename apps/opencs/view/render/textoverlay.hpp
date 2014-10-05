@@ -1,6 +1,8 @@
 #ifndef OPENCS_VIEW_TEXTOVERLAY_H
 #define OPENCS_VIEW_TEXTOVERLAY_H
 
+#include <QRect>
+
 #include <OgreString.h>
 #include <Overlay/OgreFont.h>
 
@@ -29,6 +31,7 @@ namespace CSVRender
             Ogre::FontPtr mFont;
             int mFontHeight; // in pixels
             Ogre::String mId;
+            QRect mPos;
 
             bool mEnabled;
             bool mOnScreen; // not used
@@ -45,8 +48,11 @@ namespace CSVRender
             virtual ~TextOverlay();
 
             void enable(bool enable);
+            bool isEnabled();
             void setCaption(const Ogre::String& text);
             void update(bool toggleOverlay = false);
+            QRect container();
+            Ogre::String getCaption() { return mCaption; }  // FIXME: debug
     };
 
 }

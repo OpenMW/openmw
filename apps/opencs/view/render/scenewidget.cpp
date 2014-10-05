@@ -287,8 +287,6 @@ namespace CSVRender
 
                 break;
 
-            case Qt::Key_M: updateOverlay(true);
-
             default: QWidget::keyReleaseEvent (event);
         }
     }
@@ -387,7 +385,7 @@ namespace CSVRender
         }
     }
 
-    void SceneWidget::updateOverlay(bool toggleOverlay)
+    void SceneWidget::updateOverlay()
     { }
 
     void SceneWidget::setLighting (Lighting *lighting)

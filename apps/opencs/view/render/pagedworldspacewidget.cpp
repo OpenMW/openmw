@@ -3,10 +3,13 @@
 
 #include <sstream>
 
+#include <QMouseEvent>
+
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
-
 #include <OgreManualObject.h>
+#include <Overlay/OgreOverlayContainer.h> // FIXME
+#include <OgreSceneQuery.h> // FIXME
 #include <OgreEntity.h>
 
 #include "../../../../components/esm/loadland.hpp"
@@ -78,7 +81,6 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             mCells.insert (std::make_pair (*iter,
                 new Cell (mDocument.getData(), getSceneManager(), iter->getId (mWorldspace))));
 
-            // FIXME: delete this later
             Ogre::ManualObject* manual = getSceneManager()->createManualObject("manual" + iter->getId(mWorldspace));
 
             manual->begin("BaseWhite", Ogre::RenderOperation::OT_LINE_LIST);
@@ -93,8 +95,9 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             Ogre::MeshPtr meshPtr = manual->convertToMesh("vLine" + iter->getId(mWorldspace));
             Ogre::Entity* entity = getSceneManager()->createEntity(meshPtr);
             getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
-            //entity->setVisible(false);
+            entity->setVisible(false);
 
+            // keep pointers so that they can be deleted later
             mEntities.insert(std::make_pair(iter->getId(mWorldspace), entity));
 
             CSVRender::TextOverlay *textDisp = new CSVRender::TextOverlay(entity, getCamera(), iter->getId(mWorldspace));
@@ -110,31 +113,41 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     return modified;
 }
 
-void CSVRender::PagedWorldspaceWidget::updateOverlay(bool toggleOverlay)
+void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
+{
+    //std::cout << "Qt x: " + std::to_string(event->x()) << ", y: " + std::to_string(event->y()) << std::endl;
+
+    int viewportWidth = getCamera()->getViewport()->getActualWidth();
+    int viewportHeight = getCamera()->getViewport()->getActualHeight();
+
+    Ogre::Ray mouseRay = getCamera()->getCameraToViewportRay(event->x()/viewportWidth, event->y()/viewportHeight);
+    Ogre::RaySceneQuery *rayScnQuery = getSceneManager()->createRayQuery(Ogre::Ray());
+    rayScnQuery->setRay(mouseRay);
+    Ogre::RaySceneQueryResult &result = rayScnQuery->execute();
+    Ogre::RaySceneQueryResult::iterator it = result.begin();
+
+    std::list<TextOverlay *>::iterator iter = mTextOverlays.begin();
+    for(; iter != mTextOverlays.end(); ++iter)
+    {
+        if((*iter)->isEnabled() && (*iter)->container().contains(event->x(), event->y()))
+        {
+            std::cout << "clicked: " << (*iter)->getCaption() << std::endl;
+            (*iter)->enable(false);
+        }
+    }
+
+    SceneWidget::mouseReleaseEvent(event);
+}
+
+void CSVRender::PagedWorldspaceWidget::updateOverlay()
 {
     if(!mTextOverlays.empty())
     {
         std::list<CSVRender::TextOverlay *>::iterator it = mTextOverlays.begin();
         for(; it != mTextOverlays.end(); ++it)
         {
-            (*it)->update(toggleOverlay);
+            (*it)->update();
         }
-        std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
-
-#if 0
-        if(toggleOverlay)
-        {
-            while (iter!=mCells.end())
-            {
-                std::map<std::string, Ogre::Entity *>::iterator it = mEntities.find(iter->first.getId(mWorldspace));
-                if(it != mEntities.end())
-                {
-                    it->second->setVisible(!it->second->isVisible());
-                }
-                ++iter;
-            }
-        }
-#endif
     }
 }
 
