@@ -309,9 +309,6 @@ namespace MWWorld
              */
 
             OEngine::Physic::ActorTracer tracer;
-            bool isOnGround = physicActor->getOnGround();
-            if (movement.z > 0.f)
-                isOnGround = false;
             Ogre::Vector3 inertia(0.0f);
             Ogre::Vector3 velocity;
 
@@ -428,8 +425,6 @@ namespace MWWorld
                     if((ptr.getClass().canSwim(ptr) && !ptr.getClass().canWalk(ptr)) 
                             && newPosition.z > (waterlevel - halfExtents.z * 0.5))
                         newPosition = oldPosition;
-                    else // Only on the ground if there's gravity
-                        isOnGround = !(newPosition.z < waterlevel || isFlying);
                 }
                 else
                 {
@@ -446,10 +441,11 @@ namespace MWWorld
                 }
             }
 
-            if (!(inertia.z > 0.f) && !(newPosition.z < waterlevel || isFlying))
+            bool isOnGround = false;
+            if (!(inertia.z > 0.f) && !(newPosition.z < waterlevel))
             {
                 Ogre::Vector3 from = newPosition;
-                Ogre::Vector3 to = newPosition - (isOnGround ?
+                Ogre::Vector3 to = newPosition - (physicActor->getOnGround() ?
                              Ogre::Vector3(0,0,sStepSize+2.f) : Ogre::Vector3(0,0,2.f));
                 tracer.doTrace(colobj, from, to, engine);
                 if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
@@ -462,7 +458,8 @@ namespace MWWorld
                     if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == OEngine::Physic::CollisionType_Water)
                         physicActor->setWalkingOnWater(true);
 
-                    newPosition.z = tracer.mEndPos.z + 1.0f;
+                    if (!isFlying)
+                        newPosition.z = tracer.mEndPos.z + 1.0f;
 
                     isOnGround = true;
                 }
