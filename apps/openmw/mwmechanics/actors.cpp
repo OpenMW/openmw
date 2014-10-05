@@ -1447,6 +1447,8 @@ namespace MWMechanics
                         continue;
                     if (followTarget == actor)
                         list.push_back(iter->first);
+                    else
+                        break;
                 }
                 else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
                     break;
