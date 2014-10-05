@@ -1766,7 +1766,7 @@ namespace MWGui
 
     void WindowManager::setWerewolfOverlay(bool set)
     {
-        if (mWerewolfOverlayEnabled)
+        if (!mWerewolfOverlayEnabled)
             return;
 
         if (set)
