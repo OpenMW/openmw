@@ -230,7 +230,7 @@ namespace MWClass
         const float fFatigueAttackMult = gmst.find("fFatigueAttackMult")->getFloat();
         const float fWeaponFatigueMult = gmst.find("fWeaponFatigueMult")->getFloat();
         MWMechanics::DynamicStat<float> fatigue = stats.getFatigue();
-        const float normalizedEncumbrance = getEncumbrance(ptr) / getCapacity(ptr);
+        const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
         float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
         if (!weapon.isEmpty())
             fatigueLoss += weapon.getClass().getWeight(weapon) * stats.getAttackStrength() * fWeaponFatigueMult;
@@ -537,7 +537,7 @@ namespace MWClass
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
 
-        const float normalizedEncumbrance = getEncumbrance(ptr) / getCapacity(ptr);
+        const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
         bool running = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run);
 

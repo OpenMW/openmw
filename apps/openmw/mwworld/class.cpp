@@ -420,4 +420,13 @@ namespace MWWorld
     {
         throw std::runtime_error("this is not a door");
     }
+
+    float Class::getNormalizedEncumbrance(const Ptr &ptr) const
+    {
+        float capacity = getCapacity(ptr);
+        if (capacity == 0)
+            return 1.f;
+
+        return getEncumbrance(ptr) / capacity;
+    }
 }

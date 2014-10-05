@@ -495,7 +495,7 @@ namespace MWClass
         const float fFatigueAttackMult = store.find("fFatigueAttackMult")->getFloat();
         const float fWeaponFatigueMult = store.find("fWeaponFatigueMult")->getFloat();
         MWMechanics::DynamicStat<float> fatigue = getCreatureStats(ptr).getFatigue();
-        const float normalizedEncumbrance = getEncumbrance(ptr) / getCapacity(ptr);
+        const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
         float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
         if (!weapon.isEmpty())
             fatigueLoss += weapon.getClass().getWeight(weapon) * getNpcStats(ptr).getAttackStrength() * fWeaponFatigueMult;
@@ -911,7 +911,7 @@ namespace MWClass
         const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
         const MWMechanics::MagicEffects &mageffects = npcdata->mNpcStats.getMagicEffects();
 
-        const float normalizedEncumbrance = Npc::getEncumbrance(ptr) / Npc::getCapacity(ptr);
+        const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
         bool sneaking = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Sneak);
         bool running = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run);
