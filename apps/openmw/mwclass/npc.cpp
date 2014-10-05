@@ -302,11 +302,11 @@ namespace MWClass
                 Misc::StringUtils::toLower(faction);
                 if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
                 {
-                    data->mNpcStats.getFactionRanks()[faction] = (int)ref->mBase->mNpdt52.mRank;
+                    data->mNpcStats.setFactionRank(faction, (int)ref->mBase->mNpdt52.mRank);
                 }
                 else
                 {
-                    data->mNpcStats.getFactionRanks()[faction] = (int)ref->mBase->mNpdt12.mRank;
+                    data->mNpcStats.setFactionRank(faction, (int)ref->mBase->mNpdt12.mRank);
                 }
             }
 

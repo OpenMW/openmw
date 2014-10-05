@@ -69,9 +69,41 @@ const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
     return mFactionRank;
 }
 
-std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks()
+void MWMechanics::NpcStats::raiseRank(const std::string &faction)
 {
-    return mFactionRank;
+    const std::string lower = Misc::StringUtils::lowerCase(faction);
+    std::map<std::string, int>::iterator it = mFactionRank.find(lower);
+    if (it != mFactionRank.end())
+    {
+        // Does the next rank exist?
+        const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(lower);
+        if (it->second+1 < 10 && !faction->mRanks[it->second+1].empty())
+            it->second += 1;
+    }
+}
+
+void MWMechanics::NpcStats::lowerRank(const std::string &faction)
+{
+    const std::string lower = Misc::StringUtils::lowerCase(faction);
+    std::map<std::string, int>::iterator it = mFactionRank.find(lower);
+    if (it != mFactionRank.end())
+    {
+        it->second = std::max(0, it->second-1);
+    }
+}
+
+void MWMechanics::NpcStats::setFactionRank(const std::string &faction, int rank)
+{
+    const std::string lower = Misc::StringUtils::lowerCase(faction);
+    mFactionRank[lower] = rank;
+}
+
+void MWMechanics::NpcStats::joinFaction(const std::string& faction)
+{
+    const std::string lower = Misc::StringUtils::lowerCase(faction);
+    std::map<std::string, int>::iterator it = mFactionRank.find(lower);
+    if (it == mFactionRank.end())
+        mFactionRank[lower] = 0;
 }
 
 bool MWMechanics::NpcStats::getExpelled(const std::string& factionID) const
