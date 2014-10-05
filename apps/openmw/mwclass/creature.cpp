@@ -738,7 +738,7 @@ namespace MWClass
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
-            if(world->isUnderwater(ptr.getCell(), pos))
+            if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return 2;
             if(world->isOnGround(ptr))
                 return 0;
@@ -748,7 +748,7 @@ namespace MWClass
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
-            if(world->isUnderwater(ptr.getCell(), pos))
+            if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return 3;
             if(world->isOnGround(ptr))
                 return 1;

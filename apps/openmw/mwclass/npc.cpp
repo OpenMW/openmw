@@ -1222,7 +1222,7 @@ namespace MWClass
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
             if(world->isSwimming(ptr))
                 return "Swim Left";
-            if(world->isUnderwater(ptr.getCell(), pos))
+            if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return "FootWaterLeft";
             if(world->isOnGround(ptr))
             {
@@ -1249,7 +1249,7 @@ namespace MWClass
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
             if(world->isSwimming(ptr))
                 return "Swim Right";
-            if(world->isUnderwater(ptr.getCell(), pos))
+            if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return "FootWaterRight";
             if(world->isOnGround(ptr))
             {
@@ -1274,7 +1274,7 @@ namespace MWClass
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
-            if(world->isUnderwater(ptr.getCell(), pos))
+            if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return "DefaultLandWater";
             if(world->isOnGround(ptr))
                 return "Body Fall Medium";
