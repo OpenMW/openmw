@@ -927,7 +927,7 @@ namespace MWClass
                                     gmst.fAthleticsRunBonus->getFloat() + gmst.fBaseRunMultiplier->getFloat());
 
         float moveSpeed;
-        if(normalizedEncumbrance >= 1.0f)
+        if(getEncumbrance(ptr) > getCapacity(ptr))
             moveSpeed = 0.0f;
         else if(mageffects.get(ESM::MagicEffect::Levitate).getMagnitude() > 0 &&
                 world->isLevitationEnabled())
