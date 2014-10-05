@@ -4,17 +4,13 @@
 #include <sstream>
 
 #include <OgreCamera.h>
-#include <OgreTextureManager.h>
-#include <OgreTechnique.h>
-#include <OgreMaterialManager.h>
-#include <OgreBillboardSet.h>
-#include <OgreBillboard.h>
-#include <OgreHardwarePixelBuffer.h>
 #include <OgreSceneManager.h>
-#include <OgreSceneNode.h>
 
-#include <QEvent>
-#include <QPainter>
+#include <OgreManualObject.h>
+#include <OgreEntity.h>
+
+#include "../../../../components/esm/loadland.hpp"
+#include "textoverlay.hpp"
 
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
@@ -22,18 +18,6 @@
 #include "../widget/scenetooltoggle.hpp"
 
 #include "elements.hpp"
-
-void CSVRender::PagedWorldspaceWidget::displayCellCoord(bool display)
-{
-    mDisplayCellCoord = display;
-    std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter(mCells.begin());
-
-    while (iter != mCells.end())
-    {
-        getSceneManager()->getBillboardSet("CellBillboardSet" + iter->first.getId(mWorldspace))->setVisible(display);
-        iter++;
-    }
-}
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
@@ -56,9 +40,14 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                 delete iter->second;
                 mCells.erase (iter++);
 
-                getSceneManager()->getSceneNode("CellBillboardNode" + iter->first.getId(mWorldspace))->detachAllObjects();
-                getSceneManager()->destroySceneNode("CellBillboardNode" + iter->first.getId(mWorldspace));
-                getSceneManager()->destroyBillboardSet("CellBillboardSet" + iter->first.getId(mWorldspace));
+                // destroy manual objects and entities
+                std::map<std::string, Ogre::Entity *>::iterator it = mEntities.find(iter->first.getId(mWorldspace));
+                if(it != mEntities.end())
+                {
+                    getSceneManager()->destroyEntity(it->second);
+                    mEntities.erase(it);
+                }
+                getSceneManager()->destroyManualObject("manual"+iter->first.getId(mWorldspace));
 
                 modified = true;
             }
@@ -82,78 +71,71 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             if (setCamera)
             {
                 setCamera = false;
-                getCamera()->setPosition (8192*iter->getX()+4096, 8192*iter->getY()+4096, 0);
+                getCamera()->setPosition (ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
+                                          ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2, 0);
             }
 
             mCells.insert (std::make_pair (*iter,
-                new Cell (mDocument.getData(), getSceneManager(),
-                iter->getId (mWorldspace))));
+                new Cell (mDocument.getData(), getSceneManager(), iter->getId (mWorldspace))));
 
-            //billboard which indicate the Cell coord
-            Ogre::SceneNode* billboardNode = getSceneManager()->getRootSceneNode()->createChildSceneNode("CellBillboardNode" + iter->getId(mWorldspace));
-            billboardNode->setPosition(8192 * iter->getX() + 4096, 8192 * iter->getY() + 4096, 0);
+            // FIXME: delete this later
+            Ogre::ManualObject* manual = getSceneManager()->createManualObject("manual" + iter->getId(mWorldspace));
 
-            QImage image(QSize(1024, 1024), QImage::Format_RGB888);
-            QPainter painter(&image);
-            std::stringstream ss;
-            ss << iter->getX() << ";" << iter->getY();
-            std::string text = ss.str();
-            QFont font = painter.font();
-            font.setPointSize(256);
-            painter.setFont(font);
-            painter.setPen(Qt::SolidLine);
-            painter.setPen(Qt::white);
-            painter.drawText(QRect(0, 0, 1024, 1024), Qt::AlignCenter, QString(text.c_str()));
+            manual->begin("BaseWhite", Ogre::RenderOperation::OT_LINE_LIST);
 
+            // define start and end point (x, y, z)
+            // FIXME: need terrain height to get the correct starting point
+            manual-> position(ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2, 0);
+            manual-> position(ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2, 2000);
+            manual->end();
+            Ogre::MeshPtr meshPtr = manual->convertToMesh("vLine" + iter->getId(mWorldspace));
+            Ogre::Entity* entity = getSceneManager()->createEntity(meshPtr);
+            getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
+            //entity->setVisible(false);
 
-            Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().getByName("CellBillboardTexture" + iter->getId(mWorldspace));
-            if (texture.isNull())
-            {
-                texture = Ogre::TextureManager::getSingleton().createManual("CellBillboardTexture" + iter->getId(mWorldspace),
-                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                    Ogre::TEX_TYPE_2D, 1024, 1024, 5, Ogre::PF_X8R8G8B8, Ogre::TU_DEFAULT);
+            mEntities.insert(std::make_pair(iter->getId(mWorldspace), entity));
 
-                int w = 1024;
-                int h = 1024;
-                Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream((void*)image.constBits(), w*h*Ogre::PixelUtil::getNumElemBytes(Ogre::PF_R8G8B8), false));
-                texture->loadRawData(stream, w, h, Ogre::PF_R8G8B8);
-                texture->load();
-            }
-
-            Ogre::MaterialPtr material;
-            if (Ogre::MaterialManager::getSingleton().resourceExists("CellBillboardMaterial" + iter->getId(mWorldspace)))
-            {
-                material = Ogre::MaterialManager::getSingleton().getByName("CellBillboardMaterial" + iter->getId(mWorldspace));
-            }
-            else
-            {
-                material = Ogre::MaterialManager::getSingleton().create(
-                    "CellBillboardMaterial" + iter->getId(mWorldspace), // name
-                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
-                material->getTechnique(0)->getPass(0)->createTextureUnitState("CellBillboardTexture" + iter->getId(mWorldspace));
-                material->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-                material->setDepthCheckEnabled(false);
-                material->setDepthWriteEnabled(false);
-            }
-
-            Ogre::BillboardSet* mySet = getSceneManager()->createBillboardSet("CellBillboardSet" + iter->getId(mWorldspace));
-            // FIXME: myBillboard is currently not used but will be required later
-            // for manipulating the billboard (e.g. mouse events).  Ignore compiler
-            // warnings for now.
-            Ogre::Billboard* myBillboard = mySet->createBillboard(Ogre::Vector3(0, 0, 0));
-            mySet->setDefaultDimensions(4000, 2000);
-            mySet->setMaterial(material);
-            mySet->setRenderQueueGroup(mySet->getRenderQueueGroup() + 1); // render the bilboard on top
-            billboardNode->attachObject(mySet);
-
-            mySet->setVisible(mDisplayCellCoord);
+            CSVRender::TextOverlay *textDisp = new CSVRender::TextOverlay(entity, getCamera(), iter->getId(mWorldspace));
+            textDisp->enable(true);
+            textDisp->setCaption(iter->getId(mWorldspace));
+            textDisp->update();
+            mTextOverlays.push_back(textDisp);
 
             modified = true;
         }
     }
 
     return modified;
+}
+
+void CSVRender::PagedWorldspaceWidget::updateOverlay(bool toggleOverlay)
+{
+    if(!mTextOverlays.empty())
+    {
+        std::list<CSVRender::TextOverlay *>::iterator it = mTextOverlays.begin();
+        for(; it != mTextOverlays.end(); ++it)
+        {
+            (*it)->update(toggleOverlay);
+        }
+        std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+
+#if 0
+        if(toggleOverlay)
+        {
+            while (iter!=mCells.end())
+            {
+                std::map<std::string, Ogre::Entity *>::iterator it = mEntities.find(iter->first.getId(mWorldspace));
+                if(it != mEntities.end())
+                {
+                    it->second->setVisible(!it->second->isVisible());
+                }
+                ++iter;
+            }
+        }
+#endif
+    }
 }
 
 void CSVRender::PagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
@@ -234,7 +216,7 @@ std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
 }
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
-: WorldspaceWidget(document, parent), mDocument(document), mWorldspace("std::default"), mDisplayCellCoord(true)
+: WorldspaceWidget(document, parent), mDocument(document), mWorldspace("std::default"), mTextOverlays(0)
 {
     QAbstractItemModel *cells =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells);
@@ -251,7 +233,17 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
 {
     for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
         iter!=mCells.end(); ++iter)
+    {
         delete iter->second;
+
+        std::map<std::string, Ogre::Entity *>::iterator it = mEntities.find(iter->first.getId(mWorldspace));
+        if(it != mEntities.end())
+        {
+            getSceneManager()->destroyEntity(it->second);
+            mEntities.erase(it);
+        }
+        getSceneManager()->destroyManualObject("manual"+iter->first.getId(mWorldspace));
+    }
 }
 
 void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)

@@ -59,6 +59,8 @@ namespace CSVRender
             void setDefaultAmbient (const Ogre::ColourValue& colour);
             ///< \note The actual ambient colour may differ based on lighting settings.
 
+            virtual void updateOverlay(bool toggleOverlay = false);
+
         private:
             void paintEvent(QPaintEvent* e);
             void resizeEvent(QResizeEvent* e);

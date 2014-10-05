@@ -314,3 +314,6 @@ void CSVRender::WorldspaceWidget::elementSelectionChanged()
     setVisibilityMask (getElementMask());
     flagAsModified();
 }
+
+void CSVRender::WorldspaceWidget::updateOverlay(bool toggleOverlay)
+{ }

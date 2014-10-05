@@ -11,6 +11,7 @@
 #include <OgreCamera.h>
 #include <OgreSceneNode.h>
 #include <OgreViewport.h>
+#include <Overlay/OgreOverlaySystem.h>
 
 #include "../widget/scenetoolmode.hpp"
 #include "../../model/settings/usersettings.hpp"
@@ -56,6 +57,9 @@ namespace CSVRender
         mCamera->roll (Ogre::Degree (90));
 
         setLighting (&mLightingDay);
+
+        Ogre::OverlaySystem *mOverlaySystem = new Ogre::OverlaySystem(); // FIXME: delete
+        mSceneMgr->addRenderQueueListener(mOverlaySystem);
 
         QTimer *timer = new QTimer (this);
 
@@ -283,6 +287,8 @@ namespace CSVRender
 
                 break;
 
+            case Qt::Key_M: updateOverlay(true);
+
             default: QWidget::keyReleaseEvent (event);
         }
     }
@@ -377,8 +383,12 @@ namespace CSVRender
         {
             mUpdate = false;
             mWindow->update();
+            updateOverlay();
         }
     }
+
+    void SceneWidget::updateOverlay(bool toggleOverlay)
+    { }
 
     void SceneWidget::setLighting (Lighting *lighting)
     {
