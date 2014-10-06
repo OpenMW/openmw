@@ -2936,6 +2936,9 @@ namespace MWWorld
 
     void World::spawnBloodEffect(const Ptr &ptr, const Vector3 &worldPosition)
     {
+        if (ptr.getRefData().getHandle() == "player" && Settings::Manager::getBool("hit fader", "GUI"))
+            return;
+
         int type = ptr.getClass().getBloodTexture(ptr);
         std::string texture;
         switch (type)
