@@ -124,7 +124,7 @@ namespace MWMechanics
             const float fFatigueBlockMult = gmst.find("fFatigueBlockMult")->getFloat();
             const float fWeaponFatigueBlockMult = gmst.find("fWeaponFatigueBlockMult")->getFloat();
             MWMechanics::DynamicStat<float> fatigue = blockerStats.getFatigue();
-            float normalizedEncumbrance = blocker.getClass().getEncumbrance(blocker) / blocker.getClass().getCapacity(blocker);
+            float normalizedEncumbrance = blocker.getClass().getNormalizedEncumbrance(blocker);
             normalizedEncumbrance = std::min(1.f, normalizedEncumbrance);
             float fatigueLoss = fFatigueBlockBase + normalizedEncumbrance * fFatigueBlockMult;
             fatigueLoss += weapon.getClass().getWeight(weapon) * attackerStats.getAttackStrength() * fWeaponFatigueBlockMult;

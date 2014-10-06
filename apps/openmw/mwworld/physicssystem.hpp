@@ -1,6 +1,8 @@
 #ifndef GAME_MWWORLD_PHYSICSSYSTEM_H
 #define GAME_MWWORLD_PHYSICSSYSTEM_H
 
+#include <memory>
+
 #include <OgreVector3.h>
 
 #include <btBulletCollisionCommon.h>
@@ -31,6 +33,10 @@ namespace MWWorld
         public:
             PhysicsSystem (OEngine::Render::OgreRenderer &_rend);
             ~PhysicsSystem ();
+
+            void enableWater(float height);
+            void setWaterHeight(float height);
+            void disableWater();
 
             void addObject (const MWWorld::Ptr& ptr, bool placeable=false);
 
@@ -108,6 +114,8 @@ namespace MWWorld
 
         private:
 
+            void updateWater();
+
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;
             std::map<std::string, std::string> handleToMesh;
@@ -123,6 +131,12 @@ namespace MWWorld
             PtrVelocityList mMovementResults;
 
             float mTimeAccum;
+
+            float mWaterHeight;
+            float mWaterEnabled;
+
+            std::auto_ptr<btCollisionObject> mWaterCollisionObject;
+            std::auto_ptr<btCollisionShape> mWaterCollisionShape;
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);

@@ -81,7 +81,7 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
     const float fWeaponFatigueMult = gmst.find("fWeaponFatigueMult")->getFloat();
     MWMechanics::CreatureStats& attackerStats = actor.getClass().getCreatureStats(actor);
     MWMechanics::DynamicStat<float> fatigue = attackerStats.getFatigue();
-    const float normalizedEncumbrance = actor.getClass().getEncumbrance(actor) / actor.getClass().getCapacity(actor);
+    const float normalizedEncumbrance = actor.getClass().getNormalizedEncumbrance(actor);
     float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
     if (!weapon->isEmpty())
         fatigueLoss += weapon->getClass().getWeight(*weapon) * attackerStats.getAttackStrength() * fWeaponFatigueMult;

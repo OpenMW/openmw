@@ -302,11 +302,11 @@ namespace MWClass
                 Misc::StringUtils::toLower(faction);
                 if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
                 {
-                    data->mNpcStats.getFactionRanks()[faction] = (int)ref->mBase->mNpdt52.mRank;
+                    data->mNpcStats.setFactionRank(faction, (int)ref->mBase->mNpdt52.mRank);
                 }
                 else
                 {
-                    data->mNpcStats.getFactionRanks()[faction] = (int)ref->mBase->mNpdt12.mRank;
+                    data->mNpcStats.setFactionRank(faction, (int)ref->mBase->mNpdt12.mRank);
                 }
             }
 
@@ -495,7 +495,7 @@ namespace MWClass
         const float fFatigueAttackMult = store.find("fFatigueAttackMult")->getFloat();
         const float fWeaponFatigueMult = store.find("fWeaponFatigueMult")->getFloat();
         MWMechanics::DynamicStat<float> fatigue = getCreatureStats(ptr).getFatigue();
-        const float normalizedEncumbrance = getEncumbrance(ptr) / getCapacity(ptr);
+        const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
         float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
         if (!weapon.isEmpty())
             fatigueLoss += weapon.getClass().getWeight(weapon) * getNpcStats(ptr).getAttackStrength() * fWeaponFatigueMult;
@@ -914,7 +914,7 @@ namespace MWClass
         const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
         const MWMechanics::MagicEffects &mageffects = npcdata->mNpcStats.getMagicEffects();
 
-        const float normalizedEncumbrance = Npc::getEncumbrance(ptr) / Npc::getCapacity(ptr);
+        const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
         bool sneaking = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Sneak);
         bool running = ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run);
@@ -930,7 +930,7 @@ namespace MWClass
                                     gmst.fAthleticsRunBonus->getFloat() + gmst.fBaseRunMultiplier->getFloat());
 
         float moveSpeed;
-        if(normalizedEncumbrance >= 1.0f)
+        if(getEncumbrance(ptr) > getCapacity(ptr))
             moveSpeed = 0.0f;
         else if(mageffects.get(ESM::MagicEffect::Levitate).getMagnitude() > 0 &&
                 world->isLevitationEnabled())
@@ -1225,7 +1225,7 @@ namespace MWClass
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
             if(world->isSwimming(ptr))
                 return "Swim Left";
-            if(world->isUnderwater(ptr.getCell(), pos))
+            if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return "FootWaterLeft";
             if(world->isOnGround(ptr))
             {
@@ -1252,7 +1252,7 @@ namespace MWClass
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
             if(world->isSwimming(ptr))
                 return "Swim Right";
-            if(world->isUnderwater(ptr.getCell(), pos))
+            if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return "FootWaterRight";
             if(world->isOnGround(ptr))
             {
@@ -1277,7 +1277,7 @@ namespace MWClass
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
-            if(world->isUnderwater(ptr.getCell(), pos))
+            if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return "DefaultLandWater";
             if(world->isOnGround(ptr))
                 return "Body Fall Medium";

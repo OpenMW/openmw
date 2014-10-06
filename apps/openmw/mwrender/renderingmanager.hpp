@@ -100,7 +100,6 @@ public:
     /// \todo this function should be removed later. Instead the rendering subsystems should track
     /// when rebatching is needed and update automatically at the end of each frame.
     void cellAdded (MWWorld::CellStore *store);
-    void waterAdded(MWWorld::CellStore *store);
 
     /// Clear all savegame-specific data (i.e. fog of war textures)
     void clear();
@@ -121,7 +120,8 @@ public:
     /// Updates an object's rotation
     void rotateObject (const MWWorld::Ptr& ptr);
 
-    void setWaterHeight(const float height);
+    void setWaterHeight(float height);
+    void setWaterEnabled(bool enabled);
     bool toggleWater();
     bool toggleWorld();
 

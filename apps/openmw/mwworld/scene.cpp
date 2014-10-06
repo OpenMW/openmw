@@ -83,7 +83,12 @@ namespace
                 ptr.getClass().insertObject (ptr, mPhysics);
 
                 updateObjectLocalRotation(ptr, mPhysics, mRendering);
-                MWBase::Environment::get().getWorld()->scaleObject (ptr, ptr.getCellRef().getScale());
+                if (ptr.getRefData().getBaseNode())
+                {
+                    float scale = ptr.getCellRef().getScale();
+                    ptr.getClass().adjustScale(ptr, scale);
+                    mRendering.scaleObject(ptr, Ogre::Vector3(scale));
+                }
                 ptr.getClass().adjustPosition (ptr, false);
             }
             catch (const std::exception& e)
@@ -233,6 +238,15 @@ namespace MWWorld
             insertCell (*cell, true, loadingListener);
 
             mRendering.cellAdded (cell);
+            bool waterEnabled = cell->getCell()->hasWater();
+            mRendering.setWaterEnabled(waterEnabled);
+            if (waterEnabled)
+            {
+                mPhysics->enableWater(cell->getWaterLevel());
+                mRendering.setWaterHeight(cell->getWaterLevel());
+            }
+            else
+                mPhysics->disableWater();
 
             mRendering.configureAmbient(*cell);
         }
