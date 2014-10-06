@@ -18,7 +18,6 @@
 
 #include "navigation.hpp"
 #include "lighting.hpp"
-#include "elements.hpp" // FIXME: for testing only
 
 namespace CSVRender
 {

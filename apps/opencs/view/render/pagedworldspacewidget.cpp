@@ -117,17 +117,18 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
 
 void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 {
-    std::list<TextOverlay *>::iterator iter = mTextOverlays.begin();
-    for(; iter != mTextOverlays.end(); ++iter)
+    if(event->button() == Qt::RightButton)
     {
-        if(mDisplayCellCoord &&
-           (*iter)->isEnabled() && (*iter)->container().contains(event->x(), event->y()))
+        std::list<TextOverlay *>::iterator iter = mTextOverlays.begin();
+        for(; iter != mTextOverlays.end(); ++iter)
         {
-            std::cout << "clicked: " << (*iter)->getCaption() << std::endl;
+            if(mDisplayCellCoord &&
+               (*iter)->isEnabled() && (*iter)->container().contains(event->x(), event->y()))
+            {
+                std::cout << "clicked: " << (*iter)->getCaption() << std::endl;
+            }
         }
     }
-
-    SceneWidget::mouseReleaseEvent(event);
 }
 
 void CSVRender::PagedWorldspaceWidget::updateOverlay()
