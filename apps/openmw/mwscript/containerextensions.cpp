@@ -290,18 +290,15 @@ namespace MWScript
                     const std::string &name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    int count = 0;
                     MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     for (MWWorld::ContainerStoreIterator it = invStore.begin(MWWorld::ContainerStore::Type_Miscellaneous);
                          it != invStore.end(); ++it)
                     {
-
                         if (::Misc::StringUtils::ciEqual(it->getCellRef().getSoul(), name))
-                        {
-                            runtime.push(1);
-                            return;
-                        }
+                            ++count;
                     }
-                    runtime.push(0);
+                    runtime.push(count);
                 }
         };
 
