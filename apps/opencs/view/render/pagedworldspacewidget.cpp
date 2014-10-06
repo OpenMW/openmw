@@ -186,7 +186,7 @@ void CSVRender::PagedWorldspaceWidget::updateOverlay()
         if(getCamera()->getViewport())
         {
             if((uint32_t)getCamera()->getViewport()->getVisibilityMask()
-                                    & (uint32_t)CSVRender::Elements::Element_CellMarker)
+                                    & (uint32_t)CSVRender::Element_CellMarker)
             {
                 mDisplayCellCoord = true;
                 overlay->show();
