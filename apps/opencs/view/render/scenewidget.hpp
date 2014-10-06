@@ -15,6 +15,7 @@ namespace Ogre
     class SceneManager;
     class RenderWindow;
     class Viewport;
+    class OverlaySystem;
 }
 
 namespace CSVWidget
@@ -89,6 +90,7 @@ namespace CSVRender
             Ogre::SceneManager* mSceneMgr;
             Ogre::RenderWindow* mWindow;
             Ogre::Viewport *mViewport;
+            Ogre::OverlaySystem *mOverlaySystem;
 
             Navigation *mNavigation;
             Lighting *mLighting;

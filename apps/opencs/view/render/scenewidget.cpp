@@ -18,6 +18,7 @@
 
 #include "navigation.hpp"
 #include "lighting.hpp"
+#include "elements.hpp" // FIXME: for testing only
 
 namespace CSVRender
 {
@@ -58,7 +59,7 @@ namespace CSVRender
 
         setLighting (&mLightingDay);
 
-        Ogre::OverlaySystem *mOverlaySystem = new Ogre::OverlaySystem(); // FIXME: delete
+        Ogre::OverlaySystem *mOverlaySystem = new Ogre::OverlaySystem();
         mSceneMgr->addRenderQueueListener(mOverlaySystem);
 
         QTimer *timer = new QTimer (this);
@@ -162,8 +163,17 @@ namespace CSVRender
         if (mWindow)
             Ogre::Root::getSingleton().destroyRenderTarget (mWindow);
 
+        if (mOverlaySystem)
+        {
+            if (mSceneMgr)
+                mSceneMgr->removeRenderQueueListener (mOverlaySystem);
+
+            delete mOverlaySystem;
+        }
+
         if (mSceneMgr)
             Ogre::Root::getSingleton().destroySceneManager (mSceneMgr);
+
     }
 
     void SceneWidget::setVisibilityMask (unsigned int mask)
@@ -285,6 +295,20 @@ namespace CSVRender
                 if (mNavigation)
                     mNavigation->setFastModeFactor (1);
 
+                break;
+
+            //FIXME: for testing only
+            case Qt::Key_N:
+                setVisibilityMask((uint32_t)mViewport->getVisibilityMask()
+                        & ~(uint32_t)CSVRender::Elements::Element_CellMarker);
+                updateOverlay();
+                break;
+
+            //FIXME: for testing only
+            case Qt::Key_M:
+                setVisibilityMask((uint32_t)mViewport->getVisibilityMask()
+                        | (uint32_t)CSVRender::Elements::Element_CellMarker);
+                updateOverlay();
                 break;
 
             default: QWidget::keyReleaseEvent (event);

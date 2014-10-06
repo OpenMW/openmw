@@ -8,8 +8,10 @@
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
 #include <OgreManualObject.h>
-#include <Overlay/OgreOverlayContainer.h> // FIXME
-#include <OgreSceneQuery.h> // FIXME
+#include <Overlay/OgreOverlayContainer.h>
+#include <Overlay/OgreOverlayManager.h>
+#include <OgreRoot.h>
+#include <OgreSceneQuery.h>
 #include <OgreEntity.h>
 
 #include "../../../../components/esm/loadland.hpp"
@@ -115,32 +117,88 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
 
 void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 {
-    //std::cout << "Qt x: " + std::to_string(event->x()) << ", y: " + std::to_string(event->y()) << std::endl;
-
-    int viewportWidth = getCamera()->getViewport()->getActualWidth();
-    int viewportHeight = getCamera()->getViewport()->getActualHeight();
-
-    Ogre::Ray mouseRay = getCamera()->getCameraToViewportRay(event->x()/viewportWidth, event->y()/viewportHeight);
-    Ogre::RaySceneQuery *rayScnQuery = getSceneManager()->createRayQuery(Ogre::Ray());
-    rayScnQuery->setRay(mouseRay);
-    Ogre::RaySceneQueryResult &result = rayScnQuery->execute();
-    Ogre::RaySceneQueryResult::iterator it = result.begin();
-
     std::list<TextOverlay *>::iterator iter = mTextOverlays.begin();
     for(; iter != mTextOverlays.end(); ++iter)
     {
-        if((*iter)->isEnabled() && (*iter)->container().contains(event->x(), event->y()))
+        if(mDisplayCellCoord &&
+           (*iter)->isEnabled() && (*iter)->container().contains(event->x(), event->y()))
         {
             std::cout << "clicked: " << (*iter)->getCaption() << std::endl;
-            (*iter)->enable(false);
+            //(*iter)->enable(false); // FIXME: for testing only
         }
     }
+
+#if 0
+    // mouse picking
+    int viewportWidth = getCamera()->getViewport()->getActualWidth();
+    int viewportHeight = getCamera()->getViewport()->getActualHeight();
+
+    Ogre::Ray mouseRay = getCamera()->getCameraToViewportRay((float)(event->x()/viewportWidth),
+                                                             (float)(event->y()/viewportHeight));
+    Ogre::RaySceneQuery *rayScnQuery = getSceneManager()->createRayQuery(Ogre::Ray());
+    rayScnQuery->setRay(mouseRay);
+    rayScnQuery->setSortByDistance(true);
+    Ogre::RaySceneQueryResult result = rayScnQuery->execute();
+
+    Ogre::RaySceneQueryResult::iterator it = result.begin();
+    for (; it != result.end(); it++)
+    {
+        if(it->worldFragment)
+        {
+            // FIXME: just testing
+            std::string str;
+            if (it->worldFragment->fragmentType == Ogre::SceneQuery::WorldFragmentType::WFT_NONE)
+                str = "no world geometry hits";
+            else if (it->worldFragment->fragmentType == Ogre::SceneQuery::WorldFragmentType::WFT_PLANE_BOUNDED_REGION)
+                str = "pointers to convex plane-bounded regions";
+            else if (it->worldFragment->fragmentType == Ogre::SceneQuery::WorldFragmentType::WFT_SINGLE_INTERSECTION)
+                str = "single intersection point";
+            else if(it->worldFragment->fragmentType == Ogre::SceneQuery::WorldFragmentType::WFT_CUSTOM_GEOMETRY)
+                str = "custom geometry";
+            else if (it->worldFragment->fragmentType == Ogre::SceneQuery::WorldFragmentType::WFT_RENDER_OPERATION)
+                str = "general render operation structure";
+
+            std::cout << "fragment type: " << str << std::endl;
+        }
+        else if (it->movable)
+        {
+            // FIXME: just testing
+            it->movable->getParentSceneNode()->showBoundingBox(true);
+
+            std::cout << "movable object: " + it->movable->getName() << std::endl;
+        }
+        else
+            std::cout << "nothing: " << std::endl;
+    }
+
+    getSceneManager()->destroyQuery(rayScnQuery);
+#endif
 
     SceneWidget::mouseReleaseEvent(event);
 }
 
 void CSVRender::PagedWorldspaceWidget::updateOverlay()
 {
+    Ogre::OverlayManager &overlayMgr = Ogre::OverlayManager::getSingleton();
+    Ogre::Overlay* overlay = overlayMgr.getByName("CellIDPanel");
+    if(overlay && !mTextOverlays.empty())
+    {
+        if(getCamera()->getViewport())
+        {
+            if((uint32_t)getCamera()->getViewport()->getVisibilityMask()
+                                    & (uint32_t)CSVRender::Elements::Element_CellMarker)
+            {
+                mDisplayCellCoord = true;
+                overlay->show();
+            }
+            else
+            {
+                mDisplayCellCoord = false;
+                overlay->hide();
+            }
+        }
+    }
+
     if(!mTextOverlays.empty())
     {
         std::list<CSVRender::TextOverlay *>::iterator it = mTextOverlays.begin();
@@ -229,7 +287,8 @@ std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
 }
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
-: WorldspaceWidget(document, parent), mDocument(document), mWorldspace("std::default"), mTextOverlays(0)
+: WorldspaceWidget(document, parent), mDocument(document), mWorldspace("std::default"), mDisplayCellCoord(true)
+, mTextOverlays(0)
 {
     QAbstractItemModel *cells =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells);

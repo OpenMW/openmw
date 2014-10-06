@@ -22,6 +22,7 @@ namespace CSVRender
             std::map<CSMWorld::CellCoordinates, Cell *> mCells;
             std::string mWorldspace;
             CSVWidget::SceneToolToggle *mControlElements;
+            bool mDisplayCellCoord;
             std::list<TextOverlay *> mTextOverlays;
             std::map<std::string, Ogre::Entity*> mEntities;
 

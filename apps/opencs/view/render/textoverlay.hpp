@@ -50,7 +50,7 @@ namespace CSVRender
             void enable(bool enable);
             bool isEnabled();
             void setCaption(const Ogre::String& text);
-            void update(bool toggleOverlay = false);
+            void update();
             QRect container();
             Ogre::String getCaption() { return mCaption; }  // FIXME: debug
     };

@@ -259,20 +259,8 @@ int TextOverlay::fontHeight()
     return mFontHeight;
 }
 
-void TextOverlay::update(bool toggleOverlay)
+void TextOverlay::update()
 {
-    if(toggleOverlay)
-        mEnabled = !mEnabled;
-
-    if (!mEnabled)
-    {
-        mOverlay->hide();
-        Ogre::Root::getSingleton().renderOneFrame();
-        return;
-    }
-    else
-        mOverlay->show();
-
     float min_x, max_x, min_y, max_y;
     getMinMaxEdgesOfTopAABBIn2D(min_x, min_y, max_x, max_y);
 
