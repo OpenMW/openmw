@@ -24,6 +24,7 @@
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/autocalcspell.hpp"
 #include "../mwmechanics/difficultyscaling.hpp"
+#include "../mwmechanics/character.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -1220,60 +1221,43 @@ namespace MWClass
 
     std::string Npc::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
     {
-        if(name == "left")
+        if(name == "left" || name == "right")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
             if(world->isSwimming(ptr))
-                return "Swim Left";
+                return (name == "left") ? "Swim Left" : "Swim Right";
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
-                return "FootWaterLeft";
+                return (name == "left") ? "FootWaterLeft" : "FootWaterRight";
             if(world->isOnGround(ptr))
             {
+                if (ptr.getClass().getNpcStats(ptr).isWerewolf()
+                        && ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
+                {
+                    MWMechanics::WeaponType weaponType = MWMechanics::WeapType_None;
+                    MWMechanics::getActiveWeapon(ptr.getClass().getCreatureStats(ptr), ptr.getClass().getInventoryStore(ptr), &weaponType);
+                    if (weaponType == MWMechanics::WeapType_None)
+                        return "";
+                }
+
                 MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
                 MWWorld::ContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
                 if(boots == inv.end() || boots->getTypeName() != typeid(ESM::Armor).name())
-                    return "FootBareLeft";
+                    return (name == "left") ? "FootBareLeft" : "FootBareRight";
 
                 switch(boots->getClass().getEquipmentSkill(*boots))
                 {
                     case ESM::Skill::LightArmor:
-                        return "FootLightLeft";
+                        return (name == "left") ? "FootLightLeft" : "FootLightRight";
                     case ESM::Skill::MediumArmor:
-                        return "FootMedLeft";
+                        return (name == "left") ? "FootMedLeft" : "FootMedRight";
                     case ESM::Skill::HeavyArmor:
-                        return "FootHeavyLeft";
+                        return (name == "left") ? "FootHeavyLeft" : "FootHeavyRight";
                 }
             }
             return "";
         }
-        if(name == "right")
-        {
-            MWBase::World *world = MWBase::Environment::get().getWorld();
-            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
-            if(world->isSwimming(ptr))
-                return "Swim Right";
-            if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
-                return "FootWaterRight";
-            if(world->isOnGround(ptr))
-            {
-                MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
-                MWWorld::ContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
-                if(boots == inv.end() || boots->getTypeName() != typeid(ESM::Armor).name())
-                    return "FootBareRight";
 
-                switch(boots->getClass().getEquipmentSkill(*boots))
-                {
-                    case ESM::Skill::LightArmor:
-                        return "FootLightRight";
-                    case ESM::Skill::MediumArmor:
-                        return "FootMedRight";
-                    case ESM::Skill::HeavyArmor:
-                        return "FootHeavyRight";
-                }
-            }
-            return "";
-        }
         if(name == "land")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
