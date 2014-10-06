@@ -1559,6 +1559,8 @@ namespace MWGui
 
         mForceHidden = GW_None;
 
+        setWerewolfOverlay(false);
+
         mGuiModes.clear();
         MWBase::Environment::get().getInputManager()->changeInputMode(false);
         updateVisible();
@@ -1769,10 +1771,7 @@ namespace MWGui
         if (!mWerewolfOverlayEnabled)
             return;
 
-        if (set)
-            mWerewolfFader->fadeOut(1.0f);
-        else
-            mWerewolfFader->fadeIn(1.0f);
+        mWerewolfFader->notifyAlphaChanged(set ? 1.0f : 0.0f);
     }
 
     void WindowManager::onClipboardChanged(const std::string &_type, const std::string &_data)

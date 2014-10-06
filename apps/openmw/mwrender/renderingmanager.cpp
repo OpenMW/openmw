@@ -36,6 +36,7 @@
 #include "../mwbase/statemanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "../mwworld/ptr.hpp"
 
@@ -345,6 +346,9 @@ void RenderingManager::update (float duration, bool paused)
     int blind = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude();
     MWBase::Environment::get().getWindowManager()->setScreenFactor(std::max(0.f, 1.f-(blind / 100.f)));
     setAmbientMode();
+
+    if (player.getClass().getNpcStats(player).isWerewolf())
+        MWBase::Environment::get().getWindowManager()->setWerewolfOverlay(mCamera->isFirstPerson());
 
     // player position
     MWWorld::RefData &data = player.getRefData();
