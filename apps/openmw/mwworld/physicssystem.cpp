@@ -859,6 +859,8 @@ namespace MWWorld
                     waterCollision = true;
 
                 OEngine::Physic::PhysicActor *physicActor = mEngine->getCharacter(iter->first.getRefData().getHandle());
+                if (!physicActor) // actor was already removed from the scene
+                    continue;
                 physicActor->setCanWaterWalk(waterCollision);
 
                 // 100 points of slowfall reduce gravity by 90% (this is just a guess)
