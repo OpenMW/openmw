@@ -8,8 +8,8 @@
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
 #include <OgreManualObject.h>
-#include <OgreOverlayContainer.h>
-#include <OgreOverlayManager.h>
+#include <OGRE/Overlay/OgreOverlayContainer.h>
+#include <OGRE/Overlay/OgreOverlayManager.h>
 #include <OgreRoot.h>
 #include <OgreSceneQuery.h>
 #include <OgreEntity.h>

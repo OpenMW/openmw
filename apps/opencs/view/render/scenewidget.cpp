@@ -11,7 +11,7 @@
 #include <OgreCamera.h>
 #include <OgreSceneNode.h>
 #include <OgreViewport.h>
-#include <OgreOverlaySystem.h>
+#include <OGRE/Overlay/OgreOverlaySystem.h>
 
 #include "../widget/scenetoolmode.hpp"
 #include "../../model/settings/usersettings.hpp"

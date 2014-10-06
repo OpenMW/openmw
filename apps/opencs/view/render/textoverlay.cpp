@@ -4,10 +4,10 @@
 #include <OgreMaterialManager.h>
 #include <OgreTechnique.h>
 
-#include <OgreOverlayManager.h>
-#include <OgreOverlayContainer.h>
-#include <OgreFontManager.h>
-#include <OgreTextAreaOverlayElement.h>
+#include <OGRE/Overlay/OgreOverlayManager.h>
+#include <OGRE/Overlay/OgreOverlayContainer.h>
+#include <OGRE/Overlay/OgreFontManager.h>
+#include <OGRE/Overlay/OgreTextAreaOverlayElement.h>
 #include <OgreEntity.h>
 #include <OgreViewport.h>
 #include <OgreRoot.h>
