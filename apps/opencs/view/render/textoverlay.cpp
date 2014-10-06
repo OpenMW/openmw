@@ -4,10 +4,10 @@
 #include <OgreMaterialManager.h>
 #include <OgreTechnique.h>
 
-#include <Overlay/OgreOverlayManager.h>
-#include <Overlay/OgreOverlayContainer.h>
-#include <Overlay/OgreFontManager.h>
-#include <Overlay/OgreTextAreaOverlayElement.h>
+#include <OgreOverlayManager.h>
+#include <OgreOverlayContainer.h>
+#include <OgreFontManager.h>
+#include <OgreTextAreaOverlayElement.h>
 #include <OgreEntity.h>
 #include <OgreViewport.h>
 #include <OgreRoot.h>
@@ -19,7 +19,6 @@ namespace CSVRender
 // Things to do:
 // - configurable font size in pixels (automatically calulate everything else from it)
 // - configurable texture to use
-// - configurable toggle key to enable/disable the text overlays (currntly fixed 'm')
 // - try material script
 // - decide whether to use QPaint
 

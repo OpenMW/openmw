@@ -4,7 +4,7 @@
 #include <QRect>
 
 #include <OgreString.h>
-#include <Overlay/OgreFont.h>
+#include <OgreFont.h>
 
 namespace Ogre
 {
