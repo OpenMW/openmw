@@ -300,14 +300,14 @@ namespace CSVRender
             //FIXME: for testing only
             case Qt::Key_N:
                 setVisibilityMask((uint32_t)mViewport->getVisibilityMask()
-                        & ~(uint32_t)CSVRender::Elements::Element_CellMarker);
+                        & ~(uint32_t)CSVRender::Element_CellMarker);
                 updateOverlay();
                 break;
 
             //FIXME: for testing only
             case Qt::Key_M:
                 setVisibilityMask((uint32_t)mViewport->getVisibilityMask()
-                        | (uint32_t)CSVRender::Elements::Element_CellMarker);
+                        | (uint32_t)CSVRender::Element_CellMarker);
                 updateOverlay();
                 break;
 
