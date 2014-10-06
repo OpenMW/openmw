@@ -1489,10 +1489,12 @@ namespace MWWorld
         if (mGoToJail && !paused)
             goToJail();
 
-        updateWeather(duration);
 
         if (!paused)
+        {
+            updateWeather(duration);
             doPhysics (duration);
+        }
 
         mWorldScene->update (duration, paused);
 
