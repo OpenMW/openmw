@@ -124,55 +124,8 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
            (*iter)->isEnabled() && (*iter)->container().contains(event->x(), event->y()))
         {
             std::cout << "clicked: " << (*iter)->getCaption() << std::endl;
-            //(*iter)->enable(false); // FIXME: for testing only
         }
     }
-
-#if 0
-    // mouse picking
-    int viewportWidth = getCamera()->getViewport()->getActualWidth();
-    int viewportHeight = getCamera()->getViewport()->getActualHeight();
-
-    Ogre::Ray mouseRay = getCamera()->getCameraToViewportRay((float)(event->x()/viewportWidth),
-                                                             (float)(event->y()/viewportHeight));
-    Ogre::RaySceneQuery *rayScnQuery = getSceneManager()->createRayQuery(Ogre::Ray());
-    rayScnQuery->setRay(mouseRay);
-    rayScnQuery->setSortByDistance(true);
-    Ogre::RaySceneQueryResult result = rayScnQuery->execute();
-
-    Ogre::RaySceneQueryResult::iterator it = result.begin();
-    for (; it != result.end(); it++)
-    {
-        if(it->worldFragment)
-        {
-            // FIXME: just testing
-            std::string str;
-            if (it->worldFragment->fragmentType == Ogre::SceneQuery::WorldFragmentType::WFT_NONE)
-                str = "no world geometry hits";
-            else if (it->worldFragment->fragmentType == Ogre::SceneQuery::WorldFragmentType::WFT_PLANE_BOUNDED_REGION)
-                str = "pointers to convex plane-bounded regions";
-            else if (it->worldFragment->fragmentType == Ogre::SceneQuery::WorldFragmentType::WFT_SINGLE_INTERSECTION)
-                str = "single intersection point";
-            else if(it->worldFragment->fragmentType == Ogre::SceneQuery::WorldFragmentType::WFT_CUSTOM_GEOMETRY)
-                str = "custom geometry";
-            else if (it->worldFragment->fragmentType == Ogre::SceneQuery::WorldFragmentType::WFT_RENDER_OPERATION)
-                str = "general render operation structure";
-
-            std::cout << "fragment type: " << str << std::endl;
-        }
-        else if (it->movable)
-        {
-            // FIXME: just testing
-            it->movable->getParentSceneNode()->showBoundingBox(true);
-
-            std::cout << "movable object: " + it->movable->getName() << std::endl;
-        }
-        else
-            std::cout << "nothing: " << std::endl;
-    }
-
-    getSceneManager()->destroyQuery(rayScnQuery);
-#endif
 
     SceneWidget::mouseReleaseEvent(event);
 }
