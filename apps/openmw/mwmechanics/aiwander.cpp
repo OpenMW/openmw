@@ -174,7 +174,7 @@ namespace MWMechanics
         if(mWalking) // have not yet reached the destination
         {
             // turn towards the next point in mPath
-            zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+            zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]) );
             actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
 
             // Returns true if evasive action needs to be taken
@@ -198,7 +198,7 @@ namespace MWMechanics
                     actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
                     actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
                     // change the angle a bit, too
-                    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+                    zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1]) );
                 }
                 mStuckCount++;  // TODO: maybe no longer needed
             }
@@ -222,7 +222,7 @@ namespace MWMechanics
             // Reduce the turning animation glitch by using a *HUGE* value of
             // epsilon...  TODO: a proper fix might be in either the physics or the
             // animation subsystem
-            if (zTurn(actor, Ogre::Degree(mTargetAngle), Ogre::Degree(5)))
+            if (zTurn(actor, mTargetAngle, Ogre::Degree(5)))
                 mRotate = false;
         }
 
@@ -464,13 +464,13 @@ namespace MWMechanics
                 if(!mRotate)
                 {
                     Ogre::Vector3 dir = playerPos - actorPos;
-                    float length = dir.length();
 
-                    float faceAngle = Ogre::Radian(Ogre::Math::ACos(dir.y / length) *
-                            ((Ogre::Math::ASin(dir.x / length).valueRadians()>0)?1.0:-1.0)).valueDegrees();
-                    float actorAngle = actor.getRefData().getBaseNode()->getOrientation().getRoll().valueDegrees();
+                    Ogre::Radian faceAngle = Ogre::Math::ATan2(dir.x,dir.y);
+                    
+                    Ogre::Radian actorAngle = actor.getRefData().getBaseNode()->getOrientation().getRoll();
+                    
                     // an attempt at reducing the turning animation glitch
-                    if(abs(abs(faceAngle) - abs(actorAngle)) >= 5) // TODO: is there a better way?
+                    if( Ogre::Math::Abs(faceAngle - actorAngle) >= Ogre::Radian(5) ) // TODO: is there a better way?
                     {
                         mTargetAngle = faceAngle;
                         mRotate = true;
