@@ -70,7 +70,15 @@ namespace MWMechanics
             SkillValue& getSkill (int index);
 
             const std::map<std::string, int>& getFactionRanks() const;
-            std::map<std::string, int>& getFactionRanks();
+            /// Increase the rank in this faction by 1, if such a rank exists.
+            void raiseRank(const std::string& faction);
+            /// Lower the rank in this faction by 1, if such a rank exists.
+            void lowerRank(const std::string& faction);
+            /// Join this faction, setting the initial rank to 0.
+            void joinFaction(const std::string& faction);
+            /// Warning: this function performs no check whether the rank exists,
+            /// and should be used in initial actor setup only.
+            void setFactionRank(const std::string& faction, int rank);
 
             const std::set<std::string>& getExpelled() const { return mExpelled; }
             bool getExpelled(const std::string& factionID) const;

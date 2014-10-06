@@ -153,7 +153,8 @@ namespace MWWorld
             Ogre::Vector3 pos(it->mNode->getPosition());
             Ogre::Vector3 newPos = pos + direction * duration * speed;
 
-            it->mSound->setPosition(newPos);
+            if (it->mSound.get())
+                it->mSound->setPosition(newPos);
 
             it->mNode->setPosition(newPos);
 
@@ -163,7 +164,8 @@ namespace MWWorld
             // TODO: use a proper btRigidBody / btGhostObject?
             btVector3 from(pos.x, pos.y, pos.z);
             btVector3 to(newPos.x, newPos.y, newPos.z);
-            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to);
+
+            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to, OEngine::Physic::CollisionType_Projectile);
             bool hit=false;
 
             for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end() && !hit; ++cIt)
@@ -239,7 +241,7 @@ namespace MWWorld
             // TODO: use a proper btRigidBody / btGhostObject?
             btVector3 from(pos.x, pos.y, pos.z);
             btVector3 to(newPos.x, newPos.y, newPos.z);
-            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to);
+            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to, OEngine::Physic::CollisionType_Projectile);
             bool hit=false;
 
             for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end() && !hit; ++cIt)
@@ -408,6 +410,7 @@ namespace MWWorld
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             state.mSound = sndMgr->playManualSound3D(esm.mPosition, esm.mSound, 1.0f, 1.0f,
                                                      MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
+            state.mSoundId = esm.mSound;
 
             mMagicBolts.push_back(state);
             return true;

@@ -615,6 +615,8 @@ namespace MWWorld
 
             /// Resets all actors in the current active cells to their original location within that cell.
             virtual void resetActors();
+
+            virtual bool isWalkingOnWater (const MWWorld::Ptr& actor);
     };
 }
 

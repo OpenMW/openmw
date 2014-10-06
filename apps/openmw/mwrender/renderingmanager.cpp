@@ -250,7 +250,6 @@ void RenderingManager::cellAdded (MWWorld::CellStore *store)
     mObjects->buildStaticGeometry (*store);
     sh::Factory::getInstance().unloadUnreferencedMaterials();
     mDebugging->cellAdded(store);
-    waterAdded(store);
 }
 
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){
@@ -421,18 +420,12 @@ void RenderingManager::postRenderTargetUpdate(const RenderTargetEvent &evt)
     mOcclusionQuery->setActive(false);
 }
 
-void RenderingManager::waterAdded (MWWorld::CellStore *store)
+void RenderingManager::setWaterEnabled(bool enable)
 {
-    if (store->getCell()->mData.mFlags & ESM::Cell::HasWater)
-    {
-        mWater->changeCell (store->getCell());
-        mWater->setActive(true);
-    }
-    else
-        removeWater();
+    mWater->setActive(enable);
 }
 
-void RenderingManager::setWaterHeight(const float height)
+void RenderingManager::setWaterHeight(float height)
 {
     mWater->setHeight(height);
 }

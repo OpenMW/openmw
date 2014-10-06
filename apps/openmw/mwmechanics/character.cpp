@@ -1428,7 +1428,9 @@ void CharacterController::update(float duration)
             const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
             const float fatigueJumpBase = gmst.find("fFatigueJumpBase")->getFloat();
             const float fatigueJumpMult = gmst.find("fFatigueJumpMult")->getFloat();
-            const float normalizedEncumbrance = cls.getEncumbrance(mPtr) / cls.getCapacity(mPtr);
+            float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
+            if (normalizedEncumbrance > 1)
+                normalizedEncumbrance = 1;
             const int fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
             DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
             fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
