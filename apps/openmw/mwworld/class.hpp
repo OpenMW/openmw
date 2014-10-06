@@ -223,6 +223,9 @@ namespace MWWorld
             /// effects). Throws an exception, if the object can't hold other objects.
             /// (default implementation: throws an exception)
 
+            virtual float getNormalizedEncumbrance (const MWWorld::Ptr& ptr) const;
+            ///< Returns encumbrance re-scaled to capacity
+
             virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id,
                 const MWWorld::Ptr& actor) const;
             ///< Apply \a id on \a ptr.

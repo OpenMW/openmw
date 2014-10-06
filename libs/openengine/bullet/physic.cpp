@@ -74,6 +74,8 @@ namespace Physic
       , mExternalCollisionMode(true)
       , mForce(0.0f)
       , mScale(scale)
+      , mWalkingOnWater(false)
+      , mCanWaterWalk(false)
     {
         if (!NifBullet::getBoundingBox(mMesh, mHalfExtents, mMeshTranslation, mMeshOrientation))
         {
@@ -103,8 +105,7 @@ namespace Physic
         setPosition(position);
         setRotation(rotation);
 
-        mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor,
-            CollisionType_Actor|CollisionType_World|CollisionType_HeightMap);
+        updateCollisionMask();
     }
 
     PhysicActor::~PhysicActor()
@@ -123,10 +124,22 @@ namespace Physic
 
     void PhysicActor::enableCollisionBody(bool collision)
     {
-        assert(mBody);
-        if(collision && !mExternalCollisionMode) enableCollisionBody();
-        if(!collision && mExternalCollisionMode) disableCollisionBody();
-        mExternalCollisionMode = collision;
+        if (mExternalCollisionMode != collision)
+        {
+            mExternalCollisionMode = collision;
+            updateCollisionMask();
+        }
+    }
+
+    void PhysicActor::updateCollisionMask()
+    {
+        mEngine->mDynamicsWorld->removeRigidBody(mBody);
+        int collisionMask = CollisionType_World | CollisionType_HeightMap;
+        if (mExternalCollisionMode)
+            collisionMask |= CollisionType_Actor | CollisionType_Projectile;
+        if (mCanWaterWalk)
+            collisionMask |= CollisionType_Water;
+        mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor, collisionMask);
     }
 
     const Ogre::Vector3& PhysicActor::getPosition() const
@@ -178,18 +191,23 @@ namespace Physic
         mOnGround = grounded;
     }
 
-    void PhysicActor::disableCollisionBody()
+    bool PhysicActor::isWalkingOnWater() const
     {
-        mEngine->mDynamicsWorld->removeRigidBody(mBody);
-        mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor,
-            CollisionType_World|CollisionType_HeightMap);
+        return mWalkingOnWater;
     }
 
-    void PhysicActor::enableCollisionBody()
+    void PhysicActor::setWalkingOnWater(bool walkingOnWater)
     {
-        mEngine->mDynamicsWorld->removeRigidBody(mBody);
-        mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor,
-            CollisionType_Actor|CollisionType_World|CollisionType_HeightMap);
+        mWalkingOnWater = walkingOnWater;
+    }
+
+    void PhysicActor::setCanWaterWalk(bool waterWalk)
+    {
+        if (waterWalk != mCanWaterWalk)
+        {
+            mCanWaterWalk = waterWalk;
+            updateCollisionMask();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -381,7 +399,7 @@ namespace Physic
         mHeightFieldMap [name] = hf;
 
         mDynamicsWorld->addRigidBody(body,CollisionType_HeightMap,
-                                    CollisionType_Actor|CollisionType_Raycasting);
+                                    CollisionType_Actor|CollisionType_Raycasting|CollisionType_Projectile);
     }
 
     void PhysicEngine::removeHeightField(int x, int y)
@@ -494,7 +512,7 @@ namespace Physic
         {
             assert (mRaycastingObjectMap.find(name) == mRaycastingObjectMap.end());
             mRaycastingObjectMap[name] = body;
-            mDynamicsWorld->addRigidBody(body,CollisionType_Raycasting,CollisionType_Raycasting);
+            mDynamicsWorld->addRigidBody(body,CollisionType_Raycasting,CollisionType_Raycasting|CollisionType_Projectile);
         }
 
         return body;
@@ -800,10 +818,10 @@ namespace Physic
             return std::make_pair(false, 1);
     }
 
-    std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(const btVector3& from, const btVector3& to)
+    std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(const btVector3& from, const btVector3& to, int filterGroup)
     {
         MyRayResultCallback resultCallback1;
-        resultCallback1.m_collisionFilterGroup = 0xff;
+        resultCallback1.m_collisionFilterGroup = filterGroup;
         resultCallback1.m_collisionFilterMask = CollisionType_Raycasting|CollisionType_Actor|CollisionType_HeightMap;
         mDynamicsWorld->rayTest(from, to, resultCallback1);
         std::vector< std::pair<float, const btCollisionObject*> > results = resultCallback1.results;

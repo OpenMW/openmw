@@ -102,6 +102,8 @@ namespace MWWorld
             typedef std::vector<std::pair<ContainerStoreIterator, float> > TRechargingItems;
             TRechargingItems mRechargingItems;
 
+            bool mRechargingItemsUpToDate;
+
             void copySlots (const InventoryStore& store);
 
             void initSlots (TSlots& slots_);

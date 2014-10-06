@@ -385,7 +385,7 @@ namespace MWInput
                 {
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
                     mOverencumberedMessageDelay -= dt;
-                    if (player.getClass().getEncumbrance(player) >= player.getClass().getCapacity(player))
+                    if (player.getClass().getEncumbrance(player) > player.getClass().getCapacity(player))
                     {
                         mPlayer->setAutoMove (false);
                         if (mOverencumberedMessageDelay <= 0)

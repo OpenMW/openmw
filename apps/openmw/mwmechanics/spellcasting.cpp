@@ -774,7 +774,7 @@ namespace MWMechanics
             static const float fFatigueSpellBase = store.get<ESM::GameSetting>().find("fFatigueSpellBase")->getFloat();
             static const float fFatigueSpellMult = store.get<ESM::GameSetting>().find("fFatigueSpellMult")->getFloat();
             DynamicStat<float> fatigue = stats.getFatigue();
-            const float normalizedEncumbrance = mCaster.getClass().getEncumbrance(mCaster) / mCaster.getClass().getCapacity(mCaster);
+            const float normalizedEncumbrance = mCaster.getClass().getNormalizedEncumbrance(mCaster);
             float fatigueLoss = spell->mData.mCost * (fFatigueSpellBase + normalizedEncumbrance * fFatigueSpellMult);
             fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss); stats.setFatigue(fatigue);
 

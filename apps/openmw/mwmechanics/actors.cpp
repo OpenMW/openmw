@@ -445,9 +445,7 @@ namespace MWMechanics
 
         int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
 
-        float capacity = ptr.getClass().getCapacity(ptr);
-        float encumbrance = ptr.getClass().getEncumbrance(ptr);
-        float normalizedEncumbrance = (capacity == 0 ? 1 : encumbrance/capacity);
+        float normalizedEncumbrance = ptr.getClass().getNormalizedEncumbrance(ptr);
         if (normalizedEncumbrance > 1)
             normalizedEncumbrance = 1;
 
@@ -1447,6 +1445,8 @@ namespace MWMechanics
                         continue;
                     if (followTarget == actor)
                         list.push_back(iter->first);
+                    else
+                        break;
                 }
                 else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
                     break;
