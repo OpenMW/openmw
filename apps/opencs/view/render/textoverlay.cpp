@@ -217,8 +217,6 @@ void TextOverlay::enable(bool enable)
         mContainer->show();
     else
         mContainer->hide();
-
-    Ogre::Root::getSingleton().renderOneFrame();
 }
 
 bool TextOverlay::isEnabled()
