@@ -35,8 +35,10 @@ namespace
             return "Anisotropic";
         else if (val == "bilinear")
             return "Bilinear";
-        else
+        else if (val == "trilinear")
             return "Trilinear";
+        else if (val == "none")
+            return "None";
     }
 
     void parseResolution (int &x, int &y, const std::string& str)

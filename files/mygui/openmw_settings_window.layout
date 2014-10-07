@@ -324,6 +324,7 @@
                             <Property key="AddItem" value="Bilinear"/>
                             <Property key="AddItem" value="Trilinear"/>
                             <Property key="AddItem" value="Anisotropic"/>
+                            <Property key="AddItem" value="None"/>
                         </Widget>
 
                         <Widget type="Widget" skin="" position="184 4 300 50" align="Left Top" name="AnisotropyBox">
