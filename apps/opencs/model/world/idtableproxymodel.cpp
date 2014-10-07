@@ -48,3 +48,24 @@ void CSMWorld::IdTableProxyModel::setFilter (const boost::shared_ptr<CSMFilter::
     updateColumnMap();
     invalidateFilter();
 }
+
+bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+{
+    if(headerData(left.column(), Qt::Horizontal).toString() != "ID")
+        return QSortFilterProxyModel::lessThan(left, right);
+
+    QRegExp cellPattern = QRegExp("^#(\\D?\\d+) +(\\D?\\d+)");
+
+    int leftResult = cellPattern.indexIn(sourceModel()->data(left).toString());
+    int leftX = cellPattern.cap(1).toInt();
+    int leftY = cellPattern.cap(2).toInt();
+
+    int rightResult = cellPattern.indexIn(sourceModel()->data(right).toString());
+    int rightX = cellPattern.cap(1).toInt();
+    int rightY = cellPattern.cap(2).toInt();
+
+    if(leftResult != -1 && rightResult != -1)
+        return(leftX < rightX) || (leftX == rightX && leftY <= rightY);
+    else
+        return QSortFilterProxyModel::lessThan(left, right);
+}
