@@ -21,7 +21,7 @@
 	    depth.y = shOutputPosition.w;
 
 	    // clamp z to zero. seem to do the trick. :-/
-	    shOutputPosition.z = max(shOutputPosition.z, 0);
+	    shOutputPosition.z = max(shOutputPosition.z, 0.0);
 
 #if ALPHA
 	    UV = uv0;
@@ -49,7 +49,7 @@
             discard;
 #endif
 
-	    shOutputColour(0) = float4(finalDepth, finalDepth, finalDepth, 1);
+	    shOutputColour(0) = float4(finalDepth, finalDepth, finalDepth, 1.0);
     }
 
 #endif
