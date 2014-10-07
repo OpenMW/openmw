@@ -38,7 +38,7 @@ TextOverlay::TextOverlay(const Ogre::MovableObject* obj, const Ogre::Camera* cam
         mFont = Ogre::FontManager::getSingleton().getByName("DejaVuLGC","General");
     else
     {
-        Ogre::ResourceGroupManager::getSingleton().addResourceLocation("resources\\mygui", "FileSystem");
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation("resources/mygui", "FileSystem");
         mFont = Ogre::FontManager::getSingleton().create("DejaVuLGC","General");
         mFont->setType(Ogre::FT_TRUETYPE);
         mFont->setSource("DejaVuLGCSansMono.ttf");
