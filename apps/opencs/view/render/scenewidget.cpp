@@ -166,8 +166,6 @@ namespace CSVRender
         {
             if (mSceneMgr)
                 mSceneMgr->removeRenderQueueListener (mOverlaySystem);
-
-            delete mOverlaySystem;
         }
 
         if (mSceneMgr)

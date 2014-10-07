@@ -82,6 +82,8 @@ namespace CSVRender
 
             virtual void mouseReleaseEvent (QMouseEvent *event);
 
+            virtual void mouseDoubleClickEvent (QMouseEvent *event);
+
         signals:
 
             void cellSelectionChanged (const CSMWorld::CellSelection& selection);

@@ -134,8 +134,22 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
     }
 }
 
+void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
+{
+    if(event->button() == Qt::RightButton)
+    {
+        std::cout << "double clicked" << std::endl;
+    }
+}
+
 void CSVRender::PagedWorldspaceWidget::updateOverlay()
 {
+    // better camera position at the start
+    if(getCamera()->getViewport() && getCamera()->getPosition().z < 1)
+    {
+        getCamera()->move(getCamera()->getDirection() * -6000);
+    }
+
     Ogre::OverlayManager &overlayMgr = Ogre::OverlayManager::getSingleton();
     Ogre::Overlay* overlay = overlayMgr.getByName("CellIDPanel");
     if(overlay && !mTextOverlays.empty())
