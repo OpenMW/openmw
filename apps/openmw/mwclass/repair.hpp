@@ -63,7 +63,7 @@ namespace MWClass
 
             virtual int getItemMaxHealth (const MWWorld::Ptr& ptr) const;
             ///< Return item max health or throw an exception, if class does not have item health
-            /// (default implementation: throw an exceoption)
+            /// (default implementation: throw an exception)
 
             virtual float getWeight (const MWWorld::Ptr& ptr) const;
 
