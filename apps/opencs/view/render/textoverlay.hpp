@@ -54,7 +54,8 @@ namespace CSVRender
             void setDesc(const Ogre::String& text);
             void update();
             QRect container();
-            Ogre::String getCaption() { return mCaption; }  // FIXME: debug
+            Ogre::String getCaption() { return mCaption; } // FIXME: debug
+            Ogre::String getDesc() { return mDesc; }
     };
 
 }

@@ -32,7 +32,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     const CSMWorld::IdCollection<CSMWorld::Cell>& cells = mDocument.getData().getCells();
 
     {
-        // remove
+        // remove (or name/region modified)
         std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
 
         while (iter!=mCells.end())
@@ -43,21 +43,61 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                 cells.getRecord (index).mState==CSMWorld::RecordBase::State_Deleted)
             {
                 delete iter->second;
-                mCells.erase (iter++);
+                mCells.erase (iter);
+
+                // delete overlays
+                std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator itOverlay = mTextOverlays.find(iter->first);
+                if(itOverlay != mTextOverlays.end())
+                {
+                    delete itOverlay->second;
+                    mTextOverlays.erase(itOverlay);
+                }
 
                 // destroy manual objects and entities
-                std::map<std::string, Ogre::Entity *>::iterator it = mEntities.find(iter->first.getId(mWorldspace));
-                if(it != mEntities.end())
+                std::map<CSMWorld::CellCoordinates, Ogre::Entity *>::iterator itEntity = mEntities.find(iter->first);
+                if(itEntity != mEntities.end())
                 {
-                    getSceneManager()->destroyEntity(it->second);
-                    mEntities.erase(it);
+                    getSceneManager()->destroyEntity(itEntity->second);
+                    mEntities.erase(itEntity);
                 }
                 getSceneManager()->destroyManualObject("manual"+iter->first.getId(mWorldspace));
 
+                iter++;
                 modified = true;
             }
             else
+            {
+                // check if name or region field has changed
+                std::string name = cells.getRecord(index).get().mName;
+                std::string region = cells.getRecord(index).get().mRegion;
+
+                std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator it = mTextOverlays.find(iter->first);
+                if(it != mTextOverlays.end())
+                {
+                    if(it->second->getDesc() != "") // previously had name
+                    {
+                        if(name != it->second->getDesc()) // new name
+                        {
+                            if(name != "")
+                                it->second->setDesc(name);
+                            else // name deleted, use region
+                                it->second->setDesc(region);
+                            it->second->update();
+                        }
+                    }
+                    else if(name != "") // name added
+                    {
+                        it->second->setDesc(name);
+                        it->second->update();
+                    }
+                    else if(region != it->second->getDesc()) // new region
+                    {
+                        it->second->setDesc(region);
+                        it->second->update();
+                    }
+                }
                 ++iter;
+            }
         }
     }
 
@@ -100,7 +140,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             entity->setVisible(false);
 
             // keep pointers so that they can be deleted later
-            mEntities.insert(std::make_pair(iter->getId(mWorldspace), entity));
+            mEntities.insert(std::make_pair(*iter, entity));
 
             CSVRender::TextOverlay *textDisp = new CSVRender::TextOverlay(entity, getCamera(), iter->getId(mWorldspace));
             textDisp->enable(true);
@@ -109,7 +149,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             if(desc == "") desc = cells.getRecord(index).get().mRegion;
             textDisp->setDesc(desc);
             textDisp->update();
-            mTextOverlays.push_back(textDisp);
+            mTextOverlays.insert(std::make_pair(*iter, textDisp));
 
             modified = true;
         }
@@ -122,13 +162,14 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 {
     if(event->button() == Qt::RightButton)
     {
-        std::list<TextOverlay *>::iterator iter = mTextOverlays.begin();
+        std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator iter = mTextOverlays.begin();
         for(; iter != mTextOverlays.end(); ++iter)
         {
             if(mDisplayCellCoord &&
-               (*iter)->isEnabled() && (*iter)->container().contains(event->x(), event->y()))
+               iter->second->isEnabled() && iter->second->container().contains(event->x(), event->y()))
             {
-                std::cout << "clicked: " << (*iter)->getCaption() << std::endl;
+                std::cout << "clicked: " << iter->second->getCaption() << std::endl;
+                break;
             }
         }
     }
@@ -172,10 +213,10 @@ void CSVRender::PagedWorldspaceWidget::updateOverlay()
 
     if(!mTextOverlays.empty())
     {
-        std::list<CSVRender::TextOverlay *>::iterator it = mTextOverlays.begin();
+        std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator it = mTextOverlays.begin();
         for(; it != mTextOverlays.end(); ++it)
         {
-            (*it)->update();
+            it->second->update();
         }
     }
 }
@@ -259,7 +300,6 @@ std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
 : WorldspaceWidget(document, parent), mDocument(document), mWorldspace("std::default"), mDisplayCellCoord(true)
-, mTextOverlays(0)
 {
     QAbstractItemModel *cells =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells);
@@ -279,7 +319,7 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
     {
         delete iter->second;
 
-        std::map<std::string, Ogre::Entity *>::iterator it = mEntities.find(iter->first.getId(mWorldspace));
+        std::map<CSMWorld::CellCoordinates, Ogre::Entity *>::iterator it = mEntities.find(iter->first);
         if(it != mEntities.end())
         {
             getSceneManager()->destroyEntity(it->second);
