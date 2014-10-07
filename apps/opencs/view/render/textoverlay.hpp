@@ -25,6 +25,7 @@ namespace CSVRender
             Ogre::OverlayContainer* mContainer;
             Ogre::TextAreaOverlayElement* mElement;
             Ogre::String mCaption;
+            Ogre::String mDesc;
 
             const Ogre::MovableObject* mObj;
             const Ogre::Camera* mCamera;
@@ -50,6 +51,7 @@ namespace CSVRender
             void enable(bool enable);
             bool isEnabled();
             void setCaption(const Ogre::String& text);
+            void setDesc(const Ogre::String& text);
             void update();
             QRect container();
             Ogre::String getCaption() { return mCaption; }  // FIXME: debug

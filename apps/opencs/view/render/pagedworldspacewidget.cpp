@@ -105,6 +105,9 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             CSVRender::TextOverlay *textDisp = new CSVRender::TextOverlay(entity, getCamera(), iter->getId(mWorldspace));
             textDisp->enable(true);
             textDisp->setCaption(iter->getId(mWorldspace));
+            std::string desc = cells.getRecord(index).get().mName;
+            if(desc == "") desc = cells.getRecord(index).get().mRegion;
+            textDisp->setDesc(desc);
             textDisp->update();
             mTextOverlays.push_back(textDisp);
 

@@ -233,6 +233,15 @@ void TextOverlay::setCaption(const Ogre::String& text)
     mElement->setCaption(text);
 }
 
+void TextOverlay::setDesc(const Ogre::String& text)
+{
+    if(mDesc == text)
+        return;
+
+    mDesc = text;
+    mElement->setCaption(mCaption + ((text == "") ? "" : ("\n" + text)));
+}
+
 Ogre::FontPtr TextOverlay::getFont()
 {
     return mFont;
@@ -240,15 +249,19 @@ Ogre::FontPtr TextOverlay::getFont()
 
 int TextOverlay::textWidth()
 {
-    float textWidth = 0;
+    float captionWidth = 0;
+    float descWidth = 0;
 
     // NOTE: assumed fixed width font, i.e. no compensation for narrow glyphs
     for(Ogre::String::const_iterator i = mCaption.begin(); i < mCaption.end(); ++i)
-        textWidth += getFont()->getGlyphAspectRatio(*i);
+        captionWidth += getFont()->getGlyphAspectRatio(*i);
+    for(Ogre::String::const_iterator i = mDesc.begin(); i < mDesc.end(); ++i)
+        descWidth += getFont()->getGlyphAspectRatio(*i);
 
-    textWidth *= fontHeight();
+    captionWidth *= fontHeight();
+    descWidth *= fontHeight();
 
-    return (int) textWidth;
+    return (int) std::max(captionWidth, descWidth);
 }
 
 int TextOverlay::fontHeight()
@@ -278,8 +291,10 @@ void TextOverlay::update()
     float viewportWidth = std::max(overlayMgr.getViewportWidth(), 1); // zero at the start
     float viewportHeight = std::max(overlayMgr.getViewportHeight(), 1); // zero at the start
 
-    int width = 2*fontHeight()/3 + textWidth() + fontHeight()/3; // 2 = fudge factor
+    int width = fontHeight()/3 + textWidth() + fontHeight()/3;
     int height = fontHeight()/3 + fontHeight() + fontHeight()/3;
+    if(mDesc != "")
+        height = fontHeight()/3 + 2*fontHeight() + fontHeight()/3;
 
     float relTextWidth = width / viewportWidth;
     float relTextHeight = height / viewportHeight;
