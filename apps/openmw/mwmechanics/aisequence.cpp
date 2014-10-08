@@ -2,6 +2,7 @@
 #include "aisequence.hpp"
 
 #include "aipackage.hpp"
+#include "aistate.hpp"
 
 #include "aiwander.hpp"
 #include "aiescort.hpp"
@@ -146,7 +147,7 @@ bool AiSequence::isPackageDone() const
     return mDone;
 }
 
-void AiSequence::execute (const MWWorld::Ptr& actor,float duration)
+void AiSequence::execute (const MWWorld::Ptr& actor, AiState& state,float duration)
 {
     if(actor != MWBase::Environment::get().getWorld()->getPlayerPtr()
             && !actor.getClass().getCreatureStats(actor).getKnockedDown())
@@ -208,7 +209,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor,float duration)
                 }
             }
 
-            if (package->execute (actor,duration))
+            if (package->execute (actor,state,duration))
             {
                 // To account for the rare case where AiPackage::execute() queued another AI package
                 // (e.g. AiPursue executing a dialogue script that uses startCombat)

@@ -64,7 +64,7 @@ namespace MWMechanics
         return new AiEscort(*this);
     }
 
-    bool AiEscort::execute (const MWWorld::Ptr& actor,float duration)
+    bool AiEscort::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
     {
         // If AiEscort has ran for as long or longer then the duration specified
         // and the duration is not infinite, the package is complete.

@@ -18,6 +18,8 @@
 #include "steering.hpp"
 #include "movement.hpp"
 
+
+
 namespace MWMechanics
 {
     static const int COUNT_BEFORE_RESET = 200; // TODO: maybe no longer needed
@@ -45,9 +47,9 @@ namespace MWMechanics
         mStuckCount = 0;// TODO: maybe no longer needed
         mDoorCheckDuration = 0;
         mTrimCurrentNode = false;
-        mReaction = 0;
-        mRotate = false;
-        mTargetAngle = 0;
+//         mReaction = 0;
+//         mRotate = false;
+//         mTargetAngle = 0;
         mSaidGreeting = Greet_None;
         mGreetingTimer = 0;
         mHasReturnPosition = false;
@@ -125,8 +127,13 @@ namespace MWMechanics
      * actors will enter combat (i.e. no longer wandering) and different pathfinding
      * will kick in.
      */
-    bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
+    bool AiWander::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
     {
+        AiWanderStorage& storage = state.get<AiWanderStorage>();
+        float& mTargetAngle = storage.mTargetAngle;
+        bool& mRotate = storage.mRotate;
+        float& mReaction = storage.mReaction;
+        
         MWMechanics::CreatureStats& cStats = actor.getClass().getCreatureStats(actor);
         if(cStats.isDead() || cStats.getHealth().getCurrent() <= 0)
             return true; // Don't bother with dead actors

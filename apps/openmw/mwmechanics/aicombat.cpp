@@ -170,7 +170,7 @@ namespace MWMechanics
      * Use the Observer Pattern to co-ordinate attacks, provide intelligence on
      * whether the target was hit, etc.
      */
-    bool AiCombat::execute (const MWWorld::Ptr& actor,float duration)
+    bool AiCombat::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
     {
         //General description
         if(actor.getClass().getCreatureStats(actor).isDead())

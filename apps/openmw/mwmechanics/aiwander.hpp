@@ -12,6 +12,9 @@
 
 #include "../mwworld/timestamp.hpp"
 
+
+#include "aistate.hpp"
+
 namespace ESM
 {
     namespace AiSequence
@@ -22,6 +25,17 @@ namespace ESM
 
 namespace MWMechanics
 {
+    /// \brief Temporary values used by AiWander
+    struct AiWanderStorage : AiTemporaryBase
+    {
+        // the z rotation angle (degrees) we want to reach
+        // used every frame when mRotate is true
+        float mTargetAngle;
+        bool mRotate;
+        float mReaction; // update some actions infrequently
+        AiWanderStorage():mTargetAngle(0),mRotate(false),mReaction(0){};
+    };
+    
     /// \brief Causes the Actor to wander within a specified range
     class AiWander : public AiPackage
     {
@@ -41,7 +55,7 @@ namespace MWMechanics
 
             virtual AiPackage *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor,float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
 
             virtual int getTypeId() const;
 
@@ -109,11 +123,7 @@ namespace MWMechanics
             float mDoorCheckDuration;
             int mStuckCount;
 
-            // the z rotation angle (degrees) we want to reach
-            // used every frame when mRotate is true
-            float mTargetAngle;
-            bool mRotate;
-            float mReaction; // update some actions infrequently
+
     };
 }
 

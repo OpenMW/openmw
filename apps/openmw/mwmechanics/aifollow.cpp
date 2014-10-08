@@ -41,7 +41,7 @@ MWMechanics::AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
 
 }
 
-bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
+bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
 {
     MWWorld::Ptr target = getTarget();
 
