@@ -39,19 +39,11 @@ namespace MWMechanics
     {
         // NOTE: mDistance and mDuration must be set already
 
-        mCellX = std::numeric_limits<int>::max();
-        mCellY = std::numeric_limits<int>::max();
-        mXCell = 0;
-        mYCell = 0;
-        mCell = NULL;
+
         mStuckCount = 0;// TODO: maybe no longer needed
         mDoorCheckDuration = 0;
         mTrimCurrentNode = false;
-//         mReaction = 0;
-//         mRotate = false;
-//         mTargetAngle = 0;
-        mSaidGreeting = Greet_None;
-        mGreetingTimer = 0;
+
         mHasReturnPosition = false;
         mReturnPosition = Ogre::Vector3(0,0,0);
 
@@ -129,22 +121,32 @@ namespace MWMechanics
      */
     bool AiWander::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
     {
+        // define references for readability
         AiWanderStorage& storage = state.get<AiWanderStorage>();
-        float& mTargetAngle = storage.mTargetAngle;
-        bool& mRotate = storage.mRotate;
-        float& mReaction = storage.mReaction;
+        
+        float& targetAngle = storage.mTargetAngle;
+        bool& rotate = storage.mRotate;
+        float& lastReaction = storage.mReaction;
+        AiWander::GreetingState& greetingState = storage.mSaidGreeting;
+        int& greetingTimer = storage.mGreetingTimer;
+        int& cachedCellX = storage.mCellX;
+        int& cachedCellY = storage.mCellY;
+        float& cachedCellXf = storage.mXCell;
+        float& cachedCellYf = storage.mYCell;
+        const MWWorld::CellStore*& currentCell = storage.mCell;
+
         
         MWMechanics::CreatureStats& cStats = actor.getClass().getCreatureStats(actor);
         if(cStats.isDead() || cStats.getHealth().getCurrent() <= 0)
             return true; // Don't bother with dead actors
 
-        bool cellChange = mCell && (actor.getCell() != mCell);
-        if(!mCell || cellChange)
+        bool cellChange = storage.mCell && (actor.getCell() != storage.mCell);
+        if(!currentCell || cellChange)
         {
-            mCell = actor.getCell();
+            currentCell = actor.getCell();
             mStoredAvailableNodes = false; // prob. not needed since mDistance = 0
         }
-        const ESM::Cell *cell = mCell->getCell();
+        const ESM::Cell *cell = currentCell->getCell();
 
         cStats.setDrawState(DrawState_Nothing);
         cStats.setMovementFlag(CreatureStats::Flag_Run, false);
@@ -224,22 +226,22 @@ namespace MWMechanics
 //#endif
         }
 
-        if (mRotate)
+        if (rotate)
         {
             // Reduce the turning animation glitch by using a *HUGE* value of
             // epsilon...  TODO: a proper fix might be in either the physics or the
             // animation subsystem
-            if (zTurn(actor, Ogre::Degree(mTargetAngle), Ogre::Degree(5)))
-                mRotate = false;
+            if (zTurn(actor, Ogre::Degree(targetAngle), Ogre::Degree(5)))
+                rotate = false;
         }
 
-        mReaction += duration;
-        if(mReaction < REACTION_INTERVAL)
+        lastReaction += duration;
+        if(lastReaction < REACTION_INTERVAL)
         {
             return false;
         }
         else
-            mReaction = 0;
+            lastReaction = 0;
 
         // NOTE: everything below get updated every REACTION_INTERVAL seconds
 
@@ -278,8 +280,8 @@ namespace MWMechanics
                 pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell);
 
             // cache the current cell location
-            mCellX = cell->mData.mX;
-            mCellY = cell->mData.mY;
+            cachedCellX = cell->mData.mX;
+            cachedCellY = cell->mData.mY;
 
             // If there is no path this actor doesn't go anywhere. See:
             // https://forum.openmw.org/viewtopic.php?t=1556
@@ -293,12 +295,12 @@ namespace MWMechanics
             // destinations within the allowed set of pathgrid points (nodes).
             if(mDistance)
             {
-                mXCell = 0;
-                mYCell = 0;
+                cachedCellXf = 0;
+                cachedCellYf = 0;
                 if(cell->isExterior())
                 {
-                    mXCell = mCellX * ESM::Land::REAL_SIZE;
-                    mYCell = mCellY * ESM::Land::REAL_SIZE;
+                    cachedCellXf = cachedCellX * ESM::Land::REAL_SIZE;
+                    cachedCellYf = cachedCellYf * ESM::Land::REAL_SIZE;
                 }
 
                 // FIXME: There might be a bug here.  The allowed node points are
@@ -308,8 +310,8 @@ namespace MWMechanics
                 //
                 // convert npcPos to local (i.e. cell) co-ordinates
                 Ogre::Vector3 npcPos(pos.pos);
-                npcPos[0] = npcPos[0] - mXCell;
-                npcPos[1] = npcPos[1] - mYCell;
+                npcPos[0] = npcPos[0] - cachedCellXf;
+                npcPos[1] = npcPos[1] - cachedCellYf;
 
                 // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
                 // NOTE: mPoints and mAllowedNodes are in local co-ordinates
@@ -439,24 +441,24 @@ namespace MWMechanics
             Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
             float playerDistSqr = playerPos.squaredDistance(actorPos);
             
-            if (mSaidGreeting == Greet_None)
+            if (greetingState == Greet_None)
             {
                 if ((playerDistSqr <= helloDistance*helloDistance) &&
                         !player.getClass().getCreatureStats(player).isDead() && MWBase::Environment::get().getWorld()->getLOS(player, actor)
                     && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
-                    mGreetingTimer++;
+                    greetingTimer++;
                 
-                if (mGreetingTimer >= GREETING_SHOULD_START)
+                if (greetingTimer >= GREETING_SHOULD_START)
                 {
-                    mSaidGreeting = Greet_InProgress;
+                    greetingState = Greet_InProgress;
                     MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
-                    mGreetingTimer = 0;
+                    greetingTimer = 0;
                 }
             }
             
-            if(mSaidGreeting == Greet_InProgress)
+            if(greetingState == Greet_InProgress)
             {
-                mGreetingTimer++;
+                greetingTimer++;
                 
                 if(mWalking)
                 {
@@ -468,7 +470,7 @@ namespace MWMechanics
                     getRandomIdle();
                 }
 
-                if(!mRotate)
+                if(!rotate)
                 {
                     Ogre::Vector3 dir = playerPos - actorPos;
                     float length = dir.length();
@@ -479,29 +481,29 @@ namespace MWMechanics
                     // an attempt at reducing the turning animation glitch
                     if(abs(abs(faceAngle) - abs(actorAngle)) >= 5) // TODO: is there a better way?
                     {
-                        mTargetAngle = faceAngle;
-                        mRotate = true;
+                        targetAngle = faceAngle;
+                        rotate = true;
                     }
                 }
                 
-                if (mGreetingTimer >= GREETING_SHOULD_END)
+                if (greetingTimer >= GREETING_SHOULD_END)
                 {
-                    mSaidGreeting = Greet_Done;
-                    mGreetingTimer = 0;
+                    greetingState = Greet_Done;
+                    greetingTimer = 0;
                 }
             }
             
-            if (mSaidGreeting == MWMechanics::AiWander::Greet_Done)
+            if (greetingState == MWMechanics::AiWander::Greet_Done)
             {
                 static float fGreetDistanceReset = MWBase::Environment::get().getWorld()->getStore()
                         .get<ESM::GameSetting>().find("fGreetDistanceReset")->getFloat();
 
                 if (playerDistSqr >= fGreetDistanceReset*fGreetDistanceReset)
-                    mSaidGreeting = Greet_None;
+                    greetingState = Greet_None;
             }
 
             // Check if idle animation finished
-            if(!checkIdle(actor, mPlayedIdle) && (playerDistSqr > helloDistance*helloDistance || mSaidGreeting == MWMechanics::AiWander::Greet_Done))
+            if(!checkIdle(actor, mPlayedIdle) && (playerDistSqr > helloDistance*helloDistance || greetingState == MWMechanics::AiWander::Greet_Done))
             {
                 mPlayedIdle = 0;
                 mIdleNow = false;
@@ -523,8 +525,8 @@ namespace MWMechanics
 
                 // convert dest to use world co-ordinates
                 ESM::Pathgrid::Point dest;
-                dest.mX = destNodePos[0] + mXCell;
-                dest.mY = destNodePos[1] + mYCell;
+                dest.mX = destNodePos[0] + cachedCellXf;
+                dest.mY = destNodePos[1] + cachedCellYf;
                 dest.mZ = destNodePos[2];
 
                 // actor position is already in world co-ordinates

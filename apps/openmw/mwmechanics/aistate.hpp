@@ -27,7 +27,9 @@ private:
         BOOST_STATIC_ASSERT(boost::is_base_of<Base,Derived>::value);//,"DerivedClassStorage may only store derived classes");
     }
     
-    DerivedClassStorage( const DerivedClassStorage& );
+    //if needed you have to provide a clone member function
+    DerivedClassStorage( const DerivedClassStorage& other );
+    DerivedClassStorage& operator=( const DerivedClassStorage& );
     
 public:
     /// \brief returns reference to stored object or deletes it and creates a fitting
@@ -103,6 +105,9 @@ public:
         if(mStorage)
             delete mStorage;
     };
+    
+    
+    
 };
 
 namespace MWMechanics
