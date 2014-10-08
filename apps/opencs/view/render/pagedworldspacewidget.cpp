@@ -455,6 +455,13 @@ CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibil
     return mControlElements;
 }
 
+void CSVRender::PagedWorldspaceWidget::elementSelectionChanged ()
+{
+    WorldspaceWidget::elementSelectionChanged();
+
+    updateOverlay();
+}
+
 void CSVRender::PagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {

@@ -125,7 +125,7 @@ namespace CSVRender
 
         protected slots:
 
-            void elementSelectionChanged();
+            virtual void elementSelectionChanged();
 
         signals:
 
