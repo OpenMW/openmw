@@ -33,6 +33,8 @@
 #include "idcollection.hpp"
 #include "universalid.hpp"
 #include "cell.hpp"
+#include "land.hpp"
+#include "landtexture.hpp"
 #include "refidcollection.hpp"
 #include "refcollection.hpp"
 #include "infocollection.hpp"
@@ -74,6 +76,8 @@ namespace CSMWorld
             InfoCollection mTopicInfos;
             InfoCollection mJournalInfos;
             IdCollection<Cell> mCells;
+            IdCollection<LandTexture> mLandTextures;
+            IdCollection<Land> mLand;
             RefIdCollection mReferenceables;
             RefCollection mRefs;
             IdCollection<ESM::Filter> mFilters;
@@ -87,6 +91,8 @@ namespace CSMWorld
             bool mBase;
             bool mProject;
             std::map<std::string, std::map<ESM::RefNum, std::string> > mRefLoadCache;
+
+            std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
             // not implemented
             Data (const Data&);
@@ -194,6 +200,10 @@ namespace CSMWorld
             const IdCollection<ESM::DebugProfile>& getDebugProfiles() const;
 
             IdCollection<ESM::DebugProfile>& getDebugProfiles();
+
+            const IdCollection<CSMWorld::Land>& getLand() const;
+
+            const IdCollection<CSMWorld::LandTexture>& getLandTextures() const;
 
             /// Throws an exception, if \a id does not match a resources list.
             const Resources& getResources (const UniversalId& id) const;
