@@ -17,7 +17,7 @@
 namespace MWMechanics
 {
     AiTravel::AiTravel(float x, float y, float z)
-    : mX(x),mY(y),mZ(z),mPathFinder()
+    : mX(x),mY(y),mZ(z)
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
@@ -25,7 +25,6 @@ namespace MWMechanics
 
     AiTravel::AiTravel(const ESM::AiSequence::AiTravel *travel)
         : mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ)
-        , mPathFinder()
         , mCellX(std::numeric_limits<int>::max())
         , mCellY(std::numeric_limits<int>::max())
     {

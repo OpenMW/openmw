@@ -39,7 +39,6 @@ namespace MWMechanics
             int mCellX;
             int mCellY;
 
-            PathFinder mPathFinder;
     };
 }
 
