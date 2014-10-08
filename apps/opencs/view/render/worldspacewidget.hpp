@@ -88,6 +88,8 @@ namespace CSVRender
 
             CSMDoc::Document& getDocument();
 
+            virtual void updateOverlay();
+
         private:
 
             void dragEnterEvent(QDragEnterEvent *event);
@@ -125,7 +127,7 @@ namespace CSVRender
 
         protected slots:
 
-            virtual void elementSelectionChanged();
+            void elementSelectionChanged();
 
         signals:
 

@@ -88,10 +88,6 @@ namespace CSVRender
 
             void cellSelectionChanged (const CSMWorld::CellSelection& selection);
 
-        protected slots:
-
-            virtual void elementSelectionChanged();
-
         private slots:
 
             virtual void cellDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);

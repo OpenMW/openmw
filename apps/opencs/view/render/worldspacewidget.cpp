@@ -313,4 +313,9 @@ void CSVRender::WorldspaceWidget::elementSelectionChanged()
 {
     setVisibilityMask (getElementMask());
     flagAsModified();
+    updateOverlay();
+}
+
+void CSVRender::WorldspaceWidget::updateOverlay()
+{
 }
