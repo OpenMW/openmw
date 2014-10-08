@@ -26,12 +26,6 @@
 
 namespace
 {
-    static float sgn(Ogre::Radian a)
-    {
-        if(a.valueDegrees() > 0)
-            return 1.0;
-        return -1.0;
-    }
 
     //chooses an attack depending on probability to avoid uniformity
     ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement);
@@ -41,16 +35,15 @@ namespace
     Ogre::Vector3 AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const Ogre::Vector3& vLastTargetPos, 
         float duration, int weapType, float strength);
 
-    float getZAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f)
+    float getZAngleToDir(const Ogre::Vector3& dir)
     {
-        float len = (dirLen > 0.0f)? dirLen : dir.length();
-        return Ogre::Radian( Ogre::Math::ACos(dir.y / len) * sgn(Ogre::Math::ASin(dir.x / len)) ).valueDegrees();
+        return Ogre::Math::ATan2(dir.x,dir.y).valueDegrees();
     }
 
     float getXAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f)
     {
         float len = (dirLen > 0.0f)? dirLen : dir.length();
-        return Ogre::Radian(-Ogre::Math::ASin(dir.z / len)).valueDegrees();
+        return -Ogre::Math::ASin(dir.z / len).valueRadians();
     }
 
 
@@ -90,38 +83,16 @@ namespace MWMechanics
 
     AiCombat::AiCombat(const MWWorld::Ptr& actor) :
         mTargetActorId(actor.getClass().getCreatureStats(actor).getActorId())
-      , mMinMaxAttackDuration()
-      , mMovement()
-    {
-        init();
-
-        mLastTargetPos = Ogre::Vector3(actor.getRefData().getPosition().pos);
-    }
+    {}
 
     AiCombat::AiCombat(const ESM::AiSequence::AiCombat *combat)
-        : mMinMaxAttackDuration()
-        , mMovement()
     {
         mTargetActorId = combat->mTargetActorId;
-
-        init();
     }
 
     void AiCombat::init()
     {
-        mActionCooldown = 0;
-        mTimerAttack = 0;
-        mTimerReact = 0;
-        mTimerCombatMove = 0;
-        mFollowTarget = false;
-        mReadyToAttack = false;
-        mAttack = false;
-        mCombatMove = false;
-        mForceNoShortcut = false;
-        mStrength = 0;
-        mCell = NULL;
-        mLastTargetPos = Ogre::Vector3(0,0,0);
-        mMinMaxAttackDurationInitialised = false;
+        
     }
 
     /*
@@ -172,6 +143,29 @@ namespace MWMechanics
      */
     bool AiCombat::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
     {
+        AiCombatStorage& storage = state.get<AiCombatStorage>();
+        
+   //     PathFinder& mPathFinder;
+  //      ObstacleCheck& mObstacleCheck = storage.mObstacleCheck;
+        float& timerAttack = storage.mTimerAttack;
+        float& timerReact = storage.mTimerReact;
+        float& timerCombatMove = storage.mTimerCombatMove;
+        bool& readyToAttack = storage.mReadyToAttack;
+        bool& attack = storage.mAttack;
+        bool& followTarget = storage.mFollowTarget;
+        bool& combatMove = storage.mCombatMove;
+        Ogre::Vector3& lastTargetPos = storage.mLastTargetPos;
+        const MWWorld::CellStore*& currentCell = storage.mCell;
+        boost::shared_ptr<Action>& currentAction = storage.mCurrentAction;
+        float actionCooldown = storage.mActionCooldown;
+        float strength = storage.mStrength;
+        float (&minMaxAttackDuration)[3][2] = storage.mMinMaxAttackDuration;
+        bool& minMaxAttackDurationInitialised = storage.mMinMaxAttackDurationInitialised;
+        bool& forceNoShortcut = storage.mForceNoShortcut;
+        ESM::Position& shortcutFailPos = storage.mShortcutFailPos;
+        Ogre::Vector3& lastActorPos = storage.mLastActorPos;
+        MWMechanics::Movement& movement = storage.mMovement;
+        
         //General description
         if(actor.getClass().getCreatureStats(actor).isDead())
             return true;
@@ -200,29 +194,29 @@ namespace MWMechanics
         }  
 
         //Update every frame
-        if(mCombatMove)
+        if(combatMove)
         {
-            mTimerCombatMove -= duration;
-            if( mTimerCombatMove <= 0)
+            timerCombatMove -= duration;
+            if( timerCombatMove <= 0)
             {
-                mTimerCombatMove = 0;
-                mMovement.mPosition[1] = mMovement.mPosition[0] = 0;
-                mCombatMove = false;
+                timerCombatMove = 0;
+                movement.mPosition[1] = movement.mPosition[0] = 0;
+                combatMove = false;
             }
         }
 
-        actorClass.getMovementSettings(actor) = mMovement;
+        actorClass.getMovementSettings(actor) = movement;
         actorClass.getMovementSettings(actor).mRotation[0] = 0;
         actorClass.getMovementSettings(actor).mRotation[2] = 0;
 
-        if(mMovement.mRotation[2] != 0)
+        if(movement.mRotation[2] != 0)
         {
-            if(zTurn(actor, Ogre::Degree(mMovement.mRotation[2]))) mMovement.mRotation[2] = 0;
+            if(zTurn(actor, Ogre::Degree(movement.mRotation[2]))) movement.mRotation[2] = 0;
         }
 
-        if(mMovement.mRotation[0] != 0)
+        if(movement.mRotation[0] != 0)
         {
-            if(smoothTurn(actor, Ogre::Degree(mMovement.mRotation[0]), 0)) mMovement.mRotation[0] = 0;
+            if(smoothTurn(actor, Ogre::Degree(movement.mRotation[0]), 0)) movement.mRotation[0] = 0;
         }
 
         //TODO: Some skills affect period of strikes.For berserk-like style period ~ 0.25f
@@ -230,44 +224,44 @@ namespace MWMechanics
 
         ESM::Weapon::AttackType attackType;
 
-        if(mReadyToAttack)
+        if(readyToAttack)
         {
-            if (!mMinMaxAttackDurationInitialised)
+            if (!minMaxAttackDurationInitialised)
             {
                 // TODO: this must be updated when a different weapon is equipped
-                getMinMaxAttackDuration(actor, mMinMaxAttackDuration);
-                mMinMaxAttackDurationInitialised = true;
+                getMinMaxAttackDuration(actor, minMaxAttackDuration);
+                minMaxAttackDurationInitialised = true;
             }
 
-            if (mTimerAttack < 0) mAttack = false;
+            if (timerAttack < 0) attack = false;
 
-            mTimerAttack -= duration;
+            timerAttack -= duration;
         }
         else
         {
-            mTimerAttack = -attacksPeriod;
-            mAttack = false;
+            timerAttack = -attacksPeriod;
+            attack = false;
         }
 
-        actorClass.getCreatureStats(actor).setAttackingOrSpell(mAttack);
+        actorClass.getCreatureStats(actor).setAttackingOrSpell(attack);
 
-        mActionCooldown -= duration;
+        actionCooldown -= duration;
 
         float tReaction = 0.25f;
-        if(mTimerReact < tReaction)
+        if(timerReact < tReaction)
         {
-            mTimerReact += duration;
+            timerReact += duration;
             return false;
         }
 
         //Update with period = tReaction
 
-        mTimerReact = 0;
+        timerReact = 0;
 
-        bool cellChange = mCell && (actor.getCell() != mCell);
-        if(!mCell || cellChange)
+        bool cellChange = currentCell && (actor.getCell() != currentCell);
+        if(!currentCell || cellChange)
         {
-            mCell = actor.getCell();
+            currentCell = actor.getCell();
         }
 
         MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(actor);
@@ -276,18 +270,18 @@ namespace MWMechanics
 
         actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
-        if (mActionCooldown > 0)
+        if (actionCooldown > 0)
             return false;
 
         float rangeAttack = 0;
         float rangeFollow = 0;
         if (anim->upperBodyReady())
         {
-            mCurrentAction = prepareNextAction(actor, target);
-            mActionCooldown = mCurrentAction->getActionCooldown();
+            currentAction = prepareNextAction(actor, target);
+            actionCooldown = currentAction->getActionCooldown();
         }
-        if (mCurrentAction.get())
-            mCurrentAction->getCombatRange(rangeAttack, rangeFollow);
+        if (currentAction.get())
+            currentAction->getCombatRange(rangeAttack, rangeFollow);
 
         // FIXME: consider moving this stuff to ActionWeapon::getCombatRange
         const ESM::Weapon *weapon = NULL;
@@ -347,20 +341,20 @@ namespace MWMechanics
         }
 
         // start new attack
-        if(mReadyToAttack)
+        if(readyToAttack)
         {
-            if(mTimerAttack <= -attacksPeriod)
+            if(timerAttack <= -attacksPeriod)
             {
-                mAttack = true; // attack starts just now
+                attack = true; // attack starts just now
 
-                if (!distantCombat) attackType = chooseBestAttack(weapon, mMovement);
+                if (!distantCombat) attackType = chooseBestAttack(weapon, movement);
                 else attackType = ESM::Weapon::AT_Chop; // cause it's =0
 
-                mStrength = static_cast<float>(rand()) / RAND_MAX;
+                strength = static_cast<float>(rand()) / RAND_MAX;
 
                 // Note: may be 0 for some animations
-                mTimerAttack = mMinMaxAttackDuration[attackType][0] + 
-                    (mMinMaxAttackDuration[attackType][1] - mMinMaxAttackDuration[attackType][0]) * mStrength;
+                timerAttack = minMaxAttackDuration[attackType][0] + 
+                    (minMaxAttackDuration[attackType][1] - minMaxAttackDuration[attackType][0]) * strength;
 
                 //say a provoking combat phrase
                 if (actor.getClass().isNpc())
@@ -414,10 +408,10 @@ namespace MWMechanics
 
         bool isStuck = false;
         float speed = 0.0f;
-        if(mMovement.mPosition[1] && (mLastActorPos - vActorPos).length() < (speed = actorClass.getSpeed(actor)) * tReaction / 2)
+        if(movement.mPosition[1] && (lastActorPos - vActorPos).length() < (speed = actorClass.getSpeed(actor)) * tReaction / 2)
             isStuck = true;
 
-        mLastActorPos = vActorPos;
+        lastActorPos = vActorPos;
 
         // check if actor can move along z-axis
         bool canMoveByZ = (actorClass.canSwim(actor) && world->isSwimming(actor))
@@ -427,7 +421,7 @@ namespace MWMechanics
         bool inLOS = distantCombat ? world->getLOS(actor, target) : true;
 
         // (within attack dist) || (not quite attack dist while following)
-        if(inLOS && (distToTarget < rangeAttack || (distToTarget <= rangeFollow && mFollowTarget && !isStuck)))
+        if(inLOS && (distToTarget < rangeAttack || (distToTarget <= rangeFollow && followTarget && !isStuck)))
         {
             //Melee and Close-up combat
             
@@ -437,29 +431,29 @@ namespace MWMechanics
             // note: in getZAngleToDir if we preserve dir.z then horizontal angle can be inaccurate
             if (distantCombat)
             {
-                Ogre::Vector3 vAimDir = AimDirToMovingTarget(actor, target, mLastTargetPos, tReaction, weaptype, mStrength);
-                mLastTargetPos = vTargetPos;
-                mMovement.mRotation[0] = getXAngleToDir(vAimDir);
-                mMovement.mRotation[2] = getZAngleToDir(Ogre::Vector3(vAimDir.x, vAimDir.y, 0));
+                Ogre::Vector3 vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, tReaction, weaptype, strength);
+                lastTargetPos = vTargetPos;
+                movement.mRotation[0] = getXAngleToDir(vAimDir);
+                movement.mRotation[2] = getZAngleToDir(vAimDir);
             }
             else
             {
-                mMovement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
-                mMovement.mRotation[2] = getZAngleToDir(Ogre::Vector3(vDirToTarget.x, vDirToTarget.y, 0));
+                movement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
+                movement.mRotation[2] = getZAngleToDir(vDirToTarget);
             }
 
             // (not quite attack dist while following)
-            if (mFollowTarget && distToTarget > rangeAttack)
+            if (followTarget && distToTarget > rangeAttack)
             {
                 //Close-up combat: just run up on target
-                mMovement.mPosition[1] = 1;
+                movement.mPosition[1] = 1;
             }
             else // (within attack dist)
             {
-                if(mMovement.mPosition[0] || mMovement.mPosition[1])
+                if(movement.mPosition[0] || movement.mPosition[1])
                 {
-                    mTimerCombatMove = 0.1f + 0.1f * static_cast<float>(rand())/RAND_MAX;
-                    mCombatMove = true;
+                    timerCombatMove = 0.1f + 0.1f * static_cast<float>(rand())/RAND_MAX;
+                    combatMove = true;
                 }
                 // only NPCs are smart enough to use dodge movements
                 else if(actorClass.isNpc() && (!distantCombat || (distantCombat && distToTarget < rangeAttack/2)))
@@ -467,20 +461,20 @@ namespace MWMechanics
                     //apply sideway movement (kind of dodging) with some probability
                     if(static_cast<float>(rand())/RAND_MAX < 0.25)
                     {
-                        mMovement.mPosition[0] = static_cast<float>(rand())/RAND_MAX < 0.5? 1: -1;
-                        mTimerCombatMove = 0.05f + 0.15f * static_cast<float>(rand())/RAND_MAX;
-                        mCombatMove = true;
+                        movement.mPosition[0] = static_cast<float>(rand())/RAND_MAX < 0.5? 1: -1;
+                        timerCombatMove = 0.05f + 0.15f * static_cast<float>(rand())/RAND_MAX;
+                        combatMove = true;
                     }
                 }
 
                 if(distantCombat && distToTarget < rangeAttack/4)
                 {
-                    mMovement.mPosition[1] = -1;
+                    movement.mPosition[1] = -1;
                 }
 
-                mReadyToAttack = true;
+                readyToAttack = true;
                 //only once got in melee combat, actor is allowed to use close-up shortcutting
-                mFollowTarget = true;
+                followTarget = true;
             }
         }
         else // remote pathfinding
@@ -489,8 +483,8 @@ namespace MWMechanics
             if (!distantCombat) inLOS = world->getLOS(actor, target);
 
             // check if shortcut is available
-            if(inLOS && (!isStuck || mReadyToAttack)
-                && (!mForceNoShortcut || (Ogre::Vector3(mShortcutFailPos.pos) - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST))
+            if(inLOS && (!isStuck || readyToAttack)
+                && (!forceNoShortcut || (Ogre::Vector3(shortcutFailPos.pos) - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST))
             {
                 if(speed == 0.0f) speed = actorClass.getSpeed(actor);
                 // maximum dist before pit/obstacle for actor to avoid them depending on his speed
@@ -504,21 +498,21 @@ namespace MWMechanics
             if(preferShortcut)
             {
                 if (canMoveByZ)
-                    mMovement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
-                mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
-                mForceNoShortcut = false;
-                mShortcutFailPos.pos[0] = mShortcutFailPos.pos[1] = mShortcutFailPos.pos[2] = 0;
+                    movement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
+                movement.mRotation[2] = getZAngleToDir(vDirToTarget);
+                forceNoShortcut = false;
+                shortcutFailPos.pos[0] = shortcutFailPos.pos[1] = shortcutFailPos.pos[2] = 0;
                 mPathFinder.clearPath();
             }
             else // if shortcut failed stick to path grid
             {
-                if(!isStuck && mShortcutFailPos.pos[0] == 0.0f && mShortcutFailPos.pos[1] == 0.0f && mShortcutFailPos.pos[2] == 0.0f)
+                if(!isStuck && shortcutFailPos.pos[0] == 0.0f && shortcutFailPos.pos[1] == 0.0f && shortcutFailPos.pos[2] == 0.0f)
                 {
-                    mForceNoShortcut = true;
-                    mShortcutFailPos = pos;
+                    forceNoShortcut = true;
+                    shortcutFailPos = pos;
                 }
 
-                mFollowTarget = false;
+                followTarget = false;
 
                 buildNewPath(actor, target); //may fail to build a path, check before use
 
@@ -536,7 +530,7 @@ namespace MWMechanics
                     // if current actor pos is closer to target then last point of path (excluding target itself) then go straight on target
                     if(distToTarget <= (vTargetPos - vBeforeTarget).length())
                     {
-                        mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
+                        movement.mRotation[2] = getZAngleToDir(vDirToTarget);
                         preferShortcut = true;
                     }
                 }
@@ -545,20 +539,20 @@ namespace MWMechanics
                 if(!preferShortcut)
                 {
                     if(!mPathFinder.getPath().empty())
-                        mMovement.mRotation[2] = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+                        movement.mRotation[2] = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
                     else
-                        mMovement.mRotation[2] = getZAngleToDir(vDirToTarget, distToTarget);
+                        movement.mRotation[2] = getZAngleToDir(vDirToTarget);
                 }
             }
 
-            mMovement.mPosition[1] = 1;
-            if (mReadyToAttack)
+            movement.mPosition[1] = 1;
+            if (readyToAttack)
             {
                 // to stop possible sideway moving after target moved out of attack range
-                mCombatMove = true;
-                mTimerCombatMove = 0;
+                combatMove = true;
+                timerCombatMove = 0;
             }
-            mReadyToAttack = false;
+            readyToAttack = false;
         }
 
         if(!isStuck && distToTarget > rangeAttack && !distantCombat)
@@ -579,16 +573,16 @@ namespace MWMechanics
                 float t = s1/speed1;
                 float s2 = speed2 * t;
                 float t_swing = 
-                    mMinMaxAttackDuration[ESM::Weapon::AT_Thrust][0] + 
-                    (mMinMaxAttackDuration[ESM::Weapon::AT_Thrust][1] - mMinMaxAttackDuration[ESM::Weapon::AT_Thrust][0]) * static_cast<float>(rand()) / RAND_MAX;
+                    minMaxAttackDuration[ESM::Weapon::AT_Thrust][0] + 
+                    (minMaxAttackDuration[ESM::Weapon::AT_Thrust][1] - minMaxAttackDuration[ESM::Weapon::AT_Thrust][0]) * static_cast<float>(rand()) / RAND_MAX;
 
                 if (t + s2/speed1 <= t_swing)
                 {
-                    mReadyToAttack = true;
-                    if(mTimerAttack <= -attacksPeriod)
+                    readyToAttack = true;
+                    if(timerAttack <= -attacksPeriod)
                     {
-                        mTimerAttack = t_swing;
-                        mAttack = true;
+                        timerAttack = t_swing;
+                        attack = true;
                     }
                 }
             }
@@ -598,7 +592,7 @@ namespace MWMechanics
         //       coded at 250ms or 1/4 second
         //
         // TODO: Add a parameter to vary DURATION_SAME_SPOT?
-        if((distToTarget > rangeAttack || mFollowTarget) &&
+        if((distToTarget > rangeAttack || followTarget) &&
             mObstacleCheck.check(actor, tReaction)) // check if evasive action needed
         {
             // probably walking into another NPC TODO: untested in combat situation
@@ -610,8 +604,8 @@ namespace MWMechanics
             if(mPathFinder.isPathConstructed())
                 zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
 
-            if(mFollowTarget)
-                mFollowTarget = false;
+            if(followTarget)
+                followTarget = false;
             // FIXME: can fool actors to stay behind doors, etc.
             // Related to Bug#1102 and to some degree #1155 as well
         }
