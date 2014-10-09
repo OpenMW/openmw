@@ -105,6 +105,7 @@ void ActorTracer::findGround(const OEngine::Physic::PhysicActor* actor, const Og
     // Inherit the actor's collision group and mask
     newTraceCallback.m_collisionFilterGroup = actor->getCollisionBody()->getBroadphaseHandle()->m_collisionFilterGroup;
     newTraceCallback.m_collisionFilterMask = actor->getCollisionBody()->getBroadphaseHandle()->m_collisionFilterMask;
+    newTraceCallback.m_collisionFilterMask &= ~CollisionType_Actor;
 
     btVector3 halfExtents(actor->getHalfExtents().x, actor->getHalfExtents().y, actor->getHalfExtents().z);
 

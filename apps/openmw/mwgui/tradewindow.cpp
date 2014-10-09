@@ -333,7 +333,8 @@ namespace MWGui
             float e1 = 0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified();
             float f1 = 0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified();
 
-            float pcTerm = (clampedDisposition - 50 + a1 + b1 + c1) * playerStats.getFatigueTerm();
+            float dispositionTerm = gmst.find("fDispositionMod")->getFloat() * (clampedDisposition - 50);
+            float pcTerm = (dispositionTerm - 50 + a1 + b1 + c1) * playerStats.getFatigueTerm();
             float npcTerm = (d1 + e1 + f1) * sellerStats.getFatigueTerm();
             float x = gmst.find("fBargainOfferMulti")->getFloat() * d + gmst.find("fBargainOfferBase")->getFloat();
             if (buying)

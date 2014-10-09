@@ -548,10 +548,7 @@ namespace MWScript
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                        if(player.getClass().getNpcStats(player).getFactionRanks().find(factionID) == player.getClass().getNpcStats(player).getFactionRanks().end())
-                        {
-                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] = 0;
-                        }
+                        player.getClass().getNpcStats(player).joinFaction(factionID);
                     }
                 }
         };
@@ -585,13 +582,11 @@ namespace MWScript
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                         if(player.getClass().getNpcStats(player).getFactionRanks().find(factionID) == player.getClass().getNpcStats(player).getFactionRanks().end())
                         {
-                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] = 0;
+                            player.getClass().getNpcStats(player).joinFaction(factionID);
                         }
                         else
                         {
-                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] =
-                                    std::min(player.getClass().getNpcStats(player).getFactionRanks()[factionID] +1,
-                                             9);
+                            player.getClass().getNpcStats(player).raiseRank(factionID);
                         }
                     }
                 }
@@ -624,11 +619,7 @@ namespace MWScript
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                        if(player.getClass().getNpcStats(player).getFactionRanks().find(factionID) != player.getClass().getNpcStats(player).getFactionRanks().end())
-                        {
-                            player.getClass().getNpcStats(player).getFactionRanks()[factionID] =
-                                    std::max(0, player.getClass().getNpcStats(player).getFactionRanks()[factionID]-1);
-                        }
+                        player.getClass().getNpcStats(player).lowerRank(factionID);
                     }
                 }
         };
@@ -668,7 +659,7 @@ namespace MWScript
                     {
                         if(player.getClass().getNpcStats(player).getFactionRanks().find(factionID) != player.getClass().getNpcStats(player).getFactionRanks().end())
                         {
-                            runtime.push(player.getClass().getNpcStats(player).getFactionRanks()[factionID]);
+                            runtime.push(player.getClass().getNpcStats(player).getFactionRanks().at(factionID));
                         }
                         else
                         {
@@ -1036,8 +1027,7 @@ namespace MWScript
                     if (ptr == player)
                         return;
 
-                    std::map<std::string, int>& ranks = ptr.getClass().getNpcStats(ptr).getFactionRanks ();
-                    ranks[factionID] = std::min(9, ranks[factionID]+1);
+                    ptr.getClass().getNpcStats(ptr).raiseRank(factionID);
                 }
         };
 
@@ -1063,8 +1053,7 @@ namespace MWScript
                     if (ptr == player)
                         return;
 
-                    std::map<std::string, int>& ranks = ptr.getClass().getNpcStats(ptr).getFactionRanks ();
-                    ranks[factionID] = std::max(0, ranks[factionID]-1);
+                    ptr.getClass().getNpcStats(ptr).lowerRank(factionID);
                 }
         };
 

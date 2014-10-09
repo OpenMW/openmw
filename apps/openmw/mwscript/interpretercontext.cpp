@@ -310,7 +310,7 @@ namespace MWScript
 
     std::string InterpreterContext::getNPCRank() const
     {
-        std::map<std::string, int> ranks = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks();
+        const std::map<std::string, int>& ranks = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks();
         std::map<std::string, int>::const_iterator it = ranks.begin();
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -348,7 +348,7 @@ namespace MWScript
 
         std::string factionId = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks().begin()->first;
 
-        std::map<std::string, int> ranks = player.getClass().getNpcStats (player).getFactionRanks();
+        const std::map<std::string, int>& ranks = player.getClass().getNpcStats (player).getFactionRanks();
         std::map<std::string, int>::const_iterator it = ranks.find(factionId);
         int rank = -1;
         if (it != ranks.end())
@@ -375,7 +375,7 @@ namespace MWScript
 
         std::string factionId = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks().begin()->first;
 
-        std::map<std::string, int> ranks = player.getClass().getNpcStats (player).getFactionRanks();
+        const std::map<std::string, int>& ranks = player.getClass().getNpcStats (player).getFactionRanks();
         std::map<std::string, int>::const_iterator it = ranks.find(factionId);
         int rank = -1;
         if (it != ranks.end())

@@ -119,11 +119,14 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     // Set default texture filtering options
     TextureFilterOptions tfo;
     std::string filter = Settings::Manager::getString("texture filtering", "General");
+#ifndef ANDROID
     if (filter == "anisotropic") tfo = TFO_ANISOTROPIC;
     else if (filter == "trilinear") tfo = TFO_TRILINEAR;
     else if (filter == "bilinear") tfo = TFO_BILINEAR;
     else /*if (filter == "none")*/ tfo = TFO_NONE;
-
+#else
+    tfo = TFO_NONE;
+#endif
     MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
     MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
 
@@ -250,7 +253,6 @@ void RenderingManager::cellAdded (MWWorld::CellStore *store)
     mObjects->buildStaticGeometry (*store);
     sh::Factory::getInstance().unloadUnreferencedMaterials();
     mDebugging->cellAdded(store);
-    waterAdded(store);
 }
 
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){
@@ -421,18 +423,12 @@ void RenderingManager::postRenderTargetUpdate(const RenderTargetEvent &evt)
     mOcclusionQuery->setActive(false);
 }
 
-void RenderingManager::waterAdded (MWWorld::CellStore *store)
+void RenderingManager::setWaterEnabled(bool enable)
 {
-    if (store->getCell()->mData.mFlags & ESM::Cell::HasWater)
-    {
-        mWater->changeCell (store->getCell());
-        mWater->setActive(true);
-    }
-    else
-        removeWater();
+    mWater->setActive(enable);
 }
 
-void RenderingManager::setWaterHeight(const float height)
+void RenderingManager::setWaterHeight(float height)
 {
     mWater->setHeight(height);
 }

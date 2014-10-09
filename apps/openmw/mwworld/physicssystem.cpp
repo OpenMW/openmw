@@ -238,10 +238,31 @@ namespace MWWorld
                 physicActor->setOnGround(false);
                 return position;
             }
+            else
+            {
+                // Check if we actually found a valid spawn point (use an infinitely thin ray this time).
+                // Required for some broken door destinations in Morrowind.esm, where the spawn point
+                // intersects with other geometry if the actor's base is taken into account
+                btVector3 from = BtOgre::Convert::toBullet(position);
+                btVector3 to = from - btVector3(0,0,maxHeight);
 
-            physicActor->setOnGround(getSlope(tracer.mPlaneNormal) <= sMaxSlope);
+                btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
+                resultCallback1.m_collisionFilterGroup = 0xff;
+                resultCallback1.m_collisionFilterMask = OEngine::Physic::CollisionType_World|OEngine::Physic::CollisionType_HeightMap;
 
-            return tracer.mEndPos;
+                engine->mDynamicsWorld->rayTest(from, to, resultCallback1);
+                if (resultCallback1.hasHit() &&
+                        (BtOgre::Convert::toOgre(resultCallback1.m_hitPointWorld).distance(tracer.mEndPos) > 30
+                        || getSlope(tracer.mPlaneNormal) > sMaxSlope))
+                {
+                    physicActor->setOnGround(getSlope(BtOgre::Convert::toOgre(resultCallback1.m_hitNormalWorld)) <= sMaxSlope);
+                    return BtOgre::Convert::toOgre(resultCallback1.m_hitPointWorld) + Ogre::Vector3(0,0,1.f);
+                }
+
+                physicActor->setOnGround(getSlope(tracer.mPlaneNormal) <= sMaxSlope);
+
+                return tracer.mEndPos;
+            }
         }
 
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
@@ -257,8 +278,10 @@ namespace MWWorld
             if (!ptr.getClass().canWalk(ptr) && !ptr.getClass().canFly(ptr) && !ptr.getClass().canSwim(ptr))
                 return position;
 
-            /* Anything to collide with? */
             OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
+            // Reset per-frame data
+            physicActor->setWalkingOnWater(false);
+            /* Anything to collide with? */
             if(!physicActor || !physicActor->getCollisionMode())
             {
                 return position +  (Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
@@ -286,9 +309,6 @@ namespace MWWorld
              */
 
             OEngine::Physic::ActorTracer tracer;
-            bool isOnGround = physicActor->getOnGround();
-            if (movement.z > 0.f)
-                isOnGround = false;
             Ogre::Vector3 inertia(0.0f);
             Ogre::Vector3 velocity;
 
@@ -405,8 +425,6 @@ namespace MWWorld
                     if((ptr.getClass().canSwim(ptr) && !ptr.getClass().canWalk(ptr)) 
                             && newPosition.z > (waterlevel - halfExtents.z * 0.5))
                         newPosition = oldPosition;
-                    else // Only on the ground if there's gravity
-                        isOnGround = !(newPosition.z < waterlevel || isFlying);
                 }
                 else
                 {
@@ -423,10 +441,11 @@ namespace MWWorld
                 }
             }
 
-            if (!(inertia.z > 0.f) && !(newPosition.z < waterlevel || isFlying))
+            bool isOnGround = false;
+            if (!(inertia.z > 0.f) && !(newPosition.z < waterlevel))
             {
                 Ogre::Vector3 from = newPosition;
-                Ogre::Vector3 to = newPosition - (isOnGround ?
+                Ogre::Vector3 to = newPosition - (physicActor->getOnGround() ?
                              Ogre::Vector3(0,0,sStepSize+2.f) : Ogre::Vector3(0,0,2.f));
                 tracer.doTrace(colobj, from, to, engine);
                 if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
@@ -436,8 +455,11 @@ namespace MWWorld
                     {
                         standingCollisionTracker[ptr.getRefData().getHandle()] = body->mName;
                     }
+                    if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == OEngine::Physic::CollisionType_Water)
+                        physicActor->setWalkingOnWater(true);
 
-                    newPosition.z = tracer.mEndPos.z + 1.0f;
+                    if (!isFlying)
+                        newPosition.z = tracer.mEndPos.z + 1.0f;
 
                     isOnGround = true;
                 }
@@ -464,7 +486,7 @@ namespace MWWorld
 
 
     PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend) :
-        mRender(_rend), mEngine(0), mTimeAccum(0.0f)
+        mRender(_rend), mEngine(0), mTimeAccum(0.0f), mWaterEnabled(false), mWaterHeight(0)
     {
         // Create physics. shapeLoader is deleted by the physic engine
         NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
@@ -473,6 +495,8 @@ namespace MWWorld
 
     PhysicsSystem::~PhysicsSystem()
     {
+        if (mWaterCollisionObject.get())
+            mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
         delete mEngine;
     }
 
@@ -640,9 +664,9 @@ namespace MWWorld
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         handleToMesh[node->getName()] = mesh;
         mEngine->createAndAdjustRigidBody(
-            mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation(), 0, 0, false, placeable);
+            mesh, node->getName(), ptr.getCellRef().getScale(), node->getPosition(), node->getOrientation(), 0, 0, false, placeable);
         mEngine->createAndAdjustRigidBody(
-            mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation(), 0, 0, true, placeable);
+            mesh, node->getName(), ptr.getCellRef().getScale(), node->getPosition(), node->getOrientation(), 0, 0, true, placeable);
     }
 
     void PhysicsSystem::addActor (const Ptr& ptr)
@@ -834,14 +858,10 @@ namespace MWWorld
                                                Ogre::Vector3(iter->first.getRefData().getPosition().pos)))
                     waterCollision = true;
 
-                btStaticPlaneShape planeShape(btVector3(0,0,1), waterlevel);
-                btCollisionObject object;
-                object.setCollisionShape(&planeShape);
-
-                // TODO: this seems to have a slight performance impact
-                if (waterCollision)
-                    mEngine->mDynamicsWorld->addCollisionObject(&object,
-                                                                0xff, OEngine::Physic::CollisionType_Actor);
+                OEngine::Physic::PhysicActor *physicActor = mEngine->getCharacter(iter->first.getRefData().getHandle());
+                if (!physicActor) // actor was already removed from the scene
+                    continue;
+                physicActor->setCanWaterWalk(waterCollision);
 
                 // 100 points of slowfall reduce gravity by 90% (this is just a guess)
                 float slowFall = 1-std::min(std::max(0.f, (effects.get(ESM::MagicEffect::SlowFall).getMagnitude() / 100.f) * 0.9f), 0.9f);
@@ -849,9 +869,6 @@ namespace MWWorld
                 Ogre::Vector3 newpos = MovementSolver::move(iter->first, iter->second, mTimeAccum,
                                                             world->isFlying(iter->first),
                                                             waterlevel, slowFall, mEngine, mCollisions, mStandingCollisions);
-
-                if (waterCollision)
-                    mEngine->mDynamicsWorld->removeCollisionObject(&object);
 
                 float heightDiff = newpos.z - oldHeight;
 
@@ -928,4 +945,48 @@ namespace MWWorld
         }
     }
 
+    void PhysicsSystem::disableWater()
+    {
+        if (mWaterEnabled)
+        {
+            mWaterEnabled = false;
+            updateWater();
+        }
+    }
+
+    void PhysicsSystem::enableWater(float height)
+    {
+        if (!mWaterEnabled || mWaterHeight != height)
+        {
+            mWaterEnabled = true;
+            mWaterHeight = height;
+            updateWater();
+        }
+    }
+
+    void PhysicsSystem::setWaterHeight(float height)
+    {
+        if (mWaterHeight != height)
+        {
+            mWaterHeight = height;
+            updateWater();
+        }
+    }
+
+    void PhysicsSystem::updateWater()
+    {
+        if (mWaterCollisionObject.get())
+        {
+            mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
+        }
+
+        if (!mWaterEnabled)
+            return;
+
+        mWaterCollisionObject.reset(new btCollisionObject());
+        mWaterCollisionShape.reset(new btStaticPlaneShape(btVector3(0,0,1), mWaterHeight));
+        mWaterCollisionObject->setCollisionShape(mWaterCollisionShape.get());
+        mEngine->mDynamicsWorld->addCollisionObject(mWaterCollisionObject.get(), OEngine::Physic::CollisionType_Water,
+                                                    OEngine::Physic::CollisionType_Actor);
+    }
 }

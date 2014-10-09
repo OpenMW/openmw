@@ -728,7 +728,7 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
         {
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             MWBase::SoundManager::PlayType type = MWBase::SoundManager::Play_TypeSfx;
-            if(evt.compare(10, evt.size()-10, "left") == 0 || evt.compare(10, evt.size()-10, "right") == 0)
+            if(evt.compare(10, evt.size()-10, "left") == 0 || evt.compare(10, evt.size()-10, "right") == 0 || evt.compare(10, evt.size()-10, "land") == 0)
                 type = MWBase::SoundManager::Play_TypeFoot;
             sndMgr->playSound3D(mPtr, sound, volume, pitch, type);
         }

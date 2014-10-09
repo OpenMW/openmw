@@ -96,7 +96,7 @@ namespace MWWorld
 
             virtual MWMechanics::CreatureStats& getCreatureStats (const Ptr& ptr) const;
             ///< Return creature stats or throw an exception, if class does not have creature stats
-            /// (default implementation: throw an exceoption)
+            /// (default implementation: throw an exception)
 
             virtual bool hasToolTip (const Ptr& ptr) const;
             ///< @return true if this object has a tooltip when focused (default implementation: false)
@@ -106,7 +106,7 @@ namespace MWWorld
 
             virtual MWMechanics::NpcStats& getNpcStats (const Ptr& ptr) const;
             ///< Return NPC stats or throw an exception, if class does not have NPC stats
-            /// (default implementation: throw an exceoption)
+            /// (default implementation: throw an exception)
 
             virtual bool hasItemHealth (const Ptr& ptr) const;
             ///< \return Item health data available? (default implementation: false)
@@ -123,7 +123,7 @@ namespace MWWorld
             /// of the given attacker, and whoever is hit.
             /// \param type - type of attack, one of the MWMechanics::CreatureStats::AttackType
             ///               enums. ignored for creature attacks.
-            /// (default implementation: throw an exceoption)
+            /// (default implementation: throw an exception)
 
             virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const;
             ///< Alerts \a ptr that it's being hit for \a damage points to health if \a ishealth is
@@ -139,7 +139,7 @@ namespace MWWorld
             ///< Sets a new current health value for the actor, optionally specifying the object causing
             /// the change. Use this instead of using CreatureStats directly as this will make sure the
             /// correct dialog and actor states are properly handled when being hurt or healed.
-            /// (default implementation: throw an exceoption)
+            /// (default implementation: throw an exception)
 
             virtual boost::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
             ///< Generate action for activation (default implementation: return a null action).
@@ -151,11 +151,11 @@ namespace MWWorld
 
             virtual ContainerStore& getContainerStore (const Ptr& ptr) const;
             ///< Return container store or throw an exception, if class does not have a
-            /// container store (default implementation: throw an exceoption)
+            /// container store (default implementation: throw an exception)
 
             virtual InventoryStore& getInventoryStore (const Ptr& ptr) const;
             ///< Return inventory store or throw an exception, if class does not have a
-            /// inventory store (default implementation: throw an exceoption)
+            /// inventory store (default implementation: throw an exception)
 
             virtual bool hasInventoryStore (const Ptr& ptr) const;
             ///< Does this object have an inventory store, i.e. equipment slots? (default implementation: false)
@@ -222,6 +222,9 @@ namespace MWWorld
             ///< Returns total weight of objects inside this object (including modifications from magic
             /// effects). Throws an exception, if the object can't hold other objects.
             /// (default implementation: throws an exception)
+
+            virtual float getNormalizedEncumbrance (const MWWorld::Ptr& ptr) const;
+            ///< Returns encumbrance re-scaled to capacity
 
             virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id,
                 const MWWorld::Ptr& actor) const;

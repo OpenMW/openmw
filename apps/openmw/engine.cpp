@@ -478,7 +478,7 @@ void OMW::Engine::go()
     }
 
     // Start the main rendering loop
-    while (!mEnvironment.get().getStateManager()->hasQuitRequest())
+    while (!MWBase::Environment::get().getStateManager()->hasQuitRequest())
         Ogre::Root::getSingleton().renderOneFrame();
 
     // Save user settings

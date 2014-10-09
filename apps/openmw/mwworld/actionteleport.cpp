@@ -5,6 +5,23 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "player.hpp"
 
+namespace
+{
+
+    void getFollowers (const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out)
+    {
+        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(actor);
+        for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
+        {
+            if (out.insert(*it).second)
+            {
+                getFollowers(*it, out);
+            }
+        }
+    }
+
+}
+
 namespace MWWorld
 {
     ActionTeleport::ActionTeleport (const std::string& cellName,
@@ -16,8 +33,9 @@ namespace MWWorld
     void ActionTeleport::executeImp (const Ptr& actor)
     {
         //find any NPC that is following the actor and teleport him too
-        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(actor);
-        for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
+        std::set<MWWorld::Ptr> followers;
+        getFollowers(actor, followers);
+        for(std::set<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
         {
             teleport(*it);
         }

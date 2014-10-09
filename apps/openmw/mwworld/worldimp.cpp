@@ -1253,7 +1253,7 @@ namespace MWWorld
 
         if (force || !isFlying(ptr))
         {
-            Ogre::Vector3 traced = mPhysics->traceDown(ptr, 200);
+            Ogre::Vector3 traced = mPhysics->traceDown(ptr, 300);
             if (traced.z < pos.pos[2])
                 pos.pos[2] = traced.z;
         }
@@ -1660,6 +1660,7 @@ namespace MWWorld
 
     void World::setWaterHeight(const float height)
     {
+        mPhysics->setWaterHeight(height);
         mRendering->setWaterHeight(height);
     }
 
@@ -1994,7 +1995,7 @@ namespace MWWorld
         Ogre::Vector3 playerPos(refdata.getPosition().pos);
 
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
-        if((!physactor->getOnGround()&&physactor->getCollisionMode()) || isUnderwater(currentCell, playerPos))
+        if((!physactor->getOnGround()&&physactor->getCollisionMode()) || isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
             return 2;
         if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) ||
            player.getClass().getNpcStats(player).isWerewolf())
@@ -3070,5 +3071,13 @@ namespace MWWorld
             ResetActorsFunctor functor;
             cellstore->forEach(functor);
         }
+    }
+
+    bool World::isWalkingOnWater(const Ptr &actor)
+    {
+        OEngine::Physic::PhysicActor* physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
+        if (physicActor && physicActor->isWalkingOnWater())
+            return true;
+        return false;
     }
 }

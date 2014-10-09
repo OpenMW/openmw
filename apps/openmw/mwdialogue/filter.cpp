@@ -68,7 +68,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
             return false;
 
         MWMechanics::NpcStats& stats = mActor.getClass().getNpcStats (mActor);
-        std::map<std::string, int>::iterator iter = stats.getFactionRanks().find ( Misc::StringUtils::lowerCase (info.mFaction));
+        std::map<std::string, int>::const_iterator iter = stats.getFactionRanks().find ( Misc::StringUtils::lowerCase (info.mFaction));
 
         if (iter==stats.getFactionRanks().end())
             return false;
@@ -112,7 +112,7 @@ bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
     if (!info.mPcFaction.empty())
     {
         MWMechanics::NpcStats& stats = player.getClass().getNpcStats (player);
-        std::map<std::string,int>::iterator iter = stats.getFactionRanks().find (Misc::StringUtils::lowerCase (info.mPcFaction));
+        std::map<std::string,int>::const_iterator iter = stats.getFactionRanks().find (Misc::StringUtils::lowerCase (info.mPcFaction));
 
         if(iter==stats.getFactionRanks().end())
             return false;
@@ -379,7 +379,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
             if (mActor.getClass().getNpcStats (mActor).getFactionRanks().empty())
                 return 0;
 
-            std::pair<std::string, int> faction =
+            const std::pair<std::string, int> faction =
                 *mActor.getClass().getNpcStats (mActor).getFactionRanks().begin();
 
             int rank = getFactionRank (player, faction.first);

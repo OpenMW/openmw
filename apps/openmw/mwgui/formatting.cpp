@@ -21,7 +21,7 @@ namespace MWGui
     {
         /* BookTextParser */
         BookTextParser::BookTextParser(const std::string & text)
-            : mIndex(0), mText(text), mIgnoreNewlineTags(true), mIgnoreLineEndings(true)
+            : mIndex(0), mText(text), mIgnoreNewlineTags(true), mIgnoreLineEndings(true), mClosingTag(false)
         {
             MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
             mText = Interpreter::fixDefinesBook(mText, interpreterContext);
@@ -40,7 +40,7 @@ namespace MWGui
             mTagTypes[tag] = type;
         }
 
-        std::string BookTextParser::getReadyText()
+        std::string BookTextParser::getReadyText() const
         {
             return mReadyText;
         }
@@ -81,7 +81,6 @@ namespace MWGui
 
                         if (type == Event_ImgTag)
                         {
-                            mIgnoreLineEndings = false;
                             mIgnoreNewlineTags = false;
                         }
 
@@ -117,12 +116,27 @@ namespace MWGui
             return mAttributes;
         }
 
+        bool BookTextParser::isClosingTag() const
+        {
+            return mClosingTag;
+        }
+
         void BookTextParser::parseTag(std::string tag)
         {
             size_t tagNameEndPos = tag.find(' ');
+            mAttributes.clear();
             mTag = tag.substr(0, tagNameEndPos);
             Misc::StringUtils::toLower(mTag);
-            mAttributes.clear();
+            if (mTag.empty())
+                return;
+
+            mClosingTag = (mTag[0] == '/');
+            if (mClosingTag)
+            {
+                mTag.erase(mTag.begin());
+                return;
+            }
+
             if (tagNameEndPos == std::string::npos)
                 return;
             tag.erase(0, tagNameEndPos+1);
@@ -183,6 +197,9 @@ namespace MWGui
             paper->setNeedMouseFocus(false);
 
             BookTextParser parser(markup);
+
+            bool brBeforeLastTag = false;
+            bool isPrevImg = false;
             for (;;)
             {
                 BookTextParser::Events event = parser.next();
@@ -190,10 +207,20 @@ namespace MWGui
                     continue;
 
                 std::string plainText = parser.getReadyText();
-                if (!plainText.empty())
+                if (plainText.empty())
+                    brBeforeLastTag = false;
+                else
                 {
-                    // if there's a newline at the end of the box caption, remove it
-                    if (plainText[plainText.size()-1] == '\n')
+                    // Each block of text (between two tags / boundary and tag) will be displayed in a separate editbox widget,
+                    // which means an additional linebreak will be created between them.
+                    // ^ This is not what vanilla MW assumes, so we must deal with line breaks around tags appropriately.
+                    bool brAtStart = (plainText[0] == '\n');
+                    bool brAtEnd = (plainText[plainText.size()-1] == '\n');
+
+                    if (brAtStart && !brBeforeLastTag && !isPrevImg)
+                        plainText.erase(plainText.begin());
+
+                    if (plainText.size() && brAtEnd)
                         plainText.erase(plainText.end()-1);
 
 #if (MYGUI_VERSION < MYGUI_DEFINE_VERSION(3, 2, 2))
@@ -206,12 +233,20 @@ namespace MWGui
                     }
 #endif
 
-                    TextElement elem(paper, pag, mTextStyle, plainText);
-                    elem.paginate();
+                    if (!plainText.empty() || brBeforeLastTag || isPrevImg)
+                    {
+                        TextElement elem(paper, pag, mBlockStyle,
+                                         mTextStyle, plainText);
+                        elem.paginate();
+                    }
+
+                    brBeforeLastTag = brAtEnd;
                 }
 
                 if (event == BookTextParser::Event_EOF)
                     break;
+
+                isPrevImg = (event == BookTextParser::Event_ImgTag);
 
                 switch (event)
                 {
@@ -226,12 +261,16 @@ namespace MWGui
                         int width = boost::lexical_cast<int>(attr.at("width"));
                         int height = boost::lexical_cast<int>(attr.at("height"));
 
-                        ImageElement elem(paper, pag, src, width, height);
+                        ImageElement elem(paper, pag, mBlockStyle,
+                                          src, width, height);
                         elem.paginate();
                         break;
                     }
                     case BookTextParser::Event_FontTag:
-                        handleFont(parser.getAttributes());
+                        if (parser.isClosingTag())
+                            resetFontProperties();
+                        else
+                            handleFont(parser.getAttributes());
                         break;
                     case BookTextParser::Event_DivTag:
                         handleDiv(parser.getAttributes());
@@ -255,6 +294,11 @@ namespace MWGui
             return markupToWidget(parent, markup, parent->getWidth(), parent->getHeight());
         }
 
+        void BookFormatter::resetFontProperties()
+        {
+            mTextStyle = TextStyle();
+        }
+
         void BookFormatter::handleDiv(const BookTextParser::Attributes & attr)
         {
             if (attr.find("align") == attr.end())
@@ -263,9 +307,11 @@ namespace MWGui
             std::string align = attr.at("align");
 
             if (Misc::StringUtils::ciEqual(align, "center"))
-                mTextStyle.mTextAlign = MyGUI::Align::HCenter;
+                mBlockStyle.mAlign = MyGUI::Align::HCenter;
             else if (Misc::StringUtils::ciEqual(align, "left"))
-                mTextStyle.mTextAlign = MyGUI::Align::Left;
+                mBlockStyle.mAlign = MyGUI::Align::Left;
+            else if (Misc::StringUtils::ciEqual(align, "right"))
+                mBlockStyle.mAlign = MyGUI::Align::Right;
         }
 
         void BookFormatter::handleFont(const BookTextParser::Attributes & attr)
@@ -296,8 +342,8 @@ namespace MWGui
         }
 
         /* GraphicElement */
-        GraphicElement::GraphicElement(MyGUI::Widget * parent, Paginator & pag)
-            : mParent(parent), mPaginator(pag)
+        GraphicElement::GraphicElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle)
+            : mParent(parent), mPaginator(pag), mBlockStyle(blockStyle)
         {
         }
 
@@ -320,10 +366,10 @@ namespace MWGui
         }
 
         /* TextElement */
-        TextElement::TextElement(MyGUI::Widget * parent, Paginator & pag,
-                                 const TextStyle & style, const std::string & text)
-            : GraphicElement(parent, pag),
-              mStyle(style)
+        TextElement::TextElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle,
+                                 const TextStyle & textStyle, const std::string & text)
+            : GraphicElement(parent, pag, blockStyle),
+              mTextStyle(textStyle)
         {
             MyGUI::EditBox* box = parent->createWidget<MyGUI::EditBox>("NormalText",
                 MyGUI::IntCoord(0, pag.getCurrentTop(), pag.getPageWidth(), 0), MyGUI::Align::Left | MyGUI::Align::Top,
@@ -333,9 +379,9 @@ namespace MWGui
             box->setProperty("WordWrap", "true");
             box->setProperty("NeedMouse", "false");
             box->setMaxTextLength(text.size());
-            box->setTextAlign(mStyle.mTextAlign);
-            box->setTextColour(mStyle.mColour);
-            box->setFontName(mStyle.mFont);
+            box->setTextAlign(mBlockStyle.mAlign);
+            box->setTextColour(mTextStyle.mColour);
+            box->setFontName(mTextStyle.mFont);
             box->setCaption(MyGUI::TextIterator::toTagsString(text));
             box->setSize(box->getSize().width, box->getTextSize().height);
             mEditBox = box;
@@ -343,7 +389,7 @@ namespace MWGui
 
         int TextElement::currentFontHeight() const
         {
-            std::string fontName(mStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mStyle.mFont);
+            std::string fontName(mTextStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mTextStyle.mFont);
             return MyGUI::FontManager::getInstance().getByName(fontName)->getDefaultHeight();
         }
 
@@ -375,13 +421,21 @@ namespace MWGui
         }
 
         /* ImageElement */
-        ImageElement::ImageElement(MyGUI::Widget * parent, Paginator & pag,
+        ImageElement::ImageElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle,
                                    const std::string & src, int width, int height)
-            : GraphicElement(parent, pag),
+            : GraphicElement(parent, pag, blockStyle),
               mImageHeight(height)
         {
+            int left = 0;
+            if (mBlockStyle.mAlign.isHCenter())
+                left += (pag.getPageWidth() - width) / 2;
+            else if (mBlockStyle.mAlign.isLeft())
+                left = 0;
+            else if (mBlockStyle.mAlign.isRight())
+                left += pag.getPageWidth() - width;
+
             mImageBox = parent->createWidget<MyGUI::ImageBox> ("ImageBox",
-                MyGUI::IntCoord(0, pag.getCurrentTop(), width, mImageHeight), MyGUI::Align::Left | MyGUI::Align::Top,
+                MyGUI::IntCoord(left, pag.getCurrentTop(), width, mImageHeight), MyGUI::Align::Left | MyGUI::Align::Top,
                 parent->getName() + boost::lexical_cast<std::string>(parent->getChildCount()));
 
             std::string image = Misc::ResourceHelpers::correctBookartPath(src, width, mImageHeight);

@@ -47,7 +47,7 @@
         // Scroll in y direction
         float2 scrolledUV = UV + float2(0,1) * cloudAnimationTimer * 0.003; 
         
-        float4 albedo = shSample(diffuseMap1, scrolledUV) * (1-cloudBlendFactor) + shSample(diffuseMap2, scrolledUV) * cloudBlendFactor;
+        float4 albedo = shSample(diffuseMap1, scrolledUV) * (1.0-cloudBlendFactor) + shSample(diffuseMap2, scrolledUV) * cloudBlendFactor;
         
         shOutputColour(0) = float4(cloudColour, 1) * albedo * float4(1,1,1, cloudOpacity * alphaFade);
     }

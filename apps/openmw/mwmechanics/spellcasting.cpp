@@ -246,10 +246,7 @@ namespace MWMechanics
                               const ESM::Spell* spell, const MagicEffects* effects)
     {
         float resistance = getEffectResistance(effectId, actor, caster, spell, effects);
-        if (resistance >= 0)
-            return 1 - resistance / 100.f;
-        else
-            return -(resistance-100) / 100.f;
+        return 1 - resistance / 100.f;
     }
 
     /// Check if the given affect can be applied to the target. If \a castByPlayer, emits a message box on failure.
@@ -774,7 +771,7 @@ namespace MWMechanics
             static const float fFatigueSpellBase = store.get<ESM::GameSetting>().find("fFatigueSpellBase")->getFloat();
             static const float fFatigueSpellMult = store.get<ESM::GameSetting>().find("fFatigueSpellMult")->getFloat();
             DynamicStat<float> fatigue = stats.getFatigue();
-            const float normalizedEncumbrance = mCaster.getClass().getEncumbrance(mCaster) / mCaster.getClass().getCapacity(mCaster);
+            const float normalizedEncumbrance = mCaster.getClass().getNormalizedEncumbrance(mCaster);
             float fatigueLoss = spell->mData.mCost * (fFatigueSpellBase + normalizedEncumbrance * fFatigueSpellMult);
             fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss); stats.setFatigue(fatigue);
 
