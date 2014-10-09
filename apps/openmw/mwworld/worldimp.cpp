@@ -1489,12 +1489,10 @@ namespace MWWorld
         if (mGoToJail && !paused)
             goToJail();
 
+        updateWeather(duration, paused);
 
         if (!paused)
-        {
-            updateWeather(duration);
             doPhysics (duration);
-        }
 
         mWorldScene->update (duration, paused);
 
@@ -2639,13 +2637,19 @@ namespace MWWorld
 
     void World::updateWeather(float duration)
     {
+        // Implement original behavior:
+        this->updateWeather(duration, false);
+    }
+    
+    void World::updateWeather(float duration, bool paused)
+    {
         if (mPlayer->wasTeleported())
         {
             mPlayer->setTeleported(false);
             mWeatherManager->switchToNextWeather(true);
         }
-
-        mWeatherManager->update(duration);
+        
+        mWeatherManager->update(duration, paused);
     }
 
     struct AddDetectedReference

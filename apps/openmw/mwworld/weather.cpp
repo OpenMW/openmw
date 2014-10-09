@@ -350,6 +350,11 @@ void WeatherManager::transition(float factor)
 
 void WeatherManager::update(float duration)
 {
+    this->update(duration, false);
+}
+
+void WeatherManager::update(float duration, bool paused)
+{
     float timePassed = mTimePassed;
     mTimePassed = 0;
 
@@ -483,7 +488,7 @@ void WeatherManager::update(float duration)
         mRendering->getSkyManager()->secundaDisable();
     }
 
-    if (mCurrentWeather == "thunderstorm" && mNextWeather == "")
+    if (mCurrentWeather == "thunderstorm" && mNextWeather == "" && !paused)
     {
         if (mThunderFlash > 0)
         {

@@ -171,6 +171,7 @@ namespace MWWorld
          * @param duration
          */
         void update(float duration);
+        void update(float duration, bool paused);
 
         void stopSounds(bool stopAll);
 
