@@ -6,6 +6,8 @@
 
 #include <OgreVector3.h>
 
+#include <components/terrain/terraingrid.hpp>
+
 #include "object.hpp"
 
 class QModelIndex;
@@ -29,6 +31,7 @@ namespace CSVRender
             std::string mId;
             Ogre::SceneNode *mCellNode;
             std::map<std::string, Object *> mObjects;
+            std::auto_ptr<Terrain::TerrainGrid> mTerrain;
 
             /// Ignored if cell does not have an object with the given ID.
             ///

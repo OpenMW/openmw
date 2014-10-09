@@ -50,7 +50,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     {
         int index = cells.searchId (iter->getId (mWorldspace));
 
-        if (index!=0 && cells.getRecord (index).mState!=CSMWorld::RecordBase::State_Deleted &&
+        if (index > 0 && cells.getRecord (index).mState!=CSMWorld::RecordBase::State_Deleted &&
             mCells.find (*iter)==mCells.end())
         {
             if (setCamera)

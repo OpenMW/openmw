@@ -53,22 +53,22 @@ AndroidPath::AndroidPath(const std::string& application_name)
 
 boost::filesystem::path AndroidPath::getUserConfigPath() const
 {
-    return getEnv("XDG_CONFIG_HOME",  "/sdcard/morrowind/config") / mName;
+    return getEnv("XDG_CONFIG_HOME",  "/sdcard/libopenmw/config") / mName;
 }
 
 boost::filesystem::path AndroidPath::getUserDataPath() const
 {
-    return getEnv("XDG_DATA_HOME", "/sdcard/morrowind/share") / mName;
+    return getEnv("XDG_DATA_HOME", "/sdcard/libopenmw/share") / mName;
 }
 
 boost::filesystem::path AndroidPath::getCachePath() const
 {
-    return getEnv("XDG_CACHE_HOME", "/sdcard/morrowind/cache") / mName;
+    return getEnv("XDG_CACHE_HOME", "/sdcard/libopenmw/cache") / mName;
 }
 
 boost::filesystem::path AndroidPath::getGlobalConfigPath() const
 {
-    boost::filesystem::path globalPath("/sdcard/morrowind/"); 
+    boost::filesystem::path globalPath("/sdcard/libopenmw/"); 
     return globalPath / mName;
 }
 
@@ -79,7 +79,7 @@ boost::filesystem::path AndroidPath::getLocalPath() const
 
 boost::filesystem::path AndroidPath::getGlobalDataPath() const
 {
-    boost::filesystem::path globalDataPath("/sdcard/morrowind/data");
+    boost::filesystem::path globalDataPath("/sdcard/libopenmw/data");
     return globalDataPath / mName;
 }
 

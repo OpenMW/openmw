@@ -45,8 +45,8 @@ shUniform(float4x4, projection) @shAutoConstant(projection, projection_matrix)
         
         shOutputColour(0).a = shSample(alphaMap, UV).a * materialDiffuse.a;
         
-        shOutputColour(0).rgb += (1-tex.a) * shOutputColour(0).a * atmosphereColour.rgb; //fill dark side of moon with atmosphereColour
-        shOutputColour(0).rgb += (1-materialDiffuse.a) * atmosphereColour.rgb; //fade bump
+        shOutputColour(0).rgb += (1.0-tex.a) * shOutputColour(0).a * atmosphereColour.rgb; //fill dark side of moon with atmosphereColour
+        shOutputColour(0).rgb += (1.0-materialDiffuse.a) * atmosphereColour.rgb; //fade bump
 
     }
 
