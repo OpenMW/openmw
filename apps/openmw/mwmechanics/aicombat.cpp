@@ -81,6 +81,48 @@ namespace MWMechanics
     static const float DOOR_CHECK_INTERVAL = 1.5f; // same as AiWander
     // NOTE: MIN_DIST_TO_DOOR_SQUARED is defined in obstacle.hpp
 
+    
+    /// \brief This class holds the variables AiCombat needs which are deleted if the package becomes inactive.
+    struct AiCombatStorage : AiTemporaryBase
+    {
+        float mTimerAttack;
+        float mTimerReact;
+        float mTimerCombatMove;
+        bool mReadyToAttack;
+        bool mAttack;
+        bool mFollowTarget;
+        bool mCombatMove;
+        Ogre::Vector3 mLastTargetPos;
+        const MWWorld::CellStore* mCell;
+        boost::shared_ptr<Action> mCurrentAction;
+        float mActionCooldown;
+        float mStrength;
+        float mMinMaxAttackDuration[3][2];
+        bool mMinMaxAttackDurationInitialised;
+        bool mForceNoShortcut;
+        ESM::Position mShortcutFailPos;
+        Ogre::Vector3 mLastActorPos;
+        MWMechanics::Movement mMovement;
+        
+        AiCombatStorage():
+        mTimerAttack(0),
+        mTimerReact(0),
+        mTimerCombatMove(0),
+        mAttack(false),
+        mFollowTarget(false),
+        mCombatMove(false),
+        mReadyToAttack(false),
+        mForceNoShortcut(false),
+        mCell(NULL),
+        mCurrentAction(),
+        mActionCooldown(0),
+        mStrength(),
+        mMinMaxAttackDurationInitialised(false),
+        mLastTargetPos(0,0,0),
+        mLastActorPos(0,0,0),
+        mMovement(){}    
+    };
+    
     AiCombat::AiCombat(const MWWorld::Ptr& actor) :
         mTargetActorId(actor.getClass().getCreatureStats(actor).getActorId())
     {}
@@ -157,8 +199,8 @@ namespace MWMechanics
         Ogre::Vector3& lastTargetPos = storage.mLastTargetPos;
         const MWWorld::CellStore*& currentCell = storage.mCell;
         boost::shared_ptr<Action>& currentAction = storage.mCurrentAction;
-        float actionCooldown = storage.mActionCooldown;
-        float strength = storage.mStrength;
+        float& actionCooldown = storage.mActionCooldown;
+        float& strength = storage.mStrength;
         float (&minMaxAttackDuration)[3][2] = storage.mMinMaxAttackDuration;
         bool& minMaxAttackDurationInitialised = storage.mMinMaxAttackDurationInitialised;
         bool& forceNoShortcut = storage.mForceNoShortcut;
