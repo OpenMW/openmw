@@ -10,6 +10,9 @@
 #include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
 
+#include "elements.hpp"
+#include "terrainstorage.hpp"
+
 bool CSVRender::Cell::removeObject (const std::string& id)
 {
     std::map<std::string, Object *>::iterator iter =
@@ -67,6 +70,18 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
     int rows = references.rowCount();
 
     addObjects (0, rows-1);
+
+    const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
+    int landIndex = land.searchId(mId);
+    if (landIndex != -1)
+    {
+        mTerrain.reset(new Terrain::TerrainGrid(sceneManager, new TerrainStorage(mData), Element_Terrain, true,
+                                                Terrain::Align_XY));
+
+        const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
+        mTerrain->loadCell(esmLand->mX,
+                           esmLand->mY);
+    }
 }
 
 CSVRender::Cell::~Cell()

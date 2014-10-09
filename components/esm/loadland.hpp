@@ -98,6 +98,8 @@ struct Land
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 
+    void blank() {}
+
     /**
      * Actually loads data
      */

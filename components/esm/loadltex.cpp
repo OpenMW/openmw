@@ -19,4 +19,10 @@ void LandTexture::save(ESMWriter &esm) const
     esm.writeHNCString("DATA", mTexture);
 }
 
+void LandTexture::blank()
+{
+    mTexture.clear();
+    mIndex = -1;
+}
+
 }
