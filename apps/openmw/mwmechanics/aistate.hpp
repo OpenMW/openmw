@@ -112,13 +112,19 @@ public:
 
 namespace MWMechanics
 {
-    /// \brief base class for the temporary storage of AiPackages
+    /// \brief base class for the temporary storage of AiPackages.
+    /**
+     * Each AI package with temporary values needs a AiPackageStorage class
+     * which is derived from AiTemporaryBase. The CharacterController holds a container
+     * AiState where one of these storages can be stored at a time.
+     * The execute(...) member function takes this container as an argument.
+     * */
     struct AiTemporaryBase
     {
         virtual ~AiTemporaryBase(){};
     };
     
-    /// \brief Container for AI package status
+    /// \brief Container for AI package status.
     typedef DerivedClassStorage<AiTemporaryBase> AiState;
 }
 
