@@ -68,6 +68,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             else
             {
                 // check if name or region field has changed
+                // FIXME: config setting
                 std::string name = cells.getRecord(index).get().mName;
                 std::string region = cells.getRecord(index).get().mRegion;
 
@@ -113,26 +114,34 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
         if (index > 0 && cells.getRecord (index).mState!=CSMWorld::RecordBase::State_Deleted &&
             mCells.find (*iter)==mCells.end())
         {
+            Cell *cell = new Cell (mDocument.getData(), getSceneManager(), iter->getId (mWorldspace));
+            mCells.insert (std::make_pair (*iter, cell));
+
+            float height = cell->getTerrainHeightAt(Ogre::Vector3(
+                              ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
+                              0));
             if (setCamera)
             {
                 setCamera = false;
-                getCamera()->setPosition (ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
-                                          ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2, 0);
+                getCamera()->setPosition (
+                              ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
+                              height);
+                // better camera position at the start
+                getCamera()->move(getCamera()->getDirection() * -6000); // FIXME: config setting
             }
 
-            mCells.insert (std::make_pair (*iter,
-                new Cell (mDocument.getData(), getSceneManager(), iter->getId (mWorldspace))));
-
-            Ogre::ManualObject* manual = getSceneManager()->createManualObject("manual" + iter->getId(mWorldspace));
-
+            Ogre::ManualObject* manual =
+                    getSceneManager()->createManualObject("manual" + iter->getId(mWorldspace));
             manual->begin("BaseWhite", Ogre::RenderOperation::OT_LINE_LIST);
-
             // define start and end point (x, y, z)
-            // FIXME: need terrain height to get the correct starting point
             manual-> position(ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
-                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2, 0);
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
+                              height);
             manual-> position(ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
-                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2, 2000);
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
+                              height+2000); // FIXME: config setting
             manual->end();
             Ogre::MeshPtr meshPtr = manual->convertToMesh("vLine" + iter->getId(mWorldspace));
             Ogre::Entity* entity = getSceneManager()->createEntity(meshPtr);
@@ -142,12 +151,13 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             // keep pointers so that they can be deleted later
             mEntities.insert(std::make_pair(*iter, entity));
 
-            CSVRender::TextOverlay *textDisp = new CSVRender::TextOverlay(entity, getCamera(), iter->getId(mWorldspace));
+            CSVRender::TextOverlay *textDisp =
+                    new CSVRender::TextOverlay(entity, getCamera(), iter->getId(mWorldspace));
             textDisp->enable(true);
             textDisp->setCaption(iter->getId(mWorldspace));
             std::string desc = cells.getRecord(index).get().mName;
             if(desc == "") desc = cells.getRecord(index).get().mRegion;
-            textDisp->setDesc(desc);
+            textDisp->setDesc(desc); // FIXME: config setting
             textDisp->update();
             mTextOverlays.insert(std::make_pair(*iter, textDisp));
 
@@ -185,12 +195,6 @@ void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event
 
 void CSVRender::PagedWorldspaceWidget::updateOverlay()
 {
-    // better camera position at the start
-    if(getCamera()->getViewport() && getCamera()->getPosition().z < 1)
-    {
-        getCamera()->move(getCamera()->getDirection() * -6000);
-    }
-
     Ogre::OverlayManager &overlayMgr = Ogre::OverlayManager::getSingleton();
     Ogre::Overlay* overlay = overlayMgr.getByName("CellIDPanel");
     if(overlay && !mTextOverlays.empty())

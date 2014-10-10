@@ -70,6 +70,8 @@ namespace CSVRender
             /// \return Did this call result in a modification of the visual representation of
             /// this cell?
             bool referenceAdded (const QModelIndex& parent, int start, int end);
+
+            float getTerrainHeightAt(const Ogre::Vector3 &pos) const;
     };
 }
 
