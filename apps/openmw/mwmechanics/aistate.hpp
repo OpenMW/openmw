@@ -30,7 +30,7 @@ namespace MWMechanics
             // static_assert( std::is_base_of<Base,Derived> , "DerivedClassStorage may only store derived classes" );
             
             // boost:
-            BOOST_STATIC_ASSERT(boost::is_base_of<Base,Derived>::value);//,"DerivedClassStorage may only store derived classes");
+            BOOST_STATIC_ASSERT((boost::is_base_of<Base,Derived>::value));//,"DerivedClassStorage may only store derived classes");
         }
         
         //if needed you have to provide a clone member function
