@@ -337,6 +337,8 @@ void CSMDoc::WritePathgridCollectionStage::perform (int stage, Messages& message
             char ignore;
             stream >> ignore >> record.mData.mX >> record.mData.mY;
         }
+        else
+            record.mCell = record.mId;
 
         mState.getWriter().startRecord (record.sRecordId);
 
