@@ -23,6 +23,8 @@
 #include <components/esm/loaddial.hpp>
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadbody.hpp>
+#include <components/esm/loadsndg.hpp>
+#include <components/esm/loadmgef.hpp>
 #include <components/esm/debugprofile.hpp>
 #include <components/esm/filter.hpp>
 
@@ -38,6 +40,8 @@
 #include "refidcollection.hpp"
 #include "refcollection.hpp"
 #include "infocollection.hpp"
+#include "pathgrid.hpp"
+#include "subcellcollection.hpp"
 
 class QAbstractItemModel;
 
@@ -72,7 +76,10 @@ namespace CSMWorld
             IdCollection<ESM::Dialogue> mJournals;
             IdCollection<ESM::Enchantment> mEnchantments;
             IdCollection<ESM::BodyPart> mBodyParts;
+            IdCollection<ESM::MagicEffect> mMagicEffects;
+            SubCellCollection<Pathgrid> mPathgrids;
             IdCollection<ESM::DebugProfile> mDebugProfiles;
+            IdCollection<ESM::SoundGenerator> mSoundGens;
             InfoCollection mTopicInfos;
             InfoCollection mJournalInfos;
             IdCollection<Cell> mCells;
@@ -204,6 +211,18 @@ namespace CSMWorld
             const IdCollection<CSMWorld::Land>& getLand() const;
 
             const IdCollection<CSMWorld::LandTexture>& getLandTextures() const;
+
+            const IdCollection<ESM::SoundGenerator>& getSoundGens() const;
+
+            IdCollection<ESM::SoundGenerator>& getSoundGens();
+
+            const IdCollection<ESM::MagicEffect>& getMagicEffects() const;
+
+            IdCollection<ESM::MagicEffect>& getMagicEffects();
+
+            const SubCellCollection<Pathgrid>& getPathgrids() const;
+
+            SubCellCollection<Pathgrid>& getPathgrids();
 
             /// Throws an exception, if \a id does not match a resources list.
             const Resources& getResources (const UniversalId& id) const;

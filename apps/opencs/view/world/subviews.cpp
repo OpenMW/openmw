@@ -26,6 +26,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     manager.add (CSMWorld::UniversalId::Type_Skills,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, NullCreatorFactory>);
 
+    manager.add (CSMWorld::UniversalId::Type_MagicEffects,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, NullCreatorFactory>);
+
     static const CSMWorld::UniversalId::Type sTableTypes[] =
     {
         CSMWorld::UniversalId::Type_Globals,
@@ -38,6 +41,8 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Spells,
         CSMWorld::UniversalId::Type_Enchantments,
         CSMWorld::UniversalId::Type_BodyParts,
+        CSMWorld::UniversalId::Type_SoundGens,
+        CSMWorld::UniversalId::Type_Pathgrids,
 
         CSMWorld::UniversalId::Type_None // end marker
     };
@@ -116,6 +121,8 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Faction,
         CSMWorld::UniversalId::Type_Enchantment,
         CSMWorld::UniversalId::Type_BodyPart,
+        CSMWorld::UniversalId::Type_SoundGen,
+        CSMWorld::UniversalId::Type_Pathgrid,
 
         CSMWorld::UniversalId::Type_None // end marker
     };
@@ -126,6 +133,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
             CreatorFactory<GenericCreator> > (false));
 
     manager.add (CSMWorld::UniversalId::Type_Skill,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, NullCreatorFactory > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_MagicEffect,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, NullCreatorFactory > (false));
 
     manager.add (CSMWorld::UniversalId::Type_Gmst,

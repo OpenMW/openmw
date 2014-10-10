@@ -183,6 +183,23 @@ namespace CSMDoc
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
+
+    class WritePathgridCollectionStage : public Stage
+    {
+            Document& mDocument;
+            SavingState& mState;
+
+        public:
+
+            WritePathgridCollectionStage (Document& document, SavingState& state);
+
+            virtual int setup();
+            ///< \return number of steps
+
+            virtual void perform (int stage, Messages& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
+
     class CloseSaveStage : public Stage
     {
             SavingState& mState;

@@ -179,7 +179,21 @@ namespace CSMWorld
             ColumnId_GlobalProfile = 167,
             ColumnId_RefNumCounter = 168,
             ColumnId_RefNum = 169,
-
+            ColumnId_Creature = 170,
+            ColumnId_SoundGeneratorType = 171,
+            ColumnId_AllowSpellmaking = 172,
+            ColumnId_AllowEnchanting = 173,
+            ColumnId_BaseCost = 174,
+            ColumnId_School = 175,
+            ColumnId_Particle = 176,
+            ColumnId_CastingObject = 177,
+            ColumnId_HitObject = 178,
+            ColumnId_AreaObject = 179,
+            ColumnId_BoltObject = 180,
+            ColumnId_CastingSound = 177,
+            ColumnId_HitSound = 178,
+            ColumnId_AreaSound = 179,
+            ColumnId_BoltSound = 180,
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,

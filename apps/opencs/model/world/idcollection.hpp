@@ -11,6 +11,8 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
     class IdCollection : public Collection<ESXRecordT, IdAccessorT>
     {
+            virtual void loadRecord (ESXRecordT& record, ESM::ESMReader& reader);
+
         public:
 
             void load (ESM::ESMReader& reader, bool base);
@@ -25,6 +27,13 @@ namespace CSMWorld
             ///
             /// \return Has the ID been deleted?
     };
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    void IdCollection<ESXRecordT, IdAccessorT>::loadRecord (ESXRecordT& record,
+        ESM::ESMReader& reader)
+    {
+        record.load (reader);
+    }
 
     template<typename ESXRecordT, typename IdAccessorT>
     void IdCollection<ESXRecordT, IdAccessorT>::load (ESM::ESMReader& reader, bool base)
@@ -69,7 +78,7 @@ namespace CSMWorld
                 record = this->getRecord (index).get();
             }
 
-            record.load (reader);
+            loadRecord (record, reader);
 
             if (index==-1)
             {

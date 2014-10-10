@@ -82,7 +82,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         { CSMWorld::ColumnBase::Display_EnchantmentType, CSMWorld::Columns::ColumnId_EnchantmentType, false },
         { CSMWorld::ColumnBase::Display_BodyPartType, CSMWorld::Columns::ColumnId_BodyPartType, false },
         { CSMWorld::ColumnBase::Display_MeshType, CSMWorld::Columns::ColumnId_MeshType, false },
-        { CSMWorld::ColumnBase::Display_Gender, CSMWorld::Columns::ColumnId_Gender, true }
+        { CSMWorld::ColumnBase::Display_Gender, CSMWorld::Columns::ColumnId_Gender, true },
+        { CSMWorld::ColumnBase::Display_SoundGeneratorType, CSMWorld::Columns::ColumnId_SoundGeneratorType, false },
+        { CSMWorld::ColumnBase::Display_School, CSMWorld::Columns::ColumnId_School, true }
     };
 
     for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)

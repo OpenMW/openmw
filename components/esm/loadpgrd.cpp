@@ -115,4 +115,14 @@ void Pathgrid::save(ESMWriter &esm) const
     }
 }
 
+    void Pathgrid::blank()
+    {
+        mCell.clear();
+        mData.mX = 0;
+        mData.mY = 0;
+        mData.mS1 = 0;
+        mData.mS2 = 0;
+        mPoints.clear();
+        mEdges.clear();
+    }
 }
