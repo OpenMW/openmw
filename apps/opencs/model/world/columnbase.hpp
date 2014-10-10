@@ -127,8 +127,6 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct Column : public ColumnBase
     {
-        int mFlags;
-
         Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue)
         : ColumnBase (columnId, displayType, flags) {}
 
