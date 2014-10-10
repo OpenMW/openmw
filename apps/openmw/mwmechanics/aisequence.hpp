@@ -19,13 +19,13 @@ namespace ESM
     }
 }
 
-template< class Base > class DerivedClassStorage;
+
 
 namespace MWMechanics
 {
     class AiPackage;
     
-    
+    template< class Base > class DerivedClassStorage;
     class AiTemporaryBase;
     typedef DerivedClassStorage<AiTemporaryBase> AiState;
 
