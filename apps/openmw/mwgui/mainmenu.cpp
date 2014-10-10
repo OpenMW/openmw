@@ -29,6 +29,7 @@ namespace MWGui
         , mButtonBox(0), mWidth (w), mHeight (h)
         , mSaveGameDialog(NULL)
         , mBackground(NULL)
+        , mVideoBackground(NULL)
         , mVideo(NULL)
     {
         getWidget(mVersionText, "VersionText");
@@ -43,7 +44,7 @@ namespace MWGui
                 rev = rev.substr(0,10);
                 sstream << "\nRevision: " <<  rev;
         }
-        
+
         std::string output = sstream.str();
         mVersionText->setCaption(output);
 
