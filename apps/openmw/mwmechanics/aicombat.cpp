@@ -43,7 +43,7 @@ namespace
     float getXAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f)
     {
         float len = (dirLen > 0.0f)? dirLen : dir.length();
-        return -Ogre::Math::ASin(dir.z / len).valueRadians();
+        return -Ogre::Math::ASin(dir.z / len).valueDegrees();
     }
 
 
@@ -185,28 +185,10 @@ namespace MWMechanics
      */
     bool AiCombat::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
     {
+        // get or create temporary storage
         AiCombatStorage& storage = state.get<AiCombatStorage>();
         
-   //     PathFinder& mPathFinder;
-  //      ObstacleCheck& mObstacleCheck = storage.mObstacleCheck;
-        float& timerAttack = storage.mTimerAttack;
-        float& timerReact = storage.mTimerReact;
-        float& timerCombatMove = storage.mTimerCombatMove;
-        bool& readyToAttack = storage.mReadyToAttack;
-        bool& attack = storage.mAttack;
-        bool& followTarget = storage.mFollowTarget;
-        bool& combatMove = storage.mCombatMove;
-        Ogre::Vector3& lastTargetPos = storage.mLastTargetPos;
-        const MWWorld::CellStore*& currentCell = storage.mCell;
-        boost::shared_ptr<Action>& currentAction = storage.mCurrentAction;
-        float& actionCooldown = storage.mActionCooldown;
-        float& strength = storage.mStrength;
-        float (&minMaxAttackDuration)[3][2] = storage.mMinMaxAttackDuration;
-        bool& minMaxAttackDurationInitialised = storage.mMinMaxAttackDurationInitialised;
-        bool& forceNoShortcut = storage.mForceNoShortcut;
-        ESM::Position& shortcutFailPos = storage.mShortcutFailPos;
-        Ogre::Vector3& lastActorPos = storage.mLastActorPos;
-        MWMechanics::Movement& movement = storage.mMovement;
+
         
         //General description
         if(actor.getClass().getCreatureStats(actor).isDead())
@@ -233,9 +215,16 @@ namespace MWMechanics
         {
             actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
             return true;
-        }  
+        }
+        
+
+      
+        
 
         //Update every frame
+        bool& combatMove = storage.mCombatMove;
+        float& timerCombatMove = storage.mTimerCombatMove; 
+        MWMechanics::Movement& movement = storage.mMovement;
         if(combatMove)
         {
             timerCombatMove -= duration;
@@ -266,6 +255,16 @@ namespace MWMechanics
 
         ESM::Weapon::AttackType attackType;
 
+
+        
+        
+        bool& attack = storage.mAttack;
+        bool& readyToAttack = storage.mReadyToAttack;
+        float& timerAttack = storage.mTimerAttack;
+        
+        bool& minMaxAttackDurationInitialised = storage.mMinMaxAttackDurationInitialised;
+        float (&minMaxAttackDuration)[3][2] = storage.mMinMaxAttackDuration;
+        
         if(readyToAttack)
         {
             if (!minMaxAttackDurationInitialised)
@@ -287,8 +286,11 @@ namespace MWMechanics
 
         actorClass.getCreatureStats(actor).setAttackingOrSpell(attack);
 
-        actionCooldown -= duration;
 
+        float& actionCooldown = storage.mActionCooldown;
+        actionCooldown -= duration;
+        
+        float& timerReact = storage.mTimerReact;
         float tReaction = 0.25f;
         if(timerReact < tReaction)
         {
@@ -299,7 +301,7 @@ namespace MWMechanics
         //Update with period = tReaction
 
         timerReact = 0;
-
+        const MWWorld::CellStore*& currentCell = storage.mCell;
         bool cellChange = currentCell && (actor.getCell() != currentCell);
         if(!currentCell || cellChange)
         {
@@ -317,6 +319,7 @@ namespace MWMechanics
 
         float rangeAttack = 0;
         float rangeFollow = 0;
+        boost::shared_ptr<Action>& currentAction = storage.mCurrentAction;
         if (anim->upperBodyReady())
         {
             currentAction = prepareNextAction(actor, target);
@@ -382,6 +385,8 @@ namespace MWMechanics
             weapRange = 150.f;
         }
 
+        
+        float& strength = storage.mStrength;      
         // start new attack
         if(readyToAttack)
         {
@@ -447,6 +452,9 @@ namespace MWMechanics
         Ogre::Vector3 vTargetPos(target.getRefData().getPosition().pos);
         Ogre::Vector3 vDirToTarget = vTargetPos - vActorPos;
         float distToTarget = vDirToTarget.length();
+        
+        Ogre::Vector3& lastActorPos = storage.mLastActorPos;
+        bool& followTarget = storage.mFollowTarget;
 
         bool isStuck = false;
         float speed = 0.0f;
@@ -473,6 +481,7 @@ namespace MWMechanics
             // note: in getZAngleToDir if we preserve dir.z then horizontal angle can be inaccurate
             if (distantCombat)
             {
+                Ogre::Vector3& lastTargetPos = storage.mLastTargetPos;
                 Ogre::Vector3 vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, tReaction, weaptype, strength);
                 lastTargetPos = vTargetPos;
                 movement.mRotation[0] = getXAngleToDir(vAimDir);
@@ -525,6 +534,9 @@ namespace MWMechanics
             if (!distantCombat) inLOS = world->getLOS(actor, target);
 
             // check if shortcut is available
+            bool& forceNoShortcut = storage.mForceNoShortcut;
+            ESM::Position& shortcutFailPos = storage.mShortcutFailPos;
+            
             if(inLOS && (!isStuck || readyToAttack)
                 && (!forceNoShortcut || (Ogre::Vector3(shortcutFailPos.pos) - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST))
             {

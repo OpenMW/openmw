@@ -33,7 +33,7 @@ namespace MWMechanics
     {
         // the z rotation angle (degrees) we want to reach
         // used every frame when mRotate is true
-        float mTargetAngle;
+        Ogre::Radian mTargetAngle;
         bool mRotate;
         float mReaction; // update some actions infrequently
         
@@ -166,31 +166,16 @@ namespace MWMechanics
      */
     bool AiWander::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
     {
-        // define references for readability
+        // get or create temporary storage
         AiWanderStorage& storage = state.get<AiWanderStorage>();
         
-        float& targetAngle = storage.mTargetAngle;
-        bool& rotate = storage.mRotate;
-        float& lastReaction = storage.mReaction;
-        AiWander::GreetingState& greetingState = storage.mSaidGreeting;
-        int& greetingTimer = storage.mGreetingTimer;
-        int& cachedCellX = storage.mCellX;
-        int& cachedCellY = storage.mCellY;
-        float& cachedCellXposition = storage.mXCell;
-        float& cachedCellYposition = storage.mYCell;
-        const MWWorld::CellStore*& currentCell = storage.mCell;
-        bool& chooseAction = storage.mChooseAction;
-        bool& idleNow = storage.mIdleNow;
-        bool& moveNow = storage.mMoveNow;
-        bool& walking = storage.mWalking;
-        short unsigned& playedIdle = storage.mPlayedIdle;
 
-        
+        const MWWorld::CellStore*& currentCell = storage.mCell;
         MWMechanics::CreatureStats& cStats = actor.getClass().getCreatureStats(actor);
         if(cStats.isDead() || cStats.getHealth().getCurrent() <= 0)
             return true; // Don't bother with dead actors
 
-        bool cellChange = storage.mCell && (actor.getCell() != storage.mCell);
+        bool cellChange = currentCell && (actor.getCell() != currentCell);
         if(!currentCell || cellChange)
         {
             currentCell = actor.getCell();
@@ -202,7 +187,11 @@ namespace MWMechanics
         cStats.setMovementFlag(CreatureStats::Flag_Run, false);
 
         ESM::Position pos = actor.getRefData().getPosition();
-
+        
+        
+        bool& idleNow = storage.mIdleNow;
+        bool& moveNow = storage.mMoveNow;
+        bool& walking = storage.mWalking;
         // Check if an idle actor is  too close to a door - if so start walking
         mDoorCheckDuration += duration;
         if(mDoorCheckDuration >= DOOR_CHECK_INTERVAL)
@@ -220,6 +209,7 @@ namespace MWMechanics
         }
 
         // Are we there yet?
+        bool& chooseAction = storage.mChooseAction;
         if(walking &&
            mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
         {
@@ -230,6 +220,8 @@ namespace MWMechanics
             mHasReturnPosition = false;
         }
 
+
+        
         if(walking) // have not yet reached the destination
         {
             // turn towards the next point in mPath
@@ -275,16 +267,20 @@ namespace MWMechanics
             }
 //#endif
         }
-
+        
+        
+        Ogre::Radian& targetAngle = storage.mTargetAngle;
+        bool& rotate = storage.mRotate;
         if (rotate)
         {
             // Reduce the turning animation glitch by using a *HUGE* value of
             // epsilon...  TODO: a proper fix might be in either the physics or the
             // animation subsystem
-            if (zTurn(actor, Ogre::Degree(targetAngle), Ogre::Degree(5)))
+            if (zTurn(actor, targetAngle, Ogre::Degree(5)))
                 rotate = false;
         }
 
+        float& lastReaction = storage.mReaction;
         lastReaction += duration;
         if(lastReaction < REACTION_INTERVAL)
         {
@@ -322,6 +318,12 @@ namespace MWMechanics
             }
         }
 
+
+        
+        int& cachedCellX = storage.mCellX;
+        int& cachedCellY = storage.mCellY;
+        float& cachedCellXposition = storage.mXCell;
+        float& cachedCellYposition = storage.mYCell;
         // Initialization to discover & store allowed node points for this actor.
         if(!mStoredAvailableNodes)
         {
@@ -435,6 +437,8 @@ namespace MWMechanics
             }
         }
 
+        AiWander::GreetingState& greetingState = storage.mSaidGreeting;
+        short unsigned& playedIdle = storage.mPlayedIdle;
         if(chooseAction)
         {
             playedIdle = 0;
@@ -491,6 +495,7 @@ namespace MWMechanics
             Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
             float playerDistSqr = playerPos.squaredDistance(actorPos);
             
+            int& greetingTimer = storage.mGreetingTimer;
             if (greetingState == Greet_None)
             {
                 if ((playerDistSqr <= helloDistance*helloDistance) &&
@@ -524,10 +529,10 @@ namespace MWMechanics
                 {
                     Ogre::Vector3 dir = playerPos - actorPos;
 
-                    float faceAngle = Ogre::Math::ATan2(dir.x,dir.y).valueDegrees();
-                    float actorAngle = actor.getRefData().getBaseNode()->getOrientation().getRoll().valueDegrees();
+                    Ogre::Radian faceAngle = Ogre::Math::ATan2(dir.x,dir.y);
+                    Ogre::Radian actorAngle = actor.getRefData().getBaseNode()->getOrientation().getRoll();
                     // an attempt at reducing the turning animation glitch
-                    if(abs(abs(faceAngle) - abs(actorAngle)) >= 5) // TODO: is there a better way?
+                    if( Ogre::Math::Abs( faceAngle - actorAngle ) >= Ogre::Degree(5) ) // TODO: is there a better way?
                     {
                         targetAngle = faceAngle;
                         rotate = true;
