@@ -48,7 +48,6 @@ namespace MWMechanics
             float mMaxDist;
             float mRemainingDuration; // In seconds
 
-            //PathFinder mPathFinder;
             int mCellX;
             int mCellY;
     };

@@ -280,7 +280,7 @@ namespace MWMechanics
         float directionY = nextPoint.mY - y;
         float directionResult = sqrt(directionX * directionX + directionY * directionY);
 
-        return Ogre::Radian(Ogre::Math::ACos(directionY / directionResult) * sgn(Ogre::Math::ASin(directionX / directionResult))).valueDegrees();
+        return Ogre::Math::ATan2(directionX,directionY).valueDegrees();
     }
 
     bool PathFinder::checkWaypoint(float x, float y, float z)
