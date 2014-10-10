@@ -33,7 +33,11 @@ QString getAspect(int x, int y)
 }
 
 Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSetting, QWidget *parent)
-    : mCfgMgr(cfg)
+    : mOgre(NULL)
+    , mSelectedRenderSystem(NULL)
+    , mOpenGLRenderSystem(NULL)
+    , mDirect3DRenderSystem(NULL)
+    , mCfgMgr(cfg)
     , mGraphicsSettings(graphicsSetting)
     , QWidget(parent)
 {
