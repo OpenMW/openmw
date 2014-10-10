@@ -2634,12 +2634,6 @@ namespace MWWorld
         MWWorld::ActionTeleport action("", closestMarker.getRefData().getPosition());
         action.execute(ptr);
     }
-
-    void World::updateWeather(float duration)
-    {
-        // Implement original behavior:
-        this->updateWeather(duration, false);
-    }
     
     void World::updateWeather(float duration, bool paused)
     {
