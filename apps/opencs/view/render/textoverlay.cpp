@@ -20,15 +20,15 @@ namespace CSVRender
 // - configurable font size in pixels (automatically calulate everything else from it)
 // - configurable texture to use
 // - try material script
-// - decide whether to use QPaint
+// - decide whether to use QPaint (http://www.ogre3d.org/tikiwiki/Ogre+overlays+using+Qt)
 
-// http://www.ogre3d.org/tikiwiki/tiki-index.php?page=ObjectTextDisplay
-// http://www.ogre3d.org/tikiwiki/tiki-index.php?page=MovableTextOverlay
-// http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Creating+dynamic+textures
+// http://www.ogre3d.org/tikiwiki/ObjectTextDisplay
+// http://www.ogre3d.org/tikiwiki/MovableTextOverlay
+// http://www.ogre3d.org/tikiwiki/Creating+dynamic+textures
 // http://www.ogre3d.org/tikiwiki/ManualObject
 TextOverlay::TextOverlay(const Ogre::MovableObject* obj, const Ogre::Camera* camera, const  Ogre::String& id)
     : mOverlay(0), mCaption(""), mDesc(""), mEnabled(true), mCamera(camera), mObj(obj), mId(id), mOnScreen(false)
-    , mFontHeight(16) // FIXME: make this configurable
+    , mFontHeight(16) // FIXME: make font height configurable
 {
     if(id == "" || !camera || !obj)
         throw std::runtime_error("TextOverlay could not be created.");
@@ -38,7 +38,6 @@ TextOverlay::TextOverlay(const Ogre::MovableObject* obj, const Ogre::Camera* cam
         mFont = Ogre::FontManager::getSingleton().getByName("DejaVuLGC","General");
     else
     {
-        Ogre::ResourceGroupManager::getSingleton().addResourceLocation("resources/mygui", "FileSystem");
         mFont = Ogre::FontManager::getSingleton().create("DejaVuLGC","General");
         mFont->setType(Ogre::FT_TRUETYPE);
         mFont->setSource("DejaVuLGCSansMono.ttf");

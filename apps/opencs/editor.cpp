@@ -295,6 +295,10 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
     sh::OgrePlatform* platform =
         new sh::OgrePlatform ("General", (mResources / "materials").string());
 
+    // for font used in overlays
+    Ogre::Root::getSingleton().addResourceLocation ((mResources / "mygui").string(),
+            "FileSystem", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
+
     if (!boost::filesystem::exists (mCfgMgr.getCachePath()))
         boost::filesystem::create_directories (mCfgMgr.getCachePath());
 
