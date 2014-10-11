@@ -664,12 +664,13 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
 
     std::string soundId;
     MWWorld::ContainerStoreIterator csi = mInv.getSlot(group < 0 ? MWWorld::InventoryStore::Slot_Helmet : group);
+
     if (csi != mInv.end() && csi->getTypeName() == typeid(ESM::Light).name())
     {
         soundId = csi->get<ESM::Light>()->mBase->mSound;
     }
     mObjectParts[type] = std::make_pair(insertBoundedPart(mesh, group, sPartList.at(type), enchantedGlow, glowColor), soundId);
-    if (!soundId.empty())
+    if (!soundId.empty() &&  mPtr.getClass().getCreatureStats(mPtr).getDrawState() == MWMechanics::DrawState_Nothing)
     {
         MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, soundId, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
             MWBase::SoundManager::Play_Loop);
