@@ -123,7 +123,6 @@ namespace MWGui
       , mScreenFader(NULL)
       , mDebugWindow(NULL)
       , mTranslationDataStorage (translationDataStorage)
-      , mSoftwareCursor(NULL)
       , mCharGen(NULL)
       , mInputBlocker(NULL)
       , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
