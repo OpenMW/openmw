@@ -97,9 +97,6 @@ private:
     Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
-    bool mUnequipping;
-    bool mFirstEquip;
-
     MWWorld::InventoryStore& mInv;
 
     void updateNpcBase();

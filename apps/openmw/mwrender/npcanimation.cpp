@@ -187,8 +187,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mFirstPersonOffset(0.f, 0.f, 0.f),
     mAlpha(1.f),
     mNpcType(Type_Normal),
-    mUnequipping(false),
-    mFirstEquip(true),
     mInv(ptr.getClass().getInventoryStore(ptr))
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
@@ -664,7 +662,6 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
 
     std::string soundId;
     MWWorld::ContainerStoreIterator csi = mInv.getSlot(group < 0 ? MWWorld::InventoryStore::Slot_Helmet : group);
-
     if (csi != mInv.end() && csi->getTypeName() == typeid(ESM::Light).name())
     {
         soundId = csi->get<ESM::Light>()->mBase->mSound;
