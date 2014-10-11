@@ -27,7 +27,6 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 		throw std::runtime_error("Couldn't get WM Info!");
 
 	Ogre::String winHandle;
-	Ogre::String winHandleSurface;
 
 	switch (wmInfo.subsystem)
 	{
@@ -46,8 +45,6 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 #elif ANDROID           
         case SDL_SYSWM_ANDROID:
 		winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.android.window);
-		winHandleSurface = Ogre::StringConverter::toString((unsigned long)wmInfo.info.android.surface);
-         
 		break;
  #else
 	case SDL_SYSWM_X11:
@@ -63,7 +60,8 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 	/// to work properly. On Linux/X11 it causes an occasional GLXBadDrawable error.
 
 #ifdef ANDROID	
-        params.insert(std::make_pair("externalSurface",  winHandleSurface));
+        SDL_GLContext context= SDL_GL_CreateContext(window);
+        params.insert(std::make_pair("currentGLContext","True"));
 #endif
         params.insert(std::make_pair("externalWindowHandle",  winHandle));
 
