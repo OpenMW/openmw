@@ -69,7 +69,8 @@ private:
     bool mListenerDisabled;
 
     // Bounded Parts
-    std::pair<NifOgre::ObjectScenePtr, std::string /* sound id */> mObjectParts[ESM::PRT_Count];
+    NifOgre::ObjectScenePtr mObjectParts[ESM::PRT_Count];
+    std::string mSoundIds[ESM::PRT_Count];
 
     const ESM::NPC *mNpc;
     std::string    mHeadModel;
@@ -97,7 +98,6 @@ private:
     Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
-    MWWorld::InventoryStore& mInv;
 
     void updateNpcBase();
 
@@ -147,7 +147,7 @@ public:
     virtual void releaseArrow();
 
     // WeaponAnimation
-    virtual NifOgre::ObjectScenePtr getWeapon() { return mObjectParts[ESM::PRT_Weapon].first; }
+    virtual NifOgre::ObjectScenePtr getWeapon() { return mObjectParts[ESM::PRT_Weapon]; }
     virtual void showWeapon(bool show) { showWeapons(show); }
     virtual void configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot);
 
