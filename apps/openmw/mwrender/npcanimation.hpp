@@ -51,7 +51,7 @@ public:
 class NpcAnimation : public Animation, public WeaponAnimation, public MWWorld::InventoryStoreListener
 {
 public:
-    virtual void equipmentChanged(const MWWorld::Ptr& actor, const MWWorld::Ptr& item, InventoryStoreListener::State state);
+    virtual void equipmentChanged();
     virtual void permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound);
 
 public:
@@ -69,7 +69,7 @@ private:
     bool mListenerDisabled;
 
     // Bounded Parts
-    NifOgre::ObjectScenePtr mObjectParts[ESM::PRT_Count];
+    std::pair<NifOgre::ObjectScenePtr, std::string /* sound id */> mObjectParts[ESM::PRT_Count];
 
     const ESM::NPC *mNpc;
     std::string    mHeadModel;
@@ -99,6 +99,8 @@ private:
     float mAlpha;
     bool mUnequipping;
     bool mFirstEquip;
+
+    MWWorld::InventoryStore& mInv;
 
     void updateNpcBase();
 
@@ -148,7 +150,7 @@ public:
     virtual void releaseArrow();
 
     // WeaponAnimation
-    virtual NifOgre::ObjectScenePtr getWeapon() { return mObjectParts[ESM::PRT_Weapon]; }
+    virtual NifOgre::ObjectScenePtr getWeapon() { return mObjectParts[ESM::PRT_Weapon].first; }
     virtual void showWeapon(bool show) { showWeapons(show); }
     virtual void configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot);
 

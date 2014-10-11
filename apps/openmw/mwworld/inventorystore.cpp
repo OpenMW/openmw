@@ -146,18 +146,20 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
 
     flagAsModified();
 
-    fireEquipmentChangedEvent(actor, *iterator, InventoryStoreListener::EQUIP);
+    fireEquipmentChangedEvent();
 
     updateMagicEffects(actor);
 }
 
 void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
 {
-    fireEquipmentChangedEvent(actor, MWWorld::Ptr(), InventoryStoreListener::UNEQUIPALL_BEGIN);
+    mUpdatesEnabled = false;
     for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
         unequipSlot(slot, actor);
 
-    fireEquipmentChangedEvent(actor, MWWorld::Ptr(), InventoryStoreListener::UNEQUIPALL_END);
+    mUpdatesEnabled = true;
+
+    fireEquipmentChangedEvent();
     updateMagicEffects(actor);
 }
 
@@ -203,8 +205,9 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         if (!Misc::StringUtils::ciEqual(test.getCellRef().getOwner(), actor.getCellRef().getRefId()) &&
                 (actor.getClass().getScript(actor).empty() ||
                 !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion")))
+        {
             continue;
-
+        }
         int testSkill = test.getClass().getEquipmentSkill (test);
 
         std::pair<std::vector<int>, bool> itemsSlots =
@@ -288,7 +291,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     if (changed)
     {
         mSlots.swap (slots_);
-        fireEquipmentChangedEvent(actor, MWWorld::Ptr(), InventoryStoreListener::AUTOEQUIP);
+        fireEquipmentChangedEvent();
         updateMagicEffects(actor);
         flagAsModified();
     }
@@ -521,7 +524,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
             }
         }
 
-        fireEquipmentChangedEvent(actor, *it, InventoryStoreListener::UNEQUIP);
+        fireEquipmentChangedEvent();
         updateMagicEffects(actor);
 
         return retval;
@@ -546,18 +549,14 @@ void MWWorld::InventoryStore::setListener(InventoryStoreListener *listener, cons
 {
     mListener = listener;
     updateMagicEffects(actor);
-    if (mListener != NULL)
-    {
-        mListener->equipmentChanged(actor, MWWorld::Ptr(), InventoryStoreListener::AUTOEQUIP);
-    }
 }
 
-void MWWorld::InventoryStore::fireEquipmentChangedEvent(const MWWorld::Ptr& actor, const MWWorld::Ptr& item, InventoryStoreListener::State state)
+void MWWorld::InventoryStore::fireEquipmentChangedEvent()
 {
     if (!mUpdatesEnabled)
         return;
     if (mListener)
-        mListener->equipmentChanged(actor, item, state);
+        mListener->equipmentChanged();
 }
 
 void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisitor &visitor)

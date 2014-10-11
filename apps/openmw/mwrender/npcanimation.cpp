@@ -173,7 +173,7 @@ const NpcAnimation::PartBoneMap NpcAnimation::sPartList = createPartListMap();
 NpcAnimation::~NpcAnimation()
 {
     if (!mListenerDisabled)
-        mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
+        mInv.setListener(NULL, mPtr);
 }
 
 
@@ -188,7 +188,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mAlpha(1.f),
     mNpcType(Type_Normal),
     mUnequipping(false),
-    mFirstEquip(true)
+    mFirstEquip(true),
+    mInv(ptr.getClass().getInventoryStore(ptr))
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -202,7 +203,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     }
 
     if (!disableListener)
-        mPtr.getClass().getInventoryStore(mPtr).setListener(this, mPtr);
+        mInv.setListener(this, mPtr);
 
     updateNpcBase();
 }
@@ -299,7 +300,6 @@ void NpcAnimation::updateParts()
 {    
     mAlpha = 1.f;
     const MWWorld::Class &cls = mPtr.getClass();
-    MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
 
     NpcType curType = Type_Normal;
     if (cls.getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0)
@@ -338,11 +338,11 @@ void NpcAnimation::updateParts()
 
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
     {
-        MWWorld::ContainerStoreIterator store = inv.getSlot(slotlist[i].mSlot);
+        MWWorld::ContainerStoreIterator store = mInv.getSlot(slotlist[i].mSlot);
 
         removePartGroup(slotlist[i].mSlot);
 
-        if(store == inv.end())
+        if(store == mInv.end())
             continue;
 
         if(slotlist[i].mSlot == MWWorld::InventoryStore::Slot_Helmet)
@@ -395,14 +395,14 @@ void NpcAnimation::updateParts()
 
     if(mPartPriorities[ESM::PRT_Shield] < 1)
     {
-        MWWorld::ContainerStoreIterator store = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        MWWorld::ContainerStoreIterator store = mInv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         MWWorld::Ptr part;
-        if(store != inv.end() && (part=*store).getTypeName() == typeid(ESM::Light).name())
+        if(store != mInv.end() && (part=*store).getTypeName() == typeid(ESM::Light).name())
         {
             const ESM::Light *light = part.get<ESM::Light>()->mBase;
             addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft,
                                        1, "meshes\\"+light->mModel);
-            addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], light);
+            addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield].first, light);
         }
     }
 
@@ -606,13 +606,13 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
-        if (mObjectParts[i].isNull())
+        if (mObjectParts[i].first.isNull())
             continue;
-        std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i]->mControllers.begin());
-        for(;ctrl != mObjectParts[i]->mControllers.end();++ctrl)
+        std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i].first->mControllers.begin());
+        for(;ctrl != mObjectParts[i].first->mControllers.end();++ctrl)
             ctrl->update();
 
-        Ogre::Entity *ent = mObjectParts[i]->mSkelBase;
+        Ogre::Entity *ent = mObjectParts[i].first->mSkelBase;
         if(!ent) continue;
         updateSkeletonInstance(baseinst, ent->getSkeleton());
         ent->getAllAnimationStates()->_notifyDirty();
@@ -626,7 +626,12 @@ void NpcAnimation::removeIndividualPart(ESM::PartReferenceType type)
     mPartPriorities[type] = 0;
     mPartslots[type] = -1;
 
-    mObjectParts[type].setNull();
+    mObjectParts[type].first.setNull();
+    if (!mObjectParts[type].second.empty())
+    {
+        MWBase::Environment::get().getSoundManager()->stopSound3D(mPtr, mObjectParts[type].second);
+        mObjectParts[type].second.clear();
+    }
 }
 
 void NpcAnimation::reserveIndividualPart(ESM::PartReferenceType type, int group, int priority)
@@ -657,13 +662,25 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     mPartslots[type] = group;
     mPartPriorities[type] = priority;
 
-    mObjectParts[type] = insertBoundedPart(mesh, group, sPartList.at(type), enchantedGlow, glowColor);
-    if(mObjectParts[type]->mSkelBase)
+    std::string soundId;
+    MWWorld::ContainerStoreIterator csi = mInv.getSlot(group < 0 ? MWWorld::InventoryStore::Slot_Helmet : group);
+    if (csi != mInv.end() && csi->getTypeName() == typeid(ESM::Light).name())
     {
-        Ogre::SkeletonInstance *skel = mObjectParts[type]->mSkelBase->getSkeleton();
-        if(mObjectParts[type]->mSkelBase->isParentTagPoint())
+        soundId = csi->get<ESM::Light>()->mBase->mSound;
+    }
+    mObjectParts[type] = std::make_pair(insertBoundedPart(mesh, group, sPartList.at(type), enchantedGlow, glowColor), soundId);
+    if (!soundId.empty())
+    {
+        MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, soundId, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
+            MWBase::SoundManager::Play_Loop);
+    }
+
+    if(mObjectParts[type].first->mSkelBase)
+    {
+        Ogre::SkeletonInstance *skel = mObjectParts[type].first->mSkelBase->getSkeleton();
+        if(mObjectParts[type].first->mSkelBase->isParentTagPoint())
         {
-            Ogre::Node *root = mObjectParts[type]->mSkelBase->getParentNode();
+            Ogre::Node *root = mObjectParts[type].first->mSkelBase->getParentNode();
             if(skel->hasBone("BoneOffset"))
             {
                 Ogre::Bone *offset = skel->getBone("BoneOffset");
@@ -682,8 +699,8 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         updateSkeletonInstance(mSkelBase->getSkeleton(), skel);
     }
 
-    std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type]->mControllers.begin());
-    for(;ctrl != mObjectParts[type]->mControllers.end();++ctrl)
+    std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type].first->mControllers.begin());
+    for(;ctrl != mObjectParts[type].first->mControllers.end();++ctrl)
     {
         if(ctrl->getSource().isNull())
         {
@@ -692,7 +709,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
             if (type == ESM::PRT_Head)
             {
                 ctrl->setSource(mHeadAnimationTime);
-                const NifOgre::TextKeyMap& keys = mObjectParts[type]->mTextKeys;
+                const NifOgre::TextKeyMap& keys = mObjectParts[type].first->mTextKeys;
                 for (NifOgre::TextKeyMap::const_iterator it = keys.begin(); it != keys.end(); ++it)
                 {
                     if (Misc::StringUtils::ciEqual(it->second, "talk: start"))
@@ -762,9 +779,8 @@ void NpcAnimation::showWeapons(bool showWeapon)
     mShowWeapons = showWeapon;
     if(showWeapon)
     {
-        MWWorld::InventoryStore &inv = mPtr.getClass().getInventoryStore(mPtr);
-        MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        if(weapon != inv.end())
+        MWWorld::ContainerStoreIterator weapon = mInv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        if(weapon != mInv.end())
         {
             Ogre::Vector3 glowColor = getEnchantmentColor(*weapon);
             std::string mesh = weapon->getClass().getModel(*weapon);
@@ -775,8 +791,8 @@ void NpcAnimation::showWeapons(bool showWeapon)
             if (weapon->getTypeName() == typeid(ESM::Weapon).name() &&
                     weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
             {
-                MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
-                if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt)
+                MWWorld::ContainerStoreIterator ammo = mInv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+                if (ammo != mInv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt)
                     attachArrow();
                 else
                     mAmmunition.setNull();
@@ -795,10 +811,9 @@ void NpcAnimation::showWeapons(bool showWeapon)
 void NpcAnimation::showCarriedLeft(bool show)
 {
     mShowCarriedLeft = show;
-    MWWorld::InventoryStore &inv = mPtr.getClass().getInventoryStore(mPtr);
-    MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
-    if(show && iter != inv.end())
+    MWWorld::ContainerStoreIterator iter = mInv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+    if(show && iter != mInv.end())
     {
         Ogre::Vector3 glowColor = getEnchantmentColor(*iter);
         std::string mesh = iter->getClass().getModel(*iter);
@@ -806,7 +821,7 @@ void NpcAnimation::showCarriedLeft(bool show)
                                    mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))
         {
             if (iter->getTypeName() == typeid(ESM::Light).name())
-                addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], iter->get<ESM::Light>()->mBase);
+                addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield].first, iter->get<ESM::Light>()->mBase);
         }
     }
     else
@@ -869,14 +884,14 @@ void NpcAnimation::setAlpha(float alpha)
 
     for (int i=0; i<ESM::PRT_Count; ++i)
     {
-        if (mObjectParts[i].isNull())
+        if (mObjectParts[i].first.isNull())
             continue;
 
-        for (unsigned int j=0; j<mObjectParts[i]->mEntities.size(); ++j)
+        for (unsigned int j=0; j<mObjectParts[i].first->mEntities.size(); ++j)
         {
-            Ogre::Entity* ent = mObjectParts[i]->mEntities[j];
-            if (ent != mObjectParts[i]->mSkelBase)
-                applyAlpha(alpha, ent, mObjectParts[i]);
+            Ogre::Entity* ent = mObjectParts[i].first->mEntities[j];
+            if (ent != mObjectParts[i].first->mSkelBase)
+                applyAlpha(alpha, ent, mObjectParts[i].first);
         }
     }
 }
@@ -891,9 +906,9 @@ void NpcAnimation::preRender(Ogre::Camera *camera)
     Animation::preRender(camera);
     for (int i=0; i<ESM::PRT_Count; ++i)
     {
-        if (mObjectParts[i].isNull())
+        if (mObjectParts[i].first.isNull())
             continue;
-        mObjectParts[i]->rotateBillboardNodes(camera);
+        mObjectParts[i].first->rotateBillboardNodes(camera);
     }
 }
 
@@ -930,79 +945,9 @@ void NpcAnimation::applyAlpha(float alpha, Ogre::Entity *ent, NifOgre::ObjectSce
     }
 }
 
-void NpcAnimation::equipmentChanged(const MWWorld::Ptr& actor, const MWWorld::Ptr& item, InventoryStoreListener::State state)
+void NpcAnimation::equipmentChanged()
 {
-    if (actor.getRefData().getHandle() == "player")
-    {
-        std::string soundId;
-
-        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-
-        if (state == InventoryStoreListener::EQUIP
-            || state == InventoryStoreListener::UNEQUIP)
-        {
-            if (item.getTypeName() == typeid(ESM::Light).name())
-            {
-                soundId = item.get<ESM::Light>()->mBase->mSound;
-            }
-
-            if (!soundId.empty())
-            {
-                if (state == InventoryStoreListener::EQUIP)
-                {
-                    sndMgr->playSound3D(mPtr, soundId, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
-                        MWBase::SoundManager::Play_Loop);
-                }
-                else
-                {
-                    sndMgr->stopSound3D(mPtr, soundId);
-                }
-            }
-        }
-        else if (state == InventoryStoreListener::AUTOEQUIP)
-        {
-            const MWWorld::Class &cls = mPtr.getClass();
-            MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
-            for (int i = MWWorld::InventoryStore::Slot_Helmet; i < MWWorld::InventoryStore::Slots; ++i)
-            {
-                MWWorld::ContainerStoreIterator store = inv.getSlot(i);
-
-                if (store != inv.end() && store->getTypeName() == typeid(ESM::Light).name())
-                {
-                    soundId = store->get<ESM::Light>()->mBase->mSound;
-                }
-
-                if (!soundId.empty())
-                {
-                    sndMgr->playSound3D(mPtr, soundId, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
-                        MWBase::SoundManager::Play_Loop);
-                }
-            }
-        }
-    }
-
-    /**
-     * AUTOEQUIP is triggered just after setting listener (ie. when game is loaded from savegame),
-     * but not all things are initialized yet, so we have to check it (mFirstEquip variable)
-     * and skip one call to updateParts() method.
-     *
-     * Also call to updateParts() method will be called only once if inventory.unequipAll()
-     * was called (mUnequipping == true).
-     */
-    if (state == InventoryStoreListener::UNEQUIPALL_BEGIN)
-        mUnequipping = true;
-    else if (state == InventoryStoreListener::UNEQUIPALL_END)
-        mUnequipping = false;
-
-    if (!mUnequipping && !mFirstEquip)
-    {
-        updateParts();
-    }
-
-    if (mFirstEquip && state == InventoryStoreListener::AUTOEQUIP)
-    {
-        mFirstEquip = false;
-    }
+    updateParts();
 }
 
 }
