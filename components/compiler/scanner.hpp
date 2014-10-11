@@ -37,6 +37,7 @@ namespace Compiler
             float mPutbackFloat;
             std::string mPutbackName;
             TokenLoc mPutbackLoc;
+            bool mNameStartingWithDigit;
 
         public:
 
@@ -122,6 +123,9 @@ namespace Compiler
 
             void listKeywords (std::vector<std::string>& keywords);
             ///< Append all known keywords to \a kaywords.
+
+            /// For the next token allow names to start with a digit.
+            void allowNameStartingwithDigit();
     };
 }
 

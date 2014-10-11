@@ -19,14 +19,14 @@ using namespace Ogre;
 
 OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNode* sunNode) :
     mSunTotalAreaQuery(0), mSunVisibleAreaQuery(0), mActiveQuery(0),
-    mDoQuery(0), mSunVisibility(0),
+    mBBQueryVisible(0), mBBQueryTotal(0), mSunNode(sunNode), mBBNodeReal(0),
+    mSunVisibility(0),
     mWasVisible(false),
     mActive(false),
-    mFirstFrame(true)
+    mFirstFrame(true),
+    mDoQuery(0),
+    mRendering(renderer)
 {
-    mRendering = renderer;
-    mSunNode = sunNode;
-
     try {
         RenderSystem* renderSystem = Root::getSingleton().getRenderSystem();
 

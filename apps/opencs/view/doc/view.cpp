@@ -135,6 +135,10 @@ void CSVDoc::View::setupWorldMenu()
     connect (references, SIGNAL (triggered()), this, SLOT (addReferencesSubView()));
     world->addAction (references);
 
+    QAction *grid = new QAction (tr ("Pathgrid"), this);
+    connect (grid, SIGNAL (triggered()), this, SLOT (addPathgridSubView()));
+    world->addAction (grid);
+
     world->addSeparator(); // items that don't represent single record lists follow here
 
     QAction *regionMap = new QAction (tr ("Region Map"), this);
@@ -165,6 +169,10 @@ void CSVDoc::View::setupMechanicsMenu()
     QAction *enchantments = new QAction (tr ("Enchantments"), this);
     connect (enchantments, SIGNAL (triggered()), this, SLOT (addEnchantmentsSubView()));
     mechanics->addAction (enchantments);
+
+    QAction *effects = new QAction (tr ("Magic Effects"), this);
+    connect (effects, SIGNAL (triggered()), this, SLOT (addMagicEffectsSubView()));
+    mechanics->addAction (effects);
 }
 
 void CSVDoc::View::setupCharacterMenu()
@@ -219,6 +227,10 @@ void CSVDoc::View::setupAssetsMenu()
     QAction *sounds = new QAction (tr ("Sounds"), this);
     connect (sounds, SIGNAL (triggered()), this, SLOT (addSoundsSubView()));
     assets->addAction (sounds);
+
+    QAction *soundGens = new QAction (tr ("Sound Generators"), this);
+    connect (soundGens, SIGNAL (triggered()), this, SLOT (addSoundGensSubView()));
+    assets->addAction (soundGens);
 
     assets->addSeparator(); // resources follow here
 
@@ -634,6 +646,11 @@ void CSVDoc::View::addBodyPartsSubView()
     addSubView (CSMWorld::UniversalId::Type_BodyParts);
 }
 
+void CSVDoc::View::addSoundGensSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_SoundGens);
+}
+
 void CSVDoc::View::addMeshesSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Meshes);
@@ -654,6 +671,11 @@ void CSVDoc::View::addSoundsResSubView()
     addSubView (CSMWorld::UniversalId::Type_SoundsRes);
 }
 
+void CSVDoc::View::addMagicEffectsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_MagicEffects);
+}
+
 void CSVDoc::View::addTexturesSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Textures);
@@ -672,6 +694,11 @@ void CSVDoc::View::addDebugProfilesSubView()
 void CSVDoc::View::addRunLogSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_RunLog);
+}
+
+void CSVDoc::View::addPathgridSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Pathgrids);
 }
 
 void CSVDoc::View::abortOperation (int type)

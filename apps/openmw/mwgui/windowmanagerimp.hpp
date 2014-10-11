@@ -79,7 +79,6 @@ namespace MWGui
   class SpellCreationDialog;
   class EnchantingDialog;
   class TrainingWindow;
-  class Cursor;
   class SpellIcons;
   class MerchantRepair;
   class Repair;
@@ -397,7 +396,6 @@ namespace MWGui
     DebugWindow* mDebugWindow;
 
     Translation::Storage& mTranslationDataStorage;
-    Cursor* mSoftwareCursor;
 
     CharacterCreation* mCharGen;
 

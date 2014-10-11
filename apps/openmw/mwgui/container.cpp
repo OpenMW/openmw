@@ -34,7 +34,7 @@ namespace MWGui
         , mSourceModel(NULL)
         , mSourceView(NULL)
         , mSourceSortModel(NULL)
-        , mIsOnDragAndDrop(NULL)
+        , mIsOnDragAndDrop(false)
     {
     }
 

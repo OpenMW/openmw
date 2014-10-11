@@ -26,6 +26,7 @@ namespace ESM
 {
     struct GameSetting;
     struct Global;
+    struct MagicEffect;
 }
 
 namespace Files
@@ -73,9 +74,13 @@ namespace CSMDoc
 
             void addOptionalGlobals();
 
+            void addOptionalMagicEffects();
+
             void addOptionalGmst (const ESM::GameSetting& gmst);
 
             void addOptionalGlobal (const ESM::Global& global);
+
+            void addOptionalMagicEffect (const ESM::MagicEffect& effect);
 
         public:
 

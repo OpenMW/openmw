@@ -39,6 +39,8 @@ namespace MWGui
         , mPreviewDirty(true)
         , mPreviewResize(true)
         , mDragAndDrop(dragAndDrop)
+        , mSortModel(NULL)
+        , mTradeModel(NULL)
         , mSelectedItem(-1)
         , mGuiMode(GM_Inventory)
     {

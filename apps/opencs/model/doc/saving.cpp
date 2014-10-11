@@ -72,6 +72,12 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::BodyPart> >
         (mDocument.getData().getBodyParts(), mState));
 
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::SoundGenerator> >
+        (mDocument.getData().getSoundGens(), mState));
+
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::MagicEffect> >
+        (mDocument.getData().getMagicEffects(), mState));
+
     appendStage (new WriteDialogueCollectionStage (mDocument, mState, false));
 
     appendStage (new WriteDialogueCollectionStage (mDocument, mState, true));
@@ -81,6 +87,8 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
     appendStage (new CollectionReferencesStage (mDocument, mState));
 
     appendStage (new WriteCellCollectionStage (mDocument, mState));
+
+    appendStage (new WritePathgridCollectionStage (mDocument, mState));
 
     // close file and clean up
     appendStage (new CloseSaveStage (mState));

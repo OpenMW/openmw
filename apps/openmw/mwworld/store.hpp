@@ -590,6 +590,7 @@ namespace MWWorld
         typedef SharedIterator<ESM::Cell> iterator;
 
         Store<ESM::Cell>()
+        : mEsmStore(NULL)
         {}
 
         const ESM::Cell *search(const std::string &id) const {
