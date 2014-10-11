@@ -38,6 +38,8 @@ namespace MWGui
     public:
         ScreenFader(const std::string & texturePath);
 
+        void setTexture(const std::string & texturePath);
+
         void update(float dt);
 
         void fadeIn(const float time);

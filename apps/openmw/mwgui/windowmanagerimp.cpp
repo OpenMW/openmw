@@ -273,7 +273,11 @@ namespace MWGui
         trackWindow(mCompanionWindow, "companion");
 
         mWerewolfFader = new ScreenFader("textures\\werewolfoverlay.dds");
-        mHitFader = new ScreenFader("textures\\player_hit_01.dds");
+        mHitFader = new ScreenFader("textures\\bm_player_hit_01.dds");
+        // fall back to player_hit_01.dds if bm_player_hit_01.dds is not available
+        // TODO: check if non-BM versions actually use player_hit_01.dds
+        if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("textures\\bm_player_hit_01.dds"))
+            mHitFader->setTexture("textures\\player_hit_01.dds");
         mScreenFader = new ScreenFader("black.png");
 
         mDebugWindow = new DebugWindow();

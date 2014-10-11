@@ -71,8 +71,13 @@ namespace MWGui
         , mRepeat(false)
     {
         mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
-        mMainWidget->setProperty("ImageTexture", texturePath);
+        setTexture(texturePath);
         setVisible(false);
+    }
+
+    void ScreenFader::setTexture(const std::string & texturePath)
+    {
+        mMainWidget->setProperty("ImageTexture", texturePath);
     }
 
     void ScreenFader::update(float dt)
