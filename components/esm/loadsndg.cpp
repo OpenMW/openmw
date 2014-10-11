@@ -22,4 +22,10 @@ void SoundGenerator::save(ESMWriter &esm) const
     esm.writeHNOCString("SNAM", mSound);
 }
 
+    void SoundGenerator::blank()
+    {
+        mType = LeftFoot;
+        mCreature.clear();
+        mSound.clear();
+    }
 }

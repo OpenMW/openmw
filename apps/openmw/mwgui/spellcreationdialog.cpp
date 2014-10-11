@@ -447,8 +447,12 @@ namespace MWGui
 
     EffectEditorBase::EffectEditorBase(Type type)
         : mAddEffectDialog()
+        , mAvailableEffectsList(NULL)
+        , mUsedEffectsView(NULL)
         , mSelectAttributeDialog(NULL)
         , mSelectSkillDialog(NULL)
+        , mSelectedEffect(0)
+        , mSelectedKnownEffectId(0)
         , mType(type)
     {
         mAddEffectDialog.eventEffectAdded += MyGUI::newDelegate(this, &EffectEditorBase::onEffectAdded);

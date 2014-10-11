@@ -19,7 +19,7 @@
 #include "elements.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-: SceneWidget (parent), mDocument(document), mRun (0)
+: SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0)
 {
     setAcceptDrops(true);
 

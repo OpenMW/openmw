@@ -303,7 +303,8 @@ std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
 }
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
-: WorldspaceWidget(document, parent), mDocument(document), mWorldspace("std::default"), mDisplayCellCoord(true)
+: WorldspaceWidget (document, parent), mDocument (document), mWorldspace ("std::default"),
+  mControlElements(NULL), mDisplayCellCoord(true)
 {
     QAbstractItemModel *cells =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells);

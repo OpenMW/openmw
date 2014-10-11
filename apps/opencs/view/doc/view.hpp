@@ -193,6 +193,10 @@ namespace CSVDoc
 
             void addBodyPartsSubView();
 
+            void addSoundGensSubView();
+
+            void addMagicEffectsSubView();
+
             void addMeshesSubView();
 
             void addIconsSubView();
@@ -208,6 +212,8 @@ namespace CSVDoc
             void addDebugProfilesSubView();
 
             void addRunLogSubView();
+
+            void addPathgridSubView();
 
             void toggleShowStatusBar (bool show);
 

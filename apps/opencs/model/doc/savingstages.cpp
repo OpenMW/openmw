@@ -311,6 +311,48 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
 }
 
 
+CSMDoc::WritePathgridCollectionStage::WritePathgridCollectionStage (Document& document,
+    SavingState& state)
+: mDocument (document), mState (state)
+{}
+
+int CSMDoc::WritePathgridCollectionStage::setup()
+{
+    return mDocument.getData().getPathgrids().getSize();
+}
+
+void CSMDoc::WritePathgridCollectionStage::perform (int stage, Messages& messages)
+{
+    const CSMWorld::Record<CSMWorld::Pathgrid>& pathgrid =
+        mDocument.getData().getPathgrids().getRecord (stage);
+
+    if (pathgrid.mState==CSMWorld::RecordBase::State_Modified ||
+        pathgrid.mState==CSMWorld::RecordBase::State_ModifiedOnly)
+    {
+        CSMWorld::Pathgrid record = pathgrid.get();
+
+        if (record.mId.substr (0, 1)=="#")
+        {
+            std::istringstream stream (record.mId.c_str());
+            char ignore;
+            stream >> ignore >> record.mData.mX >> record.mData.mY;
+        }
+        else
+            record.mCell = record.mId;
+
+        mState.getWriter().startRecord (record.sRecordId);
+
+        record.save (mState.getWriter());
+
+        mState.getWriter().endRecord (record.sRecordId);
+    }
+    else if (pathgrid.mState==CSMWorld::RecordBase::State_Deleted)
+    {
+        /// \todo write record with delete flag
+    }
+}
+
+
 CSMDoc::CloseSaveStage::CloseSaveStage (SavingState& state)
 : mState (state)
 {}

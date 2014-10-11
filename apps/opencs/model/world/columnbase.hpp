@@ -101,7 +101,9 @@ namespace CSMWorld
             Display_Texture,
             Display_Video,
             Display_Colour,
-            Display_ScriptLines // console context
+            Display_ScriptLines, // console context
+            Display_SoundGeneratorType,
+            Display_School
         };
 
         int mColumnId;
@@ -125,8 +127,6 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct Column : public ColumnBase
     {
-        int mFlags;
-
         Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue)
         : ColumnBase (columnId, displayType, flags) {}
 
