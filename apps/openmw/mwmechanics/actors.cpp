@@ -585,6 +585,12 @@ namespace MWMechanics
             }
         }
 
+        bool receivedMagicDamage = false;
+
+        if (creatureStats.getMagicEffects().get(ESM::MagicEffect::DamageHealth).getMagnitude() > 0.0f
+                || creatureStats.getMagicEffects().get(ESM::MagicEffect::AbsorbHealth).getMagnitude() > 0.0f)
+            receivedMagicDamage = true;
+
         // Apply damage ticks
         int damageEffects[] = {
             ESM::MagicEffect::FireDamage, ESM::MagicEffect::ShockDamage, ESM::MagicEffect::FrostDamage, ESM::MagicEffect::Poison,
@@ -592,7 +598,6 @@ namespace MWMechanics
         };
 
         DynamicStat<float> health = creatureStats.getHealth();
-        bool receivedMagicDamage = false;
         for (unsigned int i=0; i<sizeof(damageEffects)/sizeof(int); ++i)
         {
             float magnitude = creatureStats.getMagicEffects().get(damageEffects[i]).getMagnitude();
