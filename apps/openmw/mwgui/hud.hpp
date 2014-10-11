@@ -74,8 +74,6 @@ namespace MWGui
         MyGUI::TextBox* mWeaponSpellBox;
         MyGUI::Widget *mDrowningFrame, *mDrowningFlash;
 
-        MyGUI::Widget* mDummy;
-
         MyGUI::Widget* mFpsBox;
         MyGUI::TextBox* mFpsCounter;
         MyGUI::TextBox* mTriangleCounter;

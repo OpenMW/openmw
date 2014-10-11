@@ -9,7 +9,7 @@
 #include "view.hpp"
 
 CSVSettings::SettingWindow::SettingWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), mModel(NULL)
 {}
 
 void CSVSettings::SettingWindow::createPages()
@@ -84,7 +84,7 @@ void CSVSettings::SettingWindow::createConnections
 
 void CSVSettings::SettingWindow::setViewValues()
 {
-    //iterate each page and view, setting their definintions
+    //iterate each page and view, setting their definitions
     //if they exist in the model
     foreach (const Page *page, mPages)
     {

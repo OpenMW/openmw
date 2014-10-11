@@ -69,6 +69,7 @@ BillboardObject::BillboardObject( const String& textureName,
 }
 
 BillboardObject::BillboardObject()
+: mNode(NULL), mMaterial(NULL), mEntity(NULL)
 {
 }
 
@@ -222,6 +223,7 @@ SkyManager::SkyManager(Ogre::SceneNode *root, Ogre::Camera *pCamera)
     , mCloudOpacity(0.0f)
     , mCloudSpeed(0.0f)
     , mStarsOpacity(0.0f)
+    , mLightning(NULL)
     , mRemainingTransitionTime(0.0f)
     , mGlareFade(0.0f)
     , mGlare(0.0f)
