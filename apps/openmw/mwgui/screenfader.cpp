@@ -131,6 +131,11 @@ namespace MWGui
         mQueue.push_back(FadeOp::Ptr(new FadeOp(this, time, targetAlpha)));
     }
 
+    bool ScreenFader::isEmpty()
+    {
+        return mQueue.empty();
+    }
+
     void ScreenFader::clearQueue()
     {
         mQueue.clear();

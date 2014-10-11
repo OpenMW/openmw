@@ -592,6 +592,7 @@ namespace MWMechanics
         };
 
         DynamicStat<float> health = creatureStats.getHealth();
+        bool receivedMagicDamage = false;
         for (unsigned int i=0; i<sizeof(damageEffects)/sizeof(int); ++i)
         {
             float magnitude = creatureStats.getMagicEffects().get(damageEffects[i]).getMagnitude();
@@ -612,11 +613,22 @@ namespace MWMechanics
                 if (weather > 1)
                     damageScale *= fMagicSunBlockedMult;
                 health.setCurrent(health.getCurrent() - magnitude * duration * damageScale);
+
+                if (magnitude * damageScale > 0.0f)
+                    receivedMagicDamage = true;
             }
             else
+            {
                 health.setCurrent(health.getCurrent() - magnitude * duration);
 
+                if (magnitude > 0.0f)
+                    receivedMagicDamage = true;
+            }
         }
+
+        if (receivedMagicDamage && ptr.getRefData().getHandle() == "player")
+            MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
+
         creatureStats.setHealth(health);
 
         if (!wasDead && creatureStats.isDead())
@@ -875,13 +887,13 @@ namespace MWMechanics
                 static const float fSuffocationDamage = world->getStore().get<ESM::GameSetting>().find("fSuffocationDamage")->getFloat();
                 ptr.getClass().setActorHealth(ptr, stats.getHealth().getCurrent() - fSuffocationDamage*duration);
 
-                // Play a drowning sound as necessary for the player
+                // Play a drowning sound
+                MWBase::SoundManager *sndmgr = MWBase::Environment::get().getSoundManager();
+                if(!sndmgr->getSoundPlaying(ptr, "drown"))
+                    sndmgr->playSound3D(ptr, "drown", 1.0f, 1.0f);
+
                 if(ptr == world->getPlayerPtr())
-                {
-                    MWBase::SoundManager *sndmgr = MWBase::Environment::get().getSoundManager();
-                    if(!sndmgr->getSoundPlaying(MWWorld::Ptr(), "drown"))
-                        sndmgr->playSound("drown", 1.0f, 1.0f);
-                }
+                    MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
             }
         }
         else

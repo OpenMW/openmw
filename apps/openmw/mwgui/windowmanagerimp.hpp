@@ -333,7 +333,7 @@ namespace MWGui
     /// Darken the screen by \a factor (1.0 = no darkening). Works independently from screen fading.
     virtual void setScreenFactor (float factor);
 
-    virtual void activateHitOverlay();
+    virtual void activateHitOverlay(bool interrupt);
     virtual void setWerewolfOverlay(bool set);
 
     virtual void toggleDebugWindow();

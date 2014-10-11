@@ -48,6 +48,7 @@ namespace MWGui
         void setRepeat(bool repeat);
 
         void queue(float time, float targetAlpha);
+        bool isEmpty();
         void clearQueue();
 
         void notifyAlphaChanged(float alpha);

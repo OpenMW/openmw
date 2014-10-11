@@ -2087,9 +2087,20 @@ namespace MWWorld
                 continue;
 
             MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+            if (stats.isDead())
+                continue;
             MWMechanics::DynamicStat<float> health = stats.getHealth();
             health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
             stats.setHealth(health);
+
+            if (healthPerSecond > 0.0f)
+            {
+                if (actor.getRefData().getHandle() == "player")
+                    MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
+
+                if (!MWBase::Environment::get().getSoundManager()->getSoundPlaying(actor, "Health Damage"))
+                    MWBase::Environment::get().getSoundManager()->playSound3D(actor, "Health Damage", 1.0f, 1.0f);
+            }
         }
     }
 
@@ -2104,9 +2115,20 @@ namespace MWWorld
                 continue;
 
             MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+            if (stats.isDead())
+                continue;
             MWMechanics::DynamicStat<float> health = stats.getHealth();
             health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
             stats.setHealth(health);
+
+            if (healthPerSecond > 0.0f)
+            {
+                if (actor.getRefData().getHandle() == "player")
+                    MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
+
+                if (!MWBase::Environment::get().getSoundManager()->getSoundPlaying(actor, "Health Damage"))
+                    MWBase::Environment::get().getSoundManager()->playSound3D(actor, "Health Damage", 1.0f, 1.0f);
+            }
         }
     }
 

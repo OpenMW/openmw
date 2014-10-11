@@ -338,7 +338,7 @@ namespace MWBase
             /// Darken the screen by \a factor (1.0 = no darkening). Works independently from screen fading.
             virtual void setScreenFactor (float factor) = 0;
 
-            virtual void activateHitOverlay() = 0;
+            virtual void activateHitOverlay(bool interrupt=true) = 0;
             virtual void setWerewolfOverlay(bool set) = 0;
 
             virtual void toggleDebugWindow() = 0;

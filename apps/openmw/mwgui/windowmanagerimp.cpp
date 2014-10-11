@@ -1756,14 +1756,17 @@ namespace MWGui
         mScreenFader->setFactor(factor);
     }
 
-    void WindowManager::activateHitOverlay()
+    void WindowManager::activateHitOverlay(bool interrupt)
     {
         if (!mHitFaderEnabled)
             return;
 
+        if (!interrupt && !mHitFader->isEmpty())
+            return;
+
         mHitFader->clearQueue();
-        mHitFader->fadeTo(50, 0.2f);
-        mHitFader->fadeTo(0, 0.2f);
+        mHitFader->fadeTo(100, 0.0f);
+        mHitFader->fadeTo(0, 0.5f);
     }
 
     void WindowManager::setWerewolfOverlay(bool set)
