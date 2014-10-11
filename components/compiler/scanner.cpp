@@ -48,6 +48,9 @@ namespace Compiler
 
     bool Scanner::scanToken (Parser& parser)
     {
+        bool allowDigit = mNameStartingWithDigit;
+        mNameStartingWithDigit = false;
+
         switch (mPutback)
         {
             case Putback_Special:
@@ -112,6 +115,7 @@ namespace Compiler
         else if (isWhitespace (c))
         {
             mLoc.mLiteral.clear();
+            mNameStartingWithDigit = allowDigit;
             return true;
         }
         else if (c==':')
@@ -120,21 +124,21 @@ namespace Compiler
             mLoc.mLiteral.clear();
             return true;
         }
-        else if (std::isdigit (c))
+        else if (std::isalpha (c) || c=='_' || c=='"' || (allowDigit && std::isdigit (c)))
         {
             bool cont = false;
 
-            if (scanInt (c, parser, cont))
+            if (scanName (c, parser, cont))
             {
                 mLoc.mLiteral.clear();
                 return cont;
             }
         }
-        else if (std::isalpha (c) || c=='_' || c=='"')
+        else if (std::isdigit (c))
         {
             bool cont = false;
 
-            if (scanName (c, parser, cont))
+            if (scanInt (c, parser, cont))
             {
                 mLoc.mLiteral.clear();
                 return cont;
@@ -516,7 +520,8 @@ namespace Compiler
     Scanner::Scanner (ErrorHandler& errorHandler, std::istream& inputStream,
         const Extensions *extensions)
     : mErrorHandler (errorHandler), mStream (inputStream), mExtensions (extensions),
-      mPutback (Putback_None), mPutbackCode(0), mPutbackInteger(0), mPutbackFloat(0)
+      mPutback (Putback_None), mPutbackCode(0), mPutbackInteger(0), mPutbackFloat(0),
+      mNameStartingWithDigit (false)
     {
     }
 
@@ -567,5 +572,10 @@ namespace Compiler
 
         if (mExtensions)
             mExtensions->listKeywords (keywords);
+    }
+
+    void Scanner::allowNameStartingwithDigit()
+    {
+        mNameStartingWithDigit = true;
     }
 }
