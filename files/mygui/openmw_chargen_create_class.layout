@@ -3,7 +3,7 @@
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 498 198" name="_Main">
 
         <!-- Class name -->
-        <Widget type="TextBox" skin="NormalText" position="8 8 48 23" name="LabelT" align="Left Top">
+        <Widget type="TextBox" skin="NormalText" position="8 8 52 23" name="LabelT" align="Left Top">
             <Property key="Caption" value="#{sName}:"/>
             <Property key="TextAlign" value="Left VCenter"/>
         </Widget>

@@ -89,11 +89,11 @@
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="LevelToolTip"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandTextRight" position="104 22 104 18" name="RaceText" align="Right Top">
+                <Widget type="TextBox" skin="SandTextRight" position="24 22 184 18" name="RaceText" align="Right Top">
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandTextRight" position="104 40 104 18" name="ClassText" align="Right Top">
+                <Widget type="TextBox" skin="SandTextRight" position="24 40 184 18" name="ClassText" align="Right Top">
                     <UserString key="ToolTipType" value="Layout"/>
                     <UserString key="ToolTipLayout" value="ClassToolTip"/>
                 </Widget>
