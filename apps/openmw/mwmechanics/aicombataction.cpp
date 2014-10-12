@@ -166,9 +166,17 @@ namespace MWMechanics
     {
         const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        // Never casting racial spells (ST_Power and F_Always)
-        if (spell->mData.mType != ESM::Spell::ST_Spell || spell->mData.mFlags & ESM::Spell::F_Always)
+        if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 0.f;
+
+        // Don't make use of racial bonus spells, like MW. Can be made optional later
+        if (actor.getClass().isNpc())
+        {
+            std::string raceid = actor.get<ESM::NPC>()->mBase->mRace;
+            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(raceid);
+            if (race->mPowers.exists(spell->mId))
+                return 0.f;
+        }
 
         if (spell->mData.mCost > stats.getMagicka().getCurrent())
             return 0.f;
