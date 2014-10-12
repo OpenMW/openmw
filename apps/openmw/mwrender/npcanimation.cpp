@@ -177,7 +177,7 @@ NpcAnimation::~NpcAnimation()
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, bool disableListener, ViewMode viewMode)
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, bool disableListener, bool disableSounds, ViewMode viewMode)
   : Animation(ptr, node),
     mVisibilityFlags(visibilityFlags),
     mListenerDisabled(disableListener),
@@ -186,7 +186,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mShowCarriedLeft(true),
     mFirstPersonOffset(0.f, 0.f, 0.f),
     mAlpha(1.f),
-    mNpcType(Type_Normal)
+    mNpcType(Type_Normal),
+    mSoundsDisabled(disableSounds)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -625,7 +626,7 @@ void NpcAnimation::removeIndividualPart(ESM::PartReferenceType type)
     mPartslots[type] = -1;
 
     mObjectParts[type].setNull();
-    if (!mSoundIds[type].empty())
+    if (!mSoundIds[type].empty() && !mSoundsDisabled)
     {
         MWBase::Environment::get().getSoundManager()->stopSound3D(mPtr, mSoundIds[type]);
         mSoundIds[type].clear();
@@ -659,20 +660,22 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     removeIndividualPart(type);
     mPartslots[type] = group;
     mPartPriorities[type] = priority;
-
-    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-    MWWorld::ContainerStoreIterator csi = inv.getSlot(group < 0 ? MWWorld::InventoryStore::Slot_Helmet : group);
-    if (csi != inv.end() && csi->getTypeName() == typeid(ESM::Light).name())
-    {
-        mSoundIds[type] = csi->get<ESM::Light>()->mBase->mSound;
-    }
     mObjectParts[type] = insertBoundedPart(mesh, group, sPartList.at(type), enchantedGlow, glowColor);
-    if (!mSoundIds[type].empty() &&  mPtr.getClass().getCreatureStats(mPtr).getDrawState() == MWMechanics::DrawState_Nothing)
-    {
-        MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, mSoundIds[type], 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
-            MWBase::SoundManager::Play_Loop);
-    }
 
+    if (!mSoundsDisabled)
+    {
+        MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+        MWWorld::ContainerStoreIterator csi = inv.getSlot(group < 0 ? MWWorld::InventoryStore::Slot_Helmet : group);
+        if (csi != inv.end())
+        {
+            mSoundIds[type] = csi->getClass().getSound(*csi);
+            if (!mSoundIds[type].empty())
+            {
+                MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, mSoundIds[type], 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
+                    MWBase::SoundManager::Play_Loop);
+            }
+        }
+    }
     if(mObjectParts[type]->mSkelBase)
     {
         Ogre::SkeletonInstance *skel = mObjectParts[type]->mSkelBase->getSkeleton();

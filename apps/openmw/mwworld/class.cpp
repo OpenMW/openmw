@@ -420,4 +420,9 @@ namespace MWWorld
     {
         throw std::runtime_error("this is not a door");
     }
+
+    const std::string& Class::getSound(const MWWorld::Ptr&) const
+    {
+      return std::string();
+    }
 }

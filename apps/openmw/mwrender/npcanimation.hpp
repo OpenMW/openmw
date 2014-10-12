@@ -98,6 +98,7 @@ private:
     Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
+    bool mSoundsDisabled;
 
     void updateNpcBase();
 
@@ -124,10 +125,11 @@ public:
      *                         one listener at a time, so you shouldn't do this if creating several NpcAnimations
      *                         for the same Ptr, eg preview dolls for the player.
      *                         Those need to be manually rendered anyway.
+     * @param disableSounds    Same as \a disableListener but for playing items sounds
      * @param viewMode
      */
     NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, bool disableListener = false,
-                 ViewMode viewMode=VM_Normal);
+                 bool disableSounds = false, ViewMode viewMode=VM_Normal);
     virtual ~NpcAnimation();
 
     virtual void enableHeadAnimation(bool enable);
