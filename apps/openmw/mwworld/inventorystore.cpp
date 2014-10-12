@@ -148,16 +148,18 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     flagAsModified();
 
     fireEquipmentChangedEvent();
+
     updateMagicEffects(actor);
 }
 
 void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
 {
-    // Only *one* change event should be fired
     mUpdatesEnabled = false;
     for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
         unequipSlot(slot, actor);
+
     mUpdatesEnabled = true;
+
     fireEquipmentChangedEvent();
     updateMagicEffects(actor);
 }
@@ -204,8 +206,9 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         if (!Misc::StringUtils::ciEqual(test.getCellRef().getOwner(), actor.getCellRef().getRefId()) &&
                 (actor.getClass().getScript(actor).empty() ||
                 !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion")))
+        {
             continue;
-
+        }
         int testSkill = test.getClass().getEquipmentSkill (test);
 
         std::pair<std::vector<int>, bool> itemsSlots =
@@ -277,11 +280,13 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     bool changed = false;
 
     for (std::size_t i=0; i<slots_.size(); ++i)
-        if (slots_[i]!=mSlots[i])
+    {
+        if (slots_[i] != mSlots[i])
         {
             changed = true;
+            break;
         }
-
+    }
     mUpdatesEnabled = true;
 
     if (changed)

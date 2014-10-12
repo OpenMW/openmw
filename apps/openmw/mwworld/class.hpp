@@ -339,6 +339,9 @@ namespace MWWorld
             virtual void respawn (const MWWorld::Ptr& ptr) const {}
 
             virtual void restock (const MWWorld::Ptr& ptr) const {}
+
+            /// Returns sound id
+            virtual std::string getSound(const MWWorld::Ptr& ptr) const;
     };
 }
 
