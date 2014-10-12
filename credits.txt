@@ -94,6 +94,7 @@ Thomas Luppi (Digmaster)
 Tom Mason (wheybags)
 Torben Leif Carrington (TorbenC)
 Vincent Heuken
+vocollapse
 
 Packagers:
 Alexander Olofsson (Ace) - Windows
