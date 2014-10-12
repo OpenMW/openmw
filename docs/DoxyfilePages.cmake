@@ -38,7 +38,7 @@ PROJECT_NUMBER         =
 # If a relative path is entered, it will be relative to the location
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = @OpenMW_SOURCE_DIR@/doxygen
+OUTPUT_DIRECTORY       = @DOXYGEN_PAGES_OUTPUT_DIR@
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create
 # 4096 sub-directories (in 2 levels) under the output directory of each output
@@ -576,7 +576,7 @@ WARN_LOGFILE           =
 INPUT                  = @OpenMW_SOURCE_DIR@/apps \
                          @OpenMW_SOURCE_DIR@/components \
                          @OpenMW_SOURCE_DIR@/libs \
-                         @OpenMW_BINARY_DIR@/docs
+                         @OpenMW_BINARY_DIR@/docs/mainpage.hpp
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
