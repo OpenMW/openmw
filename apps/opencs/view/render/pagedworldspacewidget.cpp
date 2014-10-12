@@ -12,7 +12,6 @@
 #include <OgreOverlayManager.h>
 #include <OgreRoot.h>
 #include <OgreSceneQuery.h>
-#include <OgreEntity.h>
 
 #include <components/esm/loadland.hpp>
 #include "textoverlay.hpp"
@@ -53,13 +52,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                     mTextOverlays.erase(itOverlay);
                 }
 
-                // destroy manual objects and entities
-                std::map<CSMWorld::CellCoordinates, Ogre::Entity *>::iterator itEntity = mEntities.find(iter->first);
-                if(itEntity != mEntities.end())
-                {
-                    getSceneManager()->destroyEntity(itEntity->second);
-                    mEntities.erase(itEntity);
-                }
+                // destroy manual objects
                 getSceneManager()->destroyManualObject("manual"+iter->first.getId(mWorldspace));
 
                 iter++;
@@ -143,16 +136,18 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                               ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
                               height+2000); // FIXME: config setting
             manual->end();
-            Ogre::MeshPtr meshPtr = manual->convertToMesh("vLine" + iter->getId(mWorldspace));
-            Ogre::Entity* entity = getSceneManager()->createEntity(meshPtr);
-            getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(entity);
-            entity->setVisible(false);
-
-            // keep pointers so that they can be deleted later
-            mEntities.insert(std::make_pair(*iter, entity));
+            manual->setBoundingBox(Ogre::AxisAlignedBox(
+                              ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
+                              height,
+                              ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
+                              height+2000));
+            getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(manual);
+            manual->setVisible(false);
 
             CSVRender::TextOverlay *textDisp =
-                    new CSVRender::TextOverlay(entity, getCamera(), iter->getId(mWorldspace));
+                    new CSVRender::TextOverlay(manual, getCamera(), iter->getId(mWorldspace));
             textDisp->enable(true);
             textDisp->setCaption(iter->getId(mWorldspace));
             std::string desc = cells.getRecord(index).get().mName;
@@ -315,13 +310,6 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
         delete iter->second;
 
         getSceneManager()->destroyManualObject("manual"+iter->first.getId(mWorldspace));
-    }
-
-    for (std::map<CSMWorld::CellCoordinates, Ogre::Entity *>::iterator iter (mEntities.begin());
-        iter != mEntities.end(); ++iter)
-    {
-        getSceneManager()->destroyEntity(iter->second);
-        mEntities.erase(iter);
     }
 
     for (std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator iter (mTextOverlays.begin());
