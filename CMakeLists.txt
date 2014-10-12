@@ -60,7 +60,7 @@ endif (ANDROID)
 
 # doxygen main page
 
-configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/docs/mainpage.hpp")
+configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_DIR}/docs/mainpage.hpp")
 
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
 option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
@@ -835,4 +835,19 @@ if (APPLE)
         " COMPONENT Runtime)
         include(CPack)
 endif (APPLE)
+
+# Doxygen Target -- simply run 'make doc' or 'make doc_pages'
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+    configure_file(${OpenMW_SOURCE_DIR}/docs/Doxyfile.in ${OpenMW_BINARY_DIR}/docs/Doxyfile @ONLY)
+    configure_file(${OpenMW_SOURCE_DIR}/docs/DoxyfilePages.in ${OpenMW_BINARY_DIR}/docs/DoxyfilePages @ONLY)
+    add_custom_target(doc
+        ${DOXYGEN_EXECUTABLE} ${OpenMW_BINARY_DIR}/docs/Doxyfile
+        WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen (from Doxyfile)" VERBATIM)
+    add_custom_target(doc_pages
+        ${DOXYGEN_EXECUTABLE} ${OpenMW_BINARY_DIR}/docs/DoxyfilePages
+        WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen (from DoxyfilePages)" VERBATIM)
+endif(DOXYGEN_FOUND)
 
