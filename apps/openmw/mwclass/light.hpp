@@ -83,7 +83,7 @@ namespace MWClass
                 const;
             ///< Write additional state from \a ptr into \a state.
 
-            virtual const std::string& getSound(const MWWorld::Ptr& ptr) const;
+            virtual std::string getSound(const MWWorld::Ptr& ptr) const;
     };
 }
 

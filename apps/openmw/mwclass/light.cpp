@@ -298,7 +298,7 @@ namespace MWClass
         state2.mTime = dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime;
     }
 
-    const std::string& Light::getSound(const MWWorld::Ptr& ptr) const
+    std::string Light::getSound(const MWWorld::Ptr& ptr) const
     {
       return ptr.get<ESM::Light>()->mBase->mSound;
     }
