@@ -347,7 +347,7 @@ void RenderingManager::update (float duration, bool paused)
     MWWorld::Ptr player = world->getPlayerPtr();
 
     int blind = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude();
-    MWBase::Environment::get().getWindowManager()->setScreenFactor(std::max(0.f, 1.f-(blind / 100.f)));
+    MWBase::Environment::get().getWindowManager()->setBlindness(std::max(0, std::min(100, blind)));
     setAmbientMode();
 
     if (player.getClass().getNpcStats(player).isWerewolf())
