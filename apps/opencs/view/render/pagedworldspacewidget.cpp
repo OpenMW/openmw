@@ -8,13 +8,13 @@
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
 #include <OgreManualObject.h>
-#include <OGRE/Overlay/OgreOverlayContainer.h>
-#include <OGRE/Overlay/OgreOverlayManager.h>
+#include <OgreOverlayContainer.h>
+#include <OgreOverlayManager.h>
 #include <OgreRoot.h>
 #include <OgreSceneQuery.h>
 #include <OgreEntity.h>
 
-#include "../../../../components/esm/loadland.hpp"
+#include <components/esm/loadland.hpp>
 #include "textoverlay.hpp"
 
 #include "../../model/world/tablemimedata.hpp"
@@ -195,24 +195,13 @@ void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event
 
 void CSVRender::PagedWorldspaceWidget::updateOverlay()
 {
-    Ogre::OverlayManager &overlayMgr = Ogre::OverlayManager::getSingleton();
-    Ogre::Overlay* overlay = overlayMgr.getByName("CellIDPanel");
-    if(overlay && !mTextOverlays.empty())
+    if(getCamera()->getViewport())
     {
-        if(getCamera()->getViewport())
-        {
-            if((uint32_t)getCamera()->getViewport()->getVisibilityMask()
-                                    & (uint32_t)CSVRender::Element_CellMarker)
-            {
-                mDisplayCellCoord = true;
-                overlay->show();
-            }
-            else
-            {
-                mDisplayCellCoord = false;
-                overlay->hide();
-            }
-        }
+        if((uint32_t)getCamera()->getViewport()->getVisibilityMask()
+                                & (uint32_t)CSVRender::Element_CellMarker)
+            mDisplayCellCoord = true;
+        else
+            mDisplayCellCoord = false;
     }
 
     if(!mTextOverlays.empty())
@@ -220,6 +209,7 @@ void CSVRender::PagedWorldspaceWidget::updateOverlay()
         std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator it = mTextOverlays.begin();
         for(; it != mTextOverlays.end(); ++it)
         {
+            it->second->enable(mDisplayCellCoord);
             it->second->update();
         }
     }
@@ -324,13 +314,20 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
     {
         delete iter->second;
 
-        std::map<CSMWorld::CellCoordinates, Ogre::Entity *>::iterator it = mEntities.find(iter->first);
-        if(it != mEntities.end())
-        {
-            getSceneManager()->destroyEntity(it->second);
-            mEntities.erase(it);
-        }
         getSceneManager()->destroyManualObject("manual"+iter->first.getId(mWorldspace));
+    }
+
+    for (std::map<CSMWorld::CellCoordinates, Ogre::Entity *>::iterator iter (mEntities.begin());
+        iter != mEntities.end(); ++iter)
+    {
+        getSceneManager()->destroyEntity(iter->second);
+        mEntities.erase(iter);
+    }
+
+    for (std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator iter (mTextOverlays.begin());
+        iter != mTextOverlays.end(); ++iter)
+    {
+        delete iter->second;
     }
 }
 

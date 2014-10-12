@@ -4,10 +4,10 @@
 #include <OgreMaterialManager.h>
 #include <OgreTechnique.h>
 
-#include <OGRE/Overlay/OgreOverlayManager.h>
-#include <OGRE/Overlay/OgreOverlayContainer.h>
-#include <OGRE/Overlay/OgreFontManager.h>
-#include <OGRE/Overlay/OgreTextAreaOverlayElement.h>
+#include <OgreOverlayManager.h>
+#include <OgreOverlayContainer.h>
+#include <OgreFontManager.h>
+#include <OgreTextAreaOverlayElement.h>
 #include <OgreEntity.h>
 #include <OgreViewport.h>
 #include <OgreRoot.h>
@@ -27,18 +27,19 @@ namespace CSVRender
 // http://www.ogre3d.org/tikiwiki/Creating+dynamic+textures
 // http://www.ogre3d.org/tikiwiki/ManualObject
 TextOverlay::TextOverlay(const Ogre::MovableObject* obj, const Ogre::Camera* camera, const  Ogre::String& id)
-    : mOverlay(0), mCaption(""), mDesc(""), mEnabled(true), mCamera(camera), mObj(obj), mId(id), mOnScreen(false)
-    , mFontHeight(16) // FIXME: make font height configurable
+    : mOverlay(0), mCaption(""), mDesc(""), mEnabled(true), mCamera(camera), mObj(obj), mId(id)
+    , mOnScreen(false) , mInstance(0), mFontHeight(16) // FIXME: make font height configurable
 {
     if(id == "" || !camera || !obj)
         throw std::runtime_error("TextOverlay could not be created.");
 
     // setup font
-    if (Ogre::FontManager::getSingleton().resourceExists("DejaVuLGC"))
-        mFont = Ogre::FontManager::getSingleton().getByName("DejaVuLGC","General");
+    Ogre::FontManager &fontMgr = Ogre::FontManager::getSingleton();
+    if (fontMgr.resourceExists("DejaVuLGC"))
+        mFont = fontMgr.getByName("DejaVuLGC","General");
     else
     {
-        mFont = Ogre::FontManager::getSingleton().create("DejaVuLGC","General");
+        mFont = fontMgr.create("DejaVuLGC","General");
         mFont->setType(Ogre::FT_TRUETYPE);
         mFont->setSource("DejaVuLGCSansMono.ttf");
         mFont->setTrueTypeSize(mFontHeight);
@@ -51,9 +52,13 @@ TextOverlay::TextOverlay(const Ogre::MovableObject* obj, const Ogre::Camera* cam
 
     // setup overlay
     Ogre::OverlayManager &overlayMgr = Ogre::OverlayManager::getSingleton();
-    mOverlay = overlayMgr.getByName("CellIDPanel");
-    if(!mOverlay)
-        mOverlay = overlayMgr.create("CellIDPanel");
+    mOverlay = overlayMgr.getByName("CellIDPanel"+mId+Ogre::StringConverter::toString(mInstance));
+    while(mOverlay != NULL)
+    {
+        mInstance++;
+        mOverlay = overlayMgr.getByName("CellIDPanel"+mId+Ogre::StringConverter::toString(mInstance));
+    }
+    mOverlay = overlayMgr.create("CellIDPanel"+mId+Ogre::StringConverter::toString(mInstance));
 
     // create texture
     Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().getByName("DynamicTransBlue");
@@ -93,24 +98,32 @@ TextOverlay::TextOverlay(const Ogre::MovableObject* obj, const Ogre::Camera* cam
     }
 
     // setup material for containers
-    Ogre::MaterialPtr mQuadMaterial = Ogre::MaterialManager::getSingleton().create("TransOverlayMaterial",
-                                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true );
-    Ogre::Pass *pass = mQuadMaterial->getTechnique( 0 )->getPass( 0 );
-    pass->setLightingEnabled( false );
-    pass->setDepthWriteEnabled( false );
-    pass->setSceneBlending( Ogre::SBT_TRANSPARENT_ALPHA );
+    Ogre::MaterialPtr mQuadMaterial = Ogre::MaterialManager::getSingleton().getByName(
+                "TransOverlayMaterial");
+    if(mQuadMaterial.isNull())
+    {
+        Ogre::MaterialPtr mQuadMaterial = Ogre::MaterialManager::getSingleton().create(
+                    "TransOverlayMaterial",
+                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true );
+        Ogre::Pass *pass = mQuadMaterial->getTechnique( 0 )->getPass( 0 );
+        pass->setLightingEnabled( false );
+        pass->setDepthWriteEnabled( false );
+        pass->setSceneBlending( Ogre::SBT_TRANSPARENT_ALPHA );
 
-    Ogre::TextureUnitState *tex = pass->createTextureUnitState("MyCustomState", 0);
-    tex->setTextureName("DynamicTransBlue");
-    tex->setTextureFiltering( Ogre::TFO_ANISOTROPIC );
-    mQuadMaterial->load();
+        Ogre::TextureUnitState *tex = pass->createTextureUnitState("MyCustomState", 0);
+        tex->setTextureName("DynamicTransBlue");
+        tex->setTextureFiltering( Ogre::TFO_ANISOTROPIC );
+        mQuadMaterial->load();
+    }
 
-    mContainer = static_cast<Ogre::OverlayContainer*>(overlayMgr.createOverlayElement("Panel", "container"+mId));
+    mContainer = static_cast<Ogre::OverlayContainer*>(overlayMgr.createOverlayElement(
+                "Panel", "container"+mId +"#"+Ogre::StringConverter::toString(mInstance)));
     mContainer->setMaterialName("TransOverlayMaterial");
     mOverlay->add2D(mContainer);
 
     // setup text area overlay element
-    mElement = static_cast<Ogre::TextAreaOverlayElement*>(overlayMgr.createOverlayElement("TextArea", "text"+mId));
+    mElement = static_cast<Ogre::TextAreaOverlayElement*>(overlayMgr.createOverlayElement(
+                "TextArea", "text"+mId +"#"+Ogre::StringConverter::toString(mInstance)));
     mElement->setMetricsMode(Ogre::GMM_RELATIVE);
     mElement->setDimensions(1.0, 1.0);
     mElement->setMetricsMode(Ogre::GMM_PIXELS);
@@ -197,10 +210,8 @@ TextOverlay::~TextOverlay()
         mOverlay->hide();
 
     Ogre::OverlayManager *overlayMgr = Ogre::OverlayManager::getSingletonPtr();
-    mContainer->removeChild("text"+mId);
+    mContainer->removeChild("text"+mId+"#"+Ogre::StringConverter::toString(mInstance));
     mOverlay->remove2D(mContainer);
-    overlayMgr->destroyOverlayElement(mElement);
-    overlayMgr->destroyOverlayElement(mContainer);
 
     if(!iter.hasMoreElements())
         overlayMgr->destroy(mOverlay);
@@ -208,14 +219,14 @@ TextOverlay::~TextOverlay()
 
 void TextOverlay::enable(bool enable)
 {
-    if(enable == mContainer->isVisible())
+    if(enable == mOverlay->isVisible())
         return;
 
     mEnabled = enable;
     if (enable)
-        mContainer->show();
+        mOverlay->show();
     else
-        mContainer->hide();
+        mOverlay->hide();
 }
 
 bool TextOverlay::isEnabled()
@@ -282,7 +293,6 @@ void TextOverlay::update()
     {
         mOnScreen = false;
         mContainer->hide();
-        Ogre::Root::getSingleton().renderOneFrame();
         return;
     }
 
@@ -306,8 +316,6 @@ void TextOverlay::update()
     mContainer->setDimensions(relTextWidth, relTextHeight);
 
     mPos = QRect(posX*viewportWidth, posY*viewportHeight, width, height);
-
-    Ogre::Root::getSingleton().renderOneFrame();
 }
 
 QRect TextOverlay::container()

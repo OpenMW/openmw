@@ -4,7 +4,7 @@
 #include <QRect>
 
 #include <OgreString.h>
-#include <OGRE/Overlay/OgreFont.h>
+#include <OgreFont.h>
 
 namespace Ogre
 {
@@ -36,6 +36,7 @@ namespace CSVRender
 
             bool mEnabled;
             bool mOnScreen; // not used
+            int mInstance;
 
             Ogre::FontPtr getFont();
             int textWidth();
