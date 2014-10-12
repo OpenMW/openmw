@@ -2,7 +2,8 @@
 
 #include "view.hpp"
 
-CSVDoc::SubView::SubView (const CSMWorld::UniversalId& id) : mUniversalId (id)
+CSVDoc::SubView::SubView (const CSMWorld::UniversalId& id)
+ : mUniversalId (id), mParent (NULL)
 {
     /// \todo  add a button to the title bar that clones this sub view
 
