@@ -29,7 +29,7 @@ namespace MWSound
                 else if (type == SampleType_Int16)
                 {
                     value = *reinterpret_cast<const Ogre::int16*>(&data[sample*advance]);
-                    value /= float(std::numeric_limits<Ogre::int16>().max());
+                    value /= float(std::numeric_limits<Ogre::int16>::max());
                 }
                 else if (type == SampleType_Float32)
                 {

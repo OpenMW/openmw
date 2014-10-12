@@ -438,7 +438,7 @@ namespace MWScript
 
         // If the objects are in different worldspaces, return a large value (just like vanilla)
         if (ref.getCell()->getCell()->getCellId().mWorldspace != ref2.getCell()->getCell()->getCellId().mWorldspace)
-            return std::numeric_limits<float>().max();
+            return std::numeric_limits<float>::max();
 
         double diff[3];
 

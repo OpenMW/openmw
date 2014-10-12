@@ -515,7 +515,7 @@ void RenderingManager::configureFog(const float density, const Ogre::ColourValue
     if (density == 0)
     {
         mFogStart = 0;
-        mFogEnd = std::numeric_limits<float>().max();
+        mFogEnd = std::numeric_limits<float>::max();
         mRendering.getCamera()->setFarClipDistance (max);
     }
     else
