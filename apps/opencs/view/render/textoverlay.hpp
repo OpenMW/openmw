@@ -49,12 +49,13 @@ namespace CSVRender
             TextOverlay(const Ogre::MovableObject* obj, const Ogre::Camera* camera, const Ogre::String &id);
             virtual ~TextOverlay();
 
-            void enable(bool enable);
+            void enable(bool enable); // controlled from scene widget toolbar visibility mask
+            void show(bool show);  // for updating from render target listener
             bool isEnabled();
             void setCaption(const Ogre::String& text);
             void setDesc(const Ogre::String& text);
             void update();
-            QRect container();
+            QRect container(); // for detection of mouse click on the overlay
             Ogre::String getCaption() { return mCaption; } // FIXME: debug
             Ogre::String getDesc() { return mDesc; }
     };

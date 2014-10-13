@@ -12,6 +12,7 @@ namespace CSVRender
 {
 
     class TextOverlay;
+    class OverlayMask;
 
     class PagedWorldspaceWidget : public WorldspaceWidget
     {
@@ -24,6 +25,7 @@ namespace CSVRender
             CSVWidget::SceneToolToggle *mControlElements;
             bool mDisplayCellCoord;
             std::map<CSMWorld::CellCoordinates, TextOverlay *> mTextOverlays;
+            OverlayMask *mOverlayMask;
 
         private:
 

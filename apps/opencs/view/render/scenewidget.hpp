@@ -16,6 +16,7 @@ namespace Ogre
     class RenderWindow;
     class Viewport;
     class OverlaySystem;
+    class RenderTargetListener;
 }
 
 namespace CSVWidget
@@ -50,6 +51,12 @@ namespace CSVRender
 
             void setNavigation (Navigation *navigation);
             ///< \attention The ownership of \a navigation is not transferred to *this.
+
+            void addRenderTargetListener(Ogre::RenderTargetListener *listener);
+
+            void removeRenderTargetListener(Ogre::RenderTargetListener *listener);
+
+            Ogre::Viewport *getViewport();
 
             Ogre::SceneManager *getSceneManager();
 
@@ -86,7 +93,7 @@ namespace CSVRender
             void setLighting (Lighting *lighting);
             ///< \attention The ownership of \a lighting is not transferred to *this.
 
-            Ogre::Camera*	    mCamera;
+            Ogre::Camera*       mCamera;
             Ogre::SceneManager* mSceneMgr;
             Ogre::RenderWindow* mWindow;
             Ogre::Viewport *mViewport;

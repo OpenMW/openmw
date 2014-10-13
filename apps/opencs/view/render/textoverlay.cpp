@@ -217,13 +217,21 @@ TextOverlay::~TextOverlay()
         overlayMgr->destroy(mOverlay);
 }
 
+void TextOverlay::show(bool show)
+{
+    if(show)
+        mContainer->show();
+    else
+        mContainer->hide();
+}
+
 void TextOverlay::enable(bool enable)
 {
     if(enable == mOverlay->isVisible())
         return;
 
     mEnabled = enable;
-    if (enable)
+    if(enable)
         mOverlay->show();
     else
         mOverlay->hide();

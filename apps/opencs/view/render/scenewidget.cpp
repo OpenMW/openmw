@@ -190,6 +190,24 @@ namespace CSVRender
         }
     }
 
+    void SceneWidget::addRenderTargetListener(Ogre::RenderTargetListener *listener)
+    {
+        mWindow->addListener(listener);
+    }
+
+    void SceneWidget::removeRenderTargetListener(Ogre::RenderTargetListener *listener)
+    {
+        mWindow->removeListener(listener);
+    }
+
+    Ogre::Viewport *SceneWidget::getViewport()
+    {
+        if (!mWindow)
+            updateOgreWindow();
+
+        return mViewport;
+    }
+
     Ogre::SceneManager *SceneWidget::getSceneManager()
     {
         return mSceneMgr;

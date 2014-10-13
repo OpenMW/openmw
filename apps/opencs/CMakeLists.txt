@@ -82,7 +82,7 @@ opencs_units (view/render
 
 opencs_units_noqt (view/render
     navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
-    lightingbright object cell textoverlay
+    lightingbright object cell textoverlay overlaymask
     )
 
 opencs_hdrs_noqt (view/render
