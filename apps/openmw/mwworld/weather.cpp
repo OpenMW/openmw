@@ -348,7 +348,7 @@ void WeatherManager::transition(float factor)
     mResult.mRainFrequency = current.mRainFrequency;
 }
 
-void WeatherManager::update(float duration)
+void WeatherManager::update(float duration, bool paused)
 {
     float timePassed = mTimePassed;
     mTimePassed = 0;
@@ -483,52 +483,56 @@ void WeatherManager::update(float duration)
         mRendering->getSkyManager()->secundaDisable();
     }
 
-    if (mCurrentWeather == "thunderstorm" && mNextWeather == "")
+    if (!paused)
     {
-        if (mThunderFlash > 0)
+        if (mCurrentWeather == "thunderstorm" && mNextWeather == "")
         {
-            // play the sound after a delay
-            mThunderSoundDelay -= duration;
-            if (mThunderSoundDelay <= 0)
-            {
-                // pick a random sound
-                int sound = rand() % 4;
-                std::string* soundName = NULL;
-                if (sound == 0) soundName = &mThunderSoundID0;
-                else if (sound == 1) soundName = &mThunderSoundID1;
-                else if (sound == 2) soundName = &mThunderSoundID2;
-                else if (sound == 3) soundName = &mThunderSoundID3;
-                if (soundName)
-                    MWBase::Environment::get().getSoundManager()->playSound(*soundName, 1.0, 1.0);
-                mThunderSoundDelay = 1000;
-            }
-
-            mThunderFlash -= duration;
             if (mThunderFlash > 0)
-                mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
+            {
+                // play the sound after a delay
+                mThunderSoundDelay -= duration;
+                if (mThunderSoundDelay <= 0)
+                {
+                    // pick a random sound
+                    int sound = rand() % 4;
+                    std::string* soundName = NULL;
+                    if (sound == 0) soundName = &mThunderSoundID0;
+                    else if (sound == 1) soundName = &mThunderSoundID1;
+                    else if (sound == 2) soundName = &mThunderSoundID2;
+                    else if (sound == 3) soundName = &mThunderSoundID3;
+                    if (soundName)
+                        MWBase::Environment::get().getSoundManager()->playSound(*soundName, 1.0, 1.0);
+                    mThunderSoundDelay = 1000;
+                }
+
+                mThunderFlash -= duration;
+                if (mThunderFlash > 0)
+                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
+                else
+                {
+                    mThunderChanceNeeded = rand() % 100;
+                    mThunderChance = 0;
+                    mRendering->getSkyManager()->setLightningStrength( 0.f );
+                }
+            }
             else
             {
-                mThunderChanceNeeded = rand() % 100;
-                mThunderChance = 0;
-                mRendering->getSkyManager()->setLightningStrength( 0.f );
+                // no thunder active
+                mThunderChance += duration*4; // chance increases by 4 percent every second
+                if (mThunderChance >= mThunderChanceNeeded)
+                {
+                    mThunderFlash = mThunderThreshold;
+
+                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
+
+                    mThunderSoundDelay = 0.25;
+                }
             }
         }
         else
-        {
-            // no thunder active
-            mThunderChance += duration*4; // chance increases by 4 percent every second
-            if (mThunderChance >= mThunderChanceNeeded)
-            {
-                mThunderFlash = mThunderThreshold;
-
-                mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
-
-                mThunderSoundDelay = 0.25;
-            }
-        }
+            mRendering->getSkyManager()->setLightningStrength(0.f);
     }
-    else
-        mRendering->getSkyManager()->setLightningStrength(0.f);
+    
 
     mRendering->setAmbientColour(mResult.mAmbientColor);
     mRendering->sunEnable(false);

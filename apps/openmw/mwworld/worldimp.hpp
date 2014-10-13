@@ -99,7 +99,7 @@ namespace MWWorld
 
             std::string mStartCell;
 
-            void updateWeather(float duration);
+            void updateWeather(float duration, bool paused = false);
             int getDaysPerMonth (int month) const;
 
             void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);

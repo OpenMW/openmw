@@ -169,8 +169,9 @@ namespace MWWorld
         /**
          * Per-frame update
          * @param duration
+         * @param paused
          */
-        void update(float duration);
+        void update(float duration, bool paused = false);
 
         void stopSounds(bool stopAll);
 

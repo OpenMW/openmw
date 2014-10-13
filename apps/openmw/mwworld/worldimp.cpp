@@ -1489,7 +1489,7 @@ namespace MWWorld
         if (mGoToJail && !paused)
             goToJail();
 
-        updateWeather(duration);
+        updateWeather(duration, paused);
 
         if (!paused)
             doPhysics (duration);
@@ -2665,16 +2665,16 @@ namespace MWWorld
         MWWorld::ActionTeleport action("", closestMarker.getRefData().getPosition());
         action.execute(ptr);
     }
-
-    void World::updateWeather(float duration)
+    
+    void World::updateWeather(float duration, bool paused)
     {
         if (mPlayer->wasTeleported())
         {
             mPlayer->setTeleported(false);
             mWeatherManager->switchToNextWeather(true);
         }
-
-        mWeatherManager->update(duration);
+        
+        mWeatherManager->update(duration, paused);
     }
 
     struct AddDetectedReference
