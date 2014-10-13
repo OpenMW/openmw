@@ -27,7 +27,7 @@ namespace MWMechanics
 
             virtual AiTravel *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor,float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
 
             virtual int getTypeId() const;
 
@@ -39,7 +39,6 @@ namespace MWMechanics
             int mCellX;
             int mCellY;
 
-            PathFinder mPathFinder;
     };
 }
 

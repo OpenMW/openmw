@@ -4,6 +4,7 @@
 #include <list>
 
 #include <components/esm/loadnpc.hpp>
+//#include "aistate.hpp"
 
 namespace MWWorld
 {
@@ -18,9 +19,15 @@ namespace ESM
     }
 }
 
+
+
 namespace MWMechanics
 {
     class AiPackage;
+    
+    template< class Base > class DerivedClassStorage;
+    class AiTemporaryBase;
+    typedef DerivedClassStorage<AiTemporaryBase> AiState;
 
     /// \brief Sequence of AI-packages for a single actor
     /** The top-most AI package is run each frame. When completed, it is removed from the stack. **/
@@ -88,7 +95,7 @@ namespace MWMechanics
             void stopPursuit();
 
             /// Execute current package, switching if needed.
-            void execute (const MWWorld::Ptr& actor,float duration);
+            void execute (const MWWorld::Ptr& actor, MWMechanics::AiState& state, float duration);
 
             /// Remove all packages.
             void clear();

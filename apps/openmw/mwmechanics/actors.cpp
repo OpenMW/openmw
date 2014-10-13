@@ -25,6 +25,7 @@
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
+#include "character.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -1170,7 +1171,7 @@ namespace MWMechanics
                             updateCrimePersuit(iter->first, duration);
 
                         if (iter->first != player)
-                            iter->first.getClass().getCreatureStats(iter->first).getAiSequence().execute(iter->first, duration);
+                            iter->first.getClass().getCreatureStats(iter->first).getAiSequence().execute(iter->first,iter->second->getAiState(), duration);
 
                         CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
                         if(!stats.isDead())

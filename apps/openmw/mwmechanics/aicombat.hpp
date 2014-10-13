@@ -42,7 +42,7 @@ namespace MWMechanics
 
             virtual AiCombat *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor,float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
 
             virtual int getTypeId() const;
 
@@ -54,40 +54,14 @@ namespace MWMechanics
             virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
         private:
-            PathFinder mPathFinder;
-            // controls duration of the actual strike
-            float mTimerAttack;
-            float mTimerReact;
-            // controls duration of the sideway & forward moves
-            // when mCombatMove is true
-            float mTimerCombatMove;
-
-            // AiCombat states
-            bool mReadyToAttack, mAttack;
-            bool mFollowTarget;
-            bool mCombatMove;
-
-            float mStrength; // this is actually make sense only in ranged combat
-            float mMinMaxAttackDuration[3][2]; // slash, thrust, chop has different durations
-            bool mMinMaxAttackDurationInitialised;
-
-            bool mForceNoShortcut;
-            ESM::Position mShortcutFailPos;
-
-            Ogre::Vector3 mLastActorPos;
-            MWMechanics::Movement mMovement;
 
             int mTargetActorId;
-            Ogre::Vector3 mLastTargetPos;
 
-            const MWWorld::CellStore* mCell;
-            ObstacleCheck mObstacleCheck;
-
-            boost::shared_ptr<Action> mCurrentAction;
-            float mActionCooldown;
 
             void buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
     };
+    
+    
 }
 
 #endif
