@@ -35,7 +35,7 @@ namespace CSVRender
 
     protected:
 
-        virtual void preViewportUpdate(const Ogre::RenderTargetViewportEvent &event) override;
+        virtual void preViewportUpdate(const Ogre::RenderTargetViewportEvent &event);
     };
 }
 
