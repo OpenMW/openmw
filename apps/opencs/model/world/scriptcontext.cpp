@@ -55,19 +55,16 @@ std::pair<char, bool> CSMWorld::ScriptContext::getMemberType (const std::string&
         if (index!=-1)
         {
             // Referenceable found.
-            int columnIndex = mData.getReferenceables().searchColumnIndex (Columns::ColumnId_Script);
+            int columnIndex = mData.getReferenceables().findColumnIndex (Columns::ColumnId_Script);
 
-            if (columnIndex!=-1)
+            id2 = Misc::StringUtils::lowerCase (mData.getReferenceables().
+                getData (index, columnIndex).toString().toUtf8().constData());
+
+            if (!id2.empty())
             {
-                id2 = Misc::StringUtils::lowerCase (mData.getReferenceables().
-                    getData (index, columnIndex).toString().toUtf8().constData());
-
-                if (!id2.empty())
-                {
-                    // Referenceable has a script -> use it.
-                    index = mData.getScripts().searchId (id2);
-                    reference = true;
-                }
+                // Referenceable has a script -> use it.
+                index = mData.getScripts().searchId (id2);
+                reference = true;
             }
         }
     }
