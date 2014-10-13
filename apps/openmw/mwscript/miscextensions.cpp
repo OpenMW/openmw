@@ -854,6 +854,7 @@ namespace MWScript
 
                 MWMechanics::CastSpell cast(ptr, target);
                 cast.mHitPosition = Ogre::Vector3(target.getRefData().getPosition().pos);
+                cast.mAlwaysSucceed = true;
                 cast.cast(spell);
             }
         };
@@ -871,6 +872,7 @@ namespace MWScript
 
                 MWMechanics::CastSpell cast(ptr, ptr);
                 cast.mHitPosition = Ogre::Vector3(ptr.getRefData().getPosition().pos);
+                cast.mAlwaysSucceed = true;
                 cast.cast(spell);
             }
         };

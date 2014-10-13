@@ -68,6 +68,7 @@ namespace MWMechanics
         std::string mId; // ID of spell, potion, item etc
         std::string mSourceName; // Display name for spell, potion, etc
         Ogre::Vector3 mHitPosition; // Used for spawning area orb
+        bool mAlwaysSucceed; // Always succeed spells casted by NPCs/creatures regardless of their chance (default: false)
 
     public:
         CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target);

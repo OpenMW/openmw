@@ -454,6 +454,7 @@ namespace MWSound
         while(snditer != mActiveSounds.end())
         {
             if(snditer->second.first != MWWorld::Ptr() &&
+               snditer->second.first.getCellRef().getRefId() != "player" &&
                snditer->second.first.getCell() == cell)
             {
                 snditer->first->stop();
