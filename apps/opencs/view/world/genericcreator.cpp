@@ -120,6 +120,13 @@ void CSVWorld::GenericCreator::updateNamespace()
     }
 }
 
+void CSVWorld::GenericCreator::addScope (const QString& name, CSMWorld::Scope scope,
+    const QString& tooltip)
+{
+    mScope->addItem (name, static_cast<int> (scope));
+    mScope->setItemData (mScope->count()-1, tooltip, Qt::ToolTipRole);
+}
+
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id, bool relaxedIdRules)
 : mData (data), mUndoStack (undoStack), mListId (id), mLocked (false), mCloneMode (false),
@@ -231,13 +238,20 @@ void CSVWorld::GenericCreator::setScope (unsigned int scope)
         insertAtBeginning (mScope, false);
 
         if (mScopes & CSMWorld::Scope_Content)
-            mScope->addItem ("Content", static_cast<int> (CSMWorld::Scope_Content));
+            addScope ("Content", CSMWorld::Scope_Content,
+                "Record will be stored in the currently edited content file.");
 
         if (mScopes & CSMWorld::Scope_Project)
-            mScope->addItem ("Project", static_cast<int> (CSMWorld::Scope_Project));
+            addScope ("Project", CSMWorld::Scope_Project,
+                "Record will be stored in a local project file.<p>"
+                "Record will be created in the reserved namespace \"project\".<p>"
+                "Record is available when running OpenMW via OpenCS.");
 
         if (mScopes & CSMWorld::Scope_Session)
-            mScope->addItem ("Session", static_cast<int> (CSMWorld::Scope_Session));
+            addScope ("Session", CSMWorld::Scope_Session,
+                "Record exists only for the duration of the current editing session.<p>"
+                "Record will be created in the reserved namespace \"session\".<p>"
+                "Record is not available when running OpenMW via OpenCS.");
 
         connect (mScope, SIGNAL (currentIndexChanged (int)), this, SLOT (scopeChanged (int)));
 

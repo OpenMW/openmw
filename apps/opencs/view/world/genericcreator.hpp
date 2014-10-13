@@ -78,6 +78,9 @@ namespace CSVWorld
 
             void updateNamespace();
 
+            void addScope (const QString& name, CSMWorld::Scope scope,
+                const QString& tooltip);
+
         public:
 
             GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
