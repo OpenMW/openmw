@@ -35,7 +35,7 @@ namespace CSVRender
             QRect mPos;
 
             bool mEnabled;
-            bool mOnScreen; // not used
+            bool mOnScreen;
             int mInstance;
 
             Ogre::FontPtr getFont();

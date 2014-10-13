@@ -219,7 +219,7 @@ TextOverlay::~TextOverlay()
 
 void TextOverlay::show(bool show)
 {
-    if(show)
+    if(show && mOnScreen)
         mContainer->show();
     else
         mContainer->hide();
