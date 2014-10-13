@@ -120,8 +120,9 @@ namespace MWGui
       , mCompanionWindow(NULL)
       , mVideoBackground(NULL)
       , mVideoWidget(NULL)
-      , mHitFader(NULL)
       , mWerewolfFader(NULL)
+      , mBlindnessFader(NULL)
+      , mHitFader(NULL)
       , mScreenFader(NULL)
       , mDebugWindow(NULL)
       , mTranslationDataStorage (translationDataStorage)
@@ -273,6 +274,7 @@ namespace MWGui
         trackWindow(mCompanionWindow, "companion");
 
         mWerewolfFader = new ScreenFader("textures\\werewolfoverlay.dds");
+        mBlindnessFader = new ScreenFader("black.png");
         std::string hitFaderTexture = "textures\\bm_player_hit_01.dds";
         // fall back to player_hit_01.dds if bm_player_hit_01.dds is not available
         // TODO: check if non-BM versions actually use player_hit_01.dds
@@ -877,8 +879,9 @@ namespace MWGui
         mConsole->checkReferenceAvailable();
         mCompanionWindow->onFrame();
 
-        mHitFader->update(frameDuration);
         mWerewolfFader->update(frameDuration);
+        mBlindnessFader->update(frameDuration);
+        mHitFader->update(frameDuration);
         mScreenFader->update(frameDuration);
 
         mDebugWindow->onFrame(frameDuration);
@@ -1741,13 +1744,13 @@ namespace MWGui
     void WindowManager::fadeScreenIn(const float time)
     {
         mScreenFader->clearQueue();
-        mScreenFader->fadeIn(time);
+        mScreenFader->fadeOut(time);
     }
 
     void WindowManager::fadeScreenOut(const float time)
     {
         mScreenFader->clearQueue();
-        mScreenFader->fadeOut(time);
+        mScreenFader->fadeIn(time);
     }
 
     void WindowManager::fadeScreenTo(const int percent, const float time)
@@ -1756,9 +1759,9 @@ namespace MWGui
         mScreenFader->fadeTo(percent, time);
     }
 
-    void WindowManager::setScreenFactor(float factor)
+    void WindowManager::setBlindness(const int percent)
     {
-        mScreenFader->setFactor(factor);
+        mBlindnessFader->notifyAlphaChanged(percent / 100.f);
     }
 
     void WindowManager::activateHitOverlay(bool interrupt)

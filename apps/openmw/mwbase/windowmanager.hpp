@@ -335,8 +335,8 @@ namespace MWBase
             virtual void fadeScreenOut(const float time) = 0;
             /// Fade the screen to a specified percentage of black, over \a time seconds
             virtual void fadeScreenTo(const int percent, const float time) = 0;
-            /// Darken the screen by \a factor (1.0 = no darkening). Works independently from screen fading.
-            virtual void setScreenFactor (float factor) = 0;
+            /// Darken the screen to a specified percentage
+            virtual void setBlindness(const int percent) = 0;
 
             virtual void activateHitOverlay(bool interrupt=true) = 0;
             virtual void setWerewolfOverlay(bool set) = 0;

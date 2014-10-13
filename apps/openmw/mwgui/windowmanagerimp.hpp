@@ -330,8 +330,8 @@ namespace MWGui
     virtual void fadeScreenOut(const float time);
     /// Fade the screen to a specified percentage of black, over \a time seconds
     virtual void fadeScreenTo(const int percent, const float time);
-    /// Darken the screen by \a factor (1.0 = no darkening). Works independently from screen fading.
-    virtual void setScreenFactor (float factor);
+    /// Darken the screen to a specified percentage
+    virtual void setBlindness(const int percent);
 
     virtual void activateHitOverlay(bool interrupt);
     virtual void setWerewolfOverlay(bool set);
@@ -391,6 +391,7 @@ namespace MWGui
     MyGUI::ImageBox* mVideoBackground;
     VideoWidget* mVideoWidget;
     ScreenFader* mWerewolfFader;
+    ScreenFader* mBlindnessFader;
     ScreenFader* mHitFader;
     ScreenFader* mScreenFader;
     DebugWindow* mDebugWindow;

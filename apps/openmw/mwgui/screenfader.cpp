@@ -98,12 +98,12 @@ namespace MWGui
 
     void ScreenFader::fadeIn(float time)
     {
-        queue(time, 0.f);
+        queue(time, 1.f);
     }
 
     void ScreenFader::fadeOut(const float time)
     {
-        queue(time, 1.f);
+        queue(time, 0.f);
     }
 
     void ScreenFader::fadeTo(const int percent, const float time)
@@ -114,6 +114,7 @@ namespace MWGui
     void ScreenFader::setFactor(float factor)
     {
         mFactor = factor;
+        applyAlpha();
     }
 
     void ScreenFader::setRepeat(bool repeat)
