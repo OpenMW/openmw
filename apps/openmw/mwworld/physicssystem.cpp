@@ -829,15 +829,15 @@ namespace MWWorld
 
     const PtrVelocityList& PhysicsSystem::applyQueuedMovement(float dt)
     {
-        // Collision events are only tracked for a single frame, so reset first
-        mCollisions.clear();
-        mStandingCollisions.clear();
-
         mMovementResults.clear();
 
         mTimeAccum += dt;
         if(mTimeAccum >= 1.0f/60.0f)
         {
+            // Collision events should be available on every frame
+            mCollisions.clear();
+            mStandingCollisions.clear();
+
             const MWBase::World *world = MWBase::Environment::get().getWorld();
             PtrVelocityList::iterator iter = mMovementQueue.begin();
             for(;iter != mMovementQueue.end();++iter)

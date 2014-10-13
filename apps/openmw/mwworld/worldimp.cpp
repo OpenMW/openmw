@@ -2078,6 +2078,9 @@ namespace MWWorld
 
     void World::hurtStandingActors(const Ptr &object, float healthPerSecond)
     {
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+            return;
+
         std::vector<std::string> actors;
         mPhysics->getActorsStandingOn(object, actors);
         for (std::vector<std::string>::iterator it = actors.begin(); it != actors.end(); ++it)
@@ -2087,14 +2090,28 @@ namespace MWWorld
                 continue;
 
             MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+            if (stats.isDead())
+                continue;
             MWMechanics::DynamicStat<float> health = stats.getHealth();
             health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
             stats.setHealth(health);
+
+            if (healthPerSecond > 0.0f)
+            {
+                if (actor.getRefData().getHandle() == "player")
+                    MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
+
+                if (!MWBase::Environment::get().getSoundManager()->getSoundPlaying(actor, "Health Damage"))
+                    MWBase::Environment::get().getSoundManager()->playSound3D(actor, "Health Damage", 1.0f, 1.0f);
+            }
         }
     }
 
     void World::hurtCollidingActors(const Ptr &object, float healthPerSecond)
     {
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+            return;
+
         std::vector<std::string> actors;
         mPhysics->getActorsCollidingWith(object, actors);
         for (std::vector<std::string>::iterator it = actors.begin(); it != actors.end(); ++it)
@@ -2104,9 +2121,20 @@ namespace MWWorld
                 continue;
 
             MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+            if (stats.isDead())
+                continue;
             MWMechanics::DynamicStat<float> health = stats.getHealth();
             health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
             stats.setHealth(health);
+
+            if (healthPerSecond > 0.0f)
+            {
+                if (actor.getRefData().getHandle() == "player")
+                    MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
+
+                if (!MWBase::Environment::get().getSoundManager()->getSoundPlaying(actor, "Health Damage"))
+                    MWBase::Environment::get().getSoundManager()->playSound3D(actor, "Health Damage", 1.0f, 1.0f);
+            }
         }
     }
 
@@ -2352,6 +2380,8 @@ namespace MWWorld
                 windowManager->unsetForceHide(MWGui::GW_Inventory);
                 windowManager->unsetForceHide(MWGui::GW_Magic);
             }
+
+            windowManager->setWerewolfOverlay(werewolf);
 
             // Witnesses of the player's transformation will make them a globally known werewolf
             std::vector<MWWorld::Ptr> closeActors;
@@ -2934,6 +2964,9 @@ namespace MWWorld
 
     void World::spawnBloodEffect(const Ptr &ptr, const Vector3 &worldPosition)
     {
+        if (ptr.getRefData().getHandle() == "player" && Settings::Manager::getBool("hit fader", "GUI"))
+            return;
+
         int type = ptr.getClass().getBloodTexture(ptr);
         std::string texture;
         switch (type)

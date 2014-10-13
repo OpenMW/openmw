@@ -85,7 +85,7 @@ namespace MWRender
         mNode = renderRoot->createChildSceneNode();
 
         mAnimation = new NpcAnimation(mCharacter, mNode,
-                                      0, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
+                                      0, true, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
         Ogre::Vector3 scale = mNode->getScale();
         mCamera->setPosition(mPosition * scale);
@@ -118,7 +118,7 @@ namespace MWRender
         assert(mAnimation);
         delete mAnimation;
         mAnimation = new NpcAnimation(mCharacter, mNode,
-                                      0, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
+                                      0, true, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
         float scale=1.f;
         mCharacter.getClass().adjustScale(mCharacter, scale);

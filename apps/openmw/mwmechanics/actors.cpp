@@ -220,7 +220,7 @@ namespace MWMechanics
             // Use the smallest soulgem that is large enough to hold the soul
             MWWorld::ContainerStore& container = caster.getClass().getContainerStore(caster);
             MWWorld::ContainerStoreIterator gem = container.end();
-            float gemCapacity = std::numeric_limits<float>().max();
+            float gemCapacity = std::numeric_limits<float>::max();
             std::string soulgemFilter = "misc_soulgem"; // no other way to check for soulgems? :/
             for (MWWorld::ContainerStoreIterator it = container.begin(MWWorld::ContainerStore::Type_Miscellaneous);
                  it != container.end(); ++it)
@@ -585,6 +585,12 @@ namespace MWMechanics
             }
         }
 
+        bool receivedMagicDamage = false;
+
+        if (creatureStats.getMagicEffects().get(ESM::MagicEffect::DamageHealth).getMagnitude() > 0.0f
+                || creatureStats.getMagicEffects().get(ESM::MagicEffect::AbsorbHealth).getMagnitude() > 0.0f)
+            receivedMagicDamage = true;
+
         // Apply damage ticks
         int damageEffects[] = {
             ESM::MagicEffect::FireDamage, ESM::MagicEffect::ShockDamage, ESM::MagicEffect::FrostDamage, ESM::MagicEffect::Poison,
@@ -612,11 +618,22 @@ namespace MWMechanics
                 if (weather > 1)
                     damageScale *= fMagicSunBlockedMult;
                 health.setCurrent(health.getCurrent() - magnitude * duration * damageScale);
+
+                if (magnitude * damageScale > 0.0f)
+                    receivedMagicDamage = true;
             }
             else
+            {
                 health.setCurrent(health.getCurrent() - magnitude * duration);
 
+                if (magnitude > 0.0f)
+                    receivedMagicDamage = true;
+            }
         }
+
+        if (receivedMagicDamage && ptr.getRefData().getHandle() == "player")
+            MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
+
         creatureStats.setHealth(health);
 
         if (!wasDead && creatureStats.isDead())
@@ -875,13 +892,13 @@ namespace MWMechanics
                 static const float fSuffocationDamage = world->getStore().get<ESM::GameSetting>().find("fSuffocationDamage")->getFloat();
                 ptr.getClass().setActorHealth(ptr, stats.getHealth().getCurrent() - fSuffocationDamage*duration);
 
-                // Play a drowning sound as necessary for the player
+                // Play a drowning sound
+                MWBase::SoundManager *sndmgr = MWBase::Environment::get().getSoundManager();
+                if(!sndmgr->getSoundPlaying(ptr, "drown"))
+                    sndmgr->playSound3D(ptr, "drown", 1.0f, 1.0f);
+
                 if(ptr == world->getPlayerPtr())
-                {
-                    MWBase::SoundManager *sndmgr = MWBase::Environment::get().getSoundManager();
-                    if(!sndmgr->getSoundPlaying(MWWorld::Ptr(), "drown"))
-                        sndmgr->playSound("drown", 1.0f, 1.0f);
-                }
+                    MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
             }
         }
         else

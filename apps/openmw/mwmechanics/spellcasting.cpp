@@ -292,6 +292,7 @@ namespace MWMechanics
         , mTarget(target)
         , mStack(false)
         , mHitPosition(0,0,0)
+        , mAlwaysSucceed(false)
     {
     }
 
@@ -761,7 +762,7 @@ namespace MWMechanics
 
         int school = 0;
 
-        if (mCaster.getClass().isActor())
+        if (mCaster.getClass().isActor() && !mAlwaysSucceed)
         {
             school = getSpellSchool(spell, mCaster);
 

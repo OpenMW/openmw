@@ -15,8 +15,8 @@ namespace Gui
 
     public:
         NumericEditBox()
-            : mValue(0), mMinValue(std::numeric_limits<int>().min()),
-            mMaxValue(std::numeric_limits<int>().max())
+            : mValue(0), mMinValue(std::numeric_limits<int>::min()),
+            mMaxValue(std::numeric_limits<int>::max())
         {}
 
         void initialiseOverride();

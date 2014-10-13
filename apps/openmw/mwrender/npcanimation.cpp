@@ -177,7 +177,7 @@ NpcAnimation::~NpcAnimation()
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, bool disableListener, ViewMode viewMode)
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, bool disableListener, bool disableSounds, ViewMode viewMode)
   : Animation(ptr, node),
     mVisibilityFlags(visibilityFlags),
     mListenerDisabled(disableListener),
@@ -186,7 +186,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mShowCarriedLeft(true),
     mFirstPersonOffset(0.f, 0.f, 0.f),
     mAlpha(1.f),
-    mNpcType(Type_Normal)
+    mNpcType(Type_Normal),
+    mSoundsDisabled(disableSounds)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -297,7 +298,6 @@ void NpcAnimation::updateParts()
 {    
     mAlpha = 1.f;
     const MWWorld::Class &cls = mPtr.getClass();
-    MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
 
     NpcType curType = Type_Normal;
     if (cls.getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0)
@@ -334,6 +334,7 @@ void NpcAnimation::updateParts()
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
+    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
     {
         MWWorld::ContainerStoreIterator store = inv.getSlot(slotlist[i].mSlot);
@@ -625,6 +626,11 @@ void NpcAnimation::removeIndividualPart(ESM::PartReferenceType type)
     mPartslots[type] = -1;
 
     mObjectParts[type].setNull();
+    if (!mSoundIds[type].empty() && !mSoundsDisabled)
+    {
+        MWBase::Environment::get().getSoundManager()->stopSound3D(mPtr, mSoundIds[type]);
+        mSoundIds[type].clear();
+    }
 }
 
 void NpcAnimation::reserveIndividualPart(ESM::PartReferenceType type, int group, int priority)
@@ -654,8 +660,22 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     removeIndividualPart(type);
     mPartslots[type] = group;
     mPartPriorities[type] = priority;
-
     mObjectParts[type] = insertBoundedPart(mesh, group, sPartList.at(type), enchantedGlow, glowColor);
+
+    if (!mSoundsDisabled)
+    {
+        MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+        MWWorld::ContainerStoreIterator csi = inv.getSlot(group < 0 ? MWWorld::InventoryStore::Slot_Helmet : group);
+        if (csi != inv.end())
+        {
+            mSoundIds[type] = csi->getClass().getSound(*csi);
+            if (!mSoundIds[type].empty())
+            {
+                MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, mSoundIds[type], 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
+                    MWBase::SoundManager::Play_Loop);
+            }
+        }
+    }
     if(mObjectParts[type]->mSkelBase)
     {
         Ogre::SkeletonInstance *skel = mObjectParts[type]->mSkelBase->getSkeleton();
@@ -760,7 +780,7 @@ void NpcAnimation::showWeapons(bool showWeapon)
     mShowWeapons = showWeapon;
     if(showWeapon)
     {
-        MWWorld::InventoryStore &inv = mPtr.getClass().getInventoryStore(mPtr);
+        MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
         MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         if(weapon != inv.end())
         {
@@ -793,9 +813,8 @@ void NpcAnimation::showWeapons(bool showWeapon)
 void NpcAnimation::showCarriedLeft(bool show)
 {
     mShowCarriedLeft = show;
-    MWWorld::InventoryStore &inv = mPtr.getClass().getInventoryStore(mPtr);
+    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-
     if(show && iter != inv.end())
     {
         Ogre::Vector3 glowColor = getEnchantmentColor(*iter);
@@ -926,6 +945,11 @@ void NpcAnimation::applyAlpha(float alpha, Ogre::Entity *ent, NifOgre::ObjectSce
             pass->setVertexColourTracking(pass->getVertexColourTracking() &~Ogre::TVC_DIFFUSE);
         }
     }
+}
+
+void NpcAnimation::equipmentChanged()
+{
+    updateParts();
 }
 
 }

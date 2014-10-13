@@ -120,6 +120,9 @@ namespace MWGui
       , mCompanionWindow(NULL)
       , mVideoBackground(NULL)
       , mVideoWidget(NULL)
+      , mWerewolfFader(NULL)
+      , mBlindnessFader(NULL)
+      , mHitFader(NULL)
       , mScreenFader(NULL)
       , mDebugWindow(NULL)
       , mTranslationDataStorage (translationDataStorage)
@@ -127,6 +130,8 @@ namespace MWGui
       , mInputBlocker(NULL)
       , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
       , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
+      , mHitFaderEnabled(Settings::Manager::getBool ("hit fader", "GUI"))
+      , mWerewolfOverlayEnabled(Settings::Manager::getBool ("werewolf overlay", "GUI"))
       , mHudEnabled(true)
       , mGuiEnabled(true)
       , mCursorVisible(true)
@@ -267,7 +272,17 @@ namespace MWGui
         mSoulgemDialog = new SoulgemDialog(mMessageBoxManager);
         mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
         trackWindow(mCompanionWindow, "companion");
-        mScreenFader = new ScreenFader();
+
+        mWerewolfFader = new ScreenFader("textures\\werewolfoverlay.dds");
+        mBlindnessFader = new ScreenFader("black.png");
+        std::string hitFaderTexture = "textures\\bm_player_hit_01.dds";
+        // fall back to player_hit_01.dds if bm_player_hit_01.dds is not available
+        // TODO: check if non-BM versions actually use player_hit_01.dds
+        if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(hitFaderTexture))
+            hitFaderTexture = "textures\\player_hit_01.dds";
+        mHitFader = new ScreenFader(hitFaderTexture);
+        mScreenFader = new ScreenFader("black.png");
+
         mDebugWindow = new DebugWindow();
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"Overlay");
@@ -359,6 +374,8 @@ namespace MWGui
         delete mCursorManager;
         delete mRecharge;
         delete mCompanionWindow;
+        delete mHitFader;
+        delete mWerewolfFader;
         delete mScreenFader;
         delete mDebugWindow;
 
@@ -862,6 +879,9 @@ namespace MWGui
         mConsole->checkReferenceAvailable();
         mCompanionWindow->onFrame();
 
+        mWerewolfFader->update(frameDuration);
+        mBlindnessFader->update(frameDuration);
+        mHitFader->update(frameDuration);
         mScreenFader->update(frameDuration);
 
         mDebugWindow->onFrame(frameDuration);
@@ -1450,7 +1470,10 @@ namespace MWGui
 
         const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (player.getClass().getNpcStats(player).isWerewolf())
+        {
+            setWerewolfOverlay(true);
             forceHide((GuiWindow)(MWGui::GW_Inventory | MWGui::GW_Magic));
+        }
     }
 
     // Remove this method for MyGUI 3.2.2
@@ -1543,6 +1566,8 @@ namespace MWGui
         mCustomMarkers.clear();
 
         mForceHidden = GW_None;
+
+        setWerewolfOverlay(false);
 
         mGuiModes.clear();
         MWBase::Environment::get().getInputManager()->changeInputMode(false);
@@ -1718,22 +1743,46 @@ namespace MWGui
 
     void WindowManager::fadeScreenIn(const float time)
     {
-        mScreenFader->fadeIn(time);
+        mScreenFader->clearQueue();
+        mScreenFader->fadeOut(time);
     }
 
     void WindowManager::fadeScreenOut(const float time)
     {
-        mScreenFader->fadeOut(time);
+        mScreenFader->clearQueue();
+        mScreenFader->fadeIn(time);
     }
 
     void WindowManager::fadeScreenTo(const int percent, const float time)
     {
+        mScreenFader->clearQueue();
         mScreenFader->fadeTo(percent, time);
     }
 
-    void WindowManager::setScreenFactor(float factor)
+    void WindowManager::setBlindness(const int percent)
     {
-        mScreenFader->setFactor(factor);
+        mBlindnessFader->notifyAlphaChanged(percent / 100.f);
+    }
+
+    void WindowManager::activateHitOverlay(bool interrupt)
+    {
+        if (!mHitFaderEnabled)
+            return;
+
+        if (!interrupt && !mHitFader->isEmpty())
+            return;
+
+        mHitFader->clearQueue();
+        mHitFader->fadeTo(100, 0.0f);
+        mHitFader->fadeTo(0, 0.5f);
+    }
+
+    void WindowManager::setWerewolfOverlay(bool set)
+    {
+        if (!mWerewolfOverlayEnabled)
+            return;
+
+        mWerewolfFader->notifyAlphaChanged(set ? 1.0f : 0.0f);
     }
 
     void WindowManager::onClipboardChanged(const std::string &_type, const std::string &_data)

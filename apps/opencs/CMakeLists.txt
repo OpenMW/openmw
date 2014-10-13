@@ -77,12 +77,12 @@ opencs_units (view/widget
 
 opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
-    previewwidget terrainstorage
+    previewwidget
     )
 
 opencs_units_noqt (view/render
     navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
-    lightingbright object cell textoverlay overlaymask
+    lightingbright object cell terrainstorage textoverlay overlaymask
     )
 
 opencs_hdrs_noqt (view/render
