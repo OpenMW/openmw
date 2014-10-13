@@ -507,7 +507,7 @@ namespace MWGui
             mScrollBar->setVisible(true);
         }
 
-        BookTypesetter::Ptr typesetter = BookTypesetter::create (mHistory->getWidth(), std::numeric_limits<int>().max());
+        BookTypesetter::Ptr typesetter = BookTypesetter::create (mHistory->getWidth(), std::numeric_limits<int>::max());
 
         for (std::vector<DialogueText*>::iterator it = mHistoryContents.begin(); it != mHistoryContents.end(); ++it)
             (*it)->write(typesetter, &mKeywordSearch, mTopicLinks);

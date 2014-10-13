@@ -153,7 +153,7 @@ namespace MWScript
                     if (cell->getCell()->hasWater())
                         runtime.push (cell->getWaterLevel());
                     else
-                        runtime.push (-std::numeric_limits<float>().max());
+                        runtime.push (-std::numeric_limits<float>::max());
                 }
         };
 

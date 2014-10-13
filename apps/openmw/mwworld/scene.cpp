@@ -124,10 +124,10 @@ namespace MWWorld
 
     void Scene::getGridCenter(int &cellX, int &cellY)
     {
-        int maxX = std::numeric_limits<int>().min();
-        int maxY = std::numeric_limits<int>().min();
-        int minX = std::numeric_limits<int>().max();
-        int minY = std::numeric_limits<int>().max();
+        int maxX = std::numeric_limits<int>::min();
+        int maxY = std::numeric_limits<int>::min();
+        int minX = std::numeric_limits<int>::max();
+        int minY = std::numeric_limits<int>::max();
         CellStoreCollection::iterator iter = mActiveCells.begin();
         while (iter!=mActiveCells.end())
         {

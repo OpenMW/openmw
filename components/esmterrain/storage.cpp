@@ -34,8 +34,8 @@ namespace ESMTerrain
         if (!land)
             return false;
 
-        min = std::numeric_limits<float>().max();
-        max = -std::numeric_limits<float>().max();
+        min = std::numeric_limits<float>::max();
+        max = -std::numeric_limits<float>::max();
         for (int row=0; row<ESM::Land::LAND_SIZE; ++row)
         {
             for (int col=0; col<ESM::Land::LAND_SIZE; ++col)
