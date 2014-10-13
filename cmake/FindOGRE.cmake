@@ -378,11 +378,7 @@ endmacro()
 # look for Paging component
 ogre_find_component(Paging OgrePaging.h)
 # look for Overlay component
-if(APPLE)
-  ogre_find_component(Overlay Overlay/OgreOverlaySystem.h)
-else()
-  ogre_find_component(Overlay OgreOverlaySystem.h)
-endif()
+ogre_find_component(Overlay OgreOverlaySystem.h)
 ogre_find_component(Overlay OgreOverlay.h)
 # look for Terrain component
 ogre_find_component(Terrain OgreTerrain.h)
