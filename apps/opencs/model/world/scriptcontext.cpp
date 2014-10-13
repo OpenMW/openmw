@@ -47,7 +47,7 @@ std::pair<char, bool> CSMWorld::ScriptContext::getMemberType (const std::string&
     int index = mData.getScripts().searchId (id2);
     bool reference = false;
 
-    if (index!=-1)
+    if (index==-1)
     {
         // ID is not a script ID. Search for a matching referenceable instead.
         index = mData.getReferenceables().searchId (id2);
