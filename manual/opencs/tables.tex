@@ -14,21 +14,14 @@ Let's browse through the various screens and see what all these tables show.
 \begin{description}
  \item[Record:] An entry in \OCS{} representing an item, location, sound, NPC or anything else.
 
- \item[Reference, Referenceable:] When an item is placed in the world, it does not create a new record each time. For example, the game world might
- contain a lot of exquisite belts on different NPCs and in many crates, but they all refer to one specific record: the Exquisite Belt record.
- In this case, all those belts in crates and on NPCs are references. The central Exquisite Belt record is called a referenceable. This allows modders
- to make changes to all items of the same type. For example, if you want all exquisite belts to have 4000 enchantment points rather than 400, you will
- only need to change the referenceable Exquisite Belt rather than all exquisite belts references individually.
+ \item[Reference, Referenceable:] When an item is placed in the world, it isn't an isolated and unique object. For example, the game world might contain a lot of exquisite belts on different NPCs and in many crates, but they all refer to one specific record in the game's library: the Exquisite Belt record. In this case, all those belts in crates and on NPCs are references. The central Exquisite Belt record is called a referenceable. This allows modders to make changes to all items of the same type. For example, if you want all exquisite belts to have 4000 enchantment points rather than 400, you will only need to change the referenceable Exquisite Belt rather than all exquisite belts references individually.
 \end{description}
 
 \subsubsection{Recurring Terms}
 Some columns are recurring throughout \OCS. They show up in (nearly) every table in \OCS.
 
 \begin{description}
-\item[ID] Each item, location, sound, etc. gets the same unique identifier in both \OCS{} and \MW. This is usually a very self-explanatory name.
-For example, the ID for the (unique) black pants of Caius Cosades is ``Caius\_pants''. This allows you to manipulate the game in many ways. For example,
-you could add these pants to your inventory by simply opening the console and write: ``player->addItem Caius\_pants''. Either way, in both Morrowind 
-and \OCS, the ID is the primary way to identify all these different parts of the game. %Wrong! Cells do not have ID, only name.
+\item[ID] Many items in the OpenCS database have a unique identifier in both OpenCS and Morrowind. This is usually a very self-explanatory name. For example, the ID for the (unique) black pants of Caius Cosades is ``Caius\_pants''. This allows you to manipulate the game in many ways. For example, you could add these pants to your inventory by simply opening the console and write: ``player->addItem Caius\_pants''. Either way, in both Morrowind and OpenCS, the ID is the primary way to identify all these different parts of the game.
 \item[Modified] This column shows what has happened (if something has happened) to this record. There are four possible states in which it can exist. 
 \item[Base] means that this record is part of the base game and is in its original state. Usually, if you create a mod, the base game is Morrowind with
 optionally the Bloodmoon and Tribunal expansions.
@@ -96,8 +89,8 @@ a record is, it will need specific information to function. For example, an NPC 
 does not. All Record Types contain at least a~model. How else would the player see them? Usually they also have a Name, which is what you see
 when you hover your reticle  over the object.
 
-Let's go through all Record Types and discuss what you can tell \OCS{} about them.
+This is a library of all the items, triggers, containers, NPCs, etc. in the game. There are several kinds of Record Types. Depending on which type a record is, it will need specific information to function. For example, an NPC needs a value attached to its aggression level. A chest, of course, does not. All Record Types contain at least a model. How else would the player see them? Usually they also have a Name, which is what you see when you hover your reticle over the object.
 
-\begin{description}
- \item[Activator:] This is an item that, when activated, starts a script or even just shows a~tooltip.
+Please refer to the Record Types section for an overview of what each type of Referenceable does and what you can tell OpenCS about these objects.
+
 \end{description}
