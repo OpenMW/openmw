@@ -37,7 +37,7 @@ void OverlayMask::preViewportUpdate(const Ogre::RenderTargetViewportEvent &event
                     it.hasMoreElements();)
             {
                 Ogre::OverlayContainer* container = it.getNext();
-                container->hide();
+                if(container) container->hide();
             }
         }
 
