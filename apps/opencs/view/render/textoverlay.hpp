@@ -42,7 +42,8 @@ namespace CSVRender
             int textWidth();
             int fontHeight();
             void getScreenCoordinates(const Ogre::Vector3& position, Ogre::Real& x, Ogre::Real& y);
-            void getMinMaxEdgesOfTopAABBIn2D(float& MinX, float& MinY, float& MaxX, float& MaxY);
+            void getMinMaxEdgesOfAABBIn2D(float& MinX, float& MinY, float& MaxX, float& MaxY,
+                                          bool top = true);
 
         public:
 

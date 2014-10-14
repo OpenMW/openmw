@@ -53,6 +53,7 @@ TextOverlay::TextOverlay(const Ogre::MovableObject* obj, const Ogre::Camera* cam
     // setup overlay
     Ogre::OverlayManager &overlayMgr = Ogre::OverlayManager::getSingleton();
     mOverlay = overlayMgr.getByName("CellIDPanel"+mId+Ogre::StringConverter::toString(mInstance));
+    // FIXME: this logic is badly broken as it is possible to delete an earlier instance
     while(mOverlay != NULL)
     {
         mInstance++;
@@ -147,35 +148,47 @@ void TextOverlay::getScreenCoordinates(const Ogre::Vector3& position, Ogre::Real
     y = ((hcsPosition.y * 0.5f) + 0.5f); // 0 <= y <= 1 // bottom := 0,top := 1
 }
 
-void TextOverlay::getMinMaxEdgesOfTopAABBIn2D(float& MinX, float& MinY, float& MaxX, float& MaxY)
+void TextOverlay::getMinMaxEdgesOfAABBIn2D(float& MinX, float& MinY, float& MaxX, float& MaxY,
+                                           bool top)
 {
     MinX = 0, MinY = 0, MaxX = 0, MaxY = 0;
     float X[4]; // the 2D dots of the AABB in screencoordinates
     float Y[4];
 
-    if (!mObj->isInScene())
+    if(!mObj->isInScene())
         return;
 
     const Ogre::AxisAlignedBox &AABB = mObj->getWorldBoundingBox(true); // the AABB of the target
-    const Ogre::Vector3 CornersOfTopAABB[4] = { AABB.getCorner(Ogre::AxisAlignedBox::FAR_LEFT_TOP),
-                                        AABB.getCorner(Ogre::AxisAlignedBox::FAR_RIGHT_TOP),
-                                        AABB.getCorner(Ogre::AxisAlignedBox::NEAR_LEFT_TOP),
-                                        AABB.getCorner(Ogre::AxisAlignedBox::NEAR_RIGHT_TOP)};
+    Ogre::Vector3 cornersOfAABB[4];
+    if(top)
+    {
+        cornersOfAABB[0] = AABB.getCorner(Ogre::AxisAlignedBox::FAR_LEFT_TOP);
+        cornersOfAABB[1] = AABB.getCorner(Ogre::AxisAlignedBox::FAR_RIGHT_TOP);
+        cornersOfAABB[2] = AABB.getCorner(Ogre::AxisAlignedBox::NEAR_LEFT_TOP);
+        cornersOfAABB[3] = AABB.getCorner(Ogre::AxisAlignedBox::NEAR_RIGHT_TOP);
+    }
+    else
+    {
+        cornersOfAABB[0] = AABB.getCorner(Ogre::AxisAlignedBox::FAR_LEFT_BOTTOM);
+        cornersOfAABB[1] = AABB.getCorner(Ogre::AxisAlignedBox::FAR_RIGHT_BOTTOM);
+        cornersOfAABB[2] = AABB.getCorner(Ogre::AxisAlignedBox::NEAR_LEFT_BOTTOM);
+        cornersOfAABB[3] = AABB.getCorner(Ogre::AxisAlignedBox::NEAR_RIGHT_BOTTOM);
+    }
 
-    //The normal vector of the plaine.this points directly infront of the cam
-    Ogre::Vector3 CameraPlainNormal = mCamera->getDerivedOrientation().zAxis();
+    //The normal vector of the plane. This points directly infront of the camera.
+    Ogre::Vector3 cameraPlainNormal = mCamera->getDerivedOrientation().zAxis();
 
-    //the plaine that devides the space bevor and behin the cam
-    Ogre::Plane CameraPlain = Ogre::Plane(CameraPlainNormal, mCamera->getDerivedPosition());
+    //the plane that devides the space before and behind the camera.
+    Ogre::Plane CameraPlane = Ogre::Plane(cameraPlainNormal, mCamera->getDerivedPosition());
 
     for (int i = 0; i < 4; i++)
     {
         X[i] = 0;
         Y[i] = 0;
 
-        getScreenCoordinates(CornersOfTopAABB[i],X[i],Y[i]); // transfor into 2d dots
+        getScreenCoordinates(cornersOfAABB[i],X[i],Y[i]); // transfor into 2d dots
 
-        if (CameraPlain.getSide(CornersOfTopAABB[i]) == Ogre::Plane::NEGATIVE_SIDE)
+        if (CameraPlane.getSide(cornersOfAABB[i]) == Ogre::Plane::NEGATIVE_SIDE)
         {
             if (i == 0) // accept the first set of values, no matter how bad it might be.
             {
@@ -270,11 +283,21 @@ int TextOverlay::textWidth()
     float captionWidth = 0;
     float descWidth = 0;
 
-    // NOTE: assumed fixed width font, i.e. no compensation for narrow glyphs
     for(Ogre::String::const_iterator i = mCaption.begin(); i < mCaption.end(); ++i)
-        captionWidth += getFont()->getGlyphAspectRatio(*i);
+    {
+        if(*i == 0x0020)
+            captionWidth += getFont()->getGlyphAspectRatio(0x0030);
+        else
+            captionWidth += getFont()->getGlyphAspectRatio(*i);
+    }
+
     for(Ogre::String::const_iterator i = mDesc.begin(); i < mDesc.end(); ++i)
-        descWidth += getFont()->getGlyphAspectRatio(*i);
+    {
+        if(*i == 0x0020)
+            descWidth += getFont()->getGlyphAspectRatio(0x0030);
+        else
+            descWidth += getFont()->getGlyphAspectRatio(*i);
+    }
 
     captionWidth *= fontHeight();
     descWidth *= fontHeight();
@@ -290,7 +313,7 @@ int TextOverlay::fontHeight()
 void TextOverlay::update()
 {
     float min_x, max_x, min_y, max_y;
-    getMinMaxEdgesOfTopAABBIn2D(min_x, min_y, max_x, max_y);
+    getMinMaxEdgesOfAABBIn2D(min_x, min_y, max_x, max_y, false);
 
     if ((min_x>0.0) && (max_x<1.0) && (min_y>0.0) && (max_y<1.0))
     {
@@ -304,11 +327,13 @@ void TextOverlay::update()
         return;
     }
 
+    getMinMaxEdgesOfAABBIn2D(min_x, min_y, max_x, max_y);
+
     Ogre::OverlayManager &overlayMgr = Ogre::OverlayManager::getSingleton();
     float viewportWidth = std::max(overlayMgr.getViewportWidth(), 1); // zero at the start
     float viewportHeight = std::max(overlayMgr.getViewportHeight(), 1); // zero at the start
 
-    int width = fontHeight()/3 + textWidth() + fontHeight()/3;
+    int width =  fontHeight()*2/3 + textWidth() + fontHeight()*2/3; // add margins
     int height = fontHeight()/3 + fontHeight() + fontHeight()/3;
     if(mDesc != "")
         height = fontHeight()/3 + 2*fontHeight() + fontHeight()/3;

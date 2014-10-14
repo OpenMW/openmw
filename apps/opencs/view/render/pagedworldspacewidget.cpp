@@ -136,7 +136,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                               height);
             manual-> position(ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
                               ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
-                              height+20); // FIXME: config setting
+                              height+200); // FIXME: config setting
             manual->end();
             manual->setBoundingBox(Ogre::AxisAlignedBox(
                               ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
@@ -144,7 +144,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                               height,
                               ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
                               ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
-                              height+20));
+                              height+200));
             getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(manual);
             manual->setVisible(false);
 
