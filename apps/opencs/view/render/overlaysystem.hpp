@@ -14,7 +14,7 @@ namespace CSVRender
             }
 
             ~OverlaySystem() {
-                delete mOverlaySystem;
+                if(mOverlaySystem) delete mOverlaySystem;
             }
 
             OverlaySystem(OverlaySystem const&);
@@ -29,6 +29,11 @@ namespace CSVRender
 
             Ogre::OverlaySystem *get() {
                 return mOverlaySystem;
+            }
+
+            void destroy() {
+                delete mOverlaySystem;
+                mOverlaySystem = NULL;
             }
     };
 }

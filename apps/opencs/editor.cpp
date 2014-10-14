@@ -18,6 +18,7 @@
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
+#include "view/render/overlaysystem.hpp"
 
 CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 : mUserSettings (mCfgMgr), mDocumentManager (mCfgMgr), mViewManager (mDocumentManager),
@@ -63,6 +64,11 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 
     connect (&mNewGame, SIGNAL (createRequest (const boost::filesystem::path&)),
              this, SLOT (createNewGame (const boost::filesystem::path&)));
+}
+
+CS::Editor::~Editor ()
+{
+    CSVRender::OverlaySystem::instance().destroy();  // destruct before Ogre::Root
 }
 
 void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)

@@ -64,6 +64,7 @@ namespace CS
         public:
 
             Editor (OgreInit::OgreInit& ogreInit);
+            ~Editor ();
 
             bool makeIPCServer();
             void connectToIPCServer();
