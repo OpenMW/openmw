@@ -97,7 +97,7 @@ namespace CSVRender
             Ogre::SceneManager* mSceneMgr;
             Ogre::RenderWindow* mWindow;
             Ogre::Viewport *mViewport;
-            static Ogre::OverlaySystem *mOverlaySystem;
+            Ogre::OverlaySystem *mOverlaySystem;
 
             Navigation *mNavigation;
             Lighting *mLighting;

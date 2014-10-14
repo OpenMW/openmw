@@ -11,18 +11,16 @@
 #include <OgreCamera.h>
 #include <OgreSceneNode.h>
 #include <OgreViewport.h>
-#include <OgreOverlaySystem.h>
 
 #include "../widget/scenetoolmode.hpp"
 #include "../../model/settings/usersettings.hpp"
 
 #include "navigation.hpp"
 #include "lighting.hpp"
+#include "overlaysystem.hpp"
 
 namespace CSVRender
 {
-    Ogre::OverlaySystem *SceneWidget::mOverlaySystem = NULL;
-
     SceneWidget::SceneWidget(QWidget *parent)
         : QWidget(parent)
         , mCamera(NULL)
@@ -62,8 +60,7 @@ namespace CSVRender
 
         setLighting (&mLightingDay);
 
-        if(!mOverlaySystem)
-            mOverlaySystem = new Ogre::OverlaySystem();
+        mOverlaySystem = OverlaySystem::instance().get();
         mSceneMgr->addRenderQueueListener(mOverlaySystem);
 
         QTimer *timer = new QTimer (this);
