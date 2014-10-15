@@ -29,8 +29,8 @@ namespace CSMSettings
 
     public:
 
-        explicit Setting(SettingType typ, const QString &settingName,
-                         const QString &pageName);
+        Setting(SettingType typ, const QString &settingName,
+            const QString &pageName, const QString& label = "");
 
         void addProxy (const Setting *setting, const QStringList &vals);
         void addProxy (const Setting *setting, const QList <QStringList> &list);
@@ -130,6 +130,10 @@ namespace CSMSettings
 
         void setWidgetWidth (int value);
         int widgetWidth() const;
+
+        /// This is the text the user gets to see.
+        void setLabel (const QString& label);
+        QString getLabel() const;
 
         ///returns the specified property value
         QStringList property (SettingProperty prop) const;

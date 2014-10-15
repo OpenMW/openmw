@@ -52,49 +52,49 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
     declareSection ("Objects");
     {
-        Setting *numLights = createSetting (Type_SpinBox, "num_lights");
+        Setting *numLights = createSetting (Type_SpinBox, "num_lights", "num_lights");
         numLights->setDefaultValue(8);
         numLights->setRange (0, 100);
 
-        Setting *shaders = createSetting (Type_CheckBox, "shaders");
+        Setting *shaders = createSetting (Type_CheckBox, "shaders", "Enable Shaders");
         shaders->setDefaultValue("true");
-        shaders->setSpecialValueText("Enable Shaders");
+//        shaders->setSpecialValueText("Enable Shaders");
     }
 
     declareSection ("Scene");
     {
-        Setting *fastFactor = createSetting (Type_SpinBox, "fast factor");
+        Setting *fastFactor = createSetting (Type_SpinBox, "fast factor", "fast factor");
         fastFactor->setDefaultValue(4);
         fastFactor->setRange (1, 100);
 
-        Setting *farClipDist = createSetting (Type_DoubleSpinBox, "far clip distance");
+        Setting *farClipDist = createSetting (Type_DoubleSpinBox, "far clip distance", "far clip distance");
         farClipDist->setDefaultValue(300000);
         farClipDist->setRange (0, 1000000);
 
-        Setting *timerStart = createSetting (Type_SpinBox, "timer start");
+        Setting *timerStart = createSetting (Type_SpinBox, "timer start", "timer start");
         timerStart->setDefaultValue(20);
         timerStart->setRange (1, 100);
     }
 
     declareSection ("SubView");
     {
-        Setting *maxSubView = createSetting (Type_SpinBox, "max subviews");
+        Setting *maxSubView = createSetting (Type_SpinBox, "max subviews", "max subviews");
         maxSubView->setDefaultValue(256);
         maxSubView->setRange (1, 256);
 
-        Setting *minWidth = createSetting (Type_SpinBox, "minimum width");
+        Setting *minWidth = createSetting (Type_SpinBox, "minimum width", "minimum width");
         minWidth->setDefaultValue(325);
         minWidth->setRange (50, 10000);
 
-        Setting *reuse = createSetting (Type_CheckBox, "reuse");
+        Setting *reuse = createSetting (Type_CheckBox, "reuse", "Reuse SubView");
         reuse->setDefaultValue("true");
-        reuse->setSpecialValueText("Reuse SubView");
+//        reuse->setSpecialValueText("Reuse SubView");
     }
 
     declareSection ("Window Size");
     {
-        Setting *width = createSetting (Type_LineEdit, "Width");
-        Setting *height = createSetting (Type_LineEdit, "Height");
+        Setting *width = createSetting (Type_LineEdit, "Width", "Width");
+        Setting *height = createSetting (Type_LineEdit, "Height", "Height");
 
         width->setDefaultValues (QStringList() << "1024");
         height->setDefaultValues (QStringList() << "768");
@@ -105,7 +105,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         /*
          *Create the proxy setting for predefined values
          */
-        Setting *preDefined = createSetting (Type_ComboBox, "Pre-Defined");
+        Setting *preDefined = createSetting (Type_ComboBox, "Pre-Defined", "Pre-Defined");
 
         preDefined->setEditorSetting (false);
 
@@ -131,9 +131,9 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         QStringList values = QStringList()
                             << defaultValue << "Icon Only" << "Text Only";
 
-        Setting *rsd = createSetting (Type_RadioButton, "Record Status Display");
+        Setting *rsd = createSetting (Type_RadioButton, "Record Status Display", "Record Status Display");
 
-        Setting *ritd = createSetting (Type_RadioButton, "Referenceable ID Type Display");
+        Setting *ritd = createSetting (Type_RadioButton, "Referenceable ID Type Display", "Referenceable ID Type Display");
 
         rsd->setDeclaredValues (values);
         ritd->setDeclaredValues (values);
@@ -144,7 +144,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         QString defaultValue = "None";
         QStringList values = QStringList()
                         << defaultValue << "MSAA 2" << "MSAA 4" << "MSAA 8" << "MSAA 16";
-        Setting *antialiasing = createSetting (Type_SpinBox, "antialiasing");
+        Setting *antialiasing = createSetting (Type_SpinBox, "antialiasing", "antialiasing");
         antialiasing->setDeclaredValues (values);
     }
 
@@ -486,9 +486,9 @@ CSMSettings::SettingPageMap CSMSettings::UserSettings::settingPageMap() const
 }
 
 CSMSettings::Setting *CSMSettings::UserSettings::createSetting
-        (CSMSettings::SettingType type, const QString &name)
+        (CSMSettings::SettingType type, const QString &name, const QString& label)
 {
-    Setting *setting = new Setting (type, name, mSection);
+    Setting *setting = new Setting (type, name, mSection, label);
 
     // set useful defaults
     int row = 1;
@@ -522,6 +522,9 @@ CSMSettings::Setting *CSMSettings::UserSettings::createSetting
 
     if (type==Type_CheckBox)
         setting->setDeclaredValues(QStringList() << "true" << "false");
+
+    if (type==Type_CheckBox)
+        setting->setSpecialValueText (setting->getLabel());
 
     //add declaration to the model
     mSettings.append (setting);

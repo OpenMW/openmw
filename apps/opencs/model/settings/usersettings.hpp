@@ -85,7 +85,8 @@ namespace CSMSettings {
         void buildSettingModelDefaults();
 
         ///add a new setting to the model and return it
-        Setting *createSetting (CSMSettings::SettingType type, const QString &name);
+        Setting *createSetting (CSMSettings::SettingType type, const QString &name,
+            const QString& label);
 
         /// Set the section for createSetting calls.
         ///

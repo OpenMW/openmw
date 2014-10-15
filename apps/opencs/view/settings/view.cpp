@@ -17,7 +17,7 @@ CSVSettings::View::View(CSMSettings::Setting *setting,
       mIsMultiValue (setting->isMultiValue()),
       mViewKey (setting->page() + '/' + setting->name()),
       mSerializable (setting->serializable()),
-      Frame(true, setting->name(), parent)
+      Frame(true, setting->getLabel(), parent)
 {
     setObjectName (setting->name());
     buildView();

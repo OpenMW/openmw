@@ -2,8 +2,8 @@
 #include "support.hpp"
 
 CSMSettings::Setting::Setting(SettingType typ, const QString &settingName,
-                             const QString &pageName)
-    : mIsEditorSetting (true)
+    const QString &pageName, const QString& label)
+: mIsEditorSetting (true)
 {
     buildDefaultSetting();
 
@@ -17,6 +17,7 @@ CSMSettings::Setting::Setting(SettingType typ, const QString &settingName,
     setProperty (Property_SettingType, QVariant (settingType).toString());
     setProperty (Property_Page, pageName);
     setProperty (Property_Name, settingName);
+    setProperty (Property_Label, label.isEmpty() ? settingName : label);
 }
 
 void CSMSettings::Setting::buildDefaultSetting()
@@ -362,6 +363,16 @@ void CSMSettings::Setting::setWrapping (bool state)
 bool CSMSettings::Setting::wrapping() const
 {
     return (property (Property_Wrapping).at(0) == "true");
+}
+
+void CSMSettings::Setting::setLabel (const QString& label)
+{
+    setProperty (Property_Label, label);
+}
+
+QString CSMSettings::Setting::getLabel() const
+{
+    return property (Property_Label).at (0);
 }
 
 void CSMSettings::Setting::setProperty (SettingProperty prop, bool value)
