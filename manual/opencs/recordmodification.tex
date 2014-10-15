@@ -5,5 +5,19 @@ So far you learned how to browse trough records stored inside the content files,
 
 \subsubsection{Glossary}
 \begin{description}
-  \item[Edit Panel] Interface element used inside the \OCS{} to present records data for editing. Unlike table it showes only one record at the time. However it also presents fields that are not visible inside the table. It is safe to say that Edit Panel presents data in way that is easier to read thanks to it's horizontal layout.
+  \item[Edit Panel] Interface element used inside the \OCS{} to present records data for editing. Unlike table it showes only one record at the time. However it also presents fields that are not visible inside the table. It is also safe to say that Edit Panel presents data in way that is easier to read thanks to it's horizontal layout.
 \end{description}
+
+\subsection{Edit Panel Interface}
+Edit Panel is designed to aid you with record modification tasks. As It has been said, it uses vertical layout and presents some additional fields when compared with the table -- and some fields, even if they are actually displayed in the table, clearly ill-suited for modification isnide of them (this applies to fields that holds long text strings -- like descriptions). It also displays visual difference beetween non-editable field and editable.\\
+To open edit panel, please open context menu on any record and choose edit action. This will open edit panel in the same window as your table and will present you the record fields. First data fields are actually not user editable and presented in the form of the text labels at the top of the edit panel. Lower data fields are presented in the form of actually user-editable widgets. Those includes spinboxes, text edits and text fields\footnote{Those are actually a valid terms used to describe classes of the user interface elements. If you don't understand those, don't worry -- those are very standard {GUI} elements present in almost every application since the rise of the desktop metaphor.}. Once you will finish editing one of those fields, data will be updated. There is no apply button of any sort -- simply use one of those widgets and be merry.\\
+In addition to that you probabbly noticed some icons in the bar located at the very bottom of the edit panel. Those can be used to perform the following actions:
+
+\begin{description}
+  \item[Preview] This will launch preview panel -- which will be described later.
+  \item[Next] This will switch edit panel to the next record. It is worth noticing that edit panel will skip deleted records.
+  \item[Prev] Do I really need to say what this button does?
+\end{description}
+
+\subsection{Verification tool}
+As you could notice there is nothing that can stop you from breaking the game by violating record fields logic.
