@@ -18,7 +18,6 @@
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
-#include "view/render/overlaysystem.hpp"
 
 CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 : mUserSettings (mCfgMgr), mDocumentManager (mCfgMgr), mViewManager (mDocumentManager),
@@ -276,7 +275,7 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
     Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName(renderSystem));
 
     // Initialise Ogre::OverlaySystem after Ogre::Root but before initialisation
-    CSVRender::OverlaySystem::instance();
+    mOverlaySystem.get();
 
     Ogre::Root::getSingleton().initialise(false);
 

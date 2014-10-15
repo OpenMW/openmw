@@ -27,6 +27,7 @@
 #include "view/doc/newgame.hpp"
 
 #include "view/settings/dialog.hpp"
+#include "view/render/overlaysystem.hpp"
 
 namespace OgreInit
 {
@@ -42,6 +43,7 @@ namespace CS
             Nif::Cache mNifCache;
             Files::ConfigurationManager mCfgMgr;
             CSMSettings::UserSettings mUserSettings;
+            CSVRender::OverlaySystem mOverlaySystem;
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
