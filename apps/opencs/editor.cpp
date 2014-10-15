@@ -275,6 +275,9 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName(renderSystem));
 
+    // Initialise Ogre::OverlaySystem after Ogre::Root but before initialisation
+    CSVRender::OverlaySystem::instance();
+
     Ogre::Root::getSingleton().initialise(false);
 
     // Create a hidden background window to keep resources
