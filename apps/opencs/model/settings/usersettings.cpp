@@ -50,51 +50,51 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
     QString section;
 
-    section = "Objects";
+    declareSection ("Objects");
     {
-        Setting *numLights = createSetting (Type_SpinBox, section, "num_lights");
+        Setting *numLights = createSetting (Type_SpinBox, "num_lights");
         numLights->setDefaultValue(8);
         numLights->setRange (0, 100);
 
-        Setting *shaders = createSetting (Type_CheckBox, section, "shaders");
+        Setting *shaders = createSetting (Type_CheckBox, "shaders");
         shaders->setDefaultValue("true");
         shaders->setSpecialValueText("Enable Shaders");
     }
 
-    section = "Scene";
+    declareSection ("Scene");
     {
-        Setting *fastFactor = createSetting (Type_SpinBox, section, "fast factor");
+        Setting *fastFactor = createSetting (Type_SpinBox, "fast factor");
         fastFactor->setDefaultValue(4);
         fastFactor->setRange (1, 100);
 
-        Setting *farClipDist = createSetting (Type_DoubleSpinBox, section, "far clip distance");
+        Setting *farClipDist = createSetting (Type_DoubleSpinBox, "far clip distance");
         farClipDist->setDefaultValue(300000);
         farClipDist->setRange (0, 1000000);
 
-        Setting *timerStart = createSetting (Type_SpinBox, section, "timer start");
+        Setting *timerStart = createSetting (Type_SpinBox, "timer start");
         timerStart->setDefaultValue(20);
         timerStart->setRange (1, 100);
     }
 
-    section = "SubView";
+    declareSection ("SubView");
     {
-        Setting *maxSubView = createSetting (Type_SpinBox, section, "max subviews");
+        Setting *maxSubView = createSetting (Type_SpinBox, "max subviews");
         maxSubView->setDefaultValue(256);
         maxSubView->setRange (1, 256);
 
-        Setting *minWidth = createSetting (Type_SpinBox, section, "minimum width");
+        Setting *minWidth = createSetting (Type_SpinBox, "minimum width");
         minWidth->setDefaultValue(325);
         minWidth->setRange (50, 10000);
 
-        Setting *reuse = createSetting (Type_CheckBox, section, "reuse");
+        Setting *reuse = createSetting (Type_CheckBox, "reuse");
         reuse->setDefaultValue("true");
         reuse->setSpecialValueText("Reuse SubView");
     }
 
-    section = "Window Size";
+    declareSection ("Window Size");
     {
-        Setting *width = createSetting (Type_LineEdit, section, "Width");
-        Setting *height = createSetting (Type_LineEdit, section, "Height");
+        Setting *width = createSetting (Type_LineEdit, "Width");
+        Setting *height = createSetting (Type_LineEdit, "Height");
 
         width->setDefaultValues (QStringList() << "1024");
         height->setDefaultValues (QStringList() << "768");
@@ -105,8 +105,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         /*
          *Create the proxy setting for predefined values
          */
-        Setting *preDefined = createSetting (Type_ComboBox, section,
-                                             "Pre-Defined");
+        Setting *preDefined = createSetting (Type_ComboBox, "Pre-Defined");
 
         preDefined->setEditorSetting (false);
 
@@ -125,33 +124,30 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
                              );
     }
 
-    section = "Display Format";
+    declareSection ("Display Format");
     {
         QString defaultValue = "Icon and Text";
 
         QStringList values = QStringList()
                             << defaultValue << "Icon Only" << "Text Only";
 
-        Setting *rsd = createSetting (Type_RadioButton,
-                                      section, "Record Status Display");
+        Setting *rsd = createSetting (Type_RadioButton, "Record Status Display");
 
-        Setting *ritd = createSetting (Type_RadioButton,
-                                      section, "Referenceable ID Type Display");
+        Setting *ritd = createSetting (Type_RadioButton, "Referenceable ID Type Display");
 
         rsd->setDeclaredValues (values);
         ritd->setDeclaredValues (values);
     }
 
-    section = "Video";
+    declareSection ("Video");
     {
         QString defaultValue = "None";
         QStringList values = QStringList()
                         << defaultValue << "MSAA 2" << "MSAA 4" << "MSAA 8" << "MSAA 16";
-        Setting *antialiasing = createSetting (Type_SpinBox, section, "antialiasing");
+        Setting *antialiasing = createSetting (Type_SpinBox, "antialiasing");
         antialiasing->setDeclaredValues (values);
     }
 
-    section = "Proxy Selection Test";
     {
         /******************************************************************
         * There are three types of values:
@@ -490,17 +486,9 @@ CSMSettings::SettingPageMap CSMSettings::UserSettings::settingPageMap() const
 }
 
 CSMSettings::Setting *CSMSettings::UserSettings::createSetting
-        (CSMSettings::SettingType type, const QString &page, const QString &name)
+        (CSMSettings::SettingType type, const QString &name)
 {
-    //get list of all settings for the current setting name
-    if (findSetting (page, name))
-    {
-        qWarning() << "Duplicate declaration encountered: "
-                   << (name + '/' + page);
-        return 0;
-    }
-
-    Setting *setting = new Setting (type, name, page);
+    Setting *setting = new Setting (type, name, mSection);
 
     // set useful defaults
     int row = 1;
@@ -539,6 +527,11 @@ CSMSettings::Setting *CSMSettings::UserSettings::createSetting
     mSettings.append (setting);
 
     return setting;
+}
+
+void CSMSettings::UserSettings::declareSection (const QString& page)
+{
+    mSection = page;
 }
 
 QStringList CSMSettings::UserSettings::definitions (const QString &viewKey) const

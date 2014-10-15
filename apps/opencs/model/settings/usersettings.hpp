@@ -35,6 +35,7 @@ namespace CSMSettings {
         QSettings *mSettingDefinitions;
         QSettings *mSettingCfgDefinitions;
         QList <Setting *> mSettings;
+        QString mSection;
 
 
     public:
@@ -84,8 +85,12 @@ namespace CSMSettings {
         void buildSettingModelDefaults();
 
         ///add a new setting to the model and return it
-        Setting *createSetting (CSMSettings::SettingType typ,
-                            const QString &page, const QString &name);
+        Setting *createSetting (CSMSettings::SettingType type, const QString &name);
+
+        /// Set the section for createSetting calls.
+        ///
+        /// Sections can be declared multiple times.
+        void declareSection (const QString& page);
 
     signals:
 
