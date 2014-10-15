@@ -8,6 +8,7 @@ set(MYGUI_FILES
     white.png
     core.skin
     core.xml
+    core_layouteditor.xml
     openmw_alchemy_window.layout
     openmw_book.layout
     openmw_box.skin.xml
@@ -88,6 +89,7 @@ set(MYGUI_FILES
     DejaVuLGCSansMono.ttf
     ../launcher/images/openmw.png
     OpenMWResourcePlugin.xml
+    skins.xml
 )
 
 
