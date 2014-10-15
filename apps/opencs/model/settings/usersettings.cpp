@@ -54,86 +54,41 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
     {
         Setting *numLights = createSetting (Type_SpinBox, section, "num_lights");
         numLights->setDefaultValue(8);
-        numLights->setEditorSetting(true);
-        numLights->setColumnSpan (1);
-        numLights->setMinimum (0);
-        numLights->setMaximum (100); // FIXME: not sure what the max value should be
-        numLights->setWidgetWidth (10);
-        numLights->setViewLocation(1, 2);
+        numLights->setRange (0, 100);
 
         Setting *shaders = createSetting (Type_CheckBox, section, "shaders");
-        shaders->setDeclaredValues(QStringList() << "true" << "false");
         shaders->setDefaultValue("true");
-        shaders->setEditorSetting(true);
         shaders->setSpecialValueText("Enable Shaders");
-        shaders->setWidgetWidth(25);
-        shaders->setColumnSpan (3);
-        shaders->setStyleSheet ("QGroupBox { border: 0px; }");
-        shaders->setViewLocation(2, 1);
     }
 
     section = "Scene";
     {
         Setting *fastFactor = createSetting (Type_SpinBox, section, "fast factor");
         fastFactor->setDefaultValue(4);
-        fastFactor->setEditorSetting(true);
-        fastFactor->setColumnSpan (1);
-        fastFactor->setMinimum (1);
-        fastFactor->setSpecialValueText ("1"); // FIXME: workaround
-        fastFactor->setMaximum (100); // FIXME: not sure what the max value should be
-        fastFactor->setWidgetWidth (10);
-        fastFactor->setViewLocation(1, 2);
+        fastFactor->setRange (1, 100);
 
         Setting *farClipDist = createSetting (Type_DoubleSpinBox, section, "far clip distance");
         farClipDist->setDefaultValue(300000);
-        farClipDist->setEditorSetting(true);
-        farClipDist->setColumnSpan (1);
-        farClipDist->setMinimum (0);
-        farClipDist->setMaximum (1000000); // FIXME: not sure what the max value should be
-        farClipDist->setWidgetWidth (10);
-        farClipDist->setViewLocation(2, 2);
+        farClipDist->setRange (0, 1000000);
 
         Setting *timerStart = createSetting (Type_SpinBox, section, "timer start");
         timerStart->setDefaultValue(20);
-        timerStart->setEditorSetting(true);
-        timerStart->setColumnSpan (1);
-        timerStart->setMinimum (0);
-        timerStart->setMaximum (100); // FIXME: not sure what the max value should be
-        timerStart->setWidgetWidth (10);
-        timerStart->setViewLocation(3, 2);
+        timerStart->setRange (1, 100);
     }
 
     section = "SubView";
     {
         Setting *maxSubView = createSetting (Type_SpinBox, section, "max subviews");
         maxSubView->setDefaultValue(256);
-        maxSubView->setEditorSetting(true);
-        maxSubView->setColumnSpan (1);
-        maxSubView->setMinimum (1);
-        maxSubView->setSpecialValueText ("1");
-        maxSubView->setMaximum (256); // FIXME: not sure what the max value should be
-        maxSubView->setWidgetWidth (10);
-        maxSubView->setViewLocation(1, 2);
+        maxSubView->setRange (1, 256);
 
         Setting *minWidth = createSetting (Type_SpinBox, section, "minimum width");
         minWidth->setDefaultValue(325);
-        minWidth->setEditorSetting(true);
-        minWidth->setColumnSpan (1);
-        minWidth->setMinimum (50);
-        minWidth->setSpecialValueText ("50");
-        minWidth->setMaximum (10000); // FIXME: not sure what the max value should be
-        minWidth->setWidgetWidth (10);
-        minWidth->setViewLocation(2, 2);
+        minWidth->setRange (50, 10000);
 
         Setting *reuse = createSetting (Type_CheckBox, section, "reuse");
-        reuse->setDeclaredValues(QStringList() << "true" << "false");
         reuse->setDefaultValue("true");
-        reuse->setEditorSetting(true);
         reuse->setSpecialValueText("Reuse SubView");
-        reuse->setWidgetWidth(25);
-        reuse->setColumnSpan (3);
-        reuse->setStyleSheet ("QGroupBox { border: 0px; }");
-        reuse->setViewLocation(3, 2);
     }
 
     section = "Window Size";
@@ -141,14 +96,8 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         Setting *width = createSetting (Type_LineEdit, section, "Width");
         Setting *height = createSetting (Type_LineEdit, section, "Height");
 
-        width->setWidgetWidth (5);
-        height->setWidgetWidth (8);
-
         width->setDefaultValues (QStringList() << "1024");
         height->setDefaultValues (QStringList() << "768");
-
-        width->setEditorSetting (true);
-        height->setEditorSetting (true);
 
         height->setViewLocation (2,2);
         width->setViewLocation (2,1);
@@ -159,11 +108,12 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         Setting *preDefined = createSetting (Type_ComboBox, section,
                                              "Pre-Defined");
 
+        preDefined->setEditorSetting (false);
+
         preDefined->setDeclaredValues (QStringList() << "640 x 480"
                                 << "800 x 600" << "1024 x 768" << "1440 x 900");
 
         preDefined->setViewLocation (1, 1);
-        preDefined->setWidgetWidth (10);
         preDefined->setColumnSpan (2);
 
         preDefined->addProxy (width,
@@ -190,9 +140,6 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         rsd->setDeclaredValues (values);
         ritd->setDeclaredValues (values);
-
-        rsd->setEditorSetting (true);
-        ritd->setEditorSetting (true);
     }
 
     section = "Video";
@@ -202,8 +149,6 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
                         << defaultValue << "MSAA 2" << "MSAA 4" << "MSAA 8" << "MSAA 16";
         Setting *antialiasing = createSetting (Type_SpinBox, section, "antialiasing");
         antialiasing->setDeclaredValues (values);
-        antialiasing->setEditorSetting (true);
-        antialiasing->setWidgetWidth(15);
     }
 
     section = "Proxy Selection Test";
@@ -545,7 +490,7 @@ CSMSettings::SettingPageMap CSMSettings::UserSettings::settingPageMap() const
 }
 
 CSMSettings::Setting *CSMSettings::UserSettings::createSetting
-        (CSMSettings::SettingType typ, const QString &page, const QString &name)
+        (CSMSettings::SettingType type, const QString &page, const QString &name)
 {
     //get list of all settings for the current setting name
     if (findSetting (page, name))
@@ -555,8 +500,40 @@ CSMSettings::Setting *CSMSettings::UserSettings::createSetting
         return 0;
     }
 
-    Setting *setting = new Setting (typ, name, page);
+    Setting *setting = new Setting (type, name, page);
 
+    // set useful defaults
+    int row = 1;
+
+    if (!mSettings.empty())
+        row = mSettings.back()->viewRow()+1;
+
+    int column = 2;
+
+    if (type==Type_CheckBox)
+        column = 1;
+
+    setting->setViewLocation (row, column);
+
+    int span = 1;
+
+    if (type==Type_CheckBox)
+        span = 3;
+
+    setting->setColumnSpan (span);
+
+    int width = 10;
+
+    if (type==Type_CheckBox)
+        width = 40;
+
+    setting->setWidgetWidth (width);
+
+    if (type==Type_CheckBox)
+        setting->setStyleSheet ("QGroupBox { border: 0px; }");
+
+    if (type==Type_CheckBox)
+        setting->setDeclaredValues(QStringList() << "true" << "false");
 
     //add declaration to the model
     mSettings.append (setting);

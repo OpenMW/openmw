@@ -66,12 +66,11 @@ namespace CSMSettings
         void setMask (const QString &value);
         QString mask() const;
 
-        void setMaximum (int value);
-        void setMaximum (double value);
+        void setRange (int min, int max);
+        void setRange (double min, double max);
+
         QString maximum() const;
 
-        void setMinimum (int value);
-        void setMinimum (double value);
         QString minimum() const;
 
         void setName (const QString &value);

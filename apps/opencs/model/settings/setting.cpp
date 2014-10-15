@@ -3,7 +3,7 @@
 
 CSMSettings::Setting::Setting(SettingType typ, const QString &settingName,
                              const QString &pageName)
-    : mIsEditorSetting (false)
+    : mIsEditorSetting (true)
 {
     buildDefaultSetting();
 
@@ -290,29 +290,21 @@ CSMSettings::SettingType CSMSettings::Setting::type() const
                                         Property_SettingType).at(0).toInt());
 }
 
-void CSMSettings::Setting::setMaximum (int value)
+void CSMSettings::Setting::setRange (int min, int max)
 {
-    setProperty (Property_Maximum, value);
+    setProperty (Property_Minimum, min);
+    setProperty (Property_Maximum, max);
 }
 
-void CSMSettings::Setting::setMaximum (double value)
+void CSMSettings::Setting::setRange (double min, double max)
 {
-    setProperty (Property_Maximum, value);
+    setProperty (Property_Minimum, min);
+    setProperty (Property_Maximum, max);
 }
 
 QString CSMSettings::Setting::maximum() const
 {
     return property (Property_Maximum).at(0);
-}
-
-void CSMSettings::Setting::setMinimum (int value)
-{
-    setProperty (Property_Minimum, value);
-}
-
-void CSMSettings::Setting::setMinimum (double value)
-{
-    setProperty (Property_Minimum, value);
 }
 
 QString CSMSettings::Setting::minimum() const
