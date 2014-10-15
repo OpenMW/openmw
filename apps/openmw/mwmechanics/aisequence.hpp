@@ -26,7 +26,7 @@ namespace MWMechanics
     class AiPackage;
     
     template< class Base > class DerivedClassStorage;
-    class AiTemporaryBase;
+    struct AiTemporaryBase;
     typedef DerivedClassStorage<AiTemporaryBase> AiState;
 
     /// \brief Sequence of AI-packages for a single actor
