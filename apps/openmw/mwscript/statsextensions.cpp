@@ -217,7 +217,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    int peek = runtime[0].mInteger;
+                    int peek = R::implicit ? 0 : runtime[0].mInteger;
 
                     MWWorld::Ptr ptr = R()(runtime);
 
@@ -225,7 +225,8 @@ namespace MWScript
                     runtime.pop();
 
                     // workaround broken endgame scripts that kill dagoth ur
-                    if (Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "dagoth_ur_1"))
+                    if (!R::implicit &&
+                        Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "dagoth_ur_1"))
                     {
                         runtime.push (peek);
 
