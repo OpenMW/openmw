@@ -222,6 +222,10 @@ namespace MWScript
                     Interpreter::Type_Float diff = runtime[0].mFloat;
                     runtime.pop();
 
+                    // workaround broken endgame scripts that kill dagoth ur
+                    if (Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "dagoth_ur_1"))
+                        return;
+
                     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
 
                     Interpreter::Type_Float current = stats.getDynamic(mIndex).getCurrent();
