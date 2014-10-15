@@ -16,18 +16,23 @@ namespace MWScript
 {
     struct ExplicitRef
     {
-        MWWorld::Ptr operator() (Interpreter::Runtime& runtime, bool required=true) const
+        MWWorld::Ptr operator() (Interpreter::Runtime& runtime, bool required=true,
+            bool activeOnly = false) const
         {
             std::string id = runtime.getStringLiteral (runtime[0].mInteger);
             runtime.pop();
 
-            return MWBase::Environment::get().getWorld()->getPtr (id, false);
+            if (required)
+                return MWBase::Environment::get().getWorld()->getPtr (id, activeOnly);
+            else
+                return MWBase::Environment::get().getWorld()->searchPtr (id, activeOnly);
         }
     };
 
     struct ImplicitRef
     {
-        MWWorld::Ptr operator() (Interpreter::Runtime& runtime, bool required=true) const
+        MWWorld::Ptr operator() (Interpreter::Runtime& runtime, bool required=true,
+            bool activeOnly = false) const
         {
             MWScript::InterpreterContext& context
                 = static_cast<MWScript::InterpreterContext&> (runtime.getContext());

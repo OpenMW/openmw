@@ -217,6 +217,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
+                    int peek = runtime[0].mInteger;
+
                     MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Float diff = runtime[0].mFloat;
@@ -224,7 +226,17 @@ namespace MWScript
 
                     // workaround broken endgame scripts that kill dagoth ur
                     if (Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "dagoth_ur_1"))
-                        return;
+                    {
+                        runtime.push (peek);
+
+                        if (R()(runtime, false, true).isEmpty())
+                        {
+                            std::cerr
+                                << "Compensating for broken script in Morrowind.esm by "
+                                << "ignoring remote access to dagoth_ur_1" << std::endl;
+                            return;
+                        }
+                    }
 
                     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
 
