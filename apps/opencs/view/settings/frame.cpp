@@ -39,7 +39,7 @@ void CSVSettings::Frame::hideWidgets()
 
         QWidget *widg = static_cast <QWidget *> (obj);
         if (widg->property("sizePolicy").isValid())
-            widg->setSizePolicy (QSizePolicy::Ignored, QSizePolicy::Ignored);
+            widg->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Expanding);
     }
 
     layout()->activate();
