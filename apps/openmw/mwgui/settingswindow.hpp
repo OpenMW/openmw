@@ -63,6 +63,8 @@ namespace MWGui
             void onResetDefaultBindings(MyGUI::Widget* _sender);
             void onResetDefaultBindingsAccept ();
 
+            void onWindowResize(MyGUI::Window* _sender);
+
             void apply();
 
             void configureWidgets(MyGUI::Widget* widget);

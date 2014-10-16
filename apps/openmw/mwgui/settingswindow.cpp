@@ -179,6 +179,8 @@ namespace MWGui
         getWidget(mRefractionButton, "RefractionButton");
         getWidget(mDifficultySlider, "DifficultySlider");
 
+        mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SettingsWindow::onWindowResize);
+
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mShaderModeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShaderModeToggled);
         mTextureFilteringButton->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringChanged);
@@ -514,5 +516,10 @@ namespace MWGui
     void SettingsWindow::exit()
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
+    }
+
+    void SettingsWindow::onWindowResize(MyGUI::Window *_sender)
+    {
+        updateControlsBox();
     }
 }
