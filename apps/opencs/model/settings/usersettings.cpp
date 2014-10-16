@@ -83,7 +83,6 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         Setting *reuse = createSetting (Type_CheckBox, "reuse", "Reuse SubView");
         reuse->setDefaultValue("true");
-//        reuse->setSpecialValueText("Reuse SubView");
     }
 
     declareSection ("Window Size", "Window Size");
@@ -129,6 +128,9 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         Setting *rsd = createSetting (Type_RadioButton, "Record Status Display", "Record Status Display");
 
         Setting *ritd = createSetting (Type_RadioButton, "Referenceable ID Type Display", "Referenceable ID Type Display");
+
+        rsd->setDefaultValue (defaultValue);
+        ritd->setDefaultValue (defaultValue);
 
         rsd->setDeclaredValues (values);
         ritd->setDeclaredValues (values);
