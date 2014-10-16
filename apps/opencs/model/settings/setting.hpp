@@ -135,6 +135,9 @@ namespace CSMSettings
         void setLabel (const QString& label);
         QString getLabel() const;
 
+        void setToolTip (const QString& toolTip);
+        QString getToolTip() const;
+
         ///returns the specified property value
         QStringList property (SettingProperty prop) const;
 

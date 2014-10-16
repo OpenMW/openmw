@@ -375,6 +375,16 @@ QString CSMSettings::Setting::getLabel() const
     return property (Property_Label).at (0);
 }
 
+void CSMSettings::Setting::setToolTip (const QString& toolTip)
+{
+    setProperty (Property_ToolTip, toolTip);
+}
+
+QString CSMSettings::Setting::getToolTip() const
+{
+    return property (Property_ToolTip).at (0);
+}
+
 void CSMSettings::Setting::setProperty (SettingProperty prop, bool value)
 {
     setProperty (prop, QStringList() << QVariant (value).toString());

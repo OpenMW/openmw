@@ -19,6 +19,9 @@ CSVSettings::View::View(CSMSettings::Setting *setting,
       mSerializable (setting->serializable()),
       Frame(true, setting->getLabel(), parent)
 {
+    if (!setting->getToolTip().isEmpty())
+        setToolTip (setting->getToolTip());
+
     setObjectName (setting->name());
     buildView();
     buildModel (setting);
