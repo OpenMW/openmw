@@ -36,7 +36,6 @@ namespace CSMSettings {
         const Files::ConfigurationManager& mCfgMgr;
 
         QSettings *mSettingDefinitions;
-        QSettings *mSettingCfgDefinitions;
         QList <Setting *> mSettings;
         QString mSection;
         std::map<QString, QString> mSectionLabels;

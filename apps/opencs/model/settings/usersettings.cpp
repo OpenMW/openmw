@@ -35,15 +35,11 @@ CSMSettings::UserSettings *CSMSettings::UserSettings::mUserSettingsInstance = 0;
     CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
     : mCfgMgr (configurationManager)
     , mSettingDefinitions(NULL)
-    , mSettingCfgDefinitions(NULL)
 {
     assert(!mUserSettingsInstance);
     mUserSettingsInstance = this;
 
     buildSettingModelDefaults();
-
-    // for overriding opencs.ini settings with those from settings.cfg
-    mSettingCfgDefinitions = new QSettings(QSettings::IniFormat, QSettings::UserScope, "", QString(), this);
 }
 
 void CSMSettings::UserSettings::buildSettingModelDefaults()
@@ -351,10 +347,6 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 
     mSettingDefinitions = new QSettings
         (QSettings::IniFormat, QSettings::UserScope, "opencs", QString(), this);
-
-    // check if override entry exists (default: disabled)
-    if(!mSettingDefinitions->childGroups().contains("Video", Qt::CaseInsensitive))
-        mSettingDefinitions->setValue("Video/use settings.cfg", "false");
 }
 
 // if the key is not found create one with a defaut value
@@ -391,23 +383,10 @@ QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
 {
     QStringList defs;
 
-    // check if video settings are overriden
-    if(settingKey.contains(QRegExp("^Video\\b", Qt::CaseInsensitive)) &&
-       mSettingDefinitions->value("Video/use settings.cfg") == "true" &&
-       settingKey.contains(QRegExp("^Video/\\brender|antialiasing|vsync|fullscreen\\b", Qt::CaseInsensitive)))
-    {
-        if (!mSettingCfgDefinitions->contains (settingKey))
-            return QString();
-        else
-            defs = mSettingCfgDefinitions->value (settingKey).toStringList();
-    }
-    else
-    {
-        if (!mSettingDefinitions->contains (settingKey))
-            return QString();
+    if (!mSettingDefinitions->contains (settingKey))
+        return QString();
 
-        defs = mSettingDefinitions->value (settingKey).toStringList();
-    }
+    defs = mSettingDefinitions->value (settingKey).toStringList();
 
     if (defs.isEmpty())
         return QString();
