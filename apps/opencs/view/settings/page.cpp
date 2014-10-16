@@ -17,10 +17,9 @@
 QMap <CSVSettings::ViewType, CSVSettings::IViewFactory *>
                                             CSVSettings::Page::mViewFactories;
 
-CSVSettings::Page::Page(const QString &pageName,
-                        QList <CSMSettings::Setting *> settingList,
-                        SettingWindow *parent) :
-    mParent(parent), mIsEditorPage (false), Frame(false, "", parent)
+CSVSettings::Page::Page (const QString &pageName, QList <CSMSettings::Setting *> settingList,
+    SettingWindow *parent, const QString& label)
+: mParent(parent), mIsEditorPage (false), Frame(false, "", parent), mLabel (label)
 {
     setObjectName (pageName);
 
@@ -103,4 +102,9 @@ void CSVSettings::Page::buildFactories()
     mViewFactories[ViewType_Text] = new TextViewFactory (this);
     mViewFactories[ViewType_List] = new ListViewFactory (this);
     mViewFactories[ViewType_Range] = new RangeViewFactory (this);
+}
+
+QString CSVSettings::Page::getLabel() const
+{
+    return mLabel;
 }

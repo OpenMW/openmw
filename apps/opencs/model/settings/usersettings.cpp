@@ -50,7 +50,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
     QString section;
 
-    declareSection ("Objects");
+    declareSection ("Objects", "Objects");
     {
         Setting *numLights = createSetting (Type_SpinBox, "num_lights", "num_lights");
         numLights->setDefaultValue(8);
@@ -58,10 +58,9 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         Setting *shaders = createSetting (Type_CheckBox, "shaders", "Enable Shaders");
         shaders->setDefaultValue("true");
-//        shaders->setSpecialValueText("Enable Shaders");
     }
 
-    declareSection ("Scene");
+    declareSection ("Scene", "Scene");
     {
         Setting *fastFactor = createSetting (Type_SpinBox, "fast factor", "fast factor");
         fastFactor->setDefaultValue(4);
@@ -76,7 +75,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         timerStart->setRange (1, 100);
     }
 
-    declareSection ("SubView");
+    declareSection ("SubView", "SubView");
     {
         Setting *maxSubView = createSetting (Type_SpinBox, "max subviews", "max subviews");
         maxSubView->setDefaultValue(256);
@@ -91,7 +90,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 //        reuse->setSpecialValueText("Reuse SubView");
     }
 
-    declareSection ("Window Size");
+    declareSection ("Window Size", "Window Size");
     {
         Setting *width = createSetting (Type_LineEdit, "Width", "Width");
         Setting *height = createSetting (Type_LineEdit, "Height", "Height");
@@ -124,7 +123,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
                              );
     }
 
-    declareSection ("Display Format");
+    declareSection ("Display Format", "Display Format");
     {
         QString defaultValue = "Icon and Text";
 
@@ -139,7 +138,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         ritd->setDeclaredValues (values);
     }
 
-    declareSection ("Video");
+    declareSection ("Video", "Video");
     {
         QString defaultValue = "None";
         QStringList values = QStringList()
@@ -480,7 +479,23 @@ CSMSettings::SettingPageMap CSMSettings::UserSettings::settingPageMap() const
     SettingPageMap pageMap;
 
     foreach (Setting *setting, mSettings)
-        pageMap[setting->page()].append (setting);
+    {
+        SettingPageMap::iterator iter = pageMap.find (setting->page());
+
+        if (iter==pageMap.end())
+        {
+            QPair<QString, QList <Setting *> > value;
+
+            std::map<QString, QString>::const_iterator iter2 =
+                mSectionLabels.find (setting->page());
+
+            value.first = iter2!=mSectionLabels.end() ? iter2->second : "";
+
+            iter = pageMap.insert (setting->page(), value);
+        }
+
+        iter->second.append (setting);
+    }
 
     return pageMap;
 }
@@ -532,9 +547,10 @@ CSMSettings::Setting *CSMSettings::UserSettings::createSetting
     return setting;
 }
 
-void CSMSettings::UserSettings::declareSection (const QString& page)
+void CSMSettings::UserSettings::declareSection (const QString& page, const QString& label)
 {
     mSection = page;
+    mSectionLabels[page] = label;
 }
 
 QStringList CSMSettings::UserSettings::definitions (const QString &viewKey) const

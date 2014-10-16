@@ -25,11 +25,11 @@ namespace CSVSettings
         SettingWindow *mParent;
         static QMap <ViewType, IViewFactory *> mViewFactories;
         bool mIsEditorPage;
+        QString mLabel;
 
     public:
-        explicit Page(const QString &pageName,
-                      QList <CSMSettings::Setting *> settingList,
-                      SettingWindow *parent);
+        Page (const QString &pageName, QList <CSMSettings::Setting *> settingList,
+            SettingWindow *parent, const QString& label);
 
         ///Creates a new view based on the passed setting and adds it to
         ///the page.
@@ -41,6 +41,8 @@ namespace CSVSettings
 
         ///returns the list of views associated with the page
         const QList <View *> &views () const              { return mViews; }
+
+        QString getLabel() const;
 
     private:
 

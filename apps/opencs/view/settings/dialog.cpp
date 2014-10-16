@@ -67,11 +67,9 @@ void CSVSettings::Dialog::buildPages()
 
     foreach (Page *page, SettingWindow::pages())
     {
-        QString pageName = page->objectName();
+        maxWidth = std::max (maxWidth, fm.width(page->getLabel()));
 
-        maxWidth = std::max (maxWidth, fm.width(pageName));
-
-        new QListWidgetItem (pageName, mPageListWidget);
+        new QListWidgetItem (page->getLabel(), mPageListWidget);
 
         mStackedWidget->addWidget (page);
     }

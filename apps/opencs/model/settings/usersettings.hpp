@@ -1,10 +1,13 @@
 #ifndef USERSETTINGS_HPP
 #define USERSETTINGS_HPP
 
+#include <map>
+
 #include <QList>
 #include <QStringList>
 #include <QString>
 #include <QMap>
+#include <QPair>
 
 #include <boost/filesystem/path.hpp>
 #include "support.hpp"
@@ -22,7 +25,7 @@ class QSettings;
 namespace CSMSettings {
 
     class Setting;
-    typedef QMap <QString, QList <Setting *> > SettingPageMap;
+    typedef QMap <QString, QPair<QString, QList <Setting *> > > SettingPageMap;
 
     class UserSettings: public QObject
     {
@@ -36,7 +39,7 @@ namespace CSMSettings {
         QSettings *mSettingCfgDefinitions;
         QList <Setting *> mSettings;
         QString mSection;
-
+        std::map<QString, QString> mSectionLabels;
 
     public:
 
@@ -91,7 +94,7 @@ namespace CSMSettings {
         /// Set the section for createSetting calls.
         ///
         /// Sections can be declared multiple times.
-        void declareSection (const QString& page);
+        void declareSection (const QString& page, const QString& label);
 
     signals:
 

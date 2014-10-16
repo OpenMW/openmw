@@ -20,9 +20,9 @@ void CSVSettings::SettingWindow::createPages()
 
     foreach (const QString &pageName, pageMap.keys())
     {
-        QList <CSMSettings::Setting *> pageSettings = pageMap.value (pageName);
+        QList <CSMSettings::Setting *> pageSettings = pageMap.value (pageName).second;
 
-        mPages.append (new Page (pageName, pageSettings, this));
+        mPages.append (new Page (pageName, pageSettings, this, pageMap.value (pageName).first));
 
         for (int i = 0; i < pageSettings.size(); i++)
         {
