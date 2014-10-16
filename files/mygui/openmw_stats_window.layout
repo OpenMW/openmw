@@ -70,32 +70,50 @@
 
             <!-- Player level, race and class -->
             <Widget type="Widget" skin="MW_Box" position="8 78 212 62" align="Left Top HStretch">
-                <Widget type="TextBox" skin="NormalText" position="4 4 100 18" name="Level_str" align="Left Top HStretch">
-                    <Property key="Caption" value="#{sLevel}"/>
-                    <UserString key="ToolTipType" value="Layout"/>
-                    <UserString key="ToolTipLayout" value="LevelToolTip"/>
+                <Widget type="HBox" position="4 4 210 18" align="Left Top">
+                    <Widget type="AutoSizedTextBox" position="0 0 95 18" skin="NormalText" position="4 4 104 18" name="Level_str">
+                        <Property key="Caption" value="#{sLevel}"/>
+                        <UserString key="ToolTipType" value="Layout"/>
+                        <UserString key="ToolTipLayout" value="LevelToolTip"/>
+                    </Widget>
+                    <Widget type="Widget"> <!-- spacer -->
+                        <UserString key="HStretch" value="true"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="124 0 104 18" name="LevelText" align="Right Top HStretch">
+                        <Property key="TextAlign" value="Right Top"/>
+                        <UserString key="ToolTipType" value="Layout"/>
+                        <UserString key="ToolTipLayout" value="LevelToolTip"/>
+                    </Widget>
                 </Widget>
-                <Widget type="TextBox" skin="NormalText" position="4 22 100 18" name="Race_str" align="Left Top HStretch">
-                    <Property key="Caption" value="#{sRace}"/>
-                    <UserString key="ToolTipType" value="Layout"/>
-                    <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
+                <Widget type="HBox" position="4 24 210 18" align="Left Top">
+                    <Widget type="AutoSizedTextBox" position="0 0 95 18" skin="NormalText" position="4 22 100 18" name="Race_str">
+                        <Property key="Caption" value="#{sRace}"/>
+                        <UserString key="ToolTipType" value="Layout"/>
+                        <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
+                    </Widget>
+                    <Widget type="Widget"> <!-- spacer -->
+                        <UserString key="HStretch" value="true"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="124 0 104 18" name="RaceText" align="Right Top HStretch">
+                        <Property key="TextAlign" value="Right Top"/>
+                        <UserString key="ToolTipType" value="Layout"/>
+                        <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
+                    </Widget>
                 </Widget>
-                <Widget type="TextBox" skin="NormalText" position="4 40 100 18" name="Class_str" align="Left Top HStretch">
-                    <Property key="Caption" value="#{sClass}"/>
-                    <UserString key="ToolTipType" value="Layout"/>
-                    <UserString key="ToolTipLayout" value="ClassToolTip"/>
-                </Widget>
-                <Widget type="TextBox" skin="SandTextRight" position="104 4 104 18" name="LevelText" align="Right Top">
-                    <UserString key="ToolTipType" value="Layout"/>
-                    <UserString key="ToolTipLayout" value="LevelToolTip"/>
-                </Widget>
-                <Widget type="TextBox" skin="SandTextRight" position="24 22 184 18" name="RaceText" align="Right Top">
-                    <UserString key="ToolTipType" value="Layout"/>
-                    <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
-                </Widget>
-                <Widget type="TextBox" skin="SandTextRight" position="24 40 184 18" name="ClassText" align="Right Top">
-                    <UserString key="ToolTipType" value="Layout"/>
-                    <UserString key="ToolTipLayout" value="ClassToolTip"/>
+                <Widget type="HBox" position="4 42 210 18" align="Left Top">
+                    <Widget type="AutoSizedTextBox" position="0 0 95 18" skin="NormalText" name="Class_str">
+                        <Property key="Caption" value="#{sClass}"/>
+                        <UserString key="ToolTipType" value="Layout"/>
+                        <UserString key="ToolTipLayout" value="ClassToolTip"/>
+                    </Widget>
+                    <Widget type="Widget"> <!-- spacer -->
+                        <UserString key="HStretch" value="true"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="84 0 164 18" name="ClassText" align="Right Top HStretch">
+                        <Property key="TextAlign" value="Right Top"/>
+                        <UserString key="ToolTipType" value="Layout"/>
+                        <UserString key="ToolTipLayout" value="ClassToolTip"/>
+                    </Widget>
                 </Widget>
             </Widget>
 
