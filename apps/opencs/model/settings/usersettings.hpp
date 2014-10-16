@@ -32,7 +32,7 @@ namespace CSMSettings {
 
         Q_OBJECT
 
-        static UserSettings *mUserSettingsInstance;
+        static UserSettings *sUserSettingsInstance;
         const Files::ConfigurationManager& mCfgMgr;
 
         QSettings *mSettingDefinitions;
@@ -67,7 +67,7 @@ namespace CSMSettings {
         void removeSetting
                         (const QString &pageName, const QString &settingName);
 
-        ///Retreive a map of the settings, keyed by page name
+        ///Retrieve a map of the settings, keyed by page name
         SettingPageMap settingPageMap() const;
 
         ///Returns a string list of defined vlaues for the specified setting

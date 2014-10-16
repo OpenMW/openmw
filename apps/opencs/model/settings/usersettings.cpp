@@ -30,14 +30,14 @@ namespace boost
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
 
-CSMSettings::UserSettings *CSMSettings::UserSettings::mUserSettingsInstance = 0;
+CSMSettings::UserSettings *CSMSettings::UserSettings::sUserSettingsInstance = 0;
 
     CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
     : mCfgMgr (configurationManager)
     , mSettingDefinitions(NULL)
 {
-    assert(!mUserSettingsInstance);
-    mUserSettingsInstance = this;
+    assert(!sUserSettingsInstance);
+    sUserSettingsInstance = this;
 
     buildSettingModelDefaults();
 }
@@ -318,7 +318,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
 CSMSettings::UserSettings::~UserSettings()
 {
-    mUserSettingsInstance = 0;
+    sUserSettingsInstance = 0;
 }
 
 void CSMSettings::UserSettings::loadSettings (const QString &fileName)
@@ -349,7 +349,7 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
         (QSettings::IniFormat, QSettings::UserScope, "opencs", QString(), this);
 }
 
-// if the key is not found create one with a defaut value
+// if the key is not found create one with a default value
 QString CSMSettings::UserSettings::setting(const QString &viewKey, const QString &value)
 {
     if(mSettingDefinitions->contains(viewKey))
@@ -396,8 +396,8 @@ QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
 
 CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
 {
-    assert(mUserSettingsInstance);
-    return *mUserSettingsInstance;
+    assert(sUserSettingsInstance);
+    return *sUserSettingsInstance;
 }
 
 void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
