@@ -55,13 +55,13 @@ namespace ContentSelectorView
 
     signals:
         void signalCurrentGamefileIndexChanged (int);
-        void signalAddonFileSelected (int);
-        void signalAddonFileUnselected (int);
+
+        void signalAddonDataChanged (const QModelIndex& topleft, const QModelIndex& bottomright);
 
     private slots:
 
         void slotCurrentGameFileIndexChanged(int index);
-        void slotAddonTableItemClicked(const QModelIndex &index);
+        void slotAddonTableItemActivated(const QModelIndex& index);
     };
 }
 

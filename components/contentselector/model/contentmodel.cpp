@@ -106,7 +106,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
 
     //game files can always be checked
     if (file->isGameFile())
-        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
 
     Qt::ItemFlags returnFlags;
     bool allDependenciesFound = true;
@@ -145,7 +145,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     if (gamefileChecked)
     {
         if (allDependenciesFound)
-            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | mDragDropFlags;
+            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | mDragDropFlags;
         else
             returnFlags = Qt::ItemIsSelectable;
     }

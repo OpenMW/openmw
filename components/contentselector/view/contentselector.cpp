@@ -58,7 +58,8 @@ void ContentSelectorView::ContentSelector::buildAddonView()
 
     ui.addonView->setModel(mAddonProxyModel);
 
-    connect(ui.addonView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotAddonTableItemClicked(const QModelIndex &)));
+    connect(ui.addonView, SIGNAL(activated(const QModelIndex&)), this, SLOT(slotAddonTableItemActivated(const QModelIndex&)));
+    connect(mContentModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SIGNAL(signalAddonDataChanged(QModelIndex,QModelIndex)));
 }
 
 void ContentSelectorView::ContentSelector::setProfileContent(const QStringList &fileList)
@@ -181,7 +182,7 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
     emit signalCurrentGamefileIndexChanged (index);
 }
 
-void ContentSelectorView::ContentSelector::slotAddonTableItemClicked(const QModelIndex &index)
+void ContentSelectorView::ContentSelector::slotAddonTableItemActivated(const QModelIndex &index)
 {
     QModelIndex sourceIndex = mAddonProxyModel->mapToSource (index);
 
@@ -194,10 +195,4 @@ void ContentSelectorView::ContentSelector::slotAddonTableItemClicked(const QMode
         checkState = Qt::Checked;
 
     mContentModel->setData(sourceIndex, checkState, Qt::CheckStateRole);
-
-    if (checkState == Qt::Checked)
-        emit signalAddonFileSelected (index.row());
-    else
-        emit signalAddonFileUnselected (index.row());
-
 }
