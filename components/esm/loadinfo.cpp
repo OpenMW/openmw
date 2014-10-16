@@ -16,6 +16,9 @@ void DialInfo::load(ESMReader &esm)
     mPrev = esm.getHNString("PNAM");
     mNext = esm.getHNString("NNAM");
 
+    // Since there's no way to mark selects as "deleted", we have to clear the SelectStructs from all previous loadings
+    mSelects.clear();
+
     // Not present if deleted
     if (esm.isNextSub("DATA")) {
         esm.getHT(mData, 12);
