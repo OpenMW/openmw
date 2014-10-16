@@ -126,8 +126,6 @@ void CSVSettings::RangeView::buildSpinBox (CSMSettings::Setting *setting)
         mRangeWidget->setProperty ("minimum", setting->minimum());
         mRangeWidget->setProperty ("maximum", setting->maximum());
         mRangeWidget->setProperty ("singleStep", setting->singleStep());
-        mRangeWidget->setProperty ("specialValueText",
-                                  setting->specialValueText());
     }
 
     mRangeWidget->setProperty ("prefix", setting->prefix());
