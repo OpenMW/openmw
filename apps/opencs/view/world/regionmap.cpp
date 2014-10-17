@@ -61,7 +61,7 @@ void CSVWorld::RegionMap::contextMenuEvent (QContextMenuEvent *event)
         menu.addAction (mViewInTableAction);
     }
 
-    if (selectionModel()->selectedIndexes().size()>0 && selectedNonExistentCells!=1)
+    if (selectionModel()->selectedIndexes().size()>0)
         menu.addAction (mViewAction);
 
     menu.exec (event->globalPos());
@@ -400,7 +400,7 @@ void CSVWorld::RegionMap::dropEvent (QDropEvent* event)
         QModelIndex index2(cellsModel->getModelIndex (cellId,
             cellsModel->findColumnIndex (CSMWorld::Columns::ColumnId_Region)));
 
-        mDocument.getUndoStack().push(new CSMWorld::ModifyCommand
+        mDocument.getUndoStack().push(new CSMWorld::ModifyCommand 
                                         (*cellsModel, index2, QString::fromUtf8(record.getId().c_str())));
 
         mRegionId = record.getId();
