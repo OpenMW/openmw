@@ -298,7 +298,7 @@ void Animation::addAnimSource(const std::string &model)
             }
         }
 
-        if (grp == 0 && dstval->getNode()->getName() == "Bip01")
+        if (grp == 0 && (dstval->getNode()->getName() == "Bip01" || dstval->getNode()->getName() == "Root Bone"))
         {
             mNonAccumRoot = dstval->getNode();
             mAccumRoot = mNonAccumRoot->getParent();
