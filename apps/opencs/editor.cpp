@@ -20,7 +20,8 @@
 #include "model/world/data.hpp"
 
 CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
-: mUserSettings (mCfgMgr), mDocumentManager (mCfgMgr), mViewManager (mDocumentManager),
+: mUserSettings (mCfgMgr), mOverlaySystem (0), mDocumentManager (mCfgMgr),
+  mViewManager (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
@@ -31,6 +32,8 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     mSettings.setModel (CSMSettings::UserSettings::instance());
 
     ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
+
+    mOverlaySystem.reset (new CSVRender::OverlaySystem);
 
     Bsa::registerResources (Files::Collections (config.first, !mFsStrict), config.second, true,
         mFsStrict);
@@ -66,9 +69,7 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 }
 
 CS::Editor::~Editor ()
-{
-    CSVRender::OverlaySystem::instance().destroy();  // destruct before Ogre::Root
-}
+{}
 
 void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
 {

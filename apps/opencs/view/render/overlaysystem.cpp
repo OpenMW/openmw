@@ -1,21 +1,23 @@
 #include "overlaysystem.hpp"
 
+#include <cassert>
+
 #include <OgreOverlaySystem.h>
 
 namespace CSVRender
 {
     OverlaySystem *OverlaySystem::mOverlaySystemInstance = 0;
 
-    OverlaySystem::OverlaySystem() : mOverlaySystem(NULL)
+    OverlaySystem::OverlaySystem()
     {
         assert(!mOverlaySystemInstance);
         mOverlaySystemInstance = this;
+        mOverlaySystem = new Ogre::OverlaySystem();
     }
 
     OverlaySystem::~OverlaySystem()
     {
-        if(mOverlaySystem)
-            delete mOverlaySystem;
+        delete mOverlaySystem;
     }
 
     OverlaySystem &OverlaySystem::instance()
@@ -26,15 +28,7 @@ namespace CSVRender
 
     Ogre::OverlaySystem *OverlaySystem::get()
     {
-        if(!mOverlaySystem)
-            mOverlaySystem = new Ogre::OverlaySystem();
         return mOverlaySystem;
-    }
-
-    void OverlaySystem::destroy()
-    {
-        delete mOverlaySystem;
-        mOverlaySystem = NULL;
     }
 }
 

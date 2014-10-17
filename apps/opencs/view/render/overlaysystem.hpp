@@ -20,7 +20,6 @@ namespace CSVRender
             static OverlaySystem &instance();
 
             Ogre::OverlaySystem *get();
-            void destroy();
     };
 }
 

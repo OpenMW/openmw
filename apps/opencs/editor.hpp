@@ -43,7 +43,7 @@ namespace CS
             Nif::Cache mNifCache;
             Files::ConfigurationManager mCfgMgr;
             CSMSettings::UserSettings mUserSettings;
-            CSVRender::OverlaySystem mOverlaySystem;
+            std::auto_ptr<CSVRender::OverlaySystem> mOverlaySystem;
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
