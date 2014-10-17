@@ -93,10 +93,9 @@ namespace MWGui
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer
                     (mPtr,pcStats.getSkill (skills[i].first).getBase() * gmst.find("iTrainingMod")->getInt (),true);
 
-            MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>("SandTextButton",
+            MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>(price <= playerGold ? "SandTextButton" : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
                 MyGUI::IntCoord(5, 5+i*18, mTrainingOptions->getWidth()-10, 18), MyGUI::Align::Default);
 
-            button->setEnabled(price <= playerGold);
             button->setUserData(skills[i].first);
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &TrainingWindow::onTrainingSelected);
 
@@ -132,6 +131,9 @@ namespace MWGui
 
         int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->getInt ();
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
+
+        if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
+            return;
 
         MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats (mPtr);
         if (npcStats.getSkill (skillId).getBase () <= pcStats.getSkill (skillId).getBase ())

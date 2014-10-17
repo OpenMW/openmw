@@ -54,14 +54,13 @@ namespace MWGui
 
         MyGUI::Button* toAdd =
             mSpellsView->createWidget<MyGUI::Button>(
-                "SandTextButton",
+                price <= playerGold ? "SandTextButton" : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
                 0,
                 mCurrentY,
                 200,
                 sLineHeight,
                 MyGUI::Align::Default
             );
-        toAdd->setEnabled(price<=playerGold);
 
         mCurrentY += sLineHeight;
 
@@ -140,6 +139,9 @@ namespace MWGui
         int price = *_sender->getUserData<int>();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
+            return;
+
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
         spells.add (mSpellsWidgetMap.find(_sender)->second);

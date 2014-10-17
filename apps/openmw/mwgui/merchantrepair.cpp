@@ -73,7 +73,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
 
             MyGUI::Button* button =
-                mList->createWidget<MyGUI::Button>("SandTextButton",
+                mList->createWidget<MyGUI::Button>(price <= playerGold ? "SandTextButton" : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
                     0,
                     currentY,
                     0,
@@ -83,7 +83,6 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
             currentY += 18;
 
-            button->setEnabled(price<=playerGold);
             button->setUserString("Price", boost::lexical_cast<std::string>(price));
             button->setUserData(*iter);
             button->setCaptionWithReplacing(name);
@@ -124,6 +123,10 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 {
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
+    int price = boost::lexical_cast<int>(sender->getUserString("Price"));
+    if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
+        return;
+
     // repair
     MWWorld::Ptr item = *sender->getUserData<MWWorld::Ptr>();
     item.getCellRef().setCharge(item.getClass().getItemMaxHealth(item));
@@ -132,7 +135,6 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 
     MWBase::Environment::get().getSoundManager()->playSound("Repair",1,1);
 
-    int price = boost::lexical_cast<int>(sender->getUserString("Price"));
 
     player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
