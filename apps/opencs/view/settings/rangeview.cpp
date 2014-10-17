@@ -117,7 +117,7 @@ void CSVSettings::RangeView::buildSpinBox (CSMSettings::Setting *setting)
     break;
 
     default:
-    break;
+        return;
     }
 
     //min / max values are set automatically in AlphaSpinBox
