@@ -93,6 +93,7 @@ namespace MWGui
             if (mFrame)
                 mFrame->setImageTexture("");
             mItem->setImageTexture("");
+            mText->setCaption("");
             return;
         }
 
