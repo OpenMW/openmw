@@ -15,6 +15,8 @@ namespace Ogre
     class SceneManager;
     class RenderWindow;
     class Viewport;
+    class OverlaySystem;
+    class RenderTargetListener;
 }
 
 namespace CSVWidget
@@ -50,6 +52,12 @@ namespace CSVRender
             void setNavigation (Navigation *navigation);
             ///< \attention The ownership of \a navigation is not transferred to *this.
 
+            void addRenderTargetListener(Ogre::RenderTargetListener *listener);
+
+            void removeRenderTargetListener(Ogre::RenderTargetListener *listener);
+
+            Ogre::Viewport *getViewport();
+
             Ogre::SceneManager *getSceneManager();
 
             Ogre::Camera *getCamera();
@@ -58,6 +66,10 @@ namespace CSVRender
 
             void setDefaultAmbient (const Ogre::ColourValue& colour);
             ///< \note The actual ambient colour may differ based on lighting settings.
+
+            virtual void updateOverlay();
+
+            virtual void mouseReleaseEvent (QMouseEvent *event);
 
         private:
             void paintEvent(QPaintEvent* e);
@@ -76,17 +88,16 @@ namespace CSVRender
 
             void mouseMoveEvent (QMouseEvent *event);
 
-            void mouseReleaseEvent (QMouseEvent *event);
-
             void updateOgreWindow();
 
             void setLighting (Lighting *lighting);
             ///< \attention The ownership of \a lighting is not transferred to *this.
 
-            Ogre::Camera*	    mCamera;
+            Ogre::Camera*       mCamera;
             Ogre::SceneManager* mSceneMgr;
             Ogre::RenderWindow* mWindow;
             Ogre::Viewport *mViewport;
+            Ogre::OverlaySystem *mOverlaySystem;
 
             Navigation *mNavigation;
             Lighting *mLighting;

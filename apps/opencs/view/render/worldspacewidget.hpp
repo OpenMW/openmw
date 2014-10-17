@@ -88,6 +88,8 @@ namespace CSVRender
 
             CSMDoc::Document& getDocument();
 
+            virtual void updateOverlay();
+
         private:
 
             void dragEnterEvent(QDragEnterEvent *event);

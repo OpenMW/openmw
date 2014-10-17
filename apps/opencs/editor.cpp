@@ -20,7 +20,8 @@
 #include "model/world/data.hpp"
 
 CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
-: mUserSettings (mCfgMgr), mDocumentManager (mCfgMgr), mViewManager (mDocumentManager),
+: mUserSettings (mCfgMgr), mOverlaySystem (0), mDocumentManager (mCfgMgr),
+  mViewManager (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
@@ -31,6 +32,8 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     mSettings.setModel (CSMSettings::UserSettings::instance());
 
     ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
+
+    mOverlaySystem.reset (new CSVRender::OverlaySystem);
 
     Bsa::registerResources (Files::Collections (config.first, !mFsStrict), config.second, true,
         mFsStrict);
@@ -64,6 +67,9 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     connect (&mNewGame, SIGNAL (createRequest (const boost::filesystem::path&)),
              this, SLOT (createNewGame (const boost::filesystem::path&)));
 }
+
+CS::Editor::~Editor ()
+{}
 
 void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
 {
@@ -269,6 +275,9 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName(renderSystem));
 
+    // Initialise Ogre::OverlaySystem after Ogre::Root but before initialisation
+    mOverlaySystem.get();
+
     Ogre::Root::getSingleton().initialise(false);
 
     // Create a hidden background window to keep resources
@@ -294,6 +303,10 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     sh::OgrePlatform* platform =
         new sh::OgrePlatform ("General", (mResources / "materials").string());
+
+    // for font used in overlays
+    Ogre::Root::getSingleton().addResourceLocation ((mResources / "mygui").string(),
+            "FileSystem", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 
     if (!boost::filesystem::exists (mCfgMgr.getCachePath()))
         boost::filesystem::create_directories (mCfgMgr.getCachePath());

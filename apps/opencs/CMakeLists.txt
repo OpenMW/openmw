@@ -82,7 +82,7 @@ opencs_units (view/render
 
 opencs_units_noqt (view/render
     navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
-    lightingbright object cell terrainstorage
+    lightingbright object cell terrainstorage textoverlay overlaymask overlaysystem
     )
 
 opencs_hdrs_noqt (view/render
@@ -199,6 +199,7 @@ endif(APPLE)
 
 target_link_libraries(opencs
     ${OGRE_LIBRARIES}
+    ${OGRE_Overlay_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
     ${SHINY_LIBRARIES}
     ${Boost_LIBRARIES}

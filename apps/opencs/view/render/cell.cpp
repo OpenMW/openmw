@@ -214,3 +214,11 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
 
     return addObjects (start, end);
 }
+
+float CSVRender::Cell::getTerrainHeightAt(const Ogre::Vector3 &pos) const
+{
+    if(mTerrain.get() != NULL)
+        return mTerrain->getHeightAt(pos);
+    else
+        return -std::numeric_limits<float>::max();
+}

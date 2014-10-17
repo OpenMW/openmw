@@ -10,6 +10,10 @@
 
 namespace CSVRender
 {
+
+    class TextOverlay;
+    class OverlayMask;
+
     class PagedWorldspaceWidget : public WorldspaceWidget
     {
             Q_OBJECT
@@ -19,6 +23,9 @@ namespace CSVRender
             std::map<CSMWorld::CellCoordinates, Cell *> mCells;
             std::string mWorldspace;
             CSVWidget::SceneToolToggle *mControlElements;
+            bool mDisplayCellCoord;
+            std::map<CSMWorld::CellCoordinates, TextOverlay *> mTextOverlays;
+            OverlayMask *mOverlayMask;
 
         private:
 
@@ -55,7 +62,7 @@ namespace CSVRender
 
             void useViewHint (const std::string& hint);
 
-            void setCellSelection (const CSMWorld::CellSelection& selection);
+            void setCellSelection(const CSMWorld::CellSelection& selection);
 
             /// \return Drop handled?
             virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
@@ -69,6 +76,14 @@ namespace CSVRender
                 CSVWidget::SceneToolbar *parent);
 
             virtual unsigned int getElementMask() const;
+
+        protected:
+
+            virtual void updateOverlay();
+
+            virtual void mouseReleaseEvent (QMouseEvent *event);
+
+            virtual void mouseDoubleClickEvent (QMouseEvent *event);
 
         signals:
 

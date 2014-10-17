@@ -33,6 +33,10 @@ namespace CSMWorld
             virtual QModelIndex getModelIndex (const std::string& id, int column) const;
 
             void setFilter (const boost::shared_ptr<CSMFilter::Node>& filter);
+
+        protected:
+
+            bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
     };
 }
 
