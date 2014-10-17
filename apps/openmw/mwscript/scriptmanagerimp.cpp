@@ -85,8 +85,6 @@ namespace MWScript
                 mParser.getCode (code);
                 mScripts.insert (std::make_pair (name, std::make_pair (code, mParser.getLocals())));
 
-                // TODO sanity check on generated locals
-
                 return true;
             }
         }
@@ -175,6 +173,11 @@ namespace MWScript
 
         if (const ESM::Script *script = mStore.get<ESM::Script>().find (name2))
         {
+            if (mVerbose)
+                std::cout
+                    << "scanning script for local variable declarations: " << name2
+                    << std::endl;
+
             Compiler::Locals locals;
 
             std::istringstream stream (script->mScriptText);
