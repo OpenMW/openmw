@@ -226,7 +226,7 @@ namespace Compiler
             extensions.registerInstruction ("togglefullhelp", "", opcodeToggleFullHelp);
             extensions.registerInstruction ("tfh", "", opcodeToggleFullHelp);
 
-            extensions.registerInstruction ("showmap", "S", opcodeShowMap);
+            extensions.registerInstruction ("showmap", "Sxxxx", opcodeShowMap);
             extensions.registerInstruction ("fillmap", "", opcodeFillMap);
             extensions.registerInstruction ("menutest", "/l", opcodeMenuTest);
             extensions.registerInstruction ("togglemenus", "", opcodeToggleMenus);
