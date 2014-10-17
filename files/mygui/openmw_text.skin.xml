@@ -100,6 +100,14 @@ color_misc=0,205,205 # ????
         </BasisSkin>
     </Resource>
 
+    <Resource type="ResourceSkin" name="SandTextButtonDisabled" size="16 16">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Left Bottom"/>
+        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
+            <State name="normal" colour="#{fontcolour=disabled}" shift="0"/>
+        </BasisSkin>
+    </Resource>
+
     <Resource type="ResourceSkin" name="SpellTextUnequipped" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>
