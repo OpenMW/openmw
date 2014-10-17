@@ -200,10 +200,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
         mPartPriorities[i] = 0;
     }
 
+    updateNpcBase();
+
     if (!disableListener)
         mPtr.getClass().getInventoryStore(mPtr).setListener(this, mPtr);
-
-    updateNpcBase();
 }
 
 void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
