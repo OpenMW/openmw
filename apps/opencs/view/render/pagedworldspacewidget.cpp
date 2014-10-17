@@ -42,9 +42,6 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             if (!mSelection.has (iter->first) || index==-1 ||
                 cells.getRecord (index).mState==CSMWorld::RecordBase::State_Deleted)
             {
-                delete iter->second;
-                mCells.erase (iter);
-
                 // delete overlays
                 std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator itOverlay = mTextOverlays.find(iter->first);
                 if(itOverlay != mTextOverlays.end())
@@ -56,7 +53,9 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                 // destroy manual objects
                 getSceneManager()->destroyManualObject("manual"+iter->first.getId(mWorldspace));
 
-                iter++;
+                delete iter->second;
+                mCells.erase (iter++);
+
                 modified = true;
             }
             else
