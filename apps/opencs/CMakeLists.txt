@@ -68,7 +68,7 @@ opencs_units (view/world
 
 opencs_units_noqt (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
-    scripthighlighter idvalidator dialoguecreator
+    scripthighlighter idvalidator dialoguecreator physicssystem
     )
 
 opencs_units (view/widget
@@ -165,7 +165,7 @@ qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
 qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
 qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${BULLET_INCLUDE_DIRS})
 
 if(APPLE)
     set (OPENCS_MAC_ICON ${CMAKE_SOURCE_DIR}/files/mac/opencs.icns)
@@ -175,6 +175,7 @@ endif(APPLE)
 
 add_executable(opencs
     MACOSX_BUNDLE
+    ${OENGINE_BULLET}
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
     ${OPENCS_MOC_SRC}
@@ -203,6 +204,7 @@ target_link_libraries(opencs
     ${OGRE_STATIC_PLUGINS}
     ${SHINY_LIBRARIES}
     ${Boost_LIBRARIES}
+    ${BULLET_LIBRARIES}
     ${QT_LIBRARIES}
     components
 )

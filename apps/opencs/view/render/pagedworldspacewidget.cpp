@@ -21,6 +21,7 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../widget/scenetooltoggle.hpp"
+#include "../world/physicssystem.hpp"
 
 #include "elements.hpp"
 
@@ -108,7 +109,8 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
         if (index > 0 && cells.getRecord (index).mState!=CSMWorld::RecordBase::State_Deleted &&
             mCells.find (*iter)==mCells.end())
         {
-            Cell *cell = new Cell (mDocument.getData(), getSceneManager(), iter->getId (mWorldspace));
+            Cell *cell = new Cell (mDocument.getData(), getSceneManager(),
+                    iter->getId (mWorldspace), getPhysics());
             mCells.insert (std::make_pair (*iter, cell));
 
             float height = cell->getTerrainHeightAt(Ogre::Vector3(
@@ -191,6 +193,7 @@ void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event
     if(event->button() == Qt::RightButton)
     {
         std::cout << "double clicked" << std::endl;
+        getPhysics()->toggleDebugRendering();
     }
 }
 

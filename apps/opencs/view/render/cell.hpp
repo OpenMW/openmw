@@ -23,6 +23,11 @@ namespace CSMWorld
     class Data;
 }
 
+namespace CSVWorld
+{
+    class PhysicsSystem;
+}
+
 namespace CSVRender
 {
     class Cell
@@ -32,6 +37,7 @@ namespace CSVRender
             Ogre::SceneNode *mCellNode;
             std::map<std::string, Object *> mObjects;
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
+            CSVWorld::PhysicsSystem *mPhysics;
 
             /// Ignored if cell does not have an object with the given ID.
             ///
@@ -46,7 +52,8 @@ namespace CSVRender
         public:
 
             Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
-                const std::string& id, const Ogre::Vector3& origin = Ogre::Vector3 (0, 0, 0));
+                const std::string& id, CSVWorld::PhysicsSystem *physics,
+                const Ogre::Vector3& origin = Ogre::Vector3 (0, 0, 0));
 
             ~Cell();
 

@@ -25,6 +25,11 @@ namespace CSVWidget
     class SceneToolbar;
 }
 
+namespace CSVWorld
+{
+    class PhysicsSystem;
+}
+
 namespace CSVRender
 {
     class Navigation;
@@ -57,6 +62,8 @@ namespace CSVRender
             void removeRenderTargetListener(Ogre::RenderTargetListener *listener);
 
             Ogre::Viewport *getViewport();
+
+            CSVWorld::PhysicsSystem *getPhysics();
 
             Ogre::SceneManager *getSceneManager();
 
@@ -98,6 +105,7 @@ namespace CSVRender
             Ogre::RenderWindow* mWindow;
             Ogre::Viewport *mViewport;
             Ogre::OverlaySystem *mOverlaySystem;
+            CSVWorld::PhysicsSystem *mPhysics;
 
             Navigation *mNavigation;
             Lighting *mLighting;

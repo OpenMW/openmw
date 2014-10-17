@@ -9,6 +9,8 @@
 #include "../../model/world/ref.hpp"
 #include "../../model/world/refidcollection.hpp"
 
+#include "../world/physicssystem.hpp"
+
 #include "elements.hpp"
 
 void CSVRender::Object::clearSceneNode (Ogre::SceneNode *node)
@@ -73,6 +75,12 @@ void CSVRender::Object::update()
     {
         mObject = NifOgre::Loader::createObjects (mBase, "Meshes\\" + model);
         mObject->setVisibilityFlags (Element_Reference);
+
+        bool placeable = true; // FIXME
+        mPhysics->addObject("meshes\\" + model, mBase->getName(), /*scale*/1,
+                mBase->getPosition(), mBase->getOrientation(), 0, 0, false, placeable);
+        mPhysics->addObject("meshes\\" + model, mBase->getName(), /*scale*/1,
+                mBase->getPosition(), mBase->getOrientation(), 0, 0, true, placeable); // FIXME: why again with raycasting?
     }
 }
 
@@ -110,8 +118,9 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
 }
 
 CSVRender::Object::Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode,
-    const std::string& id, bool referenceable, bool forceBaseToZero)
-: mData (data), mBase (0), mForceBaseToZero (forceBaseToZero)
+    const std::string& id, bool referenceable, CSVWorld::PhysicsSystem* physics,
+    bool forceBaseToZero)
+: mData (data), mBase (0), mForceBaseToZero (forceBaseToZero), mPhysics(physics)
 {
     mBase = cellNode->createChildSceneNode();
 

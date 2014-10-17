@@ -10,6 +10,8 @@
 #include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
 
+#include "../world/physicssystem.hpp"
+
 #include "elements.hpp"
 #include "terrainstorage.hpp"
 
@@ -49,7 +51,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
             std::string id = Misc::StringUtils::lowerCase (references.data (
                 references.index (i, idColumn)).toString().toUtf8().constData());
 
-            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false)));
+            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false, mPhysics)));
             modified = true;
         }
     }
@@ -58,8 +60,8 @@ bool CSVRender::Cell::addObjects (int start, int end)
 }
 
 CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
-    const std::string& id, const Ogre::Vector3& origin)
-: mData (data), mId (Misc::StringUtils::lowerCase (id))
+    const std::string& id, CSVWorld::PhysicsSystem *physics, const Ogre::Vector3& origin)
+: mData (data), mId (Misc::StringUtils::lowerCase (id)), mPhysics(physics)
 {
     mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
     mCellNode->setPosition (origin);
@@ -82,6 +84,9 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
         mTerrain->loadCell(esmLand->mX,
                            esmLand->mY);
     }
+        std::cout << "cell pos" + std::to_string(mCellNode->getPosition().x)
+                           + ", " + std::to_string(mCellNode->getPosition().y)
+                           + ", " + std::to_string(mCellNode->getPosition().z) << std::endl;
 }
 
 CSVRender::Cell::~Cell()
