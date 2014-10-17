@@ -46,104 +46,110 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
     QString section;
 
-    declareSection ("Objects", "Objects");
+    declareSection ("3d-render", "3D Rendering");
     {
-        Setting *numLights = createSetting (Type_SpinBox, "num_lights", "num_lights");
-        numLights->setDefaultValue(8);
-        numLights->setRange (0, 100);
-
         Setting *shaders = createSetting (Type_CheckBox, "shaders", "Enable Shaders");
-        shaders->setDefaultValue("true");
-    }
+        shaders->setDefaultValue ("true");
 
-    declareSection ("Scene", "Scene");
-    {
-        Setting *fastFactor = createSetting (Type_SpinBox, "fast factor", "fast factor");
-        fastFactor->setDefaultValue(4);
-        fastFactor->setRange (1, 100);
-
-        Setting *farClipDist = createSetting (Type_DoubleSpinBox, "far clip distance", "far clip distance");
-        farClipDist->setDefaultValue(300000);
+        Setting *farClipDist = createSetting (Type_DoubleSpinBox, "far-clip-distance", "Far clipping distance");
+        farClipDist->setDefaultValue (300000);
         farClipDist->setRange (0, 1000000);
+        farClipDist->setToolTip ("The maximum distance objects are still rendered at.");
 
-        Setting *timerStart = createSetting (Type_SpinBox, "timer start", "timer start");
-        timerStart->setDefaultValue(20);
-        timerStart->setRange (1, 100);
+        QString defaultValue = "None";
+        Setting *antialiasing = createSetting (Type_ComboBox, "antialiasing", "Antialiasing");
+        antialiasing->setDeclaredValues (QStringList()
+            << defaultValue << "MSAA 2" << "MSAA 4" << "MSAA 8" << "MSAA 16");
+        antialiasing->setDefaultValue (defaultValue);
     }
 
-    declareSection ("SubView", "SubView");
+    declareSection ("scene-input", "Scene Input");
     {
-        Setting *maxSubView = createSetting (Type_SpinBox, "max subviews", "max subviews");
-        maxSubView->setDefaultValue(256);
-        maxSubView->setRange (1, 256);
+        Setting *timer = createSetting (Type_SpinBox, "timer", "Input responsiveness");
+        timer->setDefaultValue (20);
+        timer->setRange (1, 100);
+        timer->setToolTip ("The time between two checks for user input in milliseconds.<p>"
+            "Lower value result in higher responsiveness.");
 
-        Setting *minWidth = createSetting (Type_SpinBox, "minimum width", "minimum width");
-        minWidth->setDefaultValue(325);
-        minWidth->setRange (50, 10000);
-
-        Setting *reuse = createSetting (Type_CheckBox, "reuse", "Reuse SubView");
-        reuse->setDefaultValue("true");
+        Setting *fastFactor = createSetting (Type_SpinBox, "fast-factor",
+            "Fast movement factor");
+        fastFactor->setDefaultValue (4);
+        fastFactor->setRange (1, 100);
+        fastFactor->setToolTip (
+            "Factor by which movement is speed up while the shift key is held down.");
     }
 
-    declareSection ("Window Size", "Window Size");
+    declareSection ("window", "Window");
     {
-        Setting *width = createSetting (Type_LineEdit, "Width", "Width");
-        Setting *height = createSetting (Type_LineEdit, "Height", "Height");
-
-        width->setDefaultValues (QStringList() << "1024");
-        height->setDefaultValues (QStringList() << "768");
-
-        height->setViewLocation (2,2);
-        width->setViewLocation (2,1);
-
-        /*
-         *Create the proxy setting for predefined values
-         */
-        Setting *preDefined = createSetting (Type_ComboBox, "Pre-Defined", "Pre-Defined");
-
+        Setting *preDefined = createSetting (Type_ComboBox, "pre-defined",
+            "Default window size");
         preDefined->setEditorSetting (false);
-
-        preDefined->setDeclaredValues (QStringList() << "640 x 480"
-                                << "800 x 600" << "1024 x 768" << "1440 x 900");
-
+        preDefined->setDeclaredValues (
+            QStringList() << "640 x 480" << "800 x 600" << "1024 x 768" << "1440 x 900");
         preDefined->setViewLocation (1, 1);
         preDefined->setColumnSpan (2);
+        preDefined->setToolTip ("Newly opened top-level windows will open with this size "
+            "(picked from a list of pre-defined values)");
 
-        preDefined->addProxy (width,
-                             QStringList() << "640" << "800" << "1024" << "1440"
-                             );
+        Setting *width = createSetting (Type_LineEdit, "default-width",
+            "Default window width");
+        width->setDefaultValues (QStringList() << "1024");
+        width->setViewLocation (2, 1);
+        width->setColumnSpan (1);
+        width->setToolTip ("Newly opened top-level windows will open with this width.");
+        preDefined->addProxy (width, QStringList() << "640" << "800" << "1024" << "1440");
 
-        preDefined->addProxy (height,
-                             QStringList() << "480" << "600" << "768" << "900"
-                             );
+        Setting *height = createSetting (Type_LineEdit, "default-height",
+            "Default window height");
+        height->setDefaultValues (QStringList() << "768");
+        height->setViewLocation (2, 2);
+        height->setColumnSpan (1);
+        height->setToolTip ("Newly opened top-level windows will open with this height.");
+        preDefined->addProxy (height, QStringList() << "480" << "600" << "768" << "900");
+
+        Setting *reuse = createSetting (Type_CheckBox, "reuse", "Reuse Subviews");
+        reuse->setDefaultValue ("true");
+        reuse->setToolTip ("When a new subview is requested and a matching subview already "
+            " exist, do not open a new subview and use the existing one instead.");
+
+        Setting *maxSubView = createSetting (Type_SpinBox, "max-subviews",
+            "Maximum number of subviews per top-level window");
+        maxSubView->setDefaultValue (256);
+        maxSubView->setRange (1, 256);
+        maxSubView->setToolTip ("If the maximum number is reached and a new subview is opened "
+            "it will be placed into a new top-level window.");
+
+        Setting *minWidth = createSetting (Type_SpinBox, "minimum-width",
+            "Minimum subview width");
+        minWidth->setDefaultValue (325);
+        minWidth->setRange (50, 10000);
+        minWidth->setToolTip ("Minimum width of subviews.");
     }
 
-    declareSection ("Display Format", "Display Format");
+    declareSection ("records", "Records");
     {
         QString defaultValue = "Icon and Text";
+        QStringList values = QStringList() << defaultValue << "Icon Only" << "Text Only";
 
-        QStringList values = QStringList()
-                            << defaultValue << "Icon Only" << "Text Only";
-
-        Setting *rsd = createSetting (Type_RadioButton, "Record Status Display", "Record Status Display");
-
-        Setting *ritd = createSetting (Type_RadioButton, "Referenceable ID Type Display", "Referenceable ID Type Display");
-
+        Setting *rsd = createSetting (Type_RadioButton, "status-format",
+            "Modification status display format");
         rsd->setDefaultValue (defaultValue);
-        ritd->setDefaultValue (defaultValue);
-
         rsd->setDeclaredValues (values);
+
+        Setting *ritd = createSetting (Type_RadioButton, "type-format",
+            "ID type display format");
+        ritd->setDefaultValue (defaultValue);
         ritd->setDeclaredValues (values);
     }
 
-    declareSection ("Video", "Video");
+    declareSection ("Objects", "Objects");
     {
-        QString defaultValue = "None";
-        QStringList values = QStringList()
-                        << defaultValue << "MSAA 2" << "MSAA 4" << "MSAA 8" << "MSAA 16";
-        Setting *antialiasing = createSetting (Type_SpinBox, "antialiasing", "antialiasing");
-        antialiasing->setDeclaredValues (values);
+
+        Setting *numLights = createSetting (Type_SpinBox, "num_lights", "num_lights");
+        numLights->setDefaultValue(8);
+        numLights->setRange (0, 100);
     }
+
 
     {
         /******************************************************************
@@ -411,7 +417,7 @@ void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
     {
         sh::Factory::getInstance ().setGlobalSetting ("num_lights", list.at(0).toStdString());
     }
-    else if(settingKey == "Objects/shaders" && !list.empty())
+    else if(settingKey == "3d-render/shaders" && !list.empty())
     {
         sh::Factory::getInstance ().setShadersEnabled (list.at(0).toStdString() == "true" ? true : false);
     }
@@ -492,19 +498,9 @@ CSMSettings::Setting *CSMSettings::UserSettings::createSetting
     if (!mSettings.empty())
         row = mSettings.back()->viewRow()+1;
 
-    int column = 2;
+    setting->setViewLocation (row, 1);
 
-    if (type==Type_CheckBox)
-        column = 1;
-
-    setting->setViewLocation (row, column);
-
-    int span = 1;
-
-    if (type==Type_CheckBox)
-        span = 3;
-
-    setting->setColumnSpan (span);
+    setting->setColumnSpan (3);
 
     int width = 10;
 

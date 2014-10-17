@@ -331,7 +331,7 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     factory->loadAllFiles();
 
-    bool shaders = mUserSettings.setting("Objects/shaders", QString("true")) == "true" ? true : false;
+    bool shaders = mUserSettings.setting("3d-render/shaders", QString("true")) == "true" ? true : false;
     sh::Factory::getInstance ().setShadersEnabled (shaders);
 
     std::string fog = mUserSettings.setting("Shader/fog", QString("true")).toStdString();
