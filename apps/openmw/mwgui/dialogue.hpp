@@ -6,7 +6,7 @@
 
 #include "bookpage.hpp"
 
-#include "keywordsearch.hpp"
+#include "../mwdialogue/keywordsearch.hpp"
 
 namespace Gui
 {
@@ -76,7 +76,7 @@ namespace MWGui
         virtual void activated ();
     };
 
-    typedef KeywordSearch <std::string, intptr_t> KeywordSearchT;
+    typedef MWDialogue::KeywordSearch <std::string, intptr_t> KeywordSearchT;
 
     struct DialogueText
     {

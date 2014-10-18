@@ -12,9 +12,9 @@
 #include "../mwbase/journal.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwdialogue/journalentry.hpp"
 
-#include "keywordsearch.hpp"
+#include "../mwdialogue/journalentry.hpp"
+#include "../mwdialogue/keywordsearch.hpp"
 
 namespace MWGui {
 
@@ -22,7 +22,7 @@ struct JournalViewModelImpl;
 
 struct JournalViewModelImpl : JournalViewModel
 {
-    typedef KeywordSearch <std::string, intptr_t> KeywordSearchT;
+    typedef MWDialogue::KeywordSearch <std::string, intptr_t> KeywordSearchT;
 
     mutable bool             mKeywordSearchLoaded;
     mutable KeywordSearchT mKeywordSearch;
