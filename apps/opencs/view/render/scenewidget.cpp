@@ -66,6 +66,7 @@ namespace CSVRender
         mOverlaySystem = OverlaySystem::instance().get();
         mSceneMgr->addRenderQueueListener(mOverlaySystem);
 
+        // FIXME: singleton probably needed
         mPhysics = new CSVWorld::PhysicsSystem(mSceneMgr);
 
         QTimer *timer = new QTimer (this);

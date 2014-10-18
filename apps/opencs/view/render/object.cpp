@@ -76,11 +76,48 @@ void CSVRender::Object::update()
         mObject = NifOgre::Loader::createObjects (mBase, "Meshes\\" + model);
         mObject->setVisibilityFlags (Element_Reference);
 
-        bool placeable = true; // FIXME
-        mPhysics->addObject("meshes\\" + model, mBase->getName(), /*scale*/1,
-                mBase->getPosition(), mBase->getOrientation(), 0, 0, false, placeable);
-        mPhysics->addObject("meshes\\" + model, mBase->getName(), /*scale*/1,
-                mBase->getPosition(), mBase->getOrientation(), 0, 0, true, placeable); // FIXME: why again with raycasting?
+        // mwrender/objects.cpp: insertBegin()
+        //
+        //  creates a ChildSceneNode from root if one doesn't exist for that cell (CellStore*)
+        //  creates a ChildSceneNode for that cell scene node
+        //  set the position & scale of the new node (for the object)
+        //  set the orientation of the new node
+        //  set the new node as the basenode (for the object)
+        //
+        // render/cell.cpp: Cell()
+        //
+        //  creates a ChildSceneNode from root
+        //  set the position to origin <---- each object adjusts its position later
+        //  pass the node when creating an Object
+        //
+        // render/object.cpp: Object()
+        //  creates a ChildSceneNode from the cell scene node
+        //
+        if (!mReferenceId.empty())
+        {
+            const CSMWorld::CellRef& reference = getReference();
+            Ogre::Quaternion xr (Ogre::Radian (-reference.mPos.rot[0]), Ogre::Vector3::UNIT_X);
+            Ogre::Quaternion yr (Ogre::Radian (-reference.mPos.rot[1]), Ogre::Vector3::UNIT_Y);
+            Ogre::Quaternion zr (Ogre::Radian (-reference.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
+
+            bool placeable = false; // FIXME
+            mPhysics->addObject("meshes\\" + model,
+                                mBase->getName(),
+                                reference.mScale,
+                                Ogre::Vector3(reference.mPos.pos[0],
+                                              reference.mPos.pos[1],
+                                              reference.mPos.pos[2]),
+                                xr*yr*zr,
+                                0, 0, false, placeable);
+            mPhysics->addObject("meshes\\" + model,
+                                mBase->getName(),
+                                reference.mScale,
+                                Ogre::Vector3(reference.mPos.pos[0],
+                                              reference.mPos.pos[1],
+                                              reference.mPos.pos[2]),
+                                xr*yr*zr,
+                                0, 0, true, placeable); // FIXME: why again with raycasting?
+        }
     }
 }
 
@@ -136,6 +173,10 @@ CSVRender::Object::Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode
 
     update();
     adjust();
+    std::cout << "obj pos" + std::to_string(mBase->getPosition().x)
+                    + ", " + std::to_string(mBase->getPosition().y)
+                    + ", " + std::to_string(mBase->getPosition().z) << std::endl;
+
 }
 
 CSVRender::Object::~Object()

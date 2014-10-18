@@ -147,7 +147,11 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                               ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
                               height+200));
             getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(manual);
-            manual->setVisible(false);
+            manual->setVisible(true);
+
+    std::cout << "cell pos" + std::to_string(ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2)
+                    + ", " + std::to_string(ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2)
+                    + ", " + std::to_string(height) << std::endl;
 
             CSVRender::TextOverlay *textDisp =
                     new CSVRender::TextOverlay(manual, getCamera(), iter->getId(mWorldspace));
@@ -193,6 +197,8 @@ void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event
     if(event->button() == Qt::RightButton)
     {
         std::cout << "double clicked" << std::endl;
+        //getSceneManager()->setVisibilityMask (4294967295);
+
         getPhysics()->toggleDebugRendering();
     }
 }

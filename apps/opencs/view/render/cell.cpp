@@ -84,9 +84,6 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
         mTerrain->loadCell(esmLand->mX,
                            esmLand->mY);
     }
-        std::cout << "cell pos" + std::to_string(mCellNode->getPosition().x)
-                           + ", " + std::to_string(mCellNode->getPosition().y)
-                           + ", " + std::to_string(mCellNode->getPosition().z) << std::endl;
 }
 
 CSVRender::Cell::~Cell()
@@ -183,7 +180,7 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     for (std::map<std::string, bool>::iterator iter (ids.begin()); iter!=ids.end(); ++iter)
     {
         mObjects.insert (std::make_pair (
-            iter->first, new Object (mData, mCellNode, iter->first, false)));
+            iter->first, new Object (mData, mCellNode, iter->first, false, mPhysics)));
 
         modified = true;
     }

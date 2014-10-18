@@ -22,15 +22,6 @@ namespace CSVWorld
         delete mEngine;
     }
 
-    // OpenMW                         | OpenCS
-    // Ptr                            | ?
-    // ptr.getClass().getModel(ptr)   | ? // see Object::update()
-    // ptr.getRefData().getBaseNode() | ?
-    // ptr.getCellRef().getScale()    | ?
-    //
-    // getModel() returns the mesh; each class has its own implementation
-    //
-    //void PhysicsSystem::addObject (const Ptr& ptr, bool placeable)
     void PhysicsSystem::addObject(const std::string &mesh,
                                   const std::string &name,
                                   float scale,
@@ -41,24 +32,14 @@ namespace CSVWorld
                                   bool raycasting,
                                   bool placeable)
     {
-#if 0
-        std::string mesh = ptr.getClass().getModel(ptr);
-        Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
-        handleToMesh[node->getName()] = mesh;
-        mEngine->createAndAdjustRigidBody(
-            mesh, node->getName(), ptr.getCellRef().getScale(), node->getPosition(), node->getOrientation(), 0, 0, false, placeable);
-        mEngine->createAndAdjustRigidBody(
-            mesh, node->getName(), ptr.getCellRef().getScale(), node->getPosition(), node->getOrientation(), 0, 0, true, placeable);
-#endif
+        //handleToMesh[node->getName()] = mesh;
         mEngine->createAndAdjustRigidBody(mesh, name, scale, position, rotation,
-                                          0, 0, false, placeable);
-        mEngine->createAndAdjustRigidBody(mesh, name, scale, position, rotation,
-                                          0, 0, true, placeable);
+                                          scaledBoxTranslation, boxRotation, raycasting, placeable);
     }
 
     void PhysicsSystem::toggleDebugRendering()
     {
-        //mEngine->toggleDebugRendering();
-        mEngine->setDebugRenderingMode(1);
+        mEngine->toggleDebugRendering();
+        //mEngine->setDebugRenderingMode(1);
     }
 }
