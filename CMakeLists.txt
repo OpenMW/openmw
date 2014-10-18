@@ -271,6 +271,10 @@ endif ()
     endif(WIN32)
 endif(OGRE_STATIC)
 
+if(APPLE)
+    message( STATUS "OGRE_INCLUDE_DIR: " ${OGRE_INCLUDE_DIR} )
+    message( STATUS "OGRE_Overlay_INCLUDE_DIR: " ${OGRE_Overlay_INCLUDE_DIR} )
+endif()
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_INCLUDE_DIRS} ${OGRE_PLUGIN_INCLUDE_DIRS}
     ${OGRE_INCLUDE_DIR}/Overlay ${OGRE_Overlay_INCLUDE_DIR}
