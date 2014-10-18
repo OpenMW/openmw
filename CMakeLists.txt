@@ -288,7 +288,7 @@ include_directories("."
 )
 if(APPLE)
     message( STATUS "INCLUDE_DIRECTORIES: " ${INCLUDE_DIRECTORIES} )
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I\"./OGRE/Overlay\"" )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -iquote ${OGRE_Overlay_INCLUDE_DIR}" )
     message( STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS} )
 endif()
 
