@@ -271,10 +271,6 @@ endif ()
     endif(WIN32)
 endif(OGRE_STATIC)
 
-if(APPLE)
-    message( STATUS "OGRE_INCLUDE_DIR: " ${OGRE_INCLUDE_DIR} )
-    message( STATUS "OGRE_Overlay_INCLUDE_DIR: " ${OGRE_Overlay_INCLUDE_DIR} )
-endif()
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_INCLUDE_DIRS} ${OGRE_PLUGIN_INCLUDE_DIRS}
     ${OGRE_INCLUDE_DIR}/Overlay ${OGRE_Overlay_INCLUDE_DIR}
@@ -287,9 +283,7 @@ include_directories("."
     ${LIBS_DIR}
 )
 if(APPLE)
-    message( STATUS "INCLUDE_DIRECTORIES: " ${INCLUDE_DIRECTORIES} )
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -iquote ${OGRE_Overlay_INCLUDE_DIR}" )
-    message( STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS} )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -iquote${OGRE_Overlay_INCLUDE_DIR}" )
 endif()
 
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
