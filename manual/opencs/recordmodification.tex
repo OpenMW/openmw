@@ -14,10 +14,13 @@ To open edit panel, please open context menu on any record and choose edit actio
 In addition to that you probabbly noticed some icons in the bar located at the very bottom of the edit panel. Those can be used to perform the following actions:
 
 \begin{description}
-  \item[Preview] This will launch preview panel -- which will be described later.
+  \item[Preview] This will launch simple preview panel -- which will be described later.
   \item[Next] This will switch edit panel to the next record. It is worth noticing that edit panel will skip deleted records.
-  \item[Prev] Do I really need to say what this button does?
+  \item[Prev] Do We really need to say what this button does? I guess we should! Well, this will switch edit panel to former record. Deleted records are skipped.
 \end{description}
 
 \subsection{Verification tool}
-As you could notice there is nothing that can stop you from breaking the game by violating record fields logic.
+As you could notice there is nothing that can stop you from breaking the game by violating record fields logic, and yet -- it is something that you are always trying to avoid. To adress this problem \OCS{} utilizes so called verification tool (or verifer as many prefer to call it) that basicly goes trough all records and checks if it contains any illogical fields. This includes for instance torch duration equal 0\footnote{Interestingly negative values are perfectly fine: they indicate that light source has no duration limit at all. There are records like this in the original game.} or characters without name, race or any other record with a mandatory field missing.\\
+This tool is even more usefull than it seems. If you somehow delete race that is used by some of the characters, all those characters will be suddenly broken. As a rule of thumb it is a good idea to use verifer before saving your content file.\\
+To launch this usefull tool %don't remember, todo...
+Resoults are presented as a yet another table with short (and hopefully descriptive enough) description of the identified problem. It is worth noticing that some records located in the \MW{} esm files are listed by the verification tool -- it is not fault of our tool: those records are just broken. For instance, you actually may find the 0 duration torch. However, those records are usually not placed in game world itself -- and that's good since \MW{} game engine will crash if player equip light source like this!\footnote{We would like to thanks \BS{} for such a usefull testing material. It makes us feel special.}
