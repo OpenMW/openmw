@@ -364,9 +364,6 @@ macro(ogre_find_component COMPONENT HEADER)
   make_library_set(OGRE_${COMPONENT}_LIBRARY)
   findpkg_finish(OGRE_${COMPONENT})
   if (OGRE_${COMPONENT}_FOUND)
-    if (APPLE)
-      include_directories("${OGRE_INCLUDE_DIR}/OGRE/${COMPONENT}")
-    endif()
     # find binaries
     if (NOT OGRE_STATIC)
       if (WIN32)
@@ -382,7 +379,6 @@ endmacro()
 ogre_find_component(Paging OgrePaging.h)
 # look for Overlay component
 ogre_find_component(Overlay OgreOverlaySystem.h)
-ogre_find_component(Overlay OgreOverlay.h)
 # look for Terrain component
 ogre_find_component(Terrain OgreTerrain.h)
 # look for Property component

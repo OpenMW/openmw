@@ -282,6 +282,9 @@ include_directories("."
     ${OPENAL_INCLUDE_DIR}
     ${LIBS_DIR}
 )
+if(APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -iquote${OGRE_Overlay_INCLUDE_DIR}" )
+endif()
 
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
 
