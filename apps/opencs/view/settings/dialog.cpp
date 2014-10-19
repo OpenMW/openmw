@@ -74,7 +74,7 @@ void CSVSettings::Dialog::buildPages()
         mStackedWidget->addWidget (page);
     }
 
-    mPageListWidget->setMaximumWidth (maxWidth + 50);
+    mPageListWidget->setMaximumWidth (maxWidth + 10);
 
     resize (mStackedWidget->sizeHint());
 }
