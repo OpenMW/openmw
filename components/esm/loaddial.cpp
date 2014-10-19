@@ -110,4 +110,15 @@ void Dialogue::readInfo(ESMReader &esm, bool merge)
     std::cerr << "Failed to insert info " << id << std::endl;
 }
 
+void Dialogue::clearDeletedInfos()
+{
+    for (InfoContainer::iterator it = mInfo.begin(); it != mInfo.end(); )
+    {
+        if (it->mQuestStatus == DialInfo::QS_Deleted)
+            it = mInfo.erase(it);
+        else
+            ++it;
+    }
+}
+
 }

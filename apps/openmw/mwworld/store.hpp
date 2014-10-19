@@ -1174,6 +1174,25 @@ namespace MWWorld
         mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
     }
 
+    template<>
+    inline void Store<ESM::Dialogue>::setUp()
+    {
+        // DialInfos marked as deleted are kept during the loading phase, so that the linked list
+        // structure is kept intact for inserting further INFOs. Delete them now that loading is done.
+        for (Static::iterator it = mStatic.begin(); it != mStatic.end(); ++it)
+        {
+            ESM::Dialogue& dial = it->second;
+            dial.clearDeletedInfos();
+        }
+
+        mShared.clear();
+        mShared.reserve(mStatic.size());
+        typename std::map<std::string, ESM::Dialogue>::iterator it = mStatic.begin();
+        for (; it != mStatic.end(); ++it) {
+            mShared.push_back(&(it->second));
+        }
+    }
+
 } //end namespace
 
 #endif
