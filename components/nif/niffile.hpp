@@ -19,7 +19,7 @@ class NIFFile
     };
 
     /// Nif file version
-    int ver;
+    unsigned int ver;
 
     /// File name, used for error messages and opening the file
     std::string filename;
@@ -32,6 +32,10 @@ class NIFFile
 
     /// Parse the file
     void parse();
+
+    /// Get the file's version in a human readable form
+    ///\returns A string containing a human readable NIF version number
+    std::string printVersion(unsigned int version);
 
     ///Private Copy Constructor
     NIFFile (NIFFile const &);
@@ -74,6 +78,9 @@ public:
     }
     /// Number of roots
     size_t numRoots() const { return roots.size(); }
+
+    /// Get the name of the file
+    std::string getFilename(){ return filename; }
 };
 
 

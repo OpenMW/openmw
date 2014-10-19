@@ -4,9 +4,12 @@
 #include <OgreMatrix4.h>
 
 #include "controlled.hpp"
+#include "extra.hpp"
 #include "data.hpp"
 #include "property.hpp"
 #include "niftypes.hpp"
+#include "controller.hpp"
+#include "base.hpp"
 
 namespace Nif
 {
