@@ -74,6 +74,9 @@ public:
     }
     /// Number of roots
     size_t numRoots() const { return roots.size(); }
+
+    /// Get the name of the file
+    std::string getFilename(){ return filename; }
 };
 
 

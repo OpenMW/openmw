@@ -12,6 +12,7 @@
 #include <OgreVector4.h>
 #include <OgreMatrix3.h>
 #include <OgreQuaternion.h>
+#include <OgreStringConverter.h>
 
 #include "niftypes.hpp"
 
@@ -142,7 +143,8 @@ public:
         std::vector<char> str (length+1, 0);
 
         if(inp->read(&str[0], length) != length)
-            throw std::runtime_error ("string length in NIF file does not match");
+            throw std::runtime_error (":  String length in NIF file "+ file->getFilename() +" does not match!  Expected length:  "
+                + Ogre::StringConverter::toString(length));
 
         return &str[0];
     }
