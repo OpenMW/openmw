@@ -105,9 +105,28 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     return newFactory;
 }
 
-
 ///Make the factory map used for parsing the file
 static const std::map<std::string,RecordFactoryEntry> factories = makeFactory();
+
+///Good nif file headers
+static std::vector<std::string> makeGoodHeaders()
+{
+    std::vector<std::string> header;
+    header.push_back("NetImmerse File Format");
+    header.push_back("Gamebryo File Format");
+    return header;
+}
+static const std::vector<std::string> goodHeaders = makeGoodHeaders();
+
+///Good nif file versions
+static std::set<unsigned int> makeGoodVersions()
+{
+    std::set<unsigned int> versions;
+    versions.insert(0x04000002);// Morrowind NIF version
+    versions.insert(0x14000005);// Some mods use this
+    return versions;
+}
+static const std::set<unsigned int> GoodVersions = makeGoodVersions();
 
 /// Get the file's version in a human readable form
 std::string NIFFile::printVersion(unsigned int version)
@@ -131,14 +150,23 @@ void NIFFile::parse()
     NIFStream nif (this, Ogre::ResourceGroupManager::getSingleton().openResource(filename));
 
   // Check the header string
-  std::string head = nif.getString(40);
-  if(head.compare(0, 22, "NetImmerse File Format") != 0)
-    fail("Invalid NIF header");
+  std::string head = nif.getVersionString();
+  bool isGood = false;
+  for (std::vector<std::string>::const_iterator it = goodHeaders.begin() ; it != goodHeaders.end(); it++)
+  {
+    if(head.find(*it) != std::string::npos)
+      isGood = true;
+  }
+  if(!isGood)
+    fail("Invalid NIF header:  " + head);
 
   // Get BCD version
-  ver = nif.getUInt();
-  if(ver != VER_MW)
+  ver = nif.getInt();
+  if(GoodVersions.find(ver) == GoodVersions.end())
+  {
     fail("Unsupported NIF version: " + printVersion(ver));
+  }
+
   // Number of records
   size_t recNum = nif.getInt();
   records.resize(recNum);

@@ -154,6 +154,14 @@ public:
         return getString(size);
     }
 
+    //This is special since the version string doesn't start with a number, and ends with "\n"
+    std::string getVersionString()
+    {
+        char buffer[64];
+        inp->readLine(buffer,64);
+        return std::string(buffer);
+    }
+
     void getShorts(std::vector<short> &vec, size_t size)
     {
         vec.resize(size);

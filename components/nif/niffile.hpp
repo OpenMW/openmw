@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <vector>
 #include <iostream>
+#include <stdint.h>
 
 #include "record.hpp"
 
@@ -14,10 +15,6 @@ namespace Nif
 
 class NIFFile
 {
-    enum NIFVersion {
-        VER_MW    = 0x04000002    // Morrowind NIFs
-    };
-
     /// Nif file version
     unsigned int ver;
 
