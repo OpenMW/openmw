@@ -1099,6 +1099,8 @@ void VideoState::deinit()
 {
     this->quit = true;
 
+    this->AudioTrack.reset();
+
     this->audioq.cond.notify_one();
     this->videoq.cond.notify_one();
 
