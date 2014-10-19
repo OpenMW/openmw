@@ -63,6 +63,14 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         antialiasing->setDefaultValue (defaultValue);
     }
 
+    declareSection ("3d-render-adv", "3D Rendering (Advanced)");
+    {
+        Setting *numLights = createSetting (Type_SpinBox, "num_lights",
+            "Number of lights per pass");
+        numLights->setDefaultValue (8);
+        numLights->setRange (1, 100);
+    }
+
     declareSection ("scene-input", "Scene Input");
     {
         Setting *timer = createSetting (Type_SpinBox, "timer", "Input responsiveness");
@@ -140,14 +148,6 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "ID type display format");
         ritd->setDefaultValue (defaultValue);
         ritd->setDeclaredValues (values);
-    }
-
-    declareSection ("Objects", "Objects");
-    {
-
-        Setting *numLights = createSetting (Type_SpinBox, "num_lights", "num_lights");
-        numLights->setDefaultValue(8);
-        numLights->setRange (0, 100);
     }
 
 
@@ -413,7 +413,7 @@ void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
 {
     mSettingDefinitions->setValue (settingKey ,list);
 
-    if(settingKey == "Objects/num_lights" && !list.empty())
+    if(settingKey == "3d-render-adv/num_lights" && !list.empty())
     {
         sh::Factory::getInstance ().setGlobalSetting ("num_lights", list.at(0).toStdString());
     }

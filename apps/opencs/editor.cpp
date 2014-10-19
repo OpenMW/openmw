@@ -350,7 +350,7 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
     // internal setting - may be switched on or off by the use of shader configurations
     sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
 
-    std::string num_lights = mUserSettings.setting("Objects/num_lights", QString("8")).toStdString();
+    std::string num_lights = mUserSettings.setting("3d-render-adv/num_lights", QString("8")).toStdString();
     sh::Factory::getInstance ().setGlobalSetting ("num_lights", num_lights);
 
     /// \todo add more configurable shiny settings
