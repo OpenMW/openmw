@@ -27,6 +27,10 @@ class NIFFile
     /// Root list.  This is a select portion of the pointers from records
     std::vector<Record*> roots;
 
+    /// Parse the file's header
+    ///\returns The number of records
+    size_t parseHeader(NIFStream nif);
+
     /// Parse the file
     void parse();
 

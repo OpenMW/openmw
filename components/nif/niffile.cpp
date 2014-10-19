@@ -145,40 +145,74 @@ std::string NIFFile::printVersion(unsigned int version)
     +"." + Ogre::StringConverter::toString(version_out.quad[0]);
 }
 
-void NIFFile::parse()
+size_t NIFFile::parseHeader(NIFStream nif)
 {
-    NIFStream nif (this, Ogre::ResourceGroupManager::getSingleton().openResource(filename));
+    //The number of records/blocks to get from the file
+    size_t numBlocks = 0;
 
-  // Check the header string
-  std::string head = nif.getVersionString();
-  bool isGood = false;
-  for (std::vector<std::string>::const_iterator it = goodHeaders.begin() ; it != goodHeaders.end(); it++)
-  {
-    if(head.find(*it) != std::string::npos)
-      isGood = true;
-  }
-  if(!isGood)
+    // Check the header string
+    std::string head = nif.getVersionString();
+    bool isGood = false;
+    for (std::vector<std::string>::const_iterator it = goodHeaders.begin() ; it != goodHeaders.end(); it++)
+    {
+        if(head.find(*it) != std::string::npos)
+        isGood = true;
+    }
+    if(!isGood)
     fail("Invalid NIF header:  " + head);
 
-  // Get BCD version
-  ver = nif.getInt();
-  if(GoodVersions.find(ver) == GoodVersions.end())
-  {
-    fail("Unsupported NIF version: " + printVersion(ver));
-  }
+    // Get BCD version
+    ver=nif.getUInt();
+    if(GoodVersions.find(ver) == GoodVersions.end())
+        fail("Unsupported NIF version: " + printVersion(ver));
 
-  // Number of records
-  size_t recNum = nif.getInt();
+    //If the file is a newer nif file:
+    if(ver > 0x04000002){
+        //Many of these have the type and variable commented out to prevent compiler warnings
+
+        bool isLittleEndian = nif.getChar();
+        if(!isLittleEndian)
+            fail("Is not Little Endian");
+        //unsigned int userVersion
+        nif.getUInt();
+        numBlocks = nif.getInt();
+        //unsigned int userVersion2
+        nif.getUInt();
+        //\FIXME This only works if Export Info is empty
+        //string creator
+        nif.getShortString();
+        //string exportInfo1
+        nif.getShortString();
+        //string exportInfo2
+        nif.getShortString();
+        unsigned short numBlockTypes = nif.getShort();
+        for (unsigned int i =0; i < numBlockTypes; ++i)
+        {
+            //string blockType
+            nif.getString();
+        }
+        for (unsigned int i =0; i < numBlockTypes; ++i)
+        {
+            //unsigned short blockTypeIndex
+            nif.getShort();
+        }
+        //unsigned int unkown
+        nif.getUInt();
+    }
+    else
+    {
+        numBlocks = nif.getInt();
+    }
+    return numBlocks;
+}
+
+void NIFFile::parse()
+{
+  NIFStream nif (this, Ogre::ResourceGroupManager::getSingleton().openResource(filename));
+
+  // Parse the header, and get the Number of records
+  size_t recNum = parseHeader(nif);
   records.resize(recNum);
-
-  /* The format for 10.0.1.0 seems to be a bit different. After the
-     header, it contains the number of records, r (int), just like
-     4.0.0.2, but following that it contains a short x, followed by x
-     strings. Then again by r shorts, one for each record, giving
-     which of the above strings to use to identify the record. After
-     this follows two ints (zero?) and then the record data. However
-     we do not support or plan to support other versions yet.
-  */
 
   for(size_t i = 0;i < recNum;i++)
     {
@@ -207,6 +241,7 @@ void NIFFile::parse()
       r->read(&nif);
     }
 
+    //NiFooter
     size_t rootNum = nif.getUInt();
     roots.resize(rootNum);
 

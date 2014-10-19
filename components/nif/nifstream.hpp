@@ -162,6 +162,18 @@ public:
         return std::string(buffer);
     }
 
+    //This is a strange option used by newer nif formats
+    std::string getShortString()
+    {
+        //Size is big endian format, so it needs special processing
+        uint8_t short_buffer[2];
+        char buffer[64];
+        if(inp->read(short_buffer, 2) != 2) return 0;
+        short size = (short_buffer[0]<<8) | short_buffer[1];
+
+        return getString(size);
+    }
+
     void getShorts(std::vector<short> &vec, size_t size)
     {
         vec.resize(size);
