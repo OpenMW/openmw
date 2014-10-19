@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <vector>
 #include <iostream>
+#include <stdint.h>
 
 #include "record.hpp"
 
@@ -14,12 +15,8 @@ namespace Nif
 
 class NIFFile
 {
-    enum NIFVersion {
-        VER_MW    = 0x04000002    // Morrowind NIFs
-    };
-
     /// Nif file version
-    int ver;
+    unsigned int ver;
 
     /// File name, used for error messages and opening the file
     std::string filename;
@@ -30,8 +27,16 @@ class NIFFile
     /// Root list.  This is a select portion of the pointers from records
     std::vector<Record*> roots;
 
+    /// Parse the file's header
+    ///\returns The number of records
+    size_t parseHeader(NIFStream nif);
+
     /// Parse the file
     void parse();
+
+    /// Get the file's version in a human readable form
+    ///\returns A string containing a human readable NIF version number
+    std::string printVersion(unsigned int version);
 
     ///Private Copy Constructor
     NIFFile (NIFFile const &);
@@ -74,6 +79,9 @@ public:
     }
     /// Number of roots
     size_t numRoots() const { return roots.size(); }
+
+    /// Get the name of the file
+    std::string getFilename(){ return filename; }
 };
 
 

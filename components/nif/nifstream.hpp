@@ -12,6 +12,7 @@
 #include <OgreVector4.h>
 #include <OgreMatrix3.h>
 #include <OgreQuaternion.h>
+#include <OgreStringConverter.h>
 
 #include "niftypes.hpp"
 
@@ -142,13 +143,34 @@ public:
         std::vector<char> str (length+1, 0);
 
         if(inp->read(&str[0], length) != length)
-            throw std::runtime_error ("string length in NIF file does not match");
+            throw std::runtime_error (":  String length in NIF file "+ file->getFilename() +" does not match!  Expected length:  "
+                + Ogre::StringConverter::toString(length));
 
         return &str[0];
     }
     std::string getString()
     {
         size_t size = read_le32();
+        return getString(size);
+    }
+
+    //This is special since the version string doesn't start with a number, and ends with "\n"
+    std::string getVersionString()
+    {
+        char buffer[64];
+        inp->readLine(buffer,64);
+        return std::string(buffer);
+    }
+
+    //This is a strange option used by newer nif formats
+    std::string getShortString()
+    {
+        //Size is big endian format, so it needs special processing
+        uint8_t short_buffer[2];
+        char buffer[64];
+        if(inp->read(short_buffer, 2) != 2) return 0;
+        short size = (short_buffer[0]<<8) | short_buffer[1];
+
         return getString(size);
     }
 

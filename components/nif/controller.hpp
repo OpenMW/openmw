@@ -24,43 +24,10 @@
 #ifndef OPENMW_COMPONENTS_NIF_CONTROLLER_HPP
 #define OPENMW_COMPONENTS_NIF_CONTROLLER_HPP
 
-#include "record.hpp"
-#include "niffile.hpp"
-#include "recordptr.hpp"
+#include "base.hpp"
 
 namespace Nif
 {
-
-class Controller : public Record
-{
-public:
-    ControllerPtr next;
-    int flags;
-    float frequency, phase;
-    float timeStart, timeStop;
-    ControlledPtr target;
-
-    void read(NIFStream *nif)
-    {
-        next.read(nif);
-
-        flags = nif->getUShort();
-
-        frequency = nif->getFloat();
-        phase = nif->getFloat();
-        timeStart = nif->getFloat();
-        timeStop = nif->getFloat();
-
-        target.read(nif);
-    }
-
-    void post(NIFFile *nif)
-    {
-        Record::post(nif);
-        next.post(nif);
-        target.post(nif);
-    }
-};
 
 class NiParticleSystemController : public Controller
 {

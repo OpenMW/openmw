@@ -105,36 +105,114 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     return newFactory;
 }
 
-
 ///Make the factory map used for parsing the file
 static const std::map<std::string,RecordFactoryEntry> factories = makeFactory();
 
+///Good nif file headers
+static std::vector<std::string> makeGoodHeaders()
+{
+    std::vector<std::string> header;
+    header.push_back("NetImmerse File Format");
+    header.push_back("Gamebryo File Format");
+    return header;
+}
+static const std::vector<std::string> goodHeaders = makeGoodHeaders();
+
+///Good nif file versions
+static std::set<unsigned int> makeGoodVersions()
+{
+    std::set<unsigned int> versions;
+    versions.insert(0x04000002);// Morrowind NIF version
+    versions.insert(0x14000005);// Some mods use this
+    return versions;
+}
+static const std::set<unsigned int> GoodVersions = makeGoodVersions();
+
+/// Get the file's version in a human readable form
+std::string NIFFile::printVersion(unsigned int version)
+{
+    union ver_quad
+    {
+        uint32_t full;
+        uint8_t quad[4];
+    } version_out;
+
+    version_out.full = version;
+
+    return Ogre::StringConverter::toString(version_out.quad[3])
+    +"." + Ogre::StringConverter::toString(version_out.quad[2])
+    +"." + Ogre::StringConverter::toString(version_out.quad[1])
+    +"." + Ogre::StringConverter::toString(version_out.quad[0]);
+}
+
+size_t NIFFile::parseHeader(NIFStream nif)
+{
+    //The number of records/blocks to get from the file
+    size_t numBlocks = 0;
+
+    // Check the header string
+    std::string head = nif.getVersionString();
+    bool isGood = false;
+    for (std::vector<std::string>::const_iterator it = goodHeaders.begin() ; it != goodHeaders.end(); it++)
+    {
+        if(head.find(*it) != std::string::npos)
+        isGood = true;
+    }
+    if(!isGood)
+    fail("Invalid NIF header:  " + head);
+
+    // Get BCD version
+    ver=nif.getUInt();
+    if(GoodVersions.find(ver) == GoodVersions.end())
+        fail("Unsupported NIF version: " + printVersion(ver));
+
+    //If the file is a newer nif file:
+    if(ver > 0x04000002){
+        //Many of these have the type and variable commented out to prevent compiler warnings
+
+        bool isLittleEndian = nif.getChar();
+        if(!isLittleEndian)
+            fail("Is not Little Endian");
+        //unsigned int userVersion
+        nif.getUInt();
+        numBlocks = nif.getInt();
+        //unsigned int userVersion2
+        nif.getUInt();
+        //\FIXME This only works if Export Info is empty
+        //string creator
+        nif.getShortString();
+        //string exportInfo1
+        nif.getShortString();
+        //string exportInfo2
+        nif.getShortString();
+        unsigned short numBlockTypes = nif.getShort();
+        for (unsigned int i =0; i < numBlockTypes; ++i)
+        {
+            //string blockType
+            nif.getString();
+        }
+        for (unsigned int i =0; i < numBlockTypes; ++i)
+        {
+            //unsigned short blockTypeIndex
+            nif.getShort();
+        }
+        //unsigned int unkown
+        nif.getUInt();
+    }
+    else
+    {
+        numBlocks = nif.getInt();
+    }
+    return numBlocks;
+}
+
 void NIFFile::parse()
 {
-    NIFStream nif (this, Ogre::ResourceGroupManager::getSingleton().openResource(filename));
+  NIFStream nif (this, Ogre::ResourceGroupManager::getSingleton().openResource(filename));
 
-  // Check the header string
-  std::string head = nif.getString(40);
-  if(head.compare(0, 22, "NetImmerse File Format") != 0)
-    fail("Invalid NIF header");
-
-  // Get BCD version
-  ver = nif.getInt();
-  if(ver != VER_MW)
-    fail("Unsupported NIF version");
-
-  // Number of records
-  size_t recNum = nif.getInt();
+  // Parse the header, and get the Number of records
+  size_t recNum = parseHeader(nif);
   records.resize(recNum);
-
-  /* The format for 10.0.1.0 seems to be a bit different. After the
-     header, it contains the number of records, r (int), just like
-     4.0.0.2, but following that it contains a short x, followed by x
-     strings. Then again by r shorts, one for each record, giving
-     which of the above strings to use to identify the record. After
-     this follows two ints (zero?) and then the record data. However
-     we do not support or plan to support other versions yet.
-  */
 
   for(size_t i = 0;i < recNum;i++)
     {
@@ -163,6 +241,7 @@ void NIFFile::parse()
       r->read(&nif);
     }
 
+    //NiFooter
     size_t rootNum = nif.getUInt();
     roots.resize(rootNum);
 
