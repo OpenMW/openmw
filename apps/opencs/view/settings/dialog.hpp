@@ -8,6 +8,7 @@
 class QStackedWidget;
 class QListWidget;
 class QListWidgetItem;
+class QSplitter;
 
 namespace CSVSettings {
 
@@ -39,8 +40,8 @@ namespace CSVSettings {
     private:
 
         void buildPages();
-        void buildPageListWidget (QWidget *centralWidget);
-        void buildStackedWidget (QWidget *centralWidget);
+        void buildPageListWidget (QSplitter *centralWidget);
+        void buildStackedWidget (QSplitter *centralWidget);
 
     public slots:
 

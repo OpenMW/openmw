@@ -344,7 +344,7 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 
     factory->loadAllFiles();
 
-    bool shaders = mUserSettings.setting("Objects/shaders", QString("true")) == "true" ? true : false;
+    bool shaders = mUserSettings.setting("3d-render/shaders", QString("true")) == "true" ? true : false;
     sh::Factory::getInstance ().setShadersEnabled (shaders);
 
     std::string fog = mUserSettings.setting("Shader/fog", QString("true")).toStdString();
@@ -363,7 +363,7 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
     // internal setting - may be switched on or off by the use of shader configurations
     sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
 
-    std::string num_lights = mUserSettings.setting("Objects/num_lights", QString("8")).toStdString();
+    std::string num_lights = mUserSettings.setting("3d-render-adv/num_lights", QString("8")).toStdString();
     sh::Factory::getInstance ().setGlobalSetting ("num_lights", num_lights);
 
     /// \todo add more configurable shiny settings
