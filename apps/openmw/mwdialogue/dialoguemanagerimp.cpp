@@ -87,23 +87,23 @@ namespace MWDialogue
 
         for (std::vector<HyperTextParser::Token>::iterator tok = hypertext.begin(); tok != hypertext.end(); ++tok)
         {
-            Misc::StringUtils::toLower(tok->mText);
+            std::string topicId = Misc::StringUtils::lowerCase(tok->mText);
 
             if (tok->isExplicitLink())
             {
                 // calculation of standard form for all hyperlinks
-                size_t asterisk_count = HyperTextParser::removePseudoAsterisks(tok->mText);
+                size_t asterisk_count = HyperTextParser::removePseudoAsterisks(topicId);
                 for(; asterisk_count > 0; --asterisk_count)
-                    tok->mText.append("*");
+                    topicId.append("*");
 
-                tok->mText = mTranslationDataStorage.topicStandardForm(tok->mText);
+                topicId = mTranslationDataStorage.topicStandardForm(topicId);
             }
 
             if (tok->isImplicitKeyword() && mTranslationDataStorage.hasTranslation())
                 continue;
 
-            if (std::find(mActorKnownTopics.begin(), mActorKnownTopics.end(), tok->mText) != mActorKnownTopics.end())
-                mKnownTopics[tok->mText] = true;
+            if (std::find(mActorKnownTopics.begin(), mActorKnownTopics.end(), topicId) != mActorKnownTopics.end())
+                mKnownTopics[topicId] = true;
         }
 
         updateTopics();
