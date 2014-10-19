@@ -220,7 +220,7 @@ void PacketQueue::put(AVPacket *pkt)
     pkt1->pkt = *pkt;
     pkt1->next = NULL;
 
-    if(pkt1->pkt.buf == NULL)
+    if(pkt1->pkt.destruct == NULL)
     {
         if(av_dup_packet(&pkt1->pkt) < 0)
         {
@@ -425,7 +425,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 return -1;
 
             /* if update, update the audio clock w/pts */
-            if(pkt->pts != AV_NOPTS_VALUE)
+            if((uint64_t)pkt->pts != AV_NOPTS_VALUE)
                 mAudioClock = av_q2d(mAVStream->time_base)*pkt->pts;
         }
     }
@@ -820,14 +820,20 @@ double VideoState::synchronize_video(AVFrame *src_frame, double pts)
  * a frame at the time it is allocated.
  */
 static uint64_t global_video_pkt_pts = static_cast<uint64_t>(AV_NOPTS_VALUE);
-static int our_get_buffer2(struct AVCodecContext *c, AVFrame *pic, int flags = AV_GET_BUFFER_FLAG_REF)
+static int our_get_buffer(struct AVCodecContext *c, AVFrame *pic)
 {
-    int ret = avcodec_default_get_buffer2(c, pic, flags);
+    int ret = avcodec_default_get_buffer(c, pic);
     uint64_t *pts = (uint64_t*)av_malloc(sizeof(uint64_t));
     *pts = global_video_pkt_pts;
     pic->opaque = pts;
     return ret;
 }
+static void our_release_buffer(struct AVCodecContext *c, AVFrame *pic)
+{
+    if(pic) av_freep(&pic->opaque);
+    avcodec_default_release_buffer(c, pic);
+}
+
 
 void VideoState::video_thread_loop(VideoState *self)
 {
@@ -849,9 +855,9 @@ void VideoState::video_thread_loop(VideoState *self)
             throw std::runtime_error("Error decoding video frame");
 
         double pts = 0;
-        if(packet->dts != AV_NOPTS_VALUE)
+        if((uint64_t)packet->dts != AV_NOPTS_VALUE)
             pts = packet->dts;
-        else if(pFrame->opaque && *(int64_t*)pFrame->opaque != AV_NOPTS_VALUE)
+        else if(pFrame->opaque && *(uint64_t*)pFrame->opaque != AV_NOPTS_VALUE)
             pts = *(uint64_t*)pFrame->opaque;
         pts *= av_q2d((*self->video_st)->time_base);
 
@@ -952,7 +958,6 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
     // Get a pointer to the codec context for the video stream
     codecCtx = pFormatCtx->streams[stream_index]->codec;
     codec = avcodec_find_decoder(codecCtx->codec_id);
-    codecCtx->refcounted_frames = 1;
     if(!codec || (avcodec_open2(codecCtx, codec, NULL) < 0))
     {
         fprintf(stderr, "Unsupported codec!\n");
@@ -979,7 +984,8 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
 
         this->frame_last_delay = 40e-3;
 
-        codecCtx->get_buffer2 = our_get_buffer2;
+        codecCtx->get_buffer = our_get_buffer;
+        codecCtx->release_buffer = our_release_buffer;
         this->video_thread = boost::thread(video_thread_loop, this);
         this->refresh_thread = boost::thread(video_refresh, this);
         break;
