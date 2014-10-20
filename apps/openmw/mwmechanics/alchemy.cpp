@@ -489,5 +489,5 @@ std::string MWMechanics::Alchemy::suggestPotionName()
 
     int effectId = effects.begin()->mId;
     return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                ESM::MagicEffect::effectIdToString(effectId));
+                ESM::MagicEffect::effectIdToString(effectId))->getString();
 }
