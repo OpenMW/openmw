@@ -109,6 +109,9 @@ namespace MWMechanics
             void removeIngredient (int index);
             ///< Remove ingredient from slot (calling this function on an empty slot is a no-op).
 
+            std::string suggestPotionName ();
+            ///< Suggest a name for the potion, based on the current effects
+
             Result create (const std::string& name);
             ///< Try to create a potion from the ingredients, place it in the inventory of the alchemist and
             /// adjust the skills of the alchemist accordingly.
