@@ -480,3 +480,14 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
 
     return Result_Success;
 }
+
+std::string MWMechanics::Alchemy::suggestPotionName()
+{
+    std::set<MWMechanics::EffectKey> effects = listEffects();
+    if (effects.empty())
+        return "";
+
+    int effectId = effects.begin()->mId;
+    return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                ESM::MagicEffect::effectIdToString(effectId));
+}

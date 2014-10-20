@@ -173,6 +173,11 @@ namespace MWGui
 
     void AlchemyWindow::update()
     {
+        std::string suggestedName = mAlchemy.suggestPotionName();
+        if (suggestedName != mSuggestedPotionName)
+            mNameEdit->setCaptionWithReplacing(suggestedName);
+        mSuggestedPotionName = suggestedName;
+
         mSortModel->clearDragItems();
 
         MWMechanics::Alchemy::TIngredientsIterator it = mAlchemy.beginIngredients ();
