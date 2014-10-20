@@ -205,7 +205,7 @@ void MWMechanics::Alchemy::updateEffects()
     }
 }
 
-const ESM::Potion *MWMechanics::Alchemy::getRecord() const
+const ESM::Potion *MWMechanics::Alchemy::getRecord(const ESM::Potion& toFind) const
 {
     const MWWorld::Store<ESM::Potion> &potions =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Potion>();
@@ -214,6 +214,18 @@ const ESM::Potion *MWMechanics::Alchemy::getRecord() const
     for (; iter != potions.end(); ++iter)
     {
         if (iter->mEffects.mList.size() != mEffects.size())
+            continue;
+
+        if (iter->mName != toFind.mName
+                || iter->mScript != toFind.mScript
+                || iter->mData.mWeight != toFind.mData.mWeight
+                || iter->mData.mValue != toFind.mData.mValue
+                || iter->mData.mAutoCalc != toFind.mData.mAutoCalc)
+            continue;
+
+        // Don't choose an ID that came from the content files, would have unintended side effects
+        // where alchemy can be used to produce quest-relevant items
+        if (!potions.isDynamic(iter->mId))
             continue;
 
         bool mismatch = false;
@@ -266,37 +278,34 @@ void MWMechanics::Alchemy::removeIngredients()
 
 void MWMechanics::Alchemy::addPotion (const std::string& name)
 {
-    const ESM::Potion *record = getRecord();
+    ESM::Potion newRecord;
 
+    newRecord.mData.mWeight = 0;
+
+    for (TIngredientsIterator iter (beginIngredients()); iter!=endIngredients(); ++iter)
+        if (!iter->isEmpty())
+            newRecord.mData.mWeight += iter->get<ESM::Ingredient>()->mBase->mData.mWeight;
+
+    newRecord.mData.mWeight /= countIngredients();
+
+    newRecord.mData.mValue = mValue;
+    newRecord.mData.mAutoCalc = 0;
+
+    newRecord.mName = name;
+
+    int index = static_cast<int> (std::rand()/(static_cast<double> (RAND_MAX)+1)*6);
+    assert (index>=0 && index<6);
+
+    static const char *meshes[] = { "standard", "bargain", "cheap", "fresh", "exclusive", "quality" };
+
+    newRecord.mModel = "m\\misc_potion_" + std::string (meshes[index]) + "_01.nif";
+    newRecord.mIcon = "m\\tx_potion_" + std::string (meshes[index]) + "_01.dds";
+
+    newRecord.mEffects.mList = mEffects;
+
+    const ESM::Potion* record = getRecord(newRecord);
     if (!record)
-    {
-        ESM::Potion newRecord;
-
-        newRecord.mData.mWeight = 0;
-
-        for (TIngredientsIterator iter (beginIngredients()); iter!=endIngredients(); ++iter)
-            if (!iter->isEmpty())
-                newRecord.mData.mWeight += iter->get<ESM::Ingredient>()->mBase->mData.mWeight;
-
-        newRecord.mData.mWeight /= countIngredients();
-
-        newRecord.mData.mValue = mValue;
-        newRecord.mData.mAutoCalc = 0;
-
-        newRecord.mName = name;
-
-        int index = static_cast<int> (std::rand()/(static_cast<double> (RAND_MAX)+1)*6);
-        assert (index>=0 && index<6);
-
-        static const char *name[] = { "standard", "bargain", "cheap", "fresh", "exclusive", "quality" };
-
-        newRecord.mModel = "m\\misc_potion_" + std::string (name[index]) + "_01.nif";
-        newRecord.mIcon = "m\\tx_potion_" + std::string (name[index]) + "_01.dds";
-
-        newRecord.mEffects.mList = mEffects;
-
         record = MWBase::Environment::get().getWorld()->createRecord (newRecord);
-    }
 
     mAlchemist.getClass().getContainerStore (mAlchemist).add (record->mId, 1, mAlchemist);
 }
@@ -436,14 +445,6 @@ MWMechanics::Alchemy::TEffectsIterator MWMechanics::Alchemy::endEffects() const
     return mEffects.end();
 }
 
-std::string MWMechanics::Alchemy::getPotionName() const
-{
-    if (const ESM::Potion *potion = getRecord())
-        return potion->mName;
-
-    return "";
-}
-
 MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& name)
 {
     if (mTools[ESM::Apparatus::MortarPestle].isEmpty())
@@ -452,7 +453,7 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
     if (countIngredients()<2)
         return Result_LessThanTwoIngredients;
 
-    if (name.empty() && getPotionName().empty())
+    if (name.empty())
         return Result_NoName;
 
     if (listEffects().empty())
