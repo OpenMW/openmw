@@ -690,6 +690,9 @@ void VideoState::video_refresh()
         const float threshold = 0.03;
         if (this->pictq[pictq_rindex].pts > this->get_master_clock() + threshold)
             return; // not ready yet to show this picture
+
+        // TODO: the conversion to RGBA is done in the decoding thread, so if a picture is skipped here, then it was
+        // unnecessarily converted. But we may want to replace the conversion by a pixel shader anyway (see comment in queue_picture)
         int i=0;
         for (; i<this->pictq_size-1; ++i)
         {
@@ -733,6 +736,8 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     vp = &this->pictq[this->pictq_windex];
 
     // Convert the image into RGBA format for Ogre
+    // TODO: we could do this in a pixel shader instead, if the source format
+    // matches a commonly used format (ie YUV420P)
     if(this->sws_context == NULL)
     {
         int w = (*this->video_st)->codec->width;
