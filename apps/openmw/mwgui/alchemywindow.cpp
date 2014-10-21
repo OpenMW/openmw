@@ -134,11 +134,12 @@ namespace MWGui
         for (MWMechanics::Alchemy::TToolsIterator iter (mAlchemy.beginTools());
             iter!=mAlchemy.endTools() && index<static_cast<int> (mApparatus.size()); ++iter, ++index)
         {
+            mApparatus.at (index)->setItem(*iter);
+            mApparatus.at (index)->clearUserStrings();
             if (!iter->isEmpty())
             {
                 mApparatus.at (index)->setUserString ("ToolTipType", "ItemPtr");
                 mApparatus.at (index)->setUserData (*iter);
-                mApparatus.at (index)->setItem(*iter);
             }
         }
 
@@ -173,6 +174,11 @@ namespace MWGui
 
     void AlchemyWindow::update()
     {
+        std::string suggestedName = mAlchemy.suggestPotionName();
+        if (suggestedName != mSuggestedPotionName)
+            mNameEdit->setCaptionWithReplacing(suggestedName);
+        mSuggestedPotionName = suggestedName;
+
         mSortModel->clearDragItems();
 
         MWMechanics::Alchemy::TIngredientsIterator it = mAlchemy.beginIngredients ();
