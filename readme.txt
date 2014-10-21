@@ -98,6 +98,123 @@ Allowed options:
 
 CHANGELOG
 
+0.33.0
+
+Bug #371: If console assigned to ` (probably to any symbolic key), "`" symbol will be added to console every time it closed
+Bug #1148: Some books'/scrolls' contents are displayed incorrectly
+Bug #1290: Editor: status bar is not updated when record filter is changed
+Bug #1292: Editor: Documents are not removed on closing the last view
+Bug #1301: Editor: File->Exit only checks the document it was issued from.
+Bug #1353: Bluetooth on with no speaker connected results in significantly longer initial load times
+Bug #1436: NPCs react from too far distance
+Bug #1472: PC is placed on top of following NPC when changing cell
+Bug #1487: Tall PC can get stuck in staircases
+Bug #1565: Editor: Subviews are deleted on shutdown instead when they are closed
+Bug #1623: Door marker on Ghorak Manor's balcony makes PC stuck
+Bug #1633: Loaddoor to Sadrith Mora, Telvanni Council House spawns PC in the air
+Bug #1655: Use Appropriate Application Icons on Windows
+Bug #1679: Tribunal expansion, Meryn Othralas the backstage manager in the theatre group in Mournhold in the great bazaar district is floating a good feet above the ground.
+Bug #1705: Rain is broken in third person
+Bug #1706: Thunder and lighting still occurs while the game is paused during the rain
+Bug #1708: No long jumping
+Bug #1710: Editor: ReferenceableID drag to references record filter field creates incorrect filter
+Bug #1712: Rest on Water
+Bug #1715: "Cancel" button is not always on the same side of menu
+Bug #1725: Editor: content file can be opened multiple times from the same dialogue
+Bug #1730: [MOD: Less Generic Nerevarine] Compile failure attempting to enter the Corprusarium.
+Bug #1733: Unhandled ffmpeg sample formats
+Bug #1735: Editor: "Edit Record" context menu button not opening subview for journal infos
+Bug #1750: Editor: record edits result in duplicate entries
+Bug #1789: Editor: Some characters cannot be used in addon name
+Bug #1803: Resizing the map does not keep the pre-resize center at the post-resize center
+Bug #1821: Recovering Cloudcleaver quest: attacking Sosia is considered a crime when you side with Hlormar
+Bug #1838: Editor: Preferences window appears off screen
+Bug #1839: Editor: Record filter title should be moved two pixels to the right
+Bug #1849: Subrecord error in MAO_Containers
+Bug #1854: Knocked-out actors don't fully act knocked out
+Bug #1855: "Soul trapped" sound doesn't play
+Bug #1857: Missing sound effect for enchanted items with empty charge
+Bug #1859: Missing console command: ResetActors (RA)
+Bug #1861: Vendor category "MagicItems" is unhandled
+Bug #1862: Launcher doesn't start if a file listed in launcher.cfg has correct name but wrong capitalization
+Bug #1864: Editor: Region field for cell record in dialogue subview not working
+Bug #1869: Editor: Change label "Musics" to "Music"
+Bug #1870: Goblins killed while knocked down remain in knockdown-pose
+Bug #1874: CellChanged events should not trigger when crossing exterior cell border
+Bug #1877: Spriggans killed instantly if hit while regening
+Bug #1878: Magic Menu text not un-highlighting correctly when going from spell to item as active magic
+Bug #1881: Stuck in ceiling when entering castle karstaags tower
+Bug #1884: Unlit torches still produce a burning sound
+Bug #1885: Can type text in price field in barter window
+Bug #1887: Equipped items do not emit sounds
+Bug #1889: draugr lord aesliip will attack you and remain non-hostile
+Bug #1892: Guard asks player to pay bounty of 0 gold
+Bug #1895: getdistance should only return max float if ref and target are in different worldspaces
+Bug #1896: Crash Report
+Bug #1897: Conjured Equipment cant be re-equipped if removed
+Bug #1898: Only Gidar Verothan follows you during establish the mine quest
+Bug #1900: Black screen when you open the door and breath underwater
+Bug #1904: Crash on casting recall spell
+Bug #1906: Bound item checks should use the GMSTs
+Bug #1907: Bugged door. Mournhold, The Winged Guar
+Bug #1908: Crime reported for attacking Drathas Nerus's henchmen while they attack Dilborn
+Bug #1909: Weird Quest Flow Infidelities quest
+Bug #1910: Follower fighting with gone npc
+Bug #1911: Npcs will drown themselves
+Bug #1912: World map arrow stays static when inside a building
+Bug #1920: Ulyne Henim disappears when game is loaded inside Vas
+Bug #1922: alchemy-> potion of paralyze
+Bug #1923: "levitation magic cannot be used here" shows outside of tribunal
+Bug #1927: AI prefer melee over magic.
+Bug #1929: Tamriel Rebuilt: Named cells that lie within the overlap with Morrowind.esm are not shown
+Bug #1932: BTB - Spells 14.1 magic effects don´t overwrite the Vanilla ones but are added
+Bug #1935: Stacks of items are worth more when sold individually
+Bug #1940: Launcher does not list addon files if base game file is renamed to a different case
+Bug #1946: Mod "Tel Nechim - moved" breaks savegames
+Bug #1947: Buying/Selling price doesn't properly affect the growth of mercantile skill
+Bug #1950: followers from east empire company quest will fight each other if combat happens with anything
+Bug #1958: Journal can be scrolled indefinitely with a mouse wheel
+Bug #1959: Follower not leaving party on quest end
+Bug #1960: Key bindings not always saved correctly
+Bug #1961: Spell merchants selling racial bonus spells
+Bug #1967: segmentation fault on load saves
+Bug #1968: Jump sounds are not controlled by footsteps slider, sound weird compared to footsteps
+Bug #1970: PC suffers silently when taking damage from lava
+Bug #1971: Dwarven Sceptre collision area is not removed after killing one
+Bug #1974: Dalin/Daris Norvayne follows player indefinitely
+Bug #1975: East Empire Company faction rank breaks during Raven Rock questline
+Bug #1979: 0 strength = permanently over encumbered
+Bug #1993: Shrine blessing in Maar Gan doesn't work
+Bug #2008: Enchanted items do not recharge
+Bug #2011: Editor: OpenCS script compiler doesn't handle member variable access properly
+Bug #2016: Dagoth Ur already dead in Facility Cavern
+Bug #2017: Fighters Guild Quest: The Code Book - dialogue loop when UMP is loaded.
+Bug #2019: Animation of 'Correct UV Mudcrabs' broken
+Bug #2022: Alchemy window - Removing ingredient doesn't remove the number of ingredients
+Bug #2025: Missing mouse-over text for non affordable items
+Bug #2028: [MOD: Tamriel Rebuilt] Crashing when trying to enter interior cell "Ruinous Keep, Great Hall"
+Bug #2029: Ienith Brothers Thiev's Guild quest journal entry not adding
+Feature #471: Editor: Special case implementation for top-level window with single sub-window
+Feature #472: Editor: Sub-Window re-use settings
+Feature #704: Font colors import from fallback settings
+Feature #854: Editor: Add user setting to show status bar
+Feature #879: Editor: Open sub-views in a new top-level window
+Feature #932: Editor: magic effect table
+Feature #937: Editor: Path Grid table
+Feature #938: Editor: Sound Gen table
+Feature #1117: Death and LevelUp music
+Feature #1226: Editor: Request UniversalId editing from table columns
+Feature #1310: Editor: Rendering User Settings
+Feature #1545: Targeting console on player
+Feature #1597: Editor: Render terrain
+Feature #1695: Editor: add column for CellRef's global variable
+Feature #1696: Editor: use ESM::Cell's RefNum counter
+Feature #1697: Redden player's vision when hit
+Feature #1856: Spellcasting for non-biped creatures
+Feature #1879: Editor: Run OpenMW with the currently edited content list
+Task #1851: Move AI temporary state out of AI packages
+Task #1865: Replace char type in records
+
 0.32.0
 
 Bug #1132: Unable to jump when facing a wall
