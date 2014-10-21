@@ -1033,10 +1033,10 @@ void VideoState::init(const std::string& resourceName)
         int height = (*this->video_st)->codec->height;
         static int i = 0;
         this->mTexture = Ogre::TextureManager::getSingleton().createManual(
-                        "OpenMW/VideoTexture" + Ogre::StringConverter::toString(++i),
+                        "ffmpeg/VideoTexture" + Ogre::StringConverter::toString(++i),
                                 Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                                 Ogre::TEX_TYPE_2D,
-                                width, height, // TEST
+                                width, height,
                                 0,
                                 Ogre::PF_BYTE_RGBA,
                                 Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
