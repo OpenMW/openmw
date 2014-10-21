@@ -8,6 +8,7 @@ namespace Ogre
     class Vector3;
     class Quaternion;
     class SceneManager;
+    class Camera;
 }
 
 namespace OEngine
@@ -36,12 +37,15 @@ namespace CSVWorld
                            float scale,
                            const Ogre::Vector3 &position,
                            const Ogre::Quaternion &rotation,
-                           Ogre::Vector3* scaledBoxTranslation = 0,
-                           Ogre::Quaternion* boxRotation = 0,
-                           bool raycasting=false,
+                           //Ogre::Vector3* scaledBoxTranslation = 0,
+                           //Ogre::Quaternion* boxRotation = 0,
+                           //bool raycasting=false,
                            bool placeable=false);
 
             void toggleDebugRendering();
+
+            /*std::pair<bool, Ogre::Vector3>*/ void castRay(float mouseX, float mouseY,
+                                                   Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera);
     };
 }
 
