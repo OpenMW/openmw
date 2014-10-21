@@ -1187,7 +1187,7 @@ namespace MWWorld
 
         mShared.clear();
         mShared.reserve(mStatic.size());
-        typename std::map<std::string, ESM::Dialogue>::iterator it = mStatic.begin();
+        std::map<std::string, ESM::Dialogue>::iterator it = mStatic.begin();
         for (; it != mStatic.end(); ++it) {
             mShared.push_back(&(it->second));
         }
