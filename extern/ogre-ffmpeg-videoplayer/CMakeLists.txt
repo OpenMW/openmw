@@ -8,6 +8,7 @@ set(OGRE_FFMPEG_VIDEOPLAYER_SOURCE_FILES
 	videodefs.hpp
     libavwrapper.cpp
     audiodecoder.cpp
+    audiofactory.hpp
 )
 
 

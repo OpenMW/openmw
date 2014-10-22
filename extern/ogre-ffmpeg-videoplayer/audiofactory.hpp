@@ -11,7 +11,6 @@ namespace Video
 class MovieAudioFactory
 {
 public:
-    /// @note The ownership of the created decoder is passed to the caller.
     virtual boost::shared_ptr<MovieAudioDecoder> createDecoder(VideoState* videoState) = 0;
 };
 
