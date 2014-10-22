@@ -1,22 +1,23 @@
 \section{Files and Directories}
 \subsection{Introduction}
-This section of the manual covers usage of files and directories by the OpenCS. Files and directories are file system concepts,
-and you are probably already familiar with it. We won't try to explain this concepts, we will just focus on \OCS.
+This section of the manual describes the directories and file types used by OpenCS. A file is a resource for storing data, identified by its
+filename extension (e.g. .exe, .jpg, .txt), whereas a directory is a folder or file system structure in which these files are stored. You
+are most likely already familiar with these concepts.
 
 \subsection{Used terms} %TODO
 
 \subsection{Basics}
 
 \paragraph{Directories}
-OpenMW and \OCS{} uses multiple directories on file systems. First of, there is a \textbf{user directory} that holds configuration
-files and few different folders. The location of the user directory is hard coded for each supported operating system.
+OpenMW and \OCS{} store their files in multiple directories. Firstly, there is the \textbf{user directory} that holds configuration
+files and several other folders. The location of the user directory is hard coded for each supported operating system.
 
 %TODO list paths.
-In addition to this single hard coded directory, both \OMW{} and \OCS{} need a~place to seek for actual data files of the game:
-textures, models, sounds and files that store records of objects in game; dialogues and so one -- so called content files. We support
-multiple such paths (we call it \textbf{data paths}) as specified in the configuration. Usually one data path points to the directory
-where original \MW{} is either installed or unpacked. You are free to specify as many data paths as you would like,
-however, there is one special data path that, as described later, is used to store newly created content files.
+In addition to the user directory, both \OMW{} and \OCS{} need a place to store the game’s actual data files: for example, the 
+textures, models, sounds and records of in-game objects. We support multiple paths to these files (termed \textbf{data paths}), 
+as specified in the configuration. Usually, one data path points to the directory where \MW{} is installed, however, you are 
+free to specify as many data paths as you would like. In addition, one particular data path, as described below, is used to store 
+newly created content files.
 
 \paragraph{Content files}
 \BS{} \MW{} engine is using two types of files: ESM (master) and ESP (plugin). The distinction between those
