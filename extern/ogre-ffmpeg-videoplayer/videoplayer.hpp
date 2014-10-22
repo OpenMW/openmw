@@ -4,13 +4,10 @@
 #include <string>
 #include <memory>
 
-#include <boost/shared_ptr.hpp>
-
 namespace Video
 {
 
     struct VideoState;
-    class MovieAudioDecoder;
     class MovieAudioFactory;
 
     /**
@@ -22,6 +19,9 @@ namespace Video
         VideoPlayer();
         ~VideoPlayer();
 
+        /// @brief Set the MovieAudioFactory to use.
+        /// @par This class must be implemented by the user and is responsible for reading the decoded audio data.
+        /// @note If you do not set up a MovieAudioFactory, then audio streams will be ignored and the video will be played with no sound.
         /// @note Takes ownership of the passed pointer.
         void setAudioFactory (MovieAudioFactory* factory);
 
