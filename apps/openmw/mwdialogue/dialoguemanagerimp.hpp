@@ -103,21 +103,6 @@ namespace MWDialogue
             /// Removes the last added topic response for the given actor from the journal
             virtual void clearInfoActor (const MWWorld::Ptr& actor) const;
     };
-
-
-    struct HyperTextToken
-    {
-        HyperTextToken(const std::string& text, bool link) : mText(text), mLink(link) {}
-
-        std::string mText;
-        bool mLink;
-    };
-
-    // In translations (at least Russian) the links are marked with @#, so
-    // it should be a function to parse it
-    std::vector<HyperTextToken> ParseHyperText(const std::string& text);
-
-    size_t RemovePseudoAsterisks(std::string& phrase);
 }
 
 #endif
