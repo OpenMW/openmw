@@ -21,7 +21,7 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 add_openmw_dir (mwrender
     renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
     actors objects renderinginterface localmap occlusionquery water shadows
-    characterpreview globalmap videoplayer ripplesimulation refraction
+    characterpreview globalmap ripplesimulation refraction
     terrainstorage renderconst effectmanager weaponanimation
     )
 
@@ -55,7 +55,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanagerimp openal_output ffmpeg_decoder sound sound_decoder sound_output loudness libavwrapper
+    soundmanagerimp openal_output ffmpeg_decoder sound sound_decoder sound_output loudness libavwrapper movieaudiofactory
     )
 
 add_openmw_dir (mwworld
@@ -132,6 +132,7 @@ target_link_libraries(openmw
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
+    "ogre-ffmpeg-videoplayer"
     "oics"
     "sdl4ogre"
     components

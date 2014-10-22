@@ -1,3 +1,5 @@
+// This file is a wrapper around the libavresample library (the API-incompatible swresample replacement in the libav fork of ffmpeg), to make it look like swresample to the user.
+
 #ifndef HAVE_LIBSWRESAMPLE
 extern "C"
 {

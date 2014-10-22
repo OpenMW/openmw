@@ -1664,6 +1664,10 @@ namespace MWGui
         bool cursorWasVisible = mCursorVisible;
         setCursorVisible(false);
 
+        if (mVideoWidget->hasAudioStream())
+            MWBase::Environment::get().getSoundManager()->pauseSounds(
+                        MWBase::SoundManager::Play_TypeMask&(~MWBase::SoundManager::Play_TypeMovie));
+
         while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
             MWBase::Environment::get().getInputManager()->update(0, true, false);
@@ -1671,6 +1675,8 @@ namespace MWGui
             mRendering->getWindow()->update();
         }
         mVideoWidget->stop();
+
+        MWBase::Environment::get().getSoundManager()->resumeSounds();
 
         setCursorVisible(cursorWasVisible);
 
