@@ -32,16 +32,6 @@ extern "C"
     #include <libavformat/avformat.h>
     #include <libswscale/swscale.h>
 
-
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
-#define IS_NOTEQ_NOPTS_VAL(x) ((uint64_t)x != AV_NOPTS_VALUE)
-#define IS_NOTEQ_NOPTS_VAL_PTR(x) (*(uint64_t*)x != AV_NOPTS_VALUE)
-#else
-#define IS_NOTEQ_NOPTS_VAL(x) ((int64_t)x != AV_NOPTS_VALUE)
-#define IS_NOTEQ_NOPTS_VAL_PTR(x) (*(int64_t*)x != AV_NOPTS_VALUE)
-#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
-
-
     #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
     #define av_frame_alloc  avcodec_alloc_frame
     #endif
@@ -54,23 +44,15 @@ extern "C"
         #include <libavutil/time.h>
     #endif
 
-    // From libavutil version 52.2.0 and onward the declaration of
-    // AV_CH_LAYOUT_* is removed from libavcodec/avcodec.h and moved to
-    // libavutil/channel_layout.h
     #if AV_VERSION_INT(52, 2, 0) <= AV_VERSION_INT(LIBAVUTIL_VERSION_MAJOR, \
         LIBAVUTIL_VERSION_MINOR, LIBAVUTIL_VERSION_MICRO)
         #include <libavutil/channel_layout.h>
     #endif
 
-    // WARNING: avcodec versions up to 54.54.100 potentially crashes on Windows 64bit.
-
-    // From version 54.56 binkaudio encoding format changed from S16 to FLTP. See:
-    // https://gitorious.org/ffmpeg/ffmpeg/commit/7bfd1766d1c18f07b0a2dd042418a874d49ea60d
-    // http://ffmpeg.zeranoe.com/forum/viewtopic.php?f=15&t=872
     #ifdef HAVE_LIBSWRESAMPLE
     #include <libswresample/swresample.h>
     #else
-    /* FIXME: remove this section once libswresample is available on all platforms */
+    // FIXME: remove this section once libswresample is packaged for Debian
     #include <libavresample/avresample.h>
     #include <libavutil/opt.h>
     #define SwrContext AVAudioResampleContext
@@ -85,12 +67,12 @@ extern "C"
 #define MAX_VIDEOQ_SIZE (5 * 256 * 1024)
 #define AV_SYNC_THRESHOLD 0.01
 #define AUDIO_DIFF_AVG_NB 20
-#define VIDEO_PICTURE_QUEUE_SIZE 1
+#define VIDEO_PICTURE_QUEUE_SIZE 50
 
 enum {
-    AV_SYNC_AUDIO_MASTER,
-    AV_SYNC_VIDEO_MASTER,
-    AV_SYNC_EXTERNAL_MASTER,
+    AV_SYNC_AUDIO_MASTER, // Play audio with no frame drops, sync video to audio
+    AV_SYNC_VIDEO_MASTER, // Play video with no frame drops, sync audio to video
+    AV_SYNC_EXTERNAL_MASTER, // Sync audio and video to an external clock
 
     AV_SYNC_DEFAULT = AV_SYNC_EXTERNAL_MASTER
 };
@@ -131,10 +113,10 @@ struct VideoState {
       : format_ctx(NULL), av_sync_type(AV_SYNC_DEFAULT)
       , external_clock_base(0.0)
       , audio_st(NULL)
-      , video_st(NULL), frame_last_pts(0.0), frame_last_delay(0.0),
-        video_clock(0.0), sws_context(NULL), rgbaFrame(NULL), pictq_size(0),
-        pictq_rindex(0), pictq_windex(0)
-      , refresh_rate_ms(10), refresh(false), quit(false), display_ready(false)
+      , video_st(NULL), frame_last_pts(0.0)
+      , video_clock(0.0), sws_context(NULL), rgbaFrame(NULL), pictq_size(0)
+      , pictq_rindex(0), pictq_windex(0)
+      , quit(false)
     {
         // Register all formats and codecs
         av_register_all();
@@ -153,14 +135,11 @@ struct VideoState {
     static void video_thread_loop(VideoState *is);
     static void decode_thread_loop(VideoState *is);
 
-    void video_display();
-    void video_refresh_timer();
+    void video_display(VideoPicture* vp);
+    void video_refresh();
 
     int queue_picture(AVFrame *pFrame, double pts);
     double synchronize_video(AVFrame *src_frame, double pts);
-
-    static void video_refresh(VideoState *is);
-
 
     double get_audio_clock()
     { return this->AudioTrack->getTimeOffset(); }
@@ -199,7 +178,6 @@ struct VideoState {
 
     AVStream**  video_st;
     double      frame_last_pts;
-    double      frame_last_delay;
     double      video_clock; ///<pts of last decoded frame / predicted pts of next decoded frame
     PacketQueue videoq;
     SwsContext*  sws_context;
@@ -213,12 +191,7 @@ struct VideoState {
     boost::thread parse_thread;
     boost::thread video_thread;
 
-    boost::thread refresh_thread;
-    volatile int refresh_rate_ms;
-
-    volatile bool refresh;
     volatile bool quit;
-    volatile bool display_ready;
 };
 
 
@@ -229,11 +202,8 @@ void PacketQueue::put(AVPacket *pkt)
     if(!pkt1) throw std::bad_alloc();
     pkt1->pkt = *pkt;
     pkt1->next = NULL;
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
+
     if(pkt1->pkt.destruct == NULL)
-#else
-    if(pkt1->pkt.buf == NULL)
-#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
     {
         if(av_dup_packet(&pkt1->pkt) < 0)
         {
@@ -438,7 +408,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 return -1;
 
             /* if update, update the audio clock w/pts */
-            if(IS_NOTEQ_NOPTS_VAL(pkt->pts))
+            if((uint64_t)pkt->pts != AV_NOPTS_VALUE)
                 mAudioClock = av_q2d(mAVStream->time_base)*pkt->pts;
         }
     }
@@ -680,23 +650,8 @@ int64_t VideoState::OgreResource_Seek(void *user_data, int64_t offset, int whenc
     return stream->tell();
 }
 
-
-void VideoState::video_refresh(VideoState* is)
+void VideoState::video_display(VideoPicture *vp)
 {
-    boost::system_time t = boost::get_system_time();
-    while(!is->quit)
-    {
-        t += boost::posix_time::milliseconds(is->refresh_rate_ms);
-        boost::this_thread::sleep(t);
-        is->refresh = true;
-    }
-}
-
-
-void VideoState::video_display()
-{
-    VideoPicture *vp = &this->pictq[this->pictq_rindex];
-
     if((*this->video_st)->codec->width != 0 && (*this->video_st)->codec->height != 0)
     {
 
@@ -711,55 +666,56 @@ void VideoState::video_display()
         Ogre::PixelBox pb((*this->video_st)->codec->width, (*this->video_st)->codec->height, 1, Ogre::PF_BYTE_RGBA, &vp->data[0]);
         Ogre::HardwarePixelBufferSharedPtr buffer = mTexture->getBuffer();
         buffer->blitFromMemory(pb);
-        this->display_ready = true;
     }
 }
 
-void VideoState::video_refresh_timer()
+void VideoState::video_refresh()
 {
-    VideoPicture *vp;
-    double delay;
-
     if(this->pictq_size == 0)
         return;
 
-    vp = &this->pictq[this->pictq_rindex];
-
-    delay = vp->pts - this->frame_last_pts; /* the pts from last time */
-    if(delay <= 0 || delay >= 1.0) {
-        /* if incorrect delay, use previous one */
-        delay = this->frame_last_delay;
-    }
-    /* save for next time */
-    this->frame_last_delay = delay;
-    this->frame_last_pts = vp->pts;
-
-    /* FIXME: Syncing should be done in the decoding stage, where frames can be
-     * skipped or duplicated as needed. */
-    /* update delay to sync to audio if not master source */
-    if(this->av_sync_type != AV_SYNC_VIDEO_MASTER)
+    if (this->av_sync_type == AV_SYNC_VIDEO_MASTER)
     {
-        double diff = this->get_video_clock() - this->get_master_clock();
-
-        /* Skip or repeat the frame. Take delay into account
-         * FFPlay still doesn't "know if this is the best guess." */
-        double sync_threshold = std::max(delay, AV_SYNC_THRESHOLD);
-        if(diff <= -sync_threshold)
-            delay = 0;
-        else if(diff >= sync_threshold)
-            delay = 2 * delay;
+        VideoPicture* vp = &this->pictq[this->pictq_rindex];
+        this->video_display(vp);
+        this->pictq_rindex = (pictq_rindex+1) % VIDEO_PICTURE_QUEUE_SIZE;
+        this->frame_last_pts = vp->pts;
+        this->pictq_mutex.lock();
+        this->pictq_size--;
+        this->pictq_cond.notify_one();
+        this->pictq_mutex.unlock();
     }
+    else
+    {
+        const float threshold = 0.03;
+        if (this->pictq[pictq_rindex].pts > this->get_master_clock() + threshold)
+            return; // not ready yet to show this picture
 
-    this->refresh_rate_ms = std::max<int>(1, (int)(delay*1000.0));
-    /* show the picture! */
-    this->video_display();
+        // TODO: the conversion to RGBA is done in the decoding thread, so if a picture is skipped here, then it was
+        // unnecessarily converted. But we may want to replace the conversion by a pixel shader anyway (see comment in queue_picture)
+        int i=0;
+        for (; i<this->pictq_size-1; ++i)
+        {
+            if (this->pictq[pictq_rindex].pts + threshold <= this->get_master_clock())
+                this->pictq_rindex = (this->pictq_rindex+1) % VIDEO_PICTURE_QUEUE_SIZE; // not enough time to show this picture
+            else
+                break;
+        }
 
-    /* update queue for next picture! */
-    this->pictq_rindex = (this->pictq_rindex+1) % VIDEO_PICTURE_QUEUE_SIZE;
-    this->pictq_mutex.lock();
-    this->pictq_size--;
-    this->pictq_cond.notify_one();
-    this->pictq_mutex.unlock();
+        VideoPicture* vp = &this->pictq[this->pictq_rindex];
+
+        this->video_display(vp);
+
+        this->frame_last_pts = vp->pts;
+
+        this->pictq_mutex.lock();
+        this->pictq_size -= i;
+        // update queue for next picture
+        this->pictq_size--;
+        this->pictq_rindex++;
+        this->pictq_cond.notify_one();
+        this->pictq_mutex.unlock();
+    }
 }
 
 
@@ -780,6 +736,8 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     vp = &this->pictq[this->pictq_windex];
 
     // Convert the image into RGBA format for Ogre
+    // TODO: we could do this in a pixel shader instead, if the source format
+    // matches a commonly used format (ie YUV420P)
     if(this->sws_context == NULL)
     {
         int w = (*this->video_st)->codec->width;
@@ -833,8 +791,6 @@ double VideoState::synchronize_video(AVFrame *src_frame, double pts)
  * a frame at the time it is allocated.
  */
 static uint64_t global_video_pkt_pts = static_cast<uint64_t>(AV_NOPTS_VALUE);
-
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
 static int our_get_buffer(struct AVCodecContext *c, AVFrame *pic)
 {
     int ret = avcodec_default_get_buffer(c, pic);
@@ -848,16 +804,7 @@ static void our_release_buffer(struct AVCodecContext *c, AVFrame *pic)
     if(pic) av_freep(&pic->opaque);
     avcodec_default_release_buffer(c, pic);
 }
-#else
-static int our_get_buffer2(struct AVCodecContext *c, AVFrame *pic, int flags = AV_GET_BUFFER_FLAG_REF)
-{
-    int ret = avcodec_default_get_buffer2(c, pic, flags);
-    uint64_t *pts = (uint64_t*)av_malloc(sizeof(uint64_t));
-    *pts = global_video_pkt_pts;
-    pic->opaque = pts;
-    return ret;
-}
-#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
+
 
 void VideoState::video_thread_loop(VideoState *self)
 {
@@ -879,9 +826,9 @@ void VideoState::video_thread_loop(VideoState *self)
             throw std::runtime_error("Error decoding video frame");
 
         double pts = 0;
-        if(IS_NOTEQ_NOPTS_VAL(packet->dts))
+        if((uint64_t)packet->dts != AV_NOPTS_VALUE)
             pts = packet->dts;
-        else if(pFrame->opaque && IS_NOTEQ_NOPTS_VAL_PTR(pFrame->opaque))
+        else if(pFrame->opaque && *(uint64_t*)pFrame->opaque != AV_NOPTS_VALUE)
             pts = *(uint64_t*)pFrame->opaque;
         pts *= av_q2d((*self->video_st)->time_base);
 
@@ -940,7 +887,7 @@ void VideoState::decode_thread_loop(VideoState *self)
         while(!self->quit)
         {
             // EOF reached, all packets processed, we can exit now
-            if(self->audioq.nb_packets == 0 && self->videoq.nb_packets == 0)
+            if(self->audioq.nb_packets == 0 && self->videoq.nb_packets == 0 && self->pictq_size == 0)
                 break;
             boost::this_thread::sleep(boost::posix_time::milliseconds(100));
         }
@@ -961,11 +908,7 @@ bool VideoState::update()
     if(this->quit)
         return false;
 
-    if(this->refresh)
-    {
-        this->refresh = false;
-        this->video_refresh_timer();
-    }
+    this->video_refresh();
     return true;
 }
 
@@ -982,9 +925,6 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
     // Get a pointer to the codec context for the video stream
     codecCtx = pFormatCtx->streams[stream_index]->codec;
     codec = avcodec_find_decoder(codecCtx->codec_id);
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(56,1,0)
-    codecCtx->refcounted_frames = 1;
-#endif /* LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(56,1,0) */
     if(!codec || (avcodec_open2(codecCtx, codec, NULL) < 0))
     {
         fprintf(stderr, "Unsupported codec!\n");
@@ -1009,15 +949,9 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
     case AVMEDIA_TYPE_VIDEO:
         this->video_st = pFormatCtx->streams + stream_index;
 
-        this->frame_last_delay = 40e-3;
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0)
         codecCtx->get_buffer = our_get_buffer;
         codecCtx->release_buffer = our_release_buffer;
-#else
-        codecCtx->get_buffer2 = our_get_buffer2;
-#endif /* LIBAVCODEC_VERSION_INT < AV_VERSION_INT(56,1,0) */
         this->video_thread = boost::thread(video_thread_loop, this);
-        this->refresh_thread = boost::thread(video_refresh, this);
         break;
 
     default:
@@ -1034,8 +968,6 @@ void VideoState::init(const std::string& resourceName)
     unsigned int i;
 
     this->av_sync_type = AV_SYNC_DEFAULT;
-    this->refresh_rate_ms = 10;
-    this->refresh = false;
     this->quit = false;
 
     this->stream = Ogre::ResourceGroupManager::getSingleton().openResource(resourceName);
@@ -1106,10 +1038,10 @@ void VideoState::init(const std::string& resourceName)
         int height = (*this->video_st)->codec->height;
         static int i = 0;
         this->mTexture = Ogre::TextureManager::getSingleton().createManual(
-                        "OpenMW/VideoTexture" + Ogre::StringConverter::toString(++i),
+                        "ffmpeg/VideoTexture" + Ogre::StringConverter::toString(++i),
                                 Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                                 Ogre::TEX_TYPE_2D,
-                                width, height, // TEST
+                                width, height,
                                 0,
                                 Ogre::PF_BYTE_RGBA,
                                 Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
@@ -1129,6 +1061,8 @@ void VideoState::deinit()
 {
     this->quit = true;
 
+    this->AudioTrack.reset();
+
     this->audioq.cond.notify_one();
     this->videoq.cond.notify_one();
 
@@ -1136,8 +1070,6 @@ void VideoState::deinit()
         this->parse_thread.join();
     if (this->video_thread.joinable())
         this->video_thread.join();
-    if (this->refresh_thread.joinable())
-        this->refresh_thread.join();
 
     if(this->audio_st)
         avcodec_close((*this->audio_st)->codec);
