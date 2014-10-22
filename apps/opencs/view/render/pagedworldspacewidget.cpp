@@ -186,60 +186,30 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
             }
         }
     }
-
-    // mouse picking
-    // FIXME: need to virtualise mouse buttons
-    int viewportWidth = getCamera()->getViewport()->getActualWidth();
-    int viewportHeight = getCamera()->getViewport()->getActualHeight();
-
-    float mouseX = (float) event->x()/viewportWidth;
-    float mouseY = (float) event->y()/viewportHeight;
-
-    getPhysics()->castRay(mouseX, mouseY, NULL, NULL, getCamera());
-    //Ogre::Ray mouseRay = getCamera()->getCameraToViewportRay(mouseX, mouseY);
-
-    // Issue: Say 800 pixels (a typical viewport size) representing 8000 units (in one cell)
-    //        So best case resolution is 10 units per pixel.
-
-#if 0
-    Ogre::RaySceneQuery *rayScnQuery = getSceneManager()->createRayQuery(Ogre::Ray());
-    rayScnQuery->setRay(mouseRay);
-    rayScnQuery->setSortByDistance(true);
-    // kinda works, but bounding box tests aren't accurate
-    Ogre::RaySceneQueryResult result = rayScnQuery->execute();
-
-    std::cout << "geometry: " + std::to_string(width()) + ", " + std::to_string(height()) << std::endl;
-    std::cout << "event: " + std::to_string(event->x()) + ", " + std::to_string(event->y()) << std::endl;
-    std::cout << "viewport: " + std::to_string(viewportWidth) + ", " + std::to_string(viewportHeight) << std::endl;
-    std::cout << "mouse: " + std::to_string(mouseX) + ", " + std::to_string(mouseY) << std::endl;
-
-    std::cout << "camera: " + std::to_string(getCamera()->getPosition().x)
-        + ", " + std::to_string(getCamera()->getPosition().y)
-        + ", " + std::to_string(getCamera()->getPosition().z)
-        << std::endl;
-    std::cout << "ray origin: " + std::to_string(mouseRay.getOrigin().x)
-        + ", " + std::to_string(mouseRay.getOrigin().y)
-        + ", " + std::to_string(mouseRay.getOrigin().z)
-        << std::endl;
-    std::cout << "ray direction: " + std::to_string(mouseRay.getDirection().x)
-        + ", " + std::to_string(mouseRay.getDirection().y)
-        + ", " + std::to_string(mouseRay.getDirection().z)
-        << std::endl;
-    //std::cout << "fov" + std::to_string(getCamera()->getFOVy().valueDegrees()) << std::endl;
-
-    Ogre::Vector3 res;
-    Ogre::Vector3 direction = mouseRay.getDirection();
-    OgreRay ray(getSceneManager());
-    //if(!clicked && ray.RaycastFromPoint(getCamera()->getPosition(), direction, res))
-    if(!clicked && ray.RaycastFromPoint(mouseRay.getOrigin(), direction, res))
+    else
     {
-        //std::cout << "found: " << std::endl;
-    }
+        // mouse picking
+        // FIXME: need to virtualise mouse buttons
+        // Issue: Say 800 pixels (a typical viewport size) representing 8000 units (in one cell)
+        //        So best case resolution is 10 units per pixel.
+        int viewportWidth = getCamera()->getViewport()->getActualWidth();
+        int viewportHeight = getCamera()->getViewport()->getActualHeight();
 
-    Ogre::Root::getSingleton().renderOneFrame(); // FIXME: for testing (to show the bounding box)
+        float mouseX = (float) event->x()/viewportWidth;
+        float mouseY = (float) event->y()/viewportHeight;
 
-    getSceneManager()->destroyQuery(rayScnQuery);
+        getPhysics()->castRay(mouseX, mouseY, NULL, NULL, getCamera());
+#if 0
+        std::cout << "geometry: " + std::to_string(width()) + ", " + std::to_string(height()) << std::endl;
+        std::cout << "event: " + std::to_string(event->x()) + ", " + std::to_string(event->y()) << std::endl;
+        std::cout << "viewport: " + std::to_string(viewportWidth) + ", " + std::to_string(viewportHeight) << std::endl;
+        std::cout << "mouse: " + std::to_string(mouseX) + ", " + std::to_string(mouseY) << std::endl;
+        std::cout << "camera: " + std::to_string(getCamera()->getPosition().x)
+            + ", " + std::to_string(getCamera()->getPosition().y)
+            + ", " + std::to_string(getCamera()->getPosition().z)
+            << std::endl;
 #endif
+    }
 }
 
 void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)

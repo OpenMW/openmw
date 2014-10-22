@@ -51,6 +51,7 @@ namespace CSVRender
         mCamera->setPosition (300, 0, 0);
         mCamera->lookAt (0, 0, 0);
         mCamera->setNearClipDistance (0.1);
+        //mCamera->setProjectionType(Ogre::PT_ORTHOGRAPHIC); // FIXME: debugging only
 
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
 
