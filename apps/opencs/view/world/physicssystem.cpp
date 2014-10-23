@@ -170,12 +170,15 @@ namespace CSVWorld
                                                     mSelectedEntities.find(result.first);
             if(iter != mSelectedEntities.end()) // currently selected
             {
-                std::vector<std::string> deletedEntities = mSelectedEntities[result.first];
-                while(!deletedEntities.empty())
+                std::vector<std::string> clonedEntities = mSelectedEntities[result.first];
+                while(!clonedEntities.empty())
                 {
-                    scene->detachObject(deletedEntities.back());
-                    mSceneMgr->destroyEntity(deletedEntities.back());
-                    deletedEntities.pop_back();
+                    if(mSceneMgr->hasEntity(clonedEntities.back()))
+                    {
+                        scene->detachObject(clonedEntities.back());
+                        mSceneMgr->destroyEntity(clonedEntities.back());
+                    }
+                    clonedEntities.pop_back();
                 }
                 mSelectedEntities.erase(iter);
 
@@ -189,6 +192,9 @@ namespace CSVWorld
                 while(iter.hasMoreElements())
                 {
                     Ogre::MovableObject * element = iter.getNext();
+                    if(!element)
+                        break;
+
                     if(element->getMovableType() != "Entity")
                         continue;
 
