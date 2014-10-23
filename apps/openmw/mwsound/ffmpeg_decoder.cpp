@@ -7,7 +7,7 @@
 
 extern "C" {
 #ifndef HAVE_LIBSWRESAMPLE
-/* FIXME: remove this section once libswresample is available on all platforms */
+// FIXME: remove this section once libswresample is packaged for Debian
 int  swr_init(AVAudioResampleContext *avr);
 void  swr_free(AVAudioResampleContext **avr);
 int swr_convert( AVAudioResampleContext *avr, uint8_t** output, int out_samples, const uint8_t** input, int in_samples);
