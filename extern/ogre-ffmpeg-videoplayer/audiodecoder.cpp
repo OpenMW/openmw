@@ -41,6 +41,22 @@ namespace
 namespace Video
 {
 
+// Moved to implementation file, so that HAVE_SWRESAMPLE is used at library compile time only
+struct AudioResampler
+{
+    AudioResampler()
+        : mSwr(NULL)
+    {
+    }
+
+    ~AudioResampler()
+    {
+        swr_free(&mSwr);
+    }
+
+    SwrContext* mSwr;
+};
+
 MovieAudioDecoder::MovieAudioDecoder(VideoState* videoState)
     : mVideoState(videoState)
     , mAVStream(*videoState->audio_st)
@@ -53,7 +69,6 @@ MovieAudioDecoder::MovieAudioDecoder(VideoState* videoState)
     /* Correct audio only if larger error than this */
     , mAudioDiffThreshold(2.0 * 0.050/* 50 ms */)
     , mAudioDiffAvgCount(0)
-    , mSwr(0)
     , mOutputSampleFormat(AV_SAMPLE_FMT_NONE)
     , mOutputSampleRate(0)
     , mOutputChannelLayout(0)
@@ -61,18 +76,18 @@ MovieAudioDecoder::MovieAudioDecoder(VideoState* videoState)
     , mFrameData(NULL)
     , mDataBufLen(0)
 {
+    mAudioResampler.reset(new AudioResampler());
 }
 
 MovieAudioDecoder::~MovieAudioDecoder()
 {
     av_freep(&mFrame);
-    swr_free(&mSwr);
     av_freep(&mDataBuf);
 }
 
 void MovieAudioDecoder::setupFormat()
 {
-    if (mSwr)
+    if (mAudioResampler->mSwr)
         return; // already set up
 
     AVSampleFormat inputSampleFormat = mAVStream->codec->sample_fmt;
@@ -104,7 +119,7 @@ void MovieAudioDecoder::setupFormat()
             || inputChannelLayout != mOutputChannelLayout
             || inputSampleRate != mOutputSampleRate)
     {
-        mSwr = swr_alloc_set_opts(mSwr,
+        mAudioResampler->mSwr = swr_alloc_set_opts(mAudioResampler->mSwr,
                           mOutputChannelLayout,
                           mOutputSampleFormat,
                           mOutputSampleRate,
@@ -113,9 +128,9 @@ void MovieAudioDecoder::setupFormat()
                           inputSampleRate,
                           0,                             // logging level offset
                           NULL);                         // log context
-        if(!mSwr)
+        if(!mAudioResampler->mSwr)
             fail(std::string("Couldn't allocate SwrContext"));
-        if(swr_init(mSwr) < 0)
+        if(swr_init(mAudioResampler->mSwr) < 0)
             fail(std::string("Couldn't initialize SwrContext"));
     }
 }
@@ -171,7 +186,7 @@ int MovieAudioDecoder::audio_decode_frame(AVFrame *frame)
             if(!got_frame || frame->nb_samples <= 0)
                 continue;
 
-            if(mSwr)
+            if(mAudioResampler->mSwr)
             {
                 if(!mDataBuf || mDataBufLen < frame->nb_samples)
                 {
@@ -183,7 +198,7 @@ int MovieAudioDecoder::audio_decode_frame(AVFrame *frame)
                         mDataBufLen = frame->nb_samples;
                 }
 
-                if(swr_convert(mSwr, (uint8_t**)&mDataBuf, frame->nb_samples,
+                if(swr_convert(mAudioResampler->mSwr, (uint8_t**)&mDataBuf, frame->nb_samples,
                     (const uint8_t**)frame->extended_data, frame->nb_samples) < 0)
                 {
                     break;

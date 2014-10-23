@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include <new>
+#include <memory>
 
 extern "C"
 {
@@ -18,8 +19,6 @@ extern "C"
         LIBAVUTIL_VERSION_MINOR, LIBAVUTIL_VERSION_MICRO)
         #include <libavutil/channel_layout.h>
     #endif
-
-    struct SwrContext;
 }
 
 #ifdef _WIN32
@@ -30,6 +29,8 @@ typedef SSIZE_T ssize_t;
 
 namespace Video
 {
+
+struct AudioResampler;
 
 struct VideoState;
 
@@ -57,7 +58,7 @@ private:
     };
 
 
-    SwrContext *mSwr;
+    std::auto_ptr<AudioResampler> mAudioResampler;
 
     uint8_t *mDataBuf;
     uint8_t **mFrameData;
