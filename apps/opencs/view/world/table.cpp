@@ -177,6 +177,19 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
     menu.exec (event->globalPos());
 }
 
+void CSVWorld::Table::mouseDoubleClickEvent (QMouseEvent *event)
+{
+    Qt::KeyboardModifiers modifiers =
+        event->modifiers() & (Qt::ShiftModifier | Qt::ControlModifier);
+
+    if (!modifiers)
+        DragRecordTable::mouseDoubleClickEvent (event);
+    else
+    {
+
+    }
+}
+
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     bool createAndDelete, bool sorting, CSMDoc::Document& document)
 : mCreateAction (0), mCloneAction(0), mRecordStatusDisplay (0),
