@@ -110,12 +110,16 @@ namespace CSVWorld
     /*std::pair<bool, Ogre::Vector3>*/ void PhysicsSystem::castRay(float mouseX, float mouseY,
                                         Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera)
     {
+        // using a really small value seems to mess up with the projections
+        float nearClipDistance = camera->getNearClipDistance();
+        camera->setNearClipDistance(10.0f);  // arbitrary number
         Ogre::Ray ray = camera->getCameraToViewportRay(mouseX, mouseY);
+        camera->setNearClipDistance(nearClipDistance);
+
         Ogre::Vector3 from = ray.getOrigin();
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
         float farClipDist = userSettings.setting("Scene/far clip distance", QString("300000")).toFloat();
         Ogre::Vector3 to = ray.getPoint(farClipDist);
-        //Ogre::Vector3 to = ray.getDirection();
 
         btVector3 _from, _to;
         _from = btVector3(from.x, from.y, from.z);
@@ -143,10 +147,6 @@ namespace CSVWorld
             if(mSceneMgr->hasSceneNode(result.first))
             {
                 // FIXME: for debugging cursor position
-                // If using orthographic projection the cursor position is very accurate,
-                // but with the default perspective view the cursor position is not properly
-                // calculated when using getCameraToViewportRay.
-                // See http://www.ogre3d.org/forums/viewtopic.php?p=241933
                 mSceneMgr->destroyManualObject("manual" + result.first);
                 Ogre::ManualObject* manual = mSceneMgr->createManualObject("manual" + result.first);
                 manual->begin("BaseWhite", Ogre::RenderOperation::OT_LINE_LIST);
@@ -155,17 +155,17 @@ namespace CSVWorld
                                   ray.getPoint(farClipDist*result.second).z);
                 manual-> position(ray.getPoint(farClipDist*result.second).x,
                                   ray.getPoint(farClipDist*result.second).y,
-                                  ray.getPoint(farClipDist*result.second).z+2000);
+                                  ray.getPoint(farClipDist*result.second).z+1000);
                 manual-> position(ray.getPoint(farClipDist*result.second).x,
                                   ray.getPoint(farClipDist*result.second).y,
                                   ray.getPoint(farClipDist*result.second).z);
                 manual-> position(ray.getPoint(farClipDist*result.second).x,
-                                  ray.getPoint(farClipDist*result.second).y+2000,
+                                  ray.getPoint(farClipDist*result.second).y+1000,
                                   ray.getPoint(farClipDist*result.second).z);
                 manual-> position(ray.getPoint(farClipDist*result.second).x,
                                   ray.getPoint(farClipDist*result.second).y,
                                   ray.getPoint(farClipDist*result.second).z);
-                manual-> position(ray.getPoint(farClipDist*result.second).x+2000,
+                manual-> position(ray.getPoint(farClipDist*result.second).x+1000,
                                   ray.getPoint(farClipDist*result.second).y,
                                   ray.getPoint(farClipDist*result.second).z);
                 manual->end();
