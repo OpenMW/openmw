@@ -199,6 +199,7 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
         float mouseY = (float) event->y()/viewportHeight;
 
         getPhysics()->castRay(mouseX, mouseY, NULL, NULL, getCamera());
+        flagAsModified();
 #if 0
         std::cout << "geometry: " + std::to_string(width()) + ", " + std::to_string(height()) << std::endl;
         std::cout << "event: " + std::to_string(event->x()) + ", " + std::to_string(event->y()) << std::endl;

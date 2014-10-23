@@ -4,11 +4,11 @@
 
 #include <OgreRay.h>
 #include <OgreCamera.h>
+#include <OgreSceneManager.h>
 #include <OgreManualObject.h> // FIXME: debug cursor position
 #include <OgreEntity.h>              // FIXME: visual highlight, clone
 #include <OgreMaterialManager.h>     // FIXME: visual highlight, material
 #include <OgreHardwarePixelBuffer.h> // FIXME: visual highlight, texture
-#include <OgreRoot.h> // FIXME: renderOneFrame
 
 #include <openengine/bullet/physic.hpp>
 #include <components/nifbullet/bulletnifloader.hpp>
@@ -133,7 +133,6 @@ namespace CSVWorld
     {
         mEngine->toggleDebugRendering();
         mEngine->stepSimulation(0.0167); // FIXME: DebugDrawer::step() not accessible
-        Ogre::Root::getSingleton().renderOneFrame(); // FIXME: temporary workaround for immediate visual feedback
     }
 
     std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY,
@@ -167,7 +166,7 @@ namespace CSVWorld
         {
             //TODO: Try http://www.ogre3d.org/tikiwiki/Create+outline+around+a+character
             Ogre::SceneNode *scene = mSceneMgr->getSceneNode(result.first);
-            std::map<std::string, std::vector<std::string>>::iterator iter =
+            std::map<std::string, std::vector<std::string> >::iterator iter =
                                                     mSelectedEntities.find(result.first);
             if(iter != mSelectedEntities.end()) // currently selected
             {
@@ -217,8 +216,6 @@ namespace CSVWorld
                 // FIXME: show cursor position for debugging
                 showHitPoint(mSceneMgr, result.first, ray.getPoint(farClipDist*result.second));
             }
-            // FIXME: temporary workaround for immediate visual feedback
-            Ogre::Root::getSingleton().renderOneFrame();
 #if 0
             std::cout << "hit " << result.first
                       + " result " + std::to_string(result.second*farClipDist) << std::endl;

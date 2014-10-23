@@ -1,6 +1,7 @@
 #ifndef CSV_WORLD_PHYSICSSYSTEM_H
 #define CSV_WORLD_PHYSICSSYSTEM_H
 
+#include <string>
 #include <map>
 #include <vector>
 
@@ -27,7 +28,7 @@ namespace CSVWorld
             //std::map<std::string, std::string> mHandleToMesh;
             OEngine::Physic::PhysicEngine* mEngine;
             Ogre::SceneManager *mSceneMgr;
-            std::map<std::string, std::vector<std::string>> mSelectedEntities;
+            std::map<std::string, std::vector<std::string> > mSelectedEntities;
 
         public:
 
