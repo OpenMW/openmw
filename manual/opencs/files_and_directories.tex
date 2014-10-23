@@ -22,8 +22,8 @@ newly created content files.
 \paragraph{Content files}
 \BS{} \MW{} engine uses two file types: ESM (master) and ESP (plugin). The distinction between the two is often confusing.
 You would expect that the ESM (master) file is used to specify a single master which is modified by the ESP files (plugins), and indeed:
-this is the basic idea. However, the original expansions are also ESM files, even though they can be described as a really large plugins.
-There were technical reasons behind this decision -- somewhat valid in the case of original engine, but a more logical file system is
+this is the basic idea. However, the original expansions are also ESM files, even though they can be described as very large plugins.
+There were technical reasons behind this decision -- somewhat valid in the case of the original engine, but a more logical file system is
 much preferable. \OMW{} achieves this through the creation of our own types of content file.
 
 We support both ESM and ESP files, but, in order to make use of \OMW{}'s new features, one should consider using new file types designed
@@ -48,7 +48,8 @@ for original engine compatibility. This subject is covered in the very last sect
 %not finished TODO add the said section. Most likely when more features are present.
 
 The actual creation of new files is described in the next chapter. Here we are going to focus only on the essential information needed
-to create your first \OCS{} file. For now, let's jut remember that content files are stored in the user directory, in the \textbf{data} subfolder (the particular data directory mentioned above).
+to create your first \OCS{} file. For now, let's jut remember that content files are stored in the user directory, in the \textbf{data}
+subfolder (the particular data directory mentioned above).
 
 \subparagraph{Dependencies}
 Since addons aim to modify an existing game, it is logical that they also depend on the said game: otherwise they will not function.
@@ -67,9 +68,9 @@ are the record filters (described below). As a mod author, you probably do not n
 as they are meant to be used only by you.
 
 Since project files govern how content files are used in OpenCS, they are always used in conjunction with your specific project.
-In fact, each time work commences on a new content file without a corresponding project file, a new project file will be created. 
+In fact, each time work commences on a content file that does not have a corresponding project file, a new project file will be created. 
 
-Project file extension is ``.project''. The name of the project file is the whole name of the content file with appended extensions. 
+The project file extension is ``.project''. The name of the project file is the whole name of the content file with appended extensions. 
 For instance, a content file named swords.omwaddon is associated with the project file swords.omwaddon.project.
 
 %TODO where are they stored.
@@ -80,7 +81,7 @@ project files, and the place where \OCS{} looks for already existing files.
 %textures, sounds, whatever
 The vast majority of modern video games use what we shall term \textbf{resource files}: models, textures, icons, sounds and so on.
 ESPs, ESMs and \OMW{} content files do not contain these files, merely instructions on how they are used. It follows that the \OMW{}
-engine must be capable of supporting these resource files in order for them to function. Therefore this section cover ways to add 
+engine must be capable of supporting these resource files in order for them to function. Therefore this section covers ways to add 
 resource files to your content file, and outlines which formats are supported. Later, you will learn how to make use of these files 
 in your content.
 
@@ -101,7 +102,8 @@ significant will be covered.
 \begin{description}
  \item bik Format used by the original \MW{} game.
  \item mp4 Multimedia container which use more advanced codecs ({MPEG-4 Parts 2,3,10}) with a better audio and video compression rate,
- but which require more {CPU} intensive decoding -- this probably makes it less suited for storing sounds in computer games, but good for videos.
+ but which require more {CPU} intensive decoding -- this probably makes it less suited for storing sounds in computer games, but
+ good for videos.
  \item webm A new, shiny and open source video format with excellent compression. It needs quite a lot of processing power to be decoded,
  but since game logic is not running during cut scenes we can recommend it for use with \OMW.
  \item ogv An alternative, open source container using theora codec for video and vorbis for audio.
