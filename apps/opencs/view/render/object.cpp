@@ -78,7 +78,7 @@ void CSVRender::Object::update()
         mObject = NifOgre::Loader::createObjects (mBase, "Meshes\\" + model);
         mObject->setVisibilityFlags (Element_Reference);
 
-        if (!mReferenceId.empty())
+        if (mPhysics && !mReferenceId.empty())
         {
             const CSMWorld::CellRef& reference = getReference();
 
