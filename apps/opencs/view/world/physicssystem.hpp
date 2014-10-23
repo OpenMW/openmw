@@ -24,7 +24,7 @@ namespace CSVWorld
 {
     class PhysicsSystem
     {
-            std::map<std::string, std::string> handleToMesh;
+            //std::map<std::string, std::string> mHandleToMesh;
             OEngine::Physic::PhysicEngine* mEngine;
             Ogre::SceneManager *mSceneMgr;
             std::map<std::string, std::vector<std::string>> mSelectedEntities;
@@ -44,9 +44,11 @@ namespace CSVWorld
                            //bool raycasting=false,
                            bool placeable=false);
 
+            void removeObject(const std::string &name);
+
             void toggleDebugRendering();
 
-            /*std::pair<bool, Ogre::Vector3>*/ void castRay(float mouseX, float mouseY,
+            std::pair<bool, Ogre::Vector3> castRay(float mouseX, float mouseY,
                                                    Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera);
     };
 }
