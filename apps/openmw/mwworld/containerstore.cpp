@@ -272,7 +272,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
             item.mCell = actorPtr.getCell();
         }
 
-        item.mContainerStore = 0;
+        item.mContainerStore = this;
 
         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, item);
 

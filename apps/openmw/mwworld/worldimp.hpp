@@ -260,6 +260,10 @@ namespace MWWorld
             virtual Ptr searchPtrViaActorId (int actorId);
             ///< Search is limited to the active cells.
 
+            virtual MWWorld::Ptr findContainer (const MWWorld::Ptr& ptr);
+            ///< Return a pointer to a liveCellRef which contains \a ptr.
+            /// \note Search is limited to the active cells.
+
             virtual void adjustPosition (const Ptr& ptr, bool force);
             ///< Adjust position after load to be on ground. Must be called after model load.
             /// @param force do this even if the ptr is flying

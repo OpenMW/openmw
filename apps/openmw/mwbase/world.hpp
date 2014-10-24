@@ -199,6 +199,10 @@ namespace MWBase
             virtual MWWorld::Ptr searchPtrViaActorId (int actorId) = 0;
             ///< Search is limited to the active cells.
 
+            virtual MWWorld::Ptr findContainer (const MWWorld::Ptr& ptr) = 0;
+            ///< Return a pointer to a liveCellRef which contains \a ptr.
+            /// \note Search is limited to the active cells.
+
             /// \todo enable reference in the OGRE scene
             virtual void enable (const MWWorld::Ptr& ptr) = 0;
 
