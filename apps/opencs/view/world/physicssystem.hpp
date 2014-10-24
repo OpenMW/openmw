@@ -25,6 +25,7 @@ namespace CSVWorld
 {
     class PhysicsSystem
     {
+            static PhysicsSystem *mPhysicsSystemInstance;
             //std::map<std::string, std::string> mHandleToMesh;
             OEngine::Physic::PhysicEngine* mEngine;
             Ogre::SceneManager *mSceneMgr;
@@ -32,8 +33,12 @@ namespace CSVWorld
 
         public:
 
-            PhysicsSystem(Ogre::SceneManager *sceneMgr);
+            PhysicsSystem(Ogre::SceneManager *sceneMgr = NULL);
             ~PhysicsSystem();
+
+            static PhysicsSystem *instance();
+
+            void setSceneManager(Ogre::SceneManager *sceneMgr);
 
             void addObject(const std::string &mesh,
                            const std::string &name,

@@ -110,7 +110,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             mCells.find (*iter)==mCells.end())
         {
             Cell *cell = new Cell (mDocument.getData(), getSceneManager(),
-                    iter->getId (mWorldspace), getPhysics());
+                    iter->getId (mWorldspace));
             mCells.insert (std::make_pair (*iter, cell));
 
             float height = cell->getTerrainHeightAt(Ogre::Vector3(
@@ -198,7 +198,9 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
         float mouseX = (float) event->x()/viewportWidth;
         float mouseY = (float) event->y()/viewportHeight;
 
-        getPhysics()->castRay(mouseX, mouseY, NULL, NULL, getCamera());
+        // Need to set each time in case there are multiple subviews
+        CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
+        CSVWorld::PhysicsSystem::instance()->castRay(mouseX, mouseY, NULL, NULL, getCamera());
         flagAsModified();
 #if 0
         std::cout << "geometry: " + std::to_string(width()) + ", " + std::to_string(height()) << std::endl;
@@ -219,7 +221,9 @@ void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event
     {
         std::cout << "double clicked" << std::endl;
 
-        getPhysics()->toggleDebugRendering();
+        // Need to set each time in case there are multiple subviews
+        CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
+        CSVWorld::PhysicsSystem::instance()->toggleDebugRendering();
     }
 }
 

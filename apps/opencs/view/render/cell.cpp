@@ -10,8 +10,6 @@
 #include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
 
-#include "../world/physicssystem.hpp"
-
 #include "elements.hpp"
 #include "terrainstorage.hpp"
 
@@ -51,7 +49,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
             std::string id = Misc::StringUtils::lowerCase (references.data (
                 references.index (i, idColumn)).toString().toUtf8().constData());
 
-            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false, mPhysics)));
+            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false)));
             modified = true;
         }
     }
@@ -60,8 +58,8 @@ bool CSVRender::Cell::addObjects (int start, int end)
 }
 
 CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
-    const std::string& id, CSVWorld::PhysicsSystem *physics, const Ogre::Vector3& origin)
-: mData (data), mId (Misc::StringUtils::lowerCase (id)), mPhysics(physics)
+    const std::string& id, const Ogre::Vector3& origin)
+: mData (data), mId (Misc::StringUtils::lowerCase (id))
 {
     mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
     mCellNode->setPosition (origin);
@@ -180,7 +178,7 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     for (std::map<std::string, bool>::iterator iter (ids.begin()); iter!=ids.end(); ++iter)
     {
         mObjects.insert (std::make_pair (
-            iter->first, new Object (mData, mCellNode, iter->first, false, mPhysics)));
+            iter->first, new Object (mData, mCellNode, iter->first, false)));
 
         modified = true;
     }

@@ -66,8 +66,7 @@ namespace CSVRender
         mOverlaySystem = OverlaySystem::instance().get();
         mSceneMgr->addRenderQueueListener(mOverlaySystem);
 
-        // FIXME: singleton probably needed
-        mPhysics = new CSVWorld::PhysicsSystem(mSceneMgr);
+        CSVWorld::PhysicsSystem::instance()->setSceneManager(mSceneMgr);
 
         QTimer *timer = new QTimer (this);
 
@@ -176,7 +175,6 @@ namespace CSVRender
         if (mSceneMgr)
             Ogre::Root::getSingleton().destroySceneManager (mSceneMgr);
 
-        delete mPhysics;
     }
 
     void SceneWidget::setVisibilityMask (unsigned int mask)
@@ -210,11 +208,6 @@ namespace CSVRender
             updateOgreWindow();
 
         return mViewport;
-    }
-
-    CSVWorld::PhysicsSystem *SceneWidget::getPhysics()
-    {
-        return mPhysics;
     }
 
     Ogre::SceneManager *SceneWidget::getSceneManager()

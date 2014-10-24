@@ -39,11 +39,48 @@ namespace
 
 namespace CSVWorld
 {
+    PhysicsSystem *PhysicsSystem::mPhysicsSystemInstance = 0;
+
     PhysicsSystem::PhysicsSystem(Ogre::SceneManager *sceneMgr) : mSceneMgr(sceneMgr)
     {
+        assert(!mPhysicsSystemInstance);
+        mPhysicsSystemInstance = this;
+
         // Create physics. shapeLoader is deleted by the physic engine
         NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
         mEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
+    }
+
+    PhysicsSystem::~PhysicsSystem()
+    {
+        delete mEngine;
+    }
+
+    PhysicsSystem *PhysicsSystem::instance()
+    {
+        assert(mPhysicsSystemInstance);
+        return mPhysicsSystemInstance;
+    }
+
+    void PhysicsSystem::addObject(const std::string &mesh,
+                                  const std::string &name,
+                                  float scale,
+                                  const Ogre::Vector3 &position,
+                                  const Ogre::Quaternion &rotation,
+                                  bool placeable)
+    {
+        //mHandleToMesh[name] = mesh;
+
+        mEngine->createAndAdjustRigidBody(mesh, name, scale, position, rotation,
+                                          0,    // scaledBoxTranslation
+                                          0,    // boxRotation
+                                          true, // raycasting
+                                          placeable);
+    }
+
+    void PhysicsSystem::setSceneManager(Ogre::SceneManager *sceneMgr)
+    {
+        mSceneMgr = sceneMgr;
 
         mEngine->setSceneManager(sceneMgr); // needed for toggleDebugRendering()
 
@@ -102,27 +139,6 @@ namespace CSVWorld
         }
     }
 
-    PhysicsSystem::~PhysicsSystem()
-    {
-        delete mEngine;
-    }
-
-    void PhysicsSystem::addObject(const std::string &mesh,
-                                  const std::string &name,
-                                  float scale,
-                                  const Ogre::Vector3 &position,
-                                  const Ogre::Quaternion &rotation,
-                                  bool placeable)
-    {
-        //mHandleToMesh[name] = mesh;
-
-        mEngine->createAndAdjustRigidBody(mesh, name, scale, position, rotation,
-                                          0,    // scaledBoxTranslation
-                                          0,    // boxRotation
-                                          true, // raycasting
-                                          placeable);
-    }
-
     void PhysicsSystem::removeObject(const std::string& name)
     {
         mEngine->removeRigidBody(name);
@@ -131,6 +147,9 @@ namespace CSVWorld
 
     void PhysicsSystem::toggleDebugRendering()
     {
+        if(!mSceneMgr)
+            return; // FIXME: add a warning message
+
         mEngine->toggleDebugRendering();
         mEngine->stepSimulation(0.0167); // FIXME: DebugDrawer::step() not accessible
     }
@@ -138,6 +157,9 @@ namespace CSVWorld
     std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY,
                                         Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera)
     {
+        if(!mSceneMgr)
+            return std::make_pair(false, Ogre::Vector3()); // FIXME: add a warning message
+
         // using a really small value seems to mess up with the projections
         float nearClipDistance = camera->getNearClipDistance();
         camera->setNearClipDistance(10.0f);  // arbitrary number

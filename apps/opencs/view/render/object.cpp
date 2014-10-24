@@ -78,7 +78,7 @@ void CSVRender::Object::update()
         mObject = NifOgre::Loader::createObjects (mBase, "Meshes\\" + model);
         mObject->setVisibilityFlags (Element_Reference);
 
-        if (mPhysics && !mReferenceId.empty())
+        if (!mReferenceId.empty())
         {
             const CSMWorld::CellRef& reference = getReference();
 
@@ -92,7 +92,8 @@ void CSVRender::Object::update()
             Ogre::Quaternion yr (Ogre::Radian (-reference.mPos.rot[1]), Ogre::Vector3::UNIT_Y);
             Ogre::Quaternion zr (Ogre::Radian (-reference.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
 
-            mPhysics->addObject("meshes\\" + model, mBase->getName(), reference.mScale, position, xr*yr*zr);
+            CSVWorld::PhysicsSystem::instance()->addObject("meshes\\" + model,
+                                        mBase->getName(), reference.mScale, position, xr*yr*zr);
         }
     }
 }
@@ -131,9 +132,8 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
 }
 
 CSVRender::Object::Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode,
-    const std::string& id, bool referenceable, CSVWorld::PhysicsSystem* physics,
-    bool forceBaseToZero)
-: mData (data), mBase (0), mForceBaseToZero (forceBaseToZero), mPhysics(physics)
+    const std::string& id, bool referenceable, bool forceBaseToZero)
+: mData (data), mBase (0), mForceBaseToZero (forceBaseToZero)
 {
     mBase = cellNode->createChildSceneNode();
 

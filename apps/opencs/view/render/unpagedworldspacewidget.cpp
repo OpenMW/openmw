@@ -56,7 +56,7 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
 
     update();
 
-    mCell.reset (new Cell (document.getData(), getSceneManager(), mCellId, getPhysics()));
+    mCell.reset (new Cell (document.getData(), getSceneManager(), mCellId));
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,
@@ -98,7 +98,7 @@ bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld:
         return false;
 
     mCellId = data.begin()->getId();
-    mCell.reset (new Cell (getDocument().getData(), getSceneManager(), mCellId, getPhysics()));
+    mCell.reset (new Cell (getDocument().getData(), getSceneManager(), mCellId));
 
     update();
     emit cellChanged(*data.begin());
