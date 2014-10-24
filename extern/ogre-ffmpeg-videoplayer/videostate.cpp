@@ -221,7 +221,7 @@ void VideoState::video_refresh()
     }
     else
     {
-        const float threshold = 0.03;
+        const float threshold = 0.03f;
         if (this->pictq[pictq_rindex].pts > this->get_master_clock() + threshold)
             return; // not ready yet to show this picture
 
