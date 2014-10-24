@@ -44,8 +44,8 @@ namespace MWSound
 
         size_t getSampleOffset()
         {
-            ssize_t clock_delay = (mFrameSize-mFramePos) / mAVStream->codec->channels /
-                                  av_get_bytes_per_sample(mAVStream->codec->sample_fmt);
+            ssize_t clock_delay = (mFrameSize-mFramePos) / av_get_channel_layout_nb_channels(mOutputChannelLayout) /
+                                  av_get_bytes_per_sample(mOutputSampleFormat);
             return (size_t)(mAudioClock*mAVStream->codec->sample_rate) - clock_delay;
         }
 

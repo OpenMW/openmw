@@ -148,7 +148,7 @@ size_t FFmpeg_Decoder::readAVAudioData(void *data, size_t length)
                 break;
             mFramePos = 0;
             mFrameSize = mFrame->nb_samples * (*mStream)->codec->channels *
-                         av_get_bytes_per_sample((*mStream)->codec->sample_fmt);
+                         av_get_bytes_per_sample(mOutputSampleFormat);
         }
 
         /* Get the amount of bytes remaining to be written, and clamp to
@@ -384,7 +384,7 @@ void FFmpeg_Decoder::readAll(std::vector<char> &output)
     while(getAVAudioData())
     {
         size_t got = mFrame->nb_samples * (*mStream)->codec->channels *
-                     av_get_bytes_per_sample((*mStream)->codec->sample_fmt);
+                     av_get_bytes_per_sample(mOutputSampleFormat);
         const char *inbuf = reinterpret_cast<char*>(mFrameData[0]);
         output.insert(output.end(), inbuf, inbuf+got);
     }
@@ -403,7 +403,7 @@ void FFmpeg_Decoder::rewind()
 size_t FFmpeg_Decoder::getSampleOffset()
 {
     int delay = (mFrameSize-mFramePos) / (*mStream)->codec->channels /
-                av_get_bytes_per_sample((*mStream)->codec->sample_fmt);
+                av_get_bytes_per_sample(mOutputSampleFormat);
     return (int)(mNextPts*(*mStream)->codec->sample_rate) - delay;
 }
 
