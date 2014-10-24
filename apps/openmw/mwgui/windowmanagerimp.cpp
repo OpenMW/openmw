@@ -377,6 +377,7 @@ namespace MWGui
         delete mHitFader;
         delete mWerewolfFader;
         delete mScreenFader;
+        delete mBlindnessFader;
         delete mDebugWindow;
 
         cleanupGarbage();
