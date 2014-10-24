@@ -93,7 +93,7 @@ void CSVRender::Object::update()
             Ogre::Quaternion zr (Ogre::Radian (-reference.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
 
             CSVWorld::PhysicsSystem::instance()->addObject("meshes\\" + model,
-                                        mBase->getName(), reference.mScale, position, xr*yr*zr);
+                                        mBase->getName(), mReferenceId, reference.mScale, position, xr*yr*zr);
         }
     }
 }

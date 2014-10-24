@@ -26,7 +26,7 @@ namespace CSVWorld
     class PhysicsSystem
     {
             static PhysicsSystem *mPhysicsSystemInstance;
-            //std::map<std::string, std::string> mHandleToMesh;
+            std::map<std::string, std::string> mRefToSceneNode;
             OEngine::Physic::PhysicEngine* mEngine;
             Ogre::SceneManager *mSceneMgr;
             std::map<std::string, std::vector<std::string> > mSelectedEntities;
@@ -42,20 +42,18 @@ namespace CSVWorld
 
             void addObject(const std::string &mesh,
                            const std::string &name,
+                           const std::string &referenceId,
                            float scale,
                            const Ogre::Vector3 &position,
                            const Ogre::Quaternion &rotation,
-                           //Ogre::Vector3* scaledBoxTranslation = 0,
-                           //Ogre::Quaternion* boxRotation = 0,
-                           //bool raycasting=false,
                            bool placeable=false);
 
             void removeObject(const std::string &name);
 
             void toggleDebugRendering();
 
-            std::pair<bool, Ogre::Vector3> castRay(float mouseX, float mouseY,
-                                                   Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera);
+            std::pair<bool, std::string> castRay(float mouseX, float mouseY,
+                                               Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera);
     };
 }
 

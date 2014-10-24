@@ -64,14 +64,15 @@ namespace CSVWorld
 
     void PhysicsSystem::addObject(const std::string &mesh,
                                   const std::string &name,
+                                  const std::string &referenceId,
                                   float scale,
                                   const Ogre::Vector3 &position,
                                   const Ogre::Quaternion &rotation,
                                   bool placeable)
     {
-        //mHandleToMesh[name] = mesh;
+        mRefToSceneNode[referenceId] = name;
 
-        mEngine->createAndAdjustRigidBody(mesh, name, scale, position, rotation,
+        mEngine->createAndAdjustRigidBody(mesh, referenceId, scale, position, rotation,
                                           0,    // scaledBoxTranslation
                                           0,    // boxRotation
                                           true, // raycasting
@@ -154,11 +155,11 @@ namespace CSVWorld
         mEngine->stepSimulation(0.0167); // FIXME: DebugDrawer::step() not accessible
     }
 
-    std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY,
+    std::pair<bool, std::string> PhysicsSystem::castRay(float mouseX, float mouseY,
                                         Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera)
     {
         if(!mSceneMgr)
-            return std::make_pair(false, Ogre::Vector3()); // FIXME: add a warning message
+            return std::make_pair(false, ""); // FIXME: add a warning message
 
         // using a really small value seems to mess up with the projections
         float nearClipDistance = camera->getNearClipDistance();
@@ -181,18 +182,20 @@ namespace CSVWorld
         std::pair<std::string, float> result =
                     mEngine->rayTest(_from, _to, raycastingObjectOnly, ignoreHeightMap, &norm);
 
-        if ((result.first == "") || !mSceneMgr->hasSceneNode(result.first))
-            return std::make_pair(false, Ogre::Vector3());
-            //std::cout << "no hit" << std::endl;
+        std::string sceneNode;
+        if(result.first != "")
+            sceneNode = mRefToSceneNode[result.first];
+        if ((result.first == "") || !mSceneMgr->hasSceneNode(sceneNode))
+            return std::make_pair(false, "");
         else
         {
             //TODO: Try http://www.ogre3d.org/tikiwiki/Create+outline+around+a+character
-            Ogre::SceneNode *scene = mSceneMgr->getSceneNode(result.first);
+            Ogre::SceneNode *scene = mSceneMgr->getSceneNode(sceneNode);
             std::map<std::string, std::vector<std::string> >::iterator iter =
-                                                    mSelectedEntities.find(result.first);
+                                                    mSelectedEntities.find(sceneNode);
             if(iter != mSelectedEntities.end()) // currently selected
             {
-                std::vector<std::string> clonedEntities = mSelectedEntities[result.first];
+                std::vector<std::string> clonedEntities = mSelectedEntities[sceneNode];
                 while(!clonedEntities.empty())
                 {
                     if(mSceneMgr->hasEntity(clonedEntities.back()))
@@ -204,7 +207,7 @@ namespace CSVWorld
                 }
                 mSelectedEntities.erase(iter);
 
-                removeHitPoint(mSceneMgr, result.first); // FIXME: for debugging
+                removeHitPoint(mSceneMgr, sceneNode); // FIXME: for debugging
             }
             else
             {
@@ -239,10 +242,10 @@ namespace CSVWorld
                     }
 
                 }
-                mSelectedEntities[result.first] = clonedEntities;
+                mSelectedEntities[sceneNode] = clonedEntities;
 
                 // FIXME: show cursor position for debugging
-                showHitPoint(mSceneMgr, result.first, ray.getPoint(farClipDist*result.second));
+                showHitPoint(mSceneMgr, sceneNode, ray.getPoint(farClipDist*result.second));
             }
 #if 0
             std::cout << "hit " << result.first
@@ -254,7 +257,7 @@ namespace CSVWorld
                             + ", " + std::to_string(ray.getPoint(farClipDist*result.second).y)
                             + ", " + std::to_string(ray.getPoint(farClipDist*result.second).z) << std::endl;
 #endif
-            return std::make_pair(true, ray.getPoint(farClipDist*result.second));
+            return std::make_pair(true, result.first);
         }
     }
 }

@@ -190,8 +190,6 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
     {
         // mouse picking
         // FIXME: need to virtualise mouse buttons
-        // Issue: Say 800 pixels (a typical viewport size) representing 8000 units (in one cell)
-        //        So best case resolution is 10 units per pixel.
         int viewportWidth = getCamera()->getViewport()->getActualWidth();
         int viewportHeight = getCamera()->getViewport()->getActualHeight();
 
@@ -200,18 +198,37 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 
         // Need to set each time in case there are multiple subviews
         CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
-        CSVWorld::PhysicsSystem::instance()->castRay(mouseX, mouseY, NULL, NULL, getCamera());
-        flagAsModified();
-#if 0
-        std::cout << "geometry: " + std::to_string(width()) + ", " + std::to_string(height()) << std::endl;
-        std::cout << "event: " + std::to_string(event->x()) + ", " + std::to_string(event->y()) << std::endl;
-        std::cout << "viewport: " + std::to_string(viewportWidth) + ", " + std::to_string(viewportHeight) << std::endl;
-        std::cout << "mouse: " + std::to_string(mouseX) + ", " + std::to_string(mouseY) << std::endl;
-        std::cout << "camera: " + std::to_string(getCamera()->getPosition().x)
-            + ", " + std::to_string(getCamera()->getPosition().y)
-            + ", " + std::to_string(getCamera()->getPosition().z)
-            << std::endl;
-#endif
+        std::pair<bool, std::string> result = CSVWorld::PhysicsSystem::instance()->castRay(mouseX, mouseY, NULL, NULL, getCamera());
+        if(result.first)
+        {
+            flagAsModified();
+            std::cout << "ReferenceId: " << result.second << std::endl;
+            const CSMWorld::CellRef& cellref = mDocument.getData().getReferences().getRecord (result.second).get();
+            //std::cout << "CellRef mId: " << cellref.mId << std::endl; // Same as ReferenceId
+            std::cout << "CellRef mCell: " << cellref.mCell << std::endl;
+
+            const CSMWorld::RefCollection& references = mDocument.getData().getReferences();
+            int index = references.searchId(result.second);
+            if (index != -1)
+            {
+                int columnIndex =
+                    references.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId);
+
+                std::cout << "index: " + std::to_string(index)
+                        +", column index: " + std::to_string(columnIndex) << std::endl;
+            }
+
+            std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+            while (iter!=mCells.end())
+            {
+                if(iter->first.getId("dummy") == cellref.mCell)
+                {
+                    std::cout << "Cell changed" << std::endl;
+                    break;
+                }
+                ++iter;
+            }
+        }
     }
 }
 
