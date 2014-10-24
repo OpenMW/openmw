@@ -214,8 +214,8 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
                 int columnIndex =
                     references.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId);
 
-                std::cout << "index: " + std::to_string(index)
-                        +", column index: " + std::to_string(columnIndex) << std::endl;
+                std::cout << "index: " + QString::number(index).toStdString()
+                        +", column index: " + QString::number(columnIndex).toStdString() << std::endl;
             }
 
             std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
@@ -223,7 +223,7 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
             {
                 if(iter->first.getId("dummy") == cellref.mCell)
                 {
-                    std::cout << "Cell changed" << std::endl;
+                    std::cout << "Cell found" << std::endl;
                     break;
                 }
                 ++iter;
