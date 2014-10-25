@@ -1,5 +1,6 @@
 #include "videoplayer.hpp"
 
+#include "audiofactory.hpp"
 #include "videostate.hpp"
 
 namespace Video

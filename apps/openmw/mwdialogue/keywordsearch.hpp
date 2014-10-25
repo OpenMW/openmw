@@ -1,5 +1,5 @@
-#ifndef MWGUI_KEYWORDSEARCH_H
-#define MWGUI_KEYWORDSEARCH_H
+#ifndef GAME_MWDIALOGUE_KEYWORDSEARCH_H
+#define GAME_MWDIALOGUE_KEYWORDSEARCH_H
 
 #include <map>
 #include <locale>
@@ -9,7 +9,7 @@
 
 #include <components/misc/stringops.hpp>
 
-namespace MWGui
+namespace MWDialogue
 {
 
 template <typename string_t, typename value_t>
@@ -141,7 +141,6 @@ public:
                 match.mValue = candidate->second.mValue;
                 match.mBeg = i;
                 match.mEnd = k;
-
                 return true;
             }
         }

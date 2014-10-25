@@ -38,13 +38,13 @@ add_openmw_dir (mwgui
     itemselection spellbuyingwindow loadingscreen levelupdialog waitdialog spellcreationdialog
     enchantingdialog trainingwindow travelwindow exposedwindow cursor spellicons
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
-    keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
+    itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel controllers savegamedialog
     recharge mode videowidget backgroundimage itemwidget screenfader debugwindow
     )
 
 add_openmw_dir (mwdialogue
-    dialoguemanagerimp journalimp journalentry quest topic filter selectwrapper
+    dialoguemanagerimp journalimp journalentry quest topic filter selectwrapper hypertextparser keywordsearch
     )
 
 add_openmw_dir (mwscript

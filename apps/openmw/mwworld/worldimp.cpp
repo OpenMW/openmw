@@ -657,6 +657,47 @@ namespace MWWorld
         return mWorldScene->searchPtrViaActorId (actorId);
     }
 
+    struct FindContainerFunctor
+    {
+        Ptr mContainedPtr;
+        Ptr mResult;
+
+        FindContainerFunctor(const Ptr& containedPtr) : mContainedPtr(containedPtr) {}
+
+        bool operator() (Ptr ptr)
+        {
+            if (mContainedPtr.getContainerStore() == &ptr.getClass().getContainerStore(ptr))
+            {
+                mResult = ptr;
+                return false;
+            }
+
+            return true;
+        }
+    };
+
+    Ptr World::findContainer(const Ptr& ptr)
+    {
+        if (ptr.isInCell())
+            return Ptr();
+
+        Ptr player = getPlayerPtr();
+        if (ptr.getContainerStore() == &player.getClass().getContainerStore(player))
+            return player;
+
+        const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
+        for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
+        {
+            FindContainerFunctor functor(ptr);
+            (*cellIt)->forEachContainer(functor);
+
+            if (!functor.mResult.isEmpty())
+                return functor.mResult;
+        }
+
+        return Ptr();
+    }
+
     void World::addContainerScripts(const Ptr& reference, CellStore * cell)
     {
         if( reference.getTypeName()==typeid (ESM::Container).name() ||
