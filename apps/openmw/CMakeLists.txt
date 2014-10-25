@@ -21,7 +21,7 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 add_openmw_dir (mwrender
     renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
     actors objects renderinginterface localmap occlusionquery water shadows
-    characterpreview globalmap videoplayer ripplesimulation refraction
+    characterpreview globalmap ripplesimulation refraction
     terrainstorage renderconst effectmanager weaponanimation
     )
 
@@ -38,13 +38,13 @@ add_openmw_dir (mwgui
     itemselection spellbuyingwindow loadingscreen levelupdialog waitdialog spellcreationdialog
     enchantingdialog trainingwindow travelwindow exposedwindow cursor spellicons
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
-    keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
+    itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel controllers savegamedialog
     recharge mode videowidget backgroundimage itemwidget screenfader debugwindow
     )
 
 add_openmw_dir (mwdialogue
-    dialoguemanagerimp journalimp journalentry quest topic filter selectwrapper
+    dialoguemanagerimp journalimp journalentry quest topic filter selectwrapper hypertextparser keywordsearch
     )
 
 add_openmw_dir (mwscript
@@ -55,7 +55,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanagerimp openal_output ffmpeg_decoder sound sound_decoder sound_output loudness libavwrapper
+    soundmanagerimp openal_output ffmpeg_decoder sound sound_decoder sound_output loudness libavwrapper movieaudiofactory
     )
 
 add_openmw_dir (mwworld
@@ -132,6 +132,7 @@ target_link_libraries(openmw
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
+    "ogre-ffmpeg-videoplayer"
     "oics"
     "sdl4ogre"
     components

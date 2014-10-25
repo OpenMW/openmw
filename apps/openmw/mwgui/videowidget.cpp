@@ -1,5 +1,7 @@
 #include "videowidget.hpp"
 
+#include "../mwsound/movieaudiofactory.hpp"
+
 namespace MWGui
 {
 
@@ -10,6 +12,7 @@ VideoWidget::VideoWidget()
 
 void VideoWidget::playVideo(const std::string &video)
 {
+    mPlayer.setAudioFactory(new MWSound::MovieAudioFactory());
     mPlayer.playVideo(video);
 
     setImageTexture(mPlayer.getTextureName());
@@ -34,6 +37,11 @@ bool VideoWidget::update()
 void VideoWidget::stop()
 {
     mPlayer.close();
+}
+
+bool VideoWidget::hasAudioStream()
+{
+    return mPlayer.hasAudioStream();
 }
 
 }

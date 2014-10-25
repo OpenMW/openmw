@@ -29,8 +29,8 @@ namespace CSMSettings
 
     public:
 
-        explicit Setting(SettingType typ, const QString &settingName,
-                         const QString &pageName);
+        Setting(SettingType typ, const QString &settingName,
+            const QString &pageName, const QString& label = "");
 
         void addProxy (const Setting *setting, const QStringList &vals);
         void addProxy (const Setting *setting, const QList <QStringList> &list);
@@ -66,12 +66,11 @@ namespace CSMSettings
         void setMask (const QString &value);
         QString mask() const;
 
-        void setMaximum (int value);
-        void setMaximum (double value);
+        void setRange (int min, int max);
+        void setRange (double min, double max);
+
         QString maximum() const;
 
-        void setMinimum (int value);
-        void setMinimum (double value);
         QString minimum() const;
 
         void setName (const QString &value);
@@ -131,6 +130,13 @@ namespace CSMSettings
 
         void setWidgetWidth (int value);
         int widgetWidth() const;
+
+        /// This is the text the user gets to see.
+        void setLabel (const QString& label);
+        QString getLabel() const;
+
+        void setToolTip (const QString& toolTip);
+        QString getToolTip() const;
 
         ///returns the specified property value
         QStringList property (SettingProperty prop) const;

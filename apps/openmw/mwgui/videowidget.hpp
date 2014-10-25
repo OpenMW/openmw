@@ -3,7 +3,7 @@
 
 #include <MyGUI_ImageBox.h>
 
-#include "../mwrender/videoplayer.hpp"
+#include <extern/ogre-ffmpeg-videoplayer/videoplayer.hpp>
 
 namespace MWGui
 {
@@ -26,11 +26,14 @@ namespace MWGui
         /// @return Is the video still playing?
         bool update();
 
+        /// Return true if a video is currently playing and it has an audio stream.
+        bool hasAudioStream();
+
         /// Stop video and free resources (done automatically on destruction)
         void stop();
 
     private:
-        MWRender::VideoPlayer mPlayer;
+        Video::VideoPlayer mPlayer;
     };
 
 }

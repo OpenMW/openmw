@@ -1,7 +1,9 @@
 #ifndef HAVE_LIBSWRESAMPLE
 extern "C"
 {
+#ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS
+#endif
 #include <stdint.h>
 
 #include <libavcodec/avcodec.h>
@@ -16,7 +18,7 @@ extern "C"
 #include <libavresample/avresample.h>
 #include <libavutil/opt.h>
 
-/* FIXME: delete this file once libswresample is available on all platforms */
+/* FIXME: delete this file once libswresample is packaged for Debian */
 
 int  swr_init(AVAudioResampleContext *avr) { return 1; }
 

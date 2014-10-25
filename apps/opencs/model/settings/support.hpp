@@ -36,12 +36,14 @@ namespace CSMSettings
         Property_TicksAbove = 20,
         Property_TicksBelow = 21,
         Property_StyleSheet = 22,
+        Property_Label = 23,
+        Property_ToolTip = 24,
 
         //Stringlists should always be the last items
-        Property_DefaultValues = 23,
-        Property_DeclaredValues = 24,
-        Property_DefinedValues = 25,
-        Property_Proxies = 26
+        Property_DefaultValues = 25,
+        Property_DeclaredValues = 26,
+        Property_DefinedValues = 27,
+        Property_Proxies = 28
     };
 
     ///Basic setting widget types.

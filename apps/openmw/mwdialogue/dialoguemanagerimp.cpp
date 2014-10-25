@@ -42,6 +42,7 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "filter.hpp"
+#include "hypertextparser.hpp"
 
 namespace MWDialogue
 {
@@ -82,42 +83,27 @@ namespace MWDialogue
 
     void DialogueManager::parseText (const std::string& text)
     {
-        std::vector<HyperTextToken> hypertext = ParseHyperText(text);
+        std::vector<HyperTextParser::Token> hypertext = HyperTextParser::parseHyperText(text);
 
-        //calculation of standard form fir all hyperlinks
-        for (size_t i = 0; i < hypertext.size(); ++i)
+        for (std::vector<HyperTextParser::Token>::iterator tok = hypertext.begin(); tok != hypertext.end(); ++tok)
         {
-            if (hypertext[i].mLink)
+            std::string topicId = Misc::StringUtils::lowerCase(tok->mText);
+
+            if (tok->isExplicitLink())
             {
-                size_t asterisk_count = MWDialogue::RemovePseudoAsterisks(hypertext[i].mText);
+                // calculation of standard form for all hyperlinks
+                size_t asterisk_count = HyperTextParser::removePseudoAsterisks(topicId);
                 for(; asterisk_count > 0; --asterisk_count)
-                    hypertext[i].mText.append("*");
+                    topicId.append("*");
 
-                hypertext[i].mText = mTranslationDataStorage.topicStandardForm(hypertext[i].mText);
+                topicId = mTranslationDataStorage.topicStandardForm(topicId);
             }
-        }
 
-        for (size_t i = 0; i < hypertext.size(); ++i)
-        {
-            std::list<std::string>::iterator it;
-            for(it = mActorKnownTopics.begin(); it != mActorKnownTopics.end(); ++it)
-            {
-                if (hypertext[i].mLink)
-                {
-                    if( hypertext[i].mText == *it )
-                    {
-                        mKnownTopics[hypertext[i].mText] = true;
-                    }
-                }
-                else if( !mTranslationDataStorage.hasTranslation() )
-                {
-                    size_t pos = Misc::StringUtils::lowerCase(hypertext[i].mText).find(*it, 0);
-                    if(pos !=std::string::npos)
-                    {
-                        mKnownTopics[*it] = true;
-                    }
-                }
-            }
+            if (tok->isImplicitKeyword() && mTranslationDataStorage.hasTranslation())
+                continue;
+
+            if (std::find(mActorKnownTopics.begin(), mActorKnownTopics.end(), topicId) != mActorKnownTopics.end())
+                mKnownTopics[topicId] = true;
         }
 
         updateTopics();
@@ -723,56 +709,5 @@ namespace MWDialogue
             MWBase::Environment::get().getJournal()->removeLastAddedTopicResponse(
                         mLastTopic, actor.getClass().getName(actor));
         }
-    }
-
-    std::vector<HyperTextToken> ParseHyperText(const std::string& text)
-    {
-        std::vector<HyperTextToken> result;
-        MyGUI::UString utext(text);
-        size_t pos_end, iteration_pos = 0;
-        for(;;)
-        {
-            size_t pos_begin = utext.find('@', iteration_pos);
-            if (pos_begin != std::string::npos)
-                pos_end = utext.find('#', pos_begin);
-
-            if (pos_begin != std::string::npos && pos_end != std::string::npos)
-            {
-                result.push_back( HyperTextToken(utext.substr(iteration_pos, pos_begin - iteration_pos), false) );
-
-                std::string link = utext.substr(pos_begin + 1, pos_end - pos_begin - 1);
-                result.push_back( HyperTextToken(link, true) );
-
-                iteration_pos = pos_end + 1;
-            }
-            else
-            {
-                result.push_back( HyperTextToken(utext.substr(iteration_pos), false) );
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    size_t RemovePseudoAsterisks(std::string& phrase)
-    {
-        size_t pseudoAsterisksCount = 0;
-
-        if( !phrase.empty() )
-        {
-            std::string::reverse_iterator rit = phrase.rbegin();
-
-            const char specialPseudoAsteriskCharacter = 127;
-            while( rit != phrase.rend() && *rit == specialPseudoAsteriskCharacter )
-            {
-                pseudoAsterisksCount++;
-                ++rit;
-            }
-        }
-
-        phrase = phrase.substr(0, phrase.length() - pseudoAsterisksCount);
-
-        return pseudoAsterisksCount;
     }
 }

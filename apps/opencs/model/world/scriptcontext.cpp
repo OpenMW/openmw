@@ -96,7 +96,7 @@ bool CSMWorld::ScriptContext::isId (const std::string& name) const
     {
         mIds = mData.getIds();
 
-        std::for_each (mIds.begin(), mIds.end(), &Misc::StringUtils::lowerCase);
+        std::for_each (mIds.begin(), mIds.end(), &Misc::StringUtils::toLower);
         std::sort (mIds.begin(), mIds.end());
 
         mIdsUpdated = true;

@@ -17,7 +17,6 @@ CSVSettings::Frame::Frame (bool isVisible, const QString &title,
     {
         // must be Page, not a View
         setStyleSheet (sInvisibleBoxStyle);
-        mLayout->setContentsMargins(10, 15, 10, 15);
     }
 
     setLayout (mLayout);
@@ -39,7 +38,7 @@ void CSVSettings::Frame::hideWidgets()
 
         QWidget *widg = static_cast <QWidget *> (obj);
         if (widg->property("sizePolicy").isValid())
-            widg->setSizePolicy (QSizePolicy::Ignored, QSizePolicy::Ignored);
+            widg->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Expanding);
     }
 
     layout()->activate();

@@ -23,6 +23,8 @@
 #define DARK_MAP @shPropertyHasValue(darkMap)
 #define SPEC_MAP @shPropertyHasValue(specMap) && SPECULAR
 
+#define ALPHATEST_MODE @shPropertyString(alphaTestMode)
+
 #define PARALLAX @shPropertyBool(use_parallax)
 #define PARALLAX_SCALE 0.04
 #define PARALLAX_BIAS -0.02
@@ -354,6 +356,10 @@
     #endif
 #endif
 
+#if ALPHATEST_MODE != 0
+    shUniform(float, alphaTestValue) @shUniformProperty1f(alphaTestValue, alphaTestValue)
+#endif
+
     SH_START_PROGRAM
     {
         float4 newUV = UV;
@@ -398,6 +404,29 @@
 #else
         float4 diffuse = float4(1,1,1,1);
 #endif
+
+#if ALPHATEST_MODE == 1
+        if (diffuse.a >= alphaTestValue)
+            discard;
+#elif ALPHATEST_MODE == 2
+        if (diffuse.a != alphaTestValue)
+            discard;
+#elif ALPHATEST_MODE == 3
+        if (diffuse.a > alphaTestValue)
+            discard;
+#elif ALPHATEST_MODE == 4
+        if (diffuse.a <= alphaTestValue)
+            discard;
+#elif ALPHATEST_MODE == 5
+        if (diffuse.a == alphaTestValue)
+            discard;
+#elif ALPHATEST_MODE == 6
+        if (diffuse.a < alphaTestValue)
+            discard;
+#elif ALPHATEST_MODE == 7
+        discard;
+#endif
+
 
 #if DETAIL_MAP
 #if @shPropertyString(detailMapUVSet)

@@ -109,6 +109,23 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
 ///Make the factory map used for parsing the file
 static const std::map<std::string,RecordFactoryEntry> factories = makeFactory();
 
+/// Get the file's version in a human readable form
+std::string NIFFile::printVersion(unsigned int version)
+{
+    union ver_quad
+    {
+        uint32_t full;
+        uint8_t quad[4];
+    } version_out;
+
+    version_out.full = version;
+
+    return Ogre::StringConverter::toString(version_out.quad[3])
+    +"." + Ogre::StringConverter::toString(version_out.quad[2])
+    +"." + Ogre::StringConverter::toString(version_out.quad[1])
+    +"." + Ogre::StringConverter::toString(version_out.quad[0]);
+}
+
 void NIFFile::parse()
 {
     NIFStream nif (this, Ogre::ResourceGroupManager::getSingleton().openResource(filename));
@@ -119,10 +136,9 @@ void NIFFile::parse()
     fail("Invalid NIF header");
 
   // Get BCD version
-  ver = nif.getInt();
+  ver = nif.getUInt();
   if(ver != VER_MW)
-    fail("Unsupported NIF version");
-
+    fail("Unsupported NIF version: " + printVersion(ver));
   // Number of records
   size_t recNum = nif.getInt();
   records.resize(recNum);

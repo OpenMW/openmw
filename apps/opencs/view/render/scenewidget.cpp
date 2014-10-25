@@ -54,10 +54,10 @@ namespace CSVRender
 
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
 
-        float farClipDist = userSettings.setting("Scene/far clip distance", QString("300000")).toFloat();
+        float farClipDist = userSettings.setting("3d-render/far-clip-distance", QString("300000")).toFloat();
         mCamera->setFarClipDistance (farClipDist);
 
-        mFastFactor = userSettings.setting("Scene/fast factor", QString("4")).toInt();
+        mFastFactor = userSettings.setting("scene-input/fast-factor", QString("4")).toInt();
 
         mCamera->roll (Ogre::Degree (90));
 
@@ -72,7 +72,7 @@ namespace CSVRender
 
         connect (timer, SIGNAL (timeout()), this, SLOT (update()));
 
-        int timerStart = userSettings.setting("Scene/timer start", QString("20")).toInt();
+        int timerStart = userSettings.setting("scene-input/timer", QString("20")).toInt();
         timer->start (timerStart);
 
         /// \todo make shortcut configurable
@@ -141,7 +141,7 @@ namespace CSVRender
         params.insert(std::make_pair("title", windowTitle.str()));
 
         std::string antialiasing =
-            CSMSettings::UserSettings::instance().settingValue("Video/antialiasing").toStdString();
+            CSMSettings::UserSettings::instance().settingValue("3d-render/antialiasing").toStdString();
         if(antialiasing == "MSAA 16")     antialiasing = "16";
         else if(antialiasing == "MSAA 8") antialiasing = "8";
         else if(antialiasing == "MSAA 4") antialiasing = "4";
@@ -444,14 +444,14 @@ namespace CSVRender
         if(key.contains(QRegExp("^\\b(Objects|Shader|Scene)", Qt::CaseInsensitive)))
             flagAsModified();
 
-        if(key == "Scene/far clip distance" && !list.empty())
+        if(key == "3d-render/far-clip-distance" && !list.empty())
         {
             if(mCamera->getFarClipDistance() != list.at(0).toFloat())
                 mCamera->setFarClipDistance(list.at(0).toFloat());
         }
 
         // minimise unnecessary ogre window creation by updating only when there is a change
-        if(key == "Video/antialiasing")
+        if(key == "3d-render/antialiasing")
         {
             unsigned int aa = mWindow->getFSAA();
             unsigned int antialiasing = 0;

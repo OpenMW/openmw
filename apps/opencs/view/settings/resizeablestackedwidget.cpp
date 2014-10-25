@@ -34,7 +34,6 @@ void CSVSettings::ResizeableStackedWidget::changePage
         curPage->showWidgets();
 
     layout()->activate();
-    setFixedSize(minimumSizeHint());
 
     setCurrentIndex (current);
 }

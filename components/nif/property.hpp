@@ -24,7 +24,7 @@
 #ifndef OPENMW_COMPONENTS_NIF_PROPERTY_HPP
 #define OPENMW_COMPONENTS_NIF_PROPERTY_HPP
 
-#include "controlled.hpp"
+#include "base.hpp"
 
 namespace Nif
 {
