@@ -69,6 +69,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     connect(mFilterBox, SIGNAL(recordDropped(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)),
         this, SLOT(createFilterRequest(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)));
+
+    connect (mTable, SIGNAL (closeRequest()), this, SLOT (closeRequest()));
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)
@@ -149,4 +151,9 @@ bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
         return handled;
     }
     return false;
+}
+
+void CSVWorld::TableSubView::closeRequest()
+{
+    deleteLater();
 }

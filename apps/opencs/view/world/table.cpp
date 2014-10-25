@@ -182,11 +182,71 @@ void CSVWorld::Table::mouseDoubleClickEvent (QMouseEvent *event)
     Qt::KeyboardModifiers modifiers =
         event->modifiers() & (Qt::ShiftModifier | Qt::ControlModifier);
 
-    if (!modifiers)
-        DragRecordTable::mouseDoubleClickEvent (event);
-    else
-    {
+    QModelIndex index = currentIndex();
 
+    selectionModel()->select (index,
+        QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+    std::map<Qt::KeyboardModifiers, DoubleClickAction>::iterator iter =
+        mDoubleClickActions.find (modifiers);
+
+    if (iter==mDoubleClickActions.end())
+    {
+        event->accept();
+        return;
+    }
+
+    switch (iter->second)
+    {
+        case Action_None:
+
+            event->accept();
+            break;
+
+        case Action_InPlaceEdit:
+
+            DragRecordTable::mouseDoubleClickEvent (event);
+            break;
+
+        case Action_EditRecord:
+
+            event->accept();
+            editRecord();
+            break;
+
+        case Action_View:
+
+            event->accept();
+            viewRecord();
+            break;
+
+        case Action_Revert:
+
+            event->accept();
+            if (mDispatcher->canRevert())
+                mDispatcher->executeRevert();
+            break;
+
+        case Action_Delete:
+
+            event->accept();
+            if (mDispatcher->canDelete())
+                mDispatcher->executeDelete();
+            break;
+
+        case Action_EditRecordAndClose:
+
+            event->accept();
+            editRecord();
+            emit closeRequest();
+            break;
+
+        case Action_ViewAndClose:
+
+            event->accept();
+            viewRecord();
+            emit closeRequest();
+            break;
     }
 }
 
@@ -297,6 +357,11 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
         this, SLOT (selectionSizeUpdate ()));
 
     setAcceptDrops(true);
+
+    mDoubleClickActions.insert (std::make_pair (0, Action_InPlaceEdit));
+    mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier, Action_EditRecord));
+    mDoubleClickActions.insert (std::make_pair (Qt::ControlModifier, Action_View));
+    mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier | Qt::ControlModifier, Action_EditRecordAndClose));
 }
 
 void CSVWorld::Table::setEditLock (bool locked)
@@ -417,6 +482,9 @@ void CSVWorld::Table::editCell()
 
 void CSVWorld::Table::viewRecord()
 {
+    if (!(mModel->getFeatures() & CSMWorld::IdTableBase::Feature_View))
+        return;
+
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
     if (selectedRows.size()==1)

@@ -63,6 +63,8 @@ namespace CSVWorld
             void cloneRequest (const CSMWorld::UniversalId& toClone);
             void createFilterRequest(std::vector< CSMWorld::UniversalId >& types,
                                      Qt::DropAction action);
+
+            void closeRequest();
     };
 }
 
