@@ -12,7 +12,6 @@ class MovieAudioFactory
 {
 public:
     virtual boost::shared_ptr<MovieAudioDecoder> createDecoder(VideoState* videoState) = 0;
-    virtual ~MovieAudioFactory() {}
 };
 
 }
