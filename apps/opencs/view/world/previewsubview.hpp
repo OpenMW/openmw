@@ -29,8 +29,6 @@ namespace CSVWorld
 
         private slots:
 
-            void closeRequest();
-
             void referenceableIdChanged (const std::string& id);
     };
 }

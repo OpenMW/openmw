@@ -323,7 +323,7 @@ void CSVDoc::View::updateSubViewIndicies(SubView *view)
     if(view && mSubViews.contains(view))
         mSubViews.removeOne(view);
 
-    if(mSubViews.size() == 1)
+    if (mSubViews.size() == 1)
     {
         if(!mSubViews.at(0)->isFloating())
         {
@@ -517,6 +517,8 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
              SIGNAL (userSettingUpdated (const QString &, const QStringList &)),
              view,
              SLOT (updateUserSetting (const QString &, const QStringList &)));
+
+    connect (view, SIGNAL (closeRequest (SubView *)), this, SLOT (closeRequest (SubView *)));
 
     view->show();
 }
@@ -760,4 +762,12 @@ void CSVDoc::View::run (const std::string& profile, const std::string& startupIn
 void CSVDoc::View::stop()
 {
     mDocument->stopRunning();
+}
+
+void CSVDoc::View::closeRequest (SubView *subView)
+{
+    if (mSubViews.size()>1 || mViewTotal<=1)
+        subView->deleteLater();
+    else if (mViewManager.closeRequest (this))
+        mViewManager.removeDocAndView (mDocument);
 }

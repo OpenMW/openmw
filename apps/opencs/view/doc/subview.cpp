@@ -35,3 +35,8 @@ void CSVDoc::SubView::closeEvent (QCloseEvent *event)
     if(mParent)
         mParent->updateSubViewIndicies(this);
 }
+
+void CSVDoc::SubView::closeRequest()
+{
+    emit closeRequest (this);
+}

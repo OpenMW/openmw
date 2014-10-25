@@ -57,6 +57,12 @@ namespace CSVDoc
 
             void focusId (const CSMWorld::UniversalId& universalId, const std::string& hint);
 
+            void closeRequest (SubView *subView);
+
+        protected slots:
+
+            void closeRequest();
+
         public slots:
             virtual void updateUserSetting
                                     (const QString &, const QStringList &);

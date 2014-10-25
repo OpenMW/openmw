@@ -81,6 +81,6 @@ void CSVWorld::ScriptSubView::rowsAboutToBeRemoved (const QModelIndex& parent, i
     QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
 
     if (!parent.isValid() && index.row()>=start && index.row()<=end)
-        deleteLater();
+        emit closeRequest();
 }
 

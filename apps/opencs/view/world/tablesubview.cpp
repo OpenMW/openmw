@@ -153,7 +153,3 @@ bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
     return false;
 }
 
-void CSVWorld::TableSubView::closeRequest()
-{
-    deleteLater();
-}

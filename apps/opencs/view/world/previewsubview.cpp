@@ -52,11 +52,6 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
 
 void CSVWorld::PreviewSubView::setEditLock (bool locked) {}
 
-void CSVWorld::PreviewSubView::closeRequest()
-{
-    deleteLater();
-}
-
 void CSVWorld::PreviewSubView::referenceableIdChanged (const std::string& id)
 {
     if (id.empty())

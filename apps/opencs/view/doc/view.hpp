@@ -222,6 +222,8 @@ namespace CSVDoc
             void run (const std::string& profile, const std::string& startupInstruction = "");
 
             void stop();
+
+            void closeRequest (SubView *subView);
     };
 }
 

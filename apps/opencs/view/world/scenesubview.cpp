@@ -150,11 +150,6 @@ void CSVWorld::SceneSubView::useHint (const std::string& hint)
     mScene->useViewHint (hint);
 }
 
-void CSVWorld::SceneSubView::closeRequest()
-{
-    deleteLater();
-}
-
 void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::UniversalId& id)
 {
     setUniversalId(id);

@@ -75,8 +75,6 @@ namespace CSVWorld
 
         private slots:
 
-            void closeRequest();
-
             void cellSelectionChanged (const CSMWorld::CellSelection& selection);
 
             void cellSelectionChanged (const CSMWorld::UniversalId& id);
