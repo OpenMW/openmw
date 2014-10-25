@@ -5,8 +5,6 @@
 
 #include <stdexcept>
 
-#include "al.h"
-
 extern "C" {
 #ifndef HAVE_LIBSWRESAMPLE
 // FIXME: remove this section once libswresample is packaged for Debian
@@ -287,9 +285,8 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
     if(!mStream)
         fail("No audio stream info");
 
-    if(((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_FLT || (*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
-           && alIsExtensionPresent("AL_EXT_FLOAT32"))
-        mOutputSampleFormat = AV_SAMPLE_FMT_FLT;
+    if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_FLT || (*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
+        mOutputSampleFormat = AV_SAMPLE_FMT_S16; // FIXME: Check for AL_EXT_FLOAT32 support
     else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_U8P)
         mOutputSampleFormat = AV_SAMPLE_FMT_U8;
     else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_S16P)
@@ -322,8 +319,8 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
     }
 
     mOutputChannelLayout = ch_layout;
-    if ((ch_layout == AV_CH_LAYOUT_5POINT1 || ch_layout == AV_CH_LAYOUT_7POINT1
-            || ch_layout == AV_CH_LAYOUT_QUAD) && !alIsExtensionPresent("AL_EXT_MCFORMATS"))
+    if (ch_layout == AV_CH_LAYOUT_5POINT1 || ch_layout == AV_CH_LAYOUT_7POINT1
+            || ch_layout == AV_CH_LAYOUT_QUAD) // FIXME: check for AL_EXT_MCFORMATS support
         mOutputChannelLayout = AV_CH_LAYOUT_STEREO;
     else if (ch_layout != AV_CH_LAYOUT_MONO
              && ch_layout != AV_CH_LAYOUT_STEREO)
