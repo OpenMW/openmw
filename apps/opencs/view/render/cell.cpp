@@ -5,10 +5,12 @@
 #include <OgreSceneNode.h>
 
 #include <components/misc/stringops.hpp>
+#include <components/esm/loadland.hpp>
 
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
+#include "../world/physicssystem.hpp"
 
 #include "elements.hpp"
 #include "terrainstorage.hpp"
@@ -81,6 +83,14 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
         const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
         mTerrain->loadCell(esmLand->mX,
                            esmLand->mY);
+
+        if(esmLand)
+        {
+            float verts = ESM::Land::LAND_SIZE;
+            float worldsize = ESM::Land::REAL_SIZE;
+            CSVWorld::PhysicsSystem::instance()->addHeightField(
+                    esmLand->mLandData->mHeights, esmLand->mX, esmLand->mY, 0, worldsize / (verts-1), verts);
+        }
     }
 }
 

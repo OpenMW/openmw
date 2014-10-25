@@ -187,29 +187,36 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
             }
         }
 
-        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-        bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
-        if(!debug)
-            return;
-
         // mouse picking
         // FIXME: need to virtualise mouse buttons
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+        bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
+        if(!debug || !getCamera()->getViewport())
+            return;
+
+        if(!((uint32_t)getCamera()->getViewport()->getVisibilityMask() & (uint32_t)CSVRender::Element_Reference))
+            return;
+
         int viewportWidth = getCamera()->getViewport()->getActualWidth();
         int viewportHeight = getCamera()->getViewport()->getActualHeight();
 
         float mouseX = (float) event->x()/viewportWidth;
         float mouseY = (float) event->y()/viewportHeight;
 
+        bool ignoreHeightMap = true;
+        if(((uint32_t)getCamera()->getViewport()->getVisibilityMask() & (uint32_t)CSVRender::Element_Terrain))
+            ignoreHeightMap = false;
+
         // Need to set scene manager each time in case there are multiple subviews
         CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
-        std::pair<bool, std::string> result =
-                        CSVWorld::PhysicsSystem::instance()->castRay(mouseX, mouseY, NULL, NULL, getCamera());
+        std::pair<bool, std::string> result = CSVWorld::PhysicsSystem::instance()->castRay(
+                                                    mouseX, mouseY, NULL, NULL, getCamera(), ignoreHeightMap);
         if(result.first)
         {
             std::cout << "ReferenceId: " << result.second << std::endl;
             const CSMWorld::CellRef& cellref = mDocument.getData().getReferences().getRecord (result.second).get();
-            //std::cout << "CellRef mId: " << cellref.mId << std::endl; // Same as ReferenceId
-            std::cout << "CellRef mCell: " << cellref.mCell << std::endl;
+            //std::cout << "CellRef.mId: " << cellref.mId << std::endl; // Same as ReferenceId
+            std::cout << "CellRef.mCell: " << cellref.mCell << std::endl;
 
             const CSMWorld::RefCollection& references = mDocument.getData().getReferences();
             int index = references.searchId(result.second);
@@ -248,8 +255,11 @@ void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event
         if(!debug)
             return;
 
-        // Need to set scene manager each time in case there are multiple subviews
-        CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
+        // FIXME: OEngine::PhysicEngine creates only one child scene node for the
+        // debug drawer.  Hence only the first subview that creates the debug drawer
+        // can view the debug lines.  Will need to keep a map in OEngine if multiple
+        // subviews are to be supported.
+        //CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
         CSVWorld::PhysicsSystem::instance()->toggleDebugRendering();
         flagAsModified();
     }

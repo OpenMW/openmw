@@ -146,6 +146,12 @@ namespace CSVWorld
         mEngine->deleteRigidBody(name);
     }
 
+    void PhysicsSystem::addHeightField(float* heights, int x, int y, float yoffset,
+                                       float triSize, float sqrtVerts)
+    {
+        mEngine->addHeightField(heights, x, y, yoffset, triSize, sqrtVerts);
+    }
+
     void PhysicsSystem::toggleDebugRendering()
     {
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
@@ -158,7 +164,7 @@ namespace CSVWorld
     }
 
     std::pair<bool, std::string> PhysicsSystem::castRay(float mouseX, float mouseY,
-                                        Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera)
+                            Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera, bool ignoreHeightMap)
     {
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
         bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
@@ -179,8 +185,7 @@ namespace CSVWorld
         _from = btVector3(from.x, from.y, from.z);
         _to = btVector3(to.x, to.y, to.z);
 
-        bool raycastingObjectOnly = true;
-        bool ignoreHeightMap = false;
+        bool raycastingObjectOnly = true; // FIXME
         Ogre::Vector3 norm;
         std::pair<std::string, float> result =
                     mEngine->rayTest(_from, _to, raycastingObjectOnly, ignoreHeightMap, &norm);
