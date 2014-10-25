@@ -53,11 +53,13 @@ namespace CSVWorld
             void addHeightField(float* heights, int x, int y, float yoffset,
                                 float triSize, float sqrtVerts);
 
+            void removeHeightField(int x, int y);
+
             void toggleDebugRendering();
 
             std::pair<bool, std::string> castRay(float mouseX, float mouseY,
-                                                 Ogre::Vector3* normal, std::string* hit,
-                                                 Ogre::Camera *camera, bool ignoreHeightMap);
+                            Ogre::Vector3* normal, std::string* hit,
+                            Ogre::Camera *camera, bool ignoreHeightMap);
     };
 }
 

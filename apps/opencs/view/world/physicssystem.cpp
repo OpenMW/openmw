@@ -53,6 +53,15 @@ namespace CSVWorld
 
     PhysicsSystem::~PhysicsSystem()
     {
+        std::map<std::string, std::vector<std::string> >::iterator iter = mSelectedEntities.begin();
+        for(;iter != mSelectedEntities.end(); ++iter)
+        {
+            removeHitPoint(mSceneMgr, iter->first);
+            Ogre::SceneNode *scene = mSceneMgr->getSceneNode(iter->first);
+            scene->removeAndDestroyAllChildren();
+            mSceneMgr->destroySceneNode(iter->first);
+        }
+
         delete mEngine;
     }
 
@@ -150,6 +159,11 @@ namespace CSVWorld
                                        float triSize, float sqrtVerts)
     {
         mEngine->addHeightField(heights, x, y, yoffset, triSize, sqrtVerts);
+    }
+
+    void PhysicsSystem::removeHeightField(int x, int y)
+    {
+        mEngine->removeHeightField(x, y);
     }
 
     void PhysicsSystem::toggleDebugRendering()

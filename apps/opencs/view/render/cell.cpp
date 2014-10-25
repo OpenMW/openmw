@@ -96,6 +96,19 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
 
 CSVRender::Cell::~Cell()
 {
+    // TODO: maybe store the cell coordinates rather than searching for them in the destructor?
+    if(mTerrain.get())
+    {
+        const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
+        int landIndex = land.searchId(mId);
+        if (landIndex != -1)
+        {
+            const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
+            if(esmLand)
+                CSVWorld::PhysicsSystem::instance()->removeHeightField(esmLand->mX, esmLand->mY);
+        }
+    }
+
     for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
         iter!=mObjects.end(); ++iter)
         delete iter->second;

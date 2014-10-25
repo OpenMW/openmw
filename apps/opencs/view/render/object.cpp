@@ -33,11 +33,12 @@ void CSVRender::Object::clearSceneNode (Ogre::SceneNode *node)
 
 void CSVRender::Object::clear()
 {
+    if(!mObject.isNull())
+        CSVWorld::PhysicsSystem::instance()->removeObject(mBase->getName());
+
     mObject.setNull();
 
     clearSceneNode (mBase);
-
-    // FIXME: also clear bullet objects
 }
 
 void CSVRender::Object::update()
