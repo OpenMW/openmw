@@ -148,7 +148,9 @@ namespace CSVWorld
 
     void PhysicsSystem::toggleDebugRendering()
     {
-        if(!mSceneMgr)
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+        bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
+        if(!mSceneMgr || !debug)
             return; // FIXME: add a warning message
 
         mEngine->toggleDebugRendering();
@@ -158,6 +160,8 @@ namespace CSVWorld
     std::pair<bool, std::string> PhysicsSystem::castRay(float mouseX, float mouseY,
                                         Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera)
     {
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+        bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
         if(!mSceneMgr)
             return std::make_pair(false, ""); // FIXME: add a warning message
 
@@ -168,7 +172,6 @@ namespace CSVWorld
         camera->setNearClipDistance(nearClipDistance);
 
         Ogre::Vector3 from = ray.getOrigin();
-        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
         float farClipDist = userSettings.setting("Scene/far clip distance", QString("300000")).toFloat();
         Ogre::Vector3 to = ray.getPoint(farClipDist);
 
@@ -193,7 +196,7 @@ namespace CSVWorld
             Ogre::SceneNode *scene = mSceneMgr->getSceneNode(sceneNode);
             std::map<std::string, std::vector<std::string> >::iterator iter =
                                                     mSelectedEntities.find(sceneNode);
-            if(iter != mSelectedEntities.end()) // currently selected
+            if(debug && iter != mSelectedEntities.end()) // currently selected
             {
                 std::vector<std::string> clonedEntities = mSelectedEntities[sceneNode];
                 while(!clonedEntities.empty())
@@ -207,9 +210,12 @@ namespace CSVWorld
                 }
                 mSelectedEntities.erase(iter);
 
-                removeHitPoint(mSceneMgr, sceneNode); // FIXME: for debugging
+                bool debugCursor = userSettings.setting (
+                        "debug/mouse-position", QString("false")) == "true" ? true : false;
+                if(debugCursor) // FIXME: show cursor position for debugging
+                    removeHitPoint(mSceneMgr, sceneNode);
             }
-            else
+            else if(debug)
             {
                 std::vector<std::string> clonedEntities;
                 Ogre::SceneNode::ObjectIterator iter = scene->getAttachedObjectIterator();
@@ -244,19 +250,12 @@ namespace CSVWorld
                 }
                 mSelectedEntities[sceneNode] = clonedEntities;
 
-                // FIXME: show cursor position for debugging
+                bool debugCursor = userSettings.setting (
+                        "debug/mouse-position", QString("false")) == "true" ? true : false;
+                if(debugCursor) // FIXME: show cursor position for debugging
                 showHitPoint(mSceneMgr, sceneNode, ray.getPoint(farClipDist*result.second));
             }
-#if 0
-            std::cout << "hit " << result.first
-                      + " result " + std::to_string(result.second*farClipDist) << std::endl;
-            std::cout << "normal " + std::to_string(norm.x)
-                            + ", " + std::to_string(norm.y)
-                            + ", " + std::to_string(norm.z) << std::endl;
-            std::cout << "hit pos "+ std::to_string(ray.getPoint(farClipDist*result.second).x)
-                            + ", " + std::to_string(ray.getPoint(farClipDist*result.second).y)
-                            + ", " + std::to_string(ray.getPoint(farClipDist*result.second).z) << std::endl;
-#endif
+
             return std::make_pair(true, result.first);
         }
     }

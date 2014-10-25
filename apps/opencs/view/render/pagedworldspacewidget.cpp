@@ -19,6 +19,7 @@
 
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/settings/usersettings.hpp"
 
 #include "../widget/scenetooltoggle.hpp"
 #include "../world/physicssystem.hpp"
@@ -185,9 +186,12 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
                 break;
             }
         }
-    }
-    else
-    {
+
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+        bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
+        if(!debug)
+            return;
+
         // mouse picking
         // FIXME: need to virtualise mouse buttons
         int viewportWidth = getCamera()->getViewport()->getActualWidth();
@@ -196,12 +200,12 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
         float mouseX = (float) event->x()/viewportWidth;
         float mouseY = (float) event->y()/viewportHeight;
 
-        // Need to set each time in case there are multiple subviews
+        // Need to set scene manager each time in case there are multiple subviews
         CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
-        std::pair<bool, std::string> result = CSVWorld::PhysicsSystem::instance()->castRay(mouseX, mouseY, NULL, NULL, getCamera());
+        std::pair<bool, std::string> result =
+                        CSVWorld::PhysicsSystem::instance()->castRay(mouseX, mouseY, NULL, NULL, getCamera());
         if(result.first)
         {
-            flagAsModified();
             std::cout << "ReferenceId: " << result.second << std::endl;
             const CSMWorld::CellRef& cellref = mDocument.getData().getReferences().getRecord (result.second).get();
             //std::cout << "CellRef mId: " << cellref.mId << std::endl; // Same as ReferenceId
@@ -223,11 +227,12 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
             {
                 if(iter->first.getId("dummy") == cellref.mCell)
                 {
-                    std::cout << "Cell found" << std::endl;
+                    //std::cout << "Cell found" << std::endl;
                     break;
                 }
                 ++iter;
             }
+            flagAsModified();
         }
     }
 }
@@ -238,9 +243,15 @@ void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event
     {
         std::cout << "double clicked" << std::endl;
 
-        // Need to set each time in case there are multiple subviews
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+        bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
+        if(!debug)
+            return;
+
+        // Need to set scene manager each time in case there are multiple subviews
         CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
         CSVWorld::PhysicsSystem::instance()->toggleDebugRendering();
+        flagAsModified();
     }
 }
 
