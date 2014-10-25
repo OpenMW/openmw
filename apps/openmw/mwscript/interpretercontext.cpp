@@ -21,6 +21,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -433,6 +434,16 @@ namespace MWScript
             ref2 = getReferenceImp();
         else
             ref2 = MWBase::Environment::get().getWorld()->getPtr(id, false);
+
+        if (ref2.getContainerStore()) // is the object contained?
+        {
+            MWWorld::Ptr container = MWBase::Environment::get().getWorld()->findContainer(ref2);
+
+            if (!container.isEmpty())
+                ref2 = container;
+            else
+                throw std::runtime_error("failed to find container ptr");
+        }
 
         const MWWorld::Ptr ref = MWBase::Environment::get().getWorld()->getPtr(name, false);
 
