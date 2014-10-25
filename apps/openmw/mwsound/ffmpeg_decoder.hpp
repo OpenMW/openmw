@@ -59,6 +59,7 @@ namespace MWSound
 
         SwrContext *mSwr;
         enum AVSampleFormat mOutputSampleFormat;
+        int64_t mOutputChannelLayout;
         uint8_t *mDataBuf;
         uint8_t **mFrameData;
         int mDataBufLen;

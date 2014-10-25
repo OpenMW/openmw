@@ -5,6 +5,8 @@
 
 #include <stdexcept>
 
+#include "al.h"
+
 extern "C" {
 #ifndef HAVE_LIBSWRESAMPLE
 // FIXME: remove this section once libswresample is packaged for Debian
@@ -112,7 +114,7 @@ bool FFmpeg_Decoder::getAVAudioData()
             if(!mDataBuf || mDataBufLen < mFrame->nb_samples)
             {
                 av_freep(&mDataBuf);
-                if(av_samples_alloc(&mDataBuf, NULL, (*mStream)->codec->channels,
+                if(av_samples_alloc(&mDataBuf, NULL, av_get_channel_layout_nb_channels(mOutputChannelLayout),
                                     mFrame->nb_samples, mOutputSampleFormat, 0) < 0)
                     break;
                 else
@@ -147,7 +149,7 @@ size_t FFmpeg_Decoder::readAVAudioData(void *data, size_t length)
             if(!getAVAudioData())
                 break;
             mFramePos = 0;
-            mFrameSize = mFrame->nb_samples * (*mStream)->codec->channels *
+            mFrameSize = mFrame->nb_samples * av_get_channel_layout_nb_channels(mOutputChannelLayout) *
                          av_get_bytes_per_sample(mOutputSampleFormat);
         }
 
@@ -285,47 +287,32 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
     if(!mStream)
         fail("No audio stream info");
 
-    if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_U8)
-        *type = SampleType_UInt8;
-    else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_S16)
-        *type = SampleType_Int16;
-    else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_FLT)
-        *type = SampleType_Float32;
+    if(((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_FLT || (*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
+           && alIsExtensionPresent("AL_EXT_FLOAT32"))
+        mOutputSampleFormat = AV_SAMPLE_FMT_FLT;
     else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_U8P)
-        *type = SampleType_UInt8;
+        mOutputSampleFormat = AV_SAMPLE_FMT_U8;
     else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_S16P)
-        *type = SampleType_Int16;
-    else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
-        *type = SampleType_Float32;
+        mOutputSampleFormat = AV_SAMPLE_FMT_S16;
     else
-        fail(std::string("Unsupported sample format: ")+
-             av_get_sample_fmt_name((*mStream)->codec->sample_fmt));
+        mOutputSampleFormat = AV_SAMPLE_FMT_S16;
+
+    if(mOutputSampleFormat == AV_SAMPLE_FMT_U8)
+        *type = SampleType_UInt8;
+    else if(mOutputSampleFormat == AV_SAMPLE_FMT_S16)
+        *type = SampleType_Int16;
+    else if(mOutputSampleFormat == AV_SAMPLE_FMT_FLT)
+        *type = SampleType_Float32;
 
     int64_t ch_layout = (*mStream)->codec->channel_layout;
 
-    if((*mStream)->codec->channel_layout == AV_CH_LAYOUT_MONO)
-        *chans = ChannelConfig_Mono;
-    else if((*mStream)->codec->channel_layout == AV_CH_LAYOUT_STEREO)
-        *chans = ChannelConfig_Stereo;
-    else if((*mStream)->codec->channel_layout == AV_CH_LAYOUT_QUAD)
-        *chans = ChannelConfig_Quad;
-    else if((*mStream)->codec->channel_layout == AV_CH_LAYOUT_5POINT1)
-        *chans = ChannelConfig_5point1;
-    else if((*mStream)->codec->channel_layout == AV_CH_LAYOUT_7POINT1)
-        *chans = ChannelConfig_7point1;
-    else if((*mStream)->codec->channel_layout == 0)
+    if(ch_layout == 0)
     {
         /* Unknown channel layout. Try to guess. */
         if((*mStream)->codec->channels == 1)
-        {
-            *chans = ChannelConfig_Mono;
             ch_layout = AV_CH_LAYOUT_MONO;
-        }
         else if((*mStream)->codec->channels == 2)
-        {
-            *chans = ChannelConfig_Stereo;
             ch_layout = AV_CH_LAYOUT_STEREO;
-        }
         else
         {
             std::stringstream sstr("Unsupported raw channel count: ");
@@ -333,6 +320,25 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
             fail(sstr.str());
         }
     }
+
+    mOutputChannelLayout = ch_layout;
+    if ((ch_layout == AV_CH_LAYOUT_5POINT1 || ch_layout == AV_CH_LAYOUT_7POINT1
+            || ch_layout == AV_CH_LAYOUT_QUAD) && !alIsExtensionPresent("AL_EXT_MCFORMATS"))
+        mOutputChannelLayout = AV_CH_LAYOUT_STEREO;
+    else if (ch_layout != AV_CH_LAYOUT_MONO
+             && ch_layout != AV_CH_LAYOUT_STEREO)
+        mOutputChannelLayout = AV_CH_LAYOUT_STEREO;
+
+    if(mOutputChannelLayout == AV_CH_LAYOUT_MONO)
+        *chans = ChannelConfig_Mono;
+    else if(mOutputChannelLayout == AV_CH_LAYOUT_STEREO)
+        *chans = ChannelConfig_Stereo;
+    else if(mOutputChannelLayout == AV_CH_LAYOUT_QUAD)
+        *chans = ChannelConfig_Quad;
+    else if(mOutputChannelLayout == AV_CH_LAYOUT_5POINT1)
+        *chans = ChannelConfig_5point1;
+    else if(mOutputChannelLayout == AV_CH_LAYOUT_7POINT1)
+        *chans = ChannelConfig_7point1;
     else
     {
         char str[1024];
@@ -343,17 +349,11 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
 
     *samplerate = (*mStream)->codec->sample_rate;
 
-    if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_U8P)
-        mOutputSampleFormat = AV_SAMPLE_FMT_U8;
-    else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_S16P)
-        mOutputSampleFormat = AV_SAMPLE_FMT_S16;
-    else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_FLTP)
-        mOutputSampleFormat = AV_SAMPLE_FMT_FLT;
-
-    if(mOutputSampleFormat != AV_SAMPLE_FMT_NONE)
+    if(mOutputSampleFormat != (*mStream)->codec->sample_fmt
+            || mOutputChannelLayout != ch_layout)
     {
         mSwr = swr_alloc_set_opts(mSwr,                   // SwrContext
-                          ch_layout,                      // output ch layout
+                          mOutputChannelLayout,           // output ch layout
                           mOutputSampleFormat,            // output sample format
                           (*mStream)->codec->sample_rate, // output sample rate
                           ch_layout,                      // input ch layout
@@ -383,7 +383,7 @@ void FFmpeg_Decoder::readAll(std::vector<char> &output)
 
     while(getAVAudioData())
     {
-        size_t got = mFrame->nb_samples * (*mStream)->codec->channels *
+        size_t got = mFrame->nb_samples * av_get_channel_layout_nb_channels(mOutputChannelLayout) *
                      av_get_bytes_per_sample(mOutputSampleFormat);
         const char *inbuf = reinterpret_cast<char*>(mFrameData[0]);
         output.insert(output.end(), inbuf, inbuf+got);
@@ -402,7 +402,7 @@ void FFmpeg_Decoder::rewind()
 
 size_t FFmpeg_Decoder::getSampleOffset()
 {
-    int delay = (mFrameSize-mFramePos) / (*mStream)->codec->channels /
+    int delay = (mFrameSize-mFramePos) / av_get_channel_layout_nb_channels(mOutputChannelLayout) /
                 av_get_bytes_per_sample(mOutputSampleFormat);
     return (int)(mNextPts*(*mStream)->codec->sample_rate) - delay;
 }
@@ -416,6 +416,7 @@ FFmpeg_Decoder::FFmpeg_Decoder()
   , mNextPts(0.0)
   , mSwr(0)
   , mOutputSampleFormat(AV_SAMPLE_FMT_NONE)
+  , mOutputChannelLayout(0)
   , mDataBuf(NULL)
   , mFrameData(NULL)
   , mDataBufLen(0)

@@ -6,6 +6,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "al.h"
+
 #include "sound_decoder.hpp"
 #include "sound.hpp"
 
@@ -64,20 +66,21 @@ namespace MWSound
 
         virtual void adjustAudioSettings(AVSampleFormat& sampleFormat, uint64_t& channelLayout, int& sampleRate)
         {
-            if (sampleFormat == AV_SAMPLE_FMT_U8P)
+            if (sampleFormat == AV_SAMPLE_FMT_U8P || sampleFormat == AV_SAMPLE_FMT_U8)
                 sampleFormat = AV_SAMPLE_FMT_U8;
-            else if (sampleFormat == AV_SAMPLE_FMT_S16P)
+            else if (sampleFormat == AV_SAMPLE_FMT_S16P || sampleFormat == AV_SAMPLE_FMT_S16)
                 sampleFormat = AV_SAMPLE_FMT_S16;
-            else if (sampleFormat == AV_SAMPLE_FMT_FLTP)
+            else if ((sampleFormat == AV_SAMPLE_FMT_FLTP || sampleFormat == AV_SAMPLE_FMT_FLT)
+                     && alIsExtensionPresent("AL_EXT_FLOAT32"))
                 sampleFormat = AV_SAMPLE_FMT_FLT;
             else
-                sampleFormat = AV_SAMPLE_FMT_FLT;
+                sampleFormat = AV_SAMPLE_FMT_S16;
 
-            if (channelLayout != AV_CH_LAYOUT_MONO
-                    && channelLayout != AV_CH_LAYOUT_5POINT1
-                    && channelLayout != AV_CH_LAYOUT_7POINT1
-                    && channelLayout != AV_CH_LAYOUT_STEREO
-                    && channelLayout != AV_CH_LAYOUT_QUAD)
+            if ((channelLayout == AV_CH_LAYOUT_5POINT1 || channelLayout == AV_CH_LAYOUT_7POINT1
+                    || channelLayout == AV_CH_LAYOUT_QUAD) && !alIsExtensionPresent("AL_EXT_MCFORMATS"))
+                channelLayout = AV_CH_LAYOUT_STEREO;
+            else if (channelLayout != AV_CH_LAYOUT_MONO
+                     && channelLayout != AV_CH_LAYOUT_STEREO)
                 channelLayout = AV_CH_LAYOUT_STEREO;
         }
 
