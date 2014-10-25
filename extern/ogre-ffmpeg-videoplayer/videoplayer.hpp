@@ -29,15 +29,28 @@ namespace Video
         bool hasAudioStream();
 
         /// Play the given video. If a video is already playing, the old video is closed first.
+        /// @note The video will be unpaused by default. Use the pause() and play() methods to control pausing.
         void playVideo (const std::string& resourceName);
 
+        /// Get the current playback time position in the video, in seconds
+        double getCurrentTime();
+
+        /// Get the duration of the video in seconds
+        double getDuration();
+
+        /// Seek to the specified time position in the video
+        void seek(double time);
+
+        void play();
+        void pause();
+        bool isPaused();
+
         /// This should be called every frame by the user to update the video texture.
-        void update();
+        /// @return Returns true if the video is still playing, false if we have reached the end of the video stream.
+        bool update();
 
         /// Stop the currently playing video, if a video is playing.
         void close();
-
-        bool isPlaying();
 
         /// Return the texture name of the currently playing video, or "" if no video is playing.
         std::string getTextureName();

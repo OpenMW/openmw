@@ -77,7 +77,8 @@ private:
      * skip (negative means to duplicate). */
     int synchronize_audio();
 
-    int audio_decode_frame(AVFrame *frame);
+    /// @param sample_skip If seeking happened, the sample_skip variable will be reset to 0.
+    int audio_decode_frame(AVFrame *frame, int &sample_skip);
 
 public:
     MovieAudioDecoder(VideoState *is);
@@ -101,6 +102,8 @@ public:
     virtual double getAudioClock();
 
     /// This is the main interface to be used by the user's audio library.
+    /// @par Request filling the \a stream with \a len number of bytes.
+    /// @return The number of bytes read (may not be the requested number if we arrived at the end of the audio stream)
     size_t read(char *stream, size_t len);
 };
 
