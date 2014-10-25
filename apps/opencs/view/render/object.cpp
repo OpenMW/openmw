@@ -33,8 +33,8 @@ void CSVRender::Object::clearSceneNode (Ogre::SceneNode *node)
 
 void CSVRender::Object::clear()
 {
-    if(!mObject.isNull())
-        CSVWorld::PhysicsSystem::instance()->removeObject(mBase->getName());
+    if(!mObject.isNull() && !mReferenceId.empty())
+        CSVWorld::PhysicsSystem::instance()->removeObject(mReferenceId);
 
     mObject.setNull();
 
