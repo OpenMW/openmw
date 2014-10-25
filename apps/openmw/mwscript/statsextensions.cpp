@@ -20,6 +20,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -416,8 +417,12 @@ namespace MWScript
                     MWBase::World *world = MWBase::Environment::get().getWorld();
                     MWWorld::Ptr player = world->getPlayerPtr();
 
-                    player.getClass().getNpcStats (player).setBounty(runtime[0].mFloat);
+                    int bounty = runtime[0].mFloat;
                     runtime.pop();
+                    player.getClass().getNpcStats (player).setBounty(bounty);
+
+                    if (bounty == 0)
+                        MWBase::Environment::get().getWorld()->getPlayer().recordCrimeId();
                 }
         };
 
