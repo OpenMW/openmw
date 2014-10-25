@@ -31,6 +31,13 @@ void VideoPlayer::playVideo(const std::string &resourceName)
         mState = new VideoState;
         mState->setAudioFactory(mAudioFactory.get());
         mState->init(resourceName);
+
+        // wait until we have the first picture
+        while (mState->video_st && mState->mTexture.isNull())
+        {
+            if (!mState->update())
+                break;
+        }
     }
     catch(std::exception& e) {
         std::cerr<< "Failed to play video: "<<e.what() <<std::endl;

@@ -207,14 +207,17 @@ void VideoState::video_display(VideoPicture *vp)
 {
     if((*this->video_st)->codec->width != 0 && (*this->video_st)->codec->height != 0)
     {
-
-        if(static_cast<int>(mTexture->getWidth()) != (*this->video_st)->codec->width ||
-           static_cast<int>(mTexture->getHeight()) != (*this->video_st)->codec->height)
+        if (mTexture.isNull())
         {
-            mTexture->unload();
-            mTexture->setWidth((*this->video_st)->codec->width);
-            mTexture->setHeight((*this->video_st)->codec->height);
-            mTexture->createInternalResources();
+            static int i = 0;
+            mTexture = Ogre::TextureManager::getSingleton().createManual(
+                            "ffmpeg/VideoTexture" + Ogre::StringConverter::toString(++i),
+                                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                    Ogre::TEX_TYPE_2D,
+                                    (*this->video_st)->codec->width, (*this->video_st)->codec->height,
+                                    0,
+                                    Ogre::PF_BYTE_RGBA,
+                                    Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
         }
         Ogre::PixelBox pb((*this->video_st)->codec->width, (*this->video_st)->codec->height, 1, Ogre::PF_BYTE_RGBA, &vp->data[0]);
         Ogre::HardwarePixelBufferSharedPtr buffer = mTexture->getBuffer();
@@ -657,24 +660,6 @@ void VideoState::init(const std::string& resourceName)
     if(video_index >= 0)
     {
         this->stream_open(video_index, this->format_ctx);
-
-        int width = (*this->video_st)->codec->width;
-        int height = (*this->video_st)->codec->height;
-        static int i = 0;
-        this->mTexture = Ogre::TextureManager::getSingleton().createManual(
-                        "ffmpeg/VideoTexture" + Ogre::StringConverter::toString(++i),
-                                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                Ogre::TEX_TYPE_2D,
-                                width, height,
-                                0,
-                                Ogre::PF_BYTE_RGBA,
-                                Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
-
-        // initialize to (0,0,0,0)
-        std::vector<Ogre::uint32> buffer;
-        buffer.resize(width * height, 0);
-        Ogre::PixelBox pb(width, height, 1, Ogre::PF_BYTE_RGBA, &buffer[0]);
-        this->mTexture->getBuffer()->blitFromMemory(pb);
     }
 
 
@@ -723,6 +708,12 @@ void VideoState::deinit()
             this->format_ctx->pb = NULL;
         }
         avformat_close_input(&this->format_ctx);
+    }
+
+    if (!mTexture.isNull())
+    {
+        Ogre::TextureManager::getSingleton().remove(mTexture->getName());
+        mTexture.setNull();
     }
 }
 
