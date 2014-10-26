@@ -5,39 +5,11 @@
 #include <OgreRay.h>
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
-#include <OgreManualObject.h>        // FIXME: debug cursor position
-#include <OgreEntity.h>              // FIXME: visual highlight, clone
-#include <OgreMaterialManager.h>     // FIXME: visual highlight, material
-#include <OgreHardwarePixelBuffer.h> // FIXME: visual highlight, texture
 
 #include <openengine/bullet/physic.hpp>
 #include <components/nifbullet/bulletnifloader.hpp>
 #include "../../model/settings/usersettings.hpp"
 #include "../render/elements.hpp"
-
-namespace
-{
-    // FIXME: this section should be removed once the debugging is completed
-    void showHitPoint(Ogre::SceneManager *sceneMgr, std::string name, Ogre::Vector3 point)
-    {
-        sceneMgr->destroyManualObject("manual" + name);
-        Ogre::ManualObject* manual = sceneMgr->createManualObject("manual" + name);
-        manual->begin("BaseWhite", Ogre::RenderOperation::OT_LINE_LIST);
-        manual-> position(point.x,     point.y,     point.z-100);
-        manual-> position(point.x,     point.y,     point.z+100);
-        manual-> position(point.x,     point.y-100, point.z);
-        manual-> position(point.x,     point.y+100, point.z);
-        manual-> position(point.x-100, point.y,     point.z);
-        manual-> position(point.x+100, point.y,     point.z);
-        manual->end();
-        sceneMgr->getRootSceneNode()->createChildSceneNode()->attachObject(manual);
-    }
-
-    void removeHitPoint(Ogre::SceneManager *sceneMgr, std::string name)
-    {
-        sceneMgr->destroyManualObject("manual" + name);
-    }
-}
 
 namespace CSVWorld
 {
@@ -55,15 +27,6 @@ namespace CSVWorld
 
     PhysicsSystem::~PhysicsSystem()
     {
-        std::map<std::string, std::vector<std::string> >::iterator iter = mSelectedEntities.begin();
-        for(;iter != mSelectedEntities.end(); ++iter)
-        {
-            removeHitPoint(mSceneMgr, iter->first);
-            Ogre::SceneNode *scene = mSceneMgr->getSceneNode(iter->first);
-            scene->removeAndDestroyAllChildren();
-            mSceneMgr->destroySceneNode(iter->first);
-        }
-
         delete mEngine;
     }
 
@@ -134,25 +97,20 @@ namespace CSVWorld
                                 mEngine->rayTest(_from, _to, !ignoreObjects, ignoreHeightMap, &norm);
 
         if(result.first == "")
-            return std::make_pair("", Ogre::Vector3(0,0,0)); // rayTest found nothing
+            return std::make_pair("", Ogre::Vector3(0,0,0));
+        else
+            return std::make_pair(result.first, ray.getPoint(farClipDist*result.second));
+    }
 
-        Ogre::Vector3 position = ray.getPoint(farClipDist*result.second);
-        std::string sceneNode = mRefToSceneNode[result.first];
-        if(!ignoreObjects && mSceneMgr->hasSceneNode(sceneNode))
-        {
-            if(userSettings.setting("debug/mouse-picking", QString("false")) == "true" ? true : false)
-                updateSelectionHighlight(sceneNode, position);
-        }
-        // else terrain
-        return std::make_pair(result.first, position);
+    std::string PhysicsSystem::referenceToSceneNode(std::string reference)
+    {
+        return mRefToSceneNode[reference];
     }
 
     void PhysicsSystem::setSceneManager(Ogre::SceneManager *sceneMgr)
     {
         mSceneMgr = sceneMgr;
         mEngine->setSceneManager(sceneMgr); // needed for toggleDebugRendering()
-
-        initDebug();
     }
 
     void PhysicsSystem::toggleDebugRendering()
@@ -169,128 +127,5 @@ namespace CSVWorld
 
         mEngine->toggleDebugRendering();
         mEngine->stepSimulation(0.0167); // DebugDrawer::step() not directly accessible
-    }
-
-    void PhysicsSystem::initDebug()
-    {
-        // material for visual cue on selected objects
-        Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().getByName("DynamicTrans");
-        if(texture.isNull())
-        {
-            texture = Ogre::TextureManager::getSingleton().createManual(
-                "DynamicTrans", // name
-                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                Ogre::TEX_TYPE_2D,  // type
-                8, 8,               // width & height
-                0,                  // number of mipmaps
-                Ogre::PF_BYTE_BGRA, // pixel format
-                Ogre::TU_DEFAULT);  // usage; should be TU_DYNAMIC_WRITE_ONLY_DISCARDABLE for
-                                    // textures updated very often (e.g. each frame)
-
-            Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
-            pixelBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
-            const Ogre::PixelBox& pixelBox = pixelBuffer->getCurrentLock();
-
-            uint8_t* pDest = static_cast<uint8_t*>(pixelBox.data);
-
-            // Fill in some pixel data. This will give a semi-transparent colour,
-            // but this is of course dependent on the chosen pixel format.
-            for (size_t j = 0; j < 8; j++)
-            {
-                for(size_t i = 0; i < 8; i++)
-                {
-                    *pDest++ = 255; // B
-                    *pDest++ = 255; // G
-                    *pDest++ = 127; // R
-                    *pDest++ =  63; // A
-                }
-
-                pDest += pixelBox.getRowSkip() * Ogre::PixelUtil::getNumElemBytes(pixelBox.format);
-            }
-            pixelBuffer->unlock();
-        }
-        Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().getByName(
-                    "TransMaterial");
-        if(material.isNull())
-        {
-            Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
-                        "TransMaterial",
-                        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true );
-            Ogre::Pass *pass = material->getTechnique( 0 )->getPass( 0 );
-            pass->setLightingEnabled( false );
-            pass->setDepthWriteEnabled( false );
-            pass->setSceneBlending( Ogre::SBT_TRANSPARENT_ALPHA );
-
-            Ogre::TextureUnitState *tex = pass->createTextureUnitState("CustomState", 0);
-            tex->setTextureName("DynamicTrans");
-            tex->setTextureFiltering( Ogre::TFO_ANISOTROPIC );
-            material->load();
-        }
-    }
-
-    void PhysicsSystem::updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position)
-    {
-        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-        bool debugCursor = userSettings.setting(
-                    "debug/mouse-position", QString("false")) == "true" ? true : false;
-
-        //TODO: Try http://www.ogre3d.org/tikiwiki/Create+outline+around+a+character
-        Ogre::SceneNode *scene = mSceneMgr->getSceneNode(sceneNode);
-        std::map<std::string, std::vector<std::string> >::iterator iter =
-                                                mSelectedEntities.find(sceneNode);
-        if(iter != mSelectedEntities.end()) // currently selected
-        {
-            std::vector<std::string> clonedEntities = mSelectedEntities[sceneNode];
-            while(!clonedEntities.empty())
-            {
-                if(mSceneMgr->hasEntity(clonedEntities.back()))
-                {
-                    scene->detachObject(clonedEntities.back());
-                    mSceneMgr->destroyEntity(clonedEntities.back());
-                }
-                clonedEntities.pop_back();
-            }
-            mSelectedEntities.erase(iter);
-
-            if(debugCursor)
-                removeHitPoint(mSceneMgr, sceneNode);
-        }
-        else
-        {
-            std::vector<std::string> clonedEntities;
-            Ogre::SceneNode::ObjectIterator iter = scene->getAttachedObjectIterator();
-            iter.begin();
-            while(iter.hasMoreElements())
-            {
-                Ogre::MovableObject * element = iter.getNext();
-                if(!element)
-                    break;
-
-                if(element->getMovableType() != "Entity")
-                    continue;
-
-                Ogre::Entity * entity = dynamic_cast<Ogre::Entity *>(element);
-                if(mSceneMgr->hasEntity(entity->getName()+"cover"))
-                {
-                    // FIXME: this shouldn't really happen... but does :(
-                    scene->detachObject(entity->getName()+"cover");
-                    mSceneMgr->destroyEntity(entity->getName()+"cover");
-                }
-                Ogre::Entity * clone = entity->clone(entity->getName()+"cover");
-
-                Ogre::MaterialPtr mat =
-                    Ogre::MaterialManager::getSingleton().getByName("TransMaterial");
-                if(!mat.isNull())
-                {
-                    clone->setMaterial(mat);
-                    scene->attachObject(clone);
-                    clonedEntities.push_back(entity->getName()+"cover");
-                }
-            }
-            mSelectedEntities[sceneNode] = clonedEntities;
-
-            if(debugCursor)
-                showHitPoint(mSceneMgr, sceneNode, position);
-        }
     }
 }

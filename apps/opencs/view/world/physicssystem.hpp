@@ -30,7 +30,6 @@ namespace CSVWorld
             OEngine::Physic::PhysicEngine* mEngine;
 
             Ogre::SceneManager *mSceneMgr;
-            std::map<std::string, std::vector<std::string> > mSelectedEntities;
 
         public:
 
@@ -57,6 +56,8 @@ namespace CSVWorld
 
             std::pair<std::string, Ogre::Vector3> castRay(float mouseX, float mouseY,
                             Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera);
+
+            std::string referenceToSceneNode(std::string reference);
 
         private:
 

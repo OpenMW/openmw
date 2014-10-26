@@ -13,6 +13,10 @@
 #include <OgreRoot.h>
 #include <OgreSceneQuery.h>
 
+#include <OgreEntity.h>              // FIXME: visual highlight, clone
+#include <OgreMaterialManager.h>     // FIXME: visual highlight, material
+#include <OgreHardwarePixelBuffer.h> // FIXME: visual highlight, texture
+
 #include <components/esm/loadland.hpp>
 #include "textoverlay.hpp"
 #include "overlaymask.hpp"
@@ -25,6 +29,89 @@
 #include "../world/physicssystem.hpp"
 
 #include "elements.hpp"
+
+namespace
+{
+    // FIXME: this section should be removed once the debugging is completed
+    void showHitPoint(Ogre::SceneManager *sceneMgr, std::string name, Ogre::Vector3 point)
+    {
+        if(sceneMgr->hasManualObject("manual" + name))
+            sceneMgr->destroyManualObject("manual" + name);
+        Ogre::ManualObject* manual = sceneMgr->createManualObject("manual" + name);
+        manual->begin("BaseWhite", Ogre::RenderOperation::OT_LINE_LIST);
+        manual-> position(point.x,     point.y,     point.z-100);
+        manual-> position(point.x,     point.y,     point.z+100);
+        manual-> position(point.x,     point.y-100, point.z);
+        manual-> position(point.x,     point.y+100, point.z);
+        manual-> position(point.x-100, point.y,     point.z);
+        manual-> position(point.x+100, point.y,     point.z);
+        manual->end();
+        sceneMgr->getRootSceneNode()->createChildSceneNode()->attachObject(manual);
+    }
+
+    void removeHitPoint(Ogre::SceneManager *sceneMgr, std::string name)
+    {
+        if(sceneMgr->hasManualObject("manual" + name))
+            sceneMgr->destroyManualObject("manual" + name);
+    }
+
+    void initDebug()
+    {
+        // material for visual cue on selected objects
+        Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().getByName("DynamicTrans");
+        if(texture.isNull())
+        {
+            texture = Ogre::TextureManager::getSingleton().createManual(
+                "DynamicTrans", // name
+                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                Ogre::TEX_TYPE_2D,  // type
+                8, 8,               // width & height
+                0,                  // number of mipmaps
+                Ogre::PF_BYTE_BGRA, // pixel format
+                Ogre::TU_DEFAULT);  // usage; should be TU_DYNAMIC_WRITE_ONLY_DISCARDABLE for
+                                    // textures updated very often (e.g. each frame)
+
+            Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
+            pixelBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
+            const Ogre::PixelBox& pixelBox = pixelBuffer->getCurrentLock();
+
+            uint8_t* pDest = static_cast<uint8_t*>(pixelBox.data);
+
+            // Fill in some pixel data. This will give a semi-transparent colour,
+            // but this is of course dependent on the chosen pixel format.
+            for (size_t j = 0; j < 8; j++)
+            {
+                for(size_t i = 0; i < 8; i++)
+                {
+                    *pDest++ = 255; // B
+                    *pDest++ = 255; // G
+                    *pDest++ = 127; // R
+                    *pDest++ =  63; // A
+                }
+
+                pDest += pixelBox.getRowSkip() * Ogre::PixelUtil::getNumElemBytes(pixelBox.format);
+            }
+            pixelBuffer->unlock();
+        }
+        Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().getByName(
+                    "TransMaterial");
+        if(material.isNull())
+        {
+            Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
+                        "TransMaterial",
+                        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true );
+            Ogre::Pass *pass = material->getTechnique( 0 )->getPass( 0 );
+            pass->setLightingEnabled( false );
+            pass->setDepthWriteEnabled( false );
+            pass->setSceneBlending( Ogre::SBT_TRANSPARENT_ALPHA );
+
+            Ogre::TextureUnitState *tex = pass->createTextureUnitState("CustomState", 0);
+            tex->setTextureName("DynamicTrans");
+            tex->setTextureFiltering( Ogre::TFO_ANISOTROPIC );
+            material->load();
+        }
+    }
+}
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
@@ -189,66 +276,11 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 
         // mouse picking
         // FIXME: need to virtualise mouse buttons
-        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-        bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
-        if(!debug || !getCamera()->getViewport())
+        if(!getCamera()->getViewport())
             return;
 
-        int viewportWidth = getCamera()->getViewport()->getActualWidth();
-        int viewportHeight = getCamera()->getViewport()->getActualHeight();
-
-        float mouseX = (float) event->x()/viewportWidth;
-        float mouseY = (float) event->y()/viewportHeight;
-
-        // Need to set scene manager each time in case there are multiple subviews
-        CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
-        std::pair<std::string, Ogre::Vector3> result = CSVWorld::PhysicsSystem::instance()->castRay(
-                                                    mouseX, mouseY, NULL, NULL, getCamera());
-        if(result.first != "")
-        {
-            // FIXME: is there  a better way to distinguish terrain from objects?
-            QString name  = QString(result.first.c_str());
-            if(name.contains(QRegExp("^HeightField")))
-            {
-                // terrain
-                std::cout << "terrain: " << result.first << std::endl;
-                std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
-                        + ", " + QString::number(result.second.y).toStdString()
-                        + ", " + QString::number(result.second.z).toStdString()
-                        << std::endl;
-
-            }
-            else
-            {
-                std::cout << "ReferenceId: " << result.first << std::endl;
-                const CSMWorld::CellRef& cellref = mDocument.getData().getReferences().getRecord (result.first).get();
-                //std::cout << "CellRef.mId: " << cellref.mId << std::endl; // Same as ReferenceId
-                std::cout << "  CellRef.mCell: " << cellref.mCell << std::endl;
-
-                const CSMWorld::RefCollection& references = mDocument.getData().getReferences();
-                int index = references.searchId(result.first);
-                if (index != -1)
-                {
-                    int columnIndex =
-                        references.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId);
-
-                    std::cout << "  index: " + QString::number(index).toStdString()
-                            +", column index: " + QString::number(columnIndex).toStdString() << std::endl;
-                }
-
-                std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
-                while (iter!=mCells.end())
-                {
-                    if(iter->first.getId("dummy") == cellref.mCell)
-                    {
-                        //std::cout << "Cell found" << std::endl;
-                        break;
-                    }
-                    ++iter;
-                }
-                flagAsModified();
-            }
-        }
+        debugMousePicking((float) event->x() / getCamera()->getViewport()->getActualWidth(),
+                          (float) event->y() / getCamera()->getViewport()->getActualHeight());
     }
 }
 
@@ -259,17 +291,16 @@ void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event
         std::cout << "double clicked" << std::endl;
 
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-        bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
-        if(!debug)
-            return;
-
-        // FIXME: OEngine::PhysicEngine creates only one child scene node for the
-        // debug drawer.  Hence only the first subview that creates the debug drawer
-        // can view the debug lines.  Will need to keep a map in OEngine if multiple
-        // subviews are to be supported.
-        //CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
-        CSVWorld::PhysicsSystem::instance()->toggleDebugRendering();
-        flagAsModified();
+        if(userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false)
+        {
+            // FIXME: OEngine::PhysicEngine creates only one child scene node for the
+            // debug drawer.  Hence only the first subview that creates the debug drawer
+            // can view the debug lines.  Will need to keep a map in OEngine if multiple
+            // subviews are to be supported.
+            //CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
+            CSVWorld::PhysicsSystem::instance()->toggleDebugRendering();
+            flagAsModified();
+        }
     }
 }
 
@@ -385,6 +416,8 @@ CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc
         this, SLOT (cellRemoved (const QModelIndex&, int, int)));
     connect (cells, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (cellAdded (const QModelIndex&, int, int)));
+
+        initDebug();
 }
 
 CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
@@ -405,6 +438,19 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
 
     removeRenderTargetListener(mOverlayMask);
     delete mOverlayMask;
+
+    // For debugging only
+    std::map<std::string, std::vector<std::string> >::iterator iter = mSelectedEntities.begin();
+    for(;iter != mSelectedEntities.end(); ++iter)
+    {
+        removeHitPoint(getSceneManager(), iter->first);
+        Ogre::SceneNode *scene = getSceneManager()->getSceneNode(iter->first);
+        if(scene)
+        {
+            scene->removeAndDestroyAllChildren();
+            getSceneManager()->destroySceneNode(iter->first);
+        }
+    }
 }
 
 void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
@@ -554,4 +600,139 @@ void CSVRender::PagedWorldspaceWidget::cellAdded (const QModelIndex& index, int 
     /// \todo check if no selected cell is affected and do not update, if that is the case
     if (adjustCells())
         flagAsModified();
+}
+
+
+void CSVRender::PagedWorldspaceWidget::debugMousePicking(float mouseX, float mouseY)
+{
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
+
+    // Need to set scene manager each time in case there are multiple subviews
+    CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
+    std::pair<std::string, Ogre::Vector3> result = CSVWorld::PhysicsSystem::instance()->castRay(
+                                                mouseX, mouseY, NULL, NULL, getCamera());
+    if(debug && result.first != "")
+    {
+        // FIXME: is there  a better way to distinguish terrain from objects?
+        QString name  = QString(result.first.c_str());
+        if(name.contains(QRegExp("^HeightField")))
+        {
+            // terrain
+            std::cout << "terrain: " << result.first << std::endl;
+            std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
+                    + ", " + QString::number(result.second.y).toStdString()
+                    + ", " + QString::number(result.second.z).toStdString()
+                    << std::endl;
+        }
+        else
+        {
+            std::string sceneNode =
+                CSVWorld::PhysicsSystem::instance()->referenceToSceneNode(result.first);
+
+            uint32_t visibilityMask = getCamera()->getViewport()->getVisibilityMask();
+            bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
+
+            if(!ignoreObjects && getSceneManager()->hasSceneNode(sceneNode))
+            {
+                if(userSettings.setting("debug/mouse-picking", QString("false")) == "true" ? true : false)
+                    updateSelectionHighlight(sceneNode, result.second);
+            }
+
+            std::cout << "ReferenceId: " << result.first << std::endl;
+            const CSMWorld::CellRef& cellref = mDocument.getData().getReferences().getRecord (result.first).get();
+            //std::cout << "CellRef.mId: " << cellref.mId << std::endl; // Same as ReferenceId
+            std::cout << "  CellRef.mCell: " << cellref.mCell << std::endl;
+
+            const CSMWorld::RefCollection& references = mDocument.getData().getReferences();
+            int index = references.searchId(result.first);
+            if (index != -1)
+            {
+                int columnIndex =
+                    references.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId);
+
+                std::cout << "  index: " + QString::number(index).toStdString()
+                        +", column index: " + QString::number(columnIndex).toStdString() << std::endl;
+            }
+
+            std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+            while (iter!=mCells.end())
+            {
+                if(iter->first.getId("dummy") == cellref.mCell)
+                {
+                    //std::cout << "Cell found" << std::endl;
+                    break;
+                }
+                ++iter;
+            }
+            flagAsModified();
+        }
+    }
+}
+
+// FIXME: for debugging only
+void CSVRender::PagedWorldspaceWidget::updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position)
+{
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    bool debugCursor = userSettings.setting(
+                "debug/mouse-position", QString("false")) == "true" ? true : false;
+
+    //TODO: Try http://www.ogre3d.org/tikiwiki/Create+outline+around+a+character
+    Ogre::SceneNode *scene = getSceneManager()->getSceneNode(sceneNode);
+    std::map<std::string, std::vector<std::string> >::iterator iter =
+                                            mSelectedEntities.find(sceneNode);
+    if(iter != mSelectedEntities.end()) // currently selected
+    {
+        std::vector<std::string> clonedEntities = mSelectedEntities[sceneNode];
+        while(!clonedEntities.empty())
+        {
+            if(getSceneManager()->hasEntity(clonedEntities.back()))
+            {
+                scene->detachObject(clonedEntities.back());
+                getSceneManager()->destroyEntity(clonedEntities.back());
+            }
+            clonedEntities.pop_back();
+        }
+        mSelectedEntities.erase(iter);
+
+        if(debugCursor)
+            removeHitPoint(getSceneManager(), sceneNode);
+    }
+    else
+    {
+        std::vector<std::string> clonedEntities;
+        Ogre::SceneNode::ObjectIterator iter = scene->getAttachedObjectIterator();
+        iter.begin();
+        while(iter.hasMoreElements())
+        {
+            Ogre::MovableObject * element = iter.getNext();
+            if(!element)
+                break;
+
+            if(element->getMovableType() != "Entity")
+                continue;
+
+            Ogre::Entity * entity = dynamic_cast<Ogre::Entity *>(element);
+            if(getSceneManager()->hasEntity(entity->getName()+"cover"))
+            {
+                // FIXME: this shouldn't really happen... but does :(
+                scene->detachObject(entity->getName()+"cover");
+                getSceneManager()->destroyEntity(entity->getName()+"cover");
+            }
+            Ogre::Entity * clone = entity->clone(entity->getName()+"cover");
+
+            Ogre::MaterialPtr mat =
+                Ogre::MaterialManager::getSingleton().getByName("TransMaterial");
+            if(!mat.isNull())
+            {
+                clone->setMaterial(mat);
+                scene->attachObject(clone);
+                clonedEntities.push_back(entity->getName()+"cover");
+            }
+        }
+        mSelectedEntities[sceneNode] = clonedEntities;
+
+        if(debugCursor)
+            showHitPoint(getSceneManager(), sceneNode, position);
+    }
 }
