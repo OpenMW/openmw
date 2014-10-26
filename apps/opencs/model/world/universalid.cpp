@@ -131,6 +131,7 @@ namespace
 }
 
 CSMWorld::UniversalId::UniversalId (const std::string& universalId)
+: mIndex(0)
 {
     std::string::size_type index = universalId.find (':');
 
