@@ -28,6 +28,7 @@ namespace CSVWorld
             static PhysicsSystem *mPhysicsSystemInstance;
             std::map<std::string, std::string> mRefToSceneNode;
             OEngine::Physic::PhysicEngine* mEngine;
+
             Ogre::SceneManager *mSceneMgr;
             std::map<std::string, std::vector<std::string> > mSelectedEntities;
 
@@ -40,18 +41,15 @@ namespace CSVWorld
 
             void setSceneManager(Ogre::SceneManager *sceneMgr);
 
-            void addObject(const std::string &mesh,
-                           const std::string &name,
-                           const std::string &referenceId,
-                           float scale,
-                           const Ogre::Vector3 &position,
-                           const Ogre::Quaternion &rotation,
-                           bool placeable=false);
+            void addObject(const std::string &mesh, const std::string &name,
+                            const std::string &referenceId, float scale,
+                            const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
+                            bool placeable=false);
 
             void removeObject(const std::string &name);
 
             void addHeightField(float* heights, int x, int y, float yoffset,
-                                float triSize, float sqrtVerts);
+                            float triSize, float sqrtVerts);
 
             void removeHeightField(int x, int y);
 
@@ -59,6 +57,11 @@ namespace CSVWorld
 
             std::pair<std::string, Ogre::Vector3> castRay(float mouseX, float mouseY,
                             Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera);
+
+        private:
+
+            void initDebug();
+            void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);
     };
 }
 

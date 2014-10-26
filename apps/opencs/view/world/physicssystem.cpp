@@ -1,11 +1,11 @@
 #include "physicssystem.hpp"
 
-#include <iostream> // FIXME: debug only
+#include <iostream>
 
 #include <OgreRay.h>
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
-#include <OgreManualObject.h> // FIXME: debug cursor position
+#include <OgreManualObject.h>        // FIXME: debug cursor position
 #include <OgreEntity.h>              // FIXME: visual highlight, clone
 #include <OgreMaterialManager.h>     // FIXME: visual highlight, material
 #include <OgreHardwarePixelBuffer.h> // FIXME: visual highlight, texture
@@ -17,6 +17,7 @@
 
 namespace
 {
+    // FIXME: this section should be removed once the debugging is completed
     void showHitPoint(Ogre::SceneManager *sceneMgr, std::string name, Ogre::Vector3 point)
     {
         sceneMgr->destroyManualObject("manual" + name);
@@ -73,12 +74,8 @@ namespace CSVWorld
     }
 
     void PhysicsSystem::addObject(const std::string &mesh,
-                                  const std::string &name,
-                                  const std::string &referenceId,
-                                  float scale,
-                                  const Ogre::Vector3 &position,
-                                  const Ogre::Quaternion &rotation,
-                                  bool placeable)
+            const std::string &name, const std::string &referenceId, float scale,
+            const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, bool placeable)
     {
         mRefToSceneNode[referenceId] = name;
 
@@ -89,12 +86,93 @@ namespace CSVWorld
                                           placeable);
     }
 
+    void PhysicsSystem::removeObject(const std::string& name)
+    {
+        mEngine->removeRigidBody(name);
+        mEngine->deleteRigidBody(name);
+    }
+
+    void PhysicsSystem::addHeightField(float* heights, int x, int y, float yoffset,
+                                       float triSize, float sqrtVerts)
+    {
+        mEngine->addHeightField(heights, x, y, yoffset, triSize, sqrtVerts);
+    }
+
+    void PhysicsSystem::removeHeightField(int x, int y)
+    {
+        mEngine->removeHeightField(x, y);
+    }
+
+    std::pair<std::string, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY,
+                            Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera)
+    {
+        if(!mSceneMgr || !camera || !camera->getViewport())
+            return std::make_pair("", Ogre::Vector3(0,0,0)); // FIXME: this should be an exception
+
+
+        // using a really small value seems to mess up with the projections
+        float nearClipDistance = camera->getNearClipDistance(); // save existing
+        camera->setNearClipDistance(10.0f);  // arbitrary number
+        Ogre::Ray ray = camera->getCameraToViewportRay(mouseX, mouseY);
+        camera->setNearClipDistance(nearClipDistance); // restore
+
+        Ogre::Vector3 from = ray.getOrigin();
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+        float farClipDist = userSettings.setting("Scene/far clip distance", QString("300000")).toFloat();
+        Ogre::Vector3 to = ray.getPoint(farClipDist);
+
+        btVector3 _from, _to;
+        _from = btVector3(from.x, from.y, from.z);
+        _to = btVector3(to.x, to.y, to.z);
+
+        uint32_t visibilityMask = camera->getViewport()->getVisibilityMask();
+        bool ignoreHeightMap = !(visibilityMask & (uint32_t)CSVRender::Element_Terrain);
+        bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
+
+        Ogre::Vector3 norm;
+        std::pair<std::string, float> result =
+                                mEngine->rayTest(_from, _to, !ignoreObjects, ignoreHeightMap, &norm);
+
+        if(result.first == "")
+            return std::make_pair("", Ogre::Vector3(0,0,0)); // rayTest found nothing
+
+        Ogre::Vector3 position = ray.getPoint(farClipDist*result.second);
+        std::string sceneNode = mRefToSceneNode[result.first];
+        if(!ignoreObjects && mSceneMgr->hasSceneNode(sceneNode))
+        {
+            if(userSettings.setting("debug/mouse-picking", QString("false")) == "true" ? true : false)
+                updateSelectionHighlight(sceneNode, position);
+        }
+        // else terrain
+        return std::make_pair(result.first, position);
+    }
+
     void PhysicsSystem::setSceneManager(Ogre::SceneManager *sceneMgr)
     {
         mSceneMgr = sceneMgr;
-
         mEngine->setSceneManager(sceneMgr); // needed for toggleDebugRendering()
 
+        initDebug();
+    }
+
+    void PhysicsSystem::toggleDebugRendering()
+    {
+        if(!mSceneMgr)
+            return; // FIXME: maybe this should be an exception
+
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+        if(!(userSettings.setting("debug/mouse-picking", QString("false")) == "true" ? true : false))
+        {
+            std::cerr << "Turn on mouse-picking debug option to see collision shapes." << std::endl;
+            return;
+        }
+
+        mEngine->toggleDebugRendering();
+        mEngine->stepSimulation(0.0167); // DebugDrawer::step() not directly accessible
+    }
+
+    void PhysicsSystem::initDebug()
+    {
         // material for visual cue on selected objects
         Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().getByName("DynamicTrans");
         if(texture.isNull())
@@ -150,141 +228,69 @@ namespace CSVWorld
         }
     }
 
-    void PhysicsSystem::removeObject(const std::string& name)
-    {
-        mEngine->removeRigidBody(name);
-        mEngine->deleteRigidBody(name);
-    }
-
-    void PhysicsSystem::addHeightField(float* heights, int x, int y, float yoffset,
-                                       float triSize, float sqrtVerts)
-    {
-        mEngine->addHeightField(heights, x, y, yoffset, triSize, sqrtVerts);
-    }
-
-    void PhysicsSystem::removeHeightField(int x, int y)
-    {
-        mEngine->removeHeightField(x, y);
-    }
-
-    void PhysicsSystem::toggleDebugRendering()
+    void PhysicsSystem::updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position)
     {
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-        bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
-        if(!mSceneMgr || !debug)
-            return; // FIXME: add a warning message
+        bool debugCursor = userSettings.setting(
+                    "debug/mouse-position", QString("false")) == "true" ? true : false;
 
-        mEngine->toggleDebugRendering();
-        mEngine->stepSimulation(0.0167); // DebugDrawer::step() not directly accessible
-    }
-
-    // FIXME: this method needs a cleanup/refactoring
-    std::pair<std::string, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY,
-                            Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera)
-    {
-        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-        bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
-        if(!mSceneMgr || !camera || !camera->getViewport())
-            return std::make_pair("", Ogre::Vector3(0,0,0)); // FIXME: add a warning message
-
-        // using a really small value seems to mess up with the projections
-        float nearClipDistance = camera->getNearClipDistance();
-        camera->setNearClipDistance(10.0f);  // arbitrary number
-        Ogre::Ray ray = camera->getCameraToViewportRay(mouseX, mouseY);
-        camera->setNearClipDistance(nearClipDistance);
-
-        Ogre::Vector3 from = ray.getOrigin();
-        float farClipDist = userSettings.setting("Scene/far clip distance", QString("300000")).toFloat();
-        Ogre::Vector3 to = ray.getPoint(farClipDist);
-
-        btVector3 _from, _to;
-        _from = btVector3(from.x, from.y, from.z);
-        _to = btVector3(to.x, to.y, to.z);
-
-        uint32_t visibilityMask = camera->getViewport()->getVisibilityMask();
-        bool ignoreHeightMap = !(visibilityMask & (uint32_t)CSVRender::Element_Terrain);
-        bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
-
-        Ogre::Vector3 norm;
-        std::pair<std::string, float> result =
-                                mEngine->rayTest(_from, _to, !ignoreObjects, ignoreHeightMap, &norm);
-
-        if(result.first == "")
-            return std::make_pair("", Ogre::Vector3(0,0,0));
-
-        std::string sceneNode = mRefToSceneNode[result.first];
-        if(!ignoreObjects && mSceneMgr->hasSceneNode(sceneNode))
+        //TODO: Try http://www.ogre3d.org/tikiwiki/Create+outline+around+a+character
+        Ogre::SceneNode *scene = mSceneMgr->getSceneNode(sceneNode);
+        std::map<std::string, std::vector<std::string> >::iterator iter =
+                                                mSelectedEntities.find(sceneNode);
+        if(iter != mSelectedEntities.end()) // currently selected
         {
-            //TODO: Try http://www.ogre3d.org/tikiwiki/Create+outline+around+a+character
-            Ogre::SceneNode *scene = mSceneMgr->getSceneNode(sceneNode);
-            std::map<std::string, std::vector<std::string> >::iterator iter =
-                                                    mSelectedEntities.find(sceneNode);
-            if(debug && iter != mSelectedEntities.end()) // currently selected
+            std::vector<std::string> clonedEntities = mSelectedEntities[sceneNode];
+            while(!clonedEntities.empty())
             {
-                std::vector<std::string> clonedEntities = mSelectedEntities[sceneNode];
-                while(!clonedEntities.empty())
+                if(mSceneMgr->hasEntity(clonedEntities.back()))
                 {
-                    if(mSceneMgr->hasEntity(clonedEntities.back()))
-                    {
-                        scene->detachObject(clonedEntities.back());
-                        mSceneMgr->destroyEntity(clonedEntities.back());
-                    }
-                    clonedEntities.pop_back();
+                    scene->detachObject(clonedEntities.back());
+                    mSceneMgr->destroyEntity(clonedEntities.back());
                 }
-                mSelectedEntities.erase(iter);
-
-                bool debugCursor = userSettings.setting (
-                        "debug/mouse-position", QString("false")) == "true" ? true : false;
-                if(debugCursor) // FIXME: show cursor position for debugging
-                    removeHitPoint(mSceneMgr, sceneNode);
+                clonedEntities.pop_back();
             }
-            else if(debug)
-            {
-                std::vector<std::string> clonedEntities;
-                Ogre::SceneNode::ObjectIterator iter = scene->getAttachedObjectIterator();
-                iter.begin();
-                while(iter.hasMoreElements())
-                {
-                    Ogre::MovableObject * element = iter.getNext();
-                    if(!element)
-                        break;
+            mSelectedEntities.erase(iter);
 
-                    if(element->getMovableType() != "Entity")
-                        continue;
-
-                    Ogre::Entity * entity = dynamic_cast<Ogre::Entity *>(element);
-                    if(mSceneMgr->hasEntity(entity->getName()+"cover"))
-                    {
-                        // FIXME: this shouldn't really happen... but does :(
-                        scene->detachObject(entity->getName()+"cover");
-                        mSceneMgr->destroyEntity(entity->getName()+"cover");
-                    }
-                    Ogre::Entity * clone = entity->clone(entity->getName()+"cover");
-
-                    Ogre::MaterialPtr mat =
-                        Ogre::MaterialManager::getSingleton().getByName("TransMaterial");
-                    if(!mat.isNull())
-                    {
-                        clone->setMaterial(mat);
-                        scene->attachObject(clone);
-                        clonedEntities.push_back(entity->getName()+"cover");
-                    }
-
-                }
-                mSelectedEntities[sceneNode] = clonedEntities;
-
-                bool debugCursor = userSettings.setting (
-                        "debug/mouse-position", QString("false")) == "true" ? true : false;
-                if(debugCursor) // FIXME: show cursor position for debugging
-                showHitPoint(mSceneMgr, sceneNode, ray.getPoint(farClipDist*result.second));
-            }
-
-            return std::make_pair(result.first, ray.getPoint(farClipDist*result.second));
+            if(debugCursor)
+                removeHitPoint(mSceneMgr, sceneNode);
         }
         else
         {
-            // terrain
-            return std::make_pair(result.first, ray.getPoint(farClipDist*result.second));
+            std::vector<std::string> clonedEntities;
+            Ogre::SceneNode::ObjectIterator iter = scene->getAttachedObjectIterator();
+            iter.begin();
+            while(iter.hasMoreElements())
+            {
+                Ogre::MovableObject * element = iter.getNext();
+                if(!element)
+                    break;
+
+                if(element->getMovableType() != "Entity")
+                    continue;
+
+                Ogre::Entity * entity = dynamic_cast<Ogre::Entity *>(element);
+                if(mSceneMgr->hasEntity(entity->getName()+"cover"))
+                {
+                    // FIXME: this shouldn't really happen... but does :(
+                    scene->detachObject(entity->getName()+"cover");
+                    mSceneMgr->destroyEntity(entity->getName()+"cover");
+                }
+                Ogre::Entity * clone = entity->clone(entity->getName()+"cover");
+
+                Ogre::MaterialPtr mat =
+                    Ogre::MaterialManager::getSingleton().getByName("TransMaterial");
+                if(!mat.isNull())
+                {
+                    clone->setMaterial(mat);
+                    scene->attachObject(clone);
+                    clonedEntities.push_back(entity->getName()+"cover");
+                }
+            }
+            mSelectedEntities[sceneNode] = clonedEntities;
+
+            if(debugCursor)
+                showHitPoint(mSceneMgr, sceneNode, position);
         }
     }
 }
