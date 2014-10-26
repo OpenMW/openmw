@@ -194,52 +194,60 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
         if(!debug || !getCamera()->getViewport())
             return;
 
-        if(!((uint32_t)getCamera()->getViewport()->getVisibilityMask() & (uint32_t)CSVRender::Element_Reference))
-            return;
-
         int viewportWidth = getCamera()->getViewport()->getActualWidth();
         int viewportHeight = getCamera()->getViewport()->getActualHeight();
 
         float mouseX = (float) event->x()/viewportWidth;
         float mouseY = (float) event->y()/viewportHeight;
 
-        bool ignoreHeightMap = true;
-        if(((uint32_t)getCamera()->getViewport()->getVisibilityMask() & (uint32_t)CSVRender::Element_Terrain))
-            ignoreHeightMap = false;
-
         // Need to set scene manager each time in case there are multiple subviews
         CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
-        std::pair<bool, std::string> result = CSVWorld::PhysicsSystem::instance()->castRay(
-                                                    mouseX, mouseY, NULL, NULL, getCamera(), ignoreHeightMap);
-        if(result.first)
+        std::pair<std::string, Ogre::Vector3> result = CSVWorld::PhysicsSystem::instance()->castRay(
+                                                    mouseX, mouseY, NULL, NULL, getCamera());
+        if(result.first != "")
         {
-            std::cout << "ReferenceId: " << result.second << std::endl;
-            const CSMWorld::CellRef& cellref = mDocument.getData().getReferences().getRecord (result.second).get();
-            //std::cout << "CellRef.mId: " << cellref.mId << std::endl; // Same as ReferenceId
-            std::cout << "CellRef.mCell: " << cellref.mCell << std::endl;
-
-            const CSMWorld::RefCollection& references = mDocument.getData().getReferences();
-            int index = references.searchId(result.second);
-            if (index != -1)
+            // FIXME: is there  a better way to distinguish terrain from objects?
+            QString name  = QString(result.first.c_str());
+            if(name.contains(QRegExp("^HeightField")))
             {
-                int columnIndex =
-                    references.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId);
+                // terrain
+                std::cout << "terrain: " << result.first << std::endl;
+                std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
+                        + ", " + QString::number(result.second.y).toStdString()
+                        + ", " + QString::number(result.second.z).toStdString()
+                        << std::endl;
 
-                std::cout << "index: " + QString::number(index).toStdString()
-                        +", column index: " + QString::number(columnIndex).toStdString() << std::endl;
             }
-
-            std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
-            while (iter!=mCells.end())
+            else
             {
-                if(iter->first.getId("dummy") == cellref.mCell)
+                std::cout << "ReferenceId: " << result.first << std::endl;
+                const CSMWorld::CellRef& cellref = mDocument.getData().getReferences().getRecord (result.first).get();
+                //std::cout << "CellRef.mId: " << cellref.mId << std::endl; // Same as ReferenceId
+                std::cout << "  CellRef.mCell: " << cellref.mCell << std::endl;
+
+                const CSMWorld::RefCollection& references = mDocument.getData().getReferences();
+                int index = references.searchId(result.first);
+                if (index != -1)
                 {
-                    //std::cout << "Cell found" << std::endl;
-                    break;
+                    int columnIndex =
+                        references.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId);
+
+                    std::cout << "  index: " + QString::number(index).toStdString()
+                            +", column index: " + QString::number(columnIndex).toStdString() << std::endl;
                 }
-                ++iter;
+
+                std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+                while (iter!=mCells.end())
+                {
+                    if(iter->first.getId("dummy") == cellref.mCell)
+                    {
+                        //std::cout << "Cell found" << std::endl;
+                        break;
+                    }
+                    ++iter;
+                }
+                flagAsModified();
             }
-            flagAsModified();
         }
     }
 }

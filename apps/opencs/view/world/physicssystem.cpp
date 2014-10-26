@@ -13,6 +13,7 @@
 #include <openengine/bullet/physic.hpp>
 #include <components/nifbullet/bulletnifloader.hpp>
 #include "../../model/settings/usersettings.hpp"
+#include "../render/elements.hpp"
 
 namespace
 {
@@ -174,16 +175,17 @@ namespace CSVWorld
             return; // FIXME: add a warning message
 
         mEngine->toggleDebugRendering();
-        mEngine->stepSimulation(0.0167); // FIXME: DebugDrawer::step() not accessible
+        mEngine->stepSimulation(0.0167); // DebugDrawer::step() not directly accessible
     }
 
-    std::pair<bool, std::string> PhysicsSystem::castRay(float mouseX, float mouseY,
-                            Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera, bool ignoreHeightMap)
+    // FIXME: this method needs a cleanup/refactoring
+    std::pair<std::string, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY,
+                            Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera)
     {
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
         bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
-        if(!mSceneMgr)
-            return std::make_pair(false, ""); // FIXME: add a warning message
+        if(!mSceneMgr || !camera || !camera->getViewport())
+            return std::make_pair("", Ogre::Vector3(0,0,0)); // FIXME: add a warning message
 
         // using a really small value seems to mess up with the projections
         float nearClipDistance = camera->getNearClipDistance();
@@ -199,17 +201,19 @@ namespace CSVWorld
         _from = btVector3(from.x, from.y, from.z);
         _to = btVector3(to.x, to.y, to.z);
 
-        bool raycastingObjectOnly = true; // FIXME
+        uint32_t visibilityMask = camera->getViewport()->getVisibilityMask();
+        bool ignoreHeightMap = !(visibilityMask & (uint32_t)CSVRender::Element_Terrain);
+        bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
+
         Ogre::Vector3 norm;
         std::pair<std::string, float> result =
-                    mEngine->rayTest(_from, _to, raycastingObjectOnly, ignoreHeightMap, &norm);
+                                mEngine->rayTest(_from, _to, !ignoreObjects, ignoreHeightMap, &norm);
 
-        std::string sceneNode;
-        if(result.first != "")
-            sceneNode = mRefToSceneNode[result.first];
-        if ((result.first == "") || !mSceneMgr->hasSceneNode(sceneNode))
-            return std::make_pair(false, "");
-        else
+        if(result.first == "")
+            return std::make_pair("", Ogre::Vector3(0,0,0));
+
+        std::string sceneNode = mRefToSceneNode[result.first];
+        if(!ignoreObjects && mSceneMgr->hasSceneNode(sceneNode))
         {
             //TODO: Try http://www.ogre3d.org/tikiwiki/Create+outline+around+a+character
             Ogre::SceneNode *scene = mSceneMgr->getSceneNode(sceneNode);
@@ -275,7 +279,12 @@ namespace CSVWorld
                 showHitPoint(mSceneMgr, sceneNode, ray.getPoint(farClipDist*result.second));
             }
 
-            return std::make_pair(true, result.first);
+            return std::make_pair(result.first, ray.getPoint(farClipDist*result.second));
+        }
+        else
+        {
+            // terrain
+            return std::make_pair(result.first, ray.getPoint(farClipDist*result.second));
         }
     }
 }

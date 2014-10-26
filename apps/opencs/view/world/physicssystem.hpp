@@ -57,9 +57,8 @@ namespace CSVWorld
 
             void toggleDebugRendering();
 
-            std::pair<bool, std::string> castRay(float mouseX, float mouseY,
-                            Ogre::Vector3* normal, std::string* hit,
-                            Ogre::Camera *camera, bool ignoreHeightMap);
+            std::pair<std::string, Ogre::Vector3> castRay(float mouseX, float mouseY,
+                            Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera);
     };
 }
 
