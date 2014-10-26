@@ -608,8 +608,6 @@ void CSVRender::PagedWorldspaceWidget::debugMousePicking(float mouseX, float mou
     CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
     bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
 
-    // Need to set scene manager each time in case there are multiple subviews
-    CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
     std::pair<std::string, Ogre::Vector3> result = CSVWorld::PhysicsSystem::instance()->castRay(
                                                 mouseX, mouseY, NULL, NULL, getCamera());
     if(debug && result.first != "")
