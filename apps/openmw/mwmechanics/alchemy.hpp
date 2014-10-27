@@ -56,8 +56,9 @@ namespace MWMechanics
 
             void updateEffects();
 
-            const ESM::Potion *getRecord() const;
-            ///< Return existing record for created potion (may return 0)
+            const ESM::Potion *getRecord(const ESM::Potion& toFind) const;
+            ///< Try to find a potion record similar to \a toFind in the record store, or return 0 if not found
+            /// \note Does not account for record ID, model or icon
 
             void removeIngredients();
             ///< Remove selected ingredients from alchemist's inventory, cleanup selected ingredients and
@@ -108,15 +109,13 @@ namespace MWMechanics
             void removeIngredient (int index);
             ///< Remove ingredient from slot (calling this function on an empty slot is a no-op).
 
-            std::string getPotionName() const;
-            ///< Return the name of the potion that would be created when calling create (if a record for such
-            /// a potion already exists) or return an empty string.
+            std::string suggestPotionName ();
+            ///< Suggest a name for the potion, based on the current effects
 
             Result create (const std::string& name);
             ///< Try to create a potion from the ingredients, place it in the inventory of the alchemist and
             /// adjust the skills of the alchemist accordingly.
-            /// \param name must not be an empty string, unless there is already a potion record (
-            /// getPotionName() does not return an empty string).
+            /// \param name must not be an empty string, or Result_NoName is returned
     };
 }
 

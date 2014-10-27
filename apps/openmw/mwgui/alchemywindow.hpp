@@ -23,6 +23,8 @@ namespace MWGui
         virtual void exit();
 
     private:
+        std::string mSuggestedPotionName;
+
         ItemView* mItemView;
         SortFilterItemModel* mSortModel;
 

@@ -135,6 +135,7 @@ void ESMStore::setUp()
     mSkills.setUp();
     mMagicEffects.setUp();
     mAttributes.setUp();
+    mDialogs.setUp();
 }
 
     int ESMStore::countSavedGameRecords() const
