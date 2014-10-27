@@ -520,18 +520,59 @@ void CSVWorld::Table::previewRecord()
 void CSVWorld::Table::updateUserSetting
                                 (const QString &name, const QStringList &list)
 {
-    int columns = mModel->columnCount();
+    if (name=="records/type-format" || name=="records/status-format")
+    {
+        int columns = mModel->columnCount();
 
-    for (int i=0; i<columns; ++i)
-        if (QAbstractItemDelegate *delegate = itemDelegateForColumn (i))
-        {
-            dynamic_cast<CommandDelegate&>
-                                    (*delegate).updateUserSetting (name, list);
+        for (int i=0; i<columns; ++i)
+            if (QAbstractItemDelegate *delegate = itemDelegateForColumn (i))
             {
-                emit dataChanged (mModel->index (0, i),
-                                  mModel->index (mModel->rowCount()-1, i));
+                dynamic_cast<CommandDelegate&>
+                                        (*delegate).updateUserSetting (name, list);
+                {
+                    emit dataChanged (mModel->index (0, i),
+                                    mModel->index (mModel->rowCount()-1, i));
+                }
             }
-        }
+        return;
+    }
+
+    QString base ("table-input/double");
+    if (name.startsWith (base))
+    {
+        QString modifierString = name.mid (base.size());
+        Qt::KeyboardModifiers modifiers = 0;
+
+        if (modifierString=="-s")
+            modifiers = Qt::ShiftModifier;
+        else if (modifierString=="-c")
+            modifiers = Qt::ControlModifier;
+        else if (modifierString=="-sc")
+            modifiers = Qt::ShiftModifier | Qt::ControlModifier;
+
+        DoubleClickAction action = Action_None;
+
+        QString value = list.at (0);
+
+        if (value=="Edit in Place")
+            action = Action_InPlaceEdit;
+        else if (value=="Edit Record")
+            action = Action_EditRecord;
+        else if (value=="View")
+            action = Action_View;
+        else if (value=="Revert")
+            action = Action_Revert;
+        else if (value=="Delete")
+            action = Action_Delete;
+        else if (value=="Edit Record and Close")
+            action = Action_EditRecordAndClose;
+        else if (value=="View and Close")
+            action = Action_ViewAndClose;
+
+        mDoubleClickActions[modifiers] = action;
+
+        return;
+    }
 }
 
 void CSVWorld::Table::tableSizeUpdate()
@@ -648,7 +689,6 @@ std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::Column
 
 std::vector< CSMWorld::UniversalId > CSVWorld::Table::getDraggedRecords() const
 {
-
     QModelIndexList selectedRows = selectionModel()->selectedRows();
     std::vector<CSMWorld::UniversalId> idToDrag;
 

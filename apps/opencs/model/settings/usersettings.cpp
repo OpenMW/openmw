@@ -156,6 +156,52 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         ritd->setDeclaredValues (values);
     }
 
+    declareSection ("table-input", "Table Input");
+    {
+        QString inPlaceEdit ("Edit in Place");
+        QString editRecord ("Edit Record");
+        QString view ("View");
+        QString editRecordAndClose ("Edit Record and Close");
+
+        QStringList values;
+        values
+            << "None" << inPlaceEdit << editRecord << view << "Revert" << "Delete"
+            << editRecordAndClose << "View and Close";
+
+        QString toolTip = "<ul>"
+            "<li>None</li>"
+            "<li>Edit in Place: Edit the clicked cell</li>"
+            "<li>Edit Record: Open a dialogue subview for the clicked record</li>"
+            "<li>View: Open a scene subview for the clicked record (not available everywhere)</li>"
+            "<li>Revert: Revert record</li>"
+            "<li>Delete: Delete recordy</li>"
+            "<li>Edit Record and Close: Open a dialogue subview for the clicked record and close the table subview</li>"
+            "<li>View And Close: Open a scene subview for the clicked record and close the table subview</li>"
+            "</ul>";
+
+        Setting *doubleClick = createSetting (Type_ComboBox, "double", "Double Click");
+        doubleClick->setDeclaredValues (values);
+        doubleClick->setDefaultValue (inPlaceEdit);
+        doubleClick->setToolTip ("Action on double click in table:<p>" + toolTip);
+
+        Setting *shiftDoubleClick = createSetting (Type_ComboBox, "double-s",
+            "Shift Double Click");
+        shiftDoubleClick->setDeclaredValues (values);
+        shiftDoubleClick->setDefaultValue (editRecord);
+        shiftDoubleClick->setToolTip ("Action on shift double click in table:<p>" + toolTip);
+
+        Setting *ctrlDoubleClick = createSetting (Type_ComboBox, "double-c",
+            "Control Double Click");
+        ctrlDoubleClick->setDeclaredValues (values);
+        ctrlDoubleClick->setDefaultValue (view);
+        ctrlDoubleClick->setToolTip ("Action on control double click in table:<p>" + toolTip);
+
+        Setting *shiftCtrlDoubleClick = createSetting (Type_ComboBox, "double-sc",
+            "Shift Control Double Click");
+        shiftCtrlDoubleClick->setDeclaredValues (values);
+        shiftCtrlDoubleClick->setDefaultValue (editRecordAndClose);
+        shiftCtrlDoubleClick->setToolTip ("Action on shift control double click in table:<p>" + toolTip);
+    }
 
     {
         /******************************************************************
