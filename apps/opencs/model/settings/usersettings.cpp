@@ -120,6 +120,11 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         reuse->setToolTip ("When a new subview is requested and a matching subview already "
             " exist, do not open a new subview and use the existing one instead.");
 
+        Setting *statusBar = createSetting (Type_CheckBox, "show-statusbar", "Show Status Bar");
+        statusBar->setDefaultValue ("true");
+        statusBar->setToolTip ("If a newly open top level window is showing status bars or not. "
+            " Note that this does not affect existing windows.");
+
         Setting *maxSubView = createSetting (Type_SpinBox, "max-subviews",
             "Maximum number of subviews per top-level window");
         maxSubView->setDefaultValue (256);
