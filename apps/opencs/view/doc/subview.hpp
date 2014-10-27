@@ -49,6 +49,8 @@ namespace CSVDoc
 
             void setParent(View *parent) { mParent = parent; }
 
+            virtual std::string getTitle() const;
+
         private:
 
             void closeEvent (QCloseEvent *event);
@@ -58,6 +60,8 @@ namespace CSVDoc
             void focusId (const CSMWorld::UniversalId& universalId, const std::string& hint);
 
             void closeRequest (SubView *subView);
+
+            void updateTitle();
 
         protected slots:
 

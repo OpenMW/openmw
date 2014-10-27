@@ -127,6 +127,12 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         maxSubView->setToolTip ("If the maximum number is reached and a new subview is opened "
             "it will be placed into a new top-level window.");
 
+        Setting *hide = createSetting (Type_CheckBox, "hide-subview", "Hide single subview");
+        hide->setDefaultValue ("false");
+        hide->setToolTip ("When a view contains only a single subview, hide the subview title "
+            "bar and if this subview is closed also close the view (unless it is the last "
+            "view for this document)");
+
         Setting *minWidth = createSetting (Type_SpinBox, "minimum-width",
             "Minimum subview width");
         minWidth->setDefaultValue (325);

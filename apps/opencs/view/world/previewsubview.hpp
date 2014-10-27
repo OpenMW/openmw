@@ -20,12 +20,15 @@ namespace CSVWorld
             Q_OBJECT
 
             CSVRender::PreviewWidget *mScene;
+            std::string mTitle;
 
         public:
 
             PreviewSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
             virtual void setEditLock (bool locked);
+
+            virtual std::string getTitle() const;
 
         private slots:
 

@@ -44,6 +44,7 @@ namespace CSVWorld
             QHBoxLayout* mLayout;
             CSMDoc::Document& mDocument;
             CSVWidget::SceneToolbar* mToolbar;
+            std::string mTitle;
 
         public:
 
@@ -56,6 +57,8 @@ namespace CSVWorld
             virtual void setStatusBar (bool show);
 
             virtual void useHint (const std::string& hint);
+
+            virtual std::string getTitle() const;
 
         private:
 

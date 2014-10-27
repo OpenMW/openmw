@@ -36,6 +36,11 @@ void CSVDoc::SubView::closeEvent (QCloseEvent *event)
         mParent->updateSubViewIndicies(this);
 }
 
+std::string CSVDoc::SubView::getTitle() const
+{
+    return mUniversalId.toString();
+}
+
 void CSVDoc::SubView::closeRequest()
 {
     emit closeRequest (this);

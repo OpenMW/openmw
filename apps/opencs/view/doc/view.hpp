@@ -75,8 +75,6 @@ namespace CSVDoc
 
             void setupUi();
 
-            void updateTitle(const std::string subview = "");
-
             void updateActions();
 
             void exitApplication();
@@ -138,6 +136,8 @@ namespace CSVDoc
             void abortOperation (int type);
 
             void updateUserSetting (const QString &, const QStringList &);
+
+            void updateTitle();
 
         private slots:
 
