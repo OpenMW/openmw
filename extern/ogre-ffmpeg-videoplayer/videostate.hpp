@@ -27,6 +27,21 @@ struct VideoState;
 class MovieAudioFactory;
 class MovieAudioDecoder;
 
+struct ExternalClock
+{
+    ExternalClock();
+
+    uint64_t mTimeBase;
+    uint64_t mPausedAt;
+    bool mPaused;
+
+    boost::mutex mMutex;
+
+    void setPaused(bool paused);
+    uint64_t get();
+    void set(uint64_t time);
+};
+
 struct PacketQueue {
     PacketQueue()
       : first_pkt(NULL), last_pkt(NULL), flushing(false), nb_packets(0), size(0)
@@ -66,6 +81,11 @@ struct VideoState {
     void init(const std::string& resourceName);
     void deinit();
 
+    void setPaused(bool isPaused);
+    void seekTo(double time);
+
+    double getDuration();
+
     int stream_open(int stream_index, AVFormatContext *pFormatCtx);
 
     bool update();
@@ -93,14 +113,17 @@ struct VideoState {
     MovieAudioFactory* mAudioFactory;
     boost::shared_ptr<MovieAudioDecoder> mAudioDecoder;
 
+    ExternalClock mExternalClock;
+
     Ogre::DataStreamPtr stream;
     AVFormatContext* format_ctx;
 
     int av_sync_type;
-    uint64_t external_clock_base;
 
     AVStream**  audio_st;
     PacketQueue audioq;
+
+    uint8_t* mFlushPktData;
 
     AVStream**  video_st;
     double      frame_last_pts;
@@ -113,11 +136,15 @@ struct VideoState {
     boost::mutex pictq_mutex;
     boost::condition_variable pictq_cond;
 
-
     boost::thread parse_thread;
     boost::thread video_thread;
 
-    volatile bool quit;
+    volatile bool mSeekRequested;
+    uint64_t mSeekPos;
+
+    volatile bool mVideoEnded;
+    volatile bool mPaused;
+    volatile bool mQuit;
 };
 
 }

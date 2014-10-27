@@ -25,11 +25,25 @@ extern "C"
         #include <libavutil/time.h>
     #endif
 
+    #include <libavutil/mathematics.h>
+
     #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
     #define av_frame_alloc  avcodec_alloc_frame
     #endif
 
 }
+
+static const char* flushString = "FLUSH";
+struct FlushPacket : AVPacket
+{
+    FlushPacket()
+        : AVPacket()
+    {
+        data = ( (uint8_t*)flushString);
+    }
+};
+
+static FlushPacket flush_pkt;
 
 #include "videoplayer.hpp"
 #include "audiodecoder.hpp"
@@ -46,14 +60,18 @@ namespace Video
 
 VideoState::VideoState()
     : format_ctx(NULL), av_sync_type(AV_SYNC_DEFAULT)
-    , external_clock_base(0.0)
     , audio_st(NULL)
     , video_st(NULL), frame_last_pts(0.0)
     , video_clock(0.0), sws_context(NULL), rgbaFrame(NULL), pictq_size(0)
     , pictq_rindex(0), pictq_windex(0)
-    , quit(false)
+    , mQuit(false), mPaused(false)
     , mAudioFactory(NULL)
+    , mSeekRequested(false)
+    , mSeekPos(0)
+    , mVideoEnded(false)
 {
+    mFlushPktData = flush_pkt.data;
+
     // Register all formats and codecs
     av_register_all();
 }
@@ -77,7 +95,7 @@ void PacketQueue::put(AVPacket *pkt)
     pkt1->pkt = *pkt;
     pkt1->next = NULL;
 
-    if(pkt1->pkt.destruct == NULL)
+    if(pkt->data != flush_pkt.data && pkt1->pkt.destruct == NULL)
     {
         if(av_dup_packet(&pkt1->pkt) < 0)
         {
@@ -104,7 +122,7 @@ void PacketQueue::put(AVPacket *pkt)
 int PacketQueue::get(AVPacket *pkt, VideoState *is)
 {
     boost::unique_lock<boost::mutex> lock(this->mutex);
-    while(!is->quit)
+    while(!is->mQuit)
     {
         AVPacketList *pkt1 = this->first_pkt;
         if(pkt1)
@@ -143,7 +161,8 @@ void PacketQueue::clear()
     for(pkt = this->first_pkt; pkt != NULL; pkt = pkt1)
     {
         pkt1 = pkt->next;
-        av_free_packet(&pkt->pkt);
+        if (pkt->pkt.data != flush_pkt.data)
+            av_free_packet(&pkt->pkt);
         av_freep(&pkt);
     }
     this->last_pkt = NULL;
@@ -188,14 +207,17 @@ void VideoState::video_display(VideoPicture *vp)
 {
     if((*this->video_st)->codec->width != 0 && (*this->video_st)->codec->height != 0)
     {
-
-        if(static_cast<int>(mTexture->getWidth()) != (*this->video_st)->codec->width ||
-           static_cast<int>(mTexture->getHeight()) != (*this->video_st)->codec->height)
+        if (mTexture.isNull())
         {
-            mTexture->unload();
-            mTexture->setWidth((*this->video_st)->codec->width);
-            mTexture->setHeight((*this->video_st)->codec->height);
-            mTexture->createInternalResources();
+            static int i = 0;
+            mTexture = Ogre::TextureManager::getSingleton().createManual(
+                            "ffmpeg/VideoTexture" + Ogre::StringConverter::toString(++i),
+                                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                    Ogre::TEX_TYPE_2D,
+                                    (*this->video_st)->codec->width, (*this->video_st)->codec->height,
+                                    0,
+                                    Ogre::PF_BYTE_RGBA,
+                                    Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
         }
         Ogre::PixelBox pb((*this->video_st)->codec->width, (*this->video_st)->codec->height, 1, Ogre::PF_BYTE_RGBA, &vp->data[0]);
         Ogre::HardwarePixelBufferSharedPtr buffer = mTexture->getBuffer();
@@ -205,6 +227,7 @@ void VideoState::video_display(VideoPicture *vp)
 
 void VideoState::video_refresh()
 {
+    boost::mutex::scoped_lock lock(this->pictq_mutex);
     if(this->pictq_size == 0)
         return;
 
@@ -212,16 +235,15 @@ void VideoState::video_refresh()
     {
         VideoPicture* vp = &this->pictq[this->pictq_rindex];
         this->video_display(vp);
+
         this->pictq_rindex = (pictq_rindex+1) % VIDEO_PICTURE_QUEUE_SIZE;
         this->frame_last_pts = vp->pts;
-        this->pictq_mutex.lock();
         this->pictq_size--;
         this->pictq_cond.notify_one();
-        this->pictq_mutex.unlock();
     }
     else
     {
-        const float threshold = 0.03;
+        const float threshold = 0.03f;
         if (this->pictq[pictq_rindex].pts > this->get_master_clock() + threshold)
             return; // not ready yet to show this picture
 
@@ -236,19 +258,18 @@ void VideoState::video_refresh()
                 break;
         }
 
+        assert (this->pictq_rindex < VIDEO_PICTURE_QUEUE_SIZE);
         VideoPicture* vp = &this->pictq[this->pictq_rindex];
 
         this->video_display(vp);
 
         this->frame_last_pts = vp->pts;
 
-        this->pictq_mutex.lock();
         this->pictq_size -= i;
         // update queue for next picture
         this->pictq_size--;
-        this->pictq_rindex++;
+        this->pictq_rindex = (this->pictq_rindex+1) % VIDEO_PICTURE_QUEUE_SIZE;
         this->pictq_cond.notify_one();
-        this->pictq_mutex.unlock();
     }
 }
 
@@ -260,11 +281,13 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     /* wait until we have a new pic */
     {
         boost::unique_lock<boost::mutex> lock(this->pictq_mutex);
-        while(this->pictq_size >= VIDEO_PICTURE_QUEUE_SIZE && !this->quit)
+        while(this->pictq_size >= VIDEO_PICTURE_QUEUE_SIZE && !this->mQuit)
             this->pictq_cond.timed_wait(lock, boost::posix_time::milliseconds(1));
     }
-    if(this->quit)
+    if(this->mQuit)
         return -1;
+
+    this->pictq_mutex.lock();
 
     // windex is set to 0 initially
     vp = &this->pictq[this->pictq_windex];
@@ -292,7 +315,6 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
 
     // now we inform our display thread that we have a pic ready
     this->pictq_windex = (this->pictq_windex+1) % VIDEO_PICTURE_QUEUE_SIZE;
-    this->pictq_mutex.lock();
     this->pictq_size++;
     this->pictq_mutex.unlock();
 
@@ -353,6 +375,21 @@ void VideoState::video_thread_loop(VideoState *self)
 
     while(self->videoq.get(packet, self) >= 0)
     {
+        if(packet->data == flush_pkt.data)
+        {
+            avcodec_flush_buffers((*self->video_st)->codec);
+
+            self->pictq_mutex.lock();
+            self->pictq_size = 0;
+            self->pictq_rindex = 0;
+            self->pictq_windex = 0;
+            self->pictq_mutex.unlock();
+
+            self->frame_last_pts = packet->pts * av_q2d((*self->video_st)->time_base);
+            global_video_pkt_pts = self->frame_last_pts;
+            continue;
+        }
+
         // Save global pts to be stored in pFrame
         global_video_pkt_pts = packet->pts;
         // Decode video frame
@@ -394,8 +431,67 @@ void VideoState::decode_thread_loop(VideoState *self)
             throw std::runtime_error("No streams to decode");
 
         // main decode loop
-        while(!self->quit)
+        while(!self->mQuit)
         {
+            if(self->mSeekRequested)
+            {
+                uint64_t seek_target = self->mSeekPos;
+                int streamIndex = -1;
+
+                int videoStreamIndex = -1;;
+                int audioStreamIndex = -1;
+                if (self->video_st)
+                    videoStreamIndex = self->video_st - self->format_ctx->streams;
+                if (self->audio_st)
+                    audioStreamIndex = self->audio_st - self->format_ctx->streams;
+
+                if(videoStreamIndex >= 0)
+                    streamIndex = videoStreamIndex;
+                else if(audioStreamIndex >= 0)
+                    streamIndex = audioStreamIndex;
+
+                uint64_t timestamp = seek_target;
+
+                // QtCreator's highlighter doesn't like AV_TIME_BASE_Q's {} initializer for some reason
+                AVRational avTimeBaseQ = AVRational(); // = AV_TIME_BASE_Q;
+                avTimeBaseQ.num = 1;
+                avTimeBaseQ.den = AV_TIME_BASE;
+
+                if(streamIndex >= 0)
+                    timestamp = av_rescale_q(seek_target, avTimeBaseQ, self->format_ctx->streams[streamIndex]->time_base);
+
+                // AVSEEK_FLAG_BACKWARD appears to be needed, otherwise ffmpeg may seek to a keyframe *after* the given time
+                // we want to seek to any keyframe *before* the given time, so we can continue decoding as normal from there on
+                if(av_seek_frame(self->format_ctx, streamIndex, timestamp, AVSEEK_FLAG_BACKWARD) < 0)
+                    std::cerr << "Error seeking " << self->format_ctx->filename << std::endl;
+                else
+                {
+                    // Clear the packet queues and put a special packet with the new clock time
+                    if(audioStreamIndex >= 0)
+                    {
+                        self->audioq.clear();
+                        flush_pkt.pts = av_rescale_q(seek_target, avTimeBaseQ,
+                            self->format_ctx->streams[audioStreamIndex]->time_base);
+                        self->audioq.put(&flush_pkt);
+                    }
+                    if(videoStreamIndex >= 0)
+                    {
+                        self->videoq.clear();
+                        flush_pkt.pts = av_rescale_q(seek_target, avTimeBaseQ,
+                            self->format_ctx->streams[videoStreamIndex]->time_base);
+                        self->videoq.put(&flush_pkt);
+                    }
+                    self->pictq_mutex.lock();
+                    self->pictq_size = 0;
+                    self->pictq_rindex = 0;
+                    self->pictq_windex = 0;
+                    self->pictq_mutex.unlock();
+                    self->mExternalClock.set(seek_target);
+                }
+                self->mSeekRequested = false;
+            }
+
+
             if((self->audio_st && self->audioq.size > MAX_AUDIOQ_SIZE) ||
                (self->video_st && self->videoq.size > MAX_VIDEOQ_SIZE))
             {
@@ -404,7 +500,13 @@ void VideoState::decode_thread_loop(VideoState *self)
             }
 
             if(av_read_frame(pFormatCtx, packet) < 0)
-                break;
+            {
+                if (self->audioq.nb_packets == 0 && self->videoq.nb_packets == 0 && self->pictq_size == 0)
+                    self->mVideoEnded = true;
+                continue;
+            }
+            else
+                self->mVideoEnded = false;
 
             // Is this a packet from the video stream?
             if(self->video_st && packet->stream_index == self->video_st-pFormatCtx->streams)
@@ -414,17 +516,6 @@ void VideoState::decode_thread_loop(VideoState *self)
             else
                 av_free_packet(packet);
         }
-
-        /* all done - wait for it */
-        self->videoq.flush();
-        self->audioq.flush();
-        while(!self->quit)
-        {
-            // EOF reached, all packets processed, we can exit now
-            if(self->audioq.nb_packets == 0 && self->videoq.nb_packets == 0 && self->pictq_size == 0)
-                break;
-            boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-        }
     }
     catch(std::runtime_error& e) {
         std::cerr << "An error occured playing the video: " << e.what () << std::endl;
@@ -433,17 +524,14 @@ void VideoState::decode_thread_loop(VideoState *self)
         std::cerr << "An error occured playing the video: " << e.getFullDescription () << std::endl;
     }
 
-    self->quit = true;
+    self->mQuit = true;
 }
 
 
 bool VideoState::update()
 {
-    if(this->quit)
-        return false;
-
     this->video_refresh();
-    return true;
+    return !this->mVideoEnded;
 }
 
 
@@ -510,7 +598,7 @@ void VideoState::init(const std::string& resourceName)
     unsigned int i;
 
     this->av_sync_type = AV_SYNC_DEFAULT;
-    this->quit = false;
+    this->mQuit = false;
 
     this->stream = Ogre::ResourceGroupManager::getSingleton().openResource(resourceName);
     if(this->stream.isNull())
@@ -564,7 +652,7 @@ void VideoState::init(const std::string& resourceName)
             audio_index = i;
     }
 
-    this->external_clock_base = av_gettime();
+    mExternalClock.set(0);
 
     if(audio_index >= 0)
         this->stream_open(audio_index, this->format_ctx);
@@ -572,24 +660,6 @@ void VideoState::init(const std::string& resourceName)
     if(video_index >= 0)
     {
         this->stream_open(video_index, this->format_ctx);
-
-        int width = (*this->video_st)->codec->width;
-        int height = (*this->video_st)->codec->height;
-        static int i = 0;
-        this->mTexture = Ogre::TextureManager::getSingleton().createManual(
-                        "ffmpeg/VideoTexture" + Ogre::StringConverter::toString(++i),
-                                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                Ogre::TEX_TYPE_2D,
-                                width, height,
-                                0,
-                                Ogre::PF_BYTE_RGBA,
-                                Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
-
-        // initialize to (0,0,0,0)
-        std::vector<Ogre::uint32> buffer;
-        buffer.resize(width * height, 0);
-        Ogre::PixelBox pb(width, height, 1, Ogre::PF_BYTE_RGBA, &buffer[0]);
-        this->mTexture->getBuffer()->blitFromMemory(pb);
     }
 
 
@@ -598,12 +668,12 @@ void VideoState::init(const std::string& resourceName)
 
 void VideoState::deinit()
 {
-    this->quit = true;
+    this->mQuit = true;
+
+    this->audioq.flush();
+    this->videoq.flush();
 
     mAudioDecoder.reset();
-
-    this->audioq.cond.notify_one();
-    this->videoq.cond.notify_one();
 
     if (this->parse_thread.joinable())
         this->parse_thread.join();
@@ -639,11 +709,17 @@ void VideoState::deinit()
         }
         avformat_close_input(&this->format_ctx);
     }
+
+    if (!mTexture.isNull())
+    {
+        Ogre::TextureManager::getSingleton().remove(mTexture->getName());
+        mTexture.setNull();
+    }
 }
 
 double VideoState::get_external_clock()
 {
-    return ((uint64_t)av_gettime()-this->external_clock_base) / 1000000.0;
+    return mExternalClock.get() / 1000000.0;
 }
 
 double VideoState::get_master_clock()
@@ -665,6 +741,63 @@ double VideoState::get_audio_clock()
     if (!mAudioDecoder.get())
         return 0.0;
     return mAudioDecoder->getAudioClock();
+}
+
+void VideoState::setPaused(bool isPaused)
+{
+    this->mPaused = isPaused;
+    mExternalClock.setPaused(isPaused);
+}
+
+void VideoState::seekTo(double time)
+{
+    time = std::max(0.0, time);
+    time = std::min(getDuration(), time);
+    mSeekPos = (uint64_t) (time * AV_TIME_BASE);
+    mSeekRequested = true;
+}
+
+double VideoState::getDuration()
+{
+    return this->format_ctx->duration / 1000000.0;
+}
+
+
+ExternalClock::ExternalClock()
+    : mTimeBase(av_gettime())
+    , mPausedAt(0)
+    , mPaused(false)
+{
+}
+
+void ExternalClock::setPaused(bool paused)
+{
+    boost::mutex::scoped_lock lock(mMutex);
+    if (mPaused == paused)
+        return;
+    if (paused)
+    {
+        mPausedAt = av_gettime() - mTimeBase;
+    }
+    else
+        mTimeBase = av_gettime() - mPausedAt;
+    mPaused = paused;
+}
+
+uint64_t ExternalClock::get()
+{
+    boost::mutex::scoped_lock lock(mMutex);
+    if (mPaused)
+        return mPausedAt;
+    else
+        return av_gettime() - mTimeBase;
+}
+
+void ExternalClock::set(uint64_t time)
+{
+    boost::mutex::scoped_lock lock(mMutex);
+    mTimeBase = av_gettime() - time;
+    mPausedAt = time;
 }
 
 }

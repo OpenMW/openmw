@@ -3,14 +3,13 @@ set(OGRE_FFMPEG_VIDEOPLAYER_LIBRARY "ogre-ffmpeg-videoplayer")
 # Sources
 
 set(OGRE_FFMPEG_VIDEOPLAYER_SOURCE_FILES
-	videoplayer.cpp
-	videostate.cpp
-	videodefs.hpp
+    videoplayer.cpp
+    videostate.cpp
+    videodefs.hpp
     libavwrapper.cpp
     audiodecoder.cpp
     audiofactory.hpp
 )
-
 
 # Find FFMPEG
 set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE AVRESAMPLE)
@@ -30,10 +29,14 @@ else()
         message(FATAL_ERROR "Install either libswresample (FFmpeg) or libavresample (Libav).")
     endif()
 endif()
-
 include_directories(${FFMPEG_INCLUDE_DIRS})
 
+# Find Boost
+set(BOOST_COMPONENTS thread)
+find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+include_directories(${Boost_INCLUDE_DIRS})
+
 add_library(${OGRE_FFMPEG_VIDEOPLAYER_LIBRARY} STATIC ${OGRE_FFMPEG_VIDEOPLAYER_SOURCE_FILES})
-target_link_libraries(${OGRE_FFMPEG_VIDEOPLAYER_LIBRARY} ${VIDEO_FFMPEG_LIBRARIES})
+target_link_libraries(${OGRE_FFMPEG_VIDEOPLAYER_LIBRARY} ${VIDEO_FFMPEG_LIBRARIES} ${Boost_LIBRARIES})
 
 link_directories(${CMAKE_CURRENT_BINARY_DIR})

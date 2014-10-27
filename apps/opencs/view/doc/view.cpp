@@ -105,7 +105,7 @@ void CSVDoc::View::setupViewMenu()
     mShowStatusBar->setCheckable (true);
     connect (mShowStatusBar, SIGNAL (toggled (bool)), this, SLOT (toggleShowStatusBar (bool)));
     std::string showStatusBar =
-        CSMSettings::UserSettings::instance().settingValue("Display/show statusbar").toStdString();
+        CSMSettings::UserSettings::instance().settingValue("window/show-statusbar").toStdString();
     if(showStatusBar == "true")
         mShowStatusBar->setChecked(true);
     view->addAction (mShowStatusBar);

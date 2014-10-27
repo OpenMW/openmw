@@ -152,8 +152,8 @@ int MovieAudioDecoder::synchronize_audio()
         double avg_diff = mAudioDiffAccum * (1.0 - mAudioDiffAvgCoef);
         if(fabs(avg_diff) >= mAudioDiffThreshold)
         {
-            int n = av_get_bytes_per_sample(mAVStream->codec->sample_fmt) *
-                    mAVStream->codec->channels;
+            int n = av_get_bytes_per_sample(mOutputSampleFormat) *
+                    av_get_channel_layout_nb_channels(mOutputChannelLayout);
             sample_skip = ((int)(diff * mAVStream->codec->sample_rate) * n);
         }
     }
@@ -161,7 +161,7 @@ int MovieAudioDecoder::synchronize_audio()
     return sample_skip;
 }
 
-int MovieAudioDecoder::audio_decode_frame(AVFrame *frame)
+int MovieAudioDecoder::audio_decode_frame(AVFrame *frame, int &sample_skip)
 {
     AVPacket *pkt = &mPacket;
 
@@ -191,7 +191,7 @@ int MovieAudioDecoder::audio_decode_frame(AVFrame *frame)
                 if(!mDataBuf || mDataBufLen < frame->nb_samples)
                 {
                     av_freep(&mDataBuf);
-                    if(av_samples_alloc(&mDataBuf, NULL, mAVStream->codec->channels,
+                    if(av_samples_alloc(&mDataBuf, NULL, av_get_channel_layout_nb_channels(mOutputChannelLayout),
                                         frame->nb_samples, mOutputSampleFormat, 0) < 0)
                         break;
                     else
@@ -212,14 +212,26 @@ int MovieAudioDecoder::audio_decode_frame(AVFrame *frame)
                            (double)mAVStream->codec->sample_rate;
 
             /* We have data, return it and come back for more later */
-            return frame->nb_samples * mAVStream->codec->channels *
-                   av_get_bytes_per_sample(mAVStream->codec->sample_fmt);
+            return frame->nb_samples * av_get_channel_layout_nb_channels(mOutputChannelLayout) *
+                   av_get_bytes_per_sample(mOutputSampleFormat);
         }
         av_free_packet(pkt);
 
         /* next packet */
         if(mVideoState->audioq.get(pkt, mVideoState) < 0)
             return -1;
+
+        if(pkt->data == mVideoState->mFlushPktData)
+        {
+            avcodec_flush_buffers(mAVStream->codec);
+            mAudioDiffAccum = 0.0;
+            mAudioDiffAvgCount = 0;
+            mAudioClock = av_q2d(mAVStream->time_base)*pkt->pts;
+            sample_skip = 0;
+
+            if(mVideoState->audioq.get(pkt, mVideoState) < 0)
+                return -1;
+        }
 
         /* if update, update the audio clock w/pts */
         if((uint64_t)pkt->pts != AV_NOPTS_VALUE)
@@ -229,6 +241,16 @@ int MovieAudioDecoder::audio_decode_frame(AVFrame *frame)
 
 size_t MovieAudioDecoder::read(char *stream, size_t len)
 {
+    if (mVideoState->mPaused)
+    {
+        // fill the buffer with silence
+        size_t sampleSize = av_get_bytes_per_sample(mOutputSampleFormat);
+        char* data[1];
+        data[0] = stream;
+        av_samples_set_silence((uint8_t**)data, 0, len/sampleSize, 1, mOutputSampleFormat);
+        return len;
+    }
+
     int sample_skip = synchronize_audio();
     size_t total = 0;
 
@@ -237,7 +259,7 @@ size_t MovieAudioDecoder::read(char *stream, size_t len)
         if(mFramePos >= mFrameSize)
         {
             /* We have already sent all our data; get more */
-            mFrameSize = audio_decode_frame(mFrame);
+            mFrameSize = audio_decode_frame(mFrame, sample_skip);
             if(mFrameSize < 0)
             {
                 /* If error, we're done */
@@ -260,8 +282,8 @@ size_t MovieAudioDecoder::read(char *stream, size_t len)
         {
             len1 = std::min<size_t>(len1, -mFramePos);
 
-            int n = av_get_bytes_per_sample(mAVStream->codec->sample_fmt) *
-                    mAVStream->codec->channels;
+            int n = av_get_bytes_per_sample(mOutputSampleFormat)
+                    * av_get_channel_layout_nb_channels(mOutputChannelLayout);
 
             /* add samples by copying the first sample*/
             if(n == 1)
