@@ -36,6 +36,18 @@ namespace CSVWorld
     {
             Q_OBJECT
 
+            enum DoubleClickAction
+            {
+                Action_None,
+                Action_InPlaceEdit,
+                Action_EditRecord,
+                Action_View,
+                Action_Revert,
+                Action_Delete,
+                Action_EditRecordAndClose,
+                Action_ViewAndClose
+            };
+
             std::vector<CommandDelegate *> mDelegates;
             QAction *mEditAction;
             QAction *mCreateAction;
@@ -53,8 +65,8 @@ namespace CSVWorld
             CSMWorld::IdTableBase *mModel;
             int mRecordStatusDisplay;
             CSMWorld::CommandDispatcher *mDispatcher;
-
             CSMWorld::UniversalId mEditCellId;
+            std::map<Qt::KeyboardModifiers, DoubleClickAction> mDoubleClickActions;
 
         private:
 
@@ -63,6 +75,10 @@ namespace CSVWorld
             void mouseMoveEvent(QMouseEvent *event);
 
             void dropEvent(QDropEvent *event);
+
+        protected:
+
+            virtual void mouseDoubleClickEvent (QMouseEvent *event);
 
         public:
 
@@ -93,6 +109,8 @@ namespace CSVWorld
             void createRequest();
 
             void cloneRequest(const CSMWorld::UniversalId&);
+
+            void closeRequest();
 
         private slots:
 

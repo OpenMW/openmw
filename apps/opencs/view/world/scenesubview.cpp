@@ -150,9 +150,9 @@ void CSVWorld::SceneSubView::useHint (const std::string& hint)
     mScene->useViewHint (hint);
 }
 
-void CSVWorld::SceneSubView::closeRequest()
+std::string CSVWorld::SceneSubView::getTitle() const
 {
-    deleteLater();
+    return mTitle;
 }
 
 void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::UniversalId& id)
@@ -161,9 +161,10 @@ void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::UniversalId& 
     std::ostringstream stream;
     stream << "Scene: " << getUniversalId().getId();
 
-    setWindowTitle (QString::fromUtf8 (stream.str().c_str()));
+    mTitle = stream.str();
+    setWindowTitle (QString::fromUtf8 (mTitle.c_str()));
+    emit updateTitle();
 }
-
 
 void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::CellSelection& selection)
 {
@@ -189,7 +190,9 @@ void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::CellSelection
             stream << "cell around it)";
     }
 
-    setWindowTitle (QString::fromUtf8 (stream.str().c_str()));
+    mTitle = stream.str();
+    setWindowTitle (QString::fromUtf8 (mTitle.c_str()));
+    emit updateTitle();
 }
 
 void CSVWorld::SceneSubView::handleDrop (const std::vector< CSMWorld::UniversalId >& data)
