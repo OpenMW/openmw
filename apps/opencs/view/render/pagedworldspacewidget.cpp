@@ -297,7 +297,7 @@ void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event
             // debug drawer.  Hence only the first subview that creates the debug drawer
             // can view the debug lines.  Will need to keep a map in OEngine if multiple
             // subviews are to be supported.
-            //CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
+            CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
             CSVWorld::PhysicsSystem::instance()->toggleDebugRendering();
             flagAsModified();
         }
@@ -444,11 +444,16 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
     for(;iter != mSelectedEntities.end(); ++iter)
     {
         removeHitPoint(getSceneManager(), iter->first);
-        Ogre::SceneNode *scene = getSceneManager()->getSceneNode(iter->first);
-        if(scene)
+
+        if(getSceneManager()->hasSceneNode(iter->first))
         {
-            scene->removeAndDestroyAllChildren();
-            getSceneManager()->destroySceneNode(iter->first);
+            Ogre::SceneNode *scene = getSceneManager()->getSceneNode(iter->first);
+
+            if(scene)
+            {
+                scene->removeAndDestroyAllChildren();
+                getSceneManager()->destroySceneNode(iter->first);
+            }
         }
     }
 }

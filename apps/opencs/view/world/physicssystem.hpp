@@ -61,7 +61,6 @@ namespace CSVWorld
 
         private:
 
-            void initDebug();
             void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);
     };
 }
