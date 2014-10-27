@@ -8,6 +8,8 @@
 #include "worldspacewidget.hpp"
 #include "cell.hpp"
 
+class QElapsedTimer;
+
 namespace CSVRender
 {
 
@@ -37,6 +39,7 @@ namespace CSVRender
             MouseState mMouseState;
             QPoint mOldPos;
             std::string mCurrentObj;
+            QElapsedTimer *mMouseEventTimer;
 
         private:
 

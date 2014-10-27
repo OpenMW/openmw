@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <QMouseEvent>
+#include <QElapsedTimer>
 
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
@@ -300,10 +301,16 @@ void CSVRender::PagedWorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
         {
             case Mouse_Grab:
             {
-                // FIXME: check if min elapsed time, mTimer.elapsed();
-                // then stop/disable the timer
-                mMouseState = Mouse_Drag;
-                //std::cout << "grab->drag" << std::endl;
+                // check if min elapsed time to stop false detection of drag
+                if(!mMouseEventTimer->isValid() || !mMouseEventTimer->hasExpired(200)) // ms
+                    break;
+                else
+                {
+                    mMouseEventTimer->invalidate();
+
+                    mMouseState = Mouse_Drag;
+                    std::cout << "grab->drag" << std::endl;
+                }
 
                 /* FALL_THROUGH */
             }
@@ -322,7 +329,7 @@ void CSVRender::PagedWorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
             case Mouse_Edit:
             case Mouse_Default:
             {
-                break;
+                break; // error event, ignore
             }
             /* NO_DEFAULT_CASE */
         }
@@ -355,9 +362,10 @@ void CSVRender::PagedWorldspaceWidget::mousePressEvent (QMouseEvent *event)
                     // FIXME: setup a x-z plane at the y position of the object
                     // FIXME: ray test agaist the plane to get a starting position
                     // of the mouse in relation to the object position
+                    mMouseEventTimer->start();
+
                     mMouseState = Mouse_Grab;
                     //std::cout << "default/edit->grab" << std::endl;
-                    // FIXME: start QElapsedTimer mTimer.start();
                 }
                 break;
             }
@@ -597,7 +605,7 @@ std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
 : WorldspaceWidget (document, parent), mDocument (document), mWorldspace ("std::default"),
   mControlElements(NULL), mDisplayCellCoord(true), mOverlayMask(NULL),
-  mCurrentObj(""), mMouseState(Mouse_Default), mOldPos(0,0)
+  mCurrentObj(""), mMouseState(Mouse_Default), mOldPos(0,0), mMouseEventTimer(0)
 {
     QAbstractItemModel *cells =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells);
@@ -609,7 +617,9 @@ CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc
     connect (cells, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (cellAdded (const QModelIndex&, int, int)));
 
-        initDebug();
+    initDebug();
+    mMouseEventTimer = new QElapsedTimer();
+    mMouseEventTimer->invalidate();
 }
 
 CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
@@ -630,6 +640,8 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
 
     removeRenderTargetListener(mOverlayMask);
     delete mOverlayMask;
+
+    delete mMouseEventTimer;
 
     // For debugging only
     std::map<std::string, std::vector<std::string> >::iterator iter = mSelectedEntities.begin();
