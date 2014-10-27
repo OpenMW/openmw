@@ -520,11 +520,6 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&, const std::string&)));
 
-    connect (&CSMSettings::UserSettings::instance(),
-             SIGNAL (userSettingUpdated (const QString &, const QStringList &)),
-             view,
-             SLOT (updateUserSetting (const QString &, const QStringList &)));
-
     connect (view, SIGNAL (closeRequest (SubView *)), this, SLOT (closeRequest (SubView *)));
 
     connect (view, SIGNAL (updateTitle()), this, SLOT (updateTitle()));
@@ -744,6 +739,11 @@ void CSVDoc::View::updateUserSetting (const QString &name, const QStringList &li
 {
     if (name=="window/hide-subview")
         updateSubViewIndicies (0);
+
+    foreach (SubView *subView, mSubViews)
+    {
+        subView->updateUserSetting (name, list);
+    }
 }
 
 void CSVDoc::View::toggleShowStatusBar (bool show)

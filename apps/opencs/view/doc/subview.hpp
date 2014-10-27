@@ -51,6 +51,8 @@ namespace CSVDoc
 
             virtual std::string getTitle() const;
 
+            virtual void updateUserSetting (const QString& name, const QStringList& value);
+
         private:
 
             void closeEvent (QCloseEvent *event);
@@ -66,10 +68,6 @@ namespace CSVDoc
         protected slots:
 
             void closeRequest();
-
-        public slots:
-            virtual void updateUserSetting
-                                    (const QString &, const QStringList &);
     };
 }
 
