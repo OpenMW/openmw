@@ -28,6 +28,16 @@ namespace CSVRender
             OverlayMask *mOverlayMask;
             std::map<std::string, std::vector<std::string> > mSelectedEntities;
 
+            enum MouseState {
+                Mouse_Grab,
+                Mouse_Drag,
+                Mouse_Edit,
+                Mouse_Default
+            };
+            MouseState mMouseState;
+            QPoint mOldPos;
+            std::string mCurrentObj;
+
         private:
 
             std::pair<int, int> getCoordinatesFromId(const std::string& record) const;
@@ -52,6 +62,7 @@ namespace CSVRender
 
             virtual std::string getStartupInstruction();
 
+            std::pair<std::string, Ogre::Vector3> isObjectUnderCursor(float mouseX, float mouseY);
             void debugMousePicking(float mouseX, float mouseY);
             void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);
 
@@ -85,9 +96,11 @@ namespace CSVRender
 
             virtual void updateOverlay();
 
+            virtual void mouseMoveEvent (QMouseEvent *event);
+            virtual void mousePressEvent (QMouseEvent *event);
             virtual void mouseReleaseEvent (QMouseEvent *event);
-
             virtual void mouseDoubleClickEvent (QMouseEvent *event);
+            virtual void wheelEvent (QWheelEvent *event);
 
         signals:
 

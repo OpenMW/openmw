@@ -259,6 +259,114 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     return modified;
 }
 
+// mouse picking
+// FIXME: need to virtualise mouse buttons
+//
+// State machine:
+//
+// [default] mousePressEvent->check if the mouse is pointing at an object
+//         if yes, go to [grab] else stay at [default]
+//
+// [grab] mouseReleaseEvent->if same button and new obj, go to [edit]
+//         mouseMoveEvent->if same button, create collision planes then go to [drag]
+//         other mouse events or buttons, go back to [default] (i.e. like 'cancel')
+//
+// [drag]  mouseReleaseEvent->if same button, place the object at the new
+//         location, update the document then go to [edit]
+//         mouseMoveEvent->update position to the user based on ray to the collision
+//         planes and render the object at the new location, but do not update
+//         the document yet
+//
+// [edit]  TODO, probably fine positional adjustments or rotations; clone/delete?
+//
+//
+//               press               press (obj)
+//   [default] --------> [grab] <-------------------- [edit]
+//       ^       (obj)    |  |  ------> [drag] ----->   ^
+//       |                |  |   move     ^ |  release  |
+//       |                |  |            | |           |
+//       |                |  |            +-+           |
+//       |                |  |            move          |
+//       +----------------+  +--------------------------+
+//            release                  release
+//           (same obj)               (new obj)
+//
+//
+void CSVRender::PagedWorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
+{
+    if(event->buttons() & Qt::RightButton)
+    {
+        switch(mMouseState)
+        {
+            case Mouse_Grab:
+            {
+                // FIXME: check if min elapsed time, mTimer.elapsed();
+                // then stop/disable the timer
+                mMouseState = Mouse_Drag;
+                //std::cout << "grab->drag" << std::endl;
+
+                /* FALL_THROUGH */
+            }
+            case Mouse_Drag:
+            {
+                // FIXME: don't update less than a quantum
+                //QPoint diff = mOldPos-event->pos();
+                mOldPos = event->pos();
+
+                //std::cout << QString::number(event->pos().x()).toStdString() << ", "
+                          //<< QString::number(event->pos().y()).toStdString() << std::endl;
+                // FIXME: ray test against the plane to provide feedback to the user
+                // the relative movement of the object on the x-z plane
+                break;
+            }
+            case Mouse_Edit:
+            case Mouse_Default:
+            {
+                break;
+            }
+            /* NO_DEFAULT_CASE */
+        }
+    }
+    SceneWidget::mouseMoveEvent(event);
+}
+
+void CSVRender::PagedWorldspaceWidget::mousePressEvent (QMouseEvent *event)
+{
+    if(event->buttons() & Qt::RightButton)
+    {
+        switch(mMouseState)
+        {
+            case Mouse_Grab:
+            case Mouse_Drag:
+            {
+                break; // error event, ignore
+            }
+            case Mouse_Edit:
+            case Mouse_Default:
+            {
+                if(!getCamera()->getViewport())
+                    break;
+
+                std::pair<std::string, Ogre::Vector3> result = isObjectUnderCursor(
+                    (float) event->x() / getCamera()->getViewport()->getActualWidth(),
+                    (float) event->y() / getCamera()->getViewport()->getActualHeight());
+                if(result.first != "")
+                {
+                    // FIXME: setup a x-z plane at the y position of the object
+                    // FIXME: ray test agaist the plane to get a starting position
+                    // of the mouse in relation to the object position
+                    mMouseState = Mouse_Grab;
+                    //std::cout << "default/edit->grab" << std::endl;
+                    // FIXME: start QElapsedTimer mTimer.start();
+                }
+                break;
+            }
+            /* NO_DEFAULT_CASE */
+        }
+    }
+    //SceneWidget::mousePressEvent(event);
+}
+
 void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 {
     if(event->button() == Qt::RightButton)
@@ -274,14 +382,89 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
             }
         }
 
-        // mouse picking
-        // FIXME: need to virtualise mouse buttons
         if(!getCamera()->getViewport())
+        {
+            SceneWidget::mouseReleaseEvent(event);
             return;
+        }
 
-        debugMousePicking((float) event->x() / getCamera()->getViewport()->getActualWidth(),
-                          (float) event->y() / getCamera()->getViewport()->getActualHeight());
+        // FIXME: skip this if overlay clicked above
+        // FIXME: stop/disable the timer
+        switch(mMouseState)
+        {
+            case Mouse_Grab:
+            {
+                std::pair<std::string, Ogre::Vector3> result = isObjectUnderCursor(
+                    (float) event->x() / getCamera()->getViewport()->getActualWidth(),
+                    (float) event->y() / getCamera()->getViewport()->getActualHeight());
+                if(result.first != "")
+                {
+                    if(result.first == mCurrentObj)
+                    {
+                        mMouseState = Mouse_Default;
+                        //std::cout << "grab->default" << std::endl;
+                        mCurrentObj = "";
+                    }
+                    else
+                    {
+                        mMouseState = Mouse_Edit;
+                        //std::cout << "grab->edit" << std::endl;
+                        mCurrentObj = result.first;
+
+
+                        // print some debug info
+                        std::cout << "ReferenceId: " << result.first << std::endl;
+                        const CSMWorld::RefCollection& references = mDocument.getData().getReferences();
+                        int index = references.searchId(result.first);
+                        if (index != -1)
+                        {
+                            int columnIndex =
+                                references.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId);
+                            std::cout << "  index: " + QString::number(index).toStdString()
+                                      +", column index: " + QString::number(columnIndex).toStdString()
+                                      << std::endl;
+                        }
+                    }
+                    // highlight current object
+                    std::string sceneNode =
+                        CSVWorld::PhysicsSystem::instance()->referenceToSceneNode(result.first);
+
+                    uint32_t visibilityMask = getCamera()->getViewport()->getVisibilityMask();
+                    bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
+
+                    if(!ignoreObjects && getSceneManager()->hasSceneNode(sceneNode))
+                    {
+                        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+                        if(userSettings.setting("debug/mouse-picking", QString("false")) == "true" ? true : false)
+                            updateSelectionHighlight(sceneNode, result.second);
+                    }
+                    flagAsModified();
+                }
+                break;
+            }
+            case Mouse_Drag:
+            {
+                // ray test against the plane, then destroy the plane
+                // FIXME: update document
+                std::cout << "final position" << std::endl;
+                // FIXME: highlight current object
+                mMouseState = Mouse_Edit;
+                //std::cout << "drag->edit" << std::endl;
+                break;
+            }
+            case Mouse_Edit:
+            case Mouse_Default:
+            {
+                // probably terrain
+                debugMousePicking(
+                    (float) event->x() / getCamera()->getViewport()->getActualWidth(),
+                    (float) event->y() / getCamera()->getViewport()->getActualHeight());
+                break;
+            }
+            /* NO_DEFAULT_CASE */
+        }
     }
+    SceneWidget::mouseReleaseEvent(event);
 }
 
 void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
@@ -302,6 +485,14 @@ void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event
             flagAsModified();
         }
     }
+    //SceneWidget::mouseDoubleClickEvent(event);
+}
+
+void CSVRender::PagedWorldspaceWidget::wheelEvent (QWheelEvent *event)
+{
+    // FIXME: add wheel event to move the object along the y axis during Mouse_Drag or
+    // Mouse_Grab
+    SceneWidget::wheelEvent(event);
 }
 
 void CSVRender::PagedWorldspaceWidget::updateOverlay()
@@ -405,7 +596,8 @@ std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
 : WorldspaceWidget (document, parent), mDocument (document), mWorldspace ("std::default"),
-  mControlElements(NULL), mDisplayCellCoord(true), mOverlayMask(NULL)
+  mControlElements(NULL), mDisplayCellCoord(true), mOverlayMask(NULL),
+  mCurrentObj(""), mMouseState(Mouse_Default), mOldPos(0,0)
 {
     QAbstractItemModel *cells =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells);
@@ -607,6 +799,30 @@ void CSVRender::PagedWorldspaceWidget::cellAdded (const QModelIndex& index, int 
         flagAsModified();
 }
 
+std::pair<std::string, Ogre::Vector3> CSVRender::PagedWorldspaceWidget::isObjectUnderCursor(float mouseX, float mouseY)
+{
+    std::pair<std::string, Ogre::Vector3> result = CSVWorld::PhysicsSystem::instance()->castRay(
+                                                mouseX, mouseY, NULL, NULL, getCamera());
+    if(result.first != "")
+    {
+        QString name  = QString(result.first.c_str());
+        if(!name.contains(QRegExp("^HeightField")))
+        {
+            std::string sceneNode =
+                CSVWorld::PhysicsSystem::instance()->referenceToSceneNode(result.first);
+
+            uint32_t visibilityMask = getCamera()->getViewport()->getVisibilityMask();
+            bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
+
+            if(!ignoreObjects && getSceneManager()->hasSceneNode(sceneNode))
+            {
+                return result;
+            }
+        }
+    }
+
+    return std::make_pair("", Ogre::Vector3(0,0,0));
+}
 
 void CSVRender::PagedWorldspaceWidget::debugMousePicking(float mouseX, float mouseY)
 {
