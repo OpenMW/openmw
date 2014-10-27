@@ -524,6 +524,9 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
 
     connect (view, SIGNAL (updateTitle()), this, SLOT (updateTitle()));
 
+    connect (view, SIGNAL (updateSubViewIndicies (SubView *)),
+        this, SLOT (updateSubViewIndicies (SubView *)));
+
     view->show();
 }
 

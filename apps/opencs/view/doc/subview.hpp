@@ -25,12 +25,13 @@ namespace CSVDoc
             Q_OBJECT
 
             CSMWorld::UniversalId mUniversalId;
-            View *mParent;
 
             // not implemented
             SubView (const SubView&);
             SubView& operator= (SubView&);
+
         protected:
+
             void setUniversalId(const CSMWorld::UniversalId& id);
 
         public:
@@ -47,8 +48,6 @@ namespace CSVDoc
             virtual void useHint (const std::string& hint);
             ///< Default implementation: ignored
 
-            void setParent(View *parent) { mParent = parent; }
-
             virtual std::string getTitle() const;
 
             virtual void updateUserSetting (const QString& name, const QStringList& value);
@@ -64,6 +63,8 @@ namespace CSVDoc
             void closeRequest (SubView *subView);
 
             void updateTitle();
+
+            void updateSubViewIndicies (SubView *view = 0);
 
         protected slots:
 

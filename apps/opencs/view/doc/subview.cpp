@@ -3,7 +3,7 @@
 #include "view.hpp"
 
 CSVDoc::SubView::SubView (const CSMWorld::UniversalId& id)
- : mUniversalId (id), mParent (NULL)
+ : mUniversalId (id)
 {
     /// \todo  add a button to the title bar that clones this sub view
 
@@ -31,9 +31,7 @@ void CSVDoc::SubView::setUniversalId (const CSMWorld::UniversalId& id)
 
 void CSVDoc::SubView::closeEvent (QCloseEvent *event)
 {
-    // update title bars of view and subviews
-    if(mParent)
-        mParent->updateSubViewIndicies(this);
+    emit updateSubViewIndicies (this);
 }
 
 std::string CSVDoc::SubView::getTitle() const

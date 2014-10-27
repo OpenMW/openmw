@@ -112,9 +112,6 @@ namespace CSVDoc
             /// Function called by view manager when user preferences are updated
             void updateEditorSetting (const QString &, const QString &);
 
-            // called when subviews are added or removed
-            void updateSubViewIndicies(SubView *view = 0);
-
         signals:
 
             void newGameRequest();
@@ -138,6 +135,9 @@ namespace CSVDoc
             void updateUserSetting (const QString &, const QStringList &);
 
             void updateTitle();
+
+            // called when subviews are added or removed
+            void updateSubViewIndicies (SubView *view = 0);
 
         private slots:
 
