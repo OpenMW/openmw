@@ -94,6 +94,20 @@ public:
     void getVector3s(std::vector<Ogre::Vector3> &vec, size_t size);
     void getVector4s(std::vector<Ogre::Vector4> &vec, size_t size);
     void getQuaternions(std::vector<Ogre::Quaternion> &quat, size_t size);
+
+    ///Return a vector of whatever object is needed
+    template <typename T>
+    std::vector<T> getItems(size_t number_of_items)
+    {
+        std::vector<T> items;
+        items.reserve(number_of_items);
+        for(size_t i=0; i < number_of_items; ++i)
+        {
+            items.push_back(get<T>());
+        }
+        return items;
+    }
+
 };
 
 }
