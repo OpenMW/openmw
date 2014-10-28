@@ -40,6 +40,10 @@ namespace CSVRender
             QPoint mOldPos;
             std::string mCurrentObj;
             QElapsedTimer *mMouseEventTimer;
+            Ogre::Plane *mPlane;
+            Ogre::SceneNode *mObjSceneNode;
+            Ogre::Vector3 mOrigObjPos;
+            Ogre::Vector3 mOrigMousePos;
 
         private:
 
@@ -66,6 +70,7 @@ namespace CSVRender
             virtual std::string getStartupInstruction();
 
             std::pair<std::string, Ogre::Vector3> isObjectUnderCursor(float mouseX, float mouseY);
+            std::pair<bool, Ogre::Vector3> mousePositionOnPlane(QMouseEvent *event, Ogre::Plane &plane);
             void debugMousePicking(float mouseX, float mouseY);
             void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);
 
