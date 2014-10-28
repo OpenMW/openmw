@@ -26,7 +26,6 @@ namespace CSVRender
             bool mDisplayCellCoord;
             std::map<CSMWorld::CellCoordinates, TextOverlay *> mTextOverlays;
             OverlayMask *mOverlayMask;
-            std::map<std::string, std::vector<std::string> > mSelectedEntities;
 
         private:
 
@@ -51,9 +50,6 @@ namespace CSVRender
             virtual void referenceAdded (const QModelIndex& index, int start, int end);
 
             virtual std::string getStartupInstruction();
-
-            void debugMousePicking(float mouseX, float mouseY);
-            void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);
 
         public:
 

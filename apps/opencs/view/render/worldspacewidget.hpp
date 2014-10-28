@@ -34,6 +34,8 @@ namespace CSVRender
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
 
+            std::map<std::string, std::vector<std::string> > mSelectedEntities;
+
         public:
 
             enum DropType
@@ -53,6 +55,7 @@ namespace CSVRender
             };
 
             WorldspaceWidget (CSMDoc::Document& document, QWidget *parent = 0);
+            ~WorldspaceWidget ();
 
             CSVWidget::SceneToolMode *makeNavigationSelector (CSVWidget::SceneToolbar *parent);
             ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
@@ -90,6 +93,10 @@ namespace CSVRender
 
             virtual void updateOverlay();
 
+            virtual void mouseReleaseEvent (QMouseEvent *event);
+
+            virtual void mouseDoubleClickEvent (QMouseEvent *event);
+
         private:
 
             void dragEnterEvent(QDragEnterEvent *event);
@@ -99,6 +106,9 @@ namespace CSVRender
             void dragMoveEvent(QDragMoveEvent *event);
 
             virtual std::string getStartupInstruction() = 0;
+
+            void debugMousePicking(float mouseX, float mouseY);
+            void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);
 
         private slots:
 
