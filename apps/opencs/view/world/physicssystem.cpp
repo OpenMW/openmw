@@ -37,26 +37,35 @@ namespace CSVWorld
     }
 
     void PhysicsSystem::addObject(const std::string &mesh,
-            const std::string &name, const std::string &referenceId, float scale,
+            const std::string &sceneNodeName, const std::string &referenceId, float scale,
             const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, bool placeable)
     {
-        mRefToSceneNode[referenceId] = name;
+        mRefToSceneNode[referenceId] = sceneNodeName;
+        mSceneNodeToMesh[sceneNodeName] = mesh;
 
-        mEngine->createAndAdjustRigidBody(mesh, referenceId, scale, position, rotation,
-                                          0,    // scaledBoxTranslation
-                                          0,    // boxRotation
-                                          true, // raycasting
-                                          placeable);
+        mEngine->createAndAdjustRigidBody(mesh,
+                referenceId, scale, position, rotation,
+                0,    // scaledBoxTranslation
+                0,    // boxRotation
+                true, // raycasting
+                placeable);
     }
 
-    void PhysicsSystem::removeObject(const std::string& name)
+    void PhysicsSystem::removeObject(const std::string &referenceId)
     {
-        mEngine->removeRigidBody(name);
-        mEngine->deleteRigidBody(name);
+        mEngine->removeRigidBody(referenceId);
+        mEngine->deleteRigidBody(referenceId);
     }
 
-    void PhysicsSystem::addHeightField(float* heights, int x, int y, float yoffset,
-                                       float triSize, float sqrtVerts)
+    void PhysicsSystem::moveObject(const std::string &referenceId,
+            const Ogre::Vector3 &position, const Ogre::Quaternion &rotation)
+    {
+        mEngine->adjustRigidBody(mEngine->getRigidBody(referenceId, true /*raycasting*/),
+                position, rotation);
+    }
+
+    void PhysicsSystem::addHeightField(float* heights,
+            int x, int y, float yoffset, float triSize, float sqrtVerts)
     {
         mEngine->addHeightField(heights, x, y, yoffset, triSize, sqrtVerts);
     }
@@ -66,8 +75,8 @@ namespace CSVWorld
         mEngine->removeHeightField(x, y);
     }
 
-    std::pair<std::string, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY,
-                            Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera)
+    std::pair<std::string, Ogre::Vector3> PhysicsSystem::castRay(float mouseX,
+            float mouseY, Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera)
     {
         if(!mSceneMgr || !camera || !camera->getViewport())
             return std::make_pair("", Ogre::Vector3(0,0,0)); // FIXME: this should be an exception
@@ -102,9 +111,14 @@ namespace CSVWorld
             return std::make_pair(result.first, ray.getPoint(farClipDist*result.second));
     }
 
-    std::string PhysicsSystem::referenceToSceneNode(std::string reference)
+    std::string PhysicsSystem::referenceToSceneNode(std::string referenceId)
     {
-        return mRefToSceneNode[reference];
+        return mRefToSceneNode[referenceId];
+    }
+
+    std::string PhysicsSystem::sceneNodeToMesh(std::string sceneNodeName)
+    {
+        return mSceneNodeToMesh[sceneNodeName];
     }
 
     void PhysicsSystem::setSceneManager(Ogre::SceneManager *sceneMgr)
