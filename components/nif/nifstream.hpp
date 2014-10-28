@@ -84,6 +84,10 @@ public:
     ///This is special since the version string doesn't start with a number, and ends with "\n"
     std::string getVersionString();
 
+    //Templated functions to handle reads
+    template <typename T>
+    T get(){throw std::runtime_error("Can not get this type of data from a NIF File!");}
+
     void getShorts(std::vector<short> &vec, size_t size);
     void getFloats(std::vector<float> &vec, size_t size);
     void getVector2s(std::vector<Ogre::Vector2> &vec, size_t size);

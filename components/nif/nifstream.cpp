@@ -143,4 +143,33 @@ void NIFStream::getQuaternions(std::vector<Ogre::Quaternion> &quat, size_t size)
         quat[i] = getQuaternion();
 }
 
+template <>
+char NIFStream::get<char>(){ return getChar(); }
+template <>
+short NIFStream::get<short>(){ return getShort(); }
+template <>
+unsigned short NIFStream::get<unsigned short>(){ return getUShort(); }
+template <>
+int NIFStream::get<int>(){ return getInt(); }
+template <>
+unsigned int NIFStream::get<unsigned int>(){ return getUInt(); }
+template <>
+float NIFStream::get<float>(){ return getFloat(); }
+
+template <>
+Ogre::Vector2 NIFStream::get<Ogre::Vector2>(){ return getVector2(); }
+template <>
+Ogre::Vector3 NIFStream::get<Ogre::Vector3>(){ return getVector3(); }
+template <>
+Ogre::Vector4 NIFStream::get<Ogre::Vector4>(){ return getVector4(); }
+template <>
+Ogre::Matrix3 NIFStream::get<Ogre::Matrix3>(){ return getMatrix3(); }
+template <>
+Ogre::Quaternion NIFStream::get<Ogre::Quaternion>(){ return getQuaternion(); }
+template <>
+Transformation NIFStream::get<Transformation>(){ return getTrafo(); }
+
+template <>
+std::string NIFStream::get<std::string>(){ return getString(); }
+
 }
