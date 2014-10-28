@@ -8,8 +8,6 @@
 #include "worldspacewidget.hpp"
 #include "cell.hpp"
 
-class QElapsedTimer;
-
 namespace CSVRender
 {
 
@@ -28,21 +26,6 @@ namespace CSVRender
             bool mDisplayCellCoord;
             std::map<CSMWorld::CellCoordinates, TextOverlay *> mTextOverlays;
             OverlayMask *mOverlayMask;
-
-            enum MouseState {
-                Mouse_Grab,
-                Mouse_Drag,
-                Mouse_Edit,
-                Mouse_Default
-            };
-            MouseState mMouseState;
-            QPoint mOldPos;
-            std::string mCurrentObj;
-            QElapsedTimer *mMouseEventTimer;
-            Ogre::Plane *mPlane;
-            Ogre::SceneNode *mObjSceneNode;
-            Ogre::Vector3 mOrigObjPos;
-            Ogre::Vector3 mOrigMousePos;
 
         private:
 
@@ -67,11 +50,6 @@ namespace CSVRender
             virtual void referenceAdded (const QModelIndex& index, int start, int end);
 
             virtual std::string getStartupInstruction();
-
-            std::pair<std::string, Ogre::Vector3> isObjectUnderCursor(float mouseX, float mouseY);
-            std::pair<bool, Ogre::Vector3> mousePositionOnPlane(QMouseEvent *event, Ogre::Plane &plane);
-            void debugMousePicking(float mouseX, float mouseY);
-            void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);
 
         public:
 
@@ -103,11 +81,9 @@ namespace CSVRender
 
             virtual void updateOverlay();
 
-            virtual void mouseMoveEvent (QMouseEvent *event);
-            virtual void mousePressEvent (QMouseEvent *event);
             virtual void mouseReleaseEvent (QMouseEvent *event);
+
             virtual void mouseDoubleClickEvent (QMouseEvent *event);
-            virtual void wheelEvent (QWheelEvent *event);
 
         signals:
 
