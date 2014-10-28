@@ -75,8 +75,6 @@ namespace CSVDoc
 
             void setupUi();
 
-            void updateTitle(const std::string subview = "");
-
             void updateActions();
 
             void exitApplication();
@@ -114,9 +112,6 @@ namespace CSVDoc
             /// Function called by view manager when user preferences are updated
             void updateEditorSetting (const QString &, const QString &);
 
-            // called when subviews are added or removed
-            void updateSubViewIndicies(SubView *view = 0);
-
         signals:
 
             void newGameRequest();
@@ -138,6 +133,11 @@ namespace CSVDoc
             void abortOperation (int type);
 
             void updateUserSetting (const QString &, const QStringList &);
+
+            void updateTitle();
+
+            // called when subviews are added or removed
+            void updateSubViewIndicies (SubView *view = 0);
 
         private slots:
 
@@ -222,6 +222,8 @@ namespace CSVDoc
             void run (const std::string& profile, const std::string& startupInstruction = "");
 
             void stop();
+
+            void closeRequest (SubView *subView);
     };
 }
 

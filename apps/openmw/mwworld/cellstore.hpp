@@ -149,6 +149,17 @@ namespace MWWorld
                     forEachImp (functor, mCreatureLists);
             }
 
+            template<class Functor>
+            bool forEachContainer (Functor& functor)
+            {
+                mHasState = true;
+
+                return
+                    forEachImp (functor, mContainers) &&
+                    forEachImp (functor, mCreatures) &&
+                    forEachImp (functor, mNpcs);
+            }
+
             bool isExterior() const;
 
             Ptr searchInContainer (const std::string& id);

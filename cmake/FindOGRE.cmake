@@ -382,7 +382,6 @@ endmacro()
 ogre_find_component(Paging OgrePaging.h)
 # look for Overlay component
 ogre_find_component(Overlay OgreOverlaySystem.h)
-ogre_find_component(Overlay OgreOverlay.h)
 # look for Terrain component
 ogre_find_component(Terrain OgreTerrain.h)
 # look for Property component

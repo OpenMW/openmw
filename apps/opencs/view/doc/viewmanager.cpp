@@ -144,7 +144,7 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
     mViews.push_back (view);
 
     std::string showStatusBar =
-        CSMSettings::UserSettings::instance().settingValue("Display/show statusbar").toStdString();
+        CSMSettings::UserSettings::instance().settingValue("window/show-statusbar").toStdString();
 
     view->toggleStatusBar (showStatusBar == "true");
     view->show();

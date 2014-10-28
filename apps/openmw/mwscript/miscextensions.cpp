@@ -454,7 +454,8 @@ namespace MWScript
                         if (::Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), item))
                         {
                             int removed = store.remove(*iter, toRemove, ptr);
-                            MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, removed);
+                            MWWorld::Ptr dropped = MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, removed);
+                            dropped.getCellRef().setOwner("");
 
                             toRemove -= removed;
 

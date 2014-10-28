@@ -105,7 +105,7 @@ void CSVDoc::View::setupViewMenu()
     mShowStatusBar->setCheckable (true);
     connect (mShowStatusBar, SIGNAL (toggled (bool)), this, SLOT (toggleShowStatusBar (bool)));
     std::string showStatusBar =
-        CSMSettings::UserSettings::instance().settingValue("Display/show statusbar").toStdString();
+        CSMSettings::UserSettings::instance().settingValue("window/show-statusbar").toStdString();
     if(showStatusBar == "true")
         mShowStatusBar->setChecked(true);
     view->addAction (mShowStatusBar);
@@ -300,7 +300,7 @@ void CSVDoc::View::setupUi()
     setupDebugMenu();
 }
 
-void CSVDoc::View::updateTitle(const std::string subview)
+void CSVDoc::View::updateTitle()
 {
     std::ostringstream stream;
 
@@ -312,8 +312,13 @@ void CSVDoc::View::updateTitle(const std::string subview)
     if (mViewTotal>1)
         stream << " [" << (mViewIndex+1) << "/" << mViewTotal << "]";
 
-    if (subview != "")
-        stream << " - " << subview;
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+
+    bool hideTitle = userSettings.setting ("window/hide-subview", QString ("false"))=="true" &&
+        mSubViews.size()==1 && !mSubViews.at (0)->isFloating();
+
+    if (hideTitle)
+        stream << " - " << mSubViews.at (0)->getTitle();
 
     setWindowTitle (stream.str().c_str());
 }
@@ -323,24 +328,26 @@ void CSVDoc::View::updateSubViewIndicies(SubView *view)
     if(view && mSubViews.contains(view))
         mSubViews.removeOne(view);
 
-    if(mSubViews.size() == 1)
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+
+    bool hideTitle = userSettings.setting ("window/hide-subview", QString ("false"))=="true" &&
+        mSubViews.size()==1 && !mSubViews.at (0)->isFloating();
+
+    updateTitle();
+
+    foreach (SubView *subView, mSubViews)
     {
-        if(!mSubViews.at(0)->isFloating())
+        if (!subView->isFloating())
         {
-            mSubViews.at(0)->setTitleBarWidget(new QWidget(this));
-            updateTitle(mSubViews.at(0)->getUniversalId().getTypeName().c_str());
-        }
-    }
-    else
-    {
-        updateTitle();
-        if(mSubViews.size() > 1)
-        {
-            foreach(SubView * sb, mSubViews)
+            if (hideTitle)
             {
-                QWidget * tb = sb->titleBarWidget();
-                if(tb) delete tb;
-                sb->setTitleBarWidget(0);
+                subView->setTitleBarWidget (new QWidget (this));
+                subView->setWindowTitle (QString::fromUtf8 (subView->getTitle().c_str()));
+            }
+            else
+            {
+                delete subView->titleBarWidget();
+                subView->setTitleBarWidget (0);
             }
         }
     }
@@ -513,10 +520,12 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&, const std::string&)));
 
-    connect (&CSMSettings::UserSettings::instance(),
-             SIGNAL (userSettingUpdated (const QString &, const QStringList &)),
-             view,
-             SLOT (updateUserSetting (const QString &, const QStringList &)));
+    connect (view, SIGNAL (closeRequest (SubView *)), this, SLOT (closeRequest (SubView *)));
+
+    connect (view, SIGNAL (updateTitle()), this, SLOT (updateTitle()));
+
+    connect (view, SIGNAL (updateSubViewIndicies (SubView *)),
+        this, SLOT (updateSubViewIndicies (SubView *)));
 
     view->show();
 }
@@ -729,9 +738,16 @@ void CSVDoc::View::resizeViewHeight (int height)
         resize (geometry().width(), height);
 }
 
-void CSVDoc::View::updateUserSetting
-                                (const QString &name, const QStringList &list)
-{}
+void CSVDoc::View::updateUserSetting (const QString &name, const QStringList &list)
+{
+    if (name=="window/hide-subview")
+        updateSubViewIndicies (0);
+
+    foreach (SubView *subView, mSubViews)
+    {
+        subView->updateUserSetting (name, list);
+    }
+}
 
 void CSVDoc::View::toggleShowStatusBar (bool show)
 {
@@ -760,4 +776,15 @@ void CSVDoc::View::run (const std::string& profile, const std::string& startupIn
 void CSVDoc::View::stop()
 {
     mDocument->stopRunning();
+}
+
+void CSVDoc::View::closeRequest (SubView *subView)
+{
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+
+    if (mSubViews.size()>1 || mViewTotal<=1 ||
+        userSettings.setting ("window/hide-subview", QString ("false"))!="true")
+        subView->deleteLater();
+    else if (mViewManager.closeRequest (this))
+        mViewManager.removeDocAndView (mDocument);
 }

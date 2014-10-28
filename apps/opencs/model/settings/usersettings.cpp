@@ -120,12 +120,23 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         reuse->setToolTip ("When a new subview is requested and a matching subview already "
             " exist, do not open a new subview and use the existing one instead.");
 
+        Setting *statusBar = createSetting (Type_CheckBox, "show-statusbar", "Show Status Bar");
+        statusBar->setDefaultValue ("true");
+        statusBar->setToolTip ("If a newly open top level window is showing status bars or not. "
+            " Note that this does not affect existing windows.");
+
         Setting *maxSubView = createSetting (Type_SpinBox, "max-subviews",
             "Maximum number of subviews per top-level window");
         maxSubView->setDefaultValue (256);
         maxSubView->setRange (1, 256);
         maxSubView->setToolTip ("If the maximum number is reached and a new subview is opened "
             "it will be placed into a new top-level window.");
+
+        Setting *hide = createSetting (Type_CheckBox, "hide-subview", "Hide single subview");
+        hide->setDefaultValue ("false");
+        hide->setToolTip ("When a view contains only a single subview, hide the subview title "
+            "bar and if this subview is closed also close the view (unless it is the last "
+            "view for this document)");
 
         Setting *minWidth = createSetting (Type_SpinBox, "minimum-width",
             "Minimum subview width");
@@ -156,6 +167,53 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         mousePicking->setDefaultValue ("false");
         mousePicking->setToolTip ("Enable redering debug information for mouse picking. "
             "This option may be removed in future once the mouse picking feature is completed.");
+    }
+
+    declareSection ("table-input", "Table Input");
+    {
+        QString inPlaceEdit ("Edit in Place");
+        QString editRecord ("Edit Record");
+        QString view ("View");
+        QString editRecordAndClose ("Edit Record and Close");
+
+        QStringList values;
+        values
+            << "None" << inPlaceEdit << editRecord << view << "Revert" << "Delete"
+            << editRecordAndClose << "View and Close";
+
+        QString toolTip = "<ul>"
+            "<li>None</li>"
+            "<li>Edit in Place: Edit the clicked cell</li>"
+            "<li>Edit Record: Open a dialogue subview for the clicked record</li>"
+            "<li>View: Open a scene subview for the clicked record (not available everywhere)</li>"
+            "<li>Revert: Revert record</li>"
+            "<li>Delete: Delete recordy</li>"
+            "<li>Edit Record and Close: Open a dialogue subview for the clicked record and close the table subview</li>"
+            "<li>View And Close: Open a scene subview for the clicked record and close the table subview</li>"
+            "</ul>";
+
+        Setting *doubleClick = createSetting (Type_ComboBox, "double", "Double Click");
+        doubleClick->setDeclaredValues (values);
+        doubleClick->setDefaultValue (inPlaceEdit);
+        doubleClick->setToolTip ("Action on double click in table:<p>" + toolTip);
+
+        Setting *shiftDoubleClick = createSetting (Type_ComboBox, "double-s",
+            "Shift Double Click");
+        shiftDoubleClick->setDeclaredValues (values);
+        shiftDoubleClick->setDefaultValue (editRecord);
+        shiftDoubleClick->setToolTip ("Action on shift double click in table:<p>" + toolTip);
+
+        Setting *ctrlDoubleClick = createSetting (Type_ComboBox, "double-c",
+            "Control Double Click");
+        ctrlDoubleClick->setDeclaredValues (values);
+        ctrlDoubleClick->setDefaultValue (view);
+        ctrlDoubleClick->setToolTip ("Action on control double click in table:<p>" + toolTip);
+
+        Setting *shiftCtrlDoubleClick = createSetting (Type_ComboBox, "double-sc",
+            "Shift Control Double Click");
+        shiftCtrlDoubleClick->setDeclaredValues (values);
+        shiftCtrlDoubleClick->setDefaultValue (editRecordAndClose);
+        shiftCtrlDoubleClick->setToolTip ("Action on shift control double click in table:<p>" + toolTip);
     }
 
     {

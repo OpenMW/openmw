@@ -30,8 +30,7 @@ int VideoWidget::getVideoHeight()
 
 bool VideoWidget::update()
 {
-    mPlayer.update();
-    return mPlayer.isPlaying();
+    return mPlayer.update();
 }
 
 void VideoWidget::stop()

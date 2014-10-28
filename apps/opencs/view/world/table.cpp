@@ -177,6 +177,79 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
     menu.exec (event->globalPos());
 }
 
+void CSVWorld::Table::mouseDoubleClickEvent (QMouseEvent *event)
+{
+    Qt::KeyboardModifiers modifiers =
+        event->modifiers() & (Qt::ShiftModifier | Qt::ControlModifier);
+
+    QModelIndex index = currentIndex();
+
+    selectionModel()->select (index,
+        QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+    std::map<Qt::KeyboardModifiers, DoubleClickAction>::iterator iter =
+        mDoubleClickActions.find (modifiers);
+
+    if (iter==mDoubleClickActions.end())
+    {
+        event->accept();
+        return;
+    }
+
+    switch (iter->second)
+    {
+        case Action_None:
+
+            event->accept();
+            break;
+
+        case Action_InPlaceEdit:
+
+            DragRecordTable::mouseDoubleClickEvent (event);
+            break;
+
+        case Action_EditRecord:
+
+            event->accept();
+            editRecord();
+            break;
+
+        case Action_View:
+
+            event->accept();
+            viewRecord();
+            break;
+
+        case Action_Revert:
+
+            event->accept();
+            if (mDispatcher->canRevert())
+                mDispatcher->executeRevert();
+            break;
+
+        case Action_Delete:
+
+            event->accept();
+            if (mDispatcher->canDelete())
+                mDispatcher->executeDelete();
+            break;
+
+        case Action_EditRecordAndClose:
+
+            event->accept();
+            editRecord();
+            emit closeRequest();
+            break;
+
+        case Action_ViewAndClose:
+
+            event->accept();
+            viewRecord();
+            emit closeRequest();
+            break;
+    }
+}
+
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     bool createAndDelete, bool sorting, CSMDoc::Document& document)
 : mCreateAction (0), mCloneAction(0), mRecordStatusDisplay (0),
@@ -284,6 +357,11 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
         this, SLOT (selectionSizeUpdate ()));
 
     setAcceptDrops(true);
+
+    mDoubleClickActions.insert (std::make_pair (0, Action_InPlaceEdit));
+    mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier, Action_EditRecord));
+    mDoubleClickActions.insert (std::make_pair (Qt::ControlModifier, Action_View));
+    mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier | Qt::ControlModifier, Action_EditRecordAndClose));
 }
 
 void CSVWorld::Table::setEditLock (bool locked)
@@ -404,6 +482,9 @@ void CSVWorld::Table::editCell()
 
 void CSVWorld::Table::viewRecord()
 {
+    if (!(mModel->getFeatures() & CSMWorld::IdTableBase::Feature_View))
+        return;
+
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
     if (selectedRows.size()==1)
@@ -439,18 +520,59 @@ void CSVWorld::Table::previewRecord()
 void CSVWorld::Table::updateUserSetting
                                 (const QString &name, const QStringList &list)
 {
-    int columns = mModel->columnCount();
+    if (name=="records/type-format" || name=="records/status-format")
+    {
+        int columns = mModel->columnCount();
 
-    for (int i=0; i<columns; ++i)
-        if (QAbstractItemDelegate *delegate = itemDelegateForColumn (i))
-        {
-            dynamic_cast<CommandDelegate&>
-                                    (*delegate).updateUserSetting (name, list);
+        for (int i=0; i<columns; ++i)
+            if (QAbstractItemDelegate *delegate = itemDelegateForColumn (i))
             {
-                emit dataChanged (mModel->index (0, i),
-                                  mModel->index (mModel->rowCount()-1, i));
+                dynamic_cast<CommandDelegate&>
+                                        (*delegate).updateUserSetting (name, list);
+                {
+                    emit dataChanged (mModel->index (0, i),
+                                    mModel->index (mModel->rowCount()-1, i));
+                }
             }
-        }
+        return;
+    }
+
+    QString base ("table-input/double");
+    if (name.startsWith (base))
+    {
+        QString modifierString = name.mid (base.size());
+        Qt::KeyboardModifiers modifiers = 0;
+
+        if (modifierString=="-s")
+            modifiers = Qt::ShiftModifier;
+        else if (modifierString=="-c")
+            modifiers = Qt::ControlModifier;
+        else if (modifierString=="-sc")
+            modifiers = Qt::ShiftModifier | Qt::ControlModifier;
+
+        DoubleClickAction action = Action_None;
+
+        QString value = list.at (0);
+
+        if (value=="Edit in Place")
+            action = Action_InPlaceEdit;
+        else if (value=="Edit Record")
+            action = Action_EditRecord;
+        else if (value=="View")
+            action = Action_View;
+        else if (value=="Revert")
+            action = Action_Revert;
+        else if (value=="Delete")
+            action = Action_Delete;
+        else if (value=="Edit Record and Close")
+            action = Action_EditRecordAndClose;
+        else if (value=="View and Close")
+            action = Action_ViewAndClose;
+
+        mDoubleClickActions[modifiers] = action;
+
+        return;
+    }
 }
 
 void CSVWorld::Table::tableSizeUpdate()
@@ -567,7 +689,6 @@ std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::Column
 
 std::vector< CSMWorld::UniversalId > CSVWorld::Table::getDraggedRecords() const
 {
-
     QModelIndexList selectedRows = selectionModel()->selectedRows();
     std::vector<CSMWorld::UniversalId> idToDrag;
 

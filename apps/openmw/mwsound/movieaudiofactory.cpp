@@ -44,8 +44,8 @@ namespace MWSound
 
         size_t getSampleOffset()
         {
-            ssize_t clock_delay = (mFrameSize-mFramePos) / mAVStream->codec->channels /
-                                  av_get_bytes_per_sample(mAVStream->codec->sample_fmt);
+            ssize_t clock_delay = (mFrameSize-mFramePos) / av_get_channel_layout_nb_channels(mOutputChannelLayout) /
+                                  av_get_bytes_per_sample(mOutputSampleFormat);
             return (size_t)(mAudioClock*mAVStream->codec->sample_rate) - clock_delay;
         }
 
@@ -64,20 +64,20 @@ namespace MWSound
 
         virtual void adjustAudioSettings(AVSampleFormat& sampleFormat, uint64_t& channelLayout, int& sampleRate)
         {
-            if (sampleFormat == AV_SAMPLE_FMT_U8P)
+            if (sampleFormat == AV_SAMPLE_FMT_U8P || sampleFormat == AV_SAMPLE_FMT_U8)
                 sampleFormat = AV_SAMPLE_FMT_U8;
-            else if (sampleFormat == AV_SAMPLE_FMT_S16P)
+            else if (sampleFormat == AV_SAMPLE_FMT_S16P || sampleFormat == AV_SAMPLE_FMT_S16)
                 sampleFormat = AV_SAMPLE_FMT_S16;
-            else if (sampleFormat == AV_SAMPLE_FMT_FLTP)
-                sampleFormat = AV_SAMPLE_FMT_FLT;
+            else if (sampleFormat == AV_SAMPLE_FMT_FLTP || sampleFormat == AV_SAMPLE_FMT_FLT)
+                sampleFormat = AV_SAMPLE_FMT_S16; // FIXME: check for AL_EXT_FLOAT32 support
             else
-                sampleFormat = AV_SAMPLE_FMT_FLT;
+                sampleFormat = AV_SAMPLE_FMT_S16;
 
-            if (channelLayout != AV_CH_LAYOUT_MONO
-                    && channelLayout != AV_CH_LAYOUT_5POINT1
-                    && channelLayout != AV_CH_LAYOUT_7POINT1
-                    && channelLayout != AV_CH_LAYOUT_STEREO
-                    && channelLayout != AV_CH_LAYOUT_QUAD)
+            if (channelLayout == AV_CH_LAYOUT_5POINT1 || channelLayout == AV_CH_LAYOUT_7POINT1
+                    || channelLayout == AV_CH_LAYOUT_QUAD) // FIXME: check for AL_EXT_MCFORMATS support
+                channelLayout = AV_CH_LAYOUT_STEREO;
+            else if (channelLayout != AV_CH_LAYOUT_MONO
+                     && channelLayout != AV_CH_LAYOUT_STEREO)
                 channelLayout = AV_CH_LAYOUT_STEREO;
         }
 
