@@ -106,43 +106,6 @@ std::string NIFStream::getVersionString()
     return inp->getLine();
 }
 
-void NIFStream::getShorts(std::vector<short> &vec, size_t size)
-{
-    vec.resize(size);
-    for(size_t i = 0;i < vec.size();i++)
-        vec[i] = getShort();
-}
-void NIFStream::getFloats(std::vector<float> &vec, size_t size)
-{
-    vec.resize(size);
-    for(size_t i = 0;i < vec.size();i++)
-        vec[i] = getFloat();
-}
-void NIFStream::getVector2s(std::vector<Ogre::Vector2> &vec, size_t size)
-{
-    vec.resize(size);
-    for(size_t i = 0;i < vec.size();i++)
-        vec[i] = getVector2();
-}
-void NIFStream::getVector3s(std::vector<Ogre::Vector3> &vec, size_t size)
-{
-    vec.resize(size);
-    for(size_t i = 0;i < vec.size();i++)
-        vec[i] = getVector3();
-}
-void NIFStream::getVector4s(std::vector<Ogre::Vector4> &vec, size_t size)
-{
-    vec.resize(size);
-    for(size_t i = 0;i < vec.size();i++)
-        vec[i] = getVector4();
-}
-void NIFStream::getQuaternions(std::vector<Ogre::Quaternion> &quat, size_t size)
-{
-    quat.resize(size);
-    for(size_t i = 0;i < quat.size();i++)
-        quat[i] = getQuaternion();
-}
-
 template <>
 char NIFStream::get<char>(){ return getChar(); }
 template <>

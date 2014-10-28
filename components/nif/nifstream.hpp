@@ -88,13 +88,6 @@ public:
     template <typename T>
     T get(){throw std::runtime_error("Can not get this type of data from a NIF File!");}
 
-    void getShorts(std::vector<short> &vec, size_t size);
-    void getFloats(std::vector<float> &vec, size_t size);
-    void getVector2s(std::vector<Ogre::Vector2> &vec, size_t size);
-    void getVector3s(std::vector<Ogre::Vector3> &vec, size_t size);
-    void getVector4s(std::vector<Ogre::Vector4> &vec, size_t size);
-    void getQuaternions(std::vector<Ogre::Quaternion> &quat, size_t size);
-
     ///Return a vector of whatever object is needed
     template <typename T>
     std::vector<T> getItems(size_t number_of_items)
