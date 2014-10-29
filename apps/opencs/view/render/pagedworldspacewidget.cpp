@@ -184,7 +184,7 @@ void CSVRender::PagedWorldspaceWidget::mousePressEvent (QMouseEvent *event)
             }
         }
     }
-    WorldspaceWidget::mouseReleaseEvent(event);
+    WorldspaceWidget::mousePressEvent(event);
 }
 
 void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
