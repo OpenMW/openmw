@@ -113,7 +113,9 @@ namespace
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
 : SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0),
-  mCurrentObj(""), mMouseState(Mouse_Default), mOldPos(0,0), mMouseEventTimer(0), mPlane(0)
+  mCurrentObj(""), mMouseState(Mouse_Default), mOldPos(0,0), mMouseEventTimer(0), mPlane(0),
+  mGrabbedSceneNode(""), mOrigObjPos(Ogre::Vector3()), mOrigMousePos(Ogre::Vector3()),
+  mCurrentMousePos(Ogre::Vector3()), mZOffset(0.0f)
 {
     setAcceptDrops(true);
 
@@ -461,10 +463,11 @@ void CSVRender::WorldspaceWidget::updateOverlay()
 // State machine:
 //
 // [default] mousePressEvent->check if the mouse is pointing at an object
-//         if yes, go to [grab] else stay at [default]
+//         if yes, create collision planes then go to [grab]
+//         else check for terrain
 //
-// [grab] mouseReleaseEvent->if same button and new obj, go to [edit]
-//         mouseMoveEvent->if same button, create collision planes then go to [drag]
+// [grab]  mouseReleaseEvent->if same button and new obj, go to [edit]
+//         mouseMoveEvent->if same button, go to [drag]
 //         other mouse events or buttons, go back to [default] (i.e. like 'cancel')
 //
 // [drag]  mouseReleaseEvent->if same button, place the object at the new
@@ -499,34 +502,29 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
                 // check if min elapsed time to stop false detection of drag
                 if(!mMouseEventTimer->isValid() || !mMouseEventTimer->hasExpired(100)) // ms
                     break;
-                else
-                {
-                    mMouseEventTimer->invalidate();
 
-                    mMouseState = Mouse_Drag;
-                    //std::cout << "grab->drag" << std::endl;
-                }
+                mMouseEventTimer->invalidate();
+                mMouseState = Mouse_Drag;
 
                 /* FALL_THROUGH */
             }
             case Mouse_Drag:
             {
-                // FIXME: don't update less than a quantum
-                //QPoint diff = mOldPos-event->pos();
-                if(event->pos() != mOldPos)
+                if(event->pos() != mOldPos) // TODO: maybe don't update less than a quantum?
                 {
                     mOldPos = event->pos();
-                    //std::cout << QString::number(event->pos().x()).toStdString() << ", "
-                              //<< QString::number(event->pos().y()).toStdString() << std::endl;
 
                     // ray test against the plane to provide feedback to the user the
                     // relative movement of the object on the x-y plane
-                    std::pair<bool, Ogre::Vector3> planeResult = mousePositionOnPlane(event, *mPlane);
+                    std::pair<bool, Ogre::Vector3> planeResult = mousePositionOnPlane(event->pos(), *mPlane);
                     if(planeResult.first)
                     {
-                        if(mObjSceneNode)
+                        if(mGrabbedSceneNode != "")
                         {
-                            mObjSceneNode->setPosition(mOrigObjPos+planeResult.second-mOrigMousePos);
+                            Ogre::Vector3 pos = mOrigObjPos;
+                            pos.z += mZOffset;
+                            getSceneManager()->getSceneNode(mGrabbedSceneNode)->setPosition(pos+planeResult.second-mOrigMousePos);
+                            mCurrentMousePos = planeResult.second;
                             flagAsModified();
                         }
                     }
@@ -546,52 +544,59 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 
 void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
 {
-    if(event->buttons() & Qt::RightButton)
+    switch(mMouseState)
     {
-        switch(mMouseState)
+        case Mouse_Grab:
+        case Mouse_Drag:
         {
-            case Mouse_Grab:
-            case Mouse_Drag:
+            if(event->buttons() & ~Qt::RightButton)
             {
-                break; // error event, ignore
+                // cancel operation & return the object to the original position
+                placeObject(mGrabbedSceneNode, mOrigObjPos);
+                mMouseState = Mouse_Default;
+
+                // reset states
+                mCurrentMousePos = Ogre::Vector3();
+                mOrigMousePos = Ogre::Vector3();
+                mOrigObjPos = Ogre::Vector3();
+                mGrabbedSceneNode = "";
+                mCurrentObj = "";
+                mOldPos = QPoint(0, 0);
+                mMouseEventTimer->invalidate();
+                mZOffset = 0.0f;
             }
-            case Mouse_Edit:
-            case Mouse_Default:
+            break;
+        }
+        case Mouse_Edit:
+        case Mouse_Default:
+        {
+            if(event->buttons() & Qt::RightButton)
             {
-                if(!getCamera()->getViewport())
+                std::pair<std::string, Ogre::Vector3> result = objectUnderCursor(event->x(), event->y());
+                if(result.first == "")
                     break;
 
-                std::pair<std::string, Ogre::Vector3> result = isObjectUnderCursor(
-                    (float) event->x() / getCamera()->getViewport()->getActualWidth(),
-                    (float) event->y() / getCamera()->getViewport()->getActualHeight());
-                if(result.first != "")
+                mGrabbedSceneNode = result.first;
+                // ray test agaist the plane to get a starting position of the
+                // mouse in relation to the object position
+                mPlane->redefine(Ogre::Vector3::UNIT_Z, result.second);
+                std::pair<bool, Ogre::Vector3> planeResult = mousePositionOnPlane(event->pos(), *mPlane);
+                if(planeResult.first)
                 {
-                    mCurrentObj = result.first; // FIXME
-                    // ray test agaist the plane to get a starting position of the
-                    // mouse in relation to the object position
-                    mPlane->redefine(Ogre::Vector3::UNIT_Z, result.second);
-                    std::pair<bool, Ogre::Vector3> planeResult = mousePositionOnPlane(event, *mPlane);
-                    if(planeResult.first)
-                        mOrigMousePos = planeResult.second;
-
-                    std::string sceneNodeName =
-                        CSVWorld::PhysicsSystem::instance()->referenceToSceneNode(result.first);
-                    mObjSceneNode = getSceneManager()->getSceneNode(sceneNodeName);
-                    mOrigObjPos = mObjSceneNode->getPosition();
-
-
-                    mMouseEventTimer->start();
-
-                    mMouseState = Mouse_Grab;
-                    //std::cout << "default/edit->grab" << std::endl;
+                    mOrigMousePos = planeResult.second;
+                    mCurrentMousePos = planeResult.second;
+                    mZOffset = 0.0f;
                 }
-                break;
+
+                mOrigObjPos = getSceneManager()->getSceneNode(mGrabbedSceneNode)->getPosition();
+                mMouseEventTimer->start();
+
+                mMouseState = Mouse_Grab;
             }
-            /* NO_DEFAULT_CASE */
+            break;
         }
+        /* NO_DEFAULT_CASE */
     }
-    // FIXME: other button press - cancel grab and/or drag and place the object back in the original
-    // position
     //SceneWidget::mousePressEvent(event);
 }
 
@@ -605,110 +610,98 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
             return;
         }
 
-        // FIXME: skip this if overlay clicked above
-        // FIXME: stop/disable the timer
         switch(mMouseState)
         {
             case Mouse_Grab:
             {
-                std::pair<std::string, Ogre::Vector3> result = isObjectUnderCursor(
-                    (float) event->x() / getCamera()->getViewport()->getActualWidth(),
-                    (float) event->y() / getCamera()->getViewport()->getActualHeight());
+                std::pair<std::string, Ogre::Vector3> result = objectUnderCursor(event->x(), event->y());
                 if(result.first != "")
                 {
                     if(result.first == mCurrentObj)
                     {
+                        // unselect object
                         mMouseState = Mouse_Default;
-                        //std::cout << "grab->default" << std::endl;
                         mCurrentObj = "";
                     }
                     else
                     {
+                        // select object
                         mMouseState = Mouse_Edit;
-                        //std::cout << "grab->edit" << std::endl;
                         mCurrentObj = result.first;
 
-
                         // print some debug info
-                        std::cout << "ReferenceId: " << result.first << std::endl;
-                        const CSMWorld::RefCollection& references = mDocument.getData().getReferences();
-                        int index = references.searchId(result.first);
-                        if (index != -1)
+                        if(isDebug())
                         {
-                            int columnIndex =
-                                references.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId);
-                            std::cout << "  index: " + QString::number(index).toStdString()
-                                      +", column index: " + QString::number(columnIndex).toStdString()
-                                      << std::endl;
+                            std::string referenceId =
+                                CSVWorld::PhysicsSystem::instance()->sceneNodeToRefId(result.first);
+                            std::cout << "ReferenceId: " << referenceId << std::endl;
+                            const CSMWorld::RefCollection& references = mDocument.getData().getReferences();
+                            int index = references.searchId(referenceId);
+                            if (index != -1)
+                            {
+                                int columnIndex =
+                                    references.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId);
+                                std::cout << "  index: " + QString::number(index).toStdString()
+                                          +", column index: " + QString::number(columnIndex).toStdString()
+                                          << std::endl;
+                            }
                         }
                     }
                     // update highlighting the current object
-                    std::string sceneNode =
-                        CSVWorld::PhysicsSystem::instance()->referenceToSceneNode(result.first);
-
-                    uint32_t visibilityMask = getCamera()->getViewport()->getVisibilityMask();
-                    bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
-
-                    if(!ignoreObjects && getSceneManager()->hasSceneNode(sceneNode))
-                    {
-                        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-                        if(userSettings.setting("debug/mouse-picking", QString("false")) == "true" ? true : false)
-                            updateSelectionHighlight(sceneNode, result.second);
-                    }
-                    flagAsModified();
+                    if(isDebug())
+                        updateSelectionHighlight(result.first, result.second);
                 }
                 break;
             }
             case Mouse_Drag:
             {
                 // final placement
-                std::pair<bool, Ogre::Vector3> planeResult = mousePositionOnPlane(event, *mPlane);
+                std::pair<bool, Ogre::Vector3> planeResult = mousePositionOnPlane(event->pos(), *mPlane);
                 if(planeResult.first)
                 {
-                    if(mObjSceneNode)
+                    if(mGrabbedSceneNode != "")
                     {
-                        mObjSceneNode->setPosition(mOrigObjPos+planeResult.second-mOrigMousePos);
-                        flagAsModified();
+                        mOrigObjPos.z += mZOffset;
+                        Ogre::Vector3 pos = mOrigObjPos+planeResult.second-mOrigMousePos;
+                        placeObject(mGrabbedSceneNode, pos);
+                        //mCurrentObj = mGrabbedSceneNode; // FIXME
+                        mCurrentObj = "";
 
-                        // update physics
-                        const CSMWorld::CellRef& cellref =
-                                mDocument.getData().getReferences().getRecord (mCurrentObj).get();
-                        Ogre::Quaternion xr (Ogre::Radian (-cellref.mPos.rot[0]), Ogre::Vector3::UNIT_X);
-                        Ogre::Quaternion yr (Ogre::Radian (-cellref.mPos.rot[1]), Ogre::Vector3::UNIT_Y);
-                        Ogre::Quaternion zr (Ogre::Radian (-cellref.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
+                        // reset states
+                        mCurrentMousePos = Ogre::Vector3();
+                        mOrigMousePos = Ogre::Vector3();
+                        mOrigObjPos = Ogre::Vector3();
+                        mGrabbedSceneNode = "";
+                        mOldPos = QPoint(0, 0);
+                        mZOffset = 0.0f;
 
-                        // FIXME: adjustRigidBody() seems to lose objects, delete and recreate for now
-                        //CSVWorld::PhysicsSystem::instance()->moveObject(mCurrentObj,
-                                //mOrigObjPos+planeResult.second-mOrigMousePos, xr*yr*zr);
-                        std::string sceneNodeName =
-                            CSVWorld::PhysicsSystem::instance()->referenceToSceneNode(mCurrentObj);
-                        std::string mesh =
-                            CSVWorld::PhysicsSystem::instance()->sceneNodeToMesh(sceneNodeName);
-                        CSVWorld::PhysicsSystem::instance()->removeObject(mCurrentObj);
-                        CSVWorld::PhysicsSystem::instance()->addObject(mesh,
-                            sceneNodeName, mCurrentObj, cellref.mScale,
-                            mOrigObjPos+planeResult.second-mOrigMousePos, xr*yr*zr);
+                        // FIXME: update document
+                        // FIXME: highlight current object?
+                        mMouseState = Mouse_Edit;
                     }
                 }
-                // FIXME: update document
-                // FIXME: highlight current object?
-                //std::cout << "final position" << std::endl;
-
-                mMouseState = Mouse_Edit;
-                //std::cout << "drag->edit" << std::endl;
                 break;
             }
             case Mouse_Edit:
             case Mouse_Default:
             {
-                // probably terrain
-                debugMousePicking(
-                    (float) event->x() / getCamera()->getViewport()->getActualWidth(),
-                    (float) event->y() / getCamera()->getViewport()->getActualHeight());
+                // probably terrain, check
+                std::pair<std::string, Ogre::Vector3> result = terrainUnderCursor(event->x(), event->y());
+                if(result.first != "")
+                {
+                    if(isDebug())
+                    {
+                        std::cout << "terrain: " << result.first << std::endl;
+                        std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
+                                + ", " + QString::number(result.second.y).toStdString()
+                                + ", " + QString::number(result.second.z).toStdString() << std::endl;
+                    }
+                }
                 break;
             }
             /* NO_DEFAULT_CASE */
         }
+        mMouseEventTimer->invalidate();
     }
     SceneWidget::mouseReleaseEvent(event);
 }
@@ -717,8 +710,7 @@ void CSVRender::WorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
 {
     if(event->button() == Qt::RightButton)
     {
-        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-        if(userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false)
+        if(isDebug())
         {
             // FIXME: OEngine::PhysicEngine creates only one child scene node for the
             // debug drawer.  Hence only the first subview that creates the debug drawer
@@ -734,68 +726,46 @@ void CSVRender::WorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
 
 void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
 {
-    // FIXME: add wheel event to move the object along the y axis during Mouse_Drag or
-    // Mouse_Grab
-    SceneWidget::wheelEvent(event);
-}
-
-void CSVRender::WorldspaceWidget::debugMousePicking(float mouseX, float mouseY)
-{
-    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-    bool debug = userSettings.setting ("debug/mouse-picking", QString("false")) == "true" ? true : false;
-
-    std::pair<std::string, Ogre::Vector3> result = CSVWorld::PhysicsSystem::instance()->castRay(
-                                                mouseX, mouseY, NULL, NULL, getCamera());
-    if(debug && result.first != "")
+    switch(mMouseState)
     {
-        // FIXME: is there  a better way to distinguish terrain from objects?
-        QString name  = QString(result.first.c_str());
-        if(name.contains(QRegExp("^HeightField")))
+        case Mouse_Grab:
+            mMouseState = Mouse_Drag;
+
+            /* FALL_THROUGH */
+        case Mouse_Drag:
         {
-            // terrain
-            std::cout << "terrain: " << result.first << std::endl;
-            std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
-                    + ", " + QString::number(result.second.y).toStdString()
-                    + ", " + QString::number(result.second.z).toStdString()
-                    << std::endl;
+            // move the object along the z axis during Mouse_Drag or Mouse_Grab
+            if (event->delta())
+            {
+                // seems positive is up and negative is down
+                mZOffset += (event->delta()/5); // FIXME: arbitrary number, make config option?
+
+                Ogre::Vector3 pos = mOrigObjPos;
+                pos.z += mZOffset;
+                getSceneManager()->getSceneNode(mGrabbedSceneNode)->setPosition(pos+mCurrentMousePos-mOrigMousePos);
+                flagAsModified();
+            }
+            break;
         }
-        else
+        case Mouse_Edit:
+        case Mouse_Default:
         {
-            std::string sceneNode =
-                CSVWorld::PhysicsSystem::instance()->referenceToSceneNode(result.first);
-
-            uint32_t visibilityMask = getCamera()->getViewport()->getVisibilityMask();
-            bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
-
-            if(!ignoreObjects && getSceneManager()->hasSceneNode(sceneNode))
-            {
-                if(userSettings.setting("debug/mouse-picking", QString("false")) == "true" ? true : false)
-                    updateSelectionHighlight(sceneNode, result.second);
-            }
-
-            std::cout << "ReferenceId: " << result.first << std::endl;
-            const CSMWorld::CellRef& cellref = mDocument.getData().getReferences().getRecord (result.first).get();
-            //std::cout << "CellRef.mId: " << cellref.mId << std::endl; // Same as ReferenceId
-            std::cout << "  CellRef.mCell: " << cellref.mCell << std::endl;
-
-            const CSMWorld::RefCollection& references = mDocument.getData().getReferences();
-            int index = references.searchId(result.first);
-            if (index != -1)
-            {
-                int columnIndex =
-                    references.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId);
-
-                std::cout << "  index: " + QString::number(index).toStdString()
-                        +", column index: " + QString::number(columnIndex).toStdString() << std::endl;
-            }
-            flagAsModified();
+            SceneWidget::wheelEvent(event);
+            break;
         }
+        /* NO_DEFAULT_CASE */
     }
 }
 
 // FIXME: for debugging only
-void CSVRender::WorldspaceWidget::updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position)
+void CSVRender::WorldspaceWidget::updateSelectionHighlight(const std::string sceneNode, const Ogre::Vector3 &position)
 {
+    uint32_t visibilityMask = getCamera()->getViewport()->getVisibilityMask();
+    bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
+
+    if(ignoreObjects || !getSceneManager()->hasSceneNode(sceneNode) || !isDebug())
+        return;
+
     CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
     bool debugCursor = userSettings.setting(
                 "debug/mouse-position", QString("false")) == "true" ? true : false;
@@ -858,41 +828,69 @@ void CSVRender::WorldspaceWidget::updateSelectionHighlight(std::string sceneNode
         if(debugCursor)
             showHitPoint(getSceneManager(), sceneNode, position);
     }
+    flagAsModified();
 }
 
-std::pair<std::string, Ogre::Vector3> CSVRender::WorldspaceWidget::isObjectUnderCursor(float mouseX, float mouseY)
+std::pair<std::string, Ogre::Vector3> CSVRender::WorldspaceWidget::terrainUnderCursor(const int mouseX, const int mouseY)
 {
-    std::pair<std::string, Ogre::Vector3> result = CSVWorld::PhysicsSystem::instance()->castRay(
-                                                mouseX, mouseY, NULL, NULL, getCamera());
+    if(!getCamera()->getViewport())
+        return std::make_pair("", Ogre::Vector3());
+
+    float x = (float) mouseX / getCamera()->getViewport()->getActualWidth();
+    float y = (float) mouseY / getCamera()->getViewport()->getActualHeight();
+
+    std::pair<std::string, Ogre::Vector3> result =
+        CSVWorld::PhysicsSystem::instance()->castRay(x, y, NULL, NULL, getCamera());
     if(result.first != "")
     {
+        // FIXME: is there  a better way to distinguish terrain from objects?
+        QString name  = QString(result.first.c_str());
+        if(name.contains(QRegExp("^HeightField")))
+        {
+            return result;
+        }
+    }
+
+    return std::make_pair("", Ogre::Vector3());
+}
+
+std::pair<std::string, Ogre::Vector3> CSVRender::WorldspaceWidget::objectUnderCursor(const int mouseX, const int mouseY)
+{
+    if(!getCamera()->getViewport())
+        return std::make_pair("", Ogre::Vector3());
+
+    float x = (float) mouseX / getCamera()->getViewport()->getActualWidth();
+    float y = (float) mouseY / getCamera()->getViewport()->getActualHeight();
+
+    std::pair<std::string, Ogre::Vector3> result =
+        CSVWorld::PhysicsSystem::instance()->castRay(x, y, NULL, NULL, getCamera());
+    if(result.first != "")
+    {
+        // NOTE: anything not terrain is assumed to be an object
         QString name  = QString(result.first.c_str());
         if(!name.contains(QRegExp("^HeightField")))
         {
-            std::string sceneNode =
-                CSVWorld::PhysicsSystem::instance()->referenceToSceneNode(result.first);
-
             uint32_t visibilityMask = getCamera()->getViewport()->getVisibilityMask();
             bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
 
-            if(!ignoreObjects && getSceneManager()->hasSceneNode(sceneNode))
+            if(!ignoreObjects && getSceneManager()->hasSceneNode(result.first))
             {
                 return result;
             }
         }
     }
 
-    return std::make_pair("", Ogre::Vector3(0,0,0));
+    return std::make_pair("", Ogre::Vector3());
 }
 
-std::pair<bool, Ogre::Vector3> CSVRender::WorldspaceWidget::mousePositionOnPlane(QMouseEvent *event, Ogre::Plane &plane)
+std::pair<bool, Ogre::Vector3> CSVRender::WorldspaceWidget::mousePositionOnPlane(const QPoint &pos, const Ogre::Plane &plane)
 {
     // using a really small value seems to mess up with the projections
     float nearClipDistance = getCamera()->getNearClipDistance(); // save existing
     getCamera()->setNearClipDistance(10.0f);  // arbitrary number
     Ogre::Ray mouseRay = getCamera()->getCameraToViewportRay(
-        (float) event->x() / getCamera()->getViewport()->getActualWidth(),
-        (float) event->y() / getCamera()->getViewport()->getActualHeight());
+        (float) pos.x() / getCamera()->getViewport()->getActualWidth(),
+        (float) pos.y() / getCamera()->getViewport()->getActualHeight());
     getCamera()->setNearClipDistance(nearClipDistance); // restore
     std::pair<bool, float> planeResult = mouseRay.intersects(plane);
 
@@ -900,4 +898,31 @@ std::pair<bool, Ogre::Vector3> CSVRender::WorldspaceWidget::mousePositionOnPlane
         return std::make_pair(true, mouseRay.getPoint(planeResult.second));
     else
         return std::make_pair(false, Ogre::Vector3()); // should only happen if the plane is too small
+}
+
+void CSVRender::WorldspaceWidget::placeObject(const std::string sceneNode, const Ogre::Vector3 &pos)
+{
+    getSceneManager()->getSceneNode(sceneNode)->setPosition(pos);
+    flagAsModified();
+
+    // update physics
+    std::string refId = CSVWorld::PhysicsSystem::instance()->sceneNodeToRefId(sceneNode);
+    const CSMWorld::CellRef& cellref =
+            mDocument.getData().getReferences().getRecord (refId).get();
+    Ogre::Quaternion xr (Ogre::Radian (-cellref.mPos.rot[0]), Ogre::Vector3::UNIT_X);
+    Ogre::Quaternion yr (Ogre::Radian (-cellref.mPos.rot[1]), Ogre::Vector3::UNIT_Y);
+    Ogre::Quaternion zr (Ogre::Radian (-cellref.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
+
+    // FIXME: adjustRigidBody() seems to lose objects, work around by deleting and recreating objects
+    //CSVWorld::PhysicsSystem::instance()->moveObject(sceneNode, pos, xr*yr*zr);
+    std::string mesh = CSVWorld::PhysicsSystem::instance()->sceneNodeToMesh(sceneNode);
+    CSVWorld::PhysicsSystem::instance()->removeObject(sceneNode);
+    CSVWorld::PhysicsSystem::instance()->addObject(mesh, sceneNode, refId, cellref.mScale, pos, xr*yr*zr);
+}
+
+bool CSVRender::WorldspaceWidget::isDebug()
+{
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+
+    return userSettings.setting("debug/mouse-picking", QString("false")) == "true" ? true : false;
 }

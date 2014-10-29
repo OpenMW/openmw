@@ -170,6 +170,23 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     return modified;
 }
 
+void CSVRender::PagedWorldspaceWidget::mousePressEvent (QMouseEvent *event)
+{
+    if(event->button() == Qt::RightButton)
+    {
+        std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator iter = mTextOverlays.begin();
+        for(; iter != mTextOverlays.end(); ++iter)
+        {
+            if(mDisplayCellCoord &&
+               iter->second->isEnabled() && iter->second->container().contains(event->x(), event->y()))
+            {
+                return;
+            }
+        }
+    }
+    WorldspaceWidget::mouseReleaseEvent(event);
+}
+
 void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 {
     if(event->button() == Qt::RightButton)
@@ -181,7 +198,7 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
                iter->second->isEnabled() && iter->second->container().contains(event->x(), event->y()))
             {
                 std::cout << "clicked: " << iter->second->getCaption() << std::endl;
-                break;
+                return;
             }
         }
     }
@@ -194,7 +211,7 @@ void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event
     {
         std::cout << "double clicked" << std::endl;
     }
-    //WorldspaceWidget::mouseDoubleClickEvent(event);
+    WorldspaceWidget::mouseDoubleClickEvent(event);
 }
 
 void CSVRender::PagedWorldspaceWidget::updateOverlay()

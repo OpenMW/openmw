@@ -40,27 +40,28 @@ namespace CSVWorld
             const std::string &sceneNodeName, const std::string &referenceId, float scale,
             const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, bool placeable)
     {
-        mRefToSceneNode[referenceId] = sceneNodeName;
+        // NOTE: referenceId may not be unique when editing multiple documents concurrently
+        mSceneNodeToRefId[sceneNodeName] = referenceId;
         mSceneNodeToMesh[sceneNodeName] = mesh;
 
         mEngine->createAndAdjustRigidBody(mesh,
-                referenceId, scale, position, rotation,
+                sceneNodeName, scale, position, rotation,
                 0,    // scaledBoxTranslation
                 0,    // boxRotation
                 true, // raycasting
                 placeable);
     }
 
-    void PhysicsSystem::removeObject(const std::string &referenceId)
+    void PhysicsSystem::removeObject(const std::string &sceneNodeName)
     {
-        mEngine->removeRigidBody(referenceId);
-        mEngine->deleteRigidBody(referenceId);
+        mEngine->removeRigidBody(sceneNodeName);
+        mEngine->deleteRigidBody(sceneNodeName);
     }
 
-    void PhysicsSystem::moveObject(const std::string &referenceId,
+    void PhysicsSystem::moveObject(const std::string &sceneNodeName,
             const Ogre::Vector3 &position, const Ogre::Quaternion &rotation)
     {
-        mEngine->adjustRigidBody(mEngine->getRigidBody(referenceId, true /*raycasting*/),
+        mEngine->adjustRigidBody(mEngine->getRigidBody(sceneNodeName, true /*raycasting*/),
                 position, rotation);
     }
 
@@ -111,9 +112,9 @@ namespace CSVWorld
             return std::make_pair(result.first, ray.getPoint(farClipDist*result.second));
     }
 
-    std::string PhysicsSystem::referenceToSceneNode(std::string referenceId)
+    std::string PhysicsSystem::sceneNodeToRefId(std::string sceneNodeName)
     {
-        return mRefToSceneNode[referenceId];
+        return mSceneNodeToRefId[sceneNodeName];
     }
 
     std::string PhysicsSystem::sceneNodeToMesh(std::string sceneNodeName)

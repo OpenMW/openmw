@@ -36,20 +36,24 @@ namespace CSVRender
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
 
-            enum MouseState {
+            enum MouseState
+            {
                 Mouse_Grab,
                 Mouse_Drag,
                 Mouse_Edit,
                 Mouse_Default
             };
             MouseState mMouseState;
+
             QPoint mOldPos;
             std::string mCurrentObj;
+            std::string mGrabbedSceneNode;
             QElapsedTimer *mMouseEventTimer;
             Ogre::Plane *mPlane;
-            Ogre::SceneNode *mObjSceneNode;
             Ogre::Vector3 mOrigObjPos;
             Ogre::Vector3 mOrigMousePos;
+            Ogre::Vector3 mCurrentMousePos;
+            float mZOffset;
             std::map<std::string, std::vector<std::string> > mSelectedEntities;
 
         public:
@@ -125,10 +129,12 @@ namespace CSVRender
 
             virtual std::string getStartupInstruction() = 0;
 
-            std::pair<std::string, Ogre::Vector3> isObjectUnderCursor(float mouseX, float mouseY);
-            std::pair<bool, Ogre::Vector3> mousePositionOnPlane(QMouseEvent *event, Ogre::Plane &plane);
-            void debugMousePicking(float mouseX, float mouseY);
-            void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);
+            void placeObject(const std::string sceneNode, const Ogre::Vector3 &pos);
+            bool isDebug();
+            std::pair<std::string, Ogre::Vector3> terrainUnderCursor(const int mouseX, const int mouseY);
+            std::pair<std::string, Ogre::Vector3> objectUnderCursor(const int mouseX, const int mouseY);
+            std::pair<bool, Ogre::Vector3> mousePositionOnPlane(const QPoint &pos, const Ogre::Plane &plane);
+            void updateSelectionHighlight(const std::string sceneNode, const Ogre::Vector3 &position);
 
         private slots:
 

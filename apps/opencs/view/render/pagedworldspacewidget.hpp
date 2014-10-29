@@ -81,6 +81,8 @@ namespace CSVRender
 
             virtual void updateOverlay();
 
+            virtual void mousePressEvent (QMouseEvent *event);
+
             virtual void mouseReleaseEvent (QMouseEvent *event);
 
             virtual void mouseDoubleClickEvent (QMouseEvent *event);
