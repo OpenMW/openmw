@@ -142,10 +142,8 @@ void TerrainGrid::setVisible(bool visible)
 
 Ogre::AxisAlignedBox TerrainGrid::getWorldBoundingBox (const Ogre::Vector2& center)
 {
-    float cellSize = getStorage()->getCellWorldSize();
-
-    int cellX = std::floor(center.x/cellSize);
-    int cellY = std::floor(center.y/cellSize);
+    int cellX = std::floor(center.x);
+    int cellY = std::floor(center.y);
 
     Grid::iterator it = mGrid.find(std::make_pair(cellX, cellY));
     if (it == mGrid.end())
