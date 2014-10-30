@@ -15,7 +15,7 @@ namespace CSVWorld
 {
     PhysicsSystem *PhysicsSystem::mPhysicsSystemInstance = 0;
 
-    PhysicsSystem::PhysicsSystem(Ogre::SceneManager *sceneMgr) : mSceneMgr(sceneMgr)
+    PhysicsSystem::PhysicsSystem() : mSceneMgr(0)
     {
         assert(!mPhysicsSystemInstance);
         mPhysicsSystemInstance = this;
@@ -36,20 +36,37 @@ namespace CSVWorld
         return mPhysicsSystemInstance;
     }
 
+    // FIXME: looks up the scene manager based on the scene node name (highly inefficient)
+    // NOTE: referenceId is assumed to be unique per document
+    // NOTE: searching is done here rather than after rayTest, so slower to load but
+    // faster to find (not verified w/ perf test)
     void PhysicsSystem::addObject(const std::string &mesh,
             const std::string &sceneNodeName, const std::string &referenceId, float scale,
             const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, bool placeable)
     {
-        // NOTE: referenceId may not be unique when editing multiple documents concurrently
-        mSceneNodeToRefId[sceneNodeName] = referenceId;
-        mSceneNodeToMesh[sceneNodeName] = mesh;
+        bool foundSceneManager = false;
+        std::list<Ogre::SceneManager *>::const_iterator iter = mSceneManagers.begin();
+        for(; iter != mSceneManagers.end(); ++iter)
+        {
+            if((*iter)->hasSceneNode(sceneNodeName))
+            {
+                mSceneNodeToRefId[sceneNodeName] = referenceId;
+                mRefIdToSceneNode[referenceId][*iter] = sceneNodeName;
+                mSceneNodeToMesh[sceneNodeName] = mesh;
+                foundSceneManager = true;
+                break;
+            }
+        }
 
-        mEngine->createAndAdjustRigidBody(mesh,
-                sceneNodeName, scale, position, rotation,
-                0,    // scaledBoxTranslation
-                0,    // boxRotation
-                true, // raycasting
-                placeable);
+        if(foundSceneManager)
+        {
+            mEngine->createAndAdjustRigidBody(mesh,
+                    referenceId, scale, position, rotation,
+                    0,    // scaledBoxTranslation
+                    0,    // boxRotation
+                    true, // raycasting
+                    placeable);
+        }
     }
 
     void PhysicsSystem::removeObject(const std::string &sceneNodeName)
@@ -76,12 +93,20 @@ namespace CSVWorld
         mEngine->removeHeightField(x, y);
     }
 
+    // sceneMgr: to lookup the scene node name from the object's referenceId
+    // camera: primarily used to get the visibility mask for the viewport
+    //
+    // returns the found object's scene node name and its position in the world space
+    //
+    // WARNING: far clip distance is a global setting, if it changes in future
+    //          this method will need to be updated
     std::pair<std::string, Ogre::Vector3> PhysicsSystem::castRay(float mouseX,
-            float mouseY, Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera)
+            float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera)
     {
-        if(!mSceneMgr || !camera || !camera->getViewport())
+        // NOTE: there could be more than one camera for the scene manager
+        // TODO: check whether camera belongs to sceneMgr
+        if(!sceneMgr || !camera || !camera->getViewport())
             return std::make_pair("", Ogre::Vector3(0,0,0)); // FIXME: this should be an exception
-
 
         // using a really small value seems to mess up with the projections
         float nearClipDistance = camera->getNearClipDistance(); // save existing
@@ -102,14 +127,20 @@ namespace CSVWorld
         bool ignoreHeightMap = !(visibilityMask & (uint32_t)CSVRender::Element_Terrain);
         bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
 
-        Ogre::Vector3 norm;
+        Ogre::Vector3 norm; // not used
         std::pair<std::string, float> result =
                                 mEngine->rayTest(_from, _to, !ignoreObjects, ignoreHeightMap, &norm);
 
+        // result.first is the object's referenceId
         if(result.first == "")
             return std::make_pair("", Ogre::Vector3(0,0,0));
         else
-            return std::make_pair(result.first, ray.getPoint(farClipDist*result.second));
+            return std::make_pair(refIdToSceneNode(result.first, sceneMgr), ray.getPoint(farClipDist*result.second));
+    }
+
+    std::string PhysicsSystem::refIdToSceneNode(std::string referenceId, Ogre::SceneManager *sceneMgr)
+    {
+        return mRefIdToSceneNode[referenceId][sceneMgr];
     }
 
     std::string PhysicsSystem::sceneNodeToRefId(std::string sceneNodeName)
@@ -122,16 +153,18 @@ namespace CSVWorld
         return mSceneNodeToMesh[sceneNodeName];
     }
 
-    void PhysicsSystem::setSceneManager(Ogre::SceneManager *sceneMgr)
+    void PhysicsSystem::addSceneManager(Ogre::SceneManager *sceneMgr)
     {
-        mSceneMgr = sceneMgr;
-        mEngine->setSceneManager(sceneMgr); // needed for toggleDebugRendering()
+        mSceneManagers.push_back(sceneMgr);
     }
 
-    void PhysicsSystem::toggleDebugRendering()
+    void PhysicsSystem::toggleDebugRendering(Ogre::SceneManager *sceneMgr)
     {
+        // FIXME: should check if sceneMgr is in the list
         if(!mSceneMgr)
             return; // FIXME: maybe this should be an exception
+
+        mEngine->setSceneManager(sceneMgr);
 
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
         if(!(userSettings.setting("debug/mouse-picking", QString("false")) == "true" ? true : false))

@@ -716,8 +716,8 @@ void CSVRender::WorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
             // debug drawer.  Hence only the first subview that creates the debug drawer
             // can view the debug lines.  Will need to keep a map in OEngine if multiple
             // subviews are to be supported.
-            CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
-            CSVWorld::PhysicsSystem::instance()->toggleDebugRendering();
+            //CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
+            CSVWorld::PhysicsSystem::instance()->toggleDebugRendering(getSceneManager());
             flagAsModified();
         }
     }
@@ -840,7 +840,7 @@ std::pair<std::string, Ogre::Vector3> CSVRender::WorldspaceWidget::terrainUnderC
     float y = (float) mouseY / getCamera()->getViewport()->getActualHeight();
 
     std::pair<std::string, Ogre::Vector3> result =
-        CSVWorld::PhysicsSystem::instance()->castRay(x, y, NULL, NULL, getCamera());
+        CSVWorld::PhysicsSystem::instance()->castRay(x, y, getSceneManager(), getCamera());
     if(result.first != "")
     {
         // FIXME: is there  a better way to distinguish terrain from objects?
@@ -863,7 +863,7 @@ std::pair<std::string, Ogre::Vector3> CSVRender::WorldspaceWidget::objectUnderCu
     float y = (float) mouseY / getCamera()->getViewport()->getActualHeight();
 
     std::pair<std::string, Ogre::Vector3> result =
-        CSVWorld::PhysicsSystem::instance()->castRay(x, y, NULL, NULL, getCamera());
+        CSVWorld::PhysicsSystem::instance()->castRay(x, y, getSceneManager(), getCamera());
     if(result.first != "")
     {
         // NOTE: anything not terrain is assumed to be an object

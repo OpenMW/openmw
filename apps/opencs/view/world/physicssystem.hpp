@@ -3,7 +3,7 @@
 
 #include <string>
 #include <map>
-#include <vector>
+#include <list>
 
 namespace Ogre
 {
@@ -27,19 +27,21 @@ namespace CSVWorld
     {
             static PhysicsSystem *mPhysicsSystemInstance;
             std::map<std::string, std::string> mSceneNodeToRefId;
+            std::map<std::string, std::map<Ogre::SceneManager *, std::string> > mRefIdToSceneNode;
             std::map<std::string, std::string> mSceneNodeToMesh;
+            std::list<Ogre::SceneManager *> mSceneManagers; // FIXME: change to list per OEngine
             OEngine::Physic::PhysicEngine* mEngine;
 
             Ogre::SceneManager *mSceneMgr;
 
         public:
 
-            PhysicsSystem(Ogre::SceneManager *sceneMgr = NULL);
+            PhysicsSystem();
             ~PhysicsSystem();
 
             static PhysicsSystem *instance();
 
-            void setSceneManager(Ogre::SceneManager *sceneMgr);
+            void addSceneManager(Ogre::SceneManager *sceneMgr);
 
             void addObject(const std::string &mesh,
                     const std::string &sceneNodeName, const std::string &referenceId, float scale,
@@ -56,10 +58,11 @@ namespace CSVWorld
 
             void removeHeightField(int x, int y);
 
-            void toggleDebugRendering();
+            void toggleDebugRendering(Ogre::SceneManager *sceneMgr);
 
+            // return the object's SceneNode name and position for the given SceneManager
             std::pair<std::string, Ogre::Vector3> castRay(float mouseX,
-                    float mouseY, Ogre::Vector3* normal, std::string* hit, Ogre::Camera *camera);
+                    float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera);
 
             std::string sceneNodeToRefId(std::string sceneNodeName);
             std::string sceneNodeToMesh(std::string sceneNodeName);
@@ -67,6 +70,7 @@ namespace CSVWorld
         private:
 
             void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);
+            std::string refIdToSceneNode(std::string referenceId, Ogre::SceneManager *sceneMgr);
     };
 }
 
