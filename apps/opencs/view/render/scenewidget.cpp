@@ -417,7 +417,6 @@ namespace CSVRender
     void SceneWidget::updateScene()
     {
         flagAsModified();
-        update();
     }
 
     void SceneWidget::updateOverlay()

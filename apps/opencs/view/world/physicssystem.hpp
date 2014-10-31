@@ -72,8 +72,6 @@ namespace CSVWorld
 
             std::string sceneNodeToMesh(std::string sceneNodeName);
 
-            std::list<CSVRender::SceneWidget *> sceneWidgets();
-
         private:
 
             void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);

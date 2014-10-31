@@ -925,7 +925,5 @@ void CSVRender::WorldspaceWidget::placeObject(const std::string sceneNode, const
 
 bool CSVRender::WorldspaceWidget::isDebug()
 {
-    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-
-    return userSettings.setting("debug/mouse-picking", QString("false")) == "true" ? true : false;
+    return false;
 }

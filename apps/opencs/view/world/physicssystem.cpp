@@ -213,11 +213,6 @@ namespace CSVWorld
         mSceneManagers.push_back(sceneMgr);
     }
 
-    std::list<CSVRender::SceneWidget *> PhysicsSystem::sceneWidgets()
-    {
-        return mSceneWidgets;
-    }
-
     void PhysicsSystem::toggleDebugRendering(Ogre::SceneManager *sceneMgr)
     {
         // FIXME: should check if sceneMgr is in the list
