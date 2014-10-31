@@ -525,7 +525,9 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
                             pos.z += mZOffset;
                             getSceneManager()->getSceneNode(mGrabbedSceneNode)->setPosition(pos+planeResult.second-mOrigMousePos);
                             mCurrentMousePos = planeResult.second;
-                            flagAsModified();
+                            CSVWorld::PhysicsSystem::instance()->moveSceneNodes(mGrabbedSceneNode,
+                                pos+planeResult.second-mOrigMousePos);
+                            emit signalAsModified();
                         }
                     }
                 }
@@ -744,7 +746,9 @@ void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
                 Ogre::Vector3 pos = mOrigObjPos;
                 pos.z += mZOffset;
                 getSceneManager()->getSceneNode(mGrabbedSceneNode)->setPosition(pos+mCurrentMousePos-mOrigMousePos);
-                flagAsModified();
+                CSVWorld::PhysicsSystem::instance()->moveSceneNodes(mGrabbedSceneNode,
+                    pos+mCurrentMousePos-mOrigMousePos);
+                emit signalAsModified();
             }
             break;
         }

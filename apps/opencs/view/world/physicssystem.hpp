@@ -63,6 +63,8 @@ namespace CSVWorld
             void moveObject(const std::string &sceneNodeName,
                     const Ogre::Vector3 &position, const Ogre::Quaternion &rotation);
 
+            void moveSceneNodes(const std::string sceneNodeName, const Ogre::Vector3 &position);
+
             void addHeightField(Ogre::SceneManager *sceneManager,
                     float* heights, int x, int y, float yoffset, float triSize, float sqrtVerts);
 
@@ -79,6 +81,9 @@ namespace CSVWorld
             std::string sceneNodeToMesh(std::string sceneNodeName);
 
         private:
+
+            void moveSceneNodeImpl(const std::string sceneNodeName,
+                    const std::string referenceId, const Ogre::Vector3 &position);
 
             void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);
             std::string refIdToSceneNode(std::string referenceId, Ogre::SceneManager *sceneMgr);

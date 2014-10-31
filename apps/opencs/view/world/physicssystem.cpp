@@ -159,6 +159,24 @@ namespace CSVWorld
                 position, rotation);
     }
 
+    void PhysicsSystem::moveSceneNodeImpl(const std::string sceneNodeName,
+            const std::string referenceId, const Ogre::Vector3 &position)
+    {
+        std::list<Ogre::SceneManager *>::const_iterator iter = mSceneManagers.begin();
+        for(; iter != mSceneManagers.end(); ++iter)
+        {
+            std::string name = refIdToSceneNode(referenceId, *iter);
+            if(name != sceneNodeName && (*iter)->hasSceneNode(name))
+            {
+                (*iter)->getSceneNode(name)->setPosition(position);
+            }
+        }
+    }
+
+    void PhysicsSystem::moveSceneNodes(const std::string sceneNodeName, const Ogre::Vector3 &position)
+    {
+        moveSceneNodeImpl(sceneNodeName, sceneNodeToRefId(sceneNodeName), position);
+    }
     void PhysicsSystem::addHeightField(Ogre::SceneManager *sceneManager,
             float* heights, int x, int y, float yoffset, float triSize, float sqrtVerts)
     {
