@@ -32,6 +32,7 @@ namespace CSVRender
             Ogre::SceneNode *mCellNode;
             std::map<std::string, Object *> mObjects;
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
+            Ogre::SceneManager *mSceneMgr;
 
             /// Ignored if cell does not have an object with the given ID.
             ///

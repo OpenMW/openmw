@@ -129,15 +129,35 @@ namespace CSVWorld
                 position, rotation);
     }
 
-    void PhysicsSystem::addHeightField(float* heights,
-            int x, int y, float yoffset, float triSize, float sqrtVerts)
+    void PhysicsSystem::addHeightField(Ogre::SceneManager *sceneManager,
+            float* heights, int x, int y, float yoffset, float triSize, float sqrtVerts)
     {
-        mEngine->addHeightField(heights, x, y, yoffset, triSize, sqrtVerts);
+        std::string name = "HeightField_"
+            + QString::number(x).toStdString() + "_" + QString::number(y).toStdString();
+
+        if(mTerrain.find(name) == mTerrain.end())
+            mEngine->addHeightField(heights, x, y, yoffset, triSize, sqrtVerts);
+
+        mTerrain.insert(std::pair<std::string, Ogre::SceneManager *>(name, sceneManager));
     }
 
-    void PhysicsSystem::removeHeightField(int x, int y)
+    void PhysicsSystem::removeHeightField(Ogre::SceneManager *sceneManager, int x, int y)
     {
-        mEngine->removeHeightField(x, y);
+        std::string name = "HeightField_"
+            + QString::number(x).toStdString() + "_" + QString::number(y).toStdString();
+
+        if(mTerrain.count(name) == 1)
+            mEngine->removeHeightField(x, y);
+
+        std::multimap<std::string, Ogre::SceneManager *>::iterator iter = mTerrain.begin();
+        for(; iter != mTerrain.end(); ++iter)
+        {
+            if((*iter).second == sceneManager)
+            {
+                mTerrain.erase(iter);
+                break;
+            }
+        }
     }
 
     // sceneMgr: to lookup the scene node name from the object's referenceId

@@ -37,6 +37,7 @@ namespace CSVWorld
             std::list<Ogre::SceneManager *> mSceneManagers; // FIXME: change to list per OEngine
             std::list<CSVRender::SceneWidget *> mSceneWidgets; // FIXME: change to list per OEngine
             OEngine::Physic::PhysicEngine* mEngine;
+            std::multimap<std::string, Ogre::SceneManager *> mTerrain;
 
         public:
 
@@ -57,10 +58,10 @@ namespace CSVWorld
             void moveObject(const std::string &sceneNodeName,
                     const Ogre::Vector3 &position, const Ogre::Quaternion &rotation);
 
-            void addHeightField(float* heights,
-                    int x, int y, float yoffset, float triSize, float sqrtVerts);
+            void addHeightField(Ogre::SceneManager *sceneManager,
+                    float* heights, int x, int y, float yoffset, float triSize, float sqrtVerts);
 
-            void removeHeightField(int x, int y);
+            void removeHeightField(Ogre::SceneManager *sceneManager, int x, int y);
 
             void toggleDebugRendering(Ogre::SceneManager *sceneMgr);
 

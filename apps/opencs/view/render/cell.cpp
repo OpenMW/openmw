@@ -61,7 +61,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
 
 CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
     const std::string& id, const Ogre::Vector3& origin)
-: mData (data), mId (Misc::StringUtils::lowerCase (id))
+: mData (data), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager)
 {
     mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
     mCellNode->setPosition (origin);
@@ -88,7 +88,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
         {
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
-            CSVWorld::PhysicsSystem::instance()->addHeightField(
+            CSVWorld::PhysicsSystem::instance()->addHeightField(sceneManager,
                     esmLand->mLandData->mHeights, esmLand->mX, esmLand->mY, 0, worldsize / (verts-1), verts);
         }
     }
@@ -105,7 +105,7 @@ CSVRender::Cell::~Cell()
         {
             const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
             if(esmLand)
-                CSVWorld::PhysicsSystem::instance()->removeHeightField(esmLand->mX, esmLand->mY);
+                CSVWorld::PhysicsSystem::instance()->removeHeightField(mSceneMgr, esmLand->mX, esmLand->mY);
         }
     }
 
