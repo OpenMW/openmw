@@ -21,6 +21,11 @@ namespace OEngine
     }
 }
 
+namespace CSVRender
+{
+    class SceneWidget;
+}
+
 namespace CSVWorld
 {
     class PhysicsSystem
@@ -30,9 +35,8 @@ namespace CSVWorld
             std::map<std::string, std::map<Ogre::SceneManager *, std::string> > mRefIdToSceneNode;
             std::map<std::string, std::string> mSceneNodeToMesh;
             std::list<Ogre::SceneManager *> mSceneManagers; // FIXME: change to list per OEngine
+            std::list<CSVRender::SceneWidget *> mSceneWidgets; // FIXME: change to list per OEngine
             OEngine::Physic::PhysicEngine* mEngine;
-
-            Ogre::SceneManager *mSceneMgr;
 
         public:
 
@@ -41,7 +45,7 @@ namespace CSVWorld
 
             static PhysicsSystem *instance();
 
-            void addSceneManager(Ogre::SceneManager *sceneMgr);
+            void addSceneManager(Ogre::SceneManager *sceneMgr, CSVRender::SceneWidget * scene);
 
             void addObject(const std::string &mesh,
                     const std::string &sceneNodeName, const std::string &referenceId, float scale,
@@ -65,7 +69,10 @@ namespace CSVWorld
                     float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera);
 
             std::string sceneNodeToRefId(std::string sceneNodeName);
+
             std::string sceneNodeToMesh(std::string sceneNodeName);
+
+            std::list<CSVRender::SceneWidget *> sceneWidgets();
 
         private:
 

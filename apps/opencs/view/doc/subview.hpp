@@ -52,6 +52,8 @@ namespace CSVDoc
 
             virtual void updateUserSetting (const QString& name, const QStringList& value);
 
+            virtual void updateScene();
+
         private:
 
             void closeEvent (QCloseEvent *event);
@@ -65,6 +67,8 @@ namespace CSVDoc
             void updateTitle();
 
             void updateSubViewIndicies (SubView *view = 0);
+
+            void refreshSubViews();
 
         protected slots:
 

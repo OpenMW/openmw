@@ -38,7 +38,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     mLayout->setContentsMargins (QMargins (0, 0, 0, 0));
 
-    CSVRender::WorldspaceWidget* wordspaceWidget = NULL;
+    CSVRender::WorldspaceWidget* worldspaceWidget = NULL;
     widgetType whatWidget;
 
     if (id.getId()=="sys::default")
@@ -47,7 +47,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
         CSVRender::PagedWorldspaceWidget *newWidget = new CSVRender::PagedWorldspaceWidget (this, document);
 
-        wordspaceWidget = newWidget;
+        worldspaceWidget = newWidget;
 
         makeConnections(newWidget);
     }
@@ -57,12 +57,14 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
         CSVRender::UnpagedWorldspaceWidget *newWidget = new CSVRender::UnpagedWorldspaceWidget (id.getId(), document, this);
 
-        wordspaceWidget = newWidget;
+        worldspaceWidget = newWidget;
 
         makeConnections(newWidget);
     }
 
-    replaceToolbarAndWorldspace(wordspaceWidget, makeToolbar(wordspaceWidget, whatWidget));
+    connect (worldspaceWidget, SIGNAL (signalAsModified()), this, SIGNAL (refreshSubViews()));
+
+    replaceToolbarAndWorldspace(worldspaceWidget, makeToolbar(worldspaceWidget, whatWidget));
 
     layout->insertLayout (0, mLayout, 1);
 
@@ -137,7 +139,6 @@ void CSVWorld::SceneSubView::setEditLock (bool locked)
 void CSVWorld::SceneSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)
 {
 
-
 }
 
 void CSVWorld::SceneSubView::setStatusBar (bool show)
@@ -148,6 +149,11 @@ void CSVWorld::SceneSubView::setStatusBar (bool show)
 void CSVWorld::SceneSubView::useHint (const std::string& hint)
 {
     mScene->useViewHint (hint);
+}
+
+void CSVWorld::SceneSubView::updateScene()
+{
+    if(mScene) mScene->updateScene();
 }
 
 std::string CSVWorld::SceneSubView::getTitle() const

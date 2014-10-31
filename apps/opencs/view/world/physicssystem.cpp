@@ -15,7 +15,7 @@ namespace CSVWorld
 {
     PhysicsSystem *PhysicsSystem::mPhysicsSystemInstance = 0;
 
-    PhysicsSystem::PhysicsSystem() : mSceneMgr(0)
+    PhysicsSystem::PhysicsSystem()
     {
         assert(!mPhysicsSystemInstance);
         mPhysicsSystemInstance = this;
@@ -28,6 +28,7 @@ namespace CSVWorld
     PhysicsSystem::~PhysicsSystem()
     {
         delete mEngine;
+        // FIXME: update maps when SceneManagers are destroyed
     }
 
     PhysicsSystem *PhysicsSystem::instance()
@@ -39,7 +40,7 @@ namespace CSVWorld
     // FIXME: looks up the scene manager based on the scene node name (highly inefficient)
     // NOTE: referenceId is assumed to be unique per document
     // NOTE: searching is done here rather than after rayTest, so slower to load but
-    // faster to find (not verified w/ perf test)
+    //       faster to find (not verified w/ perf test)
     void PhysicsSystem::addObject(const std::string &mesh,
             const std::string &sceneNodeName, const std::string &referenceId, float scale,
             const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, bool placeable)
@@ -58,21 +59,67 @@ namespace CSVWorld
             }
         }
 
-        if(foundSceneManager)
+        if(!foundSceneManager)
+            return; // FIXME: this should be an exception
+
+        // update physics, only one physics model per referenceId
+        if(mEngine->getRigidBody(referenceId, true) == NULL)
         {
+
             mEngine->createAndAdjustRigidBody(mesh,
                     referenceId, scale, position, rotation,
                     0,    // scaledBoxTranslation
                     0,    // boxRotation
                     true, // raycasting
                     placeable);
+
+            // update other scene managers if they have the referenceId (may have moved)
+            iter = mSceneManagers.begin();
+            for(; iter != mSceneManagers.end(); ++iter)
+            {
+                std::string name = refIdToSceneNode(referenceId, *iter);
+                if(name != sceneNodeName && (*iter)->hasSceneNode(name))
+                {
+                    // FIXME: rotation or scale not updated
+                    (*iter)->getSceneNode(name)->setPosition(position);
+                }
+            }
         }
     }
 
     void PhysicsSystem::removeObject(const std::string &sceneNodeName)
     {
-        mEngine->removeRigidBody(sceneNodeName);
-        mEngine->deleteRigidBody(sceneNodeName);
+        std::string referenceId = sceneNodeToRefId(sceneNodeName);
+        if(referenceId != "")
+        {
+            mEngine->removeRigidBody(referenceId);
+            mEngine->deleteRigidBody(referenceId);
+
+            Ogre::SceneManager *sceneManager = NULL;
+            std::list<Ogre::SceneManager *>::const_iterator iter = mSceneManagers.begin();
+            for(; iter != mSceneManagers.end(); ++iter)
+            {
+                if((*iter)->hasSceneNode(sceneNodeName))
+                {
+                    sceneManager = *iter;
+                    break;
+                }
+            }
+
+            if(!sceneManager)
+                return; // FIXME: maybe this should be an exception
+
+            std::map<std::string, std::map<Ogre::SceneManager *, std::string> >::iterator itRef =
+                mRefIdToSceneNode.begin();
+            for(; itRef != mRefIdToSceneNode.end(); ++itRef)
+            {
+                if((*itRef).second.find(sceneManager) != (*itRef).second.end())
+                {
+                    (*itRef).second.erase(sceneManager);
+                    return;
+                }
+            }
+        }
     }
 
     void PhysicsSystem::moveObject(const std::string &sceneNodeName,
@@ -135,7 +182,15 @@ namespace CSVWorld
         if(result.first == "")
             return std::make_pair("", Ogre::Vector3(0,0,0));
         else
-            return std::make_pair(refIdToSceneNode(result.first, sceneMgr), ray.getPoint(farClipDist*result.second));
+        {
+            std::string name = refIdToSceneNode(result.first, sceneMgr);
+            if(name == "")
+                name = result.first;
+            else
+                name = refIdToSceneNode(result.first, sceneMgr);
+
+            return std::make_pair(name, ray.getPoint(farClipDist*result.second));
+        }
     }
 
     std::string PhysicsSystem::refIdToSceneNode(std::string referenceId, Ogre::SceneManager *sceneMgr)
@@ -153,15 +208,20 @@ namespace CSVWorld
         return mSceneNodeToMesh[sceneNodeName];
     }
 
-    void PhysicsSystem::addSceneManager(Ogre::SceneManager *sceneMgr)
+    void PhysicsSystem::addSceneManager(Ogre::SceneManager *sceneMgr, CSVRender::SceneWidget * scene)
     {
         mSceneManagers.push_back(sceneMgr);
+    }
+
+    std::list<CSVRender::SceneWidget *> PhysicsSystem::sceneWidgets()
+    {
+        return mSceneWidgets;
     }
 
     void PhysicsSystem::toggleDebugRendering(Ogre::SceneManager *sceneMgr)
     {
         // FIXME: should check if sceneMgr is in the list
-        if(!mSceneMgr)
+        if(!sceneMgr)
             return; // FIXME: maybe this should be an exception
 
         mEngine->setSceneManager(sceneMgr);

@@ -66,7 +66,7 @@ namespace CSVRender
         mOverlaySystem = OverlaySystem::instance().get();
         mSceneMgr->addRenderQueueListener(mOverlaySystem);
 
-        CSVWorld::PhysicsSystem::instance()->addSceneManager(mSceneMgr);
+        CSVWorld::PhysicsSystem::instance()->addSceneManager(mSceneMgr, this);
 
         QTimer *timer = new QTimer (this);
 
@@ -412,6 +412,12 @@ namespace CSVRender
             mWindow->update();
             updateOverlay();
         }
+    }
+
+    void SceneWidget::updateScene()
+    {
+        flagAsModified();
+        update();
     }
 
     void SceneWidget::updateOverlay()

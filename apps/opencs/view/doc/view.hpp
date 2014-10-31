@@ -139,6 +139,8 @@ namespace CSVDoc
             // called when subviews are added or removed
             void updateSubViewIndicies (SubView *view = 0);
 
+            void refreshSubViews();
+
         private slots:
 
             void newView();

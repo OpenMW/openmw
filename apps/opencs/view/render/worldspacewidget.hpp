@@ -168,7 +168,10 @@ namespace CSVRender
         signals:
 
             void closeRequest();
+
             void dataDropped(const std::vector<CSMWorld::UniversalId>& data);
+
+            void signalAsModified();
     };
 }
 

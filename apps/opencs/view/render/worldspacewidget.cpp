@@ -665,15 +665,16 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
                         Ogre::Vector3 pos = mOrigObjPos+planeResult.second-mOrigMousePos;
                         placeObject(mGrabbedSceneNode, pos);
                         //mCurrentObj = mGrabbedSceneNode; // FIXME
-                        mCurrentObj = "";
+                        mCurrentObj = "";                   // whether the object is selected
 
                         // reset states
-                        mCurrentMousePos = Ogre::Vector3();
-                        mOrigMousePos = Ogre::Vector3();
-                        mOrigObjPos = Ogre::Vector3();
-                        mGrabbedSceneNode = "";
-                        mOldPos = QPoint(0, 0);
-                        mZOffset = 0.0f;
+                        mCurrentMousePos = Ogre::Vector3(); // mouse pos to use in wheel event
+                        mOrigMousePos = Ogre::Vector3();    // starting pos of mouse in world space
+                        mOrigObjPos = Ogre::Vector3();      // starting pos of object in world space
+                        mGrabbedSceneNode = "";             // id of the object
+                        mZOffset = 0.0f;                    // used for z-axis movement
+                        mOldPos = QPoint(0, 0);             // to calculate relative movement of mouse
+                                                            //  on screen
 
                         // FIXME: update document
                         // FIXME: highlight current object?
@@ -903,7 +904,6 @@ std::pair<bool, Ogre::Vector3> CSVRender::WorldspaceWidget::mousePositionOnPlane
 void CSVRender::WorldspaceWidget::placeObject(const std::string sceneNode, const Ogre::Vector3 &pos)
 {
     getSceneManager()->getSceneNode(sceneNode)->setPosition(pos);
-    flagAsModified();
 
     // update physics
     std::string refId = CSVWorld::PhysicsSystem::instance()->sceneNodeToRefId(sceneNode);
@@ -918,6 +918,9 @@ void CSVRender::WorldspaceWidget::placeObject(const std::string sceneNode, const
     std::string mesh = CSVWorld::PhysicsSystem::instance()->sceneNodeToMesh(sceneNode);
     CSVWorld::PhysicsSystem::instance()->removeObject(sceneNode);
     CSVWorld::PhysicsSystem::instance()->addObject(mesh, sceneNode, refId, cellref.mScale, pos, xr*yr*zr);
+
+    // update all SceneWidgets and their SceneManagers
+    emit signalAsModified();
 }
 
 bool CSVRender::WorldspaceWidget::isDebug()

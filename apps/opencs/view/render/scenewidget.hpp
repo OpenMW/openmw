@@ -47,6 +47,8 @@ namespace CSVRender
 
             virtual void setVisibilityMask (unsigned int mask);
 
+            virtual void updateScene();
+
         protected:
 
             void setNavigation (Navigation *navigation);
