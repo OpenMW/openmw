@@ -160,10 +160,22 @@ namespace MWScript
             {
                 if (const ESM::Script *scriptRecord = mStore.get<ESM::Script>().search (script.mId))
                 {
-                    GlobalScriptDesc desc;
-                    desc.mLocals.configure (*scriptRecord);
+                    try
+                    {
+                        GlobalScriptDesc desc;
+                        desc.mLocals.configure (*scriptRecord);
 
-                    iter = mScripts.insert (std::make_pair (script.mId, desc)).first;
+                        iter = mScripts.insert (std::make_pair (script.mId, desc)).first;
+                    }
+                    catch (const std::exception& exception)
+                    {
+                        std::cerr
+                            << "Failed to add start script " << script.mId
+                            << " because an exception has been thrown: " << exception.what()
+                            << std::endl;
+
+                        return true;
+                    }
                 }
                 else // script does not exist anymore
                     return true;
