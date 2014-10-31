@@ -16,7 +16,6 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../world/subviews.hpp"
-#include "../doc/subview.hpp"
 
 #include "../tools/subviews.hpp"
 
@@ -301,15 +300,6 @@ void CSVDoc::View::setupUi()
     setupDebugMenu();
 }
 
-void CSVDoc::View::refreshSubViews()
-{
-    QList<SubView *>::iterator iter = mSubViews.begin();
-    for(; iter != mSubViews.end(); ++iter)
-    {
-        (*iter)->updateScene();
-    }
-}
-
 void CSVDoc::View::updateTitle()
 {
     std::ostringstream stream;
@@ -536,8 +526,6 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
 
     connect (view, SIGNAL (updateSubViewIndicies (SubView *)),
         this, SLOT (updateSubViewIndicies (SubView *)));
-
-    connect (view, SIGNAL (refreshSubViews()), this, SLOT (refreshSubViews()));
 
     view->show();
 }

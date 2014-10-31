@@ -43,6 +43,3 @@ void CSVDoc::SubView::closeRequest()
 {
     emit closeRequest (this);
 }
-
-void CSVDoc::SubView::updateScene()
-{}

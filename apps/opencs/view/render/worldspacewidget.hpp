@@ -130,11 +130,13 @@ namespace CSVRender
             virtual std::string getStartupInstruction() = 0;
 
             void placeObject(const std::string sceneNode, const Ogre::Vector3 &pos);
-            bool isDebug();
             std::pair<std::string, Ogre::Vector3> terrainUnderCursor(const int mouseX, const int mouseY);
             std::pair<std::string, Ogre::Vector3> objectUnderCursor(const int mouseX, const int mouseY);
             std::pair<bool, Ogre::Vector3> mousePositionOnPlane(const QPoint &pos, const Ogre::Plane &plane);
             void updateSelectionHighlight(const std::string sceneNode, const Ogre::Vector3 &position);
+
+            void updateSceneWidgets();
+            bool isDebug();
 
         private slots:
 
@@ -170,8 +172,6 @@ namespace CSVRender
             void closeRequest();
 
             void dataDropped(const std::vector<CSMWorld::UniversalId>& data);
-
-            void signalAsModified();
     };
 }
 

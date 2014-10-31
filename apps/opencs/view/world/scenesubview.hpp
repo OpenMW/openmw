@@ -60,8 +60,6 @@ namespace CSVWorld
 
             virtual std::string getTitle() const;
 
-            virtual void updateScene();
-
         private:
 
             void makeConnections(CSVRender::PagedWorldspaceWidget* widget);

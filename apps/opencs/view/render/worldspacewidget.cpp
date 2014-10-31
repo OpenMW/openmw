@@ -527,7 +527,7 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
                             mCurrentMousePos = planeResult.second;
                             CSVWorld::PhysicsSystem::instance()->moveSceneNodes(mGrabbedSceneNode,
                                 pos+planeResult.second-mOrigMousePos);
-                            emit signalAsModified();
+                            updateSceneWidgets();
                         }
                     }
                 }
@@ -748,7 +748,7 @@ void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
                 getSceneManager()->getSceneNode(mGrabbedSceneNode)->setPosition(pos+mCurrentMousePos-mOrigMousePos);
                 CSVWorld::PhysicsSystem::instance()->moveSceneNodes(mGrabbedSceneNode,
                     pos+mCurrentMousePos-mOrigMousePos);
-                emit signalAsModified();
+                updateSceneWidgets();
             }
             break;
         }
@@ -923,7 +923,19 @@ void CSVRender::WorldspaceWidget::placeObject(const std::string sceneNode, const
     CSVWorld::PhysicsSystem::instance()->replaceObject(mesh, sceneNode, refId, cellref.mScale, pos, xr*yr*zr);
 
     // update all SceneWidgets and their SceneManagers
-    emit signalAsModified();
+    updateSceneWidgets();
+}
+
+void CSVRender::WorldspaceWidget::updateSceneWidgets()
+{
+    std::map<Ogre::SceneManager*, CSVRender::SceneWidget *> sceneWidgets =
+        CSVWorld::PhysicsSystem::instance()->sceneWidgets();
+
+    std::map<Ogre::SceneManager*, CSVRender::SceneWidget *>::iterator iter = sceneWidgets.begin();
+    for(; iter != sceneWidgets.end(); ++iter)
+    {
+        (*iter).second->updateScene();
+    }
 }
 
 bool CSVRender::WorldspaceWidget::isDebug()

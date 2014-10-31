@@ -276,9 +276,15 @@ namespace CSVWorld
         return mSceneNodeToMesh[sceneNodeName];
     }
 
-    void PhysicsSystem::addSceneManager(Ogre::SceneManager *sceneMgr)
+    void PhysicsSystem::addSceneManager(Ogre::SceneManager *sceneMgr, CSVRender::SceneWidget * sceneWidget)
     {
         mSceneManagers.push_back(sceneMgr);
+        mSceneWidgets[sceneMgr] = sceneWidget;
+    }
+
+    std::map<Ogre::SceneManager*, CSVRender::SceneWidget *> PhysicsSystem::sceneWidgets()
+    {
+        return mSceneWidgets;
     }
 
     void PhysicsSystem::removeSceneManager(Ogre::SceneManager *sceneMgr)
@@ -292,6 +298,7 @@ namespace CSVWorld
                 break;
             }
         }
+        mSceneWidgets.erase(sceneMgr);
     }
 
     void PhysicsSystem::toggleDebugRendering(Ogre::SceneManager *sceneMgr)

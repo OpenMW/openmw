@@ -62,8 +62,6 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
         makeConnections(newWidget);
     }
 
-    connect (worldspaceWidget, SIGNAL (signalAsModified()), this, SIGNAL (refreshSubViews()));
-
     replaceToolbarAndWorldspace(worldspaceWidget, makeToolbar(worldspaceWidget, whatWidget));
 
     layout->insertLayout (0, mLayout, 1);
@@ -133,7 +131,6 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
 void CSVWorld::SceneSubView::setEditLock (bool locked)
 {
 
-
 }
 
 void CSVWorld::SceneSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)
@@ -149,11 +146,6 @@ void CSVWorld::SceneSubView::setStatusBar (bool show)
 void CSVWorld::SceneSubView::useHint (const std::string& hint)
 {
     mScene->useViewHint (hint);
-}
-
-void CSVWorld::SceneSubView::updateScene()
-{
-    if(mScene) mScene->updateScene();
 }
 
 std::string CSVWorld::SceneSubView::getTitle() const
