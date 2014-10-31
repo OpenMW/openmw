@@ -549,7 +549,7 @@ void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
         case Mouse_Grab:
         case Mouse_Drag:
         {
-            if(event->buttons() & ~Qt::RightButton)
+            if(0 /*event->buttons() & ~Qt::RightButton*/)
             {
                 // cancel operation & return the object to the original position
                 placeObject(mGrabbedSceneNode, mOrigObjPos);

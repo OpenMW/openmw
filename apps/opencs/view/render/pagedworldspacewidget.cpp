@@ -207,10 +207,6 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 
 void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
 {
-    if(event->button() == Qt::RightButton)
-    {
-        std::cout << "double clicked" << std::endl;
-    }
     WorldspaceWidget::mouseDoubleClickEvent(event);
 }
 
