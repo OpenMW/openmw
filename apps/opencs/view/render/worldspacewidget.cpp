@@ -916,8 +916,7 @@ void CSVRender::WorldspaceWidget::placeObject(const std::string sceneNode, const
     // FIXME: adjustRigidBody() seems to lose objects, work around by deleting and recreating objects
     //CSVWorld::PhysicsSystem::instance()->moveObject(sceneNode, pos, xr*yr*zr);
     std::string mesh = CSVWorld::PhysicsSystem::instance()->sceneNodeToMesh(sceneNode);
-    CSVWorld::PhysicsSystem::instance()->removeObject(sceneNode);
-    CSVWorld::PhysicsSystem::instance()->addObject(mesh, sceneNode, refId, cellref.mScale, pos, xr*yr*zr);
+    CSVWorld::PhysicsSystem::instance()->replaceObject(mesh, sceneNode, refId, cellref.mScale, pos, xr*yr*zr);
 
     // update all SceneWidgets and their SceneManagers
     emit signalAsModified();

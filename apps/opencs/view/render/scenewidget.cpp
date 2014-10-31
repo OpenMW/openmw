@@ -66,7 +66,7 @@ namespace CSVRender
         mOverlaySystem = OverlaySystem::instance().get();
         mSceneMgr->addRenderQueueListener(mOverlaySystem);
 
-        CSVWorld::PhysicsSystem::instance()->addSceneManager(mSceneMgr, this);
+        CSVWorld::PhysicsSystem::instance()->addSceneManager(mSceneMgr);
 
         QTimer *timer = new QTimer (this);
 
@@ -166,6 +166,8 @@ namespace CSVRender
 
     SceneWidget::~SceneWidget()
     {
+        CSVWorld::PhysicsSystem::instance()->removeSceneManager(mSceneMgr);
+
         if (mWindow)
             Ogre::Root::getSingleton().destroyRenderTarget (mWindow);
 
