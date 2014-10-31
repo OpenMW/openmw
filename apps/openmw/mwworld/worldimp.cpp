@@ -1294,7 +1294,7 @@ namespace MWWorld
 
         if (force || !isFlying(ptr))
         {
-            Ogre::Vector3 traced = mPhysics->traceDown(ptr, 300);
+            Ogre::Vector3 traced = mPhysics->traceDown(ptr, 500);
             if (traced.z < pos.pos[2])
                 pos.pos[2] = traced.z;
         }
@@ -2879,7 +2879,8 @@ namespace MWWorld
             ContainerStore& store = ptr.getClass().getContainerStore(ptr);
             for (ContainerStoreIterator it = store.begin(); it != store.end(); ++it) //Move all stolen stuff into chest
             {
-                if (!it->getCellRef().getOwner().empty() && it->getCellRef().getOwner() != "player") //Not owned by no one/player?
+                MWWorld::Ptr dummy;
+                if (!MWBase::Environment::get().getMechanicsManager()->isAllowedToUse(getPlayerPtr(), *it, dummy))
                 {
                     closestChest.getClass().getContainerStore(closestChest).add(*it, it->getRefData().getCount(), closestChest);
                     store.remove(*it, it->getRefData().getCount(), ptr);

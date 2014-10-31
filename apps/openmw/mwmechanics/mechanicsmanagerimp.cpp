@@ -23,39 +23,6 @@
 
 #include <limits.h>
 
-namespace
-{
-    /// @return is \a ptr allowed to take/use \a item or is it a crime?
-    bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim)
-    {
-        const std::string& owner = item.getCellRef().getOwner();
-        bool isOwned = !owner.empty() && owner != "player";
-
-        const std::string& faction = item.getCellRef().getFaction();
-        bool isFactionOwned = false;
-        if (!faction.empty() && ptr.getClass().isNpc())
-        {
-            const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
-            std::map<std::string, int>::const_iterator found = factions.find(Misc::StringUtils::lowerCase(faction));
-            if (found == factions.end()
-                    || found->second < item.getCellRef().getFactionRank())
-                isFactionOwned = true;
-        }
-
-        const std::string& globalVariable = item.getCellRef().getGlobalVariable();
-        if (!globalVariable.empty() && MWBase::Environment::get().getWorld()->getGlobalInt(Misc::StringUtils::lowerCase(globalVariable)) == 1)
-        {
-            isOwned = false;
-            isFactionOwned = false;
-        }
-
-        if (!item.getCellRef().getOwner().empty())
-            victim = MWBase::Environment::get().getWorld()->searchPtr(item.getCellRef().getOwner(), true);
-
-        return (!isOwned && !isFactionOwned);
-    }
-}
-
 namespace MWMechanics
 {
     void MechanicsManager::buildPlayer()
@@ -877,6 +844,35 @@ namespace MWMechanics
         mClassSelected = true;
         mRaceSelected = true;
         mAI = true;
+    }
+
+    bool MechanicsManager::isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim)
+    {
+        const std::string& owner = item.getCellRef().getOwner();
+        bool isOwned = !owner.empty() && owner != "player";
+
+        const std::string& faction = item.getCellRef().getFaction();
+        bool isFactionOwned = false;
+        if (!faction.empty() && ptr.getClass().isNpc())
+        {
+            const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
+            std::map<std::string, int>::const_iterator found = factions.find(Misc::StringUtils::lowerCase(faction));
+            if (found == factions.end()
+                    || found->second < item.getCellRef().getFactionRank())
+                isFactionOwned = true;
+        }
+
+        const std::string& globalVariable = item.getCellRef().getGlobalVariable();
+        if (!globalVariable.empty() && MWBase::Environment::get().getWorld()->getGlobalInt(Misc::StringUtils::lowerCase(globalVariable)) == 1)
+        {
+            isOwned = false;
+            isFactionOwned = false;
+        }
+
+        if (!item.getCellRef().getOwner().empty())
+            victim = MWBase::Environment::get().getWorld()->searchPtr(item.getCellRef().getOwner(), true);
+
+        return (!isOwned && !isFactionOwned);
     }
 
     bool MechanicsManager::sleepInBed(const MWWorld::Ptr &ptr, const MWWorld::Ptr &bed)

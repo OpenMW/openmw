@@ -41,7 +41,8 @@ namespace MWScript
                     }
                     catch (...)
                     {
-                        MWBase::Environment::get().getJournal()->setJournalIndex(quest, index);
+                        if (MWBase::Environment::get().getJournal()->getJournalIndex(quest) < index)
+                            MWBase::Environment::get().getJournal()->setJournalIndex(quest, index);
                     }
                 }
         };

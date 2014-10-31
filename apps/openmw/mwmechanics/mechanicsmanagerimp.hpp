@@ -130,6 +130,9 @@ namespace MWMechanics
             /// @return was it illegal, and someone saw you doing it? Also returns fail when enemies are nearby
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed);
 
+            /// @return is \a ptr allowed to take/use \a item or is it a crime?
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim);
+
             virtual void forceStateUpdate(const MWWorld::Ptr &ptr);
 
             virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);

@@ -311,6 +311,9 @@ namespace MWScript
 
     std::string InterpreterContext::getNPCRank() const
     {
+        if (getReferenceImp().getClass().getNpcStats(getReferenceImp()).getFactionRanks().empty())
+            throw std::runtime_error("getNPCRank(): NPC is not in a faction");
+
         const std::map<std::string, int>& ranks = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks();
         std::map<std::string, int>::const_iterator it = ranks.begin();
 
@@ -347,6 +350,9 @@ namespace MWScript
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
 
+        if (getReferenceImp().getClass().getNpcStats(getReferenceImp()).getFactionRanks().empty())
+            throw std::runtime_error("getPCRank(): NPC is not in a faction");
+
         std::string factionId = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks().begin()->first;
 
         const std::map<std::string, int>& ranks = player.getClass().getNpcStats (player).getFactionRanks();
@@ -373,6 +379,9 @@ namespace MWScript
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
+
+        if (getReferenceImp().getClass().getNpcStats(getReferenceImp()).getFactionRanks().empty())
+            throw std::runtime_error("getPCNextRank(): NPC is not in a faction");
 
         std::string factionId = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks().begin()->first;
 
