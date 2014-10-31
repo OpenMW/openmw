@@ -90,13 +90,32 @@ namespace MWScript
 
     void GlobalScripts::addStartup()
     {
-        addScript ("main");
+        // make list of global scripts to be added
+        std::vector<std::string> scripts;
+
+        scripts.push_back ("main");
 
         for (MWWorld::Store<ESM::StartScript>::iterator iter =
             mStore.get<ESM::StartScript>().begin();
             iter != mStore.get<ESM::StartScript>().end(); ++iter)
         {
-            addScript (iter->mScript);
+            scripts.push_back (iter->mScript);
+        }
+
+        // add scripts
+        for (std::vector<std::string>::const_iterator iter (scripts.begin());
+            iter!=scripts.end(); ++iter)
+        {
+            try
+            {
+                addScript (*iter);
+            }
+            catch (const std::exception& exception)
+            {
+                std::cerr
+                    << "Failed to add start script " << *iter << " because an exception has "
+                    << "been thrown: " << exception.what() << std::endl;
+            }
         }
     }
 

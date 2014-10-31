@@ -358,7 +358,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
 
     setAcceptDrops(true);
 
-    mDoubleClickActions.insert (std::make_pair (0, Action_InPlaceEdit));
+    mDoubleClickActions.insert (std::make_pair (Qt::NoModifier, Action_InPlaceEdit));
     mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier, Action_EditRecord));
     mDoubleClickActions.insert (std::make_pair (Qt::ControlModifier, Action_View));
     mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier | Qt::ControlModifier, Action_EditRecordAndClose));

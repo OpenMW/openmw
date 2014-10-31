@@ -133,7 +133,7 @@ public:
     {
         Transformation t;
         t.pos = getVector3();
-        t.rotation = getMatrix3();
+        t.rotationScale = getMatrix3();
         t.scale = getFloat();
         return t;
     }
