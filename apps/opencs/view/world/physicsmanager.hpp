@@ -31,7 +31,6 @@ namespace CSVWorld
     {
             static PhysicsManager *mPhysicsManagerInstance;
 
-            //std::map<CSVRender::SceneWidget *, Ogre::SceneManager*>  mSceneManagers;
             std::map<CSMDoc::Document *, std::list<CSVRender::SceneWidget *> > mSceneWidgets;
             std::map<CSMDoc::Document *, CSVWorld::PhysicsSystem *> mPhysics;
 
@@ -43,15 +42,12 @@ namespace CSVWorld
             static PhysicsManager *instance();
 
             void setupPhysics(CSMDoc::Document *);
-#if 0
-            void addSceneManager(CSVRender::SceneWidget *sceneWidget, Ogre::SceneManager *sceneMgr);
-
-            void removeSceneManager(CSVRender::SceneWidget *sceneWidget);
-#endif
 
             PhysicsSystem *addSceneWidget(CSMDoc::Document &doc, CSVRender::WorldspaceWidget *widget);
 
             void removeSceneWidget(CSVRender::WorldspaceWidget *widget);
+
+            void removeDocument(CSMDoc::Document *doc);
     };
 }
 

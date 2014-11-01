@@ -25,10 +25,10 @@ namespace CSVWorld
         delete mEngine;
     }
 
-    // FIXME: looks up the scene manager based on the scene node name (highly inefficient)
+    // looks up the scene manager based on the scene node name (inefficient)
     // NOTE: referenceId is assumed to be unique per document
-    // NOTE: searching is done here rather than after rayTest, so slower to load but
-    //       faster to find (not verified w/ perf test)
+    // NOTE: searching is done here rather than after rayTest, hence slower to load but
+    //       faster to find (guessing, not verified w/ perf test)
     void PhysicsSystem::addObject(const std::string &mesh,
             const std::string &sceneNodeName, const std::string &referenceId, float scale,
             const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, bool placeable)
@@ -48,7 +48,12 @@ namespace CSVWorld
         }
 
         if(!foundSceneManager)
-            return; // FIXME: should this be an exception
+        {
+            std::cerr << "Attempt to add an object without a corresponding SceneManager: "
+                + referenceId + " : " + sceneNodeName << std::endl;
+
+            return;
+        }
 
         // update physics, only one physics model per referenceId
         if(mEngine->getRigidBody(referenceId, true) == NULL)
@@ -61,7 +66,7 @@ namespace CSVWorld
                     placeable);
 
             // update other scene managers if they have the referenceId (may have moved)
-            // FIXME: this bit not needed if object has not moved
+            // NOTE: this part is not needed if object has not moved
             iter = mSceneManagers.begin();
             for(; iter != mSceneManagers.end(); ++iter)
             {
@@ -99,7 +104,12 @@ namespace CSVWorld
             }
 
             if(!sceneManager)
-                return; // FIXME: maybe this should be an exception
+            {
+                std::cerr << "Attempt to remove an object without a corresponding SceneManager: "
+                    + sceneNodeName << std::endl;
+
+                return;
+            }
 
             // illustration: erase the object "K" from the object map
             //
@@ -123,7 +133,7 @@ namespace CSVWorld
                 }
             }
 
-            // should the physics model be deleted?
+            // check whether the physics model be deleted
             if(force || mRefIdToSceneNode.find(referenceId) == mRefIdToSceneNode.end())
             {
                 mEngine->removeRigidBody(referenceId);
@@ -132,10 +142,11 @@ namespace CSVWorld
         }
     }
 
-    void PhysicsSystem::replaceObject(const std::string &mesh,
-            const std::string &sceneNodeName, const std::string &referenceId, float scale,
-            const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, bool placeable)
+    void PhysicsSystem::replaceObject(const std::string &sceneNodeName,
+            const std::string &referenceId, float scale, const Ogre::Vector3 &position,
+            const Ogre::Quaternion &rotation, bool placeable)
     {
+        std::string mesh = mSceneNodeToMesh[sceneNodeName];
         removeObject(sceneNodeName, true); // force delete
         addObject(mesh, sceneNodeName, referenceId, scale, position, rotation, placeable);
     }
@@ -259,11 +270,6 @@ namespace CSVWorld
         return mSceneNodeToRefId[sceneNodeName];
     }
 
-    std::string PhysicsSystem::sceneNodeToMesh(std::string sceneNodeName)
-    {
-        return mSceneNodeToMesh[sceneNodeName];
-    }
-
     void PhysicsSystem::addSceneManager(Ogre::SceneManager *sceneMgr, CSVRender::SceneWidget * sceneWidget)
     {
         mSceneManagers.push_back(sceneMgr);
@@ -293,7 +299,7 @@ namespace CSVWorld
     {
         // FIXME: should check if sceneMgr is in the list
         if(!sceneMgr)
-            return; // FIXME: maybe this should be an exception
+            return;
 
         mEngine->setSceneManager(sceneMgr);
 

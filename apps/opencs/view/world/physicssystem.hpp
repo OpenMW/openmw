@@ -42,7 +42,9 @@ namespace CSVWorld
 
             PhysicsSystem();
             ~PhysicsSystem();
+
             void addSceneManager(Ogre::SceneManager *sceneMgr, CSVRender::SceneWidget * scene);
+
             void removeSceneManager(Ogre::SceneManager *sceneMgr);
 
             void addObject(const std::string &mesh,
@@ -52,10 +54,9 @@ namespace CSVWorld
 
             void removeObject(const std::string &sceneNodeName, bool force = false);
 
-            void replaceObject(const std::string &mesh,
-                    const std::string &sceneNodeName, const std::string &referenceId, float scale,
-                    const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
-                    bool placeable=false);
+            void replaceObject(const std::string &sceneNodeName,
+                    const std::string &referenceId, float scale, const Ogre::Vector3 &position,
+                    const Ogre::Quaternion &rotation, bool placeable=false);
 
             void moveObject(const std::string &sceneNodeName,
                     const Ogre::Vector3 &position, const Ogre::Quaternion &rotation);
@@ -75,8 +76,7 @@ namespace CSVWorld
 
             std::string sceneNodeToRefId(std::string sceneNodeName);
 
-            std::string sceneNodeToMesh(std::string sceneNodeName);
-
+            // for multi-scene manager per physics engine
             std::map<Ogre::SceneManager*, CSVRender::SceneWidget *> sceneWidgets();
 
         private:
@@ -85,6 +85,7 @@ namespace CSVWorld
                     const std::string referenceId, const Ogre::Vector3 &position);
 
             void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);
+
             std::string refIdToSceneNode(std::string referenceId, Ogre::SceneManager *sceneMgr);
     };
 }

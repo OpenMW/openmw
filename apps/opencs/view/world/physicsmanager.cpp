@@ -34,8 +34,25 @@ namespace CSVWorld
         std::map<CSMDoc::Document *, std::list<CSVRender::SceneWidget *> >::iterator iter = mSceneWidgets.find(doc);
         if(iter == mSceneWidgets.end())
         {
-            mSceneWidgets[doc] = std::list<CSVRender::SceneWidget *> {}; // zero elements
+            mSceneWidgets[doc] = std::list<CSVRender::SceneWidget *> (); // zero elements
             mPhysics[doc] = new PhysicsSystem();
+        }
+    }
+
+    // destroy physics, called from CSVDoc::ViewManager
+    void PhysicsManager::removeDocument(CSMDoc::Document *doc)
+    {
+        std::map<CSMDoc::Document *, CSVWorld::PhysicsSystem *>::iterator iter = mPhysics.find(doc);
+        if(iter != mPhysics.end())
+        {
+            delete iter->second;
+            mPhysics.erase(iter);
+        }
+
+        std::map<CSMDoc::Document *, std::list<CSVRender::SceneWidget *> >::iterator it = mSceneWidgets.find(doc);
+        if(it != mSceneWidgets.end())
+        {
+            mSceneWidgets.erase(it);
         }
     }
 
@@ -72,12 +89,8 @@ namespace CSVWorld
                 {
                     (*iter).second.erase(itWidget);
 
-                    if((*iter).second.empty()) // last one for the document
-                    {
-                        delete mPhysics[(*iter).first];
-                        mPhysics.erase((*iter).first);
-                        mSceneWidgets.erase(iter);
-                    }
+                    //if((*iter).second.empty()) // last one for the document
+                        // NOTE: do not delete physics until the document itself is closed
 
                     break;
                 }

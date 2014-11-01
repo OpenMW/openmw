@@ -927,8 +927,7 @@ void CSVRender::WorldspaceWidget::placeObject(const std::string sceneNode, const
 
     // FIXME: adjustRigidBody() seems to lose objects, work around by deleting and recreating objects
     //mPhysics->moveObject(sceneNode, pos, xr*yr*zr);
-    std::string mesh = mPhysics->sceneNodeToMesh(sceneNode);
-    mPhysics->replaceObject(mesh, sceneNode, refId, cellref.mScale, pos, xr*yr*zr);
+    mPhysics->replaceObject(sceneNode, refId, cellref.mScale, pos, xr*yr*zr);
 
     // update all SceneWidgets and their SceneManagers
     updateSceneWidgets();
