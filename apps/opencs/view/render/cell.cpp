@@ -51,7 +51,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
             std::string id = Misc::StringUtils::lowerCase (references.data (
                 references.index (i, idColumn)).toString().toUtf8().constData());
 
-            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false)));
+            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false, mPhysics)));
             modified = true;
         }
     }
@@ -60,8 +60,8 @@ bool CSVRender::Cell::addObjects (int start, int end)
 }
 
 CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
-    const std::string& id, const Ogre::Vector3& origin)
-: mData (data), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager)
+    const std::string& id, CSVWorld::PhysicsSystem *physics, const Ogre::Vector3& origin)
+: mData (data), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager), mPhysics(physics)
 {
     mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
     mCellNode->setPosition (origin);
@@ -88,26 +88,17 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
         {
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
-            CSVWorld::PhysicsSystem::instance()->addHeightField(sceneManager,
-                    esmLand->mLandData->mHeights, esmLand->mX, esmLand->mY, 0, worldsize / (verts-1), verts);
+            mX = esmLand->mX;
+            mY = esmLand->mY;
+            mPhysics->addHeightField(sceneManager,
+                    esmLand->mLandData->mHeights, mX, mY, 0, worldsize / (verts-1), verts);
         }
     }
 }
 
 CSVRender::Cell::~Cell()
 {
-    // TODO: maybe store the cell coordinates rather than searching for them in the destructor?
-    if(mTerrain.get())
-    {
-        const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
-        int landIndex = land.searchId(mId);
-        if (landIndex != -1)
-        {
-            const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
-            if(esmLand)
-                CSVWorld::PhysicsSystem::instance()->removeHeightField(mSceneMgr, esmLand->mX, esmLand->mY);
-        }
-    }
+    mPhysics->removeHeightField(mSceneMgr, mX, mY);
 
     for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
         iter!=mObjects.end(); ++iter)
@@ -201,7 +192,7 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     for (std::map<std::string, bool>::iterator iter (ids.begin()); iter!=ids.end(); ++iter)
     {
         mObjects.insert (std::make_pair (
-            iter->first, new Object (mData, mCellNode, iter->first, false)));
+            iter->first, new Object (mData, mCellNode, iter->first, false, mPhysics)));
 
         modified = true;
     }

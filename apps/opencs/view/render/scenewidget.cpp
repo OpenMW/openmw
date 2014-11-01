@@ -13,8 +13,6 @@
 #include <OgreViewport.h>
 #include <OgreOverlaySystem.h>
 
-#include "../world/physicssystem.hpp"
-
 #include "../widget/scenetoolmode.hpp"
 #include "../../model/settings/usersettings.hpp"
 
@@ -65,8 +63,6 @@ namespace CSVRender
 
         mOverlaySystem = OverlaySystem::instance().get();
         mSceneMgr->addRenderQueueListener(mOverlaySystem);
-
-        CSVWorld::PhysicsSystem::instance()->addSceneManager(mSceneMgr, this);
 
         QTimer *timer = new QTimer (this);
 
@@ -166,8 +162,6 @@ namespace CSVRender
 
     SceneWidget::~SceneWidget()
     {
-        CSVWorld::PhysicsSystem::instance()->removeSceneManager(mSceneMgr);
-
         if (mWindow)
             Ogre::Root::getSingleton().destroyRenderTarget (mWindow);
 

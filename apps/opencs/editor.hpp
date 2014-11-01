@@ -28,7 +28,7 @@
 
 #include "view/settings/dialog.hpp"
 #include "view/render/overlaysystem.hpp"
-#include "view/world/physicssystem.hpp"
+#include "view/world/physicsmanager.hpp"
 
 namespace OgreInit
 {
@@ -45,7 +45,7 @@ namespace CS
             Files::ConfigurationManager mCfgMgr;
             CSMSettings::UserSettings mUserSettings;
             std::auto_ptr<CSVRender::OverlaySystem> mOverlaySystem;
-            std::auto_ptr<CSVWorld::PhysicsSystem> mPhysicsSystem;
+            std::auto_ptr<CSVWorld::PhysicsManager> mPhysicsManager;
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;

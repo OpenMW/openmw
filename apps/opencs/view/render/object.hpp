@@ -16,6 +16,11 @@ namespace CSMWorld
     class CellRef;
 }
 
+namespace CSVWorld
+{
+    class PhysicsSystem;
+}
+
 namespace CSVRender
 {
     class Object
@@ -26,6 +31,7 @@ namespace CSVRender
             Ogre::SceneNode *mBase;
             NifOgre::ObjectScenePtr mObject;
             bool mForceBaseToZero;
+            CSVWorld::PhysicsSystem *mPhysics;
 
             /// Not implemented
             Object (const Object&);
@@ -51,7 +57,8 @@ namespace CSVRender
         public:
 
             Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode,
-                const std::string& id, bool referenceable, bool forceBaseToZero = false);
+                const std::string& id, bool referenceable,
+                CSVWorld::PhysicsSystem *physics = NULL, bool forceBaseToZero = false);
             /// \param forceBaseToZero If this is a reference ignore the coordinates and place
             /// it at 0, 0, 0 instead.
 

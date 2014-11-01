@@ -21,7 +21,7 @@
 
 CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 : mUserSettings (mCfgMgr), mOverlaySystem (0), mDocumentManager (mCfgMgr),
-  mViewManager (mDocumentManager), mPhysicsSystem (0),
+  mViewManager (mDocumentManager), mPhysicsManager (0),
   mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
@@ -34,7 +34,7 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
 
     mOverlaySystem.reset (new CSVRender::OverlaySystem);
-    mPhysicsSystem.reset (new CSVWorld::PhysicsSystem);
+    mPhysicsManager.reset (new CSVWorld::PhysicsManager);
 
     Bsa::registerResources (Files::Collections (config.first, !mFsStrict), config.second, true,
         mFsStrict);

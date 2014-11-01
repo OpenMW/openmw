@@ -13,12 +13,18 @@ namespace CSMWorld
 {
     class UniversalId;
 }
+
 namespace CSVWidget
 {
     class SceneToolMode;
     class SceneToolToggle;
     class SceneToolbar;
     class SceneToolRun;
+}
+
+namespace CSVWorld
+{
+    class PhysicsSystem;
 }
 
 class QElapsedTimer;
@@ -35,6 +41,7 @@ namespace CSVRender
             CSVWidget::SceneToolToggle *mSceneElements;
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
+            CSVWorld::PhysicsSystem *mPhysics;
 
             enum MouseState
             {
@@ -112,6 +119,8 @@ namespace CSVRender
             CSMDoc::Document& getDocument();
 
             virtual void updateOverlay();
+
+            CSVWorld::PhysicsSystem *getPhysics();
 
             virtual void mouseMoveEvent (QMouseEvent *event);
             virtual void mousePressEvent (QMouseEvent *event);

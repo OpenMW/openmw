@@ -30,12 +30,10 @@ namespace CSVWorld
 {
     class PhysicsSystem
     {
-            static PhysicsSystem *mPhysicsSystemInstance;
             std::map<std::string, std::string> mSceneNodeToRefId;
             std::map<std::string, std::map<Ogre::SceneManager *, std::string> > mRefIdToSceneNode;
             std::map<std::string, std::string> mSceneNodeToMesh;
-            std::list<Ogre::SceneManager *> mSceneManagers; // FIXME: change to list per OEngine
-            //std::list<CSVRender::SceneWidget *> mSceneWidgets; // FIXME: change to list per OEngine
+            std::list<Ogre::SceneManager *> mSceneManagers;
             std::map<Ogre::SceneManager*, CSVRender::SceneWidget *> mSceneWidgets;
             OEngine::Physic::PhysicEngine* mEngine;
             std::multimap<std::string, Ogre::SceneManager *> mTerrain;
@@ -44,9 +42,6 @@ namespace CSVWorld
 
             PhysicsSystem();
             ~PhysicsSystem();
-
-            static PhysicsSystem *instance();
-
             void addSceneManager(Ogre::SceneManager *sceneMgr, CSVRender::SceneWidget * scene);
             void removeSceneManager(Ogre::SceneManager *sceneMgr);
 

@@ -13,13 +13,8 @@
 
 namespace CSVWorld
 {
-    PhysicsSystem *PhysicsSystem::mPhysicsSystemInstance = 0;
-
     PhysicsSystem::PhysicsSystem()
     {
-        assert(!mPhysicsSystemInstance);
-        mPhysicsSystemInstance = this;
-
         // Create physics. shapeLoader is deleted by the physic engine
         NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
         mEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
@@ -28,13 +23,6 @@ namespace CSVWorld
     PhysicsSystem::~PhysicsSystem()
     {
         delete mEngine;
-        // FIXME: update maps when SceneManagers are destroyed
-    }
-
-    PhysicsSystem *PhysicsSystem::instance()
-    {
-        assert(mPhysicsSystemInstance);
-        return mPhysicsSystemInstance;
     }
 
     // FIXME: looks up the scene manager based on the scene node name (highly inefficient)
@@ -60,7 +48,7 @@ namespace CSVWorld
         }
 
         if(!foundSceneManager)
-            return; // FIXME: this should be an exception
+            return; // FIXME: should this be an exception
 
         // update physics, only one physics model per referenceId
         if(mEngine->getRigidBody(referenceId, true) == NULL)

@@ -24,6 +24,7 @@
 #include "../widget/scenetooltoggle.hpp"
 #include "../widget/scenetoolrun.hpp"
 
+#include "../world/physicsmanager.hpp"
 #include "../world/physicssystem.hpp"
 
 #include "elements.hpp"
@@ -147,6 +148,10 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     connect (debugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
 
+    // associate WorldSpaceWidgets (and their SceneManagers with Documents, then create physics if new document
+    mPhysics = CSVWorld::PhysicsManager::instance()->addSceneWidget(document, this);
+    mPhysics->addSceneManager(getSceneManager(), this);
+
     initDebug();
     mMouseEventTimer = new QElapsedTimer();
     mMouseEventTimer->invalidate();
@@ -166,6 +171,9 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
 
 CSVRender::WorldspaceWidget::~WorldspaceWidget ()
 {
+    mPhysics->removeSceneManager(getSceneManager());
+    CSVWorld::PhysicsManager::instance()->removeSceneWidget(this);
+
     delete mMouseEventTimer;
 
     // For debugging only
@@ -457,6 +465,12 @@ void CSVRender::WorldspaceWidget::updateOverlay()
 {
 }
 
+CSVWorld::PhysicsSystem *CSVRender::WorldspaceWidget::getPhysics()
+{
+    assert(mPhysics);
+    return mPhysics;
+}
+
 // mouse picking
 // FIXME: need to virtualise mouse buttons
 //
@@ -525,8 +539,7 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
                             pos.z += mZOffset;
                             getSceneManager()->getSceneNode(mGrabbedSceneNode)->setPosition(pos+planeResult.second-mOrigMousePos);
                             mCurrentMousePos = planeResult.second;
-                            CSVWorld::PhysicsSystem::instance()->moveSceneNodes(mGrabbedSceneNode,
-                                pos+planeResult.second-mOrigMousePos);
+                            mPhysics->moveSceneNodes(mGrabbedSceneNode, pos+planeResult.second-mOrigMousePos);
                             updateSceneWidgets();
                         }
                     }
@@ -634,8 +647,7 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
                         // print some debug info
                         if(isDebug())
                         {
-                            std::string referenceId =
-                                CSVWorld::PhysicsSystem::instance()->sceneNodeToRefId(result.first);
+                            std::string referenceId = mPhysics->sceneNodeToRefId(result.first);
                             std::cout << "ReferenceId: " << referenceId << std::endl;
                             const CSMWorld::RefCollection& references = mDocument.getData().getReferences();
                             int index = references.searchId(referenceId);
@@ -719,8 +731,8 @@ void CSVRender::WorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
             // debug drawer.  Hence only the first subview that creates the debug drawer
             // can view the debug lines.  Will need to keep a map in OEngine if multiple
             // subviews are to be supported.
-            //CSVWorld::PhysicsSystem::instance()->setSceneManager(getSceneManager());
-            CSVWorld::PhysicsSystem::instance()->toggleDebugRendering(getSceneManager());
+            //mPhysics->setSceneManager(getSceneManager());
+            mPhysics->toggleDebugRendering(getSceneManager());
             flagAsModified();
         }
     }
@@ -746,8 +758,7 @@ void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
                 Ogre::Vector3 pos = mOrigObjPos;
                 pos.z += mZOffset;
                 getSceneManager()->getSceneNode(mGrabbedSceneNode)->setPosition(pos+mCurrentMousePos-mOrigMousePos);
-                CSVWorld::PhysicsSystem::instance()->moveSceneNodes(mGrabbedSceneNode,
-                    pos+mCurrentMousePos-mOrigMousePos);
+                mPhysics->moveSceneNodes(mGrabbedSceneNode, pos+mCurrentMousePos-mOrigMousePos);
                 updateSceneWidgets();
             }
             break;
@@ -844,8 +855,7 @@ std::pair<std::string, Ogre::Vector3> CSVRender::WorldspaceWidget::terrainUnderC
     float x = (float) mouseX / getCamera()->getViewport()->getActualWidth();
     float y = (float) mouseY / getCamera()->getViewport()->getActualHeight();
 
-    std::pair<std::string, Ogre::Vector3> result =
-        CSVWorld::PhysicsSystem::instance()->castRay(x, y, getSceneManager(), getCamera());
+    std::pair<std::string, Ogre::Vector3> result = mPhysics->castRay(x, y, getSceneManager(), getCamera());
     if(result.first != "")
     {
         // FIXME: is there  a better way to distinguish terrain from objects?
@@ -867,8 +877,7 @@ std::pair<std::string, Ogre::Vector3> CSVRender::WorldspaceWidget::objectUnderCu
     float x = (float) mouseX / getCamera()->getViewport()->getActualWidth();
     float y = (float) mouseY / getCamera()->getViewport()->getActualHeight();
 
-    std::pair<std::string, Ogre::Vector3> result =
-        CSVWorld::PhysicsSystem::instance()->castRay(x, y, getSceneManager(), getCamera());
+    std::pair<std::string, Ogre::Vector3> result = mPhysics->castRay(x, y, getSceneManager(), getCamera());
     if(result.first != "")
     {
         // NOTE: anything not terrain is assumed to be an object
@@ -910,17 +919,16 @@ void CSVRender::WorldspaceWidget::placeObject(const std::string sceneNode, const
     getSceneManager()->getSceneNode(sceneNode)->setPosition(pos);
 
     // update physics
-    std::string refId = CSVWorld::PhysicsSystem::instance()->sceneNodeToRefId(sceneNode);
-    const CSMWorld::CellRef& cellref =
-            mDocument.getData().getReferences().getRecord (refId).get();
+    std::string refId = mPhysics->sceneNodeToRefId(sceneNode);
+    const CSMWorld::CellRef& cellref = mDocument.getData().getReferences().getRecord (refId).get();
     Ogre::Quaternion xr (Ogre::Radian (-cellref.mPos.rot[0]), Ogre::Vector3::UNIT_X);
     Ogre::Quaternion yr (Ogre::Radian (-cellref.mPos.rot[1]), Ogre::Vector3::UNIT_Y);
     Ogre::Quaternion zr (Ogre::Radian (-cellref.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
 
     // FIXME: adjustRigidBody() seems to lose objects, work around by deleting and recreating objects
-    //CSVWorld::PhysicsSystem::instance()->moveObject(sceneNode, pos, xr*yr*zr);
-    std::string mesh = CSVWorld::PhysicsSystem::instance()->sceneNodeToMesh(sceneNode);
-    CSVWorld::PhysicsSystem::instance()->replaceObject(mesh, sceneNode, refId, cellref.mScale, pos, xr*yr*zr);
+    //mPhysics->moveObject(sceneNode, pos, xr*yr*zr);
+    std::string mesh = mPhysics->sceneNodeToMesh(sceneNode);
+    mPhysics->replaceObject(mesh, sceneNode, refId, cellref.mScale, pos, xr*yr*zr);
 
     // update all SceneWidgets and their SceneManagers
     updateSceneWidgets();
@@ -928,8 +936,7 @@ void CSVRender::WorldspaceWidget::placeObject(const std::string sceneNode, const
 
 void CSVRender::WorldspaceWidget::updateSceneWidgets()
 {
-    std::map<Ogre::SceneManager*, CSVRender::SceneWidget *> sceneWidgets =
-        CSVWorld::PhysicsSystem::instance()->sceneWidgets();
+    std::map<Ogre::SceneManager*, CSVRender::SceneWidget *> sceneWidgets = mPhysics->sceneWidgets();
 
     std::map<Ogre::SceneManager*, CSVRender::SceneWidget *>::iterator iter = sceneWidgets.begin();
     for(; iter != sceneWidgets.end(); ++iter)
