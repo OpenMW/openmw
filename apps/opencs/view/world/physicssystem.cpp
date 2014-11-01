@@ -22,7 +22,10 @@ namespace CSVWorld
 
     PhysicsSystem::~PhysicsSystem()
     {
-        delete mEngine;
+        // FIXME: OEngine does not behave well when multiple instances are created
+        // and deleted, sometimes resulting in crashes.  Skip the deletion until the physics
+        // code is moved out of OEngine.
+        //delete mEngine;
     }
 
     // looks up the scene manager based on the scene node name (inefficient)
