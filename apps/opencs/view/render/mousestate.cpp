@@ -3,11 +3,7 @@
 #include <OgreSceneNode.h>
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
-
 #include <OgreMeshManager.h>
-#include <OgreManualObject.h>        // FIXME: for debugging
-#include <OgreMaterialManager.h>     // FIXME: for debugging
-#include <OgreHardwarePixelBuffer.h> // FIXME: for debugging
 
 #include <QMouseEvent>
 #include <QElapsedTimer>
@@ -15,26 +11,8 @@
 #include "../../model/settings/usersettings.hpp"
 #include "../world/physicssystem.hpp"
 
-#include "elements.hpp" // FIXME: for debugging
+#include "elements.hpp"
 #include "worldspacewidget.hpp"
-
-namespace
-{
-    //plane Z, upvector Y, mOffset z : x-y plane, wheel up/down
-    //plane Y, upvector X, mOffset y : y-z plane, wheel left/right
-    //plane X, upvector Y, mOffset x : x-z plane, wheel closer/further
-    std::pair<Ogre::Vector3, Ogre::Vector3> planeAxis()
-    {
-        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-        QString wheelDir =  userSettings.setting("debug/mouse-wheel", QString("Closer/Further"));
-        if(wheelDir == "Up/Down")
-            return std::make_pair(Ogre::Vector3::UNIT_Z, Ogre::Vector3::UNIT_Y);
-        else if(wheelDir == "Left/Right")
-            return std::make_pair(Ogre::Vector3::UNIT_Y, Ogre::Vector3::UNIT_X);
-        else
-            return std::make_pair(Ogre::Vector3::UNIT_X, Ogre::Vector3::UNIT_Y);
-    }
-}
 
 namespace CSVRender
 {
@@ -187,7 +165,6 @@ namespace CSVRender
                     mGrabbedSceneNode = result.first;
                     // ray test agaist the plane to get a starting position of the
                     // mouse in relation to the object position
-                    //mPlane->redefine(Ogre::Vector3::UNIT_Z, result.second);
                     std::pair<Ogre::Vector3, Ogre::Vector3> planeRes = planeAxis();
                     mPlane->redefine(planeRes.first, result.second);
                     std::pair<bool, Ogre::Vector3> planeResult = mousePositionOnPlane(event->pos(), *mPlane);
@@ -349,6 +326,38 @@ namespace CSVRender
         }
 
         return true;
+    }
+
+    //plane Z, upvector Y, mOffset z : x-y plane, wheel up/down
+    //plane Y, upvector X, mOffset y : y-z plane, wheel left/right
+    //plane X, upvector Y, mOffset x : x-z plane, wheel closer/further
+    std::pair<Ogre::Vector3, Ogre::Vector3> MouseState::planeAxis()
+    {
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+        QString coord =  userSettings.setting("debug/mouse-reference", QString("screen"));
+
+        QString wheelDir =  userSettings.setting("debug/mouse-wheel", QString("Closer/Further"));
+        if(wheelDir == "Left/Right")
+        {
+            if(coord == "world")
+                return std::make_pair(Ogre::Vector3::UNIT_Y, Ogre::Vector3::UNIT_X);
+            else
+                return std::make_pair(getCamera()->getDerivedRight(), getCamera()->getDerivedDirection());
+        }
+        else if(wheelDir == "Up/Down")
+        {
+            if(coord == "world")
+                return std::make_pair(Ogre::Vector3::UNIT_Z, Ogre::Vector3::UNIT_Y);
+            else
+                return std::make_pair(getCamera()->getDerivedUp(), getCamera()->getDerivedRight());
+        }
+        else
+        {
+            if(coord == "world")
+                return std::make_pair(Ogre::Vector3::UNIT_X, Ogre::Vector3::UNIT_Y);
+            else
+                return std::make_pair(getCamera()->getDerivedDirection(), getCamera()->getDerivedRight());
+        }
     }
 
     std::pair<bool, Ogre::Vector3> MouseState::mousePositionOnPlane(const QPoint &pos, const Ogre::Plane &plane)

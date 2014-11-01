@@ -175,6 +175,14 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "For testing mouse movement directions.");
         mouseWheel->setDefaultValue (defaultValue);
         mouseWheel->setDeclaredValues (values);
+
+        defaultValue = "screen";
+        values = QStringList() << defaultValue << "world";
+
+        Setting *mouseCoord = createSetting (Type_RadioButton, "mouse-reference",
+            "For testing mouse movement frame of reference.");
+        mouseCoord->setDefaultValue (defaultValue);
+        mouseCoord->setDeclaredValues (values);
     }
 
     declareSection ("table-input", "Table Input");

@@ -71,6 +71,7 @@ namespace CSVRender
             std::pair<std::string, Ogre::Vector3> terrainUnderCursor(const int mouseX, const int mouseY);
             std::pair<std::string, Ogre::Vector3> objectUnderCursor(const int mouseX, const int mouseY);
             void updateSelectionHighlight(const std::string sceneNode, const Ogre::Vector3 &position);
+            std::pair<Ogre::Vector3, Ogre::Vector3> planeAxis();
             void updateSceneWidgets();
             bool isDebug();
 
