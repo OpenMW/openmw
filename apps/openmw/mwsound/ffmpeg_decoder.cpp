@@ -107,6 +107,9 @@ bool FFmpeg_Decoder::getAVAudioData()
             av_shrink_packet(&mPacket, remaining);
         }
 
+        if (!got_frame || mFrame->nb_samples == 0)
+            continue;
+
         if(mSwr)
         {
             if(!mDataBuf || mDataBufLen < mFrame->nb_samples)
@@ -114,7 +117,7 @@ bool FFmpeg_Decoder::getAVAudioData()
                 av_freep(&mDataBuf);
                 if(av_samples_alloc(&mDataBuf, NULL, av_get_channel_layout_nb_channels(mOutputChannelLayout),
                                     mFrame->nb_samples, mOutputSampleFormat, 0) < 0)
-                    break;
+                    return false;
                 else
                     mDataBufLen = mFrame->nb_samples;
             }
@@ -122,7 +125,7 @@ bool FFmpeg_Decoder::getAVAudioData()
             if(swr_convert(mSwr, (uint8_t**)&mDataBuf, mFrame->nb_samples,
                 (const uint8_t**)mFrame->extended_data, mFrame->nb_samples) < 0)
             {
-                break;
+                return false;
             }
             mFrameData = &mDataBuf;
         }
