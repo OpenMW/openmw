@@ -94,19 +94,7 @@ void MovieAudioDecoder::setupFormat()
 
     uint64_t inputChannelLayout = mAVStream->codec->channel_layout;
     if (inputChannelLayout == 0)
-    {
-        /* Unknown channel layout. Try to guess. */
-        if(mAVStream->codec->channels == 1)
-            inputChannelLayout = AV_CH_LAYOUT_MONO;
-        else if(mAVStream->codec->channels == 2)
-            inputChannelLayout = AV_CH_LAYOUT_STEREO;
-        else
-        {
-            std::stringstream sstr("Unsupported raw channel count: ");
-            sstr << mAVStream->codec->channels;
-            fail(sstr.str());
-        }
-    }
+        inputChannelLayout = av_get_default_channel_layout(mAVStream->codec->channels);
 
     int inputSampleRate = mAVStream->codec->sample_rate;
 
