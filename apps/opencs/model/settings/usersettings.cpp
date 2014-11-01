@@ -161,6 +161,22 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         ritd->setDeclaredValues (values);
     }
 
+    declareSection ("debug", "Debug Options");
+    {
+        Setting *mousePicking = createSetting (Type_CheckBox, "mouse-picking", "Debug Render Mouse-Picking");
+        mousePicking->setDefaultValue ("false");
+        mousePicking->setToolTip ("Enable redering debug information for mouse picking. "
+            "This option may be removed in future once the mouse picking feature is completed.");
+
+        QString defaultValue = "Closer/Further";
+        QStringList values = QStringList() << defaultValue << "Up/Down" << "Left/Right";
+
+        Setting *mouseWheel = createSetting (Type_RadioButton, "mouse-wheel",
+            "For testing mouse movement directions.");
+        mouseWheel->setDefaultValue (defaultValue);
+        mouseWheel->setDeclaredValues (values);
+    }
+
     declareSection ("table-input", "Table Input");
     {
         QString inPlaceEdit ("Edit in Place");

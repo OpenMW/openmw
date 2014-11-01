@@ -27,12 +27,12 @@ namespace CSVWorld
     class PhysicsSystem;
 }
 
-class QElapsedTimer;
-
 namespace CSVRender
 {
     class WorldspaceWidget : public SceneWidget
     {
+        friend class MouseState;
+
             Q_OBJECT
 
             CSVRender::Navigation1st m1st;
@@ -42,26 +42,7 @@ namespace CSVRender
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
             CSVWorld::PhysicsSystem *mPhysics;
-
-            enum MouseState
-            {
-                Mouse_Grab,
-                Mouse_Drag,
-                Mouse_Edit,
-                Mouse_Default
-            };
-            MouseState mMouseState;
-
-            QPoint mOldPos;
-            std::string mCurrentObj;
-            std::string mGrabbedSceneNode;
-            QElapsedTimer *mMouseEventTimer;
-            Ogre::Plane *mPlane;
-            Ogre::Vector3 mOrigObjPos;
-            Ogre::Vector3 mOrigMousePos;
-            Ogre::Vector3 mCurrentMousePos;
-            float mZOffset;
-            std::map<std::string, std::vector<std::string> > mSelectedEntities;
+            MouseState *mMouse;
 
         public:
 
@@ -137,15 +118,6 @@ namespace CSVRender
             void dragMoveEvent(QDragMoveEvent *event);
 
             virtual std::string getStartupInstruction() = 0;
-
-            void placeObject(const std::string sceneNode, const Ogre::Vector3 &pos);
-            std::pair<std::string, Ogre::Vector3> terrainUnderCursor(const int mouseX, const int mouseY);
-            std::pair<std::string, Ogre::Vector3> objectUnderCursor(const int mouseX, const int mouseY);
-            std::pair<bool, Ogre::Vector3> mousePositionOnPlane(const QPoint &pos, const Ogre::Plane &plane);
-            void updateSelectionHighlight(const std::string sceneNode, const Ogre::Vector3 &position);
-
-            void updateSceneWidgets();
-            bool isDebug();
 
         private slots:
 
