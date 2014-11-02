@@ -85,6 +85,8 @@ namespace CSVWorld
             void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);
 
             std::string refIdToSceneNode(std::string referenceId, Ogre::SceneManager *sceneMgr);
+
+            Ogre::SceneManager *findSceneManager(std::string sceneNodeName);
     };
 }
 
