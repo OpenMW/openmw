@@ -74,7 +74,6 @@ namespace CSVWorld
         throw std::runtime_error("No physics system found for the given document.");
     }
 
-    // delete physics when the last scene widget for the document is closed
     void PhysicsManager::removeSceneWidget(CSVRender::WorldspaceWidget *widget)
     {
         CSVRender::SceneWidget *sceneWidget = static_cast<CSVRender::SceneWidget *>(widget);

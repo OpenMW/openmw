@@ -37,13 +37,13 @@ namespace CSVWorld
             const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, bool placeable)
     {
         bool foundSceneManager = false;
-        std::list<Ogre::SceneManager *>::const_iterator iter = mSceneManagers.begin();
-        for(; iter != mSceneManagers.end(); ++iter)
+        std::map<Ogre::SceneManager *, CSVRender::SceneWidget *>::const_iterator iter = mSceneWidgets.begin();
+        for(; iter != mSceneWidgets.end(); ++iter)
         {
-            if((*iter)->hasSceneNode(sceneNodeName))
+            if((*iter).first->hasSceneNode(sceneNodeName))
             {
                 mSceneNodeToRefId[sceneNodeName] = referenceId;
-                mRefIdToSceneNode[referenceId][*iter] = sceneNodeName;
+                mRefIdToSceneNode[referenceId][(*iter).first] = sceneNodeName;
                 mSceneNodeToMesh[sceneNodeName] = mesh;
                 foundSceneManager = true;
                 break;
@@ -54,7 +54,6 @@ namespace CSVWorld
         {
             std::cerr << "Attempt to add an object without a corresponding SceneManager: "
                 + referenceId + " : " + sceneNodeName << std::endl;
-
             return;
         }
 
@@ -67,19 +66,6 @@ namespace CSVWorld
                     0,    // boxRotation
                     true, // raycasting
                     placeable);
-
-            // update other scene managers if they have the referenceId (may have moved)
-            // NOTE: this part is not needed if object has not moved
-            iter = mSceneManagers.begin();
-            for(; iter != mSceneManagers.end(); ++iter)
-            {
-                std::string name = refIdToSceneNode(referenceId, *iter);
-                if(name != sceneNodeName && (*iter)->hasSceneNode(name))
-                {
-                        // FIXME: rotation or scale not updated
-                    (*iter)->getSceneNode(name)->setPosition(position);
-                }
-            }
         }
     }
 
@@ -96,12 +82,12 @@ namespace CSVWorld
 
             // find which SceneManager has this object
             Ogre::SceneManager *sceneManager = NULL;
-            std::list<Ogre::SceneManager *>::const_iterator iter = mSceneManagers.begin();
-            for(; iter != mSceneManagers.end(); ++iter)
+            std::map<Ogre::SceneManager *, CSVRender::SceneWidget *>::const_iterator iter = mSceneWidgets.begin();
+            for(; iter != mSceneWidgets.end(); ++iter)
             {
-                if((*iter)->hasSceneNode(sceneNodeName))
+                if((*iter).first->hasSceneNode(sceneNodeName))
                 {
-                    sceneManager = *iter;
+                    sceneManager = (*iter).first;
                     break;
                 }
             }
@@ -110,7 +96,6 @@ namespace CSVWorld
             {
                 std::cerr << "Attempt to remove an object without a corresponding SceneManager: "
                     + sceneNodeName << std::endl;
-
                 return;
             }
 
@@ -167,16 +152,8 @@ namespace CSVWorld
                     placeable);
 
             // update other scene managers if they have the referenceId
-            std::list<Ogre::SceneManager *>::const_iterator iter = mSceneManagers.begin();
-            for(; iter != mSceneManagers.end(); ++iter)
-            {
-                std::string name = refIdToSceneNode(referenceId, *iter);
-                if(name != sceneNodeName && (*iter)->hasSceneNode(name))
-                {
-                        // FIXME: rotation or scale not updated
-                    (*iter)->getSceneNode(name)->setPosition(position);
-                }
-            }
+            // FIXME: rotation or scale not updated
+            moveSceneNodeImpl(sceneNodeName, referenceId, position);
         }
     }
 
@@ -190,13 +167,13 @@ namespace CSVWorld
     void PhysicsSystem::moveSceneNodeImpl(const std::string sceneNodeName,
             const std::string referenceId, const Ogre::Vector3 &position)
     {
-        std::list<Ogre::SceneManager *>::const_iterator iter = mSceneManagers.begin();
-        for(; iter != mSceneManagers.end(); ++iter)
+        std::map<Ogre::SceneManager *, CSVRender::SceneWidget *>::const_iterator iter = mSceneWidgets.begin();
+        for(; iter != mSceneWidgets.end(); ++iter)
         {
-            std::string name = refIdToSceneNode(referenceId, *iter);
-            if(name != sceneNodeName && (*iter)->hasSceneNode(name))
+            std::string name = refIdToSceneNode(referenceId, (*iter).first);
+            if(name != sceneNodeName && (*iter).first->hasSceneNode(name))
             {
-                (*iter)->getSceneNode(name)->setPosition(position);
+                (*iter).first->getSceneNode(name)->setPosition(position);
             }
         }
     }
@@ -301,7 +278,6 @@ namespace CSVWorld
 
     void PhysicsSystem::addSceneManager(Ogre::SceneManager *sceneMgr, CSVRender::SceneWidget * sceneWidget)
     {
-        mSceneManagers.push_back(sceneMgr);
         mSceneWidgets[sceneMgr] = sceneWidget;
     }
 
@@ -312,15 +288,6 @@ namespace CSVWorld
 
     void PhysicsSystem::removeSceneManager(Ogre::SceneManager *sceneMgr)
     {
-        std::list<Ogre::SceneManager *>::iterator iter = mSceneManagers.begin();
-        for(; iter != mSceneManagers.end(); ++iter)
-        {
-            if(*iter == sceneMgr)
-            {
-                mSceneManagers.erase(iter);
-                break;
-            }
-        }
         mSceneWidgets.erase(sceneMgr);
     }
 

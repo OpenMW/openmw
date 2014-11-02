@@ -3,7 +3,6 @@
 
 #include <string>
 #include <map>
-#include <list>
 
 namespace Ogre
 {
@@ -33,7 +32,6 @@ namespace CSVWorld
             std::map<std::string, std::string> mSceneNodeToRefId;
             std::map<std::string, std::map<Ogre::SceneManager *, std::string> > mRefIdToSceneNode;
             std::map<std::string, std::string> mSceneNodeToMesh;
-            std::list<Ogre::SceneManager *> mSceneManagers;
             std::map<Ogre::SceneManager*, CSVRender::SceneWidget *> mSceneWidgets;
             OEngine::Physic::PhysicEngine* mEngine;
             std::multimap<std::string, Ogre::SceneManager *> mTerrain;

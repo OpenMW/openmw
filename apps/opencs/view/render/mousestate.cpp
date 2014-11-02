@@ -333,6 +333,7 @@ namespace CSVRender
     //plane X, upvector Y, mOffset x : x-z plane, wheel closer/further
     std::pair<Ogre::Vector3, Ogre::Vector3> MouseState::planeAxis()
     {
+        // FIXME: explore using signals instread of retrieving each time
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
         QString coord =  userSettings.setting("debug/mouse-reference", QString("screen"));
         Ogre::Vector3 dir = getCamera()->getDerivedDirection();
