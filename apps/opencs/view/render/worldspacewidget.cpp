@@ -19,7 +19,6 @@
 #include "../world/physicsmanager.hpp"
 #include "../world/physicssystem.hpp"
 
-#include "mousestate.hpp"
 #include "elements.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)

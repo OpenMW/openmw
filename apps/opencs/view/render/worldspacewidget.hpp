@@ -2,6 +2,7 @@
 #define OPENCS_VIEW_WORLDSPACEWIDGET_H
 
 #include "scenewidget.hpp"
+#include "mousestate.hpp"
 
 #include "navigation1st.hpp"
 #include "navigationfree.hpp"

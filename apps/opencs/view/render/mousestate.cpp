@@ -335,6 +335,7 @@ namespace CSVRender
     {
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
         QString coord =  userSettings.setting("debug/mouse-reference", QString("screen"));
+        Ogre::Vector3 derived = getCamera()->getDerivedDirection();
 
         QString wheelDir =  userSettings.setting("debug/mouse-wheel", QString("Closer/Further"));
         if(wheelDir == "Left/Right")
@@ -342,7 +343,7 @@ namespace CSVRender
             if(coord == "world")
                 return std::make_pair(Ogre::Vector3::UNIT_Y, Ogre::Vector3::UNIT_X);
             else
-                return std::make_pair(getCamera()->getDerivedRight(), getCamera()->getDerivedDirection());
+                return std::make_pair(getCamera()->getDerivedRight(), Ogre::Vector3(-derived.x, -derived.y, -derived.z));
         }
         else if(wheelDir == "Up/Down")
         {
@@ -356,7 +357,7 @@ namespace CSVRender
             if(coord == "world")
                 return std::make_pair(Ogre::Vector3::UNIT_X, Ogre::Vector3::UNIT_Y);
             else
-                return std::make_pair(getCamera()->getDerivedDirection(), getCamera()->getDerivedRight());
+                return std::make_pair(Ogre::Vector3(-derived.x, -derived.y, -derived.z), getCamera()->getDerivedRight());
         }
     }
 
