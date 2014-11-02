@@ -207,21 +207,21 @@ namespace CSVRender
                         mMouseState = Mouse_Edit;
                         mCurrentObj = result.first;
 
-                        // print some debug info
-                        if(isDebug())
+                    }
+                    // print some debug info
+                    if(isDebug())
+                    {
+                        std::string referenceId = mPhysics->sceneNodeToRefId(result.first);
+                        std::cout << "ReferenceId: " << referenceId << std::endl;
+                        const CSMWorld::RefCollection& references = mParent->mDocument.getData().getReferences();
+                        int index = references.searchId(referenceId);
+                        if (index != -1)
                         {
-                            std::string referenceId = mPhysics->sceneNodeToRefId(result.first);
-                            std::cout << "ReferenceId: " << referenceId << std::endl;
-                            const CSMWorld::RefCollection& references = mParent->mDocument.getData().getReferences();
-                            int index = references.searchId(referenceId);
-                            if (index != -1)
-                            {
-                                int columnIndex =
-                                    references.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId);
-                                std::cout << "  index: " + QString::number(index).toStdString()
-                                          +", column index: " + QString::number(columnIndex).toStdString()
-                                          << std::endl;
-                            }
+                            int columnIndex =
+                                references.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId);
+                            std::cout << "  index: " + QString::number(index).toStdString()
+                                      +", column index: " + QString::number(columnIndex).toStdString()
+                                      << std::endl;
                         }
                     }
                 }
@@ -335,29 +335,29 @@ namespace CSVRender
     {
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
         QString coord =  userSettings.setting("debug/mouse-reference", QString("screen"));
-        Ogre::Vector3 derived = getCamera()->getDerivedDirection();
+        Ogre::Vector3 dir = getCamera()->getDerivedDirection();
 
         QString wheelDir =  userSettings.setting("debug/mouse-wheel", QString("Closer/Further"));
         if(wheelDir == "Left/Right")
         {
             if(coord == "world")
-                return std::make_pair(Ogre::Vector3::UNIT_Y, Ogre::Vector3::UNIT_X);
+                return std::make_pair(Ogre::Vector3::UNIT_Y, Ogre::Vector3::UNIT_Z);
             else
-                return std::make_pair(getCamera()->getDerivedRight(), Ogre::Vector3(-derived.x, -derived.y, -derived.z));
+                return std::make_pair(getCamera()->getDerivedRight(), getCamera()->getDerivedUp());
         }
         else if(wheelDir == "Up/Down")
         {
             if(coord == "world")
-                return std::make_pair(Ogre::Vector3::UNIT_Z, Ogre::Vector3::UNIT_Y);
+                return std::make_pair(Ogre::Vector3::UNIT_Z, Ogre::Vector3::UNIT_X);
             else
-                return std::make_pair(getCamera()->getDerivedUp(), getCamera()->getDerivedRight());
+                return std::make_pair(getCamera()->getDerivedUp(), Ogre::Vector3(-dir.x, -dir.y, -dir.z));
         }
         else
         {
             if(coord == "world")
                 return std::make_pair(Ogre::Vector3::UNIT_X, Ogre::Vector3::UNIT_Y);
             else
-                return std::make_pair(Ogre::Vector3(-derived.x, -derived.y, -derived.z), getCamera()->getDerivedRight());
+                return std::make_pair(Ogre::Vector3(-dir.x, -dir.y, -dir.z), getCamera()->getDerivedRight());
         }
     }
 
