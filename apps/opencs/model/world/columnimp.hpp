@@ -1299,7 +1299,7 @@ namespace CSMWorld
         {
             ESXRecordT record2 = record.get();
 
-            ESM::Position& position = record.get().*mPosition;
+            ESM::Position& position = record2.*mPosition;
 
             position.pos[mIndex] = data.toFloat();
 
@@ -1333,7 +1333,7 @@ namespace CSMWorld
         {
             ESXRecordT record2 = record.get();
 
-            ESM::Position& position = record.get().*mPosition;
+            ESM::Position& position = record2.*mPosition;
 
             position.rot[mIndex] = data.toFloat();
 
