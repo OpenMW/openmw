@@ -441,7 +441,7 @@ namespace CSVRender
 
         // FIXME: adjustRigidBody() seems to lose objects, work around by deleting and recreating objects
         //mPhysics->moveObject(sceneNode, pos, xr*yr*zr);
-        mPhysics->replaceObject(sceneNode, refId, cellref.mScale, pos, xr*yr*zr);
+        mPhysics->replaceObject(sceneNode, cellref.mScale, pos, xr*yr*zr);
 
         // update all SceneWidgets and their SceneManagers
         updateSceneWidgets();

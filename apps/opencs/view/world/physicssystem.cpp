@@ -85,7 +85,7 @@ namespace CSVWorld
 
     // normal delete (e.g closing a scene subview)
     // TODO: should think about using some kind of reference counting within RigidBody
-    void PhysicsSystem::removeObject(const std::string &sceneNodeName, bool force)
+    void PhysicsSystem::removeObject(const std::string &sceneNodeName)
     {
         std::string referenceId = mSceneNodeToRefId[sceneNodeName];
 
@@ -137,7 +137,7 @@ namespace CSVWorld
             }
 
             // check whether the physics model be deleted
-            if(force || mRefIdToSceneNode.find(referenceId) == mRefIdToSceneNode.end())
+            if(mRefIdToSceneNode.find(referenceId) == mRefIdToSceneNode.end())
             {
                 mEngine->removeRigidBody(referenceId);
                 mEngine->deleteRigidBody(referenceId);
@@ -146,12 +146,38 @@ namespace CSVWorld
     }
 
     void PhysicsSystem::replaceObject(const std::string &sceneNodeName,
-            const std::string &referenceId, float scale, const Ogre::Vector3 &position,
+            float scale, const Ogre::Vector3 &position,
             const Ogre::Quaternion &rotation, bool placeable)
     {
+        std::string referenceId = mSceneNodeToRefId[sceneNodeName];
         std::string mesh = mSceneNodeToMesh[sceneNodeName];
-        removeObject(sceneNodeName, true); // force delete
-        addObject(mesh, sceneNodeName, referenceId, scale, position, rotation, placeable);
+
+        if(referenceId != "")
+        {
+            // delete the physics object
+            mEngine->removeRigidBody(referenceId);
+            mEngine->deleteRigidBody(referenceId);
+
+            // create the physics object
+            mEngine->createAndAdjustRigidBody(mesh,
+                    referenceId, scale, position, rotation,
+                    0,    // scaledBoxTranslation
+                    0,    // boxRotation
+                    true, // raycasting
+                    placeable);
+
+            // update other scene managers if they have the referenceId
+            std::list<Ogre::SceneManager *>::const_iterator iter = mSceneManagers.begin();
+            for(; iter != mSceneManagers.end(); ++iter)
+            {
+                std::string name = refIdToSceneNode(referenceId, *iter);
+                if(name != sceneNodeName && (*iter)->hasSceneNode(name))
+                {
+                        // FIXME: rotation or scale not updated
+                    (*iter)->getSceneNode(name)->setPosition(position);
+                }
+            }
+        }
     }
 
     void PhysicsSystem::moveObject(const std::string &sceneNodeName,

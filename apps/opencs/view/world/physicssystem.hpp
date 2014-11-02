@@ -52,10 +52,10 @@ namespace CSVWorld
                     const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
                     bool placeable=false);
 
-            void removeObject(const std::string &sceneNodeName, bool force = false);
+            void removeObject(const std::string &sceneNodeName);
 
             void replaceObject(const std::string &sceneNodeName,
-                    const std::string &referenceId, float scale, const Ogre::Vector3 &position,
+                    float scale, const Ogre::Vector3 &position,
                     const Ogre::Quaternion &rotation, bool placeable=false);
 
             void moveObject(const std::string &sceneNodeName,
