@@ -9,6 +9,9 @@
 #include <QElapsedTimer>
 
 #include "../../model/settings/usersettings.hpp"
+#include "../../model/world/commands.hpp"
+#include "../../model/world/idtable.hpp"
+#include "../../model/world/universalid.hpp"
 #include "../world/physicssystem.hpp"
 
 #include "elements.hpp"
@@ -237,20 +240,38 @@ namespace CSVRender
                     {
                         std::pair<Ogre::Vector3, Ogre::Vector3> planeRes = planeAxis();
                         Ogre::Vector3 pos = mOrigObjPos+planeRes.first*mOffset+planeResult.second-mOrigMousePos;
-                        placeObject(mGrabbedSceneNode, pos);
-                        //mCurrentObj = mGrabbedSceneNode; // FIXME
+                        //placeObject(mGrabbedSceneNode, pos); // FIXME: auto updated via signals
+
+                        // use the saved scene node name since the physics model has not moved yet
+                        std::string referenceId = mPhysics->sceneNodeToRefId(mGrabbedSceneNode);
+
+                        QAbstractItemModel *model = mParent->mDocument.getData().getTableModel(CSMWorld::UniversalId::Type_Reference);
+                        const CSMWorld::RefCollection& references = mParent->mDocument.getData().getReferences();
+                        int columnIndexPosX =
+                            references.findColumnIndex(CSMWorld::Columns::ColumnId_PositionXPos);
+                        mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*model,
+                            static_cast<CSMWorld::IdTable *>(model)->getModelIndex(referenceId, columnIndexPosX), pos.x));
+                        int columnIndexPosY =
+                            references.findColumnIndex(CSMWorld::Columns::ColumnId_PositionYPos);
+                        mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*model,
+                            static_cast<CSMWorld::IdTable *>(model)->getModelIndex(referenceId, columnIndexPosY), pos.y));
+                        int columnIndexPosZ =
+                            references.findColumnIndex(CSMWorld::Columns::ColumnId_PositionZPos);
+                        mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*model,
+                            static_cast<CSMWorld::IdTable *>(model)->getModelIndex(referenceId, columnIndexPosZ), pos.z));
+
+                        //mCurrentObj = mGrabbedSceneNode; // FIXME: doesn't work?
                         mCurrentObj = "";                   // whether the object is selected
+                                                            //  on screen
 
                         // reset states
                         mCurrentMousePos = Ogre::Vector3(); // mouse pos to use in wheel event
                         mOrigMousePos = Ogre::Vector3();    // starting pos of mouse in world space
                         mOrigObjPos = Ogre::Vector3();      // starting pos of object in world space
                         mGrabbedSceneNode = "";             // id of the object
-                        mOffset = 0.0f;                    // used for z-axis movement
+                        mOffset = 0.0f;                     // used for z-axis movement
                         mOldPos = QPoint(0, 0);             // to calculate relative movement of mouse
-                                                            //  on screen
 
-                        // FIXME: update document
                         // FIXME: highlight current object?
                         mMouseState = Mouse_Edit;
                     }
