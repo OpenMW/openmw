@@ -245,20 +245,26 @@ namespace CSVRender
                         // use the saved scene node name since the physics model has not moved yet
                         std::string referenceId = mPhysics->sceneNodeToRefId(mGrabbedSceneNode);
 
-                        QAbstractItemModel *model = mParent->mDocument.getData().getTableModel(CSMWorld::UniversalId::Type_Reference);
-                        const CSMWorld::RefCollection& references = mParent->mDocument.getData().getReferences();
+                        QAbstractItemModel *model =
+                            mParent->mDocument.getData().getTableModel(CSMWorld::UniversalId::Type_Reference);
+                        const CSMWorld::RefCollection& references =
+                            mParent->mDocument.getData().getReferences();
+
                         int columnIndexPosX =
                             references.findColumnIndex(CSMWorld::Columns::ColumnId_PositionXPos);
                         mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*model,
-                            static_cast<CSMWorld::IdTable *>(model)->getModelIndex(referenceId, columnIndexPosX), pos.x));
+                            static_cast<CSMWorld::IdTable *>(model)->getModelIndex(referenceId,
+                                                                        columnIndexPosX), pos.x));
                         int columnIndexPosY =
                             references.findColumnIndex(CSMWorld::Columns::ColumnId_PositionYPos);
                         mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*model,
-                            static_cast<CSMWorld::IdTable *>(model)->getModelIndex(referenceId, columnIndexPosY), pos.y));
+                            static_cast<CSMWorld::IdTable *>(model)->getModelIndex(referenceId,
+                                                                        columnIndexPosY), pos.y));
                         int columnIndexPosZ =
                             references.findColumnIndex(CSMWorld::Columns::ColumnId_PositionZPos);
                         mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*model,
-                            static_cast<CSMWorld::IdTable *>(model)->getModelIndex(referenceId, columnIndexPosZ), pos.z));
+                            static_cast<CSMWorld::IdTable *>(model)->getModelIndex(referenceId,
+                                                                        columnIndexPosZ), pos.z));
 
                         //mCurrentObj = mGrabbedSceneNode; // FIXME: doesn't work?
                         mCurrentObj = "";                   // whether the object is selected
