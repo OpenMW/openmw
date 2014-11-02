@@ -39,7 +39,7 @@ namespace CSVWorld
         Ogre::SceneManager *sceneManager = findSceneManager(sceneNodeName);
         if(sceneManager)
         {
-            // update maps
+            // update maps (NOTE: sometimes replaced)
             mSceneNodeToRefId[sceneNodeName] = referenceId;
             mSceneNodeToMesh[sceneNodeName] = mesh;
             mRefIdToSceneNode[referenceId][sceneManager] = sceneNodeName;
@@ -127,11 +127,8 @@ namespace CSVWorld
 
         if(referenceId != "")
         {
-            if(mRefIdToSceneNode.find(referenceId) == mRefIdToSceneNode.end())
-            {
-                mEngine->removeRigidBody(referenceId);
-                mEngine->deleteRigidBody(referenceId);
-            }
+            mEngine->removeRigidBody(referenceId);
+            mEngine->deleteRigidBody(referenceId);
         }
     }
 
