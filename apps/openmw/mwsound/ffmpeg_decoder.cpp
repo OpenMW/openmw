@@ -107,6 +107,9 @@ bool FFmpeg_Decoder::getAVAudioData()
             av_shrink_packet(&mPacket, remaining);
         }
 
+        if (!got_frame || mFrame->nb_samples == 0)
+            continue;
+
         if(mSwr)
         {
             if(!mDataBuf || mDataBufLen < mFrame->nb_samples)
@@ -114,7 +117,7 @@ bool FFmpeg_Decoder::getAVAudioData()
                 av_freep(&mDataBuf);
                 if(av_samples_alloc(&mDataBuf, NULL, av_get_channel_layout_nb_channels(mOutputChannelLayout),
                                     mFrame->nb_samples, mOutputSampleFormat, 0) < 0)
-                    break;
+                    return false;
                 else
                     mDataBufLen = mFrame->nb_samples;
             }
@@ -122,7 +125,7 @@ bool FFmpeg_Decoder::getAVAudioData()
             if(swr_convert(mSwr, (uint8_t**)&mDataBuf, mFrame->nb_samples,
                 (const uint8_t**)mFrame->extended_data, mFrame->nb_samples) < 0)
             {
-                break;
+                return false;
             }
             mFrameData = &mDataBuf;
         }
@@ -304,19 +307,7 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
     int64_t ch_layout = (*mStream)->codec->channel_layout;
 
     if(ch_layout == 0)
-    {
-        /* Unknown channel layout. Try to guess. */
-        if((*mStream)->codec->channels == 1)
-            ch_layout = AV_CH_LAYOUT_MONO;
-        else if((*mStream)->codec->channels == 2)
-            ch_layout = AV_CH_LAYOUT_STEREO;
-        else
-        {
-            std::stringstream sstr("Unsupported raw channel count: ");
-            sstr << (*mStream)->codec->channels;
-            fail(sstr.str());
-        }
-    }
+        ch_layout = av_get_default_channel_layout((*mStream)->codec->channels);
 
     mOutputChannelLayout = ch_layout;
     if (ch_layout == AV_CH_LAYOUT_5POINT1 || ch_layout == AV_CH_LAYOUT_7POINT1
