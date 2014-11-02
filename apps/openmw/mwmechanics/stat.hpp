@@ -236,20 +236,20 @@ namespace MWMechanics
     {
         int mBase;
         int mModifier;
-        int mDamage;
+        float mDamage; // needs to be float to allow continuous damage
 
     public:
         AttributeValue() : mBase(0), mModifier(0), mDamage(0) {}
 
-        int getModified() const { return std::max(0, mBase - mDamage + mModifier); }
+        int getModified() const { return std::max(0, mBase - (int) mDamage + mModifier); }
         int getBase() const { return mBase; }
         int getModifier() const {  return mModifier; }
 
         void setBase(int base) { mBase = std::max(0, base); }
         void setModifier(int mod) { mModifier = mod; }
 
-        void damage(int damage) { mDamage += damage; }
-        void restore(int amount) { mDamage -= std::min(mDamage, amount); }
+        void damage(float damage) { mDamage += damage; }
+        void restore(float amount) { mDamage -= std::min(mDamage, amount); }
         int getDamage() const { return mDamage; }
 
         void writeState (ESM::StatState<int>& state) const;
