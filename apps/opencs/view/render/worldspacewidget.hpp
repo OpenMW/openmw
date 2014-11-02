@@ -32,8 +32,6 @@ namespace CSVRender
 {
     class WorldspaceWidget : public SceneWidget
     {
-        friend class MouseState;
-
             Q_OBJECT
 
             CSVRender::Navigation1st m1st;
@@ -154,6 +152,8 @@ namespace CSVRender
             void closeRequest();
 
             void dataDropped(const std::vector<CSMWorld::UniversalId>& data);
+
+        friend class MouseState;
     };
 }
 

@@ -353,7 +353,10 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 
 void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
 {
-    mMouse->mousePressEvent(event);
+    if(event->buttons() & Qt::RightButton)
+    {
+        mMouse->mousePressEvent(event);
+    }
     //SceneWidget::mousePressEvent(event);
 }
 

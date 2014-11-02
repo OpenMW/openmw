@@ -34,7 +34,7 @@ void CSVRender::Object::clearSceneNode (Ogre::SceneNode *node)
 void CSVRender::Object::clear()
 {
     if(!mObject.isNull())
-        mPhysics->removeObject(mBase->getName());
+        mPhysics->removePhysicsObject(mBase->getName());
 
     mObject.setNull();
 
@@ -155,6 +155,8 @@ CSVRender::Object::Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode
 CSVRender::Object::~Object()
 {
     clear();
+
+    mPhysics->removeObject(mBase->getName());
 
     if (mBase)
         mBase->getCreator()->destroySceneNode (mBase);

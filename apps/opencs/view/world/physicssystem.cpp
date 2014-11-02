@@ -63,7 +63,9 @@ namespace CSVWorld
         }
     }
 
-    // normal delete (e.g closing a scene subview)
+    // normal delete (e.g closing a scene subview or ~Object())
+    // the scene node is destroyed so the mappings should be removed
+    //
     // TODO: should think about using some kind of reference counting within RigidBody
     void PhysicsSystem::removeObject(const std::string &sceneNodeName)
     {
@@ -106,6 +108,25 @@ namespace CSVWorld
             }
 
             // check whether the physics model should be deleted
+            if(mRefIdToSceneNode.find(referenceId) == mRefIdToSceneNode.end())
+            {
+                mEngine->removeRigidBody(referenceId);
+                mEngine->deleteRigidBody(referenceId);
+            }
+        }
+    }
+
+    // Object::clear() is called when reference data is changed.  It clears all
+    // contents of the SceneNode and removes the physics object
+    //
+    // A new physics object will be created and assigned to this sceneNodeName by
+    // Object::update()
+    void PhysicsSystem::removePhysicsObject(const std::string &sceneNodeName)
+    {
+        std::string referenceId = mSceneNodeToRefId[sceneNodeName];
+
+        if(referenceId != "")
+        {
             if(mRefIdToSceneNode.find(referenceId) == mRefIdToSceneNode.end())
             {
                 mEngine->removeRigidBody(referenceId);

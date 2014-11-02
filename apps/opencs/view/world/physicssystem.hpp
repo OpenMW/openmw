@@ -51,6 +51,7 @@ namespace CSVWorld
                     bool placeable=false);
 
             void removeObject(const std::string &sceneNodeName);
+            void removePhysicsObject(const std::string &sceneNodeName);
 
             void replaceObject(const std::string &sceneNodeName,
                     float scale, const Ogre::Vector3 &position,
