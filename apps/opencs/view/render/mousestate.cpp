@@ -7,6 +7,7 @@
 
 #include <QMouseEvent>
 #include <QElapsedTimer>
+#include <QObject>
 
 #include "../../model/settings/usersettings.hpp"
 #include "../../model/world/commands.hpp"
@@ -231,12 +232,14 @@ namespace CSVRender
                         // use the saved scene node name since the physics model has not moved yet
                         std::string referenceId = mPhysics->sceneNodeToRefId(mGrabbedSceneNode);
 
+                        mParent->mDocument.getUndoStack().beginMacro (QObject::tr("Move Object"));
                         mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*mIdTableModel,
                             mIdTableModel->getModelIndex(referenceId, mColIndexPosX), pos.x));
                         mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*mIdTableModel,
                             mIdTableModel->getModelIndex(referenceId, mColIndexPosY), pos.y));
                         mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*mIdTableModel,
                             mIdTableModel->getModelIndex(referenceId, mColIndexPosZ), pos.z));
+                        mParent->mDocument.getUndoStack().endMacro();
 
                         // FIXME: highlight current object?
                         //mCurrentObj = mGrabbedSceneNode; // FIXME: doesn't work?
