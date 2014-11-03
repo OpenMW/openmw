@@ -410,6 +410,11 @@ namespace CSVRender
         }
     }
 
+    void SceneWidget::updateScene()
+    {
+        flagAsModified();
+    }
+
     void SceneWidget::updateOverlay()
     { }
 

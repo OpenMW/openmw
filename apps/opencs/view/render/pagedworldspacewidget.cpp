@@ -108,7 +108,8 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
         if (index > 0 && cells.getRecord (index).mState!=CSMWorld::RecordBase::State_Deleted &&
             mCells.find (*iter)==mCells.end())
         {
-            Cell *cell = new Cell (mDocument.getData(), getSceneManager(), iter->getId (mWorldspace));
+            Cell *cell = new Cell (mDocument.getData(), getSceneManager(),
+                    iter->getId (mWorldspace), getPhysics());
             mCells.insert (std::make_pair (*iter, cell));
 
             float height = cell->getTerrainHeightAt(Ogre::Vector3(
@@ -169,6 +170,23 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     return modified;
 }
 
+void CSVRender::PagedWorldspaceWidget::mousePressEvent (QMouseEvent *event)
+{
+    if(event->button() == Qt::RightButton)
+    {
+        std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator iter = mTextOverlays.begin();
+        for(; iter != mTextOverlays.end(); ++iter)
+        {
+            if(mDisplayCellCoord &&
+               iter->second->isEnabled() && iter->second->container().contains(event->x(), event->y()))
+            {
+                return;
+            }
+        }
+    }
+    WorldspaceWidget::mousePressEvent(event);
+}
+
 void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 {
     if(event->button() == Qt::RightButton)
@@ -180,18 +198,16 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
                iter->second->isEnabled() && iter->second->container().contains(event->x(), event->y()))
             {
                 std::cout << "clicked: " << iter->second->getCaption() << std::endl;
-                break;
+                return;
             }
         }
     }
+    WorldspaceWidget::mouseReleaseEvent(event);
 }
 
 void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
 {
-    if(event->button() == Qt::RightButton)
-    {
-        std::cout << "double clicked" << std::endl;
-    }
+    WorldspaceWidget::mouseDoubleClickEvent(event);
 }
 
 void CSVRender::PagedWorldspaceWidget::updateOverlay()
@@ -428,7 +444,6 @@ CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::g
             return ignored;
     }
 }
-
 
 unsigned int CSVRender::PagedWorldspaceWidget::getElementMask() const
 {

@@ -47,6 +47,8 @@ namespace CSVRender
 
             virtual void setVisibilityMask (unsigned int mask);
 
+            virtual void updateScene();
+
         protected:
 
             void setNavigation (Navigation *navigation);
@@ -71,22 +73,22 @@ namespace CSVRender
 
             virtual void mouseReleaseEvent (QMouseEvent *event);
 
+            virtual void mouseMoveEvent (QMouseEvent *event);
+
+            void wheelEvent (QWheelEvent *event);
+
+            void keyPressEvent (QKeyEvent *event);
+
         private:
             void paintEvent(QPaintEvent* e);
             void resizeEvent(QResizeEvent* e);
             bool event(QEvent* e);
 
-            void keyPressEvent (QKeyEvent *event);
-
             void keyReleaseEvent (QKeyEvent *event);
 
             void focusOutEvent (QFocusEvent *event);
 
-            void wheelEvent (QWheelEvent *event);
-
             void leaveEvent (QEvent *event);
-
-            void mouseMoveEvent (QMouseEvent *event);
 
             void updateOgreWindow();
 

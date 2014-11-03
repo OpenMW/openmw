@@ -9,6 +9,8 @@
 #include "../../model/world/ref.hpp"
 #include "../../model/world/refidcollection.hpp"
 
+#include "../world/physicssystem.hpp"
+
 #include "elements.hpp"
 
 void CSVRender::Object::clearSceneNode (Ogre::SceneNode *node)
@@ -38,6 +40,9 @@ void CSVRender::Object::clear()
 
 void CSVRender::Object::update()
 {
+    if(!mObject.isNull())
+        mPhysics->removePhysicsObject(mBase->getName());
+
     clear();
 
     std::string model;
@@ -73,6 +78,23 @@ void CSVRender::Object::update()
     {
         mObject = NifOgre::Loader::createObjects (mBase, "Meshes\\" + model);
         mObject->setVisibilityFlags (Element_Reference);
+
+        if (mPhysics && !mReferenceId.empty())
+        {
+            const CSMWorld::CellRef& reference = getReference();
+
+            // position
+            Ogre::Vector3 position;
+            if (!mForceBaseToZero)
+                position = Ogre::Vector3(reference.mPos.pos[0], reference.mPos.pos[1], reference.mPos.pos[2]);
+
+            // orientation
+            Ogre::Quaternion xr (Ogre::Radian (-reference.mPos.rot[0]), Ogre::Vector3::UNIT_X);
+            Ogre::Quaternion yr (Ogre::Radian (-reference.mPos.rot[1]), Ogre::Vector3::UNIT_Y);
+            Ogre::Quaternion zr (Ogre::Radian (-reference.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
+
+            mPhysics->addObject("meshes\\" + model, mBase->getName(), mReferenceId, reference.mScale, position, xr*yr*zr);
+        }
     }
 }
 
@@ -110,8 +132,9 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
 }
 
 CSVRender::Object::Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode,
-    const std::string& id, bool referenceable, bool forceBaseToZero)
-: mData (data), mBase (0), mForceBaseToZero (forceBaseToZero)
+    const std::string& id, bool referenceable, CSVWorld::PhysicsSystem *physics,
+    bool forceBaseToZero)
+: mData (data), mBase (0), mForceBaseToZero (forceBaseToZero), mPhysics(physics)
 {
     mBase = cellNode->createChildSceneNode();
 
@@ -132,6 +155,8 @@ CSVRender::Object::Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode
 CSVRender::Object::~Object()
 {
     clear();
+
+    mPhysics->removeObject(mBase->getName());
 
     if (mBase)
         mBase->getCreator()->destroySceneNode (mBase);

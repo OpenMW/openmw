@@ -2,6 +2,7 @@
 #define OPENCS_VIEW_WORLDSPACEWIDGET_H
 
 #include "scenewidget.hpp"
+#include "mousestate.hpp"
 
 #include "navigation1st.hpp"
 #include "navigationfree.hpp"
@@ -13,12 +14,18 @@ namespace CSMWorld
 {
     class UniversalId;
 }
+
 namespace CSVWidget
 {
     class SceneToolMode;
     class SceneToolToggle;
     class SceneToolbar;
     class SceneToolRun;
+}
+
+namespace CSVWorld
+{
+    class PhysicsSystem;
 }
 
 namespace CSVRender
@@ -33,6 +40,8 @@ namespace CSVRender
             CSVWidget::SceneToolToggle *mSceneElements;
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
+            CSVWorld::PhysicsSystem *mPhysics;
+            MouseState *mMouse;
 
         public:
 
@@ -53,6 +62,7 @@ namespace CSVRender
             };
 
             WorldspaceWidget (CSMDoc::Document& document, QWidget *parent = 0);
+            ~WorldspaceWidget ();
 
             CSVWidget::SceneToolMode *makeNavigationSelector (CSVWidget::SceneToolbar *parent);
             ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
@@ -89,6 +99,15 @@ namespace CSVRender
             CSMDoc::Document& getDocument();
 
             virtual void updateOverlay();
+
+            CSVWorld::PhysicsSystem *getPhysics();
+
+            virtual void mouseMoveEvent (QMouseEvent *event);
+            virtual void mousePressEvent (QMouseEvent *event);
+            virtual void mouseReleaseEvent (QMouseEvent *event);
+            virtual void mouseDoubleClickEvent (QMouseEvent *event);
+            virtual void wheelEvent (QWheelEvent *event);
+            virtual void keyPressEvent (QKeyEvent *event);
 
         private:
 
@@ -132,7 +151,10 @@ namespace CSVRender
         signals:
 
             void closeRequest();
+
             void dataDropped(const std::vector<CSMWorld::UniversalId>& data);
+
+        friend class MouseState;
     };
 }
 
