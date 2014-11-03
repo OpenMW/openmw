@@ -107,6 +107,7 @@ namespace CSVRender
             virtual void mouseReleaseEvent (QMouseEvent *event);
             virtual void mouseDoubleClickEvent (QMouseEvent *event);
             virtual void wheelEvent (QWheelEvent *event);
+            virtual void keyPressEvent (QKeyEvent *event);
 
         private:
 

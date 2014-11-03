@@ -61,7 +61,6 @@ namespace CSVRender
         , mGrabbedSceneNode(""), mOrigObjPos(Ogre::Vector3()), mOrigMousePos(Ogre::Vector3())
         , mCurrentMousePos(Ogre::Vector3()), mOffset(0.0f)
         , mColIndexPosX(0), mColIndexPosY(0), mColIndexPosZ(0), mIdTableModel(0)
-        //, mModel(0)
     {
         const CSMWorld::RefCollection& references = mParent->mDocument.getData().getReferences();
 
@@ -207,15 +206,6 @@ namespace CSVRender
                         mCurrentObj = result.first;
 
                     }
-                    // print some debug info
-                    if(isDebug())
-                    {
-                        std::string referenceId = mPhysics->sceneNodeToRefId(result.first);
-                        std::cout << "ReferenceId: " << referenceId << std::endl;
-                        std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
-                                + ", " + QString::number(result.second.y).toStdString()
-                                + ", " + QString::number(result.second.z).toStdString() << std::endl;
-                    }
                 }
                 break;
             }
@@ -265,13 +255,7 @@ namespace CSVRender
                 std::pair<std::string, Ogre::Vector3> result = terrainUnderCursor(event->x(), event->y());
                 if(result.first != "")
                 {
-                    if(isDebug())
-                    {
-                        std::cout << "terrain: " << result.first << std::endl;
-                        std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
-                                + ", " + QString::number(result.second.y).toStdString()
-                                + ", " + QString::number(result.second.z).toStdString() << std::endl;
-                    }
+                    // FIXME: terrain editing
                 }
                 break;
             }
@@ -282,16 +266,7 @@ namespace CSVRender
 
     void MouseState::mouseDoubleClickEvent (QMouseEvent *event)
     {
-        if(0 && isDebug()) // disable
-        {
-            // FIXME: OEngine::PhysicEngine creates only one child scene node for the
-            // debug drawer.  Hence only the first subview that creates the debug drawer
-            // can view the debug lines.  Will need to keep a map in OEngine if multiple
-            // subviews are to be supported.
-            mPhysics->addSceneManager(mSceneManager, mParent);
-            mPhysics->toggleDebugRendering(mSceneManager);
-            mParent->flagAsModified();
-        }
+        event->ignore();
     }
 
     bool MouseState::wheelEvent (QWheelEvent *event)
@@ -329,37 +304,70 @@ namespace CSVRender
         return true;
     }
 
+    void MouseState::cancelDrag()
+    {
+        switch(mMouseState)
+        {
+            case Mouse_Grab:
+            case Mouse_Drag:
+            {
+                // cancel operation & return the object to the original position
+                mSceneManager->getSceneNode(mGrabbedSceneNode)->setPosition(mOrigObjPos);
+                // update all SceneWidgets and their SceneManagers
+                mPhysics->moveSceneNodes(mGrabbedSceneNode, mOrigObjPos);
+                updateSceneWidgets();
+
+                // reset states
+                mMouseState = Mouse_Default;
+                mCurrentMousePos = Ogre::Vector3();
+                mOrigMousePos = Ogre::Vector3();
+                mOrigObjPos = Ogre::Vector3();
+                mGrabbedSceneNode = "";
+                mCurrentObj = "";
+                mOldPos = QPoint(0, 0);
+                mMouseEventTimer->invalidate();
+                mOffset = 0.0f;
+
+                break;
+            }
+            case Mouse_Edit:
+            case Mouse_Default:
+            {
+                break;
+            }
+            /* NO_DEFAULT_CASE */
+        }
+    }
+
     //plane Z, upvector Y, mOffset z : x-y plane, wheel up/down
     //plane Y, upvector X, mOffset y : y-z plane, wheel left/right
     //plane X, upvector Y, mOffset x : x-z plane, wheel closer/further
     std::pair<Ogre::Vector3, Ogre::Vector3> MouseState::planeAxis()
     {
-        // FIXME: explore using signals instread of retrieving each time
-        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-        QString coord =  userSettings.setting("debug/mouse-reference", QString("screen"));
+        bool screenCoord =  true;
         Ogre::Vector3 dir = getCamera()->getDerivedDirection();
 
-        QString wheelDir =  userSettings.setting("debug/mouse-wheel", QString("Closer/Further"));
+        QString wheelDir =  "Closer/Further";
         if(wheelDir == "Left/Right")
         {
-            if(coord == "world")
-                return std::make_pair(Ogre::Vector3::UNIT_Y, Ogre::Vector3::UNIT_Z);
-            else
+            if(screenCoord)
                 return std::make_pair(getCamera()->getDerivedRight(), getCamera()->getDerivedUp());
+            else
+                return std::make_pair(Ogre::Vector3::UNIT_Y, Ogre::Vector3::UNIT_Z);
         }
         else if(wheelDir == "Up/Down")
         {
-            if(coord == "world")
-                return std::make_pair(Ogre::Vector3::UNIT_Z, Ogre::Vector3::UNIT_X);
-            else
+            if(screenCoord)
                 return std::make_pair(getCamera()->getDerivedUp(), Ogre::Vector3(-dir.x, -dir.y, -dir.z));
+            else
+                return std::make_pair(Ogre::Vector3::UNIT_Z, Ogre::Vector3::UNIT_X);
         }
         else
         {
-            if(coord == "world")
-                return std::make_pair(Ogre::Vector3::UNIT_X, Ogre::Vector3::UNIT_Y);
-            else
+            if(screenCoord)
                 return std::make_pair(Ogre::Vector3(-dir.x, -dir.y, -dir.z), getCamera()->getDerivedRight());
+            else
+                return std::make_pair(Ogre::Vector3::UNIT_X, Ogre::Vector3::UNIT_Y);
         }
     }
 
@@ -449,12 +457,5 @@ namespace CSVRender
     Ogre::Viewport *MouseState::getViewport()
     {
         return mParent->getCamera()->getViewport();
-    }
-
-    bool MouseState::isDebug()
-    {
-        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-
-        return userSettings.setting("debug/mouse-picking", QString("false")) == "true" ? true : false;
     }
 }

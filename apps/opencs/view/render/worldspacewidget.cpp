@@ -388,3 +388,13 @@ void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
     if(!mMouse->wheelEvent(event))
         SceneWidget::wheelEvent(event);
 }
+
+void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Escape)
+    {
+        mMouse->cancelDrag();
+    }
+    else
+        SceneWidget::keyPressEvent(event);
+}

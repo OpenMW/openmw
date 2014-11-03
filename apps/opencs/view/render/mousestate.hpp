@@ -72,6 +72,8 @@ namespace CSVRender
             void mouseDoubleClickEvent (QMouseEvent *event);
             bool wheelEvent (QWheelEvent *event);
 
+            void cancelDrag();
+
         private:
 
             std::pair<bool, Ogre::Vector3> mousePositionOnPlane(const QPoint &pos, const Ogre::Plane &plane);
@@ -79,7 +81,6 @@ namespace CSVRender
             std::pair<std::string, Ogre::Vector3> objectUnderCursor(const int mouseX, const int mouseY);
             std::pair<Ogre::Vector3, Ogre::Vector3> planeAxis();
             void updateSceneWidgets();
-            bool isDebug();
 
             Ogre::Camera *getCamera();     // friend access
             Ogre::Viewport *getViewport(); // friend access
