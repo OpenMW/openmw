@@ -22,6 +22,11 @@ namespace CSVWorld
     class PhysicsSystem;
 }
 
+namespace CSMWorld
+{
+    class IdTable;
+}
+
 namespace CSVRender
 {
     class WorldspaceWidget;
@@ -51,7 +56,10 @@ namespace CSVRender
             Ogre::Vector3 mCurrentMousePos;
             float mOffset;
 
-            std::map<std::string, std::vector<std::string> > mSelectedEntities;
+            CSMWorld::IdTable *mIdTableModel;
+            int mColIndexPosX;
+            int mColIndexPosY;
+            int mColIndexPosZ;
 
         public:
 
@@ -67,10 +75,8 @@ namespace CSVRender
         private:
 
             std::pair<bool, Ogre::Vector3> mousePositionOnPlane(const QPoint &pos, const Ogre::Plane &plane);
-            void placeObject(const std::string sceneNode, const Ogre::Vector3 &pos);
             std::pair<std::string, Ogre::Vector3> terrainUnderCursor(const int mouseX, const int mouseY);
             std::pair<std::string, Ogre::Vector3> objectUnderCursor(const int mouseX, const int mouseY);
-            void updateSelectionHighlight(const std::string sceneNode, const Ogre::Vector3 &position);
             std::pair<Ogre::Vector3, Ogre::Vector3> planeAxis();
             void updateSceneWidgets();
             bool isDebug();

@@ -59,7 +59,18 @@ namespace CSVRender
         , mCurrentObj(""), mMouseState(Mouse_Default), mOldPos(0,0), mMouseEventTimer(0), mPlane(0)
         , mGrabbedSceneNode(""), mOrigObjPos(Ogre::Vector3()), mOrigMousePos(Ogre::Vector3())
         , mCurrentMousePos(Ogre::Vector3()), mOffset(0.0f)
+        , mColIndexPosX(0), mColIndexPosY(0), mColIndexPosZ(0), mIdTableModel(0)
+        //, mModel(0)
     {
+        const CSMWorld::RefCollection& references = mParent->mDocument.getData().getReferences();
+
+        mColIndexPosX = references.findColumnIndex(CSMWorld::Columns::ColumnId_PositionXPos);
+        mColIndexPosY = references.findColumnIndex(CSMWorld::Columns::ColumnId_PositionYPos);
+        mColIndexPosZ = references.findColumnIndex(CSMWorld::Columns::ColumnId_PositionZPos);
+
+        mIdTableModel = static_cast<CSMWorld::IdTable *>(
+            mParent->mDocument.getData().getTableModel(CSMWorld::UniversalId::Type_Reference));
+
         mMouseEventTimer = new QElapsedTimer();
         mMouseEventTimer->invalidate();
 
@@ -138,22 +149,6 @@ namespace CSVRender
             case Mouse_Grab:
             case Mouse_Drag:
             {
-                if(0 /*event->buttons() & ~Qt::RightButton*/)
-                {
-                    // cancel operation & return the object to the original position
-                    placeObject(mGrabbedSceneNode, mOrigObjPos);
-                    mMouseState = Mouse_Default;
-
-                    // reset states
-                    mCurrentMousePos = Ogre::Vector3();
-                    mOrigMousePos = Ogre::Vector3();
-                    mOrigObjPos = Ogre::Vector3();
-                    mGrabbedSceneNode = "";
-                    mCurrentObj = "";
-                    mOldPos = QPoint(0, 0);
-                    mMouseEventTimer->invalidate();
-                    mOffset = 0.0f;
-                }
                 break;
             }
             case Mouse_Edit:
@@ -216,16 +211,9 @@ namespace CSVRender
                     {
                         std::string referenceId = mPhysics->sceneNodeToRefId(result.first);
                         std::cout << "ReferenceId: " << referenceId << std::endl;
-                        const CSMWorld::RefCollection& references = mParent->mDocument.getData().getReferences();
-                        int index = references.searchId(referenceId);
-                        if (index != -1)
-                        {
-                            int columnIndex =
-                                references.findColumnIndex(CSMWorld::Columns::ColumnId_ReferenceableId);
-                            std::cout << "  index: " + QString::number(index).toStdString()
-                                      +", column index: " + QString::number(columnIndex).toStdString()
-                                      << std::endl;
-                        }
+                        std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
+                                + ", " + QString::number(result.second.y).toStdString()
+                                + ", " + QString::number(result.second.z).toStdString() << std::endl;
                     }
                 }
                 break;
@@ -240,35 +228,21 @@ namespace CSVRender
                     {
                         std::pair<Ogre::Vector3, Ogre::Vector3> planeRes = planeAxis();
                         Ogre::Vector3 pos = mOrigObjPos+planeRes.first*mOffset+planeResult.second-mOrigMousePos;
-                        //placeObject(mGrabbedSceneNode, pos); // FIXME: auto updated via signals
-
                         // use the saved scene node name since the physics model has not moved yet
                         std::string referenceId = mPhysics->sceneNodeToRefId(mGrabbedSceneNode);
 
-                        QAbstractItemModel *model =
-                            mParent->mDocument.getData().getTableModel(CSMWorld::UniversalId::Type_Reference);
-                        const CSMWorld::RefCollection& references =
-                            mParent->mDocument.getData().getReferences();
+                        mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*mIdTableModel,
+                            mIdTableModel->getModelIndex(referenceId, mColIndexPosX), pos.x));
+                        mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*mIdTableModel,
+                            mIdTableModel->getModelIndex(referenceId, mColIndexPosY), pos.y));
+                        mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*mIdTableModel,
+                            mIdTableModel->getModelIndex(referenceId, mColIndexPosZ), pos.z));
 
-                        int columnIndexPosX =
-                            references.findColumnIndex(CSMWorld::Columns::ColumnId_PositionXPos);
-                        mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*model,
-                            static_cast<CSMWorld::IdTable *>(model)->getModelIndex(referenceId,
-                                                                        columnIndexPosX), pos.x));
-                        int columnIndexPosY =
-                            references.findColumnIndex(CSMWorld::Columns::ColumnId_PositionYPos);
-                        mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*model,
-                            static_cast<CSMWorld::IdTable *>(model)->getModelIndex(referenceId,
-                                                                        columnIndexPosY), pos.y));
-                        int columnIndexPosZ =
-                            references.findColumnIndex(CSMWorld::Columns::ColumnId_PositionZPos);
-                        mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*model,
-                            static_cast<CSMWorld::IdTable *>(model)->getModelIndex(referenceId,
-                                                                        columnIndexPosZ), pos.z));
-
+                        // FIXME: highlight current object?
                         //mCurrentObj = mGrabbedSceneNode; // FIXME: doesn't work?
                         mCurrentObj = "";                   // whether the object is selected
-                                                            //  on screen
+
+                        mMouseState = Mouse_Edit;
 
                         // reset states
                         mCurrentMousePos = Ogre::Vector3(); // mouse pos to use in wheel event
@@ -277,9 +251,6 @@ namespace CSVRender
                         mGrabbedSceneNode = "";             // id of the object
                         mOffset = 0.0f;                     // used for z-axis movement
                         mOldPos = QPoint(0, 0);             // to calculate relative movement of mouse
-
-                        // FIXME: highlight current object?
-                        mMouseState = Mouse_Edit;
                     }
                 }
                 break;
@@ -454,25 +425,6 @@ namespace CSVRender
         }
 
         return std::make_pair("", Ogre::Vector3());
-    }
-
-    void MouseState::placeObject(const std::string sceneNode, const Ogre::Vector3 &pos)
-    {
-        mSceneManager->getSceneNode(sceneNode)->setPosition(pos);
-
-        // update physics
-        std::string refId = mPhysics->sceneNodeToRefId(sceneNode);
-        const CSMWorld::CellRef& cellref = mParent->mDocument.getData().getReferences().getRecord (refId).get();
-        Ogre::Quaternion xr (Ogre::Radian (-cellref.mPos.rot[0]), Ogre::Vector3::UNIT_X);
-        Ogre::Quaternion yr (Ogre::Radian (-cellref.mPos.rot[1]), Ogre::Vector3::UNIT_Y);
-        Ogre::Quaternion zr (Ogre::Radian (-cellref.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
-
-        // FIXME: adjustRigidBody() seems to lose objects, work around by deleting and recreating objects
-        //mPhysics->moveObject(sceneNode, pos, xr*yr*zr);
-        mPhysics->replaceObject(sceneNode, cellref.mScale, pos, xr*yr*zr);
-
-        // update all SceneWidgets and their SceneManagers
-        updateSceneWidgets();
     }
 
     void MouseState::updateSceneWidgets()

@@ -154,6 +154,7 @@ namespace CSVWorld
         }
     }
 
+    // FIXME: adjustRigidBody() seems to lose objects, work around by deleting and recreating objects
     void PhysicsSystem::moveObject(const std::string &sceneNodeName,
             const Ogre::Vector3 &position, const Ogre::Quaternion &rotation)
     {

@@ -33,9 +33,6 @@ void CSVRender::Object::clearSceneNode (Ogre::SceneNode *node)
 
 void CSVRender::Object::clear()
 {
-    if(!mObject.isNull())
-        mPhysics->removePhysicsObject(mBase->getName());
-
     mObject.setNull();
 
     clearSceneNode (mBase);
@@ -43,6 +40,9 @@ void CSVRender::Object::clear()
 
 void CSVRender::Object::update()
 {
+    if(!mObject.isNull())
+        mPhysics->removePhysicsObject(mBase->getName());
+
     clear();
 
     std::string model;
