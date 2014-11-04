@@ -6,7 +6,7 @@
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
 
-#include <openengine/bullet/physic.hpp>
+#include "physicsengine.hpp"
 #include <components/nifbullet/bulletnifloader.hpp>
 #include "../../model/settings/usersettings.hpp"
 #include "../render/elements.hpp"
@@ -15,17 +15,12 @@ namespace CSVWorld
 {
     PhysicsSystem::PhysicsSystem()
     {
-        // Create physics. shapeLoader is deleted by the physic engine
-        NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
-        mEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
+        mEngine = new PhysicsEngine();
     }
 
     PhysicsSystem::~PhysicsSystem()
     {
-        // FIXME: OEngine does not behave well when multiple instances are created
-        // and deleted, sometimes resulting in crashes.  Skip the deletion until the physics
-        // code is moved out of OEngine.
-        //delete mEngine;
+        delete mEngine;
     }
 
     // looks up the scene manager based on the scene node name (inefficient)
@@ -56,8 +51,6 @@ namespace CSVWorld
         {
             mEngine->createAndAdjustRigidBody(mesh,
                     referenceId, scale, position, rotation,
-                    0,    // scaledBoxTranslation
-                    0,    // boxRotation
                     true, // raycasting
                     placeable);
         }
@@ -146,7 +139,7 @@ namespace CSVWorld
 
             // create a new physics object
             mEngine->createAndAdjustRigidBody(mesh, referenceId, scale, position, rotation,
-                    0, 0, true, placeable);
+                    true, placeable);
 
             // update other scene managers if they have the referenceId
             // FIXME: rotation or scale not updated
@@ -278,6 +271,8 @@ namespace CSVWorld
     void PhysicsSystem::addSceneManager(Ogre::SceneManager *sceneMgr, CSVRender::SceneWidget *sceneWidget)
     {
         mSceneWidgets[sceneMgr] = sceneWidget;
+
+        mEngine->createDebugDraw(sceneMgr);
     }
 
     std::map<Ogre::SceneManager*, CSVRender::SceneWidget *> PhysicsSystem::sceneWidgets()
@@ -287,6 +282,8 @@ namespace CSVWorld
 
     void PhysicsSystem::removeSceneManager(Ogre::SceneManager *sceneMgr)
     {
+        mEngine->removeDebugDraw(sceneMgr);
+
         mSceneWidgets.erase(sceneMgr);
     }
 
@@ -310,8 +307,6 @@ namespace CSVWorld
         if(!sceneMgr)
             return;
 
-        mEngine->setSceneManager(sceneMgr);
-
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
         if(!(userSettings.setting("debug/mouse-picking", QString("false")) == "true" ? true : false))
         {
@@ -319,7 +314,7 @@ namespace CSVWorld
             return;
         }
 
-        mEngine->toggleDebugRendering();
-        mEngine->stepSimulation(0.0167); // DebugDrawer::step() not directly accessible
+        mEngine->toggleDebugRendering(sceneMgr);
+        mEngine->stepDebug(sceneMgr);
     }
 }
