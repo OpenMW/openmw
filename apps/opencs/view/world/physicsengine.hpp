@@ -1,6 +1,7 @@
 #ifndef CSV_WORLD_PHYSICSENGINE_H
 #define CSV_WORLD_PHYSICSENGINE_H
 
+#include <string>
 #include <map>
 
 #include <BulletDynamics/Dynamics/btRigidBody.h>
