@@ -255,7 +255,7 @@ namespace CSVRender
                 std::pair<std::string, Ogre::Vector3> result = terrainUnderCursor(event->x(), event->y());
                 if(result.first != "")
                 {
-                    // FIXME: terrain editing
+                    // FIXME: terrain editing goes here
                 }
                 break;
             }
@@ -267,6 +267,8 @@ namespace CSVRender
     void MouseState::mouseDoubleClickEvent (QMouseEvent *event)
     {
         event->ignore();
+        //mPhysics->toggleDebugRendering(mSceneManager);
+        //mParent->flagAsModified();
     }
 
     bool MouseState::wheelEvent (QWheelEvent *event)

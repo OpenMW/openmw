@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include <OgreRoot.h>
+#include <openengine/bullet/BulletShapeLoader.h>
+
 #include "../render/worldspacewidget.hpp"
 #include "physicssystem.hpp"
 
@@ -54,6 +57,18 @@ namespace CSVWorld
         {
             mSceneWidgets.erase(it);
         }
+
+        // cleanup global resources
+        if(mPhysics.empty())
+        {
+            // delete the extra resources created in removeDebugDraw
+            if (Ogre::MaterialManager::getSingleton().resourceExists("BtOgre/DebugLines"))
+                Ogre::MaterialManager::getSingleton().remove("BtOgre/DebugLines");
+            if (Ogre::ResourceGroupManager::getSingleton().resourceGroupExists("BtOgre"))
+                Ogre::ResourceGroupManager::getSingleton().destroyResourceGroup("BtOgre");
+
+            delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
+        }
     }
 
     // called from CSVRender::WorldspaceWidget() to get widgets' association with Document&
@@ -74,6 +89,9 @@ namespace CSVWorld
         throw std::runtime_error("No physics system found for the given document.");
     }
 
+    // deprecated by removeDocument() and may be deleted in future code updates
+    // however there may be some value in removing the deleted scene widgets from the
+    // list so that the list does not grow forever
     void PhysicsManager::removeSceneWidget(CSVRender::WorldspaceWidget *widget)
     {
         CSVRender::SceneWidget *sceneWidget = static_cast<CSVRender::SceneWidget *>(widget);
