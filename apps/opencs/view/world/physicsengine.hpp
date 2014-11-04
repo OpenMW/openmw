@@ -1,26 +1,16 @@
 #ifndef CSV_WORLD_PHYSICSENGINE_H
 #define CSV_WORLD_PHYSICSENGINE_H
 
-//#include <vector>
 #include <map>
 
 #include <BulletDynamics/Dynamics/btRigidBody.h>
-//#include "BulletCollision/CollisionDispatch/btGhostObject.h"
-//#include <string>
-//#include "BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h"
-//#include <boost/shared_ptr.hpp>
 
-//#include <OgreVector3.h>
-//#include <OgreQuaternion.h>
-
-//class btRigidBody;
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
 class btSequentialImpulseConstraintSolver;
 class btCollisionDispatcher;
 class btDiscreteDynamicsWorld;
 class btHeightfieldTerrainShape;
-//class btCollisionObject;
 
 namespace BtOgre
 {
@@ -45,46 +35,6 @@ namespace OEngine
 
 namespace CSVWorld
 {
-
-    //  enum btIDebugDraw::DebugDrawModes
-    //  {
-    //  DBG_NoDebug=0,
-    //  DBG_DrawWireframe = 1,
-    //  DBG_DrawAabb=2,
-    //  DBG_DrawFeaturesText=4,
-    //  DBG_DrawContactPoints=8,
-    //  DBG_NoDeactivation=16,
-    //  DBG_NoHelpText = 32,
-    //  DBG_DrawText=64,
-    //  DBG_ProfileTimings = 128,
-    //  DBG_EnableSatComparison = 256,
-    //  DBG_DisableBulletLCP = 512,
-    //  DBG_EnableCCD = 1024,
-    //  DBG_DrawConstraints = (1 << 11),
-    //  DBG_DrawConstraintLimits = (1 << 12),
-    //  DBG_FastWireframe = (1<<13),
-    //  DBG_DrawNormals = (1<<14),
-    //  DBG_MAX_DEBUG_DRAW_MODE
-    //  };
-    //
-#if 0
-    class CSVDebugDrawer : public BtOgre::DebugDrawer
-    {
-            BtOgre::DebugDrawer *mDebugDrawer;
-            Ogre::SceneManager *mSceneMgr;
-            Ogre::SceneNode *mSceneNode;
-            int mDebugMode;
-
-        public:
-
-            CSVDebugDrawer(Ogre::SceneManager *sceneMgr, btDiscreteDynamicsWorld *dynamicsWorld);
-            ~CSVDebugDrawer();
-
-            void setDebugMode(int mode);
-            bool toggleDebugRendering();
-    };
-#endif
-
     // This class is just an extension of normal btRigidBody in order to add extra info.
     // When bullet give back a btRigidBody, you can just do a static_cast to RigidBody,
     // so one never should use btRigidBody directly!
@@ -106,12 +56,9 @@ namespace CSVWorld
         RigidBody* mBody;
     };
 
-    /**
-     * The PhysicsEngine class contain everything which is needed for Physic.
-     * It's needed that Ogre Resources are set up before the PhysicsEngine is created.
-     * Note:deleting it WILL NOT delete the RigidBody!
-     * TODO:unload unused resources?
-     */
+    // The PhysicsEngine class contain everything which is needed for Physic.
+    // It's needed that Ogre Resources are set up before the PhysicsEngine is created.
+    // Note:deleting it WILL NOT delete the RigidBody!
     class PhysicsEngine
     {
             //Bullet Stuff
@@ -134,20 +81,6 @@ namespace CSVWorld
 
             std::map<Ogre::SceneManager *, BtOgre::DebugDrawer *> mDebugDrawers;
             std::map<Ogre::SceneManager *, Ogre::SceneNode *> mDebugSceneNodes;
-
-#if 0
-    // from bullet
-    enum CollisionFilterGroups
-    {
-        DefaultFilter = 1,
-        StaticFilter = 2,
-        KinematicFilter = 4,
-        DebrisFilter = 8,
-        SensorTrigger = 16,
-        CharacterFilter = 32,
-        AllFilter = -1 //all bits sets: DefaultFilter | StaticFilter | KinematicFilter | DebrisFilter | SensorTrigger
-     };
-#endif
 
             enum CollisionType {
                 CollisionType_Nothing = 0, //<Collide with nothing
@@ -174,13 +107,6 @@ namespace CSVWorld
             // Adjusts a rigid body to the right position and rotation
             void adjustRigidBody(RigidBody* body,
                     const Ogre::Vector3 &position, const Ogre::Quaternion &rotation);
-#if 0
-            // Mainly used to (but not limited to) adjust rigid bodies based on box shapes
-            // to the right position and rotation.
-            void boxAdjustExternal(const std::string &mesh,
-                    RigidBody* body, float scale, const Ogre::Vector3 &position,
-                    const Ogre::Quaternion &rotation);
-#endif
 
             // Add a HeightField to the simulation
             void addHeightField(float* heights,
@@ -204,6 +130,7 @@ namespace CSVWorld
             int toggleDebugRendering(Ogre::SceneManager *sceneMgr);
 
             void createDebugDraw(Ogre::SceneManager* sceneMgr);
+
             void removeDebugDraw(Ogre::SceneManager *sceneMgr);
 
             // Return the closest object hit by a ray. If there are no objects,
@@ -226,26 +153,6 @@ namespace CSVWorld
             // Set the debug rendering mode. 0 to turn it off.
             // Important Note: this will crash if the Render is not yet initialised!
             void setDebugRenderingMode(int mode);
-#if 0
-            void getObjectAABB(const std::string &mesh,
-                    float scale, btVector3 &min, btVector3 &max);
-
-            /**
-             * Return all objects hit by a ray.
-             */
-            std::vector< std::pair<float, std::string> > rayTest2(const btVector3 &from, const btVector3 &to, int filterGroup=0xff);
-
-            std::pair<bool, float> sphereCast (float radius, btVector3 &from, btVector3 &to);
-            ///< @return (hit, relative distance)
-
-            std::vector<std::string> getCollisions(const std::string &name, int collisionGroup, int collisionMask);
-
-            // Get the nearest object that's inside the given object, filtering out objects of the
-            // provided name
-            std::pair<const RigidBody*,btVector3> getFilteredContact(const std::string &filter,
-                                                                     const btVector3 &origin,
-                                                                     btCollisionObject *object);
-#endif
     };
 }
 #endif // CSV_WORLD_PHYSICSENGINE_H

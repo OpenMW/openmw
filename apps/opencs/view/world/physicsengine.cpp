@@ -16,8 +16,9 @@
 
 // PLEASE NOTE:
 //
-// This file is based on libs/openengine/bullet/physic.cpp.  The commit history and
-// credits for the code below stem from that file.
+// This file is based on libs/openengine/bullet/physic.cpp.  Please see the commit
+// history and credits for the code below, which is mostly copied from there and
+// adapted for use with OpenCS.
 
 namespace CSVWorld
 {
@@ -132,14 +133,17 @@ namespace CSVWorld
             }
         }
 
-        delete mDynamicsWorld; // FIXME: need to reference count??
+
+        delete mDynamicsWorld;
         delete mSolver;
         delete mCollisionConfiguration;
         delete mDispatcher;
         delete mBroadphase;
         delete mShapeLoader;
 
-        delete OEngine::Physic::BulletShapeManager::getSingletonPtr(); // FIXME: need to reference count
+        // NOTE: the global resources such as "BtOgre/DebugLines" and the
+        // BulletShapeManager singleton need to be deleted only when all physics
+        // engines are deleted in PhysicsManager::removeDocument()
     }
 
     int PhysicsEngine::toggleDebugRendering(Ogre::SceneManager *sceneMgr)
@@ -159,8 +163,8 @@ namespace CSVWorld
                     mDebugDrawers[sceneMgr]->setDebugMode(1 /*mDebugDrawFlags*/);
                 else
                     mDebugDrawers[sceneMgr]->setDebugMode(0);
+                mDynamicsWorld->debugDrawWorld();
 
-                mDynamicsWorld->debugDrawWorld(); // FIXME: call this now?
                 return mDebugDrawers[sceneMgr]->getDebugMode();
             }
         }
@@ -290,9 +294,7 @@ namespace CSVWorld
             const Ogre::Vector3 &position, const Ogre::Quaternion &rotation)
     {
         btTransform tr;
-        //Ogre::Quaternion boxrot = rotation * boxRotation;
         Ogre::Quaternion boxrot = rotation * Ogre::Quaternion::IDENTITY;
-        //Ogre::Vector3 transrot = boxrot * scaledBoxTranslation;
         Ogre::Vector3 transrot = boxrot * Ogre::Vector3::ZERO;
         Ogre::Vector3 newPosition = transrot + position;
 

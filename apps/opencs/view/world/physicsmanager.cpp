@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include <OgreRoot.h>
+#include <openengine/bullet/BulletShapeLoader.h>
+
 #include "../render/worldspacewidget.hpp"
 #include "physicssystem.hpp"
 
@@ -53,6 +56,18 @@ namespace CSVWorld
         if(it != mSceneWidgets.end())
         {
             mSceneWidgets.erase(it);
+        }
+
+        // cleanup global resources
+        if(mPhysics.empty())
+        {
+            // delete the extra resources created in removeDebugDraw
+            if (Ogre::MaterialManager::getSingleton().resourceExists("BtOgre/DebugLines"))
+                Ogre::MaterialManager::getSingleton().remove("BtOgre/DebugLines");
+            if (Ogre::ResourceGroupManager::getSingleton().resourceGroupExists("BtOgre"))
+                Ogre::ResourceGroupManager::getSingleton().destroyResourceGroup("BtOgre");
+
+            delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
         }
     }
 
