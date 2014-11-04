@@ -9,8 +9,6 @@
 //#include <string>
 //#include "BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h"
 //#include <boost/shared_ptr.hpp>
-#include <OgreSceneNode.h>
-#include <openengine/bullet/BtOgreExtras.h> // needs Ogre::SceneNode defined
 
 //#include <OgreVector3.h>
 //#include <OgreQuaternion.h>

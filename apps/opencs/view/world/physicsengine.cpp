@@ -11,6 +11,8 @@
 
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <openengine/bullet/BulletShapeLoader.h>
+#include <OgreSceneNode.h>
+#include <openengine/bullet/BtOgreExtras.h> // needs Ogre::SceneNode defined
 
 // PLEASE NOTE:
 //
@@ -199,6 +201,17 @@ namespace CSVWorld
         {
             delete (*iter).second;
             mDebugDrawers.erase(iter);
+
+            // BtOgre::DebugDrawer destroys the resources leading to crashes in some
+            // situations.  Workaround by recreating them each time.
+            if (!Ogre::ResourceGroupManager::getSingleton().resourceGroupExists("BtOgre"))
+                Ogre::ResourceGroupManager::getSingleton().createResourceGroup("BtOgre");
+            if (!Ogre::MaterialManager::getSingleton().resourceExists("BtOgre/DebugLines"))
+            {
+                Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create("BtOgre/DebugLines", "BtOgre");
+                mat->setReceiveShadows(false);
+                mat->setSelfIllumination(1,1,1);
+            }
         }
 
         std::map<Ogre::SceneManager *, Ogre::SceneNode *>::iterator it =
