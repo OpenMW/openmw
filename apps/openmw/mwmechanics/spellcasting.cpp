@@ -435,7 +435,6 @@ namespace MWMechanics
                 magnitude *= magnitudeMult;
 
                 bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration) && effectIt->mDuration > 0;
-                std::cout << (hasDuration == true ? "true" : "false") << std::endl;
                 if (target.getClass().isActor() && hasDuration)
                 {
                     ActiveSpells::ActiveEffect effect;
