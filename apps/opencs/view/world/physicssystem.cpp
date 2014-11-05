@@ -6,7 +6,7 @@
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
 
-#include "physicsengine.hpp"
+#include <openengine/bullet/physic.hpp>
 #include <components/nifbullet/bulletnifloader.hpp>
 #include "../../model/settings/usersettings.hpp"
 #include "../render/elements.hpp"
@@ -15,7 +15,9 @@ namespace CSVWorld
 {
     PhysicsSystem::PhysicsSystem()
     {
-        mEngine = new PhysicsEngine();
+        // Create physics. shapeLoader is deleted by the physic engine
+        NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
+        mEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
     }
 
     PhysicsSystem::~PhysicsSystem()
@@ -51,6 +53,8 @@ namespace CSVWorld
         {
             mEngine->createAndAdjustRigidBody(mesh,
                     referenceId, scale, position, rotation,
+                    0,    // scaledBoxTranslation
+                    0,    // boxRotation
                     true, // raycasting
                     placeable);
         }
@@ -139,7 +143,7 @@ namespace CSVWorld
 
             // create a new physics object
             mEngine->createAndAdjustRigidBody(mesh, referenceId, scale, position, rotation,
-                    true, placeable);
+                    0, 0, true, placeable);
 
             // update other scene managers if they have the referenceId
             // FIXME: rotation or scale not updated

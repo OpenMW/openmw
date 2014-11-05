@@ -14,6 +14,7 @@
 #include <openengine/bullet/physic.hpp>
 #include <openengine/bullet/BtOgreExtras.h>
 #include <openengine/ogre/renderer.hpp>
+#include <openengine/bullet/BulletShapeLoader.h>
 
 #include <components/nifbullet/bulletnifloader.hpp>
 
@@ -498,6 +499,7 @@ namespace MWWorld
         if (mWaterCollisionObject.get())
             mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
         delete mEngine;
+        delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
     }
 
     OEngine::Physic::PhysicEngine* PhysicsSystem::getEngine()

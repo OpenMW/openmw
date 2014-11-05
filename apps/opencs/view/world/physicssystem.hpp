@@ -12,6 +12,14 @@ namespace Ogre
     class Camera;
 }
 
+namespace OEngine
+{
+    namespace Physic
+    {
+        class PhysicEngine;
+    }
+}
+
 namespace CSVRender
 {
     class SceneWidget;
@@ -19,15 +27,13 @@ namespace CSVRender
 
 namespace CSVWorld
 {
-    class PhysicsEngine;
-
     class PhysicsSystem
     {
             std::map<std::string, std::string> mSceneNodeToRefId;
             std::map<std::string, std::map<Ogre::SceneManager *, std::string> > mRefIdToSceneNode;
             std::map<std::string, std::string> mSceneNodeToMesh;
             std::map<Ogre::SceneManager*, CSVRender::SceneWidget *> mSceneWidgets;
-            PhysicsEngine* mEngine;
+            OEngine::Physic::PhysicEngine* mEngine;
             std::multimap<std::string, Ogre::SceneManager *> mTerrain;
 
         public:
