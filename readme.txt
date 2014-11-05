@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.33.0
+Version: 0.33.1
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -97,6 +97,10 @@ Allowed options:
   --activate-dist arg (=-1)             activation distance override
 
 CHANGELOG
+
+0.33.1
+
+Bug #2108: OpenCS fails to build
 
 0.33.0
 
@@ -197,14 +201,12 @@ Bug #2029: Ienith Brothers Thiev's Guild quest journal entry not adding
 Feature #471: Editor: Special case implementation for top-level window with single sub-window
 Feature #472: Editor: Sub-Window re-use settings
 Feature #704: Font colors import from fallback settings
-Feature #854: Editor: Add user setting to show status bar
 Feature #879: Editor: Open sub-views in a new top-level window
 Feature #932: Editor: magic effect table
 Feature #937: Editor: Path Grid table
 Feature #938: Editor: Sound Gen table
 Feature #1117: Death and LevelUp music
 Feature #1226: Editor: Request UniversalId editing from table columns
-Feature #1310: Editor: Rendering User Settings
 Feature #1545: Targeting console on player
 Feature #1597: Editor: Render terrain
 Feature #1695: Editor: add column for CellRef's global variable

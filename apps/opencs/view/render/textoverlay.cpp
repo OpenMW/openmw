@@ -79,7 +79,7 @@ TextOverlay::TextOverlay(const Ogre::MovableObject* obj, const Ogre::Camera* cam
         pixelBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL);
         const Ogre::PixelBox& pixelBox = pixelBuffer->getCurrentLock();
 
-        uint8_t* pDest = static_cast<uint8_t*>(pixelBox.data);
+        Ogre::uint8* pDest = static_cast<Ogre::uint8*>(pixelBox.data);
 
         // Fill in some pixel data. This will give a semi-transparent blue,
         // but this is of course dependent on the chosen pixel format.
