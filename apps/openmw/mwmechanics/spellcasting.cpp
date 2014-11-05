@@ -434,7 +434,8 @@ namespace MWMechanics
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
                 magnitude *= magnitudeMult;
 
-                bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
+                bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration) && effectIt->mDuration > 0;
+                std::cout << (hasDuration == true ? "true" : "false") << std::endl;
                 if (target.getClass().isActor() && hasDuration)
                 {
                     ActiveSpells::ActiveEffect effect;
@@ -577,6 +578,33 @@ namespace MWMechanics
                 else
                     value.restore(magnitude);
                 target.getClass().getCreatureStats(target).setAttribute(attribute, value);
+            }
+            else if (effectId == ESM::MagicEffect::DamageHealth || effectId == ESM::MagicEffect::RestoreHealth)
+            {
+                MWMechanics::DynamicStat<float> health = target.getClass().getCreatureStats(target).getHealth();
+                if (effectId == ESM::MagicEffect::DamageHealth)
+                    health.setCurrent(health.getCurrent() - magnitude);
+                else
+                    health.setCurrent(health.getCurrent() + magnitude);
+                target.getClass().getCreatureStats(target).setHealth(health);
+            }
+            else if (effectId == ESM::MagicEffect::DamageFatigue || effectId == ESM::MagicEffect::RestoreFatigue)
+            {
+                MWMechanics::DynamicStat<float> fatigue = target.getClass().getCreatureStats(target).getFatigue();
+                if (effectId == ESM::MagicEffect::DamageFatigue)
+                    fatigue.setCurrent(fatigue.getCurrent() - magnitude);
+                else
+                    fatigue.setCurrent(fatigue.getCurrent() + magnitude);
+                target.getClass().getCreatureStats(target).setHealth(fatigue);
+            }
+            else if (effectId == ESM::MagicEffect::DamageMagicka || effectId == ESM::MagicEffect::RestoreMagicka)
+            {
+                MWMechanics::DynamicStat<float> magicka = target.getClass().getCreatureStats(target).getMagicka();
+                if (effectId == ESM::MagicEffect::DamageMagicka)
+                    magicka.setCurrent(magicka.getCurrent() - magnitude);
+                else
+                    magicka.setCurrent(magicka.getCurrent() + magnitude);
+                target.getClass().getCreatureStats(target).setHealth(magicka);
             }
             else if (effectId == ESM::MagicEffect::DamageSkill || effectId == ESM::MagicEffect::RestoreSkill)
             {
