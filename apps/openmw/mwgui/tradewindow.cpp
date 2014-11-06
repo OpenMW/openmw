@@ -89,6 +89,7 @@ namespace MWGui
         mDecreaseButton->eventMouseButtonReleased += MyGUI::newDelegate(this, &TradeWindow::onBalanceButtonReleased);
 
         mTotalBalance->eventValueChanged += MyGUI::newDelegate(this, &TradeWindow::onBalanceValueChanged);
+        mTotalBalance->setMinValue(INT_MIN+1); // disallow INT_MIN since abs(INT_MIN) is undefined
 
         setCoord(400, 0, 400, 300);
     }
@@ -448,6 +449,9 @@ namespace MWGui
 
     void TradeWindow::onIncreaseButtonTriggered()
     {
+        // prevent overflows, and prevent entering INT_MIN since abs(INT_MIN) is undefined
+        if (mCurrentBalance == INT_MAX || mCurrentBalance == INT_MIN+1)
+            return;
         if(mCurrentBalance<=-1) mCurrentBalance -= 1;
         if(mCurrentBalance>=1) mCurrentBalance += 1;
         updateLabels();
