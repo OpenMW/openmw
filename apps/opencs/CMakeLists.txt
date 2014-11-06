@@ -72,7 +72,7 @@ opencs_units_noqt (view/world
     )
 
 opencs_units (view/widget
-    scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun
+    scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun modebutton
     )
 
 opencs_units (view/render
