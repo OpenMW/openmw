@@ -19,7 +19,6 @@ after_script:
  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./openmw_test_suite; fi
 notifications:
   recipients:
-    - lgromanowski+travis.ci@gmail.com
     - corrmage+travis-ci@gmail.com
   email:
     on_success: change
