@@ -38,6 +38,9 @@ namespace CSVWidget
             void addButton (const std::string& icon, const std::string& id,
                 const QString& tooltip = "");
 
+            /// The ownership of \a button is transferred to *this.
+            void addButton (ModeButton *button, const std::string& id);
+
         signals:
 
             void modeChanged (const std::string& id);

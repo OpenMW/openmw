@@ -45,6 +45,13 @@ void CSVWidget::SceneToolMode::addButton (const std::string& icon, const std::st
     const QString& tooltip)
 {
     ModeButton *button = new ModeButton (QIcon (QPixmap (icon.c_str())), tooltip, mPanel);
+    addButton (button, id);
+}
+
+void CSVWidget::SceneToolMode::addButton (ModeButton *button, const std::string& id)
+{
+    button->setParent (mPanel);
+
     button->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
     button->setIconSize (QSize (mIconSize, mIconSize));
     button->setFixedSize (mButtonSize, mButtonSize);
