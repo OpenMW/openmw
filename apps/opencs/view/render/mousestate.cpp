@@ -206,6 +206,15 @@ namespace CSVRender
                         mCurrentObj = result.first;
 
                     }
+                    // print some debug info
+                    std::string referenceId = mPhysics->sceneNodeToRefId(result.first);
+                    if(referenceId != "")
+                        std::cout << "result: " << referenceId << std::endl;
+                    else
+                        std::cout << "result: " << result.first << std::endl;
+                    std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
+                            + ", " + QString::number(result.second.y).toStdString()
+                            + ", " + QString::number(result.second.z).toStdString() << std::endl;
                 }
                 break;
             }
@@ -213,15 +222,22 @@ namespace CSVRender
             {
                 // final placement
                 std::pair<bool, Ogre::Vector3> planeResult = mousePositionOnPlane(event->pos(), *mPlane);
-                if(planeResult.first)
+                if(planeResult.first && mGrabbedSceneNode != "")
                 {
-                    if(mGrabbedSceneNode != "")
-                    {
-                        std::pair<Ogre::Vector3, Ogre::Vector3> planeRes = planeAxis();
-                        Ogre::Vector3 pos = mOrigObjPos+planeRes.first*mOffset+planeResult.second-mOrigMousePos;
-                        // use the saved scene node name since the physics model has not moved yet
-                        std::string referenceId = mPhysics->sceneNodeToRefId(mGrabbedSceneNode);
+                    std::pair<Ogre::Vector3, Ogre::Vector3> planeRes = planeAxis();
+                    Ogre::Vector3 pos = mOrigObjPos+planeRes.first*mOffset+planeResult.second-mOrigMousePos;
+                    // use the saved scene node name since the physics model has not moved yet
+                    std::string referenceId = mPhysics->sceneNodeToRefId(mGrabbedSceneNode);
 
+                    if(QString(referenceId.c_str()).contains(QRegExp("^Pathgrid")))
+                    {
+                        // move pathgrid point, but don't save yet (need pathgrid
+                        // table feature & its data structure to be completed)
+                        // FIXME: need to signal PathgridPoint object of change
+                        placeObject(mGrabbedSceneNode, pos);
+                    }
+                    else
+                    {
                         mParent->mDocument.getUndoStack().beginMacro (QObject::tr("Move Object"));
                         mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*mIdTableModel,
                             mIdTableModel->getModelIndex(referenceId, mColIndexPosX), pos.x));
@@ -230,22 +246,22 @@ namespace CSVRender
                         mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*mIdTableModel,
                             mIdTableModel->getModelIndex(referenceId, mColIndexPosZ), pos.z));
                         mParent->mDocument.getUndoStack().endMacro();
-
-                        // FIXME: highlight current object?
-                        //mCurrentObj = mGrabbedSceneNode; // FIXME: doesn't work?
-                        mCurrentObj = "";                   // whether the object is selected
-
-                        mMouseState = Mouse_Edit;
-
-                        // reset states
-                        mCurrentMousePos = Ogre::Vector3(); // mouse pos to use in wheel event
-                        mOrigMousePos = Ogre::Vector3();    // starting pos of mouse in world space
-                        mOrigObjPos = Ogre::Vector3();      // starting pos of object in world space
-                        mGrabbedSceneNode = "";             // id of the object
-                        mOffset = 0.0f;                     // used for z-axis movement
-                        mOldPos = QPoint(0, 0);             // to calculate relative movement of mouse
                     }
-                }
+
+                    // FIXME: highlight current object?
+                    //mCurrentObj = mGrabbedSceneNode; // FIXME: doesn't work?
+                    mCurrentObj = "";                   // whether the object is selected
+
+                    mMouseState = Mouse_Edit;
+
+                    // reset states
+                    mCurrentMousePos = Ogre::Vector3(); // mouse pos to use in wheel event
+                    mOrigMousePos = Ogre::Vector3();    // starting pos of mouse in world space
+                    mOrigObjPos = Ogre::Vector3();      // starting pos of object in world space
+                    mGrabbedSceneNode = "";             // id of the object
+                    mOffset = 0.0f;                     // used for z-axis movement
+                    mOldPos = QPoint(0, 0);             // to calculate relative movement of mouse
+            }
                 break;
             }
             case Mouse_Edit:
@@ -266,9 +282,9 @@ namespace CSVRender
 
     void MouseState::mouseDoubleClickEvent (QMouseEvent *event)
     {
-        event->ignore();
-        //mPhysics->toggleDebugRendering(mSceneManager);
-        //mParent->flagAsModified();
+        //event->ignore();
+        mPhysics->toggleDebugRendering(mSceneManager);
+        mParent->flagAsModified();
     }
 
     bool MouseState::wheelEvent (QWheelEvent *event)
@@ -401,6 +417,10 @@ namespace CSVRender
         std::pair<std::string, Ogre::Vector3> result = mPhysics->castRay(x, y, mSceneManager, getCamera());
         if(result.first != "")
         {
+                    std::cout << "result: " << result.first << std::endl;
+                    std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
+                            + ", " + QString::number(result.second.y).toStdString()
+                            + ", " + QString::number(result.second.z).toStdString() << std::endl;
             // FIXME: is there  a better way to distinguish terrain from objects?
             QString name  = QString(result.first.c_str());
             if(name.contains(QRegExp("^HeightField")))
@@ -423,7 +443,7 @@ namespace CSVRender
         std::pair<std::string, Ogre::Vector3> result = mPhysics->castRay(x, y, mSceneManager, getCamera());
         if(result.first != "")
         {
-            // NOTE: anything not terrain is assumed to be an object
+            // NOTE: anything not terrain is assumed to be an object, e.g pathgrid points
             QString name  = QString(result.first.c_str());
             if(!name.contains(QRegExp("^HeightField")))
             {
@@ -459,5 +479,18 @@ namespace CSVRender
     Ogre::Viewport *MouseState::getViewport()
     {
         return mParent->getCamera()->getViewport();
+    }
+
+    void MouseState::placeObject(const std::string sceneNode, const Ogre::Vector3 &pos)
+    {
+        mSceneManager->getSceneNode(sceneNode)->setPosition(pos);
+
+        // update physics
+        std::string refId = mPhysics->sceneNodeToRefId(sceneNode);
+
+        mPhysics->replaceObject(sceneNode, 1, pos, Ogre::Quaternion::IDENTITY);
+
+        // update all SceneWidgets and their SceneManagers
+        updateSceneWidgets();
     }
 }

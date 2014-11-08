@@ -82,6 +82,8 @@ namespace CSVRender
             std::pair<Ogre::Vector3, Ogre::Vector3> planeAxis();
             void updateSceneWidgets();
 
+            void placeObject(const std::string sceneNode, const Ogre::Vector3 &pos); // FIXME
+
             Ogre::Camera *getCamera();     // friend access
             Ogre::Viewport *getViewport(); // friend access
     };
