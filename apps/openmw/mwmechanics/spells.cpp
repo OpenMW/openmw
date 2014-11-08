@@ -70,11 +70,13 @@ namespace MWMechanics
             if (mPermanentSpellEffects.find(lower) != mPermanentSpellEffects.end())
             {
                 MagicEffects & effects = mPermanentSpellEffects[lower];
-                for (MagicEffects::Collection::const_iterator effectIt = effects.begin(); effectIt != effects.end(); ++effectIt)
+                for (MagicEffects::Collection::const_iterator effectIt = effects.begin(); effectIt != effects.end();)
                 {
                     const ESM::MagicEffect * magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->first.mId);
                     if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
-                        effects.remove(effectIt->first);
+                        effects.remove((effectIt++)->first);
+                    else
+                        ++effectIt;
                 }
             }
             mCorprusSpells.erase(corprusIt);
