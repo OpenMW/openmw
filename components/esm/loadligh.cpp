@@ -10,7 +10,7 @@ namespace ESM
 
 void Light::load(ESMReader &esm)
 {
-    mModel = esm.getHNString("MODL");
+    mModel = esm.getHNOString("MODL");
     mName = esm.getHNOString("FNAM");
     mIcon = esm.getHNOString("ITEX");
     assert(sizeof(mData) == 24);
