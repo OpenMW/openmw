@@ -103,7 +103,8 @@ namespace CSVWorld
             }
 
             // check whether the physics model should be deleted
-            if(mRefIdToSceneNode.find(referenceId) == mRefIdToSceneNode.end())
+            itRef = mRefIdToSceneNode.find(referenceId);
+            if(itRef == mRefIdToSceneNode.end() || (*itRef).second.empty())
             {
                 mEngine->removeRigidBody(referenceId);
                 mEngine->deleteRigidBody(referenceId);
