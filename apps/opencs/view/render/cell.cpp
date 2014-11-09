@@ -399,7 +399,7 @@ void CSVRender::Cell::pathgridPointRemoved(const std::string &name)
     int index = result.second;
 
     // check if the point exists
-    if(index < 0 || mPathgridId != pathgridId || index >= mPoints.size())
+    if(index < 0 || mPathgridId != pathgridId || (unsigned int)index >= mPoints.size())
         return;
 
     int numToDelete = mPoints[index].mConnectionNum * 2; // for sanity check later
@@ -484,7 +484,7 @@ void CSVRender::Cell::pathgridPointMoved(const std::string &name, const Ogre::Ve
     int index = result.second;
 
     // check if the point exists
-    if(index < 0 || mPathgridId != pathgridId || index >= mPoints.size())
+    if(index < 0 || mPathgridId != pathgridId || (unsigned int)index >= mPoints.size())
         return;
 
     float worldsize = ESM::Land::REAL_SIZE;
