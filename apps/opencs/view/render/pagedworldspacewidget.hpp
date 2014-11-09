@@ -75,7 +75,7 @@ namespace CSVRender
             virtual CSVWidget::SceneToolToggle *makeControlVisibilitySelector (
                 CSVWidget::SceneToolbar *parent);
 
-            virtual unsigned int getElementMask() const;
+            virtual unsigned int getVisibilityMask() const;
 
         protected:
 

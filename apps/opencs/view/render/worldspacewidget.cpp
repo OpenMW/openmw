@@ -216,7 +216,7 @@ bool CSVRender::WorldspaceWidget::handleDrop (const std::vector<CSMWorld::Univer
     return false;
 }
 
-unsigned int CSVRender::WorldspaceWidget::getElementMask() const
+unsigned int CSVRender::WorldspaceWidget::getVisibilityMask() const
 {
     return mSceneElements->getSelection();
 }
@@ -311,7 +311,7 @@ void CSVRender::WorldspaceWidget::debugProfileAboutToBeRemoved (const QModelInde
 
 void CSVRender::WorldspaceWidget::elementSelectionChanged()
 {
-    setVisibilityMask (getElementMask());
+    setVisibilityMask (getVisibilityMask());
     flagAsModified();
     updateOverlay();
 }

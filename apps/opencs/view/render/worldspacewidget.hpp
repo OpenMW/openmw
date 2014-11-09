@@ -80,7 +80,7 @@ namespace CSVRender
             virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
                 DropType type);
 
-            virtual unsigned int getElementMask() const;
+            virtual unsigned int getVisibilityMask() const;
 
         protected:
 

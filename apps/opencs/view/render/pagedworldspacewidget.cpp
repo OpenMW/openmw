@@ -430,9 +430,9 @@ CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::g
 }
 
 
-unsigned int CSVRender::PagedWorldspaceWidget::getElementMask() const
+unsigned int CSVRender::PagedWorldspaceWidget::getVisibilityMask() const
 {
-    return WorldspaceWidget::getElementMask() | mControlElements->getSelection();
+    return WorldspaceWidget::getVisibilityMask() | mControlElements->getSelection();
 }
 
 CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (
