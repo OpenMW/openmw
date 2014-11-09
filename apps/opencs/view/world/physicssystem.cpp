@@ -243,14 +243,29 @@ namespace CSVWorld
         uint32_t visibilityMask = camera->getViewport()->getVisibilityMask();
         bool ignoreHeightMap = !(visibilityMask & (uint32_t)CSVRender::Element_Terrain);
         bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
+        bool ignorePathgrid = !(visibilityMask & (uint32_t)CSVRender::Element_Pathgrid);
 
-        Ogre::Vector3 norm; // not used
-        std::pair<std::string, float> result =
-                                mEngine->rayTest(_from, _to, !ignoreObjects, ignoreHeightMap, &norm);
+        std::pair<std::string, float> result = std::make_pair("", -1);
+        short mask = OEngine::Physic::CollisionType_Raycasting;
+        std::vector<std::pair<float, std::string> > objects = mEngine->rayTest2(_from, _to, mask);
+
+        for (std::vector<std::pair<float, std::string> >::iterator it = objects.begin();
+                it != objects.end(); ++it)
+        {
+            if(ignorePathgrid && QString((*it).second.c_str()).contains(QRegExp("^Pathgrid")))
+                continue;
+            else if(ignoreObjects && QString((*it).second.c_str()).contains(QRegExp("^ref#")))
+                continue;
+            else if(ignoreHeightMap && QString((*it).second.c_str()).contains(QRegExp("^Height")))
+                continue;
+
+            result = std::make_pair((*it).second, (*it).first);
+            break;
+        }
 
         // result.first is the object's referenceId
         if(result.first == "")
-            return std::make_pair("", Ogre::Vector3(0,0,0));
+            return std::make_pair("", Ogre::Vector3());
         else
         {
             // FIXME: maybe below logic belongs in the caller, i.e. terrainUnderCursor or

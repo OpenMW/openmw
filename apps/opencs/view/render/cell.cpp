@@ -315,7 +315,6 @@ float CSVRender::Cell::getTerrainHeightAt(const Ogre::Vector3 &pos) const
 
 // FIXME:
 //  - updating indicies
-//  - collision mask
 //  - add pathgrid point above an object
 //  - adding edges
 //  - save to document & signals

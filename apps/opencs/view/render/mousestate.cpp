@@ -285,6 +285,10 @@ namespace CSVRender
                 if(result.first != "")
                 {
                     // FIXME: terrain editing goes here
+                    std::cout << "result default/edit release: " << result.first << std::endl;
+                    std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
+                            + ", " + QString::number(result.second.y).toStdString()
+                            + ", " + QString::number(result.second.z).toStdString() << std::endl;
                 }
                 break;
             }
@@ -456,6 +460,7 @@ namespace CSVRender
         return std::make_pair("", Ogre::Vector3());
     }
 
+    // NOTE: also returns pathgrids
     std::pair<std::string, Ogre::Vector3> MouseState::objectUnderCursor(const int mouseX, const int mouseY)
     {
         if(!getViewport())
@@ -473,8 +478,9 @@ namespace CSVRender
             {
                 uint32_t visibilityMask = getViewport()->getVisibilityMask();
                 bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
+                bool ignorePathgrid = !(visibilityMask & (uint32_t)CSVRender::Element_Pathgrid);
 
-                if(!ignoreObjects && mSceneManager->hasSceneNode(result.first))
+                if((!ignoreObjects || !ignorePathgrid) && mSceneManager->hasSceneNode(result.first))
                 {
                     return result;
                 }
