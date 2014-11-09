@@ -49,7 +49,15 @@ namespace CSVRender
 
             virtual void referenceAdded (const QModelIndex& index, int start, int end);
 
+            //virtual void pathgridAdded (const QModelIndex& parent, int start, int end);
+
+            //virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            //virtual void pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
             virtual std::string getStartupInstruction();
+
+            Cell *findCell(const std::string &cellId);
 
         public:
 
@@ -86,6 +94,11 @@ namespace CSVRender
             virtual void mouseReleaseEvent (QMouseEvent *event);
 
             virtual void mouseDoubleClickEvent (QMouseEvent *event);
+
+            // FIXME: temporary only until signals from the document is implemented
+            virtual void pathgridInserted (const std::string &terrain, const Ogre::Vector3 &pos);
+            virtual void pathgridMoved (const std::string &pgName, const Ogre::Vector3 &pos);
+            virtual void pathgridAboutToBeRemoved (const std::string &pgName);
 
         signals:
 

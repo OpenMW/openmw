@@ -2,6 +2,8 @@
 
 #include <iostream> // FIXME
 
+#include <QRegExp>
+
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 
@@ -34,5 +36,38 @@ namespace CSVRender
 
         if (mBase)
             mBase->getCreator()->destroySceneNode(mBase);
+    }
+
+    // FIXME: Is there a way to identify the pathgrid point other than via the index?
+    // ESM::Pathgrid::Edge itself uses the indicies so any change (add/delete) must be
+    // propagated everywhere.
+    std::pair<std::string, int> PathgridPoint::getIdAndIndex(const std::string &name)
+    {
+        // decode name
+        QString id = QString(name.c_str());
+        QRegExp pathgridRe("^Pathgrid_(.+)_(\\d+)$");
+
+        if (id.isEmpty() || !id.startsWith("Pathgrid_"))
+            return std::make_pair("", -1);
+
+        std::string pathgridId = "";
+        int index = -1;
+        if (pathgridRe.indexIn(id) != -1)
+        {
+            pathgridId = pathgridRe.cap(1).toStdString();
+            index = pathgridRe.cap(2).toInt();
+
+            return std::make_pair(pathgridId, index);
+        }
+
+        return std::make_pair("", -1);
+    }
+
+    std::string PathgridPoint::getName(const std::string &pathgridId, const int index)
+    {
+        std::ostringstream stream;
+        stream << "Pathgrid_" << pathgridId << "_" << index;
+
+        return stream.str();
     }
 }

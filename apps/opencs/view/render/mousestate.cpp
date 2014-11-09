@@ -209,9 +209,9 @@ namespace CSVRender
                     // print some debug info
                     std::string referenceId = mPhysics->sceneNodeToRefId(result.first);
                     if(referenceId != "")
-                        std::cout << "result: " << referenceId << std::endl;
+                        std::cout << "result grab release: " << referenceId << std::endl;
                     else
-                        std::cout << "result: " << result.first << std::endl;
+                        std::cout << "result grab release: " << result.first << std::endl;
                     std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
                             + ", " + QString::number(result.second.y).toStdString()
                             + ", " + QString::number(result.second.z).toStdString() << std::endl;
@@ -234,7 +234,20 @@ namespace CSVRender
                         // move pathgrid point, but don't save yet (need pathgrid
                         // table feature & its data structure to be completed)
                         // FIXME: need to signal PathgridPoint object of change
-                        placeObject(mGrabbedSceneNode, pos);
+                        std::pair<std::string, Ogre::Vector3> result =
+                            terrainUnderCursor(event->x(), event->y()); // FIXME: some pathgrid points are on objects
+                        if(result.first != "")
+                        {
+                            // FIXME: rather than just updating at the end, should
+                            // consider providing visual feedback of terrain height
+                            // while dragging the pathgrid point (maybe check whether
+                            // the object is a pathgrid point at the begging and set
+                            // a flag?)
+                            // FIXME: this also disallows dragging over objects, so
+                            // may need to use ignoreObjects while raycasting
+                            placeObject(mGrabbedSceneNode, result.second);
+                            mParent->pathgridMoved(referenceId, result.second);
+                        }
                     }
                     else
                     {
@@ -389,6 +402,21 @@ namespace CSVRender
         }
     }
 
+    // FIXME: castRay converts referenceId to scene node name only to be re-converted
+    // here - investigate whether refactoring required
+    std::pair<std::string, Ogre::Vector3> MouseState::pgPointUnderCursor(const int mouseX, const int mouseY)
+    {
+        std::pair<std::string, Ogre::Vector3> result = objectUnderCursor(mouseX, mouseY);
+        std::string referenceId = mPhysics->sceneNodeToRefId(result.first);
+        if(result.first != "" &&
+                referenceId != "" && QString(referenceId.c_str()).contains(QRegExp("^Pathgrid")))
+        {
+            return std::make_pair(referenceId, result.second);
+        }
+
+        return std::make_pair("", Ogre::Vector3());
+    }
+
     std::pair<bool, Ogre::Vector3> MouseState::mousePositionOnPlane(const QPoint &pos, const Ogre::Plane &plane)
     {
         // using a really small value seems to mess up with the projections
@@ -417,10 +445,6 @@ namespace CSVRender
         std::pair<std::string, Ogre::Vector3> result = mPhysics->castRay(x, y, mSceneManager, getCamera());
         if(result.first != "")
         {
-                    std::cout << "result: " << result.first << std::endl;
-                    std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
-                            + ", " + QString::number(result.second.y).toStdString()
-                            + ", " + QString::number(result.second.z).toStdString() << std::endl;
             // FIXME: is there  a better way to distinguish terrain from objects?
             QString name  = QString(result.first.c_str());
             if(name.contains(QRegExp("^HeightField")))

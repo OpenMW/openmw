@@ -8,6 +8,7 @@
 #include <OgreVector3.h>
 
 #include <components/terrain/terraingrid.hpp>
+#include <components/esm/loadpgrd.hpp>  // FIXME: temporaty storage until saving to document
 
 #include "object.hpp"
 
@@ -23,6 +24,7 @@ namespace Ogre
 namespace CSMWorld
 {
     class Data;
+    class Pathgrid;
 }
 
 namespace CSVWorld
@@ -42,6 +44,11 @@ namespace CSVRender
             std::map<std::string, Object *> mObjects;
             std::map<std::string, PathgridPoint *> mPgPoints;
             std::map<std::pair<int, int>, std::string> mPgEdges;
+
+            ESM::Pathgrid::PointList mPoints; // FIXME: temporary storage until saving to document
+            ESM::Pathgrid::EdgeList mEdges; // FIXME: temporary storage until saving to document
+            std::string mPathgridId; // FIXME: temporary storage until saving to document
+
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
             CSVWorld::PhysicsSystem *mPhysics;
             Ogre::SceneManager *mSceneMgr;
@@ -88,14 +95,21 @@ namespace CSVRender
 
             float getTerrainHeightAt(const Ogre::Vector3 &pos) const;
 
+            void pathgridPointAdded(const Ogre::Vector3 &pos);
+            void pathgridPointMoved(const std::string &name, const Ogre::Vector3 &newPos);
+            void pathgridPointRemoved(const std::string &name);
+
         private:
 
             // for drawing pathgrid points & lines
             void createGridMaterials();
             void destroyGridMaterials();
-            void addPathgrid();
+            void loadPathgrid();
             Ogre::ManualObject *createPathgridEdge(const std::string &name,
                     const Ogre::Vector3 &start, const Ogre::Vector3 &end);
+
+            void addPathgridEdge();
+            void removePathgridEdge();
     };
 }
 

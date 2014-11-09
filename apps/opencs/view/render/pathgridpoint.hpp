@@ -29,6 +29,10 @@ namespace CSVRender
                 Ogre::SceneNode *cellNode, const Ogre::Vector3 &pos, CSVWorld::PhysicsSystem *physics);
 
             ~PathgridPoint();
+
+            static std::pair<std::string, int> getIdAndIndex(const std::string &name);
+
+            static std::string getName(const std::string &pathgridId, int index);
     };
 }
 

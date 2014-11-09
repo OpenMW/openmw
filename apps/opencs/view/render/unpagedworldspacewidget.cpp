@@ -160,6 +160,24 @@ void CSVRender::UnpagedWorldspaceWidget::referenceAdded (const QModelIndex& pare
             flagAsModified();
 }
 
+//void CSVRender::UnpagedWorldspaceWidget::pathgridAdded (const QModelIndex& parent,
+//    int start, int end)
+//{
+//    // FIXME:
+//}
+//
+//void CSVRender::UnpagedWorldspaceWidget::pathgridDataChanged (const QModelIndex& topLeft,
+//    const QModelIndex& bottomRight)
+//{
+//    // FIXME:
+//}
+//
+//void CSVRender::UnpagedWorldspaceWidget::pathgridAboutToBeRemoved (const QModelIndex& parent,
+//    int start, int end)
+//{
+//    // FIXME:
+//}
+
 std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()
 {
     Ogre::Vector3 position = getCamera()->getPosition();
