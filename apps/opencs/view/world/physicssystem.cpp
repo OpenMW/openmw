@@ -70,9 +70,6 @@ namespace CSVWorld
 
         if(referenceId != "")
         {
-            mSceneNodeToRefId.erase(sceneNodeName);
-            mSceneNodeToMesh.erase(sceneNodeName);
-
             // find which SceneManager has this object
             Ogre::SceneManager *sceneManager = findSceneManager(sceneNodeName);
             if(!sceneManager)
@@ -97,7 +94,8 @@ namespace CSVWorld
                 mRefIdToSceneNode.begin();
             for(; itRef != mRefIdToSceneNode.end(); ++itRef)
             {
-                if((*itRef).second.find(sceneManager) != (*itRef).second.end())
+                if((*itRef).first == referenceId &&
+                        (*itRef).second.find(sceneManager) != (*itRef).second.end())
                 {
                     (*itRef).second.erase(sceneManager);
                     break;
@@ -110,6 +108,9 @@ namespace CSVWorld
                 mEngine->removeRigidBody(referenceId);
                 mEngine->deleteRigidBody(referenceId);
             }
+
+            mSceneNodeToRefId.erase(sceneNodeName);
+            mSceneNodeToMesh.erase(sceneNodeName);
         }
     }
 
@@ -252,11 +253,13 @@ namespace CSVWorld
             return std::make_pair("", Ogre::Vector3(0,0,0));
         else
         {
+            // FIXME: maybe below logic belongs in the caller, i.e. terrainUnderCursor or
+            // objectUnderCursor
             std::string name = refIdToSceneNode(result.first, sceneMgr);
             if(name == "")
-                name = result.first;
+                name = result.first; // prob terrain
             else
-                name = refIdToSceneNode(result.first, sceneMgr);
+                name = refIdToSceneNode(result.first, sceneMgr); // prob object
 
             return std::make_pair(name, ray.getPoint(farClipDist*result.second));
         }
