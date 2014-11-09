@@ -422,7 +422,7 @@ void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
     else if(event->key() == Qt::Key_Insert)
     {
         QPoint p = this->mapFromGlobal(QCursor::pos());
-        std::pair<std::string, Ogre::Vector3> result = mMouse->terrainUnderCursor(p.x(), p.y());
+        std::pair<std::string, Ogre::Vector3> result = mMouse->anyUnderCursor(p.x(), p.y());
         if(result.first != "")
         {
             pathgridInserted(result.first, result.second);

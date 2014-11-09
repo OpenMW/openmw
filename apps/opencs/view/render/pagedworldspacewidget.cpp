@@ -21,6 +21,7 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../widget/scenetooltoggle.hpp"
+#include "../world/physicssystem.hpp"
 
 #include "pathgridpoint.hpp"
 #include "elements.hpp"
@@ -332,26 +333,44 @@ CSVRender::Cell *CSVRender::PagedWorldspaceWidget::findCell(const std::string &c
     return NULL;
 }
 
-// FIXME: pathgrid may be inserted above an object, the parsing needs to change
-void CSVRender::PagedWorldspaceWidget::pathgridInserted (const std::string &terrain, const Ogre::Vector3 &pos)
+// NOTE: allow placing pathgrid points above objects and terrain
+void CSVRender::PagedWorldspaceWidget::pathgridInserted (const std::string &name, const Ogre::Vector3 &pos)
 {
-    // decode name
-    QString id = QString(terrain.c_str());
-    QRegExp terrainRe("^HeightField_([\\d-]+)_([\\d-]+)$");
+    QString id = QString(name.c_str());
+    std::string referenceId = getPhysics()->sceneNodeToRefId(name); // FIXME: move back
 
-    if (id.isEmpty() || !id.startsWith("HeightField_"))
+    bool terrain = id.startsWith("HeightField_");
+    bool object = QString(referenceId.c_str()).startsWith("ref#");
+    // don't allow placing another one on top of a pathgrid point
+    if (id.isEmpty() || (!terrain && !object))
         return;
 
-    if (terrainRe.indexIn(id) == -1)
-        return;
+    std::string cellId;
+    if(terrain)
+    {
+        QRegExp nameRe("^HeightField_([\\d-]+)_([\\d-]+)$");
+        if (nameRe.indexIn(id) == -1)
+            return;
 
-    int cellX = terrainRe.cap(1).toInt();
-    int cellY = terrainRe.cap(2).toInt();
+        int cellX = nameRe.cap(1).toInt();
+        int cellY = nameRe.cap(2).toInt();
 
-    std::ostringstream stream;
-    stream << "#" << cellX << " " << cellY;
+        std::ostringstream stream;
+        stream << "#" << cellX << " " << cellY;
+        cellId = stream.str();
+    }
+    else
+    {
+        const CSMWorld::RefCollection& references = mDocument.getData().getReferences();
+        int index = references.searchId(referenceId);
+        if(index == -1)
+            return;
 
-    Cell *cell = findCell(stream.str());
+        cellId = references.getData(index, references.findColumnIndex(CSMWorld::Columns::ColumnId_Cell))
+            .toString().toUtf8().constData();
+    }
+
+    Cell *cell = findCell(cellId);
     if(cell)
     {
         cell->pathgridPointAdded(pos);

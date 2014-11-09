@@ -234,8 +234,9 @@ namespace CSVRender
                         // move pathgrid point, but don't save yet (need pathgrid
                         // table feature & its data structure to be completed)
                         // FIXME: need to signal PathgridPoint object of change
+                        // FIXME: shouldn't allow pathgrid points under the cursor
                         std::pair<std::string, Ogre::Vector3> result =
-                            terrainUnderCursor(event->x(), event->y()); // FIXME: some pathgrid points are on objects
+                                anyUnderCursor(event->x(), event->y());
                         if(result.first != "")
                         {
                             // FIXME: rather than just updating at the end, should
@@ -243,8 +244,6 @@ namespace CSVRender
                             // while dragging the pathgrid point (maybe check whether
                             // the object is a pathgrid point at the begging and set
                             // a flag?)
-                            // FIXME: this also disallows dragging over objects, so
-                            // may need to use ignoreObjects while raycasting
                             placeObject(mGrabbedSceneNode, result.second);
                             mParent->pathgridMoved(referenceId, result.second);
                         }
@@ -440,13 +439,7 @@ namespace CSVRender
 
     std::pair<std::string, Ogre::Vector3> MouseState::terrainUnderCursor(const int mouseX, const int mouseY)
     {
-        if(!getViewport())
-            return std::make_pair("", Ogre::Vector3());
-
-        float x = (float) mouseX / getViewport()->getActualWidth();
-        float y = (float) mouseY / getViewport()->getActualHeight();
-
-        std::pair<std::string, Ogre::Vector3> result = mPhysics->castRay(x, y, mSceneManager, getCamera());
+        std::pair<std::string, Ogre::Vector3> result = anyUnderCursor(mouseX, mouseY);
         if(result.first != "")
         {
             // FIXME: is there  a better way to distinguish terrain from objects?
@@ -463,13 +456,7 @@ namespace CSVRender
     // NOTE: also returns pathgrids
     std::pair<std::string, Ogre::Vector3> MouseState::objectUnderCursor(const int mouseX, const int mouseY)
     {
-        if(!getViewport())
-            return std::make_pair("", Ogre::Vector3());
-
-        float x = (float) mouseX / getViewport()->getActualWidth();
-        float y = (float) mouseY / getViewport()->getActualHeight();
-
-        std::pair<std::string, Ogre::Vector3> result = mPhysics->castRay(x, y, mSceneManager, getCamera());
+        std::pair<std::string, Ogre::Vector3> result = anyUnderCursor(mouseX, mouseY);
         if(result.first != "")
         {
             // NOTE: anything not terrain is assumed to be an object, e.g pathgrid points
@@ -485,6 +472,23 @@ namespace CSVRender
                     return result;
                 }
             }
+        }
+
+        return std::make_pair("", Ogre::Vector3());
+    }
+
+    std::pair<std::string, Ogre::Vector3> MouseState::anyUnderCursor(const int mouseX, const int mouseY)
+    {
+        if(!getViewport())
+            return std::make_pair("", Ogre::Vector3());
+
+        float x = (float) mouseX / getViewport()->getActualWidth();
+        float y = (float) mouseY / getViewport()->getActualHeight();
+
+        std::pair<std::string, Ogre::Vector3> result = mPhysics->castRay(x, y, mSceneManager, getCamera());
+        if(result.first != "")
+        {
+            return result;
         }
 
         return std::make_pair("", Ogre::Vector3());

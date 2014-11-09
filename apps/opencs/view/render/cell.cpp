@@ -315,8 +315,7 @@ float CSVRender::Cell::getTerrainHeightAt(const Ogre::Vector3 &pos) const
 
 // FIXME:
 //  - updating indicies
-//  - add pathgrid point above an object
-//  - adding edges
+//  - adding edges (need the ability to select a pathgrid and highlight)
 //  - save to document & signals
 //  - repainting edges while moving
 void CSVRender::Cell::loadPathgrid()

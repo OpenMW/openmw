@@ -72,13 +72,14 @@ namespace CSVRender
             void mouseDoubleClickEvent (QMouseEvent *event);
             bool wheelEvent (QWheelEvent *event);
             std::pair<std::string, Ogre::Vector3> pgPointUnderCursor(const int mouseX, const int mouseY);
-            std::pair<std::string, Ogre::Vector3> terrainUnderCursor(const int mouseX, const int mouseY);
+            std::pair<std::string, Ogre::Vector3> anyUnderCursor(const int mouseX, const int mouseY);
 
             void cancelDrag();
 
         private:
 
             std::pair<bool, Ogre::Vector3> mousePositionOnPlane(const QPoint &pos, const Ogre::Plane &plane);
+            std::pair<std::string, Ogre::Vector3> terrainUnderCursor(const int mouseX, const int mouseY);
             std::pair<std::string, Ogre::Vector3> objectUnderCursor(const int mouseX, const int mouseY);
             std::pair<Ogre::Vector3, Ogre::Vector3> planeAxis();
             void updateSceneWidgets();
