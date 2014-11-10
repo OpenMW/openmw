@@ -242,18 +242,23 @@ namespace CSVRender
                         if(result.first != "" && // don't allow pathgrid points under the cursor
                             !QString(refId.c_str()).contains(QRegExp("^Pathgrid")))
                         {
-                            // drop (does not work if placed below the object/terrain)
-                            // maybe look for closest object/terrain in both directions?
-                            std::pair<std::string, float> res = mPhysics->distToGround(pos, getCamera());
+                            // snap (defaults to 300 or less)
+                            // FIXME: sticks to the underside of the object if snapping up
+                            std::pair<std::string, float> res =
+                                mPhysics->distToClosest(pos, getCamera(), 500);
                             if(res.first != "")
+                            {
                                 pos.z -= res.second;
-                            // FIXME: rather than just updating at the end, should
-                            // consider providing visual feedback of terrain height
-                            // while dragging the pathgrid point (maybe check whether
-                            // the object is a pathgrid point at the begging and set
-                            // a flag?)
-                            placeObject(mGrabbedSceneNode, pos); // result.second
-                            mParent->pathgridMoved(referenceId, pos); // result.second
+                                // FIXME: rather than just updating at the end, should
+                                // consider providing visual feedback of terrain height
+                                // while dragging the pathgrid point (maybe check whether
+                                // the object is a pathgrid point at the begging and set
+                                // a flag?)
+                                placeObject(mGrabbedSceneNode, pos); // result.second
+                                mParent->pathgridMoved(referenceId, pos); // result.second
+                            }
+                            else
+                                cancelDrag();
                         }
                         else
                             cancelDrag(); // FIXME: does not allow editing if terrain not visible

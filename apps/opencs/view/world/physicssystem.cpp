@@ -281,7 +281,7 @@ namespace CSVWorld
         }
     }
 
-    std::pair<std::string, float> PhysicsSystem::distToGround(Ogre::Vector3 &position,
+    std::pair<std::string, float> PhysicsSystem::distToGround(const Ogre::Vector3 &position,
             Ogre::Camera *camera)
     {
         btVector3 _from, _to;
@@ -316,6 +316,74 @@ namespace CSVWorld
             return std::make_pair("", -1);
         else
             return std::make_pair(result.first, 300000*result.second);
+    }
+
+    // FIXME: remove code duplication
+    std::pair<std::string, float> PhysicsSystem::distToClosest(const Ogre::Vector3 &position,
+            Ogre::Camera *camera, const float limit)
+    {
+        uint32_t visibilityMask = camera->getViewport()->getVisibilityMask();
+        bool ignoreHeightMap = !(visibilityMask & (uint32_t)CSVRender::Element_Terrain);
+        bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
+        bool ignorePathgrid = !(visibilityMask & (uint32_t)CSVRender::Element_Pathgrid);
+
+        short mask = OEngine::Physic::CollisionType_Raycasting;
+
+        btVector3 _from, _to;
+        _from = btVector3(position.x, position.y, position.z);
+        _to = btVector3(position.x, position.y, position.z-limit);
+
+        std::pair<std::string, float> resDown = std::make_pair("", -1);
+        std::vector<std::pair<float, std::string> > objectsDown = mEngine->rayTest2(_from, _to, mask);
+
+        for (std::vector<std::pair<float, std::string> >::iterator it = objectsDown.begin();
+                it != objectsDown.end(); ++it)
+        {
+            if(ignorePathgrid && QString((*it).second.c_str()).contains(QRegExp("^Pathgrid")))
+                continue;
+            else if(ignoreObjects && QString((*it).second.c_str()).contains(QRegExp("^ref#")))
+                continue;
+            else if(ignoreHeightMap && QString((*it).second.c_str()).contains(QRegExp("^Height")))
+                continue;
+
+            resDown = std::make_pair((*it).second, (*it).first);
+            break;
+        }
+
+        _to = btVector3(position.x, position.y, position.z+limit);
+        std::pair<std::string, float> resUp = std::make_pair("", -1);
+        std::vector<std::pair<float, std::string> > objectsUp = mEngine->rayTest2(_from, _to, mask);
+
+        for (std::vector<std::pair<float, std::string> >::iterator it = objectsDown.begin();
+                it != objectsDown.end(); ++it)
+        {
+            if(ignorePathgrid && QString((*it).second.c_str()).contains(QRegExp("^Pathgrid")))
+                continue;
+            else if(ignoreObjects && QString((*it).second.c_str()).contains(QRegExp("^ref#")))
+                continue;
+            else if(ignoreHeightMap && QString((*it).second.c_str()).contains(QRegExp("^Height")))
+                continue;
+
+            resUp = std::make_pair((*it).second, (*it).first);
+            break;
+        }
+
+        if(resDown.first != "")
+        {
+            if(resUp.first != "")
+            {
+                if(fabs(resUp.second) < fabs(resDown.second))
+                    return std::make_pair(resUp.first, -limit*resUp.second);
+                else
+                    return std::make_pair(resDown.first, limit*resDown.second);
+            }
+            else
+                return std::make_pair(resDown.first, limit*resDown.second);
+        }
+        else if(resUp.first != "")
+            return std::make_pair(resUp.first, -limit*resUp.second);
+        else
+            return std::make_pair("", -1);
     }
 
     std::string PhysicsSystem::refIdToSceneNode(std::string referenceId, Ogre::SceneManager *sceneMgr)

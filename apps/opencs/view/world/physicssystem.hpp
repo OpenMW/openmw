@@ -73,7 +73,11 @@ namespace CSVWorld
             std::pair<std::string, Ogre::Vector3> castRay(float mouseX,
                     float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera);
 
-            std::pair<std::string, float> distToGround(Ogre::Vector3 &position, Ogre::Camera *camera);
+            std::pair<std::string, float> distToGround(const Ogre::Vector3 &position,
+                    Ogre::Camera *camera);
+
+            std::pair<std::string, float> distToClosest(const Ogre::Vector3 &position,
+                    Ogre::Camera *camera, const float limit = 300.0f);
 
             std::string sceneNodeToRefId(std::string sceneNodeName);
 
