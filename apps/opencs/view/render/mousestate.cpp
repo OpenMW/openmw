@@ -236,12 +236,17 @@ namespace CSVRender
                         // move pathgrid point, but don't save yet (need pathgrid
                         // table feature & its data structure to be completed)
                         // FIXME: need to signal PathgridPoint object of change
-                        //std::pair<std::string, Ogre::Vector3> result =
-                                //anyUnderCursor(event->x(), event->y());
-                        //std::string refId = mPhysics->sceneNodeToRefId(result.first);
-                        //if(result.first != "" && // don't allow pathgrid points under the cursor
-                            //!QString(refId.c_str()).contains(QRegExp("^Pathgrid")))
+                        std::pair<std::string, Ogre::Vector3> result =
+                                anyUnderCursor(event->x(), event->y());
+                        std::string refId = mPhysics->sceneNodeToRefId(result.first);
+                        if(result.first != "" && // don't allow pathgrid points under the cursor
+                            !QString(refId.c_str()).contains(QRegExp("^Pathgrid")))
                         {
+                            // drop (does not work if placed below the object/terrain)
+                            // maybe look for closest object/terrain in both directions?
+                            std::pair<std::string, float> res = mPhysics->distToGround(pos, getCamera());
+                            if(res.first != "")
+                                pos.z -= res.second;
                             // FIXME: rather than just updating at the end, should
                             // consider providing visual feedback of terrain height
                             // while dragging the pathgrid point (maybe check whether
@@ -250,6 +255,8 @@ namespace CSVRender
                             placeObject(mGrabbedSceneNode, pos); // result.second
                             mParent->pathgridMoved(referenceId, pos); // result.second
                         }
+                        else
+                            cancelDrag();
                     }
                     else
                     {

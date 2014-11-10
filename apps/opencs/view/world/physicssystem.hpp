@@ -73,6 +73,8 @@ namespace CSVWorld
             std::pair<std::string, Ogre::Vector3> castRay(float mouseX,
                     float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera);
 
+            std::pair<std::string, float> distToGround(Ogre::Vector3 &position, Ogre::Camera *camera);
+
             std::string sceneNodeToRefId(std::string sceneNodeName);
 
             // for multi-scene manager per physics engine
