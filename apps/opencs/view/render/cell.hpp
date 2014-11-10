@@ -95,8 +95,9 @@ namespace CSVRender
 
             float getTerrainHeightAt(const Ogre::Vector3 &pos) const;
 
-            void pathgridPointAdded(const Ogre::Vector3 &pos);
-            void pathgridPointMoved(const std::string &name, const Ogre::Vector3 &newPos);
+            void pathgridPointAdded(const Ogre::Vector3 &pos, bool interior = false);
+            void pathgridPointMoved(const std::string &name,
+                    const Ogre::Vector3 &newPos, bool interior = false);
             void pathgridPointRemoved(const std::string &name);
 
         private:

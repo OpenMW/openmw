@@ -18,7 +18,6 @@
 #include "terrainstorage.hpp"
 #include "pathgridpoint.hpp"
 
-// FIXME: redraw edges when pathgrid points are moved, added and deleted
 namespace CSVRender
 {
     // PLEASE NOTE: pathgrid edge code copied and adapted from mwrender/debugging
@@ -314,7 +313,7 @@ float CSVRender::Cell::getTerrainHeightAt(const Ogre::Vector3 &pos) const
 }
 
 // FIXME:
-//  - updating indicies
+//  - updating indicies, including mData
 //  - adding edges (need the ability to select a pathgrid and highlight)
 //  - save to document & signals
 //  - repainting edges while moving
@@ -324,7 +323,7 @@ void CSVRender::Cell::loadPathgrid()
         Ogre::ResourceGroupManager::getSingleton().createResourceGroup(DEBUGGING_GROUP);
     createGridMaterials();
 
-    float worldsize = ESM::Land::REAL_SIZE;
+    int worldsize = ESM::Land::REAL_SIZE;
 
     CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgridCollection = mData.getPathgrids();
     int index = pathgridCollection.searchId(mId);
@@ -373,14 +372,24 @@ void CSVRender::Cell::loadPathgrid()
 
 // NOTE: pos is in world coordinates
 // FIXME: save to the document
-void CSVRender::Cell::pathgridPointAdded(const Ogre::Vector3 &pos)
+void CSVRender::Cell::pathgridPointAdded(const Ogre::Vector3 &pos, bool interior)
 {
     std::string name = PathgridPoint::getName(mId, mPoints.size());
 
     mPgPoints.insert(std::make_pair(name, new PathgridPoint(name, mCellNode, pos, mPhysics)));
 
     // store to document
-    ESM::Pathgrid::Point point((int)pos.x, (int)pos.y, (int)pos.z);
+    int worldsize = ESM::Land::REAL_SIZE;
+
+    int x = pos.x;
+    int y = pos.y;
+    if(!interior)
+    {
+        x = x - (worldsize * mX);
+        y = y - (worldsize * mY);
+    }
+
+    ESM::Pathgrid::Point point(x, y, (int)pos.z);
     point.mConnectionNum = 0;
     mPoints.push_back(point);
     mPathgridId = mId;
@@ -473,7 +482,8 @@ void CSVRender::Cell::pathgridPointRemoved(const std::string &name)
 }
 
 // NOTE: newPos is in world coordinates
-void CSVRender::Cell::pathgridPointMoved(const std::string &name, const Ogre::Vector3 &newPos)
+void CSVRender::Cell::pathgridPointMoved(const std::string &name,
+        const Ogre::Vector3 &newPos, bool interior)
 {
     std::pair<std::string, int> result = PathgridPoint::getIdAndIndex(name);
     if(result.first == "")
@@ -486,7 +496,19 @@ void CSVRender::Cell::pathgridPointMoved(const std::string &name, const Ogre::Ve
     if(index < 0 || mPathgridId != pathgridId || (unsigned int)index >= mPoints.size())
         return;
 
-    float worldsize = ESM::Land::REAL_SIZE;
+    int worldsize = ESM::Land::REAL_SIZE;
+
+    int x = newPos.x;
+    int y = newPos.y;
+    if(!interior)
+    {
+        x = x - (worldsize * mX);
+        y = y - (worldsize * mY);
+    }
+
+    mPoints[index].mX = x;
+    mPoints[index].mY = y;
+    mPoints[index].mZ = newPos.z;
 
     // delete then recreate the edges
     for(unsigned i = 0; i < mEdges.size(); ++i)
