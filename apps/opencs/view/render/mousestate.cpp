@@ -233,9 +233,9 @@ namespace CSVRender
 
                     if(QString(referenceId.c_str()).contains(QRegExp("^Pathgrid")))
                     {
-                        // move pathgrid point, but don't save yet (need pathgrid
+                        // FIXME: move pathgrid point, but don't save yet (need pathgrid
                         // table feature & its data structure to be completed)
-                        // FIXME: need to signal PathgridPoint object of change
+                        // Also need to signal PathgridPoint object of change
                         std::pair<std::string, Ogre::Vector3> result =
                                 anyUnderCursor(event->x(), event->y());
                         std::string refId = mPhysics->sceneNodeToRefId(result.first);
@@ -256,7 +256,7 @@ namespace CSVRender
                             mParent->pathgridMoved(referenceId, pos); // result.second
                         }
                         else
-                            cancelDrag();
+                            cancelDrag(); // FIXME: does not allow editing if terrain not visible
                     }
                     else
                     {
@@ -331,8 +331,9 @@ namespace CSVRender
                     // The object position is usually a little away from the mount point.
 
                     // Get the new world position of mouse on the plane offset from the wheel
+                    // FIXME: make the sensitivity a user setting and/or allow modifiers
                     std::pair<Ogre::Vector3, Ogre::Vector3> planeRes = planeAxis();
-                    Ogre::Vector3 mousePos = mOldMousePos + planeRes.first*(event->delta()/2);
+                    Ogre::Vector3 mousePos = mOldMousePos + planeRes.first*(event->delta()/1.5);
 
                     // Move the movement plane to the new mouse position. The plane is created on
                     // the mouse point (i.e. not the object position)
