@@ -46,15 +46,14 @@ namespace CSVRender
             CSVWorld::PhysicsSystem *mPhysics; // local copy
             Ogre::SceneManager *mSceneManager; // local copy
 
-            QPoint mOldPos;
+            QPoint mOldCursorPos;
             std::string mCurrentObj;
             std::string mGrabbedSceneNode;
             QElapsedTimer *mMouseEventTimer;
             Ogre::Plane *mPlane;
             Ogre::Vector3 mOrigObjPos;
             Ogre::Vector3 mOrigMousePos;
-            Ogre::Vector3 mCurrentMousePos;
-            float mOffset;
+            Ogre::Vector3 mOldMousePos;
 
             CSMWorld::IdTable *mIdTableModel;
             int mColIndexPosX;
@@ -78,7 +77,7 @@ namespace CSVRender
 
         private:
 
-            std::pair<bool, Ogre::Vector3> mousePositionOnPlane(const QPoint &pos, const Ogre::Plane &plane);
+            std::pair<bool, Ogre::Vector3> mousePosOnPlane(const QPoint &pos, const Ogre::Plane &plane);
             std::pair<std::string, Ogre::Vector3> terrainUnderCursor(const int mouseX, const int mouseY);
             std::pair<std::string, Ogre::Vector3> objectUnderCursor(const int mouseX, const int mouseY);
             std::pair<Ogre::Vector3, Ogre::Vector3> planeAxis();

@@ -57,9 +57,9 @@ namespace CSVRender
 
     MouseState::MouseState(WorldspaceWidget *parent)
         : mParent(parent), mPhysics(parent->getPhysics()), mSceneManager(parent->getSceneManager())
-        , mCurrentObj(""), mMouseState(Mouse_Default), mOldPos(0,0), mMouseEventTimer(0), mPlane(0)
+        , mCurrentObj(""), mMouseState(Mouse_Default), mOldCursorPos(0,0), mMouseEventTimer(0)
         , mGrabbedSceneNode(""), mOrigObjPos(Ogre::Vector3()), mOrigMousePos(Ogre::Vector3())
-        , mCurrentMousePos(Ogre::Vector3()), mOffset(0.0f)
+        , mOldMousePos(Ogre::Vector3()), mPlane(0)
         , mColIndexPosX(0), mColIndexPosY(0), mColIndexPosZ(0), mIdTableModel(0)
     {
         const CSMWorld::RefCollection& references = mParent->mDocument.getData().getReferences();
@@ -79,11 +79,11 @@ namespace CSVRender
         Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createPlane("mouse",
             Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
             *mPlane,
-            300000,300000, // FIXME: use far clip dist?
-            1,1, // segments
-            true,  // normals
-            1,     // numTexCoordSets
-            1,1, // uTile, vTile
+            300000,300000,  // FIXME: use far clip dist?
+            1,1,            // segments
+            true,           // normals
+            1,              // numTexCoordSets
+            1,1,            // uTile, vTile
             planeRes.second // upVector
             );
     }
@@ -111,23 +111,24 @@ namespace CSVRender
             }
             case Mouse_Drag:
             {
-                if(event->pos() != mOldPos) // TODO: maybe don't update less than a quantum?
+                if(event->pos() != mOldCursorPos) // TODO: maybe don't update less than a quantum?
                 {
-                    mOldPos = event->pos();
+                    mOldCursorPos = event->pos();
 
                     // ray test against the plane to provide feedback to the user the
-                    // relative movement of the object on the x-y plane
-                    std::pair<bool, Ogre::Vector3> planeResult = mousePositionOnPlane(event->pos(), *mPlane);
+                    // relative movement of the object on the movement plane
+                    std::pair<bool, Ogre::Vector3> planeResult = mousePosOnPlane(event->pos(), *mPlane);
                     if(planeResult.first)
                     {
                         if(mGrabbedSceneNode != "")
                         {
-                            std::pair<Ogre::Vector3, Ogre::Vector3> planeRes = planeAxis();
-                            Ogre::Vector3 pos = mOrigObjPos + planeRes.first*mOffset;
-                            mSceneManager->getSceneNode(mGrabbedSceneNode)->setPosition(pos+planeResult.second-mOrigMousePos);
-                            mCurrentMousePos = planeResult.second;
-                            mPhysics->moveSceneNodes(mGrabbedSceneNode, pos+planeResult.second-mOrigMousePos);
+                            Ogre::Vector3 pos = mOrigObjPos + (planeResult.second-mOrigMousePos);
+
+                            mSceneManager->getSceneNode(mGrabbedSceneNode)->setPosition(pos);
+                            mPhysics->moveSceneNodes(mGrabbedSceneNode, pos);
                             updateSceneWidgets();
+
+                            mOldMousePos = planeResult.second;
                         }
                     }
                 }
@@ -165,12 +166,11 @@ namespace CSVRender
                     // mouse in relation to the object position
                     std::pair<Ogre::Vector3, Ogre::Vector3> planeRes = planeAxis();
                     mPlane->redefine(planeRes.first, result.second);
-                    std::pair<bool, Ogre::Vector3> planeResult = mousePositionOnPlane(event->pos(), *mPlane);
+                    std::pair<bool, Ogre::Vector3> planeResult = mousePosOnPlane(event->pos(), *mPlane);
                     if(planeResult.first)
                     {
                         mOrigMousePos = planeResult.second;
-                        mCurrentMousePos = planeResult.second;
-                        mOffset = 0.0f;
+                        mOldMousePos = planeResult.second;
                     }
 
                     mOrigObjPos = mSceneManager->getSceneNode(mGrabbedSceneNode)->getPosition();
@@ -206,6 +206,7 @@ namespace CSVRender
                         mCurrentObj = result.first;
 
                     }
+//#if 0
                     // print some debug info
                     std::string referenceId = mPhysics->sceneNodeToRefId(result.first);
                     if(referenceId != "")
@@ -215,17 +216,18 @@ namespace CSVRender
                     std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
                             + ", " + QString::number(result.second.y).toStdString()
                             + ", " + QString::number(result.second.z).toStdString() << std::endl;
+//#endif
                 }
                 break;
             }
             case Mouse_Drag:
             {
                 // final placement
-                std::pair<bool, Ogre::Vector3> planeResult = mousePositionOnPlane(event->pos(), *mPlane);
+                std::pair<bool, Ogre::Vector3> planeResult = mousePosOnPlane(event->pos(), *mPlane);
                 if(planeResult.first && mGrabbedSceneNode != "")
                 {
-                    std::pair<Ogre::Vector3, Ogre::Vector3> planeRes = planeAxis();
-                    Ogre::Vector3 pos = mOrigObjPos+planeRes.first*mOffset+planeResult.second-mOrigMousePos;
+                    Ogre::Vector3 pos = mOrigObjPos + (planeResult.second-mOrigMousePos);
+
                     // use the saved scene node name since the physics model has not moved yet
                     std::string referenceId = mPhysics->sceneNodeToRefId(mGrabbedSceneNode);
 
@@ -234,18 +236,19 @@ namespace CSVRender
                         // move pathgrid point, but don't save yet (need pathgrid
                         // table feature & its data structure to be completed)
                         // FIXME: need to signal PathgridPoint object of change
-                        // FIXME: shouldn't allow pathgrid points under the cursor
-                        std::pair<std::string, Ogre::Vector3> result =
-                                anyUnderCursor(event->x(), event->y());
-                        if(result.first != "")
+                        //std::pair<std::string, Ogre::Vector3> result =
+                                //anyUnderCursor(event->x(), event->y());
+                        //std::string refId = mPhysics->sceneNodeToRefId(result.first);
+                        //if(result.first != "" && // don't allow pathgrid points under the cursor
+                            //!QString(refId.c_str()).contains(QRegExp("^Pathgrid")))
                         {
                             // FIXME: rather than just updating at the end, should
                             // consider providing visual feedback of terrain height
                             // while dragging the pathgrid point (maybe check whether
                             // the object is a pathgrid point at the begging and set
                             // a flag?)
-                            placeObject(mGrabbedSceneNode, result.second);
-                            mParent->pathgridMoved(referenceId, result.second);
+                            placeObject(mGrabbedSceneNode, pos); // result.second
+                            mParent->pathgridMoved(referenceId, pos); // result.second
                         }
                     }
                     else
@@ -267,12 +270,11 @@ namespace CSVRender
                     mMouseState = Mouse_Edit;
 
                     // reset states
-                    mCurrentMousePos = Ogre::Vector3(); // mouse pos to use in wheel event
-                    mOrigMousePos = Ogre::Vector3();    // starting pos of mouse in world space
-                    mOrigObjPos = Ogre::Vector3();      // starting pos of object in world space
-                    mGrabbedSceneNode = "";             // id of the object
-                    mOffset = 0.0f;                     // used for z-axis movement
-                    mOldPos = QPoint(0, 0);             // to calculate relative movement of mouse
+                    mGrabbedSceneNode = "";          // id of the object
+                    mOrigMousePos = Ogre::Vector3(); // starting pos of mouse in world space
+                    mOrigObjPos =   Ogre::Vector3(); // starting pos of object in world space
+                    mOldMousePos =  Ogre::Vector3(); // mouse pos to use in wheel event
+                    mOldCursorPos = QPoint(0, 0);    // to calculate relative movement of mouse
             }
                 break;
             }
@@ -284,10 +286,12 @@ namespace CSVRender
                 if(result.first != "")
                 {
                     // FIXME: terrain editing goes here
+//#if 0
                     std::cout << "result default/edit release: " << result.first << std::endl;
                     std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
                             + ", " + QString::number(result.second.y).toStdString()
                             + ", " + QString::number(result.second.z).toStdString() << std::endl;
+//#endif
                 }
                 break;
             }
@@ -298,9 +302,9 @@ namespace CSVRender
 
     void MouseState::mouseDoubleClickEvent (QMouseEvent *event)
     {
-        //event->ignore();
-        mPhysics->toggleDebugRendering(mSceneManager);
-        mParent->flagAsModified();
+        event->ignore();
+        //mPhysics->toggleDebugRendering(mSceneManager);
+        //mParent->flagAsModified();
     }
 
     bool MouseState::wheelEvent (QWheelEvent *event)
@@ -313,17 +317,47 @@ namespace CSVRender
                 /* FALL_THROUGH */
             case Mouse_Drag:
             {
-                // move the object along the z axis during Mouse_Drag or Mouse_Grab
+                // move the object along the axis normal to the plane during Mouse_Drag or Mouse_Grab
                 if (event->delta())
                 {
-                    // seems positive is up and negative is down
-                    mOffset += (event->delta()/1); // FIXME: arbitrary number, make config option?
+                    // The mouse point is where the mouse points the object when dragging starts.
+                    // The object position is usually a little away from the mount point.
 
+                    // Get the new world position of mouse on the plane offset from the wheel
                     std::pair<Ogre::Vector3, Ogre::Vector3> planeRes = planeAxis();
-                    Ogre::Vector3 pos = mOrigObjPos + planeRes.first*mOffset;
-                    mSceneManager->getSceneNode(mGrabbedSceneNode)->setPosition(pos+mCurrentMousePos-mOrigMousePos);
-                    mPhysics->moveSceneNodes(mGrabbedSceneNode, pos+mCurrentMousePos-mOrigMousePos);
+                    Ogre::Vector3 mousePos = mOldMousePos + planeRes.first*(event->delta()/2);
+
+                    // Move the movement plane to the new mouse position. The plane is created on
+                    // the mouse point (i.e. not the object position)
+                    mPlane->redefine(planeRes.first, mousePos);
+
+                    // Calculate the new screen position of the cursor
+                    Ogre::Vector3 screenPos =
+                        getCamera()->getProjectionMatrix() * getCamera()->getViewMatrix() * mousePos;
+                    int screenX = (screenPos.x/2+0.5) * getViewport()->getActualWidth();
+                    int screenY = (1-(screenPos.y/2+0.5)) * getViewport()->getActualHeight();
+
+                    // Move the cursor to the new screen position
+                    QCursor::setPos(mParent->mapToGlobal(QPoint(screenX, screenY)));
+
+                    // Use the new position to check the world position of the mouse
+                    std::pair<bool, Ogre::Vector3> planeResult =
+                        mousePosOnPlane(QPoint(screenX, screenY), *mPlane);
+                    {
+                        if(planeResult.first)
+                            mousePos = planeResult.second;
+                    }
+
+                    // Find the final world position of the cursor
+                    Ogre::Vector3 finalPos = mOrigObjPos + (mousePos-mOrigMousePos);
+
+                    mSceneManager->getSceneNode(mGrabbedSceneNode)->setPosition(finalPos);
+                    mPhysics->moveSceneNodes(mGrabbedSceneNode, finalPos);
                     updateSceneWidgets();
+
+                    // remember positions for next time
+                    mOldMousePos = mousePos;
+                    mOldCursorPos = QPoint(screenX, screenY);
                 }
                 break;
             }
@@ -353,14 +387,13 @@ namespace CSVRender
 
                 // reset states
                 mMouseState = Mouse_Default;
-                mCurrentMousePos = Ogre::Vector3();
+                mOldMousePos = Ogre::Vector3();
                 mOrigMousePos = Ogre::Vector3();
                 mOrigObjPos = Ogre::Vector3();
                 mGrabbedSceneNode = "";
                 mCurrentObj = "";
-                mOldPos = QPoint(0, 0);
+                mOldCursorPos = QPoint(0, 0);
                 mMouseEventTimer->invalidate();
-                mOffset = 0.0f;
 
                 break;
             }
@@ -420,7 +453,7 @@ namespace CSVRender
         return std::make_pair("", Ogre::Vector3());
     }
 
-    std::pair<bool, Ogre::Vector3> MouseState::mousePositionOnPlane(const QPoint &pos, const Ogre::Plane &plane)
+    std::pair<bool, Ogre::Vector3> MouseState::mousePosOnPlane(const QPoint &pos, const Ogre::Plane &plane)
     {
         // using a really small value seems to mess up with the projections
         float nearClipDistance = getCamera()->getNearClipDistance(); // save existing
