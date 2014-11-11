@@ -282,16 +282,17 @@ namespace CSVWorld
     }
 
     std::pair<std::string, float> PhysicsSystem::distToGround(const Ogre::Vector3 &position,
-            Ogre::Camera *camera)
+            Ogre::Camera *camera, const float limit, bool ignorePgPoint)
     {
         btVector3 _from, _to;
         _from = btVector3(position.x, position.y, position.z);
-        _to = btVector3(position.x, position.y, position.z-300000);
+        _to = btVector3(position.x, position.y, position.z-limit);
 
         uint32_t visibilityMask = camera->getViewport()->getVisibilityMask();
         bool ignoreHeightMap = !(visibilityMask & (uint32_t)CSVRender::Element_Terrain);
         bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
-        bool ignorePathgrid = !(visibilityMask & (uint32_t)CSVRender::Element_Pathgrid);
+        bool ignorePathgrid = ignorePgPoint ||
+                              !(visibilityMask & (uint32_t)CSVRender::Element_Pathgrid);
 
         std::pair<std::string, float> result = std::make_pair("", -1);
         short mask = OEngine::Physic::CollisionType_Raycasting;
@@ -315,73 +316,21 @@ namespace CSVWorld
         if(result.first == "")
             return std::make_pair("", -1);
         else
-            return std::make_pair(result.first, 300000*result.second);
+            return std::make_pair(result.first, limit*result.second);
     }
 
-    // FIXME: remove code duplication
+    // tries to find the distance to the "top" of the closest object
     std::pair<std::string, float> PhysicsSystem::distToClosest(const Ogre::Vector3 &position,
             Ogre::Camera *camera, const float limit)
     {
-        uint32_t visibilityMask = camera->getViewport()->getVisibilityMask();
-        bool ignoreHeightMap = !(visibilityMask & (uint32_t)CSVRender::Element_Terrain);
-        bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
-        bool ignorePathgrid = !(visibilityMask & (uint32_t)CSVRender::Element_Pathgrid);
+        const float thickness = 50; // arbitrary number
 
-        short mask = OEngine::Physic::CollisionType_Raycasting;
-
-        btVector3 _from, _to;
-        _from = btVector3(position.x, position.y, position.z);
-        _to = btVector3(position.x, position.y, position.z-limit);
-
-        std::pair<std::string, float> resDown = std::make_pair("", -1);
-        std::vector<std::pair<float, std::string> > objectsDown = mEngine->rayTest2(_from, _to, mask);
-
-        for (std::vector<std::pair<float, std::string> >::iterator it = objectsDown.begin();
-                it != objectsDown.end(); ++it)
-        {
-            if(ignorePathgrid && QString((*it).second.c_str()).contains(QRegExp("^Pathgrid")))
-                continue;
-            else if(ignoreObjects && QString((*it).second.c_str()).contains(QRegExp("^ref#")))
-                continue;
-            else if(ignoreHeightMap && QString((*it).second.c_str()).contains(QRegExp("^Height")))
-                continue;
-
-            resDown = std::make_pair((*it).second, (*it).first);
-            break;
-        }
-
-        _to = btVector3(position.x, position.y, position.z+limit);
-        std::pair<std::string, float> resUp = std::make_pair("", -1);
-        std::vector<std::pair<float, std::string> > objectsUp = mEngine->rayTest2(_from, _to, mask);
-
-        for (std::vector<std::pair<float, std::string> >::iterator it = objectsDown.begin();
-                it != objectsDown.end(); ++it)
-        {
-            if(ignorePathgrid && QString((*it).second.c_str()).contains(QRegExp("^Pathgrid")))
-                continue;
-            else if(ignoreObjects && QString((*it).second.c_str()).contains(QRegExp("^ref#")))
-                continue;
-            else if(ignoreHeightMap && QString((*it).second.c_str()).contains(QRegExp("^Height")))
-                continue;
-
-            resUp = std::make_pair((*it).second, (*it).first);
-            break;
-        }
+        std::pair<std::string, float> resDown =
+            distToGround(Ogre::Vector3(position.x, position.y, position.z+thickness),
+                         camera, limit+thickness, true);
 
         if(resDown.first != "")
-        {
-            if(resUp.first != "")
-            {
-                if(fabs(resUp.second) < fabs(resDown.second))
-                    return std::make_pair(resUp.first, -limit*resUp.second);
-                else
-                    return std::make_pair(resDown.first, limit*resDown.second);
-            }
-            else
-                return std::make_pair(resDown.first, limit*resDown.second);
-        }
-        else if(resUp.first != "")
-            return std::make_pair(resUp.first, -limit*resUp.second);
+            return std::make_pair(resDown.first, resDown.second-thickness);
         else
             return std::make_pair("", -1);
     }

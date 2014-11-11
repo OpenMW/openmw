@@ -236,29 +236,22 @@ namespace CSVRender
                         // FIXME: move pathgrid point, but don't save yet (need pathgrid
                         // table feature & its data structure to be completed)
                         // Also need to signal PathgridPoint object of change
-                        std::pair<std::string, Ogre::Vector3> result =
-                                anyUnderCursor(event->x(), event->y());
+                        std::pair<std::string, float> result =
+                            mPhysics->distToClosest(pos, getCamera(), 600); // snap
                         std::string refId = mPhysics->sceneNodeToRefId(result.first);
+
                         if(result.first != "" && // don't allow pathgrid points under the cursor
                             !QString(refId.c_str()).contains(QRegExp("^Pathgrid")))
                         {
-                            // snap (defaults to 300 or less)
-                            // FIXME: sticks to the underside of the object if snapping up
-                            std::pair<std::string, float> res =
-                                mPhysics->distToClosest(pos, getCamera(), 500);
-                            if(res.first != "")
-                            {
-                                pos.z -= res.second;
-                                // FIXME: rather than just updating at the end, should
-                                // consider providing visual feedback of terrain height
-                                // while dragging the pathgrid point (maybe check whether
-                                // the object is a pathgrid point at the begging and set
-                                // a flag?)
-                                placeObject(mGrabbedSceneNode, pos); // result.second
-                                mParent->pathgridMoved(referenceId, pos); // result.second
-                            }
-                            else
-                                cancelDrag();
+                            pos.z -= result.second;
+                            pos.z += 2; // arbitrary number, lift up slightly (maybe change the nif?)
+                            // FIXME: rather than just updating at the end, should
+                            // consider providing visual feedback of terrain height
+                            // while dragging the pathgrid point (maybe check whether
+                            // the object is a pathgrid point at the begging and set
+                            // a flag?)
+                            placeObject(mGrabbedSceneNode, pos); // result.second
+                            mParent->pathgridMoved(referenceId, pos); // result.second
                         }
                         else
                             cancelDrag(); // FIXME: does not allow editing if terrain not visible
