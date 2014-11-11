@@ -22,10 +22,7 @@ namespace CSVWorld
 
     PhysicsSystem::~PhysicsSystem()
     {
-        // FIXME: OEngine does not behave well when multiple instances are created
-        // and deleted, sometimes resulting in crashes.  Skip the deletion until the physics
-        // code is moved out of OEngine.
-        //delete mEngine;
+        delete mEngine;
     }
 
     // looks up the scene manager based on the scene node name (inefficient)
@@ -278,6 +275,8 @@ namespace CSVWorld
     void PhysicsSystem::addSceneManager(Ogre::SceneManager *sceneMgr, CSVRender::SceneWidget *sceneWidget)
     {
         mSceneWidgets[sceneMgr] = sceneWidget;
+
+        mEngine->createDebugDraw(sceneMgr);
     }
 
     std::map<Ogre::SceneManager*, CSVRender::SceneWidget *> PhysicsSystem::sceneWidgets()
@@ -287,6 +286,8 @@ namespace CSVWorld
 
     void PhysicsSystem::removeSceneManager(Ogre::SceneManager *sceneMgr)
     {
+        mEngine->removeDebugDraw(sceneMgr);
+
         mSceneWidgets.erase(sceneMgr);
     }
 
@@ -310,8 +311,6 @@ namespace CSVWorld
         if(!sceneMgr)
             return;
 
-        mEngine->setSceneManager(sceneMgr);
-
         CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
         if(!(userSettings.setting("debug/mouse-picking", QString("false")) == "true" ? true : false))
         {
@@ -319,7 +318,7 @@ namespace CSVWorld
             return;
         }
 
-        mEngine->toggleDebugRendering();
-        mEngine->stepSimulation(0.0167); // DebugDrawer::step() not directly accessible
+        mEngine->toggleDebugRendering(sceneMgr);
+        mEngine->stepDebug(sceneMgr);
     }
 }

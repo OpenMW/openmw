@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <openengine/bullet/BulletShapeLoader.h>
+
 #include "../render/worldspacewidget.hpp"
 #include "physicssystem.hpp"
 
@@ -54,6 +56,12 @@ namespace CSVWorld
         {
             mSceneWidgets.erase(it);
         }
+
+        // cleanup global resources used by OEngine
+        if(mPhysics.empty())
+        {
+            delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
+        }
     }
 
     // called from CSVRender::WorldspaceWidget() to get widgets' association with Document&
@@ -74,6 +82,9 @@ namespace CSVWorld
         throw std::runtime_error("No physics system found for the given document.");
     }
 
+    // deprecated by removeDocument() and may be deleted in future code updates
+    // however there may be some value in removing the deleted scene widgets from the
+    // list so that the list does not grow forever
     void PhysicsManager::removeSceneWidget(CSVRender::WorldspaceWidget *widget)
     {
         CSVRender::SceneWidget *sceneWidget = static_cast<CSVRender::SceneWidget *>(widget);

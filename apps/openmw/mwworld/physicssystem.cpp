@@ -14,6 +14,7 @@
 #include <openengine/bullet/physic.hpp>
 #include <openengine/bullet/BtOgreExtras.h>
 #include <openengine/ogre/renderer.hpp>
+#include <openengine/bullet/BulletShapeLoader.h>
 
 #include <components/nifbullet/bulletnifloader.hpp>
 
@@ -471,10 +472,9 @@ namespace MWWorld
                 physicActor->setInertialForce(Ogre::Vector3(0.0f));
             else
             {
-                float diff = time*-627.2f;
+                inertia.z += time * -627.2f;
                 if (inertia.z < 0)
-                    diff *= slowFall;
-                inertia.z += diff;
+                    inertia.z *= slowFall;
                 physicActor->setInertialForce(inertia);
             }
             physicActor->setOnGround(isOnGround);
@@ -498,6 +498,7 @@ namespace MWWorld
         if (mWaterCollisionObject.get())
             mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
         delete mEngine;
+        delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
     }
 
     OEngine::Physic::PhysicEngine* PhysicsSystem::getEngine()
@@ -863,8 +864,8 @@ namespace MWWorld
                     continue;
                 physicActor->setCanWaterWalk(waterCollision);
 
-                // 100 points of slowfall reduce gravity by 90% (this is just a guess)
-                float slowFall = 1-std::min(std::max(0.f, (effects.get(ESM::MagicEffect::SlowFall).getMagnitude() / 100.f) * 0.9f), 0.9f);
+                // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
+                float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
 
                 Ogre::Vector3 newpos = MovementSolver::move(iter->first, iter->second, mTimeAccum,
                                                             world->isFlying(iter->first),

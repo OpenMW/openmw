@@ -15,7 +15,7 @@ namespace ESM
         T mMod; // Note: can either be the modifier, or the modified value.
                 // A bit inconsistent, but we can't fix this without breaking compatibility.
         T mCurrent;
-        T mDamage;
+        float mDamage;
         float mProgress;
 
         StatState();
@@ -36,8 +36,14 @@ namespace ESM
         esm.getHNOT (mMod, "STMO");
         mCurrent = 0;
         esm.getHNOT (mCurrent, "STCU");
-        mDamage = 0;
-        esm.getHNOT (mDamage, "STDA");
+
+        // mDamage was changed to a float; ensure backwards compatibility
+        T oldDamage = 0;
+        esm.getHNOT(oldDamage, "STDA");
+        mDamage = oldDamage;
+
+        esm.getHNOT (mDamage, "STDF");
+
         mProgress = 0;
         esm.getHNOT (mProgress, "STPR");
     }
@@ -54,7 +60,7 @@ namespace ESM
             esm.writeHNT ("STCU", mCurrent);
 
         if (mDamage)
-            esm.writeHNT ("STDA", mDamage);
+            esm.writeHNT ("STDF", mDamage);
 
         if (mProgress)
             esm.writeHNT ("STPR", mProgress);

@@ -369,7 +369,7 @@ namespace MWMechanics
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration)
     {
         updateDrowning(ptr, duration);
-        calculateNpcStatModifiers(ptr);
+        calculateNpcStatModifiers(ptr, duration);
         updateEquippedLight(ptr, duration);
     }
 
@@ -498,6 +498,9 @@ namespace MWMechanics
             stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyAttribute, i)).getMagnitude() -
                              effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).getMagnitude() -
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).getMagnitude());
+
+            stat.damage(effects.get(EffectKey(ESM::MagicEffect::DamageAttribute, i)).getMagnitude() * duration * 1.5);
+            stat.restore(effects.get(EffectKey(ESM::MagicEffect::RestoreAttribute, i)).getMagnitude() * duration * 1.5);
 
             creatureStats.setAttribute(i, stat);
         }
@@ -855,7 +858,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr)
+    void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr, float duration)
     {
         NpcStats &npcStats = ptr.getClass().getNpcStats(ptr);
         const MagicEffects &effects = npcStats.getMagicEffects();
@@ -867,6 +870,9 @@ namespace MWMechanics
             skill.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifySkill, i)).getMagnitude() -
                              effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).getMagnitude() -
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).getMagnitude());
+
+            skill.damage(effects.get(EffectKey(ESM::MagicEffect::DamageSkill, i)).getMagnitude() * duration * 1.5);
+            skill.restore(effects.get(EffectKey(ESM::MagicEffect::RestoreSkill, i)).getMagnitude() * duration * 1.5);
         }
     }
 
@@ -1534,6 +1540,6 @@ namespace MWMechanics
         adjustMagicEffects(ptr);
         calculateCreatureStatModifiers(ptr, 0.f);
         if (ptr.getClass().isNpc())
-            calculateNpcStatModifiers(ptr);
+            calculateNpcStatModifiers(ptr, 0.f);
     }
 }

@@ -125,6 +125,9 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (!ptr.getRefData().isEnabled())
+                        return;
+
                     MWBase::Environment::get().getDialogueManager()->startDialogue (ptr);
                 }
         };
