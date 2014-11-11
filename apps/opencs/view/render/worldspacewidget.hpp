@@ -33,6 +33,7 @@ namespace CSVRender
             CSVWidget::SceneToolToggle *mSceneElements;
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
+            unsigned int mInteractionMask;
 
         public:
 
@@ -67,6 +68,10 @@ namespace CSVRender
             /// that is the responsibility of the calling function.
             CSVWidget::SceneToolRun *makeRunTool (CSVWidget::SceneToolbar *parent);
 
+            /// \attention The created tool is not added to the toolbar (via addTool). Doing
+            /// that is the responsibility of the calling function.
+            CSVWidget::SceneToolMode *makeEditModeSelector (CSVWidget::SceneToolbar *parent);
+
             void selectDefaultNavigationMode();
 
             static DropType getDropType(const std::vector<CSMWorld::UniversalId>& data);
@@ -82,9 +87,19 @@ namespace CSVRender
 
             virtual unsigned int getVisibilityMask() const;
 
+            /// \note This function will implicitly add elements that are independent of the
+            /// selected edit mode.
+            virtual void setInteractionMask (unsigned int mask);
+
+            /// \note This function will only return those elements that are both visible and
+            /// marked for interaction.
+            unsigned int getInteractionMask() const;
+
         protected:
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle *tool);
+
+            virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
 
             CSMDoc::Document& getDocument();
 

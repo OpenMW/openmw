@@ -16,10 +16,11 @@
 #include "../widget/scenetooltoggle.hpp"
 #include "../widget/scenetoolrun.hpp"
 
+#include "editmode.hpp"
 #include "elements.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-: SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0)
+: SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0), mInteractionMask (0)
 {
     setAcceptDrops(true);
 
@@ -162,6 +163,16 @@ CSVWidget::SceneToolRun *CSVRender::WorldspaceWidget::makeRunTool (
     return mRun;
 }
 
+CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeEditModeSelector (
+    CSVWidget::SceneToolbar *parent)
+{
+    CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent, "Edit Mode");
+
+    addEditModeSelectorButtons (tool);
+
+    return tool;
+}
+
 CSVRender::WorldspaceWidget::DropType CSVRender::WorldspaceWidget::getDropType (
     const std::vector< CSMWorld::UniversalId >& data)
 {
@@ -221,6 +232,16 @@ unsigned int CSVRender::WorldspaceWidget::getVisibilityMask() const
     return mSceneElements->getSelection();
 }
 
+void CSVRender::WorldspaceWidget::setInteractionMask (unsigned int mask)
+{
+    mInteractionMask = mask | Element_CellMarker | Element_CellArrow;
+}
+
+unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
+{
+    return mInteractionMask & getVisibilityMask();
+}
+
 void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle *tool)
 {
@@ -228,6 +249,17 @@ void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
     tool->addButton (":armor.png", Element_Terrain, ":armor.png", "Terrain");
     tool->addButton (":armor.png", Element_Water, ":armor.png", "Water");
     tool->addButton (":armor.png", Element_Pathgrid, ":armor.png", "Pathgrid");
+}
+
+void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool)
+{
+    /// \todo replace EditMode with suitable subclasses
+    tool->addButton (
+        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Reference editing"),
+        "object");
+    tool->addButton (
+        new EditMode (this, QIcon (":armor.png"), Element_Pathgrid, "Pathgrid editing"),
+        "pathgrid");
 }
 
 CSMDoc::Document& CSVRender::WorldspaceWidget::getDocument()
