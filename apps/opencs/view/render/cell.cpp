@@ -327,8 +327,6 @@ float CSVRender::Cell::getTerrainHeightAt(const Ogre::Vector3 &pos) const
 //  - repainting edges while moving
 void CSVRender::Cell::loadPathgrid()
 {
-    createGridMaterials();
-
     int worldsize = ESM::Land::REAL_SIZE;
 
     CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgridCollection = mData.getPathgrids();
