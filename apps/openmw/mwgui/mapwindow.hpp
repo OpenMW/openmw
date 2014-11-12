@@ -93,11 +93,15 @@ namespace MWGui
     protected:
         int mCurX, mCurY;
         bool mInterior;
+        bool mInitializedMap;
         MyGUI::ScrollView* mLocalMap;
         MyGUI::ImageBox* mCompass;
         std::string mPrefix;
         bool mChanged;
         bool mFogOfWar;
+
+        // Stores how far (in tiles) the user can see on the local map in all directions
+        int mLocalMapViewDistance;
 
         // Stores markers that were placed by a player. May be shared between multiple map views.
         CustomMarkerCollection& mCustomMarkers;
