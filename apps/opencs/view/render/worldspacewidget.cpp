@@ -411,7 +411,9 @@ void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
     else if(event->key() == Qt::Key_Delete)
     {
         QPoint p = this->mapFromGlobal(QCursor::pos());
-        std::pair<std::string, Ogre::Vector3> result = mMouse->pgPointUnderCursor(p.x(), p.y());
+        std::pair<std::string, Ogre::Vector3> result =
+                mMouse->underCursor(p.x(), p.y(), CSVRender::Element_Pathgrid);
+
         if(result.first != "")
         {
             pathgridAboutToBeRemoved(result.first);
@@ -422,7 +424,9 @@ void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
     else if(event->key() == Qt::Key_Insert)
     {
         QPoint p = this->mapFromGlobal(QCursor::pos());
-        std::pair<std::string, Ogre::Vector3> result = mMouse->anyUnderCursor(p.x(), p.y());
+        std::pair<std::string, Ogre::Vector3> result =
+                mMouse->underCursor(p.x(), p.y(), CSVRender::Element_Reference|CSVRender::Element_Terrain);
+
         if(result.first != "")
         {
             pathgridInserted(result.first, result.second);

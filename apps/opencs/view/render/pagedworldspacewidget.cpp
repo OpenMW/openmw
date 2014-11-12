@@ -334,10 +334,9 @@ CSVRender::Cell *CSVRender::PagedWorldspaceWidget::findCell(const std::string &c
 }
 
 // NOTE: allow placing pathgrid points above objects and terrain
-void CSVRender::PagedWorldspaceWidget::pathgridInserted (const std::string &name, const Ogre::Vector3 &pos)
+void CSVRender::PagedWorldspaceWidget::pathgridInserted (const std::string &referenceId, const Ogre::Vector3 &pos)
 {
-    QString id = QString(name.c_str());
-    std::string referenceId = getPhysics()->sceneNodeToRefId(name); // FIXME: move back
+    QString id = QString(referenceId.c_str());
 
     bool terrain = id.startsWith("HeightField_");
     bool object = QString(referenceId.c_str()).startsWith("ref#");

@@ -58,8 +58,8 @@ namespace CSVRender
     MouseState::MouseState(WorldspaceWidget *parent)
         : mParent(parent), mPhysics(parent->getPhysics()), mSceneManager(parent->getSceneManager())
         , mCurrentObj(""), mMouseState(Mouse_Default), mOldCursorPos(0,0), mMouseEventTimer(0)
-        , mGrabbedSceneNode(""), mOrigObjPos(Ogre::Vector3()), mOrigMousePos(Ogre::Vector3())
-        , mOldMousePos(Ogre::Vector3()), mPlane(0)
+        , mGrabbedSceneNode(""), mGrabbedRefId(""), mOrigObjPos(Ogre::Vector3())
+        , mOrigMousePos(Ogre::Vector3()), mOldMousePos(Ogre::Vector3()), mPlane(0)
         , mColIndexPosX(0), mColIndexPosY(0), mColIndexPosZ(0), mIdTableModel(0)
     {
         const CSMWorld::RefCollection& references = mParent->mDocument.getData().getReferences();
@@ -120,16 +120,13 @@ namespace CSVRender
                     std::pair<bool, Ogre::Vector3> planeResult = mousePosOnPlane(event->pos(), *mPlane);
                     if(planeResult.first)
                     {
-                        if(mGrabbedSceneNode != "")
-                        {
-                            Ogre::Vector3 pos = mOrigObjPos + (planeResult.second-mOrigMousePos);
+                        Ogre::Vector3 pos = mOrigObjPos + (planeResult.second-mOrigMousePos);
 
-                            mSceneManager->getSceneNode(mGrabbedSceneNode)->setPosition(pos);
-                            mPhysics->moveSceneNodes(mGrabbedSceneNode, pos);
-                            updateSceneWidgets();
+                        mSceneManager->getSceneNode(mGrabbedSceneNode)->setPosition(pos);
+                        mPhysics->moveSceneNodes(mGrabbedSceneNode, pos);
+                        updateSceneWidgets();
 
-                            mOldMousePos = planeResult.second;
-                        }
+                        mOldMousePos = planeResult.second;
                     }
                 }
                 break;
@@ -157,11 +154,18 @@ namespace CSVRender
             {
                 if(event->buttons() & Qt::RightButton)
                 {
-                    std::pair<std::string, Ogre::Vector3> result = objectUnderCursor(event->x(), event->y());
+                    // get object or pathgrid
+                    std::pair<std::string, Ogre::Vector3> result = underCursor(event->x(), event->y(),
+                                CSVRender::Element_Reference|CSVRender::Element_Pathgrid);
+
                     if(result.first == "")
                         break;
 
-                    mGrabbedSceneNode = result.first;
+                    mGrabbedSceneNode = mPhysics->refIdToSceneNode(result.first, mSceneManager);
+                    if(!mSceneManager->hasSceneNode(mGrabbedSceneNode))
+                        break;
+
+                    mGrabbedRefId = result.first;
                     // ray test agaist the plane to get a starting position of the
                     // mouse in relation to the object position
                     std::pair<Ogre::Vector3, Ogre::Vector3> planeRes = planeAxis();
@@ -190,7 +194,9 @@ namespace CSVRender
         {
             case Mouse_Grab:
             {
-                std::pair<std::string, Ogre::Vector3> result = objectUnderCursor(event->x(), event->y());
+                std::pair<std::string, Ogre::Vector3> result = underCursor(event->x(), event->y(),
+                            CSVRender::Element_Reference|CSVRender::Element_Pathgrid);
+
                 if(result.first != "")
                 {
                     if(result.first == mCurrentObj)
@@ -208,11 +214,7 @@ namespace CSVRender
                     }
 //#if 0
                     // print some debug info
-                    std::string referenceId = mPhysics->sceneNodeToRefId(result.first);
-                    if(referenceId != "")
-                        std::cout << "result grab release: " << referenceId << std::endl;
-                    else
-                        std::cout << "result grab release: " << result.first << std::endl;
+                    std::cout << "result grab release: " << result.first << std::endl;
                     std::cout << "  hit pos "+ QString::number(result.second.x).toStdString()
                             + ", " + QString::number(result.second.y).toStdString()
                             + ", " + QString::number(result.second.z).toStdString() << std::endl;
@@ -224,24 +226,21 @@ namespace CSVRender
             {
                 // final placement
                 std::pair<bool, Ogre::Vector3> planeResult = mousePosOnPlane(event->pos(), *mPlane);
-                if(planeResult.first && mGrabbedSceneNode != "")
+                if(planeResult.first)
                 {
                     Ogre::Vector3 pos = mOrigObjPos + (planeResult.second-mOrigMousePos);
 
-                    // use the saved scene node name since the physics model has not moved yet
-                    std::string referenceId = mPhysics->sceneNodeToRefId(mGrabbedSceneNode);
-
-                    if(QString(referenceId.c_str()).contains(QRegExp("^Pathgrid")))
+                    // use the saved reference Id since the physics model has not moved yet
+                    if(QString(mGrabbedRefId.c_str()).contains(QRegExp("^Pathgrid")))
                     {
                         // FIXME: move pathgrid point, but don't save yet (need pathgrid
                         // table feature & its data structure to be completed)
                         // Also need to signal PathgridPoint object of change
                         std::pair<std::string, float> result =
                             mPhysics->distToClosest(pos, getCamera(), 600); // snap
-                        std::string refId = mPhysics->sceneNodeToRefId(result.first);
 
                         if(result.first != "" && // don't allow pathgrid points under the cursor
-                            !QString(refId.c_str()).contains(QRegExp("^Pathgrid")))
+                            !QString(result.first.c_str()).contains(QRegExp("^Pathgrid")))
                         {
                             pos.z -= result.second;
                             pos.z += 2; // arbitrary number, lift up slightly (maybe change the nif?)
@@ -251,7 +250,7 @@ namespace CSVRender
                             // the object is a pathgrid point at the begging and set
                             // a flag?)
                             placeObject(mGrabbedSceneNode, pos); // result.second
-                            mParent->pathgridMoved(referenceId, pos); // result.second
+                            mParent->pathgridMoved(mGrabbedRefId, pos); // result.second
                         }
                         else
                             cancelDrag(); // FIXME: does not allow editing if terrain not visible
@@ -260,22 +259,23 @@ namespace CSVRender
                     {
                         mParent->mDocument.getUndoStack().beginMacro (QObject::tr("Move Object"));
                         mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*mIdTableModel,
-                            mIdTableModel->getModelIndex(referenceId, mColIndexPosX), pos.x));
+                            mIdTableModel->getModelIndex(mGrabbedRefId, mColIndexPosX), pos.x));
                         mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*mIdTableModel,
-                            mIdTableModel->getModelIndex(referenceId, mColIndexPosY), pos.y));
+                            mIdTableModel->getModelIndex(mGrabbedRefId, mColIndexPosY), pos.y));
                         mParent->mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*mIdTableModel,
-                            mIdTableModel->getModelIndex(referenceId, mColIndexPosZ), pos.z));
+                            mIdTableModel->getModelIndex(mGrabbedRefId, mColIndexPosZ), pos.z));
                         mParent->mDocument.getUndoStack().endMacro();
                     }
 
                     // FIXME: highlight current object?
-                    //mCurrentObj = mGrabbedSceneNode; // FIXME: doesn't work?
+                    //mCurrentObj = mGrabbedRefId; // FIXME: doesn't work?
                     mCurrentObj = "";                   // whether the object is selected
 
                     mMouseState = Mouse_Edit;
 
                     // reset states
-                    mGrabbedSceneNode = "";          // id of the object
+                    mGrabbedRefId = "";              // id of the object
+                    mGrabbedSceneNode = "";
                     mOrigMousePos = Ogre::Vector3(); // starting pos of mouse in world space
                     mOrigObjPos =   Ogre::Vector3(); // starting pos of object in world space
                     mOldMousePos =  Ogre::Vector3(); // mouse pos to use in wheel event
@@ -287,7 +287,9 @@ namespace CSVRender
             case Mouse_Default:
             {
                 // probably terrain, check
-                std::pair<std::string, Ogre::Vector3> result = terrainUnderCursor(event->x(), event->y());
+                std::pair<std::string, Ogre::Vector3> result = underCursor(event->x(), event->y(),
+                        CSVRender::Element_Terrain);
+
                 if(result.first != "")
                 {
                     // FIXME: terrain editing goes here
@@ -354,9 +356,10 @@ namespace CSVRender
                             mousePos = planeResult.second;
                     }
 
-                    // Find the final world position of the cursor
+                    // Find the final world position of the object
                     Ogre::Vector3 finalPos = mOrigObjPos + (mousePos-mOrigMousePos);
 
+                    // update Ogre and Bullet
                     mSceneManager->getSceneNode(mGrabbedSceneNode)->setPosition(finalPos);
                     mPhysics->moveSceneNodes(mGrabbedSceneNode, finalPos);
                     updateSceneWidgets();
@@ -396,6 +399,7 @@ namespace CSVRender
                 mOldMousePos = Ogre::Vector3();
                 mOrigMousePos = Ogre::Vector3();
                 mOrigObjPos = Ogre::Vector3();
+                mGrabbedRefId = "";
                 mGrabbedSceneNode = "";
                 mCurrentObj = "";
                 mOldCursorPos = QPoint(0, 0);
@@ -444,21 +448,6 @@ namespace CSVRender
         }
     }
 
-    // FIXME: castRay converts referenceId to scene node name only to be re-converted
-    // here - investigate whether refactoring required
-    std::pair<std::string, Ogre::Vector3> MouseState::pgPointUnderCursor(const int mouseX, const int mouseY)
-    {
-        std::pair<std::string, Ogre::Vector3> result = objectUnderCursor(mouseX, mouseY);
-        std::string referenceId = mPhysics->sceneNodeToRefId(result.first);
-        if(result.first != "" &&
-                referenceId != "" && QString(referenceId.c_str()).contains(QRegExp("^Pathgrid")))
-        {
-            return std::make_pair(referenceId, result.second);
-        }
-
-        return std::make_pair("", Ogre::Vector3());
-    }
-
     std::pair<bool, Ogre::Vector3> MouseState::mousePosOnPlane(const QPoint &pos, const Ogre::Plane &plane)
     {
         // using a really small value seems to mess up with the projections
@@ -476,47 +465,8 @@ namespace CSVRender
             return std::make_pair(false, Ogre::Vector3()); // should only happen if the plane is too small
     }
 
-    std::pair<std::string, Ogre::Vector3> MouseState::terrainUnderCursor(const int mouseX, const int mouseY)
-    {
-        std::pair<std::string, Ogre::Vector3> result = anyUnderCursor(mouseX, mouseY);
-        if(result.first != "")
-        {
-            // FIXME: is there  a better way to distinguish terrain from objects?
-            QString name  = QString(result.first.c_str());
-            if(name.contains(QRegExp("^HeightField")))
-            {
-                return result;
-            }
-        }
-
-        return std::make_pair("", Ogre::Vector3());
-    }
-
-    // NOTE: also returns pathgrids
-    std::pair<std::string, Ogre::Vector3> MouseState::objectUnderCursor(const int mouseX, const int mouseY)
-    {
-        std::pair<std::string, Ogre::Vector3> result = anyUnderCursor(mouseX, mouseY);
-        if(result.first != "")
-        {
-            // NOTE: anything not terrain is assumed to be an object, e.g pathgrid points
-            QString name  = QString(result.first.c_str());
-            if(!name.contains(QRegExp("^HeightField")))
-            {
-                uint32_t visibilityMask = getViewport()->getVisibilityMask();
-                bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
-                bool ignorePathgrid = !(visibilityMask & (uint32_t)CSVRender::Element_Pathgrid);
-
-                if((!ignoreObjects || !ignorePathgrid) && mSceneManager->hasSceneNode(result.first))
-                {
-                    return result;
-                }
-            }
-        }
-
-        return std::make_pair("", Ogre::Vector3());
-    }
-
-    std::pair<std::string, Ogre::Vector3> MouseState::anyUnderCursor(const int mouseX, const int mouseY)
+    std::pair<std::string, Ogre::Vector3> MouseState::underCursor(const int mouseX,
+            const int mouseY, Ogre::uint32 elements)
     {
         if(!getViewport())
             return std::make_pair("", Ogre::Vector3());
@@ -524,13 +474,7 @@ namespace CSVRender
         float x = (float) mouseX / getViewport()->getActualWidth();
         float y = (float) mouseY / getViewport()->getActualHeight();
 
-        std::pair<std::string, Ogre::Vector3> result = mPhysics->castRay(x, y, mSceneManager, getCamera());
-        if(result.first != "")
-        {
-            return result;
-        }
-
-        return std::make_pair("", Ogre::Vector3());
+        return mPhysics->castRay(x, y, mSceneManager, getCamera(), elements);
     }
 
     void MouseState::updateSceneWidgets()
@@ -554,14 +498,12 @@ namespace CSVRender
         return mParent->getCamera()->getViewport();
     }
 
-    void MouseState::placeObject(const std::string sceneNode, const Ogre::Vector3 &pos)
+    void MouseState::placeObject(const std::string sceneNodeName, const Ogre::Vector3 &pos)
     {
-        mSceneManager->getSceneNode(sceneNode)->setPosition(pos);
+        mSceneManager->getSceneNode(sceneNodeName)->setPosition(pos);
 
         // update physics
-        std::string refId = mPhysics->sceneNodeToRefId(sceneNode);
-
-        mPhysics->replaceObject(sceneNode, 1, pos, Ogre::Quaternion::IDENTITY);
+        mPhysics->replaceObject(sceneNodeName, 1, pos, Ogre::Quaternion::IDENTITY);
 
         // update all SceneWidgets and their SceneManagers
         updateSceneWidgets();

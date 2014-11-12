@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 
+#include <OgrePlatform.h>
+
 namespace Ogre
 {
     class Vector3;
@@ -71,7 +73,8 @@ namespace CSVWorld
 
             // return the object's SceneNode name and position for the given SceneManager
             std::pair<std::string, Ogre::Vector3> castRay(float mouseX,
-                    float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera);
+                    float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera,
+                    Ogre::uint32 elements = 0xFFFFFFFF);
 
             std::pair<std::string, float> distToGround(const Ogre::Vector3 &position,
                     Ogre::Camera *camera, const float limit = 300000, bool ignorePgPoint = false);
@@ -79,7 +82,7 @@ namespace CSVWorld
             std::pair<std::string, float> distToClosest(const Ogre::Vector3 &position,
                     Ogre::Camera *camera, const float limit = 100.0f);
 
-            std::string sceneNodeToRefId(std::string sceneNodeName);
+            std::string refIdToSceneNode(std::string referenceId, Ogre::SceneManager *sceneMgr);
 
             // for multi-scene manager per physics engine
             std::map<Ogre::SceneManager*, CSVRender::SceneWidget *> sceneWidgets();
@@ -91,7 +94,7 @@ namespace CSVWorld
 
             void updateSelectionHighlight(std::string sceneNode, const Ogre::Vector3 &position);
 
-            std::string refIdToSceneNode(std::string referenceId, Ogre::SceneManager *sceneMgr);
+            std::string sceneNodeToRefId(std::string sceneNodeName);
 
             Ogre::SceneManager *findSceneManager(std::string sceneNodeName);
     };

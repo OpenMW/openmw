@@ -96,7 +96,7 @@ namespace CSVRender
             virtual void mouseDoubleClickEvent (QMouseEvent *event);
 
             // FIXME: temporary only until signals from the document is implemented
-            virtual void pathgridInserted (const std::string &terrain, const Ogre::Vector3 &pos);
+            virtual void pathgridInserted (const std::string &referenceId, const Ogre::Vector3 &pos);
             virtual void pathgridMoved (const std::string &pgName, const Ogre::Vector3 &pos);
             virtual void pathgridAboutToBeRemoved (const std::string &pgName);
 

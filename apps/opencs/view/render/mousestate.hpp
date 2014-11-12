@@ -49,6 +49,7 @@ namespace CSVRender
             QPoint mOldCursorPos;
             std::string mCurrentObj;
             std::string mGrabbedSceneNode;
+            std::string mGrabbedRefId;
             QElapsedTimer *mMouseEventTimer;
             Ogre::Plane *mPlane;
             Ogre::Vector3 mOrigObjPos;
@@ -70,20 +71,19 @@ namespace CSVRender
             void mouseReleaseEvent (QMouseEvent *event);
             void mouseDoubleClickEvent (QMouseEvent *event);
             bool wheelEvent (QWheelEvent *event);
-            std::pair<std::string, Ogre::Vector3> pgPointUnderCursor(const int mouseX, const int mouseY);
-            std::pair<std::string, Ogre::Vector3> anyUnderCursor(const int mouseX, const int mouseY);
+
+            std::pair<std::string, Ogre::Vector3> underCursor(const int mouseX,
+                    const int mouseY, Ogre::uint32 elements);
 
             void cancelDrag();
 
         private:
 
             std::pair<bool, Ogre::Vector3> mousePosOnPlane(const QPoint &pos, const Ogre::Plane &plane);
-            std::pair<std::string, Ogre::Vector3> terrainUnderCursor(const int mouseX, const int mouseY);
-            std::pair<std::string, Ogre::Vector3> objectUnderCursor(const int mouseX, const int mouseY);
             std::pair<Ogre::Vector3, Ogre::Vector3> planeAxis();
             void updateSceneWidgets();
 
-            void placeObject(const std::string sceneNode, const Ogre::Vector3 &pos); // FIXME
+            void placeObject(const std::string sceneNodeName, const Ogre::Vector3 &pos); // FIXME
 
             Ogre::Camera *getCamera();     // friend access
             Ogre::Viewport *getViewport(); // friend access

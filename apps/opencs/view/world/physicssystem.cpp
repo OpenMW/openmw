@@ -211,15 +211,11 @@ namespace CSVWorld
         }
     }
 
-    // sceneMgr: to lookup the scene node name from the object's referenceId
-    // camera: primarily used to get the visibility mask for the viewport
-    //
-    // returns the found object's scene node name and its position in the world space
-    //
     // WARNING: far clip distance is a global setting, if it changes in future
     //          this method will need to be updated
     std::pair<std::string, Ogre::Vector3> PhysicsSystem::castRay(float mouseX,
-            float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera)
+            float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera,
+            Ogre::uint32 elements)
     {
         // NOTE: there could be more than one camera for the scene manager
         // TODO: check whether camera belongs to sceneMgr
@@ -241,10 +237,10 @@ namespace CSVWorld
         _from = btVector3(from.x, from.y, from.z);
         _to = btVector3(to.x, to.y, to.z);
 
-        uint32_t visibilityMask = camera->getViewport()->getVisibilityMask();
-        bool ignoreHeightMap = !(visibilityMask & (uint32_t)CSVRender::Element_Terrain);
-        bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
-        bool ignorePathgrid = !(visibilityMask & (uint32_t)CSVRender::Element_Pathgrid);
+        Ogre::uint32 visibilityMask = camera->getViewport()->getVisibilityMask();
+        bool ignoreHeightMap = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Terrain);
+        bool ignoreObjects = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Reference);
+        bool ignorePathgrid = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Pathgrid);
 
         std::pair<std::string, float> result = std::make_pair("", -1);
         short mask = OEngine::Physic::CollisionType_Raycasting;
@@ -265,20 +261,18 @@ namespace CSVWorld
         }
 
         // result.first is the object's referenceId
-        if(result.first == "")
-            return std::make_pair("", Ogre::Vector3());
-        else
+        if(result.first != "" &&
+            ((elements & (Ogre::uint32)CSVRender::Element_Terrain &&
+            QString(result.first.c_str()).contains(QRegExp("^Height"))) ||
+            (elements & (Ogre::uint32)CSVRender::Element_Reference &&
+            QString(result.first.c_str()).contains(QRegExp("^ref#"))) ||
+            (elements & (Ogre::uint32)CSVRender::Element_Pathgrid &&
+            QString(result.first.c_str()).contains(QRegExp("^Pathgrid")))))
         {
-            // FIXME: maybe below logic belongs in the caller, i.e. terrainUnderCursor or
-            // objectUnderCursor
-            std::string name = refIdToSceneNode(result.first, sceneMgr);
-            if(name == "")
-                name = result.first; // prob terrain
-            else
-                name = refIdToSceneNode(result.first, sceneMgr); // prob object
-
-            return std::make_pair(name, ray.getPoint(farClipDist*result.second));
+            return std::make_pair(result.first, ray.getPoint(farClipDist*result.second));
         }
+        else
+            return std::make_pair("", Ogre::Vector3());
     }
 
     std::pair<std::string, float> PhysicsSystem::distToGround(const Ogre::Vector3 &position,
@@ -288,11 +282,11 @@ namespace CSVWorld
         _from = btVector3(position.x, position.y, position.z);
         _to = btVector3(position.x, position.y, position.z-limit);
 
-        uint32_t visibilityMask = camera->getViewport()->getVisibilityMask();
-        bool ignoreHeightMap = !(visibilityMask & (uint32_t)CSVRender::Element_Terrain);
-        bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
+        Ogre::uint32 visibilityMask = camera->getViewport()->getVisibilityMask();
+        bool ignoreHeightMap = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Terrain);
+        bool ignoreObjects = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Reference);
         bool ignorePathgrid = ignorePgPoint ||
-                              !(visibilityMask & (uint32_t)CSVRender::Element_Pathgrid);
+                              !(visibilityMask & (Ogre::uint32)CSVRender::Element_Pathgrid);
 
         std::pair<std::string, float> result = std::make_pair("", -1);
         short mask = OEngine::Physic::CollisionType_Raycasting;
