@@ -42,8 +42,13 @@ void CSVRender::Cell::createGridMaterials()
 
 void CSVRender::Cell::destroyGridMaterials()
 {
-    if(!Ogre::MaterialManager::getSingleton().getByName(PG_LINE_MATERIAL, DEBUGGING_GROUP).isNull())
-        Ogre::MaterialManager::getSingleton().remove(PG_LINE_MATERIAL);
+    if(Ogre::ResourceGroupManager::getSingleton().resourceGroupExists(DEBUGGING_GROUP))
+    {
+        if(!Ogre::MaterialManager::getSingleton().getByName(PG_LINE_MATERIAL, DEBUGGING_GROUP).isNull())
+            Ogre::MaterialManager::getSingleton().remove(PG_LINE_MATERIAL);
+
+        Ogre::ResourceGroupManager::getSingleton().destroyResourceGroup(DEBUGGING_GROUP);
+    }
 }
 
 Ogre::ManualObject *CSVRender::Cell::createPathgridEdge(const std::string &name,
@@ -165,7 +170,6 @@ CSVRender::Cell::~Cell()
         }
     }
     destroyGridMaterials();
-    Ogre::ResourceGroupManager::getSingleton().destroyResourceGroup(DEBUGGING_GROUP);
 
     for(std::map<std::string, PathgridPoint *>::iterator iter (mPgPoints.begin());
         iter!=mPgPoints.end(); ++iter)
