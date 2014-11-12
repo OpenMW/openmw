@@ -267,7 +267,7 @@ namespace CSVWorld
     }
 
     std::pair<std::string, float> PhysicsSystem::distToGround(const Ogre::Vector3 &position,
-            Ogre::uint32 visibilityMask, const float limit, bool ignorePgPoint)
+            Ogre::uint32 visibilityMask, const float limit)
     {
         btVector3 _from, _to;
         _from = btVector3(position.x, position.y, position.z);
@@ -275,8 +275,7 @@ namespace CSVWorld
 
         bool ignoreHeightMap = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Terrain);
         bool ignoreObjects = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Reference);
-        bool ignorePathgrid = ignorePgPoint ||
-                              !(visibilityMask & (Ogre::uint32)CSVRender::Element_Pathgrid);
+        bool ignorePathgrid = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Pathgrid);
 
         std::pair<std::string, float> result = std::make_pair("", -1);
         short mask = OEngine::Physic::CollisionType_Raycasting;
@@ -303,7 +302,7 @@ namespace CSVWorld
             return std::make_pair(result.first, limit*result.second);
     }
 
-    // tries to find the distance to the "top" of the closest object
+    // tries to find the distance to the "top" of the closest object (ignores pathgrid points)
     std::pair<std::string, float> PhysicsSystem::distToClosest(const Ogre::Vector3 &position,
             Ogre::uint32 visibilityMask, const float limit)
     {
@@ -311,7 +310,7 @@ namespace CSVWorld
 
         std::pair<std::string, float> resDown =
             distToGround(Ogre::Vector3(position.x, position.y, position.z+thickness),
-                         visibilityMask, limit+thickness, true);
+                         visibilityMask&(~CSVRender::Element_Pathgrid), limit+thickness);
 
         if(resDown.first != "")
             return std::make_pair(resDown.first, resDown.second-thickness);

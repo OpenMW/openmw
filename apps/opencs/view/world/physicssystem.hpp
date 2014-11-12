@@ -76,7 +76,7 @@ namespace CSVWorld
                     float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera);
 
             std::pair<std::string, float> distToGround(const Ogre::Vector3 &position,
-                    Ogre::uint32 visibilityMask, const float limit = 300000, bool ignorePgPoint = false);
+                    Ogre::uint32 visibilityMask, const float limit = 300000);
 
             std::pair<std::string, float> distToClosest(const Ogre::Vector3 &position,
                     Ogre::uint32 visibilityMask, const float limit = 100.0f);

@@ -244,7 +244,7 @@ namespace CSVRender
                             !QString(result.first.c_str()).contains(QRegExp("^Pathgrid")))
                         {
                             pos.z -= result.second;
-                            pos.z += 2; // arbitrary number, lift up slightly (maybe change the nif?)
+                            pos.z += 1; // arbitrary number, lift up slightly (maybe change the nif?)
                             // FIXME: rather than just updating at the end, should
                             // consider providing visual feedback of terrain height
                             // while dragging the pathgrid point (maybe check whether
