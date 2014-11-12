@@ -28,6 +28,9 @@ namespace CSVRender
 
 void CSVRender::Cell::createGridMaterials()
 {
+    if(!Ogre::ResourceGroupManager::getSingleton().resourceGroupExists(DEBUGGING_GROUP))
+        Ogre::ResourceGroupManager::getSingleton().createResourceGroup(DEBUGGING_GROUP);
+
     if(Ogre::MaterialManager::getSingleton().getByName(PG_LINE_MATERIAL, DEBUGGING_GROUP).isNull())
     {
         Ogre::MaterialPtr lineMatPtr =
@@ -56,6 +59,7 @@ Ogre::ManualObject *CSVRender::Cell::createPathgridEdge(const std::string &name,
 {
     Ogre::ManualObject *result = mSceneMgr->createManualObject(name);
 
+    createGridMaterials();
     result->begin(PG_LINE_MATERIAL, Ogre::RenderOperation::OT_LINE_LIST);
 
     Ogre::Vector3 direction = (end - start);
@@ -323,8 +327,6 @@ float CSVRender::Cell::getTerrainHeightAt(const Ogre::Vector3 &pos) const
 //  - repainting edges while moving
 void CSVRender::Cell::loadPathgrid()
 {
-    if(!Ogre::ResourceGroupManager::getSingleton().resourceGroupExists(DEBUGGING_GROUP))
-        Ogre::ResourceGroupManager::getSingleton().createResourceGroup(DEBUGGING_GROUP);
     createGridMaterials();
 
     int worldsize = ESM::Land::REAL_SIZE;
