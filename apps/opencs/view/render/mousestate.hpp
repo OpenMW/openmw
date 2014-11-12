@@ -73,7 +73,7 @@ namespace CSVRender
             bool wheelEvent (QWheelEvent *event);
 
             std::pair<std::string, Ogre::Vector3> underCursor(const int mouseX,
-                    const int mouseY, Ogre::uint32 elements);
+                    const int mouseY, Ogre::uint32 elements = 0xFFFFFFFF);
 
             void cancelDrag();
 

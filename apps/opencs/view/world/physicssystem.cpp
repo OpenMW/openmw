@@ -214,8 +214,7 @@ namespace CSVWorld
     // WARNING: far clip distance is a global setting, if it changes in future
     //          this method will need to be updated
     std::pair<std::string, Ogre::Vector3> PhysicsSystem::castRay(float mouseX,
-            float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera,
-            Ogre::uint32 elements)
+            float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera)
     {
         // NOTE: there could be more than one camera for the scene manager
         // TODO: check whether camera belongs to sceneMgr
@@ -261,28 +260,19 @@ namespace CSVWorld
         }
 
         // result.first is the object's referenceId
-        if(result.first != "" &&
-            ((elements & (Ogre::uint32)CSVRender::Element_Terrain &&
-            QString(result.first.c_str()).contains(QRegExp("^Height"))) ||
-            (elements & (Ogre::uint32)CSVRender::Element_Reference &&
-            QString(result.first.c_str()).contains(QRegExp("^ref#"))) ||
-            (elements & (Ogre::uint32)CSVRender::Element_Pathgrid &&
-            QString(result.first.c_str()).contains(QRegExp("^Pathgrid")))))
-        {
-            return std::make_pair(result.first, ray.getPoint(farClipDist*result.second));
-        }
-        else
+        if(result.first == "")
             return std::make_pair("", Ogre::Vector3());
+        else
+            return std::make_pair(result.first, ray.getPoint(farClipDist*result.second));
     }
 
     std::pair<std::string, float> PhysicsSystem::distToGround(const Ogre::Vector3 &position,
-            Ogre::Camera *camera, const float limit, bool ignorePgPoint)
+            Ogre::uint32 visibilityMask, const float limit, bool ignorePgPoint)
     {
         btVector3 _from, _to;
         _from = btVector3(position.x, position.y, position.z);
         _to = btVector3(position.x, position.y, position.z-limit);
 
-        Ogre::uint32 visibilityMask = camera->getViewport()->getVisibilityMask();
         bool ignoreHeightMap = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Terrain);
         bool ignoreObjects = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Reference);
         bool ignorePathgrid = ignorePgPoint ||
@@ -315,13 +305,13 @@ namespace CSVWorld
 
     // tries to find the distance to the "top" of the closest object
     std::pair<std::string, float> PhysicsSystem::distToClosest(const Ogre::Vector3 &position,
-            Ogre::Camera *camera, const float limit)
+            Ogre::uint32 visibilityMask, const float limit)
     {
         const float thickness = 50; // arbitrary number
 
         std::pair<std::string, float> resDown =
             distToGround(Ogre::Vector3(position.x, position.y, position.z+thickness),
-                         camera, limit+thickness, true);
+                         visibilityMask, limit+thickness, true);
 
         if(resDown.first != "")
             return std::make_pair(resDown.first, resDown.second-thickness);

@@ -73,14 +73,13 @@ namespace CSVWorld
 
             // return the object's SceneNode name and position for the given SceneManager
             std::pair<std::string, Ogre::Vector3> castRay(float mouseX,
-                    float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera,
-                    Ogre::uint32 elements = 0xFFFFFFFF);
+                    float mouseY, Ogre::SceneManager *sceneMgr, Ogre::Camera *camera);
 
             std::pair<std::string, float> distToGround(const Ogre::Vector3 &position,
-                    Ogre::Camera *camera, const float limit = 300000, bool ignorePgPoint = false);
+                    Ogre::uint32 visibilityMask, const float limit = 300000, bool ignorePgPoint = false);
 
             std::pair<std::string, float> distToClosest(const Ogre::Vector3 &position,
-                    Ogre::Camera *camera, const float limit = 100.0f);
+                    Ogre::uint32 visibilityMask, const float limit = 100.0f);
 
             std::string refIdToSceneNode(std::string referenceId, Ogre::SceneManager *sceneMgr);
 

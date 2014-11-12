@@ -237,7 +237,8 @@ namespace CSVRender
                         // table feature & its data structure to be completed)
                         // Also need to signal PathgridPoint object of change
                         std::pair<std::string, float> result =
-                            mPhysics->distToClosest(pos, getCamera(), 600); // snap
+                            mPhysics->distToClosest(pos,
+                                    getCamera()->getViewport()->getVisibilityMask(), 600); // snap
 
                         if(result.first != "" && // don't allow pathgrid points under the cursor
                             !QString(result.first.c_str()).contains(QRegExp("^Pathgrid")))
@@ -474,7 +475,20 @@ namespace CSVRender
         float x = (float) mouseX / getViewport()->getActualWidth();
         float y = (float) mouseY / getViewport()->getActualHeight();
 
-        return mPhysics->castRay(x, y, mSceneManager, getCamera(), elements);
+        std::pair<std::string, Ogre::Vector3> result = mPhysics->castRay(x, y, mSceneManager, getCamera());
+
+        if(result.first != "" &&
+            ((elements & (Ogre::uint32)CSVRender::Element_Terrain &&
+            QString(result.first.c_str()).contains(QRegExp("^Height"))) ||
+            (elements & (Ogre::uint32)CSVRender::Element_Reference &&
+            QString(result.first.c_str()).contains(QRegExp("^ref#"))) ||
+            (elements & (Ogre::uint32)CSVRender::Element_Pathgrid &&
+            QString(result.first.c_str()).contains(QRegExp("^Pathgrid")))))
+        {
+            return result;
+        }
+        else
+            return std::make_pair("", Ogre::Vector3());
     }
 
     void MouseState::updateSceneWidgets()
