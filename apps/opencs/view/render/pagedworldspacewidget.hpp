@@ -79,6 +79,8 @@ namespace CSVRender
 
         protected:
 
+            virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
+
             virtual void updateOverlay();
 
             virtual void mouseReleaseEvent (QMouseEvent *event);

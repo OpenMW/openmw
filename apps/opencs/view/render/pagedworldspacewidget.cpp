@@ -21,7 +21,9 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetoolmode.hpp"
 
+#include "editmode.hpp"
 #include "elements.hpp"
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
@@ -192,6 +194,26 @@ void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event
     {
         std::cout << "double clicked" << std::endl;
     }
+}
+
+void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
+    CSVWidget::SceneToolMode *tool)
+{
+    WorldspaceWidget::addEditModeSelectorButtons (tool);
+
+    /// \todo replace EditMode with suitable subclasses
+    tool->addButton (
+        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Terrain shape editing"),
+        "terrain-shape");
+    tool->addButton (
+        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Terrain texture editing"),
+        "terrain-texture");
+    tool->addButton (
+        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Terrain vertex paint editing"),
+        "terrain-vertex");
+    tool->addButton (
+        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Terrain movement"),
+        "terrain-move");
 }
 
 void CSVRender::PagedWorldspaceWidget::updateOverlay()
