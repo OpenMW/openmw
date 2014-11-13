@@ -64,6 +64,7 @@
         <file>edit-preview.png</file>
         <file>edit-clone.png</file>
         <file>add.png</file>
+        <file alias="placeholder">placeholder.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="create-addon">raster/startup/big/create-addon.png</file>

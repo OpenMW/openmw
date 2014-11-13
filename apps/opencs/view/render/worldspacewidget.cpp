@@ -130,7 +130,7 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
 CSVWidget::SceneToolToggle *CSVRender::WorldspaceWidget::makeSceneVisibilitySelector (CSVWidget::SceneToolbar *parent)
 {
     mSceneElements= new CSVWidget::SceneToolToggle (parent,
-        "Scene Element Visibility", ":door.png");
+        "Scene Element Visibility", ":placeholder");
 
     addVisibilitySelectorButtons (mSceneElements);
 
@@ -172,7 +172,7 @@ CSVWidget::SceneToolRun *CSVRender::WorldspaceWidget::makeRunTool (
     std::sort (profiles.begin(), profiles.end());
 
     mRun = new CSVWidget::SceneToolRun (parent, "Run OpenMW from the current camera position",
-        ":door.png", ":faction.png", profiles);
+        ":placeholder", ":placeholder", profiles);
 
     connect (mRun, SIGNAL (runRequest (const std::string&)),
         this, SLOT (runRequest (const std::string&)));
@@ -262,20 +262,20 @@ unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
 void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle *tool)
 {
-    tool->addButton (":activator.png", Element_Reference, ":activator.png", "References");
-    tool->addButton (":armor.png", Element_Terrain, ":armor.png", "Terrain");
-    tool->addButton (":armor.png", Element_Water, ":armor.png", "Water");
-    tool->addButton (":armor.png", Element_Pathgrid, ":armor.png", "Pathgrid");
+    tool->addButton (":placeholder", Element_Reference, ":placeholder", "References");
+    tool->addButton (":placeholder", Element_Terrain, ":placeholder", "Terrain");
+    tool->addButton (":placeholder", Element_Water, ":placeholder", "Water");
+    tool->addButton (":placeholder", Element_Pathgrid, ":placeholder", "Pathgrid");
 }
 
 void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool)
 {
     /// \todo replace EditMode with suitable subclasses
     tool->addButton (
-        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Reference editing"),
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Reference editing"),
         "object");
     tool->addButton (
-        new EditMode (this, QIcon (":armor.png"), Element_Pathgrid, "Pathgrid editing"),
+        new EditMode (this, QIcon (":placeholder"), Element_Pathgrid, "Pathgrid editing"),
         "pathgrid");
 }
 

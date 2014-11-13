@@ -328,7 +328,7 @@ std::string CSMWorld::UniversalId::getIcon() const
 
     for (int i=0; typeData[i].mName; ++i)
         if (typeData[i].mType==mType)
-            return typeData[i].mIcon ? typeData[i].mIcon : "";
+            return typeData[i].mIcon ? typeData[i].mIcon : ":placeholder";
 
     throw std::logic_error ("failed to retrieve UniversalId type icon");
 }

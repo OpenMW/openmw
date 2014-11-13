@@ -219,16 +219,16 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
 
     /// \todo replace EditMode with suitable subclasses
     tool->addButton (
-        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Terrain shape editing"),
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain shape editing"),
         "terrain-shape");
     tool->addButton (
-        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Terrain texture editing"),
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain texture editing"),
         "terrain-texture");
     tool->addButton (
-        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Terrain vertex paint editing"),
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain vertex paint editing"),
         "terrain-vertex");
     tool->addButton (
-        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Terrain movement"),
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain movement"),
         "terrain-move");
 }
 
@@ -476,12 +476,12 @@ CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibil
     CSVWidget::SceneToolbar *parent)
 {
     mControlElements = new CSVWidget::SceneToolToggle (parent,
-        "Controls & Guides Visibility", ":door.png");
+        "Controls & Guides Visibility", ":placeholder");
 
-    mControlElements->addButton (":activator.png", Element_CellMarker, ":activator.png",
+    mControlElements->addButton (":placeholder", Element_CellMarker, ":placeholder",
         "Cell marker");
-    mControlElements->addButton (":armor.png", Element_CellArrow, ":armor.png", "Cell arrows");
-    mControlElements->addButton (":armor.png", Element_CellBorder, ":armor.png", "Cell border");
+    mControlElements->addButton (":placeholder", Element_CellArrow, ":placeholder", "Cell arrows");
+    mControlElements->addButton (":placeholder", Element_CellBorder, ":placeholder", "Cell border");
 
     mControlElements->setSelection (0xffffffff);
 
