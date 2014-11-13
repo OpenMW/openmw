@@ -21,7 +21,9 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetoolmode.hpp"
 
+#include "editmode.hpp"
 #include "elements.hpp"
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
@@ -208,6 +210,26 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
 {
     WorldspaceWidget::mouseDoubleClickEvent(event);
+}
+
+void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
+    CSVWidget::SceneToolMode *tool)
+{
+    WorldspaceWidget::addEditModeSelectorButtons (tool);
+
+    /// \todo replace EditMode with suitable subclasses
+    tool->addButton (
+        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Terrain shape editing"),
+        "terrain-shape");
+    tool->addButton (
+        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Terrain texture editing"),
+        "terrain-texture");
+    tool->addButton (
+        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Terrain vertex paint editing"),
+        "terrain-vertex");
+    tool->addButton (
+        new EditMode (this, QIcon (":armor.png"), Element_Reference, "Terrain movement"),
+        "terrain-move");
 }
 
 void CSVRender::PagedWorldspaceWidget::updateOverlay()
@@ -445,9 +467,9 @@ CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::g
     }
 }
 
-unsigned int CSVRender::PagedWorldspaceWidget::getElementMask() const
+unsigned int CSVRender::PagedWorldspaceWidget::getVisibilityMask() const
 {
-    return WorldspaceWidget::getElementMask() | mControlElements->getSelection();
+    return WorldspaceWidget::getVisibilityMask() | mControlElements->getSelection();
 }
 
 CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (

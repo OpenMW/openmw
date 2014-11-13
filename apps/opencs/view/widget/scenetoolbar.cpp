@@ -31,9 +31,20 @@ CSVWidget::SceneToolbar::SceneToolbar (int buttonSize, QWidget *parent)
     connect (focusScene, SIGNAL (activated()), this, SIGNAL (focusSceneRequest()));
 }
 
-void CSVWidget::SceneToolbar::addTool (SceneTool *tool)
+void CSVWidget::SceneToolbar::addTool (SceneTool *tool, SceneTool *insertPoint)
 {
-    mLayout->addWidget (tool, 0, Qt::AlignTop);
+    if (!insertPoint)
+        mLayout->addWidget (tool, 0, Qt::AlignTop);
+    else
+    {
+        int index = mLayout->indexOf (insertPoint);
+        mLayout->insertWidget (index+1, tool, 0, Qt::AlignTop);
+    }
+}
+
+void CSVWidget::SceneToolbar::removeTool (SceneTool *tool)
+{
+    mLayout->removeWidget (tool);
 }
 
 int CSVWidget::SceneToolbar::getButtonSize() const
