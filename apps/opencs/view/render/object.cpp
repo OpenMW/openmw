@@ -93,6 +93,7 @@ void CSVRender::Object::update()
             Ogre::Quaternion yr (Ogre::Radian (-reference.mPos.rot[1]), Ogre::Vector3::UNIT_Y);
             Ogre::Quaternion zr (Ogre::Radian (-reference.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
 
+            mPhysicsObject = mReferenceId;
             mPhysics->addObject("meshes\\" + model, mBase->getName(), mReferenceId, reference.mScale, position, xr*yr*zr);
         }
     }
@@ -134,7 +135,7 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
 CSVRender::Object::Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode,
     const std::string& id, bool referenceable, CSVWorld::PhysicsSystem *physics,
     bool forceBaseToZero)
-: mData (data), mBase (0), mForceBaseToZero (forceBaseToZero), mPhysics(physics)
+: mData (data), mBase (0), mForceBaseToZero (forceBaseToZero), mPhysics(physics), mPhysicsObject("")
 {
     mBase = cellNode->createChildSceneNode();
 
@@ -156,7 +157,8 @@ CSVRender::Object::~Object()
 {
     clear();
 
-    mPhysics->removeObject(mBase->getName());
+    if(mPhysicsObject != "")
+        mPhysics->removeObject(mBase->getName());
 
     if (mBase)
         mBase->getCreator()->destroySceneNode (mBase);

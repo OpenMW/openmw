@@ -8,6 +8,7 @@
 #include <OgreVector3.h>
 
 #include <components/terrain/terraingrid.hpp>
+#include <components/esm/loadpgrd.hpp>  // FIXME: temporaty storage until saving to document
 
 #include "object.hpp"
 
@@ -17,11 +18,13 @@ namespace Ogre
 {
     class SceneManager;
     class SceneNode;
+    class ManualObject;
 }
 
 namespace CSMWorld
 {
     class Data;
+    class Pathgrid;
 }
 
 namespace CSVWorld
@@ -31,12 +34,21 @@ namespace CSVWorld
 
 namespace CSVRender
 {
+    class PathgridPoint;
+
     class Cell
     {
             CSMWorld::Data& mData;
             std::string mId;
             Ogre::SceneNode *mCellNode;
             std::map<std::string, Object *> mObjects;
+            std::map<std::string, PathgridPoint *> mPgPoints;
+            std::map<std::pair<int, int>, std::string> mPgEdges;
+
+            ESM::Pathgrid::PointList mPoints; // FIXME: temporary storage until saving to document
+            ESM::Pathgrid::EdgeList mEdges; // FIXME: temporary storage until saving to document
+            std::string mPathgridId; // FIXME: temporary storage until saving to document
+
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
             CSVWorld::PhysicsSystem *mPhysics;
             Ogre::SceneManager *mSceneMgr;
@@ -82,6 +94,23 @@ namespace CSVRender
             bool referenceAdded (const QModelIndex& parent, int start, int end);
 
             float getTerrainHeightAt(const Ogre::Vector3 &pos) const;
+
+            void pathgridPointAdded(const Ogre::Vector3 &pos, bool interior = false);
+            void pathgridPointMoved(const std::string &name,
+                    const Ogre::Vector3 &newPos, bool interior = false);
+            void pathgridPointRemoved(const std::string &name);
+
+        private:
+
+            // for drawing pathgrid points & lines
+            void createGridMaterials();
+            void destroyGridMaterials();
+            void loadPathgrid();
+            Ogre::ManualObject *createPathgridEdge(const std::string &name,
+                    const Ogre::Vector3 &start, const Ogre::Vector3 &end);
+
+            void addPathgridEdge();
+            void removePathgridEdge();
     };
 }
 

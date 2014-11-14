@@ -3,6 +3,7 @@
 
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
+#include <OgreManualObject.h>
 
 #include <components/misc/stringops.hpp>
 #include <components/esm/loadland.hpp>
@@ -10,10 +11,68 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
+#include "../../model/world/pathgrid.hpp"
 #include "../world/physicssystem.hpp"
 
 #include "elements.hpp"
 #include "terrainstorage.hpp"
+#include "pathgridpoint.hpp"
+
+namespace CSVRender
+{
+    // PLEASE NOTE: pathgrid edge code copied and adapted from mwrender/debugging
+    static const std::string PG_LINE_MATERIAL = "pathgridLineMaterial";
+    static const int POINT_MESH_BASE = 35;
+    static const std::string DEBUGGING_GROUP = "debugging";
+}
+
+void CSVRender::Cell::createGridMaterials()
+{
+    if(!Ogre::ResourceGroupManager::getSingleton().resourceGroupExists(DEBUGGING_GROUP))
+        Ogre::ResourceGroupManager::getSingleton().createResourceGroup(DEBUGGING_GROUP);
+
+    if(Ogre::MaterialManager::getSingleton().getByName(PG_LINE_MATERIAL, DEBUGGING_GROUP).isNull())
+    {
+        Ogre::MaterialPtr lineMatPtr =
+            Ogre::MaterialManager::getSingleton().create(PG_LINE_MATERIAL, DEBUGGING_GROUP);
+        lineMatPtr->setReceiveShadows(false);
+        lineMatPtr->getTechnique(0)->setLightingEnabled(true);
+        lineMatPtr->getTechnique(0)->getPass(0)->setDiffuse(1,1,0,0);
+        lineMatPtr->getTechnique(0)->getPass(0)->setAmbient(1,1,0);
+        lineMatPtr->getTechnique(0)->getPass(0)->setSelfIllumination(1,1,0);
+    }
+}
+
+void CSVRender::Cell::destroyGridMaterials()
+{
+    if(Ogre::ResourceGroupManager::getSingleton().resourceGroupExists(DEBUGGING_GROUP))
+    {
+        if(!Ogre::MaterialManager::getSingleton().getByName(PG_LINE_MATERIAL, DEBUGGING_GROUP).isNull())
+            Ogre::MaterialManager::getSingleton().remove(PG_LINE_MATERIAL);
+
+        Ogre::ResourceGroupManager::getSingleton().destroyResourceGroup(DEBUGGING_GROUP);
+    }
+}
+
+Ogre::ManualObject *CSVRender::Cell::createPathgridEdge(const std::string &name,
+        const Ogre::Vector3 &start, const Ogre::Vector3 &end)
+{
+    Ogre::ManualObject *result = mSceneMgr->createManualObject(name);
+
+    createGridMaterials();
+    result->begin(PG_LINE_MATERIAL, Ogre::RenderOperation::OT_LINE_LIST);
+
+    Ogre::Vector3 direction = (end - start);
+    Ogre::Vector3 lineDisplacement = direction.crossProduct(Ogre::Vector3::UNIT_Z).normalisedCopy();
+    // move lines up a little, so they will be less covered by meshes/landscape
+    lineDisplacement = lineDisplacement * POINT_MESH_BASE + Ogre::Vector3(0, 0, 10);
+    result->position(start + lineDisplacement);
+    result->position(end + lineDisplacement);
+
+    result->end();
+
+    return result;
+}
 
 bool CSVRender::Cell::removeObject (const std::string& id)
 {
@@ -61,7 +120,8 @@ bool CSVRender::Cell::addObjects (int start, int end)
 
 CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
     const std::string& id, CSVWorld::PhysicsSystem *physics, const Ogre::Vector3& origin)
-: mData (data), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager), mPhysics(physics)
+: mData (data), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager), mPhysics(physics),
+    mPathgridId("")
 {
     mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
     mCellNode->setPosition (origin);
@@ -94,10 +154,33 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
                     esmLand->mLandData->mHeights, mX, mY, 0, worldsize / (verts-1), verts);
         }
     }
+
+    loadPathgrid();
 }
 
 CSVRender::Cell::~Cell()
 {
+    // destroy manual objects
+    for(std::map<std::pair<int, int>, std::string>::iterator iter = mPgEdges.begin();
+        iter != mPgEdges.end(); ++iter)
+    {
+        if(mSceneMgr->hasManualObject((*iter).second))
+        {
+            Ogre::ManualObject *manual = mSceneMgr->getManualObject((*iter).second);
+            Ogre::SceneNode *node = manual->getParentSceneNode();
+            mSceneMgr->destroyManualObject((*iter).second);
+            if(mSceneMgr->hasSceneNode(node->getName()))
+                mSceneMgr->destroySceneNode(node);
+        }
+    }
+    destroyGridMaterials();
+
+    for(std::map<std::string, PathgridPoint *>::iterator iter (mPgPoints.begin());
+        iter!=mPgPoints.end(); ++iter)
+    {
+        delete iter->second;
+    }
+
     mPhysics->removeHeightField(mSceneMgr, mX, mY);
 
     for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
@@ -235,4 +318,253 @@ float CSVRender::Cell::getTerrainHeightAt(const Ogre::Vector3 &pos) const
         return mTerrain->getHeightAt(pos);
     else
         return -std::numeric_limits<float>::max();
+}
+
+// FIXME:
+//  - updating indicies, including mData
+//  - adding edges (need the ability to select a pathgrid and highlight)
+//  - save to document & signals
+//  - repainting edges while moving
+void CSVRender::Cell::loadPathgrid()
+{
+    int worldsize = ESM::Land::REAL_SIZE;
+
+    CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgridCollection = mData.getPathgrids();
+    int index = pathgridCollection.searchId(mId);
+    if(index != -1)
+    {
+        const CSMWorld::Pathgrid &pathgrid = pathgridCollection.getRecord(index).get();
+        mPathgridId = pathgrid.mId; // FIXME: temporary storage (should be document)
+
+        mPoints.resize(pathgrid.mPoints.size());
+        std::vector<ESM::Pathgrid::Point>::const_iterator iter = pathgrid.mPoints.begin();
+        for(index = 0; iter != pathgrid.mPoints.end(); ++iter, ++index)
+        {
+            std::string name = PathgridPoint::getName(pathgrid.mId, index);
+
+            Ogre::Vector3 pos =
+                Ogre::Vector3(worldsize*mX+(*iter).mX, worldsize*mY+(*iter).mY, (*iter).mZ);
+
+            mPgPoints.insert(std::make_pair(name, new PathgridPoint(name, mCellNode, pos, mPhysics)));
+            mPoints[index] = *iter; // FIXME: temporary storage (should be document)
+        }
+
+        for(ESM::Pathgrid::EdgeList::const_iterator it = pathgrid.mEdges.begin();
+            it != pathgrid.mEdges.end();
+            ++it)
+        {
+            Ogre::SceneNode *node = mCellNode->createChildSceneNode();
+            const ESM::Pathgrid::Edge &edge = *it;
+            const ESM::Pathgrid::Point &p0 = pathgrid.mPoints[edge.mV0];
+            const ESM::Pathgrid::Point &p1 = pathgrid.mPoints[edge.mV1];
+
+            std::ostringstream stream;
+            stream << pathgrid.mId << "_" << edge.mV0 << " " << edge.mV1;
+            std::string name = stream.str();
+
+            Ogre::ManualObject *line = createPathgridEdge(name,
+                Ogre::Vector3(worldsize*mX+p0.mX, worldsize*mY+p0.mY, p0.mZ),
+                Ogre::Vector3(worldsize*mX+p1.mX, worldsize*mY+p1.mY, p1.mZ));
+            line->setVisibilityFlags(Element_Pathgrid);
+            node->attachObject(line);
+
+            mPgEdges.insert(std::make_pair(std::make_pair(edge.mV0, edge.mV1), name));
+            mEdges.push_back(*it); // FIXME: temporary storage (should be document)
+        }
+    }
+}
+
+// NOTE: pos is in world coordinates
+// FIXME: save to the document
+void CSVRender::Cell::pathgridPointAdded(const Ogre::Vector3 &pos, bool interior)
+{
+    std::string name = PathgridPoint::getName(mId, mPoints.size());
+
+    mPgPoints.insert(std::make_pair(name, new PathgridPoint(name, mCellNode, pos, mPhysics)));
+
+    // store to document
+    int worldsize = ESM::Land::REAL_SIZE;
+
+    int x = pos.x;
+    int y = pos.y;
+    if(!interior)
+    {
+        x = x - (worldsize * mX);
+        y = y - (worldsize * mY);
+    }
+
+    ESM::Pathgrid::Point point(x, y, (int)pos.z);
+    point.mConnectionNum = 0;
+    mPoints.push_back(point);
+    mPathgridId = mId;
+    // FIXME: update other scene managers
+}
+
+// FIXME: save to the document
+void CSVRender::Cell::pathgridPointRemoved(const std::string &name)
+{
+    std::pair<std::string, int> result = PathgridPoint::getIdAndIndex(name);
+    if(result.first == "")
+        return;
+
+    std::string pathgridId = result.first;
+    int index = result.second;
+
+    // check if the point exists
+    if(index < 0 || mPathgridId != pathgridId || (unsigned int)index >= mPoints.size())
+        return;
+
+    int numToDelete = mPoints[index].mConnectionNum * 2; // for sanity check later
+    int edgeCount = 0;
+
+    // find edges to delete
+    std::vector<std::pair<int, int> > edges;
+    for(unsigned i = 0; i < mEdges.size(); ++i)
+    {
+        if(mEdges[i].mV0 == index || mEdges[i].mV1 == index)
+        {
+            for(std::map<std::pair<int, int>, std::string>::iterator iter = mPgEdges.begin();
+                iter != mPgEdges.end(); ++iter)
+            {
+                if((*iter).first.first == index || (*iter).first.second == index)
+                {
+                    edges.push_back(std::make_pair((*iter).first.first, (*iter).first.second));
+                }
+            }
+        }
+    }
+
+    // delete the edges
+    for(std::vector<std::pair<int, int> >::iterator iter = edges.begin();
+        iter != edges.end(); ++iter)
+    {
+        std::string name = mPgEdges[*iter];
+        if(mSceneMgr->hasManualObject(name))
+        {
+            // remove manual objects
+            Ogre::ManualObject *manual = mSceneMgr->getManualObject(name);
+            Ogre::SceneNode *node = manual->getParentSceneNode();
+            mSceneMgr->destroyManualObject(name);
+            if(mSceneMgr->hasSceneNode(node->getName()))
+                mSceneMgr->destroySceneNode(node);
+
+            edgeCount++; // for sanity check later
+
+            // update map
+            mPgEdges.erase(*iter);
+
+            // update document
+            assert(mPoints[(*iter).first].mConnectionNum > 0);
+            mPoints[(*iter).first].mConnectionNum -= 1;
+            for(unsigned i = mEdges.size() - 1; i > 0; --i)
+            {
+                if(mEdges[i].mV0 == index || mEdges[i].mV1 == index)
+                    mEdges.erase(mEdges.begin() + i);
+            }
+        }
+    }
+
+    if(edgeCount != numToDelete)
+    {
+        // WARNING: continue anyway?  Or should this be an exception?
+        std::cerr << "The no of edges del does not match the no of conn for: "
+            << mPathgridId + "_" + QString::number(index).toStdString() << std::endl;
+    }
+
+    if(edgeCount || mPoints[index].mConnectionNum == 0)
+    {
+        // remove the point
+        delete mPgPoints[name];
+        mPgPoints.erase(name);
+        // FIXME: update other scene managers
+    }
+
+    // store to document
+    //mPoints.erase(mPoints.begin() + index);  // WARNING: Can't erase because the index will change
+    // FIXME: it should be possible to refresh indicies but that means index values
+    // can't be stored in maps, names, etc
+}
+
+// NOTE: newPos is in world coordinates
+void CSVRender::Cell::pathgridPointMoved(const std::string &name,
+        const Ogre::Vector3 &newPos, bool interior)
+{
+    std::pair<std::string, int> result = PathgridPoint::getIdAndIndex(name);
+    if(result.first == "")
+        return;
+
+    std::string pathgridId = result.first;
+    int index = result.second;
+
+    // check if the point exists
+    if(index < 0 || mPathgridId != pathgridId || (unsigned int)index >= mPoints.size())
+        return;
+
+    int worldsize = ESM::Land::REAL_SIZE;
+
+    int x = newPos.x;
+    int y = newPos.y;
+    if(!interior)
+    {
+        x = x - (worldsize * mX);
+        y = y - (worldsize * mY);
+    }
+
+    mPoints[index].mX = x;
+    mPoints[index].mY = y;
+    mPoints[index].mZ = newPos.z;
+
+    // delete then recreate the edges
+    for(unsigned i = 0; i < mEdges.size(); ++i)
+    {
+        if(mEdges[i].mV0 == index || mEdges[i].mV1 == index)
+        {
+            std::ostringstream stream;
+            stream << pathgridId << "_" << mEdges[i].mV0 << " " << mEdges[i].mV1;
+            std::string name = stream.str();
+
+            if(mSceneMgr->hasManualObject(name))
+            {
+                // remove manual objects
+                Ogre::ManualObject *manual = mSceneMgr->getManualObject(name);
+                Ogre::SceneNode *node = manual->getParentSceneNode();
+                mSceneMgr->destroyManualObject(name);
+
+                if(mEdges[i].mV0 == index)
+                {
+                    const ESM::Pathgrid::Point &p1 = mPoints[mEdges[i].mV1];
+
+                    Ogre::ManualObject *line = createPathgridEdge(name,
+                        newPos,
+                        Ogre::Vector3(worldsize*mX+p1.mX, worldsize*mY+p1.mY, p1.mZ));
+                    line->setVisibilityFlags(Element_Pathgrid);
+                    node->attachObject(line);
+                }
+                else if(mEdges[i].mV1 == index)
+                {
+                    const ESM::Pathgrid::Point &p0 = mPoints[mEdges[i].mV0];
+
+                    Ogre::ManualObject *line = createPathgridEdge(name,
+                        Ogre::Vector3(worldsize*mX+p0.mX, worldsize*mY+p0.mY, p0.mZ),
+                        newPos);
+                    line->setVisibilityFlags(Element_Pathgrid);
+                    node->attachObject(line);
+                }
+            }
+        }
+    }
+}
+
+// FIXME: save to the document
+void CSVRender::Cell::addPathgridEdge()
+{
+    // check if the points exist
+    // update the edges
+    // store to document
+    // FIXME: update other scene managers
+}
+
+// FIXME: save to the document
+void CSVRender::Cell::removePathgridEdge()
+{
 }
