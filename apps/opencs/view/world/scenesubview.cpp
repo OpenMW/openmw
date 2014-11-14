@@ -125,6 +125,9 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
     CSVWidget::SceneToolRun *runTool = widget->makeRunTool (toolbar);
     toolbar->addTool (runTool);
 
+    CSVWidget::SceneToolMode *editModeTool = widget->makeEditModeSelector (toolbar);
+    toolbar->addTool (editModeTool);
+
     return toolbar;
 }
 
