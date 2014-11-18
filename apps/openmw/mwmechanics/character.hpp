@@ -6,6 +6,7 @@
 #include <components/esm/loadmgef.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include "aistate.hpp"
 
 namespace MWWorld
 {
@@ -32,6 +33,7 @@ enum Priority {
     Priority_Weapon,
     Priority_Knockdown,
     Priority_Torch,
+    Priority_Storm,
 
     Priority_Death,
 
@@ -129,7 +131,7 @@ enum UpperBodyCharacterState {
 
 enum JumpingState {
     JumpState_None,
-    JumpState_Falling,
+    JumpState_InAir,
     JumpState_Landing
 };
 
@@ -137,6 +139,9 @@ class CharacterController
 {
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
+    
+    //
+    AiState mAiState;
 
     typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
     AnimationQueue mAnimQueue;
@@ -147,7 +152,8 @@ class CharacterController
     CharacterState mMovementState;
     std::string mCurrentMovement;
     float mMovementSpeed;
-    float mMovementAnimVelocity;
+    bool mHasMovedInXY;
+    bool mMovementAnimationControlled;
 
     CharacterState mDeathState;
     std::string mCurrentDeath;
@@ -169,6 +175,8 @@ class CharacterController
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
+    float mTurnAnimationThreshold; // how long to continue playing turning animation after actor stopped turning
+
     std::string mAttackType; // slash, chop or thrust
     void determineAttackType();
 
@@ -178,6 +186,9 @@ class CharacterController
 
     bool updateWeaponState();
     bool updateCreatureState();
+    void updateIdleStormState();
+
+    void castSpell(const std::string& spellid);
 
     void updateVisibility();
 
@@ -211,6 +222,8 @@ public:
     { return mDeathState != CharState_None; }
 
     void forceStateUpdate();
+    
+    AiState& getAiState() { return mAiState; }
 };
 
     void getWeaponGroup(WeaponType weaptype, std::string &group);

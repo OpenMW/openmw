@@ -11,6 +11,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/statemanager.hpp"
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -26,10 +27,11 @@ namespace MWGui
         , WindowBase("openmw_loading_screen.layout")
         , mLastRenderTime(0.f)
         , mLastWallpaperChangeTime(0.f)
-        , mFirstLoad(true)
         , mProgress(0)
         , mVSyncWasEnabled(false)
     {
+        mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
+
         getWidget(mLoadingText, "LoadingText");
         getWidget(mProgressBar, "ProgressBar");
 
@@ -56,13 +58,6 @@ namespace MWGui
         mBackgroundImage->setVisible(visible);
     }
 
-    void LoadingScreen::onResChange(int w, int h)
-    {
-        setCoord(0,0,w,h);
-
-        mBackgroundImage->setCoord(MyGUI::IntCoord(0,0,w,h));
-    }
-
     void LoadingScreen::loadingOn()
     {
         // Early-out if already on
@@ -71,13 +66,14 @@ namespace MWGui
 
         // Temporarily turn off VSync, we want to do actual loading rather than waiting for the screen to sync.
         // Threaded loading would be even better, of course - especially because some drivers force VSync to on and we can't change it.
-        // In Ogre 1.8, the swapBuffers argument is useless and setVSyncEnabled is bugged with GLX, nothing we can do :/
         mVSyncWasEnabled = mWindow->isVSyncEnabled();
-        #if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
         mWindow->setVSyncEnabled(false);
-        #endif
 
-        if (!mFirstLoad)
+        bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
+                == MWBase::StateManager::State_NoGame);
+
+
+        if (!showWallpaper)
         {
             mBackgroundImage->setImageTexture("");
             int width = mWindow->getWidth();
@@ -103,21 +99,18 @@ namespace MWGui
 
         setVisible(true);
 
-        if (mFirstLoad)
+        if (showWallpaper)
         {
             changeWallpaper();
         }
 
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(mFirstLoad ? GM_LoadingWallpaper : GM_Loading);
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(showWallpaper ? GM_LoadingWallpaper : GM_Loading);
     }
 
     void LoadingScreen::loadingOff()
     {
         // Re-enable vsync now.
-        // In Ogre 1.8, the swapBuffers argument is useless and setVSyncEnabled is bugged with GLX, nothing we can do :/
-        #if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
         mWindow->setVSyncEnabled(mVSyncWasEnabled);
-        #endif
 
         setVisible(false);
 
@@ -132,7 +125,7 @@ namespace MWGui
             Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
             for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
             {
-                Ogre::StringVectorPtr resourcesInThisGroup = Ogre::ResourceGroupManager::getSingleton ().findResourceNames (*it, "Splash_*.tga");
+                Ogre::StringVectorPtr resourcesInThisGroup = Ogre::ResourceGroupManager::getSingleton ().findResourceNames (*it, "Splash/*.tga");
                 mResources.insert(mResources.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
             }
         }
@@ -188,11 +181,6 @@ namespace MWGui
         draw();
     }
 
-    void LoadingScreen::removeWallpaper()
-    {
-        mFirstLoad = false;
-    }
-
     void LoadingScreen::draw()
     {
         const float loadingScreenFps = 20.f;
@@ -201,7 +189,10 @@ namespace MWGui
         {
             mLastRenderTime = mTimer.getMilliseconds ();
 
-            if (mFirstLoad && mTimer.getMilliseconds () > mLastWallpaperChangeTime + 5000*1)
+            bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
+                    == MWBase::StateManager::State_NoGame);
+
+            if (showWallpaper && mTimer.getMilliseconds () > mLastWallpaperChangeTime + 5000*1)
             {
                 mLastWallpaperChangeTime = mTimer.getMilliseconds ();
                 changeWallpaper();

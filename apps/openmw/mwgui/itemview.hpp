@@ -30,10 +30,10 @@ namespace MWGui
 
         void update();
 
-        static std::string getCountString(int count);
-
     private:
         virtual void initialiseOverride();
+
+        void layoutWidgets();
 
         virtual void setSize(const MyGUI::IntSize& _value);
         virtual void setCoord(const MyGUI::IntCoord& _value);

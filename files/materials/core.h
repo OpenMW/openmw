@@ -68,7 +68,7 @@
     @version 120
 #endif
 
-#if SH_GLSLES == 1 && SH_FRAGMENT_SHADER
+#if SH_GLSLES == 1
 precision mediump int;
 precision mediump float;
 #endif

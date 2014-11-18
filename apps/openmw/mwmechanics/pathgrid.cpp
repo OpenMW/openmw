@@ -100,6 +100,9 @@ namespace MWMechanics
         if(!cell)
             return false;
 
+        if(mIsGraphConstructed)
+            return true;
+
         mCell = cell;
         mIsExterior = cell->isExterior();
         mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell);
@@ -107,8 +110,6 @@ namespace MWMechanics
         if(!mPathgrid)
             return false;
 
-        if(mIsGraphConstructed)
-            return true;
 
         mGraph.resize(mPathgrid->mPoints.size());
         for(int i = 0; i < static_cast<int> (mPathgrid->mEdges.size()); i++)

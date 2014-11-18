@@ -4,21 +4,21 @@
 #include <OgreHardwareBufferManager.h>
 #include <OgreRenderQueue.h>
 #include <OgreMaterialManager.h>
+#include <OgreStringConverter.h>
 
 #include <extern/shiny/Main/Factory.hpp>
-
-
-#include "world.hpp" // FIXME: for LoadResponseData, move to backgroundloader.hpp
 
 namespace Terrain
 {
 
-    Chunk::Chunk(Ogre::HardwareVertexBufferSharedPtr uvBuffer, const Ogre::AxisAlignedBox& bounds, const LoadResponseData& data)
+    Chunk::Chunk(Ogre::HardwareVertexBufferSharedPtr uvBuffer, const Ogre::AxisAlignedBox& bounds,
+                 const std::vector<float>& positions, const std::vector<float>& normals, const std::vector<Ogre::uint8>& colours)
         : mBounds(bounds)
+        , mOwnMaterial(false)
     {
         mVertexData = OGRE_NEW Ogre::VertexData;
         mVertexData->vertexStart = 0;
-        mVertexData->vertexCount = data.mPositions.size()/3;
+        mVertexData->vertexCount = positions.size()/3;
 
         // Set up the vertex declaration, which specifies the info for each vertex (normals, colors, UVs, etc)
         Ogre::VertexDeclaration* vertexDecl = mVertexData->vertexDeclaration;
@@ -46,14 +46,17 @@ namespace Terrain
         Ogre::HardwareVertexBufferSharedPtr colourBuffer = mgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR),
                                                 mVertexData->vertexCount, Ogre::HardwareBuffer::HBU_STATIC);
 
-        vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), &data.mPositions[0], true);
-        normalBuffer->writeData(0, normalBuffer->getSizeInBytes(), &data.mNormals[0], true);
-        colourBuffer->writeData(0, colourBuffer->getSizeInBytes(), &data.mColours[0], true);
+        vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), &positions[0], true);
+        normalBuffer->writeData(0, normalBuffer->getSizeInBytes(), &normals[0], true);
+        colourBuffer->writeData(0, colourBuffer->getSizeInBytes(), &colours[0], true);
 
         mVertexData->vertexBufferBinding->setBinding(0, vertexBuffer);
         mVertexData->vertexBufferBinding->setBinding(1, normalBuffer);
         mVertexData->vertexBufferBinding->setBinding(2, uvBuffer);
         mVertexData->vertexBufferBinding->setBinding(3, colourBuffer);
+
+        // Assign a default material in case terrain material fails to be created
+        mMaterial = Ogre::MaterialManager::getSingleton().getByName("BaseWhite");
 
         mIndexData = OGRE_NEW Ogre::IndexData();
         mIndexData->indexStart = 0;
@@ -67,18 +70,30 @@ namespace Terrain
 
     Chunk::~Chunk()
     {
+        if (!mMaterial.isNull() && mOwnMaterial)
+        {
 #if TERRAIN_USE_SHADER
-        sh::Factory::getInstance().destroyMaterialInstance(mMaterial->getName());
+            sh::Factory::getInstance().destroyMaterialInstance(mMaterial->getName());
 #endif
-        Ogre::MaterialManager::getSingleton().remove(mMaterial->getName());
-
+            Ogre::MaterialManager::getSingleton().remove(mMaterial->getName());
+        }
         OGRE_DELETE mVertexData;
         OGRE_DELETE mIndexData;
     }
 
-    void Chunk::setMaterial(const Ogre::MaterialPtr &material)
+    void Chunk::setMaterial(const Ogre::MaterialPtr &material, bool own)
     {
+        // Clean up the previous material, if we own it
+        if (!mMaterial.isNull() && mOwnMaterial)
+        {
+#if TERRAIN_USE_SHADER
+            sh::Factory::getInstance().destroyMaterialInstance(mMaterial->getName());
+#endif
+            Ogre::MaterialManager::getSingleton().remove(mMaterial->getName());
+        }
+
         mMaterial = material;
+        mOwnMaterial = own;
     }
 
     const Ogre::AxisAlignedBox& Chunk::getBoundingBox(void) const

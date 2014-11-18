@@ -14,7 +14,7 @@
 
     SH_START_PROGRAM
     {
-        shOutputPosition = float4(shInputPosition.xyz, 1.f);
+        shOutputPosition = float4(shInputPosition.xyz, 1.0);
 #if TEXTURE
         UV.xy = uv0;
 #endif

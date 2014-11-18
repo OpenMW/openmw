@@ -1,7 +1,7 @@
 #include "material.hpp"
 
 #include <components/nif/node.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
@@ -54,49 +54,6 @@ static const char *getTestMode(int mode)
     return "less_equal";
 }
 
-
-std::string NIFMaterialLoader::findTextureName(const std::string &filename)
-{
-    /* Bethesda at some point converted all their BSA
-     * textures from tga to dds for increased load speed, but all
-     * texture file name references were kept as .tga.
-     */
-    static const char path[] = "textures\\";
-    static const char path2[] = "textures/";
-
-    std::string texname = filename;
-    Misc::StringUtils::toLower(texname);
-
-    // Apparently, leading separators are allowed
-    while (texname.size() && (texname[0] == '/' || texname[0] == '\\'))
-        texname.erase(0, 1);
-
-    if(texname.compare(0, sizeof(path)-1, path) != 0 &&
-       texname.compare(0, sizeof(path2)-1, path2) != 0)
-        texname = path + texname;
-
-    Ogre::String::size_type pos = texname.rfind('.');
-    if(pos != Ogre::String::npos && texname.compare(pos, texname.length() - pos, ".dds") != 0)
-    {
-        // since we know all (GOTY edition or less) textures end
-        // in .dds, we change the extension
-        texname.replace(pos, texname.length(), ".dds");
-
-        // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
-        // verify, and revert if false (this call succeeds quickly, but fails slowly)
-        if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texname))
-        {
-            texname = filename;
-            Misc::StringUtils::toLower(texname);
-            if(texname.compare(0, sizeof(path)-1, path) != 0 &&
-               texname.compare(0, sizeof(path2)-1, path2) != 0)
-                texname = path + texname;
-        }
-    }
-
-    return texname;
-}
-
 Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
                                             const Ogre::String &name, const Ogre::String &group,
                                             const Nif::NiTexturingProperty *texprop,
@@ -106,7 +63,7 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
                                             const Nif::NiZBufferProperty *zprop,
                                             const Nif::NiSpecularProperty *specprop,
                                             const Nif::NiWireframeProperty *wireprop,
-                                            bool &needTangents)
+                                            bool &needTangents, bool particleMaterial)
 {
     Ogre::MaterialManager &matMgr = Ogre::MaterialManager::getSingleton();
     Ogre::MaterialPtr material = matMgr.getByName(name);
@@ -146,7 +103,7 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
 
             const Nif::NiSourceTexture *st = texprop->textures[i].texture.getPtr();
             if(st->external)
-                texName[i] = findTextureName(st->filename);
+                texName[i] = Misc::ResourceHelpers::correctTexturePath(st->filename);
             else
                 warn("Found internal texture, ignoring.");
         }
@@ -243,6 +200,11 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
                 warn("Unhandled material controller "+ctrls->recName+" in "+name);
             ctrls = ctrls->next;
         }
+    }
+
+    if (particleMaterial)
+    {
+        alpha = 1.f; // Apparently ignored, might be overridden by particle vertex colors?
     }
 
     {
@@ -393,11 +355,17 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
 
     if((alphaFlags>>9)&1)
     {
+#ifndef ANDROID
         std::string reject;
         reject += getTestMode((alphaFlags>>10)&0x7);
         reject += " ";
         reject += Ogre::StringConverter::toString(alphaTest);
         instance->setProperty("alpha_rejection", sh::makeProperty(new sh::StringValue(reject)));
+#else
+        // alpha test not supported in OpenGL ES 2, use manual implementation in shader
+        instance->setProperty("alphaTestMode", sh::makeProperty(new sh::IntValue((alphaFlags>>10)&0x7)));
+        instance->setProperty("alphaTestValue", sh::makeProperty(new sh::FloatValue(alphaTest/255.f)));
+#endif
     }
     else
         instance->getMaterial()->setShadowCasterMaterial("openmw_shadowcaster_noalpha");

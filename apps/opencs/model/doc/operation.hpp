@@ -54,7 +54,7 @@ namespace CSMDoc
             void reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
                 int type);
 
-            void done (int type);
+            void done (int type, bool failed);
 
         public slots:
 

@@ -13,13 +13,13 @@ shUniform(float4x4, projection) @shAutoConstant(projection, projection_matrix)
     {
         float4x4 viewFixed = view;
 #if !SH_GLSL
-        viewFixed[0][3] = 0;
-        viewFixed[1][3] = 0;
-        viewFixed[2][3] = 0;
+        viewFixed[0][3] = 0.0;
+        viewFixed[1][3] = 0.0;
+        viewFixed[2][3] = 0.0;
 #else
-        viewFixed[3][0] = 0;
-        viewFixed[3][1] = 0;
-        viewFixed[3][2] = 0;
+        viewFixed[3][0] = 0.0;
+        viewFixed[3][1] = 0.0;
+        viewFixed[3][2] = 0.0;
 #endif
         shOutputPosition = shMatrixMult(projection, shMatrixMult(viewFixed, shMatrixMult(world, shInputPosition)));
         UV = uv0;
@@ -45,8 +45,8 @@ shUniform(float4x4, projection) @shAutoConstant(projection, projection_matrix)
         
         shOutputColour(0).a = shSample(alphaMap, UV).a * materialDiffuse.a;
         
-        shOutputColour(0).rgb += (1-tex.a) * shOutputColour(0).a * atmosphereColour.rgb; //fill dark side of moon with atmosphereColour
-        shOutputColour(0).rgb += (1-materialDiffuse.a) * atmosphereColour.rgb; //fade bump
+        shOutputColour(0).rgb += (1.0-tex.a) * shOutputColour(0).a * atmosphereColour.rgb; //fill dark side of moon with atmosphereColour
+        shOutputColour(0).rgb += (1.0-materialDiffuse.a) * atmosphereColour.rgb; //fade bump
 
     }
 

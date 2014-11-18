@@ -15,6 +15,7 @@
 #include <OgreKeyFrame.h>
 
 #include <components/nif/node.hpp>
+#include <components/nifcache/nifcache.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "material.hpp"
@@ -137,9 +138,10 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
         const Nif::NodeList &bones = skin->bones;
         for(size_t b = 0;b < bones.length();b++)
         {
-            Ogre::Matrix4 mat;
-            mat.makeTransform(data->bones[b].trafo.trans, Ogre::Vector3(data->bones[b].trafo.scale),
-                              Ogre::Quaternion(data->bones[b].trafo.rotation));
+            const Ogre::Matrix3& rotationScale = data->bones[b].trafo.rotationScale;
+            Ogre::Matrix4 mat (rotationScale);
+            mat.setTrans(data->bones[b].trafo.trans);
+            mat.setScale(Ogre::Vector3(rotationScale[0][0], rotationScale[1][1], rotationScale[2][2]) * data->bones[b].trafo.scale);
             mat = bones[b]->getWorldTransform() * mat;
 
             const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[b].weights;
@@ -383,7 +385,7 @@ void NIFMeshLoader::loadResource(Ogre::Resource *resource)
     Ogre::Mesh *mesh = dynamic_cast<Ogre::Mesh*>(resource);
     OgreAssert(mesh, "Attempting to load a mesh into a non-mesh resource!");
 
-    Nif::NIFFile::ptr nif = Nif::NIFFile::create(mName);
+    Nif::NIFFilePtr nif = Nif::Cache::getInstance().load(mName);
     if(mShapeIndex >= nif->numRecords())
     {
         Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();

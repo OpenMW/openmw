@@ -47,8 +47,8 @@ void CSVWorld::VarTypeDelegate::addCommands (QAbstractItemModel *model, const QM
 }
 
 CSVWorld::VarTypeDelegate::VarTypeDelegate (const std::vector<std::pair<int, QString> >& values,
-    QUndoStack& undoStack, QObject *parent)
-: EnumDelegate (values, undoStack, parent)
+    CSMDoc::Document& document, QObject *parent)
+: EnumDelegate (values, document, parent)
 {}
 
 
@@ -68,10 +68,10 @@ CSVWorld::VarTypeDelegateFactory::VarTypeDelegateFactory (ESM::VarType type0,
         add (type3);
 }
 
-CSVWorld::CommandDelegate *CSVWorld::VarTypeDelegateFactory::makeDelegate (QUndoStack& undoStack,
-    QObject *parent) const
+CSVWorld::CommandDelegate *CSVWorld::VarTypeDelegateFactory::makeDelegate (
+    CSMDoc::Document& document, QObject *parent) const
 {
-    return new VarTypeDelegate (mValues, undoStack, parent);
+    return new VarTypeDelegate (mValues, document, parent);
 }
 
 void CSVWorld::VarTypeDelegateFactory::add (ESM::VarType type)

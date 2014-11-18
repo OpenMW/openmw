@@ -45,8 +45,8 @@ namespace ContentSelectorModel
         const EsmFile *item(const QString &name) const;
 
         bool isEnabled (QModelIndex index) const;
-        bool isChecked(const QString &name) const;
-        bool setCheckState(const QString &name, bool isChecked);
+        bool isChecked(const QString &filepath) const;
+        bool setCheckState(const QString &filepath, bool isChecked);
         void setCheckStates (const QStringList &fileList, bool isChecked);
         ContentFileList checkedItems() const;
         void uncheckAll();
@@ -64,6 +64,7 @@ namespace ContentSelectorModel
         ContentFileList mFiles;
         QHash<QString, Qt::CheckState> mCheckStates;
         QTextCodec *mCodec;
+        QString mEncoding;
 
     public:
 

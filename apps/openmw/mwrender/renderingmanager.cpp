@@ -22,7 +22,8 @@
 #include <openengine/bullet/physic.hpp>
 
 #include <components/settings/settings.hpp>
-#include <components/terrain/world.hpp>
+#include <components/terrain/defaultworld.hpp>
+#include <components/terrain/terraingrid.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -35,6 +36,7 @@
 #include "../mwbase/statemanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "../mwworld/ptr.hpp"
 
@@ -62,6 +64,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     , mPhysicsEngine(engine)
     , mTerrain(NULL)
     , mEffectManager(NULL)
+    , mRenderWorld(true)
 {
     mActors = new MWRender::Actors(mRendering, this);
     mObjects = new MWRender::Objects(mRendering);
@@ -112,22 +115,19 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 
     mFactory->loadAllFiles();
 
-    // Compressed textures with 0 mip maps are bugged in 1.8, so disable mipmap generator in that case
-    // ( https://ogre3d.atlassian.net/browse/OGRE-259 )
-#if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
     TextureManager::getSingleton().setDefaultNumMipmaps(Settings::Manager::getInt("num mipmaps", "General"));
-#else
-    TextureManager::getSingleton().setDefaultNumMipmaps(0);
-#endif
 
     // Set default texture filtering options
     TextureFilterOptions tfo;
     std::string filter = Settings::Manager::getString("texture filtering", "General");
+#ifndef ANDROID
     if (filter == "anisotropic") tfo = TFO_ANISOTROPIC;
     else if (filter == "trilinear") tfo = TFO_TRILINEAR;
     else if (filter == "bilinear") tfo = TFO_BILINEAR;
     else /*if (filter == "none")*/ tfo = TFO_NONE;
-
+#else
+    tfo = TFO_NONE;
+#endif
     MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
     MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
 
@@ -211,11 +211,6 @@ MWRender::Actors& RenderingManager::getActors(){
     return *mActors;
 }
 
-OEngine::Render::Fader* RenderingManager::getFader()
-{
-    return mRendering.getFader();
-}
-
 MWRender::Camera* RenderingManager::getCamera() const
 {
     return mCamera;
@@ -223,6 +218,9 @@ MWRender::Camera* RenderingManager::getCamera() const
 
 void RenderingManager::removeCell (MWWorld::CellStore *store)
 {
+    if (store->isExterior())
+        mTerrain->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
+
     mLocalMap->saveFogOfWar(store);
     mObjects->removeCell(store);
     mActors->removeCell(store);
@@ -239,12 +237,23 @@ bool RenderingManager::toggleWater()
     return mWater->toggle();
 }
 
+bool RenderingManager::toggleWorld()
+{
+    mRenderWorld = !mRenderWorld;
+
+    int visibilityMask = mRenderWorld ? ~int(0) : 0;
+    mRendering.getViewport()->setVisibilityMask(visibilityMask);
+    return mRenderWorld;
+}
+
 void RenderingManager::cellAdded (MWWorld::CellStore *store)
 {
+    if (store->isExterior())
+        mTerrain->loadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
+
     mObjects->buildStaticGeometry (*store);
     sh::Factory::getInstance().unloadUnreferencedMaterials();
     mDebugging->cellAdded(store);
-    waterAdded(store);
 }
 
 void RenderingManager::addObject (const MWWorld::Ptr& ptr){
@@ -306,7 +315,7 @@ void RenderingManager::updatePlayerPtr(const MWWorld::Ptr &ptr)
     if(mPlayerAnimation)
         mPlayerAnimation->updatePtr(ptr);
     if(mCamera->getHandle() == ptr.getRefData().getHandle())
-        mCamera->attachTo(ptr);
+        attachCameraTo(ptr);
 }
 
 void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
@@ -321,7 +330,7 @@ void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
         anim->rebuild();
         if(mCamera->getHandle() == ptr.getRefData().getHandle())
         {
-            mCamera->attachTo(ptr);
+            attachCameraTo(ptr);
             mCamera->setAnimation(anim);
         }
     }
@@ -337,9 +346,12 @@ void RenderingManager::update (float duration, bool paused)
 
     MWWorld::Ptr player = world->getPlayerPtr();
 
-    int blind = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).mMagnitude;
-    mRendering.getFader()->setFactor(std::max(0.f, 1.f-(blind / 100.f)));
+    int blind = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude();
+    MWBase::Environment::get().getWindowManager()->setBlindness(std::max(0, std::min(100, blind)));
     setAmbientMode();
+
+    if (player.getClass().getNpcStats(player).isWerewolf())
+        MWBase::Environment::get().getWindowManager()->setWerewolfOverlay(mCamera->isFirstPerson());
 
     // player position
     MWWorld::RefData &data = player.getRefData();
@@ -415,18 +427,12 @@ void RenderingManager::postRenderTargetUpdate(const RenderTargetEvent &evt)
     mOcclusionQuery->setActive(false);
 }
 
-void RenderingManager::waterAdded (MWWorld::CellStore *store)
+void RenderingManager::setWaterEnabled(bool enable)
 {
-    if (store->getCell()->mData.mFlags & ESM::Cell::HasWater)
-    {
-        mWater->changeCell (store->getCell());
-        mWater->setActive(true);
-    }
-    else
-        removeWater();
+    mWater->setActive(enable);
 }
 
-void RenderingManager::setWaterHeight(const float height)
+void RenderingManager::setWaterHeight(float height)
 {
     mWater->setHeight(height);
 }
@@ -493,7 +499,7 @@ bool RenderingManager::toggleRenderMode(int mode)
     }
 }
 
-void RenderingManager::configureFog(MWWorld::CellStore &mCell)
+void RenderingManager::configureFog(const MWWorld::CellStore &mCell)
 {
     Ogre::ColourValue color;
     color.setAsABGR (mCell.getCell()->mAmbi.mFog);
@@ -504,12 +510,21 @@ void RenderingManager::configureFog(MWWorld::CellStore &mCell)
 void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)
 {
     mFogColour = colour;
-    float max = Settings::Manager::getFloat("max viewing distance", "Viewing distance");
+    float max = Settings::Manager::getFloat("viewing distance", "Viewing distance");
 
-    mFogStart = max / (density) * Settings::Manager::getFloat("fog start factor", "Viewing distance");
-    mFogEnd = max / (density) * Settings::Manager::getFloat("fog end factor", "Viewing distance");
+    if (density == 0)
+    {
+        mFogStart = 0;
+        mFogEnd = std::numeric_limits<float>::max();
+        mRendering.getCamera()->setFarClipDistance (max);
+    }
+    else
+    {
+        mFogStart = max / (density) * Settings::Manager::getFloat("fog start factor", "Viewing distance");
+        mFogEnd = max / (density) * Settings::Manager::getFloat("fog end factor", "Viewing distance");
+        mRendering.getCamera()->setFarClipDistance (max / density);
+    }
 
-    mRendering.getCamera()->setFarClipDistance ( Settings::Manager::getFloat("max viewing distance", "Viewing distance") / density );
 }
 
 void RenderingManager::applyFog (bool underwater)
@@ -522,9 +537,10 @@ void RenderingManager::applyFog (bool underwater)
     }
     else
     {
-        mRendering.getScene()->setFog (FOG_LINEAR, Ogre::ColourValue(0.18039, 0.23137, 0.25490), 0, 0, 1000);
-        mRendering.getViewport()->setBackgroundColour (Ogre::ColourValue(0.18039, 0.23137, 0.25490));
-        mWater->setViewportBackground (Ogre::ColourValue(0.18039, 0.23137, 0.25490));
+        Ogre::ColourValue clv(0.090195, 0.115685, 0.12745);
+        mRendering.getScene()->setFog (FOG_LINEAR, Ogre::ColourValue(clv), 0, 0, 1000);
+        mRendering.getViewport()->setBackgroundColour (Ogre::ColourValue(clv));
+        mWater->setViewportBackground (Ogre::ColourValue(clv));
     }
 }
 
@@ -568,24 +584,6 @@ void RenderingManager::configureAmbient(MWWorld::CellStore &mCell)
         sunEnable(false);
     }
 }
-// Switch through lighting modes.
-
-void RenderingManager::toggleLight()
-{
-    if (mAmbientMode==2)
-        mAmbientMode = 0;
-    else
-        ++mAmbientMode;
-
-    switch (mAmbientMode)
-    {
-        case 0: std::cout << "Setting lights to normal\n"; break;
-        case 1: std::cout << "Turning the lights up\n"; break;
-        case 2: std::cout << "Turning the lights to full\n"; break;
-    }
-
-    setAmbientMode();
-}
 
 void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
 {
@@ -599,7 +597,7 @@ void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
     mAmbientColor = colour;
 
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    int nightEye = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).mMagnitude;
+    int nightEye = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).getMagnitude();
     Ogre::ColourValue final = colour;
     final += Ogre::ColourValue(0.7,0.7,0.7,0) * std::min(1.f, (nightEye/100.f));
 
@@ -631,12 +629,12 @@ void RenderingManager::sunDisable(bool real)
     }
 }
 
-void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
+void RenderingManager::setSunDirection(const Ogre::Vector3& direction, bool is_moon)
 {
     // direction * -1 (because 'direction' is camera to sun vector and not sun to camera),
     if (mSun) mSun->setDirection(Vector3(-direction.x, -direction.y, -direction.z));
 
-    mSkyManager->setSunDirection(direction);
+    mSkyManager->setSunDirection(direction, is_moon);
 }
 
 void RenderingManager::setGlare(bool glare)
@@ -687,11 +685,6 @@ void RenderingManager::enableLights(bool sun)
 {
     mObjects->enableLights();
     sunEnable(sun);
-}
-
-Shadows* RenderingManager::getShadows()
-{
-    return mShadows;
 }
 
 void RenderingManager::notifyWorldSpaceChanged()
@@ -749,9 +742,10 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         {
             setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
         }
-        else if (it->second == "max viewing distance" && it->first == "Viewing distance")
+        else if (it->second == "viewing distance" && it->first == "Viewing distance")
         {
-            if (!MWBase::Environment::get().getWorld()->isCellExterior() && !MWBase::Environment::get().getWorld()->isCellQuasiExterior())
+            if (!MWBase::Environment::get().getWorld()->isCellExterior() && !MWBase::Environment::get().getWorld()->isCellQuasiExterior()
+                && MWBase::Environment::get().getWorld()->getPlayerPtr().mCell)
                 configureFog(*MWBase::Environment::get().getWorld()->getPlayerPtr().getCell());
         }
         else if (it->first == "Video" && (
@@ -759,13 +753,6 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
                 || it->second == "resolution y"
                 || it->second == "fullscreen"))
             changeRes = true;
-        else if (it->first == "Video" && it->second == "vsync")
-        {
-            // setVSyncEnabled is bugged in 1.8
-#if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
-            mRendering.getWindow()->setVSyncEnabled(Settings::Manager::getBool("vsync", "Video"));
-#endif
-        }
         else if (it->second == "field of view" && it->first == "General")
             mRendering.setFov(Settings::Manager::getFloat("field of view", "General"));
         else if ((it->second == "texture filtering" && it->first == "General")
@@ -857,10 +844,9 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
 
 void RenderingManager::setMenuTransparency(float val)
 {
-    Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName("transparent.png");
-    std::vector<Ogre::uint32> buffer;
+    Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName("transparent.png"); std::vector<Ogre::uint32> buffer;
     buffer.resize(1);
-    buffer[0] = (int(255*val) << 24);
+    buffer[0] = (int(255*val) << 24) | (255 << 16) | (255 << 8) | 255;
     memcpy(tex->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], 1*4);
     tex->getBuffer()->unlock();
 }
@@ -883,7 +869,13 @@ void RenderingManager::getTriangleBatchCount(unsigned int &triangles, unsigned i
 void RenderingManager::setupPlayer(const MWWorld::Ptr &ptr)
 {
     ptr.getRefData().setBaseNode(mRendering.getScene()->getSceneNode("player"));
-    mCamera->attachTo(ptr);
+    attachCameraTo(ptr);
+}
+
+void RenderingManager::attachCameraTo(const MWWorld::Ptr &ptr)
+{
+    Ogre::SceneNode* cameraNode = mCamera->attachTo(ptr);
+    mSkyManager->attachToNode(cameraNode);
 }
 
 void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
@@ -932,9 +924,14 @@ void RenderingManager::setCameraDistance(float dist, bool adjust, bool override)
     }
 }
 
-void RenderingManager::getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
+void RenderingManager::worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
 {
-    return mLocalMap->getInteriorMapPosition (position, nX, nY, x, y);
+    return mLocalMap->worldToInteriorMapPosition (position, nX, nY, x, y);
+}
+
+Ogre::Vector2 RenderingManager::interiorMapToWorldPosition(float nX, float nY, int x, int y)
+{
+    return mLocalMap->interiorMapToWorldPosition(nX, nY, x, y);
 }
 
 bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, bool interior)
@@ -1028,9 +1025,12 @@ void RenderingManager::enableTerrain(bool enable)
     {
         if (!mTerrain)
         {
-            mTerrain = new Terrain::World(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
-                                            Settings::Manager::getBool("distant land", "Terrain"),
-                                            Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY, 1, 64);
+            if (Settings::Manager::getBool("distant land", "Terrain"))
+                mTerrain = new Terrain::DefaultWorld(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                                                Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY, 1, 64);
+            else
+                mTerrain = new Terrain::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                                                Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY);
             mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
                                      Settings::Manager::getBool("split", "Shadows"));
             mTerrain->update(mRendering.getCamera()->getRealPosition());

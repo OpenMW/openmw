@@ -14,6 +14,7 @@ namespace CSMWorld
 namespace CSMDoc
 {
     class Operation;
+    class Document;
 }
 
 namespace CSMTools
@@ -24,6 +25,7 @@ namespace CSMTools
     {
             Q_OBJECT
 
+            CSMDoc::Document& mDocument;
             CSMWorld::Data& mData;
             CSMDoc::Operation *mVerifier;
             std::map<int, ReportModel *> mReports;
@@ -44,7 +46,7 @@ namespace CSMTools
 
         public:
 
-            Tools (CSMWorld::Data& data);
+            Tools (CSMDoc::Document& document);
 
             virtual ~Tools();
 
@@ -68,7 +70,7 @@ namespace CSMTools
 
             void progress (int current, int max, int type);
 
-            void done (int type);
+            void done (int type, bool failed);
     };
 }
 

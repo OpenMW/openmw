@@ -165,9 +165,35 @@ namespace CSMWorld
             ColumnId_Rank = 152,
             ColumnId_Gender = 153,
             ColumnId_PcRank = 154,
-            ColumnId_Scope = 155,
             ColumnId_ReferenceableId = 156,
-
+            ColumnId_CombatState = 157,
+            ColumnId_MagicState = 158,
+            ColumnId_StealthState = 159,
+            ColumnId_EnchantmentType = 160,
+            ColumnId_Vampire = 161,
+            ColumnId_BodyPartType = 162,
+            ColumnId_MeshType = 163,
+            ColumnId_OwnerGlobal = 164,
+            ColumnId_DefaultProfile = 165,
+            ColumnId_BypassNewGame = 166,
+            ColumnId_GlobalProfile = 167,
+            ColumnId_RefNumCounter = 168,
+            ColumnId_RefNum = 169,
+            ColumnId_Creature = 170,
+            ColumnId_SoundGeneratorType = 171,
+            ColumnId_AllowSpellmaking = 172,
+            ColumnId_AllowEnchanting = 173,
+            ColumnId_BaseCost = 174,
+            ColumnId_School = 175,
+            ColumnId_Particle = 176,
+            ColumnId_CastingObject = 177,
+            ColumnId_HitObject = 178,
+            ColumnId_AreaObject = 179,
+            ColumnId_BoltObject = 180,
+            ColumnId_CastingSound = 177,
+            ColumnId_HitSound = 178,
+            ColumnId_AreaSound = 179,
+            ColumnId_BoltSound = 180,
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,
@@ -212,7 +238,7 @@ namespace CSMWorld
         bool hasEnums (ColumnId column);
 
         std::vector<std::string> getEnums (ColumnId column);
-        ///< Returns an empty vector, if \æ column isn't an enum type column.
+        ///< Returns an empty vector, if \a column isn't an enum type column.
     }
 }
 

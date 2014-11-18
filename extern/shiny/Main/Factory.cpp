@@ -51,23 +51,31 @@ namespace sh
 	{
 		assert(mCurrentLanguage != Language_None);
 
-		if (boost::filesystem::exists (mPlatform->getCacheFolder () + "/lastModified.txt"))
+		try
 		{
-			std::ifstream file;
-			file.open(std::string(mPlatform->getCacheFolder () + "/lastModified.txt").c_str());
-
-			std::string line;
-			while (getline(file, line))
+			if (boost::filesystem::exists (mPlatform->getCacheFolder () + "/lastModified.txt"))
 			{
-				std::string sourceFile = line;
+				std::ifstream file;
+				file.open(std::string(mPlatform->getCacheFolder () + "/lastModified.txt").c_str());
 
-				if (!getline(file, line))
-					assert(0);
+				std::string line;
+				while (getline(file, line))
+				{
+					std::string sourceFile = line;
 
-				int modified = boost::lexical_cast<int>(line);
+					if (!getline(file, line))
+						assert(0);
 
-				mShadersLastModified[sourceFile] = modified;
+					int modified = boost::lexical_cast<int>(line);
+
+					mShadersLastModified[sourceFile] = modified;
+				}
 			}
+		}
+		catch (std::exception& e)
+		{
+			std::cerr << "Failed to load shader modification index: " << e.what() << std::endl;
+			mShadersLastModified.clear();
 		}
 
 		// load configurations
@@ -267,16 +275,18 @@ namespace sh
 
 	MaterialInstance* Factory::searchInstance (const std::string& name)
 	{
-		if (mMaterials.find(name) != mMaterials.end())
-				return &mMaterials.find(name)->second;
-
-		return NULL;
+		MaterialMap::iterator it = mMaterials.find(name);
+		if (it != mMaterials.end())
+			return &(it->second);
+		else
+			return NULL;
 	}
 
 	MaterialInstance* Factory::findInstance (const std::string& name)
 	{
-		assert (mMaterials.find(name) != mMaterials.end());
-		return &mMaterials.find(name)->second;
+		MaterialInstance* m = searchInstance(name);
+		assert (m);
+		return m;
 	}
 
 	MaterialInstance* Factory::requestMaterial (const std::string& name, const std::string& configuration, unsigned short lodIndex)
@@ -288,27 +298,24 @@ namespace sh
 
 		if (m)
 		{
-			// make sure all lod techniques below (higher lod) exist
-			int i = lodIndex;
-			while (i>0)
+			if (m->createForConfiguration (configuration, 0))
 			{
-				--i;
-				if (m->createForConfiguration (configuration, i))
+				if (mListener)
+					mListener->materialCreated (m, configuration, 0);
+			}
+			else
+				return NULL;
+
+			for (LodConfigurationMap::iterator it = mLodConfigurations.begin(); it != mLodConfigurations.end(); ++it)
+			{
+				if (m->createForConfiguration (configuration, it->first))
 				{
 					if (mListener)
-					mListener->materialCreated (m, configuration, i);
+						mListener->materialCreated (m, configuration, it->first);
 				}
 				else
 					return NULL;
 			}
-
-			if (m->createForConfiguration (configuration, lodIndex))
-			{
-				if (mListener)
-					mListener->materialCreated (m, configuration, lodIndex);
-			}
-			else
-				return NULL;
 		}
 		return m;
 	}
@@ -434,8 +441,9 @@ namespace sh
 
 	std::string Factory::retrieveTextureAlias (const std::string& name)
 	{
-		if (mTextureAliases.find(name) != mTextureAliases.end())
-			return mTextureAliases[name];
+		TextureAliasMap::iterator it = mTextureAliases.find(name);
+		if (it != mTextureAliases.end())
+			return it->second;
 		else
 			return "";
 	}
@@ -615,8 +623,14 @@ namespace sh
 	{
 		MaterialInstance* m = searchInstance (name);
 		assert(m);
+
 		m->createForConfiguration (configuration, 0);
-	}
+
+		for (LodConfigurationMap::iterator it = mLodConfigurations.begin(); it != mLodConfigurations.end(); ++it)
+		{
+			m->createForConfiguration (configuration, it->first);
+		}
+   	}
 
 	bool Factory::removeCache(const std::string& pattern)
 	{
@@ -789,7 +803,7 @@ namespace sh
 		for (MaterialMap::iterator it = mMaterials.begin(); it != mMaterials.end(); ++it)
 		{
 			if (it->second.getMaterial()->isUnreferenced())
-				it->second.destroyAll();
+				it->second.getMaterial()->unreferenceTextures();
 		}
 	}
 

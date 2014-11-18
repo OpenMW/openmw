@@ -47,8 +47,6 @@ namespace MWMechanics
 
             float getZAngleToNext(float x, float y) const;
 
-            float getDistToNext(float x, float y, float z);
-
             bool isPathConstructed() const
             {
                 return mIsPathConstructed;

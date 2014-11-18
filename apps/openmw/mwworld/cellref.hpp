@@ -25,6 +25,9 @@ namespace MWWorld
         // Note: Currently unused for items in containers
         ESM::RefNum getRefNum() const;
 
+        // Set RefNum to its default state.
+        void unsetRefNum();
+
         // Id of object being referenced
         std::string getRefId() const;
 
@@ -42,7 +45,8 @@ namespace MWWorld
         float getScale() const;
         void setScale(float scale);
 
-        // Position and rotation of this object within the cell
+        // The *original* position and rotation as it was given in the Construction Set.
+        // Current position and rotation of the object is stored in RefData.
         ESM::Position getPosition() const;
         void setPosition (const ESM::Position& position);
 
@@ -60,6 +64,11 @@ namespace MWWorld
         std::string getOwner() const;
         void setOwner(const std::string& owner);
 
+        // Name of a global variable. If the global variable is set to '1', using the object is temporarily allowed
+        // even if it has an Owner field.
+        // Used by bed rent scripts to allow the player to use the bed for the duration of the rent.
+        std::string getGlobalVariable() const;
+
         // ID of creature trapped in this soul gem
         std::string getSoul() const;
         void setSoul(const std::string& soul);
@@ -68,6 +77,9 @@ namespace MWWorld
         // you take it and are not a faction member)
         std::string getFaction() const;
         void setFaction (const std::string& faction);
+
+        // PC faction rank required to use the item. Sometimes is -1, which means "any rank".
+        int getFactionRank() const;
 
         // Lock level for doors and containers
         // Positive for a locked door. 0 for a door that was never locked.

@@ -18,6 +18,7 @@ namespace CSMDoc
             struct Stage
             {
                 int mFile;
+                int mRecordsLoaded;
                 bool mRecordsLeft;
 
                 Stage();
@@ -56,9 +57,10 @@ namespace CSMDoc
             ///< Document load has been interrupted either because of a call to abortLoading
             /// or a problem during loading). In the former case error will be an empty string.
 
-            void nextStage (CSMDoc::Document *document, const std::string& name, int steps);
+            void nextStage (CSMDoc::Document *document, const std::string& name,
+                int totalRecords);
 
-            void nextRecord (CSMDoc::Document *document);
+            void nextRecord (CSMDoc::Document *document, int records);
             ///< \note This signal is only given once per group of records. The group size is
             /// approximately the total number of records divided by the steps value of the
             /// previous nextStage signal.

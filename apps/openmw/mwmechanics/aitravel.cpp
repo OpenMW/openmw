@@ -1,5 +1,9 @@
 #include "aitravel.hpp"
 
+#include <OgreVector3.h>
+
+#include <components/esm/aisequence.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
@@ -13,10 +17,18 @@
 namespace MWMechanics
 {
     AiTravel::AiTravel(float x, float y, float z)
-    : mX(x),mY(y),mZ(z),mPathFinder()
+    : mX(x),mY(y),mZ(z)
     , mCellX(std::numeric_limits<int>::max())
     , mCellY(std::numeric_limits<int>::max())
     {
+    }
+
+    AiTravel::AiTravel(const ESM::AiSequence::AiTravel *travel)
+        : mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ)
+        , mCellX(std::numeric_limits<int>::max())
+        , mCellY(std::numeric_limits<int>::max())
+    {
+
     }
 
     AiTravel *MWMechanics::AiTravel::clone() const
@@ -24,7 +36,7 @@ namespace MWMechanics
         return new AiTravel(*this);
     }
 
-    bool AiTravel::execute (const MWWorld::Ptr& actor,float duration)
+    bool AiTravel::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         ESM::Position pos = actor.getRefData().getPosition();
@@ -32,6 +44,8 @@ namespace MWMechanics
         const ESM::Cell *cell = actor.getCell()->getCell();
 
         actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
+
+        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
         MWWorld::Ptr player = world->getPlayerPtr();
         if(cell->mData.mX != player.getCell()->getCell()->mData.mX)
@@ -56,6 +70,12 @@ namespace MWMechanics
                 return false;
             }
         }
+
+        // Maximum travel distance for vanilla compatibility.
+        // Was likely meant to prevent NPCs walking into non-loaded exterior cells, but for some reason is used in interior cells as well.
+        // We can make this configurable at some point, but the default *must* be the below value. Anything else will break shoddily-written content (*cough* MW *cough*) in bizarre ways.
+        if (Ogre::Vector3(mX, mY, mZ).squaredDistance(Ogre::Vector3(pos.pos)) > 7168*7168)
+            return false;
 
         bool cellChange = cell->mData.mX != mCellX || cell->mData.mY != mCellY;
         if(!mPathFinder.isPathConstructed() || cellChange)
@@ -91,6 +111,19 @@ namespace MWMechanics
     int AiTravel::getTypeId() const
     {
         return TypeIdTravel;
+    }
+
+    void AiTravel::writeState(ESM::AiSequence::AiSequence &sequence) const
+    {
+        std::auto_ptr<ESM::AiSequence::AiTravel> travel(new ESM::AiSequence::AiTravel());
+        travel->mData.mX = mX;
+        travel->mData.mY = mY;
+        travel->mData.mZ = mZ;
+
+        ESM::AiSequence::AiPackageContainer package;
+        package.mType = ESM::AiSequence::Ai_Travel;
+        package.mPackage = travel.release();
+        sequence.mPackages.push_back(package);
     }
 }
 

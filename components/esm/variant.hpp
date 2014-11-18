@@ -38,6 +38,10 @@ namespace ESM
 
             Variant();
 
+            Variant (const std::string& value);
+            Variant (int value);
+            Variant (float value);
+
             ~Variant();
 
             Variant& operator= (const Variant& variant);

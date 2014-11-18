@@ -22,6 +22,11 @@ namespace MWGui
         void setTextLabel(const std::string &label);
         virtual void open();
 
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_WindowBase eventDone;
+
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
         void onTextAccepted(MyGUI::Edit* _sender);

@@ -38,12 +38,18 @@ namespace ICS
             , mValue(initialValue)
 			, mSymmetricAt(symmetricAt)
 			, mBezierStep(bezierStep)
+            , mEnabled(true)
     { 
 		mBezierMidPoint.x = bezierMidPointX;
 		mBezierMidPoint.y = bezierMidPointY;
 
 		setBezierFunction(bezierMidPointY, bezierMidPointX, symmetricAt, bezierStep);
 	} 
+
+    void Channel::setEnabled(bool enabled)
+    {
+        mEnabled = enabled;
+    }
 
 	float Channel::getValue()
 	{
@@ -52,22 +58,23 @@ namespace ICS
 			return mValue;
 		}
 
-		BezierFunction::iterator it = mBezierFunction.begin();
-		//size_t size_minus_1 = mBezierFunction.size() - 1;
-		BezierFunction::iterator last = mBezierFunction.end();
-		last--;
-		for ( ; it != last ; )
-		{
-			BezierPoint left = (*it);
-			BezierPoint right = (*(++it));			
+        assert (!mBezierFunction.empty());
+        BezierFunction::iterator it = mBezierFunction.begin();
+        //size_t size_minus_1 = mBezierFunction.size() - 1;
+        BezierFunction::iterator last = mBezierFunction.end();
+        --last;
+        for ( ; it != last ; )
+        {
+            BezierPoint left = (*it);
+            BezierPoint right = (*(++it));
 
-			if( (left.x <= mValue) && (right.x > mValue) )
-			{
-				float val = left.y - (left.x - mValue) * (left.y - right.y) / (left.x - right.x);
+            if( (left.x <= mValue) && (right.x > mValue) )
+            {
+                float val = left.y - (left.x - mValue) * (left.y - right.y) / (left.x - right.x);
 
-				return std::max<float>(0.0,std::min<float>(1.0, val));
-			}
-		}
+                return std::max<float>(0.0,std::min<float>(1.0, val));
+            }
+        }
 
 		return -1; 
 	}
@@ -78,7 +85,7 @@ namespace ICS
     
         mValue = value;
 
-        if(previousValue != value)
+        if(previousValue != value && mEnabled)
         {
             notifyListeners(previousValue);
         }
@@ -89,7 +96,7 @@ namespace ICS
         std::list<ChannelListener*>::iterator pos = mListeners.begin();
         while (pos != mListeners.end())
         {
-            ((ChannelListener* )(*pos))->channelChanged((Channel*)this, this->getValue(), previousValue);
+            (*pos)->channelChanged((Channel*)this, this->getValue(), previousValue);
             ++pos;
         }
     }
@@ -124,7 +131,7 @@ namespace ICS
 
 	void Channel::update()
 	{
-		if(this->getControlsCount() == 1)
+        if(this->getControlsCount() == 1)
 		{
 			ControlChannelBinderItem ccBinderItem = mAttachedControls.back();
 			float diff = ccBinderItem.control->getValue() - ccBinderItem.control->getInitialValue();

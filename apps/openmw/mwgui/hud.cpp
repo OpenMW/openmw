@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -18,6 +20,7 @@
 #include "container.hpp"
 
 #include "itemmodel.hpp"
+#include "itemwidget.hpp"
 
 namespace MWGui
 {
@@ -58,8 +61,9 @@ namespace MWGui
     };
 
 
-    HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
+    HUD::HUD(CustomMarkerCollection &customMarkers, int fpsLevel, DragAndDrop* dragAndDrop)
         : Layout("openmw_hud.layout")
+        , LocalMapBase(customMarkers)
         , mHealth(NULL)
         , mMagicka(NULL)
         , mStamina(NULL)
@@ -91,11 +95,12 @@ namespace MWGui
         , mSpellVisible(true)
         , mWorldMouseOver(false)
         , mEnemyHealthTimer(-1)
+        , mEnemyActorId(-1)
         , mIsDrowning(false)
         , mWeaponSpellTimer(0.f)
         , mDrowningFlashTheta(0.f)
     {
-        setCoord(0,0, width, height);
+        mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
 
         // Energy bars
         getWidget(mHealthFrame, "HealthFrame");
@@ -157,7 +162,7 @@ namespace MWGui
         getWidget(mTriangleCounter, "TriangleCounter");
         getWidget(mBatchCounter, "BatchCounter");
 
-        LocalMapBase::init(mMinimap, mCompass, this);
+        LocalMapBase::init(mMinimap, mCompass);
 
         mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
         mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
@@ -383,6 +388,8 @@ namespace MWGui
 
     void HUD::onFrame(float dt)
     {
+        LocalMapBase::onFrame(dt);
+
         mCellNameTimer -= dt;
         mWeaponSpellTimer -= dt;
         if (mCellNameTimer < 0)
@@ -399,11 +406,6 @@ namespace MWGui
 
         if (mIsDrowning)
             mDrowningFlashTheta += dt * Ogre::Math::TWO_PI;
-    }
-
-    void HUD::onResChange(int width, int height)
-    {
-        setCoord(0, 0, width, height);
     }
 
     void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
@@ -423,9 +425,6 @@ namespace MWGui
         mSpellStatus->setProgressRange(100);
         mSpellStatus->setProgressPosition(successChancePercent);
 
-        if (mSpellImage->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(mSpellImage->getChildAt(0));
-
         mSpellBox->setUserString("ToolTipType", "Spell");
         mSpellBox->setUserString("Spell", spellId);
 
@@ -434,11 +433,12 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
 
         std::string icon = effect->mIcon;
-        int slashPos = icon.find("\\");
+        int slashPos = icon.rfind('\\');
         icon.insert(slashPos+1, "b_");
-        icon = std::string("icons\\") + icon;
-        Widgets::fixTexturePath(icon);
-        mSpellImage->setImageTexture(icon);
+        icon = Misc::ResourceHelpers::correctIconPath(icon);
+
+        mSpellImage->setItem(MWWorld::Ptr());
+        mSpellImage->setIcon(icon);
     }
 
     void HUD::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)
@@ -455,21 +455,10 @@ namespace MWGui
         mSpellStatus->setProgressRange(100);
         mSpellStatus->setProgressPosition(chargePercent);
 
-        if (mSpellImage->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(mSpellImage->getChildAt(0));
-
         mSpellBox->setUserString("ToolTipType", "ItemPtr");
         mSpellBox->setUserData(item);
 
-        mSpellImage->setImageTexture("textures\\menu_icon_magic_mini.dds");
-        MyGUI::ImageBox* itemBox = mSpellImage->createWidgetReal<MyGUI::ImageBox>("ImageBox", MyGUI::FloatCoord(0,0,1,1)
-            , MyGUI::Align::Stretch);
-
-        std::string path = std::string("icons\\");
-        path+=item.getClass().getInventoryIcon(item);
-        Widgets::fixTexturePath(path);
-        itemBox->setImageTexture(path);
-        itemBox->setNeedMouseFocus(false);
+        mSpellImage->setItem(item);
     }
 
     void HUD::setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent)
@@ -483,29 +472,14 @@ namespace MWGui
             mWeaponSpellBox->setVisible(true);
         }
 
+        mWeapBox->clearUserStrings();
         mWeapBox->setUserString("ToolTipType", "ItemPtr");
         mWeapBox->setUserData(item);
 
         mWeapStatus->setProgressRange(100);
         mWeapStatus->setProgressPosition(durabilityPercent);
 
-        if (mWeapImage->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(mWeapImage->getChildAt(0));
-
-        std::string path = std::string("icons\\");
-        path+=item.getClass().getInventoryIcon(item);
-        Widgets::fixTexturePath(path);
-
-        if (item.getClass().getEnchantment(item) != "")
-        {
-            mWeapImage->setImageTexture("textures\\menu_icon_magic_mini.dds");
-            MyGUI::ImageBox* itemBox = mWeapImage->createWidgetReal<MyGUI::ImageBox>("ImageBox", MyGUI::FloatCoord(0,0,1,1)
-                , MyGUI::Align::Stretch);
-            itemBox->setImageTexture(path);
-            itemBox->setNeedMouseFocus(false);
-        }
-        else
-            mWeapImage->setImageTexture(path);
+        mWeapImage->setItem(item);
     }
 
     void HUD::unsetSelectedSpell()
@@ -519,11 +493,9 @@ namespace MWGui
             mWeaponSpellBox->setVisible(true);
         }
 
-        if (mSpellImage->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(mSpellImage->getChildAt(0));
         mSpellStatus->setProgressRange(100);
         mSpellStatus->setProgressPosition(0);
-        mSpellImage->setImageTexture("");
+        mSpellImage->setItem(MWWorld::Ptr());
         mSpellBox->clearUserStrings();
     }
 
@@ -538,19 +510,21 @@ namespace MWGui
             mWeaponSpellBox->setVisible(true);
         }
 
-        if (mWeapImage->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(mWeapImage->getChildAt(0));
         mWeapStatus->setProgressRange(100);
         mWeapStatus->setProgressPosition(0);
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
-        if (player.getClass().getNpcStats(player).isWerewolf())
-            mWeapImage->setImageTexture("icons\\k\\tx_werewolf_hand.dds");
-        else
-            mWeapImage->setImageTexture("icons\\k\\stealth_handtohand.dds");
+
+        mWeapImage->setItem(MWWorld::Ptr());
+        std::string icon = (player.getClass().getNpcStats(player).isWerewolf()) ? "icons\\k\\tx_werewolf_hand.dds" : "icons\\k\\stealth_handtohand.dds";
+        mWeapImage->setIcon(icon);
 
         mWeapBox->clearUserStrings();
+        mWeapBox->setUserString("ToolTipType", "Layout");
+        mWeapBox->setUserString("ToolTipLayout", "HandToHandToolTip");
+        mWeapBox->setUserString("Caption_HandToHandText", itemName);
+        mWeapBox->setUserString("ImageTexture_HandToHandImage", icon);
     }
 
     void HUD::setCrosshairVisible(bool visible)
@@ -636,7 +610,10 @@ namespace MWGui
 
     void HUD::updateEnemyHealthBar()
     {
-        MWMechanics::CreatureStats& stats = mEnemy.getClass().getCreatureStats(mEnemy);
+        MWWorld::Ptr enemy = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mEnemyActorId);
+        if (enemy.isEmpty())
+            return;
+        MWMechanics::CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
         mEnemyHealth->setProgressRange(100);
         // Health is usually cast to int before displaying. Actors die whenever they are < 1 health.
         // Therefore any value < 1 should show as an empty health bar. We do the same in statswindow :)
@@ -647,7 +624,7 @@ namespace MWGui
     {
         mSpellIcons->updateWidgets(mEffectBox, true);
 
-        if (!mEnemy.isEmpty() && mEnemyHealth->getVisible())
+        if (mEnemyActorId != -1 && mEnemyHealth->getVisible())
         {
             updateEnemyHealthBar();
         }
@@ -661,7 +638,7 @@ namespace MWGui
 
     void HUD::setEnemy(const MWWorld::Ptr &enemy)
     {
-        mEnemy = enemy;
+        mEnemyActorId = enemy.getClass().getCreatureStats(enemy).getActorId();
         mEnemyHealthTimer = 5;
         if (!mEnemyHealth->getVisible())
             mWeaponSpellBox->setPosition(mWeaponSpellBox->getPosition() - MyGUI::IntPoint(0,20));
@@ -671,7 +648,7 @@ namespace MWGui
 
     void HUD::resetEnemy()
     {
-        mEnemy = MWWorld::Ptr();
+        mEnemyActorId = -1;
         mEnemyHealthTimer = -1;
     }
 

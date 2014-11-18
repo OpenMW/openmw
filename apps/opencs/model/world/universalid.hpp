@@ -22,7 +22,10 @@ namespace CSMWorld
                 Class_RecordList,
                 Class_Collection, // multiple types of records combined
                 Class_Transient, // not part of the world data or the project data
-                Class_NonRecord // record like data that is not part of the world
+                Class_NonRecord, // record like data that is not part of the world
+                Class_Resource, ///< \attention Resource IDs are unique only within the
+                                /// respective collection
+                Class_ResourceList
             };
 
             enum ArgumentType
@@ -32,6 +35,8 @@ namespace CSMWorld
                 ArgumentType_Index
             };
 
+            /// \note A record list type must always be immediately followed by the matching
+            /// record type, if this type is of class SubRecord or Record.
             enum Type
             {
                 Type_None = 0,
@@ -86,8 +91,8 @@ namespace CSMWorld
                 Type_References,
                 Type_Reference,
                 Type_RegionMap,
-                Type_Filter,
                 Type_Filters,
+                Type_Filter,
                 Type_Topics,
                 Type_Topic,
                 Type_Journals,
@@ -98,10 +103,35 @@ namespace CSMWorld
                 Type_JournalInfo,
                 Type_Scene,
                 Type_Preview,
-                Type_LoadErrorLog
+                Type_LoadErrorLog,
+                Type_Enchantments,
+                Type_Enchantment,
+                Type_BodyParts,
+                Type_BodyPart,
+                Type_Meshes,
+                Type_Mesh,
+                Type_Icons,
+                Type_Icon,
+                Type_Musics,
+                Type_Music,
+                Type_SoundsRes,
+                Type_SoundRes,
+                Type_Textures,
+                Type_Texture,
+                Type_Videos,
+                Type_Video,
+                Type_DebugProfiles,
+                Type_DebugProfile,
+                Type_SoundGens,
+                Type_SoundGen,
+                Type_MagicEffects,
+                Type_MagicEffect,
+                Type_Pathgrids,
+                Type_Pathgrid,
+                Type_RunLog
             };
 
-            enum { NumberOfTypes = Type_LoadErrorLog+1 };
+            enum { NumberOfTypes = Type_RunLog+1 };
 
         private:
 
@@ -147,6 +177,11 @@ namespace CSMWorld
             ///< Will return an empty string, if no icon is available.
 
             static std::vector<Type> listReferenceableTypes();
+
+            /// If \a type is a SubRecord, RefRecord or Record type return the type of the table
+            /// that contains records of type \a type.
+            /// Otherwise return Type_None.
+            static Type getParentType (Type type);
     };
 
     bool operator== (const UniversalId& left, const UniversalId& right);

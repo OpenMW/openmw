@@ -2,8 +2,8 @@
 #include "support.hpp"
 
 CSMSettings::Setting::Setting(SettingType typ, const QString &settingName,
-                             const QString &pageName)
-    : mIsEditorSetting (false)
+    const QString &pageName, const QString& label)
+: mIsEditorSetting (true)
 {
     buildDefaultSetting();
 
@@ -17,6 +17,7 @@ CSMSettings::Setting::Setting(SettingType typ, const QString &settingName,
     setProperty (Property_SettingType, QVariant (settingType).toString());
     setProperty (Property_Page, pageName);
     setProperty (Property_Name, settingName);
+    setProperty (Property_Label, label.isEmpty() ? settingName : label);
 }
 
 void CSMSettings::Setting::buildDefaultSetting()
@@ -194,6 +195,16 @@ QString CSMSettings::Setting::page() const
     return property (Property_Page).at(0);
 }
 
+void CSMSettings::Setting::setStyleSheet (const QString &value)
+{
+    setProperty (Property_StyleSheet, value);
+}
+
+QString CSMSettings::Setting::styleSheet() const
+{
+    return property (Property_StyleSheet).at(0);
+}
+
 void CSMSettings::Setting::setPrefix (const QString &value)
 {
     setProperty (Property_Prefix, value);
@@ -280,29 +291,21 @@ CSMSettings::SettingType CSMSettings::Setting::type() const
                                         Property_SettingType).at(0).toInt());
 }
 
-void CSMSettings::Setting::setMaximum (int value)
+void CSMSettings::Setting::setRange (int min, int max)
 {
-    setProperty (Property_Maximum, value);
+    setProperty (Property_Minimum, min);
+    setProperty (Property_Maximum, max);
 }
 
-void CSMSettings::Setting::setMaximum (double value)
+void CSMSettings::Setting::setRange (double min, double max)
 {
-    setProperty (Property_Maximum, value);
+    setProperty (Property_Minimum, min);
+    setProperty (Property_Maximum, max);
 }
 
 QString CSMSettings::Setting::maximum() const
 {
     return property (Property_Maximum).at(0);
-}
-
-void CSMSettings::Setting::setMinimum (int value)
-{
-    setProperty (Property_Minimum, value);
-}
-
-void CSMSettings::Setting::setMinimum (double value)
-{
-    setProperty (Property_Minimum, value);
 }
 
 QString CSMSettings::Setting::minimum() const
@@ -360,6 +363,26 @@ void CSMSettings::Setting::setWrapping (bool state)
 bool CSMSettings::Setting::wrapping() const
 {
     return (property (Property_Wrapping).at(0) == "true");
+}
+
+void CSMSettings::Setting::setLabel (const QString& label)
+{
+    setProperty (Property_Label, label);
+}
+
+QString CSMSettings::Setting::getLabel() const
+{
+    return property (Property_Label).at (0);
+}
+
+void CSMSettings::Setting::setToolTip (const QString& toolTip)
+{
+    setProperty (Property_ToolTip, toolTip);
+}
+
+QString CSMSettings::Setting::getToolTip() const
+{
+    return property (Property_ToolTip).at (0);
 }
 
 void CSMSettings::Setting::setProperty (SettingProperty prop, bool value)

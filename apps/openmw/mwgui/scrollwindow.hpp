@@ -2,7 +2,8 @@
 #define MWGUI_SCROLLWINDOW_H
 
 #include "windowbase.hpp"
-#include "imagebutton.hpp"
+
+#include <components/widgets/imagebutton.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -14,6 +15,7 @@ namespace MWGui
             ScrollWindow ();
 
             void open (MWWorld::Ptr scroll);
+            virtual void exit();
             void setTakeButtonShow(bool show);
             void setInventoryAllowed(bool allowed);
 
@@ -22,8 +24,8 @@ namespace MWGui
             void onTakeButtonClicked (MyGUI::Widget* _sender);
 
         private:
-            MWGui::ImageButton* mCloseButton;
-            MWGui::ImageButton* mTakeButton;
+            Gui::ImageButton* mCloseButton;
+            Gui::ImageButton* mTakeButton;
             MyGUI::ScrollView* mTextView;
 
             MWWorld::Ptr mScroll;

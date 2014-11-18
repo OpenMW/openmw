@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <stdint.h>
 
 namespace Ogre
 {
@@ -13,12 +14,20 @@ namespace Ogre
 namespace ESM
 {
     struct Class;
+
+    class ESMReader;
+    class ESMWriter;
 }
 
 namespace MWWorld
 {
     class Ptr;
     class CellStore;
+}
+
+namespace Loading
+{
+    class Listener;
 }
 
 namespace MWBase
@@ -111,6 +120,7 @@ namespace MWBase
             /**
              * @brief Commit a crime. If any actors witness the crime and report it,
              *        reportCrime will be called automatically.
+             * @note victim may be empty
              * @param arg Depends on \a type, e.g. for Theft, the value of the item that was stolen.
              * @return was the crime reported?
              */
@@ -118,6 +128,8 @@ namespace MWBase
                                       OffenseType type, int arg=0) = 0;
             virtual void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0) = 0;
+            /// @return false if the attack was considered a "friendly hit" and forgiven
+            virtual bool actorAttacked (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker) = 0;
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, int count) = 0;
             /// Utility to check if opening (i.e. unlocking) this object is illegal and calling commitCrime if so
@@ -125,6 +137,9 @@ namespace MWBase
             /// Attempt sleeping in a bed. If this is illegal, call commitCrime.
             /// @return was it illegal, and someone saw you doing it?
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed) = 0;
+
+            /// @return is \a ptr allowed to take/use \a item or is it a crime?
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim) = 0;
 
             enum PersuasionType
             {
@@ -174,6 +189,21 @@ namespace MWBase
             virtual std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor) = 0;
 
             virtual void playerLoaded() = 0;
+
+            virtual int countSavedGameRecords() const = 0;
+
+            virtual void write (ESM::ESMWriter& writer, Loading::Listener& listener) const = 0;
+
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
+
+            virtual void clear() = 0;
+
+            /// @param bias Can be used to add an additional aggression bias towards the target,
+            ///             making it more likely for the function to return true.
+            virtual bool isAggressive (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, int bias=0, bool ignoreDistance=false) = 0;
+
+            /// Resurrects the player if necessary
+            virtual void keepPlayerAlive() = 0;
     };
 }
 

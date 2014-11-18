@@ -8,6 +8,7 @@
 
 #include "../../model/filter/node.hpp"
 #include "../../model/world/columnbase.hpp"
+#include "../../model/world/universalid.hpp"
 #include "dragrecordtable.hpp"
 
 class QUndoStack;
@@ -21,9 +22,9 @@ namespace CSMDoc
 namespace CSMWorld
 {
     class Data;
-    class UniversalId;
     class IdTableProxyModel;
-    class IdTable;
+    class IdTableBase;
+    class CommandDispatcher;
 }
 
 namespace CSVWorld
@@ -35,6 +36,18 @@ namespace CSVWorld
     {
             Q_OBJECT
 
+            enum DoubleClickAction
+            {
+                Action_None,
+                Action_InPlaceEdit,
+                Action_EditRecord,
+                Action_View,
+                Action_Revert,
+                Action_Delete,
+                Action_EditRecordAndClose,
+                Action_ViewAndClose
+            };
+
             std::vector<CommandDelegate *> mDelegates;
             QAction *mEditAction;
             QAction *mCreateAction;
@@ -44,22 +57,28 @@ namespace CSVWorld
             QAction *mMoveUpAction;
             QAction *mMoveDownAction;
             QAction *mViewAction;
+            QAction *mEditCellAction;
             QAction *mPreviewAction;
+            QAction *mExtendedDeleteAction;
+            QAction *mExtendedRevertAction;
             CSMWorld::IdTableProxyModel *mProxyModel;
-            CSMWorld::IdTable *mModel;
+            CSMWorld::IdTableBase *mModel;
             int mRecordStatusDisplay;
+            CSMWorld::CommandDispatcher *mDispatcher;
+            CSMWorld::UniversalId mEditCellId;
+            std::map<Qt::KeyboardModifiers, DoubleClickAction> mDoubleClickActions;
 
         private:
 
             void contextMenuEvent (QContextMenuEvent *event);
 
-            std::vector<std::string> listRevertableSelectedIds() const;
-
-            std::vector<std::string> listDeletableSelectedIds() const;
-
             void mouseMoveEvent(QMouseEvent *event);
 
             void dropEvent(QDropEvent *event);
+
+        protected:
+
+            virtual void mouseDoubleClickEvent (QMouseEvent *event);
 
         public:
 
@@ -91,11 +110,11 @@ namespace CSVWorld
 
             void cloneRequest(const CSMWorld::UniversalId&);
 
+            void closeRequest();
+
         private slots:
 
-            void revertRecord();
-
-            void deleteRecord();
+            void editCell();
 
             void editRecord();
 

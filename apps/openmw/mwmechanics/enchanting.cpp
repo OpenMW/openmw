@@ -53,6 +53,9 @@ namespace MWMechanics
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
         ESM::Enchantment enchantment;
         enchantment.mData.mCharge = getGemCharge();
+        enchantment.mData.mAutocalc = 0;
+        enchantment.mData.mType = mCastStyle;
+        enchantment.mData.mCost = getEnchantPoints();
 
         store.remove(mSoulGemPtr, 1, player);
 
@@ -62,7 +65,7 @@ namespace MWMechanics
 
         if(mSelfEnchanting)
         {
-            if(getEnchantChance()<std::rand()/static_cast<double> (RAND_MAX)*100)
+            if(std::rand()/static_cast<double> (RAND_MAX)*100 < getEnchantChance())
                 return false;
 
             mEnchanter.getClass().skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 2);
@@ -72,8 +75,6 @@ namespace MWMechanics
         {
             enchantment.mData.mCharge=0;
         }
-        enchantment.mData.mType = mCastStyle;
-        enchantment.mData.mCost = getEnchantPoints();
         enchantment.mEffects = mEffectList;
 
         // Apply the enchantment
@@ -166,16 +167,15 @@ namespace MWMechanics
 
         float enchantmentCost = 0;
         int effectsLeftCnt = mEffects.size();
-        float baseCost, magnitudeCost, areaCost;
-        int magMin, magMax, area;
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
-            baseCost = (store.get<ESM::MagicEffect>().find(it->mEffectID))->mData.mBaseCost;
+            float baseCost = (store.get<ESM::MagicEffect>().find(it->mEffectID))->mData.mBaseCost;
             // To reflect vanilla behavior
-            magMin = (it->mMagnMin == 0) ? 1 : it->mMagnMin;
-            magMax = (it->mMagnMax == 0) ? 1 : it->mMagnMax;
-            area = (it->mArea == 0) ? 1 : it->mArea;
+            int magMin = (it->mMagnMin == 0) ? 1 : it->mMagnMin;
+            int magMax = (it->mMagnMax == 0) ? 1 : it->mMagnMax;
+            int area = (it->mArea == 0) ? 1 : it->mArea;
 
+            float magnitudeCost = 0;
             if (mCastStyle == ESM::Enchantment::ConstantEffect)
             {
                 magnitudeCost = (magMin + magMax) * baseCost * 2.5;
@@ -187,7 +187,7 @@ namespace MWMechanics
                     magnitudeCost *= 1.5;
             }
 
-            areaCost = area * 0.025 * baseCost;
+            float areaCost = area * 0.025 * baseCost;
             if (it->mRange == ESM::RT_Target)
                 areaCost *= 1.5;
 
@@ -292,5 +292,9 @@ namespace MWMechanics
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
         store.remove(MWWorld::ContainerStore::sGoldId, getEnchantPrice(), player);
+
+        // add gold to NPC trading gold pool
+        CreatureStats& enchanterStats = mEnchanter.getClass().getCreatureStats(mEnchanter);
+        enchanterStats.setGoldPool(enchanterStats.getGoldPool() + getEnchantPrice());
     }
 }

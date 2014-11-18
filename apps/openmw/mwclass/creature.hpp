@@ -19,20 +19,25 @@ namespace MWClass
 
             static int getSndGenTypeFromName(const MWWorld::Ptr &ptr, const std::string &name);
 
-            static const ESM::GameSetting *fMinWalkSpeedCreature;
-            static const ESM::GameSetting *fMaxWalkSpeedCreature;
-            static const ESM::GameSetting *fEncumberedMoveEffect;
-            static const ESM::GameSetting *fSneakSpeedMultiplier;
-            static const ESM::GameSetting *fAthleticsRunBonus;
-            static const ESM::GameSetting *fBaseRunMultiplier;
-            static const ESM::GameSetting *fMinFlySpeed;
-            static const ESM::GameSetting *fMaxFlySpeed;
-            static const ESM::GameSetting *fSwimRunBase;
-            static const ESM::GameSetting *fSwimRunAthleticsMult;
-            static const ESM::GameSetting *fKnockDownMult;
-            static const ESM::GameSetting *iKnockDownOddsMult;
-            static const ESM::GameSetting *iKnockDownOddsBase;
+            // cached GMSTs
+            struct GMST
+            {
+                const ESM::GameSetting *fMinWalkSpeedCreature;
+                const ESM::GameSetting *fMaxWalkSpeedCreature;
+                const ESM::GameSetting *fEncumberedMoveEffect;
+                const ESM::GameSetting *fSneakSpeedMultiplier;
+                const ESM::GameSetting *fAthleticsRunBonus;
+                const ESM::GameSetting *fBaseRunMultiplier;
+                const ESM::GameSetting *fMinFlySpeed;
+                const ESM::GameSetting *fMaxFlySpeed;
+                const ESM::GameSetting *fSwimRunBase;
+                const ESM::GameSetting *fSwimRunAthleticsMult;
+                const ESM::GameSetting *fKnockDownMult;
+                const ESM::GameSetting *iKnockDownOddsMult;
+                const ESM::GameSetting *iKnockDownOddsBase;
+            };
 
+            static const GMST& getGmst();
 
         public:
 
@@ -44,7 +49,9 @@ namespace MWClass
 
             virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
 
-            virtual void adjustPosition(const MWWorld::Ptr& ptr) const;
+            virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) const;
+            ///< Adjust position to stand on ground. Must be called post model load
+            /// @param force do this even if the ptr is flying
 
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);

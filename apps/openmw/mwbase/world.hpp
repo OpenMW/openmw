@@ -17,11 +17,6 @@ namespace Ogre
 
 namespace OEngine
 {
-    namespace Render
-    {
-        class Fader;
-    }
-
     namespace Physic
     {
         class PhysicEngine;
@@ -113,9 +108,6 @@ namespace MWBase
             virtual void readRecord (ESM::ESMReader& reader, int32_t type,
                 const std::map<int, int>& contentFileMap) = 0;
 
-            virtual OEngine::Render::Fader* getFader() = 0;
-            ///< \todo remove this function. Rendering details should not be exposed.
-
             virtual MWWorld::CellStore *getExterior (int x, int y) = 0;
 
             virtual MWWorld::CellStore *getInterior (const std::string& name) = 0;
@@ -127,6 +119,7 @@ namespace MWBase
             virtual void setWaterHeight(const float height) = 0;
 
             virtual bool toggleWater() = 0;
+            virtual bool toggleWorld() = 0;
 
             virtual void adjustSky() = 0;
 
@@ -144,20 +137,23 @@ namespace MWBase
             virtual MWWorld::LocalScripts& getLocalScripts() = 0;
 
             virtual bool hasCellChanged() const = 0;
-            ///< Has the player moved to a different cell, since the last frame?
+            ///< Has the set of active cells changed, since the last frame?
 
             virtual bool isCellExterior() const = 0;
 
             virtual bool isCellQuasiExterior() const = 0;
 
             virtual Ogre::Vector2 getNorthVector (MWWorld::CellStore* cell) = 0;
-            ///< get north vector (OGRE coordinates) for given interior cell
+            ///< get north vector for given interior cell
 
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out) = 0;
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
-            virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y) = 0;
-            ///< see MWRender::LocalMap::getInteriorMapPosition
+            virtual void worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y) = 0;
+            ///< see MWRender::LocalMap::worldToInteriorMapPosition
+
+            virtual Ogre::Vector2 interiorMapToWorldPosition (float nX, float nY, int x, int y) = 0;
+            ///< see MWRender::LocalMap::interiorMapToWorldPosition
 
             virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior) = 0;
             ///< see MWRender::LocalMap::isPositionExplored
@@ -202,6 +198,10 @@ namespace MWBase
 
             virtual MWWorld::Ptr searchPtrViaActorId (int actorId) = 0;
             ///< Search is limited to the active cells.
+
+            virtual MWWorld::Ptr findContainer (const MWWorld::Ptr& ptr) = 0;
+            ///< Return a pointer to a liveCellRef which contains \a ptr.
+            /// \note Search is limited to the active cells.
 
             /// \todo enable reference in the OGRE scene
             virtual void enable (const MWWorld::Ptr& ptr) = 0;
@@ -271,8 +271,12 @@ namespace MWBase
             /// use the "Head" node, or alternatively the "Bip01 Head" node as a basis.
             virtual std::pair<MWWorld::Ptr,Ogre::Vector3> getHitContact(const MWWorld::Ptr &ptr, float distance) = 0;
 
-            virtual void adjustPosition (const MWWorld::Ptr& ptr) = 0;
+            virtual void adjustPosition (const MWWorld::Ptr& ptr, bool force) = 0;
             ///< Adjust position after load to be on ground. Must be called after model load.
+            /// @param force do this even if the ptr is flying
+
+            virtual void fixPosition (const MWWorld::Ptr& actor) = 0;
+            ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
 
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
 
@@ -395,11 +399,22 @@ namespace MWBase
 
             /// open or close a non-teleport door (depending on current state)
             virtual void activateDoor(const MWWorld::Ptr& door) = 0;
-            /// open or close a non-teleport door as specified
-            virtual void activateDoor(const MWWorld::Ptr& door, bool open) = 0;
+            /// update movement state of a non-teleport door as specified
+            /// @param state see MWClass::setDoorState
+            /// @note throws an exception when invoked on a teleport door
+            virtual void activateDoor(const MWWorld::Ptr& door, int state) = 0;
 
             virtual bool getPlayerStandingOn (const MWWorld::Ptr& object) = 0; ///< @return true if the player is standing on \a object
             virtual bool getActorStandingOn (const MWWorld::Ptr& object) = 0; ///< @return true if any actor is standing on \a object
+            virtual bool getPlayerCollidingWith(const MWWorld::Ptr& object) = 0; ///< @return true if the player is colliding with \a object
+            virtual bool getActorCollidingWith (const MWWorld::Ptr& object) = 0; ///< @return true if any actor is colliding with \a object
+            virtual void hurtStandingActors (const MWWorld::Ptr& object, float dmgPerSecond) = 0;
+            ///< Apply a health difference to any actors standing on \a object.
+            /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
+            virtual void hurtCollidingActors (const MWWorld::Ptr& object, float dmgPerSecond) = 0;
+            ///< Apply a health difference to any actors colliding with \a object.
+            /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
+
             virtual float getWindSpeed() = 0;
 
             virtual void getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out) = 0;
@@ -407,7 +422,7 @@ namespace MWBase
             virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out) = 0;
             ///< get all items in active cells owned by this Npc
 
-            virtual bool getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc) = 0;
+            virtual bool getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor) = 0;
             ///< get Line of Sight (morrowind stupid implementation)
 
             virtual float getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist) = 0;
@@ -470,7 +485,7 @@ namespace MWBase
 
             virtual void launchMagicBolt (const std::string& model, const std::string& sound, const std::string& spellId,
                                           float speed, bool stack, const ESM::EffectList& effects,
-                                           const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
+                                           const MWWorld::Ptr& caster, const std::string& sourceName, const Ogre::Vector3& fallbackDirection) = 0;
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
                                            const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed) = 0;
 
@@ -515,8 +530,23 @@ namespace MWBase
             /// Spawn a blood effect for \a ptr at \a worldPosition
             virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition) = 0;
 
+            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const Ogre::Vector3& worldPos) = 0;
+
             virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName) = 0;
+
+            virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
+
+            /// @see MWWorld::WeatherManager::isInStorm
+            virtual bool isInStorm() const = 0;
+
+            /// @see MWWorld::WeatherManager::getStormDirection
+            virtual Ogre::Vector3 getStormDirection() const = 0;
+
+            /// Resets all actors in the current active cells to their original location within that cell.
+            virtual void resetActors() = 0;
+
+            virtual bool isWalkingOnWater (const MWWorld::Ptr& actor) = 0;
     };
 }
 

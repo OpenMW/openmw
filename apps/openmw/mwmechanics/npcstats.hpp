@@ -19,9 +19,6 @@ namespace ESM
 namespace MWMechanics
 {
     /// \brief Additional stats for NPCs
-    ///
-    /// \note For technical reasons the spell list and the currently selected spell is also handled by
-    /// CreatureStats, even though they are actually NPC stats.
 
     class NpcStats : public CreatureStats
     {
@@ -52,8 +49,6 @@ namespace MWMechanics
             /// time since last hit from drowning
             float mLastDrowningHit;
 
-            float mLevelHealthBonus;
-
         public:
 
             NpcStats();
@@ -75,7 +70,15 @@ namespace MWMechanics
             SkillValue& getSkill (int index);
 
             const std::map<std::string, int>& getFactionRanks() const;
-            std::map<std::string, int>& getFactionRanks();
+            /// Increase the rank in this faction by 1, if such a rank exists.
+            void raiseRank(const std::string& faction);
+            /// Lower the rank in this faction by 1, if such a rank exists.
+            void lowerRank(const std::string& faction);
+            /// Join this faction, setting the initial rank to 0.
+            void joinFaction(const std::string& faction);
+            /// Warning: this function performs no check whether the rank exists,
+            /// and should be used in initial actor setup only.
+            void setFactionRank(const std::string& faction, int rank);
 
             const std::set<std::string>& getExpelled() const { return mExpelled; }
             bool getExpelled(const std::string& factionID) const;
@@ -86,12 +89,12 @@ namespace MWMechanics
             ///< Do *this and \a npcStats share a faction?
 
             float getSkillGain (int skillIndex, const ESM::Class& class_, int usageType = -1,
-                int level = -1) const;
+                int level = -1, float extraFactor=1.f) const;
             ///< \param usageType: Usage specific factor, specified in the respective skill record;
             /// -1: use a factor of 1.0 instead.
             /// \param level Level to base calculation on; -1: use current level.
 
-            void useSkill (int skillIndex, const ESM::Class& class_, int usageType = -1);
+            void useSkill (int skillIndex, const ESM::Class& class_, int usageType = -1, float extraFactor=1.f);
             ///< Increase skill by usage.
 
             void increaseSkill (int skillIndex, const ESM::Class& class_, bool preserveProgress);
@@ -104,7 +107,7 @@ namespace MWMechanics
 
             void updateHealth();
             ///< Calculate health based on endurance and strength.
-            ///  Called at character creation and at level up.
+            ///  Called at character creation.
 
             void flagAsUsed (const std::string& id);
 
@@ -125,6 +128,9 @@ namespace MWMechanics
             void setWerewolf(bool set);
 
             int getWerewolfKills() const;
+
+            /// Increments mWerewolfKills by 1.
+            void addWerewolfKill();
 
             float getTimeToStartDrowning() const;
             /// Sets time left for the creature to drown if it stays underwater.

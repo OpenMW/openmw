@@ -18,6 +18,11 @@ namespace CSVWorld
     class CommandDelegateFactoryCollection;
 }
 
+namespace CSMWorld
+{
+    class UniversalId;
+}
+
 namespace CSVDoc
 {
     class View;
@@ -41,6 +46,7 @@ namespace CSVDoc
             bool notifySaveOnClose (View *view = 0);
             bool showModifiedDocumentMessageBox (View *view);
             bool showSaveInProgressMessageBox (View *view);
+            bool removeDocument(View *view);
 
         public:
 
@@ -51,10 +57,13 @@ namespace CSVDoc
             View *addView (CSMDoc::Document *document);
             ///< The ownership of the returned view is not transferred.
 
+            View *addView (CSMDoc::Document *document, const CSMWorld::UniversalId& id, const std::string& hint);
+
             int countViews (const CSMDoc::Document *document) const;
             ///< Return number of views for \a document.
 
             bool closeRequest (View *view);
+            void removeDocAndView (CSMDoc::Document *document);
 
         signals:
 

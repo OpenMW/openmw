@@ -250,14 +250,6 @@ void ESMReader::skipRecord()
     mCtx.leftRec = 0;
 }
 
-void ESMReader::skipHRecord()
-{
-    if (!mCtx.leftFile)
-        return;
-    getRecHeader();
-    skipRecord();
-}
-
 void ESMReader::getRecHeader(uint32_t &flags)
 {
     // General error checking

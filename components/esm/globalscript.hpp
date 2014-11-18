@@ -15,6 +15,7 @@ namespace ESM
         std::string mId;
         Locals mLocals;
         int mRunning;
+        std::string mTargetId; // for targeted scripts
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

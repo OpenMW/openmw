@@ -35,11 +35,11 @@ namespace MWMechanics
         AiSequence mAiSequence;
         bool mDead;
         bool mDied;
+        bool mMurdered;
         int mFriendlyHits;
         bool mTalkedTo;
         bool mAlarmed;
         bool mAttacked;
-        bool mHostile;
         bool mAttackingOrSpell;
         bool mKnockdown;
         bool mKnockdownOneFrame;
@@ -67,6 +67,12 @@ namespace MWMechanics
         // The index of the death animation that was played
         unsigned char mDeathAnimation;
 
+        // <ESM::MagicEffect index, ActorId>
+        std::map<int, int> mSummonedCreatures;
+        // Contains ActorIds of summoned creatures with an expired lifetime that have not been deleted yet.
+        // This may be necessary when the creature is in an inactive cell.
+        std::vector<int> mSummonGraveyard;
+
     protected:
         // These two are only set by NpcStats, but they are declared in CreatureStats to prevent using virtual methods.
         bool mIsWerewolf;
@@ -85,6 +91,7 @@ namespace MWMechanics
         void setAttackStrength(float value);
 
         bool needToRecalcDynamicStats();
+        void setNeedRecalcDynamicStats(bool val);
 
         void addToFallHeight(float height);
 
@@ -130,11 +137,8 @@ namespace MWMechanics
 
         void setDynamic (int index, const DynamicStat<float> &value);
 
-        void setSpells(const Spells &spells);
-
-        void setActiveSpells(const ActiveSpells &active);
-
-        void setMagicEffects(const MagicEffects &effects);
+        /// Set Modifier for each magic effect according to \a effects. Does not touch Base values.
+        void modifyMagicEffects(const MagicEffects &effects);
 
         void setAttackingOrSpell(bool attackingOrSpell);
 
@@ -160,9 +164,17 @@ namespace MWMechanics
 
         bool isDead() const;
 
+        void notifyDied();
+
         bool hasDied() const;
 
         void clearHasDied();
+
+        bool hasBeenMurdered() const;
+
+        void clearHasBeenMurdered();
+
+        void notifyMurder();
 
         void resurrect();
 
@@ -187,15 +199,13 @@ namespace MWMechanics
         bool getAttacked() const;
         void setAttacked (bool attacked);
 
-        bool isHostile() const;
-        void setHostile (bool hostile);
-
         bool getCreatureTargetted() const;
 
         float getEvasion() const;
 
         void setKnockedDown(bool value);
-        ///Returns true for the entire duration of the actor being knocked down
+        /// Returns true for the entire duration of the actor being knocked down or knocked out,
+        /// including transition animations (falling down & standing up)
         bool getKnockedDown() const;
         void setKnockedDownOneFrame(bool value);
         ///Returns true only for the first frame of the actor being knocked out; used for "onKnockedOut" command
@@ -208,12 +218,17 @@ namespace MWMechanics
         void setBlock(bool value);
         bool getBlock() const;
 
+        std::map<int, int>& getSummonedCreatureMap();
+        std::vector<int>& getSummonedCreatureGraveyard();
+
         enum Flag
         {
             Flag_ForceRun = 1,
             Flag_ForceSneak = 2,
             Flag_Run = 4,
-            Flag_Sneak = 8
+            Flag_Sneak = 8,
+            Flag_ForceJump = 16,
+            Flag_ForceMoveJump = 32
         };
         enum Stance
         {
@@ -232,13 +247,6 @@ namespace MWMechanics
         // Note, this is just a cache to avoid checking the whole container store every frame. We don't need to store it in saves.
         // TODO: Put it somewhere else?
         std::set<int> mBoundItems;
-
-        // TODO: store in savegame
-        // TODO: encapsulate?
-        // <ESM::MagicEffect index, actor index>
-        std::map<int, int> mSummonedCreatures;
-        // Contains summoned creatures with an expired lifetime that have not been deleted yet.
-        std::vector<int> mSummonGraveyard;
 
         void writeState (ESM::CreatureStats& state) const;
 

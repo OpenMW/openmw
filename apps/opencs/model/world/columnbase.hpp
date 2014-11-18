@@ -68,6 +68,7 @@ namespace CSMWorld
             Display_TopicInfo,
             Display_JournalInfo,
             Display_Scene,
+            Display_GlobalVariable,
             //CONCRETE TYPES ENDS HERE
 
             Display_Integer,
@@ -89,7 +90,20 @@ namespace CSMWorld
             Display_RefRecordType,
             Display_DialogueType,
             Display_QuestStatusType,
-            Display_Gender
+            Display_EnchantmentType,
+            Display_BodyPartType,
+            Display_MeshType,
+            Display_Gender,
+            Display_Mesh,
+            Display_Icon,
+            Display_Music,
+            Display_SoundRes,
+            Display_Texture,
+            Display_Video,
+            Display_Colour,
+            Display_ScriptLines, // console context
+            Display_SoundGeneratorType,
+            Display_School
         };
 
         int mColumnId;
@@ -113,8 +127,6 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct Column : public ColumnBase
     {
-        int mFlags;
-
         Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue)
         : ColumnBase (columnId, displayType, flags) {}
 

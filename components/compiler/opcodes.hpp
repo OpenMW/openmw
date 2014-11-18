@@ -59,6 +59,8 @@ namespace Compiler
         const int opcodeStartCombatExplicit = 0x200023b;
         const int opcodeStopCombat = 0x200023c;
         const int opcodeStopCombatExplicit = 0x200023d;
+        const int opcodeFace = 0x200024c;
+        const int opcodeFaceExplicit = 0x200024d;
     }
 
     namespace Animation
@@ -121,6 +123,14 @@ namespace Compiler
         const int opcodeClearForceRunExplicit = 0x2000155;
         const int opcodeForceRun = 0x2000156;
         const int opcodeForceRunExplicit = 0x2000157;
+        const int opcodeClearForceJump = 0x2000258;
+        const int opcodeClearForceJumpExplicit = 0x2000259;
+        const int opcodeForceJump = 0x200025a;
+        const int opcodeForceJumpExplicit = 0x200025b;
+        const int opcodeClearForceMoveJump = 0x200025c;
+        const int opcodeClearForceMoveJumpExplicit = 0x200025d;
+        const int opcodeForceMoveJump = 0x200025e;
+        const int opcodeForceMoveJumpExplicit = 0x200025f;
         const int opcodeClearForceSneak = 0x2000158;
         const int opcodeClearForceSneakExplicit = 0x2000159;
         const int opcodeForceSneak = 0x200015a;
@@ -132,6 +142,10 @@ namespace Compiler
         const int opcodeGetForceSneak = 0x20001cc;
         const int opcodeGetForceRunExplicit = 0x20001cd;
         const int opcodeGetForceSneakExplicit = 0x20001ce;
+        const int opcodeGetForceJump = 0x2000260;
+        const int opcodeGetForceMoveJump = 0x2000262;
+        const int opcodeGetForceJumpExplicit = 0x2000261;
+        const int opcodeGetForceMoveJumpExplicit = 0x2000263;
     }
 
     namespace Dialogue
@@ -154,6 +168,8 @@ namespace Compiler
         const int opcodeSameFactionExplicit = 0x20001b6;
         const int opcodeModFactionReaction = 0x2000242;
         const int opcodeGetFactionReaction = 0x2000243;
+        const int opcodeClearInfoActor = 0x2000245;
+        const int opcodeClearInfoActorExplicit = 0x2000246;
     }
 
     namespace Gui
@@ -175,6 +191,8 @@ namespace Compiler
         const int opcodeToggleFullHelp = 0x2000151;
         const int opcodeShowMap = 0x20001a0;
         const int opcodeFillMap = 0x20001a1;
+        const int opcodeMenuTest = 0x2002c;
+        const int opcodeToggleMenus = 0x200024b;
     }
 
     namespace Misc
@@ -194,6 +212,7 @@ namespace Compiler
         const int opcodeFadeOut = 0x200013d;
         const int opcodeFadeTo = 0x200013e;
         const int opcodeToggleWater = 0x2000144;
+        const int opcodeToggleWorld = 0x20002f5;
         const int opcodeTogglePathgrid = 0x2000146;
         const int opcodeDontSaveObject = 0x2000153;
         const int opcodeToggleVanityMode = 0x2000174;
@@ -204,6 +223,8 @@ namespace Compiler
         const int opcodeGetLockedExplicit = 0x20001c8;
         const int opcodeGetEffect = 0x20001cf;
         const int opcodeGetEffectExplicit = 0x20001d0;
+        const int opcodeBetaComment = 0x2000247;
+        const int opcodeBetaCommentExplicit = 0x2000248;
         const int opcodeAddSoulGem = 0x20001f3;
         const int opcodeAddSoulGemExplicit = 0x20001f4;
         const int opcodeRemoveSoulGem = 0x20027;
@@ -230,6 +251,14 @@ namespace Compiler
         const int opcodeGetStandingPcExplicit = 0x200020d;
         const int opcodeGetStandingActor = 0x200020e;
         const int opcodeGetStandingActorExplicit = 0x200020f;
+        const int opcodeGetCollidingPc = 0x2000250;
+        const int opcodeGetCollidingPcExplicit = 0x2000251;
+        const int opcodeGetCollidingActor = 0x2000252;
+        const int opcodeGetCollidingActorExplicit = 0x2000253;
+        const int opcodeHurtStandingActor = 0x2000254;
+        const int opcodeHurtStandingActorExplicit = 0x2000255;
+        const int opcodeHurtCollidingActor = 0x2000256;
+        const int opcodeHurtCollidingActorExplicit = 0x2000257;
         const int opcodeGetWindSpeed = 0x2000212;
         const int opcodePlayBink = 0x20001f7;
         const int opcodeGoToJail = 0x2000235;
@@ -294,6 +323,8 @@ namespace Compiler
         const int numberOfDynamics = 3;
         const int numberOfSkills = 27;
 
+        const int numberOfMagicEffects = 24;
+
         const int opcodeGetAttribute = 0x2000027;
         const int opcodeGetAttributeExplicit = 0x200002f;
         const int opcodeSetAttribute = 0x2000037;
@@ -318,6 +349,13 @@ namespace Compiler
         const int opcodeSetSkillExplicit = 0x20000df;
         const int opcodeModSkill = 0x20000fa;
         const int opcodeModSkillExplicit = 0x2000115;
+
+        const int opcodeGetMagicEffect = 0x2000264;
+        const int opcodeGetMagicEffectExplicit = 0x200027c;
+        const int opcodeSetMagicEffect = 0x2000294;
+        const int opcodeSetMagicEffectExplicit = 0x20002ac;
+        const int opcodeModMagicEffect = 0x20002c4;
+        const int opcodeModMagicEffectExplicit = 0x20002dc;
 
         const int opcodeGetPCCrimeLevel = 0x20001ec;
         const int opcodeSetPCCrimeLevel = 0x20001ed;
@@ -380,6 +418,8 @@ namespace Compiler
         const int opcodeLowerRankExplicit = 0x20001eb;
         const int opcodeOnDeath = 0x20001fc;
         const int opcodeOnDeathExplicit = 0x2000205;
+        const int opcodeOnMurder = 0x2000249;
+        const int opcodeOnMurderExplicit = 0x200024a;
         const int opcodeOnKnockout = 0x2000240;
         const int opcodeOnKnockoutExplicit = 0x2000241;
 
@@ -400,6 +440,9 @@ namespace Compiler
         const int opcodeRemoveEffectsExplicit = 0x200022e;
         const int opcodeResurrect = 0x200022f;
         const int opcodeResurrectExplicit = 0x2000230;
+
+        const int opcodeGetStat = 0x200024e;
+        const int opcodeGetStatExplicit = 0x200024f;
     }
 
     namespace Transformation
@@ -442,6 +485,7 @@ namespace Compiler
         const int opcodeMoveExplicit = 0x2000207;
         const int opcodeMoveWorld = 0x2000208;
         const int opcodeMoveWorldExplicit = 0x2000209;
+        const int opcodeResetActors = 0x20002f4;
     }
 
     namespace User

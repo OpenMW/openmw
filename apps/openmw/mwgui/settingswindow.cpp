@@ -73,17 +73,6 @@ namespace
         return (Ogre::Root::getSingleton ().getRenderSystem ()->getName ().find("OpenGL") != std::string::npos) ? "glsl" : "hlsl";
     }
 
-    bool cgAvailable ()
-    {
-        Ogre::Root::PluginInstanceList list = Ogre::Root::getSingleton ().getInstalledPlugins ();
-        for (Ogre::Root::PluginInstanceList::const_iterator it = list.begin(); it != list.end(); ++it)
-        {
-            if ((*it)->getName() == "Cg Program Manager")
-                return true;
-        }
-        return false;
-    }
-
     const char* checkButtonType = "CheckButton";
     const char* sliderType = "Slider";
 
@@ -147,6 +136,7 @@ namespace MWGui
                     float min,max;
                     getSettingMinMax(scroll, min, max);
                     float value = Settings::Manager::getFloat(getSettingName(current), getSettingCategory(current));
+                    value = std::max(min, std::min(value, max));
                     value = (value-min)/(max-min);
 
                     scroll->setScrollPosition( value * (scroll->getScrollRange()-1));
@@ -168,6 +158,8 @@ namespace MWGui
     {
         configureWidgets(mMainWidget);
 
+        setTitle("#{sOptions}");
+
         getWidget(mOkButton, "OkButton");
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mFullscreenButton, "FullscreenButton");
@@ -185,6 +177,9 @@ namespace MWGui
         getWidget(mControlsBox, "ControlsBox");
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mRefractionButton, "RefractionButton");
+        getWidget(mDifficultySlider, "DifficultySlider");
+
+        mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SettingsWindow::onWindowResize);
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mShaderModeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShaderModeToggled);
@@ -238,11 +233,15 @@ namespace MWGui
         MyGUI::TextBox* fovText;
         getWidget(fovText, "FovText");
         fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("field of view", "General"))) + ")");
+
+        MyGUI::TextBox* diffText;
+        getWidget(diffText, "DifficultyText");
+        diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
+        exit();
     }
 
     void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
@@ -297,15 +296,6 @@ namespace MWGui
             newState = true;
         }
 
-        if (_sender == mVSyncButton)
-        {
-            // Ogre::Window::setVSyncEnabled is bugged in 1.8
-#if OGRE_VERSION < (1 << 16 | 9 << 8 | 0)
-            MWBase::Environment::get().getWindowManager()->
-                messageBox("VSync will be applied after a restart", std::vector<std::string>());
-#endif
-        }
-
         if (_sender == mShadersButton)
         {
             if (newState == false)
@@ -333,6 +323,15 @@ namespace MWGui
         if (_sender == mFullscreenButton)
         {
             // check if this resolution is supported in fullscreen
+            if (mResolutionList->getIndexSelected() != MyGUI::ITEM_NONE)
+            {
+                std::string resStr = mResolutionList->getItemNameAt(mResolutionList->getIndexSelected());
+                int resX, resY;
+                parseResolution (resX, resY, resStr);
+                Settings::Manager::setInt("resolution x", "Video", resX);
+                Settings::Manager::setInt("resolution y", "Video", resY);
+            }
+
             bool supported = false;
             for (unsigned int i=0; i<mResolutionList->getItemCount(); ++i)
             {
@@ -365,15 +364,9 @@ namespace MWGui
 
     void SettingsWindow::onShaderModeToggled(MyGUI::Widget* _sender)
     {
-        std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
-        if (val == "cg")
-        {
-            val = hlslGlsl();
-        }
-        else if (cgAvailable ())
-            val = "cg";
+        std::string val = hlslGlsl();
 
-        static_cast<MyGUI::Button*>(_sender)->setCaption(val);
+        _sender->castType<MyGUI::Button>()->setCaption(val);
 
         Settings::Manager::setString("shader mode", "General", val);
 
@@ -412,6 +405,12 @@ namespace MWGui
                     MyGUI::TextBox* fovText;
                     getWidget(fovText, "FovText");
                     fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int(value)) + ")");
+                }
+                if (scroller == mDifficultySlider)
+                {
+                    MyGUI::TextBox* diffText;
+                    getWidget(diffText, "DifficultyText");
+                    diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(value)) + ")");
                 }
             }
             else
@@ -467,14 +466,17 @@ namespace MWGui
             curH += h;
         }
 
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mControlsBox->setVisibleVScroll(false);
         mControlsBox->setCanvasSize (mControlsBox->getWidth(), std::max(curH, mControlsBox->getHeight()));
+        mControlsBox->setVisibleVScroll(true);
     }
 
     void SettingsWindow::onRebindAction(MyGUI::Widget* _sender)
     {
         int actionId = *_sender->getUserData<int>();
 
-        static_cast<MyGUI::Button*>(_sender)->setCaptionWithReplacing("#{sNone}");
+        _sender->castType<MyGUI::Button>()->setCaptionWithReplacing("#{sNone}");
 
         MWBase::Environment::get().getWindowManager ()->staticMessageBox ("#{sControlsMenu3}");
         MWBase::Environment::get().getWindowManager ()->disallowMouse();
@@ -509,5 +511,15 @@ namespace MWGui
     void SettingsWindow::open()
     {
         updateControlsBox ();
+    }
+
+    void SettingsWindow::exit()
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
+    }
+
+    void SettingsWindow::onWindowResize(MyGUI::Window *_sender)
+    {
+        updateControlsBox();
     }
 }

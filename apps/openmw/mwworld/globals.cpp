@@ -100,7 +100,7 @@ namespace MWWorld
             if (iter!=mVariables.end())
                 iter->second.read (reader, ESM::Variant::Format_Global);
             else
-                reader.skipHRecord();
+                reader.skipRecord();
 
             return true;
         }

@@ -6,7 +6,12 @@
 
 namespace ESM
 {
-    ESMWriter::ESMWriter() : mEncoder (0), mRecordCount (0), mCounting (true) {}
+    ESMWriter::ESMWriter()
+        : mEncoder (0)
+        , mRecordCount (0)
+        , mCounting (true)
+        , mStream(NULL)
+    {}
 
     unsigned int ESMWriter::getVersion() const
     {
@@ -16,6 +21,11 @@ namespace ESM
     void ESMWriter::setVersion(unsigned int ver)
     {
         mHeader.mData.version = ver;
+    }
+
+    void ESMWriter::setType(int type)
+    {
+        mHeader.mData.type = type;
     }
 
     void ESMWriter::setAuthor(const std::string& auth)

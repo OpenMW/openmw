@@ -23,6 +23,7 @@ ContentSelectorModel::ContentModel::ContentModel(QObject *parent) :
 
 void ContentSelectorModel::ContentModel::setEncoding(const QString &encoding)
 {
+    mEncoding = encoding;
     if (encoding == QLatin1String("win1252"))
         mCodec = QTextCodec::codecForName("windows-1252");
 
@@ -76,7 +77,7 @@ const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(co
 
     foreach (const EsmFile *file, mFiles)
     {
-        if (name == file->fileProperty (fp).toString())
+        if (name.compare(file->fileProperty (fp).toString(), Qt::CaseInsensitive) == 0)
             return file;
     }
     return 0;
@@ -119,7 +120,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
         {
             //compare filenames only.  Multiple instances
             //of the filename (with different paths) is not relevant here.
-            depFound = (dependency->fileName() == fileName);
+            depFound = (dependency->fileName().compare(fileName, Qt::CaseInsensitive) == 0);
 
             if (!depFound)
                 continue;
@@ -239,7 +240,7 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const
         return false;
 
     EsmFile *file = item(index.row());
-    QString fileName = file->filePath();
+    QString fileName = file->fileName();
     bool success = false;
 
     switch(role)
@@ -266,7 +267,7 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const
 
             if (success)
             {
-                success = setCheckState(fileName, value.toBool());
+                success = setCheckState(file->filePath(), value.toBool());
                 emit dataChanged(index, index);
             }
         }
@@ -275,21 +276,20 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const
         case Qt::CheckStateRole:
         {
             int checkValue = value.toInt();
-            bool success = false;
             bool setState = false;
-            if ((checkValue==Qt::Checked) && !isChecked(fileName))
+            if ((checkValue==Qt::Checked) && !isChecked(file->filePath()))
             {
                 setState = true;
                 success = true;
             }
-            else if ((checkValue == Qt::Checked) && isChecked (fileName))
+            else if ((checkValue == Qt::Checked) && isChecked (file->filePath()))
                 setState = true;
             else if (checkValue == Qt::Unchecked)
                 setState = true;
 
             if (setState)
             {
-                setCheckState(fileName, success);
+                setCheckState(file->filePath(), success);
                 emit dataChanged(index, index);
 
             }
@@ -299,7 +299,7 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const
 
             foreach (EsmFile *file, mFiles)
             {
-                if (file->gameFiles().contains(fileName))
+                if (file->gameFiles().contains(fileName, Qt::CaseInsensitive))
                 {
                     QModelIndex idx = indexFromItem(file);
                     emit dataChanged(idx, idx);
@@ -449,7 +449,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
         try {
             ESM::ESMReader fileReader;
             ToUTF8::Utf8Encoder encoder =
-            ToUTF8::calculateEncoding(QString(mCodec->name()).toStdString());
+            ToUTF8::calculateEncoding(mEncoding.toStdString());
             fileReader.setEncoder(&encoder);
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
@@ -500,7 +500,7 @@ void ContentSelectorModel::ContentModel::sortFiles()
             //dependencies appear.
             for (int j = i + 1; j < fileCount; j++)
             {
-                if (gamefiles.contains(mFiles.at(j)->fileName()))
+                if (gamefiles.contains(mFiles.at(j)->fileName(), Qt::CaseInsensitive))
                 {
                         mFiles.move(j, i);
 
@@ -517,10 +517,10 @@ void ContentSelectorModel::ContentModel::sortFiles()
     }
 }
 
-bool ContentSelectorModel::ContentModel::isChecked(const QString& name) const
+bool ContentSelectorModel::ContentModel::isChecked(const QString& filepath) const
 {
-    if (mCheckStates.contains(name))
-        return (mCheckStates[name] == Qt::Checked);
+    if (mCheckStates.contains(filepath))
+        return (mCheckStates[filepath] == Qt::Checked);
 
     return false;
 }
@@ -543,12 +543,12 @@ void ContentSelectorModel::ContentModel::refreshModel()
     emit dataChanged (index(0,0), index(rowCount()-1,0));
 }
 
-bool ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool checkState)
+bool ContentSelectorModel::ContentModel::setCheckState(const QString &filepath, bool checkState)
 {
-    if (name.isEmpty())
+    if (filepath.isEmpty())
         return false;
 
-    const EsmFile *file = item(name);
+    const EsmFile *file = item(filepath);
 
     if (!file)
         return false;
@@ -558,8 +558,8 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool
     if (checkState)
         state = Qt::Checked;
 
-    mCheckStates[name] = state;
-    emit dataChanged(indexFromItem(item(name)), indexFromItem(item(name)));
+    mCheckStates[filepath] = state;
+    emit dataChanged(indexFromItem(item(filepath)), indexFromItem(item(filepath)));
 
     if (file->isGameFile())
         refreshModel();
@@ -586,7 +586,10 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool
     {
         foreach (const EsmFile *downstreamFile, mFiles)
         {
-            if (downstreamFile->gameFiles().contains(name))
+            QFileInfo fileInfo(filepath);
+            QString filename = fileInfo.fileName();
+
+            if (downstreamFile->gameFiles().contains(filename, Qt::CaseInsensitive))
             {
                 if (mCheckStates.contains(downstreamFile->filePath()))
                     mCheckStates[downstreamFile->filePath()] = Qt::Unchecked;

@@ -57,7 +57,8 @@ op 0x20028: RemoveSoulGem, explicit reference
 op 0x20029: PCRaiseRank, explicit reference
 op 0x2002a: PCLowerRank, explicit reference
 op 0x2002b: PCJoinFaction, explicit reference
-opcodes 0x2002c-0x3ffff unused
+op 0x2002c: MenuTest
+opcodes 0x2002d-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -393,5 +394,44 @@ op 0x2000241: onKnockoutExplicit
 op 0x2000242: ModFactionReaction
 op 0x2000243: GetFactionReaction
 op 0x2000244: Activate, explicit
+op 0x2000245: ClearInfoActor
+op 0x2000246: ClearInfoActor, explicit
+op 0x2000247: BetaComment
+op 0x2000248: BetaComment, explicit
+op 0x2000249: OnMurder
+op 0x200024a: OnMurder, explicit
+op 0x200024b: ToggleMenus
+op 0x200024c: Face
+op 0x200024d: Face, explicit
+op 0x200024e: GetStat (dummy function)
+op 0x200024f: GetStat (dummy function), explicit
+op 0x2000250: GetCollidingPC
+op 0x2000251: GetCollidingPC, explicit
+op 0x2000252: GetCollidingActor
+op 0x2000253: GetCollidingActor, explicit
+op 0x2000254: HurtStandingActor
+op 0x2000255: HurtStandingActor, explicit
+op 0x2000256: HurtCollidingActor
+op 0x2000257: HurtCollidingActor, explicit
+op 0x2000258: ClearForceJump
+op 0x2000259: ClearForceJump, explicit reference
+op 0x200025a: ForceJump
+op 0x200025b: ForceJump, explicit reference
+op 0x200025c: ClearForceMoveJump
+op 0x200025d: ClearForceMoveJump, explicit reference
+op 0x200025e: ForceMoveJump
+op 0x200025f: ForceMoveJump, explicit reference
+op 0x2000260: GetForceJump
+op 0x2000261: GetForceJump, explicit reference
+op 0x2000262: GetForceMoveJump
+op 0x2000263: GetForceMoveJump, explicit reference
+op 0x2000264-0x200027b: GetMagicEffect
+op 0x200027c-0x2000293: GetMagicEffect, explicit
+op 0x2000294-0x20002ab: SetMagicEffect
+op 0x20002ac-0x20002c3: SetMagicEffect, explicit
+op 0x20002c4-0x20002db: ModMagicEffect
+op 0x20002dc-0x20002f3: ModMagicEffect, explicit
+op 0x20002f4: ResetActors
+op 0x20002f5: ToggleWorld
 
-opcodes 0x2000245-0x3ffffff unused
+opcodes 0x20002f6-0x3ffffff unused

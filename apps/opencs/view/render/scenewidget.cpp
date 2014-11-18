@@ -3,6 +3,7 @@
 #include <QEvent>
 #include <QResizeEvent>
 #include <QTimer>
+#include <QShortcut>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
@@ -10,23 +11,28 @@
 #include <OgreCamera.h>
 #include <OgreSceneNode.h>
 #include <OgreViewport.h>
+#include <OgreOverlaySystem.h>
 
-#include "../world/scenetoolmode.hpp"
+#include "../widget/scenetoolmode.hpp"
+#include "../../model/settings/usersettings.hpp"
 
 #include "navigation.hpp"
 #include "lighting.hpp"
+#include "overlaysystem.hpp"
 
 namespace CSVRender
 {
     SceneWidget::SceneWidget(QWidget *parent)
         : QWidget(parent)
-        , mWindow(NULL)
         , mCamera(NULL)
-        , mSceneMgr(NULL), mNavigation (0), mLighting (0), mUpdate (false)
-        , mKeyForward (false), mKeyBackward (false), mKeyLeft (false), mKeyRight (false)
+        , mSceneMgr(NULL)
+        , mWindow(NULL)
+        , mViewport(NULL)
+        , mNavigation (0), mLighting (0), mUpdate (false), mKeyForward (false)
+        , mKeyBackward (false), mKeyLeft (false), mKeyRight (false)
         , mKeyRollLeft (false), mKeyRollRight (false)
         , mFast (false), mDragging (false), mMod1 (false)
-        , mFastFactor (4) /// \todo make this configurable
+        , mFastFactor (4)
         , mDefaultAmbient (0, 0, 0, 0), mHasDefaultAmbient (false)
     {
         setAttribute(Qt::WA_PaintOnScreen);
@@ -43,24 +49,54 @@ namespace CSVRender
         mCamera->setPosition (300, 0, 0);
         mCamera->lookAt (0, 0, 0);
         mCamera->setNearClipDistance (0.1);
-        mCamera->setFarClipDistance (30000);
+
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+
+        float farClipDist = userSettings.setting("3d-render/far-clip-distance", QString("300000")).toFloat();
+        mCamera->setFarClipDistance (farClipDist);
+
+        mFastFactor = userSettings.setting("scene-input/fast-factor", QString("4")).toInt();
+
         mCamera->roll (Ogre::Degree (90));
 
         setLighting (&mLightingDay);
 
+        mOverlaySystem = OverlaySystem::instance().get();
+        mSceneMgr->addRenderQueueListener(mOverlaySystem);
+
         QTimer *timer = new QTimer (this);
 
         connect (timer, SIGNAL (timeout()), this, SLOT (update()));
-        timer->start (20); /// \todo make this configurable
+
+        int timerStart = userSettings.setting("scene-input/timer", QString("20")).toInt();
+        timer->start (timerStart);
+
+        /// \todo make shortcut configurable
+        QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
+        connect (focusToolbar, SIGNAL (activated()), this, SIGNAL (focusToolbarRequest()));
     }
 
-    CSVWorld::SceneToolMode *SceneWidget::makeLightingSelector (CSVWorld::SceneToolbar *parent)
+    CSVWidget::SceneToolMode *SceneWidget::makeLightingSelector (CSVWidget::SceneToolbar *parent)
     {
-        CSVWorld::SceneToolMode *tool = new CSVWorld::SceneToolMode (parent);
+        CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent, "Lighting Mode");
 
-        tool->addButton (":door.png", "day"); /// \todo replace icons
-        tool->addButton (":GMST.png", "night");
-        tool->addButton (":Info.png", "bright");
+        /// \todo replace icons
+        tool->addButton (":scenetoolbar/day", "day",
+            "Day"
+            "<ul><li>Cell specific ambient in interiors</li>"
+            "<li>Low ambient in exteriors</li>"
+            "<li>Strong directional light source/lir>"
+            "<li>This mode closely resembles day time in-game</li></ul>");
+        tool->addButton (":scenetoolbar/night", "night",
+            "Night"
+            "<ul><li>Cell specific ambient in interiors</li>"
+            "<li>Low ambient in exteriors</li>"
+            "<li>Weak directional light source</li>"
+            "<li>This mode closely resembles night time in-game</li></ul>");
+        tool->addButton (":scenetoolbar/bright", "bright",
+            "Bright"
+            "<ul><li>Maximum ambient</li>"
+            "<li>Strong directional light source</li></ul>");
 
         connect (tool, SIGNAL (modeChanged (const std::string&)),
             this, SLOT (selectLightingMode (const std::string&)));
@@ -87,7 +123,7 @@ namespace CSVRender
 
         std::stringstream windowHandle;
 #ifdef WIN32
-        windowHandle << Ogre::StringConverter::toString((unsigned long)(this->winId()));
+        windowHandle << Ogre::StringConverter::toString((uintptr_t)(this->winId()));
 #else
         windowHandle << this->winId();
 #endif
@@ -99,7 +135,16 @@ namespace CSVRender
 
         params.insert(std::make_pair("externalWindowHandle",  windowHandle.str()));
         params.insert(std::make_pair("title", windowTitle.str()));
-        params.insert(std::make_pair("FSAA", "0")); // TODO setting
+
+        std::string antialiasing =
+            CSMSettings::UserSettings::instance().settingValue("3d-render/antialiasing").toStdString();
+        if(antialiasing == "MSAA 16")     antialiasing = "16";
+        else if(antialiasing == "MSAA 8") antialiasing = "8";
+        else if(antialiasing == "MSAA 4") antialiasing = "4";
+        else if(antialiasing == "MSAA 2") antialiasing = "2";
+        else                              antialiasing = "0";
+        params.insert(std::make_pair("FSAA", antialiasing));
+
         params.insert(std::make_pair("vsync", "false")); // TODO setting
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
         params.insert(std::make_pair("macAPI", "cocoa"));
@@ -107,7 +152,9 @@ namespace CSVRender
 #endif
 
         mWindow = Ogre::Root::getSingleton().createRenderWindow(windowTitle.str(), this->width(), this->height(), false, &params);
-        mWindow->addViewport(mCamera)->setBackgroundColour(Ogre::ColourValue(0.3,0.3,0.3,1));
+
+        mViewport = mWindow->addViewport (mCamera);
+        mViewport->setBackgroundColour (Ogre::ColourValue (0.3,0.3,0.3,1));
 
         Ogre::Real aspectRatio = Ogre::Real(width()) / Ogre::Real(height());
         mCamera->setAspectRatio(aspectRatio);
@@ -119,7 +166,16 @@ namespace CSVRender
             Ogre::Root::getSingleton().destroyRenderTarget (mWindow);
 
         if (mSceneMgr)
+            mSceneMgr->removeRenderQueueListener (mOverlaySystem);
+
+        if (mSceneMgr)
             Ogre::Root::getSingleton().destroySceneManager (mSceneMgr);
+
+    }
+
+    void SceneWidget::setVisibilityMask (unsigned int mask)
+    {
+        mViewport->setVisibilityMask (mask);
     }
 
     void SceneWidget::setNavigation (Navigation *navigation)
@@ -132,9 +188,32 @@ namespace CSVRender
         }
     }
 
+    void SceneWidget::addRenderTargetListener(Ogre::RenderTargetListener *listener)
+    {
+        mWindow->addListener(listener);
+    }
+
+    void SceneWidget::removeRenderTargetListener(Ogre::RenderTargetListener *listener)
+    {
+        mWindow->removeListener(listener);
+    }
+
+    Ogre::Viewport *SceneWidget::getViewport()
+    {
+        if (!mWindow)
+            updateOgreWindow();
+
+        return mViewport;
+    }
+
     Ogre::SceneManager *SceneWidget::getSceneManager()
     {
         return mSceneMgr;
+    }
+
+    Ogre::Camera *SceneWidget::getCamera()
+    {
+        return mCamera;
     }
 
     void SceneWidget::flagAsModified()
@@ -327,13 +406,17 @@ namespace CSVRender
         {
             mUpdate = false;
             mWindow->update();
+            updateOverlay();
         }
     }
 
-    int SceneWidget::getFastFactor() const
+    void SceneWidget::updateScene()
     {
-        return mFast ? mFastFactor : 1;
+        flagAsModified();
     }
+
+    void SceneWidget::updateOverlay()
+    { }
 
     void SceneWidget::setLighting (Lighting *lighting)
     {
@@ -342,6 +425,9 @@ namespace CSVRender
 
         mLighting = lighting;
         mLighting->activate (mSceneMgr, mHasDefaultAmbient ? &mDefaultAmbient : 0);
+
+        if (mWindow)
+            mWindow->update();
     }
 
     void SceneWidget::selectLightingMode (const std::string& mode)
@@ -352,5 +438,33 @@ namespace CSVRender
             setLighting (&mLightingNight);
         else if (mode=="bright")
             setLighting (&mLightingBright);
+    }
+
+    void SceneWidget::updateUserSetting (const QString &key, const QStringList &list)
+    {
+        if(key.contains(QRegExp("^\\b(Objects|Shader|Scene)", Qt::CaseInsensitive)))
+            flagAsModified();
+
+        if(key == "3d-render/far-clip-distance" && !list.empty())
+        {
+            if(mCamera->getFarClipDistance() != list.at(0).toFloat())
+                mCamera->setFarClipDistance(list.at(0).toFloat());
+        }
+
+        // minimise unnecessary ogre window creation by updating only when there is a change
+        if(key == "3d-render/antialiasing")
+        {
+            unsigned int aa = mWindow->getFSAA();
+            unsigned int antialiasing = 0;
+            if(!list.empty())
+            {
+                if(list.at(0) == "MSAA 16")     antialiasing = 16;
+                else if(list.at(0) == "MSAA 8") antialiasing = 8;
+                else if(list.at(0) == "MSAA 4") antialiasing = 4;
+                else if(list.at(0) == "MSAA 2") antialiasing = 2;
+            }
+            if(aa != antialiasing)
+                updateOgreWindow();
+        }
     }
 }

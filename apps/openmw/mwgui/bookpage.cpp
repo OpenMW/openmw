@@ -360,10 +360,16 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             int spaceLeft = mPageHeight - (curPageStop - curPageStart);
             int sectionHeight = i->mRect.height ();
 
-            if (sectionHeight <= mPageHeight)
+            // This is NOT equal to i->mRect.height(), which doesn't account for section breaks.
+            int spaceRequired = (i->mRect.bottom - curPageStop);
+            if (curPageStart == curPageStop) // If this is a new page, the section break is not needed
+                spaceRequired = i->mRect.height();
+
+            if (spaceRequired <= mPageHeight)
             {
-                if (sectionHeight > spaceLeft)
+                if (spaceRequired > spaceLeft)
                 {
+                    // The section won't completely fit on the current page. Finish the current page and start a new one.
                     assert (curPageStart != curPageStop);
 
                     mBook->mPages.push_back (Page (curPageStart, curPageStop));
@@ -380,8 +386,6 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
                 int sectionHeightLeft = sectionHeight;
                 while (sectionHeightLeft > mPageHeight)
                 {
-                    spaceLeft = mPageHeight - (curPageStop - curPageStart);
-
                     // Adjust to the top of the first line that does not fit on the current page anymore
                     int splitPos = curPageStop;
                     for (Lines::iterator j = i->mLines.begin (); j != i->mLines.end (); ++j)

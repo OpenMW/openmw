@@ -13,7 +13,7 @@ set(LAUNCHER
     utils/textinputdialog.cpp
     utils/lineedit.cpp
 
-    ${CMAKE_SOURCE_DIR}/files/launcher/launcher.rc
+    ${CMAKE_SOURCE_DIR}/files/windows/launcher.rc
 )
 
 set(LAUNCHER_HEADER
@@ -74,19 +74,10 @@ QT4_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
 include(${QT_USE_FILE})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 if(NOT WIN32)
-    include_directories(${LIBUNSHIELD_INCLUDE})
+    include_directories(${LIBUNSHIELD_INCLUDE_DIR})
 endif(NOT WIN32)
 
 # Main executable
-IF(OGRE_STATIC)
-IF(WIN32)
-ADD_DEFINITIONS(-DENABLE_PLUGIN_Direct3D9 -DENABLE_PLUGIN_GL)
-set(OGRE_STATIC_PLUGINS ${OGRE_RenderSystem_Direct3D9_LIBRARIES} ${OGRE_RenderSystem_GL_LIBRARIES})
-ELSE(WIN32)
-ADD_DEFINITIONS(-DENABLE_PLUGIN_GL)
-set(OGRE_STATIC_PLUGINS ${OGRE_RenderSystem_GL_LIBRARIES})
-ENDIF(WIN32)
-ENDIF(OGRE_STATIC)
 add_executable(omwlauncher
     ${GUI_TYPE}
     ${LAUNCHER}
@@ -100,16 +91,13 @@ target_link_libraries(omwlauncher
     ${Boost_LIBRARIES}
     ${OGRE_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
-    ${SDL2_LIBRARY}
+    ${SDL2_LIBRARY_ONLY}
     ${QT_LIBRARIES}
     components
 )
 
-if(DPKG_PROGRAM)
-    INSTALL(TARGETS omwlauncher RUNTIME DESTINATION games COMPONENT omwlauncher)
-endif()
 
-if(BUILD_WITH_CODE_COVERAGE)
+if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
   target_link_libraries(omwlauncher gcov)
 endif()

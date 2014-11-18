@@ -17,14 +17,9 @@
 
 #include "openal_output.hpp"
 #define SOUND_OUT "OpenAL"
-/* Set up the sound manager to use FFMPEG for input.
- * The OPENMW_USE_x macros are set in CMakeLists.txt.
-*/
-#ifdef OPENMW_USE_FFMPEG
 #include "ffmpeg_decoder.hpp"
 #ifndef SOUND_IN
 #define SOUND_IN "FFmpeg"
-#endif
 #endif
 
 
@@ -42,6 +37,7 @@ namespace MWSound
         , mListenerPos(0,0,0)
         , mListenerDir(1,0,0)
         , mListenerUp(0,0,1)
+        , mListenerUnderwater(false)
     {
         if(!useSound)
             return;
@@ -179,6 +175,7 @@ namespace MWSound
         if(!mOutput->isInitialized())
             return;
         std::cout <<"Playing "<<filename<< std::endl;
+        mLastPlayedMusic = filename;
         try
         {
             stopMusic();
@@ -203,19 +200,31 @@ namespace MWSound
     void SoundManager::startRandomTitle()
     {
         Ogre::StringVector filelist;
-
-        Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
-        for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
+        if (mMusicFiles.find(mCurrentPlaylist) == mMusicFiles.end())
         {
-            Ogre::StringVectorPtr resourcesInThisGroup = mResourceMgr.findResourceNames(*it,
-                                                                                        "Music/"+mCurrentPlaylist+"/*");
-            filelist.insert(filelist.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
+            Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
+            for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
+            {
+                Ogre::StringVectorPtr resourcesInThisGroup = mResourceMgr.findResourceNames(*it,
+                                                                                            "Music/"+mCurrentPlaylist+"/*");
+                filelist.insert(filelist.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
+            }
+            mMusicFiles[mCurrentPlaylist] = filelist;
         }
+        else
+            filelist = mMusicFiles[mCurrentPlaylist];
 
         if(!filelist.size())
             return;
 
         int i = rand()%filelist.size();
+
+        // Don't play the same music track twice in a row
+        if (filelist[i] == mLastPlayedMusic)
+        {
+            i = (i+1) % filelist.size();
+        }
+
         streamMusicFull(filelist[i]);
     }
 
@@ -242,13 +251,28 @@ namespace MWSound
             const Ogre::Vector3 objpos(pos.pos);
 
             MWBase::SoundPtr sound = mOutput->playSound3D(filePath, objpos, 1.0f, basevol, 1.0f,
-                                                          20.0f, 1500.0f, Play_Normal|Play_TypeVoice, 0);
+                                                          20.0f, 1500.0f, Play_Normal|Play_TypeVoice, 0, true);
             mActiveSounds[sound] = std::make_pair(ptr, std::string("_say_sound"));
         }
         catch(std::exception &e)
         {
             std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
+    }
+
+    float SoundManager::getSaySoundLoudness(const MWWorld::Ptr &ptr) const
+    {
+        SoundMap::const_iterator snditer = mActiveSounds.begin();
+        while(snditer != mActiveSounds.end())
+        {
+            if(snditer->second.first == ptr && snditer->second.second == "_say_sound")
+                break;
+            ++snditer;
+        }
+        if (snditer == mActiveSounds.end())
+            return 0.f;
+
+        return snditer->first->getCurrentLoudness();
     }
 
     void SoundManager::say(const std::string& filename)
@@ -372,7 +396,7 @@ namespace MWSound
             sound = mOutput->playSound3D(file, initialPos, volume, basevol, pitch, min, max, mode|type, offset);
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
-        catch(std::exception &e)
+        catch(std::exception &)
         {
             //std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
@@ -430,6 +454,7 @@ namespace MWSound
         while(snditer != mActiveSounds.end())
         {
             if(snditer->second.first != MWWorld::Ptr() &&
+               snditer->second.first.getCellRef().getRefId() != "player" &&
                snditer->second.first.getCell() == cell)
             {
                 snditer->first->stop();
@@ -571,12 +596,8 @@ namespace MWSound
         if(!isMusicPlaying())
             startRandomTitle();
 
-        MWWorld::Ptr player =
-            MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const ESM::Cell *cell = player.getCell()->getCell();
-
         Environment env = Env_Normal;
-        if((cell->mData.mFlags&cell->HasWater) && mListenerPos.z < cell->mWater)
+        if (mListenerUnderwater)
         {
             env = Env_Underwater;
             //play underwater sound
@@ -669,6 +690,12 @@ namespace MWSound
         mListenerPos = pos;
         mListenerDir = dir;
         mListenerUp  = up;
+
+        MWWorld::Ptr player =
+            MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const ESM::Cell *cell = player.getCell()->getCell();
+
+        mListenerUnderwater = ((cell->mData.mFlags&cell->HasWater) && mListenerPos.z < cell->mWater);
     }
 
     void SoundManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)

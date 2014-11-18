@@ -37,6 +37,8 @@ public:
     char **get() const { return const_cast<char **>(argv); }
 
 private:
+    utf8argv(const utf8argv&);
+    utf8argv& operator=(const utf8argv&);
 
     const char **argv;
     std::vector<std::string> args;

@@ -35,7 +35,7 @@ namespace MWGui
         bool found = false;
         for (; it != out.end(); ++it)
         {
-            if (it->stacks(item))
+            if (it->mBase == item.mBase)
             {
                 it->mCount += item.mCount;
                 found = true;
@@ -52,7 +52,7 @@ namespace MWGui
         bool found = false;
         for (; it != out.end(); ++it)
         {
-            if (it->stacks(item))
+            if (it->mBase == item.mBase)
             {
                 if (it->mCount < count)
                     throw std::runtime_error("Not enough borrowed items to return");
@@ -93,6 +93,21 @@ namespace MWGui
         unborrowImpl(item, count, mBorrowedFromUs);
     }
 
+    void TradeItemModel::adjustEncumbrance(float &encumbrance)
+    {
+        for (std::vector<ItemStack>::iterator it = mBorrowedToUs.begin(); it != mBorrowedToUs.end(); ++it)
+        {
+            MWWorld::Ptr item = it->mBase;
+            encumbrance += item.getClass().getWeight(item) * it->mCount;
+        }
+        for (std::vector<ItemStack>::iterator it = mBorrowedFromUs.begin(); it != mBorrowedFromUs.end(); ++it)
+        {
+            MWWorld::Ptr item = it->mBase;
+            encumbrance -= item.getClass().getWeight(item) * it->mCount;
+        }
+        encumbrance = std::max(0.f, encumbrance);
+    }
+
     void TradeItemModel::abort()
     {
         mBorrowedFromUs.clear();
@@ -114,7 +129,7 @@ namespace MWGui
             size_t i=0;
             for (; i<sourceModel->getItemCount(); ++i)
             {
-                if (it->stacks(sourceModel->getItem(i)))
+                if (it->mBase == sourceModel->getItem(i).mBase)
                     break;
             }
             if (i == sourceModel->getItemCount())
@@ -154,11 +169,8 @@ namespace MWGui
                     continue;
 
                 // Bound items may not be bought
-                if (item.mBase.getCellRef().getRefId().size() > 6
-                        && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
-                {
+                if (item.mFlags & ItemStack::Flag_Bound)
                     continue;
-                }
 
                 // don't show equipped items
                 if(mMerchant.getClass().hasInventoryStore(mMerchant))
@@ -182,7 +194,7 @@ namespace MWGui
             std::vector<ItemStack>::iterator it = mBorrowedFromUs.begin();
             for (; it != mBorrowedFromUs.end(); ++it)
             {
-                if (it->stacks(item))
+                if (it->mBase == item.mBase)
                 {
                     if (item.mCount < it->mCount)
                         throw std::runtime_error("Lent more items than present");

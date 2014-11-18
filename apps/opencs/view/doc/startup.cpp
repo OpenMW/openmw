@@ -81,6 +81,7 @@ QWidget *CSVDoc::StartupDialogue::createTools()
 
     config->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
     config->setIcon (QIcon (":startup/configure"));
+    config->setToolTip ("Open user settings");
 
     layout->addWidget (config);
 

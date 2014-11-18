@@ -20,7 +20,9 @@ namespace Compiler
         l - Integer <BR>
         s - Short <BR>
         S - String, case preserved <BR>
-        x - Optional, ignored argument
+        x - Optional, ignored string argument
+        X - Optional, ignored numeric expression
+        z - Optional, ignored string or numeric argument
     **/
     typedef std::string ScriptArgs;
 
@@ -105,7 +107,7 @@ namespace Compiler
             ///< Append code for function to \a code.
 
             void listKeywords (std::vector<std::string>& keywords) const;
-            ///< Append all known keywords to \æ kaywords.
+            ///< Append all known keywords to \a kaywords.
     };
 }
 

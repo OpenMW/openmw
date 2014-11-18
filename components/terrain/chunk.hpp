@@ -7,21 +7,21 @@
 namespace Terrain
 {
 
-    class BufferCache;
-    struct LoadResponseData;
-
     /**
-     * @brief Renders a chunk of terrain, either using alpha splatting or a composite map.
+     * @brief A movable object representing a chunk of terrain.
      */
     class Chunk : public Ogre::Renderable, public Ogre::MovableObject
     {
     public:
-        Chunk (Ogre::HardwareVertexBufferSharedPtr uvBuffer, const Ogre::AxisAlignedBox& bounds, const LoadResponseData& data);
+        Chunk (Ogre::HardwareVertexBufferSharedPtr uvBuffer, const Ogre::AxisAlignedBox& bounds,
+               const std::vector<float>& positions,
+               const std::vector<float>& normals,
+               const std::vector<Ogre::uint8>& colours);
 
         virtual ~Chunk();
 
-        /// @note Takes ownership of \a material
-        void setMaterial (const Ogre::MaterialPtr& material);
+        /// @param own Should we take ownership of the material?
+        void setMaterial (const Ogre::MaterialPtr& material, bool own=true);
 
         void setIndexBuffer(Ogre::HardwareIndexBufferSharedPtr buffer);
 
@@ -43,6 +43,7 @@ namespace Terrain
     private:
         Ogre::AxisAlignedBox mBounds;
         Ogre::MaterialPtr mMaterial;
+        bool mOwnMaterial; // Should we remove mMaterial on destruction?
 
         Ogre::VertexData* mVertexData;
         Ogre::IndexData* mIndexData;

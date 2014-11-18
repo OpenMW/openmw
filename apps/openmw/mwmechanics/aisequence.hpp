@@ -4,15 +4,30 @@
 #include <list>
 
 #include <components/esm/loadnpc.hpp>
+//#include "aistate.hpp"
 
 namespace MWWorld
 {
     class Ptr;
 }
 
+namespace ESM
+{
+    namespace AiSequence
+    {
+        class AiSequence;
+    }
+}
+
+
+
 namespace MWMechanics
 {
     class AiPackage;
+    
+    template< class Base > class DerivedClassStorage;
+    struct AiTemporaryBase;
+    typedef DerivedClassStorage<AiTemporaryBase> AiState;
 
     /// \brief Sequence of AI-packages for a single actor
     /** The top-most AI package is run each frame. When completed, it is removed from the stack. **/
@@ -42,6 +57,12 @@ namespace MWMechanics
 
             virtual ~AiSequence();
 
+            /// Iterator may be invalidated by any function calls other than begin() or end().
+            std::list<AiPackage*>::const_iterator begin() const;
+            std::list<AiPackage*>::const_iterator end() const;
+
+            void erase (std::list<AiPackage*>::const_iterator package);
+
             /// Returns currently executing AiPackage type
             /** \see enum AiPackage::TypeId **/
             int getTypeId() const;
@@ -54,6 +75,12 @@ namespace MWMechanics
 
             /// Return true and assign target if combat package is currently active, return false otherwise
             bool getCombatTarget (MWWorld::Ptr &targetActor) const;
+
+            /// Is there any combat package?
+            bool isInCombat () const;
+
+            /// Are we in combat with this particular actor?
+            bool isInCombat (const MWWorld::Ptr& actor) const;
 
             bool canAddTarget(const ESM::Position& actorPos, float distToTarget) const;
             ///< Function assumes that actor can have only 1 target apart player
@@ -68,7 +95,7 @@ namespace MWMechanics
             void stopPursuit();
 
             /// Execute current package, switching if needed.
-            void execute (const MWWorld::Ptr& actor,float duration);
+            void execute (const MWWorld::Ptr& actor, MWMechanics::AiState& state, float duration);
 
             /// Remove all packages.
             void clear();
@@ -78,10 +105,6 @@ namespace MWMechanics
                 @param actor The actor that owns this AiSequence **/
             void stack (const AiPackage& package, const MWWorld::Ptr& actor);
 
-            /// Add \a package to the end of the sequence
-            /** Executed after all other packages have been completed **/
-            void queue (const AiPackage& package);
-
             /// Return the current active package.
             /** If there is no active package, it will throw an exception **/
             AiPackage* getActivePackage();
@@ -90,6 +113,9 @@ namespace MWMechanics
             /** Typically used for loading from the ESM
                 \see ESM::AIPackageList **/
             void fill (const ESM::AIPackageList& list);
+
+            void writeState (ESM::AiSequence::AiSequence& sequence) const;
+            void readState (const ESM::AiSequence::AiSequence& sequence);
     };
 }
 

@@ -47,12 +47,20 @@ namespace
 
 namespace MWClass
 {
+    std::string Light::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Light>()->mBase->mId;
+    }
+
     void Light::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
-        if(!model.empty()) {
-            renderingInterface.getObjects().insertModel(ptr, model);
-        }
+
+        MWWorld::LiveCellRef<ESM::Light> *ref =
+            ptr.get<ESM::Light>();
+
+        // Insert even if model is empty, so that the light is added
+        renderingInterface.getObjects().insertModel(ptr, model, false, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
     }
 
     void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
@@ -66,7 +74,7 @@ namespace MWClass
         if(!model.empty())
             physics.addObject(ptr,ref->mBase->mData.mFlags & ESM::Light::Carry);
 
-        if (!ref->mBase->mSound.empty())
+        if (!ref->mBase->mSound.empty() && !(ref->mBase->mData.mFlags & ESM::Light::OffDefault))
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0,
                                                                       MWBase::SoundManager::Play_TypeSfx,
                                                                       MWBase::SoundManager::Play_Loop);
@@ -183,12 +191,14 @@ namespace MWClass
 
         std::string text;
 
-        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
+        if (ref->mBase->mData.mWeight != 0)
+        {
+            text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
+            text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+        }
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
+            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -289,5 +299,10 @@ namespace MWClass
         ensureCustomData (ptr);
 
         state2.mTime = dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime;
+    }
+
+    std::string Light::getSound(const MWWorld::Ptr& ptr) const
+    {
+      return ptr.get<ESM::Light>()->mBase->mSound;
     }
 }

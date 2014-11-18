@@ -102,6 +102,8 @@ namespace MWWorld
             typedef std::vector<std::pair<ContainerStoreIterator, float> > TRechargingItems;
             TRechargingItems mRechargingItems;
 
+            bool mRechargingItemsUpToDate;
+
             void copySlots (const InventoryStore& store);
 
             void initSlots (TSlots& slots_);
@@ -141,7 +143,7 @@ namespace MWWorld
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
             void equip (int slot, const ContainerStoreIterator& iterator, const Ptr& actor);
-            ///< \note \a iterator can be an end-iterator
+            ///< \warning \a iterator can not be an end()-iterator, use unequip function instead
 
             void setSelectedEnchantItem(const ContainerStoreIterator& iterator);
             ///< set the selected magic item (for using enchantments of type "Cast once" or "Cast when used")

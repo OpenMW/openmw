@@ -27,7 +27,7 @@ namespace Compiler
                 bool end = false);
 
             void getCode (std::vector<Interpreter::Type_Code>& code) const;
-            ///< store generated code in \æ code.
+            ///< store generated code in \a code.
 
             virtual bool parseName (const std::string& name, const TokenLoc& loc,
                 Scanner& scanner);

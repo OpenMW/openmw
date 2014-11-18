@@ -118,14 +118,16 @@ namespace ICS
 		//TODO: does this have an SDL equivalent?
         //bool sliderMoved(const OIS::JoyStickEvent &evt, int index);
 
-		void addKeyBinding(Control* control, SDL_Keycode key, Control::ControlChangingDirection direction);
+        void addKeyBinding(Control* control, SDL_Scancode key, Control::ControlChangingDirection direction);
+        bool isKeyBound(SDL_Scancode key) const;
 		void addMouseAxisBinding(Control* control, NamedAxis axis, Control::ControlChangingDirection direction);
 		void addMouseButtonBinding(Control* control, unsigned int button, Control::ControlChangingDirection direction);
-		void addJoystickAxisBinding(Control* control, int deviceId, int axis, Control::ControlChangingDirection direction);
+        bool isMouseButtonBound(unsigned int button) const;
+        void addJoystickAxisBinding(Control* control, int deviceId, int axis, Control::ControlChangingDirection direction);
 		void addJoystickButtonBinding(Control* control, int deviceId, unsigned int button, Control::ControlChangingDirection direction);
 		void addJoystickPOVBinding(Control* control, int deviceId, int index, POVAxis axis, Control::ControlChangingDirection direction);
 		void addJoystickSliderBinding(Control* control, int deviceId, int index, Control::ControlChangingDirection direction);
-		void removeKeyBinding(SDL_Keycode key);
+        void removeKeyBinding(SDL_Scancode key);
 		void removeMouseAxisBinding(NamedAxis axis);
 		void removeMouseButtonBinding(unsigned int button);
 		void removeJoystickAxisBinding(int deviceId, int axis);
@@ -133,7 +135,7 @@ namespace ICS
 		void removeJoystickPOVBinding(int deviceId, int index, POVAxis axis);
 		void removeJoystickSliderBinding(int deviceId, int index);
 
-		SDL_Keycode getKeyBinding(Control* control, ICS::Control::ControlChangingDirection direction);
+        SDL_Scancode getKeyBinding(Control* control, ICS::Control::ControlChangingDirection direction);
 		NamedAxis getMouseAxisBinding(Control* control, ICS::Control::ControlChangingDirection direction);
 		unsigned int getMouseButtonBinding(Control* control, ICS::Control::ControlChangingDirection direction);
 		int getJoystickAxisBinding(Control* control, int deviceId, ICS::Control::ControlChangingDirection direction);
@@ -141,11 +143,11 @@ namespace ICS
 		POVBindingPair getJoystickPOVBinding(Control* control, int deviceId, ICS::Control::ControlChangingDirection direction);
 		int getJoystickSliderBinding(Control* control, int deviceId, ICS::Control::ControlChangingDirection direction);
 
-		std::string keyCodeToString(SDL_Keycode key);
-		SDL_Keycode stringToKeyCode(std::string key);
+        std::string scancodeToString(SDL_Scancode key);
 
 		void enableDetectingBindingState(Control* control, Control::ControlChangingDirection direction);
 		void cancelDetectingBindingState();
+        bool detectingBindingState();
 
 		bool save(std::string fileName = "");
 
@@ -185,7 +187,7 @@ namespace ICS
 
 		std::string mFileName;
 
-		typedef std::map<SDL_Keycode, ControlKeyBinderItem> ControlsKeyBinderMapType;	// <KeyCode, [direction, control]>
+        typedef std::map<SDL_Scancode, ControlKeyBinderItem> ControlsKeyBinderMapType;	// <Scancode, [direction, control]>
 		typedef std::map<int, ControlAxisBinderItem> ControlsAxisBinderMapType;			// <axis, [direction, control]>
 		typedef std::map<int, ControlButtonBinderItem> ControlsButtonBinderMapType;		// <button, [direction, control]>
 		typedef std::map<int, ControlPOVBinderItem> ControlsPOVBinderMapType;			// <index, [direction, control]>
@@ -207,8 +209,6 @@ namespace ICS
 		std::vector<Channel *> mChannels;
 
 		ControlsKeyBinderMapType mControlsKeyBinderMap;
-		std::map<std::string, SDL_Keycode> mKeys;
-		std::map<SDL_Keycode, std::string> mKeyCodes;
 
 		bool mActive;
 		InputControlSystemLog* mLog;
@@ -226,8 +226,6 @@ namespace ICS
 
 	private:
 
-		void fillSDLKeysMap();
-
 		Uint16 mClientWidth;
 		Uint16 mClientHeight;
 	};
@@ -236,7 +234,7 @@ namespace ICS
 	{
 	public:
 		virtual void keyBindingDetected(InputControlSystem* ICS, Control* control
-			, SDL_Keycode key, Control::ControlChangingDirection direction);
+            , SDL_Scancode key, Control::ControlChangingDirection direction);
 
 		virtual void mouseAxisBindingDetected(InputControlSystem* ICS, Control* control
 			, InputControlSystem::NamedAxis axis, Control::ControlChangingDirection direction);

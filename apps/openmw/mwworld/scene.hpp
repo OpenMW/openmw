@@ -60,10 +60,12 @@ namespace MWWorld
 
             bool mNeedMapUpdate;
 
-            void playerCellChange (CellStore *cell, const ESM::Position& position,
-                bool adjustPlayerPos = true);
-
             void insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener);
+
+            // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
+            void changeCellGrid (int X, int Y);
+
+            void getGridCenter(int& cellX, int& cellY);
 
         public:
 
@@ -75,19 +77,21 @@ namespace MWWorld
 
             void loadCell (CellStore *cell, Loading::Listener* loadingListener);
 
-            void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
+            void playerMoved (const Ogre::Vector3& pos);
 
-            CellStore* getCurrentCell ();
+            void changePlayerCell (CellStore* newCell, const ESM::Position& position, bool adjustPlayerPos);
+
+            CellStore *getCurrentCell();
 
             const CellStoreCollection& getActiveCells () const;
 
             bool hasCellChanged() const;
-            ///< Has the player moved to a different cell, since the last frame?
+            ///< Has the set of active cells changed, since the last frame?
 
             void changeToInteriorCell (const std::string& cellName, const ESM::Position& position);
             ///< Move to interior cell.
 
-            void changeToExteriorCell (const ESM::Position& position);
+            void changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos);
             ///< Move to exterior cell.
 
             void changeToVoid();
@@ -102,6 +106,10 @@ namespace MWWorld
 
             void removeObjectFromScene (const Ptr& ptr);
             ///< Remove an object from the scene, but not from the world model.
+
+            void updateObjectLocalRotation (const Ptr& ptr);
+
+            void updateObjectRotation (const Ptr& ptr);
 
             bool isCellActive(const CellStore &cell);
 

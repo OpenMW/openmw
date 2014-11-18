@@ -20,6 +20,7 @@ namespace MWGui
         MyGUI::EditBox* mLevelDescription;
 
         MyGUI::Widget* mCoinBox;
+        MyGUI::Widget* mAssignWidget;
 
         std::vector<MyGUI::Button*> mAttributes;
         std::vector<MyGUI::TextBox*> mAttributeValues;
@@ -28,8 +29,11 @@ namespace MWGui
 
         std::vector<int> mSpentAttributes;
 
-        void onOkButtonClicked (MyGUI::Widget* sender);
-        void onAttributeClicked (MyGUI::Widget* sender);
+        unsigned int mCoinCount;
+        static const unsigned int sMaxCoins;
+
+        void onOkButtonClicked(MyGUI::Widget* sender);
+        void onAttributeClicked(MyGUI::Widget* sender);
 
         void assignCoins();
         void resetCoins();

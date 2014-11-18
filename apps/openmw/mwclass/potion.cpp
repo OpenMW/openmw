@@ -24,6 +24,11 @@
 
 namespace MWClass
 {
+    std::string Potion::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Potion>()->mBase->mId;
+    }
+
     void Potion::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
@@ -127,7 +132,7 @@ namespace MWClass
         std::string text;
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
+        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         info.effects = MWGui::Widgets::MWEffectList::effectListFromESM(&ref->mBase->mEffects);
 
@@ -140,19 +145,15 @@ namespace MWClass
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->getFloat();
         for (MWGui::Widgets::SpellEffectList::iterator it = info.effects.begin(); it != info.effects.end(); ++it)
         {
-            it->mKnown = ( (i == 0 && alchemySkill >= fWortChanceValue)
-                 || (i == 1 && alchemySkill >= fWortChanceValue*2)
-                 || (i == 2 && alchemySkill >= fWortChanceValue*3)
-                 || (i == 3 && alchemySkill >= fWortChanceValue*4));
-
+            it->mKnown = (i <= 1 && alchemySkill >= fWortChanceValue)
+                 || (i <= 3 && alchemySkill >= fWortChanceValue*2);
             ++i;
         }
 
         info.isPotion = true;
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
+            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -166,13 +167,8 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
-        MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
-        // remove used potion (assume it is present in inventory)
-        ptr.getContainerStore()->remove(ptr, 1, actor);
-
         boost::shared_ptr<MWWorld::Action> action (
-            new MWWorld::ActionApply (actor, ref->mBase->mId));
+            new MWWorld::ActionApply (ptr, ref->mBase->mId));
 
         action->setSound ("Drink");
 

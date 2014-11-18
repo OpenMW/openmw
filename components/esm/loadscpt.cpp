@@ -22,6 +22,8 @@ void Script::load(ESMReader &esm)
     mData = data.mData;
     mId = data.mName.toString();
 
+    mVarNames.clear();
+
     // List of local variables
     if (esm.isNextSub("SCVR"))
     {
@@ -38,22 +40,51 @@ void Script::load(ESMReader &esm)
         char* str = &tmp[0];
         for (size_t i = 0; i < mVarNames.size(); i++)
         {
+            // Support '\r' terminated strings like vanilla.  See Bug #1324.
             char *termsym = strchr(str, '\r');
             if(termsym) *termsym = '\0';
             mVarNames[i] = std::string(str);
             str += mVarNames[i].size() + 1;
 
             if (str - &tmp[0] > s)
-                esm.fail("String table overflow");
+            {
+                // Apparently SCVR subrecord is not used and variable names are
+                // determined on the fly from the script text.  Therefore don't throw
+                // an exeption, just log an error and continue.
+                std::stringstream ss;
+
+                ss << "ESM Error: " << "String table overflow";
+                ss << "\n  File: " << esm.getName();
+                ss << "\n  Record: " << esm.getContext().recName.toString();
+                ss << "\n  Subrecord: " << "SCVR";
+                ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
+                std::cerr << ss.str() << std::endl;
+                break;
+            }
+
         }
     }
 
     // Script mData
-    mScriptData.resize(mData.mScriptDataSize);
-    esm.getHNExact(&mScriptData[0], mScriptData.size(), "SCDT");
+    if (esm.isNextSub("SCDT"))
+    {
+        mScriptData.resize(mData.mScriptDataSize);
+        esm.getHExact(&mScriptData[0], mScriptData.size());
+    }
 
     // Script text
     mScriptText = esm.getHNOString("SCTX");
+
+    // NOTE: A minor hack/workaround...
+    //
+    // MAO_Containers.esp from Morrowind Acoustic Overhaul has SCVR records
+    // at the end (see Bug #1849). Since OpenMW does not use SCVR subrecords
+    // for variable names just skip these as a quick fix.  An alternative
+    // solution would be to decode and validate SCVR subrecords even if they
+    // appear here.
+    if (esm.isNextSub("SCVR")) {
+        esm.skipHSub();
+    }
 }
 void Script::save(ESMWriter &esm) const
 {
@@ -95,7 +126,11 @@ void Script::save(ESMWriter &esm) const
 
         mVarNames.clear();
         mScriptData.clear();
-        mScriptText = "Begin " + mId + "\n\nEnd " + mId + "\n";
+
+        if (mId.find ("::")!=std::string::npos)
+            mScriptText = "Begin \"" + mId + "\"\n\nEnd " + mId + "\n";
+        else
+            mScriptText = "Begin " + mId + "\n\nEnd " + mId + "\n";
     }
 
 }

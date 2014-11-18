@@ -7,6 +7,14 @@
 
 #include "pathfinding.hpp"
 
+namespace ESM
+{
+namespace AiSequence
+{
+    struct AiPursue;
+}
+}
+
 namespace MWMechanics
 {
     /// \brief Makes the actor very closely follow the actor
@@ -20,17 +28,19 @@ namespace MWMechanics
             /** \param actor Actor to pursue **/
             AiPursue(const MWWorld::Ptr& actor);
 
+            AiPursue(const ESM::AiSequence::AiPursue* pursue);
+
             virtual AiPursue *clone() const;
-            virtual bool execute (const MWWorld::Ptr& actor,float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
             virtual int getTypeId() const;
 
             MWWorld::Ptr getTarget() const;
 
+            virtual void writeState (ESM::AiSequence::AiSequence& sequence) const;
+
         private:
 
             int mTargetActorId; // The actor to pursue
-            int mCellX;
-            int mCellY;
     };
 }
 #endif

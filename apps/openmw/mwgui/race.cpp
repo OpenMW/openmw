@@ -32,7 +32,6 @@ namespace MWGui
       , mHairIndex(0)
       , mCurrentAngle(0)
       , mPreviewDirty(true)
-      , mPreview(NULL)
     {
         // Centre dialog
         center();
@@ -42,12 +41,11 @@ namespace MWGui
 
         getWidget(mHeadRotate, "HeadRotate");
 
-        // Mouse wheel step is hardcoded to 50 in MyGUI 3.2 ("FIXME").
-        // Give other steps the same value to accomodate.
         mHeadRotate->setScrollRange(1000);
         mHeadRotate->setScrollPosition(500);
         mHeadRotate->setScrollViewPage(50);
         mHeadRotate->setScrollPage(50);
+        mHeadRotate->setScrollWheelPage(50);
         mHeadRotate->eventScrollChangePosition += MyGUI::newDelegate(this, &RaceDialog::onHeadRotate);
 
         // Set up next/previous buttons
@@ -115,7 +113,14 @@ namespace MWGui
         updateSkills();
         updateSpellPowers();
 
-        mPreview = new MWRender::RaceSelectionPreview();
+        mPreview.reset(NULL);
+
+        mPreviewImage->setImageTexture("");
+
+        const std::string textureName = "CharacterHeadPreview";
+        MyGUI::RenderManager::getInstance().destroyTexture(MyGUI::RenderManager::getInstance().getTexture(textureName));
+
+        mPreview.reset(new MWRender::RaceSelectionPreview());
         mPreview->setup();
         mPreview->update (0);
 
@@ -129,7 +134,7 @@ namespace MWGui
         index = proto.mHair.substr(proto.mHair.size() - 2, 2);
         mHairIndex = boost::lexical_cast<int>(index) - 1;
 
-        mPreviewImage->setImageTexture ("CharacterHeadPreview");
+        mPreviewImage->setImageTexture (textureName);
 
         mPreviewDirty = true;
     }
@@ -157,8 +162,7 @@ namespace MWGui
 
     void RaceDialog::close()
     {
-        delete mPreview;
-        mPreview = 0;
+        mPreview.reset(NULL);
     }
 
     // widget controls
@@ -306,6 +310,10 @@ namespace MWGui
 
     void RaceDialog::doRenderUpdate()
     {
+        if (!mPreview.get())
+            return;
+
+        mPreview->onFrame();
         if (mPreviewDirty)
         {
             mPreview->render();
@@ -384,7 +392,6 @@ namespace MWGui
         if (mCurrentRaceId.empty())
             return;
 
-        Widgets::MWSpellPtr spellPowerWidget;
         const int lineHeight = 18;
         MyGUI::IntCoord coord(0, 0, mSpellPowerList->getWidth(), 18);
 
@@ -396,7 +403,7 @@ namespace MWGui
         for (int i = 0; it != end; ++it)
         {
             const std::string &spellpower = *it;
-            spellPowerWidget = mSpellPowerList->createWidget<Widgets::MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + boost::lexical_cast<std::string>(i));
+            Widgets::MWSpellPtr spellPowerWidget = mSpellPowerList->createWidget<Widgets::MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + boost::lexical_cast<std::string>(i));
             spellPowerWidget->setSpellId(spellpower);
             spellPowerWidget->setUserString("ToolTipType", "Spell");
             spellPowerWidget->setUserString("Spell", spellpower);

@@ -1,6 +1,7 @@
 #include "loadmgef.hpp"
 
 #include <stdexcept>
+#include <sstream>
 
 #include <boost/lexical_cast.hpp>
 
@@ -10,6 +11,157 @@
 
 namespace
 {
+    static const char *sIds[ESM::MagicEffect::Length] =
+    {
+        "WaterBreathing",
+        "SwiftSwim",
+        "WaterWalking",
+        "Shield",
+        "FireShield",
+        "LightningShield",
+        "FrostShield",
+        "Burden",
+        "Feather",
+        "Jump",
+        "Levitate",
+        "SlowFall",
+        "Lock",
+        "Open",
+        "FireDamage",
+        "ShockDamage",
+        "FrostDamage",
+        "DrainAttribute",
+        "DrainHealth",
+        "DrainMagicka",
+        "DrainFatigue",
+        "DrainSkill",
+        "DamageAttribute",
+        "DamageHealth",
+        "DamageMagicka",
+        "DamageFatigue",
+        "DamageSkill",
+        "Poison",
+        "WeaknessToFire",
+        "WeaknessToFrost",
+        "WeaknessToShock",
+        "WeaknessToMagicka",
+        "WeaknessToCommonDisease",
+        "WeaknessToBlightDisease",
+        "WeaknessToCorprusDisease",
+        "WeaknessToPoison",
+        "WeaknessToNormalWeapons",
+        "DisintegrateWeapon",
+        "DisintegrateArmor",
+        "Invisibility",
+        "Chameleon",
+        "Light",
+        "Sanctuary",
+        "NightEye",
+        "Charm",
+        "Paralyze",
+        "Silence",
+        "Blind",
+        "Sound",
+        "CalmHumanoid",
+        "CalmCreature",
+        "FrenzyHumanoid",
+        "FrenzyCreature",
+        "DemoralizeHumanoid",
+        "DemoralizeCreature",
+        "RallyHumanoid",
+        "RallyCreature",
+        "Dispel",
+        "Soultrap",
+        "Telekinesis",
+        "Mark",
+        "Recall",
+        "DivineIntervention",
+        "AlmsiviIntervention",
+        "DetectAnimal",
+        "DetectEnchantment",
+        "DetectKey",
+        "SpellAbsorption",
+        "Reflect",
+        "CureCommonDisease",
+        "CureBlightDisease",
+        "CureCorprusDisease",
+        "CurePoison",
+        "CureParalyzation",
+        "RestoreAttribute",
+        "RestoreHealth",
+        "RestoreMagicka",
+        "RestoreFatigue",
+        "RestoreSkill",
+        "FortifyAttribute",
+        "FortifyHealth",
+        "FortifyMagicka",
+        "FortifyFatigue",
+        "FortifySkill",
+        "FortifyMaximumMagicka",
+        "AbsorbAttribute",
+        "AbsorbHealth",
+        "AbsorbMagicka",
+        "AbsorbFatigue",
+        "AbsorbSkill",
+        "ResistFire",
+        "ResistFrost",
+        "ResistShock",
+        "ResistMagicka",
+        "ResistCommonDisease",
+        "ResistBlightDisease",
+        "ResistCorprusDisease",
+        "ResistPoison",
+        "ResistNormalWeapons",
+        "ResistParalysis",
+        "RemoveCurse",
+        "TurnUndead",
+        "SummonScamp",
+        "SummonClannfear",
+        "SummonDaedroth",
+        "SummonDremora",
+        "SummonAncestralGhost",
+        "SummonSkeletalMinion",
+        "SummonBonewalker",
+        "SummonGreaterBonewalker",
+        "SummonBonelord",
+        "SummonWingedTwilight",
+        "SummonHunger",
+        "SummonGoldenSaint",
+        "SummonFlameAtronach",
+        "SummonFrostAtronach",
+        "SummonStormAtronach",
+        "FortifyAttack",
+        "CommandCreature",
+        "CommandHumanoid",
+        "BoundDagger",
+        "BoundLongsword",
+        "BoundMace",
+        "BoundBattleAxe",
+        "BoundSpear",
+        "BoundLongbow",
+        "ExtraSpell",
+        "BoundCuirass",
+        "BoundHelm",
+        "BoundBoots",
+        "BoundShield",
+        "BoundGloves",
+        "Corprus",
+        "Vampirism",
+        "SummonCenturionSphere",
+        "SunDamage",
+        "StuntedMagicka",
+
+        // Tribunal only
+        "SummonFabricant",
+
+        // Bloodmoon only
+        "SummonWolf",
+        "SummonBear",
+        "SummonBonewolf",
+        "SummonCreature04",
+        "SummonCreature05"
+    };
+
     const int NumberOfHardcodedFlags = 143;
     const int HardcodedFlags[NumberOfHardcodedFlags] = {
         0x11c8, 0x11c0, 0x11c8, 0x11e0, 0x11e0, 0x11e0, 0x11e0, 0x11d0,
@@ -41,9 +193,16 @@ void MagicEffect::load(ESMReader &esm)
 {
   esm.getHNT(mIndex, "INDX");
 
+    mId = indexToId (mIndex);
+
   esm.getHNT(mData, "MEDT", 36);
-  if (mIndex>=0 && mIndex<NumberOfHardcodedFlags)
-    mData.mFlags |= HardcodedFlags[mIndex];
+  if (esm.getFormat() == 0)
+  {
+      // don't allow mods to change fixed flags in the legacy format
+      mData.mFlags &= (AllowSpellmaking | AllowEnchanting | NegativeLight);
+      if (mIndex>=0 && mIndex<NumberOfHardcodedFlags)
+        mData.mFlags |= HardcodedFlags[mIndex];
+  }
 
   mIcon = esm.getHNOString("ITEX");
   mParticle = esm.getHNOString("PTEX");
@@ -383,4 +542,51 @@ MagicEffect::MagnitudeDisplayType MagicEffect::getMagnitudeDisplayType() const {
     return MDT_Points;
 }
 
+    void MagicEffect::blank()
+    {
+        mData.mSchool = 0;
+        mData.mBaseCost = 0;
+        mData.mFlags = 0;
+        mData.mRed = 0;
+        mData.mGreen = 0;
+        mData.mBlue = 0;
+        mData.mSpeed = 0;
+
+        mIcon.clear();
+        mParticle.clear();
+        mCasting.clear();
+        mHit.clear();
+        mArea.clear();
+        mBolt.clear();
+        mCastSound.clear();
+        mBoltSound.clear();
+        mHitSound.clear();
+        mAreaSound.clear();
+        mDescription.clear();
+    }
+
+    std::string MagicEffect::indexToId (int index)
+    {
+        std::ostringstream stream;
+
+        if (index!=-1)
+        {
+            stream << "#";
+
+            if (index<100)
+            {
+                stream << "0";
+
+                if (index<10)
+                    stream << "0";
+            }
+
+            stream << index;
+
+            if (index>=0 && index<Length)
+                stream << sIds[index];
+        }
+
+        return stream.str();
+    }
 }

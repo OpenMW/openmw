@@ -41,7 +41,8 @@ namespace MWScript
                     }
                     catch (...)
                     {
-                        MWBase::Environment::get().getJournal()->setJournalIndex(quest, index);
+                        if (MWBase::Environment::get().getJournal()->getJournalIndex(quest) < index)
+                            MWBase::Environment::get().getJournal()->setJournalIndex(quest, index);
                     }
                 }
         };
@@ -123,6 +124,9 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+
+                    if (!ptr.getRefData().isEnabled())
+                        return;
 
                     MWBase::Environment::get().getDialogueManager()->startDialogue (ptr);
                 }
@@ -227,11 +231,20 @@ namespace MWScript
                 std::string faction2 = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
 
-                // ignore extra garbage argument
-                runtime.pop();
-
                 runtime.push(MWBase::Environment::get().getDialogueManager()
                              ->getFactionReaction(faction1, faction2));
+            }
+        };
+
+        template <class R>
+        class OpClearInfoActor : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWWorld::Ptr ptr = R()(runtime);
+
+                MWBase::Environment::get().getDialogueManager()->clearInfoActor(ptr);
             }
         };
 
@@ -256,6 +269,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFactionExplicit, new OpSameFaction<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeModFactionReaction, new OpModFactionReaction);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeGetFactionReaction, new OpGetFactionReaction);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeClearInfoActor, new OpClearInfoActor<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeClearInfoActorExplicit, new OpClearInfoActor<ExplicitRef>);
         }
     }
 

@@ -31,8 +31,8 @@ CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& con
         &mLoader, SLOT (loadDocument (CSMDoc::Document *)));
     connect (&mLoader, SIGNAL (nextStage (CSMDoc::Document *, const std::string&, int)),
         this, SIGNAL (nextStage (CSMDoc::Document *, const std::string&, int)));
-    connect (&mLoader, SIGNAL (nextRecord (CSMDoc::Document *)),
-        this, SIGNAL (nextRecord (CSMDoc::Document *)));
+    connect (&mLoader, SIGNAL (nextRecord (CSMDoc::Document *, int)),
+        this, SIGNAL (nextRecord (CSMDoc::Document *, int)));
     connect (this, SIGNAL (cancelLoading (CSMDoc::Document *)),
         &mLoader, SLOT (abortLoading (CSMDoc::Document *)));
     connect (&mLoader, SIGNAL (loadMessage (CSMDoc::Document *, const std::string&)),
@@ -52,7 +52,7 @@ CSMDoc::DocumentManager::~DocumentManager()
 void CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::path>& files, const boost::filesystem::path& savePath,
     bool new_)
 {
-    Document *document = new Document (mConfiguration, files, new_, savePath, mResDir, mEncoding);
+    Document *document = new Document (mConfiguration, files, new_, savePath, mResDir, mEncoding, mResourcesManager, mBlacklistedScripts);
 
     mDocuments.push_back (document);
 
@@ -83,6 +83,16 @@ void CSMDoc::DocumentManager::setResourceDir (const boost::filesystem::path& par
 void CSMDoc::DocumentManager::setEncoding (ToUTF8::FromType encoding)
 {
     mEncoding = encoding;
+}
+
+void CSMDoc::DocumentManager::setBlacklistedScripts (const std::vector<std::string>& scriptIds)
+{
+    mBlacklistedScripts = scriptIds;
+}
+
+void CSMDoc::DocumentManager::listResources()
+{
+    mResourcesManager.listResources();
 }
 
 void CSMDoc::DocumentManager::documentLoaded (Document *document)

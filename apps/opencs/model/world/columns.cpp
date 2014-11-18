@@ -172,8 +172,35 @@ namespace CSMWorld
             { ColumnId_Rank, "Rank" },
             { ColumnId_Gender, "Gender" },
             { ColumnId_PcRank, "PC Rank" },
-            { ColumnId_Scope, "Scope" },
             { ColumnId_ReferenceableId, "Referenceable ID" },
+            { ColumnId_CombatState, "Combat" },
+            { ColumnId_MagicState, "Magic" },
+            { ColumnId_StealthState, "Stealth" },
+            { ColumnId_EnchantmentType, "Enchantment Type" },
+            { ColumnId_Vampire, "Vampire" },
+            { ColumnId_BodyPartType, "Bodypart Type" },
+            { ColumnId_MeshType, "Mesh Type" },
+            { ColumnId_OwnerGlobal, "Owner Global" },
+            { ColumnId_DefaultProfile, "Default Profile" },
+            { ColumnId_BypassNewGame, "Bypass New Game" },
+            { ColumnId_GlobalProfile, "Global Profile" },
+            { ColumnId_RefNumCounter, "RefNum Counter" },
+            { ColumnId_RefNum, "RefNum" },
+            { ColumnId_Creature, "Creature" },
+            { ColumnId_SoundGeneratorType, "Sound Generator Type" },
+            { ColumnId_AllowSpellmaking, "Allow Spellmaking" },
+            { ColumnId_AllowEnchanting, "Allow Enchanting" },
+            { ColumnId_BaseCost, "Base Cost" },
+            { ColumnId_School, "School" },
+            { ColumnId_Particle, "Particle" },
+            { ColumnId_CastingObject, "Casting Object" },
+            { ColumnId_HitObject, "Hit Object" },
+            { ColumnId_AreaObject, "Area Object" },
+            { ColumnId_BoltObject, "Bolt Object" },
+            { ColumnId_CastingSound, "Casting Sound" },
+            { ColumnId_HitSound, "Hit Sound" },
+            { ColumnId_AreaSound, "Area Sound" },
+            { ColumnId_BoltSound, "Bolt Sound" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
@@ -299,6 +326,33 @@ namespace
         "Male", "Female", 0
     };
 
+    static const char *sEnchantmentTypes[] =
+    {
+        "Cast Once", "When Strikes", "When Used", "Constant Effect", 0
+    };
+
+    static const char *sBodyPartTypes[] =
+    {
+        "Head", "Hair", "Neck", "Chest", "Groin", "Hand", "Wrist", "Forearm", "Upper Arm",
+        "Foot", "Ankle", "Knee", "Upper Leg", "Clavicle", "Tail", 0
+    };
+
+    static const char *sMeshTypes[] =
+    {
+        "Skin", "Clothing", "Armour", 0
+    };
+
+    static const char *sSoundGeneratorType[] =
+    {
+        "Left Foot", "Right Foot", "Swim Left", "Swim Right", "Moan", "Roar", "Scream",
+        "Land", 0
+    };
+
+    static const char *sSchools[] =
+    {
+        "Alteration", "Conjuration", "Destruction", "Illusion", "Mysticism", "Restoration", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -316,6 +370,11 @@ namespace
             case CSMWorld::Columns::ColumnId_DialogueType: return sDialogueTypeEnums;
             case CSMWorld::Columns::ColumnId_QuestStatusType: return sQuestStatusTypes;
             case CSMWorld::Columns::ColumnId_Gender: return sGenderEnums;
+            case CSMWorld::Columns::ColumnId_EnchantmentType: return sEnchantmentTypes;
+            case CSMWorld::Columns::ColumnId_BodyPartType: return sBodyPartTypes;
+            case CSMWorld::Columns::ColumnId_MeshType: return sMeshTypes;
+            case CSMWorld::Columns::ColumnId_SoundGeneratorType: return sSoundGeneratorType;
+            case CSMWorld::Columns::ColumnId_School: return sSchools;
 
             default: return 0;
         }

@@ -25,6 +25,7 @@ namespace CSVDoc
 {
     class ViewManager;
     class Operations;
+    class GlobalDebugProfileMenu;
 
     class View : public QMainWindow
     {
@@ -34,15 +35,18 @@ namespace CSVDoc
             CSMDoc::Document *mDocument;
             int mViewIndex;
             int mViewTotal;
+            QList<SubView *> mSubViews;
             QAction *mUndo;
             QAction *mRedo;
             QAction *mSave;
             QAction *mVerify;
             QAction *mShowStatusBar;
+            QAction *mStopDebug;
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
             SubViewFactoryManager mSubViewFactory;
             QMainWindow mSubViewWindow;
+            GlobalDebugProfileMenu *mGlobalDebugProfileMenu;
 
 
             // not implemented
@@ -67,9 +71,9 @@ namespace CSVDoc
 
             void setupAssetsMenu();
 
-            void setupUi();
+            void setupDebugMenu();
 
-            void updateTitle();
+            void setupUi();
 
             void updateActions();
 
@@ -101,6 +105,8 @@ namespace CSVDoc
 
             void updateProgress (int current, int max, int type, int threads);
 
+            void toggleStatusBar(bool checked);
+
             Operations *getOperations() const;
 
             /// Function called by view manager when user preferences are updated
@@ -127,6 +133,11 @@ namespace CSVDoc
             void abortOperation (int type);
 
             void updateUserSetting (const QString &, const QStringList &);
+
+            void updateTitle();
+
+            // called when subviews are added or removed
+            void updateSubViewIndicies (SubView *view = 0);
 
         private slots:
 
@@ -178,9 +189,41 @@ namespace CSVDoc
 
             void addJournalInfosSubView();
 
+            void addEnchantmentsSubView();
+
+            void addBodyPartsSubView();
+
+            void addSoundGensSubView();
+
+            void addMagicEffectsSubView();
+
+            void addMeshesSubView();
+
+            void addIconsSubView();
+
+            void addMusicsSubView();
+
+            void addSoundsResSubView();
+
+            void addTexturesSubView();
+
+            void addVideosSubView();
+
+            void addDebugProfilesSubView();
+
+            void addRunLogSubView();
+
+            void addPathgridSubView();
+
             void toggleShowStatusBar (bool show);
 
             void loadErrorLog();
+
+            void run (const std::string& profile, const std::string& startupInstruction = "");
+
+            void stop();
+
+            void closeRequest (SubView *subView);
     };
 }
 

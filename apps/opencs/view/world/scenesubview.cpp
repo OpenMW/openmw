@@ -17,9 +17,13 @@
 #include "../render/pagedworldspacewidget.hpp"
 #include "../render/unpagedworldspacewidget.hpp"
 
+#include "../widget/scenetoolbar.hpp"
+#include "../widget/scenetoolmode.hpp"
+#include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetoolrun.hpp"
+
 #include "tablebottombox.hpp"
 #include "creator.hpp"
-#include "scenetoolmode.hpp"
 
 CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : SubView (id), mLayout(new QHBoxLayout), mDocument(document), mScene(NULL), mToolbar(NULL)
@@ -34,7 +38,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     mLayout->setContentsMargins (QMargins (0, 0, 0, 0));
 
-    CSVRender::WorldspaceWidget* wordspaceWidget = NULL;
+    CSVRender::WorldspaceWidget* worldspaceWidget = NULL;
     widgetType whatWidget;
 
     if (id.getId()=="sys::default")
@@ -43,7 +47,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
         CSVRender::PagedWorldspaceWidget *newWidget = new CSVRender::PagedWorldspaceWidget (this, document);
 
-        wordspaceWidget = newWidget;
+        worldspaceWidget = newWidget;
 
         makeConnections(newWidget);
     }
@@ -53,12 +57,12 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
         CSVRender::UnpagedWorldspaceWidget *newWidget = new CSVRender::UnpagedWorldspaceWidget (id.getId(), document, this);
 
-        wordspaceWidget = newWidget;
+        worldspaceWidget = newWidget;
 
         makeConnections(newWidget);
     }
 
-    replaceToolbarAndWorldspace(wordspaceWidget, makeToolbar(wordspaceWidget, whatWidget));
+    replaceToolbarAndWorldspace(worldspaceWidget, makeToolbar(worldspaceWidget, whatWidget));
 
     layout->insertLayout (0, mLayout, 1);
 
@@ -95,40 +99,45 @@ void CSVWorld::SceneSubView::makeConnections (CSVRender::PagedWorldspaceWidget* 
              this, SLOT (cellSelectionChanged (const CSMWorld::CellSelection&)));
 }
 
-CSVWorld::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::WorldspaceWidget* widget, widgetType type)
+CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::WorldspaceWidget* widget, widgetType type)
 {
-    CSVWorld::SceneToolbar* toolbar = new SceneToolbar (48+6, this);
+    CSVWidget::SceneToolbar* toolbar = new CSVWidget::SceneToolbar (48+6, this);
 
-    SceneToolMode *navigationTool = widget->makeNavigationSelector (toolbar);
+    CSVWidget::SceneToolMode *navigationTool = widget->makeNavigationSelector (toolbar);
     toolbar->addTool (navigationTool);
 
-    SceneToolMode *lightingTool = widget->makeLightingSelector (toolbar);
+    CSVWidget::SceneToolMode *lightingTool = widget->makeLightingSelector (toolbar);
     toolbar->addTool (lightingTool);
 
-/* Add buttons specific to the type. For now no need for it.
- * 
-    switch (type)
+    CSVWidget::SceneToolToggle *sceneVisibilityTool =
+        widget->makeSceneVisibilitySelector (toolbar);
+    toolbar->addTool (sceneVisibilityTool);
+
+    if (type==widget_Paged)
     {
-        case widget_Paged:
-            break;
+        CSVWidget::SceneToolToggle *controlVisibilityTool =
+            dynamic_cast<CSVRender::PagedWorldspaceWidget&> (*widget).
+            makeControlVisibilitySelector (toolbar);
 
-        case widget_Unpaged:
-            break;
-
+        toolbar->addTool (controlVisibilityTool);
     }
-*/
+
+    CSVWidget::SceneToolRun *runTool = widget->makeRunTool (toolbar);
+    toolbar->addTool (runTool);
+
+    CSVWidget::SceneToolMode *editModeTool = widget->makeEditModeSelector (toolbar);
+    toolbar->addTool (editModeTool);
+
     return toolbar;
 }
 
 void CSVWorld::SceneSubView::setEditLock (bool locked)
 {
 
-
 }
 
 void CSVWorld::SceneSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)
 {
-
 
 }
 
@@ -142,9 +151,9 @@ void CSVWorld::SceneSubView::useHint (const std::string& hint)
     mScene->useViewHint (hint);
 }
 
-void CSVWorld::SceneSubView::closeRequest()
+std::string CSVWorld::SceneSubView::getTitle() const
 {
-    deleteLater();
+    return mTitle;
 }
 
 void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::UniversalId& id)
@@ -153,9 +162,10 @@ void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::UniversalId& 
     std::ostringstream stream;
     stream << "Scene: " << getUniversalId().getId();
 
-    setWindowTitle (QString::fromUtf8 (stream.str().c_str()));
+    mTitle = stream.str();
+    setWindowTitle (QString::fromUtf8 (mTitle.c_str()));
+    emit updateTitle();
 }
-
 
 void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::CellSelection& selection)
 {
@@ -181,19 +191,23 @@ void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::CellSelection
             stream << "cell around it)";
     }
 
-    setWindowTitle (QString::fromUtf8 (stream.str().c_str()));
+    mTitle = stream.str();
+    setWindowTitle (QString::fromUtf8 (mTitle.c_str()));
+    emit updateTitle();
 }
 
 void CSVWorld::SceneSubView::handleDrop (const std::vector< CSMWorld::UniversalId >& data)
 {
     CSVRender::PagedWorldspaceWidget* pagedNewWidget = NULL;
     CSVRender::UnpagedWorldspaceWidget* unPagedNewWidget = NULL;
-    SceneToolbar* toolbar = NULL;
+    CSVWidget::SceneToolbar* toolbar = NULL;
 
-    switch (mScene->getDropRequirements(CSVRender::WorldspaceWidget::getDropType(data)))
+    CSVRender::WorldspaceWidget::DropType type = CSVRender::WorldspaceWidget::getDropType (data);
+
+    switch (mScene->getDropRequirements (type))
     {
         case CSVRender::WorldspaceWidget::canHandle:
-            mScene->handleDrop(data);
+            mScene->handleDrop (data, type);
             break;
 
         case CSVRender::WorldspaceWidget::needPaged:
@@ -201,7 +215,7 @@ void CSVWorld::SceneSubView::handleDrop (const std::vector< CSMWorld::UniversalI
             toolbar = makeToolbar(pagedNewWidget, widget_Paged);
             makeConnections(pagedNewWidget);
             replaceToolbarAndWorldspace(pagedNewWidget, toolbar);
-            mScene->handleDrop(data);
+            mScene->handleDrop (data, type);
             break;
 
         case CSVRender::WorldspaceWidget::needUnpaged:
@@ -217,7 +231,7 @@ void CSVWorld::SceneSubView::handleDrop (const std::vector< CSMWorld::UniversalI
     }
 }
 
-void CSVWorld::SceneSubView::replaceToolbarAndWorldspace (CSVRender::WorldspaceWidget* widget, CSVWorld::SceneToolbar* toolbar)
+void CSVWorld::SceneSubView::replaceToolbarAndWorldspace (CSVRender::WorldspaceWidget* widget, CSVWidget::SceneToolbar* toolbar)
 {
     assert(mLayout);
 
@@ -236,8 +250,19 @@ void CSVWorld::SceneSubView::replaceToolbarAndWorldspace (CSVRender::WorldspaceW
     mScene = widget;
     mToolbar = toolbar;
 
+    connect (mScene, SIGNAL (focusToolbarRequest()), mToolbar, SLOT (setFocus()));
+    connect (this, SIGNAL (updateSceneUserSetting(const QString &, const QStringList &)),
+            mScene, SLOT (updateUserSetting(const QString &, const QStringList &)));
+    connect (mToolbar, SIGNAL (focusSceneRequest()), mScene, SLOT (setFocus()));
+
     mLayout->addWidget (mToolbar, 0);
     mLayout->addWidget (mScene, 1);
 
     mScene->selectDefaultNavigationMode();
+    setFocusProxy (mScene);
+}
+
+void CSVWorld::SceneSubView::updateUserSetting (const QString &key, const QStringList &list)
+{
+    emit updateSceneUserSetting(key, list);
 }

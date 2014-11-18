@@ -6,30 +6,36 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/containerstore.hpp"
+
 namespace MWWorld
 {
-    ActionApply::ActionApply (const Ptr& target, const std::string& id)
-    : Action (false, target), mId (id)
+    ActionApply::ActionApply (const Ptr& object, const std::string& id)
+    : Action (false, object), mId (id)
     {}
 
     void ActionApply::executeImp (const Ptr& actor)
     {
         MWBase::Environment::get().getWorld()->breakInvisibility(actor);
 
-        getTarget().getClass().apply (getTarget(), mId, actor);
+        actor.getClass().apply (actor, mId, actor);
+
+        actor.getClass().getContainerStore(actor).remove(getTarget(), 1, actor);
     }
 
 
-    ActionApplyWithSkill::ActionApplyWithSkill (const Ptr& target, const std::string& id,
+    ActionApplyWithSkill::ActionApplyWithSkill (const Ptr& object, const std::string& id,
         int skillIndex, int usageType)
-    : Action (false, target), mId (id), mSkillIndex (skillIndex), mUsageType (usageType)
+    : Action (false, object), mId (id), mSkillIndex (skillIndex), mUsageType (usageType)
     {}
 
     void ActionApplyWithSkill::executeImp (const Ptr& actor)
     {
         MWBase::Environment::get().getWorld()->breakInvisibility(actor);
 
-        if (getTarget().getClass().apply (getTarget(), mId, actor) && mUsageType!=-1)
-            getTarget().getClass().skillUsageSucceeded (actor, mSkillIndex, mUsageType);
+        if (actor.getClass().apply (actor, mId, actor) && mUsageType!=-1)
+            actor.getClass().skillUsageSucceeded (actor, mSkillIndex, mUsageType);
+
+        actor.getClass().getContainerStore(actor).remove(getTarget(), 1, actor);
     }
 }

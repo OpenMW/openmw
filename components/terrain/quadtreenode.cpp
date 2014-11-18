@@ -6,7 +6,7 @@
 #include <OgreMaterialManager.h>
 #include <OgreTextureManager.h>
 
-#include "world.hpp"
+#include "defaultworld.hpp"
 #include "chunk.hpp"
 #include "storage.hpp"
 #include "buffercache.hpp"
@@ -73,38 +73,6 @@ namespace
             return NULL;
     }
 
-
-    // Ogre::AxisAlignedBox::distance is broken in 1.8.
-    Ogre::Real distance(const Ogre::AxisAlignedBox& box, const Ogre::Vector3& v)
-    {
-
-      if (box.contains(v))
-        return 0;
-      else
-      {
-          Ogre::Vector3 maxDist(0,0,0);
-        const Ogre::Vector3& minimum = box.getMinimum();
-        const Ogre::Vector3& maximum = box.getMaximum();
-
-        if (v.x < minimum.x)
-          maxDist.x = minimum.x - v.x;
-        else if (v.x > maximum.x)
-          maxDist.x = v.x - maximum.x;
-
-        if (v.y < minimum.y)
-          maxDist.y = minimum.y - v.y;
-        else if (v.y > maximum.y)
-          maxDist.y = v.y - maximum.y;
-
-        if (v.z < minimum.z)
-          maxDist.z = minimum.z - v.z;
-        else if (v.z > maximum.z)
-          maxDist.z = v.z - maximum.z;
-
-        return maxDist.length();
-      }
-    }
-
     // Create a 2D quad
     void makeQuad(Ogre::SceneManager* sceneMgr, float left, float top, float right, float bottom, Ogre::MaterialPtr material)
     {
@@ -142,7 +110,7 @@ namespace
     }
 }
 
-QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const Ogre::Vector2 &center, QuadTreeNode* parent)
+QuadTreeNode::QuadTreeNode(DefaultWorld* terrain, ChildDirection dir, float size, const Ogre::Vector2 &center, QuadTreeNode* parent)
     : mMaterialGenerator(NULL)
     , mIsDummy(false)
     , mSize(size)
@@ -178,7 +146,8 @@ QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const
 
     mSceneNode->setPosition(sceneNodePos);
 
-    mMaterialGenerator = new MaterialGenerator(mTerrain->getShadersEnabled());
+    mMaterialGenerator = new MaterialGenerator();
+    mMaterialGenerator->enableShaders(mTerrain->getShadersEnabled());
 }
 
 void QuadTreeNode::createChild(ChildDirection id, float size, const Ogre::Vector2 &center)
@@ -269,7 +238,7 @@ bool QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
     if (mBounds.isNull())
         return true;
 
-    float dist = distance(mWorldBounds, cameraPos);
+    float dist = mWorldBounds.distance(cameraPos);
 
     // Make sure our scene node is attached
     if (!mSceneNode->isInSceneGraph())
@@ -386,11 +355,9 @@ void QuadTreeNode::load(const LoadResponseData &data)
 {
     assert (!mChunk);
 
-    mChunk = new Chunk(mTerrain->getBufferCache().getUVBuffer(), mBounds, data);
-    mChunk->setVisibilityFlags(mTerrain->getVisiblityFlags());
+    mChunk = new Chunk(mTerrain->getBufferCache().getUVBuffer(), mBounds, data.mPositions, data.mNormals, data.mColours);
+    mChunk->setVisibilityFlags(mTerrain->getVisibilityFlags());
     mChunk->setCastShadows(true);
-    if (!mTerrain->getDistantLandEnabled())
-        mChunk->setRenderingDistance(8192);
     mSceneNode->attachObject(mChunk);
 
     mMaterialGenerator->enableShadows(mTerrain->getShadowsEnabled());
@@ -400,13 +367,13 @@ void QuadTreeNode::load(const LoadResponseData &data)
     {
         if (mSize == 1)
         {
-            mChunk->setMaterial(mMaterialGenerator->generate(mChunk->getMaterial()));
+            mChunk->setMaterial(mMaterialGenerator->generate());
         }
         else
         {
             ensureCompositeMap();
             mMaterialGenerator->setCompositeMap(mCompositeMap->getName());
-            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap(mChunk->getMaterial()));
+            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap());
         }
     }
     // else: will be loaded in loadMaterials() after background thread has finished loading layers
@@ -532,13 +499,13 @@ void QuadTreeNode::loadMaterials()
     {
         if (mSize == 1)
         {
-            mChunk->setMaterial(mMaterialGenerator->generate(mChunk->getMaterial()));
+            mChunk->setMaterial(mMaterialGenerator->generate());
         }
         else
         {
             ensureCompositeMap();
             mMaterialGenerator->setCompositeMap(mCompositeMap->getName());
-            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap(mChunk->getMaterial()));
+            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap());
         }
     }
 }
@@ -550,11 +517,12 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
     if (mIsDummy)
     {
         // TODO - store this default material somewhere instead of creating one for each empty cell
-        MaterialGenerator matGen(mTerrain->getShadersEnabled());
+        MaterialGenerator matGen;
+        matGen.enableShaders(mTerrain->getShadersEnabled());
         std::vector<LayerInfo> layer;
         layer.push_back(mTerrain->getStorage()->getDefaultLayer());
         matGen.setLayerList(layer);
-        makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, matGen.generateForCompositeMapRTT(Ogre::MaterialPtr()));
+        makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, matGen.generateForCompositeMapRTT());
         return;
     }
     if (mSize > 1)
@@ -577,7 +545,7 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
     else
     {
         // TODO: when to destroy?
-        Ogre::MaterialPtr material = mMaterialGenerator->generateForCompositeMapRTT(Ogre::MaterialPtr());
+        Ogre::MaterialPtr material = mMaterialGenerator->generateForCompositeMapRTT();
         makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, material);
     }
 }
@@ -612,9 +580,9 @@ void QuadTreeNode::applyMaterials()
         mMaterialGenerator->enableShadows(mTerrain->getShadowsEnabled());
         mMaterialGenerator->enableSplitShadows(mTerrain->getSplitShadowsEnabled());
         if (mSize <= 1)
-            mChunk->setMaterial(mMaterialGenerator->generate(Ogre::MaterialPtr()));
+            mChunk->setMaterial(mMaterialGenerator->generate());
         else
-            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap(Ogre::MaterialPtr()));
+            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap());
     }
     if (hasChildren())
         for (int i=0; i<4; ++i)

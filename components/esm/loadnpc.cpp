@@ -10,8 +10,6 @@ namespace ESM
 
 void NPC::load(ESMReader &esm)
 {
-    //mNpdt52.mGold = -10;
-
     mPersistent = esm.getRecordFlags() & 0x0400;
 
     mModel = esm.getHNOString("MODL");
@@ -53,6 +51,7 @@ void NPC::load(ESMReader &esm)
     else
         mHasAI = false;
 
+    mTransport.clear();
     while (esm.isNextSub("DODT") || esm.isNextSub("DNAM")) {
         if (esm.retSubName() == 0x54444f44) { // DODT struct
             Dest dodt;
@@ -63,7 +62,6 @@ void NPC::load(ESMReader &esm)
         }
     }
     mAiPackage.load(esm);
-    esm.skipRecord();
 }
 void NPC::save(ESMWriter &esm) const
 {

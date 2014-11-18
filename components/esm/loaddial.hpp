@@ -47,8 +47,12 @@ struct Dialogue
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 
+    /// Remove all INFOs marked as QS_Deleted from mInfos.
+    void clearDeletedInfos();
+
+    /// Read the next info record
     /// @param merge Merge with existing list, or just push each record to the end of the list?
-    void addInfo (const ESM::DialInfo& info, bool merge);
+    void readInfo (ESM::ESMReader& esm, bool merge);
 
     void blank();
     ///< Set record to default state (does not touch the ID and does not change the type).

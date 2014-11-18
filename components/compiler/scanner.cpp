@@ -48,6 +48,9 @@ namespace Compiler
 
     bool Scanner::scanToken (Parser& parser)
     {
+        bool allowDigit = mNameStartingWithDigit;
+        mNameStartingWithDigit = false;
+
         switch (mPutback)
         {
             case Putback_Special:
@@ -112,6 +115,7 @@ namespace Compiler
         else if (isWhitespace (c))
         {
             mLoc.mLiteral.clear();
+            mNameStartingWithDigit = allowDigit;
             return true;
         }
         else if (c==':')
@@ -120,21 +124,21 @@ namespace Compiler
             mLoc.mLiteral.clear();
             return true;
         }
-        else if (std::isdigit (c))
+        else if (std::isalpha (c) || c=='_' || c=='"' || (allowDigit && std::isdigit (c)))
         {
             bool cont = false;
 
-            if (scanInt (c, parser, cont))
+            if (scanName (c, parser, cont))
             {
                 mLoc.mLiteral.clear();
                 return cont;
             }
         }
-        else if (std::isalpha (c) || c=='_' || c=='"')
+        else if (std::isdigit (c))
         {
             bool cont = false;
 
-            if (scanName (c, parser, cont))
+            if (scanInt (c, parser, cont))
             {
                 mLoc.mLiteral.clear();
                 return cont;
@@ -343,17 +347,13 @@ namespace Compiler
             }
             else if (!(c=='"' && name.empty()))
             {
-                if (!(std::isalpha (c) || std::isdigit (c) || c=='_' || c=='`' ||
-                    /// \todo add an option to disable the following hack. Also, find out who is
-                    /// responsible for allowing it in the first place and meet up with that person in
-                    /// a dark alley.
-                    (c=='-' && !name.empty() && std::isalpha (mStream.peek()))))
+                if (!isStringCharacter (c))
                 {
                     putback (c);
                     break;
                 }
 
-                if (first && std::isdigit (c))
+                if (first && (std::isdigit (c) || c=='`' || c=='-'))
                     error = true;
             }
 
@@ -499,9 +499,21 @@ namespace Compiler
         return true;
     }
 
+    bool Scanner::isStringCharacter (char c, bool lookAhead)
+    {
+        return std::isalpha (c) || std::isdigit (c) || c=='_' ||
+            /// \todo disable this when doing more stricter compiling
+            c=='`' ||
+            /// \todo disable this when doing more stricter compiling. Also, find out who is
+            /// responsible for allowing it in the first place and meet up with that person in
+            /// a dark alley.
+            (c=='-' && (!lookAhead || isStringCharacter (mStream.peek(), false)));
+    }
+
     bool Scanner::isWhitespace (char c)
     {
-        return c==' ' || c=='\t';
+        return c==' ' || c=='\t'
+            || c=='['; ///< \todo disable this when doing more strict compiling
     }
 
     // constructor
@@ -509,7 +521,8 @@ namespace Compiler
     Scanner::Scanner (ErrorHandler& errorHandler, std::istream& inputStream,
         const Extensions *extensions)
     : mErrorHandler (errorHandler), mStream (inputStream), mExtensions (extensions),
-      mPutback (Putback_None), mPutbackCode(0), mPutbackInteger(0), mPutbackFloat(0)
+      mPutback (Putback_None), mPutbackCode(0), mPutbackInteger(0), mPutbackFloat(0),
+      mNameStartingWithDigit (false)
     {
     }
 
@@ -560,5 +573,10 @@ namespace Compiler
 
         if (mExtensions)
             mExtensions->listKeywords (keywords);
+    }
+
+    void Scanner::allowNameStartingwithDigit()
+    {
+        mNameStartingWithDigit = true;
     }
 }

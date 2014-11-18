@@ -61,7 +61,7 @@ namespace MWGui
         }
         catch (const std::exception& error)
         {
-            printError (std::string ("An exception has been thrown: ") + error.what());
+            printError (std::string ("Error: ") + error.what());
         }
 
         return false;
@@ -140,18 +140,19 @@ namespace MWGui
     void Console::close()
     {
         // Apparently, hidden widgets can retain key focus
+        // Remove for MyGUI 3.2.2
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
+    }
+
+    void Console::exit()
+    {
+         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Console);
     }
 
     void Console::setFont(const std::string &fntName)
     {
         mHistory->setFontName(fntName);
         mCommandLine->setFontName(fntName);
-    }
-
-    void Console::clearHistory()
-    {
-        mHistory->setCaption("");
     }
 
     void Console::print(const std::string &msg)
@@ -190,7 +191,7 @@ namespace MWGui
             }
             catch (const std::exception& error)
             {
-                printError (std::string ("An exception has been thrown: ") + error.what());
+                printError (std::string ("Error: ") + error.what());
             }
         }
     }
@@ -428,6 +429,12 @@ namespace MWGui
 
     void Console::onReferenceUnavailable()
     {
+        setSelectedObject(MWWorld::Ptr());
+    }
+
+    void Console::resetReference()
+    {
+        ReferenceInterface::resetReference();
         setSelectedObject(MWWorld::Ptr());
     }
 }

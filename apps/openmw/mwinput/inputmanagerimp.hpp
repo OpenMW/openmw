@@ -108,7 +108,7 @@ namespace MWInput
             , ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction);
 
         virtual void keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-            , SDL_Keycode key, ICS::Control::ControlChangingDirection direction);
+            , SDL_Scancode key, ICS::Control::ControlChangingDirection direction);
 
         virtual void mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
             , unsigned int button, ICS::Control::ControlChangingDirection direction);
@@ -163,6 +163,7 @@ namespace MWInput
         int mMouseWheel;
         bool mUserFileExists;
         bool mAlwaysRunActive;
+        bool mAttemptJump;
 
         std::map<std::string, bool> mControlSwitch;
 
@@ -172,6 +173,8 @@ namespace MWInput
 
         void resetIdleTime();
         void updateIdleTime(float dt);
+
+        void setPlayerControlsEnabled(bool enabled);
 
     private:
         void toggleMainMenu();
@@ -255,6 +258,8 @@ namespace MWInput
             A_QuickKeysMenu,
 
             A_ToggleHUD,
+
+            A_ToggleDebug,
 
             A_Last            // Marker for the last item
         };

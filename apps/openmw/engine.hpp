@@ -7,6 +7,8 @@
 #include <components/files/collections.hpp>
 #include <components/translation/translation.hpp>
 #include <components/settings/settings.hpp>
+#include <components/nifcache/nifcache.hpp>
+
 
 #include "mwbase/environment.hpp"
 
@@ -83,12 +85,19 @@ namespace OMW
             // Grab mouse?
             bool mGrab;
 
+            bool mExportFonts;
+
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
 
             Files::Collections mFileCollections;
             bool mFSStrict;
             Translation::Storage mTranslationDataStorage;
+            std::vector<std::string> mScriptBlacklist;
+            bool mScriptBlacklistUse;
+            bool mNewGame;
+
+            Nif::Cache mNifCache;
 
             // not implemented
             Engine (const Engine&);
@@ -149,7 +158,11 @@ namespace OMW
             /// Disable or enable all sounds
             void setSoundUsage(bool soundUsage);
 
-            void setSkipMenu (bool skipMenu);
+            /// Skip main menu and go directly into the game
+            ///
+            /// \param newGame Start a new game instead off dumping the player into the game
+            /// (ignored if !skipMenu).
+            void setSkipMenu (bool skipMenu, bool newGame);
 
             void setGrabMouse(bool grab) { mGrab = grab; }
 
@@ -180,6 +193,12 @@ namespace OMW
             void setActivationDistanceOverride (int distance);
 
             void setWarningsMode (int mode);
+
+            void setScriptBlacklist (const std::vector<std::string>& list);
+
+            void setScriptBlacklistUse (bool use);
+
+            void enableFontExport(bool exportFonts);
 
         private:
             Files::ConfigurationManager& mCfgMgr;

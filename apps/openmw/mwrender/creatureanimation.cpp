@@ -150,7 +150,7 @@ void CreatureWeaponAnimation::updatePart(NifOgre::ObjectScenePtr& scene, int slo
     }
 
     std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(scene->mControllers.begin());
-    for(;ctrl != scene->mControllers.end();ctrl++)
+    for(;ctrl != scene->mControllers.end();++ctrl)
     {
         if(ctrl->getSource().isNull())
         {
@@ -184,6 +184,18 @@ Ogre::Vector3 CreatureWeaponAnimation::runAnimation(float duration)
 {
     Ogre::Vector3 ret = Animation::runAnimation(duration);
     pitchSkeleton(mPtr.getRefData().getPosition().rot[0], mSkelBase->getSkeleton());
+
+    if (!mWeapon.isNull())
+    {
+        for (unsigned int i=0; i<mWeapon->mControllers.size(); ++i)
+            mWeapon->mControllers[i].update();
+    }
+    if (!mShield.isNull())
+    {
+        for (unsigned int i=0; i<mShield->mControllers.size(); ++i)
+            mShield->mControllers[i].update();
+    }
+
     return ret;
 }
 

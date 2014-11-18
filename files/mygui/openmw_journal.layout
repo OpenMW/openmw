@@ -77,14 +77,10 @@
         <Property key="ImagePushed" value="textures\tx_menubook_quests_all_pressed.dds"/>
       </Widget>
 
-      <Widget type="ScrollView" skin="MW_ScrollView" position="20 15 184 245" name="TopicsList" align="Right VStretch">
-        <Property key="CanvasAlign" value="Left Top"/>
-        <Widget type="BookPage" skin="MW_BookPage" position="0 0 30000 30000" name="TopicsPage"/>
+      <Widget type="MWList" skin="MW_QuestList" position="8 35 208 225" name="TopicsList" align="Right VStretch">
       </Widget>
 
-      <Widget type="ScrollView" skin="MW_ScrollView" position="20 35 184 225" name="QuestsList" align="Right VStretch">
-        <Property key="CanvasAlign" value="Left Top"/>
-        <Widget type="BookPage" skin="MW_BookPage" position="0 0 30000 30000" name="QuestsPage"/>
+      <Widget type="MWList" skin="MW_QuestList" position="8 35 208 225" name="QuestsList" align="Right VStretch">
       </Widget>
 
       <Widget type="ImageButton" skin="ImageBox" position="20 265 56 32" Align="Top|Left" name="TopicsBTN">

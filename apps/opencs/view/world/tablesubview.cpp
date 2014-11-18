@@ -69,6 +69,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     connect(mFilterBox, SIGNAL(recordDropped(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)),
         this, SLOT(createFilterRequest(std::vector<CSMWorld::UniversalId>&, Qt::DropAction)));
+
+    connect (mTable, SIGNAL (closeRequest()), this, SLOT (closeRequest()));
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)
@@ -111,14 +113,21 @@ void CSVWorld::TableSubView::createFilterRequest (std::vector< CSMWorld::Univers
 {
     std::vector<std::pair<std::string, std::vector<std::string> > > filterSource;
 
+    std::vector<std::string> refIdColumns = mTable->getColumnsWithDisplay(CSMWorld::TableMimeData::convertEnums(CSMWorld::UniversalId::Type_Referenceable));
+    bool hasRefIdDisplay = !refIdColumns.empty();
+
     for (std::vector<CSMWorld::UniversalId>::iterator it(types.begin()); it != types.end(); ++it)
     {
-        std::pair<std::string, std::vector<std::string> > pair(                         //splited long line
-            std::make_pair(it->getId(), mTable->getColumnsWithDisplay(CSMWorld::TableMimeData::convertEnums(it->getType()))));
-
-        if(!pair.second.empty())
+        CSMWorld::UniversalId::Type type = it->getType();
+        std::vector<std::string> col = mTable->getColumnsWithDisplay(CSMWorld::TableMimeData::convertEnums(type));
+        if(!col.empty())
         {
-            filterSource.push_back(pair);
+            filterSource.push_back(std::make_pair(it->getId(), col));
+        }
+
+        if(hasRefIdDisplay && CSMWorld::TableMimeData::isReferencable(type))
+        {
+            filterSource.push_back(std::make_pair(it->getId(), refIdColumns));
         }
     }
 
@@ -131,6 +140,9 @@ bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
     {
         QDropEvent* drop = dynamic_cast<QDropEvent*>(event);
         const CSMWorld::TableMimeData* data = dynamic_cast<const CSMWorld::TableMimeData*>(drop->mimeData());
+        if (!data) // May happen when non-records (e.g. plain text) are dragged and dropped
+            return false;
+
         bool handled = data->holdsType(CSMWorld::UniversalId::Type_Filter);
         if (handled)
         {
@@ -140,3 +152,4 @@ bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
     }
     return false;
 }
+

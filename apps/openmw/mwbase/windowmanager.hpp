@@ -57,6 +57,7 @@ namespace MWGui
     class InventoryWindow;
     class ContainerWindow;
     class DialogueWindow;
+    class WindowModal;
 
     enum ShowInDialogueMode {
         ShowInDialogueMode_IfPossible,
@@ -144,8 +145,6 @@ namespace MWBase
             virtual MWGui::SpellWindow* getSpellWindow() = 0;
             virtual MWGui::Console* getConsole() = 0;
 
-            virtual MyGUI::Gui* getGui() const = 0;
-
             virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount) = 0;
 
             /// Set value for the given ID.
@@ -178,7 +177,7 @@ namespace MWBase
             virtual void changeCell(MWWorld::CellStore* cell) = 0;
             ///< change the active cell
 
-            virtual void setPlayerPos(const float x, const float y) = 0;
+            virtual void setPlayerPos(int cellX, int cellY, const float x, const float y) = 0;
             ///< set player position in map space
 
             virtual void setPlayerDir(const float x, const float y) = 0;
@@ -226,7 +225,7 @@ namespace MWBase
 
             virtual void showCrosshair(bool show) = 0;
             virtual bool getSubtitlesEnabled() = 0;
-            virtual void toggleHud() = 0;
+            virtual bool toggleGui() = 0;
 
             virtual void disallowMouse() = 0;
             virtual void allowMouse() = 0;
@@ -234,14 +233,19 @@ namespace MWBase
 
             virtual void addVisitedLocation(const std::string& name, int x, int y) = 0;
 
+            /// Hides dialog and schedules dialog to be deleted.
             virtual void removeDialog(OEngine::GUI::Layout* dialog) = 0;
-            ///< Hides dialog and schedules dialog to be deleted.
+
+            ///Gracefully attempts to exit the topmost GUI mode
+            /** No guarentee of actually closing the window **/
+            virtual void exitCurrentGuiMode() = 0;
 
             virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
             virtual void staticMessageBox(const std::string& message) = 0;
             virtual void removeStaticMessageBox() = 0;
+
+            /// returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
             virtual int readPressedButton() = 0;
-            ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
             virtual void onFrame (float frameDuration) = 0;
 
@@ -309,6 +313,35 @@ namespace MWBase
 
             /// Does the current stack of GUI-windows permit saving?
             virtual bool isSavingAllowed() const = 0;
+
+            /// Returns the current Modal
+            /** Used to send exit command to active Modal when Esc is pressed **/
+            virtual MWGui::WindowModal* getCurrentModal() const = 0;
+
+            /// Sets the current Modal
+            /** Used to send exit command to active Modal when Esc is pressed **/
+            virtual void addCurrentModal(MWGui::WindowModal* input) = 0;
+
+            /// Removes the top Modal
+            /** Used when one Modal adds another Modal
+                \param input Pointer to the current modal, to ensure proper modal is removed **/
+            virtual void removeCurrentModal(MWGui::WindowModal* input) = 0;
+
+            virtual void pinWindow (MWGui::GuiWindow window) = 0;
+
+            /// Fade the screen in, over \a time seconds
+            virtual void fadeScreenIn(const float time) = 0;
+            /// Fade the screen out to black, over \a time seconds
+            virtual void fadeScreenOut(const float time) = 0;
+            /// Fade the screen to a specified percentage of black, over \a time seconds
+            virtual void fadeScreenTo(const int percent, const float time) = 0;
+            /// Darken the screen to a specified percentage
+            virtual void setBlindness(const int percent) = 0;
+
+            virtual void activateHitOverlay(bool interrupt=true) = 0;
+            virtual void setWerewolfOverlay(bool set) = 0;
+
+            virtual void toggleDebugWindow() = 0;
     };
 }
 

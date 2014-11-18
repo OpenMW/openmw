@@ -21,15 +21,17 @@ namespace MWGui
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
 
+        ///Unhides the window
         virtual void open() {}
+        ///Hides the window
         virtual void close () {}
+        ///Gracefully exits the window
+        virtual void exit() {}
+        ///Sets the visibility of the window
         virtual void setVisible(bool visible);
+        ///Returns the visibility state of the window
+        virtual bool isVisible();
         void center();
-
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_WindowBase eventDone;
     };
 
 
@@ -42,6 +44,7 @@ namespace MWGui
         WindowModal(const std::string& parLayout);
         virtual void open();
         virtual void close();
+        virtual void exit() {}
     };
 
     /// A window that cannot be the target of a drag&drop action.
@@ -52,6 +55,7 @@ namespace MWGui
         NoDrop(DragAndDrop* drag, MyGUI::Widget* widget);
 
         void onFrame(float dt);
+        virtual void setAlpha(float alpha);
 
     private:
         MyGUI::Widget* mWidget;

@@ -27,7 +27,9 @@ void CSMDoc::Operation::prepareStages()
 }
 
 CSMDoc::Operation::Operation (int type, bool ordered, bool finalAlways)
-: mType (type), mOrdered (ordered), mFinalAlways (finalAlways)
+: mType (type), mStages(std::vector<std::pair<Stage *, int> >()), mCurrentStage(mStages.begin()),
+  mCurrentStep(0), mCurrentStepTotal(0), mTotalSteps(0), mOrdered (ordered),
+  mFinalAlways (finalAlways), mError(false)
 {
     connect (this, SIGNAL (finished()), this, SLOT (operationDone()));
 }
@@ -119,5 +121,5 @@ void CSMDoc::Operation::executeStage()
 
 void CSMDoc::Operation::operationDone()
 {
-    emit done (mType);
+    emit done (mType, mError);
 }

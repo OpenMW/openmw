@@ -24,73 +24,10 @@
 #ifndef OPENMW_COMPONENTS_NIF_DATA_HPP
 #define OPENMW_COMPONENTS_NIF_DATA_HPP
 
-#include "controlled.hpp"
-
-#include <OgreQuaternion.h>
-#include <OgreVector3.h>
+#include "base.hpp"
 
 namespace Nif
 {
-
-class NiSourceTexture : public Named
-{
-public:
-    // Is this an external (references a separate texture file) or
-    // internal (data is inside the nif itself) texture?
-    bool external;
-
-    std::string filename; // In case of external textures
-    NiPixelDataPtr data;  // In case of internal textures
-
-    /* Pixel layout
-        0 - Palettised
-        1 - High color 16
-        2 - True color 32
-        3 - Compressed
-        4 - Bumpmap
-        5 - Default */
-    int pixel;
-
-    /* Mipmap format
-        0 - no
-        1 - yes
-        2 - default */
-    int mipmap;
-
-    /* Alpha
-        0 - none
-        1 - binary
-        2 - smooth
-        3 - default (use material alpha, or multiply material with texture if present)
-    */
-    int alpha;
-
-    void read(NIFStream *nif)
-    {
-        Named::read(nif);
-
-        external = !!nif->getChar();
-        if(external)
-            filename = nif->getString();
-        else
-        {
-            nif->getChar(); // always 1
-            data.read(nif);
-        }
-
-        pixel = nif->getInt();
-        mipmap = nif->getInt();
-        alpha = nif->getInt();
-
-        nif->getChar(); // always 1
-    }
-
-    void post(NIFFile *nif)
-    {
-        Named::post(nif);
-        data.post(nif);
-    }
-};
 
 // Common ancestor for several data classes
 class ShapeData : public Record
@@ -211,7 +148,7 @@ public:
 class NiPosData : public Record
 {
 public:
-    Vector3KeyList mKeyList;
+    Vector3KeyMap mKeyList;
 
     void read(NIFStream *nif)
     {
@@ -222,7 +159,7 @@ public:
 class NiUVData : public Record
 {
 public:
-    FloatKeyList mKeyList[4];
+    FloatKeyMap mKeyList[4];
 
     void read(NIFStream *nif)
     {
@@ -234,7 +171,7 @@ public:
 class NiFloatData : public Record
 {
 public:
-    FloatKeyList mKeyList;
+    FloatKeyMap mKeyList;
 
     void read(NIFStream *nif)
     {
@@ -284,11 +221,11 @@ public:
 class NiColorData : public Record
 {
 public:
-    Vector4KeyList mKeyList;
+    Vector4KeyMap mKeyMap;
 
     void read(NIFStream *nif)
     {
-        mKeyList.read(nif);
+        mKeyMap.read(nif);
     }
 };
 
@@ -335,7 +272,7 @@ class NiSkinData : public Record
 public:
     struct BoneTrafo
     {
-        Ogre::Matrix3 rotation; // Rotation offset from bone?
+        Ogre::Matrix3 rotationScale; // Rotation offset from bone, non-uniform scale
         Ogre::Vector3 trans;    // Translation
         float scale;            // Probably scale (always 1)
     };
@@ -358,7 +295,7 @@ public:
 
     void read(NIFStream *nif)
     {
-        trafo.rotation = nif->getMatrix3();
+        trafo.rotationScale = nif->getMatrix3();
         trafo.trans = nif->getVector3();
         trafo.scale = nif->getFloat();
 
@@ -370,7 +307,7 @@ public:
         {
             BoneInfo &bi = bones[i];
 
-            bi.trafo.rotation = nif->getMatrix3();
+            bi.trafo.rotationScale = nif->getMatrix3();
             bi.trafo.trans = nif->getVector3();
             bi.trafo.scale = nif->getFloat();
             bi.unknown = nif->getVector4();
@@ -389,7 +326,7 @@ public:
 struct NiMorphData : public Record
 {
     struct MorphData {
-        FloatKeyList mData;
+        FloatKeyMap mData;
         std::vector<Ogre::Vector3> mVertices;
     };
     std::vector<MorphData> mMorphs;
@@ -412,13 +349,26 @@ struct NiMorphData : public Record
 
 struct NiKeyframeData : public Record
 {
-    QuaternionKeyList mRotations;
-    Vector3KeyList mTranslations;
-    FloatKeyList mScales;
+    QuaternionKeyMap mRotations;
+    //\FIXME mXYZ_Keys are read, but not used.
+    FloatKeyMap mXYZ_Keys;
+    Vector3KeyMap mTranslations;
+    FloatKeyMap mScales;
 
     void read(NIFStream *nif)
     {
         mRotations.read(nif);
+        if(mRotations.mInterpolationType == mRotations.sXYZInterpolation)
+        {
+            //Chomp unused float
+            nif->getFloat();
+            for(size_t i=0;i<3;++i)
+            {
+                //Read concatenates items together. 
+                mXYZ_Keys.read(nif,true);
+            }
+            nif->file->warn("XYZ_ROTATION_KEY read, but not used!");
+        }
         mTranslations.read(nif);
         mScales.read(nif);
     }

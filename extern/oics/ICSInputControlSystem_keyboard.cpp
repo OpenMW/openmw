@@ -43,16 +43,16 @@ namespace ICS
 				dir = Control::DECREASE;
 			}
 
-			addKeyBinding(mControls.back(), mKeys[xmlKeyBinder->Attribute("key")], dir);
+            addKeyBinding(mControls.back(), SDL_Scancode(FromString<int>(xmlKeyBinder->Attribute("key"))), dir);
 
 			xmlKeyBinder = xmlKeyBinder->NextSiblingElement("KeyBinder");
 		}
 	}
 
-	void InputControlSystem::addKeyBinding(Control* control, SDL_Keycode key, Control::ControlChangingDirection direction)
+    void InputControlSystem::addKeyBinding(Control* control, SDL_Scancode key, Control::ControlChangingDirection direction)
 	{
 		ICS_LOG("\tAdding KeyBinder [key="
-			+ keyCodeToString(key) + ", direction="
+            + scancodeToString(key) + ", direction="
 			+ ToString<int>(direction) + "]");
 
 		ControlKeyBinderItem controlKeyBinderItem;        
@@ -61,7 +61,12 @@ namespace ICS
 		mControlsKeyBinderMap[ key ] = controlKeyBinderItem;
 	}
 
-	void InputControlSystem::removeKeyBinding(SDL_Keycode key)
+    bool InputControlSystem::isKeyBound(SDL_Scancode key) const
+    {
+        return mControlsKeyBinderMap.find(key) != mControlsKeyBinderMap.end();
+    }
+
+    void InputControlSystem::removeKeyBinding(SDL_Scancode key)
 	{
 		ControlsKeyBinderMapType::iterator it = mControlsKeyBinderMap.find(key);
 		if(it != mControlsKeyBinderMap.end())
@@ -70,7 +75,7 @@ namespace ICS
 		}
 	}
 
-	SDL_Keycode InputControlSystem::getKeyBinding(Control* control
+    SDL_Scancode InputControlSystem::getKeyBinding(Control* control
 		, ICS::Control::ControlChangingDirection direction)
 	{
 		ControlsKeyBinderMapType::iterator it = mControlsKeyBinderMap.begin();
@@ -80,10 +85,10 @@ namespace ICS
 			{
 				return it->first;
 			}
-			it++;
+            ++it;
 		}
 
-		return SDLK_UNKNOWN;
+        return SDL_SCANCODE_UNKNOWN;
 	}
     void InputControlSystem::keyPressed(const SDL_KeyboardEvent &evt)
 	{
@@ -91,7 +96,7 @@ namespace ICS
 		{
 			if(!mDetectingBindingControl)
 			{
-				ControlsKeyBinderMapType::const_iterator it = mControlsKeyBinderMap.find(evt.keysym.sym);
+                ControlsKeyBinderMapType::const_iterator it = mControlsKeyBinderMap.find(evt.keysym.scancode);
 				if(it != mControlsKeyBinderMap.end())
 				{
 					it->second.control->setIgnoreAutoReverse(false);
@@ -115,7 +120,7 @@ namespace ICS
 			else if(mDetectingBindingListener)
 			{
 				mDetectingBindingListener->keyBindingDetected(this,
-					mDetectingBindingControl, evt.keysym.sym, mDetectingBindingDirection);
+                    mDetectingBindingControl, evt.keysym.scancode, mDetectingBindingDirection);
 			}
 		}
     }
@@ -124,7 +129,7 @@ namespace ICS
 	{
 		if(mActive)
 		{
-			ControlsKeyBinderMapType::const_iterator it = mControlsKeyBinderMap.find(evt.keysym.sym);
+            ControlsKeyBinderMapType::const_iterator it = mControlsKeyBinderMap.find(evt.keysym.scancode);
 			if(it != mControlsKeyBinderMap.end())
 			{
 				it->second.control->setChangingDirection(Control::STOP);
@@ -133,14 +138,14 @@ namespace ICS
 	}
 
 	void DetectingBindingListener::keyBindingDetected(InputControlSystem* ICS, Control* control
-		, SDL_Keycode key, Control::ControlChangingDirection direction)
+        , SDL_Scancode key, Control::ControlChangingDirection direction)
 	{
 		// if the key is used by another control, remove it
 		ICS->removeKeyBinding(key);
 
 		// if the control has a key assigned, remove it
-		SDL_Keycode oldKey = ICS->getKeyBinding(control, direction);
-		if(oldKey != SDLK_UNKNOWN)
+        SDL_Scancode oldKey = ICS->getKeyBinding(control, direction);
+        if(oldKey != SDL_SCANCODE_UNKNOWN)
 		{
 			ICS->removeKeyBinding(oldKey);
 		}

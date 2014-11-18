@@ -193,8 +193,10 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
         }
 
     // Then check cells that are already listed
-    for (std::map<std::pair<int, int>, CellStore>::iterator iter = mExteriors.begin();
-        iter!=mExteriors.end(); ++iter)
+    // Search in reverse, this is a workaround for an ambiguous chargen_plank reference in the vanilla game.
+    // there is one at -22,16 and one at -2,-9, the latter should be used.
+    for (std::map<std::pair<int, int>, CellStore>::reverse_iterator iter = mExteriors.rbegin();
+        iter!=mExteriors.rend(); ++iter)
     {
         Ptr ptr = getPtrAndCache (name, iter->second);
         if (!ptr.isEmpty())
@@ -314,6 +316,8 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, int32_t type,
         catch (...)
         {
             // silently drop cells that don't exist anymore
+            reader.skipRecord();
+            return true;
             /// \todo log
         }
 

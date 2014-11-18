@@ -18,22 +18,43 @@ namespace Render
 {
 
     SelectionBuffer::SelectionBuffer(Ogre::Camera *camera, int sizeX, int sizeY, int visibilityFlags)
+        : mCamera(camera)
+        , mVisibilityFlags(visibilityFlags)
     {
         mTexture = Ogre::TextureManager::getSingleton().createManual("SelectionBuffer",
-            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, sizeX, sizeY, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET);
+            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, sizeX, sizeY, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET, this);
 
+        setupRenderTarget();
+
+        mCurrentColour = Ogre::ColourValue(0.3, 0.3, 0.3);
+    }
+
+    void SelectionBuffer::setupRenderTarget()
+    {
         mRenderTarget = mTexture->getBuffer()->getRenderTarget();
-        Ogre::Viewport* vp = mRenderTarget->addViewport(camera);
+        mRenderTarget->removeAllViewports();
+        Ogre::Viewport* vp = mRenderTarget->addViewport(mCamera);
         vp->setOverlaysEnabled(false);
         vp->setBackgroundColour(Ogre::ColourValue(0, 0, 0, 0));
         vp->setShadowsEnabled(false);
         vp->setMaterialScheme("selectionbuffer");
-        if (visibilityFlags != 0)
-            vp->setVisibilityMask (visibilityFlags);
+        if (mVisibilityFlags != 0)
+            vp->setVisibilityMask (mVisibilityFlags);
         mRenderTarget->setActive(true);
         mRenderTarget->setAutoUpdated (false);
+    }
 
-        mCurrentColour = Ogre::ColourValue(0.3, 0.3, 0.3);
+    void SelectionBuffer::loadResource(Ogre::Resource *resource)
+    {
+        Ogre::Texture* tex = dynamic_cast<Ogre::Texture*>(resource);
+        if (!tex)
+            return;
+
+        tex->createInternalResources();
+
+        mRenderTarget = NULL;
+
+        // Don't need to re-render texture, because we have a copy in system memory (mBuffer)
     }
 
     SelectionBuffer::~SelectionBuffer()
@@ -44,6 +65,10 @@ namespace Render
     void SelectionBuffer::update ()
     {
         Ogre::MaterialManager::getSingleton ().addListener (this);
+
+        mTexture->load();
+        if (mRenderTarget == NULL)
+            setupRenderTarget();
 
         mRenderTarget->update();
 

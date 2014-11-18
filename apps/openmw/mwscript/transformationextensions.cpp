@@ -86,16 +86,24 @@ namespace MWScript
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                     float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
 
+                    MWWorld::LocalRotation localRot = ptr.getRefData().getLocalRotation();
+
                     if (axis == "x")
                     {
+                        localRot.rot[0] = 0;
+                        ptr.getRefData().setLocalRotation(localRot);
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az);
                     }
                     else if (axis == "y")
                     {
+                        localRot.rot[1] = 0;
+                        ptr.getRefData().setLocalRotation(localRot);
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az);
                     }
                     else if (axis == "z")
                     {
+                        localRot.rot[2] = 0;
+                        ptr.getRefData().setLocalRotation(localRot);
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
                     }
                     else
@@ -319,11 +327,11 @@ namespace MWScript
                         }
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
 
-                        ptr.getClass().adjustPosition(ptr);
+                        ptr.getClass().adjustPosition(ptr, false);
                     }
                     else
                     {
-                        throw std::runtime_error ("unknown cell");
+                        throw std::runtime_error (std::string("unknown cell (") + cellID + ")");
                     }
                 }
         };
@@ -355,8 +363,19 @@ namespace MWScript
                     runtime.pop();
                     int cx,cy;
                     MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
-                    MWBase::Environment::get().getWorld()->moveObject(ptr,
-                        MWBase::Environment::get().getWorld()->getExterior(cx,cy),x,y,z);
+
+                    // another morrowind oddity: player will be moved to the exterior cell at this location,
+                    // non-player actors will move within the cell they are in.
+                    if (ptr.getRefData().getHandle() == "player")
+                    {
+                        MWBase::Environment::get().getWorld()->moveObject(ptr,
+                            MWBase::Environment::get().getWorld()->getExterior(cx,cy),x,y,z);
+                    }
+                    else
+                    {
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, x, y, z);
+                    }
+
                     float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                     if(ptr.getTypeName() == typeid(ESM::NPC).name())//some morrowind oddity
@@ -366,7 +385,7 @@ namespace MWScript
                         zRot = zRot/60.;
                     }
                     MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
-                    ptr.getClass().adjustPosition(ptr);
+                    ptr.getClass().adjustPosition(ptr, false);
                 }
         };
 
@@ -420,7 +439,7 @@ namespace MWScript
                     }
                     else
                     {
-                        throw std::runtime_error ("unknown cell");
+                        throw std::runtime_error ( std::string("unknown cell (") + cellID + ")");
                     }
                 }
         };
@@ -444,25 +463,26 @@ namespace MWScript
                     Interpreter::Type_Float zRot = runtime[0].mFloat;
                     runtime.pop();
 
-                    int cx,cy;
-                    MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
-                    MWWorld::CellStore* store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
-                    if(store)
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                    MWWorld::CellStore* store = NULL;
+                    if (player.getCell()->isExterior())
                     {
-                        ESM::Position pos;
-                        pos.pos[0] = x;
-                        pos.pos[1] = y;
-                        pos.pos[2] = z;
-                        pos.rot[0] = pos.rot[1] = 0;
-                        pos.rot[2]  = zRot;
-                        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
-                        ref.getPtr().getCellRef().setPosition(pos);
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
+                        int cx,cy;
+                        MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
+                        store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
                     }
                     else
-                    {
-                        throw std::runtime_error ("unknown cell");
-                    }
+                        store = player.getCell();
+
+                    ESM::Position pos;
+                    pos.pos[0] = x;
+                    pos.pos[1] = y;
+                    pos.pos[2] = z;
+                    pos.rot[0] = pos.rot[1] = 0;
+                    pos.rot[2]  = zRot;
+                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
+                    ref.getPtr().getCellRef().setPosition(pos);
+                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
                 }
         };
 
@@ -578,7 +598,7 @@ namespace MWScript
                     Interpreter::Type_Float rotation = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    float *objRot = ptr.getRefData().getPosition().rot;
+                    const float *objRot = ptr.getRefData().getPosition().rot;
 
                     float ax = Ogre::Radian(objRot[0]).valueDegrees();
                     float ay = Ogre::Radian(objRot[1]).valueDegrees();
@@ -613,9 +633,12 @@ namespace MWScript
                     if (!ptr.isInCell())
                         return;
 
-                    ptr.getRefData().getLocalRotation().rot[0] = 0;
-                    ptr.getRefData().getLocalRotation().rot[1] = 0;
-                    ptr.getRefData().getLocalRotation().rot[2] = 0;
+                    MWWorld::LocalRotation rot;
+                    rot.rot[0] = 0;
+                    rot.rot[1] = 0;
+                    rot.rot[2] = 0;
+                    ptr.getRefData().setLocalRotation(rot);
+
                     MWBase::Environment::get().getWorld()->rotateObject(ptr, 0,0,0,true);
                     MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
                             ptr.getCellRef().getPosition().pos[1], ptr.getCellRef().getPosition().pos[2]);
@@ -678,7 +701,7 @@ namespace MWScript
                     Interpreter::Type_Float movement = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    float *objPos = ptr.getRefData().getPosition().pos;
+                    const float *objPos = ptr.getRefData().getPosition().pos;
 
                     if (axis == "x")
                     {
@@ -697,6 +720,15 @@ namespace MWScript
                 }
         };
 
+        class OpResetActors : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWBase::Environment::get().getWorld()->resetActors();
+            }
+        };
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -737,6 +769,7 @@ namespace MWScript
             interpreter.installSegment5(Compiler::Transformation::opcodeMoveWorldExplicit,new OpMoveWorld<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingAngle, new OpGetStartingAngle<ImplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingAngleExplicit, new OpGetStartingAngle<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeResetActors, new OpResetActors);
         }
     }
 }

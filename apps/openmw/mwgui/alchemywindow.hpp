@@ -11,6 +11,7 @@
 namespace MWGui
 {
     class ItemView;
+    class ItemWidget;
     class SortFilterItemModel;
 
     class AlchemyWindow : public WindowBase
@@ -19,8 +20,11 @@ namespace MWGui
         AlchemyWindow();
 
         virtual void open();
+        virtual void exit();
 
     private:
+        std::string mSuggestedPotionName;
+
         ItemView* mItemView;
         SortFilterItemModel* mSortModel;
 
@@ -43,8 +47,8 @@ namespace MWGui
 
         MWMechanics::Alchemy mAlchemy;
 
-        std::vector<MyGUI::ImageBox *> mApparatus;
-        std::vector<MyGUI::ImageBox *> mIngredients;
+        std::vector<ItemWidget*> mApparatus;
+        std::vector<ItemWidget*> mIngredients;
     };
 }
 

@@ -1,5 +1,9 @@
 #include "aifollow.hpp"
+
 #include <iostream>
+
+#include <components/esm/aisequence.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
@@ -12,31 +16,53 @@
 #include "steering.hpp"
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(""), AiPackage()
+: mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
+, mActorRefId(actorId), mCellId(""), mActorId(-1)
 {
 }
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
-: mAlwaysFollow(false), mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(cellId), AiPackage()
+: mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
+, mActorRefId(actorId), mCellId(cellId), mActorId(-1)
 {
 }
 
-MWMechanics::AiFollow::AiFollow(const std::string &actorId)
-: mAlwaysFollow(true), mDuration(0), mX(0), mY(0), mZ(0), mActorId(actorId), mCellId(""), AiPackage()
+MWMechanics::AiFollow::AiFollow(const std::string &actorId, bool commanded)
+: mAlwaysFollow(true), mCommanded(commanded), mRemainingDuration(0), mX(0), mY(0), mZ(0)
+, mActorRefId(actorId), mCellId(""), mActorId(-1)
 {
 }
 
-bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
+MWMechanics::AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
+    : mAlwaysFollow(follow->mAlwaysFollow), mRemainingDuration(follow->mRemainingDuration)
+    , mX(follow->mData.mX), mY(follow->mData.mY), mZ(follow->mData.mZ)
+    , mActorRefId(follow->mTargetId), mActorId(-1), mCellId(follow->mCellId)
+    , mCommanded(follow->mCommanded)
 {
-    const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mActorId, false); //The target to follow
 
-    if(target == MWWorld::Ptr()) return true;   //Target doesn't exist
+}
+
+bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
+{
+    MWWorld::Ptr target = getTarget();
+
+    if (target.isEmpty() || !target.getRefData().getCount() || !target.getRefData().isEnabled()  // Really we should be checking whether the target is currently registered
+                                                                                                 // with the MechanicsManager
+            )
+        return true; //Target doesn't exist
+
+    actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 
     if(!mAlwaysFollow) //Update if you only follow for a bit
     {
-        if(mTotalTime > mDuration && mDuration != 0) //Check if we've run out of time
-            return true;
+         //Check if we've run out of time
+        if (mRemainingDuration != 0)
+        {
+            mRemainingDuration -= duration;
+            if (duration <= 0)
+                return true;
+        }
 
         if((pos.pos[0]-mX)*(pos.pos[0]-mX) +
             (pos.pos[1]-mY)*(pos.pos[1]-mY) +
@@ -55,7 +81,7 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
         }
     }
 
-    //Set the target desition from the actor
+    //Set the target destination from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
     if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < 100) //Stop when you get close
@@ -65,9 +91,9 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
     }
 
     //Check if you're far away
-    if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) > 1000)
+    if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) > 450)
         actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, true); //Make NPC run
-    else if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2])  < 800) //Have a bit of a dead zone, otherwise npc will constantly flip between running and not when right on the edge of the running threshhold
+    else if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2])  < 325) //Have a bit of a dead zone, otherwise npc will constantly flip between running and not when right on the edge of the running threshhold
         actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, false); //make NPC walk
 
     return false;
@@ -75,7 +101,7 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 
 std::string MWMechanics::AiFollow::getFollowedActor()
 {
-    return mActorId;
+    return mActorRefId;
 }
 
 MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
@@ -83,7 +109,53 @@ MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
     return new AiFollow(*this);
 }
 
- int MWMechanics::AiFollow::getTypeId() const
+int MWMechanics::AiFollow::getTypeId() const
 {
     return TypeIdFollow;
+}
+
+bool MWMechanics::AiFollow::isCommanded() const
+{
+    return mCommanded;
+}
+
+void MWMechanics::AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) const
+{
+    std::auto_ptr<ESM::AiSequence::AiFollow> follow(new ESM::AiSequence::AiFollow());
+    follow->mData.mX = mX;
+    follow->mData.mY = mY;
+    follow->mData.mZ = mZ;
+    follow->mTargetId = mActorRefId;
+    follow->mRemainingDuration = mRemainingDuration;
+    follow->mCellId = mCellId;
+    follow->mAlwaysFollow = mAlwaysFollow;
+    follow->mCommanded = mCommanded;
+
+    ESM::AiSequence::AiPackageContainer package;
+    package.mType = ESM::AiSequence::Ai_Follow;
+    package.mPackage = follow.release();
+    sequence.mPackages.push_back(package);
+}
+
+MWWorld::Ptr MWMechanics::AiFollow::getTarget()
+{
+    if (mActorId == -2)
+        return MWWorld::Ptr();
+
+    if (mActorId == -1)
+    {
+        MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mActorRefId, false);
+        if (target.isEmpty())
+        {
+            mActorId = -2;
+            return target;
+        }
+        else
+            mActorId = target.getClass().getCreatureStats(target).getActorId();
+    }
+
+    if (mActorId != -1)
+        return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mActorId);
+    else
+        return MWWorld::Ptr();
 }

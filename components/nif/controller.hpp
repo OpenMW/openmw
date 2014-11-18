@@ -24,43 +24,10 @@
 #ifndef OPENMW_COMPONENTS_NIF_CONTROLLER_HPP
 #define OPENMW_COMPONENTS_NIF_CONTROLLER_HPP
 
-#include "record.hpp"
-#include "niffile.hpp"
-#include "recordptr.hpp"
+#include "base.hpp"
 
 namespace Nif
 {
-
-class Controller : public Record
-{
-public:
-    ControllerPtr next;
-    int flags;
-    float frequency, phase;
-    float timeStart, timeStop;
-    ControlledPtr target;
-
-    void read(NIFStream *nif)
-    {
-        next.read(nif);
-
-        flags = nif->getUShort();
-
-        frequency = nif->getFloat();
-        phase = nif->getFloat();
-        timeStart = nif->getFloat();
-        timeStop = nif->getFloat();
-
-        target.read(nif);
-    }
-
-    void post(NIFFile *nif)
-    {
-        Record::post(nif);
-        next.post(nif);
-        target.post(nif);
-    }
-};
 
 class NiParticleSystemController : public Controller
 {
@@ -89,7 +56,14 @@ public:
     float lifetime;
     float lifetimeRandom;
 
-    int emitFlags; // Bit 0: Emit Rate toggle bit (0 = auto adjust, 1 = use Emit Rate value)
+    enum EmitFlags
+    {
+        NoAutoAdjust = 0x1 // If this flag is set, we use the emitRate value. Otherwise,
+                           // we calculate an emit rate so that the maximum number of particles
+                           // in the system (numParticles) is never exceeded.
+    };
+    int emitFlags;
+
     Ogre::Vector3 offsetRandom;
 
     NodePtr emitter;

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "idtable.hpp"
+#include "idtablebase.hpp"
 
 void CSMWorld::IdTableProxyModel::updateColumnMap()
 {
@@ -13,7 +13,7 @@ void CSMWorld::IdTableProxyModel::updateColumnMap()
     {
         std::vector<int> columns = mFilter->getReferencedColumns();
 
-        const IdTable& table = dynamic_cast<const IdTable&> (*sourceModel());
+        const IdTableBase& table = dynamic_cast<const IdTableBase&> (*sourceModel());
 
         for (std::vector<int>::const_iterator iter (columns.begin()); iter!=columns.end(); ++iter)
             mColumnMap.insert (std::make_pair (*iter,
@@ -28,7 +28,7 @@ bool CSMWorld::IdTableProxyModel::filterAcceptsRow (int sourceRow, const QModelI
         return true;
 
     return mFilter->test (
-        dynamic_cast<IdTable&> (*sourceModel()), sourceRow, mColumnMap);
+        dynamic_cast<IdTableBase&> (*sourceModel()), sourceRow, mColumnMap);
 }
 
 CSMWorld::IdTableProxyModel::IdTableProxyModel (QObject *parent)
@@ -39,7 +39,7 @@ CSMWorld::IdTableProxyModel::IdTableProxyModel (QObject *parent)
 
 QModelIndex CSMWorld::IdTableProxyModel::getModelIndex (const std::string& id, int column) const
 {
-    return mapFromSource (dynamic_cast<IdTable&> (*sourceModel()).getModelIndex (id, column));
+    return mapFromSource (dynamic_cast<IdTableBase&> (*sourceModel()).getModelIndex (id, column));
 }
 
 void CSMWorld::IdTableProxyModel::setFilter (const boost::shared_ptr<CSMFilter::Node>& filter)
@@ -47,4 +47,9 @@ void CSMWorld::IdTableProxyModel::setFilter (const boost::shared_ptr<CSMFilter::
     mFilter = filter;
     updateColumnMap();
     invalidateFilter();
+}
+
+bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+{
+    return QSortFilterProxyModel::lessThan(left, right);
 }

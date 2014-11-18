@@ -37,11 +37,12 @@ resources
 /omwlauncher
 /openmw
 /opencs
+/niftest
 
 ## generated objects
 apps/openmw/config.hpp
 components/version/version.hpp
-Docs/mainpage.hpp
+docs/mainpage.hpp
 moc_*.cxx
 *.cxx_parameters
 *qrc_launcher.cxx

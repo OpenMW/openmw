@@ -20,12 +20,23 @@
 #include "inventorywindow.hpp"
 
 #include "itemview.hpp"
+#include "itemwidget.hpp"
 #include "inventoryitemmodel.hpp"
 #include "sortfilteritemmodel.hpp"
 #include "pickpocketitemmodel.hpp"
 
 namespace MWGui
 {
+
+    DragAndDrop::DragAndDrop()
+        : mDraggedWidget(NULL)
+        , mDraggedCount(0)
+        , mSourceModel(NULL)
+        , mSourceView(NULL)
+        , mSourceSortModel(NULL)
+        , mIsOnDragAndDrop(false)
+    {
+    }
 
     void DragAndDrop::startDrag (int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView, int count)
     {
@@ -35,7 +46,32 @@ namespace MWGui
         mSourceView = sourceView;
         mSourceSortModel = sortModel;
         mIsOnDragAndDrop = true;
-        mDragAndDropWidget->setVisible(true);
+
+        // If picking up an item that isn't from the player's inventory, the item gets added to player inventory backend
+        // immediately, even though it's still floating beneath the mouse cursor. A bit counterintuitive,
+        // but this is how it works in vanilla, and not doing so would break quests (BM_beasts for instance).
+        ItemModel* playerModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getModel();
+        if (mSourceModel != playerModel)
+        {
+            MWWorld::Ptr item = mSourceModel->moveItem(mItem, mDraggedCount, playerModel);
+
+            playerModel->update();
+
+            ItemModel::ModelIndex newIndex = -1;
+            for (unsigned int i=0; i<playerModel->getItemCount(); ++i)
+            {
+                if (playerModel->getItem(i).mBase == item)
+                {
+                    newIndex = i;
+                    break;
+                }
+            }
+            mItem = playerModel->getItem(newIndex);
+            mSourceModel = playerModel;
+
+            SortFilterItemModel* playerFilterModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getSortFilterModel();
+            mSourceSortModel = playerFilterModel;
+        }
 
         std::string sound = mItem.mBase.getClass().getUpSoundId(mItem.mBase);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
@@ -46,28 +82,17 @@ namespace MWGui
             mSourceSortModel->addDragItem(mItem.mBase, count);
         }
 
-        std::string path = std::string("icons\\");
-        path += mItem.mBase.getClass().getInventoryIcon(mItem.mBase);
-        MyGUI::ImageBox* baseWidget = mDragAndDropWidget->createWidget<MyGUI::ImageBox>
-                ("ImageBox", MyGUI::IntCoord(0, 0, 42, 42), MyGUI::Align::Default);
-        mDraggedWidget = baseWidget;
-        MyGUI::ImageBox* image = baseWidget->createWidget<MyGUI::ImageBox>("ImageBox",
-            MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
-        size_t pos = path.rfind(".");
-        if (pos != std::string::npos)
-            path.erase(pos);
-        path.append(".dds");
-        image->setImageTexture(path);
-        image->setNeedMouseFocus(false);
+        ItemWidget* baseWidget = MyGUI::Gui::getInstance().createWidget<ItemWidget>("MW_ItemIcon", 0, 0, 42, 42, MyGUI::Align::Default, "DragAndDrop");
 
-        // text widget that shows item count
-        MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText",
-            MyGUI::IntCoord(0, 14, 32, 18), MyGUI::Align::Default, std::string("Label"));
-        text->setTextAlign(MyGUI::Align::Right);
-        text->setNeedMouseFocus(false);
-        text->setTextShadow(true);
-        text->setTextShadowColour(MyGUI::Colour(0,0,0));
-        text->setCaption(ItemView::getCountString(count));
+        Controllers::ControllerFollowMouse* controller =
+                MyGUI::ControllerManager::getInstance().createItem(Controllers::ControllerFollowMouse::getClassTypeName())
+                ->castType<Controllers::ControllerFollowMouse>();
+        MyGUI::ControllerManager::getInstance().addItem(baseWidget, controller);
+
+        mDraggedWidget = baseWidget;
+        baseWidget->setItem(mItem.mBase);
+        baseWidget->setNeedMouseFocus(false);
+        baseWidget->setCount(count);
 
         sourceView->update();
 
@@ -79,7 +104,12 @@ namespace MWGui
         std::string sound = mItem.mBase.getClass().getDownSoundId(mItem.mBase);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
-        mDragAndDropWidget->setVisible(false);
+        // We can't drop a conjured item to the ground; the target container should always be the source container
+        if (mItem.mFlags & ItemStack::Flag_Bound && targetModel != mSourceModel)
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
+            return;
+        }
 
         // If item is dropped where it was taken from, we don't need to do anything -
         // otherwise, do the transfer
@@ -144,6 +174,13 @@ namespace MWGui
 
         const ItemStack& item = mSortModel->getItem(index);
 
+        // We can't take a conjured item from a container (some NPC we're pickpocketing, a box, etc)
+        if (item.mFlags & ItemStack::Flag_Bound)
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage1}");
+            return;
+        }
+
         MWWorld::Ptr object = item.mBase;
         int count = item.mCount;
         bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
@@ -175,21 +212,21 @@ namespace MWGui
     {
         if (mPtr.getTypeName() == typeid(ESM::Container).name())
         {
-            // check that we don't exceed container capacity
-            MWWorld::Ptr item = mDragAndDrop->mItem.mBase;
-            float weight = item.getClass().getWeight(item) * mDragAndDrop->mDraggedCount;
-            if (mPtr.getClass().getCapacity(mPtr) < mPtr.getClass().getEncumbrance(mPtr) + weight)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage3}");
-                return;
-            }
-
             // check container organic flag
             MWWorld::LiveCellRef<ESM::Container>* ref = mPtr.get<ESM::Container>();
             if (ref->mBase->mFlags & ESM::Container::Organic)
             {
                 MWBase::Environment::get().getWindowManager()->
                     messageBox("#{sContentsMessage2}");
+                return;
+            }
+
+            // check that we don't exceed container capacity
+            MWWorld::Ptr item = mDragAndDrop->mItem.mBase;
+            float weight = item.getClass().getWeight(item) * mDragAndDrop->mDraggedCount;
+            if (mPtr.getClass().getCapacity(mPtr) < mPtr.getClass().getEncumbrance(mPtr) + weight)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage3}");
                 return;
             }
         }
@@ -212,7 +249,8 @@ namespace MWGui
         {
             // we are stealing stuff
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            mModel = new PickpocketItemModel(player, new InventoryItemModel(container));
+            mModel = new PickpocketItemModel(player, new InventoryItemModel(container),
+                                             !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown());
         }
         else
             mModel = new InventoryItemModel(container);
@@ -236,6 +274,14 @@ namespace MWGui
             onCloseButtonClicked(mCloseButton);
         if (_key == MyGUI::KeyCode::Return || _key == MyGUI::KeyCode::NumpadEnter)
             onTakeAllButtonClicked(mTakeButton);
+    }
+
+    void ContainerWindow::resetReference()
+    {
+        ReferenceInterface::resetReference();
+        mItemView->setModel(NULL);
+        mModel = NULL;
+        mSortModel = NULL;
     }
 
     void ContainerWindow::close()
@@ -263,12 +309,17 @@ namespace MWGui
         }
     }
 
-    void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
+    void ContainerWindow::exit()
     {
         if(mDragAndDrop == NULL || !mDragAndDrop->mIsOnDragAndDrop)
         {
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
         }
+    }
+
+    void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
+    {
+        exit();
     }
 
     void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
@@ -323,7 +374,9 @@ namespace MWGui
     bool ContainerWindow::onTakeItem(const ItemStack &item, int count)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        if (dynamic_cast<PickpocketItemModel*>(mModel))
+        // TODO: move to ItemModels
+        if (dynamic_cast<PickpocketItemModel*>(mModel)
+                && !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown())
         {
             MWMechanics::Pickpocket pickpocket(player, mPtr);
             if (pickpocket.pick(item.mBase, count))

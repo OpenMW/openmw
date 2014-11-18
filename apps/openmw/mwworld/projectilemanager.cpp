@@ -20,6 +20,8 @@
 #include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwrender/effectmanager.hpp"
+#include "../mwrender/animation.hpp"
+#include "../mwrender/renderconst.hpp"
 
 #include "../mwsound/sound.hpp"
 
@@ -41,6 +43,9 @@ namespace MWWorld
             if(state.mObject->mControllers[i].getSource().isNull())
                 state.mObject->mControllers[i].setSource(Ogre::SharedPtr<MWRender::EffectAnimationTime> (new MWRender::EffectAnimationTime()));
         }
+
+        MWRender::Animation::setRenderProperties(state.mObject, MWRender::RV_Misc,
+                            MWRender::RQG_Main, MWRender::RQG_Alpha, 0.f, false, NULL);
     }
 
     void ProjectileManager::update(NifOgre::ObjectScenePtr object, float duration)
@@ -57,22 +62,35 @@ namespace MWWorld
 
     void ProjectileManager::launchMagicBolt(const std::string &model, const std::string &sound,
                                             const std::string &spellId, float speed, bool stack,
-                                            const ESM::EffectList &effects, const Ptr &actor, const std::string &sourceName)
+                                            const ESM::EffectList &effects, const Ptr &caster, const std::string &sourceName,
+                                            const Ogre::Vector3& fallbackDirection)
     {
-        // Spawn at 0.75 * ActorHeight
-        float height = mPhysEngine.getCharacter(actor.getRefData().getHandle())->getHalfExtents().z * 2 * 0.75;
+        float height = 0;
+        if (OEngine::Physic::PhysicActor* actor = mPhysEngine.getCharacter(caster.getRefData().getHandle()))
+            height = actor->getHalfExtents().z * 2 * 0.75;         // Spawn at 0.75 * ActorHeight
 
-        Ogre::Vector3 pos(actor.getRefData().getPosition().pos);
+        Ogre::Vector3 pos(caster.getRefData().getPosition().pos);
         pos.z += height;
 
-        Ogre::Quaternion orient = Ogre::Quaternion(Ogre::Radian(actor.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
-                Ogre::Quaternion(Ogre::Radian(actor.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X);
+        if (MWBase::Environment::get().getWorld()->isUnderwater(caster.getCell(), pos)) // Underwater casting not possible
+            return;
+
+        Ogre::Quaternion orient;
+        if (caster.getClass().isActor())
+            orient = Ogre::Quaternion(Ogre::Radian(caster.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
+                    Ogre::Quaternion(Ogre::Radian(caster.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X);
+        else
+            orient = Ogre::Vector3::UNIT_Y.getRotationTo(fallbackDirection);
 
         MagicBoltState state;
         state.mSourceName = sourceName;
         state.mId = model;
         state.mSpellId = spellId;
-        state.mActorId = actor.getClass().getCreatureStats(actor).getActorId();
+        state.mCasterHandle = caster.getRefData().getHandle();
+        if (caster.getClass().isActor())
+            state.mActorId = caster.getClass().getCreatureStats(caster).getActorId();
+        else
+            state.mActorId = -1;
         state.mSpeed = speed;
         state.mStack = stack;
         state.mSoundId = sound;
@@ -135,7 +153,8 @@ namespace MWWorld
             Ogre::Vector3 pos(it->mNode->getPosition());
             Ogre::Vector3 newPos = pos + direction * duration * speed;
 
-            it->mSound->setPosition(newPos);
+            if (it->mSound.get())
+                it->mSound->setPosition(newPos);
 
             it->mNode->setPosition(newPos);
 
@@ -145,14 +164,17 @@ namespace MWWorld
             // TODO: use a proper btRigidBody / btGhostObject?
             btVector3 from(pos.x, pos.y, pos.z);
             btVector3 to(newPos.x, newPos.y, newPos.z);
-            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to);
+
+            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to, OEngine::Physic::CollisionType_Projectile);
             bool hit=false;
 
             for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end() && !hit; ++cIt)
             {
                 MWWorld::Ptr obstacle = MWBase::Environment::get().getWorld()->searchPtrViaHandle(cIt->second);
 
-                MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->mActorId);
+                MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaHandle(it->mCasterHandle);
+                if (caster.isEmpty())
+                    caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->mActorId);
 
                 if (!obstacle.isEmpty() && obstacle == caster)
                     continue;
@@ -176,6 +198,11 @@ namespace MWWorld
 
                 hit = true;
             }
+
+            // Explodes when hitting water
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWBase::Environment::get().getWorld()->getPlayerPtr().getCell(), newPos))
+                hit = true;
+
             if (hit)
             {
                 MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->mActorId);
@@ -214,7 +241,7 @@ namespace MWWorld
             // TODO: use a proper btRigidBody / btGhostObject?
             btVector3 from(pos.x, pos.y, pos.z);
             btVector3 to(newPos.x, newPos.y, newPos.z);
-            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to);
+            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to, OEngine::Physic::CollisionType_Projectile);
             bool hit=false;
 
             for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end() && !hit; ++cIt)
@@ -227,29 +254,23 @@ namespace MWWorld
                 if (obstacle == caster)
                     continue;
 
-                if (obstacle.isEmpty())
+                MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mId);
+
+                // Try to get a Ptr to the bow that was used. It might no longer exist.
+                MWWorld::Ptr bow = projectileRef.getPtr();
+                if (!caster.isEmpty())
                 {
-                    // Terrain
+                    MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
+                    MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                    if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
+                        bow = *invIt;
                 }
-                else if (obstacle.getClass().isActor())
-                {                    
-                    MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mId);
 
-                    // Try to get a Ptr to the bow that was used. It might no longer exist.
-                    MWWorld::Ptr bow = projectileRef.getPtr();
-                    if (!caster.isEmpty())
-                    {
-                        MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
-                        MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                        if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
-                            bow = *invIt;
-                    }
+                if (caster.isEmpty())
+                    caster = obstacle;
 
-                    if (caster.isEmpty())
-                        caster = obstacle;
+                MWMechanics::projectileHit(caster, obstacle, bow, projectileRef.getPtr(), pos + (newPos - pos) * cIt->first);
 
-                    MWMechanics::projectileHit(caster, obstacle, bow, projectileRef.getPtr(), pos + (newPos - pos) * cIt->first);
-                }
                 hit = true;
             }
             if (hit)
@@ -389,6 +410,7 @@ namespace MWWorld
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             state.mSound = sndMgr->playManualSound3D(esm.mPosition, esm.mSound, 1.0f, 1.0f,
                                                      MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
+            state.mSoundId = esm.mSound;
 
             mMagicBolts.push_back(state);
             return true;

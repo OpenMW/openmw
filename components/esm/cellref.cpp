@@ -6,10 +6,12 @@
 
 void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
 {
-    // NAM0 sometimes appears here, sometimes further on
-    mNam0 = 0;
+    // According to Hrnchamd, this does not belong to the actual ref. Instead, it is a marker indicating that
+    // the following refs are part of a "temp refs" section. A temp ref is not being tracked by the moved references system.
+    // Its only purpose is a performance optimization for "immovable" things. We don't need this, and it's problematic anyway,
+    // because any item can theoretically be moved by a script.
     if (esm.isNextSub ("NAM0"))
-        esm.getHT (mNam0);
+        esm.skipHSub();
 
     if (wideRefNum)
         esm.getHNT (mRefNum, "FRMR", 8);
@@ -27,12 +29,12 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
     esm.getHNOT (mScale, "XSCL");
 
     mOwner = esm.getHNOString ("ANAM");
-    mGlob = esm.getHNOString ("BNAM");
+    mGlobalVariable = esm.getHNOString ("BNAM");
     mSoul = esm.getHNOString ("XSOL");
 
     mFaction = esm.getHNOString ("CNAM");
-    mFactIndex = -2;
-    esm.getHNOT (mFactIndex, "INDX");
+    mFactionRank = -2;
+    esm.getHNOT (mFactionRank, "INDX");
 
     mGoldValue = 1;
     mCharge = -1;
@@ -60,20 +62,14 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
     mKey = esm.getHNOString ("KNAM");
     mTrap = esm.getHNOString ("TNAM");
 
-    mFltv = 0;
     esm.getHNOT (mReferenceBlocked, "UNAM");
-    esm.getHNOT (mFltv, "FLTV");
+    if (esm.isNextSub("FLTV")) // no longer used
+        esm.skipHSub();
 
     esm.getHNOT(mPos, "DATA", 24);
 
-    // Number of references in the cell? Maximum once in each cell,
-    // but not always at the beginning, and not always right. In other
-    // words, completely useless.
-    // Update: Well, maybe not completely useless. This might actually be
-    //  number_of_references + number_of_references_moved_here_Across_boundaries,
-    //  and could be helpful for collecting these weird moved references.
-    if (esm.isNextSub ("NAM0"))
-        esm.getHT (mNam0);
+    if (esm.isNextSub("NAM0"))
+        esm.skipHSub();
 }
 
 void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) const
@@ -90,12 +86,12 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
     }
 
     esm.writeHNOCString("ANAM", mOwner);
-    esm.writeHNOCString("BNAM", mGlob);
+    esm.writeHNOCString("BNAM", mGlobalVariable);
     esm.writeHNOCString("XSOL", mSoul);
 
     esm.writeHNOCString("CNAM", mFaction);
-    if (mFactIndex != -2) {
-        esm.writeHNT("INDX", mFactIndex);
+    if (mFactionRank != -2) {
+        esm.writeHNT("INDX", mFactionRank);
     }
 
     if (mEnchantmentCharge != -1)
@@ -108,13 +104,13 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
         esm.writeHNT("NAM9", mGoldValue);
     }
 
-    if (mTeleport && !inInventory)
+    if (!inInventory && mTeleport)
     {
         esm.writeHNT("DODT", mDoorDest);
         esm.writeHNOCString("DNAM", mDestCell);
     }
 
-    if (mLockLevel != 0 && !inInventory) {
+    if (!inInventory && mLockLevel != 0) {
             esm.writeHNT("FLTV", mLockLevel);
     }
 
@@ -127,14 +123,8 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
     if (mReferenceBlocked != -1)
         esm.writeHNT("UNAM", mReferenceBlocked);
 
-    if (mFltv != 0 && !inInventory)
-        esm.writeHNT("FLTV", mFltv);
-
     if (!inInventory)
         esm.writeHNT("DATA", mPos, 24);
-
-    if (mNam0 != 0 && !inInventory)
-        esm.writeHNT("NAM0", mNam0);
 }
 
 void ESM::CellRef::blank()
@@ -144,10 +134,10 @@ void ESM::CellRef::blank()
     mRefID.clear();
     mScale = 1;
     mOwner.clear();
-    mGlob.clear();
+    mGlobalVariable.clear();
     mSoul.clear();
     mFaction.clear();
-    mFactIndex = -1;
+    mFactionRank = -2;
     mCharge = 0;
     mEnchantmentCharge = 0;
     mGoldValue = 0;
@@ -156,8 +146,7 @@ void ESM::CellRef::blank()
     mKey.clear();
     mTrap.clear();
     mReferenceBlocked = 0;
-    mFltv = 0;
-    mNam0 = 0;
+    mTeleport = false;
 
     for (int i=0; i<3; ++i)
     {
@@ -171,4 +160,15 @@ void ESM::CellRef::blank()
 bool ESM::operator== (const RefNum& left, const RefNum& right)
 {
     return left.mIndex==right.mIndex && left.mContentFile==right.mContentFile;
+}
+
+bool ESM::operator< (const RefNum& left, const RefNum& right)
+{
+    if (left.mIndex<right.mIndex)
+        return true;
+
+    if (left.mIndex>right.mIndex)
+        return false;
+
+    return left.mContentFile<right.mContentFile;
 }

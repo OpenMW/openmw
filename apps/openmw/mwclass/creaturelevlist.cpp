@@ -27,6 +27,11 @@ namespace
 
 namespace MWClass
 {
+    std::string CreatureLevList::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::CreatureLevList>()->mBase->mId;
+    }
+
     std::string CreatureLevList::getName (const MWWorld::Ptr& ptr) const
     {
         return "";
@@ -78,6 +83,8 @@ namespace MWClass
             customData.mSpawnActorId = placed.getClass().getCreatureStats(placed).getActorId();
             customData.mSpawn = false;
         }
+        else
+            customData.mSpawn = false;
     }
 
     void CreatureLevList::ensureCustomData(const MWWorld::Ptr &ptr) const

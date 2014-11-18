@@ -12,6 +12,11 @@
 
 #include "../mwbase/windowmanager.hpp"
 
+#include "mapwindow.hpp"
+
+#include <MyGUI_KeyCode.h>
+#include <MyGUI_Types.h>
+
 namespace MyGUI
 {
     class Gui;
@@ -74,7 +79,6 @@ namespace MWGui
   class SpellCreationDialog;
   class EnchantingDialog;
   class TrainingWindow;
-  class Cursor;
   class SpellIcons;
   class MerchantRepair;
   class Repair;
@@ -82,6 +86,9 @@ namespace MWGui
   class Recharge;
   class CompanionWindow;
   class VideoWidget;
+  class WindowModal;
+  class ScreenFader;
+  class DebugWindow;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -92,7 +99,7 @@ namespace MWGui
     WindowManager(const Compiler::Extensions& extensions, int fpsLevel,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
-                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding);
+                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap);
     virtual ~WindowManager();
 
     void initUI();
@@ -132,10 +139,10 @@ namespace MWGui
     virtual void forceHide(MWGui::GuiWindow wnd);
     virtual void unsetForceHide(MWGui::GuiWindow wnd);
 
-    // Disallow all inventory mode windows
+    /// Disallow all inventory mode windows
     virtual void disallowAll();
 
-    // Allow one or more windows
+    /// Allow one or more windows
     virtual void allow(GuiWindow wnd);
 
     virtual bool isAllowed(GuiWindow wnd) const;
@@ -153,8 +160,6 @@ namespace MWGui
     virtual MWGui::TravelWindow* getTravelWindow();
     virtual MWGui::SpellWindow* getSpellWindow();
     virtual MWGui::Console* getConsole();
-
-    virtual MyGUI::Gui* getGui() const;
 
     virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount);
 
@@ -177,7 +182,7 @@ namespace MWGui
     virtual void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
     virtual void changeCell(MWWorld::CellStore* cell); ///< change the active cell
-    virtual void setPlayerPos(const float x, const float y); ///< set player position in map space
+    virtual void setPlayerPos(int cellX, int cellY, const float x, const float y); ///< set player position in map space
     virtual void setPlayerDir(const float x, const float y); ///< set player view direction in map space
 
     virtual void setFocusObject(const MWWorld::Ptr& focus);
@@ -217,7 +222,9 @@ namespace MWGui
 
     virtual void showCrosshair(bool show);
     virtual bool getSubtitlesEnabled();
-    virtual void toggleHud();
+
+    /// Turn visibility of *all* GUI elements on or off (HUD and all windows, except the console)
+    virtual bool toggleGui();
 
     virtual void disallowMouse();
     virtual void allowMouse();
@@ -225,7 +232,11 @@ namespace MWGui
 
     virtual void addVisitedLocation(const std::string& name, int x, int y);
 
-    virtual void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.
+    ///Hides dialog and schedules dialog to be deleted.
+    virtual void removeDialog(OEngine::GUI::Layout* dialog);
+
+    ///Gracefully attempts to exit the topmost GUI mode
+    virtual void exitCurrentGuiMode();
 
     virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible);
     virtual void staticMessageBox(const std::string& message);
@@ -298,6 +309,35 @@ namespace MWGui
     /// Does the current stack of GUI-windows permit saving?
     virtual bool isSavingAllowed() const;
 
+    /// Returns the current Modal
+    /** Used to send exit command to active Modal when Esc is pressed **/
+    virtual WindowModal* getCurrentModal() const;
+
+    /// Sets the current Modal
+    /** Used to send exit command to active Modal when Esc is pressed **/
+    virtual void addCurrentModal(WindowModal* input) {mCurrentModals.push(input);}
+
+    /// Removes the top Modal
+    /** Used when one Modal adds another Modal
+        \param input Pointer to the current modal, to ensure proper modal is removed **/
+    virtual void removeCurrentModal(WindowModal* input);
+
+    virtual void pinWindow (MWGui::GuiWindow window);
+
+    /// Fade the screen in, over \a time seconds
+    virtual void fadeScreenIn(const float time);
+    /// Fade the screen out to black, over \a time seconds
+    virtual void fadeScreenOut(const float time);
+    /// Fade the screen to a specified percentage of black, over \a time seconds
+    virtual void fadeScreenTo(const int percent, const float time);
+    /// Darken the screen to a specified percentage
+    virtual void setBlindness(const int percent);
+
+    virtual void activateHitOverlay(bool interrupt);
+    virtual void setWerewolfOverlay(bool set);
+
+    virtual void toggleDebugWindow();
+
   private:
     bool mConsoleOnlyScripts;
 
@@ -306,6 +346,11 @@ namespace MWGui
     void onWindowChangeCoord(MyGUI::Window* _sender);
 
     std::string mSelectedSpell;
+
+    std::stack<WindowModal*> mCurrentModals;
+
+    // Markers placed manually by the player. Must be shared between both map views (the HUD map and the map window).
+    CustomMarkerCollection mCustomMarkers;
 
     OEngine::GUI::MyGUIManager *mGuiManager;
     OEngine::Render::OgreRenderer *mRendering;
@@ -345,9 +390,13 @@ namespace MWGui
     CompanionWindow* mCompanionWindow;
     MyGUI::ImageBox* mVideoBackground;
     VideoWidget* mVideoWidget;
+    ScreenFader* mWerewolfFader;
+    ScreenFader* mBlindnessFader;
+    ScreenFader* mHitFader;
+    ScreenFader* mScreenFader;
+    DebugWindow* mDebugWindow;
 
     Translation::Storage& mTranslationDataStorage;
-    Cursor* mSoftwareCursor;
 
     CharacterCreation* mCharGen;
 
@@ -355,7 +404,10 @@ namespace MWGui
 
     bool mCrosshairEnabled;
     bool mSubtitlesEnabled;
+    bool mHitFaderEnabled;
+    bool mWerewolfOverlayEnabled;
     bool mHudEnabled;
+    bool mGuiEnabled;
     bool mCursorVisible;
 
     void setCursorVisible(bool visible);
@@ -395,16 +447,30 @@ namespace MWGui
     unsigned int mTriangleCount;
     unsigned int mBatchCount;
 
+    std::map<std::string, std::string> mFallbackMap;
+
     /**
-     * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,
-     * so this method will retrieve the GMST with the name \a _tag and place the result in \a _result
+     * Called when MyGUI tries to retrieve a tag's value. Tags must be denoted in #{tag} notation and will be replaced upon setting a user visible text/property.
+     * Supported syntax:
+     * #{GMSTName}: retrieves String value of the GMST called GMSTName
+     * #{sCell=CellID}: retrieves translated name of the given CellID (used only by some Morrowind localisations, in others cell ID is == cell name)
+     * #{fontcolour=FontColourName}: retrieves the value of the fallback setting "FontColor_color_<FontColourName>" from openmw.cfg,
+     *                              in the format "r g b a", float values in range 0-1. Useful for "Colour" and "TextColour" properties in skins.
+     * #{fontcolourhtml=FontColourName}: retrieves the value of the fallback setting "FontColor_color_<FontColourName>" from openmw.cfg,
+     *                              in the format "#xxxxxx" where x are hexadecimal numbers. Useful in an EditBox's caption to change the color of following text.
      */
     void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
 
     void onCursorChange(const std::string& name);
     void onKeyFocusChanged(MyGUI::Widget* widget);
 
+    // Key pressed while playing a video
+    void onVideoKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char);
+
     void sizeVideo(int screenWidth, int screenHeight);
+
+    void onClipboardChanged(const std::string& _type, const std::string& _data);
+    void onClipboardRequested(const std::string& _type, std::string& _data);
   };
 }
 

@@ -6,6 +6,14 @@
 #include "pathfinding.hpp"
 #include <components/esm/defs.hpp>
 
+namespace ESM
+{
+namespace AiSequence
+{
+    struct AiFollow;
+}
+}
+
 namespace MWMechanics
 {
     /// \brief AiPackage for an actor to follow another actor/the PC
@@ -19,26 +27,36 @@ namespace MWMechanics
             /// Follow Actor for duration or until you arrive at a position in a cell
             AiFollow(const std::string &ActorId,const std::string &CellId,float duration, float X, float Y, float Z);
             /// Follow Actor indefinitively
-            AiFollow(const std::string &ActorId);
+            AiFollow(const std::string &ActorId, bool commanded=false);
+
+            AiFollow(const ESM::AiSequence::AiFollow* follow);
+
+            MWWorld::Ptr getTarget();
 
             virtual AiFollow *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor,float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
 
             virtual int getTypeId() const;
 
             /// Returns the actor being followed
             std::string getFollowedActor();
 
+            virtual void writeState (ESM::AiSequence::AiSequence& sequence) const;
+
+            bool isCommanded() const;
+
         private:
             /// This will make the actor always follow.
             /** Thus ignoring mDuration and mX,mY,mZ (used for summoned creatures). **/
             bool mAlwaysFollow;
-            float mDuration;
+            bool mCommanded;
+            float mRemainingDuration; // Seconds
             float mX;
             float mY;
             float mZ;
-            std::string mActorId;
+            std::string mActorRefId;
+            int mActorId;
             std::string mCellId;
     };
 }

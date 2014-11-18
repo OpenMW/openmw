@@ -17,6 +17,8 @@ namespace MWGui
 
             virtual void open();
 
+            virtual void exit();
+
             void updateControlsBox();
 
     protected:
@@ -28,6 +30,7 @@ namespace MWGui
             MyGUI::Button* mVSyncButton;
             MyGUI::Button* mFPSButton;
             MyGUI::ScrollBar* mFOVSlider;
+            MyGUI::ScrollBar* mDifficultySlider;
             MyGUI::ScrollBar* mAnisotropySlider;
             MyGUI::ComboBox* mTextureFilteringButton;
             MyGUI::TextBox* mAnisotropyLabel;
@@ -59,6 +62,8 @@ namespace MWGui
             void onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel);
             void onResetDefaultBindings(MyGUI::Widget* _sender);
             void onResetDefaultBindingsAccept ();
+
+            void onWindowResize(MyGUI::Window* _sender);
 
             void apply();
 

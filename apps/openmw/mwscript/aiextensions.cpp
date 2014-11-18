@@ -186,7 +186,7 @@ namespace MWScript
                     Interpreter::Type_Integer time = runtime[0].mFloat;
                     runtime.pop();
 
-                    std::vector<int> idleList;
+                    std::vector<unsigned char> idleList;
                     bool repeat = false;
 
                     for(int i=1; i < 10 && arg0; ++i)
@@ -194,6 +194,7 @@ namespace MWScript
                         if(!repeat)
                             repeat = true;
                         Interpreter::Type_Integer idleValue = runtime[0].mInteger;
+                        idleValue = std::min(255, std::max(0, idleValue));
                         idleList.push_back(idleValue);
                         runtime.pop();
                         --arg0;
@@ -370,6 +371,12 @@ namespace MWScript
 
                     MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPtr(actorID, true);
 
+                    if(!actor.getClass().isActor() || !observer.getClass().isActor())
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
                     Interpreter::Type_Integer value =
                             MWBase::Environment::get().getWorld()->getLOS(observer, actor) &&
                             MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, observer);
@@ -391,9 +398,10 @@ namespace MWScript
                     std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+
                     MWWorld::Ptr dest = MWBase::Environment::get().getWorld()->getPtr(actorID,true);
                     bool value = false;
-                    if(dest != MWWorld::Ptr() )
+                    if(dest != MWWorld::Ptr() && source.getClass().isActor() && dest.getClass().isActor())
                     {
                         value = MWBase::Environment::get().getWorld()->getLOS(source,dest);
                     }
@@ -412,7 +420,6 @@ namespace MWScript
                     runtime.pop();
 
                     const MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
-                    std::string currentTargetId;
 
                     bool targetsAreEqual = false;
                     MWWorld::Ptr targetPtr;
@@ -449,7 +456,6 @@ namespace MWScript
                     MWWorld::Ptr actor = R()(runtime);
                     MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
                     creatureStats.getAiSequence().stopCombat();
-                    creatureStats.setHostile(false);
                 }
         };
 
@@ -467,6 +473,16 @@ namespace MWScript
 
                     context.report (enabled ? "AI -> On" : "AI -> Off");
                 }
+        };
+
+        template <class R>
+        class OpFace : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime& runtime)
+            {
+                /// \todo implement
+            }
         };
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -530,6 +546,9 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Ai::opcodeGetFleeExplicit, new OpGetAiSetting<ExplicitRef>(2));
             interpreter.installSegment5 (Compiler::Ai::opcodeGetAlarm, new OpGetAiSetting<ImplicitRef>(3));
             interpreter.installSegment5 (Compiler::Ai::opcodeGetAlarmExplicit, new OpGetAiSetting<ExplicitRef>(3));
+
+            interpreter.installSegment5 (Compiler::Ai::opcodeFace, new OpFace<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeFaceExplicit, new OpFace<ExplicitRef>);
         }
     }
 }

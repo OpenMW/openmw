@@ -13,6 +13,7 @@ namespace ESM
 
     void AIPackageList::load(ESMReader &esm)
     {
+        mList.clear();
         while (esm.hasMoreSubs()) {
             // initialize every iteration
             AIPackage pack;

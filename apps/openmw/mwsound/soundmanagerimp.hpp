@@ -31,6 +31,10 @@ namespace MWSound
 
         std::auto_ptr<Sound_Output> mOutput;
 
+        // Caches available music tracks by <playlist name, (sound files) >
+        std::map<std::string, Ogre::StringVector> mMusicFiles;
+        std::string mLastPlayedMusic; // The music file that was last played
+
         float mMasterVolume;
         float mSFXVolume;
         float mMusicVolume;
@@ -46,6 +50,7 @@ namespace MWSound
 
         MWBase::SoundPtr mUnderwaterSound;
 
+        bool mListenerUnderwater;
         Ogre::Vector3 mListenerPos;
         Ogre::Vector3 mListenerDir;
         Ogre::Vector3 mListenerUp;
@@ -104,6 +109,11 @@ namespace MWSound
 
         virtual void stopSay(const MWWorld::Ptr &reference=MWWorld::Ptr());
         ///< Stop an actor speaking
+
+        virtual float getSaySoundLoudness(const MWWorld::Ptr& reference) const;
+        ///< Check the currently playing say sound for this actor
+        /// and get an average loudness value (scale [0,1]) at the current time position.
+        /// If the actor is not saying anything, returns 0.
 
         virtual MWBase::SoundPtr playTrack(const DecoderPtr& decoder, PlayType type);
         ///< Play a 2D audio track, using a custom decoder

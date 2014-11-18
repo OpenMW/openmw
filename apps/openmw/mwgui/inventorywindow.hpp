@@ -37,6 +37,7 @@ namespace MWGui
                 mPreview->rebuild();
             }
 
+            SortFilterItemModel* getSortFilterModel();
             TradeItemModel* getTradeModel();
             ItemModel* getModel();
 
@@ -52,6 +53,7 @@ namespace MWGui
             DragAndDrop* mDragAndDrop;
 
             bool mPreviewDirty;
+            bool mPreviewResize;
             int mSelectedItem;
 
             MWWorld::Ptr mPtr;
@@ -97,6 +99,7 @@ namespace MWGui
             void onFilterChanged(MyGUI::Widget* _sender);
             void onAvatarClicked(MyGUI::Widget* _sender);
             void onPinToggled();
+            void onTitleDoubleClicked();
 
             void updateEncumbranceBar();
             void notifyContentChanged();

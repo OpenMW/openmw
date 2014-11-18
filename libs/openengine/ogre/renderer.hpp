@@ -43,8 +43,6 @@ namespace OEngine
             std::string icon;
         };
 
-        class Fader;
-
         class WindowSizeListener
         {
         public:
@@ -62,8 +60,6 @@ namespace OEngine
 
             OgreInit::OgreInit* mOgreInit;
 
-            Fader* mFader;
-
             WindowSizeListener* mWindowListener;
 
             int mWindowWidth;
@@ -79,7 +75,6 @@ namespace OEngine
             , mCamera(NULL)
             , mView(NULL)
             , mOgreInit(NULL)
-            , mFader(NULL)
             , mWindowListener(NULL)
             , mWindowWidth(0)
             , mWindowHeight(0)
@@ -113,9 +108,7 @@ namespace OEngine
             void update(float dt);
 
             /// Write a screenshot to file
-            void screenshot(const std::string &file);
-
-            float getFPS();
+            void screenshot(const std::string &file, const std::string& imageFormat);
 
             void windowResized(int x, int y);
 
@@ -130,9 +123,6 @@ namespace OEngine
 
             /// Get the scene manager
             Ogre::SceneManager *getScene() { return mScene; }
-
-            /// Get the screen colour fader
-            Fader *getFader() { return mFader; }
 
             /// Camera
             Ogre::Camera *getCamera() { return mCamera; }

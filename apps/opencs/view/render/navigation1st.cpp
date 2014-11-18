@@ -44,10 +44,11 @@ bool CSVRender::Navigation1st::mouseMoved (const QPoint& delta, int mode)
             float deltaPitch = getFactor (true) * delta.y();
             Ogre::Radian newPitch = oldPitch + Ogre::Degree (deltaPitch);
 
-            Ogre::Radian limit (Ogre::Math::PI/2-0.5);
-
-            if ((deltaPitch>0 && newPitch<limit) || (deltaPitch<0 && newPitch>-limit))
+            if ((deltaPitch>0 && newPitch<Ogre::Radian(Ogre::Math::PI-0.5)) ||
+                (deltaPitch<0 && newPitch>Ogre::Radian(0.5)))
+            {
                 mCamera->pitch (Ogre::Degree (deltaPitch));
+            }
         }
 
         return true;

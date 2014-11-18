@@ -12,6 +12,9 @@ namespace MWClass
 
         public:
 
+            /// Return ID of \a ptr
+            virtual std::string getId (const MWWorld::Ptr& ptr) const;
+
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
@@ -64,6 +67,9 @@ namespace MWClass
 
             virtual int getItemMaxHealth (const MWWorld::Ptr& ptr) const;
             ///< Return item max health or throw an exception, if class does not have item health
+
+            virtual bool hasItemHealth (const MWWorld::Ptr& ptr) const { return true; }
+            ///< \return Item health data available? (default implementation: false)
     };
 }
 

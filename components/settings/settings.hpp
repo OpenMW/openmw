@@ -36,10 +36,10 @@ namespace Settings
         static const CategorySettingVector apply();
         ///< returns the list of changed settings and then clears it
 
-        static const int getInt (const std::string& setting, const std::string& category);
-        static const float getFloat (const std::string& setting, const std::string& category);
-        static const std::string getString (const std::string& setting, const std::string& category);
-        static const bool getBool (const std::string& setting, const std::string& category);
+        static int getInt (const std::string& setting, const std::string& category);
+        static float getFloat (const std::string& setting, const std::string& category);
+        static std::string getString (const std::string& setting, const std::string& category);
+        static bool getBool (const std::string& setting, const std::string& category);
 
         static void setInt (const std::string& setting, const std::string& category, const int value);
         static void setFloat (const std::string& setting, const std::string& category, const float value);

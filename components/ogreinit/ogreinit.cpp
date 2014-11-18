@@ -22,6 +22,7 @@
 
 #include "ogreplugin.hpp"
 
+
 namespace bfs = boost::filesystem;
 
 namespace
@@ -44,7 +45,7 @@ namespace
         LogListener(const std::string &path)
             : file((bfs::path(path)))
         {
-            memset(buffer, sizeof(buffer), 0);
+            memset(buffer, 0, sizeof(buffer));
         }
 
         void timestamp()
@@ -82,28 +83,34 @@ namespace OgreInit
     #ifdef ENABLE_PLUGIN_GL
     , mGLPlugin(NULL)
     #endif
-    #ifdef ENABLE_PLUGIN_Direct3D9
+    #ifdef ENABLE_PLUGIN_GLES2
+    , mGLES2Plugin(NULL)
+    #endif
+    
+  #ifdef ENABLE_PLUGIN_Direct3D9
     , mD3D9Plugin(NULL)
     #endif
     {}
 
     Ogre::Root* OgreInit::init(const std::string &logPath)
     {
+
+        #ifndef ANDROID
         // Set up logging first
         new Ogre::LogManager;
         Ogre::Log *log = Ogre::LogManager::getSingleton().createLog(logPath);
 
-    #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
         // Use custom listener only on Windows
         log->addListener(new LogListener(logPath));
-    #endif
+        #endif
 
         // Disable logging to cout/cerr
         log->setDebugOutputEnabled(false);
-
+        #endif
         mRoot = new Ogre::Root("", "", "");
 
-        #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
+        #if defined(ENABLE_PLUGIN_GL) || (ENABLE_PLUGIN_GLES2) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
         loadStaticPlugins();
         #else
         loadPlugins();
@@ -133,6 +140,10 @@ namespace OgreInit
         delete mGLPlugin;
         mGLPlugin = NULL;
         #endif
+        #ifdef ENABLE_PLUGIN_GLES2
+        delete mGLES2Plugin;
+        mGLES2Plugin = NULL;
+        #endif   
         #ifdef ENABLE_PLUGIN_Direct3D9
         delete mD3D9Plugin;
         mD3D9Plugin = NULL;
@@ -157,6 +168,10 @@ namespace OgreInit
         mGLPlugin = new Ogre::GLPlugin();
         mRoot->installPlugin(mGLPlugin);
         #endif
+        #ifdef ENABLE_PLUGIN_GLES2
+        mGLES2Plugin = new Ogre::GLES2Plugin();
+        mRoot->installPlugin(mGLES2Plugin);
+        #endif       
         #ifdef ENABLE_PLUGIN_Direct3D9
         mD3D9Plugin = new Ogre::D3D9Plugin();
         mRoot->installPlugin(mD3D9Plugin);
@@ -193,7 +208,7 @@ namespace OgreInit
                 pluginDir = Ogre::macFrameworksPath();
     #endif
     #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
-            pluginDir = OGRE_PLUGIN_DIR_REL;
+            pluginDir = OGRE_PLUGIN_DIR;
     #endif
         }
         Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mRoot);
@@ -201,7 +216,8 @@ namespace OgreInit
         Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mRoot);
         Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
         Files::loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
-        Files::loadOgrePlugin(pluginDir, "Plugin_ParticleFX", *mRoot);
+        if (!Files::loadOgrePlugin(pluginDir, "Plugin_ParticleFX", *mRoot))
+            throw std::runtime_error("Required Plugin_ParticleFX for Ogre not found!");
     }
 
     void OgreInit::loadParticleFactories()

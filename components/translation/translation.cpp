@@ -6,6 +6,11 @@
 
 namespace Translation
 {
+    Storage::Storage()
+        : mEncoder(NULL)
+    {
+    }
+
     void Storage::loadTranslationData(const Files::Collections& dataFileCollections,
                                       const std::string& esmFileName)
     {
@@ -42,7 +47,7 @@ namespace Translation
     void Storage::loadDataFromStream(ContainerType& container, std::istream& stream)
     {
         std::string line;
-        while (!stream.eof())
+        while (!stream.eof() && !stream.fail())
         {
             std::getline( stream, line );
             if (!line.empty() && *line.rbegin() == '\r')

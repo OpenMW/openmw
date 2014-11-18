@@ -52,7 +52,7 @@ namespace MWWorld
         return false;
     }
 
-    void Class::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const
+    void Class::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor) const
     {
         throw std::runtime_error ("class does not represent an actor");
     }
@@ -303,10 +303,6 @@ namespace MWWorld
     {
     }
 
-    void Class::adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const
-    {
-    }
-
     std::string Class::getModel(const MWWorld::Ptr &ptr) const
     {
         return "";
@@ -322,7 +318,7 @@ namespace MWWorld
         return std::make_pair (1, "");
     }
 
-    void Class::adjustPosition(const MWWorld::Ptr& ptr) const
+    void Class::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
     {
     }
 
@@ -358,7 +354,7 @@ namespace MWWorld
     Class::copyToCell(const Ptr &ptr, CellStore &cell) const
     {
         Ptr newPtr = copyToCellImpl(ptr, cell);
-
+        newPtr.getCellRef().unsetRefNum(); // This RefNum is only valid within the original cell of the reference
         return newPtr;
     }
 
@@ -366,7 +362,7 @@ namespace MWWorld
     Class::copyToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const
     {
         Ptr newPtr = copyToCell(ptr, cell);
-        newPtr.getRefData().getPosition() = pos;
+        newPtr.getRefData().setPosition(pos);
 
         return newPtr;
     }
@@ -423,5 +419,19 @@ namespace MWWorld
     void Class::setDoorState (const MWWorld::Ptr &ptr, int state) const
     {
         throw std::runtime_error("this is not a door");
+    }
+
+    float Class::getNormalizedEncumbrance(const Ptr &ptr) const
+    {
+        float capacity = getCapacity(ptr);
+        if (capacity == 0)
+            return 1.f;
+
+        return getEncumbrance(ptr) / capacity;
+    }
+
+    std::string Class::getSound(const MWWorld::Ptr&) const
+    {
+      return std::string();
     }
 }

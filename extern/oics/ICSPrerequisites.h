@@ -36,6 +36,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <map>
 #include <list>
 #include <limits>
+#include <algorithm> /* std::min and std::max for MSVC 2013 */
 
 #include "tinyxml.h"
 
@@ -76,7 +77,7 @@ namespace ICS
 	{
 		std::stringstream ss(Text);
 		T result;
-		return ss >> result ? true : false;
+        return (ss >> result) ? true : false;
 	}
 
 	// from http://www.cplusplus.com/forum/articles/9645/
@@ -90,11 +91,11 @@ namespace ICS
 
 	// from http://www.cplusplus.com/forum/articles/9645/
 	template <typename T>
-	T FromString ( const std::string &Text )//Text not by const reference so that the function can be used with a 
+	T FromString ( const std::string &Text )//Text not by const reference so that the function can be used with a
 	{											//character array as argument
 		std::stringstream ss(Text);
 		T result;
-		return ss >> result ? result : 0;
+        return (ss >> result) ? result : 0;
 	}
 
 	class InputControlSystem;

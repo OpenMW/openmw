@@ -6,14 +6,25 @@
 #include "../mwbase/world.hpp"
 
 #include "obstacle.hpp"
+#include "aistate.hpp"
 
 namespace MWWorld
 {
     class Ptr;
 }
 
+namespace ESM
+{
+    namespace AiSequence
+    {
+        class AiSequence;
+    }
+}
+
+
 namespace MWMechanics
 {
+
     /// \brief Base class for AI packages
     class AiPackage
     {
@@ -42,7 +53,7 @@ namespace MWMechanics
 
             /// Updates and runs the package (Should run every frame)
             /// \return Package completed?
-            virtual bool execute (const MWWorld::Ptr& actor,float duration) = 0;
+            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration) = 0;
 
             /// Returns the TypeID of the AiPackage
             /// \see enum TypeId
@@ -50,6 +61,8 @@ namespace MWMechanics
 
             /// Higher number is higher priority (0 being the lowest)
             virtual unsigned int getPriority() const {return 0;}
+
+            virtual void writeState (ESM::AiSequence::AiSequence& sequence) const {}
 
         protected:
             /// Causes the actor to attempt to walk to the specified location
@@ -59,12 +72,8 @@ namespace MWMechanics
             PathFinder mPathFinder;
             ObstacleCheck mObstacleCheck;
 
-            float mDoorCheckDuration;
             float mTimer;
             float mStuckTimer;
-            float mTotalTime;
-
-            MWWorld::Ptr mLastDoorChecked; //Used to ensure we don't try to CONSTANTLY open a door
 
             ESM::Position mStuckPos;
             ESM::Pathgrid::Point mPrevDest;

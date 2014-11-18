@@ -19,11 +19,17 @@ namespace MWGui
 
         virtual void open();
 
+        virtual void exit();
+
         void setLoadOrSave(bool load);
 
     private:
+        void confirmDeleteSave();
+
+        void onKeyButtonPressed(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char character);
         void onCancelButtonClicked (MyGUI::Widget* sender);
         void onOkButtonClicked (MyGUI::Widget* sender);
+        void onDeleteButtonClicked (MyGUI::Widget* sender);
         void onCharacterSelected (MyGUI::ComboBox* sender, size_t pos);
         // Slot selected (mouse click or arrow keys)
         void onSlotSelected (MyGUI::ListBox* sender, size_t pos);
@@ -49,6 +55,7 @@ namespace MWGui
         MyGUI::EditBox* mInfoText;
         MyGUI::Button* mOkButton;
         MyGUI::Button* mCancelButton;
+        MyGUI::Button* mDeleteButton;
         MyGUI::ListBox* mSaveList;
         MyGUI::EditBox* mSaveNameEdit;
         MyGUI::Widget* mSpacer;

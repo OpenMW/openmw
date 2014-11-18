@@ -43,6 +43,11 @@ namespace
 
 namespace MWClass
 {
+    std::string Container::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Container>()->mBase->mId;
+    }
+
     void Container::ensureCustomData (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCustomData())
@@ -235,8 +240,7 @@ namespace MWClass
             text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
+            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -286,7 +290,12 @@ namespace MWClass
     {
         const ESM::ContainerState& state2 = dynamic_cast<const ESM::ContainerState&> (state);
 
-        ensureCustomData (ptr);
+        if (!ptr.getRefData().getCustomData())
+        {
+            // Create a CustomData, but don't fill it from ESM records (not needed)
+            std::auto_ptr<ContainerCustomData> data (new ContainerCustomData);
+            ptr.getRefData().setCustomData (data.release());
+        }
 
         dynamic_cast<ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
             readState (state2.mInventory);

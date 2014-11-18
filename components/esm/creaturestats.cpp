@@ -21,6 +21,9 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mDied = false;
     esm.getHNOT (mDied, "DIED");
 
+    mMurdered = false;
+    esm.getHNOT (mMurdered, "MURD");
+
     mFriendlyHits = 0;
     esm.getHNOT (mFriendlyHits, "FRHT");
 
@@ -30,8 +33,11 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mAlarmed = false;
     esm.getHNOT (mAlarmed, "ALRM");
 
-    mHostile = false;
-    esm.getHNOT (mHostile, "HOST");
+    mAttacked = false;
+    esm.getHNOT (mAttacked, "ATKD");
+
+    if (esm.isNextSub("HOST"))
+        esm.skipHSub(); // Hostile, no longer used
 
     mAttackingOrSpell = false;
     esm.getHNOT (mAttackingOrSpell, "ATCK");
@@ -79,6 +85,33 @@ void ESM::CreatureStats::load (ESMReader &esm)
 
     mSpells.load(esm);
     mActiveSpells.load(esm);
+    mAiSequence.load(esm);
+    mMagicEffects.load(esm);
+
+    while (esm.isNextSub("SUMM"))
+    {
+        int magicEffect;
+        esm.getHT(magicEffect);
+        int actorId;
+        esm.getHNT (actorId, "ACID");
+        mSummonedCreatureMap[magicEffect] = actorId;
+    }
+
+    while (esm.isNextSub("GRAV"))
+    {
+        int actorId;
+        esm.getHT(actorId);
+        mSummonGraveyard.push_back(actorId);
+    }
+
+    mHasAiSettings = false;
+    esm.getHNOT(mHasAiSettings, "AISE");
+
+    if (mHasAiSettings)
+    {
+        for (int i=0; i<4; ++i)
+            mAiSettings[i].load(esm);
+    }
 }
 
 void ESM::CreatureStats::save (ESMWriter &esm) const
@@ -101,6 +134,9 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mDied)
         esm.writeHNT ("DIED", mDied);
 
+    if (mMurdered)
+        esm.writeHNT ("MURD", mMurdered);
+
     if (mFriendlyHits)
         esm.writeHNT ("FRHT", mFriendlyHits);
 
@@ -110,8 +146,8 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mAlarmed)
         esm.writeHNT ("ALRM", mAlarmed);
 
-    if (mHostile)
-        esm.writeHNT ("HOST", mHostile);
+    if (mAttacked)
+        esm.writeHNT ("ATKD", mAttacked);
 
     if (mAttackingOrSpell)
         esm.writeHNT ("ATCK", mAttackingOrSpell);
@@ -160,4 +196,21 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
 
     mSpells.save(esm);
     mActiveSpells.save(esm);
+    mAiSequence.save(esm);
+    mMagicEffects.save(esm);
+
+    for (std::map<int, int>::const_iterator it = mSummonedCreatureMap.begin(); it != mSummonedCreatureMap.end(); ++it)
+    {
+        esm.writeHNT ("SUMM", it->first);
+        esm.writeHNT ("ACID", it->second);
+    }
+
+    for (std::vector<int>::const_iterator it = mSummonGraveyard.begin(); it != mSummonGraveyard.end(); ++it)
+    {
+        esm.writeHNT ("GRAV", *it);
+    }
+
+    esm.writeHNT("AISE", mHasAiSettings);
+    for (int i=0; i<4; ++i)
+        mAiSettings[i].save(esm);
 }

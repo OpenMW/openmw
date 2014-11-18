@@ -81,7 +81,7 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
     const float fWeaponFatigueMult = gmst.find("fWeaponFatigueMult")->getFloat();
     MWMechanics::CreatureStats& attackerStats = actor.getClass().getCreatureStats(actor);
     MWMechanics::DynamicStat<float> fatigue = attackerStats.getFatigue();
-    const float normalizedEncumbrance = actor.getClass().getEncumbrance(actor) / actor.getClass().getCapacity(actor);
+    const float normalizedEncumbrance = actor.getClass().getNormalizedEncumbrance(actor);
     float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
     if (!weapon->isEmpty())
         fatigueLoss += weapon->getClass().getWeight(*weapon) * attackerStats.getAttackStrength() * fWeaponFatigueMult;
@@ -150,9 +150,19 @@ void WeaponAnimation::pitchSkeleton(float xrot, Ogre::SkeletonInstance* skel)
         return;
 
     float pitch = xrot * mPitchFactor;
-    Ogre::Node *node = skel->getBone("Bip01 Spine2");
+    Ogre::Node *node;
+
+    // In spherearcher.nif, we have spine, not Spine. Not sure if all bone names should be case insensitive?
+    if (skel->hasBone("Bip01 spine2"))
+        node = skel->getBone("Bip01 spine2");
+    else
+        node = skel->getBone("Bip01 Spine2");
     node->pitch(Ogre::Radian(-pitch/2), Ogre::Node::TS_WORLD);
-    node = skel->getBone("Bip01 Spine1");
+
+    if (skel->hasBone("Bip01 spine1")) // in spherearcher.nif
+        node = skel->getBone("Bip01 spine1");
+    else
+        node = skel->getBone("Bip01 Spine1");
     node->pitch(Ogre::Radian(-pitch/2), Ogre::Node::TS_WORLD);
 }
 

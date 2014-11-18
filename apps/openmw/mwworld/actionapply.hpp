@@ -16,7 +16,7 @@ namespace MWWorld
 
         public:
 
-            ActionApply (const Ptr& target, const std::string& id);
+            ActionApply (const Ptr& object, const std::string& id);
     };
 
     class ActionApplyWithSkill : public Action
@@ -29,7 +29,7 @@ namespace MWWorld
 
         public:
 
-            ActionApplyWithSkill (const Ptr& target, const std::string& id,
+            ActionApplyWithSkill (const Ptr& object, const std::string& id,
                 int skillIndex, int usageType);
     };
 }

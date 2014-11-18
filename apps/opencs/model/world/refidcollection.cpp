@@ -44,7 +44,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
     baseColumns.mId = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Modification, ColumnBase::Display_RecordState,
-        ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
+        ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, true, false));
     baseColumns.mModified = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_RecordType, ColumnBase::Display_RefRecordType,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
@@ -52,7 +52,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     ModelColumns modelColumns (baseColumns);
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Model, ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Model, ColumnBase::Display_Mesh));
     modelColumns.mModel = &mColumns.back();
 
     NameColumns nameColumns (modelColumns);
@@ -64,7 +64,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     InventoryColumns inventoryColumns (nameColumns);
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Icon, ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Icon, ColumnBase::Display_Icon));
     inventoryColumns.mIcon = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Weight, ColumnBase::Display_Float));
     inventoryColumns.mWeight = &mColumns.back();
@@ -175,6 +175,15 @@ CSMWorld::RefIdCollection::RefIdCollection()
     creatureColumns.mScale = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_OriginalCreature, ColumnBase::Display_String));
     creatureColumns.mOriginal = &mColumns.back();
+    mColumns.push_back (
+        RefIdColumn (Columns::ColumnId_CombatState, ColumnBase::Display_Integer));
+    creatureColumns.mCombat = &mColumns.back();
+    mColumns.push_back (
+        RefIdColumn (Columns::ColumnId_MagicState, ColumnBase::Display_Integer));
+    creatureColumns.mMagic = &mColumns.back();
+    mColumns.push_back (
+        RefIdColumn (Columns::ColumnId_StealthState, ColumnBase::Display_Integer));
+    creatureColumns.mStealth = &mColumns.back();
 
     static const struct
     {
@@ -304,10 +313,17 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_WeaponReach, ColumnBase::Display_Float));
     weaponColumns.mReach = &mColumns.back();
 
-    for (int i=0; i<6; ++i)
+    for (int i=0; i<3; ++i)
     {
-        mColumns.push_back (RefIdColumn (Columns::ColumnId_MinChop + i, ColumnBase::Display_Integer));
-        weaponColumns.mChop[i] = &mColumns.back();
+        const RefIdColumn **column =
+            i==0 ? weaponColumns.mChop : (i==1 ? weaponColumns.mSlash : weaponColumns.mThrust);
+
+        for (int j=0; j<2; ++j)
+        {
+            mColumns.push_back (
+                RefIdColumn (Columns::ColumnId_MinChop+i*2+j, ColumnBase::Display_Integer));
+            column[j] = &mColumns.back();
+        }
     }
 
     static const struct

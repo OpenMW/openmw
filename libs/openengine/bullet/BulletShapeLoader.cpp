@@ -42,7 +42,7 @@ void BulletShape::deleteShape(btCollisionShape* shape)
     {
         if(shape->isCompound())
         {
-            btCompoundShape* ms = static_cast<btCompoundShape*>(mCollisionShape);
+            btCompoundShape* ms = static_cast<btCompoundShape*>(shape);
             int a = ms->getNumChildShapes();
             for(int i=0; i <a;i++)
             {
@@ -51,13 +51,14 @@ void BulletShape::deleteShape(btCollisionShape* shape)
         }
         delete shape;
     }
-    shape = NULL;
 }
 
 void BulletShape::unloadImpl()
 {
     deleteShape(mCollisionShape);
     deleteShape(mRaycastingShape);
+    mCollisionShape = NULL;
+    mRaycastingShape = NULL;
 }
 
 //TODO:change this?
@@ -104,7 +105,6 @@ BulletShapeManager::~BulletShapeManager()
     sThis = 0;
 }
 
-#if (OGRE_VERSION >= ((1 << 16) | (9 << 8) | 0))
 BulletShapePtr BulletShapeManager::getByName(const Ogre::String& name, const Ogre::String& groupName)
 {
     return getResourceByName(name, groupName).staticCast<BulletShape>();
@@ -116,7 +116,6 @@ BulletShapePtr BulletShapeManager::create (const Ogre::String& name, const Ogre:
 {
     return createResource(name,group,isManual,loader,createParams).staticCast<BulletShape>();
 }
-#endif
 
 BulletShapePtr BulletShapeManager::load(const Ogre::String &name, const Ogre::String &group)
 {

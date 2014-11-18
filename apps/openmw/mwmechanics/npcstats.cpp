@@ -34,7 +34,6 @@ MWMechanics::NpcStats::NpcStats()
 , mProfit(0)
 , mTimeToStartDrowning(20.0)
 , mLastDrowningHit(0)
-, mLevelHealthBonus(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
 }
@@ -70,9 +69,41 @@ const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
     return mFactionRank;
 }
 
-std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks()
+void MWMechanics::NpcStats::raiseRank(const std::string &faction)
 {
-    return mFactionRank;
+    const std::string lower = Misc::StringUtils::lowerCase(faction);
+    std::map<std::string, int>::iterator it = mFactionRank.find(lower);
+    if (it != mFactionRank.end())
+    {
+        // Does the next rank exist?
+        const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(lower);
+        if (it->second+1 < 10 && !faction->mRanks[it->second+1].empty())
+            it->second += 1;
+    }
+}
+
+void MWMechanics::NpcStats::lowerRank(const std::string &faction)
+{
+    const std::string lower = Misc::StringUtils::lowerCase(faction);
+    std::map<std::string, int>::iterator it = mFactionRank.find(lower);
+    if (it != mFactionRank.end())
+    {
+        it->second = std::max(0, it->second-1);
+    }
+}
+
+void MWMechanics::NpcStats::setFactionRank(const std::string &faction, int rank)
+{
+    const std::string lower = Misc::StringUtils::lowerCase(faction);
+    mFactionRank[lower] = rank;
+}
+
+void MWMechanics::NpcStats::joinFaction(const std::string& faction)
+{
+    const std::string lower = Misc::StringUtils::lowerCase(faction);
+    std::map<std::string, int>::iterator it = mFactionRank.find(lower);
+    if (it == mFactionRank.end())
+        mFactionRank[lower] = 0;
 }
 
 bool MWMechanics::NpcStats::getExpelled(const std::string& factionID) const
@@ -108,7 +139,7 @@ bool MWMechanics::NpcStats::isSameFaction (const NpcStats& npcStats) const
 }
 
 float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& class_, int usageType,
-    int level) const
+    int level, float extraFactor) const
 {
     if (level<0)
         level = static_cast<int> (getSkill (skillIndex).getBase());
@@ -131,6 +162,8 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
         if (skillFactor==0)
             return 0;
     }
+
+    skillFactor *= extraFactor;
 
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -168,7 +201,7 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
     return 1.0 / ((level+1) * (1.0/skillFactor) * typeFactor * specialisationFactor);
 }
 
-void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType)
+void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType, float extraFactor)
 {
     // Don't increase skills as a werewolf
     if(mIsWerewolf)
@@ -176,7 +209,7 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
 
     MWMechanics::SkillValue& value = getSkill (skillIndex);
 
-    value.setProgress(value.getProgress() + getSkillGain (skillIndex, class_, usageType));
+    value.setProgress(value.getProgress() + getSkillGain (skillIndex, class_, usageType, -1, extraFactor));
 
     if (value.getProgress()>=1)
     {
@@ -262,8 +295,7 @@ void MWMechanics::NpcStats::levelUp()
     // "When you gain a level, in addition to increasing three primary attributes, your Health
     // will automatically increase by 10% of your Endurance attribute. If you increased Endurance this level,
     // the Health increase is calculated from the increased Endurance"
-    mLevelHealthBonus += endurance * gmst.find("fLevelUpHealthEndMult")->getFloat();
-    updateHealth();
+    setHealth(getHealth().getBase() + endurance * gmst.find("fLevelUpHealthEndMult")->getFloat());
 
     setLevel(getLevel()+1);
 }
@@ -273,7 +305,7 @@ void MWMechanics::NpcStats::updateHealth()
     const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
     const int strength = getAttribute(ESM::Attribute::Strength).getBase();
 
-    setHealth(static_cast<int> (0.5 * (strength + endurance)) + mLevelHealthBonus);
+    setHealth(static_cast<int> (0.5 * (strength + endurance)));
 }
 
 int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const
@@ -361,8 +393,14 @@ bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int 
 
     std::vector<int> skills;
 
-    for (int i=0; i<6; ++i)
-        skills.push_back (static_cast<int> (getSkill (faction.mData.mSkills[i]).getModified()));
+    for (int i=0; i<7; ++i)
+    {
+        if (faction.mData.mSkills[i] != -1)
+            skills.push_back (static_cast<int> (getSkill (faction.mData.mSkills[i]).getModified()));
+    }
+
+    if (skills.empty())
+        return true;
 
     std::sort (skills.begin(), skills.end());
 
@@ -372,6 +410,9 @@ bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int 
 
     if (*iter<rankData.mSkill1)
         return false;
+
+    if (skills.size() < 2)
+        return true;
 
     return *++iter>=rankData.mSkill2;
 }
@@ -386,6 +427,8 @@ void MWMechanics::NpcStats::setWerewolf (bool set)
     if(set != false)
     {
         const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        mWerewolfKills = 0;
 
         for(size_t i = 0;i < ESM::Attribute::Length;i++)
         {
@@ -416,6 +459,11 @@ void MWMechanics::NpcStats::setWerewolf (bool set)
 int MWMechanics::NpcStats::getWerewolfKills() const
 {
     return mWerewolfKills;
+}
+
+void MWMechanics::NpcStats::addWerewolfKill()
+{
+    ++mWerewolfKills;
 }
 
 int MWMechanics::NpcStats::getProfit() const
@@ -481,7 +529,6 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
 
     state.mTimeToStartDrowning = mTimeToStartDrowning;
     state.mLastDrowningHit = mLastDrowningHit;
-    state.mLevelHealthBonus = mLevelHealthBonus;
 }
 
 void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
@@ -533,5 +580,4 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
 
     mTimeToStartDrowning = state.mTimeToStartDrowning;
     mLastDrowningHit = state.mLastDrowningHit;
-    mLevelHealthBonus = state.mLevelHealthBonus;
 }

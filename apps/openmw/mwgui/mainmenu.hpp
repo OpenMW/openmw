@@ -3,17 +3,24 @@
 
 #include <openengine/gui/layout.hpp>
 
+namespace Gui
+{
+    class ImageButton;
+}
+
 namespace MWGui
 {
 
-    class ImageButton;
     class BackgroundImage;
     class SaveGameDialog;
+    class VideoWidget;
 
     class MainMenu : public OEngine::GUI::Layout
     {
             int mWidth;
             int mHeight;
+
+            bool mHasAnimatedMenu;
 
         public:
 
@@ -24,6 +31,8 @@ namespace MWGui
 
             virtual void setVisible (bool visible);
 
+            void update(float dt);
+
         private:
 
             MyGUI::Widget* mButtonBox;
@@ -31,7 +40,10 @@ namespace MWGui
 
             BackgroundImage* mBackground;
 
-            std::map<std::string, MWGui::ImageButton*> mButtons;
+            MyGUI::ImageBox* mVideoBackground;
+            VideoWidget* mVideo; // For animated main menus
+
+            std::map<std::string, Gui::ImageButton*> mButtons;
 
             void onButtonClicked (MyGUI::Widget* sender);
             void onNewGameConfirmed();

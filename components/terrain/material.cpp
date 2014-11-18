@@ -36,8 +36,8 @@ std::string getBlendmapComponentForLayer (int layerIndex)
 namespace Terrain
 {
 
-    MaterialGenerator::MaterialGenerator(bool shaders)
-        : mShaders(shaders)
+    MaterialGenerator::MaterialGenerator()
+        : mShaders(true)
         , mShadows(false)
         , mSplitShadows(false)
         , mNormalMapping(true)
@@ -46,35 +46,28 @@ namespace Terrain
 
     }
 
-    Ogre::MaterialPtr MaterialGenerator::generate(Ogre::MaterialPtr mat)
+    Ogre::MaterialPtr MaterialGenerator::generate()
     {
         assert(!mLayerList.empty() && "Can't create material with no layers");
 
-        return create(mat, false, false);
+        return create(false, false);
     }
 
-    Ogre::MaterialPtr MaterialGenerator::generateForCompositeMapRTT(Ogre::MaterialPtr mat)
+    Ogre::MaterialPtr MaterialGenerator::generateForCompositeMapRTT()
     {
         assert(!mLayerList.empty() && "Can't create material with no layers");
 
-        return create(mat, true, false);
+        return create(true, false);
     }
 
-    Ogre::MaterialPtr MaterialGenerator::generateForCompositeMap(Ogre::MaterialPtr mat)
+    Ogre::MaterialPtr MaterialGenerator::generateForCompositeMap()
     {
-        return create(mat, false, true);
+        return create(false, true);
     }
 
-    Ogre::MaterialPtr MaterialGenerator::create(Ogre::MaterialPtr mat, bool renderCompositeMap, bool displayCompositeMap)
+    Ogre::MaterialPtr MaterialGenerator::create(bool renderCompositeMap, bool displayCompositeMap)
     {
         assert(!renderCompositeMap || !displayCompositeMap);
-        if (!mat.isNull())
-        {
-#if TERRAIN_USE_SHADER
-            sh::Factory::getInstance().destroyMaterialInstance(mat->getName());
-#endif
-            Ogre::MaterialManager::getSingleton().remove(mat->getName());
-        }
 
         static int count = 0;
         std::stringstream name;
@@ -82,7 +75,7 @@ namespace Terrain
 
         if (!mShaders)
         {
-            mat = Ogre::MaterialManager::getSingleton().create(name.str(),
+            Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create(name.str(),
                                                                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
             Ogre::Technique* technique = mat->getTechnique(0);
             technique->removeAllPasses();

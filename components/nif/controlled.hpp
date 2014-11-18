@@ -24,44 +24,70 @@
 #ifndef OPENMW_COMPONENTS_NIF_CONTROLLED_HPP
 #define OPENMW_COMPONENTS_NIF_CONTROLLED_HPP
 
-#include "extra.hpp"
-#include "controller.hpp"
+#include "base.hpp"
 
 namespace Nif
 {
 
-/// Anything that has a controller
-class Controlled : public Extra
+class NiSourceTexture : public Named
 {
 public:
-    ControllerPtr controller;
+    // Is this an external (references a separate texture file) or
+    // internal (data is inside the nif itself) texture?
+    bool external;
+
+    std::string filename; // In case of external textures
+    NiPixelDataPtr data;  // In case of internal textures
+
+    /* Pixel layout
+        0 - Palettised
+        1 - High color 16
+        2 - True color 32
+        3 - Compressed
+        4 - Bumpmap
+        5 - Default */
+    int pixel;
+
+    /* Mipmap format
+        0 - no
+        1 - yes
+        2 - default */
+    int mipmap;
+
+    /* Alpha
+        0 - none
+        1 - binary
+        2 - smooth
+        3 - default (use material alpha, or multiply material with texture if present)
+    */
+    int alpha;
 
     void read(NIFStream *nif)
     {
-        Extra::read(nif);
-        controller.read(nif);
+        Named::read(nif);
+
+        external = !!nif->getChar();
+        if(external)
+            filename = nif->getString();
+        else
+        {
+            nif->getChar(); // always 1
+            data.read(nif);
+        }
+
+        pixel = nif->getInt();
+        mipmap = nif->getInt();
+        alpha = nif->getInt();
+
+        nif->getChar(); // always 1
     }
 
     void post(NIFFile *nif)
     {
-        Extra::post(nif);
-        controller.post(nif);
+        Named::post(nif);
+        data.post(nif);
     }
 };
-
-/// Has name, extra-data and controller
-class Named : public Controlled
-{
-public:
-    std::string name;
-
-    void read(NIFStream *nif)
-    {
-        name = nif->getString();
-        Controlled::read(nif);
-    }
-};
-typedef Named NiSequenceStreamHelper;
 
 class NiParticleGrowFade : public Controlled
 {
@@ -146,6 +172,8 @@ public:
         nif->skip(17);
     }
 };
+
+
 
 } // Namespace
 #endif

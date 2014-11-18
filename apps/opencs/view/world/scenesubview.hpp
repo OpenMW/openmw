@@ -4,7 +4,6 @@
 #include <QHBoxLayout>
 
 #include "../doc/subview.hpp"
-#include "scenetoolbar.hpp"
 
 class QModelIndex;
 
@@ -25,6 +24,11 @@ namespace CSVRender
     class UnpagedWorldspaceWidget;
 }
 
+namespace CSVWidget
+{
+    class SceneToolbar;
+}
+
 namespace CSVWorld
 {
     class Table;
@@ -39,7 +43,8 @@ namespace CSVWorld
             CSVRender::WorldspaceWidget *mScene;
             QHBoxLayout* mLayout;
             CSMDoc::Document& mDocument;
-            SceneToolbar* mToolbar;
+            CSVWidget::SceneToolbar* mToolbar;
+            std::string mTitle;
 
         public:
 
@@ -53,30 +58,39 @@ namespace CSVWorld
 
             virtual void useHint (const std::string& hint);
 
+            virtual std::string getTitle() const;
+
         private:
 
             void makeConnections(CSVRender::PagedWorldspaceWidget* widget);
 
             void makeConnections(CSVRender::UnpagedWorldspaceWidget* widget);
 
-            void replaceToolbarAndWorldspace(CSVRender::WorldspaceWidget* widget, SceneToolbar* toolbar);
+            void replaceToolbarAndWorldspace(CSVRender::WorldspaceWidget* widget, CSVWidget::SceneToolbar* toolbar);
 
             enum widgetType
             {
                 widget_Paged,
                 widget_Unpaged
             };
-            SceneToolbar* makeToolbar(CSVRender::WorldspaceWidget* widget, widgetType type);
+
+            CSVWidget::SceneToolbar* makeToolbar(CSVRender::WorldspaceWidget* widget, widgetType type);
 
         private slots:
-
-            void closeRequest();
 
             void cellSelectionChanged (const CSMWorld::CellSelection& selection);
 
             void cellSelectionChanged (const CSMWorld::UniversalId& id);
 
             void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
+
+        public slots:
+
+            void updateUserSetting (const QString &, const QStringList &);
+
+        signals:
+
+            void updateSceneUserSetting (const QString &, const QStringList &);
     };
 }
 

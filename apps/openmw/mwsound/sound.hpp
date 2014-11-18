@@ -24,6 +24,9 @@ namespace MWSound
         int mFlags;
         float mFadeOutTime;
 
+        std::vector<float> mLoudnessVector;
+        float mLoudnessFPS;
+
     public:
         virtual void stop() = 0;
         virtual bool isPlaying() = 0;
@@ -31,6 +34,12 @@ namespace MWSound
         void setPosition(const Ogre::Vector3 &pos) { mPos = pos; }
         void setVolume(float volume) { mVolume = volume; }
         void setFadeout(float duration) { mFadeOutTime=duration; }
+        void setLoudnessVector(const std::vector<float>& loudnessVector, float loudnessFPS);
+
+        /// Get loudness at the current time position on a [0,1] scale.
+        /// Requires that loudnessVector was filled in by the user.
+        float getCurrentLoudness();
+
         MWBase::SoundManager::PlayType getPlayType() const
         { return (MWBase::SoundManager::PlayType)(mFlags&MWBase::SoundManager::Play_TypeMask); }
 
@@ -44,6 +53,7 @@ namespace MWSound
           , mMaxDistance(maxdist)
           , mFlags(flags)
           , mFadeOutTime(0)
+          , mLoudnessFPS(20)
         { }
         virtual ~Sound() { }
 

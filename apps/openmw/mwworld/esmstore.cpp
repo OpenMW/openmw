@@ -68,13 +68,12 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
 
         if (it == mStores.end()) {
             if (n.val == ESM::REC_INFO) {
-                std::string id = esm.getHNOString("INAM");
-                if (dialogue) {
-                    ESM::DialInfo info;
-                    info.mId = id;
-                    info.load(esm);
-                    dialogue->addInfo(info, esm.getIndex() != 0);
-                } else {
+                if (dialogue)
+                {
+                    dialogue->readInfo(esm, esm.getIndex() != 0);
+                }
+                else
+                {
                     std::cerr << "error: info record without dialog" << std::endl;
                     esm.skipRecord();
                 }
@@ -82,7 +81,13 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                 mMagicEffects.load (esm);
             } else if (n.val == ESM::REC_SKIL) {
                 mSkills.load (esm);
-            } else {
+            }
+            else if (n.val==ESM::REC_FILT || ESM::REC_DBGP)
+            {
+                // ignore project file only records
+                esm.skipRecord();
+            }
+            else {
                 std::stringstream error;
                 error << "Unknown record: " << n.toString();
                 throw std::runtime_error(error.str());
@@ -99,6 +104,13 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
               continue;
             }
             it->second->load(esm, id);
+
+            // DELE can also occur after the usual subrecords
+            if (esm.isNextSub("DELE")) {
+              esm.skipRecord();
+              it->second->eraseStatic(id);
+              continue;
+            }
 
             if (n.val==ESM::REC_DIAL) {
                 dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id));
@@ -123,6 +135,7 @@ void ESMStore::setUp()
     mSkills.setUp();
     mMagicEffects.setUp();
     mAttributes.setUp();
+    mDialogs.setUp();
 }
 
     int ESMStore::countSavedGameRecords() const

@@ -24,25 +24,10 @@
 #ifndef OPENMW_COMPONENTS_NIF_EXTRA_HPP
 #define OPENMW_COMPONENTS_NIF_EXTRA_HPP
 
-#include "record.hpp"
-#include "niffile.hpp"
-#include "recordptr.hpp"
+#include "base.hpp"
 
 namespace Nif
 {
-
-/** A record that can have extra data. The extra data objects
-    themselves decend from the Extra class, and all the extra data
-    connected to an object form a linked list
-*/
-class Extra : public Record
-{
-public:
-    ExtraPtr extra;
-
-    void read(NIFStream *nif) { extra.read(nif); }
-    void post(NIFFile *nif) { extra.post(nif); }
-};
 
 class NiVertWeightsExtraData : public Extra
 {

@@ -5,11 +5,11 @@
 
 #include "../render/previewwidget.hpp"
 
-#include "scenetoolbar.hpp"
-#include "scenetoolmode.hpp"
+#include "../widget/scenetoolbar.hpp"
+#include "../widget/scenetoolmode.hpp"
 
 CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id)
+: SubView (id), mTitle (id.toString().c_str())
 {
     QHBoxLayout *layout = new QHBoxLayout;
 
@@ -23,14 +23,14 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
         referenceableIdChanged (referenceableId);
 
         mScene =
-            new CSVRender::PreviewWidget (document.getData(), referenceableId, id.getId(), this);
+            new CSVRender::PreviewWidget (document.getData(), id.getId(), false, this);
     }
     else
-        mScene = new CSVRender::PreviewWidget (document.getData(), id.getId(), this);
+        mScene = new CSVRender::PreviewWidget (document.getData(), id.getId(), true, this);
 
-    SceneToolbar *toolbar = new SceneToolbar (48+6, this);
+    CSVWidget::SceneToolbar *toolbar = new CSVWidget::SceneToolbar (48+6, this);
 
-    SceneToolMode *lightingTool = mScene->makeLightingSelector (toolbar);
+    CSVWidget::SceneToolMode *lightingTool = mScene->makeLightingSelector (toolbar);
     toolbar->addTool (lightingTool);
 
     layout->addWidget (toolbar, 0);
@@ -46,19 +46,25 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
     connect (mScene, SIGNAL (closeRequest()), this, SLOT (closeRequest()));
     connect (mScene, SIGNAL (referenceableIdChanged (const std::string&)),
         this, SLOT (referenceableIdChanged (const std::string&)));
+    connect (mScene, SIGNAL (focusToolbarRequest()), toolbar, SLOT (setFocus()));
+    connect (toolbar, SIGNAL (focusSceneRequest()), mScene, SLOT (setFocus()));
 }
 
 void CSVWorld::PreviewSubView::setEditLock (bool locked) {}
 
-void CSVWorld::PreviewSubView::closeRequest()
+std::string CSVWorld::PreviewSubView::getTitle() const
 {
-    deleteLater();
+    return mTitle;
 }
 
 void CSVWorld::PreviewSubView::referenceableIdChanged (const std::string& id)
 {
     if (id.empty())
-        setWindowTitle ("Preview: Reference to <nothing>");
+        mTitle = "Preview: Reference to <nothing>";
     else
-        setWindowTitle (("Preview: Reference to " + id).c_str());
+        mTitle = "Preview: Reference to " + id;
+
+    setWindowTitle (QString::fromUtf8 (mTitle.c_str()));
+
+    emit updateTitle();
 }

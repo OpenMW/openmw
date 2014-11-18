@@ -11,6 +11,8 @@
 
 #include <components/to_utf8/to_utf8.hpp>
 
+#include "../world/resourcesmanager.hpp"
+
 #include "loader.hpp"
 
 namespace Files
@@ -31,6 +33,8 @@ namespace CSMDoc
             QThread mLoaderThread;
             Loader mLoader;
             ToUTF8::FromType mEncoding;
+            CSMWorld::ResourcesManager mResourcesManager;
+            std::vector<std::string> mBlacklistedScripts;
 
             DocumentManager (const DocumentManager&);
             DocumentManager& operator= (const DocumentManager&);
@@ -49,6 +53,11 @@ namespace CSMDoc
 	    void setResourceDir (const boost::filesystem::path& parResDir);
 
             void setEncoding (ToUTF8::FromType encoding);
+
+            void setBlacklistedScripts (const std::vector<std::string>& scriptIds);
+
+            /// Ask OGRE for a list of available resources.
+            void listResources();
 
         private:
 
@@ -79,9 +88,10 @@ namespace CSMDoc
             void loadingStopped (CSMDoc::Document *document, bool completed,
                 const std::string& error);
 
-            void nextStage (CSMDoc::Document *document, const std::string& name, int steps);
+            void nextStage (CSMDoc::Document *document, const std::string& name,
+                int totalRecords);
 
-            void nextRecord (CSMDoc::Document *document);
+            void nextRecord (CSMDoc::Document *document, int records);
 
             void cancelLoading (CSMDoc::Document *document);
 

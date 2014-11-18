@@ -114,6 +114,8 @@ namespace SFO
                     if (mWindowListener)
                         mWindowListener->windowClosed();
                     break;
+                case SDL_CLIPBOARDUPDATE:
+                    break; // We don't need this event, clipboard is retrieved on demand
                 default:
                     std::cerr << "Unhandled SDL event of type 0x" << std::hex << evt.type << std::endl;
                     break;
@@ -239,9 +241,11 @@ namespace SFO
 
         mWrapPointer = false;
 
-        //eep, wrap the pointer manually if the input driver doesn't support
-        //relative positioning natively
-        bool success = SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE) == 0;
+        // eep, wrap the pointer manually if the input driver doesn't support
+        // relative positioning natively
+        // also use wrapping if no-grab was specified in options (SDL_SetRelativeMouseMode
+        // appears to eat the mouse cursor when pausing in a debugger)
+        bool success = mAllowGrab && SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE) == 0;
         if(relative && !success)
             mWrapPointer = true;
 
@@ -338,9 +342,6 @@ namespace SFO
     {
         //lifted from OIS's SDLKeyboard.cpp
 
-        //TODO: Consider switching to scancodes so we
-        //can properly support international keyboards
-        //look at SDL_GetKeyFromScancode and SDL_GetKeyName
         mKeyMap.insert( KeyMap::value_type(SDLK_UNKNOWN, OIS::KC_UNASSIGNED));
         mKeyMap.insert( KeyMap::value_type(SDLK_ESCAPE, OIS::KC_ESCAPE) );
         mKeyMap.insert( KeyMap::value_type(SDLK_1, OIS::KC_1) );

@@ -15,10 +15,6 @@ namespace Compiler
             std::vector<std::string> mLongs;
             std::vector<std::string> mFloats;
 
-            int searchIndex (char type, const std::string& name) const;
-
-            bool search (char type, const std::string& name) const;
-
             std::vector<std::string>& get (char type);
 
         public:
@@ -28,6 +24,12 @@ namespace Compiler
 
             int getIndex (const std::string& name) const;
             ///< return index for local variable \a name (-1: does not exist).
+
+            bool search (char type, const std::string& name) const;
+
+            /// Return index for local variable \a name of type \a type (-1: variable does not
+            /// exit).
+            int searchIndex (char type, const std::string& name) const;
 
             const std::vector<std::string>& get (char type) const;
 

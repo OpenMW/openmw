@@ -38,6 +38,11 @@ bool isGold (const MWWorld::Ptr& ptr)
 
 namespace MWClass
 {
+    std::string Miscellaneous::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Miscellaneous>()->mBase->mId;
+    }
+
     void Miscellaneous::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
@@ -175,15 +180,14 @@ namespace MWClass
 
         std::string text;
 
-        if (!gold)
+        if (!gold && !ref->mBase->mData.mIsKey)
         {
             text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
             text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
         }
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
+            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 

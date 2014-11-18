@@ -118,7 +118,7 @@ namespace Terrain
 
             // North
             row = verts-1;
-            outerStep = 1 << (lodDeltas[North] + lodLevel);
+            outerStep = size_t(1) << (lodDeltas[North] + lodLevel);
             for (size_t col = 0; col < verts-1; col += outerStep)
             {
                 indices.push_back(verts*(col+outerStep)+row);
@@ -142,7 +142,7 @@ namespace Terrain
 
             // West
             size_t col = 0;
-            outerStep = 1 << (lodDeltas[West] + lodLevel);
+            outerStep = size_t(1) << (lodDeltas[West] + lodLevel);
             for (size_t row = 0; row < verts-1; row += outerStep)
             {
                 indices.push_back(verts*col+row+outerStep);
@@ -166,7 +166,7 @@ namespace Terrain
 
             // East
             col = verts-1;
-            outerStep = 1 << (lodDeltas[East] + lodLevel);
+            outerStep = size_t(1) << (lodDeltas[East] + lodLevel);
             for (size_t row = 0; row < verts-1; row += outerStep)
             {
                 indices.push_back(verts*col+row);

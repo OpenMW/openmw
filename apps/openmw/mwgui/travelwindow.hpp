@@ -22,6 +22,8 @@ namespace MWGui
         public:
             TravelWindow();
 
+            virtual void exit();
+
             void startTravel(const MWWorld::Ptr& actor);
 
         protected:
@@ -32,14 +34,12 @@ namespace MWGui
 
             MyGUI::ScrollView* mDestinationsView;
 
-            std::map<MyGUI::Widget*, std::string> mDestinationsWidgetMap;
-
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onTravelButtonClick(MyGUI::Widget* _sender);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
-            void addDestination(const std::string& destinationID,ESM::Position pos,bool interior);
+            void addDestination(const std::string& name, ESM::Position pos, bool interior);
             void clearDestinations();
-            int mLastPos,mCurrentY;
+            int mCurrentY;
 
             static const int sLineHeight;
 

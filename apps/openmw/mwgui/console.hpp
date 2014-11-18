@@ -21,86 +21,83 @@
 
 namespace MWGui
 {
-  class Console : public WindowBase, private Compiler::ErrorHandler, public ReferenceInterface
-  {
-    private:
+    class Console : public WindowBase, private Compiler::ErrorHandler, public ReferenceInterface
+    {
+        public:
+            /// Set the implicit object for script execution
+            void setSelectedObject(const MWWorld::Ptr& object);
 
-        Compiler::Extensions mExtensions;
-        MWScript::CompilerContext mCompilerContext;
-        std::vector<std::string> mNames;
-        bool mConsoleOnlyScripts;
+            MyGUI::EditBox* mCommandLine;
+            MyGUI::EditBox* mHistory;
 
-        bool compile (const std::string& cmd, Compiler::Output& output);
+            typedef std::list<std::string> StringList;
 
-        /// Report error to the user.
-        virtual void report (const std::string& message, const Compiler::TokenLoc& loc, Type type);
+            // History of previous entered commands
+            StringList mCommandHistory;
+            StringList::iterator mCurrent;
+            std::string mEditString;
 
-        /// Report a file related error
-        virtual void report (const std::string& message, Type type);
+            Console(int w, int h, bool consoleOnlyScripts);
 
-        void listNames();
-        ///< Write all valid identifiers and keywords into mNames and sort them.
-        /// \note If mNames is not empty, this function is a no-op.
-        /// \note The list may contain duplicates (if a name is a keyword and an identifier at the same
-        /// time).
+            virtual void open();
+            virtual void close();
 
-    public:
+            virtual void exit();
 
-        void setSelectedObject(const MWWorld::Ptr& object);
-        ///< Set the implicit object for script execution
+            void setFont(const std::string &fntName);
 
-    protected:
+            void onResChange(int width, int height);
 
-        virtual void onReferenceUnavailable();
+            // Print a message to the console. Messages may contain color
+            // code, eg. "#FFFFFF this is white".
+            void print(const std::string &msg);
 
+            // These are pre-colored versions that you should use.
 
-    public:
-    MyGUI::EditBox* mCommandLine;
-    MyGUI::EditBox* mHistory;
+            /// Output from successful console command
+            void printOK(const std::string &msg);
 
-    typedef std::list<std::string> StringList;
+            /// Error message
+            void printError(const std::string &msg);
 
-    // History of previous entered commands
-    StringList mCommandHistory;
-    StringList::iterator mCurrent;
-    std::string mEditString;
+            void execute (const std::string& command);
 
-    Console(int w, int h, bool consoleOnlyScripts);
+            void executeFile (const std::string& path);
 
-    virtual void open();
-    virtual void close();
+            virtual void resetReference ();
 
-    void setFont(const std::string &fntName);
+        protected:
 
-    void onResChange(int width, int height);
+            virtual void onReferenceUnavailable();
 
-    void clearHistory();
+        private:
 
-    // Print a message to the console. Messages may contain color
-    // code, eg. "#FFFFFF this is white".
-    void print(const std::string &msg);
+            void keyPress(MyGUI::Widget* _sender,
+                          MyGUI::KeyCode key,
+                          MyGUI::Char _char);
 
-    // These are pre-colored versions that you should use.
+            void acceptCommand(MyGUI::EditBox* _sender);
 
-    /// Output from successful console command
-    void printOK(const std::string &msg);
+            std::string complete( std::string input, std::vector<std::string> &matches );
 
-    /// Error message
-    void printError(const std::string &msg);
+            Compiler::Extensions mExtensions;
+            MWScript::CompilerContext mCompilerContext;
+            std::vector<std::string> mNames;
+            bool mConsoleOnlyScripts;
 
-    void execute (const std::string& command);
+            bool compile (const std::string& cmd, Compiler::Output& output);
 
-    void executeFile (const std::string& path);
+            /// Report error to the user.
+            virtual void report (const std::string& message, const Compiler::TokenLoc& loc, Type type);
 
-  private:
+            /// Report a file related error
+            virtual void report (const std::string& message, Type type);
 
-    void keyPress(MyGUI::Widget* _sender,
-                  MyGUI::KeyCode key,
-                  MyGUI::Char _char);
-
-    void acceptCommand(MyGUI::EditBox* _sender);
-
-    std::string complete( std::string input, std::vector<std::string> &matches );
+            /// Write all valid identifiers and keywords into mNames and sort them.
+            /// \note If mNames is not empty, this function is a no-op.
+            /// \note The list may contain duplicates (if a name is a keyword and an identifier at the same
+            /// time).
+            void listNames();
   };
 }
 #endif

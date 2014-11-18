@@ -35,12 +35,13 @@ namespace ESM
 
             float mScale;          // Scale applied to mesh
 
-            // The NPC that owns this object (and will get angry if you steal
-            // it)
+            // The NPC that owns this object (and will get angry if you steal it)
             std::string mOwner;
 
-            // I have no idea, looks like a link to a global variable?
-            std::string mGlob;
+            // Name of a global variable. If the global variable is set to '1', using the object is temporarily allowed
+            // even if it has an Owner field.
+            // Used by bed rent scripts to allow the player to use the bed for the duration of the rent.
+            std::string mGlobalVariable;
 
             // ID of creature trapped in this soul gem
             std::string mSoul;
@@ -49,9 +50,8 @@ namespace ESM
             // you take it and are not a faction member)
             std::string mFaction;
 
-            // INDX might be PC faction rank required to use the item? Sometimes
-            // is -1, which I assume means "any rank".
-            int mFactIndex;
+            // PC faction rank required to use the item. Sometimes is -1, which means "any rank".
+            int mFactionRank;
 
             // For weapon or armor, this is the remaining item health.
             // For tools (lockpicks, probes, repair hammer) it is the remaining uses.
@@ -82,12 +82,6 @@ namespace ESM
             // -1 is not blocked, otherwise it is blocked.
             signed char mReferenceBlocked;
 
-            // Occurs in Tribunal.esm, eg. in the cell "Mournhold, Plaza
-            // Brindisi Dorom", where it has the value 100. Also only for
-            // activators.
-            int mFltv;
-            int mNam0;
-
             // Position and rotation of this object within the cell
             Position mPos;
 
@@ -99,6 +93,7 @@ namespace ESM
     };
 
     bool operator== (const RefNum& left, const RefNum& right);
+    bool operator< (const RefNum& left, const RefNum& right);
 }
 
 #endif

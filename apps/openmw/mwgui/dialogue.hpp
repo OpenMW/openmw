@@ -6,16 +6,16 @@
 
 #include "bookpage.hpp"
 
-#include "keywordsearch.hpp"
+#include "../mwdialogue/keywordsearch.hpp"
+
+namespace Gui
+{
+    class MWList;
+}
 
 namespace MWGui
 {
     class WindowManager;
-
-    namespace Widgets
-    {
-        class MWList;
-    }
 }
 
 /*
@@ -34,6 +34,7 @@ namespace MWGui
         PersuasionDialog();
 
         virtual void open();
+        virtual void exit();
 
     private:
         MyGUI::Button* mCancelButton;
@@ -75,7 +76,7 @@ namespace MWGui
         virtual void activated ();
     };
 
-    typedef KeywordSearch <std::string, intptr_t> KeywordSearchT;
+    typedef MWDialogue::KeywordSearch <std::string, intptr_t> KeywordSearchT;
 
     struct DialogueText
     {
@@ -103,12 +104,14 @@ namespace MWGui
     public:
         DialogueWindow();
 
+        virtual void exit();
+
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         void notifyLinkClicked (TypesetBook::InteractiveId link);
 
-        void startDialogue(MWWorld::Ptr actor, std::string npcName);
+        void startDialogue(MWWorld::Ptr actor, std::string npcName, bool resetHistory);
         void setKeywords(std::list<std::string> keyWord);
 
         void addResponse (const std::string& text, const std::string& title="");
@@ -149,6 +152,7 @@ namespace MWGui
 
     private:
         void updateOptions();
+        void restock();
 
         int mServices;
 
@@ -157,7 +161,7 @@ namespace MWGui
         bool mGoodbye;
 
         std::vector<DialogueText*> mHistoryContents;
-        std::map<std::string, int> mChoices;
+        std::vector<std::pair<std::string, int> > mChoices;
 
         std::vector<Link*> mLinks;
         std::map<std::string, Link*> mTopicLinks;
@@ -165,9 +169,9 @@ namespace MWGui
         KeywordSearchT mKeywordSearch;
 
         BookPage* mHistory;
-        Widgets::MWList*   mTopicsList;
+        Gui::MWList*   mTopicsList;
         MyGUI::ScrollBar* mScrollBar;
-        MyGUI::ProgressPtr mDispositionBar;
+        MyGUI::Progress* mDispositionBar;
         MyGUI::EditBox*     mDispositionText;
 
         PersuasionDialog mPersuasionDialog;

@@ -42,6 +42,11 @@ namespace
 
 namespace MWClass
 {
+    std::string Door::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Door>()->mBase->mId;
+    }
+
     void Door::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
@@ -57,11 +62,13 @@ namespace MWClass
             physics.addObject(ptr);
 
         // Resume the door's opening/closing animation if it wasn't finished
-        ensureCustomData(ptr);
-        const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
-        if (customData.mDoorState > 0)
+        if (ptr.getRefData().getCustomData())
         {
-            MWBase::Environment::get().getWorld()->activateDoor(ptr, customData.mDoorState == 1 ? true : false);
+            const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
+            if (customData.mDoorState > 0)
+            {
+                MWBase::Environment::get().getWorld()->activateDoor(ptr, customData.mDoorState);
+            }
         }
     }
 
@@ -125,7 +132,7 @@ namespace MWClass
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
             unlock(ptr); //Call the function here. because that makes sense.
             // using a key disarms the trap
-            ptr.getCellRef().getTrap() = "";
+            ptr.getCellRef().setTrap("");
         }
 
         if (!needKey || hasKey)
@@ -248,8 +255,10 @@ namespace MWClass
             text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
+        {
+            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
-
+        }
         info.text = text;
 
         return info;
@@ -315,6 +324,9 @@ namespace MWClass
 
     void Door::setDoorState (const MWWorld::Ptr &ptr, int state) const
     {
+        if (ptr.getCellRef().getTeleport())
+            throw std::runtime_error("load doors can't be moved");
+
         ensureCustomData(ptr);
         DoorCustomData& customData = dynamic_cast<DoorCustomData&>(*ptr.getRefData().getCustomData());
         customData.mDoorState = state;

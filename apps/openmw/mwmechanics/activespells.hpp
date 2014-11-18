@@ -40,6 +40,10 @@ namespace MWMechanics
             void readState (const ESM::ActiveSpells& state);
             void writeState (ESM::ActiveSpells& state) const;
 
+            TIterator begin() const;
+
+            TIterator end() const;
+
         private:
 
             mutable TContainer mSpells;
@@ -56,10 +60,6 @@ namespace MWMechanics
             /// expires.
 
             const TContainer& getActiveSpells() const;
-
-            TIterator begin() const;
-
-            TIterator end() const;
 
         public:
 

@@ -10,13 +10,22 @@ namespace ESM
 
 void DialInfo::load(ESMReader &esm)
 {
+    mQuestStatus = QS_None;
+    mFactionLess = false;
+
     mPrev = esm.getHNString("PNAM");
     mNext = esm.getHNString("NNAM");
+
+    // Since there's no way to mark selects as "deleted", we have to clear the SelectStructs from all previous loadings
+    mSelects.clear();
 
     // Not present if deleted
     if (esm.isNextSub("DATA")) {
         esm.getHT(mData, 12);
     }
+
+    if (!esm.hasMoreSubs())
+        return;
 
     // What follows is somewhat spaghetti-ish, but it's worth if for
     // an extra speedup. INFO is by far the most common record type.
@@ -46,7 +55,6 @@ void DialInfo::load(ESMReader &esm)
             return;
     }
 
-    mFactionLess = false;
     if (subName.val == REC_FNAM)
     {
         mFaction = esm.getHString();
@@ -100,8 +108,6 @@ void DialInfo::load(ESMReader &esm)
         if (esm.isEmptyOrGetName())
             return;
     }
-
-    mQuestStatus = QS_None;
 
     if (subName.val == REC_QSTN)
         mQuestStatus = QS_Name;

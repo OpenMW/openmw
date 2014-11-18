@@ -19,7 +19,11 @@ add_component_dir (bsa
     )
 
 add_component_dir (nif
-    controlled effect niftypes record controller extra node record_ptr data niffile property
+    controlled effect niftypes record controller extra node record_ptr data niffile property nifkey data node base nifstream
+    )
+
+add_component_dir (nifcache
+    nifcache
     )
 
 add_component_dir (nifogre
@@ -41,15 +45,24 @@ add_component_dir (esm
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
     savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap lightstate inventorystate containerstate npcstate creaturestate dialoguestate statstate
-    npcstats creaturestats weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate
+    npcstats creaturestats weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
+    aisequence magiceffects
+    )
+
+add_component_dir (esmterrain
+    storage
     )
 
 add_component_dir (misc
-    utf8stream stringops
+    utf8stream stringops resourcehelpers
     )
 
+IF(NOT WIN32 AND NOT APPLE)
+    add_definitions(-DGLOBAL_DATA_PATH="${GLOBAL_DATA_PATH}")
+    add_definitions(-DGLOBAL_CONFIG_PATH="${GLOBAL_CONFIG_PATH}")
+ENDIF()
 add_component_dir (files
-    linuxpath windowspath macospath fixedpath multidircollection collections configurationmanager
+    linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
     constrainedfiledatastream lowlevelfile
     )
 
@@ -57,7 +70,7 @@ add_component_dir (compiler
     context controlparser errorhandler exception exprparser extensions fileparser generator
     lineparser literals locals output parser scanner scriptparser skipparser streamerrorhandler
     stringparser tokenloc nullerrorhandler opcodes extensions0 declarationparser
-    quickfileparser
+    quickfileparser discardparser
     )
 
 add_component_dir (interpreter
@@ -71,7 +84,7 @@ add_component_dir (translation
 
 add_definitions(-DTERRAIN_USE_SHADER=1)
 add_component_dir (terrain
-    quadtreenode chunk world storage material buffercache defs
+    quadtreenode chunk world defaultworld terraingrid storage material buffercache defs
     )
 
 add_component_dir (loadinglistener
@@ -80,6 +93,14 @@ add_component_dir (loadinglistener
 
 add_component_dir (ogreinit
     ogreinit ogreplugin
+    )
+
+add_component_dir (widgets
+    box imagebutton tags list numericeditbox widgets
+    )
+
+add_component_dir (fontloader
+    fontloader
     )
 
 add_component_dir (version
@@ -111,6 +132,12 @@ if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
     QT4_WRAP_UI(ESM_UI_HDR ${ESM_UI})
    QT4_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
 endif(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
+
+if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" AND NOT APPLE)
+        add_definitions(-fPIC)
+    endif()
+endif ()
 
 include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 

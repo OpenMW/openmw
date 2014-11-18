@@ -3,8 +3,7 @@
 
 #include <vector>
 
-#include <QAbstractItemModel>
-
+#include "idtablebase.hpp"
 #include "universalid.hpp"
 #include "columns.hpp"
 
@@ -13,33 +12,13 @@ namespace CSMWorld
     class CollectionBase;
     class RecordBase;
 
-    class IdTable : public QAbstractItemModel
+    class IdTable : public IdTableBase
     {
             Q_OBJECT
-
-        public:
-
-            enum Reordering
-            {
-                Reordering_None,
-                Reordering_WithinTopic
-            };
-
-            enum Viewing
-            {
-                Viewing_None,
-                Viewing_Id, // use ID column to generate view request (ID is transformed into
-                            // worldspace and original ID is passed as hint with c: prefix)
-                Viewing_Cell // use cell column to generate view request (cell ID is transformed
-                             // into worldspace and record ID is passed as hint with r: prefix)
-            };
 
         private:
 
             CollectionBase *mIdCollection;
-            Reordering mReordering;
-            Viewing mViewing;
-            bool mPreview;
 
             // not implemented
             IdTable (const IdTable&);
@@ -47,8 +26,7 @@ namespace CSMWorld
 
         public:
 
-            IdTable (CollectionBase *idCollection, Reordering reordering = Reordering_None,
-                Viewing viewing = Viewing_None, bool preview = false);
+            IdTable (CollectionBase *idCollection, unsigned int features = 0);
             ///< The ownership of \a idCollection is not transferred.
 
             virtual ~IdTable();
@@ -79,17 +57,17 @@ namespace CSMWorld
                              const std::string& destination,
                              UniversalId::Type type = UniversalId::Type_None);
 
-            QModelIndex getModelIndex (const std::string& id, int column) const;
+            virtual QModelIndex getModelIndex (const std::string& id, int column) const;
 
             void setRecord (const std::string& id, const RecordBase& record);
             ///< Add record or overwrite existing recrod.
 
             const RecordBase& getRecord (const std::string& id) const;
 
-            int searchColumnIndex (Columns::ColumnId id) const;
+            virtual int searchColumnIndex (Columns::ColumnId id) const;
             ///< Return index of column with the given \a id. If no such column exists, -1 is returned.
 
-            int findColumnIndex (Columns::ColumnId id) const;
+            virtual int findColumnIndex (Columns::ColumnId id) const;
             ///< Return index of column with the given \a id. If no such column exists, an exception is
             /// thrown.
 
@@ -97,15 +75,12 @@ namespace CSMWorld
             ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
 
-            Reordering getReordering() const;
-
-            Viewing getViewing() const;
-
-            bool hasPreview() const;
-
-            std::pair<UniversalId, std::string> view (int row) const;
+            virtual std::pair<UniversalId, std::string> view (int row) const;
             ///< Return the UniversalId and the hint for viewing \a row. If viewing is not
             /// supported by this table, return (UniversalId::Type_None, "").
+
+            /// Is \a id flagged as deleted?
+            virtual bool isDeleted (const std::string& id) const;
 
             int getColumnId(int column) const;
     };

@@ -33,6 +33,11 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onCancelButtonClicked);
     }
 
+    void SpellBuyingWindow::exit()
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_SpellBuying);
+    }
+
     void SpellBuyingWindow::addSpell(const std::string& spellId)
     {
         const MWWorld::ESMStore &store =
@@ -45,16 +50,17 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
+        // TODO: refactor to use MyGUI::ListBox
+
         MyGUI::Button* toAdd =
             mSpellsView->createWidget<MyGUI::Button>(
-                "SandTextButton",
+                price <= playerGold ? "SandTextButton" : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
                 0,
                 mCurrentY,
                 200,
                 sLineHeight,
                 MyGUI::Align::Default
             );
-        toAdd->setEnabled(price<=playerGold);
 
         mCurrentY += sLineHeight;
 
@@ -93,6 +99,15 @@ namespace MWGui
             if (spell->mData.mType!=ESM::Spell::ST_Spell)
                 continue; // don't try to sell diseases, curses or powers
 
+            if (actor.getClass().isNpc())
+            {
+                const ESM::Race* race =
+                        MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(
+                        actor.get<ESM::NPC>()->mBase->mRace);
+                if (race->mPowers.exists(spell->mId))
+                    continue;
+            }
+
             if (playerHasSpell(iter->first))
                 continue;
 
@@ -101,7 +116,10 @@ namespace MWGui
 
         updateLabels();
 
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mSpellsView->setVisibleVScroll(false);
         mSpellsView->setCanvasSize (MyGUI::IntSize(mSpellsView->getWidth(), std::max(mSpellsView->getHeight(), mCurrentY)));
+        mSpellsView->setVisibleVScroll(true);
     }
 
     bool SpellBuyingWindow::playerHasSpell(const std::string &id)
@@ -121,10 +139,18 @@ namespace MWGui
         int price = *_sender->getUserData<int>();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
+            return;
+
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
         spells.add (mSpellsWidgetMap.find(_sender)->second);
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+
+        // add gold to NPC trading gold pool
+        MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
+        npcStats.setGoldPool(npcStats.getGoldPool() + price);
+
         startSpellBuying(mPtr);
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
@@ -132,7 +158,7 @@ namespace MWGui
 
     void SpellBuyingWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_SpellBuying);
+        exit();
     }
 
     void SpellBuyingWindow::updateLabels()

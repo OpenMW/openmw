@@ -33,12 +33,13 @@ namespace MWGui
     public:
         bool mIsOnDragAndDrop;
         MyGUI::Widget* mDraggedWidget;
-        MyGUI::Widget* mDragAndDropWidget;
         ItemModel* mSourceModel;
         ItemView* mSourceView;
         SortFilterItemModel* mSourceSortModel;
         ItemStack mItem;
         int mDraggedCount;
+
+        DragAndDrop();
 
         void startDrag (int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView, int count);
         void drop (ItemModel* targetModel, ItemView* targetView);
@@ -53,6 +54,10 @@ namespace MWGui
 
         void open(const MWWorld::Ptr& container, bool loot=false);
         virtual void close();
+
+        virtual void resetReference();
+
+        virtual void exit();
 
     private:
         DragAndDrop* mDragAndDrop;

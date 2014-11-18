@@ -5,8 +5,8 @@
 
             <!-- Label -->
             <Widget type="TextBox" skin="HeaderText" position="0 0 186 18" name="LabelT" align="Left Top">
-                <Property key="Caption" value="Choose a Specialization"/>
-                <Property key="TextAlign" value="Left Top"/>
+                <Property key="Caption" value="#{sAttributesMenu1}"/>
+                <Property key="TextAlign" value="HCenter Top"/>
             </Widget>
 
             <!-- Attribute list -->
@@ -22,7 +22,7 @@
             <!-- Dialog buttons -->
             <Widget type="AutoSizedButton" skin="MW_Button" position="120 180 66 21" name="CancelButton">
                 <Property key="ExpandDirection" value="Left"/>
-                <Property key="Caption" value="Cancel"/>
+                <Property key="Caption" value="#{sCancel}"/>
             </Widget>
 
         </Widget>

@@ -44,8 +44,9 @@ namespace MWWorld
         cellRef.mRefID = "player";
         mPlayer = LiveCellRef<ESM::NPC>(cellRef, player);
 
-        float* playerPos = mPlayer.mData.getPosition().pos;
-        playerPos[0] = playerPos[1] = playerPos[2] = 0;
+        ESM::Position playerPos = mPlayer.mData.getPosition();
+        playerPos.pos[0] = playerPos.pos[1] = playerPos.pos[2] = 0;
+        mPlayer.mData.setPosition(playerPos);
     }
 
     void Player::set(const ESM::NPC *player)
@@ -243,9 +244,23 @@ namespace MWWorld
 
             mPlayer.load (player.mObject);
 
+            getPlayer().getClass().getCreatureStats(getPlayer()).getAiSequence().clear();
+
             MWBase::World& world = *MWBase::Environment::get().getWorld();
 
-            mCellStore = world.getCell (player.mCellId);
+            try
+            {
+                mCellStore = world.getCell (player.mCellId);
+            }
+            catch (...)
+            {
+                // Cell no longer exists. Place the player in a default cell.
+                ESM::Position pos = mPlayer.mData.getPosition();
+                MWBase::Environment::get().getWorld()->indexToPosition(0, 0, pos.pos[0], pos.pos[1], true);
+                pos.pos[2] = 0;
+                mPlayer.mData.setPosition(pos);
+                mCellStore = world.getExterior(0,0);
+            }
 
             if (!player.mBirthsign.empty() &&
                 !world.getStore().get<ESM::BirthSign>().search (player.mBirthsign))

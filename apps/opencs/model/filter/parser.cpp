@@ -550,7 +550,12 @@ bool CSMFilter::Parser::parse (const std::string& filter, bool allowPredefined)
     if (allowPredefined)
         token = getNextToken();
 
-    if (!allowPredefined || token==Token (Token::Type_OneShot))
+    if (allowPredefined && token==Token (Token::Type_EOS))
+    {
+        mFilter.reset();
+        return true;
+    }
+    else if (!allowPredefined || token==Token (Token::Type_OneShot))
     {
         boost::shared_ptr<Node> node = parseImp (true, token!=Token (Token::Type_OneShot));
 
@@ -591,7 +596,7 @@ bool CSMFilter::Parser::parse (const std::string& filter, bool allowPredefined)
             return false;
         }
 
-        const CSMWorld::Record<CSMFilter::Filter>& record = mData.getFilters().getRecord (index);
+        const CSMWorld::Record<ESM::Filter>& record = mData.getFilters().getRecord (index);
 
         if (record.isDeleted())
         {

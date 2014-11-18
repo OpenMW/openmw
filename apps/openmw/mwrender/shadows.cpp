@@ -20,10 +20,9 @@ using namespace Ogre;
 using namespace MWRender;
 
 Shadows::Shadows(OEngine::Render::OgreRenderer* rend) :
+    mRendering(rend), mSceneMgr(rend->getScene()), mPSSMSetup(NULL),
     mShadowFar(1000), mFadeStart(0.9)
 {
-    mRendering = rend;
-    mSceneMgr = mRendering->getScene();
     recreate();
 }
 
@@ -185,14 +184,4 @@ void Shadows::recreate()
 PSSMShadowCameraSetup* Shadows::getPSSMSetup()
 {
     return mPSSMSetup;
-}
-
-float Shadows::getShadowFar() const
-{
-    return mShadowFar;
-}
-
-float Shadows::getFadeStart() const
-{
-    return mFadeStart;
 }

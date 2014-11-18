@@ -10,7 +10,7 @@ namespace ESM
 
 void Potion::load(ESMReader &esm)
 {
-    mModel = esm.getHNString("MODL");
+    mModel = esm.getHNOString("MODL");
     mIcon = esm.getHNOString("TEXT"); // not ITEX here for some reason
     mScript = esm.getHNOString("SCRI");
     mName = esm.getHNOString("FNAM");

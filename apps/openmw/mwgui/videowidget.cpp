@@ -1,20 +1,18 @@
 #include "videowidget.hpp"
 
+#include "../mwsound/movieaudiofactory.hpp"
+
 namespace MWGui
 {
 
 VideoWidget::VideoWidget()
-    : mAllowSkipping(true)
 {
-    eventKeyButtonPressed += MyGUI::newDelegate(this, &VideoWidget::onKeyPressed);
-
     setNeedKeyFocus(true);
 }
 
-void VideoWidget::playVideo(const std::string &video, bool allowSkipping)
+void VideoWidget::playVideo(const std::string &video)
 {
-    mAllowSkipping = allowSkipping;
-
+    mPlayer.setAudioFactory(new MWSound::MovieAudioFactory());
     mPlayer.playVideo(video);
 
     setImageTexture(mPlayer.getTextureName());
@@ -30,16 +28,19 @@ int VideoWidget::getVideoHeight()
     return mPlayer.getVideoHeight();
 }
 
-void VideoWidget::onKeyPressed(MyGUI::Widget *_sender, MyGUI::KeyCode _key, MyGUI::Char _char)
-{
-    if (_key == MyGUI::KeyCode::Escape && mAllowSkipping)
-        mPlayer.stopVideo();
-}
-
 bool VideoWidget::update()
 {
-    mPlayer.update();
-    return mPlayer.isPlaying();
+    return mPlayer.update();
+}
+
+void VideoWidget::stop()
+{
+    mPlayer.close();
+}
+
+bool VideoWidget::hasAudioStream()
+{
+    return mPlayer.hasAudioStream();
 }
 
 }

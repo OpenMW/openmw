@@ -29,21 +29,15 @@ namespace MWGui
 
         virtual void setVisible(bool visible);
 
-        virtual void removeWallpaper();
-
         LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw);
         virtual ~LoadingScreen();
 
         void setLoadingProgress (const std::string& stage, int depth, int current, int total);
         void loadingDone();
 
-        void onResChange(int w, int h);
-
         void updateWindow(Ogre::RenderWindow* rw) { mWindow = rw; }
 
     private:
-        bool mFirstLoad;
-
         Ogre::SceneManager* mSceneMgr;
         Ogre::RenderWindow* mWindow;
 

@@ -24,7 +24,6 @@ namespace MWGui
         void setButtons(ButtonList &buttons);
 
         virtual void open();
-        int getChosenButton() const;
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
@@ -41,7 +40,6 @@ namespace MWGui
 
         void fitToText(MyGUI::TextBox* widget);
         void layoutVertically(MyGUI::Widget* widget, int margin);
-        int mCurrentButton;
         MyGUI::Widget* mTextBox;
         MyGUI::TextBox* mText;
         MyGUI::Widget* mButtonBar;
@@ -79,6 +77,11 @@ namespace MWGui
         */
         EventHandle_Void eventBack;
 
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_WindowBase eventDone;
+
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
@@ -109,6 +112,11 @@ namespace MWGui
         */
         EventHandle_Void eventBack;
 
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_WindowBase eventDone;
+
     protected:
         void onSelectClass(MyGUI::ListBox* _sender, size_t _index);
         void onAccept(MyGUI::ListBox* _sender, size_t _index);
@@ -135,6 +143,8 @@ namespace MWGui
     public:
         SelectSpecializationDialog();
         ~SelectSpecializationDialog();
+
+        virtual void exit();
 
         ESM::Class::Specialization getSpecializationId() const { return mSpecializationId; }
 
@@ -167,6 +177,8 @@ namespace MWGui
         SelectAttributeDialog();
         ~SelectAttributeDialog();
 
+        virtual void exit();
+
         ESM::Attribute::AttributeID getAttributeId() const { return mAttributeId; }
 
         // Events
@@ -195,6 +207,8 @@ namespace MWGui
     public:
         SelectSkillDialog();
         ~SelectSkillDialog();
+
+        virtual void exit();
 
         ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
 
@@ -232,6 +246,11 @@ namespace MWGui
         std::string getTextInput() const { return mTextEdit->getCaption(); }
         void setTextInput(const std::string &text) { mTextEdit->setCaption(text); }
 
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_WindowBase eventDone;
+
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
 
@@ -261,6 +280,11 @@ namespace MWGui
             signature : void method()\n
         */
         EventHandle_Void eventBack;
+
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_WindowBase eventDone;
 
     protected:
         void onOkClicked(MyGUI::Widget* _sender);

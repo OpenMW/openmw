@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 289 256" name="_Main">
+    <Widget type="VBox" skin="MW_Dialog" layer="Windows" position="0 0 289 256" name="_Main">
+        <Property key="AutoResize" value="true"/>
+        <Property key="Padding" value="12"/>
+        <Property key="Spacing" value="8"/>
+
         <!-- Class image -->
         <Widget type="Widget" skin="MW_Box" position="8 8 265 138" align="Left Top">
             <Widget type="ImageBox" skin="ImageBox" position="2 2 261 134" name="ClassImage" align="Left Top"/>
         </Widget>
 
         <!-- Class text -->
-        <Widget type="EditBox" skin="SandText" position="8 152 265 40" name="ReflectT" align="Left Top">
+        <Widget type="AutoSizedEditBox" skin="SandText" position="8 152 265 40" name="ReflectT" align="Left Top">
             <Property key="TextAlign" value="Top HCenter"/>
             <Property key="MultiLine" value="true"/>
             <Property key="WordWrap" value="true"/>
             <Property key="Static" value="true"/>
         </Widget>
-        <Widget type="TextBox" skin="SandText" position="8 183 265 23" name="ClassName" align="Left Top">
+        <Widget type="AutoSizedTextBox" skin="SandText" position="8 183 265 23" name="ClassName" align="Left Top">
             <Property key="Caption" value="[Class]"/>
             <Property key="TextAlign" value="Top HCenter"/>
         </Widget>
 
         <!-- Dialog buttons -->
         <Widget type="HBox" position="0 216 273 24">
-            <Widget type="Widget">
-                <UserString key="HStretch" value="true"/>
-            </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="BackButton">
                 <Property key="Caption" value="#{sBack}"/>
             </Widget>

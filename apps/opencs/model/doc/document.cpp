@@ -1,6 +1,7 @@
 #include "document.hpp"
 
 #include <cassert>
+#include <fstream>
 
 #include <boost/filesystem.hpp>
 
@@ -2022,6 +2023,7 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sFloats[i];
+        gmst.blank();
         gmst.mValue.setType (ESM::VT_Float);
         addOptionalGmst (gmst);
     }
@@ -2030,6 +2032,7 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sIntegers[i];
+        gmst.blank();
         gmst.mValue.setType (ESM::VT_Int);
         addOptionalGmst (gmst);
     }
@@ -2038,6 +2041,7 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sStrings[i];
+        gmst.blank();
         gmst.mValue.setType (ESM::VT_String);
         gmst.mValue.setString ("<no text>");
         addOptionalGmst (gmst);
@@ -2058,12 +2062,26 @@ void CSMDoc::Document::addOptionalGlobals()
     {
         ESM::Global global;
         global.mId = sGlobals[i];
+        global.blank();
         global.mValue.setType (ESM::VT_Long);
 
         if (i==0)
             global.mValue.setInteger (1); // dayspassed starts counting at 1
 
         addOptionalGlobal (global);
+    }
+}
+
+void CSMDoc::Document::addOptionalMagicEffects()
+{
+    for (int i=ESM::MagicEffect::SummonFabricant; i<=ESM::MagicEffect::SummonCreature05; ++i)
+    {
+        ESM::MagicEffect effect;
+        effect.mIndex = i;
+        effect.mId = ESM::MagicEffect::indexToId (i);
+        effect.blank();
+
+        addOptionalMagicEffect (effect);
     }
 }
 
@@ -2086,6 +2104,17 @@ void CSMDoc::Document::addOptionalGlobal (const ESM::Global& global)
         record.mBase = global;
         record.mState = CSMWorld::RecordBase::State_BaseOnly;
         getData().getGlobals().appendRecord (record);
+    }
+}
+
+void CSMDoc::Document::addOptionalMagicEffect (const ESM::MagicEffect& magicEffect)
+{
+    if (getData().getMagicEffects().searchId (magicEffect.mId)==-1)
+    {
+        CSMWorld::Record<ESM::MagicEffect> record;
+        record.mBase = magicEffect;
+        record.mState = CSMWorld::RecordBase::State_BaseOnly;
+        getData().getMagicEffects().appendRecord (record);
     }
 }
 
@@ -2200,33 +2229,49 @@ void CSMDoc::Document::createBase()
 
         getData().getTopics().add (record);
     }
+
+    for (int i=0; i<ESM::MagicEffect::Length; ++i)
+    {
+        ESM::MagicEffect record;
+
+        record.mIndex = i;
+        record.mId = ESM::MagicEffect::indexToId (i);
+
+        record.blank();
+
+        getData().getMagicEffects().add (record);
+    }
 }
 
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     const std::vector< boost::filesystem::path >& files, bool new_,
     const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
-    ToUTF8::FromType encoding)
-: mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding), mTools (mData),
-  mResDir(resDir),
+    ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
+    const std::vector<std::string>& blacklistedScripts)
+: mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
+  mTools (*this), mResDir(resDir),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
-  mSaving (*this, mProjectPath, encoding)
+  mSaving (*this, mProjectPath, encoding),
+  mRunner (mProjectPath)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
 
     if (!boost::filesystem::exists (mProjectPath))
     {
-        boost::filesystem::path locCustomFiltersPath (configuration.getUserDataPath());
-        locCustomFiltersPath /= "defaultfilters";
+        boost::filesystem::path customFiltersPath (configuration.getUserDataPath());
+        customFiltersPath /= "defaultfilters";
 
-        if (boost::filesystem::exists (locCustomFiltersPath))
+        std::ofstream destination (mProjectPath.string().c_str(), std::ios::binary);
+
+        if (boost::filesystem::exists (customFiltersPath))
         {
-            boost::filesystem::copy_file (locCustomFiltersPath, mProjectPath);
+            destination << std::ifstream(customFiltersPath.c_str(), std::ios::binary).rdbuf();
         }
         else
         {
-            boost::filesystem::copy_file (mResDir / "defaultfilters", mProjectPath);
+            destination << std::ifstream(std::string(mResDir.string() + "/defaultfilters").c_str(), std::ios::binary).rdbuf();
         }
     }
 
@@ -2239,20 +2284,25 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
             createBase();
     }
 
+    mBlacklist.add (CSMWorld::UniversalId::Type_Script, blacklistedScripts);
+
     addOptionalGmsts();
     addOptionalGlobals();
+    addOptionalMagicEffects();
 
     connect (&mUndoStack, SIGNAL (cleanChanged (bool)), this, SLOT (modificationStateChanged (bool)));
 
     connect (&mTools, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
-    connect (&mTools, SIGNAL (done (int)), this, SLOT (operationDone (int)));
+    connect (&mTools, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
 
     connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
-    connect (&mSaving, SIGNAL (done (int)), this, SLOT (operationDone (int)));
+    connect (&mSaving, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
 
     connect (
         &mSaving, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)),
         this, SLOT (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)));
+
+    connect (&mRunner, SIGNAL (runStateChanged()), this, SLOT (runStateChanged()));
 }
 
 CSMDoc::Document::~Document()
@@ -2273,6 +2323,9 @@ int CSMDoc::Document::getState() const
 
     if (mSaving.isRunning())
         state |= State_Locked | State_Saving | State_Operation;
+
+    if (mRunner.isRunning())
+        state |= State_Locked | State_Running;
 
     if (int operations = mTools.getRunningOperations())
         state |= State_Locked | State_Operation | operations;
@@ -2338,7 +2391,7 @@ void CSMDoc::Document::reportMessage (const CSMWorld::UniversalId& id, const std
     std::cout << message << std::endl;
 }
 
-void CSMDoc::Document::operationDone (int type)
+void CSMDoc::Document::operationDone (int type, bool failed)
 {
     emit stateChanged (getState(), this);
 }
@@ -2356,6 +2409,55 @@ CSMWorld::Data& CSMDoc::Document::getData()
 CSMTools::ReportModel *CSMDoc::Document::getReport (const CSMWorld::UniversalId& id)
 {
     return mTools.getReport (id);
+}
+
+bool CSMDoc::Document::isBlacklisted (const CSMWorld::UniversalId& id)
+    const
+{
+    return mBlacklist.isBlacklisted (id);
+}
+
+void CSMDoc::Document::startRunning (const std::string& profile,
+    const std::string& startupInstruction)
+{
+    std::vector<std::string> contentFiles;
+
+    for (std::vector<boost::filesystem::path>::const_iterator iter (mContentFiles.begin());
+        iter!=mContentFiles.end(); ++iter)
+        contentFiles.push_back (iter->filename().string());
+
+    mRunner.configure (getData().getDebugProfiles().getRecord (profile).get(), contentFiles,
+        startupInstruction);
+
+    int state = getState();
+
+    if (state & State_Modified)
+    {
+        // need to save first
+        mRunner.start (true);
+
+        new SaveWatcher (&mRunner, &mSaving); // no, that is not a memory leak. Qt is weird.
+
+        if (!(state & State_Saving))
+            save();
+    }
+    else
+        mRunner.start();
+}
+
+void CSMDoc::Document::stopRunning()
+{
+    mRunner.stop();
+}
+
+QTextDocument *CSMDoc::Document::getRunLog()
+{
+    return mRunner.getLog();
+}
+
+void CSMDoc::Document::runStateChanged()
+{
+    emit stateChanged (getState(), this);
 }
 
 void CSMDoc::Document::progress (int current, int max, int type)

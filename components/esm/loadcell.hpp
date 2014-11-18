@@ -78,10 +78,7 @@ struct Cell
     float mFogDensity;
   };
 
-  Cell() : mWater(0), mHasWaterLevelRecord(false) {}
-
-  /// Merge \a modified into \a original
-  static void merge (Cell* original, Cell* modified);
+  Cell() : mWater(0) {}
 
   // Interior cells are indexed by this (it's the 'id'), for exterior
   // cells it is optional.
@@ -93,23 +90,28 @@ struct Cell
   std::vector<ESM_Context> mContextList; // File position; multiple positions for multiple plugin support
   DATAstruct mData;
   AMBIstruct mAmbi;
+
   float mWater; // Water level
-  bool mHasWaterLevelRecord;
   bool mWaterInt;
   int mMapColor;
-  int mNAM0;
+  // Counter for RefNums. This is only used during content file editing and has no impact on gameplay.
+  // It prevents overwriting previous refNums, even if they were deleted.
+  // as that would collide with refs when a content file is upgraded.
+  int mRefNumCounter;
 
   // References "leased" from another cell (i.e. a different cell
   //  introduced this ref, and it has been moved here by a plugin)
   CellRefTracker mLeasedRefs;
   MovedCellRefTracker mMovedRefs;
 
-  void preLoad(ESMReader &esm);
   void postLoad(ESMReader &esm);
 
   // This method is left in for compatibility with esmtool. Parsing moved references currently requires
   //  passing ESMStore, bit it does not know about this parameter, so we do it this way.
-  void load(ESMReader &esm, bool saveContext = true);
+  void load(ESMReader &esm, bool saveContext = true); // Load everything (except references)
+  void loadData(ESMReader &esm); // Load DATAstruct only
+  void loadCell(ESMReader &esm, bool saveContext = true); // Load everything, except DATAstruct and references
+
   void save(ESMWriter &esm) const;
 
   bool isExterior() const

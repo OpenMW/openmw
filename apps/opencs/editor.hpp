@@ -16,6 +16,8 @@
 
 #include <components/files/multidircollection.hpp>
 
+#include <components/nifcache/nifcache.hpp>
+
 #include "model/settings/usersettings.hpp"
 #include "model/doc/documentmanager.hpp"
 
@@ -25,6 +27,8 @@
 #include "view/doc/newgame.hpp"
 
 #include "view/settings/dialog.hpp"
+#include "view/render/overlaysystem.hpp"
+#include "view/world/physicsmanager.hpp"
 
 namespace OgreInit
 {
@@ -37,8 +41,11 @@ namespace CS
     {
             Q_OBJECT
 
+            Nif::Cache mNifCache;
             Files::ConfigurationManager mCfgMgr;
             CSMSettings::UserSettings mUserSettings;
+            std::auto_ptr<CSVRender::OverlaySystem> mOverlaySystem;
+            std::auto_ptr<CSVWorld::PhysicsManager> mPhysicsManager;
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
@@ -61,6 +68,7 @@ namespace CS
         public:
 
             Editor (OgreInit::OgreInit& ogreInit);
+            ~Editor ();
 
             bool makeIPCServer();
             void connectToIPCServer();

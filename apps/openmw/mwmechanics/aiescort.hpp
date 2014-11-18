@@ -6,6 +6,14 @@
 
 #include "pathfinding.hpp"
 
+namespace ESM
+{
+namespace AiSequence
+{
+    struct AiEscort;
+}
+}
+
 namespace MWMechanics
 {
     /// \brief AI Package to have an NPC lead the player to a specific point
@@ -21,11 +29,15 @@ namespace MWMechanics
                 \implement AiEscortCell **/
             AiEscort(const std::string &actorId,const std::string &cellId,int duration, float x, float y, float z);
 
+            AiEscort(const ESM::AiSequence::AiEscort* escort);
+
             virtual AiEscort *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor,float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
 
             virtual int getTypeId() const;
+
+            void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
         private:
             std::string mActorId;
@@ -34,10 +46,8 @@ namespace MWMechanics
             float mY;
             float mZ;
             float mMaxDist;
-            unsigned int mStartingSecond;
-            unsigned int mDuration;
+            float mRemainingDuration; // In seconds
 
-            PathFinder mPathFinder;
             int mCellX;
             int mCellY;
     };

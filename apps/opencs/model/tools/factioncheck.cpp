@@ -42,7 +42,7 @@ void CSMTools::FactionCheckStage::perform (int stage, Messages& messages)
     // test for non-unique skill
     std::map<int, int> skills; // ID, number of occurrences
 
-    for (int i=0; i<6; ++i)
+    for (int i=0; i<7; ++i)
         if (faction.mData.mSkills[i]!=-1)
             ++skills[faction.mData.mSkills[i]];
 

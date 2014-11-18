@@ -40,7 +40,7 @@
 
     SH_START_PROGRAM
     {
-        shOutputColour(0).xyz = shSample(animatedTexture, UV * 15).xyz * float3(1.0, 1.0, 1.0);
+        shOutputColour(0).xyz = shSample(animatedTexture, UV * float2(15.0, 15.0)).xyz * float3(1.0, 1.0, 1.0);
         shOutputColour(0).w = 0.7;
         
 #if FOG
@@ -102,10 +102,10 @@
 	   
 	   
 	    #if !SH_GLSL
-        float4x4 scalemat = float4x4(   0.5,    0,      0,      0.5,
-                                        0,      -0.5,   0,      0.5,
-                                        0,      0,      0.5,    0.5,
-                                        0,      0,      0,      1   );
+        float4x4 scalemat = float4x4(   0.5,    0.0,      0.0,      0.5,
+                                        0.0,      -0.5,   0.0,      0.5,
+                                        0.0,      0.0,      0.5,    0.5,
+                                        0.0,      0.0,      0.0,      1.0   );
         #else                            
         mat4 scalemat = mat4(0.5, 0.0, 0.0, 0.0, 
                          0.0, -0.5, 0.0, 0.0,
@@ -148,7 +148,7 @@
         #define SMALL_WAVES_Y 0.1      
         
         #define WAVE_CHOPPYNESS 0.15                // wave choppyness
-        #define WAVE_SCALE 75                      // overall wave scale
+        #define WAVE_SCALE 75.0                      // overall wave scale
 
         #define BUMP 1.5                            // overall water surface bumpiness
         #define REFL_BUMP 0.08                      // reflection distortion amount
@@ -159,7 +159,7 @@
         
         #define SUN_EXT float3(0.45, 0.55, 0.68)   //sunlight extinction
         
-        #define SPEC_HARDNESS 256                   // specular highlights hardness
+        #define SPEC_HARDNESS 256.0                   // specular highlights hardness
         
 
     // ---------------------------------------------------------------
@@ -260,7 +260,7 @@
 
 #if SHADOWS || SHADOWS_PSSM
             float fadeRange = shadowFar_fadeStart.x - shadowFar_fadeStart.y;
-            float fade = 1-((depthPassthrough - shadowFar_fadeStart.y) / fadeRange);
+            float fade = 1.0-((depthPassthrough - shadowFar_fadeStart.y) / fadeRange);
             shadow = (depthPassthrough > shadowFar_fadeStart.x) ? 1.0 : ((depthPassthrough > shadowFar_fadeStart.y) ? 1.0-((1.0-shadow)*fade) : shadow);
 #endif
 
@@ -270,9 +270,9 @@
 
 
         float2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
-        screenCoords.y = (1-shSaturate(renderTargetFlipping))+renderTargetFlipping*screenCoords.y;
+        screenCoords.y = (1.0-shSaturate(renderTargetFlipping))+renderTargetFlipping*screenCoords.y;
 
-	    float2 nCoord = float2(0,0);
+	    float2 nCoord = float2(0.0,0.0);
 
       	nCoord = UV * (WAVE_SCALE * 0.05) + WIND_DIR * waterTimer * (WIND_SPEED*0.04);
 	    float3 normal0 = 2.0 * shSample(normalMap, nCoord + float2(-waterTimer*0.015,-waterTimer*0.005)).rgb - 1.0;
@@ -297,7 +297,7 @@
 
         float4 worldPosition = shMatrixMult(wMat, float4(position.xyz, 1));
         float2 relPos = (worldPosition.xy - rippleCenter.xy) / rippleAreaLength + 0.5;
-        float3 normal_ripple = normalize(shSample(rippleNormalMap, relPos.xy).xyz * 2 - 1);
+        float3 normal_ripple = normalize(shSample(rippleNormalMap, relPos.xy).xyz * 2.0 - 1.0);
 
         //normal = normalize(normal + normal_ripple);
         normal = normalize(float3(normal.x * BUMP + normal_ripple.x, normal.y * BUMP + normal_ripple.y, normal.z));
@@ -315,7 +315,7 @@
         float3 vVec = normalize(position.xyz - cameraPos.xyz);
         
         
-        float isUnderwater = (cameraPos.z > 0) ? 0.0 : 1.0;
+        float isUnderwater = (cameraPos.z > 0.0) ? 0.0 : 1.0;
         
         // sunlight scattering
         float3 pNormal = float3(0,0,1);
@@ -327,7 +327,7 @@
         float3 scatterColour = shLerp(float3(SCATTER_COLOUR)*float3(1.0,0.4,0.0), SCATTER_COLOUR, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
 
         // fresnel
-        float ior = (cameraPos.z>0)?(1.333/1.0):(1.0/1.333); //air to water; water to air
+        float ior = (cameraPos.z>0.0)?(1.333/1.0):(1.0/1.333); //air to water; water to air
         float fresnel = fresnel_dielectric(-vVec, normal, ior);
         
         fresnel = shSaturate(fresnel);
@@ -340,9 +340,9 @@
 
 #if REFRACTION
         float3 refraction = shSample(refractionMap, (screenCoords-(normal.xy*REFR_BUMP))*1.0).rgb;
-        
+
          // brighten up the refraction underwater
-        refraction = (cameraPos.z < 0) ? shSaturate(refraction * 1.5) : refraction;
+        refraction = (cameraPos.z < 0.0) ? shSaturate(refraction * 1.5) : refraction;
 #endif
 
 		// specular
@@ -351,16 +351,16 @@
 #if REFRACTION
         shOutputColour(0).xyz = shLerp(  shLerp(refraction, scatterColour, lightScatter), reflection, fresnel) + specular * sunSpecular.xyz;
 #else
-        shOutputColour(0).xyz = shLerp(reflection, float3(0.18039, 0.23137, 0.25490), (1.0-fresnel)*0.5) + specular * sunSpecular.xyz;
+        shOutputColour(0).xyz = shLerp(reflection, float3(0.090195, 0.115685, 0.12745), (1.0-fresnel)*0.5) + specular * sunSpecular.xyz;
 #endif
         // fog
         float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
 
 #if REFRACTION
-                shOutputColour(0).w = 1;
+                shOutputColour(0).w = 1.0;
 #else
-        shOutputColour(0).w = shSaturate(fresnel*2 + specular);
+        shOutputColour(0).w = shSaturate(fresnel*2.0 + specular);
 #endif
     }
 

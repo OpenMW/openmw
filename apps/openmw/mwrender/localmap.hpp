@@ -5,6 +5,7 @@
 
 #include <OgreAxisAlignedBox.h>
 #include <OgreColourValue.h>
+#include <OgreResource.h>
 
 namespace MWWorld
 {
@@ -23,11 +24,13 @@ namespace MWRender
     ///
     /// \brief Local map rendering
     ///
-    class LocalMap
+    class LocalMap : public Ogre::ManualResourceLoader
     {
     public:
         LocalMap(OEngine::Render::OgreRenderer*, MWRender::RenderingManager* rendering);
         ~LocalMap();
+
+        virtual void loadResource(Ogre::Resource* resource);
 
         /**
          * Clear all savegame-specific data (i.e. fog of war textures)
@@ -58,8 +61,6 @@ namespace MWRender
          * Set the position & direction of the player.
          * @remarks This is used to draw a "fog of war" effect
          * to hide areas on the map the player has not discovered yet.
-         * @param position (OGRE coordinates)
-         * @param camera orientation (OGRE coordinates)
          */
         void updatePlayer (const Ogre::Vector3& position, const Ogre::Quaternion& orientation);
 
@@ -71,9 +72,11 @@ namespace MWRender
 
         /**
          * Get the interior map texture index and normalized position
-         * on this texture, given a world position (in ogre coordinates)
+         * on this texture, given a world position
          */
-        void getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y);
+        void worldToInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y);
+
+        Ogre::Vector2 interiorMapToWorldPosition (float nX, float nY, int x, int y);
 
         /**
          * Check if a given position is explored by the player (i.e. not obscured by fog of war)
@@ -131,7 +134,6 @@ namespace MWRender
         Ogre::RenderTarget* mRenderTarget;
 
         bool mInterior;
-        int mCellX, mCellY;
         Ogre::AxisAlignedBox mBounds;
         std::string mInteriorName;
     };

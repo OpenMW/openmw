@@ -6,7 +6,7 @@
 
             <!-- Label -->
             <Widget type="TextBox" skin="HeaderText" position="0 0 216 18" name="LabelT" align="Left Top">
-                <Property key="Caption" value="Choose a Specialization"/>
+                <Property key="Caption" value="#{sSpecializationMenu1}"/>
                 <Property key="TextAlign" value="Left Top"/>
             </Widget>
 
@@ -24,7 +24,7 @@
             <!-- Dialog buttons -->
             <Widget type="AutoSizedButton" skin="MW_Button" position="150 90 66 21" name="CancelButton">
                 <Property key="ExpandDirection" value="Left"/>
-                <Property key="Caption" value="Cancel"/>
+                <Property key="Caption" value="#{sCancel}"/>
             </Widget>
 
         </Widget>

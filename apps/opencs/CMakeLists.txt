@@ -1,15 +1,17 @@
-set (OPENCS_SRC main.cpp)
+set (OPENCS_SRC main.cpp
+    ${CMAKE_SOURCE_DIR}/files/windows/opencs.rc
+    )
 
 opencs_units (. editor)
 
 set (CMAKE_BUILD_TYPE DEBUG)
 
 opencs_units (model/doc
-    document operation saving documentmanager loader
+    document operation saving documentmanager loader runner
     )
 
 opencs_units_noqt (model/doc
-    stage savingstate savingstages
+    stage savingstate savingstages blacklist
     )
 
 opencs_hdrs_noqt (model/doc
@@ -18,17 +20,18 @@ opencs_hdrs_noqt (model/doc
 
 
 opencs_units (model/world
-    idtable idtableproxymodel regionmap data
+    idtable idtableproxymodel regionmap data commanddispatcher idtablebase resourcetable
     )
 
 
 opencs_units_noqt (model/world
     universalid record commands columnbase scriptcontext cell refidcollection
-    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection
+    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
+    pathgrid landtexture land
     )
 
 opencs_hdrs_noqt (model/world
-    columnimp idcollection collection info
+    columnimp idcollection collection info subcellcollection
     )
 
 
@@ -38,13 +41,13 @@ opencs_units (model/tools
 
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
-    birthsigncheck spellcheck referenceablecheck scriptcheck
+    birthsigncheck spellcheck referenceablecheck scriptcheck bodypartcheck
     )
 
 
 opencs_units (view/doc
     viewmanager view operations operation subview startup filedialog newgame
-    filewidget adjusterwidget loader
+    filewidget adjusterwidget loader globaldebugprofilemenu runlogsubview
     )
 
 
@@ -59,23 +62,31 @@ opencs_hdrs_noqt (view/doc
 
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
-    cellcreator referenceablecreator referencecreator scenesubview scenetoolbar scenetool
-    scenetoolmode infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable
-    )
-
-opencs_units (view/render
-    scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
-    previewwidget
-    )
-
-opencs_units_noqt (view/render
-    navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
-    lightingbright
+    cellcreator referenceablecreator referencecreator scenesubview
+    infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable
     )
 
 opencs_units_noqt (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
-    scripthighlighter idvalidator dialoguecreator
+    scripthighlighter idvalidator dialoguecreator physicssystem physicsmanager
+    )
+
+opencs_units (view/widget
+    scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun modebutton
+    )
+
+opencs_units (view/render
+    scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
+    previewwidget editmode
+    )
+
+opencs_units_noqt (view/render
+    navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
+    lightingbright object cell terrainstorage textoverlay overlaymask overlaysystem mousestate
+    )
+
+opencs_hdrs_noqt (view/render
+    elements
     )
 
 
@@ -118,12 +129,8 @@ opencs_units_noqt (model/filter
     node unarynode narynode leafnode booleannode parser andnode ornode notnode textnode valuenode
     )
 
-opencs_hdrs_noqt (model/filter
-    filter
-    )
-
 opencs_units (view/filter
-    filtercreator filterbox recordfilterbox editwidget
+    filterbox recordfilterbox editwidget
     )
 
 set (OPENCS_US
@@ -158,7 +165,7 @@ qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
 qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
 qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${BULLET_INCLUDE_DIRS})
 
 if(APPLE)
     set (OPENCS_MAC_ICON ${CMAKE_SOURCE_DIR}/files/mac/opencs.icns)
@@ -168,6 +175,7 @@ endif(APPLE)
 
 add_executable(opencs
     MACOSX_BUNDLE
+    ${OENGINE_BULLET}
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
     ${OPENCS_MOC_SRC}
@@ -192,15 +200,14 @@ endif(APPLE)
 
 target_link_libraries(opencs
     ${OGRE_LIBRARIES}
+    ${OGRE_Overlay_LIBRARIES}
+    ${OGRE_STATIC_PLUGINS}
     ${SHINY_LIBRARIES}
     ${Boost_LIBRARIES}
+    ${BULLET_LIBRARIES}
     ${QT_LIBRARIES}
     components
 )
-
-if(DPKG_PROGRAM)
-    INSTALL(TARGETS opencs RUNTIME DESTINATION games COMPONENT opencs)
-endif()
 
 if(APPLE)
     INSTALL(TARGETS opencs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)

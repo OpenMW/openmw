@@ -209,8 +209,6 @@ namespace MWWorld
         }
 
         void setUp() {
-            //std::sort(mStatic.begin(), mStatic.end(), RecordCmp());
-
             mShared.clear();
             mShared.reserve(mStatic.size());
             typename std::map<std::string, T>::iterator it = mStatic.begin();
@@ -552,23 +550,16 @@ namespace MWWorld
     template <>
     class Store<ESM::Cell> : public StoreBase
     {
-        struct ExtCmp
-        {
-            bool operator()(const ESM::Cell &x, const ESM::Cell &y) {
-                if (x.mData.mX == y.mData.mX) {
-                    return x.mData.mY < y.mData.mY;
-                }
-                return x.mData.mX < y.mData.mX;
-            }
-        };
-
         struct DynamicExtCmp
         {
             bool operator()(const std::pair<int, int> &left, const std::pair<int, int> &right) const {
-                if (left.first == right.first) {
-                    return left.second < right.second;
-                }
-                return left.first < right.first;
+                if (left.first == right.first && left.second == right.second)
+                    return false;
+
+                if (left.first == right.first)
+                    return left.second > right.second;
+
+                return left.first > right.first;
             }
         };
 
@@ -591,12 +582,15 @@ namespace MWWorld
             return search(cell.mName);
         }
 
+        void handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell);
+
     public:
         ESMStore *mEsmStore;
 
         typedef SharedIterator<ESM::Cell> iterator;
 
         Store<ESM::Cell>()
+        : mEsmStore(NULL)
         {}
 
         const ESM::Cell *search(const std::string &id) const {
@@ -680,17 +674,16 @@ namespace MWWorld
         }
 
         void setUp() {
-            //typedef std::vector<ESM::Cell>::iterator Iterator;
             typedef DynamicExt::iterator ExtIterator;
             typedef std::map<std::string, ESM::Cell>::iterator IntIterator;
 
-            //std::sort(mInt.begin(), mInt.end(), RecordCmp());
+            mSharedInt.clear();
             mSharedInt.reserve(mInt.size());
             for (IntIterator it = mInt.begin(); it != mInt.end(); ++it) {
                 mSharedInt.push_back(&(it->second));
             }
 
-            //std::sort(mExt.begin(), mExt.end(), ExtCmp());
+            mSharedExt.clear();
             mSharedExt.reserve(mExt.size());
             for (ExtIterator it = mExt.begin(); it != mExt.end(); ++it) {
                 mSharedExt.push_back(&(it->second));
@@ -1149,6 +1142,56 @@ namespace MWWorld
             return mStatic.end();
         }
     };
+
+
+    // Specialisation for ESM::Spell to preserve record order as it was in the content files.
+    // The NPC spell autocalc code heavily depends on this order.
+    // We could also do this in the base class, but it's usually not a good idea to depend on record order.
+    template<>
+    inline void Store<ESM::Spell>::clearDynamic()
+    {
+        // remove the dynamic part of mShared
+        mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
+        mDynamic.clear();
+    }
+
+    template<>
+    inline void Store<ESM::Spell>::load(ESM::ESMReader &esm, const std::string &id) {
+        std::string idLower = Misc::StringUtils::lowerCase(id);
+
+        std::pair<Static::iterator, bool> inserted = mStatic.insert(std::make_pair(idLower, ESM::Spell()));
+        if (inserted.second)
+            mShared.push_back(&mStatic[idLower]);
+
+        inserted.first->second.mId = idLower;
+        inserted.first->second.load(esm);
+    }
+
+    template<>
+    inline void Store<ESM::Spell>::setUp()
+    {
+        // remove the dynamic part of mShared
+        mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
+    }
+
+    template<>
+    inline void Store<ESM::Dialogue>::setUp()
+    {
+        // DialInfos marked as deleted are kept during the loading phase, so that the linked list
+        // structure is kept intact for inserting further INFOs. Delete them now that loading is done.
+        for (Static::iterator it = mStatic.begin(); it != mStatic.end(); ++it)
+        {
+            ESM::Dialogue& dial = it->second;
+            dial.clearDeletedInfos();
+        }
+
+        mShared.clear();
+        mShared.reserve(mStatic.size());
+        std::map<std::string, ESM::Dialogue>::iterator it = mStatic.begin();
+        for (; it != mStatic.end(); ++it) {
+            mShared.push_back(&(it->second));
+        }
+    }
 
 } //end namespace
 

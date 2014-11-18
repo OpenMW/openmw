@@ -6,6 +6,7 @@
 #include <OgreBone.h>
 
 #include <components/nif/node.hpp>
+#include <components/nifcache/nifcache.hpp>
 #include <components/misc/stringops.hpp>
 
 namespace NifOgre
@@ -14,16 +15,38 @@ namespace NifOgre
 void NIFSkeletonLoader::buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *parent)
 {
     Ogre::Bone *bone;
-    if(!skel->hasBone(node->name))
-        bone = skel->createBone(node->name);
+    if (node->name.empty())
+    {
+        // HACK: use " " instead of empty name, otherwise Ogre will replace it with an auto-generated
+        // name in SkeletonInstance::cloneBoneAndChildren.
+        static const char* emptyname = " ";
+        if (!skel->hasBone(emptyname))
+            bone = skel->createBone(emptyname);
+        else
+            bone = skel->createBone();
+    }
     else
-        bone = skel->createBone();
+    {
+        if(!skel->hasBone(node->name))
+            bone = skel->createBone(node->name);
+        else
+            bone = skel->createBone();
+    }
+
     if(parent) parent->addChild(bone);
     mNifToOgreHandleMap[node->recIndex] = bone->getHandle();
 
-    bone->setOrientation(node->trafo.rotation);
-    bone->setPosition(node->trafo.pos);
-    bone->setScale(Ogre::Vector3(node->trafo.scale));
+    // decompose the local transform into position, scale and orientation.
+    // this is required for cases where the rotationScale matrix includes scaling, which the NIF format allows :(
+    // the code would look a bit nicer if Ogre allowed setting the transform matrix of a Bone directly, but we can't do that.
+    Ogre::Matrix4 mat(node->getLocalTransform());
+    Ogre::Vector3 position, scale;
+    Ogre::Quaternion orientation;
+    mat.decomposition(position, scale, orientation);
+    bone->setOrientation(orientation);
+    bone->setPosition(position);
+    bone->setScale(scale);
+
     bone->setBindingPose();
 
     if(!(node->recType == Nif::RC_NiNode || /* Nothing special; children traversed below */
@@ -69,7 +92,7 @@ void NIFSkeletonLoader::loadResource(Ogre::Resource *resource)
     Ogre::Skeleton *skel = dynamic_cast<Ogre::Skeleton*>(resource);
     OgreAssert(skel, "Attempting to load a skeleton into a non-skeleton resource!");
 
-    Nif::NIFFile::ptr nif(Nif::NIFFile::create(skel->getName()));
+    Nif::NIFFilePtr nif(Nif::Cache::getInstance().load(skel->getName()));
     const Nif::Node *node = static_cast<const Nif::Node*>(nif->getRoot(0));
 
     try {

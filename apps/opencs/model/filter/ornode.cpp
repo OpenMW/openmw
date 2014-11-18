@@ -7,7 +7,7 @@ CSMFilter::OrNode::OrNode (const std::vector<boost::shared_ptr<Node> >& nodes)
 : NAryNode (nodes, "or")
 {}
 
-bool CSMFilter::OrNode::test (const CSMWorld::IdTable& table, int row,
+bool CSMFilter::OrNode::test (const CSMWorld::IdTableBase& table, int row,
     const std::map<int, int>& columns) const
 {
     int size = getSize();

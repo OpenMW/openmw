@@ -2,12 +2,11 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <openengine/ogre/fader.hpp>
-
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -15,6 +14,24 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "tooltips.hpp"
+
+namespace
+{
+// Sorts a container descending by skill value. If skill value is equal, sorts ascending by skill ID.
+// pair <skill ID, skill value>
+bool sortSkills (const std::pair<int, int>& left, const std::pair<int, int>& right)
+{
+    if (left == right)
+        return false;
+
+    if (left.second > right.second)
+        return true;
+    else if (left.second < right.second)
+        return false;
+
+    return left.first < right.first;
+}
+}
 
 namespace MWGui
 {
@@ -35,6 +52,11 @@ namespace MWGui
         center();
     }
 
+    void TrainingWindow::exit()
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
+    }
+
     void TrainingWindow::startTraining (MWWorld::Ptr actor)
     {
         mPtr = actor;
@@ -47,28 +69,16 @@ namespace MWGui
         MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats (actor);
 
         // NPC can train you in his best 3 skills
-        std::vector< std::pair<int, int> > bestSkills;
-        bestSkills.push_back (std::make_pair(-1, -1));
-        bestSkills.push_back (std::make_pair(-1, -1));
-        bestSkills.push_back (std::make_pair(-1, -1));
+        std::vector< std::pair<int, int> > skills;
 
         for (int i=0; i<ESM::Skill::Length; ++i)
         {
             int value = npcStats.getSkill (i).getBase ();
 
-            for (int j=0; j<3; ++j)
-            {
-                if (value > bestSkills[j].second)
-                {
-                    if (j<2)
-                    {
-                        bestSkills[j+1] = bestSkills[j];
-                    }
-                    bestSkills[j] = std::make_pair(i, value);
-                    break;
-                }
-            }
+            skills.push_back(std::make_pair(i, value));
         }
+
+        std::sort(skills.begin(), skills.end(), sortSkills);
 
         MyGUI::EnumeratorWidgetPtr widgets = mTrainingOptions->getEnumerator ();
         MyGUI::Gui::getInstance ().destroyWidgets (widgets);
@@ -81,20 +91,19 @@ namespace MWGui
         for (int i=0; i<3; ++i)
         {
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer
-                    (mPtr,pcStats.getSkill (bestSkills[i].first).getBase() * gmst.find("iTrainingMod")->getInt (),true);
+                    (mPtr,pcStats.getSkill (skills[i].first).getBase() * gmst.find("iTrainingMod")->getInt (),true);
 
-            MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>("SandTextButton",
+            MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>(price <= playerGold ? "SandTextButton" : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
                 MyGUI::IntCoord(5, 5+i*18, mTrainingOptions->getWidth()-10, 18), MyGUI::Align::Default);
 
-            button->setEnabled(price <= playerGold);
-            button->setUserData(bestSkills[i].first);
+            button->setUserData(skills[i].first);
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &TrainingWindow::onTrainingSelected);
 
-            button->setCaptionWithReplacing("#{" + ESM::Skill::sSkillNameIds[bestSkills[i].first] + "} - " + boost::lexical_cast<std::string>(price));
+            button->setCaptionWithReplacing("#{" + ESM::Skill::sSkillNameIds[skills[i].first] + "} - " + boost::lexical_cast<std::string>(price));
 
             button->setSize(button->getTextSize ().width+12, button->getSize().height);
 
-            ToolTips::createSkillToolTip (button, bestSkills[i].first);
+            ToolTips::createSkillToolTip (button, skills[i].first);
         }
 
         center();
@@ -107,7 +116,7 @@ namespace MWGui
 
     void TrainingWindow::onCancelButtonClicked (MyGUI::Widget *sender)
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
+        exit();
     }
 
     void TrainingWindow::onTrainingSelected (MyGUI::Widget *sender)
@@ -122,6 +131,9 @@ namespace MWGui
 
         int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->getInt ();
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
+
+        if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
+            return;
 
         MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats (mPtr);
         if (npcStats.getSkill (skillId).getBase () <= pcStats.getSkill (skillId).getBase ())
@@ -148,16 +160,19 @@ namespace MWGui
         // remove gold
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
+        // add gold to NPC trading gold pool
+        npcStats.setGoldPool(npcStats.getGoldPool() + price);
+
         // go back to game mode
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
+        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
 
         // advance time
         MWBase::Environment::get().getWorld ()->advanceTime (2);
         MWBase::Environment::get().getMechanicsManager()->rest(false);
         MWBase::Environment::get().getMechanicsManager()->rest(false);
 
-        MWBase::Environment::get().getWorld ()->getFader()->fadeOut(0.25);
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.25);
         mFadeTimeRemaining = 0.5;
     }
 
@@ -169,6 +184,6 @@ namespace MWGui
         mFadeTimeRemaining -= dt;
 
         if (mFadeTimeRemaining <= 0)
-            MWBase::Environment::get().getWorld ()->getFader()->fadeIn(0.25);
+            MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.25);
     }
 }

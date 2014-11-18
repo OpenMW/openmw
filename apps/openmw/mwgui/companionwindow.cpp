@@ -50,6 +50,13 @@ void CompanionWindow::onItemSelected(int index)
 
     const ItemStack& item = mSortModel->getItem(index);
 
+    // We can't take conjured items from a companion NPC
+    if (item.mFlags & ItemStack::Flag_Bound)
+    {
+        MWBase::Environment::get().getWindowManager()->messageBox("#{sBarterDialog12}");
+        return;
+    }
+
     MWWorld::Ptr object = item.mBase;
     int count = item.mCount;
     bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
@@ -119,6 +126,11 @@ void CompanionWindow::updateEncumbranceBar()
 
 void CompanionWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
 {
+    exit();
+}
+
+void CompanionWindow::exit()
+{
     if (mPtr.getTypeName() == typeid(ESM::NPC).name() && mPtr.getClass().getNpcStats(mPtr).getProfit() < 0)
     {
         std::vector<std::string> buttons;
@@ -136,10 +148,11 @@ void CompanionWindow::onMessageBoxButtonClicked(int button)
     if (button == 0)
     {
         mPtr.getRefData().getLocals().setVarByInt(mPtr.getClass().getScript(mPtr),
-            "minimumProfit", mPtr.getClass().getNpcStats(mPtr).getProfit());
+            "minimumprofit", mPtr.getClass().getNpcStats(mPtr).getProfit());
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);
-        MWBase::Environment::get().getDialogueManager()->startDialogue (mPtr);
+        // Important for Calvus' contract script to work properly
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
     }
 }
 
@@ -148,6 +161,13 @@ void CompanionWindow::onReferenceUnavailable()
     MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);
 }
 
+void CompanionWindow::resetReference()
+{
+    ReferenceInterface::resetReference();
+    mItemView->setModel(NULL);
+    mModel = NULL;
+    mSortModel = NULL;
+}
 
 
 }

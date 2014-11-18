@@ -4,9 +4,8 @@
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
 
-CSMWorld::IdTable::IdTable (CollectionBase *idCollection, Reordering reordering,
-    Viewing viewing, bool preview)
-: mIdCollection (idCollection), mReordering (reordering), mViewing (viewing), mPreview (preview)
+CSMWorld::IdTable::IdTable (CollectionBase *idCollection, unsigned int features)
+: IdTableBase (features), mIdCollection (idCollection)
 {}
 
 CSMWorld::IdTable::~IdTable()
@@ -30,7 +29,7 @@ int CSMWorld::IdTable::columnCount (const QModelIndex & parent) const
 
 QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
 {
-    if (role!=Qt::DisplayRole && role!=Qt::EditRole)
+    if ((role!=Qt::DisplayRole && role!=Qt::EditRole) || index.row() < 0 || index.column() < 0)
         return QVariant();
 
     if (role==Qt::EditRole && !mIdCollection->getColumn (index.column()).isEditable())
@@ -186,27 +185,12 @@ void CSMWorld::IdTable::reorderRows (int baseIndex, const std::vector<int>& newO
                 index (baseIndex+newOrder.size()-1, mIdCollection->getColumns()-1));
 }
 
-CSMWorld::IdTable::Reordering CSMWorld::IdTable::getReordering() const
-{
-    return mReordering;
-}
-
-CSMWorld::IdTable::Viewing CSMWorld::IdTable::getViewing() const
-{
-    return mViewing;
-}
-
-bool CSMWorld::IdTable::hasPreview() const
-{
-    return mPreview;
-}
-
 std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view (int row) const
 {
     std::string id;
     std::string hint;
 
-    if (mViewing==Viewing_Cell)
+    if (getFeatures() & Feature_ViewCell)
     {
         int cellColumn = mIdCollection->searchColumnIndex (Columns::ColumnId_Cell);
         int idColumn = mIdCollection->searchColumnIndex (Columns::ColumnId_Id);
@@ -217,7 +201,7 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view (int row) 
             hint = "r:" + std::string (mIdCollection->getData (row, idColumn).toString().toUtf8().constData());
         }
     }
-    else if (mViewing==Viewing_Id)
+    else if (getFeatures() & Feature_ViewId)
     {
         int column = mIdCollection->searchColumnIndex (Columns::ColumnId_Id);
 
@@ -235,6 +219,11 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view (int row) 
         id = "sys::default";
 
     return std::make_pair (UniversalId (UniversalId::Type_Scene, id), hint);
+}
+
+bool CSMWorld::IdTable::isDeleted (const std::string& id) const
+{
+    return getRecord (id).isDeleted();
 }
 
 int CSMWorld::IdTable::getColumnId(int column) const

@@ -41,8 +41,6 @@ namespace ICS
 
 		this->mActive = active;
 
-		this->fillSDLKeysMap();
-
 		ICS_LOG("Channel count = " + ToString<size_t>(channelCount) );
 		for(size_t i=0;i<channelCount;i++)
 		{
@@ -86,7 +84,7 @@ namespace ICS
 	            TiXmlElement* xmlChannel = xmlControl->FirstChildElement("Channel");    
 				while(xmlChannel)
 				{
-	                controlChannelCount = std::max(channelCount, FromString<size_t>(xmlChannel->Attribute("number")));
+					controlChannelCount = std::max(channelCount, FromString<size_t>(xmlChannel->Attribute("number"))+1);
 
 					xmlChannel = xmlChannel->NextSiblingElement("Channel");
 				}
@@ -122,8 +120,6 @@ namespace ICS
 
 					if(type == "bezier")
 					{
-						float step = 0.1;
-
 						float startX = FromString<float>(xmlInterval->Attribute("startX"));
 						float startY = FromString<float>(xmlInterval->Attribute("startY"));
 						float midX = FromString<float>(xmlInterval->Attribute("midX"));
@@ -131,7 +127,7 @@ namespace ICS
 						float endX = FromString<float>(xmlInterval->Attribute("endX"));
 						float endY = FromString<float>(xmlInterval->Attribute("endY"));
 
-						step = FromString<float>(xmlInterval->Attribute("step"));
+                        float step = FromString<float>(xmlInterval->Attribute("step"));
 
 						ICS_LOG("Applying Bezier filter to channel [number="
 							+ ToString<int>(ch) + ", startX=" 
@@ -310,9 +306,6 @@ namespace ICS
 		mControlsMouseButtonBinderMap.clear();
 		mControlsJoystickButtonBinderMap.clear();
 
-		mKeys.clear();
-		mKeyCodes.clear();
-
 		ICS_LOG(" - InputControlSystem deleted - ");
 	}
 
@@ -339,7 +332,7 @@ namespace ICS
 
 		TiXmlElement Controller( "Controller" );
 
-		for(std::vector<Channel*>::const_iterator o = mChannels.begin() ; o != mChannels.end(); o++)
+        for(std::vector<Channel*>::const_iterator o = mChannels.begin() ; o != mChannels.end(); ++o)
 		{
 			ICS::IntervalList intervals = (*o)->getIntervals();
 			
@@ -376,14 +369,14 @@ namespace ICS
 						ChannelFilter.InsertEndChild(XMLInterval);
 					}
 					
-					interval++;
+                    ++interval;
 				}
 
 				Controller.InsertEndChild(ChannelFilter);
 			}
 		}
 
-		for(std::vector<Control*>::const_iterator o = mControls.begin() ; o != mControls.end(); o++)
+        for(std::vector<Control*>::const_iterator o = mControls.begin() ; o != mControls.end(); ++o)
 		{
 			TiXmlElement control( "Control" );
 
@@ -429,21 +422,21 @@ namespace ICS
 				control.SetAttribute( "axisBindable", "false" );
 			}
 
-			if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::INCREASE) != SDLK_UNKNOWN)
+            if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::INCREASE) != SDL_SCANCODE_UNKNOWN)
 			{
 				TiXmlElement keyBinder( "KeyBinder" );
 
-				keyBinder.SetAttribute( "key", keyCodeToString(
+                keyBinder.SetAttribute( "key", ToString<int>(
 					getKeyBinding(*o, Control/*::ControlChangingDirection*/::INCREASE)).c_str() );
 				keyBinder.SetAttribute( "direction", "INCREASE" );
 				control.InsertEndChild(keyBinder);
 			}
 
-			if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::DECREASE) != SDLK_UNKNOWN)
+            if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::DECREASE) != SDL_SCANCODE_UNKNOWN)
 			{
 				TiXmlElement keyBinder( "KeyBinder" );
 
-				keyBinder.SetAttribute( "key", keyCodeToString(
+                keyBinder.SetAttribute( "key", ToString<int>(
 					getKeyBinding(*o, Control/*::ControlChangingDirection*/::DECREASE)).c_str() );
 				keyBinder.SetAttribute( "direction", "DECREASE" );
 				control.InsertEndChild(keyBinder);
@@ -692,13 +685,13 @@ namespace ICS
 					control.InsertEndChild(binder);
 				}
 
-				it++;
+                ++it;
 			}
 
 
 			std::list<Channel*> channels = (*o)->getAttachedChannels();
 			for(std::list<Channel*>::iterator it = channels.begin() ;
-				it != channels.end() ; it++)
+                it != channels.end() ; ++it)
 			{
 				TiXmlElement binder( "Channel" );
 
@@ -796,133 +789,23 @@ namespace ICS
 		mMouseAxisBindingInitialValues[0] = ICS_MOUSE_AXIS_BINDING_NULL_VALUE;
 	}
 
+    bool InputControlSystem::detectingBindingState()
+    {
+        return mDetectingBindingControl != NULL;
+    }
+
 	void InputControlSystem::cancelDetectingBindingState()
 	{
 		mDetectingBindingControl = NULL;
 	}
 
-	void InputControlSystem::fillSDLKeysMap()
+    std::string InputControlSystem::scancodeToString(SDL_Scancode key)
 	{
-		mKeys["UNASSIGNED"]= SDLK_UNKNOWN;
-		mKeys["ESCAPE"]= SDLK_ESCAPE;
-		mKeys["1"]= SDLK_1;
-		mKeys["2"]= SDLK_2;
-		mKeys["3"]= SDLK_3;
-		mKeys["4"]= SDLK_4;
-		mKeys["5"]= SDLK_5;
-		mKeys["6"]= SDLK_6;
-		mKeys["7"]= SDLK_7;
-		mKeys["8"]= SDLK_8;
-		mKeys["9"]= SDLK_9;
-		mKeys["0"]= SDLK_0;
-		mKeys["MINUS"]= SDLK_MINUS;
-		mKeys["EQUALS"]= SDLK_EQUALS;
-		mKeys["BACK"]= SDLK_BACKSPACE;
-		mKeys["TAB"]= SDLK_TAB;
-		mKeys["Q"]= SDLK_q;
-		mKeys["W"]= SDLK_w;
-		mKeys["E"]= SDLK_e;
-		mKeys["R"]= SDLK_r;
-		mKeys["T"]= SDLK_t;
-		mKeys["Y"]= SDLK_y;
-		mKeys["U"]= SDLK_u;
-		mKeys["I"]= SDLK_i;
-		mKeys["O"]= SDLK_o;
-		mKeys["P"]= SDLK_p;
-		mKeys["LBRACKET"]= SDLK_LEFTBRACKET;
-		mKeys["RBRACKET"]= SDLK_RIGHTBRACKET;
-		mKeys["RETURN"]= SDLK_RETURN;
-		mKeys["LCONTROL"]= SDLK_LCTRL;
-		mKeys["A"]= SDLK_a;
-		mKeys["S"]= SDLK_s;
-		mKeys["D"]= SDLK_d;
-		mKeys["F"]= SDLK_f;
-		mKeys["G"]= SDLK_g;
-		mKeys["H"]= SDLK_h;
-		mKeys["J"]= SDLK_j;
-		mKeys["K"]= SDLK_k;
-		mKeys["L"]= SDLK_l;
-		mKeys["SEMICOLON"]= SDLK_SEMICOLON;
-		mKeys["APOSTROPHE"]= SDLK_QUOTE;
-		mKeys["GRAVE"]= SDLK_BACKQUOTE;
-		mKeys["LSHIFT"]= SDLK_LSHIFT;
-		mKeys["BACKSLASH"]= SDLK_BACKSLASH;
-		mKeys["Z"]= SDLK_z;
-		mKeys["X"]= SDLK_x;
-		mKeys["C"]= SDLK_c;
-		mKeys["V"]= SDLK_v;
-		mKeys["B"]= SDLK_b;
-		mKeys["N"]= SDLK_n;
-		mKeys["M"]= SDLK_m;
-		mKeys["COMMA"]= SDLK_COMMA;
-		mKeys["PERIOD"]= SDLK_PERIOD;
-		mKeys["SLASH"]= SDLK_SLASH;
-		mKeys["RSHIFT"]= SDLK_RSHIFT;
-		mKeys["MULTIPLY"]= SDLK_ASTERISK;
-		mKeys["LMENU"]= SDLK_LALT;
-		mKeys["SPACE"]= SDLK_SPACE;
-		mKeys["CAPITAL"]= SDLK_CAPSLOCK;
-		mKeys["F1"]= SDLK_F1;
-		mKeys["F2"]= SDLK_F2;
-		mKeys["F3"]= SDLK_F3;
-		mKeys["F4"]= SDLK_F4;
-		mKeys["F5"]= SDLK_F5;
-		mKeys["F6"]= SDLK_F6;
-		mKeys["F7"]= SDLK_F7;
-		mKeys["F8"]= SDLK_F8;
-		mKeys["F9"]= SDLK_F9;
-		mKeys["F10"]= SDLK_F10;
-		mKeys["F11"]= SDLK_F11;
-		mKeys["F12"]= SDLK_F12;
-		mKeys["NUMLOCK"]= SDLK_NUMLOCKCLEAR;
-		mKeys["SCROLL"]= SDLK_SCROLLLOCK;
-		mKeys["NUMPAD7"]= SDLK_KP_7;
-		mKeys["NUMPAD8"]= SDLK_KP_8;
-		mKeys["NUMPAD9"]= SDLK_KP_9;
-		mKeys["SUBTRACT"]= SDLK_KP_MINUS;
-		mKeys["NUMPAD4"]= SDLK_KP_4;
-		mKeys["NUMPAD5"]= SDLK_KP_5;
-		mKeys["NUMPAD6"]= SDLK_KP_6;
-		mKeys["ADD"]= SDLK_KP_PLUS;
-		mKeys["NUMPAD1"]= SDLK_KP_1;
-		mKeys["NUMPAD2"]= SDLK_KP_2;
-		mKeys["NUMPAD3"]= SDLK_KP_3;
-		mKeys["NUMPAD0"]= SDLK_KP_0;
-		mKeys["DECIMAL"]= SDLK_KP_DECIMAL;
-		mKeys["RCONTROL"]= SDLK_RCTRL;
-		mKeys["DIVIDE"]= SDLK_SLASH;
-		mKeys["SYSRQ"]= SDLK_SYSREQ;
-		mKeys["PRNTSCRN"] = SDLK_PRINTSCREEN;
-		mKeys["RMENU"]= SDLK_RALT;
-		mKeys["PAUSE"]= SDLK_PAUSE;
-		mKeys["HOME"]= SDLK_HOME;
-		mKeys["UP"]= SDLK_UP;
-		mKeys["PGUP"]= SDLK_PAGEUP;
-		mKeys["LEFT"]= SDLK_LEFT;
-		mKeys["RIGHT"]= SDLK_RIGHT;
-		mKeys["END"]= SDLK_END;
-		mKeys["DOWN"]= SDLK_DOWN;
-		mKeys["PGDOWN"]= SDLK_PAGEDOWN;
-		mKeys["INSERT"]= SDLK_INSERT;
-		mKeys["DELETE"]= SDLK_DELETE;
-
-		mKeys["NUMPADENTER"]= SDLK_KP_ENTER;
-
-		for(std::map<std::string, SDL_Keycode>::iterator it = mKeys.begin()
-			; it != mKeys.end() ; it++)
-		{
-			mKeyCodes[ it->second ] = it->first;
-		}
-	}
-
-	std::string InputControlSystem::keyCodeToString(SDL_Keycode key)
-	{
-		return mKeyCodes[key];
-	}
-
-	SDL_Keycode InputControlSystem::stringToKeyCode(std::string key)
-	{
-		return mKeys[key];
+        SDL_Keycode code = SDL_GetKeyFromScancode(key);
+        if (code == SDLK_UNKNOWN)
+            return std::string(SDL_GetScancodeName(key));
+        else
+            return std::string(SDL_GetKeyName(code));
 	}
 
     void InputControlSystem::adjustMouseRegion(Uint16 width, Uint16 height)

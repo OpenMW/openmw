@@ -26,6 +26,7 @@ namespace MWMechanics
     {
             MWWorld::Ptr mWatched;
             NpcStats mWatchedStats;
+            bool mWatchedStatsEmpty;
             bool mUpdatePlayer;
             bool mClassSelected;
             bool mRaceSelected;
@@ -111,6 +112,7 @@ namespace MWMechanics
             /**
              * @brief Commit a crime. If any actors witness the crime and report it,
              *        reportCrime will be called automatically.
+             * @note victim may be empty
              * @param arg Depends on \a type, e.g. for Theft, the value of the item that was stolen.
              * @return was the crime reported?
              */
@@ -118,6 +120,8 @@ namespace MWMechanics
                                       OffenseType type, int arg=0);
             virtual void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0);
+            /// @return false if the attack was considered a "friendly hit" and forgiven
+            virtual bool actorAttacked (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, int count);
             /// Utility to check if opening (i.e. unlocking) this object is illegal and calling commitCrime if so
@@ -125,6 +129,9 @@ namespace MWMechanics
             /// Attempt sleeping in a bed. If this is illegal, call commitCrime.
             /// @return was it illegal, and someone saw you doing it? Also returns fail when enemies are nearby
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed);
+
+            /// @return is \a ptr allowed to take/use \a item or is it a crime?
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim);
 
             virtual void forceStateUpdate(const MWWorld::Ptr &ptr);
 
@@ -147,6 +154,20 @@ namespace MWMechanics
             virtual bool isAIActive();
 
             virtual void playerLoaded();
+
+            virtual int countSavedGameRecords() const;
+
+            virtual void write (ESM::ESMWriter& writer, Loading::Listener& listener) const;
+
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+
+            virtual void clear();
+
+            /// @param bias Can be used to add an additional aggression bias towards the target,
+            ///             making it more likely for the function to return true.
+            virtual bool isAggressive (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, int bias=0, bool ignoreDistance=false);
+
+            virtual void keepPlayerAlive();
     };
 }
 

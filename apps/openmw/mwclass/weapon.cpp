@@ -154,7 +154,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
-        return ref->mBase->mData.mValue * (static_cast<float>(getItemHealth(ptr)) / getItemMaxHealth(ptr));
+        return ref->mBase->mData.mValue;
     }
 
     void Weapon::registerSelf()
@@ -343,7 +343,7 @@ namespace MWClass
         }
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
+        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         info.enchant = ref->mBase->mEnchant;
 
@@ -351,8 +351,7 @@ namespace MWClass
             info.remainingEnchantCharge = ptr.getCellRef().getEnchantmentCharge();
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getOwner(), "Owner");
-            text += MWGui::ToolTips::getMiscString(ptr.getCellRef().getFaction(), "Faction");
+            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
@@ -379,6 +378,7 @@ namespace MWClass
         newItem.mName=newName;
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;
+        newItem.mData.mFlags |= ESM::Weapon::Magical;
         const ESM::Weapon *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         return record->mId;
     }
@@ -435,7 +435,8 @@ namespace MWClass
 
     bool Weapon::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Weapon;
+        return (npcServices & ESM::NPC::Weapon)
+                || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
     float Weapon::getWeight(const MWWorld::Ptr &ptr) const

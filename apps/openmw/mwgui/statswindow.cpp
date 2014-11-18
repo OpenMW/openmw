@@ -66,7 +66,7 @@ namespace MWGui
             mSkillWidgetMap.insert(std::pair<int, MyGUI::TextBox*>(i, (MyGUI::TextBox*)NULL));
         }
 
-        MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
+        MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
         t->eventWindowChangeCoord += MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
     }
 
@@ -82,12 +82,15 @@ namespace MWGui
     {
         mLeftPane->setCoord( MyGUI::IntCoord(0, 0, 0.44*window->getSize().width, window->getSize().height) );
         mRightPane->setCoord( MyGUI::IntCoord(0.44*window->getSize().width, 0, 0.56*window->getSize().width, window->getSize().height) );
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mSkillView->setVisibleVScroll(false);
         mSkillView->setCanvasSize (mSkillView->getWidth(), mSkillView->getCanvasSize().height);
+        mSkillView->setVisibleVScroll(true);
     }
 
     void StatsWindow::setBar(const std::string& name, const std::string& tname, int val, int max)
     {
-        MyGUI::ProgressPtr pt;
+        MyGUI::ProgressBar* pt;
         getWidget(pt, name);
         pt->setProgressRange(max);
         pt->setProgressPosition(val);
@@ -99,7 +102,7 @@ namespace MWGui
 
     void StatsWindow::setPlayerName(const std::string& playerName)
     {
-        static_cast<MyGUI::Window*>(mMainWidget)->setCaption(playerName);
+        mMainWidget->castType<MyGUI::Window>()->setCaption(playerName);
         adjustWindowCaption();
     }
 
@@ -321,6 +324,11 @@ namespace MWGui
         skillValueWidget->_setWidgetState(state);
         skillValueWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
 
+        // resize dynamically according to text size
+        int textWidthPlusMargin = skillValueWidget->getTextSize().width + 12;
+        skillValueWidget->setCoord(coord2.left + coord2.width - textWidthPlusMargin, coord2.top, textWidthPlusMargin, coord2.height);
+        skillNameWidget->setSize(skillNameWidget->getSize() + MyGUI::IntSize(coord2.width - textWidthPlusMargin, 0));
+
         mSkillWidgets.push_back(skillNameWidget);
         mSkillWidgets.push_back(skillValueWidget);
 
@@ -395,9 +403,24 @@ namespace MWGui
                 mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_SkillDescription", skill->mDescription);
                 mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_SkillAttribute", "#{sGoverningAttribute}: #{" + attr->mName + "}");
                 mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("ImageTexture_SkillImage", icon);
-                mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_SkillProgressText", boost::lexical_cast<std::string>(progressPercent)+"/100");
-                mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Range_SkillProgress", "100");
-                mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("RangePosition_SkillProgress", boost::lexical_cast<std::string>(progressPercent));
+                if (base < 100)
+                {
+                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Visible_SkillMaxed", "false");
+                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("UserData^Hidden_SkillMaxed", "true");
+
+                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Visible_SkillProgressVBox", "true");
+                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("UserData^Hidden_SkillProgressVBox", "false");
+
+                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_SkillProgressText", boost::lexical_cast<std::string>(progressPercent)+"/100");
+                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Range_SkillProgress", "100");
+                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("RangePosition_SkillProgress", boost::lexical_cast<std::string>(progressPercent));
+                } else {
+                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Visible_SkillMaxed", "true");
+                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("UserData^Hidden_SkillMaxed", "false");
+
+                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Visible_SkillProgressVBox", "false");
+                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("UserData^Hidden_SkillProgressVBox", "true");
+                }
             }
 
             mSkillWidgetMap[skillId] = widget;
@@ -454,51 +477,70 @@ namespace MWGui
 
         if (!mFactions.empty())
         {
-            // Add a line separator if there are items above
-            if (!mSkillWidgets.empty())
-                addSeparator(coord1, coord2);
-
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             const MWMechanics::NpcStats &PCstats = player.getClass().getNpcStats(player);
             const std::set<std::string> &expelled = PCstats.getExpelled();
 
-            addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sFaction", "Faction"), coord1, coord2);
+            bool firstFaction=true;
             FactionList::const_iterator end = mFactions.end();
             for (FactionList::const_iterator it = mFactions.begin(); it != end; ++it)
             {
                 const ESM::Faction *faction =
                     store.get<ESM::Faction>().find(it->first);
+                if (faction->mData.mIsHidden == 1)
+                    continue;
+
+                if (firstFaction)
+                {
+                    // Add a line separator if there are items above
+                    if (!mSkillWidgets.empty())
+                        addSeparator(coord1, coord2);
+
+                    addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sFaction", "Faction"), coord1, coord2);
+
+                    firstFaction = false;
+                }
+
                 MyGUI::Widget* w = addItem(faction->mName, coord1, coord2);
 
                 std::string text;
 
-                text += std::string("#DDC79E") + faction->mName;
+                text += std::string("#{fontcolourhtml=header}") + faction->mName;
 
                 if (expelled.find(it->first) != expelled.end())
-                    text += "\n#BF9959#{sExpelled}";
+                    text += "\n#{fontcolourhtml=normal}#{sExpelled}";
                 else
                 {
-                    text += std::string("\n#BF9959") + faction->mRanks[it->second];
+                    int rank = it->second;
+                    rank = std::max(0, std::min(9, rank));
+                    text += std::string("\n#{fontcolourhtml=normal}") + faction->mRanks[rank];
 
-                    if (it->second < 9)
+                    if (rank < 9)
                     {
                         // player doesn't have max rank yet
-                        text += std::string("\n\n#DDC79E#{sNextRank} ") + faction->mRanks[it->second+1];
+                        text += std::string("\n\n#{fontcolourhtml=header}#{sNextRank} ") + faction->mRanks[rank+1];
 
-                        ESM::RankData rankData = faction->mData.mRankData[it->second+1];
+                        ESM::RankData rankData = faction->mData.mRankData[rank+1];
                         const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[0]);
                         const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[1]);
 
-                        text += "\n#BF9959#{" + attr1->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute1)
+                        text += "\n#{fontcolourhtml=normal}#{" + attr1->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute1)
                                 + ", #{" + attr2->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute2);
 
-                        text += "\n\n#DDC79E#{sFavoriteSkills}";
-                        text += "\n#BF9959";
-                        for (int i=0; i<6; ++i)
+                        text += "\n\n#{fontcolourhtml=header}#{sFavoriteSkills}";
+                        text += "\n#{fontcolourhtml=normal}";
+                        bool firstSkill = true;
+                        for (int i=0; i<7; ++i)
                         {
-                            text += "#{"+ESM::Skill::sSkillNameIds[faction->mData.mSkills[i]]+"}";
-                            if (i<5)
-                                text += ", ";
+                            if (faction->mData.mSkills[i] != -1)
+                            {
+                                if (!firstSkill)
+                                    text += ", ";
+
+                                firstSkill = false;
+
+                                text += "#{"+ESM::Skill::sSkillNameIds[faction->mData.mSkills[i]]+"}";
+                            }
                         }
 
                         text += "\n";
@@ -554,11 +596,20 @@ namespace MWGui
             mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_Text", "#{sCrimeHelp}");
         }
 
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mSkillView->setVisibleVScroll(false);
         mSkillView->setCanvasSize (mSkillView->getWidth(), std::max(mSkillView->getHeight(), coord1.top));
+        mSkillView->setVisibleVScroll(true);
     }
 
     void StatsWindow::onPinToggled()
     {
         MWBase::Environment::get().getWindowManager()->setHMSVisibility(!mPinned);
+    }
+
+    void StatsWindow::onTitleDoubleClicked()
+    {
+        if (!mPinned)
+            MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Stats);
     }
 }

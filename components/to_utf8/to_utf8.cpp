@@ -4,6 +4,7 @@
 #include <cassert>
 #include <iostream>
 #include <iomanip>
+#include <stdexcept>
 
 /* This file contains the code to translate from WINDOWS-1252 (native
    charset used in English version of Morrowind) to UTF-8. The library
@@ -329,8 +330,10 @@ ToUTF8::FromType ToUTF8::calculateEncoding(const std::string& encodingName)
         return ToUTF8::WINDOWS_1250;
     else if (encodingName == "win1251")
         return ToUTF8::WINDOWS_1251;
-    else
+    else if (encodingName == "win1252")
         return ToUTF8::WINDOWS_1252;
+    else
+        throw std::runtime_error(std::string("Unknown encoding '") + encodingName + std::string("', see openmw --help for available options."));
 }
 
 std::string ToUTF8::encodingUsingMessage(const std::string& encodingName)
@@ -339,6 +342,8 @@ std::string ToUTF8::encodingUsingMessage(const std::string& encodingName)
         return "Using Central and Eastern European font encoding.";
     else if (encodingName == "win1251")
         return "Using Cyrillic font encoding.";
-    else
+    else if (encodingName == "win1252")
         return "Using default (English) font encoding.";
+    else
+        throw std::runtime_error(std::string("Unknown encoding '") + encodingName + std::string("', see openmw --help for available options."));
 }

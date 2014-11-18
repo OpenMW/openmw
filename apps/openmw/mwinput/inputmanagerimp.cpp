@@ -26,7 +26,11 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
+
+#include "../mwdialogue/dialoguemanagerimp.hpp"
+
+#include "../mwgui/windowbase.hpp"
 
 using namespace ICS;
 
@@ -113,7 +117,8 @@ namespace MWInput
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
-        , mAlwaysRunActive(false)
+        , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
+        , mAttemptJump(false)
         , mControlsDisabled(false)
     {
 
@@ -161,6 +166,21 @@ namespace MWInput
         delete mInputManager;
     }
 
+    void InputManager::setPlayerControlsEnabled(bool enabled)
+    {
+        int nPlayerChannels = 17;
+        int playerChannels[] = {A_Activate, A_AutoMove, A_AlwaysRun, A_ToggleWeapon,
+                                A_ToggleSpell, A_Rest, A_QuickKey1, A_QuickKey2,
+                                A_QuickKey3, A_QuickKey4, A_QuickKey5, A_QuickKey6,
+                                A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10,
+                               A_Use};
+
+        for(int i = 0; i < nPlayerChannels; i++) {
+            int pc = playerChannels[i];
+            mInputBinder->getChannel(pc)->setEnabled(enabled);
+        }
+    }
+
     void InputManager::channelChanged(ICS::Channel* channel, float currentValue, float previousValue)
     {
         if (mDragDrop)
@@ -173,6 +193,11 @@ namespace MWInput
         if (action == A_Use)
         {
             mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
+        }
+
+        if (action == A_Jump)
+        {
+            mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
         }
 
         if (currentValue == 1)
@@ -252,7 +277,10 @@ namespace MWInput
                 showQuickKeysMenu();
                 break;
             case A_ToggleHUD:
-                MWBase::Environment::get().getWindowManager()->toggleHud();
+                MWBase::Environment::get().getWindowManager()->toggleGui();
+                break;
+            case A_ToggleDebug:
+                MWBase::Environment::get().getWindowManager()->toggleDebugWindow();
                 break;
             case A_QuickSave:
                 quickSave();
@@ -301,107 +329,107 @@ namespace MWInput
         }
 
         // Disable movement in Gui mode
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode()
-            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running)
-                return;
-
-
-        // Configure player movement according to keyboard input. Actual movement will
-        // be done in the physics system.
-        if (mControlSwitch["playercontrols"])
+        if (!(MWBase::Environment::get().getWindowManager()->isGuiMode()
+            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running))
         {
-            bool triedToMove = false;
-            if (actionIsActive(A_MoveLeft))
+            // Configure player movement according to keyboard input. Actual movement will
+            // be done in the physics system.
+            if (mControlSwitch["playercontrols"])
             {
-                triedToMove = true;
-                mPlayer->setLeftRight (-1);
-            }
-            else if (actionIsActive(A_MoveRight))
-            {
-                triedToMove = true;
-                mPlayer->setLeftRight (1);
-            }
-
-            if (actionIsActive(A_MoveForward))
-            {
-                triedToMove = true;
-                mPlayer->setAutoMove (false);
-                mPlayer->setForwardBackward (1);
-            }
-            else if (actionIsActive(A_MoveBackward))
-            {
-                triedToMove = true;
-                mPlayer->setAutoMove (false);
-                mPlayer->setForwardBackward (-1);
-            }
-
-            else if(mPlayer->getAutoMove())
-            {
-                triedToMove = true;
-                mPlayer->setForwardBackward (1);
-            }
-
-            mPlayer->setSneak(actionIsActive(A_Sneak));
-
-            if (actionIsActive(A_Jump) && mControlSwitch["playerjumping"])
-            {
-                mPlayer->setUpDown (1);
-                triedToMove = true;
-            }
-
-            if (mAlwaysRunActive)
-                mPlayer->setRunState(!actionIsActive(A_Run));
-            else
-                mPlayer->setRunState(actionIsActive(A_Run));
-
-            // if player tried to start moving, but can't (due to being overencumbered), display a notification.
-            if (triedToMove)
-            {
-                MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-                mOverencumberedMessageDelay -= dt;
-                if (player.getClass().getEncumbrance(player) >= player.getClass().getCapacity(player))
+                bool triedToMove = false;
+                if (actionIsActive(A_MoveLeft))
                 {
+                    triedToMove = true;
+                    mPlayer->setLeftRight (-1);
+                }
+                else if (actionIsActive(A_MoveRight))
+                {
+                    triedToMove = true;
+                    mPlayer->setLeftRight (1);
+                }
+
+                if (actionIsActive(A_MoveForward))
+                {
+                    triedToMove = true;
                     mPlayer->setAutoMove (false);
-                    if (mOverencumberedMessageDelay <= 0)
+                    mPlayer->setForwardBackward (1);
+                }
+                else if (actionIsActive(A_MoveBackward))
+                {
+                    triedToMove = true;
+                    mPlayer->setAutoMove (false);
+                    mPlayer->setForwardBackward (-1);
+                }
+
+                else if(mPlayer->getAutoMove())
+                {
+                    triedToMove = true;
+                    mPlayer->setForwardBackward (1);
+                }
+
+                mPlayer->setSneak(actionIsActive(A_Sneak));
+
+                if (mAttemptJump && mControlSwitch["playerjumping"])
+                {
+                    mPlayer->setUpDown (1);
+                    triedToMove = true;
+                }
+
+                if (mAlwaysRunActive)
+                    mPlayer->setRunState(!actionIsActive(A_Run));
+                else
+                    mPlayer->setRunState(actionIsActive(A_Run));
+
+                // if player tried to start moving, but can't (due to being overencumbered), display a notification.
+                if (triedToMove)
+                {
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+                    mOverencumberedMessageDelay -= dt;
+                    if (player.getClass().getEncumbrance(player) > player.getClass().getCapacity(player))
                     {
-                        MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage59}");
-                        mOverencumberedMessageDelay = 1.0;
+                        mPlayer->setAutoMove (false);
+                        if (mOverencumberedMessageDelay <= 0)
+                        {
+                            MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage59}");
+                            mOverencumberedMessageDelay = 1.0;
+                        }
+                    }
+                }
+
+                if (mControlSwitch["playerviewswitch"]) {
+
+                    // work around preview mode toggle when pressing Alt+Tab
+                    if (actionIsActive(A_TogglePOV) && !mInputManager->isModifierHeld(SDL_Keymod(KMOD_ALT))) {
+                        if (mPreviewPOVDelay <= 0.5 &&
+                            (mPreviewPOVDelay += dt) > 0.5)
+                        {
+                            mPreviewPOVDelay = 1.f;
+                            MWBase::Environment::get().getWorld()->togglePreviewMode(true);
+                        }
+                    } else {
+                        //disable preview mode
+                        MWBase::Environment::get().getWorld()->togglePreviewMode(false);
+                        if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= 0.5) {
+                            MWBase::Environment::get().getWorld()->togglePOV();
+                        }
+                        mPreviewPOVDelay = 0.f;
                     }
                 }
             }
-
-            if (mControlSwitch["playerviewswitch"]) {
-
-                // work around preview mode toggle when pressing Alt+Tab
-                if (actionIsActive(A_TogglePOV) && !mInputManager->isModifierHeld(SDL_Keymod(KMOD_ALT))) {
-                    if (mPreviewPOVDelay <= 0.5 &&
-                        (mPreviewPOVDelay += dt) > 0.5)
-                    {
-                        mPreviewPOVDelay = 1.f;
-                        MWBase::Environment::get().getWorld()->togglePreviewMode(true);
-                    }
-                } else {
-                    //disable preview mode
-                    MWBase::Environment::get().getWorld()->togglePreviewMode(false);
-                    if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= 0.5) {
-                        MWBase::Environment::get().getWorld()->togglePOV();
-                    }
-                    mPreviewPOVDelay = 0.f;
-                }
+            if (actionIsActive(A_MoveForward) ||
+                actionIsActive(A_MoveBackward) ||
+                actionIsActive(A_MoveLeft) ||
+                actionIsActive(A_MoveRight) ||
+                actionIsActive(A_Jump) ||
+                actionIsActive(A_Sneak) ||
+                actionIsActive(A_TogglePOV))
+            {
+                resetIdleTime();
+            } else {
+                updateIdleTime(dt);
             }
         }
-        if (actionIsActive(A_MoveForward) ||
-            actionIsActive(A_MoveBackward) ||
-            actionIsActive(A_MoveLeft) ||
-            actionIsActive(A_MoveRight) ||
-            actionIsActive(A_Jump) ||
-            actionIsActive(A_Sneak) ||
-            actionIsActive(A_TogglePOV))
-        {
-            resetIdleTime();
-        } else {
-            updateIdleTime(dt);
-        }
+        mAttemptJump = false; // Can only jump on first frame input is on
     }
 
     void InputManager::setDragDrop(bool dragDrop)
@@ -473,53 +501,25 @@ namespace MWInput
 
     void InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
-        // Cut, copy & paste
-        MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-        if (focus)
-        {
-            MyGUI::EditBox* edit = focus->castType<MyGUI::EditBox>(false);
-            if (edit && !edit->getEditReadOnly())
-            {
-                if (arg.keysym.sym == SDLK_v && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
-                {
-                    char* text = SDL_GetClipboardText();
-
-                    if (text)
-                    {
-                        edit->insertText(MyGUI::UString(text), edit->getTextCursor());
-                        SDL_free(text);
-                    }
-                }
-                if (arg.keysym.sym == SDLK_x && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
-                {
-                    // Discard color codes and other escape characters
-                    std::string text = MyGUI::TextIterator::getOnlyText(edit->getTextSelection());
-                    if (text.length())
-                    {
-                        SDL_SetClipboardText(text.c_str());
-                        edit->deleteTextSelection();
-                    }
-                }
-            }
-            if (edit && !edit->getEditStatic())
-            {
-                if (arg.keysym.sym == SDLK_c && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
-                {
-                    // Discard color codes and other escape characters
-                    std::string text = MyGUI::TextIterator::getOnlyText(edit->getTextSelection());
-                    if (text.length())
-                        SDL_SetClipboardText(text.c_str());
-                }
-            }
-        }
-
-        if (!mControlsDisabled)
-            mInputBinder->keyPressed (arg);
-
+        // HACK: to make Morrowind's default keybinding for the console work without printing an extra "^" upon closing
+        // This assumes that SDL_TextInput events always come *after* the key event
+        // (which is somewhat reasonable, and hopefully true for all SDL platforms)
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
+        if (mInputBinder->getKeyBinding(mInputBinder->getControl(A_Console), ICS::Control::INCREASE)
+                == arg.keysym.scancode
+                && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Console)
+            SDL_StopTextInput();
 
+        bool consumed = false;
         if (kc != OIS::KC_UNASSIGNED)
-            MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+        {
+            consumed = SDL_IsTextInputActive() &&
+                    ( !(SDLK_SCANCODE_MASK & arg.keysym.sym) && std::isprint(arg.keysym.sym)); // Little trick to check if key is printable
+            bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+            setPlayerControlsEnabled(!guiFocus);
+        }
+        if (!mControlsDisabled && !consumed)
+            mInputBinder->keyPressed (arg);
     }
 
     void InputManager::textInput(const SDL_TextInputEvent &arg)
@@ -532,36 +532,52 @@ namespace MWInput
 
     void InputManager::keyReleased(const SDL_KeyboardEvent &arg )
     {
-        mInputBinder->keyReleased (arg);
-
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
-        MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc));
+        setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
+        mInputBinder->keyReleased (arg);
     }
 
     void InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
-        mInputBinder->mousePressed (arg, id);
+        bool guiMode = false;
 
-        if (id != SDL_BUTTON_LEFT && id != SDL_BUTTON_RIGHT)
-            return; // MyGUI has no use for these events
-
-        MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
-        if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
+        if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI only uses these mouse events
         {
-            MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
-            if (b && b->getEnabled())
+            guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
+            guiMode = MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id)) && guiMode;
+            if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
             {
-                MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+                MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
+                if (b && b->getEnabled())
+                {
+                    MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+                }
             }
         }
+
+        setPlayerControlsEnabled(!guiMode);
+
+        // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
+        if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings)
+            mInputBinder->mousePressed (arg, id);
     }
 
     void InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
-    {
-        mInputBinder->mouseReleased (arg, id);
+    {      
 
-        MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
+        if(mInputBinder->detectingBindingState())
+        {
+            mInputBinder->mouseReleased (arg, id);
+        } else {
+            bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
+            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id)) && guiMode;
+
+            if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
+
+            setPlayerControlsEnabled(!guiMode);
+            mInputBinder->mouseReleased (arg, id);
+        }
     }
 
     void InputManager::mouseMoved(const SFO::MouseMotionEvent &arg )
@@ -635,27 +651,29 @@ namespace MWInput
 
     void InputManager::toggleMainMenu()
     {
-        if (MyGUI::InputManager::getInstance ().isModalAny())
+        if (MyGUI::InputManager::getInstance().isModalAny()) {
+            MWBase::Environment::get().getWindowManager()->getCurrentModal()->exit();
             return;
-
-        if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
-        {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
-            MWBase::Environment::get().getSoundManager()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);
         }
-        else
+
+        if(!MWBase::Environment::get().getWindowManager()->isGuiMode()) //No open GUIs, open up the MainMenu
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
-            MWBase::Environment::get().getSoundManager()->pauseSounds (MWBase::SoundManager::Play_TypeSfx);
+        }
+        else //Close current GUI
+        {
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
         }
     }
 
     void InputManager::quickLoad() {
-        MWBase::Environment::get().getStateManager()->quickLoad();
+        if (!MyGUI::InputManager::getInstance().isModalAny())
+            MWBase::Environment::get().getStateManager()->quickLoad();
     }
 
     void InputManager::quickSave() {
-        MWBase::Environment::get().getStateManager()->quickSave();
+        if (!MyGUI::InputManager::getInstance().isModalAny())
+            MWBase::Environment::get().getStateManager()->quickSave();
     }
     void InputManager::toggleSpell()
     {
@@ -755,22 +773,28 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        // Toggle between game mode and journal mode
-        if(!MWBase::Environment::get().getWindowManager()->isGuiMode() && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
+        if(MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Journal
+                && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
         {
             MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Journal);
         }
-        else if(MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Journal)
+        else if(MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Journal))
         {
-            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Journal);
         }
-        // .. but don't touch any other mode.
     }
 
     void InputManager::quickKey (int index)
     {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        if (player.getClass().getNpcStats(player).isWerewolf())
+        {
+            // Cannot use items or spells while in werewolf form
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
+            return;
+        }
+
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
             MWBase::Environment::get().getWindowManager()->activateQuickKey (index);
     }
@@ -779,9 +803,24 @@ namespace MWInput
     {
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode ()
                 && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
+        {
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            if (player.getClass().getNpcStats(player).isWerewolf())
+            {
+                // Cannot use items or spells while in werewolf form
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
+                return;
+            }
+
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_QuickKeysMenu);
-        else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu)
-            MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_QuickKeysMenu);
+
+        }
+        else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu) {
+            while(MyGUI::InputManager::getInstance().isModalAny()) { //Handle any open Modal windows
+                MWBase::Environment::get().getWindowManager()->getCurrentModal()->exit();
+            }
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode(); //And handle the actual main window
+        }
     }
 
     void InputManager::activate()
@@ -802,6 +841,8 @@ namespace MWInput
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
         mAlwaysRunActive = !mAlwaysRunActive;
+
+        Settings::Manager::setBool("always run", "Input", mAlwaysRunActive);
     }
 
     void InputManager::resetIdleTime()
@@ -832,41 +873,42 @@ namespace MWInput
     {
         // using hardcoded key defaults is inevitable, if we want the configuration files to stay valid
         // across different versions of OpenMW (in the case where another input action is added)
-        std::map<int, int> defaultKeyBindings;
+        std::map<int, SDL_Scancode> defaultKeyBindings;
 
         //Gets the Keyvalue from the Scancode; gives the button in the same place reguardless of keyboard format
-        defaultKeyBindings[A_Activate] = SDL_GetKeyFromScancode(SDL_SCANCODE_SPACE);
-        defaultKeyBindings[A_MoveBackward] = SDL_GetKeyFromScancode(SDL_SCANCODE_S);
-        defaultKeyBindings[A_MoveForward] = SDL_GetKeyFromScancode(SDL_SCANCODE_W);
-        defaultKeyBindings[A_MoveLeft] = SDL_GetKeyFromScancode(SDL_SCANCODE_A);
-        defaultKeyBindings[A_MoveRight] = SDL_GetKeyFromScancode(SDL_SCANCODE_D);
-        defaultKeyBindings[A_ToggleWeapon] = SDL_GetKeyFromScancode(SDL_SCANCODE_F);
-        defaultKeyBindings[A_ToggleSpell] = SDL_GetKeyFromScancode(SDL_SCANCODE_R);
-        defaultKeyBindings[A_QuickKeysMenu] = SDL_GetKeyFromScancode(SDL_SCANCODE_F1);
-        defaultKeyBindings[A_Console] = SDL_GetKeyFromScancode(SDL_SCANCODE_F2);
-        defaultKeyBindings[A_Run] = SDL_GetKeyFromScancode(SDL_SCANCODE_LSHIFT);
-        defaultKeyBindings[A_Sneak] = SDL_GetKeyFromScancode(SDL_SCANCODE_LCTRL);
-        defaultKeyBindings[A_AutoMove] = SDL_GetKeyFromScancode(SDL_SCANCODE_Q);
-        defaultKeyBindings[A_Jump] = SDL_GetKeyFromScancode(SDL_SCANCODE_E);
-        defaultKeyBindings[A_Journal] = SDL_GetKeyFromScancode(SDL_SCANCODE_J);
-        defaultKeyBindings[A_Rest] = SDL_GetKeyFromScancode(SDL_SCANCODE_T);
-        defaultKeyBindings[A_GameMenu] = SDL_GetKeyFromScancode(SDL_SCANCODE_ESCAPE);
-        defaultKeyBindings[A_TogglePOV] = SDL_GetKeyFromScancode(SDL_SCANCODE_TAB);
-        defaultKeyBindings[A_QuickKey1] = SDL_GetKeyFromScancode(SDL_SCANCODE_1);
-        defaultKeyBindings[A_QuickKey2] = SDL_GetKeyFromScancode(SDL_SCANCODE_2);
-        defaultKeyBindings[A_QuickKey3] = SDL_GetKeyFromScancode(SDL_SCANCODE_3);
-        defaultKeyBindings[A_QuickKey4] = SDL_GetKeyFromScancode(SDL_SCANCODE_4);
-        defaultKeyBindings[A_QuickKey5] = SDL_GetKeyFromScancode(SDL_SCANCODE_5);
-        defaultKeyBindings[A_QuickKey6] = SDL_GetKeyFromScancode(SDL_SCANCODE_6);
-        defaultKeyBindings[A_QuickKey7] = SDL_GetKeyFromScancode(SDL_SCANCODE_7);
-        defaultKeyBindings[A_QuickKey8] = SDL_GetKeyFromScancode(SDL_SCANCODE_8);
-        defaultKeyBindings[A_QuickKey9] = SDL_GetKeyFromScancode(SDL_SCANCODE_9);
-        defaultKeyBindings[A_QuickKey10] = SDL_GetKeyFromScancode(SDL_SCANCODE_0);
-        defaultKeyBindings[A_Screenshot] = SDL_GetKeyFromScancode(SDL_SCANCODE_F12);
-        defaultKeyBindings[A_ToggleHUD] = SDL_GetKeyFromScancode(SDL_SCANCODE_F11);
-        defaultKeyBindings[A_AlwaysRun] = SDL_GetKeyFromScancode(SDL_SCANCODE_Y);
-        defaultKeyBindings[A_QuickSave] = SDL_GetKeyFromScancode(SDL_SCANCODE_F5);
-        defaultKeyBindings[A_QuickLoad] = SDL_GetKeyFromScancode(SDL_SCANCODE_F9);
+        defaultKeyBindings[A_Activate] = SDL_SCANCODE_SPACE;
+        defaultKeyBindings[A_MoveBackward] = SDL_SCANCODE_S;
+        defaultKeyBindings[A_MoveForward] = SDL_SCANCODE_W;
+        defaultKeyBindings[A_MoveLeft] = SDL_SCANCODE_A;
+        defaultKeyBindings[A_MoveRight] = SDL_SCANCODE_D;
+        defaultKeyBindings[A_ToggleWeapon] = SDL_SCANCODE_F;
+        defaultKeyBindings[A_ToggleSpell] = SDL_SCANCODE_R;
+        defaultKeyBindings[A_QuickKeysMenu] = SDL_SCANCODE_F1;
+        defaultKeyBindings[A_Console] = SDL_SCANCODE_GRAVE;
+        defaultKeyBindings[A_Run] = SDL_SCANCODE_LSHIFT;
+        defaultKeyBindings[A_Sneak] = SDL_SCANCODE_LCTRL;
+        defaultKeyBindings[A_AutoMove] = SDL_SCANCODE_Q;
+        defaultKeyBindings[A_Jump] = SDL_SCANCODE_E;
+        defaultKeyBindings[A_Journal] = SDL_SCANCODE_J;
+        defaultKeyBindings[A_Rest] = SDL_SCANCODE_T;
+        defaultKeyBindings[A_GameMenu] = SDL_SCANCODE_ESCAPE;
+        defaultKeyBindings[A_TogglePOV] = SDL_SCANCODE_TAB;
+        defaultKeyBindings[A_QuickKey1] = SDL_SCANCODE_1;
+        defaultKeyBindings[A_QuickKey2] = SDL_SCANCODE_2;
+        defaultKeyBindings[A_QuickKey3] = SDL_SCANCODE_3;
+        defaultKeyBindings[A_QuickKey4] = SDL_SCANCODE_4;
+        defaultKeyBindings[A_QuickKey5] = SDL_SCANCODE_5;
+        defaultKeyBindings[A_QuickKey6] = SDL_SCANCODE_6;
+        defaultKeyBindings[A_QuickKey7] = SDL_SCANCODE_7;
+        defaultKeyBindings[A_QuickKey8] = SDL_SCANCODE_8;
+        defaultKeyBindings[A_QuickKey9] = SDL_SCANCODE_9;
+        defaultKeyBindings[A_QuickKey10] = SDL_SCANCODE_0;
+        defaultKeyBindings[A_Screenshot] = SDL_SCANCODE_F12;
+        defaultKeyBindings[A_ToggleHUD] = SDL_SCANCODE_F11;
+        defaultKeyBindings[A_ToggleDebug] = SDL_SCANCODE_F10;
+        defaultKeyBindings[A_AlwaysRun] = SDL_SCANCODE_CAPSLOCK;
+        defaultKeyBindings[A_QuickSave] = SDL_SCANCODE_F5;
+        defaultKeyBindings[A_QuickLoad] = SDL_SCANCODE_F9;
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = SDL_BUTTON_RIGHT;
@@ -888,23 +930,20 @@ namespace MWInput
             }
 
             if (!controlExists || force ||
-                    ( mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) == SDLK_UNKNOWN
+                    ( mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) == SDL_SCANCODE_UNKNOWN
                       && mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS
                       ))
             {
                 clearAllBindings (control);
 
-                if (defaultKeyBindings.find(i) != defaultKeyBindings.end())
-                    mInputBinder->addKeyBinding(control, static_cast<SDL_Keycode>(defaultKeyBindings[i]), ICS::Control::INCREASE);
-                else if (defaultMouseButtonBindings.find(i) != defaultMouseButtonBindings.end())
+                if (defaultKeyBindings.find(i) != defaultKeyBindings.end()
+                        && !mInputBinder->isKeyBound(defaultKeyBindings[i]))
+                    mInputBinder->addKeyBinding(control, defaultKeyBindings[i], ICS::Control::INCREASE);
+                else if (defaultMouseButtonBindings.find(i) != defaultMouseButtonBindings.end()
+                         && !mInputBinder->isMouseButtonBound(defaultMouseButtonBindings[i]))
                     mInputBinder->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
             }
         }
-
-        // Printscreen key should not be allowed because it's captured by system screenshot function
-        // We check this explicitely here to fix up pre-0.26 config files. Can be removed after a few versions
-        if (mInputBinder->getKeyBinding(mInputBinder->getControl(A_Screenshot), ICS::Control::INCREASE) == SDLK_PRINTSCREEN)
-            mInputBinder->addKeyBinding(mInputBinder->getControl(A_Screenshot), SDLK_F12, ICS::Control::INCREASE);
     }
 
     std::string InputManager::getActionDescription (int action)
@@ -959,8 +998,8 @@ namespace MWInput
 
         ICS::Control* c = mInputBinder->getChannel (action)->getAttachedControls ().front().control;
 
-        if (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE) != SDLK_UNKNOWN)
-            return mInputBinder->keyCodeToString (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE));
+        if (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE) != SDL_SCANCODE_UNKNOWN)
+            return mInputBinder->scancodeToString (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE));
         else if (mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
             return "#{sMouse} " + boost::lexical_cast<std::string>(mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE));
         else
@@ -1021,10 +1060,10 @@ namespace MWInput
     }
 
     void InputManager::keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-        , SDL_Keycode key, ICS::Control::ControlChangingDirection direction)
+        , SDL_Scancode key, ICS::Control::ControlChangingDirection direction)
     {
         //Disallow binding escape key
-        if(key==SDLK_ESCAPE)
+        if(key==SDL_SCANCODE_ESCAPE)
             return;
 
         clearAllBindings(control);
@@ -1075,7 +1114,7 @@ namespace MWInput
     void InputManager::clearAllBindings (ICS::Control* control)
     {
         // right now we don't really need multiple bindings for the same action, so remove all others first
-        if (mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) != SDLK_UNKNOWN)
+        if (mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) != SDL_SCANCODE_UNKNOWN)
             mInputBinder->removeKeyBinding (mInputBinder->getKeyBinding (control, ICS::Control::INCREASE));
         if (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
             mInputBinder->removeMouseButtonBinding (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE));

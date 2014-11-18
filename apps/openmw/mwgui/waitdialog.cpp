@@ -2,7 +2,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <libs/openengine/ogre/fader.hpp>
+#include <components/widgets/box.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -69,6 +69,12 @@ namespace MWGui
         mProgressBar.setVisible (false);
     }
 
+    void WaitDialog::exit()
+    {
+        if(!mProgressBar.isVisible()) //Only exit if not currently waiting
+            MWBase::Environment::get().getWindowManager()->popGuiMode();
+    }
+
     void WaitDialog::open()
     {
         if (!MWBase::Environment::get().getWindowManager ()->getRestEnabled ())
@@ -122,7 +128,7 @@ namespace MWGui
             MWBase::Environment::get().getStateManager()->quickSave("Autosave");
 
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        world->getFader ()->fadeOut(0.2);
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.2);
         setVisible(false);
         mProgressBar.setVisible (true);
 
@@ -160,7 +166,7 @@ namespace MWGui
 
     void WaitDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        MWBase::Environment::get().getWindowManager()->popGuiMode ();
+        exit();
     }
 
     void WaitDialog::onHourSliderChangedPosition(MyGUI::ScrollBar* sender, size_t position)
@@ -173,8 +179,7 @@ namespace MWGui
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
-        bool full = (stats.getFatigue().getCurrent() >= stats.getFatigue().getModified())
-                && (stats.getHealth().getCurrent() >= stats.getHealth().getModified())
+        bool full = (stats.getHealth().getCurrent() >= stats.getHealth().getModified())
                 && (stats.getMagicka().getCurrent() >= stats.getMagicka().getModified());
         MWMechanics::NpcStats& npcstats = player.getClass().getNpcStats(player);
         bool werewolf = npcstats.isWerewolf();
@@ -187,7 +192,10 @@ namespace MWGui
 
         mSleeping = canRest;
 
-        dynamic_cast<Widgets::Box*>(mMainWidget)->notifyChildrenSizeChanged();
+        Gui::Box* box = dynamic_cast<Gui::Box*>(mMainWidget);
+        if (box == NULL)
+            throw std::runtime_error("main widget must be a box");
+        box->notifyChildrenSizeChanged();
         center();
     }
 
@@ -237,7 +245,7 @@ namespace MWGui
 
     void WaitDialog::stopWaiting ()
     {
-        MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.2);
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.2);
         mProgressBar.setVisible (false);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Rest);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_RestBed);
