@@ -79,7 +79,7 @@
      <item>
       <widget class="QLabel" name="newLocationLabel">
        <property name="text">
-        <string>Install Morrowind to a new location for OpenMW to use.</string>
+        <string>Install Morrowind from a retail disk to a new location for OpenMW to use.</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
