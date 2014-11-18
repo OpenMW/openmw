@@ -111,37 +111,39 @@ bool Process::ProcessInvoker::startProcess(const QString &name, const QStringLis
     } else {
         mProcess->start(path, arguments);
 
-//        if (!mProcess->waitForFinished()) {
-//            QMessageBox msgBox;
-//            msgBox.setWindowTitle(tr("Error starting executable"));
-//            msgBox.setIcon(QMessageBox::Critical);
-//            msgBox.setStandardButtons(QMessageBox::Ok);
-//            msgBox.setText(tr("<html><head/><body><p><b>Could not start %1</b></p> \
-//                              <p>An error occurred while starting %1.</p> \
-//                              <p>Press \"Show Details...\" for more information.</p></body></html>").arg(info.fileName()));
-//            msgBox.setDetailedText(mProcess->errorString());
-//            msgBox.exec();
+        /*
+        if (!mProcess->waitForFinished()) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error starting executable"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<html><head/><body><p><b>Could not start %1</b></p> \
+                              <p>An error occurred while starting %1.</p> \
+                              <p>Press \"Show Details...\" for more information.</p></body></html>").arg(info.fileName()));
+            msgBox.setDetailedText(mProcess->errorString());
+            msgBox.exec();
 
-//            return false;
-//        }
+            return false;
+        }
 
-//        if (mProcess->exitCode() != 0 || mProcess->exitStatus() == QProcess::CrashExit) {
-//            QString error(mProcess->readAllStandardError());
-//            error.append(tr("\nArguments:\n"));
-//            error.append(arguments.join(" "));
+        if (mProcess->exitCode() != 0 || mProcess->exitStatus() == QProcess::CrashExit) {
+            QString error(mProcess->readAllStandardError());
+            error.append(tr("\nArguments:\n"));
+            error.append(arguments.join(" "));
 
-//            QMessageBox msgBox;
-//            msgBox.setWindowTitle(tr("Error running executable"));
-//            msgBox.setIcon(QMessageBox::Critical);
-//            msgBox.setStandardButtons(QMessageBox::Ok);
-//            msgBox.setText(tr("<html><head/><body><p><b>Executable %1 returned an error</b></p> \
-//                              <p>An error occurred while running %1.</p> \
-//                              <p>Press \"Show Details...\" for more information.</p></body></html>").arg(info.fileName()));
-//            msgBox.setDetailedText(error);
-//            msgBox.exec();
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error running executable"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<html><head/><body><p><b>Executable %1 returned an error</b></p> \
+                              <p>An error occurred while running %1.</p> \
+                              <p>Press \"Show Details...\" for more information.</p></body></html>").arg(info.fileName()));
+            msgBox.setDetailedText(error);
+            msgBox.exec();
 
-//            return false;
-//        }
+            return false;
+        }
+        */
     }
 
     return true;
