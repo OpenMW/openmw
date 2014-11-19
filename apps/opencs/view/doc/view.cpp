@@ -474,8 +474,13 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     {
         foreach(SubView *sb, mSubViews)
         {
-            if((isReferenceable && (CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, id.getId()) == CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, sb->getUniversalId().getId())))
-                || (!isReferenceable && (id == sb->getUniversalId())))
+            bool isSubViewReferenceable =
+                sb->getUniversalId().getType() == CSMWorld::UniversalId::Type_Referenceable;
+
+            if((isReferenceable && isSubViewReferenceable &&
+                id.getId() == sb->getUniversalId().getId())
+               ||
+               (!isReferenceable && id == sb->getUniversalId()))
             {
                 sb->setFocus(Qt::OtherFocusReason); // FIXME: focus not quite working
                 return;
