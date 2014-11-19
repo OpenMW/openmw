@@ -603,7 +603,7 @@ namespace MWInput
             MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
         }
 
-        if (mMouseLookEnabled)
+        if (mMouseLookEnabled && !mControlsDisabled)
         {
             resetIdleTime();
 
