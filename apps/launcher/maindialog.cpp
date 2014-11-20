@@ -388,27 +388,14 @@ bool Launcher::MainDialog::setupGameSettings()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Cancel);
         msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
-                                   The directory containing the data files was not found.<br><br> \
-                                   Press \"Browse...\" to specify the location manually.<br>"));
-
-        QAbstractButton *browseButton =
-                msgBox.addButton(tr("Browse..."), QMessageBox::ActionRole);
+                                   The directory containing the data files was not found."));
 
         QAbstractButton *wizardButton =
                 msgBox.addButton(tr("Run &Installation Wizard..."), QMessageBox::ActionRole);
 
         msgBox.exec();
 
-        QString selectedFile;
-        if (msgBox.clickedButton() == browseButton)
-        {
-            selectedFile = QFileDialog::getOpenFileName(
-                        this,
-                        tr("Select master file"),
-                        QDir::currentPath(),
-                        tr("Morrowind master file (*.esm)"));
-        }
-        else if (msgBox.clickedButton() == wizardButton)
+        if (msgBox.clickedButton() == wizardButton)
         {
             if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false)) {
                 return false;
@@ -416,15 +403,6 @@ bool Launcher::MainDialog::setupGameSettings()
                 return true;
             }
         }
-
-        if (selectedFile.isEmpty())
-            return false; // Cancel was clicked
-
-        QFileInfo info(selectedFile);
-
-        // Add the new dir to the settings file and to the data dir container
-        mGameSettings.setMultiValue(QString("data"), info.absolutePath());
-        mGameSettings.addDataDir(info.absolutePath());
     }
 
     return true;
@@ -610,14 +588,12 @@ bool Launcher::MainDialog::writeSettings()
 
 void Launcher::MainDialog::closeEvent(QCloseEvent *event)
 {
-    qDebug() << "close event!";
     writeSettings();
     event->accept();
 }
 
 void Launcher::MainDialog::wizardStarted()
 {
-    qDebug() << "wizard started!";
     hide();
 }
 

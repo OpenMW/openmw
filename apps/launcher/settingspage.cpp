@@ -174,13 +174,11 @@ void Launcher::SettingsPage::wizardStarted()
 {
     mMain->hide(); // Hide the launcher
 
-    qDebug() << "wizard started!";
     wizardButton->setEnabled(false);
 }
 
 void Launcher::SettingsPage::wizardFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    qDebug() << "wizard finished!";
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
         return qApp->quit();
 
@@ -192,13 +190,11 @@ void Launcher::SettingsPage::wizardFinished(int exitCode, QProcess::ExitStatus e
 
 void Launcher::SettingsPage::importerStarted()
 {
-    qDebug() << "importer started!";
     importerButton->setEnabled(false);
 }
 
 void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    qDebug() << "importer finished!";
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
         return;
 

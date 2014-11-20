@@ -58,8 +58,6 @@ Wizard::InstallationPage::InstallationPage(QWidget *parent) :
 
 Wizard::InstallationPage::~InstallationPage()
 {
-    qDebug() << "stop!";
-
     if (mThread->isRunning()) {
         mUnshield->stopWorker();
         mThread->wait();

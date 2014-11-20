@@ -331,12 +331,10 @@ void Wizard::MainWizard::setupPages()
 
 void Wizard::MainWizard::importerStarted()
 {
-    qDebug() << "importer started!";
 }
 
 void Wizard::MainWizard::importerFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    qDebug() << "importer finished!";
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
         return;
 

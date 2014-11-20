@@ -33,7 +33,6 @@ QStringList Wizard::IniSettings::findKeys(const QString &text)
 
 bool Wizard::IniSettings::readFile(QTextStream &stream)
 {
-    qDebug() << "readFile called!";
     // Look for a square bracket, "'\\["
     // that has one or more "not nothing" in it, "([^]]+)"
     // and is closed with a square bracket, "\\]"
@@ -66,7 +65,6 @@ bool Wizard::IniSettings::readFile(QTextStream &stream)
             if (!currentSection.isEmpty())
                 key = currentSection + QLatin1Char('/') + key;
 
-            //qDebug() << "adding: " << key << value;
             mSettings[key] = QVariant(value);
         }
     }
@@ -204,7 +202,6 @@ bool Wizard::IniSettings::parseInx(const QString &path)
             const QString key(array.mid(section.length() + 3, lenght));
 
             QString value(array.mid(section.length() + key.length() + 6));
-            //qDebug() << section << key << value;
 
             // Add the value
             setValue(section + QLatin1Char('/') + key, QVariant(value));
