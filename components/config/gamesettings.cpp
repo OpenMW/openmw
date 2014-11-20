@@ -38,9 +38,6 @@ Config::GameSettings::~GameSettings()
 
 void Config::GameSettings::validatePaths()
 {
-    if (mSettings.isEmpty() || !mDataDirs.isEmpty())
-        return; // Don't re-validate paths if they are already parsed
-
     QStringList paths = mSettings.values(QString("data"));
     Files::PathContainer dataDirs;
 
