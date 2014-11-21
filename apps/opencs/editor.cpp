@@ -379,5 +379,5 @@ void CS::Editor::documentAdded (CSMDoc::Document *document)
 
 void CS::Editor::lastDocumentDeleted()
 {
-    exit (0);
+    QApplication::quit();
 }
