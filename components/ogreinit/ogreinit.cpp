@@ -94,6 +94,8 @@ namespace OgreInit
 
     Ogre::Root* OgreInit::init(const std::string &logPath)
     {
+        if (mRoot)
+            throw std::runtime_error("OgreInit was already initialised");
 
         #ifndef ANDROID
         // Set up logging first

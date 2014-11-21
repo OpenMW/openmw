@@ -14,7 +14,7 @@ namespace Files
   struct ConfigurationManager;
 }
 
-namespace Launcher
+namespace Config
 {
     class GameSettings
     {
@@ -52,6 +52,8 @@ namespace Launcher
         }
 
         inline QStringList getDataDirs() { return mDataDirs; }
+
+        inline void removeDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.removeAll(dir); }
         inline void addDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.append(dir); }
         inline QString getDataLocal() {return mDataLocal; }
 
