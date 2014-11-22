@@ -137,6 +137,7 @@ bool Launcher::GraphicsPage::setupSDL()
         return false;
     }
 
+    screenComboBox->clear();
     for (int i = 0; i < displays; i++)
     {
         screenComboBox->addItem(QString(tr("Screen ")) + QString::number(i + 1));
@@ -149,7 +150,7 @@ bool Launcher::GraphicsPage::loadSettings()
 {
     if (!setupSDL())
         return false;
-    if (!setupOgre())
+    if (!mOgre && !setupOgre())
         return false;
 
     if (mGraphicsSettings.value(QString("Video/vsync")) == QLatin1String("true"))

@@ -60,7 +60,7 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 
 CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mResourcesManager (resourcesManager), mReader (0), mDialogue (0)
+  mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0)
 {
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
     mGlobals.addColumn (new RecordStateColumn<ESM::Global>);
@@ -659,6 +659,7 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
 
     mReader = new ESM::ESMReader;
     mReader->setEncoder (&mEncoder);
+    mReader->setIndex(mReaderIndex++);
     mReader->open (path.string());
 
     mBase = base;
