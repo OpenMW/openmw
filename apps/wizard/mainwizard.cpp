@@ -322,7 +322,9 @@ void Wizard::MainWizard::setupPages()
     setPage(Page_ExistingInstallation, new ExistingInstallationPage(this));
     setPage(Page_InstallationTarget, new InstallationTargetPage(this, mCfgMgr));
     setPage(Page_ComponentSelection, new ComponentSelectionPage(this));
+#ifdef OPENMW_USE_UNSHIELD
     setPage(Page_Installation, new InstallationPage(this));
+#endif
     setPage(Page_Import, new ImportPage(this));
     setPage(Page_Conclusion, new ConclusionPage(this));
     setStartId(Page_Intro);
