@@ -82,7 +82,7 @@ QT4_WRAP_UI(UI_HDRS ${WIZARD_UI})
 
 
 include(${QT_USE_FILE})
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LIBUNSHIELD_INCLUDE})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LIBUNSHIELD_INCLUDE_DIR})
 
 add_executable(openmw-wizard
     ${GUI_TYPE}
