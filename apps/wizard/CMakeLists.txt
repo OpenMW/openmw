@@ -96,9 +96,14 @@ add_executable(openmw-wizard
 target_link_libraries(openmw-wizard
     ${Boost_LIBRARIES}
     ${QT_LIBRARIES}
-    ${LIBUNSHIELD_LIBRARY}
     components
 )
+
+if(NOT WIN32)
+    target_link_libraries(openmw-wizard
+        ${LIBUNSHIELD_LIBRARY}
+    )
+endif(NOT WIN32)
 
 if(DPKG_PROGRAM)
     INSTALL(TARGETS openmw-wizard RUNTIME DESTINATION games COMPONENT openmw-wizard)
