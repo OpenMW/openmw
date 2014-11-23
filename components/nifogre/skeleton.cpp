@@ -111,7 +111,7 @@ bool NIFSkeletonLoader::needSkeleton(const Nif::Node *node)
     /* We need to be a little aggressive here, since some NIFs have a crap-ton
      * of nodes and Ogre only supports 256 bones. We will skip a skeleton if:
      * There are no bones used for skinning, there are no keyframe controllers, there
-     * are no nodes named "AttachLight", and the tree consists of NiNode,
+     * are no nodes named "AttachLight" or "ArrowBone", and the tree consists of NiNode,
      * NiTriShape, and RootCollisionNode types only.
      */
     if(node->boneTrafo)
@@ -126,7 +126,7 @@ bool NIFSkeletonLoader::needSkeleton(const Nif::Node *node)
         } while(!(ctrl=ctrl->next).empty());
     }
 
-    if (node->name == "AttachLight")
+    if (node->name == "AttachLight" || node->name == "ArrowBone")
         return true;
 
     if(node->recType == Nif::RC_NiNode || node->recType == Nif::RC_RootCollisionNode)
