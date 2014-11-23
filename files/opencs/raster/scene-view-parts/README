@@ -1,0 +1,10 @@
+This directory contains the 15 layers exported from the SVG in scalable/,
+as well as a BASH+imagemagick script to composite them into the final 32 icons.
+
+If you edit the SVG (Inkscape is strongly recommended for editing it), export
+the layers into raster overwriting these files and run the script to assemble
+the final icons.
+
+Enjoy my icons!
+--
+Sergey "Shnatsel" Davidoff <shnatsel@gmail.com>
