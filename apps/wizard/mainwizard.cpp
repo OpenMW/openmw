@@ -15,9 +15,12 @@
 #include "existinginstallationpage.hpp"
 #include "installationtargetpage.hpp"
 #include "componentselectionpage.hpp"
-#include "installationpage.hpp"
 #include "importpage.hpp"
 #include "conclusionpage.hpp"
+
+#ifdef OPENMW_USE_UNSHIELD
+#include "installationpage.hpp"
+#endif
 
 using namespace Process;
 
