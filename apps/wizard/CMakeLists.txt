@@ -25,6 +25,10 @@ set(WIZARD
     utils/componentlistwidget.cpp
 )
 
+if(WIN32)
+    list(APPEND WIZARD ${CMAKE_SOURCE_DIR}/files/windows/openmw-wizard.rc)
+endif()
+
 set(WIZARD_HEADER
     componentselectionpage.hpp
     conclusionpage.hpp
