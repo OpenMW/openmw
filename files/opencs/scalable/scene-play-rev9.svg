@@ -15,7 +15,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="14_play9_.svg">
+   sodipodi:docname="scene-play-rev9.svg">
   <defs
      id="defs4">
     <linearGradient
@@ -330,12 +330,12 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="-111.69654"
-     inkscape:cy="53.933788"
+     inkscape:zoom="2.8284271"
+     inkscape:cx="37.185345"
+     inkscape:cy="-43.397102"
      inkscape:document-units="px"
      inkscape:current-layer="layer15"
-     showgrid="true"
+     showgrid="false"
      inkscape:snap-page="true"
      showguides="true"
      inkscape:guide-bbox="true"
@@ -367,6 +367,18 @@
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
         <dc:title></dc:title>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Sergey &quot;Shnatsel&quot; Davidoff &lt;shnatsel@gmail.com&gt;</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>Sergey &quot;Shnatsel&quot; Davidoff &lt;shnatsel@gmail.com&gt;</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <cc:license
+           rdf:resource="https://www.gnu.org/licenses/gpl-3.0.en.html" />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -947,8 +959,7 @@
   <g
      inkscape:groupmode="layer"
      id="layer15"
-     inkscape:label="play"
-     sodipodi:insensitive="true">
+     inkscape:label="play">
     <g
        id="layer1-5-9"
        transform="matrix(0.94999108,0,0,0.94999108,3.2143519,1.1399272)">
@@ -968,5 +979,28 @@
          inkscape:connector-curvature="0"
          d="m 4.5035809,44.49642 0,-39.9928394 L 43.49642,24.500001 4.5035809,44.49642 z" />
     </g>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Open Sans;-inkscape-font-specification:Open Sans"
+       x="24.925514"
+       y="78"
+       id="text3124"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3126"
+         x="24.925514"
+         y="78">the &quot;play&quot; sign is taken from</tspan><tspan
+         sodipodi:role="line"
+         x="24.925514"
+         y="93"
+         id="tspan3128">elementary icon theme</tspan><tspan
+         sodipodi:role="line"
+         x="24.925514"
+         y="108"
+         id="tspan3130">by Daniel Fore</tspan><tspan
+         sodipodi:role="line"
+         x="24.925514"
+         y="123"
+         id="tspan3132">licensed under GNU GPLv3</tspan></text>
   </g>
 </svg>
