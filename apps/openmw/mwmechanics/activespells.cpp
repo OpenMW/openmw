@@ -17,18 +17,35 @@ namespace MWMechanics
 
         MWWorld::TimeStamp now = MWBase::Environment::get().getWorld()->getTimeStamp();
 
-        // Erase no longer active spells
+        // Erase no longer active spells and effects
         if (mLastUpdate!=now)
         {
             TContainer::iterator iter (mSpells.begin());
             while (iter!=mSpells.end())
+            {
                 if (!timeToExpire (iter))
                 {
                     mSpells.erase (iter++);
                     rebuild = true;
                 }
                 else
+                {
+                    std::vector<ActiveEffect>& effects = iter->second.mEffects;
+                    for (std::vector<ActiveEffect>::iterator effectIt = effects.begin(); effectIt != effects.end();)
+                    {
+                        MWWorld::TimeStamp start = iter->second.mTimeStamp;
+                        MWWorld::TimeStamp end = start + static_cast<double>(effectIt->mDuration)*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
+                        if (end <= now)
+                        {
+                            effectIt = effects.erase(effectIt);
+                            rebuild = true;
+                        }
+                        else
+                            ++effectIt;
+                    }
                     ++iter;
+                }
+            }
 
             mLastUpdate = now;
         }
