@@ -6,11 +6,11 @@ float depthShadowPCF (shTexture2D shadowMap, float4 shadowMapPos, float2 offset)
     shadowMapPos /= shadowMapPos.w;
     float3 o = float3(offset.xy, -offset.x) * 0.3;
     //float3 o = float3(0,0,0);
-    float c =   (shadowMapPos.z <= FIXED_BIAS + shSample(shadowMap, shadowMapPos.xy - o.xy).r) ? 1 : 0; // top left
-    c +=        (shadowMapPos.z <= FIXED_BIAS + shSample(shadowMap, shadowMapPos.xy + o.xy).r) ? 1 : 0; // bottom right
-    c +=        (shadowMapPos.z <= FIXED_BIAS + shSample(shadowMap, shadowMapPos.xy + o.zy).r) ? 1 : 0; // bottom left
-    c +=        (shadowMapPos.z <= FIXED_BIAS + shSample(shadowMap, shadowMapPos.xy - o.zy).r) ? 1 : 0; // top right
-    return c / 4;
+    float c =   (shadowMapPos.z <= FIXED_BIAS + shSample(shadowMap, shadowMapPos.xy - o.xy).r) ? 1.0 : 0.0; // top left
+    c +=        (shadowMapPos.z <= FIXED_BIAS + shSample(shadowMap, shadowMapPos.xy + o.xy).r) ? 1.0 : 0.0; // bottom right
+    c +=        (shadowMapPos.z <= FIXED_BIAS + shSample(shadowMap, shadowMapPos.xy + o.zy).r) ? 1.0 : 0.0; // bottom left
+    c +=        (shadowMapPos.z <= FIXED_BIAS + shSample(shadowMap, shadowMapPos.xy - o.zy).r) ? 1.0 : 0.0; // top right
+    return c / 4.0;
 }
 
 
