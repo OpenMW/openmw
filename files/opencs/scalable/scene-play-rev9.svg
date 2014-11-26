@@ -15,7 +15,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="scene-view-status-rev14.svg">
+   sodipodi:docname="scene-play-rev9.svg">
   <defs
      id="defs4">
     <linearGradient
@@ -265,6 +265,63 @@
        y1="34.229584"
        x2="19.753233"
        y2="46.420998" />
+    <radialGradient
+       gradientTransform="matrix(0,2.0155687,-2.1927484,0,130.64162,-129.06561)"
+       gradientUnits="userSpaceOnUse"
+       xlink:href="#linearGradient3242-7-0-5"
+       id="radialGradient3324-3"
+       fy="48.744953"
+       fx="65.59787"
+       r="31.000002"
+       cy="48.744953"
+       cx="65.59787" />
+    <linearGradient
+       id="linearGradient3242-7-0-5">
+      <stop
+         offset="0"
+         style="stop-color:#eef87e;stop-opacity:1"
+         id="stop3244-5-5-7" />
+      <stop
+         offset="0.26238"
+         style="stop-color:#cde34f;stop-opacity:1"
+         id="stop3246-9-0-3" />
+      <stop
+         offset="0.66093999"
+         style="stop-color:#93b723;stop-opacity:1"
+         id="stop3248-7-3-2" />
+      <stop
+         offset="1"
+         style="stop-color:#5a7e0d;stop-opacity:1"
+         id="stop3250-8-4-0" />
+    </linearGradient>
+    <linearGradient
+       gradientTransform="matrix(1.2581102,0,0,1.2504864,-4.0494212,-4.9527886)"
+       gradientUnits="userSpaceOnUse"
+       xlink:href="#linearGradient3289-1"
+       id="linearGradient3109-2-1"
+       y2="38.274109"
+       x2="22.368837"
+       y1="8.6829262"
+       x1="22.368837" />
+    <linearGradient
+       id="linearGradient3289-1">
+      <stop
+         offset="0"
+         style="stop-color:#ffffff;stop-opacity:1"
+         id="stop3291-3" />
+      <stop
+         offset="0.54391336"
+         style="stop-color:#ffffff;stop-opacity:0.23529412"
+         id="stop3293-6" />
+      <stop
+         offset="0.71666551"
+         style="stop-color:#ffffff;stop-opacity:0.15686275"
+         id="stop3295-4" />
+      <stop
+         offset="1"
+         style="stop-color:#ffffff;stop-opacity:0.39215687"
+         id="stop3297-7" />
+    </linearGradient>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -273,11 +330,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="4"
-     inkscape:cx="19.041611"
-     inkscape:cy="-5.7168931"
+     inkscape:zoom="2.8284271"
+     inkscape:cx="37.185345"
+     inkscape:cy="-43.397102"
      inkscape:document-units="px"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="layer15"
      showgrid="false"
      inkscape:snap-page="true"
      showguides="true"
@@ -309,7 +366,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
         <dc:creator>
           <cc:Agent>
             <dc:title>Sergey &quot;Shnatsel&quot; Davidoff &lt;shnatsel@gmail.com&gt;</dc:title>
@@ -321,7 +378,7 @@
           </cc:Agent>
         </dc:rights>
         <cc:license
-           rdf:resource="http://www.gnu.org/copyleft/gpl.html" />
+           rdf:resource="https://www.gnu.org/licenses/gpl-3.0.en.html" />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -339,29 +396,6 @@
        height="48"
        x="0"
        y="1004.3622" />
-    <text
-       xml:space="preserve"
-       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Open Sans;-inkscape-font-specification:Open Sans"
-       x="24"
-       y="1070.3622"
-       id="text3111"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan3113"
-         x="24"
-         y="1070.3622">This icon was designed by</tspan><tspan
-         sodipodi:role="line"
-         x="24"
-         y="1085.3622"
-         id="tspan3115">Sergey &quot;Shnatsel&quot; Davidoff</tspan><tspan
-         sodipodi:role="line"
-         x="24"
-         y="1100.3622"
-         id="tspan3117">for OpenMW content editor</tspan><tspan
-         sodipodi:role="line"
-         x="24"
-         y="1115.3622"
-         id="tspan3119">Licensed under GNU GPLv3</tspan></text>
   </g>
   <g
      inkscape:groupmode="layer"
@@ -845,7 +879,7 @@
      inkscape:groupmode="layer"
      id="layer4"
      inkscape:label="pathgrid"
-     style="display:inline"
+     style="display:none"
      sodipodi:insensitive="true">
     <use
        x="0"
@@ -914,11 +948,59 @@
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="divider"
-     style="display:inline">
+     style="display:none"
+     sodipodi:insensitive="true">
     <path
        style="fill:none;stroke:#ac0c0c;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 24.5,-30.497582 0,88.12502"
        id="path3771"
        inkscape:connector-curvature="0" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer15"
+     inkscape:label="play">
+    <g
+       id="layer1-5-9"
+       transform="matrix(0.94999108,0,0,0.94999108,3.2143519,1.1399272)">
+      <path
+         style="color:#000000;fill:url(#radialGradient3324-3);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.98542732;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="path3375-8"
+         inkscape:connector-curvature="0"
+         d="m 4.5035809,44.49642 0,-39.9928391 L 43.49642,24.500001 4.5035809,44.49642 z" />
+      <path
+         style="opacity:0.5;color:#000000;fill:none;stroke:url(#linearGradient3109-2-1);stroke-width:1.05264139;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="path2294-1"
+         inkscape:connector-curvature="0"
+         d="M 5.5298027,42.691518 5.5930412,6.1685557 41.417031,24.500001 5.5298027,42.691518 z" />
+      <path
+         style="opacity:0.3;color:#000000;fill:none;stroke:#000000;stroke-width:1.03730154;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="path3375-9-5"
+         inkscape:connector-curvature="0"
+         d="m 4.5035809,44.49642 0,-39.9928394 L 43.49642,24.500001 4.5035809,44.49642 z" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Open Sans;-inkscape-font-specification:Open Sans"
+       x="24.925514"
+       y="78"
+       id="text3124"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3126"
+         x="24.925514"
+         y="78">the &quot;play&quot; sign is taken from</tspan><tspan
+         sodipodi:role="line"
+         x="24.925514"
+         y="93"
+         id="tspan3128">elementary icon theme</tspan><tspan
+         sodipodi:role="line"
+         x="24.925514"
+         y="108"
+         id="tspan3130">by Daniel Fore</tspan><tspan
+         sodipodi:role="line"
+         x="24.925514"
+         y="123"
+         id="tspan3132">licensed under GNU GPLv3</tspan></text>
   </g>
 </svg>
