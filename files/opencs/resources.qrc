@@ -79,5 +79,6 @@
         <file alias="1st-person">eyeballdude.png</file>
         <file alias="free-camera">flying eye.png</file>
         <file alias="orbiting-camera">orbit2.png</file>
+        <file alias="play">scene-play.png</file>
     </qresource>
 </RCC>

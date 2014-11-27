@@ -172,7 +172,7 @@ CSVWidget::SceneToolRun *CSVRender::WorldspaceWidget::makeRunTool (
     std::sort (profiles.begin(), profiles.end());
 
     mRun = new CSVWidget::SceneToolRun (parent, "Run OpenMW from the current camera position",
-        ":placeholder", ":placeholder", profiles);
+        ":scenetoolbar/play", profiles);
 
     connect (mRun, SIGNAL (runRequest (const std::string&)),
         this, SLOT (runRequest (const std::string&)));
