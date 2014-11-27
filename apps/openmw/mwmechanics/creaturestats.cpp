@@ -184,6 +184,7 @@ namespace MWMechanics
         if (index==0 && mDynamic[index].getCurrent()<1)
         {
             mDead = true;
+            mDynamic[index].setCurrent(0);
 
             if (MWBase::Environment::get().getWorld()->getGodModeState())
                 MWBase::Environment::get().getMechanicsManager()->keepPlayerAlive();
