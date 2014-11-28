@@ -964,6 +964,9 @@ namespace MWScript
                         msg << "Grid: " << cell->getCell()->getGridX() << " " << cell->getCell()->getGridY() << std::endl;
                     Ogre::Vector3 pos (ptr.getRefData().getPosition().pos);
                     msg << "Coordinates: " << pos << std::endl;
+                    msg << "Model: " << ptr.getClass().getModel(ptr) << std::endl;
+                    if (!ptr.getClass().getScript(ptr).empty())
+                        msg << "Script: " << ptr.getClass().getScript(ptr) << std::endl;
                 }
 
                 std::string notes = runtime.getStringLiteral (runtime[0].mInteger);
