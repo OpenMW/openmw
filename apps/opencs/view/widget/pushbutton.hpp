@@ -53,6 +53,10 @@ namespace CSVWidget
             QString getBaseToolTip() const;
 
             Type getType() const;
+
+        private slots:
+
+            void checkedStateChanged (bool checked);
     };
 }
 

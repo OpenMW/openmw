@@ -8,9 +8,13 @@
 #include "worldspacewidget.hpp"
 #include "cell.hpp"
 
+namespace CSVWidget
+{
+   class SceneToolToggle;
+}
+
 namespace CSVRender
 {
-
     class TextOverlay;
     class OverlayMask;
 

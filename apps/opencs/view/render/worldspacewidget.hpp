@@ -18,7 +18,7 @@ namespace CSMWorld
 namespace CSVWidget
 {
     class SceneToolMode;
-    class SceneToolToggle;
+    class SceneToolToggle2;
     class SceneToolbar;
     class SceneToolRun;
 }
@@ -37,7 +37,7 @@ namespace CSVRender
             CSVRender::Navigation1st m1st;
             CSVRender::NavigationFree mFree;
             CSVRender::NavigationOrbit mOrbit;
-            CSVWidget::SceneToolToggle *mSceneElements;
+            CSVWidget::SceneToolToggle2 *mSceneElements;
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
             CSVWorld::PhysicsSystem *mPhysics;
@@ -71,7 +71,7 @@ namespace CSVRender
 
             /// \attention The created tool is not added to the toolbar (via addTool). Doing
             /// that is the responsibility of the calling function.
-            CSVWidget::SceneToolToggle *makeSceneVisibilitySelector (
+            CSVWidget::SceneToolToggle2 *makeSceneVisibilitySelector (
                 CSVWidget::SceneToolbar *parent);
 
             /// \attention The created tool is not added to the toolbar (via addTool). Doing
@@ -107,7 +107,7 @@ namespace CSVRender
 
         protected:
 
-            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle *tool);
+            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
 
             virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
 

@@ -13,7 +13,7 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../widget/scenetoolmode.hpp"
-#include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolrun.hpp"
 
 #include "../world/physicsmanager.hpp"
@@ -127,10 +127,10 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
     return tool;
 }
 
-CSVWidget::SceneToolToggle *CSVRender::WorldspaceWidget::makeSceneVisibilitySelector (CSVWidget::SceneToolbar *parent)
+CSVWidget::SceneToolToggle2 *CSVRender::WorldspaceWidget::makeSceneVisibilitySelector (CSVWidget::SceneToolbar *parent)
 {
-    mSceneElements= new CSVWidget::SceneToolToggle (parent,
-        "Scene Element Visibility", ":placeholder");
+    mSceneElements = new CSVWidget::SceneToolToggle2 (parent,
+        "Scene Element Visibility", ":scenetoolbar/scene-view-c", ":scenetoolbar/scene-view-");
 
     addVisibilitySelectorButtons (mSceneElements);
 
@@ -172,7 +172,7 @@ CSVWidget::SceneToolRun *CSVRender::WorldspaceWidget::makeRunTool (
     std::sort (profiles.begin(), profiles.end());
 
     mRun = new CSVWidget::SceneToolRun (parent, "Run OpenMW from the current camera position",
-        ":placeholder", ":placeholder", profiles);
+        ":scenetoolbar/play", profiles);
 
     connect (mRun, SIGNAL (runRequest (const std::string&)),
         this, SLOT (runRequest (const std::string&)));
@@ -260,12 +260,13 @@ unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
 }
 
 void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
-    CSVWidget::SceneToolToggle *tool)
+    CSVWidget::SceneToolToggle2 *tool)
 {
-    tool->addButton (":placeholder", Element_Reference, ":placeholder", "References");
-    tool->addButton (":placeholder", Element_Terrain, ":placeholder", "Terrain");
-    tool->addButton (":placeholder", Element_Water, ":placeholder", "Water");
-    tool->addButton (":placeholder", Element_Pathgrid, ":placeholder", "Pathgrid");
+    tool->addButton (Element_Reference, "References");
+    tool->addButton (Element_Terrain, "Terrain");
+    tool->addButton (Element_Water, "Water");
+    tool->addButton (Element_Pathgrid, "Pathgrid");
+    tool->addButton (Element_Fog, "Fog");
 }
 
 void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool)
