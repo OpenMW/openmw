@@ -34,7 +34,7 @@ namespace CSVRender
 
         protected:
 
-            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle *tool);
+            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
 
         public:
 

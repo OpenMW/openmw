@@ -15,6 +15,7 @@
 #include "../../model/world/tablemimedata.hpp"
 
 #include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetooltoggle2.hpp"
 
 #include "elements.hpp"
 
@@ -33,11 +34,11 @@ void CSVRender::UnpagedWorldspaceWidget::update()
 }
 
 void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
-    CSVWidget::SceneToolToggle *tool)
+    CSVWidget::SceneToolToggle2 *tool)
 {
     WorldspaceWidget::addVisibilitySelectorButtons (tool);
 
-    tool->addButton (":armor.png", Element_Fog, ":armor.png", "Fog");
+    tool->addButton (Element_Fog, "Fog");
 }
 
 CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document, QWidget* parent)
