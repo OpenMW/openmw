@@ -190,14 +190,12 @@ namespace MWInput
 
         int action = channel->getNumber();
 
-        if (action == A_Use)
+        if (mControlSwitch["playercontrols"])
         {
-            mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
-        }
-
-        if (action == A_Jump)
-        {
-            mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
+            if (action == A_Use)
+                mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
+            else if (action == A_Jump)
+                mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
         }
 
         if (currentValue == 1)
@@ -622,7 +620,7 @@ namespace MWInput
                 mPlayer->pitch(y);
             }
 
-            if (arg.zrel && mControlSwitch["playerviewswitch"]) //Check to make sure you are allowed to zoomout and there is a change
+            if (arg.zrel && mControlSwitch["playerviewswitch"] && mControlSwitch["playercontrols"]) //Check to make sure you are allowed to zoomout and there is a change
             {
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.zrel);
                 MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
@@ -680,7 +678,7 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
 
         // Not allowed before the magic window is accessible
-        if (!mControlSwitch["playermagic"])
+        if (!mControlSwitch["playermagic"] || !mControlSwitch["playercontrols"])
             return;
 
         // Not allowed if no spell selected
@@ -701,7 +699,7 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
 
         // Not allowed before the inventory window is accessible
-        if (!mControlSwitch["playerfighting"])
+        if (!mControlSwitch["playerfighting"] || !mControlSwitch["playercontrols"])
             return;
 
         MWMechanics::DrawState_ state = mPlayer->getDrawState();
@@ -713,6 +711,9 @@ namespace MWInput
 
     void InputManager::rest()
     {
+        if (!mControlSwitch["playercontrols"])
+            return;
+
         if (!MWBase::Environment::get().getWindowManager()->getRestEnabled () || MWBase::Environment::get().getWindowManager()->isGuiMode ())
             return;
 
@@ -734,6 +735,9 @@ namespace MWInput
 
     void InputManager::toggleInventory()
     {
+        if (!mControlSwitch["playercontrols"])
+            return;
+
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
@@ -770,6 +774,8 @@ namespace MWInput
 
     void InputManager::toggleJournal()
     {
+        if (!mControlSwitch["playercontrols"])
+            return;
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
@@ -787,6 +793,8 @@ namespace MWInput
 
     void InputManager::quickKey (int index)
     {
+        if (!mControlSwitch["playercontrols"])
+            return;
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (player.getClass().getNpcStats(player).isWerewolf())
         {
