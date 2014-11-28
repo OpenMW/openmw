@@ -20,7 +20,7 @@ namespace MWMechanics
           mAttacked (false),
           mAttackingOrSpell(false),
           mIsWerewolf(false),
-          mFallHeight(0), mRecalcDynamicStats(false), mKnockdown(false), mKnockdownOneFrame(false),
+          mFallHeight(0), mRecalcMagicka(false), mKnockdown(false), mKnockdownOneFrame(false),
           mKnockdownOverOneFrame(false), mHitRecovery(false), mBlock(false),
           mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f),
           mLastRestock(0,0), mGoldPool(0), mActorId(-1),
@@ -147,10 +147,22 @@ namespace MWMechanics
 
         if (value != currentValue)
         {
-            if (index != ESM::Attribute::Luck
-                    && index != ESM::Attribute::Personality
-                    && index != ESM::Attribute::Speed)
-                mRecalcDynamicStats = true;
+            if (index == ESM::Attribute::Intelligence)
+                mRecalcMagicka = true;
+            else if (index == ESM::Attribute::Strength ||
+                     index == ESM::Attribute::Willpower ||
+                     index == ESM::Attribute::Agility ||
+                     index == ESM::Attribute::Endurance)
+            {
+                int strength     = getAttribute(ESM::Attribute::Strength).getModified();
+                int willpower    = getAttribute(ESM::Attribute::Willpower).getModified();
+                int agility      = getAttribute(ESM::Attribute::Agility).getModified();
+                int endurance    = getAttribute(ESM::Attribute::Endurance).getModified();
+                DynamicStat<float> fatigue = getFatigue();
+                float diff = (strength+willpower+agility+endurance) - fatigue.getBase();
+                fatigue.modify(diff);
+                setFatigue(fatigue);
+            }
         }
 
         if(!mIsWerewolf)
@@ -199,7 +211,7 @@ namespace MWMechanics
     {
         if (effects.get(ESM::MagicEffect::FortifyMaximumMagicka).getModifier()
                 != mMagicEffects.get(ESM::MagicEffect::FortifyMaximumMagicka).getModifier())
-            mRecalcDynamicStats = true;
+            mRecalcMagicka = true;
 
         mMagicEffects.setModifiers(effects);
     }
@@ -360,9 +372,9 @@ namespace MWMechanics
 
     bool CreatureStats::needToRecalcDynamicStats()
     {
-         if (mRecalcDynamicStats)
+         if (mRecalcMagicka)
          {
-             mRecalcDynamicStats = false;
+             mRecalcMagicka = false;
              return true;
          }
          return false;
@@ -370,7 +382,7 @@ namespace MWMechanics
 
     void CreatureStats::setNeedRecalcDynamicStats(bool val)
     {
-        mRecalcDynamicStats = val;
+        mRecalcMagicka = val;
     }
 
     void CreatureStats::setKnockedDown(bool value)
@@ -497,7 +509,7 @@ namespace MWMechanics
         state.mAttackStrength = mAttackStrength;
         state.mFallHeight = mFallHeight; // TODO: vertical velocity (move from PhysicActor to CreatureStats?)
         state.mLastHitObject = mLastHitObject;
-        state.mRecalcDynamicStats = mRecalcDynamicStats;
+        state.mRecalcDynamicStats = mRecalcMagicka;
         state.mDrawState = mDrawState;
         state.mLevel = mLevel;
         state.mActorId = mActorId;
@@ -545,7 +557,7 @@ namespace MWMechanics
         mAttackStrength = state.mAttackStrength;
         mFallHeight = state.mFallHeight;
         mLastHitObject = state.mLastHitObject;
-        mRecalcDynamicStats = state.mRecalcDynamicStats;
+        mRecalcMagicka = state.mRecalcDynamicStats;
         mDrawState = DrawState_(state.mDrawState);
         mLevel = state.mLevel;
         mActorId = state.mActorId;

@@ -53,8 +53,7 @@ namespace MWMechanics
 
         std::string mLastHitObject; // The last object to hit this actor
 
-        // Do we need to recalculate stats derived from attributes or other factors?
-        bool mRecalcDynamicStats;
+        bool mRecalcMagicka;
 
         // For merchants: the last time items were restocked and gold pool refilled.
         MWWorld::TimeStamp mLastRestock;
