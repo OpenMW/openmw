@@ -266,6 +266,7 @@ void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
     tool->addButton (Element_Terrain, "Terrain");
     tool->addButton (Element_Water, "Water");
     tool->addButton (Element_Pathgrid, "Pathgrid");
+    tool->addButton (Element_Fog, "Fog");
 }
 
 void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool)

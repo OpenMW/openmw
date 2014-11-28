@@ -33,14 +33,6 @@ void CSVRender::UnpagedWorldspaceWidget::update()
     flagAsModified();
 }
 
-void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
-    CSVWidget::SceneToolToggle2 *tool)
-{
-    WorldspaceWidget::addVisibilitySelectorButtons (tool);
-
-    tool->addButton (Element_Fog, "Fog");
-}
-
 CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document, QWidget* parent)
 : WorldspaceWidget (document, parent), mCellId (cellId)
 {
