@@ -1645,6 +1645,8 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
         }
         else if(mode == 0)
         {
+            if (!mAnimQueue.empty())
+                mAnimation->stopLooping(mAnimQueue.front().first);
             mAnimQueue.resize(1);
             mAnimQueue.push_back(std::make_pair(groupname, count-1));
         }

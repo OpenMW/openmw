@@ -842,6 +842,17 @@ void Animation::changeGroups(const std::string &groupname, int groups)
         return;
     }
 }
+
+void Animation::stopLooping(const std::string& groupname)
+{
+    AnimStateMap::iterator stateiter = mStates.find(groupname);
+    if(stateiter != mStates.end())
+    {
+        stateiter->second.mLoopCount = 0;
+        return;
+    }
+}
+
 void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
     if(!mSkelBase || mAnimSources.empty())
