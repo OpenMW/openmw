@@ -514,6 +514,7 @@ namespace Physic
             assert (mRaycastingObjectMap.find(name) == mRaycastingObjectMap.end());
             mRaycastingObjectMap[name] = body;
             mDynamicsWorld->addRigidBody(body,CollisionType_Raycasting,CollisionType_Raycasting|CollisionType_Projectile);
+            body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
         }
 
         return body;
