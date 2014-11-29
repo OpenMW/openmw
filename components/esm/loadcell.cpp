@@ -177,17 +177,10 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted)
     // NOTE: We should not need this check. It is a safety check until we have checked
     // more plugins, and how they treat these moved references.
     if (esm.isNextSub("MVRF")) {
-        esm.skipRecord(); // skip MVRF
-        esm.skipRecord(); // skip CNDT
-        // That should be it, I haven't seen any other fields yet.
-    }
-
-    // If moved references are not handled then it is possible that CellRef::load() can lead
-    // to strange results because ESMReader::isNextSub("xxx") will always return false when
-    // there are no more subrecords.  When moved references are handled properly by OpenCS
-    // below 2 lines can be removed.
-    if (!esm.hasMoreSubs())
+        // skip rest of cell record (moved references), they are handled elsewhere
+        esm.skipRecord(); // skip MVRF, CNDT
         return false;
+    }
 
     ref.load (esm);
 
