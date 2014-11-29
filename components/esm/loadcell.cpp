@@ -182,6 +182,13 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted)
         // That should be it, I haven't seen any other fields yet.
     }
 
+    // If moved references are not handled then it is possible that CellRef::load() can lead
+    // to strange results because ESMReader::isNextSub("xxx") will always return false when
+    // there are no more subrecords.  When moved references are handled properly by OpenCS
+    // below 2 lines can be removed.
+    if (!esm.hasMoreSubs())
+        return false;
+
     ref.load (esm);
 
     // Identify references belonging to a parent file and adapt the ID accordingly.
