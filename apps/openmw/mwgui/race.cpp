@@ -162,6 +162,9 @@ namespace MWGui
 
     void RaceDialog::close()
     {
+        mPreviewImage->setImageTexture("");
+        const std::string textureName = "CharacterHeadPreview";
+        MyGUI::RenderManager::getInstance().destroyTexture(MyGUI::RenderManager::getInstance().getTexture(textureName));
         mPreview.reset(NULL);
     }
 

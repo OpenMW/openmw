@@ -278,7 +278,9 @@ namespace MWScript
                     MWMechanics::DynamicStat<float> stat (ptr.getClass().getCreatureStats (ptr)
                         .getDynamic (mIndex));
 
-                    stat.setCurrent (diff + current, true);
+                    // for fatigue, a negative current value is allowed and means the actor will be knocked down
+                    bool allowDecreaseBelowZero = (mIndex == 2);
+                    stat.setCurrent (diff + current, allowDecreaseBelowZero);
 
                     ptr.getClass().getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
