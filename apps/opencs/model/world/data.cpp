@@ -678,9 +678,15 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
 
     if (!mReader->hasMoreRecs())
     {
-        // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading
-        boost::shared_ptr<ESM::ESMReader> ptr(mReader);
-        mReaders.push_back(ptr);
+        if (mBase)
+        {
+            // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading.
+            // We don't store non-base reader, because everything going into modified will be
+            // fully loaded during the initial loading process.
+            boost::shared_ptr<ESM::ESMReader> ptr(mReader);
+            mReaders.push_back(ptr);
+        }
+
         mReader = 0;
 
         mDialogue = 0;
