@@ -713,7 +713,18 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         case ESM::REC_PGRD: mPathgrids.load (*mReader, mBase); break;
 
         case ESM::REC_LTEX: mLandTextures.load (*mReader, mBase); break;
-        case ESM::REC_LAND: mLand.load(*mReader, mBase); break;
+
+        case ESM::REC_LAND:
+        {
+            int index = mLand.load(*mReader, mBase);
+
+            if (index!=-1 && !mBase)
+                mLand.getRecord (index).mModified.mLand->loadData (
+                    ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR |
+                    ESM::Land::DATA_VTEX);
+
+            break;
+        }
 
         case ESM::REC_CELL:
         {
