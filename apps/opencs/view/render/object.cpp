@@ -156,7 +156,8 @@ CSVRender::Object::~Object()
 {
     clear();
 
-    mPhysics->removeObject(mBase->getName());
+    if(mPhysics) // preview may not have physics enabled
+        mPhysics->removeObject(mBase->getName());
 
     if (mBase)
         mBase->getCreator()->destroySceneNode (mBase);
