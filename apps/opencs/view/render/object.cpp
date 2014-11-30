@@ -132,7 +132,7 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
 }
 
 CSVRender::Object::Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode,
-    const std::string& id, bool referenceable, CSVWorld::PhysicsSystem *physics,
+    const std::string& id, bool referenceable, boost::shared_ptr<CSVWorld::PhysicsSystem> physics,
     bool forceBaseToZero)
 : mData (data), mBase (0), mForceBaseToZero (forceBaseToZero), mPhysics(physics)
 {

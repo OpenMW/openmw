@@ -111,7 +111,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             mCells.find (*iter)==mCells.end())
         {
             Cell *cell = new Cell (mDocument.getData(), getSceneManager(),
-                    iter->getId (mWorldspace), getPhysics());
+                    iter->getId (mWorldspace), mDocument.getPhysics());
             mCells.insert (std::make_pair (*iter, cell));
 
             float height = cell->getTerrainHeightAt(Ogre::Vector3(
