@@ -137,6 +137,7 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
 void Launcher::DataFilesPage::removeProfile(const QString &profile)
 {
     mLauncherSettings.remove(QString("Profiles/") + profile);
+    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/content"));
 }
 
 QAbstractItemModel *Launcher::DataFilesPage::profilesModel() const
