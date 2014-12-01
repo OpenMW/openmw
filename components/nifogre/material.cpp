@@ -354,7 +354,7 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         instance->setProperty("has_vertex_colour", sh::makeProperty(new sh::BooleanValue(true)));
 
     // Override alpha flags based on our override list (transparency-overrides.cfg)
-    if (!texName[0].empty())
+    if ((alphaFlags&1) && !texName[0].empty())
     {
         NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName[0]);
         if (result.first)
