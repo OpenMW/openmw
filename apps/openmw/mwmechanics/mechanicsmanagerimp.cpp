@@ -930,7 +930,6 @@ namespace MWMechanics
 
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
-        bool reported = false;
 
         // Find all the actors within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
@@ -947,6 +946,8 @@ namespace MWMechanics
         bool victimAware = false;
 
         // Find actors who directly witnessed the crime
+        bool crimeSeen = false;
+        bool reported = false;
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
             if (*it == player)
@@ -974,15 +975,17 @@ namespace MWMechanics
                 if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
                     continue;
 
-                // Will the witness report the crime?
-                if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= 100)
-                {
-                    reported = true;
-                }
+                crimeSeen = true;
+            }
+
+            // Will the witness report the crime?
+            if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= 100)
+            {
+                reported = true;
             }
         }
 
-        if (reported)
+        if (crimeSeen && reported)
             reportCrime(player, victim, type, arg);
         else if (victimAware && !victim.isEmpty() && type == OT_Assault)
             startCombat(victim, player);
