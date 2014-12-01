@@ -246,7 +246,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWindowManager()->fadeScreenIn(time);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenIn(time, false);
                 }
         };
 
@@ -259,7 +259,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWindowManager()->fadeScreenOut(time);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenOut(time, false);
                 }
         };
 
@@ -275,7 +275,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWindowManager()->fadeScreenTo(alpha, time);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenTo(alpha, time, false);
                 }
         };
 

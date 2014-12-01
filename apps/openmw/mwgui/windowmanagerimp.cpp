@@ -1748,21 +1748,24 @@ namespace MWGui
         updateVisible();
     }
 
-    void WindowManager::fadeScreenIn(const float time)
+    void WindowManager::fadeScreenIn(const float time, bool clearQueue)
     {
-        mScreenFader->clearQueue();
+        if (clearQueue)
+            mScreenFader->clearQueue();
         mScreenFader->fadeOut(time);
     }
 
-    void WindowManager::fadeScreenOut(const float time)
+    void WindowManager::fadeScreenOut(const float time, bool clearQueue)
     {
-        mScreenFader->clearQueue();
+        if (clearQueue)
+            mScreenFader->clearQueue();
         mScreenFader->fadeIn(time);
     }
 
-    void WindowManager::fadeScreenTo(const int percent, const float time)
+    void WindowManager::fadeScreenTo(const int percent, const float time, bool clearQueue)
     {
-        mScreenFader->clearQueue();
+        if (clearQueue)
+            mScreenFader->clearQueue();
         mScreenFader->fadeTo(percent, time);
     }
 
