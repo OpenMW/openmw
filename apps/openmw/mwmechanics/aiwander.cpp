@@ -57,6 +57,8 @@ namespace MWMechanics
         bool mWalking;
         
         unsigned short mPlayedIdle;
+
+        PathFinder mPathFinder;
         
         AiWanderStorage():
             mTargetAngle(0),
@@ -211,9 +213,9 @@ namespace MWMechanics
         // Are we there yet?
         bool& chooseAction = storage.mChooseAction;
         if(walking &&
-           mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
+           storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
         {
-            stopWalking(actor);
+            stopWalking(actor, storage);
             moveNow = false;
             walking = false;
             chooseAction = true;
@@ -225,7 +227,7 @@ namespace MWMechanics
         if(walking) // have not yet reached the destination
         {
             // turn towards the next point in mPath
-            zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+            zTurn(actor, Ogre::Degree(storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
             actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
 
             // Returns true if evasive action needs to be taken
@@ -236,9 +238,9 @@ namespace MWMechanics
                 {
                     // remove allowed points then select another random destination
                     mTrimCurrentNode = true;
-                    trimAllowedNodes(mAllowedNodes, mPathFinder);
+                    trimAllowedNodes(mAllowedNodes, storage.mPathFinder);
                     mObstacleCheck.clear();
-                    mPathFinder.clearPath();
+                    storage.mPathFinder.clearPath();
                     walking = false;
                     moveNow = true;
                 }
@@ -249,7 +251,7 @@ namespace MWMechanics
                     actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
                     actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
                     // change the angle a bit, too
-                    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+                    zTurn(actor, Ogre::Degree(storage.mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
                 }
                 mStuckCount++;  // TODO: maybe no longer needed
             }
@@ -260,7 +262,7 @@ namespace MWMechanics
                 //std::cout << "Reset \""<< cls.getName(actor) << "\"" << std::endl;
                 mObstacleCheck.clear();
 
-                stopWalking(actor);
+                stopWalking(actor, storage);
                 moveNow = false;
                 walking = false;
                 chooseAction = true;
@@ -300,7 +302,7 @@ namespace MWMechanics
             {
                 if(!mRepeat)
                 {
-                    stopWalking(actor);
+                    stopWalking(actor, storage);
                     return true;
                 }
                 else
@@ -310,7 +312,7 @@ namespace MWMechanics
             {
                 if(!mRepeat)
                 {
-                    stopWalking(actor);
+                    stopWalking(actor, storage);
                     return true;
                 }
                 else
@@ -411,7 +413,7 @@ namespace MWMechanics
             chooseAction = false;
             idleNow = false;
 
-            if (!mPathFinder.isPathConstructed())
+            if (!storage.mPathFinder.isPathConstructed())
             {
                 Ogre::Vector3 destNodePos = mReturnPosition;
 
@@ -427,9 +429,9 @@ namespace MWMechanics
                 start.mZ = pos.pos[2];
 
                 // don't take shortcuts for wandering
-                mPathFinder.buildPath(start, dest, actor.getCell(), false);
+                storage.mPathFinder.buildPath(start, dest, actor.getCell(), false);
 
-                if(mPathFinder.isPathConstructed())
+                if(storage.mPathFinder.isPathConstructed())
                 {
                     moveNow = false;
                     walking = true;
@@ -517,7 +519,7 @@ namespace MWMechanics
                 
                 if(walking)
                 {
-                    stopWalking(actor);
+                    stopWalking(actor, storage);
                     moveNow = false;
                     walking = false;
                     mObstacleCheck.clear();
@@ -567,7 +569,7 @@ namespace MWMechanics
         if(moveNow && mDistance)
         {
             // Construct a new path if there isn't one
-            if(!mPathFinder.isPathConstructed())
+            if(!storage.mPathFinder.isPathConstructed())
             {
                 assert(mAllowedNodes.size());
                 unsigned int randNode = (int)(rand() / ((double)RAND_MAX + 1) * mAllowedNodes.size());
@@ -589,16 +591,16 @@ namespace MWMechanics
                 start.mZ = pos.pos[2];
 
                 // don't take shortcuts for wandering
-                mPathFinder.buildPath(start, dest, actor.getCell(), false);
+                storage.mPathFinder.buildPath(start, dest, actor.getCell(), false);
 
-                if(mPathFinder.isPathConstructed())
+                if(storage.mPathFinder.isPathConstructed())
                 {
                     // buildPath inserts dest in case it is not a pathgraph point
                     // index which is a duplicate for AiWander.  However below code
                     // does not work since getPath() returns a copy of path not a
                     // reference
-                    //if(mPathFinder.getPathSize() > 1)
-                        //mPathFinder.getPath().pop_back();
+                    //if(storage.mPathFinder.getPathSize() > 1)
+                        //storage.mPathFinder.getPath().pop_back();
 
                     // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
                     ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
@@ -616,7 +618,7 @@ namespace MWMechanics
                 // Choose a different node and delete this one from possible nodes because it is uncreachable:
                 else
                     mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
-            }
+            } 
         }
 
         return false; // AiWander package not yet completed
@@ -653,9 +655,9 @@ namespace MWMechanics
         return TypeIdWander;
     }
 
-    void AiWander::stopWalking(const MWWorld::Ptr& actor)
+    void AiWander::stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage)
     {
-        mPathFinder.clearPath();
+        storage.mPathFinder.clearPath();
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
     }
 

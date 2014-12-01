@@ -27,6 +27,8 @@ namespace MWMechanics
 {    
     
     
+    struct AiWanderStorage;
+
     /// \brief Causes the Actor to wander within a specified range
     class AiWander : public AiPackage
     {
@@ -65,7 +67,7 @@ namespace MWMechanics
             // NOTE: mDistance and mDuration must be set already
             void init();
             
-            void stopWalking(const MWWorld::Ptr& actor);
+            void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             void getRandomIdle(unsigned short& playedIdle);
@@ -101,7 +103,6 @@ namespace MWMechanics
             void trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
                                   const PathFinder& pathfinder);
 
-//             PathFinder mPathFinder;
 
 //             ObstacleCheck mObstacleCheck;
             float mDoorCheckDuration;
