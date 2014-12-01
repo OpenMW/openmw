@@ -156,7 +156,7 @@ namespace MWWorld
             LiveRef liveCellRef (ref, ptr);
 
             if (deleted)
-                liveCellRef.mData.setCount (0);
+                liveCellRef.mData.setDeleted(true);
 
             if (iter != mList.end())
                 *iter = liveCellRef;

@@ -1057,7 +1057,7 @@ namespace MWWorld
 
     void World::deleteObject (const Ptr& ptr)
     {
-        if (ptr.getRefData().getCount() > 0)
+        if (!ptr.getRefData().isDeleted())
         {
             ptr.getRefData().setCount(0);
 

@@ -17,7 +17,7 @@ namespace
             cellRefList.mList.begin());
             iter!=cellRefList.mList.end(); ++iter)
         {
-            if (!iter->mBase->mScript.empty() && iter->mData.getCount())
+            if (!iter->mBase->mScript.empty() && !iter->mData.isDeleted())
             {
                 localScripts.add (iter->mBase->mScript, MWWorld::Ptr (&*iter, cell));
             }

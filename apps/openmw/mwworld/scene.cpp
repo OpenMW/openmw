@@ -75,7 +75,7 @@ namespace
                 ptr.getCellRef().setScale(2);
         }
 
-        if (ptr.getRefData().getCount() && ptr.getRefData().isEnabled())
+        if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
         {
             try
             {
