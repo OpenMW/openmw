@@ -876,8 +876,36 @@ namespace MWWorld
     public:
 
         void load(ESM::ESMReader &esm, const std::string &id) {
-            mStatic.push_back(ESM::Pathgrid());
-            mStatic.back().load(esm);
+
+            ESM::Pathgrid pathgrid;
+            pathgrid.load(esm);
+
+            // Try to overwrite existing record
+            // Can't use search() because we aren't sorted yet
+            if (!pathgrid.mCell.empty())
+            {
+                for (std::vector<ESM::Pathgrid>::iterator it = mStatic.begin(); it != mStatic.end(); ++it)
+                {
+                    if ((*it).mCell == pathgrid.mCell)
+                    {
+                        (*it) = pathgrid;
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                for (std::vector<ESM::Pathgrid>::iterator it = mStatic.begin(); it != mStatic.end(); ++it)
+                {
+                    if ((*it).mData.mX == pathgrid.mData.mX && (*it).mData.mY == pathgrid.mData.mY)
+                    {
+                        (*it) = pathgrid;
+                        return;
+                    }
+                }
+            }
+
+            mStatic.push_back(pathgrid);
         }
 
         size_t getSize() const {
