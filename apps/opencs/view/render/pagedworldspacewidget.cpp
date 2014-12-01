@@ -362,8 +362,11 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
         delete iter->second;
     }
 
-    removeRenderTargetListener(mOverlayMask);
-    delete mOverlayMask;
+    if(mOverlayMask)
+    {
+        removeRenderTargetListener(mOverlayMask);
+        delete mOverlayMask;
+    }
 }
 
 void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
