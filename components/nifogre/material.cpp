@@ -54,6 +54,28 @@ static const char *getTestMode(int mode)
     return "less_equal";
 }
 
+static void setTextureProperties(sh::MaterialInstance* material, const std::string& textureSlotName, const Nif::NiTexturingProperty::Texture& tex)
+{
+    material->setProperty(textureSlotName + "UVSet", sh::makeProperty(new sh::IntValue(tex.uvSet)));
+    const std::string clampMode = textureSlotName + "ClampMode";
+    switch (tex.clamp)
+    {
+    case 0:
+        material->setProperty(clampMode, sh::makeProperty(new sh::StringValue("clamp clamp")));
+        break;
+    case 1:
+        material->setProperty(clampMode, sh::makeProperty(new sh::StringValue("clamp wrap")));
+        break;
+    case 2:
+        material->setProperty(clampMode, sh::makeProperty(new sh::StringValue("wrap clamp")));
+        break;
+    case 3:
+    default:
+        material->setProperty(clampMode, sh::makeProperty(new sh::StringValue("wrap wrap")));
+        break;
+    }
+}
+
 Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
                                             const Ogre::String &name, const Ogre::String &group,
                                             const Nif::NiTexturingProperty *texprop,
@@ -294,22 +316,22 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
     if (!texName[Nif::NiTexturingProperty::BaseTexture].empty())
     {
         instance->setProperty("use_diffuse_map", sh::makeProperty(new sh::BooleanValue(true)));
-        instance->setProperty("diffuseMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::BaseTexture].uvSet)));
+        setTextureProperties(instance, "diffuseMap", texprop->textures[Nif::NiTexturingProperty::BaseTexture]);
     }
     if (!texName[Nif::NiTexturingProperty::GlowTexture].empty())
     {
         instance->setProperty("use_emissive_map", sh::makeProperty(new sh::BooleanValue(true)));
-        instance->setProperty("emissiveMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::GlowTexture].uvSet)));
+        setTextureProperties(instance, "emissiveMap", texprop->textures[Nif::NiTexturingProperty::GlowTexture]);
     }
     if (!texName[Nif::NiTexturingProperty::DetailTexture].empty())
     {
         instance->setProperty("use_detail_map", sh::makeProperty(new sh::BooleanValue(true)));
-        instance->setProperty("detailMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::DetailTexture].uvSet)));
+        setTextureProperties(instance, "detailMap", texprop->textures[Nif::NiTexturingProperty::DetailTexture]);
     }
     if (!texName[Nif::NiTexturingProperty::DarkTexture].empty())
     {
         instance->setProperty("use_dark_map", sh::makeProperty(new sh::BooleanValue(true)));
-        instance->setProperty("darkMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::DarkTexture].uvSet)));
+        setTextureProperties(instance, "darkMap", texprop->textures[Nif::NiTexturingProperty::DarkTexture]);
     }
 
     bool useParallax = !texName[Nif::NiTexturingProperty::BumpTexture].empty()
