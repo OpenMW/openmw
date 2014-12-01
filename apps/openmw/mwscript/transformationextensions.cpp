@@ -319,12 +319,11 @@ namespace MWScript
                         ptr = MWWorld::Ptr(ptr.getBase(), store);
                         float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                         float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
-                        if(ptr.getTypeName() == typeid(ESM::NPC).name())//some morrowind oddity
-                        {
-                            ax = ax/60.;
-                            ay = ay/60.;
+                        // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
+                        // except for when you position the player, then degrees must be used.
+                        // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
+                        if(ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
                             zRot = zRot/60.;
-                        }
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
 
                         ptr.getClass().adjustPosition(ptr, false);
@@ -378,12 +377,11 @@ namespace MWScript
 
                     float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
-                    if(ptr.getTypeName() == typeid(ESM::NPC).name())//some morrowind oddity
-                    {
-                        ax = ax/60.;
-                        ay = ay/60.;
+                    // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
+                    // except for when you position the player, then degrees must be used.
+                    // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
+                    if(ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
                         zRot = zRot/60.;
-                    }
                     MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
                     ptr.getClass().adjustPosition(ptr, false);
                 }
