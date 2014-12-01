@@ -623,7 +623,9 @@ namespace MWInput
             if (arg.zrel && mControlSwitch["playerviewswitch"] && mControlSwitch["playercontrols"]) //Check to make sure you are allowed to zoomout and there is a change
             {
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.zrel);
-                MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
+
+                if (Settings::Manager::getBool("allow third person zoom", "Input"))
+                    MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
             }
         }
     }
