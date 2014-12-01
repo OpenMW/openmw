@@ -6,8 +6,6 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-#include <openengine/bullet/BulletShapeLoader.h>
-
 #include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/document.hpp"
 #include "../../model/world/columns.hpp"
@@ -220,8 +218,6 @@ void CSVDoc::ViewManager::removeDocAndView (CSMDoc::Document *document)
             mDocumentManager.removeDocument(document);
             (*iter)->deleteLater();
             mViews.erase (iter);
-            // cleanup global resources used by OEngine
-            delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
 
             updateIndices();
             return;

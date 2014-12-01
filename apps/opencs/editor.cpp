@@ -1,6 +1,8 @@
 
 #include "editor.hpp"
 
+#include <openengine/bullet/BulletShapeLoader.h>
+
 #include <QApplication>
 #include <QLocalServer>
 #include <QLocalSocket>
@@ -69,7 +71,10 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 }
 
 CS::Editor::~Editor ()
-{}
+{
+    // cleanup global resources used by OEngine
+    delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
+}
 
 void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
 {
