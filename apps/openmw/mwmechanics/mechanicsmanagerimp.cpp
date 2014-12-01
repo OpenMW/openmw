@@ -930,19 +930,6 @@ namespace MWMechanics
 
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
-        // What amount of alarm did this crime generate?
-        int alarm = 0;
-        if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
-            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmTresspass")->getInt();
-        else if (type == OT_Pickpocket)
-            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmPickPocket")->getInt();
-        else if (type == OT_Assault)
-            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmAttack")->getInt();
-        else if (type == OT_Murder)
-            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmKilling")->getInt();
-        else if (type == OT_Theft)
-            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmStealing")->getInt();
-
         bool reported = false;
 
         // Find all the actors within the alarm radius
@@ -988,7 +975,7 @@ namespace MWMechanics
                     continue;
 
                 // Will the witness report the crime?
-                if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
+                if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= 100)
                 {
                     reported = true;
                 }
