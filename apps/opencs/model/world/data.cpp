@@ -686,6 +686,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
             boost::shared_ptr<ESM::ESMReader> ptr(mReader);
             mReaders.push_back(ptr);
         }
+        else
+            delete mReader;
 
         mReader = 0;
 
