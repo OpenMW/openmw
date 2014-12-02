@@ -9,10 +9,11 @@ void Node::getProperties(const Nif::NiTexturingProperty *&texprop,
                          const Nif::NiVertexColorProperty *&vertprop,
                          const Nif::NiZBufferProperty *&zprop,
                          const Nif::NiSpecularProperty *&specprop,
-                         const Nif::NiWireframeProperty *&wireprop) const
+                         const Nif::NiWireframeProperty *&wireprop,
+                         const Nif::NiStencilProperty *&stencilprop) const
 {
     if(parent)
-        parent->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
+        parent->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop, stencilprop);
 
     for(size_t i = 0;i < props.length();i++)
     {
@@ -35,6 +36,8 @@ void Node::getProperties(const Nif::NiTexturingProperty *&texprop,
             specprop = static_cast<const Nif::NiSpecularProperty*>(pr);
         else if(pr->recType == Nif::RC_NiWireframeProperty)
             wireprop = static_cast<const Nif::NiWireframeProperty*>(pr);
+        else if (pr->recType == Nif::RC_NiStencilProperty)
+            stencilprop = static_cast<const Nif::NiStencilProperty*>(pr);
         else
             std::cerr<< "Unhandled property type: "<<pr->recName <<std::endl;
     }

@@ -320,13 +320,14 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
     const Nif::NiZBufferProperty *zprop = NULL;
     const Nif::NiSpecularProperty *specprop = NULL;
     const Nif::NiWireframeProperty *wireprop = NULL;
+    const Nif::NiStencilProperty *stencilprop = NULL;
     bool needTangents = false;
 
-    shape->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
+    shape->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop, stencilprop);
     std::string matname = NIFMaterialLoader::getMaterial(data, mesh->getName(), mGroup,
                                                          texprop, matprop, alphaprop,
                                                          vertprop, zprop, specprop,
-                                                         wireprop, needTangents);
+                                                         wireprop, stencilprop, needTangents);
     if(matname.length() > 0)
         sub->setMaterialName(matname);
 

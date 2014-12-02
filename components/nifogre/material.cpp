@@ -85,6 +85,7 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
                                             const Nif::NiZBufferProperty *zprop,
                                             const Nif::NiSpecularProperty *specprop,
                                             const Nif::NiWireframeProperty *wireprop,
+                                            const Nif::NiStencilProperty *stencilprop,
                                             bool &needTangents, bool particleMaterial)
 {
     Ogre::MaterialManager &matMgr = Ogre::MaterialManager::getSingleton();
@@ -106,6 +107,7 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
     // Default should be 1, but Bloodmoon's models are broken
     int specFlags = 0;
     int wireFlags = 0;
+    int drawMode = 1;
     Ogre::String texName[7];
 
     bool vertexColour = (shapedata->colors.size() != 0);
@@ -205,6 +207,20 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         }
     }
 
+    if(stencilprop)
+    {
+        drawMode = stencilprop->data.drawMode;
+        if (stencilprop->data.enabled)
+            warn("Unhandled stencil test in "+name);
+
+        Nif::ControllerPtr ctrls = stencilprop->controller;
+        while(!ctrls.empty())
+        {
+            warn("Unhandled stencil controller "+ctrls->recName+" in "+name);
+            ctrls = ctrls->next;
+        }
+    }
+
     // Material
     if(matprop)
     {
@@ -249,8 +265,13 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         for(int i = 0;i < 7;i++)
         {
             if(!texName[i].empty())
+            {
                 boost::hash_combine(h, texName[i]);
+                boost::hash_combine(h, texprop->textures[i].clamp);
+                boost::hash_combine(h, texprop->textures[i].uvSet);
+            }
         }
+        boost::hash_combine(h, drawMode);
         boost::hash_combine(h, vertexColour);
         boost::hash_combine(h, alphaFlags);
         boost::hash_combine(h, alphaTest);
@@ -307,6 +328,13 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
     {
         instance->setProperty("polygon_mode", sh::makeProperty(new sh::StringValue("wireframe")));
     }
+
+    if (drawMode == 1)
+        instance->setProperty("cullmode", sh::makeProperty(new sh::StringValue("clockwise")));
+    else if (drawMode == 2)
+        instance->setProperty("cullmode", sh::makeProperty(new sh::StringValue("anticlockwise")));
+    else if (drawMode == 3)
+        instance->setProperty("cullmode", sh::makeProperty(new sh::StringValue("none")));
 
     instance->setProperty("diffuseMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BaseTexture]));
     instance->setProperty("normalMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BumpTexture]));

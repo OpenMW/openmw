@@ -98,7 +98,8 @@ public:
                        const Nif::NiVertexColorProperty *&vertprop,
                        const Nif::NiZBufferProperty *&zprop,
                        const Nif::NiSpecularProperty *&specprop,
-                       const Nif::NiWireframeProperty *&wireprop) const;
+                       const Nif::NiWireframeProperty *&wireprop,
+                       const Nif::NiStencilProperty *&stencilprop) const;
 
     Ogre::Matrix4 getLocalTransform() const;
     Ogre::Matrix4 getWorldTransform() const;

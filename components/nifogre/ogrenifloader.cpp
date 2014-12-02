@@ -732,7 +732,8 @@ class NIFObjectLoader
         const Nif::NiZBufferProperty *zprop = NULL;
         const Nif::NiSpecularProperty *specprop = NULL;
         const Nif::NiWireframeProperty *wireprop = NULL;
-        node->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
+        const Nif::NiStencilProperty *stencilprop = NULL;
+        node->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop, stencilprop);
 
         Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
                                             Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
@@ -889,13 +890,14 @@ class NIFObjectLoader
         const Nif::NiZBufferProperty *zprop = NULL;
         const Nif::NiSpecularProperty *specprop = NULL;
         const Nif::NiWireframeProperty *wireprop = NULL;
+        const Nif::NiStencilProperty *stencilprop = NULL;
         bool needTangents = false;
 
-        partnode->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
+        partnode->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop, stencilprop);
         partsys->setMaterialName(NIFMaterialLoader::getMaterial(particledata, fullname, group,
                                                                 texprop, matprop, alphaprop,
                                                                 vertprop, zprop, specprop,
-                                                                wireprop, needTangents,
+                                                                wireprop, stencilprop, needTangents,
                                                                 // MW doesn't light particles, but the MaterialProperty
                                                                 // used still has lighting, so that must be ignored.
                                                                 true));

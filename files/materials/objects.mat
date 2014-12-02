@@ -67,6 +67,7 @@ material openmw_objects_base
         depth_check $depth_check
         transparent_sorting $transparent_sorting
         polygon_mode $polygon_mode
+        cull_hardware $cullmode
 
         texture_unit diffuseMap
         {
