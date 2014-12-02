@@ -36,17 +36,9 @@ void NIFSkeletonLoader::buildBones(Ogre::Skeleton *skel, const Nif::Node *node, 
     if(parent) parent->addChild(bone);
     mNifToOgreHandleMap[node->recIndex] = bone->getHandle();
 
-    // decompose the local transform into position, scale and orientation.
-    // this is required for cases where the rotationScale matrix includes scaling, which the NIF format allows :(
-    // the code would look a bit nicer if Ogre allowed setting the transform matrix of a Bone directly, but we can't do that.
-    Ogre::Matrix4 mat(node->getLocalTransform());
-    Ogre::Vector3 position, scale;
-    Ogre::Quaternion orientation;
-    mat.decomposition(position, scale, orientation);
-    bone->setOrientation(orientation);
-    bone->setPosition(position);
-    bone->setScale(scale);
-
+    bone->setOrientation(node->trafo.rotation);
+    bone->setPosition(node->trafo.pos);
+    bone->setScale(Ogre::Vector3(node->trafo.scale));
     bone->setBindingPose();
 
     if(!(node->recType == Nif::RC_NiNode || /* Nothing special; children traversed below */
