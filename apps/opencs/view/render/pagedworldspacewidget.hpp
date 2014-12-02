@@ -83,6 +83,8 @@ namespace CSVRender
 
         protected:
 
+            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
+
             virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
 
             virtual void updateOverlay();

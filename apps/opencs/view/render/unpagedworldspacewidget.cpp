@@ -153,6 +153,14 @@ void CSVRender::UnpagedWorldspaceWidget::referenceAdded (const QModelIndex& pare
             flagAsModified();
 }
 
+void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
+    CSVWidget::SceneToolToggle2 *tool)
+{
+    WorldspaceWidget::addVisibilitySelectorButtons (tool);
+    tool->addButton (Element_Terrain, "Terrain", "", true);
+    tool->addButton (Element_Fog, "Fog");
+}
+
 std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()
 {
     Ogre::Vector3 position = getCamera()->getPosition();
