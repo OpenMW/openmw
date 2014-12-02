@@ -313,7 +313,15 @@ namespace MWGui
         record.mHead = mAvailableHeads[mFaceIndex];
         record.mHair = mAvailableHairs[mHairIndex];
 
-        mPreview->setPrototype(record);
+        try
+        {
+            mPreview->setPrototype(record);
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << "Error creating preview: " << e.what() << std::endl;
+        }
+
         mPreviewDirty = true;
     }
 

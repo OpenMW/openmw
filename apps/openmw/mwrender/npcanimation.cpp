@@ -676,7 +676,15 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     removeIndividualPart(type);
     mPartslots[type] = group;
     mPartPriorities[type] = priority;
-    mObjectParts[type] = insertBoundedPart(mesh, group, sPartList.at(type), enchantedGlow, glowColor);
+    try
+    {
+        mObjectParts[type] = insertBoundedPart(mesh, group, sPartList.at(type), enchantedGlow, glowColor);
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Error adding NPC part: " << e.what() << std::endl;
+        return false;
+    }
 
     if (!mSoundsDisabled)
     {
