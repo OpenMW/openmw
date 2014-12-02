@@ -5,11 +5,37 @@
 #include <cstdlib>
 #include <cstring>
 #include <pwd.h>
+#include "androidpath.h"
 #include <unistd.h>
 #include <boost/filesystem/fstream.hpp>
 
+
+class Buffer {
+    public:
+      static void setData(char const *data);
+      static char const * getData();
+};
+static char const *path;
+
+void Buffer::setData(char const *data)
+{
+    path=data;
+}
+char const * Buffer::getData()
+{
+    return path;
+}
+
+
+JNIEXPORT void JNICALL Java_org_libsdl_app_SDLActivity_getPathToJni(JNIEnv *env, jobject obj, jstring prompt)
+{
+    jboolean iscopy;
+    Buffer::setData((env)->GetStringUTFChars(prompt, &iscopy));
+}
+
 namespace
 {
+
     boost::filesystem::path getUserHome()
     {
         const char* dir = getenv("HOME");
@@ -53,22 +79,30 @@ AndroidPath::AndroidPath(const std::string& application_name)
 
 boost::filesystem::path AndroidPath::getUserConfigPath() const
 {
-    return getEnv("XDG_CONFIG_HOME",  "/sdcard/libopenmw/config") / mName;
+    std::string buffer = ""; 
+    buffer = buffer + Buffer::getData() +"/config";
+    return getEnv("XDG_CONFIG_HOME", buffer) / mName;
 }
 
 boost::filesystem::path AndroidPath::getUserDataPath() const
 {
-    return getEnv("XDG_DATA_HOME", "/sdcard/libopenmw/share") / mName;
+    std::string buffer = ""; 
+    buffer = buffer + Buffer::getData() +"/share";
+    return getEnv("XDG_DATA_HOME", buffer) / mName;
 }
 
 boost::filesystem::path AndroidPath::getCachePath() const
 {
-    return getEnv("XDG_CACHE_HOME", "/sdcard/libopenmw/cache") / mName;
+    std::string buffer = ""; 
+    buffer = buffer + Buffer::getData() +"/cache";
+    return getEnv("XDG_CACHE_HOME", buffer) / mName;
 }
 
 boost::filesystem::path AndroidPath::getGlobalConfigPath() const
 {
-    boost::filesystem::path globalPath("/sdcard/libopenmw/"); 
+    std::string buffer = ""; 
+    buffer = buffer + Buffer::getData() +"/";
+    boost::filesystem::path globalPath(buffer); 
     return globalPath / mName;
 }
 
@@ -79,7 +113,9 @@ boost::filesystem::path AndroidPath::getLocalPath() const
 
 boost::filesystem::path AndroidPath::getGlobalDataPath() const
 {
-    boost::filesystem::path globalDataPath("/sdcard/libopenmw/data");
+    std::string buffer = ""; 
+    buffer = buffer + Buffer::getData() +"/data";
+    boost::filesystem::path globalDataPath(buffer);
     return globalDataPath / mName;
 }
 

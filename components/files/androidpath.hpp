@@ -11,9 +11,7 @@
 
 namespace Files
 {
-class getJniPath{
-public: const char *getPathFromJni;
-};
+
 struct AndroidPath
 {
     AndroidPath(const std::string& application_name);
