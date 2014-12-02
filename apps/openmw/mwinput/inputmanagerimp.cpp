@@ -371,6 +371,7 @@ namespace MWInput
                 {
                     mPlayer->setUpDown (1);
                     triedToMove = true;
+                    mOverencumberedMessageDelay = 0.f;
                 }
 
                 if (mAlwaysRunActive)
