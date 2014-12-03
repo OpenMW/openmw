@@ -98,6 +98,82 @@ Allowed options:
 
 CHANGELOG
 
+0.34.0
+
+Bug #904: omwlauncher doesn't allow installing Tribunal and Bloodmoon if only MW is installed
+Bug #1061: "Browse to CD..." launcher crash
+Bug #1135: Launcher crashes if user does not have write permission
+Bug #1231: Current installer in launcher does not correctly import russian Morrowind.ini settings from setup.inx
+Bug #1288: Fix the Alignment of the Resolution Combobox
+Bug #1343: BIK videos occasionally out of sync with audio
+Bug #1734: NPC in fight with invisible/sneaking player
+Bug #1982: Long class names are cut off in the UI
+Bug #2012: Editor: OpenCS script compiler sometimes fails to find IDs
+Bug #2015: Running while levitating does not affect speed but still drains fatigue
+Bug #2018: OpenMW don´t reset modified cells to vanilla when a plugin is deselected and don´t apply changes to cells already visited.
+Bug #2045: ToggleMenus command should close dialogue windows
+Bug #2046: Crash: light_de_streetlight_01_223
+Bug #2047: Buglamp tooltip minor correction
+Bug #2050: Roobrush floating texture bits
+Bug #2053: Slaves react negatively to PC picking up slave's bracers
+Bug #2055: Dremora corpses use the wrong model
+Bug #2056: Mansilamat Vabdas's corpse is floating in the water
+Bug #2057: "Quest: Larius Varro Tells A Little Story": Bounty not completely removed after finishing quest
+Bug #2059: Silenced enemies try to cast spells anyway
+Bug #2060: Editor: Special case implementation for top level window with single sub-window should be optional
+Bug #2061: Editor: SubView closing that is not directly triggered by the user isn't handled properly
+Bug #2063: Tribunal: Quest 'The Warlords' doesn't work
+Bug #2064: Sneak attack on hostiles causes bounty
+Bug #2065: Editor: Qt signal-slot error when closing a dialogue subview
+Bug #2070: Loading ESP in OpenMW works but fails in OpenCS
+Bug #2071: CTD in 0.33
+Bug #2073: Storm atronach animation stops now and then
+Bug #2075: Molag Amur Region, Map shows water on solid ground
+Bug #2080: game won't work with fair magicka regen
+Bug #2082: NPCs appear frozen or switched off after leaving and quickly reentering a cell
+Bug #2088: OpenMW is unable to play OGG files.
+Bug #2093: Darth Gares talks to you in Ilunibi even when he's not there, screwing up the Main Quests
+Bug #2095: Coordinate and rotation editing in the Reference table does not work.
+Bug #2096: Some overflow fun and bartering exploit
+Bug #2098: [D3D] Game crash on maximize
+Bug #2099: Activate, player seems not to work
+Bug #2104: Only labels are sensitive in buttons
+Bug #2107: "Slowfall" effect is too weak
+Bug #2114: OpenCS doesn't load an ESP file full of errors even though Vanilla MW Construction Set can
+Bug #2117: Crash when encountering bandits on opposite side of river from the egg mine south of Balmora
+Bug #2124: [Mod: Baldurians Transparent Glass Amor] Armor above head
+Bug #2125: Unnamed NiNodes in weapons problem in First Person
+Bug #2126: Dirty dialog script in tribunal.esm causing bug in Tribunal MQ
+Bug #2128: Crash when picking character's face
+Bug #2129: Disable the third-person zoom feature by default
+Bug #2130: Ash storm particles shown too long during transition to clear sky
+Bug #2137: Editor: exception caused by following the Creature column of a SoundGen record
+Bug #2139: Mouse movement should be ignored during intro video
+Bug #2143: Editor: Saving is broken
+Bug #2145: OpenMW - crash while exiting x64 debug build
+Bug #2152: You can attack Almalexia during her final monologue
+Bug #2154: Visual effects behave weirdly after loading/taking a screenshot
+Bug #2155: Vivec has too little magicka
+Bug #2156: Azura's spirit fades away too fast
+Bug #2158: [Mod]Julan Ashlander Companion 2.0: Negative magicka
+Bug #2161: Editor: combat/magic/stealth values of creature not displayed correctly
+Bug #2163: OpenMW can't detect death if the NPC die by the post damage effect of a magic weapon.
+Bug #2168: Westly's Master Head Pack X – Some hairs aren't rendered correctly.
+Bug #2170: Mods using conversations to update PC inconsistant
+Bug #2173: Launcher: disabling plugin files is broken
+Bug #2175: Pathgrid mods do not overwrite the existing pathgrid
+Bug #2180: Editor: Verifier doesn't handle Windows-specific path issues when dealing with resources
+Feature #238: Add UI to run INI-importer from the launcher
+Feature #854: Editor: Add user setting to show status bar
+Feature #987: Launcher: first launch instructions for CD need to be more explicit
+Feature #1232: There is no way to set the "encoding" option using launcher UI.
+Feature #1281: Editor: Render cell markers
+Feature #1918: Editor: Functionality for Double-Clicking in Tables
+Feature #1966: Editor: User Settings dialogue grouping/labelling/tooltips
+Feature #2097: Editor: Edit position of references in 3D scene
+Feature #2121: Editor: Add edit mode button to scene toolbar
+Task #1965: Editor: Improve layout of user settings dialogue
+
 0.33.1
 
 Bug #2108: OpenCS fails to build
