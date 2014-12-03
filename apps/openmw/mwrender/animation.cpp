@@ -574,7 +574,8 @@ float Animation::getVelocity(const std::string &groupname) const
 
 static void updateBoneTree(const Ogre::SkeletonInstance *skelsrc, Ogre::Bone *bone)
 {
-    if(skelsrc->hasBone(bone->getName()))
+    if(bone->getName() != " " // really should be != "", but see workaround in skeleton.cpp for empty node names
+            && skelsrc->hasBone(bone->getName()))
     {
         Ogre::Bone *srcbone = skelsrc->getBone(bone->getName());
         if(!srcbone->getParent() || !bone->getParent())

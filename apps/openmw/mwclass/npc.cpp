@@ -969,6 +969,9 @@ namespace MWClass
 
     float Npc::getJump(const MWWorld::Ptr &ptr) const
     {
+        if(getEncumbrance(ptr) > getCapacity(ptr))
+            return 0.f;
+
         const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
         const GMST& gmst = getGmst();
         const MWMechanics::MagicEffects &mageffects = npcdata->mNpcStats.getMagicEffects();

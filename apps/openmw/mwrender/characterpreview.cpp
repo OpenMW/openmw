@@ -115,8 +115,8 @@ namespace MWRender
 
     void CharacterPreview::rebuild()
     {
-        assert(mAnimation);
         delete mAnimation;
+        mAnimation = NULL;
         mAnimation = new NpcAnimation(mCharacter, mNode,
                                       0, true, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
@@ -187,6 +187,9 @@ namespace MWRender
 
     void InventoryPreview::update()
     {
+        if (!mAnimation)
+            return;
+
         mAnimation->updateParts();
 
         MWWorld::InventoryStore &inv = mCharacter.getClass().getInventoryStore(mCharacter);

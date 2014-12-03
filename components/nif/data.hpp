@@ -272,7 +272,7 @@ class NiSkinData : public Record
 public:
     struct BoneTrafo
     {
-        Ogre::Matrix3 rotationScale; // Rotation offset from bone, non-uniform scale
+        Ogre::Matrix3 rotation; // Rotation offset from bone?
         Ogre::Vector3 trans;    // Translation
         float scale;            // Probably scale (always 1)
     };
@@ -295,7 +295,7 @@ public:
 
     void read(NIFStream *nif)
     {
-        trafo.rotationScale = nif->getMatrix3();
+        trafo.rotation = nif->getMatrix3();
         trafo.trans = nif->getVector3();
         trafo.scale = nif->getFloat();
 
@@ -307,7 +307,7 @@ public:
         {
             BoneInfo &bi = bones[i];
 
-            bi.trafo.rotationScale = nif->getMatrix3();
+            bi.trafo.rotation = nif->getMatrix3();
             bi.trafo.trans = nif->getVector3();
             bi.trafo.scale = nif->getFloat();
             bi.unknown = nif->getVector4();

@@ -1414,29 +1414,32 @@ void CharacterController::update(float duration)
         {
             // Started a jump.
             float z = cls.getJump(mPtr);
-            if(vec.x == 0 && vec.y == 0)
-                vec = Ogre::Vector3(0.0f, 0.0f, z);
-            else
+            if (z > 0)
             {
-                Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
-                vec = Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
+                if(vec.x == 0 && vec.y == 0)
+                    vec = Ogre::Vector3(0.0f, 0.0f, z);
+                else
+                {
+                    Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
+                    vec = Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
+                }
+
+                // advance acrobatics
+                if (mPtr.getRefData().getHandle() == "player")
+                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
+
+                // decrease fatigue
+                const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+                const float fatigueJumpBase = gmst.find("fFatigueJumpBase")->getFloat();
+                const float fatigueJumpMult = gmst.find("fFatigueJumpMult")->getFloat();
+                float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
+                if (normalizedEncumbrance > 1)
+                    normalizedEncumbrance = 1;
+                const int fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
+                DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
+                fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
+                cls.getCreatureStats(mPtr).setFatigue(fatigue);
             }
-
-            // advance acrobatics
-            if (mPtr.getRefData().getHandle() == "player")
-                cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
-
-            // decrease fatigue
-            const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
-            const float fatigueJumpBase = gmst.find("fFatigueJumpBase")->getFloat();
-            const float fatigueJumpMult = gmst.find("fFatigueJumpMult")->getFloat();
-            float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
-            if (normalizedEncumbrance > 1)
-                normalizedEncumbrance = 1;
-            const int fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
-            DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
-            fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
-            cls.getCreatureStats(mPtr).setFatigue(fatigue);
         }
         else if(mJumpState == JumpState_InAir)
         {

@@ -147,6 +147,11 @@ namespace MWMechanics
 
         if (value != currentValue)
         {
+            if(!mIsWerewolf)
+                mAttributes[index] = value;
+            else
+                mWerewolfAttributes[index] = value;
+
             if (index == ESM::Attribute::Intelligence)
                 mRecalcMagicka = true;
             else if (index == ESM::Attribute::Strength ||
@@ -164,11 +169,6 @@ namespace MWMechanics
                 setFatigue(fatigue);
             }
         }
-
-        if(!mIsWerewolf)
-            mAttributes[index] = value;
-        else
-            mWerewolfAttributes[index] = value;
     }
 
     void CreatureStats::setHealth(const DynamicStat<float> &value)
