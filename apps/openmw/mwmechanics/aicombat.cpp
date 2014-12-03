@@ -325,6 +325,11 @@ namespace MWMechanics
             currentAction = prepareNextAction(actor, target);
             actionCooldown = currentAction->getActionCooldown();
         }
+
+        // Stop attacking if target is not seen
+        if (!MWBase::Environment::get().getMechanicsManager()->awarenessCheck(target, actor))
+            return true;
+
         if (currentAction.get())
             currentAction->getCombatRange(rangeAttack, rangeFollow);
 
