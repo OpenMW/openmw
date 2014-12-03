@@ -55,7 +55,8 @@ CSMWorld::Resources::Resources (const std::string& baseDirectory, UniversalId::T
 
             std::string file = iter->substr (baseSize+1);
             mFiles.push_back (file);
-            mIndex.insert (std::make_pair (file, static_cast<int> (mFiles.size())-1));
+            mIndex.insert (std::make_pair (
+                Misc::StringUtils::lowerCase (file), static_cast<int> (mFiles.size())-1));
         }
     }
 }
