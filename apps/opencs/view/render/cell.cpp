@@ -60,7 +60,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
 }
 
 CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
-    const std::string& id, CSVWorld::PhysicsSystem *physics, const Ogre::Vector3& origin)
+    const std::string& id, boost::shared_ptr<CSVWorld::PhysicsSystem> physics, const Ogre::Vector3& origin)
 : mData (data), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager), mPhysics(physics)
 {
     mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();

@@ -1,6 +1,8 @@
 
 #include "editor.hpp"
 
+#include <openengine/bullet/BulletShapeLoader.h>
+
 #include <QApplication>
 #include <QLocalServer>
 #include <QLocalSocket>
@@ -21,7 +23,7 @@
 
 CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 : mUserSettings (mCfgMgr), mOverlaySystem (0), mDocumentManager (mCfgMgr),
-  mViewManager (mDocumentManager), mPhysicsManager (0),
+  mViewManager (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
@@ -34,7 +36,6 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
 
     mOverlaySystem.reset (new CSVRender::OverlaySystem);
-    mPhysicsManager.reset (new CSVWorld::PhysicsManager);
 
     Bsa::registerResources (Files::Collections (config.first, !mFsStrict), config.second, true,
         mFsStrict);
@@ -70,7 +71,10 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 }
 
 CS::Editor::~Editor ()
-{}
+{
+    // cleanup global resources used by OEngine
+    delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
+}
 
 void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
 {
