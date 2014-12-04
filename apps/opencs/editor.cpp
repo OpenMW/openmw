@@ -239,7 +239,7 @@ bool CS::Editor::makeIPCServer()
     try
     {
         mPid = boost::filesystem::temp_directory_path();
-        mPid += "opencs.pid";
+        mPid /= "opencs.pid";
         bool pidExists = boost::filesystem::exists(mPid);
 
         boost::filesystem::ofstream tempFile(mPid);
