@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <boost/interprocess/sync/file_lock.hpp>
+
 #include <QObject>
 #include <QString>
 #include <QLocalServer>
@@ -54,6 +56,8 @@ namespace CS
             CSVDoc::FileDialog mFileDialog;
             boost::filesystem::path mLocal;
             boost::filesystem::path mResources;
+            boost::filesystem::path mPid;
+            boost::interprocess::file_lock mLock;
             bool mFsStrict;
 
             void setupDataFiles (const Files::PathContainer& dataDirs);

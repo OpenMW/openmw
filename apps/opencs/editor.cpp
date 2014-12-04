@@ -22,7 +22,7 @@
 CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 : mUserSettings (mCfgMgr), mOverlaySystem (0), mDocumentManager (mCfgMgr),
   mViewManager (mDocumentManager), mPhysicsManager (0),
-  mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
+  mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL), mPid(""), mLock()
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
@@ -70,7 +70,10 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 }
 
 CS::Editor::~Editor ()
-{}
+{
+    if(mServer && boost::filesystem::exists(mPid))
+        remove(mPid.string().c_str()); // ignore error
+}
 
 void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
 {
@@ -233,7 +236,54 @@ void CS::Editor::showSettings()
 
 bool CS::Editor::makeIPCServer()
 {
-    mServer = new QLocalServer(this);
+    try
+    {
+        mPid = boost::filesystem::temp_directory_path();
+        mPid += "opencs.pid";
+        bool pidExists = boost::filesystem::exists(mPid);
+
+        boost::filesystem::ofstream tempFile(mPid);
+
+        mLock = boost::interprocess::file_lock(mPid.string().c_str());
+        if(!mLock.try_lock())
+        {
+            std::cerr << "OpenCS already running."  << std::endl;
+            return false;
+        }
+
+#ifdef _WIN32
+        tempFile << GetCurrentProcessId() << std::endl;
+#else
+        tempFile << getpid() << std::endl;
+#endif
+        tempFile.close();
+
+        mServer = new QLocalServer(this);
+
+        if(pidExists)
+        {
+            // hack to get the temp directory path
+            mServer->listen("dummy");
+            QString fullPath = mServer->fullServerName();
+            mServer->close();
+            fullPath.remove(QRegExp("dummy$"));
+            fullPath += mIpcServerName;
+            if(boost::filesystem::exists(fullPath.toStdString().c_str()))
+            {
+                // TODO: compare pid of the current process with that in the file
+                std::cout << "Detected unclean shutdown." << std::endl;
+                // delete the stale file
+                if(remove(fullPath.toStdString().c_str()))
+                    std::cerr << "ERROR removing stale connection file" << std::endl;
+            }
+        }
+    }
+
+    catch(const std::exception& e)
+    {
+        std::cerr << "ERROR " << e.what() << std::endl;
+        return false;
+    }
 
     if(mServer->listen(mIpcServerName))
     {
@@ -242,6 +292,7 @@ bool CS::Editor::makeIPCServer()
     }
 
     mServer->close();
+    mServer = NULL;
     return false;
 }
 
