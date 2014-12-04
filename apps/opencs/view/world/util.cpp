@@ -173,6 +173,8 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         {
             QDoubleSpinBox *dsb = new QDoubleSpinBox(parent);
             dsb->setRange(FLT_MIN, FLT_MAX);
+            dsb->setSingleStep(0.01f);
+            dsb->setDecimals(3);
             return dsb;
         }
 
