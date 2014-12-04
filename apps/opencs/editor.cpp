@@ -72,8 +72,10 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 
 CS::Editor::~Editor ()
 {
+    mPidFile.close();
+
     if(mServer && boost::filesystem::exists(mPid))
-        remove(mPid.string().c_str()); // ignore error
+        remove(mPid.string().c_str()); // ignore any error
 
     // cleanup global resources used by OEngine
     delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
@@ -246,7 +248,7 @@ bool CS::Editor::makeIPCServer()
         mPid /= "opencs.pid";
         bool pidExists = boost::filesystem::exists(mPid);
 
-        boost::filesystem::ofstream tempFile(mPid);
+        mPidFile.open(mPid);
 
         mLock = boost::interprocess::file_lock(mPid.string().c_str());
         if(!mLock.try_lock())
@@ -256,11 +258,10 @@ bool CS::Editor::makeIPCServer()
         }
 
 #ifdef _WIN32
-        tempFile << GetCurrentProcessId() << std::endl;
+        mPidFile << GetCurrentProcessId() << std::endl;
 #else
-        tempFile << getpid() << std::endl;
+        mPidFile << getpid() << std::endl;
 #endif
-        tempFile.close();
 
         mServer = new QLocalServer(this);
 
