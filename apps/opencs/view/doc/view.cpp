@@ -16,7 +16,6 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../world/subviews.hpp"
-#include "../world/physicsmanager.hpp"
 
 #include "../tools/subviews.hpp"
 
@@ -407,8 +406,6 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     mSubViewFactory.add (CSMWorld::UniversalId::Type_RunLog, new SubViewFactory<RunLogSubView>);
 
     connect (mOperations, SIGNAL (abortOperation (int)), this, SLOT (abortOperation (int)));
-
-    CSVWorld::PhysicsManager::instance()->setupPhysics(document);
 }
 
 CSVDoc::View::~View()

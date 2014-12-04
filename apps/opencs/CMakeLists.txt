@@ -68,7 +68,7 @@ opencs_units (view/world
 
 opencs_units_noqt (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
-    scripthighlighter idvalidator dialoguecreator physicssystem physicsmanager
+    scripthighlighter idvalidator dialoguecreator physicssystem
     )
 
 opencs_units (view/widget
