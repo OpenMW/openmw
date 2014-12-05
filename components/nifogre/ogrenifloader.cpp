@@ -442,6 +442,9 @@ public:
     {
     private:
         const Nif::QuaternionKeyMap* mRotations;
+        const Nif::FloatKeyMap* mXRotations;
+        const Nif::FloatKeyMap* mYRotations;
+        const Nif::FloatKeyMap* mZRotations;
         const Nif::Vector3KeyMap* mTranslations;
         const Nif::FloatKeyMap* mScales;
         Nif::NIFFilePtr mNif; // Hold a SharedPtr to make sure key lists stay valid
@@ -472,11 +475,25 @@ public:
                 return keys.rbegin()->second.mValue;
         }
 
+        Ogre::Quaternion getXYZRotation(float time) const
+        {
+            float xrot = interpKey(mXRotations->mKeys, time);
+            float yrot = interpKey(mYRotations->mKeys, time);
+            float zrot = interpKey(mZRotations->mKeys, time);
+            Ogre::Quaternion xr(Ogre::Radian(xrot), Ogre::Vector3::UNIT_X);
+            Ogre::Quaternion yr(Ogre::Radian(yrot), Ogre::Vector3::UNIT_Y);
+            Ogre::Quaternion zr(Ogre::Radian(zrot), Ogre::Vector3::UNIT_Z);
+            return (xr*yr*zr);
+        }
+
     public:
         /// @note The NiKeyFrameData must be valid as long as this KeyframeController exists.
         Value(Ogre::Node *target, const Nif::NIFFilePtr& nif, const Nif::NiKeyframeData *data)
           : NodeTargetValue<Ogre::Real>(target)
           , mRotations(&data->mRotations)
+          , mXRotations(&data->mXRotations)
+          , mYRotations(&data->mYRotations)
+          , mZRotations(&data->mZRotations)
           , mTranslations(&data->mTranslations)
           , mScales(&data->mScales)
           , mNif(nif)
@@ -486,6 +503,8 @@ public:
         {
             if(mRotations->mKeys.size() > 0)
                 return interpKey(mRotations->mKeys, time);
+            else if (!mXRotations->mKeys.empty() || !mYRotations->mKeys.empty() || !mZRotations->mKeys.empty())
+                return getXYZRotation(time);
             return mNode->getOrientation();
         }
 
@@ -513,6 +532,8 @@ public:
         {
             if(mRotations->mKeys.size() > 0)
                 mNode->setOrientation(interpKey(mRotations->mKeys, time));
+            else if (!mXRotations->mKeys.empty() || !mYRotations->mKeys.empty() || !mZRotations->mKeys.empty())
+                mNode->setOrientation(getXYZRotation(time));
             if(mTranslations->mKeys.size() > 0)
                 mNode->setPosition(interpKey(mTranslations->mKeys, time));
             if(mScales->mKeys.size() > 0)

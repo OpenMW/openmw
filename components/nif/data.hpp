@@ -350,8 +350,11 @@ struct NiMorphData : public Record
 struct NiKeyframeData : public Record
 {
     QuaternionKeyMap mRotations;
-    //\FIXME mXYZ_Keys are read, but not used.
-    FloatKeyMap mXYZ_Keys;
+
+    FloatKeyMap mXRotations;
+    FloatKeyMap mYRotations;
+    FloatKeyMap mZRotations;
+
     Vector3KeyMap mTranslations;
     FloatKeyMap mScales;
 
@@ -362,12 +365,9 @@ struct NiKeyframeData : public Record
         {
             //Chomp unused float
             nif->getFloat();
-            for(size_t i=0;i<3;++i)
-            {
-                //Read concatenates items together. 
-                mXYZ_Keys.read(nif,true);
-            }
-            nif->file->warn("XYZ_ROTATION_KEY read, but not used!");
+            mXRotations.read(nif, true);
+            mYRotations.read(nif, true);
+            mZRotations.read(nif, true);
         }
         mTranslations.read(nif);
         mScales.read(nif);
