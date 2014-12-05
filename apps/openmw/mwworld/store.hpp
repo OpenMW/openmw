@@ -1015,23 +1015,14 @@ namespace MWWorld
     template <class T>
     class IndexedStore
     {
-        struct Compare
-        {
-            bool operator()(const T &x, const T &y) const {
-                return x.mIndex < y.mIndex;
-            }
-        };
     protected:
-        std::vector<T> mStatic;
+        typedef typename std::map<int, T> Static;
+        Static mStatic;
 
     public:
-        typedef typename std::vector<T>::const_iterator iterator;
+        typedef typename std::map<int, T>::const_iterator iterator;
 
         IndexedStore() {}
-
-        IndexedStore(unsigned int size) {
-            mStatic.reserve(size);
-        }
 
         iterator begin() const {
             return mStatic.begin();
@@ -1041,10 +1032,14 @@ namespace MWWorld
             return mStatic.end();
         }
 
-        /// \todo refine loading order
         void load(ESM::ESMReader &esm) {
-            mStatic.push_back(T());
-            mStatic.back().load(esm);
+            T record;
+            record.load(esm);
+
+            // Try to overwrite existing record
+            std::pair<typename Static::iterator, bool> found = mStatic.insert(std::make_pair(record.mIndex, record));
+            if (found.second)
+                found.first->second = record;
         }
 
         int getSize() const {
@@ -1052,40 +1047,13 @@ namespace MWWorld
         }
 
         void setUp() {
-            /// \note This method sorts indexed values for further
-            /// searches. Every loaded item is present in storage, but
-            /// latest loaded shadows any previous while searching.
-            /// If memory cost will be too high, it is possible to remove
-            /// unused values.
-
-            Compare cmp;
-
-            std::stable_sort(mStatic.begin(), mStatic.end(), cmp);
-
-            typename std::vector<T>::iterator first, next;
-            next = first = mStatic.begin();
-
-            while (first != mStatic.end() && ++next != mStatic.end()) {
-                while (next != mStatic.end() && !cmp(*first, *next)) {
-                    ++next;
-                }
-                if (first != --next) {
-                    std::swap(*first, *next);
-                }
-                first = ++next;
-            }
         }
 
         const T *search(int index) const {
-            T item;
-            item.mIndex = index;
-
-            iterator it =
-                std::lower_bound(mStatic.begin(), mStatic.end(), item, Compare());
-            if (it != mStatic.end() && it->mIndex == index) {
-                return &(*it);
-            }
-            return 0;
+            typename Static::const_iterator it = mStatic.find(index);
+            if (it != mStatic.end())
+                return &(it->second);
+            return NULL;
         }
 
         const T *find(int index) const {
@@ -1103,18 +1071,12 @@ namespace MWWorld
     struct Store<ESM::Skill> : public IndexedStore<ESM::Skill>
     {
         Store() {}
-        Store(unsigned int size)
-          : IndexedStore<ESM::Skill>(size)
-        {}
     };
 
     template <>
     struct Store<ESM::MagicEffect> : public IndexedStore<ESM::MagicEffect>
     {
         Store() {}
-        Store(unsigned int size)
-          : IndexedStore<ESM::MagicEffect>(size)
-        {}
     };
 
     template <>
