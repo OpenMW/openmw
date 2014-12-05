@@ -161,6 +161,38 @@ void ObjectScene::rotateBillboardNodes(Ogre::Camera *camera)
     }
 }
 
+void ObjectScene::_notifyAttached()
+{
+    // convert initial particle positions to world space for world-space particle systems
+    // this can't be done on creation because the particle system is not in its correct world space position yet
+    for (std::vector<Ogre::ParticleSystem*>::iterator it = mParticles.begin(); it != mParticles.end(); ++it)
+    {
+        Ogre::ParticleSystem* psys = *it;
+        if (psys->getKeepParticlesInLocalSpace())
+            continue;
+        Ogre::ParticleIterator pi = psys->_getIterator();
+        while (!pi.end())
+        {
+            Ogre::Particle *p = pi.getNext();
+
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+            Ogre::Vector3& position = p->mPosition;
+            Ogre::Vector3& direction = p->mDirection;
+#else
+            Ogre::Vector3& position = p->position;
+            Ogre::Vector3& direction = p->direction;
+#endif
+
+            position =
+                (psys->getParentNode()->_getDerivedOrientation() *
+                (psys->getParentNode()->_getDerivedScale() * position))
+                + psys->getParentNode()->_getDerivedPosition();
+            direction =
+                (psys->getParentNode()->_getDerivedOrientation() * direction);
+        }
+    }
+}
+
 // Animates a texture
 class FlipController
 {
@@ -949,6 +981,8 @@ class NIFObjectLoader
                     createParticleEmitterAffectors(partsys, partctrl, trgtbone, scene->mSkelBase->getName());
                 }
 
+                createParticleInitialState(partsys, particledata, partctrl);
+
                 Ogre::ControllerValueRealPtr srcval((partflags&Nif::NiNode::ParticleFlag_AutoPlay) ?
                                                     Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                     Ogre::ControllerValueRealPtr());
@@ -975,6 +1009,50 @@ class NIFObjectLoader
         createMaterialControllers(partnode, partsys, animflags, scene);
     }
 
+    static void createParticleInitialState(Ogre::ParticleSystem* partsys, const Nif::NiAutoNormalParticlesData* particledata,
+                                           const Nif::NiParticleSystemController* partctrl)
+    {
+        partsys->_update(0.f); // seems to be required to allocate mFreeParticles
+        int i=0;
+        for (std::vector<Nif::NiParticleSystemController::Particle>::const_iterator it = partctrl->particles.begin();
+             i<particledata->activeCount && it != partctrl->particles.end(); ++it, ++i)
+        {
+            const Nif::NiParticleSystemController::Particle& particle = *it;
+
+            Ogre::Particle* created = partsys->createParticle();
+            if (!created)
+                break;
+
+#if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+            Ogre::Vector3& position = created->mPosition;
+            Ogre::Vector3& direction = created->mDirection;
+            Ogre::ColourValue& colour = created->mColour;
+            float& totalTimeToLive = created->mTotalTimeToLive;
+            float& timeToLive = created->mTimeToLive;
+#else
+            Ogre::Vector3& position = created->position;
+            Ogre::Vector3& direction = created->direction;
+            Ogre::ColourValue& colour = created->colour;
+            float& totalTimeToLive = created->totalTimeToLive;
+            float& timeToLive = created->timeToLive;
+#endif
+
+            direction = particle.velocity;
+            position = particledata->vertices.at(particle.vertex);
+
+            if (particle.vertex < int(particledata->colors.size()))
+            {
+                Ogre::Vector4 partcolour = particledata->colors.at(particle.vertex);
+                colour = Ogre::ColourValue(partcolour.x, partcolour.y, partcolour.z, partcolour.w);
+            }
+            else
+                colour = Ogre::ColourValue(1.f, 1.f, 1.f, 1.f);
+            float size = particledata->sizes.at(particle.vertex);
+            created->setDimensions(size, size);
+            totalTimeToLive = std::max(0.f, particle.lifespan);
+            timeToLive = std::max(0.f, particle.lifespan - particle.lifetime);
+        }
+    }
 
     static void createNodeControllers(const Nif::NIFFilePtr& nif, const std::string &name, Nif::ControllerPtr ctrl, ObjectScenePtr scene, int animflags)
     {
@@ -1275,6 +1353,8 @@ ObjectScenePtr Loader::createObjects(Ogre::SceneNode *parentNode, std::string na
             parentNode->attachObject(entity);
     }
 
+    scene->_notifyAttached();
+
     return scene;
 }
 
@@ -1341,6 +1421,8 @@ ObjectScenePtr Loader::createObjects(Ogre::Entity *parent, const std::string &bo
             }
         }
     }
+
+    scene->_notifyAttached();
 
     return scene;
 }
