@@ -842,36 +842,12 @@ namespace MWWorld
     template <>
     class Store<ESM::Pathgrid> : public StoreBase
     {
-    public:
-        typedef std::vector<ESM::Pathgrid>::const_iterator iterator;
-
     private:
-        std::vector<ESM::Pathgrid>  mStatic;
+        typedef std::map<std::string, ESM::Pathgrid> Interior;
+        typedef std::map<std::pair<int, int>, ESM::Pathgrid> Exterior;
 
-        std::vector<ESM::Pathgrid>::iterator mIntBegin, mIntEnd, mExtBegin, mExtEnd;
-
-        struct IntExtOrdering
-        {
-            bool operator()(const ESM::Pathgrid &x, const ESM::Pathgrid &y) const {
-                // interior pathgrids precedes exterior ones (x < y)
-                if ((x.mData.mX == 0 && x.mData.mY == 0) &&
-                    (y.mData.mX != 0 || y.mData.mY != 0))
-                {
-                    return true;
-                }
-                return false;
-            }
-        };
-
-        struct ExtCompare
-        {
-            bool operator()(const ESM::Pathgrid &x, const ESM::Pathgrid &y) const {
-                if (x.mData.mX == y.mData.mX) {
-                    return x.mData.mY < y.mData.mY;
-                }
-                return x.mData.mX < y.mData.mX;
-            }
-        };
+        Interior mInt;
+        Exterior mExt;
 
     public:
 
@@ -881,65 +857,33 @@ namespace MWWorld
             pathgrid.load(esm);
 
             // Try to overwrite existing record
-            // Can't use search() because we aren't sorted yet
             if (!pathgrid.mCell.empty())
             {
-                for (std::vector<ESM::Pathgrid>::iterator it = mStatic.begin(); it != mStatic.end(); ++it)
-                {
-                    if ((*it).mCell == pathgrid.mCell)
-                    {
-                        (*it) = pathgrid;
-                        return;
-                    }
-                }
+                std::pair<Interior::iterator, bool> found = mInt.insert(std::make_pair(pathgrid.mCell, pathgrid));
+                if (found.second)
+                    found.first->second = pathgrid;
             }
             else
             {
-                for (std::vector<ESM::Pathgrid>::iterator it = mStatic.begin(); it != mStatic.end(); ++it)
-                {
-                    if ((*it).mData.mX == pathgrid.mData.mX && (*it).mData.mY == pathgrid.mData.mY)
-                    {
-                        (*it) = pathgrid;
-                        return;
-                    }
-                }
+                std::pair<Exterior::iterator, bool> found = mExt.insert(std::make_pair(std::make_pair(pathgrid.mData.mX, pathgrid.mData.mY),
+                                                                                       pathgrid));
+                if (found.second)
+                    found.first->second = pathgrid;
             }
-
-            mStatic.push_back(pathgrid);
         }
 
         size_t getSize() const {
-            return mStatic.size();
+            return mInt.size() + mExt.size();
         }
 
         void setUp() {
-            IntExtOrdering cmp;
-            std::sort(mStatic.begin(), mStatic.end(), cmp);
-
-            ESM::Pathgrid pg;
-            pg.mData.mX = pg.mData.mY = 1;
-            mExtBegin =
-                std::lower_bound(mStatic.begin(), mStatic.end(), pg, cmp);
-            mExtEnd = mStatic.end();
-
-            mIntBegin = mStatic.begin();
-            mIntEnd = mExtBegin;
-
-            std::sort(mIntBegin, mIntEnd, RecordCmp());
-            std::sort(mExtBegin, mExtEnd, ExtCompare());
         }
 
         const ESM::Pathgrid *search(int x, int y) const {
-            ESM::Pathgrid pg;
-            pg.mData.mX = x;
-            pg.mData.mY = y;
-
-            iterator it =
-                std::lower_bound(mExtBegin, mExtEnd, pg, ExtCompare());
-            if (it != mExtEnd && it->mData.mX == x && it->mData.mY == y) {
-                return &(*it);
-            }
-            return 0;
+            Exterior::const_iterator it = mExt.find(std::make_pair(x,y));
+            if (it != mExt.end())
+                return &(it->second);
+            return NULL;
         }
 
         const ESM::Pathgrid *find(int x, int y) const {
@@ -953,14 +897,10 @@ namespace MWWorld
         }
 
         const ESM::Pathgrid *search(const std::string &name) const {
-            ESM::Pathgrid pg;
-            pg.mCell = name;
-
-            iterator it = std::lower_bound(mIntBegin, mIntEnd, pg, RecordCmp());
-            if (it != mIntEnd && Misc::StringUtils::ciEqual(it->mCell, name)) {
-                return &(*it);
-            }
-            return 0;
+            Interior::const_iterator it = mInt.find(name);
+            if (it != mInt.end())
+                return &(it->second);
+            return NULL;
         }
 
         const ESM::Pathgrid *find(const std::string &name) const {
@@ -985,30 +925,6 @@ namespace MWWorld
                 return find(cell.mName);
             }
             return find(cell.mData.mX, cell.mData.mY);
-        }
-
-        iterator begin() const {
-            return mStatic.begin();
-        }
-
-        iterator end() const {
-            return mStatic.end();
-        }
-
-        iterator interiorPathsBegin() const {
-            return mIntBegin;
-        }
-
-        iterator interiorPathsEnd() const {
-            return mIntEnd;
-        }
-
-        iterator exteriorPathsBegin() const {
-            return mExtBegin;
-        }
-
-        iterator exteriorPathsEnd() const {
-            return mExtEnd;
         }
     };
 
