@@ -859,16 +859,16 @@ namespace MWWorld
             // Try to overwrite existing record
             if (!pathgrid.mCell.empty())
             {
-                std::pair<Interior::iterator, bool> found = mInt.insert(std::make_pair(pathgrid.mCell, pathgrid));
-                if (found.second)
-                    found.first->second = pathgrid;
+                std::pair<Interior::iterator, bool> ret = mInt.insert(std::make_pair(pathgrid.mCell, pathgrid));
+                if (!ret.second)
+                    ret.first->second = pathgrid;
             }
             else
             {
-                std::pair<Exterior::iterator, bool> found = mExt.insert(std::make_pair(std::make_pair(pathgrid.mData.mX, pathgrid.mData.mY),
+                std::pair<Exterior::iterator, bool> ret = mExt.insert(std::make_pair(std::make_pair(pathgrid.mData.mX, pathgrid.mData.mY),
                                                                                        pathgrid));
-                if (found.second)
-                    found.first->second = pathgrid;
+                if (!ret.second)
+                    ret.first->second = pathgrid;
             }
         }
 
@@ -953,9 +953,9 @@ namespace MWWorld
             record.load(esm);
 
             // Try to overwrite existing record
-            std::pair<typename Static::iterator, bool> found = mStatic.insert(std::make_pair(record.mIndex, record));
-            if (found.second)
-                found.first->second = record;
+            std::pair<typename Static::iterator, bool> ret = mStatic.insert(std::make_pair(record.mIndex, record));
+            if (!ret.second)
+                ret.first->second = record;
         }
 
         int getSize() const {

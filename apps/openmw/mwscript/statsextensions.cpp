@@ -1179,7 +1179,14 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    ptr.getClass().getCreatureStats(ptr).resurrect();
+
+                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                        ptr.getClass().getCreatureStats(ptr).resurrect();
+                    else if (ptr.getClass().getCreatureStats(ptr).isDead())
+                    {
+                        // resets runtime state such as inventory, stats and AI. does not reset position in the world
+                        ptr.getRefData().setCustomData(NULL);
+                    }
                 }
         };
 
