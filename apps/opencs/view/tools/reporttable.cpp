@@ -24,6 +24,7 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     setSelectionMode (QAbstractItemView::ExtendedSelection);
 
     setModel (mModel);
+    setColumnHidden (2, true);
 
     mIdTypeDelegate = CSVWorld::IdTypeDelegateFactory().makeDelegate (
         document, this);
@@ -55,5 +56,5 @@ void CSVTools::ReportTable::updateUserSetting (const QString& name, const QStrin
 
 void CSVTools::ReportTable::show (const QModelIndex& index)
 {
-    emit editRequest (mModel->getUniversalId (index.row()), "");
+    emit editRequest (mModel->getUniversalId (index.row()), mModel->getHint (index.row()));
 }
