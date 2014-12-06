@@ -7,6 +7,12 @@
 
 #include "../../view/world/idtypedelegate.hpp"
 
+void CSVTools::ReportTable::mouseMoveEvent (QMouseEvent *event)
+{
+    if (event->buttons() & Qt::LeftButton)
+        startDrag (*this);
+}
+
 CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     const CSMWorld::UniversalId& id, QWidget *parent)
 : CSVWorld::DragRecordTable (document, parent), mModel (document.getReport (id))

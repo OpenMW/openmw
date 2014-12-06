@@ -22,6 +22,10 @@ namespace CSVTools
             CSMTools::ReportModel *mModel;
             CSVWorld::CommandDelegate *mIdTypeDelegate;
 
+        private:
+
+            void mouseMoveEvent (QMouseEvent *event);
+
         public:
 
             ReportTable (CSMDoc::Document& document, const CSMWorld::UniversalId& id,
