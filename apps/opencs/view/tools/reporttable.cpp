@@ -1,6 +1,8 @@
 
 #include "reporttable.hpp"
 
+#include <algorithm>
+
 #include <QHeaderView>
 #include <QAction>
 #include <QMenu>
@@ -17,7 +19,10 @@ void CSVTools::ReportTable::contextMenuEvent (QContextMenuEvent *event)
     QMenu menu (this);
 
     if (!selectedRows.empty())
+    {
         menu.addAction (mShowAction);
+        menu.addAction (mRemoveAction);
+    }
 
     menu.exec (event->globalPos());
 }
@@ -49,6 +54,10 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     mShowAction = new QAction (tr ("Show"), this);
     connect (mShowAction, SIGNAL (triggered()), this, SLOT (showSelection()));
     addAction (mShowAction);
+
+    mRemoveAction = new QAction (tr ("Remove from list"), this);
+    connect (mRemoveAction, SIGNAL (triggered()), this, SLOT (removeSelection()));
+    addAction (mRemoveAction);
 
     connect (this, SIGNAL (doubleClicked (const QModelIndex&)), this, SLOT (show (const QModelIndex&)));
 }
@@ -85,4 +94,17 @@ void CSVTools::ReportTable::showSelection()
     for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
         ++iter)
         show (*iter);
+}
+
+void CSVTools::ReportTable::removeSelection()
+{
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+    std::reverse (selectedRows.begin(), selectedRows.end());
+
+    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
+        ++iter)
+        mModel->removeRows (iter->row(), 1);
+
+    selectionModel()->clear();
 }

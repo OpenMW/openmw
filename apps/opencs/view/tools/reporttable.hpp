@@ -24,6 +24,7 @@ namespace CSVTools
             CSMTools::ReportModel *mModel;
             CSVWorld::CommandDelegate *mIdTypeDelegate;
             QAction *mShowAction;
+            QAction *mRemoveAction;
 
         private:
 
@@ -45,6 +46,8 @@ namespace CSVTools
             void show (const QModelIndex& index);
 
             void showSelection();
+
+            void removeSelection();
 
         signals:
 
