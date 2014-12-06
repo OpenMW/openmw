@@ -1,31 +1,15 @@
 
 #include "reportsubview.hpp"
 
-#include <QTableView>
-#include <QHeaderView>
-
-#include "../../model/tools/reportmodel.hpp"
-
-#include "../../view/world/idtypedelegate.hpp"
+#include "reporttable.hpp"
 
 CSVTools::ReportSubView::ReportSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: CSVDoc::SubView (id), mModel (document.getReport (id))
+: CSVDoc::SubView (id)
 {
-    setWidget (mTable = new QTableView (this));
-    mTable->setModel (mModel);
+    setWidget (mTable = new ReportTable (document, id, this));
 
-    mTable->horizontalHeader()->setResizeMode (QHeaderView::Interactive);
-    mTable->verticalHeader()->hide();
-    mTable->setSortingEnabled (true);
-    mTable->setSelectionBehavior (QAbstractItemView::SelectRows);
-    mTable->setSelectionMode (QAbstractItemView::ExtendedSelection);
-
-    mIdTypeDelegate = CSVWorld::IdTypeDelegateFactory().makeDelegate (
-        document, this);
-
-    mTable->setItemDelegateForColumn (0, mIdTypeDelegate);
-
-    connect (mTable, SIGNAL (doubleClicked (const QModelIndex&)), this, SLOT (show (const QModelIndex&)));
+    connect (mTable, SIGNAL (editRequest (const CSMWorld::UniversalId&, const std::string&)),
+        SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)));
 }
 
 void CSVTools::ReportSubView::setEditLock (bool locked)
@@ -33,13 +17,7 @@ void CSVTools::ReportSubView::setEditLock (bool locked)
     // ignored. We don't change document state anyway.
 }
 
-void CSVTools::ReportSubView::updateUserSetting
-                                (const QString &name, const QStringList &list)
+void CSVTools::ReportSubView::updateUserSetting (const QString &name, const QStringList &list)
 {
-    mIdTypeDelegate->updateUserSetting (name, list);
-}
-
-void CSVTools::ReportSubView::show (const QModelIndex& index)
-{
-    focusId (mModel->getUniversalId (index.row()), "");
+    mTable->updateUserSetting (name, list);
 }
