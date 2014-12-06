@@ -3,6 +3,8 @@
 
 #include "../world/dragrecordtable.hpp"
 
+class QAction;
+
 namespace CSMTools
 {
     class ReportModel;
@@ -21,8 +23,11 @@ namespace CSVTools
 
             CSMTools::ReportModel *mModel;
             CSVWorld::CommandDelegate *mIdTypeDelegate;
+            QAction *mShowAction;
 
         private:
+
+            void contextMenuEvent (QContextMenuEvent *event);
 
             void mouseMoveEvent (QMouseEvent *event);
 
@@ -38,6 +43,8 @@ namespace CSVTools
         private slots:
 
             void show (const QModelIndex& index);
+
+            void showSelection();
 
         signals:
 

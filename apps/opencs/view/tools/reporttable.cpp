@@ -2,10 +2,25 @@
 #include "reporttable.hpp"
 
 #include <QHeaderView>
+#include <QAction>
+#include <QMenu>
 
 #include "../../model/tools/reportmodel.hpp"
 
 #include "../../view/world/idtypedelegate.hpp"
+
+void CSVTools::ReportTable::contextMenuEvent (QContextMenuEvent *event)
+{
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+    // create context menu
+    QMenu menu (this);
+
+    if (!selectedRows.empty())
+        menu.addAction (mShowAction);
+
+    menu.exec (event->globalPos());
+}
 
 void CSVTools::ReportTable::mouseMoveEvent (QMouseEvent *event)
 {
@@ -30,6 +45,10 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
         document, this);
 
     setItemDelegateForColumn (0, mIdTypeDelegate);
+
+    mShowAction = new QAction (tr ("Show"), this);
+    connect (mShowAction, SIGNAL (triggered()), this, SLOT (showSelection()));
+    addAction (mShowAction);
 
     connect (this, SIGNAL (doubleClicked (const QModelIndex&)), this, SLOT (show (const QModelIndex&)));
 }
@@ -57,4 +76,13 @@ void CSVTools::ReportTable::updateUserSetting (const QString& name, const QStrin
 void CSVTools::ReportTable::show (const QModelIndex& index)
 {
     emit editRequest (mModel->getUniversalId (index.row()), mModel->getHint (index.row()));
+}
+
+void CSVTools::ReportTable::showSelection()
+{
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
+        ++iter)
+        show (*iter);
 }
