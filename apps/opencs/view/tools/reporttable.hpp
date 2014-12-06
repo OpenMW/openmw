@@ -32,6 +32,8 @@ namespace CSVTools
 
             void mouseMoveEvent (QMouseEvent *event);
 
+            virtual void mouseDoubleClickEvent (QMouseEvent *event);
+
         public:
 
             ReportTable (CSMDoc::Document& document, const CSMWorld::UniversalId& id,
@@ -42,8 +44,6 @@ namespace CSVTools
             void updateUserSetting (const QString& name, const QStringList& list);
 
         private slots:
-
-            void show (const QModelIndex& index);
 
             void showSelection();
 

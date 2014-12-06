@@ -33,6 +33,39 @@ void CSVTools::ReportTable::mouseMoveEvent (QMouseEvent *event)
         startDrag (*this);
 }
 
+void CSVTools::ReportTable::mouseDoubleClickEvent (QMouseEvent *event)
+{
+    Qt::KeyboardModifiers modifiers =
+        event->modifiers() & (Qt::ShiftModifier | Qt::ControlModifier);
+
+    QModelIndex index = currentIndex();
+
+    selectionModel()->select (index,
+        QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+    switch (modifiers)
+    {
+        case 0:
+
+            event->accept();
+            showSelection();
+            break;
+
+        case Qt::ShiftModifier:
+
+            event->accept();
+            removeSelection();
+            break;
+
+        case Qt::ControlModifier:
+
+            event->accept();
+            showSelection();
+            removeSelection();
+            break;
+    }
+}
+
 CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     const CSMWorld::UniversalId& id, QWidget *parent)
 : CSVWorld::DragRecordTable (document, parent), mModel (document.getReport (id))
@@ -58,8 +91,6 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     mRemoveAction = new QAction (tr ("Remove from list"), this);
     connect (mRemoveAction, SIGNAL (triggered()), this, SLOT (removeSelection()));
     addAction (mRemoveAction);
-
-    connect (this, SIGNAL (doubleClicked (const QModelIndex&)), this, SLOT (show (const QModelIndex&)));
 }
 
 std::vector<CSMWorld::UniversalId> CSVTools::ReportTable::getDraggedRecords() const
@@ -82,18 +113,13 @@ void CSVTools::ReportTable::updateUserSetting (const QString& name, const QStrin
     mIdTypeDelegate->updateUserSetting (name, list);
 }
 
-void CSVTools::ReportTable::show (const QModelIndex& index)
-{
-    emit editRequest (mModel->getUniversalId (index.row()), mModel->getHint (index.row()));
-}
-
 void CSVTools::ReportTable::showSelection()
 {
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
     for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
         ++iter)
-        show (*iter);
+        emit editRequest (mModel->getUniversalId (iter->row()), mModel->getHint (iter->row()));
 }
 
 void CSVTools::ReportTable::removeSelection()
