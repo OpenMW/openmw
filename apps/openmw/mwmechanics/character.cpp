@@ -1072,7 +1072,8 @@ bool CharacterController::updateWeaponState()
         }
         else if (mHitState == CharState_KnockDown)
         {
-            mUpperBodyState = UpperCharState_WeapEquiped;
+            if (mUpperBodyState > UpperCharState_WeapEquiped)
+                mUpperBodyState = UpperCharState_WeapEquiped;
             mAnimation->disable(mCurrentWeapon);
         }
     }

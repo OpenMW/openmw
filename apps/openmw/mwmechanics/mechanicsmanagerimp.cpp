@@ -143,9 +143,9 @@ namespace MWMechanics
             MWWorld::Store<ESM::Skill>::iterator iter = skills.begin();
             for (; iter != skills.end(); ++iter)
             {
-                if (iter->mData.mSpecialization==class_->mData.mSpecialization)
+                if (iter->second.mData.mSpecialization==class_->mData.mSpecialization)
                 {
-                    int index = iter->mIndex;
+                    int index = iter->first;
 
                     if (index>=0 && index<27)
                     {

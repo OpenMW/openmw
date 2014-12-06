@@ -84,6 +84,10 @@ struct ObjectScene {
     void rotateBillboardNodes(Ogre::Camera* camera);
 
     void setVisibilityFlags (unsigned int flags);
+
+    // This is called internally by the OgreNifLoader once all elements of the
+    // scene have been attached to their respective nodes.
+    void _notifyAttached();
 };
 
 typedef Ogre::SharedPtr<ObjectScene> ObjectScenePtr;
