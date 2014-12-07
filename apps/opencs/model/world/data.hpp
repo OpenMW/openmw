@@ -244,7 +244,7 @@ namespace CSMWorld
             ///
             ///< \return estimated number of records
 
-            bool continueLoading (CSMDoc::Stage::Messages& messages);
+            bool continueLoading (CSMDoc::Messages& messages);
             ///< \return Finished?
 
             bool hasId (const std::string& id) const;

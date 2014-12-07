@@ -58,7 +58,7 @@ int CSMTools::ScriptCheckStage::setup()
     return mDocument.getData().getScripts().getSize();
 }
 
-void CSMTools::ScriptCheckStage::perform (int stage, Messages& messages)
+void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     mId = mDocument.getData().getScripts().getId (stage);
 

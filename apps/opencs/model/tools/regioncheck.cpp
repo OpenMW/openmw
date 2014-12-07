@@ -17,7 +17,7 @@ int CSMTools::RegionCheckStage::setup()
     return mRegions.getSize();
 }
 
-void CSMTools::RegionCheckStage::perform (int stage, Messages& messages)
+void CSMTools::RegionCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     const CSMWorld::Record<ESM::Region>& record = mRegions.getRecord (stage);
 

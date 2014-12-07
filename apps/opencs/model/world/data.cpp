@@ -671,7 +671,7 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     return mReader->getRecordCount();
 }
 
-bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
+bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 {
     if (!mReader)
         throw std::logic_error ("can't continue loading, because no load has been started");
@@ -794,8 +794,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
                 }
                 else
                 {
-                    messages.push_back (std::make_pair (UniversalId::Type_None,
-                        "Trying to delete dialogue record " + id + " which does not exist"));
+                    messages.add (UniversalId::Type_None,
+                        "Trying to delete dialogue record " + id + " which does not exist");
                 }
             }
             else
@@ -811,8 +811,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         {
             if (!mDialogue)
             {
-                messages.push_back (std::make_pair (UniversalId::Type_None,
-                    "Found info record not following a dialogue record"));
+                messages.add (UniversalId::Type_None,
+                    "Found info record not following a dialogue record");
 
                 mReader->skipRecord();
                 break;
@@ -855,8 +855,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
 
     if (unhandledRecord)
     {
-        messages.push_back (std::make_pair (UniversalId::Type_None,
-            "Unsupported record type: " + n.toString()));
+        messages.add (UniversalId::Type_None, "Unsupported record type: " + n.toString());
 
         mReader->skipRecord();
     }

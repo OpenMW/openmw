@@ -84,7 +84,7 @@ void CSMDoc::Operation::abort()
 
 void CSMDoc::Operation::executeStage()
 {
-    Stage::Messages messages;
+    Messages messages;
 
     while (mCurrentStage!=mStages.end())
     {
@@ -112,8 +112,8 @@ void CSMDoc::Operation::executeStage()
 
     emit progress (mCurrentStepTotal, mTotalSteps ? mTotalSteps : 1, mType);
 
-    for (Stage::Messages::const_iterator iter (messages.begin()); iter!=messages.end(); ++iter)
-        emit reportMessage (iter->first, iter->second, mType);
+    for (Messages::Iterator iter (messages.begin()); iter!=messages.end(); ++iter)
+        emit reportMessage (iter->mId, iter->mMessage, mType);
 
     if (mCurrentStage==mStages.end())
         exit();

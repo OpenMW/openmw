@@ -17,7 +17,7 @@ int CSMTools::SpellCheckStage::setup()
     return mSpells.getSize();
 }
 
-void CSMTools::SpellCheckStage::perform (int stage, Messages& messages)
+void CSMTools::SpellCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     const CSMWorld::Record<ESM::Spell>& record = mSpells.getRecord (stage);
 
