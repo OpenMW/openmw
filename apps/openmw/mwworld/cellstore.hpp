@@ -196,7 +196,7 @@ namespace MWWorld
                 for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
                     ++iter)
                 {
-                    if (iter->mData.isDeleted())
+                    if (iter->mData.isDeletedByContentFile())
                         continue;
                     if (!functor (MWWorld::Ptr(&*iter, this)))
                         return false;

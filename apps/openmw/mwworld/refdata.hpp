@@ -100,6 +100,8 @@ namespace MWWorld
 
             /// Returns true if the object was either deleted by the content file or by gameplay.
             bool isDeleted() const;
+            /// Returns true if the object was deleted by a content file.
+            bool isDeletedByContentFile() const;
 
             MWScript::Locals& getLocals();
 

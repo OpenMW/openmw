@@ -279,6 +279,7 @@ namespace MWBase
             ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
 
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
+            virtual void undeleteObject (const MWWorld::Ptr& ptr) = 0;
 
             virtual void moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
 

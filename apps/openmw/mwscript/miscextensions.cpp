@@ -571,6 +571,10 @@ namespace MWScript
 
                     if (parameter == 1)
                         MWBase::Environment::get().getWorld()->deleteObject(ptr);
+                    else if (parameter == 0)
+                        MWBase::Environment::get().getWorld()->undeleteObject(ptr);
+                    else
+                        throw std::runtime_error("SetDelete: unexpected parameter");
                 }
         };
 

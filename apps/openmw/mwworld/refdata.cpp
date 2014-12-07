@@ -180,6 +180,11 @@ namespace MWWorld
         return mDeleted || mCount == 0;
     }
 
+    bool RefData::isDeletedByContentFile() const
+    {
+        return mDeleted;
+    }
+
     MWScript::Locals& RefData::getLocals()
     {
         return mLocals;

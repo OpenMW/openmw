@@ -1072,6 +1072,25 @@ namespace MWWorld
         }
     }
 
+    void World::undeleteObject(const Ptr& ptr)
+    {
+        if (ptr.getCellRef().getRefNum().mContentFile == -1)
+            return;
+        if (ptr.getRefData().isDeleted())
+        {
+            ptr.getRefData().setCount(1);
+            if (mWorldScene->getActiveCells().find(ptr.getCell()) != mWorldScene->getActiveCells().end()
+                    && ptr.getRefData().isEnabled())
+            {
+                mWorldScene->addObjectToScene(ptr);
+                std::string script = ptr.getClass().getScript(ptr);
+                if (!script.empty())
+                    mLocalScripts.add(script, ptr);
+                addContainerScripts(ptr, ptr.getCell());
+            }
+        }
+    }
+
     void World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z)
     {
         ESM::Position pos = ptr.getRefData().getPosition();
