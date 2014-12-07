@@ -101,7 +101,7 @@ void CSMDoc::Operation::executeStage()
             }
             catch (const std::exception& e)
             {
-                emit reportMessage (CSMWorld::UniversalId(), e.what(), mType);
+                emit reportMessage (CSMWorld::UniversalId(), e.what(), "", mType);
                 abort();
             }
 
@@ -113,7 +113,7 @@ void CSMDoc::Operation::executeStage()
     emit progress (mCurrentStepTotal, mTotalSteps ? mTotalSteps : 1, mType);
 
     for (Messages::Iterator iter (messages.begin()); iter!=messages.end(); ++iter)
-        emit reportMessage (iter->mId, iter->mMessage, mType);
+        emit reportMessage (iter->mId, iter->mMessage, iter->mHint, mType);
 
     if (mCurrentStage==mStages.end())
         exit();
