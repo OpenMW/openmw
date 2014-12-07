@@ -191,19 +191,15 @@
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sControls}  "/>
 
-                <Widget type="ComboBox" skin="MW_ComboBox" position="4 4 352 24" align="Left Top" name="InputDevice">
-                    <Property key="AddItem" value="Mouse/Keyboard"/>
-                </Widget>
-
-                <Widget type="Widget" skin="MW_Box" position="4 28 352 154">
+                <Widget type="Widget" skin="MW_Box" position="4 4 352 154">
                     <Widget type="ScrollView" skin="MW_ScrollView" name="ControlsBox" position="4 4 344 146"/>
                 </Widget>
 
-                <Widget type="AutoSizedButton" skin="MW_Button" name="ResetControlsButton" position="4 182 100 24">
+                <Widget type="AutoSizedButton" skin="MW_Button" name="ResetControlsButton" position="4 158 100 24">
                     <Property key="Caption" value="#{sControlsMenu1}"/>
                 </Widget>
 
-                <Widget type="HBox" position="4 206 300 24">
+                <Widget type="HBox" position="4 182 300 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" name="InvertYButton">
                         <UserString key="SettingCategory" value="Input"/>
                         <UserString key="SettingName" value="invert y axis"/>
@@ -214,10 +210,10 @@
                     </Widget>
                 </Widget>
 
-                <Widget type="TextBox" skin="NormalText" position="4 230 336 18" align="Left Top">
+                <Widget type="TextBox" skin="NormalText" position="4 226 336 18" align="Left Top">
                     <Property key="Caption" value="Camera sensitivity"/>
                 </Widget>
-                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 252 336 18" align="Left Top" name="CameraSensitivitySlider">
+                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 246 336 18" align="Left Top" name="CameraSensitivitySlider">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
@@ -227,13 +223,16 @@
                     <UserString key="SettingMin" value="0.2"/>
                     <UserString key="SettingMax" value="5.0"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 276 336 18" align="Left Top">
+                <Widget type="TextBox" skin="SandText" position="4 264 336 18" align="Left Top">
                     <Property key="Caption" value="#{sLow}"/>
                     <Property key="TextAlign" value="Left"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 276 336 18" align="Left Top">
+                <Widget type="TextBox" skin="SandText" position="4 264 336 18" align="Left Top">
                     <Property key="Caption" value="#{sHigh}"/>
                     <Property key="TextAlign" value="Right"/>
+                </Widget>
+		<Widget type="ComboBox" skin="MW_ComboBox" position="4 287 352 24" align="Left Top" name="InputDevice">
+                    <Property key="AddItem" value="Mouse/Keyboard"/>
                 </Widget>
 
             </Widget>
