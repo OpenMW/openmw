@@ -14,7 +14,7 @@ int CSMTools::BodyPartCheckStage::setup()
     return mBodyParts.getSize();
 }
 
-void CSMTools::BodyPartCheckStage::perform ( int stage, Messages &messages )
+void CSMTools::BodyPartCheckStage::perform (int stage, CSMDoc::Messages &messages)
 {
     const CSMWorld::Record<ESM::BodyPart> &record = mBodyParts.getRecord(stage);
 

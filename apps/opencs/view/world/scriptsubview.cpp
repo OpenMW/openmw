@@ -47,6 +47,32 @@ void CSVWorld::ScriptSubView::setEditLock (bool locked)
     mEditor->setReadOnly (locked);
 }
 
+void CSVWorld::ScriptSubView::useHint (const std::string& hint)
+{
+    if (hint.empty())
+        return;
+
+    if (hint[0]=='l')
+    {
+        std::istringstream stream (hint.c_str()+1);
+
+        char ignore;
+        int line;
+        int column;
+
+        if (stream >> ignore >> line >> column)
+        {
+            QTextCursor cursor = mEditor->textCursor();
+
+            cursor.movePosition (QTextCursor::Start);
+            if (cursor.movePosition (QTextCursor::Down, QTextCursor::MoveAnchor, line))
+                cursor.movePosition (QTextCursor::Right, QTextCursor::MoveAnchor, column);
+
+            mEditor->setTextCursor (cursor);
+        }
+    }
+}
+
 void CSVWorld::ScriptSubView::textChanged()
 {
     if (mEditor->isChangeLocked())

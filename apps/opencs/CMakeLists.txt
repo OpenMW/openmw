@@ -11,7 +11,7 @@ opencs_units (model/doc
     )
 
 opencs_units_noqt (model/doc
-    stage savingstate savingstages blacklist
+    stage savingstate savingstages blacklist messages
     )
 
 opencs_hdrs_noqt (model/doc
@@ -92,7 +92,7 @@ opencs_hdrs_noqt (view/render
 
 
 opencs_units (view/tools
-    reportsubview
+    reportsubview reporttable
     )
 
 opencs_units_noqt (view/tools

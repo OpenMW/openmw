@@ -18,7 +18,7 @@ int CSMTools::ClassCheckStage::setup()
     return mClasses.getSize();
 }
 
-void CSMTools::ClassCheckStage::perform (int stage, Messages& messages)
+void CSMTools::ClassCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     const CSMWorld::Record<ESM::Class>& record = mClasses.getRecord (stage);
 

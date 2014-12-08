@@ -48,8 +48,8 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
         connect (mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
         connect (mVerifier, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
         connect (mVerifier,
-            SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)),
-            this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, int)));
+            SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
+            this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
 
         std::vector<std::string> mandatoryIds; //  I want C++11, damn it!
         mandatoryIds.push_back ("Day");
@@ -155,11 +155,11 @@ CSMTools::ReportModel *CSMTools::Tools::getReport (const CSMWorld::UniversalId& 
 }
 
 void CSMTools::Tools::verifierMessage (const CSMWorld::UniversalId& id, const std::string& message,
-    int type)
+    const std::string& hint, int type)
 {
     std::map<int, int>::iterator iter = mActiveReports.find (type);
 
     if (iter!=mActiveReports.end())
-        mReports[iter->second]->add (id, message);
+        mReports[iter->second]->add (id, message, hint);
 }
 

@@ -7,7 +7,7 @@
 
 #include "../world/universalid.hpp"
 
-void CSMTools::RaceCheckStage::performPerRecord (int stage, Messages& messages)
+void CSMTools::RaceCheckStage::performPerRecord (int stage, CSMDoc::Messages& messages)
 {
     const CSMWorld::Record<ESM::Race>& record = mRaces.getRecord (stage);
 
@@ -46,7 +46,7 @@ void CSMTools::RaceCheckStage::performPerRecord (int stage, Messages& messages)
     /// \todo check data members that can't be edited in the table view
 }
 
-void CSMTools::RaceCheckStage::performFinal (Messages& messages)
+void CSMTools::RaceCheckStage::performFinal (CSMDoc::Messages& messages)
 {
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Races);
 
@@ -64,7 +64,7 @@ int CSMTools::RaceCheckStage::setup()
     return mRaces.getSize()+1;
 }
 
-void CSMTools::RaceCheckStage::perform (int stage, Messages& messages)
+void CSMTools::RaceCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     if (stage==mRaces.getSize())
         performFinal (messages);

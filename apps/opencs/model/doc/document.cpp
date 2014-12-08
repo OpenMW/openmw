@@ -2301,8 +2301,8 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     connect (&mSaving, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
 
     connect (
-        &mSaving, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)),
-        this, SLOT (reportMessage (const CSMWorld::UniversalId&, const std::string&, int)));
+        &mSaving, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
+        this, SLOT (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
 
     connect (&mRunner, SIGNAL (runStateChanged()), this, SLOT (runStateChanged()));
 }
@@ -2387,7 +2387,7 @@ void CSMDoc::Document::modificationStateChanged (bool clean)
 }
 
 void CSMDoc::Document::reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
-    int type)
+    const std::string& hint, int type)
 {
     /// \todo find a better way to get these messages to the user.
     std::cout << message << std::endl;

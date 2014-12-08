@@ -11,7 +11,7 @@
 #include "record.hpp"
 
 void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base,
-    std::map<ESM::RefNum, std::string>& cache, CSMDoc::Stage::Messages& messages)
+    std::map<ESM::RefNum, std::string>& cache, CSMDoc::Messages& messages)
 {
     Record<Cell> cell = mCells.getRecord (cellIndex);
 
@@ -36,8 +36,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
                 CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Cell,
                     mCells.getId (cellIndex));
 
-                messages.push_back (std::make_pair (id,
-                    "Attempt to delete a non-existing reference"));
+                messages.add (id, "Attempt to delete a non-existing reference");
 
                 continue;
             }
