@@ -160,7 +160,6 @@ Bug #2161: Editor: combat/magic/stealth values of creature not displayed correct
 Bug #2163: OpenMW can't detect death if the NPC die by the post damage effect of a magic weapon.
 Bug #2168: Westly's Master Head Pack X – Some hairs aren't rendered correctly.
 Bug #2170: Mods using conversations to update PC inconsistant
-Bug #2173: Launcher: disabling plugin files is broken
 Bug #2175: Pathgrid mods do not overwrite the existing pathgrid
 Bug #2180: Editor: Verifier doesn't handle Windows-specific path issues when dealing with resources
 Feature #238: Add UI to run INI-importer from the launcher
