@@ -628,7 +628,9 @@ void OpenAL_Sound3D::update()
 {
     ALfloat gain = mVolume*mBaseVolume;
     ALfloat pitch = mPitch;
-    if(!(mFlags&MWBase::SoundManager::Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)
+    if(mPos.squaredDistance(mOutput.mPos) > mMaxDistance*mMaxDistance)
+        gain = 0.0f;
+    else if(!(mFlags&MWBase::SoundManager::Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)
     {
         gain *= 0.9f;
         pitch *= 0.7f;
@@ -694,7 +696,7 @@ void OpenAL_Output::init(const std::string &devname)
         fail(std::string("Failed to setup context: ")+alcGetString(mDevice, alcGetError(mDevice)));
     }
 
-    alDistanceModel(AL_INVERSE_DISTANCE);
+    alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
     throwALerror();
 
     ALCint maxmono=0, maxstereo=0;

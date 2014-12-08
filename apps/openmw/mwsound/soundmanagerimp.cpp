@@ -385,6 +385,11 @@ namespace MWSound
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const Ogre::Vector3 objpos(pos.pos);
 
+            if ((mode & Play_RemoveAtDistance) && mListenerPos.squaredDistance(objpos) > 2000*2000)
+            {
+                return MWBase::SoundPtr();
+            }
+
             sound = mOutput->playSound3D(file, objpos, volume, basevol, pitch, min, max, mode|type, offset);
             if((mode&Play_NoTrack))
                 mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
@@ -650,6 +655,13 @@ namespace MWSound
                     const ESM::Position &pos = ptr.getRefData().getPosition();
                     const Ogre::Vector3 objpos(pos.pos);
                     snditer->first->setPosition(objpos);
+
+                    if ((snditer->first->mFlags & Play_RemoveAtDistance)
+                            && mListenerPos.squaredDistance(Ogre::Vector3(ptr.getRefData().getPosition().pos)) > 2000*2000)
+                    {
+                        mActiveSounds.erase(snditer++);
+                        continue;
+                    }
                 }
                 //update fade out
                 if(snditer->first->mFadeOutTime>0)
