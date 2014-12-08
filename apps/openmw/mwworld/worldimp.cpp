@@ -1560,11 +1560,24 @@ namespace MWWorld
 
         updateWindowManager ();
 
+        updateSoundListener();
+
         if (!paused && mPlayer->getPlayer().getCell()->isExterior())
         {
             ESM::Position pos = mPlayer->getPlayer().getRefData().getPosition();
             mPlayer->setLastKnownExteriorPosition(Ogre::Vector3(pos.pos));
         }
+    }
+
+    void World::updateSoundListener()
+    {
+        Ogre::Vector3 playerPos = mPlayer->getPlayer().getRefData().getBaseNode()->getPosition();
+        const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(getPlayerPtr().getRefData().getHandle());
+        if(actor) playerPos.z += 1.85*actor->getHalfExtents().z;
+        Ogre::Quaternion playerOrient = Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
+                    Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X);
+        MWBase::Environment::get().getSoundManager()->setListenerPosDir(playerPos, playerOrient.yAxis(),
+                                                                        playerOrient.zAxis());
     }
 
     void World::updateWindowManager ()
