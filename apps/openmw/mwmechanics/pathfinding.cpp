@@ -188,7 +188,8 @@ namespace MWMechanics
         if(mCell != cell || !mPathgrid)
         {
             mCell = cell;
-            mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*mCell->getCell());
+            mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*mCell->getCell(),
+            MWBase::Environment::get().getWorld()->getCellName(mCell));
         }
 
         // Refer to AiWander reseach topic on openmw forums for some background.

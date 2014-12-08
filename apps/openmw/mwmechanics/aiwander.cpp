@@ -382,7 +382,7 @@ namespace MWMechanics
         {
             // infrequently used, therefore no benefit in caching it as a member
             const ESM::Pathgrid *
-                pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell);
+                pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell, world->getCellName(currentCell));
 
             // cache the current cell location
             cachedCellX = cell->mData.mX;
