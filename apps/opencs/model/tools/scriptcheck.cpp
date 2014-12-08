@@ -28,7 +28,11 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, const Compi
         << ", line " << loc.mLine << ", column " << loc.mColumn
         << " (" << loc.mLiteral << "): " << message;
 
-    mMessages->push_back (std::make_pair (id, stream.str()));
+    std::ostringstream hintStream;
+
+    hintStream << "l:" << loc.mLine << " " << loc.mColumn;
+
+    mMessages->add (id, stream.str(), hintStream.str());
 }
 
 void CSMTools::ScriptCheckStage::report (const std::string& message, Type type)
