@@ -45,6 +45,9 @@ namespace MWGui
             // controls
             MyGUI::ScrollView* mControlsBox;
             MyGUI::Button* mResetControlsButton;
+            MyGUI::Button* mKeyboardSwitch;
+            MyGUI::Button* mControllerSwitch;
+            bool mKeyboardMode; //if true, setting up the keyboard. Otherwise, it's controller
 
             void onOkButtonClicked(MyGUI::Widget* _sender);
             void onFpsToggled(MyGUI::Widget* _sender);
@@ -62,6 +65,8 @@ namespace MWGui
             void onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel);
             void onResetDefaultBindings(MyGUI::Widget* _sender);
             void onResetDefaultBindingsAccept ();
+            void onKeyboardSwitchClicked(MyGUI::Widget* _sender);
+            void onControllerSwitchClicked(MyGUI::Widget* _sender);
 
             void onWindowResize(MyGUI::Window* _sender);
 

@@ -268,7 +268,7 @@ namespace MWScript
 
     std::string InterpreterContext::getActionBinding(const std::string& action) const
     {
-        std::vector<int> actions = MWBase::Environment::get().getInputManager()->getActionSorting ();
+        std::vector<int> actions = MWBase::Environment::get().getInputManager()->getActionKeySorting ();
         for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
         {
             std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
@@ -276,7 +276,7 @@ namespace MWScript
                 continue;
 
             if(desc == action)
-                return MWBase::Environment::get().getInputManager()->getActionBindingName (*it);
+                return MWBase::Environment::get().getInputManager()->getActionKeyBindingName (*it);
         }
 
         return "None";

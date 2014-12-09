@@ -55,6 +55,7 @@ namespace MWInput
             public SFO::KeyListener,
             public SFO::MouseListener,
             public SFO::WindowListener,
+            public SFO::ControllerListener,
             public ICS::ChannelListener,
             public ICS::DetectingBindingListener
     {
@@ -82,11 +83,16 @@ namespace MWInput
         virtual bool getControlSwitch (const std::string& sw);
 
         virtual std::string getActionDescription (int action);
-        virtual std::string getActionBindingName (int action);
+        virtual std::string getActionKeyBindingName (int action);
+        virtual std::string getActionControllerBindingName (int action);
+        virtual std::string sdlControllerAxisToString(int axis);
+        virtual std::string sdlControllerButtonToString(int button);
         virtual int getNumActions() { return A_Last; }
-        virtual std::vector<int> getActionSorting ();
-        virtual void enableDetectingBindingMode (int action);
-        virtual void resetToDefaultBindings();
+        virtual std::vector<int> getActionKeySorting();
+        virtual std::vector<int> getActionControllerSorting();
+        virtual void enableDetectingBindingMode (int action, bool keyboard);
+        virtual void resetToDefaultKeyBindings();
+        virtual void resetToDefaultControllerBindings();
 
     public:
         virtual void keyPressed(const SDL_KeyboardEvent &arg );
@@ -96,6 +102,12 @@ namespace MWInput
         virtual void mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual void mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual void mouseMoved( const SFO::MouseMotionEvent &arg );
+
+        virtual void buttonPressed( const SDL_ControllerButtonEvent &arg);
+        virtual void buttonReleased( const SDL_ControllerButtonEvent &arg);
+        virtual void axisMoved( const SDL_ControllerAxisEvent &arg);
+        virtual void controllerAdded( const SDL_ControllerDeviceEvent &arg);
+        virtual void controllerRemoved( const SDL_ControllerDeviceEvent &arg);
 
         virtual void windowVisibilityChange( bool visible );
         virtual void windowFocusChange( bool have_focus );
@@ -114,20 +126,16 @@ namespace MWInput
             , unsigned int button, ICS::Control::ControlChangingDirection direction);
 
         virtual void joystickAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-            , int deviceId, int axis, ICS::Control::ControlChangingDirection direction);
+            , int axis, ICS::Control::ControlChangingDirection direction);
 
         virtual void joystickButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-            , int deviceId, unsigned int button, ICS::Control::ControlChangingDirection direction);
+            , unsigned int button, ICS::Control::ControlChangingDirection direction);
 
-        virtual void joystickPOVBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-            , int deviceId, int pov,ICS:: InputControlSystem::POVAxis axis, ICS::Control::ControlChangingDirection direction);
-
-        virtual void joystickSliderBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-            , int deviceId, int slider, ICS::Control::ControlChangingDirection direction);
-
-        void clearAllBindings (ICS::Control* control);
+        void clearAllKeyBindings (ICS::Control* control);
+        void clearAllControllerBindings (ICS::Control* control);
 
     private:
+        bool mJoystickLastUsed;
         OEngine::Render::OgreRenderer &mOgre;
         MWWorld::Player* mPlayer;
         OMW::Engine& mEngine;
@@ -155,6 +163,8 @@ namespace MWInput
 
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
+
+        bool mDetectingKeyboard;
 
         float mOverencumberedMessageDelay;
 
@@ -191,12 +201,15 @@ namespace MWInput
         void quickLoad();
         void quickSave();
 
+        bool isAReverse(int action);
+
         void quickKey (int index);
         void showQuickKeysMenu();
 
         bool actionIsActive (int id);
 
         void loadKeyDefaults(bool force = false);
+        void loadControllerDefaults(bool force = false);
 
     private:
         enum Actions
@@ -260,6 +273,11 @@ namespace MWInput
             A_ToggleHUD,
 
             A_ToggleDebug,
+
+            A_LookUpDown,         //Joystick look
+            A_LookLeftRight,
+            A_MoveForwardBackward,
+            A_MoveLeftRight,
 
             A_Last            // Marker for the last item
         };

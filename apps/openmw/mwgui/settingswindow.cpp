@@ -156,7 +156,8 @@ namespace MWGui
     }
 
     SettingsWindow::SettingsWindow() :
-        WindowBase("openmw_settings_window.layout")
+        WindowBase("openmw_settings_window.layout"),
+        mKeyboardMode(true)
     {
         configureWidgets(mMainWidget);
 
@@ -180,6 +181,8 @@ namespace MWGui
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mRefractionButton, "RefractionButton");
         getWidget(mDifficultySlider, "DifficultySlider");
+        getWidget(mKeyboardSwitch, "KeyboardButton");
+        getWidget(mControllerSwitch, "ControllerButton");
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SettingsWindow::onWindowResize);
 
@@ -190,6 +193,9 @@ namespace MWGui
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
 
         mShadowsTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onShadowTextureSizeChanged);
+
+        mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
+        mControllerSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onControllerSwitchClicked);
 
         center();
 
@@ -436,14 +442,33 @@ namespace MWGui
         MWBase::Environment::get().getInputManager()->processChangedSettings(changed);
     }
 
+    void SettingsWindow::onKeyboardSwitchClicked(MyGUI::Widget* _sender)
+    {
+        if(mKeyboardMode)
+            return;
+        mKeyboardMode = true;
+        updateControlsBox();
+    }
+
+    void SettingsWindow::onControllerSwitchClicked(MyGUI::Widget* _sender)
+    {
+        if(!mKeyboardMode)
+            return;
+        mKeyboardMode = false;
+        updateControlsBox();
+    }
+
     void SettingsWindow::updateControlsBox()
     {
         while (mControlsBox->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mControlsBox->getChildAt(0));
 
-        MWBase::Environment::get().getWindowManager ()->removeStaticMessageBox();
-
-        std::vector<int> actions = MWBase::Environment::get().getInputManager()->getActionSorting ();
+        MWBase::Environment::get().getWindowManager()->removeStaticMessageBox();
+        std::vector<int> actions;
+        if(mKeyboardMode)
+            actions = MWBase::Environment::get().getInputManager()->getActionKeySorting();
+        else
+            actions = MWBase::Environment::get().getInputManager()->getActionControllerSorting();
 
         const int h = 18;
         const int w = mControlsBox->getWidth() - 28;
@@ -454,7 +479,11 @@ namespace MWGui
             if (desc == "")
                 continue;
 
-            std::string binding = MWBase::Environment::get().getInputManager()->getActionBindingName (*it);
+            std::string binding;
+            if(mKeyboardMode)
+                binding = MWBase::Environment::get().getInputManager()->getActionKeyBindingName(*it);
+            else
+                binding = MWBase::Environment::get().getInputManager()->getActionControllerBindingName(*it);
 
             Gui::SharedStateButton* leftText = mControlsBox->createWidget<Gui::SharedStateButton>("SandTextButton", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
             leftText->setCaptionWithReplacing(desc);
@@ -488,7 +517,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager ()->staticMessageBox ("#{sControlsMenu3}");
         MWBase::Environment::get().getWindowManager ()->disallowMouse();
 
-        MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId);
+        MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId, mKeyboardMode);
 
     }
 
@@ -511,7 +540,10 @@ namespace MWGui
 
     void SettingsWindow::onResetDefaultBindingsAccept()
     {
-        MWBase::Environment::get().getInputManager ()->resetToDefaultBindings ();
+        if(mKeyboardMode)
+            MWBase::Environment::get().getInputManager ()->resetToDefaultKeyBindings ();
+        else
+            MWBase::Environment::get().getInputManager()->resetToDefaultControllerBindings();
         updateControlsBox ();
     }
 

@@ -37,11 +37,19 @@ namespace MWBase
             virtual bool getControlSwitch (const std::string& sw) = 0;
 
             virtual std::string getActionDescription (int action) = 0;
-            virtual std::string getActionBindingName (int action) = 0;
-            virtual std::vector<int> getActionSorting () = 0;
+            virtual std::string getActionKeyBindingName (int action) = 0;
+            virtual std::string getActionControllerBindingName (int action) = 0;
+            virtual std::string sdlControllerAxisToString(int axis) = 0;
+            virtual std::string sdlControllerButtonToString(int button) = 0;
+            ///Actions available for binding to keyboard buttons
+            virtual std::vector<int> getActionKeySorting() = 0;
+            ///Actions available for binding to controller buttons
+            virtual std::vector<int> getActionControllerSorting() = 0;
             virtual int getNumActions() = 0;
-            virtual void enableDetectingBindingMode (int action) = 0;
-            virtual void resetToDefaultBindings() = 0;
+            ///If keyboard is true, only pay attention to keyboard events. If false, only pay attention to cntroller events (excluding esc)
+            virtual void enableDetectingBindingMode (int action, bool keyboard) = 0;
+            virtual void resetToDefaultKeyBindings() = 0;
+            virtual void resetToDefaultControllerBindings() = 0;
     };
 }
 
