@@ -109,6 +109,7 @@ namespace MWWorld
 
             Ptr copyObjectToCell(const Ptr &ptr, CellStore* cell, ESM::Position pos, bool adjustPos=true);
 
+            void updateSoundListener();
             void updateWindowManager ();
             void performUpdateSceneQueries ();
             void getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer=true);

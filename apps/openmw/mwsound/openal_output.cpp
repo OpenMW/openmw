@@ -696,7 +696,7 @@ void OpenAL_Output::init(const std::string &devname)
         fail(std::string("Failed to setup context: ")+alcGetString(mDevice, alcGetError(mDevice)));
     }
 
-    alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+    alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
     throwALerror();
 
     ALCint maxmono=0, maxstereo=0;
