@@ -581,6 +581,8 @@ namespace ICS
 
                 binder.SetAttribute( "direction", "INCREASE" );
 
+                binder.SetAttribute( "deviceId", "1" ); //completely useless, but required for backwards compatability
+
                 control.InsertEndChild(binder);
             }
 
@@ -593,6 +595,8 @@ namespace ICS
                     getJoystickAxisBinding(*o, Control/*::ControlChangingDirection*/::DECREASE)).c_str() );
 
                 binder.SetAttribute( "direction", "DECREASE" );
+
+                binder.SetAttribute( "deviceId", "1" ); //completely useless, but required for backwards compatability
 
                 control.InsertEndChild(binder);
             }
@@ -607,6 +611,8 @@ namespace ICS
 
                 binder.SetAttribute( "direction", "INCREASE" );
 
+                binder.SetAttribute( "deviceId", "1" ); //completely useless, but required for backwards compatability
+
                 control.InsertEndChild(binder);
             }
 
@@ -619,6 +625,8 @@ namespace ICS
                     getJoystickButtonBinding(*o, Control/*::ControlChangingDirection*/::DECREASE)).c_str() );
 
                 binder.SetAttribute( "direction", "DECREASE" );
+
+                binder.SetAttribute( "deviceId", "1" ); //completely useless, but required for backwards compatability
 
                 control.InsertEndChild(binder);
             }
