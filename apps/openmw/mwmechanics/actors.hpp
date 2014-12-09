@@ -112,6 +112,9 @@ namespace MWMechanics
             /**ie AiFollow is active and the target is the actor **/
             std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
 
+            /// Get the list of AiFollow::mFollowIndex for all actors following this target
+            std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor);
+
             ///Returns the list of actors which are fighting the given actor
             /**ie AiCombat is active and the target is the actor **/
             std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor);

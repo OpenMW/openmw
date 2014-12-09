@@ -1470,6 +1470,36 @@ namespace MWMechanics
         return list;
     }
 
+    std::list<int> Actors::getActorsFollowingIndices(const MWWorld::Ptr &actor)
+    {
+        std::list<int> list;
+        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+        {
+            const MWWorld::Class &cls = iter->first.getClass();
+            CreatureStats &stats = cls.getCreatureStats(iter->first);
+            if (stats.isDead())
+                continue;
+
+            // An actor counts as following if AiFollow is the current AiPackage, or there are only Combat packages before the AiFollow package
+            for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
+            {
+                if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
+                {
+                    MWWorld::Ptr followTarget = dynamic_cast<MWMechanics::AiFollow*>(*it)->getTarget();
+                    if (followTarget.isEmpty())
+                        continue;
+                    if (followTarget == actor)
+                        list.push_back(dynamic_cast<MWMechanics::AiFollow*>(*it)->getFollowIndex());
+                    else
+                        break;
+                }
+                else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
+                    break;
+            }
+        }
+        return list;
+    }
+
     std::list<MWWorld::Ptr> Actors::getActorsFighting(const MWWorld::Ptr& actor) {
         std::list<MWWorld::Ptr> list;
         std::vector<MWWorld::Ptr> neighbors;

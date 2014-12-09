@@ -46,6 +46,8 @@ namespace MWMechanics
 
             bool isCommanded() const;
 
+            int getFollowIndex() const;
+
         private:
             /// This will make the actor always follow.
             /** Thus ignoring mDuration and mX,mY,mZ (used for summoned creatures). **/
@@ -58,6 +60,9 @@ namespace MWMechanics
             std::string mActorRefId;
             int mActorId;
             std::string mCellId;
+            int mFollowIndex;
+
+            static int mFollowIndexCounter;
     };
 }
 #endif

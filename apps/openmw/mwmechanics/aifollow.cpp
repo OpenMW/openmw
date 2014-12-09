@@ -6,6 +6,7 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "creaturestats.hpp"
@@ -15,28 +16,31 @@
 
 #include "steering.hpp"
 
+int MWMechanics::AiFollow::mFollowIndexCounter = 0;
+
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
 : mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
-, mActorRefId(actorId), mCellId(""), mActorId(-1)
+, mActorRefId(actorId), mCellId(""), mActorId(-1), mFollowIndex(mFollowIndexCounter++)
 {
 }
 MWMechanics::AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
 : mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
-, mActorRefId(actorId), mCellId(cellId), mActorId(-1)
+, mActorRefId(actorId), mCellId(cellId), mActorId(-1), mFollowIndex(mFollowIndexCounter++)
 {
 }
 
 MWMechanics::AiFollow::AiFollow(const std::string &actorId, bool commanded)
 : mAlwaysFollow(true), mCommanded(commanded), mRemainingDuration(0), mX(0), mY(0), mZ(0)
-, mActorRefId(actorId), mCellId(""), mActorId(-1)
+, mActorRefId(actorId), mCellId(""), mActorId(-1), mFollowIndex(mFollowIndexCounter++)
 {
+
 }
 
 MWMechanics::AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
     : mAlwaysFollow(follow->mAlwaysFollow), mRemainingDuration(follow->mRemainingDuration)
     , mX(follow->mData.mX), mY(follow->mData.mY), mZ(follow->mData.mZ)
     , mActorRefId(follow->mTargetId), mActorId(-1), mCellId(follow->mCellId)
-    , mCommanded(follow->mCommanded)
+    , mCommanded(follow->mCommanded), mFollowIndex(mFollowIndexCounter++)
 {
 
 }
@@ -48,11 +52,23 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, 
     if (target.isEmpty() || !target.getRefData().getCount() || !target.getRefData().isEnabled()  // Really we should be checking whether the target is currently registered
                                                                                                  // with the MechanicsManager
             )
-        return true; //Target doesn't exist
+        return false; // Target is not here right now, wait for it to return
 
     actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
+
+    float followDistance = 180;
+    // When there are multiple actors following the same target, they form a group with each group member at 180*(i+1) distance to the target
+    int i=0;
+    std::list<int> followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowingIndices(target);
+    followers.sort();
+    for (std::list<int>::iterator it = followers.begin(); it != followers.end(); ++it)
+    {
+        if (*it == mFollowIndex)
+            followDistance *= (i+1);
+        ++i;
+    }
 
     if(!mAlwaysFollow) //Update if you only follow for a bit
     {
@@ -66,7 +82,7 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, 
 
         if((pos.pos[0]-mX)*(pos.pos[0]-mX) +
             (pos.pos[1]-mY)*(pos.pos[1]-mY) +
-            (pos.pos[2]-mZ)*(pos.pos[2]-mZ) < 100*100) //Close-ish to final position
+            (pos.pos[2]-mZ)*(pos.pos[2]-mZ) < followDistance*followDistance) //Close-ish to final position
         {
             if(actor.getCell()->isExterior()) //Outside?
             {
@@ -84,7 +100,7 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, 
     //Set the target destination from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
-    if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < 100) //Stop when you get close
+    if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < followDistance) //Stop when you get close
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
     else {
         pathTo(actor, dest, duration); //Go to the destination
@@ -158,4 +174,9 @@ MWWorld::Ptr MWMechanics::AiFollow::getTarget()
         return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mActorId);
     else
         return MWWorld::Ptr();
+}
+
+int MWMechanics::AiFollow::getFollowIndex() const
+{
+    return mFollowIndex;
 }
