@@ -842,76 +842,48 @@ namespace MWWorld
     template <>
     class Store<ESM::Pathgrid> : public StoreBase
     {
-    public:
-        typedef std::vector<ESM::Pathgrid>::const_iterator iterator;
-
     private:
-        std::vector<ESM::Pathgrid>  mStatic;
+        typedef std::map<std::string, ESM::Pathgrid> Interior;
+        typedef std::map<std::pair<int, int>, ESM::Pathgrid> Exterior;
 
-        std::vector<ESM::Pathgrid>::iterator mIntBegin, mIntEnd, mExtBegin, mExtEnd;
-
-        struct IntExtOrdering
-        {
-            bool operator()(const ESM::Pathgrid &x, const ESM::Pathgrid &y) const {
-                // interior pathgrids precedes exterior ones (x < y)
-                if ((x.mData.mX == 0 && x.mData.mY == 0) &&
-                    (y.mData.mX != 0 || y.mData.mY != 0))
-                {
-                    return true;
-                }
-                return false;
-            }
-        };
-
-        struct ExtCompare
-        {
-            bool operator()(const ESM::Pathgrid &x, const ESM::Pathgrid &y) const {
-                if (x.mData.mX == y.mData.mX) {
-                    return x.mData.mY < y.mData.mY;
-                }
-                return x.mData.mX < y.mData.mX;
-            }
-        };
+        Interior mInt;
+        Exterior mExt;
 
     public:
 
         void load(ESM::ESMReader &esm, const std::string &id) {
-            mStatic.push_back(ESM::Pathgrid());
-            mStatic.back().load(esm);
+
+            ESM::Pathgrid pathgrid;
+            pathgrid.load(esm);
+
+            // Try to overwrite existing record
+            if (!pathgrid.mCell.empty())
+            {
+                std::pair<Interior::iterator, bool> ret = mInt.insert(std::make_pair(pathgrid.mCell, pathgrid));
+                if (!ret.second)
+                    ret.first->second = pathgrid;
+            }
+            else
+            {
+                std::pair<Exterior::iterator, bool> ret = mExt.insert(std::make_pair(std::make_pair(pathgrid.mData.mX, pathgrid.mData.mY),
+                                                                                       pathgrid));
+                if (!ret.second)
+                    ret.first->second = pathgrid;
+            }
         }
 
         size_t getSize() const {
-            return mStatic.size();
+            return mInt.size() + mExt.size();
         }
 
         void setUp() {
-            IntExtOrdering cmp;
-            std::sort(mStatic.begin(), mStatic.end(), cmp);
-
-            ESM::Pathgrid pg;
-            pg.mData.mX = pg.mData.mY = 1;
-            mExtBegin =
-                std::lower_bound(mStatic.begin(), mStatic.end(), pg, cmp);
-            mExtEnd = mStatic.end();
-
-            mIntBegin = mStatic.begin();
-            mIntEnd = mExtBegin;
-
-            std::sort(mIntBegin, mIntEnd, RecordCmp());
-            std::sort(mExtBegin, mExtEnd, ExtCompare());
         }
 
         const ESM::Pathgrid *search(int x, int y) const {
-            ESM::Pathgrid pg;
-            pg.mData.mX = x;
-            pg.mData.mY = y;
-
-            iterator it =
-                std::lower_bound(mExtBegin, mExtEnd, pg, ExtCompare());
-            if (it != mExtEnd && it->mData.mX == x && it->mData.mY == y) {
-                return &(*it);
-            }
-            return 0;
+            Exterior::const_iterator it = mExt.find(std::make_pair(x,y));
+            if (it != mExt.end())
+                return &(it->second);
+            return NULL;
         }
 
         const ESM::Pathgrid *find(int x, int y) const {
@@ -925,14 +897,10 @@ namespace MWWorld
         }
 
         const ESM::Pathgrid *search(const std::string &name) const {
-            ESM::Pathgrid pg;
-            pg.mCell = name;
-
-            iterator it = std::lower_bound(mIntBegin, mIntEnd, pg, RecordCmp());
-            if (it != mIntEnd && Misc::StringUtils::ciEqual(it->mCell, name)) {
-                return &(*it);
-            }
-            return 0;
+            Interior::const_iterator it = mInt.find(name);
+            if (it != mInt.end())
+                return &(it->second);
+            return NULL;
         }
 
         const ESM::Pathgrid *find(const std::string &name) const {
@@ -958,52 +926,19 @@ namespace MWWorld
             }
             return find(cell.mData.mX, cell.mData.mY);
         }
-
-        iterator begin() const {
-            return mStatic.begin();
-        }
-
-        iterator end() const {
-            return mStatic.end();
-        }
-
-        iterator interiorPathsBegin() const {
-            return mIntBegin;
-        }
-
-        iterator interiorPathsEnd() const {
-            return mIntEnd;
-        }
-
-        iterator exteriorPathsBegin() const {
-            return mExtBegin;
-        }
-
-        iterator exteriorPathsEnd() const {
-            return mExtEnd;
-        }
     };
 
     template <class T>
     class IndexedStore
     {
-        struct Compare
-        {
-            bool operator()(const T &x, const T &y) const {
-                return x.mIndex < y.mIndex;
-            }
-        };
     protected:
-        std::vector<T> mStatic;
+        typedef typename std::map<int, T> Static;
+        Static mStatic;
 
     public:
-        typedef typename std::vector<T>::const_iterator iterator;
+        typedef typename std::map<int, T>::const_iterator iterator;
 
         IndexedStore() {}
-
-        IndexedStore(unsigned int size) {
-            mStatic.reserve(size);
-        }
 
         iterator begin() const {
             return mStatic.begin();
@@ -1013,10 +948,14 @@ namespace MWWorld
             return mStatic.end();
         }
 
-        /// \todo refine loading order
         void load(ESM::ESMReader &esm) {
-            mStatic.push_back(T());
-            mStatic.back().load(esm);
+            T record;
+            record.load(esm);
+
+            // Try to overwrite existing record
+            std::pair<typename Static::iterator, bool> ret = mStatic.insert(std::make_pair(record.mIndex, record));
+            if (!ret.second)
+                ret.first->second = record;
         }
 
         int getSize() const {
@@ -1024,40 +963,13 @@ namespace MWWorld
         }
 
         void setUp() {
-            /// \note This method sorts indexed values for further
-            /// searches. Every loaded item is present in storage, but
-            /// latest loaded shadows any previous while searching.
-            /// If memory cost will be too high, it is possible to remove
-            /// unused values.
-
-            Compare cmp;
-
-            std::stable_sort(mStatic.begin(), mStatic.end(), cmp);
-
-            typename std::vector<T>::iterator first, next;
-            next = first = mStatic.begin();
-
-            while (first != mStatic.end() && ++next != mStatic.end()) {
-                while (next != mStatic.end() && !cmp(*first, *next)) {
-                    ++next;
-                }
-                if (first != --next) {
-                    std::swap(*first, *next);
-                }
-                first = ++next;
-            }
         }
 
         const T *search(int index) const {
-            T item;
-            item.mIndex = index;
-
-            iterator it =
-                std::lower_bound(mStatic.begin(), mStatic.end(), item, Compare());
-            if (it != mStatic.end() && it->mIndex == index) {
-                return &(*it);
-            }
-            return 0;
+            typename Static::const_iterator it = mStatic.find(index);
+            if (it != mStatic.end())
+                return &(it->second);
+            return NULL;
         }
 
         const T *find(int index) const {
@@ -1075,18 +987,12 @@ namespace MWWorld
     struct Store<ESM::Skill> : public IndexedStore<ESM::Skill>
     {
         Store() {}
-        Store(unsigned int size)
-          : IndexedStore<ESM::Skill>(size)
-        {}
     };
 
     template <>
     struct Store<ESM::MagicEffect> : public IndexedStore<ESM::MagicEffect>
     {
         Store() {}
-        Store(unsigned int size)
-          : IndexedStore<ESM::MagicEffect>(size)
-        {}
     };
 
     template <>

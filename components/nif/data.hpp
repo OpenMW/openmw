@@ -272,7 +272,7 @@ class NiSkinData : public Record
 public:
     struct BoneTrafo
     {
-        Ogre::Matrix3 rotationScale; // Rotation offset from bone, non-uniform scale
+        Ogre::Matrix3 rotation; // Rotation offset from bone?
         Ogre::Vector3 trans;    // Translation
         float scale;            // Probably scale (always 1)
     };
@@ -295,7 +295,7 @@ public:
 
     void read(NIFStream *nif)
     {
-        trafo.rotationScale = nif->getMatrix3();
+        trafo.rotation = nif->getMatrix3();
         trafo.trans = nif->getVector3();
         trafo.scale = nif->getFloat();
 
@@ -307,7 +307,7 @@ public:
         {
             BoneInfo &bi = bones[i];
 
-            bi.trafo.rotationScale = nif->getMatrix3();
+            bi.trafo.rotation = nif->getMatrix3();
             bi.trafo.trans = nif->getVector3();
             bi.trafo.scale = nif->getFloat();
             bi.unknown = nif->getVector4();
@@ -350,8 +350,11 @@ struct NiMorphData : public Record
 struct NiKeyframeData : public Record
 {
     QuaternionKeyMap mRotations;
-    //\FIXME mXYZ_Keys are read, but not used.
-    FloatKeyMap mXYZ_Keys;
+
+    FloatKeyMap mXRotations;
+    FloatKeyMap mYRotations;
+    FloatKeyMap mZRotations;
+
     Vector3KeyMap mTranslations;
     FloatKeyMap mScales;
 
@@ -362,12 +365,9 @@ struct NiKeyframeData : public Record
         {
             //Chomp unused float
             nif->getFloat();
-            for(size_t i=0;i<3;++i)
-            {
-                //Read concatenates items together. 
-                mXYZ_Keys.read(nif,true);
-            }
-            nif->file->warn("XYZ_ROTATION_KEY read, but not used!");
+            mXRotations.read(nif, true);
+            mYRotations.read(nif, true);
+            mZRotations.read(nif, true);
         }
         mTranslations.read(nif);
         mScales.read(nif);

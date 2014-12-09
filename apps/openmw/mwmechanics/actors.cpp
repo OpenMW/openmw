@@ -396,11 +396,7 @@ namespace MWMechanics
     {
         CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
 
-        int strength     = creatureStats.getAttribute(ESM::Attribute::Strength).getModified();
         int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
-        int willpower    = creatureStats.getAttribute(ESM::Attribute::Willpower).getModified();
-        int agility      = creatureStats.getAttribute(ESM::Attribute::Agility).getModified();
-        int endurance    = creatureStats.getAttribute(ESM::Attribute::Endurance).getModified();
 
         float base = 1.f;
         if (ptr.getCellRef().getRefId() == "player")
@@ -415,11 +411,6 @@ namespace MWMechanics
         float diff = (static_cast<int>(magickaFactor*intelligence)) - magicka.getBase();
         magicka.modify(diff);
         creatureStats.setMagicka(magicka);
-
-        DynamicStat<float> fatigue = creatureStats.getFatigue();
-        diff = (strength+willpower+agility+endurance) - fatigue.getBase();
-        fatigue.modify(diff);
-        creatureStats.setFatigue(fatigue);
     }
 
     void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, bool sleep)

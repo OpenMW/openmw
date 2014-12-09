@@ -3,6 +3,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
+#include <components/widgets/sharedstatebutton.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -177,7 +179,7 @@ namespace MWGui
         for (std::vector<std::string>::const_iterator it = spellList.begin(); it != spellList.end(); ++it)
         {
             const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(*it);
-            MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>("SandTextButton",
+            Gui::SharedStateButton* t = mSpellView->createWidget<Gui::SharedStateButton>("SandTextButton",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setCaption(spell->mName);
             t->setTextAlign(MyGUI::Align::Left);
@@ -185,19 +187,27 @@ namespace MWGui
             t->setUserString("Spell", *it);
             t->eventMouseWheel += MyGUI::newDelegate(this, &SpellWindow::onMouseWheel);
             t->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onSpellSelected);
-            t->setStateSelected(*it == MWBase::Environment::get().getWindowManager()->getSelectedSpell());
 
             // cost / success chance
-            MyGUI::Button* costChance = mSpellView->createWidget<MyGUI::Button>("SandTextButton",
+            Gui::SharedStateButton* costChance = mSpellView->createWidget<Gui::SharedStateButton>("SandTextButton",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             std::string cost = boost::lexical_cast<std::string>(spell->mData.mCost);
             std::string chance = boost::lexical_cast<std::string>(int(MWMechanics::getSpellSuccessChance(*it, player)));
             costChance->setCaption(cost + "/" + chance);
             costChance->setTextAlign(MyGUI::Align::Right);
-            costChance->setNeedMouseFocus(false);
-            costChance->setStateSelected(*it == MWBase::Environment::get().getWindowManager()->getSelectedSpell());
+            costChance->setUserString("ToolTipType", "Spell");
+            costChance->setUserString("Spell", *it);
+            costChance->eventMouseWheel += MyGUI::newDelegate(this, &SpellWindow::onMouseWheel);
+            costChance->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onSpellSelected);
 
             t->setSize(mWidth-12-costChance->getTextSize().width, t->getHeight());
+
+            Gui::ButtonGroup group;
+            group.push_back(t);
+            group.push_back(costChance);
+            Gui::SharedStateButton::createButtonGroup(group);
+
+            t->setStateSelected(*it == MWBase::Environment::get().getWindowManager()->getSelectedSpell());
 
             mHeight += spellHeight;
         }
@@ -224,7 +234,7 @@ namespace MWGui
                 }
             }
 
-            MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>(equipped ? "SandTextButton" : "SpellTextUnequipped",
+            Gui::SharedStateButton* t = mSpellView->createWidget<Gui::SharedStateButton>(equipped ? "SandTextButton" : "SpellTextUnequipped",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setCaption(item.getClass().getName(item));
             t->setTextAlign(MyGUI::Align::Left);
@@ -233,12 +243,9 @@ namespace MWGui
             t->setUserString("Equipped", equipped ? "true" : "false");
             t->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onEnchantedItemSelected);
             t->eventMouseWheel += MyGUI::newDelegate(this, &SpellWindow::onMouseWheel);
-            if (store.getSelectedEnchantItem() != store.end())
-                t->setStateSelected(item == *store.getSelectedEnchantItem());
-
 
             // cost / charge
-            MyGUI::Button* costCharge = mSpellView->createWidget<MyGUI::Button>(equipped ? "SandTextButton" : "SpellTextUnequipped",
+            Gui::SharedStateButton* costCharge = mSpellView->createWidget<Gui::SharedStateButton>(equipped ? "SandTextButton" : "SpellTextUnequipped",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
 
             float enchantCost = enchant->mData.mCost;
@@ -257,11 +264,22 @@ namespace MWGui
                 charge = "100";
             }
 
+
+            costCharge->setUserData(item);
+            costCharge->setUserString("ToolTipType", "ItemPtr");
+            costCharge->setUserString("Equipped", equipped ? "true" : "false");
+            costCharge->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onEnchantedItemSelected);
+            costCharge->eventMouseWheel += MyGUI::newDelegate(this, &SpellWindow::onMouseWheel);
             costCharge->setCaption(cost + "/" + charge);
             costCharge->setTextAlign(MyGUI::Align::Right);
-            costCharge->setNeedMouseFocus(false);
+
+            Gui::ButtonGroup group;
+            group.push_back(t);
+            group.push_back(costCharge);
+            Gui::SharedStateButton::createButtonGroup(group);
+
             if (store.getSelectedEnchantItem() != store.end())
-                costCharge->setStateSelected(item == *store.getSelectedEnchantItem());
+                t->setStateSelected(item == *store.getSelectedEnchantItem());
 
             t->setSize(mWidth-12-costCharge->getTextSize().width, t->getHeight());
 

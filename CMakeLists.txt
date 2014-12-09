@@ -600,11 +600,6 @@ if (BUILD_OPENCS)
 endif()
 
 if (BUILD_WIZARD)
-    find_package(LIBUNSHIELD REQUIRED)
-    if(NOT LIBUNSHIELD_FOUND)
-        message(FATAL_ERROR "Failed to find Unshield library")
-    endif(NOT LIBUNSHIELD_FOUND)
-
    add_subdirectory(apps/wizard)
 endif()
 

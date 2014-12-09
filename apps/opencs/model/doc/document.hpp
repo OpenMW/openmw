@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include <boost/shared_ptr.hpp>
 #include <boost/filesystem/path.hpp>
 
 #include <QUndoStack>
@@ -39,6 +40,11 @@ namespace CSMWorld
     class ResourcesManager;
 }
 
+namespace CSVWorld
+{
+    class PhysicsSystem;
+}
+
 namespace CSMDoc
 {
     class Document : public QObject
@@ -57,6 +63,7 @@ namespace CSMDoc
             boost::filesystem::path mResDir;
             Blacklist mBlacklist;
             Runner mRunner;
+            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
 
             // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is connected to a slot, that is
             // using other member variables.  Unfortunately this connection is cut only in the QObject destructor, which is way too late.
@@ -129,6 +136,8 @@ namespace CSMDoc
 
             QTextDocument *getRunLog();
 
+            boost::shared_ptr<CSVWorld::PhysicsSystem> getPhysics();
+
         signals:
 
             void stateChanged (int state, CSMDoc::Document *document);
@@ -140,7 +149,7 @@ namespace CSMDoc
             void modificationStateChanged (bool clean);
 
             void reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
-                int type);
+                const std::string& hint, int type);
 
             void operationDone (int type, bool failed);
 

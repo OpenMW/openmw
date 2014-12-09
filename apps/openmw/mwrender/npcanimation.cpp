@@ -60,6 +60,21 @@ std::string getVampireHead(const std::string& race, bool female)
     return "meshes\\" + sVampireMapping[thisCombination]->mModel;
 }
 
+bool isSkinned (NifOgre::ObjectScenePtr scene)
+{
+    if (scene->mSkelBase == NULL)
+        return false;
+    for(size_t j = 0; j < scene->mEntities.size(); j++)
+    {
+        Ogre::Entity *ent = scene->mEntities[j];
+        if(scene->mSkelBase != ent && ent->hasSkeleton())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 }
 
 
@@ -556,10 +571,6 @@ NifOgre::ObjectScenePtr NpcAnimation::insertBoundedPart(const std::string &model
     std::for_each(objects->mEntities.begin(), objects->mEntities.end(), SetObjectGroup(group));
     std::for_each(objects->mParticles.begin(), objects->mParticles.end(), SetObjectGroup(group));
 
-    // Fast forward auto-play particles, which will have been set up as Emitting by the loader.
-    for (unsigned int i=0; i<objects->mParticles.size(); ++i)
-        objects->mParticles[i]->fastForward(1, 0.1);
-
     if(objects->mSkelBase)
     {
         Ogre::AnimationStateSet *aset = objects->mSkelBase->getAllAnimationStates();
@@ -611,10 +622,11 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
         for(;ctrl != mObjectParts[i]->mControllers.end();++ctrl)
             ctrl->update();
 
-        Ogre::Entity *ent = mObjectParts[i]->mSkelBase;
-        if(!ent) continue;
-        updateSkeletonInstance(baseinst, ent->getSkeleton());
-        ent->getAllAnimationStates()->_notifyDirty();
+        if (!isSkinned(mObjectParts[i]))
+            continue;
+
+        updateSkeletonInstance(baseinst, mObjectParts[i]->mSkelBase->getSkeleton());
+        mObjectParts[i]->mSkelBase->getAllAnimationStates()->_notifyDirty();
     }
 
     return ret;
@@ -660,7 +672,15 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     removeIndividualPart(type);
     mPartslots[type] = group;
     mPartPriorities[type] = priority;
-    mObjectParts[type] = insertBoundedPart(mesh, group, sPartList.at(type), enchantedGlow, glowColor);
+    try
+    {
+        mObjectParts[type] = insertBoundedPart(mesh, group, sPartList.at(type), enchantedGlow, glowColor);
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Error adding NPC part: " << e.what() << std::endl;
+        return false;
+    }
 
     if (!mSoundsDisabled)
     {
@@ -697,7 +717,8 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
             }
         }
 
-        updateSkeletonInstance(mSkelBase->getSkeleton(), skel);
+        if (isSkinned(mObjectParts[type]))
+            updateSkeletonInstance(mSkelBase->getSkeleton(), skel);
     }
 
     std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type]->mControllers.begin());

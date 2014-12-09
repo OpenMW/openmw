@@ -9,6 +9,7 @@
 #include "../mwworld/actionequip.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadmgef.hpp>
@@ -165,6 +166,9 @@ namespace MWMechanics
     float rateSpell(const ESM::Spell *spell, const MWWorld::Ptr &actor, const MWWorld::Ptr& target)
     {
         const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+
+        if (MWMechanics::getSpellSuccessChance(spell, actor) == 0)
+            return 0.f;
 
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 0.f;

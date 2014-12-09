@@ -9,6 +9,11 @@ Wizard::MethodSelectionPage::MethodSelectionPage(QWidget *parent) :
 
     setupUi(this);
 
+#ifndef OPENMW_USE_UNSHIELD
+    newLocationRadioButton->setEnabled(false);
+    existingLocationRadioButton->setChecked(true);
+#endif
+
     registerField(QLatin1String("installation.new"), newLocationRadioButton);
 }
 

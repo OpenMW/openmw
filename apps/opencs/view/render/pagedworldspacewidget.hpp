@@ -8,9 +8,13 @@
 #include "worldspacewidget.hpp"
 #include "cell.hpp"
 
+namespace CSVWidget
+{
+   class SceneToolToggle;
+}
+
 namespace CSVRender
 {
-
     class TextOverlay;
     class OverlayMask;
 
@@ -86,6 +90,8 @@ namespace CSVRender
             virtual unsigned int getVisibilityMask() const;
 
         protected:
+
+            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
 
             virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
 

@@ -19,8 +19,6 @@ namespace CSVWidget
             std::set<std::string> mProfiles;
             std::set<std::string>::iterator mSelected;
             QString mToolTip;
-            QString mIcon;
-            QString mIconDisabled;
             QFrame *mPanel;
             QTableWidget *mTable;
 
@@ -35,7 +33,7 @@ namespace CSVWidget
         public:
 
             SceneToolRun (SceneToolbar *parent, const QString& toolTip, const QString& icon,
-                const QString& iconDisabled, const std::vector<std::string>& profiles);
+                const std::vector<std::string>& profiles);
 
             virtual void showPanel (const QPoint& position);
 

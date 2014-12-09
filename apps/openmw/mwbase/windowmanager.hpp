@@ -330,11 +330,11 @@ namespace MWBase
             virtual void pinWindow (MWGui::GuiWindow window) = 0;
 
             /// Fade the screen in, over \a time seconds
-            virtual void fadeScreenIn(const float time) = 0;
+            virtual void fadeScreenIn(const float time, bool clearQueue=true) = 0;
             /// Fade the screen out to black, over \a time seconds
-            virtual void fadeScreenOut(const float time) = 0;
+            virtual void fadeScreenOut(const float time, bool clearQueue=true) = 0;
             /// Fade the screen to a specified percentage of black, over \a time seconds
-            virtual void fadeScreenTo(const int percent, const float time) = 0;
+            virtual void fadeScreenTo(const int percent, const float time, bool clearQueue=true) = 0;
             /// Darken the screen to a specified percentage
             virtual void setBlindness(const int percent) = 0;
 

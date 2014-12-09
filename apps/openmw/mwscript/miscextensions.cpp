@@ -246,7 +246,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWindowManager()->fadeScreenIn(time);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenIn(time, false);
                 }
         };
 
@@ -259,7 +259,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWindowManager()->fadeScreenOut(time);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenOut(time, false);
                 }
         };
 
@@ -275,7 +275,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWindowManager()->fadeScreenTo(alpha, time);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenTo(alpha, time, false);
                 }
         };
 
@@ -571,6 +571,10 @@ namespace MWScript
 
                     if (parameter == 1)
                         MWBase::Environment::get().getWorld()->deleteObject(ptr);
+                    else if (parameter == 0)
+                        MWBase::Environment::get().getWorld()->undeleteObject(ptr);
+                    else
+                        throw std::runtime_error("SetDelete: unexpected parameter");
                 }
         };
 
@@ -964,6 +968,9 @@ namespace MWScript
                         msg << "Grid: " << cell->getCell()->getGridX() << " " << cell->getCell()->getGridY() << std::endl;
                     Ogre::Vector3 pos (ptr.getRefData().getPosition().pos);
                     msg << "Coordinates: " << pos << std::endl;
+                    msg << "Model: " << ptr.getClass().getModel(ptr) << std::endl;
+                    if (!ptr.getClass().getScript(ptr).empty())
+                        msg << "Script: " << ptr.getClass().getScript(ptr) << std::endl;
                 }
 
                 std::string notes = runtime.getStringLiteral (runtime[0].mInteger);

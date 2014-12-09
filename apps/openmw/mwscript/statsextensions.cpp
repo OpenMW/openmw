@@ -278,7 +278,9 @@ namespace MWScript
                     MWMechanics::DynamicStat<float> stat (ptr.getClass().getCreatureStats (ptr)
                         .getDynamic (mIndex));
 
-                    stat.setCurrent (diff + current, true);
+                    // for fatigue, a negative current value is allowed and means the actor will be knocked down
+                    bool allowDecreaseBelowZero = (mIndex == 2);
+                    stat.setCurrent (diff + current, allowDecreaseBelowZero);
 
                     ptr.getClass().getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
@@ -1177,7 +1179,15 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    ptr.getClass().getCreatureStats(ptr).resurrect();
+
+                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                        ptr.getClass().getCreatureStats(ptr).resurrect();
+                    else if (ptr.getClass().getCreatureStats(ptr).isDead())
+                    {
+                        MWBase::Environment::get().getWorld()->undeleteObject(ptr);
+                        // resets runtime state such as inventory, stats and AI. does not reset position in the world
+                        ptr.getRefData().setCustomData(NULL);
+                    }
                 }
         };
 

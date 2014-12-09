@@ -34,6 +34,8 @@ namespace CSVWorld
 
             virtual void setEditLock (bool locked);
 
+            virtual void useHint (const std::string& hint);
+
         public slots:
 
             void textChanged();

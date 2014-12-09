@@ -17,7 +17,7 @@ int CSMTools::BirthsignCheckStage::setup()
     return mBirthsigns.getSize();
 }
 
-void CSMTools::BirthsignCheckStage::perform (int stage, Messages& messages)
+void CSMTools::BirthsignCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     const CSMWorld::Record<ESM::BirthSign>& record = mBirthsigns.getRecord (stage);
 

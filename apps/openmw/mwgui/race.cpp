@@ -128,11 +128,17 @@ namespace MWGui
         setRaceId(proto.mRace);
         recountParts();
 
-        std::string index = proto.mHead.substr(proto.mHead.size() - 2, 2);
-        mFaceIndex = boost::lexical_cast<int>(index) - 1;
+        for (unsigned int i=0; i<mAvailableHeads.size(); ++i)
+        {
+            if (mAvailableHeads[i] == proto.mHead)
+                mFaceIndex = i;
+        }
 
-        index = proto.mHair.substr(proto.mHair.size() - 2, 2);
-        mHairIndex = boost::lexical_cast<int>(index) - 1;
+        for (unsigned int i=0; i<mAvailableHairs.size(); ++i)
+        {
+            if (mAvailableHairs[i] == proto.mHair)
+                mHairIndex = i;
+        }
 
         mPreviewImage->setImageTexture (textureName);
 
@@ -162,6 +168,9 @@ namespace MWGui
 
     void RaceDialog::close()
     {
+        mPreviewImage->setImageTexture("");
+        const std::string textureName = "CharacterHeadPreview";
+        MyGUI::RenderManager::getInstance().destroyTexture(MyGUI::RenderManager::getInstance().getTexture(textureName));
         mPreview.reset(NULL);
     }
 
@@ -304,7 +313,15 @@ namespace MWGui
         record.mHead = mAvailableHeads[mFaceIndex];
         record.mHair = mAvailableHairs[mHairIndex];
 
-        mPreview->setPrototype(record);
+        try
+        {
+            mPreview->setPrototype(record);
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << "Error creating preview: " << e.what() << std::endl;
+        }
+
         mPreviewDirty = true;
     }
 

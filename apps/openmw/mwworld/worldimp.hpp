@@ -338,6 +338,7 @@ namespace MWWorld
             virtual std::pair<MWWorld::Ptr,Ogre::Vector3> getHitContact(const MWWorld::Ptr &ptr, float distance);
 
             virtual void deleteObject (const Ptr& ptr);
+            virtual void undeleteObject (const Ptr& ptr);
 
             virtual void moveObject (const Ptr& ptr, float x, float y, float z);
             virtual void moveObject (const Ptr& ptr, CellStore* newCell, float x, float y, float z);

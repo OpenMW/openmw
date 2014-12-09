@@ -6,6 +6,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwsound/sound.hpp"
+
 #include "../mwrender/renderingmanager.hpp"
 
 #include "player.hpp"
@@ -152,12 +154,12 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
     setFallbackWeather(foggy,"foggy");
 
     Weather thunderstorm;
-    thunderstorm.mRainLoopSoundID = "rain heavy";
+    thunderstorm.mAmbientLoopSoundID = "rain heavy";
     thunderstorm.mRainEffect = "meshes\\raindrop.nif";
     setFallbackWeather(thunderstorm,"thunderstorm");
 
     Weather rain;
-    rain.mRainLoopSoundID = "rain";
+    rain.mAmbientLoopSoundID = "rain";
     rain.mRainEffect = "meshes\\raindrop.nif";
     setFallbackWeather(rain,"rain");
 
@@ -186,7 +188,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
 
 WeatherManager::~WeatherManager()
 {
-    stopSounds(true);
+    stopSounds();
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
@@ -228,6 +230,8 @@ void WeatherManager::setResult(const String& weatherType)
     mResult.mCloudSpeed = current.mCloudSpeed;
     mResult.mGlareView = current.mGlareView;
     mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+    mResult.mAmbientSoundVolume = 1.f;
+    mResult.mEffectFade = 1.f;
     mResult.mSunColor = current.mSunDiscSunsetColor;
 
     mResult.mIsStorm = current.mIsStorm;
@@ -341,11 +345,30 @@ void WeatherManager::transition(float factor)
 
     mResult.mNight = current.mNight;
 
-    mResult.mIsStorm = current.mIsStorm;
-    mResult.mParticleEffect = current.mParticleEffect;
-    mResult.mRainEffect = current.mRainEffect;
-    mResult.mRainSpeed = current.mRainSpeed;
-    mResult.mRainFrequency = current.mRainFrequency;
+    if (factor < 0.5)
+    {
+        mResult.mIsStorm = current.mIsStorm;
+        mResult.mParticleEffect = current.mParticleEffect;
+        mResult.mRainEffect = current.mRainEffect;
+        mResult.mParticleEffect = current.mParticleEffect;
+        mResult.mRainSpeed = current.mRainSpeed;
+        mResult.mRainFrequency = current.mRainFrequency;
+        mResult.mAmbientSoundVolume = 1-(factor*2);
+        mResult.mEffectFade = mResult.mAmbientSoundVolume;
+        mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+    }
+    else
+    {
+        mResult.mIsStorm = other.mIsStorm;
+        mResult.mParticleEffect = other.mParticleEffect;
+        mResult.mRainEffect = other.mRainEffect;
+        mResult.mParticleEffect = other.mParticleEffect;
+        mResult.mRainSpeed = other.mRainSpeed;
+        mResult.mRainFrequency = other.mRainFrequency;
+        mResult.mAmbientSoundVolume = 2*(factor-0.5);
+        mResult.mEffectFade = mResult.mAmbientSoundVolume;
+        mResult.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
+    }
 }
 
 void WeatherManager::update(float duration, bool paused)
@@ -361,7 +384,7 @@ void WeatherManager::update(float duration, bool paused)
     {
         mRendering->skyDisable();
         mRendering->getSkyManager()->setLightningStrength(0.f);
-        stopSounds(true);
+        stopSounds();
         return;
     }
 
@@ -541,40 +564,25 @@ void WeatherManager::update(float duration, bool paused)
     mRendering->getSkyManager()->setWeather(mResult);
 
     // Play sounds
-    if (mNextWeather == "")
+    if (mPlayingSoundID != mResult.mAmbientLoopSoundID)
     {
-        std::string ambientSnd = mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID;
-        if (!ambientSnd.empty() && std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), ambientSnd) == mSoundsPlaying.end())
-        {
-            mSoundsPlaying.push_back(ambientSnd);
-            MWBase::Environment::get().getSoundManager()->playSound(ambientSnd, 1.0, 1.0, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
-        }
+        stopSounds();
+        if (!mResult.mAmbientLoopSoundID.empty())
+            mAmbientSound = MWBase::Environment::get().getSoundManager()->playSound(mResult.mAmbientLoopSoundID, 1.0, 1.0, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
 
-        std::string rainSnd = mWeatherSettings[mCurrentWeather].mRainLoopSoundID;
-        if (!rainSnd.empty() && std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), rainSnd) == mSoundsPlaying.end())
-        {
-            mSoundsPlaying.push_back(rainSnd);
-            MWBase::Environment::get().getSoundManager()->playSound(rainSnd, 1.0, 1.0, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
-        }
+        mPlayingSoundID = mResult.mAmbientLoopSoundID;
     }
-
-    stopSounds(false);
+    if (mAmbientSound.get())
+        mAmbientSound->setVolume(mResult.mAmbientSoundVolume);
 }
 
-void WeatherManager::stopSounds(bool stopAll)
+void WeatherManager::stopSounds()
 {
-    std::vector<std::string>::iterator it = mSoundsPlaying.begin();
-    while (it!=mSoundsPlaying.end())
+    if (mAmbientSound.get())
     {
-        if (stopAll ||
-                !((*it == mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID) ||
-                (*it == mWeatherSettings[mCurrentWeather].mRainLoopSoundID)))
-        {
-            MWBase::Environment::get().getSoundManager()->stopSound(*it);
-            it = mSoundsPlaying.erase(it);
-        }
-        else
-            ++it;
+        MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
+        mAmbientSound.reset();
+        mPlayingSoundID.clear();
     }
 }
 
@@ -764,7 +772,7 @@ bool WeatherManager::readRecord(ESM::ESMReader& reader, int32_t type)
         state.load(reader);
 
         // reset other temporary state, now that we loaded successfully
-        stopSounds(true); // let's hope this never throws
+        stopSounds(); // let's hope this never throws
         mRegionOverrides.clear();
         mRegionMods.clear();
         mThunderFlash = 0.0;

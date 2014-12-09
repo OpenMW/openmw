@@ -62,7 +62,7 @@ void Wizard::ComponentSelectionPage::initializePage()
 
     if (field(QLatin1String("installation.new")).toBool() == true)
     {
-        morrowindItem->setFlags(morrowindItem->flags() & !Qt::ItemIsEnabled & Qt::ItemIsUserCheckable);
+        morrowindItem->setFlags((morrowindItem->flags() & ~Qt::ItemIsEnabled) | Qt::ItemIsUserCheckable);
         morrowindItem->setData(Qt::CheckStateRole, Qt::Checked);
         componentsList->addItem(morrowindItem);
 
@@ -77,7 +77,7 @@ void Wizard::ComponentSelectionPage::initializePage()
 
         if (mWizard->mInstallations[path].hasMorrowind) {
             morrowindItem->setText(tr("Morrowind\t\t(installed)"));
-            morrowindItem->setFlags(morrowindItem->flags() & !Qt::ItemIsEnabled & Qt::ItemIsUserCheckable);
+            morrowindItem->setFlags((morrowindItem->flags() & ~Qt::ItemIsEnabled) | Qt::ItemIsUserCheckable);
             morrowindItem->setData(Qt::CheckStateRole, Qt::Unchecked);
         } else {
             morrowindItem->setText(tr("Morrowind"));
@@ -88,7 +88,7 @@ void Wizard::ComponentSelectionPage::initializePage()
 
         if (mWizard->mInstallations[path].hasTribunal) {
             tribunalItem->setText(tr("Tribunal\t\t(installed)"));
-            tribunalItem->setFlags(tribunalItem->flags() & !Qt::ItemIsEnabled & Qt::ItemIsUserCheckable);
+            tribunalItem->setFlags((tribunalItem->flags() & ~Qt::ItemIsEnabled) | Qt::ItemIsUserCheckable);
             tribunalItem->setData(Qt::CheckStateRole, Qt::Unchecked);
         } else {
             tribunalItem->setText(tr("Tribunal"));
@@ -99,7 +99,7 @@ void Wizard::ComponentSelectionPage::initializePage()
 
         if (mWizard->mInstallations[path].hasBloodmoon) {
             bloodmoonItem->setText(tr("Bloodmoon\t\t(installed)"));
-            bloodmoonItem->setFlags(bloodmoonItem->flags() & !Qt::ItemIsEnabled & Qt::ItemIsUserCheckable);
+            bloodmoonItem->setFlags((bloodmoonItem->flags() & ~Qt::ItemIsEnabled) | Qt::ItemIsUserCheckable);
             bloodmoonItem->setData(Qt::CheckStateRole, Qt::Unchecked);
         } else {
             bloodmoonItem->setText(tr("Bloodmoon"));

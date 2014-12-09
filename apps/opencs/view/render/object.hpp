@@ -1,6 +1,8 @@
 #ifndef OPENCS_VIEW_OBJECT_H
 #define OPENCS_VIEW_OBJECT_H
 
+#include <boost/shared_ptr.hpp>
+
 #include <components/nifogre/ogrenifloader.hpp>
 
 class QModelIndex;
@@ -31,7 +33,7 @@ namespace CSVRender
             Ogre::SceneNode *mBase;
             NifOgre::ObjectScenePtr mObject;
             bool mForceBaseToZero;
-            CSVWorld::PhysicsSystem *mPhysics;
+            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
             std::string mPhysicsObject;
 
             /// Not implemented
@@ -59,7 +61,8 @@ namespace CSVRender
 
             Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode,
                 const std::string& id, bool referenceable,
-                CSVWorld::PhysicsSystem *physics = NULL, bool forceBaseToZero = false);
+                boost::shared_ptr<CSVWorld::PhysicsSystem> physics = boost::shared_ptr<CSVWorld::PhysicsSystem> (),
+                bool forceBaseToZero = false);
             /// \param forceBaseToZero If this is a reference ignore the coordinates and place
             /// it at 0, 0, 0 instead.
 

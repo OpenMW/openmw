@@ -16,7 +16,7 @@ int CSMTools::ReportModel::columnCount (const QModelIndex & parent) const
     if (parent.isValid())
         return 0;
 
-    return 2;
+    return 3;
 }
 
 QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
@@ -26,8 +26,11 @@ QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
 
     if (index.column()==0)
         return static_cast<int> (mRows.at (index.row()).first.getType());
-    else
-        return mRows.at (index.row()).second.c_str();
+
+    if (index.column()==1)
+        return QString::fromUtf8 (mRows.at (index.row()).second.first.c_str());
+
+    return QString::fromUtf8 (mRows.at (index.row()).second.second.c_str());
 }
 
 QVariant CSMTools::ReportModel::headerData (int section, Qt::Orientation orientation, int role) const
@@ -38,7 +41,13 @@ QVariant CSMTools::ReportModel::headerData (int section, Qt::Orientation orienta
     if (orientation==Qt::Vertical)
         return QVariant();
 
-    return tr (section==0 ? "Type" : "Description");
+    if (section==0)
+        return "Type";
+
+    if (section==1)
+        return "Description";
+
+    return "Hint";
 }
 
 bool CSMTools::ReportModel::removeRows (int row, int count, const QModelIndex& parent)
@@ -51,11 +60,12 @@ bool CSMTools::ReportModel::removeRows (int row, int count, const QModelIndex& p
     return true;
 }
 
-void CSMTools::ReportModel::add (const CSMWorld::UniversalId& id, const std::string& message)
+void CSMTools::ReportModel::add (const CSMWorld::UniversalId& id, const std::string& message,
+    const std::string& hint)
 {
     beginInsertRows (QModelIndex(), mRows.size(), mRows.size());
 
-    mRows.push_back (std::make_pair (id, message));
+    mRows.push_back (std::make_pair (id, std::make_pair (message, hint)));
 
     endInsertRows();
 }
@@ -63,4 +73,9 @@ void CSMTools::ReportModel::add (const CSMWorld::UniversalId& id, const std::str
 const CSMWorld::UniversalId& CSMTools::ReportModel::getUniversalId (int row) const
 {
     return mRows.at (row).first;
+}
+
+std::string CSMTools::ReportModel::getHint (int row) const
+{
+    return mRows.at (row).second.second;
 }

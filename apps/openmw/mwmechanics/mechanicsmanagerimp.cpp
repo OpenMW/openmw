@@ -143,9 +143,9 @@ namespace MWMechanics
             MWWorld::Store<ESM::Skill>::iterator iter = skills.begin();
             for (; iter != skills.end(); ++iter)
             {
-                if (iter->mData.mSpecialization==class_->mData.mSpecialization)
+                if (iter->second.mData.mSpecialization==class_->mData.mSpecialization)
                 {
-                    int index = iter->mIndex;
+                    int index = iter->first;
 
                     if (index>=0 && index<27)
                     {
@@ -930,20 +930,6 @@ namespace MWMechanics
 
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
-        // What amount of alarm did this crime generate?
-        int alarm = 0;
-        if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
-            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmTresspass")->getInt();
-        else if (type == OT_Pickpocket)
-            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmPickPocket")->getInt();
-        else if (type == OT_Assault)
-            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmAttack")->getInt();
-        else if (type == OT_Murder)
-            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmKilling")->getInt();
-        else if (type == OT_Theft)
-            alarm = esmStore.get<ESM::GameSetting>().find("iAlarmStealing")->getInt();
-
-        bool reported = false;
 
         // Find all the actors within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
@@ -960,6 +946,8 @@ namespace MWMechanics
         bool victimAware = false;
 
         // Find actors who directly witnessed the crime
+        bool crimeSeen = false;
+        bool reported = false;
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
             if (*it == player)
@@ -987,15 +975,17 @@ namespace MWMechanics
                 if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
                     continue;
 
-                // Will the witness report the crime?
-                if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= alarm)
-                {
-                    reported = true;
-                }
+                crimeSeen = true;
+            }
+
+            // Will the witness report the crime?
+            if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= 100)
+            {
+                reported = true;
             }
         }
 
-        if (reported)
+        if (crimeSeen && reported)
             reportCrime(player, victim, type, arg);
         else if (victimAware && !victim.isEmpty() && type == OT_Assault)
             startCombat(victim, player);

@@ -3,6 +3,9 @@
 
 #include <memory>
 
+#include <boost/interprocess/sync/file_lock.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 #include <QObject>
 #include <QString>
 #include <QLocalServer>
@@ -28,7 +31,6 @@
 
 #include "view/settings/dialog.hpp"
 #include "view/render/overlaysystem.hpp"
-#include "view/world/physicsmanager.hpp"
 
 namespace OgreInit
 {
@@ -45,7 +47,6 @@ namespace CS
             Files::ConfigurationManager mCfgMgr;
             CSMSettings::UserSettings mUserSettings;
             std::auto_ptr<CSVRender::OverlaySystem> mOverlaySystem;
-            std::auto_ptr<CSVWorld::PhysicsManager> mPhysicsManager;
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
@@ -54,6 +55,9 @@ namespace CS
             CSVDoc::FileDialog mFileDialog;
             boost::filesystem::path mLocal;
             boost::filesystem::path mResources;
+            boost::filesystem::path mPid;
+            boost::interprocess::file_lock mLock;
+            boost::filesystem::ofstream mPidFile;
             bool mFsStrict;
 
             void setupDataFiles (const Files::PathContainer& dataDirs);

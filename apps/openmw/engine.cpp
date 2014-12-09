@@ -79,8 +79,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 {
     try
     {
-        float frametime = std::min(evt.timeSinceLastFrame, 0.2f);
-
+        float frametime = evt.timeSinceLastFrame;
         mEnvironment.setFrameDuration (frametime);
 
         // update input
@@ -478,9 +477,15 @@ void OMW::Engine::go()
     }
 
     // Start the main rendering loop
+    Ogre::Timer timer;
     while (!MWBase::Environment::get().getStateManager()->hasQuitRequest())
-        Ogre::Root::getSingleton().renderOneFrame();
+    {
+        float dt = timer.getMilliseconds()/1000.f;
+        dt = std::min(dt, 0.2f);
 
+        timer.reset();
+        Ogre::Root::getSingleton().renderOneFrame(dt);
+    }
     // Save user settings
     settings.saveUser(settingspath);
 

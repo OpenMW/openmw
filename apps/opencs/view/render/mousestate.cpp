@@ -56,7 +56,7 @@ namespace CSVRender
     //
 
     MouseState::MouseState(WorldspaceWidget *parent)
-        : mParent(parent), mPhysics(parent->getPhysics()), mSceneManager(parent->getSceneManager())
+        : mParent(parent), mPhysics(parent->mDocument.getPhysics()), mSceneManager(parent->getSceneManager())
         , mCurrentObj(""), mMouseState(Mouse_Default), mOldCursorPos(0,0), mMouseEventTimer(0)
         , mGrabbedSceneNode(""), mGrabbedRefId(""), mOrigObjPos(Ogre::Vector3())
         , mOrigMousePos(Ogre::Vector3()), mOldMousePos(Ogre::Vector3()), mPlane(0)

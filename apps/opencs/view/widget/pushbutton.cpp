@@ -72,6 +72,11 @@ CSVWidget::PushButton::PushButton (const QIcon& icon, Type type, const QString& 
     QWidget *parent)
 : QPushButton (icon, "", parent), mKeepOpen (false), mType (type), mToolTip (tooltip)
 {
+    if (type==Type_Mode || type==Type_Toggle)
+    {
+        setCheckable (true);
+        connect (this, SIGNAL (toggled (bool)), this, SLOT (checkedStateChanged (bool)));
+    }
     setCheckable (type==Type_Mode || type==Type_Toggle);
     setExtendedToolTip();
 }
@@ -96,4 +101,9 @@ QString CSVWidget::PushButton::getBaseToolTip() const
 CSVWidget::PushButton::Type CSVWidget::PushButton::getType() const
 {
     return mType;
+}
+
+void CSVWidget::PushButton::checkedStateChanged (bool checked)
+{
+    setExtendedToolTip();
 }

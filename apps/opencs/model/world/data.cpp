@@ -671,16 +671,24 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     return mReader->getRecordCount();
 }
 
-bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
+bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 {
     if (!mReader)
         throw std::logic_error ("can't continue loading, because no load has been started");
 
     if (!mReader->hasMoreRecs())
     {
-        // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading
-        boost::shared_ptr<ESM::ESMReader> ptr(mReader);
-        mReaders.push_back(ptr);
+        if (mBase)
+        {
+            // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading.
+            // We don't store non-base reader, because everything going into modified will be
+            // fully loaded during the initial loading process.
+            boost::shared_ptr<ESM::ESMReader> ptr(mReader);
+            mReaders.push_back(ptr);
+        }
+        else
+            delete mReader;
+
         mReader = 0;
 
         mDialogue = 0;
@@ -713,7 +721,18 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         case ESM::REC_PGRD: mPathgrids.load (*mReader, mBase); break;
 
         case ESM::REC_LTEX: mLandTextures.load (*mReader, mBase); break;
-        case ESM::REC_LAND: mLand.load(*mReader, mBase); break;
+
+        case ESM::REC_LAND:
+        {
+            int index = mLand.load(*mReader, mBase);
+
+            if (index!=-1 && !mBase)
+                mLand.getRecord (index).mModified.mLand->loadData (
+                    ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR |
+                    ESM::Land::DATA_VTEX);
+
+            break;
+        }
 
         case ESM::REC_CELL:
         {
@@ -775,8 +794,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
                 }
                 else
                 {
-                    messages.push_back (std::make_pair (UniversalId::Type_None,
-                        "Trying to delete dialogue record " + id + " which does not exist"));
+                    messages.add (UniversalId::Type_None,
+                        "Trying to delete dialogue record " + id + " which does not exist");
                 }
             }
             else
@@ -792,8 +811,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         {
             if (!mDialogue)
             {
-                messages.push_back (std::make_pair (UniversalId::Type_None,
-                    "Found info record not following a dialogue record"));
+                messages.add (UniversalId::Type_None,
+                    "Found info record not following a dialogue record");
 
                 mReader->skipRecord();
                 break;
@@ -836,8 +855,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
 
     if (unhandledRecord)
     {
-        messages.push_back (std::make_pair (UniversalId::Type_None,
-            "Unsupported record type: " + n.toString()));
+        messages.add (UniversalId::Type_None, "Unsupported record type: " + n.toString());
 
         mReader->skipRecord();
     }
