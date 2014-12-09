@@ -98,6 +98,8 @@ namespace ESM
         bool mAlwaysFollow;
         bool mCommanded;
 
+        bool mActive;
+
         void load(ESMReader &esm);
         void save(ESMWriter &esm) const;
     };

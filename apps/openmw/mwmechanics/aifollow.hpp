@@ -60,6 +60,7 @@ namespace MWMechanics
             std::string mActorRefId;
             int mActorId;
             std::string mCellId;
+            bool mActive; // have we spotted the target?
             int mFollowIndex;
 
             static int mFollowIndexCounter;

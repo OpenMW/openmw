@@ -13,39 +13,51 @@
 #include "movement.hpp"
 
 #include <OgreMath.h>
+#include <OgreVector3.h>
 
 #include "steering.hpp"
 
-int MWMechanics::AiFollow::mFollowIndexCounter = 0;
+namespace MWMechanics
+{
 
-MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
+
+struct AiFollowStorage : AiTemporaryBase
+{
+    float mTimer;
+
+    AiFollowStorage() : mTimer(0.f) {}
+};
+
+int AiFollow::mFollowIndexCounter = 0;
+
+AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
 : mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
-, mActorRefId(actorId), mCellId(""), mActorId(-1), mFollowIndex(mFollowIndexCounter++)
+, mActorRefId(actorId), mCellId(""), mActorId(-1), mFollowIndex(mFollowIndexCounter++), mActive(false)
 {
 }
-MWMechanics::AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
+AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
 : mAlwaysFollow(false), mCommanded(false), mRemainingDuration(duration), mX(x), mY(y), mZ(z)
-, mActorRefId(actorId), mCellId(cellId), mActorId(-1), mFollowIndex(mFollowIndexCounter++)
+, mActorRefId(actorId), mCellId(cellId), mActorId(-1), mFollowIndex(mFollowIndexCounter++), mActive(false)
 {
 }
 
-MWMechanics::AiFollow::AiFollow(const std::string &actorId, bool commanded)
+AiFollow::AiFollow(const std::string &actorId, bool commanded)
 : mAlwaysFollow(true), mCommanded(commanded), mRemainingDuration(0), mX(0), mY(0), mZ(0)
-, mActorRefId(actorId), mCellId(""), mActorId(-1), mFollowIndex(mFollowIndexCounter++)
+, mActorRefId(actorId), mCellId(""), mActorId(-1), mFollowIndex(mFollowIndexCounter++), mActive(false)
 {
 
 }
 
-MWMechanics::AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
+AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
     : mAlwaysFollow(follow->mAlwaysFollow), mRemainingDuration(follow->mRemainingDuration)
     , mX(follow->mData.mX), mY(follow->mData.mY), mZ(follow->mData.mZ)
     , mActorRefId(follow->mTargetId), mActorId(-1), mCellId(follow->mCellId)
-    , mCommanded(follow->mCommanded), mFollowIndex(mFollowIndexCounter++)
+    , mCommanded(follow->mCommanded), mFollowIndex(mFollowIndexCounter++), mActive(follow->mActive)
 {
 
 }
 
-bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
+bool AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
 {
     MWWorld::Ptr target = getTarget();
 
@@ -55,6 +67,24 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, 
         return false; // Target is not here right now, wait for it to return
 
     actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+
+    // AiFollow requires the target to be in range and within sight for the initial activation
+    if (!mActive)
+    {
+        AiFollowStorage& storage = state.get<AiFollowStorage>();
+        storage.mTimer -= duration;
+
+        if (storage.mTimer < 0)
+        {
+            if (Ogre::Vector3(actor.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(target.getRefData().getPosition().pos))
+                    < 500*500
+                    && MWBase::Environment::get().getWorld()->getLOS(actor, target))
+                mActive = true;
+            storage.mTimer = 0.5f;
+        }
+    }
+    if (!mActive)
+        return false;
 
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 
@@ -101,8 +131,16 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, 
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
     if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < followDistance) //Stop when you get close
+    {
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-    else {
+
+        // turn towards target anyway
+        float directionX = target.getRefData().getPosition().pos[0] - actor.getRefData().getPosition().pos[0];
+        float directionY = target.getRefData().getPosition().pos[1] - actor.getRefData().getPosition().pos[1];
+        zTurn(actor, Ogre::Math::ATan2(directionX,directionY), Ogre::Degree(5));
+    }
+    else
+    {
         pathTo(actor, dest, duration); //Go to the destination
     }
 
@@ -115,27 +153,27 @@ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, 
     return false;
 }
 
-std::string MWMechanics::AiFollow::getFollowedActor()
+std::string AiFollow::getFollowedActor()
 {
     return mActorRefId;
 }
 
-MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
+AiFollow *MWMechanics::AiFollow::clone() const
 {
     return new AiFollow(*this);
 }
 
-int MWMechanics::AiFollow::getTypeId() const
+int AiFollow::getTypeId() const
 {
     return TypeIdFollow;
 }
 
-bool MWMechanics::AiFollow::isCommanded() const
+bool AiFollow::isCommanded() const
 {
     return mCommanded;
 }
 
-void MWMechanics::AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) const
+void AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) const
 {
     std::auto_ptr<ESM::AiSequence::AiFollow> follow(new ESM::AiSequence::AiFollow());
     follow->mData.mX = mX;
@@ -146,6 +184,7 @@ void MWMechanics::AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) co
     follow->mCellId = mCellId;
     follow->mAlwaysFollow = mAlwaysFollow;
     follow->mCommanded = mCommanded;
+    follow->mActive = mActive;
 
     ESM::AiSequence::AiPackageContainer package;
     package.mType = ESM::AiSequence::Ai_Follow;
@@ -153,7 +192,7 @@ void MWMechanics::AiFollow::writeState(ESM::AiSequence::AiSequence &sequence) co
     sequence.mPackages.push_back(package);
 }
 
-MWWorld::Ptr MWMechanics::AiFollow::getTarget()
+MWWorld::Ptr AiFollow::getTarget()
 {
     if (mActorId == -2)
         return MWWorld::Ptr();
@@ -176,7 +215,9 @@ MWWorld::Ptr MWMechanics::AiFollow::getTarget()
         return MWWorld::Ptr();
 }
 
-int MWMechanics::AiFollow::getFollowIndex() const
+int AiFollow::getFollowIndex() const
 {
     return mFollowIndex;
+}
+
 }
