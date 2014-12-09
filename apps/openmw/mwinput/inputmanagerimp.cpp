@@ -135,8 +135,8 @@ namespace MWInput
         mInputManager->setControllerEventCallback(this);
 
         std::string file = userFileExists ? userFile : "";
-        mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
-
+        std::string controllerdb = Settings::Manager::getString("gamecontrollerdb file", "Input");
+        mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, controllerdb, A_Last);
         adjustMouseRegion (window->getWidth(), window->getHeight());
 
         loadKeyDefaults();

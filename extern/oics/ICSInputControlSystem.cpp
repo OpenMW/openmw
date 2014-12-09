@@ -30,7 +30,7 @@ namespace ICS
 {
 	InputControlSystem::InputControlSystem(std::string file, bool active
 		, DetectingBindingListener* detectingBindingListener
-		, InputControlSystemLog* log, size_t channelCount)
+		, InputControlSystemLog* log, std::string controllerdb, size_t channelCount)
 		: mFileName(file)
 		, mDetectingBindingListener(detectingBindingListener)
 		, mDetectingBindingControl(NULL)
@@ -279,14 +279,17 @@ namespace ICS
 
 		//Load controller mappings
 #if SDL_VERSION_ATLEAST(2,0,2)
-		int res = SDL_GameControllerAddMappingsFromFile("resources/gamecontrollerdb.txt");
-		if(res == -1)
-		{
-            ICS_LOG(std::string("Error loading controller bindings: ")+SDL_GetError());
-		}
-		else
-		{
-            ICS_LOG(std::string("Loaded ")+boost::lexical_cast<std::string>(res)+" Game controller bindings");
+        if(!controllerdb.empty())
+        {
+            int res = SDL_GameControllerAddMappingsFromFile(controllerdb.c_str());
+            if(res == -1)
+            {
+                ICS_LOG(std::string("Error loading controller bindings: ")+SDL_GetError());
+            }
+            else
+            {
+                ICS_LOG(std::string("Loaded ")+boost::lexical_cast<std::string>(res)+" Game controller bindings");
+            }
         }
 #endif
 

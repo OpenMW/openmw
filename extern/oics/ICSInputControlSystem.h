@@ -74,7 +74,8 @@ namespace ICS
 
 		InputControlSystem(std::string file = "", bool active = true
 			, DetectingBindingListener* detectingBindingListener = NULL
-			, InputControlSystemLog* log = NULL, size_t channelCount = 16);
+			, InputControlSystemLog* log = NULL, std::string controllerdb = ""
+			, size_t channelCount = 16);
 		~InputControlSystem();
 
 		std::string getFileName(){ return mFileName; };
