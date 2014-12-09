@@ -180,11 +180,6 @@ namespace ICS
                     }
                 }
 			}
-			else if(mDetectingBindingListener)
-			{
-				mDetectingBindingListener->joystickButtonBindingDetected(this,
-					mDetectingBindingControl, evt.button, mDetectingBindingDirection);
-			}
 		}
 	}
 
@@ -192,11 +187,19 @@ namespace ICS
 	{
 		if(mActive)
 		{
-            ControlsButtonBinderMapType::const_iterator it = mControlsJoystickButtonBinderMap.find(evt.button);
-            if(it != mControlsJoystickButtonBinderMap.end())
+            if(!mDetectingBindingControl)
             {
-                it->second.control->setChangingDirection(Control::STOP);
+                ControlsButtonBinderMapType::const_iterator it = mControlsJoystickButtonBinderMap.find(evt.button);
+                if(it != mControlsJoystickButtonBinderMap.end())
+                {
+                    it->second.control->setChangingDirection(Control::STOP);
+                }
             }
+            else if(mDetectingBindingListener)
+			{
+				mDetectingBindingListener->joystickButtonBindingDetected(this,
+					mDetectingBindingControl, evt.button, mDetectingBindingDirection);
+			}
 		}
 	}
 

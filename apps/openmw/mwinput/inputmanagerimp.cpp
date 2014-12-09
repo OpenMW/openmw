@@ -740,13 +740,16 @@ namespace MWInput
         if (arg.button == SDL_CONTROLLER_BUTTON_A || arg.button == SDL_CONTROLLER_BUTTON_B) // We'll pretend that A is left click and B is right click
         {
             guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
-            if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
+            if(!mInputBinder->detectingBindingState())
             {
-                MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
-                if (b && b->getEnabled())
+                guiMode = MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
+                if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
                 {
-                    MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+                    MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
+                    if (b && b->getEnabled())
+                    {
+                        MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+                    }
                 }
             }
         }
