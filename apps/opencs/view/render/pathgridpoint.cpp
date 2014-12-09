@@ -15,7 +15,7 @@
 namespace CSVRender
 {
     PathgridPoint::PathgridPoint(const std::string &name,
-            Ogre::SceneNode *cellNode, const Ogre::Vector3 &pos, CSVWorld::PhysicsSystem *physics)
+            Ogre::SceneNode *cellNode, const Ogre::Vector3 &pos, boost::shared_ptr<CSVWorld::PhysicsSystem> physics)
         : mBase(cellNode), mPhysics(physics)
     {
         mBase = cellNode->createChildSceneNode();

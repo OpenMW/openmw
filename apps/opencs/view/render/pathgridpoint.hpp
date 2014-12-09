@@ -1,6 +1,8 @@
 #ifndef OPENCS_VIEW_PATHGRIDPOINT_H
 #define OPENCS_VIEW_PATHGRIDPOINT_H
 
+#include <boost/shared_ptr.hpp>
+
 #include <components/nifogre/ogrenifloader.hpp>
 
 namespace Ogre
@@ -19,14 +21,15 @@ namespace CSVRender
 {
     class PathgridPoint
     {
-            CSVWorld::PhysicsSystem *mPhysics; // local copy
+            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics; // local copy
             NifOgre::ObjectScenePtr mPgPoint;
             Ogre::SceneNode *mBase;
 
         public:
 
             PathgridPoint(const std::string &name,
-                Ogre::SceneNode *cellNode, const Ogre::Vector3 &pos, CSVWorld::PhysicsSystem *physics);
+                Ogre::SceneNode *cellNode, const Ogre::Vector3 &pos,
+                boost::shared_ptr<CSVWorld::PhysicsSystem> physics);
 
             ~PathgridPoint();
 
