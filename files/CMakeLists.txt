@@ -49,8 +49,12 @@ set(MATERIAL_FILES
     mygui.shaderset
 )
 
+set(ETC_FILES
+    gamecontrollerdb.txt
+)
+
 copy_all_files(${CMAKE_CURRENT_SOURCE_DIR}/water "${OpenMW_BINARY_DIR}/resources/water/" "${WATER_FILES}")
 
 copy_all_files(${CMAKE_CURRENT_SOURCE_DIR}/materials "${OpenMW_BINARY_DIR}/resources/materials/" "${MATERIAL_FILES}")
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/gamecontrollerdb.txt ${OpenMW_BINARY_DIR}/resources/)
+copy_all_files(${CMAKE_CURRENT_SOURCE_DIR} "${OpenMW_BINARY_DIR}/resources/" "${ETC_FILES}")

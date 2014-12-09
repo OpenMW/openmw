@@ -1047,7 +1047,7 @@ namespace MWInput
 
     bool InputManager::actionIsActive (int id)
     {
-        return (mInputBinder->getChannel (id)->getValue ()!=0.0);
+        return (mInputBinder->getChannel (id)->getValue ()==1.0);
     }
 
     void InputManager::loadKeyDefaults (bool force)
