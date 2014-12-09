@@ -1120,11 +1120,13 @@ namespace MWInput
                 if (defaultKeyBindings.find(i) != defaultKeyBindings.end()
                         && !mInputBinder->isKeyBound(defaultKeyBindings[i]))
                 {
+                    control->setInitialValue(0.0f);
                     mInputBinder->addKeyBinding(control, defaultKeyBindings[i], ICS::Control::INCREASE);
                 }
                 else if (defaultMouseButtonBindings.find(i) != defaultMouseButtonBindings.end()
                          && !mInputBinder->isMouseButtonBound(defaultMouseButtonBindings[i]))
                 {
+                    control->setInitialValue(0.0f);
                     mInputBinder->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
                 }
             }
@@ -1167,7 +1169,11 @@ namespace MWInput
             bool controlExists = mInputBinder->getChannel(i)->getControlsCount () != 0;
             if (!controlExists)
             {
-                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, 0, ICS::ICS_MAX, ICS::ICS_MAX);
+                int inital;
+                if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
+                    inital = 0.0f;
+                else inital = 0.5f;
+                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, inital, ICS::ICS_MAX, ICS::ICS_MAX);
                 mInputBinder->addControl(control);
                 control->attachChannel(mInputBinder->getChannel(i), ICS::Channel::DIRECT);
             }
@@ -1182,11 +1188,13 @@ namespace MWInput
 
                 if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
                 {
-                    control->setValue(0.5f);
+                    control->setInitialValue(0.0f);
                     mInputBinder->addJoystickButtonBinding(control, defaultButtonBindings[i], ICS::Control::INCREASE);
                 }
                 else if (defaultAxisBindings.find(i) != defaultAxisBindings.end())
                 {
+                    control->setValue(0.5f);
+                    control->setInitialValue(0.5f);
                     mInputBinder->addJoystickAxisBinding(control, defaultAxisBindings[i], ICS::Control::INCREASE);
                 }
             }
@@ -1426,6 +1434,7 @@ namespace MWInput
             return;
 
         clearAllKeyBindings(control);
+        control->setInitialValue(0.0f);
         ICS::DetectingBindingListener::keyBindingDetected (ICS, control, key, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
     }
@@ -1436,6 +1445,7 @@ namespace MWInput
         if(!mDetectingKeyboard)
             return;
         clearAllKeyBindings(control);
+        control->setInitialValue(0.0f);
         ICS::DetectingBindingListener::mouseButtonBindingDetected (ICS, control, button, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
     }
@@ -1451,6 +1461,7 @@ namespace MWInput
 
         clearAllControllerBindings(control);
         control->setValue(0.5f); //axis bindings must start at 0.5
+        control->setInitialValue(0.5f);
         ICS::DetectingBindingListener::joystickAxisBindingDetected (ICS, control, axis, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
     }
@@ -1461,6 +1472,7 @@ namespace MWInput
         if(mDetectingKeyboard)
             return;
         clearAllControllerBindings(control);
+        control->setInitialValue(0.0f);
         ICS::DetectingBindingListener::joystickButtonBindingDetected (ICS, control, button, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
     }

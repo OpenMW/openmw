@@ -278,6 +278,7 @@ namespace ICS
 		/* Joystick Init */
 
 		//Load controller mappings
+#if SDL_VERSION_ATLEAST(2,0,2)
 		int res = SDL_GameControllerAddMappingsFromFile("resources/gamecontrollerdb.txt");
 		if(res == -1)
 		{
@@ -287,6 +288,7 @@ namespace ICS
 		{
             ICS_LOG(std::string("Loaded ")+boost::lexical_cast<std::string>(res)+" Game controller bindings");
         }
+#endif
 
 		//Open all presently connected sticks
 		int numSticks = SDL_NumJoysticks();
