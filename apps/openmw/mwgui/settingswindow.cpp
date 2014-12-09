@@ -245,6 +245,9 @@ namespace MWGui
         MyGUI::TextBox* diffText;
         getWidget(diffText, "DifficultyText");
         diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
+
+        mKeyboardSwitch->setStateSelected(true);
+        mControllerSwitch->setStateSelected(false);
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
@@ -447,6 +450,8 @@ namespace MWGui
         if(mKeyboardMode)
             return;
         mKeyboardMode = true;
+        mKeyboardSwitch->setStateSelected(true);
+        mControllerSwitch->setStateSelected(false);
         updateControlsBox();
     }
 
@@ -455,6 +460,8 @@ namespace MWGui
         if(!mKeyboardMode)
             return;
         mKeyboardMode = false;
+        mKeyboardSwitch->setStateSelected(false);
+        mControllerSwitch->setStateSelected(true);
         updateControlsBox();
     }
 
