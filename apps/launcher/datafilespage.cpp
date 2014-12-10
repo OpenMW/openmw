@@ -238,10 +238,8 @@ void Launcher::DataFilesPage::addProfile (const QString &profile, bool setAsCurr
     if (profile.isEmpty())
         return;
 
-    if (ui.profilesComboBox->findText (profile) != -1)
-        return;
-
-    ui.profilesComboBox->addItem (profile);
+    if (ui.profilesComboBox->findText (profile) == -1)
+        ui.profilesComboBox->addItem (profile);
 
     if (setAsCurrent)
         setProfile (ui.profilesComboBox->findText (profile), false);
