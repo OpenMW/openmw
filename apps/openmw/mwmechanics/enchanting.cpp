@@ -156,7 +156,7 @@ namespace MWMechanics
      *
      *  Formula on UESPWiki is not entirely correct.
      */
-    float Enchanting::getEnchantPoints() const
+    int Enchanting::getEnchantPoints() const
     {
         if (mEffectList.mList.empty())
             // No effects added, cost = 0
@@ -195,7 +195,7 @@ namespace MWMechanics
             --effectsLeftCnt;
         }
 
-        return enchantmentCost;
+        return static_cast<int>(enchantmentCost);
     }
 
 
@@ -240,7 +240,7 @@ namespace MWMechanics
         return soul->mData.mSoul;
     }
 
-    float Enchanting::getMaxEnchantValue() const
+    int Enchanting::getMaxEnchantValue() const
     {
         if (itemEmpty())
             return 0;
