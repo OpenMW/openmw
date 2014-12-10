@@ -154,8 +154,10 @@ void Launcher::DataFilesPage::setProfile(int index, bool savePrevious)
 {
     if (index >= -1 && index < ui.profilesComboBox->count())
     {
-        QString previous = ui.profilesComboBox->itemText(ui.profilesComboBox->currentIndex());
+        QString previous = mPreviousProfile;
         QString current = ui.profilesComboBox->itemText(index);
+
+        mPreviousProfile = current;
 
         setProfile (previous, current, savePrevious);
     }
@@ -166,9 +168,6 @@ void Launcher::DataFilesPage::setProfile (const QString &previous, const QString
     //abort if no change (poss. duplicate signal)
     if (previous == current)
             return;
-
-    if (previous.isEmpty())
-           return;
 
     if (!previous.isEmpty() && savePrevious)
         saveSettings (previous);
@@ -212,7 +211,7 @@ void Launcher::DataFilesPage::slotProfileChanged(int index)
 
 void Launcher::DataFilesPage::on_newProfileAction_triggered()
 {
-    if (!mProfileDialog->exec() == QDialog::Accepted)
+    if (mProfileDialog->exec() != QDialog::Accepted)
         return;
 
     QString profile = mProfileDialog->lineEdit()->text();
@@ -222,9 +221,10 @@ void Launcher::DataFilesPage::on_newProfileAction_triggered()
 
     saveSettings();
 
-    mSelector->clearCheckStates();
+    mLauncherSettings.setValue(QString("Profiles/currentprofile"), profile);
 
     addProfile(profile, true);
+    mSelector->clearCheckStates();
 
     mSelector->setGameFile();
 
@@ -257,10 +257,12 @@ void Launcher::DataFilesPage::on_deleteProfileAction_triggered()
     if (!showDeleteMessageBox (profile))
         return;
 
-    // Remove the profile from the combobox
-    ui.profilesComboBox->removeItem (ui.profilesComboBox->findText (profile));
+    // this should work since the Default profile can't be deleted and is always index 0
+    int next = ui.profilesComboBox->currentIndex()-1;
+    ui.profilesComboBox->setCurrentIndex(next);
 
     removeProfile(profile);
+    ui.profilesComboBox->removeItem(ui.profilesComboBox->findText(profile));
 
     saveSettings();
 
