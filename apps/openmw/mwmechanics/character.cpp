@@ -92,6 +92,35 @@ MWMechanics::CharacterState runStateToWalkState (MWMechanics::CharacterState sta
     return ret;
 }
 
+float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
+{
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
+
+    const float fallDistanceMin = store.find("fFallDamageDistanceMin")->getFloat();
+
+    if (fallHeight >= fallDistanceMin)
+    {
+        const float acrobaticsSkill = ptr.getClass().getSkill(ptr, ESM::Skill::Acrobatics);
+        const float jumpSpellBonus = ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Jump).getMagnitude();
+        const float fallAcroBase = store.find("fFallAcroBase")->getFloat();
+        const float fallAcroMult = store.find("fFallAcroMult")->getFloat();
+        const float fallDistanceBase = store.find("fFallDistanceBase")->getFloat();
+        const float fallDistanceMult = store.find("fFallDistanceMult")->getFloat();
+
+        float x = fallHeight - fallDistanceMin;
+        x -= (1.5 * acrobaticsSkill) + jumpSpellBonus;
+        x = std::max(0.0f, x);
+
+        float a = fallAcroBase + fallAcroMult * (100 - acrobaticsSkill);
+        x = fallDistanceBase + fallDistanceMult * x;
+        x *= a;
+
+        return x;
+    }
+    return 0.f;
+}
+
 }
 
 namespace MWMechanics
@@ -1449,7 +1478,7 @@ void CharacterController::update(float duration)
             vec.z = 0.0f;
 
             float height = cls.getCreatureStats(mPtr).land();
-            float healthLost = cls.getFallDamage(mPtr, height);
+            float healthLost = getFallDamage(mPtr, height);
             if (healthLost > 0.0f)
             {
                 const float fatigueTerm = cls.getCreatureStats(mPtr).getFatigueTerm();
