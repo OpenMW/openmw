@@ -198,11 +198,11 @@ namespace MWGui
             mRangeButton->setCaptionWithReplacing ("#{sRangeTouch}");
 
         // cycle through range types until we find something that's allowed
-        if (mEffect.mRange == ESM::RT_Target && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget))
+        if (mEffect.mRange == ESM::RT_Target && (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget) || constantEffect))
             onRangeButtonClicked(sender);
         if (mEffect.mRange == ESM::RT_Self && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf))
             onRangeButtonClicked(sender);
-        if (mEffect.mRange == ESM::RT_Touch && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch))
+        if (mEffect.mRange == ESM::RT_Touch && (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch) || constantEffect))
             onRangeButtonClicked(sender);
 
         if(mEffect.mRange == ESM::RT_Self)
