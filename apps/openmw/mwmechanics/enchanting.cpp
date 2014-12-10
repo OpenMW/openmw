@@ -55,7 +55,7 @@ namespace MWMechanics
         enchantment.mData.mCharge = getGemCharge();
         enchantment.mData.mAutocalc = 0;
         enchantment.mData.mType = mCastStyle;
-        enchantment.mData.mCost = getEnchantPoints();
+        enchantment.mData.mCost = getCastCost();
 
         store.remove(mSoulGemPtr, 1, player);
 
@@ -199,7 +199,7 @@ namespace MWMechanics
     }
 
 
-    float Enchanting::getCastCost() const
+    int Enchanting::getCastCost() const
     {
         if (mCastStyle == ESM::Enchantment::ConstantEffect)
             return 0;
@@ -215,7 +215,7 @@ namespace MWMechanics
          */
         const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
 
-        return (castCost < 1) ? 1 : castCost;
+        return static_cast<int>((castCost < 1) ? 1 : castCost);
     }
 
 
