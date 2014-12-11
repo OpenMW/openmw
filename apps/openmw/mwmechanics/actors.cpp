@@ -1122,15 +1122,6 @@ namespace MWMechanics
             // target lists get updated once every 1.0 sec
             if (timerUpdateAITargets >= 1.0f) timerUpdateAITargets = 0;
 
-            // Reset data from previous frame
-            for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
-            {
-                // Reset last hit object, which is only valid for one frame
-                // Note, the new hit object for this frame may be set by CharacterController::update -> Animation::runAnimation
-                // (below)
-                iter->first.getClass().getCreatureStats(iter->first).setLastHitObject(std::string());
-            }
-
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
             int hostilesCount = 0; // need to know this to play Battle music
