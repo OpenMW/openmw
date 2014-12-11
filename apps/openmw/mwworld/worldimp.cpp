@@ -1158,6 +1158,7 @@ namespace MWWorld
                         ptr.getClass().copyToCell(ptr, *newCell, pos);
 
                     mRendering->updateObjectCell(ptr, copy);
+                    ptr.getRefData().setBaseNode(NULL);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, copy);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
