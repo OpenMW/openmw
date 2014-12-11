@@ -295,6 +295,7 @@ namespace Compiler
             extensions.registerInstruction ("hurtcollidingactor", "f", opcodeHurtCollidingActor, opcodeHurtCollidingActorExplicit);
             extensions.registerFunction ("getwindspeed", 'f', "", opcodeGetWindSpeed);
             extensions.registerFunction ("hitonme", 'l', "S", opcodeHitOnMe, opcodeHitOnMeExplicit);
+            extensions.registerFunction ("hitattemptonme", 'l', "S", opcodeHitAttemptOnMe, opcodeHitAttemptOnMeExplicit);
             extensions.registerInstruction ("disableteleporting", "", opcodeDisableTeleporting);
             extensions.registerInstruction ("enableteleporting", "", opcodeEnableTeleporting);
             extensions.registerInstruction ("showvars", "", opcodeShowVars, opcodeShowVarsExplicit);

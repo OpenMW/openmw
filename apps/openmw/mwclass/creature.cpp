@@ -346,10 +346,11 @@ namespace MWClass
             setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
+        if(!object.isEmpty())
+            getCreatureStats(ptr).setLastHitAttemptObject(object.getClass().getId(object));
+
         if(!successful)
         {
-            // TODO: Handle HitAttemptOnMe script function
-
             // Missed
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "miss", 1.0f, 1.0f);
             return;

@@ -269,6 +269,8 @@ namespace Compiler
         const int opcodePayFineThief = 0x2000237;
         const int opcodeHitOnMe = 0x2000213;
         const int opcodeHitOnMeExplicit = 0x2000214;
+        const int opcodeHitAttemptOnMe = 0x20002f9;
+        const int opcodeHitAttemptOnMeExplicit = 0x20002fa;
         const int opcodeDisableTeleporting = 0x2000215;
         const int opcodeEnableTeleporting = 0x2000216;
         const int opcodeShowVars = 0x200021d;

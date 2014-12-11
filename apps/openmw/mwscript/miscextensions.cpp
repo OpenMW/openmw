@@ -737,6 +737,25 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpHitAttemptOnMe : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string objectID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
+                    runtime.push(::Misc::StringUtils::ciEqual(objectID, stats.getLastHitAttemptObject()));
+
+                    stats.setLastHitAttemptObject(std::string());
+                }
+        };
+
         template <bool Enable>
         class OpEnableTeleporting : public Interpreter::Opcode0
         {
@@ -1085,6 +1104,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeGetWindSpeed, new OpGetWindSpeed);
             interpreter.installSegment5 (Compiler::Misc::opcodeHitOnMe, new OpHitOnMe<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeHitOnMeExplicit, new OpHitOnMe<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeHitAttemptOnMe, new OpHitAttemptOnMe<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeHitAttemptOnMeExplicit, new OpHitAttemptOnMe<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeDisableTeleporting, new OpEnableTeleporting<false>);
             interpreter.installSegment5 (Compiler::Misc::opcodeEnableTeleporting, new OpEnableTeleporting<true>);
             interpreter.installSegment5 (Compiler::Misc::opcodeShowVars, new OpShowVars<ImplicitRef>);

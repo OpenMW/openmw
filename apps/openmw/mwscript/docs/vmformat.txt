@@ -436,5 +436,7 @@ op 0x20002f5: ToggleWorld
 op 0x20002f6: PCForce1stPerson
 op 0x20002f7: PCForce3rdPerson
 op 0x20002f8: PCGet3rdPerson
+op 0x20002f9: HitAttemptOnMe
+op 0x20002fa: HitAttemptOnMe, explicit
 
-opcodes 0x20002f9-0x3ffffff unused
+opcodes 0x20002fb-0x3ffffff unused
