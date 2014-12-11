@@ -104,8 +104,8 @@ namespace MWWorld
 
             void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);
 
-            bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
-            ///< @return true if the active cell (cell player is in) changed
+            Ptr moveObjectImp (const Ptr& ptr, float x, float y, float z);
+            ///< @return an updated Ptr in case the Ptr's cell changes
 
             Ptr copyObjectToCell(const Ptr &ptr, CellStore* cell, ESM::Position pos, bool adjustPos=true);
 
@@ -341,7 +341,8 @@ namespace MWWorld
             virtual void deleteObject (const Ptr& ptr);
             virtual void undeleteObject (const Ptr& ptr);
 
-            virtual void moveObject (const Ptr& ptr, float x, float y, float z);
+            virtual MWWorld::Ptr moveObject (const Ptr& ptr, float x, float y, float z);
+            ///< @return an updated Ptr in case the Ptr's cell changes
             virtual void moveObject (const Ptr& ptr, CellStore* newCell, float x, float y, float z);
 
             virtual void scaleObject (const Ptr& ptr, float scale);

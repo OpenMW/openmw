@@ -391,6 +391,10 @@ namespace Compiler
         {
             if (get (c))
             {
+                /// \todo hack to allow a space in comparison operators (add option to disable)
+                if (c==' ')
+                    get (c);
+
                 if (c=='=')
                     special = S_cmpEQ;
                 else
@@ -398,7 +402,7 @@ namespace Compiler
                     special = S_cmpEQ;
                     putback (c);
 //                    return false;
-// Allow = as synonym for ==. \todo optionally disable for post-1.0 scripting improvements.
+/// Allow = as synonym for ==. \todo optionally disable for post-1.0 scripting improvements.
                 }
             }
             else
@@ -411,6 +415,10 @@ namespace Compiler
         {
             if (get (c))
             {
+                /// \todo hack to allow a space in comparison operators (add option to disable)
+                if (c==' ' && !get (c))
+                    return false;
+
                 if (c=='=')
                     special = S_cmpNE;
                 else
@@ -441,6 +449,10 @@ namespace Compiler
         {
             if (get (c))
             {
+                /// \todo hack to allow a space in comparison operators (add option to disable)
+                if (c==' ')
+                    get (c);
+
                 if (c=='=')
                 {
                     special = S_cmpLE;
@@ -461,6 +473,10 @@ namespace Compiler
         {
             if (get (c))
             {
+                /// \todo hack to allow a space in comparison operators (add option to disable)
+                if (c==' ')
+                    get (c);
+
                 if (c=='=')
                 {
                     special = S_cmpGE;
