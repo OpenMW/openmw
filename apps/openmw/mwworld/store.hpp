@@ -849,15 +849,28 @@ namespace MWWorld
         Interior mInt;
         Exterior mExt;
 
+        Store<ESM::Cell>* mCells;
+
     public:
 
-        void load(ESM::ESMReader &esm, const std::string &id) {
+        void setCells(Store<ESM::Cell>& cells)
+        {
+            mCells = &cells;
+        }
 
+        void load(ESM::ESMReader &esm, const std::string &id) {
             ESM::Pathgrid pathgrid;
             pathgrid.load(esm);
 
+            // Unfortunately the Pathgrid record model does not specify whether the pathgrid belongs to an interior or exterior cell.
+            // For interior cells, mCell is the cell name, but for exterior cells it is either the cell name or if that doesn't exist, the cell's region name.
+            // mX and mY will be (0,0) for interior cells, but there is also an exterior cell with the coordinates of (0,0), so that doesn't help.
+            // Check whether mCell is an interior cell. This isn't perfect, will break if a Region with the same name as an interior cell is created.
+            // A proper fix should be made for future versions of the file format.
+            bool interior = mCells->search(pathgrid.mCell) != NULL;
+
             // Try to overwrite existing record
-            if (!pathgrid.mCell.empty())
+            if (interior)
             {
                 std::pair<Interior::iterator, bool> ret = mInt.insert(std::make_pair(pathgrid.mCell, pathgrid));
                 if (!ret.second)
@@ -865,8 +878,7 @@ namespace MWWorld
             }
             else
             {
-                std::pair<Exterior::iterator, bool> ret = mExt.insert(std::make_pair(std::make_pair(pathgrid.mData.mX, pathgrid.mData.mY),
-                                                                                       pathgrid));
+                std::pair<Exterior::iterator, bool> ret = mExt.insert(std::make_pair(std::make_pair(pathgrid.mData.mX, pathgrid.mData.mY), pathgrid));
                 if (!ret.second)
                     ret.first->second = pathgrid;
             }
@@ -886,45 +898,47 @@ namespace MWWorld
             return NULL;
         }
 
-        const ESM::Pathgrid *find(int x, int y) const {
-            const ESM::Pathgrid *ptr = search(x, y);
-            if (ptr == 0) {
-                std::ostringstream msg;
-                msg << "Pathgrid at (" << x << ", " << y << ") not found";
-                throw std::runtime_error(msg.str());
-            }
-            return ptr;
-        }
-
-        const ESM::Pathgrid *search(const std::string &name) const {
+        const ESM::Pathgrid *search(const std::string& name) const {
             Interior::const_iterator it = mInt.find(name);
             if (it != mInt.end())
                 return &(it->second);
             return NULL;
         }
 
-        const ESM::Pathgrid *find(const std::string &name) const {
-            const ESM::Pathgrid *ptr = search(name);
-            if (ptr == 0) {
+        const ESM::Pathgrid *find(int x, int y) const {
+            const ESM::Pathgrid* pathgrid = search(x,y);
+            if (!pathgrid)
+            {
+                std::ostringstream msg;
+                msg << "Pathgrid in cell '" << x << " " << y << "' not found";
+                throw std::runtime_error(msg.str());
+            }
+            return pathgrid;
+        }
+
+        const ESM::Pathgrid* find(const std::string& name) const {
+            const ESM::Pathgrid* pathgrid = search(name);
+            if (!pathgrid)
+            {
                 std::ostringstream msg;
                 msg << "Pathgrid in cell '" << name << "' not found";
                 throw std::runtime_error(msg.str());
             }
-            return ptr;
+            return pathgrid;
         }
 
         const ESM::Pathgrid *search(const ESM::Cell &cell) const {
-            if (cell.mData.mFlags & ESM::Cell::Interior) {
+            if (!(cell.mData.mFlags & ESM::Cell::Interior))
+                return search(cell.mData.mX, cell.mData.mY);
+            else
                 return search(cell.mName);
-            }
-            return search(cell.mData.mX, cell.mData.mY);
         }
 
         const ESM::Pathgrid *find(const ESM::Cell &cell) const {
-            if (cell.mData.mFlags & ESM::Cell::Interior) {
+            if (!(cell.mData.mFlags & ESM::Cell::Interior))
+                return find(cell.mData.mX, cell.mData.mY);
+            else
                 return find(cell.mName);
-            }
-            return find(cell.mData.mX, cell.mData.mY);
         }
     };
 
