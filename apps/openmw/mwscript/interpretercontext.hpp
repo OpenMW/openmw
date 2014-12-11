@@ -78,7 +78,7 @@ namespace MWScript
                 const std::vector<std::string>& buttons);
 
             virtual void report (const std::string& message);
-            ///< By default echo via messageBox.
+            ///< By default, do nothing.
 
             virtual bool menuMode();
 
