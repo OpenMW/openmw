@@ -312,6 +312,35 @@ namespace MWScript
                 }
         };
 
+        class OpPcForce1stPerson : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                if (!MWBase::Environment::get().getWorld()->isFirstPerson())
+                    MWBase::Environment::get().getWorld()->togglePOV();
+            }
+        };
+
+        class OpPcForce3rdPerson : public Interpreter::Opcode0
+        {
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                if (MWBase::Environment::get().getWorld()->isFirstPerson())
+                    MWBase::Environment::get().getWorld()->togglePOV();
+            }
+        };
+
+        class OpPcGet3rdPerson : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime& runtime)
+            {
+                runtime.push(!MWBase::Environment::get().getWorld()->isFirstPerson());
+            }
+        };
+
         class OpToggleVanityMode : public Interpreter::Opcode0
         {
             static bool sActivate;
@@ -1002,6 +1031,9 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleWater, new OpToggleWater);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleWorld, new OpToggleWorld);
             interpreter.installSegment5 (Compiler::Misc::opcodeDontSaveObject, new OpDontSaveObject);
+            interpreter.installSegment5 (Compiler::Misc::opcodePcForce1stPerson, new OpPcForce1stPerson);
+            interpreter.installSegment5 (Compiler::Misc::opcodePcForce3rdPerson, new OpPcForce3rdPerson);
+            interpreter.installSegment5 (Compiler::Misc::opcodePcGet3rdPerson, new OpPcGet3rdPerson);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleVanityMode, new OpToggleVanityMode);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetPcSleep, new OpGetPcSleep);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetPcJumping, new OpGetPcJumping);

@@ -387,6 +387,7 @@ namespace MWBase
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
 
             virtual void togglePOV() = 0;
+            virtual bool isFirstPerson() const = 0;
             virtual void togglePreviewMode(bool enable) = 0;
             virtual bool toggleVanityMode(bool enable) = 0;
             virtual void allowVanityMode(bool allow) = 0;

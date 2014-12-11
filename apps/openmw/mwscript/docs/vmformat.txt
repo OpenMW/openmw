@@ -433,5 +433,8 @@ op 0x20002c4-0x20002db: ModMagicEffect
 op 0x20002dc-0x20002f3: ModMagicEffect, explicit
 op 0x20002f4: ResetActors
 op 0x20002f5: ToggleWorld
+op 0x20002f6: PCForce1stPerson
+op 0x20002f7: PCForce3rdPerson
+op 0x20002f8: PCGet3rdPerson
 
-opcodes 0x20002f6-0x3ffffff unused
+opcodes 0x20002f9-0x3ffffff unused
