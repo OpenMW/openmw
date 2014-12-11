@@ -206,6 +206,10 @@ void Launcher::DataFilesPage::slotProfileRenamed(const QString &previous, const 
 
 void Launcher::DataFilesPage::slotProfileChanged(int index)
 {
+    // in case the event was triggered externally
+    if (ui.profilesComboBox->currentIndex() != index)
+        ui.profilesComboBox->setCurrentIndex(index);
+
     setProfile (index, true);
 }
 
