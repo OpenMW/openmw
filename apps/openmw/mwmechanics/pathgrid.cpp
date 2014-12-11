@@ -105,9 +105,7 @@ namespace MWMechanics
 
         mCell = cell->getCell();
         mIsExterior = cell->getCell()->isExterior();
-        mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell->getCell(),
-            MWBase::Environment::get().getWorld()->getCellName(cell));
-
+        mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell->getCell());
         if(!mPathgrid)
             return false;
 

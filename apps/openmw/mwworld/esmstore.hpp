@@ -141,6 +141,8 @@ namespace MWWorld
             mStores[ESM::REC_SSCR] = &mStartScripts;
             mStores[ESM::REC_STAT] = &mStatics;
             mStores[ESM::REC_WEAP] = &mWeapons;
+
+            mPathgrids.setCells(mCells);
         }
 
         void clearDynamic ()
