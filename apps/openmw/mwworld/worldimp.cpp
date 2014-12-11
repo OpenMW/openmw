@@ -1187,7 +1187,7 @@ namespace MWWorld
         }
     }
 
-    bool World::moveObjectImp(const Ptr& ptr, float x, float y, float z)
+    MWWorld::Ptr World::moveObjectImp(const Ptr& ptr, float x, float y, float z)
     {
         CellStore *cell = ptr.getCell();
 
@@ -1200,12 +1200,14 @@ namespace MWWorld
 
         moveObject(ptr, cell, x, y, z);
 
-        return cell != ptr.getCell();
+        MWWorld::Ptr updated = ptr;
+        updated.mCell = cell;
+        return updated;
     }
 
-    void World::moveObject (const Ptr& ptr, float x, float y, float z)
+    MWWorld::Ptr World::moveObject (const Ptr& ptr, float x, float y, float z)
     {
-        moveObjectImp(ptr, x, y, z);
+        return moveObjectImp(ptr, x, y, z);
     }
 
     void World::scaleObject (const Ptr& ptr, float scale)

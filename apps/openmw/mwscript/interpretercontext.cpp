@@ -590,4 +590,10 @@ namespace MWScript
     {
         return mTargetId;
     }
+
+    void InterpreterContext::updatePtr(const MWWorld::Ptr& updated)
+    {
+        if (!mReference.isEmpty())
+            mReference = updated;
+    }
 }
