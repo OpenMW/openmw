@@ -589,6 +589,7 @@ namespace MWGui
                     break;
                 case GM_LoadingWallpaper:
                     mHud->setVisible(false);
+                    mToolTips->setVisible(false);
                     setCursorVisible(false);
                     break;
                 case GM_Loading:
@@ -597,7 +598,7 @@ namespace MWGui
                     mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats));
                     mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory));
                     mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic));
-
+                    mToolTips->setVisible(false);
                     setCursorVisible(false);
                     break;
                 default:
