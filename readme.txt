@@ -101,11 +101,13 @@ CHANGELOG
 0.34.0
 
 Bug #904: omwlauncher doesn't allow installing Tribunal and Bloodmoon if only MW is installed
+Bug #986: Launcher: renaming profile names is broken
 Bug #1061: "Browse to CD..." launcher crash
 Bug #1135: Launcher crashes if user does not have write permission
 Bug #1231: Current installer in launcher does not correctly import russian Morrowind.ini settings from setup.inx
 Bug #1288: Fix the Alignment of the Resolution Combobox
 Bug #1343: BIK videos occasionally out of sync with audio
+Bug #1684: Morrowind Grass Mod graphical glitches
 Bug #1734: NPC in fight with invisible/sneaking player
 Bug #1982: Long class names are cut off in the UI
 Bug #2012: Editor: OpenCS script compiler sometimes fails to find IDs
