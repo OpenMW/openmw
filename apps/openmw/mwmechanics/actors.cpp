@@ -1554,4 +1554,13 @@ namespace MWMechanics
         if (ptr.getClass().isNpc())
             calculateNpcStatModifiers(ptr, 0.f);
     }
+
+    bool Actors::isReadyToBlock(const MWWorld::Ptr &ptr) const
+    {
+        PtrControllerMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+
+        return it->second->isReadyToBlock();
+    }
 }

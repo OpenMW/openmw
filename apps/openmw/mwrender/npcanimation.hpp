@@ -143,7 +143,7 @@ public:
     virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
 
     virtual void showWeapons(bool showWeapon);
-    virtual void showCarriedLeft(bool showa);
+    virtual void showCarriedLeft(bool show);
 
     virtual void attachArrow();
     virtual void releaseArrow();

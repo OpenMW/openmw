@@ -648,7 +648,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
                 mAnimation->showWeapons(true);
                 mAnimation->setWeaponGroup(mCurrentWeapon);
             }
-            mAnimation->showCarriedLeft(mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand);
+
+            mAnimation->showCarriedLeft(updateCarriedLeftVisible(mWeaponType));
         }
 
         if(!cls.getCreatureStats(mPtr).isDead())
@@ -836,6 +837,25 @@ bool CharacterController::updateCreatureState()
     return false;
 }
 
+bool CharacterController::updateCarriedLeftVisible(WeaponType weaptype) const
+{
+    // Shields/torches shouldn't be visible during any operation involving two hands
+    // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
+    // but they are also present in weapon drawing animation.
+    switch (weaptype)
+    {
+    case WeapType_Spell:
+    case WeapType_BowAndArrow:
+    case WeapType_Crossbow:
+    case WeapType_HandToHand:
+    case WeapType_TwoHand:
+    case WeapType_TwoWide:
+        return false;
+    default:
+        return true;
+    }
+}
+
 bool CharacterController::updateWeaponState()
 {
     const MWWorld::Class &cls = mPtr.getClass();
@@ -850,10 +870,7 @@ bool CharacterController::updateWeaponState()
     {
         forcestateupdate = true;
 
-        // Shields/torches shouldn't be visible during spellcasting or hand-to-hand
-        // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
-        // but they are also present in weapon drawing animation.
-        mAnimation->showCarriedLeft(weaptype != WeapType_Spell && weaptype != WeapType_HandToHand);
+        mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaptype));
 
         std::string weapgroup;
         if(weaptype == WeapType_None)
@@ -1816,6 +1833,11 @@ void CharacterController::determineAttackType()
         else
             mAttackType = "chop";
     }
+}
+
+bool CharacterController::isReadyToBlock() const
+{
+    return updateCarriedLeftVisible(mWeaponType);
 }
 
 }

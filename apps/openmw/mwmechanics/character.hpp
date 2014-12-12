@@ -199,6 +199,8 @@ class CharacterController
     /// @param num if non-NULL, the chosen animation number will be written here
     std::string chooseRandomGroup (const std::string& prefix, int* num = NULL);
 
+    bool updateCarriedLeftVisible(WeaponType weaptype) const;
+
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
@@ -224,6 +226,8 @@ public:
     void forceStateUpdate();
     
     AiState& getAiState() { return mAiState; }
+
+    bool isReadyToBlock() const;
 };
 
     void getWeaponGroup(WeaponType weaptype, std::string &group);
