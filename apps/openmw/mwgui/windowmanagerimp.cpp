@@ -444,6 +444,7 @@ namespace MWGui
         mVideoBackground->setVisible(false);
 
         mHud->setVisible(mHudEnabled && mGuiEnabled);
+        mToolTips->setVisible(mGuiEnabled);
 
         bool gameMode = !isGuiMode();
 
@@ -587,16 +588,11 @@ namespace MWGui
                     mJournal->setVisible(true);
                     break;
                 case GM_LoadingWallpaper:
-                    mHud->setVisible(false);
-                    setCursorVisible(false);
-                    break;
                 case GM_Loading:
-                    // Show the pinned windows
-                    mMap->setVisible(mMap->pinned() && !(mForceHidden & GW_Map));
-                    mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats));
-                    mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory));
-                    mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic));
-
+                    // Don't need to show anything here - GM_LoadingWallpaper covers everything else anyway,
+                    // GM_Loading uses a texture of the last rendered frame so everything previously visible will be rendered.
+                    mHud->setVisible(false);
+                    mToolTips->setVisible(false);
                     setCursorVisible(false);
                     break;
                 default:

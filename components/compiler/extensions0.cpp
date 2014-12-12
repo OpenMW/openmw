@@ -261,6 +261,9 @@ namespace Compiler
             extensions.registerInstruction ("togglepathgrid", "", opcodeTogglePathgrid);
             extensions.registerInstruction ("tpg", "", opcodeTogglePathgrid);
             extensions.registerInstruction ("dontsaveobject", "", opcodeDontSaveObject);
+            extensions.registerInstruction ("pcforce1stperson", "", opcodePcForce1stPerson);
+            extensions.registerInstruction ("pcforce3rdperson", "", opcodePcForce3rdPerson);
+            extensions.registerFunction ("pcget3rdperson", 'l', "", opcodePcGet3rdPerson);
             extensions.registerInstruction ("togglevanitymode", "", opcodeToggleVanityMode);
             extensions.registerInstruction ("tvm", "", opcodeToggleVanityMode);
             extensions.registerFunction ("getpcsleep", 'l', "", opcodeGetPcSleep);
@@ -292,6 +295,7 @@ namespace Compiler
             extensions.registerInstruction ("hurtcollidingactor", "f", opcodeHurtCollidingActor, opcodeHurtCollidingActorExplicit);
             extensions.registerFunction ("getwindspeed", 'f', "", opcodeGetWindSpeed);
             extensions.registerFunction ("hitonme", 'l', "S", opcodeHitOnMe, opcodeHitOnMeExplicit);
+            extensions.registerFunction ("hitattemptonme", 'l', "S", opcodeHitAttemptOnMe, opcodeHitAttemptOnMeExplicit);
             extensions.registerInstruction ("disableteleporting", "", opcodeDisableTeleporting);
             extensions.registerInstruction ("enableteleporting", "", opcodeEnableTeleporting);
             extensions.registerInstruction ("showvars", "", opcodeShowVars, opcodeShowVarsExplicit);

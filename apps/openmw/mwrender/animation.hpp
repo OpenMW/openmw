@@ -228,6 +228,7 @@ public:
     virtual void preRender (Ogre::Camera* camera);
 
     virtual void setAlpha(float alpha) {}
+    virtual void setVampire(bool vampire) {}
 
 public:
     void updatePtr(const MWWorld::Ptr &ptr);

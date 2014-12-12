@@ -205,7 +205,6 @@ namespace MWScript
 
     void InterpreterContext::report (const std::string& message)
     {
-        messageBox (message);
     }
 
     bool InterpreterContext::menuMode()

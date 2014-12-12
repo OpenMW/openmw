@@ -56,8 +56,13 @@ std::string getVampireHead(const std::string& race, bool female)
         }
     }
 
-    assert(sVampireMapping[thisCombination]);
-    return "meshes\\" + sVampireMapping[thisCombination]->mModel;
+    if (sVampireMapping.find(thisCombination) == sVampireMapping.end())
+        sVampireMapping[thisCombination] = NULL;
+
+    const ESM::BodyPart* bodyPart = sVampireMapping[thisCombination];
+    if (!bodyPart)
+        return std::string();
+    return "meshes\\" + bodyPart->mModel;
 }
 
 bool isSkinned (NifOgre::ObjectScenePtr scene)
@@ -256,10 +261,15 @@ void NpcAnimation::updateNpcBase()
     {
         if (isVampire)
             mHeadModel = getVampireHead(mNpc->mRace, mNpc->mFlags & ESM::NPC::Female);
-        else
+        else if (!mNpc->mHead.empty())
             mHeadModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHead)->mModel;
+        else
+            mHeadModel = "";
 
-        mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHair)->mModel;
+        if (!mNpc->mHair.empty())
+            mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHair)->mModel;
+        else
+            mHairModel = "";
     }
 
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
@@ -399,9 +409,9 @@ void NpcAnimation::updateParts()
 
     if(mViewMode != VM_FirstPerson)
     {
-        if(mPartPriorities[ESM::PRT_Head] < 1)
+        if(mPartPriorities[ESM::PRT_Head] < 1 && !mHeadModel.empty())
             addOrReplaceIndividualPart(ESM::PRT_Head, -1,1, mHeadModel);
-        if(mPartPriorities[ESM::PRT_Hair] < 1 && mPartPriorities[ESM::PRT_Head] <= 1)
+        if(mPartPriorities[ESM::PRT_Hair] < 1 && mPartPriorities[ESM::PRT_Head] <= 1 && !mHairModel.empty())
             addOrReplaceIndividualPart(ESM::PRT_Hair, -1,1, mHairModel);
     }
     if(mViewMode == VM_HeadOnly)
@@ -971,6 +981,16 @@ void NpcAnimation::applyAlpha(float alpha, Ogre::Entity *ent, NifOgre::ObjectSce
 void NpcAnimation::equipmentChanged()
 {
     updateParts();
+}
+
+void NpcAnimation::setVampire(bool vampire)
+{
+    if (mNpcType == Type_Werewolf) // we can't have werewolf vampires, can we
+        return;
+    if ((mNpcType == Type_Vampire) != vampire)
+    {
+        rebuild();
+    }
 }
 
 }

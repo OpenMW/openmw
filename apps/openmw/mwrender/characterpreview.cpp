@@ -195,6 +195,7 @@ namespace MWRender
         MWWorld::InventoryStore &inv = mCharacter.getClass().getInventoryStore(mCharacter);
         MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         std::string groupname;
+        bool showCarriedLeft = true;
         if(iter == inv.end())
             groupname = "inventoryhandtohand";
         else
@@ -224,10 +225,14 @@ namespace MWRender
                     groupname = "inventoryweapontwowide";
                 else
                     groupname = "inventoryhandtohand";
-            }
+
+                showCarriedLeft = (iter->getClass().canBeEquipped(*iter, mCharacter).first != 2);
+           }
             else
                 groupname = "inventoryhandtohand";
         }
+
+        mAnimation->showCarriedLeft(showCarriedLeft);
 
         mCurrentAnimGroup = groupname;
         mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, 1.0f, "start", "stop", 0.0f, 0);

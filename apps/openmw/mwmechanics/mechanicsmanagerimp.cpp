@@ -1352,4 +1352,9 @@ namespace MWMechanics
             stats.resurrect();
         }
     }
+
+    bool MechanicsManager::isReadyToBlock(const MWWorld::Ptr &ptr) const
+    {
+        return mActors.isReadyToBlock(ptr);
+    }
 }

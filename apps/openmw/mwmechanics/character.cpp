@@ -92,6 +92,35 @@ MWMechanics::CharacterState runStateToWalkState (MWMechanics::CharacterState sta
     return ret;
 }
 
+float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
+{
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
+
+    const float fallDistanceMin = store.find("fFallDamageDistanceMin")->getFloat();
+
+    if (fallHeight >= fallDistanceMin)
+    {
+        const float acrobaticsSkill = ptr.getClass().getSkill(ptr, ESM::Skill::Acrobatics);
+        const float jumpSpellBonus = ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Jump).getMagnitude();
+        const float fallAcroBase = store.find("fFallAcroBase")->getFloat();
+        const float fallAcroMult = store.find("fFallAcroMult")->getFloat();
+        const float fallDistanceBase = store.find("fFallDistanceBase")->getFloat();
+        const float fallDistanceMult = store.find("fFallDistanceMult")->getFloat();
+
+        float x = fallHeight - fallDistanceMin;
+        x -= (1.5 * acrobaticsSkill) + jumpSpellBonus;
+        x = std::max(0.0f, x);
+
+        float a = fallAcroBase + fallAcroMult * (100 - acrobaticsSkill);
+        x = fallDistanceBase + fallDistanceMult * x;
+        x *= a;
+
+        return x;
+    }
+    return 0.f;
+}
+
 }
 
 namespace MWMechanics
@@ -619,7 +648,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
                 mAnimation->showWeapons(true);
                 mAnimation->setWeaponGroup(mCurrentWeapon);
             }
-            mAnimation->showCarriedLeft(mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand);
+
+            mAnimation->showCarriedLeft(updateCarriedLeftVisible(mWeaponType));
         }
 
         if(!cls.getCreatureStats(mPtr).isDead())
@@ -807,6 +837,25 @@ bool CharacterController::updateCreatureState()
     return false;
 }
 
+bool CharacterController::updateCarriedLeftVisible(WeaponType weaptype) const
+{
+    // Shields/torches shouldn't be visible during any operation involving two hands
+    // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
+    // but they are also present in weapon drawing animation.
+    switch (weaptype)
+    {
+    case WeapType_Spell:
+    case WeapType_BowAndArrow:
+    case WeapType_Crossbow:
+    case WeapType_HandToHand:
+    case WeapType_TwoHand:
+    case WeapType_TwoWide:
+        return false;
+    default:
+        return true;
+    }
+}
+
 bool CharacterController::updateWeaponState()
 {
     const MWWorld::Class &cls = mPtr.getClass();
@@ -821,10 +870,7 @@ bool CharacterController::updateWeaponState()
     {
         forcestateupdate = true;
 
-        // Shields/torches shouldn't be visible during spellcasting or hand-to-hand
-        // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
-        // but they are also present in weapon drawing animation.
-        mAnimation->showCarriedLeft(weaptype != WeapType_Spell && weaptype != WeapType_HandToHand);
+        mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaptype));
 
         std::string weapgroup;
         if(weaptype == WeapType_None)
@@ -1250,7 +1296,7 @@ void CharacterController::update(float duration)
     const MWWorld::Class &cls = mPtr.getClass();
     Ogre::Vector3 movement(0.0f);
 
-    updateVisibility();
+    updateMagicEffects();
 
     if(!cls.isActor())
     {
@@ -1449,7 +1495,7 @@ void CharacterController::update(float duration)
             vec.z = 0.0f;
 
             float height = cls.getCreatureStats(mPtr).land();
-            float healthLost = cls.getFallDamage(mPtr, height);
+            float healthLost = getFallDamage(mPtr, height);
             if (healthLost > 0.0f)
             {
                 const float fatigueTerm = cls.getCreatureStats(mPtr).getFatigueTerm();
@@ -1748,7 +1794,7 @@ void CharacterController::updateContinuousVfx()
     }
 }
 
-void CharacterController::updateVisibility()
+void CharacterController::updateMagicEffects()
 {
     if (!mPtr.getClass().isActor())
         return;
@@ -1765,8 +1811,10 @@ void CharacterController::updateVisibility()
     {
         alpha *= std::max(0.2f, (100.f - chameleon)/100.f);
     }
-
     mAnimation->setAlpha(alpha);
+
+    bool vampire = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0.0f;
+    mAnimation->setVampire(vampire);
 
     float light = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Light).getMagnitude();
     mAnimation->setLightEffect(light);
@@ -1785,6 +1833,16 @@ void CharacterController::determineAttackType()
         else
             mAttackType = "chop";
     }
+}
+
+bool CharacterController::isReadyToBlock() const
+{
+    return updateCarriedLeftVisible(mWeaponType);
+}
+
+bool CharacterController::isKnockedOut() const
+{
+    return mHitState == CharState_KnockOut;
 }
 
 }

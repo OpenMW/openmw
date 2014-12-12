@@ -68,6 +68,8 @@ void ESM::CreatureStats::load (ESMReader &esm)
 
     mLastHitObject = esm.getHNOString ("LHIT");
 
+    mLastHitAttemptObject = esm.getHNOString ("LHAT");
+
     mRecalcDynamicStats = false;
     esm.getHNOT (mRecalcDynamicStats, "CALC");
 
@@ -178,6 +180,9 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
 
     if (!mLastHitObject.empty())
         esm.writeHNString ("LHIT", mLastHitObject);
+
+    if (!mLastHitAttemptObject.empty())
+        esm.writeHNString ("LHAT", mLastHitAttemptObject);
 
     if (mRecalcDynamicStats)
         esm.writeHNT ("CALC", mRecalcDynamicStats);

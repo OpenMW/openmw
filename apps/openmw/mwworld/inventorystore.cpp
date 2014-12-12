@@ -255,11 +255,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
             {
                 case 0:
                     continue;
-                case 2:
-                    slots_[MWWorld::InventoryStore::Slot_CarriedLeft] = end();
-                    break;
-                case 3:
-                    // Prefer keeping twohanded weapon
+                default:
                     break;
             }
 
