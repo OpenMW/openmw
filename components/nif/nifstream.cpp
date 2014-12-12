@@ -86,7 +86,7 @@ std::string NIFStream::getString(size_t length)
     //Make sure we're not reading in too large of a string
     unsigned int fileSize = inp->size();
     if(fileSize != 0 && fileSize < length)
-        file->fail("Attempted to read a string with " + Ogre::StringConverter::toString(length) + "characters , but file is only "+Ogre::StringConverter::toString(fileSize)+ "bytes!");
+        file->fail("Attempted to read a string with " + Ogre::StringConverter::toString(length) + " characters , but file is only "+Ogre::StringConverter::toString(fileSize)+ " bytes!");
 
     std::vector<char> str (length+1, 0);
 
