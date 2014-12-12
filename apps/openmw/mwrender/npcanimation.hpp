@@ -168,6 +168,8 @@ public:
     /// Make the NPC only partially visible
     virtual void setAlpha(float alpha);
 
+    virtual void setVampire(bool vampire);
+
     /// Prepare this animation for being rendered with \a camera (rotates billboard nodes)
     virtual void preRender (Ogre::Camera* camera);
 };

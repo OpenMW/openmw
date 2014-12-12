@@ -983,4 +983,14 @@ void NpcAnimation::equipmentChanged()
     updateParts();
 }
 
+void NpcAnimation::setVampire(bool vampire)
+{
+    if (mNpcType == Type_Werewolf) // we can't have werewolf vampires, can we
+        return;
+    if ((mNpcType == Type_Vampire) != vampire)
+    {
+        rebuild();
+    }
+}
+
 }

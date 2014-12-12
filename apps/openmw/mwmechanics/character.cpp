@@ -1279,7 +1279,7 @@ void CharacterController::update(float duration)
     const MWWorld::Class &cls = mPtr.getClass();
     Ogre::Vector3 movement(0.0f);
 
-    updateVisibility();
+    updateMagicEffects();
 
     if(!cls.isActor())
     {
@@ -1777,7 +1777,7 @@ void CharacterController::updateContinuousVfx()
     }
 }
 
-void CharacterController::updateVisibility()
+void CharacterController::updateMagicEffects()
 {
     if (!mPtr.getClass().isActor())
         return;
@@ -1794,8 +1794,10 @@ void CharacterController::updateVisibility()
     {
         alpha *= std::max(0.2f, (100.f - chameleon)/100.f);
     }
-
     mAnimation->setAlpha(alpha);
+
+    bool vampire = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0.0f;
+    mAnimation->setVampire(vampire);
 
     float light = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Light).getMagnitude();
     mAnimation->setLightEffect(light);

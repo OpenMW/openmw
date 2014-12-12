@@ -190,7 +190,7 @@ class CharacterController
 
     void castSpell(const std::string& spellid);
 
-    void updateVisibility();
+    void updateMagicEffects();
 
     void playDeath(float startpoint, CharacterState death);
     void playRandomDeath(float startpoint = 0.0f);
