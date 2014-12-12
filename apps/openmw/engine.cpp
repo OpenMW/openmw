@@ -505,6 +505,9 @@ void OMW::Engine::activate()
     if (ptr.getClass().getName(ptr) == "") // objects without name presented to user can never be activated
         return;
 
+    if (ptr.getClass().isActor() && ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat())
+        return;
+
     MWBase::Environment::get().getWorld()->activate(ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
 }
 
