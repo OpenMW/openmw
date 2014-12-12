@@ -131,9 +131,9 @@ void NIFFile::parse()
     NIFStream nif (this, Ogre::ResourceGroupManager::getSingleton().openResource(filename));
 
   // Check the header string
-  std::string head = nif.getString(40);
+  std::string head = nif.getVersionString();
   if(head.compare(0, 22, "NetImmerse File Format") != 0)
-    fail("Invalid NIF header");
+    fail("Invalid NIF header:  " + head);
 
   // Get BCD version
   ver = nif.getUInt();

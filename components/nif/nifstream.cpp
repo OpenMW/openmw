@@ -101,6 +101,10 @@ std::string NIFStream::getString()
     size_t size = read_le32();
     return getString(size);
 }
+std::string NIFStream::getVersionString()
+{
+    return inp->getLine();
+}
 
 void NIFStream::getShorts(std::vector<short> &vec, size_t size)
 {
