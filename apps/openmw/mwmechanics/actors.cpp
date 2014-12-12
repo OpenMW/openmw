@@ -869,13 +869,19 @@ namespace MWMechanics
 
     void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
     {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
+        PtrControllerMap::iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return;
+        CharacterController* ctrl = it->second;
+
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
-        if(world->isSubmerged(ptr) &&
-           stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), Ogre::Vector3(ptr.getRefData().getPosition().pos)));
+        if((world->isSubmerged(ptr) || knockedOutUnderwater)
+           && stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
         {
             float timeLeft = 0.0f;
-            if(stats.getFatigue().getCurrent() == 0)
+            if(knockedOutUnderwater)
                 stats.setTimeToStartDrowning(0);
             else
             {

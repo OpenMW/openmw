@@ -228,6 +228,7 @@ public:
     AiState& getAiState() { return mAiState; }
 
     bool isReadyToBlock() const;
+    bool isKnockedOut() const;
 };
 
     void getWeaponGroup(WeaponType weaptype, std::string &group);

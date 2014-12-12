@@ -1840,4 +1840,9 @@ bool CharacterController::isReadyToBlock() const
     return updateCarriedLeftVisible(mWeaponType);
 }
 
+bool CharacterController::isKnockedOut() const
+{
+    return mHitState == CharState_KnockOut;
+}
+
 }
