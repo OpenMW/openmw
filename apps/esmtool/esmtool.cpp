@@ -22,7 +22,7 @@ struct ESMData
 {
     std::string author;
     std::string description;
-    int version;
+    unsigned int version;
     std::vector<ESM::Header::MasterData> masters;
 
     std::deque<EsmTool::RecordBase *> mRecords;
@@ -48,9 +48,9 @@ const std::set<int> ESMData::sLabeledRec =
 // Based on the legacy struct
 struct Arguments
 {
-    unsigned int raw_given;
-    unsigned int quiet_given;
-    unsigned int loadcells_given;
+    unsigned long raw_given;
+    unsigned long quiet_given;
+    unsigned long loadcells_given;
     bool plain_given;
 
     std::string mode;
@@ -65,7 +65,7 @@ struct Arguments
     ESM::ESMWriter writer;
 };
 
-bool parseOptions (int argc, char** argv, Arguments &info)
+bool parseOptions (int argc, const char** argv, Arguments &info)
 {
     bpo::options_description desc("Inspect and extract from Morrowind ES files (ESM, ESP, ESS)\nSyntax: esmtool [options] mode infile [outfile]\nAllowed modes:\n  dump\t Dumps all readable data from the input file.\n  clone\t Clones the input file to the output file.\n  comp\t Compares the given files.\n\nAllowed options");
 
@@ -201,7 +201,7 @@ int load(Arguments& info);
 int clone(Arguments& info);
 int comp(Arguments& info);
 
-int main(int argc, char**argv)
+int main(int argc, const char** argv)
 {
     Arguments info;
     if(!parseOptions (argc, argv, info))
@@ -420,7 +420,7 @@ int clone(Arguments& info)
         return 1;
     }
 
-    int recordCount = info.data.mRecords.size();
+    unsigned long recordCount = info.data.mRecords.size();
 
     int digitCount = 1; // For a nicer output
     if (recordCount > 9) ++digitCount;
@@ -491,9 +491,9 @@ int clone(Arguments& info)
             if (!info.data.mCellRefs[ptr].empty()) {
                 typedef std::deque<ESM::CellRef> RefList;
                 RefList &refs = info.data.mCellRefs[ptr];
-                for (RefList::iterator it = refs.begin(); it != refs.end(); ++it)
+                for (RefList::iterator it2 = refs.begin(); it2 != refs.end(); it2.next())
                 {
-                    it->save(esm);
+                    it2->save(esm);
                 }
             }
         }
@@ -501,7 +501,7 @@ int clone(Arguments& info)
         esm.endRecord(name.toString());
 
         saved++;
-        int perc = (saved / (float)recordCount)*100;
+        int perc = (int)(saved / (float)recordCount)*100;
         if (perc % 10 == 0)
         {
             std::cerr << "\r" << perc << "%";
