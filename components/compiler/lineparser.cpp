@@ -489,6 +489,13 @@ namespace Compiler
 
     bool LineParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
     {
+        if (mState==EndState && code==Scanner::S_open)
+        {
+            getErrorHandler().warning ("stray '[' or '(' at the end of the line (ignoring it)",
+                loc);
+            return true;
+        }
+
         if (code==Scanner::S_newline &&
             (mState==EndState || mState==BeginState || mState==PotentialEndState))
             return false;

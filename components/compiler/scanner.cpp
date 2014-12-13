@@ -528,8 +528,7 @@ namespace Compiler
 
     bool Scanner::isWhitespace (char c)
     {
-        return c==' ' || c=='\t'
-            || c=='['; ///< \todo disable this when doing more strict compiling
+        return c==' ' || c=='\t';
     }
 
     // constructor
