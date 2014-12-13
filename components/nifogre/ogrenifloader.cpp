@@ -483,7 +483,7 @@ public:
             Ogre::Quaternion xr(Ogre::Radian(xrot), Ogre::Vector3::UNIT_X);
             Ogre::Quaternion yr(Ogre::Radian(yrot), Ogre::Vector3::UNIT_Y);
             Ogre::Quaternion zr(Ogre::Radian(zrot), Ogre::Vector3::UNIT_Z);
-            return (xr*yr*zr);
+            return (zr*yr*xr);
         }
 
     public:
