@@ -40,6 +40,7 @@
 
 #include "mwdialogue/dialoguemanagerimp.hpp"
 #include "mwdialogue/journalimp.hpp"
+#include "mwdialogue/scripttest.hpp"
 
 #include "mwmechanics/mechanicsmanagerimp.hpp"
 
@@ -174,6 +175,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mSkipMenu (false)
   , mUseSound (true)
   , mCompileAll (false)
+  , mCompileAllDialogue (false)
   , mWarningsMode (1)
   , mScriptContext (0)
   , mFSStrict (false)
@@ -425,10 +427,19 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     if (mCompileAll)
     {
         std::pair<int, int> result = MWBase::Environment::get().getScriptManager()->compileAll();
-
         if (result.first)
             std::cout
                 << "compiled " << result.second << " of " << result.first << " scripts ("
+                << 100*static_cast<double> (result.second)/result.first
+                << "%)"
+                << std::endl;
+    }
+    if (mCompileAllDialogue)
+    {
+        std::pair<int, int> result = MWDialogue::ScriptTest::compileAll(&mExtensions);
+        if (result.first)
+            std::cout
+                << "compiled " << result.second << " of " << result.first << " dialogue script/actor combinations a("
                 << 100*static_cast<double> (result.second)/result.first
                 << "%)"
                 << std::endl;
@@ -533,6 +544,11 @@ void OMW::Engine::screenshot()
 void OMW::Engine::setCompileAll (bool all)
 {
     mCompileAll = all;
+}
+
+void OMW::Engine::setCompileAllDialogue (bool all)
+{
+    mCompileAllDialogue = all;
 }
 
 void OMW::Engine::setSoundUsage(bool soundUsage)
