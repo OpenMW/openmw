@@ -125,6 +125,8 @@ namespace MWMechanics
 
             void clear(); // Clear death counter
 
+            bool isReadyToBlock(const MWWorld::Ptr& ptr) const;
+
     private:
         PtrControllerMap mActors;
 

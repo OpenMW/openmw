@@ -143,7 +143,7 @@ public:
     virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
 
     virtual void showWeapons(bool showWeapon);
-    virtual void showCarriedLeft(bool showa);
+    virtual void showCarriedLeft(bool show);
 
     virtual void attachArrow();
     virtual void releaseArrow();
@@ -167,6 +167,8 @@ public:
 
     /// Make the NPC only partially visible
     virtual void setAlpha(float alpha);
+
+    virtual void setVampire(bool vampire);
 
     /// Prepare this animation for being rendered with \a camera (rotates billboard nodes)
     virtual void preRender (Ogre::Camera* camera);

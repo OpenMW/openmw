@@ -869,13 +869,19 @@ namespace MWMechanics
 
     void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
     {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
+        PtrControllerMap::iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return;
+        CharacterController* ctrl = it->second;
+
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
-        if(world->isSubmerged(ptr) &&
-           stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), Ogre::Vector3(ptr.getRefData().getPosition().pos)));
+        if((world->isSubmerged(ptr) || knockedOutUnderwater)
+           && stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
         {
             float timeLeft = 0.0f;
-            if(stats.getFatigue().getCurrent() == 0)
+            if(knockedOutUnderwater)
                 stats.setTimeToStartDrowning(0);
             else
             {
@@ -1121,15 +1127,6 @@ namespace MWMechanics
 
             // target lists get updated once every 1.0 sec
             if (timerUpdateAITargets >= 1.0f) timerUpdateAITargets = 0;
-
-            // Reset data from previous frame
-            for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
-            {
-                // Reset last hit object, which is only valid for one frame
-                // Note, the new hit object for this frame may be set by CharacterController::update -> Animation::runAnimation
-                // (below)
-                iter->first.getClass().getCreatureStats(iter->first).setLastHitObject(std::string());
-            }
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
@@ -1562,5 +1559,14 @@ namespace MWMechanics
         calculateCreatureStatModifiers(ptr, 0.f);
         if (ptr.getClass().isNpc())
             calculateNpcStatModifiers(ptr, 0.f);
+    }
+
+    bool Actors::isReadyToBlock(const MWWorld::Ptr &ptr) const
+    {
+        PtrControllerMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+
+        return it->second->isReadyToBlock();
     }
 }

@@ -205,6 +205,8 @@ namespace MWBase
 
             /// Resurrects the player if necessary
             virtual void keepPlayerAlive() = 0;
+
+            virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const = 0;
     };
 }
 

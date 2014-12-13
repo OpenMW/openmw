@@ -169,6 +169,8 @@ namespace MWMechanics
             virtual bool isAggressive (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, int bias=0, bool ignoreDistance=false);
 
             virtual void keepPlayerAlive();
+
+            virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const;
     };
 }
 

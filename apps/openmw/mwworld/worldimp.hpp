@@ -452,6 +452,10 @@ namespace MWWorld
                 mRendering->togglePOV();
             }
 
+            virtual bool isFirstPerson() const {
+                return mRendering->getCamera()->isFirstPerson();
+            }
+
             virtual void togglePreviewMode(bool enable) {
                 mRendering->togglePreviewMode(enable);
             }

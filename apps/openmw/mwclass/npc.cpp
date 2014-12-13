@@ -654,10 +654,11 @@ namespace MWClass
             setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
+        if(!object.isEmpty())
+            getCreatureStats(ptr).setLastHitAttemptObject(object.getClass().getId(object));
+
         if(!successful)
         {
-            // TODO: Handle HitAttemptOnMe script function
-
             // Missed
             sndMgr->playSound3D(ptr, "miss", 1.0f, 1.0f);
             return;
@@ -1000,37 +1001,6 @@ namespace MWClass
         x /= 3.0f;
 
         return x;
-    }
-
-    float Npc::getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const
-    {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
-        const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
-
-        const float fallDistanceMin = store.find("fFallDamageDistanceMin")->getFloat();
-
-        if (fallHeight >= fallDistanceMin)
-        {
-            const float acrobaticsSkill = ptr.getClass().getNpcStats (ptr).getSkill(ESM::Skill::Acrobatics).getModified();
-            const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
-            const float jumpSpellBonus = npcdata->mNpcStats.getMagicEffects().get(ESM::MagicEffect::Jump).getMagnitude();
-            const float fallAcroBase = store.find("fFallAcroBase")->getFloat();
-            const float fallAcroMult = store.find("fFallAcroMult")->getFloat();
-            const float fallDistanceBase = store.find("fFallDistanceBase")->getFloat();
-            const float fallDistanceMult = store.find("fFallDistanceMult")->getFloat();
-
-            float x = fallHeight - fallDistanceMin;
-            x -= (1.5 * acrobaticsSkill) + jumpSpellBonus;
-            x = std::max(0.0f, x);
-
-            float a = fallAcroBase + fallAcroMult * (100 - acrobaticsSkill);
-            x = fallDistanceBase + fallDistanceMult * x;
-            x *= a;
-
-            return x;
-        }
-
-        return 0;
     }
 
     MWMechanics::Movement& Npc::getMovementSettings (const MWWorld::Ptr& ptr) const

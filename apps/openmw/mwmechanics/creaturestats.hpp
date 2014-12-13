@@ -52,6 +52,7 @@ namespace MWMechanics
         float mFallHeight;
 
         std::string mLastHitObject; // The last object to hit this actor
+        std::string mLastHitAttemptObject; // The last object to attempt to hit this actor
 
         bool mRecalcMagicka;
 
@@ -241,7 +242,9 @@ namespace MWMechanics
         bool getStance (Stance flag) const;
 
         void setLastHitObject(const std::string &objectid);
+        void setLastHitAttemptObject(const std::string &objectid);
         const std::string &getLastHitObject() const;
+        const std::string &getLastHitAttemptObject() const;
 
         // Note, this is just a cache to avoid checking the whole container store every frame. We don't need to store it in saves.
         // TODO: Put it somewhere else?

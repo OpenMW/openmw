@@ -215,6 +215,9 @@ namespace Compiler
         const int opcodeToggleWorld = 0x20002f5;
         const int opcodeTogglePathgrid = 0x2000146;
         const int opcodeDontSaveObject = 0x2000153;
+        const int opcodePcForce1stPerson = 0x20002f6;
+        const int opcodePcForce3rdPerson = 0x20002f7;
+        const int opcodePcGet3rdPerson = 0x20002f8;
         const int opcodeToggleVanityMode = 0x2000174;
         const int opcodeGetPcSleep = 0x200019f;
         const int opcodeGetPcJumping = 0x2000233;
@@ -266,6 +269,8 @@ namespace Compiler
         const int opcodePayFineThief = 0x2000237;
         const int opcodeHitOnMe = 0x2000213;
         const int opcodeHitOnMeExplicit = 0x2000214;
+        const int opcodeHitAttemptOnMe = 0x20002f9;
+        const int opcodeHitAttemptOnMeExplicit = 0x20002fa;
         const int opcodeDisableTeleporting = 0x2000215;
         const int opcodeEnableTeleporting = 0x2000216;
         const int opcodeShowVars = 0x200021d;

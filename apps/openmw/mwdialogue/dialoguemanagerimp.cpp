@@ -227,7 +227,7 @@ namespace MWDialogue
             success = false;
         }
 
-        if (!success && mScriptVerbose)
+        if (!success)
         {
             std::cerr
                 << "compiling failed (dialogue script)" << std::endl
