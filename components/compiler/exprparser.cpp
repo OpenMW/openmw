@@ -660,7 +660,7 @@ namespace Compiler
             else
             {
                 // no comma was used between arguments
-                scanner.putbackKeyword (code, loc);
+                scanner.putbackSpecial (code, loc);
                 return false;
             }
         }
