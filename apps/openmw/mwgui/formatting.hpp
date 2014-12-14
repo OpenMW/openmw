@@ -81,7 +81,8 @@ namespace MWGui
 
                 Paginator(int pageWidth, int pageHeight)
                     : mStartTop(0), mCurrentTop(0),
-                      mPageWidth(pageWidth), mPageHeight(pageHeight)
+                      mPageWidth(pageWidth), mPageHeight(pageHeight),
+                      mIgnoreLeadingEmptyLines(false)
                 {
                 }
 
@@ -89,10 +90,12 @@ namespace MWGui
                 int getCurrentTop() const { return mCurrentTop; }
                 int getPageWidth() const { return mPageWidth; }
                 int getPageHeight() const { return mPageHeight; }
+                bool getIgnoreLeadingEmptyLines() const { return mIgnoreLeadingEmptyLines; }
                 Pages getPages() const { return mPages; }
 
                 void setStartTop(int top) { mStartTop = top; }
                 void setCurrentTop(int top) { mCurrentTop = top; }
+                void setIgnoreLeadingEmptyLines(bool ignore) { mIgnoreLeadingEmptyLines = ignore; }
 
                 Paginator & operator<<(const Page & page)
                 {
@@ -103,6 +106,7 @@ namespace MWGui
             private:
                 int mStartTop, mCurrentTop;
                 int mPageWidth, mPageHeight;
+                bool mIgnoreLeadingEmptyLines;
                 Pages mPages;
         };
 
