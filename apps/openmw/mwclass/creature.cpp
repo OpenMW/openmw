@@ -119,7 +119,13 @@ namespace MWClass
             // spells
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
                 iter!=ref->mBase->mSpells.mList.end(); ++iter)
-                data->mCreatureStats.getSpells().add (*iter);
+            {
+                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter);
+                if (spell)
+                    data->mCreatureStats.getSpells().add (spell);
+                else /// \todo add option to make this a fatal error message pop-up, but default to warning for vanilla compatibility
+                    std::cerr << "Warning: ignoring nonexistent spell '" << spell->mId << "' on creature '" << ref->mBase->mId << "'" << std::endl;
+            }
 
             // inventory
             if (ref->mBase->mFlags & ESM::Creature::Weapon)

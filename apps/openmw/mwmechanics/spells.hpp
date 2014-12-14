@@ -79,6 +79,9 @@ namespace MWMechanics
             void add (const std::string& spell);
             ///< Adding a spell that is already listed in *this is a no-op.
 
+            void add (const ESM::Spell* spell);
+            ///< Adding a spell that is already listed in *this is a no-op.
+
             void remove (const std::string& spell);
             ///< If the spell to be removed is the selected spell, the selected spell will be changed to
             /// no spell (empty string).

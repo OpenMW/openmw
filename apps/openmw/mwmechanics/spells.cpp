@@ -25,12 +25,10 @@ namespace MWMechanics
         return mSpells.end();
     }
 
-    void Spells::add (const std::string& spellId)
+    void Spells::add (const ESM::Spell* spell)
     {
-        if (mSpells.find (spellId)==mSpells.end())
+        if (mSpells.find (spell->mId)==mSpells.end())
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-
             std::map<const int, float> random;
 
             // Determine the random magnitudes (unless this is a castable spell, in which case
@@ -50,11 +48,17 @@ namespace MWMechanics
                 corprus.mWorsenings = 0;
                 corprus.mNextWorsening = MWBase::Environment::get().getWorld()->getTimeStamp() + CorprusStats::sWorseningPeriod;
 
-                mCorprusSpells[spellId] = corprus;
+                mCorprusSpells[spell->mId] = corprus;
             }
 
-            mSpells.insert (std::make_pair (Misc::StringUtils::lowerCase(spellId), random));
+            mSpells.insert (std::make_pair (spell->mId, random));
         }
+    }
+
+    void Spells::add (const std::string& spellId)
+    {
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+        add(spell);
     }
 
     void Spells::remove (const std::string& spellId)

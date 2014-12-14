@@ -300,15 +300,20 @@ namespace MWClass
             if (!ref->mBase->mFaction.empty())
             {
                 std::string faction = ref->mBase->mFaction;
-                Misc::StringUtils::toLower(faction);
-                if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+                const ESM::Faction* fact = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().search(faction);
+                if (fact)
                 {
-                    data->mNpcStats.setFactionRank(faction, (int)ref->mBase->mNpdt52.mRank);
+                    if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+                    {
+                        data->mNpcStats.setFactionRank(fact->mId, (int)ref->mBase->mNpdt52.mRank);
+                    }
+                    else
+                    {
+                        data->mNpcStats.setFactionRank(fact->mId, (int)ref->mBase->mNpdt12.mRank);
+                    }
                 }
                 else
-                {
-                    data->mNpcStats.setFactionRank(faction, (int)ref->mBase->mNpdt12.mRank);
-                }
+                    std::cerr << "Warning: ignoring nonexistent faction '" << fact->mId << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
             }
 
             // creature stats
@@ -361,7 +366,11 @@ namespace MWClass
             for (std::vector<std::string>::const_iterator iter (race->mPowers.mList.begin());
                 iter!=race->mPowers.mList.end(); ++iter)
             {
-                data->mNpcStats.getSpells().add (*iter);
+                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter);
+                if (spell)
+                    data->mNpcStats.getSpells().add (spell);
+                else
+                    std::cerr << "Warning: ignoring nonexistent race power '" << *iter << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
             }
 
             if (data->mNpcStats.getFactionRanks().size())
@@ -385,7 +394,16 @@ namespace MWClass
             // spells
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
                 iter!=ref->mBase->mSpells.mList.end(); ++iter)
-                data->mNpcStats.getSpells().add (*iter);
+            {
+                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter);
+                if (spell)
+                    data->mNpcStats.getSpells().add (spell);
+                else
+                {
+                    /// \todo add option to make this a fatal error message pop-up, but default to warning for vanilla compatibility
+                    std::cerr << "Warning: ignoring nonexistent spell '" << *iter << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
+                }
+            }
 
             // inventory
             data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr), "",
