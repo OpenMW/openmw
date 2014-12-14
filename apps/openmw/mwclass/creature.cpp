@@ -679,14 +679,15 @@ namespace MWClass
         if(type >= 0)
         {
             std::vector<const ESM::SoundGenerator*> sounds;
-            sounds.reserve(8);
 
             MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
+
+            const std::string& ourId = (ref->mBase->mOriginal.empty()) ? getId(ptr) : ref->mBase->mOriginal;
 
             MWWorld::Store<ESM::SoundGenerator>::iterator sound = store.begin();
             while(sound != store.end())
             {
-                if (type == sound->mType && !sound->mCreature.empty() && Misc::StringUtils::ciEqual(ref->mBase->mOriginal, sound->mCreature))
+                if (type == sound->mType && !sound->mCreature.empty() && (Misc::StringUtils::ciEqual(ourId, sound->mCreature)))
                     sounds.push_back(&*sound);
                 ++sound;
             }
