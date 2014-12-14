@@ -679,6 +679,7 @@ namespace MWClass
         if(type >= 0)
         {
             std::vector<const ESM::SoundGenerator*> sounds;
+            std::vector<const ESM::SoundGenerator*> fallbacksounds;
 
             MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
 
@@ -689,10 +690,14 @@ namespace MWClass
             {
                 if (type == sound->mType && !sound->mCreature.empty() && (Misc::StringUtils::ciEqual(ourId, sound->mCreature)))
                     sounds.push_back(&*sound);
+                if (type == sound->mType && sound->mCreature.empty())
+                    fallbacksounds.push_back(&*sound);
                 ++sound;
             }
             if(!sounds.empty())
                 return sounds[(int)(rand()/(RAND_MAX+1.0)*sounds.size())]->mSound;
+            if (!fallbacksounds.empty())
+                return fallbacksounds[(int)(rand()/(RAND_MAX+1.0)*fallbacksounds.size())]->mSound;
         }
 
         return "";
