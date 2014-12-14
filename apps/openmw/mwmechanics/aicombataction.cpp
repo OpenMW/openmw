@@ -454,6 +454,8 @@ namespace MWMechanics
         float bestActionRating = 0.f;
         // Default to hand-to-hand combat
         boost::shared_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
+        if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
+            return bestAction;
 
         if (actor.getClass().hasInventoryStore(actor))
         {
