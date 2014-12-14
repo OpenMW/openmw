@@ -455,7 +455,10 @@ namespace MWMechanics
         // Default to hand-to-hand combat
         boost::shared_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
+        {
+            bestAction->prepare(actor);
             return bestAction;
+        }
 
         if (actor.getClass().hasInventoryStore(actor))
         {

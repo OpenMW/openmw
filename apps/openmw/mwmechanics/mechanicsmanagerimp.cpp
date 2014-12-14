@@ -1096,6 +1096,11 @@ namespace MWMechanics
                 {
                     startCombat(*it, player);
 
+                    // Apply aggression value to the base Fight rating, so that the actor can continue fighting
+                    // after a Calm spell wears off
+                    int fightBase = it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Fight).getBase();
+                    it->getClass().getCreatureStats(*it).setAiSetting(CreatureStats::AI_Fight, fightBase + aggression);
+
                     // Set the crime ID, which we will use to calm down participants
                     // once the bounty has been paid.
                     it->getClass().getNpcStats(*it).setCrimeId(id);

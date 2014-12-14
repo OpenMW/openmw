@@ -61,7 +61,7 @@ namespace MWMechanics
             std::list<AiPackage*>::const_iterator begin() const;
             std::list<AiPackage*>::const_iterator end() const;
 
-            void erase (std::list<AiPackage*>::const_iterator package);
+            std::list<AiPackage*>::const_iterator erase (std::list<AiPackage*>::const_iterator package);
 
             /// Returns currently executing AiPackage type
             /** \see enum AiPackage::TypeId **/

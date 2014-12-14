@@ -677,6 +677,19 @@ namespace MWMechanics
 
         // TODO: dirty flag for magic effects to avoid some unnecessary work below?
 
+        // any value of calm > 0 will stop the actor from fighting
+        if ((creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid).getMagnitude() > 0 && ptr.getClass().isNpc())
+                || (creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmCreature).getMagnitude() > 0 && !ptr.getClass().isNpc()))
+        {
+            for (std::list<AiPackage*>::const_iterator it = creatureStats.getAiSequence().begin(); it != creatureStats.getAiSequence().end(); )
+            {
+                if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+                    it = creatureStats.getAiSequence().erase(it);
+                else
+                    ++it;
+            }
+        }
+
         // Update bound effects
         static std::map<int, std::string> boundItemsMap;
         if (boundItemsMap.empty())
@@ -1056,6 +1069,7 @@ namespace MWMechanics
                     // Reset factors to attack
                     creatureStats.setAttacked(false);
                     creatureStats.setAlarmed(false);
+                    creatureStats.setAiSetting(CreatureStats::AI_Fight, ptr.getClass().getBaseFightRating(ptr));
 
                     // Update witness crime id
                     npcStats.setCrimeId(-1);

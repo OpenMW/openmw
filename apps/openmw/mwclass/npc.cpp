@@ -1266,6 +1266,7 @@ namespace MWClass
         // TODO: I have no idea what these are supposed to do for NPCs since they use
         // voiced dialog for various conditions like health loss and combat taunts. Maybe
         // only for biped creatures?
+
         if(name == "moan")
             return "";
         if(name == "roar")
@@ -1379,5 +1380,11 @@ namespace MWClass
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
         store.restock(list, ptr, ptr.getCellRef().getRefId(), ptr.getCellRef().getFaction());
+    }
+
+    int Npc::getBaseFightRating (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        return ref->mBase->mAiData.mFight;
     }
 }
