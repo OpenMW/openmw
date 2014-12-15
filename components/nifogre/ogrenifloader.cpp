@@ -1033,7 +1033,7 @@ class NIFObjectLoader
     static void createParticleInitialState(Ogre::ParticleSystem* partsys, const Nif::NiAutoNormalParticlesData* particledata,
                                            const Nif::NiParticleSystemController* partctrl)
     {
-        partsys->_update(0.f); // seems to be required to allocate mFreeParticles
+        partsys->_update(0.f); // seems to be required to allocate mFreeParticles. TODO: patch Ogre to handle this better
         int i=0;
         for (std::vector<Nif::NiParticleSystemController::Particle>::const_iterator it = partctrl->particles.begin();
              i<particledata->activeCount && it != partctrl->particles.end(); ++it, ++i)
@@ -1073,6 +1073,7 @@ class NIFObjectLoader
             totalTimeToLive = std::max(0.f, particle.lifespan);
             timeToLive = std::max(0.f, particle.lifespan - particle.lifetime);
         }
+        partsys->_update(0.f); // now apparently needs another update, otherwise it won't render in the first frame. TODO: patch Ogre to handle this better
     }
 
     static void createNodeControllers(const Nif::NIFFilePtr& nif, const std::string &name, Nif::ControllerPtr ctrl, ObjectScenePtr scene, int animflags)
