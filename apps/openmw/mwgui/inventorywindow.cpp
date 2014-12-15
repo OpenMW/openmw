@@ -527,6 +527,14 @@ namespace MWGui
     void InventoryWindow::doRenderUpdate ()
     {
         mPreview->onFrame();
+
+        if (mPreviewResize || mPreviewDirty)
+        {
+            mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
+                + boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
+            if (mArmorRating->getTextSize().width > mArmorRating->getSize().width)
+                mArmorRating->setCaptionWithReplacing (boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
+        }
         if (mPreviewResize)
         {
             mPreviewResize = false;
@@ -543,11 +551,6 @@ namespace MWGui
             mPreview->update ();
 
             mAvatarImage->setImageTexture("CharacterPreview");
-
-            mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
-                + boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
-            if (mArmorRating->getTextSize().width > mArmorRating->getSize().width)
-                mArmorRating->setCaptionWithReplacing (boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
         }
     }
 
