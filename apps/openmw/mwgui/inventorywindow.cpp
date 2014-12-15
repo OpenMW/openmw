@@ -615,13 +615,14 @@ namespace MWGui
 
     void InventoryWindow::cycle(bool next)
     {
-        ItemModel::ModelIndex selected = 0;
+        ItemModel::ModelIndex selected = -1;
         // not using mSortFilterModel as we only need sorting, not filtering
         SortFilterItemModel model(new InventoryItemModel(MWBase::Environment::get().getWorld()->getPlayerPtr()));
         model.setSortByType(false);
         model.update();
         if (model.getItemCount() == 0)
             return;
+
         for (ItemModel::ModelIndex i=0; i<int(model.getItemCount()); ++i)
         {
             MWWorld::Ptr item = model.getItem(i).mBase;
@@ -631,6 +632,9 @@ namespace MWGui
 
         int incr = next ? 1 : -1;
         bool found = false;
+        std::string lastId;
+        if (selected != -1)
+            lastId = model.getItem(selected).mBase.getCellRef().getRefId();
         ItemModel::ModelIndex cycled = selected;
         while (!found)
         {
@@ -638,11 +642,18 @@ namespace MWGui
             cycled = (cycled + model.getItemCount()) % model.getItemCount();
 
             MWWorld::Ptr item = model.getItem(cycled).mBase;
-            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() && isRightHandWeapon(item))
-                found = true;
 
             if (cycled == selected) // we've been through all items, nothing found
                 return;
+
+            // skip different stacks of the same item, or we will get stuck as stacking/unstacking them may change their relative ordering
+            if (Misc::StringUtils::ciEqual(lastId, item.getCellRef().getRefId()))
+                continue;
+
+            lastId = item.getCellRef().getRefId();
+
+            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() && isRightHandWeapon(item))
+                found = true;
         }
 
         useItem(model.getItem(cycled).mBase);
