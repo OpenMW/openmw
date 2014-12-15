@@ -73,6 +73,7 @@
 #include "itemwidget.hpp"
 #include "screenfader.hpp"
 #include "debugwindow.hpp"
+#include "spellview.hpp"
 
 namespace MWGui
 {
@@ -179,6 +180,7 @@ namespace MWGui
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
         ItemWidget::registerComponents();
+        SpellView::registerComponents();
         Gui::registerAllWidgets();
 
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatEvent>("Controller");
