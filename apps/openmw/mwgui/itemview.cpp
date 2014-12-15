@@ -53,9 +53,14 @@ void ItemView::layoutWidgets()
 
     int x = 0;
     int y = 0;
-    int maxHeight = mScrollView->getSize().height - 58;
-
     MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
+    int maxHeight = dragArea->getHeight();
+
+    int rows = maxHeight/42;
+    rows = std::max(rows, 1);
+    bool showScrollbar = std::ceil(dragArea->getChildCount()/float(rows)) > mScrollView->getWidth()/42;
+    if (showScrollbar)
+        maxHeight -= 18;
 
     for (unsigned int i=0; i<dragArea->getChildCount(); ++i)
     {
@@ -64,7 +69,8 @@ void ItemView::layoutWidgets()
         w->setPosition(x, y);
 
         y += 42;
-        if (y > maxHeight)
+
+        if (y > maxHeight-42 && i < dragArea->getChildCount()-1)
         {
             x += 42;
             y = 0;
