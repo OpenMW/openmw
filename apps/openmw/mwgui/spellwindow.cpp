@@ -160,4 +160,25 @@ namespace MWGui
 
         updateSpells();
     }
+
+    void SpellWindow::cycle(bool next)
+    {
+        mSpellView->setModel(new SpellModel(MWBase::Environment::get().getWorld()->getPlayerPtr()));
+        mSpellView->getModel()->update();
+
+        SpellModel::ModelIndex selected = 0;
+        for (SpellModel::ModelIndex i = 0; i<int(mSpellView->getModel()->getItemCount()); ++i)
+        {
+            if (mSpellView->getModel()->getItem(i).mSelected)
+                selected = i;
+        }
+
+        selected += next ? 1 : -1;
+        int itemcount = mSpellView->getModel()->getItemCount();
+        if (itemcount == 0)
+            return;
+        selected = (selected + itemcount) % itemcount;
+
+        onModelIndexSelected(selected);
+    }
 }

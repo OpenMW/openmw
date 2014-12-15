@@ -1820,4 +1820,14 @@ namespace MWGui
         mDebugWindow->setVisible(!mDebugWindow->isVisible());
     }
 
+    void WindowManager::cycleSpell(bool next)
+    {
+        mSpellWindow->cycle(next);
+    }
+
+    void WindowManager::cycleWeapon(bool next)
+    {
+        mInventoryWindow->cycle(next);
+    }
+
 }

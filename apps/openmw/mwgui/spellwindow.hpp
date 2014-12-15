@@ -21,6 +21,9 @@ namespace MWGui
 
         void onFrame(float dt) { NoDrop::onFrame(dt); }
 
+        /// Cycle to next/previous spell
+        void cycle(bool next);
+
     protected:
         MyGUI::Widget* mEffectBox;
 

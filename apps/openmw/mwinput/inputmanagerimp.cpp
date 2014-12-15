@@ -286,6 +286,18 @@ namespace MWInput
             case A_QuickLoad:
                 quickLoad();
                 break;
+            case A_CycleSpellLeft:
+                MWBase::Environment::get().getWindowManager()->cycleSpell(false);
+                break;
+            case A_CycleSpellRight:
+                MWBase::Environment::get().getWindowManager()->cycleSpell(true);
+                break;
+            case A_CycleWeaponLeft:
+                MWBase::Environment::get().getWindowManager()->cycleWeapon(false);
+                break;
+            case A_CycleWeaponRight:
+                MWBase::Environment::get().getWindowManager()->cycleWeapon(true);
+                break;
             }
         }
     }
@@ -894,6 +906,11 @@ namespace MWInput
         defaultKeyBindings[A_MoveRight] = SDL_SCANCODE_D;
         defaultKeyBindings[A_ToggleWeapon] = SDL_SCANCODE_F;
         defaultKeyBindings[A_ToggleSpell] = SDL_SCANCODE_R;
+        defaultKeyBindings[A_CycleSpellLeft] = SDL_SCANCODE_MINUS;
+        defaultKeyBindings[A_CycleSpellRight] = SDL_SCANCODE_EQUALS;
+        defaultKeyBindings[A_CycleWeaponLeft] = SDL_SCANCODE_LEFTBRACKET;
+        defaultKeyBindings[A_CycleWeaponRight] = SDL_SCANCODE_RIGHTBRACKET;
+
         defaultKeyBindings[A_QuickKeysMenu] = SDL_SCANCODE_F1;
         defaultKeyBindings[A_Console] = SDL_SCANCODE_GRAVE;
         defaultKeyBindings[A_Run] = SDL_SCANCODE_LSHIFT;
@@ -972,6 +989,10 @@ namespace MWInput
         descriptions[A_MoveRight] = "sRight";
         descriptions[A_ToggleWeapon] = "sReady_Weapon";
         descriptions[A_ToggleSpell] = "sReady_Magic";
+        descriptions[A_CycleSpellLeft] = "sPrevSpell";
+        descriptions[A_CycleSpellRight] = "sNextSpell";
+        descriptions[A_CycleWeaponLeft] = "sPrevWeapon";
+        descriptions[A_CycleWeaponRight] = "sNextWeapon";
         descriptions[A_Console] = "sConsoleTitle";
         descriptions[A_Run] = "sRun";
         descriptions[A_Sneak] = "sCrouch_Sneak";
@@ -1032,6 +1053,10 @@ namespace MWInput
         ret.push_back(A_Use);
         ret.push_back(A_ToggleWeapon);
         ret.push_back(A_ToggleSpell);
+        ret.push_back(A_CycleSpellLeft);
+        ret.push_back(A_CycleSpellRight);
+        ret.push_back(A_CycleWeaponLeft);
+        ret.push_back(A_CycleWeaponRight);
         ret.push_back(A_AutoMove);
         ret.push_back(A_Jump);
         ret.push_back(A_Inventory);

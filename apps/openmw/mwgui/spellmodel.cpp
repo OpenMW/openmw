@@ -97,6 +97,10 @@ namespace MWGui
             }
             else
             {
+                if (!item.getClass().getEquipmentSlots(item).first.empty()
+                        && item.getClass().canBeEquipped(item, mActor).first == 0)
+                    continue;
+
                 float enchantCost = enchant->mData.mCost;
                 int eSkill = mActor.getClass().getSkill(mActor, ESM::Skill::Enchant);
                 int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));

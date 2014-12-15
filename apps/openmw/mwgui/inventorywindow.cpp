@@ -27,6 +27,19 @@
 #include "tradewindow.hpp"
 #include "container.hpp"
 
+namespace
+{
+
+    bool isRightHandWeapon(const MWWorld::Ptr& item)
+    {
+        if (item.getClass().getTypeName() != typeid(ESM::Weapon).name())
+            return false;
+        std::vector<int> equipmentSlots = item.getClass().getEquipmentSlots(item).first;
+        return (!equipmentSlots.empty() && equipmentSlots.front() == MWWorld::InventoryStore::Slot_CarriedRight);
+    }
+
+}
+
 namespace MWGui
 {
 
@@ -598,5 +611,40 @@ namespace MWGui
         mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, newObject, count);
+    }
+
+    void InventoryWindow::cycle(bool next)
+    {
+        ItemModel::ModelIndex selected = 0;
+        // not using mSortFilterModel as we only need sorting, not filtering
+        SortFilterItemModel model(new InventoryItemModel(MWBase::Environment::get().getWorld()->getPlayerPtr()));
+        model.setSortByType(false);
+        model.update();
+        if (model.getItemCount() == 0)
+            return;
+        for (ItemModel::ModelIndex i=0; i<int(model.getItemCount()); ++i)
+        {
+            MWWorld::Ptr item = model.getItem(i).mBase;
+            if (model.getItem(i).mType & ItemStack::Type_Equipped && isRightHandWeapon(item))
+                selected = i;
+        }
+
+        int incr = next ? 1 : -1;
+        bool found = false;
+        ItemModel::ModelIndex cycled = selected;
+        while (!found)
+        {
+            cycled += incr;
+            cycled = (cycled + model.getItemCount()) % model.getItemCount();
+
+            MWWorld::Ptr item = model.getItem(cycled).mBase;
+            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() && isRightHandWeapon(item))
+                found = true;
+
+            if (cycled == selected) // we've been through all items, nothing found
+                return;
+        }
+
+        useItem(model.getItem(cycled).mBase);
     }
 }

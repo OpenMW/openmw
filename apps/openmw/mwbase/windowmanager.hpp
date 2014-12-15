@@ -342,6 +342,11 @@ namespace MWBase
             virtual void setWerewolfOverlay(bool set) = 0;
 
             virtual void toggleDebugWindow() = 0;
+
+            /// Cycle to next or previous spell
+            virtual void cycleSpell(bool next) = 0;
+            /// Cycle to next or previous weapon
+            virtual void cycleWeapon(bool next) = 0;
     };
 }
 

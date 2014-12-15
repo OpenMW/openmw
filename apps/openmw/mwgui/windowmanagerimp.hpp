@@ -338,6 +338,11 @@ namespace MWGui
 
     virtual void toggleDebugWindow();
 
+    /// Cycle to next or previous spell
+    virtual void cycleSpell(bool next);
+    /// Cycle to next or previous weapon
+    virtual void cycleWeapon(bool next);
+
   private:
     bool mConsoleOnlyScripts;
 
