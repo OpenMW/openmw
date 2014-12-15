@@ -79,7 +79,8 @@ namespace MWGui
                 break;
             }
         }
-        assert(it != store.end());
+        if (it == store.end())
+            throw std::runtime_error("can't find selected item");
 
         // equip, if it can be equipped and is not already equipped
         if (!alreadyEquipped

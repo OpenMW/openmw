@@ -309,6 +309,9 @@ namespace MWGui
 
     void InventoryWindow::updateItemView()
     {
+        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
+            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+
         mItemView->update();
         mPreviewDirty = true;
     }
@@ -614,6 +617,9 @@ namespace MWGui
         mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, newObject, count);
+
+        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
+            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
     }
 
     void InventoryWindow::cycle(bool next)
