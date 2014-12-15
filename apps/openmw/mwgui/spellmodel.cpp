@@ -108,16 +108,7 @@ namespace MWGui
                 std::string charge = boost::lexical_cast<std::string>(currentCharge);
                 newSpell.mCostColumn = cost + "/" + charge;
 
-                bool equipped = false;
-                for (int i=0; i < MWWorld::InventoryStore::Slots; ++i)
-                {
-                    if (invStore.getSlot(i) != invStore.end() && *invStore.getSlot(i) == item)
-                    {
-                        equipped = true;
-                        break;
-                    }
-                }
-                newSpell.mActive = equipped;
+                newSpell.mActive = invStore.isEquipped(item);
             }
             mSpells.push_back(newSpell);
         }

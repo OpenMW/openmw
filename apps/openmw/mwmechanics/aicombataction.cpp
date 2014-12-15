@@ -201,12 +201,16 @@ namespace MWMechanics
             return 0.f;
 
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(ptr.getClass().getEnchantment(ptr));
+
         if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
         {
             return rateEffects(enchantment->mEffects, actor, target);
         }
         else
+        {
+            //if (!ptr.getClass().canBeEquipped(ptr, actor))
             return 0.f;
+        }
     }
 
     float rateEffect(const ESM::ENAMstruct &effect, const MWWorld::Ptr &actor, const MWWorld::Ptr &target)

@@ -643,3 +643,13 @@ void MWWorld::InventoryStore::clear()
     initSlots (mSlots);
     ContainerStore::clear();
 }
+
+bool MWWorld::InventoryStore::isEquipped(const MWWorld::Ptr &item)
+{
+    for (int i=0; i < MWWorld::InventoryStore::Slots; ++i)
+    {
+        if (getSlot(i) != end() && *getSlot(i) == item)
+            return true;
+    }
+    return false;
+}

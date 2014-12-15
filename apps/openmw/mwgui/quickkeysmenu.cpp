@@ -326,6 +326,10 @@ namespace MWGui
             if (!item.getClass().getEquipmentSlots(item).first.empty())
             {
                 MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
+
+                // make sure that item was successfully equipped
+                if (!store.isEquipped(item))
+                    return;
             }
 
             store.setSelectedEnchantItem(it);
