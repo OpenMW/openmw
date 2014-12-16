@@ -175,6 +175,8 @@ class CharacterController
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
+    MWWorld::Ptr mHeadTrackTarget;
+
     float mTurnAnimationThreshold; // how long to continue playing turning animation after actor stopped turning
 
     std::string mAttackType; // slash, chop or thrust
@@ -187,6 +189,8 @@ class CharacterController
     bool updateWeaponState();
     bool updateCreatureState();
     void updateIdleStormState();
+
+    void updateHeadTracking(float duration);
 
     void castSpell(const std::string& spellid);
 
@@ -229,6 +233,9 @@ public:
 
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
+
+    /// Make this character turn its head towards \a target. To turn off head tracking, pass an empty Ptr.
+    void setHeadTrackTarget(const MWWorld::Ptr& target);
 };
 
     void getWeaponGroup(WeaponType weaptype, std::string &group);

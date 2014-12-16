@@ -207,7 +207,9 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mFirstPersonOffset(0.f, 0.f, 0.f),
     mAlpha(1.f),
     mNpcType(Type_Normal),
-    mSoundsDisabled(disableSounds)
+    mSoundsDisabled(disableSounds),
+    mHeadPitch(0.f),
+    mHeadYaw(0.f)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -621,6 +623,13 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     {
         // In third person mode we may still need pitch for ranged weapon targeting
         pitchSkeleton(mPtr.getRefData().getPosition().rot[0], baseinst);
+
+        Ogre::Node* node = baseinst->getBone("Bip01 Head");
+        if (node)
+        {
+            node->rotate(Ogre::Vector3::UNIT_Z, mHeadYaw, Ogre::Node::TS_WORLD);
+            node->rotate(Ogre::Vector3::UNIT_X, mHeadPitch, Ogre::Node::TS_WORLD);
+        }
     }
     mFirstPersonOffset = 0.f; // reset the X, Y, Z offset for the next frame.
 
@@ -991,6 +1000,26 @@ void NpcAnimation::setVampire(bool vampire)
     {
         rebuild();
     }
+}
+
+void NpcAnimation::setHeadPitch(Ogre::Radian pitch)
+{
+    mHeadPitch = pitch;
+}
+
+void NpcAnimation::setHeadYaw(Ogre::Radian yaw)
+{
+    mHeadYaw = yaw;
+}
+
+Ogre::Radian NpcAnimation::getHeadPitch() const
+{
+    return mHeadPitch;
+}
+
+Ogre::Radian NpcAnimation::getHeadYaw() const
+{
+    return mHeadYaw;
 }
 
 }

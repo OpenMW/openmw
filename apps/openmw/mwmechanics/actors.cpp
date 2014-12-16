@@ -4,6 +4,7 @@
 #include <typeinfo>
 
 #include <OgreVector3.h>
+#include <OgreSceneNode.h>
 
 #include <components/esm/loadnpc.hpp>
 
@@ -271,6 +272,40 @@ namespace MWMechanics
         calculateCreatureStatModifiers (ptr, duration);
         // fatigue restoration
         calculateRestoration(ptr, duration);
+    }
+
+    void Actors::updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
+                                    MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance)
+    {
+        static const float fMaxHeadTrackDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                .find("fMaxHeadTrackDistance")->getFloat();
+        static const float fInteriorHeadTrackMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                .find("fInteriorHeadTrackMult")->getFloat();
+        float maxDistance = fMaxHeadTrackDistance;
+        const ESM::Cell* currentCell = actor.getCell()->getCell();
+        if (!currentCell->isExterior() && !(currentCell->mData.mFlags & ESM::Cell::QuasiEx))
+            maxDistance *= fInteriorHeadTrackMult;
+
+        const ESM::Position& actor1Pos = actor.getRefData().getPosition();
+        const ESM::Position& actor2Pos = targetActor.getRefData().getPosition();
+        float sqrDist = Ogre::Vector3(actor1Pos.pos).squaredDistance(Ogre::Vector3(actor2Pos.pos));
+
+        if (sqrDist > maxDistance*maxDistance)
+            return;
+
+        // stop tracking when target is behind the actor
+        Ogre::Vector3 actorDirection (actor.getRefData().getBaseNode()->getOrientation().yAxis());
+        Ogre::Vector3 targetDirection (Ogre::Vector3(actor2Pos.pos) - Ogre::Vector3(actor1Pos.pos));
+        actorDirection.z = 0;
+        targetDirection.z = 0;
+        if (actorDirection.angleBetween(targetDirection) < Ogre::Degree(90)
+            && sqrDist <= sqrHeadTrackDistance
+            && MWBase::Environment::get().getWorld()->getLOS(actor, targetActor) // check LOS and awareness last as it's the most expensive function
+            && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(targetActor, actor))
+        {
+            sqrHeadTrackDistance = sqrDist;
+            headTrackTarget = targetActor;
+        }
     }
 
     void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer)
@@ -1138,9 +1173,11 @@ namespace MWMechanics
         if(!paused)
         {
             static float timerUpdateAITargets = 0;
+            static float timerUpdateHeadTrack = 0;
 
             // target lists get updated once every 1.0 sec
             if (timerUpdateAITargets >= 1.0f) timerUpdateAITargets = 0;
+            if (timerUpdateHeadTrack >= 0.3f) timerUpdateHeadTrack = 0;
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
@@ -1174,6 +1211,19 @@ namespace MWMechanics
                                 engageCombat(iter->first, it->first, it->first == player);
                             }
                         }
+                        if (timerUpdateHeadTrack == 0)
+                        {
+                            float sqrHeadTrackDistance = std::numeric_limits<float>::max();
+                            MWWorld::Ptr headTrackTarget;
+
+                            for(PtrControllerMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
+                            {
+                                if (it->first == iter->first)
+                                    continue;
+                                updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
+                            }
+                            iter->second->setHeadTrackTarget(headTrackTarget);
+                        }
 
                         if (iter->first.getClass().isNpc() && iter->first != player)
                             updateCrimePersuit(iter->first, duration);
@@ -1194,6 +1244,7 @@ namespace MWMechanics
             }
 
             timerUpdateAITargets += duration;
+            timerUpdateHeadTrack += duration;
 
             // Looping magic VFX update
             // Note: we need to do this before any of the animations are updated.

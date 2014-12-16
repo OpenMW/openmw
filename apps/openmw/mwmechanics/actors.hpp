@@ -89,6 +89,9 @@ namespace MWMechanics
             */
             void engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer);
 
+            void updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
+                                            MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance);
+
             void restoreDynamicStats(bool sleep);
             ///< If the player is sleeping, this should be called every hour.
 

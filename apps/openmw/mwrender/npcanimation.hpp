@@ -100,6 +100,9 @@ private:
     float mAlpha;
     bool mSoundsDisabled;
 
+    Ogre::Radian mHeadYaw;
+    Ogre::Radian mHeadPitch;
+
     void updateNpcBase();
 
     NifOgre::ObjectScenePtr insertBoundedPart(const std::string &model, int group, const std::string &bonename,
@@ -141,6 +144,11 @@ public:
     /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
     /// to indicate the facing orientation of the character.
     virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
+
+    virtual void setHeadPitch(Ogre::Radian pitch);
+    virtual void setHeadYaw(Ogre::Radian yaw);
+    virtual Ogre::Radian getHeadPitch() const;
+    virtual Ogre::Radian getHeadYaw() const;
 
     virtual void showWeapons(bool showWeapon);
     virtual void showCarriedLeft(bool show);

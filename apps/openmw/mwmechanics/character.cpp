@@ -42,6 +42,15 @@
 namespace
 {
 
+// Wraps a value to (-PI, PI]
+void wrap(Ogre::Radian& rad)
+{
+    if (rad.valueRadians()>0)
+        rad = Ogre::Radian(std::fmod(rad.valueRadians()+Ogre::Math::PI, 2.0f*Ogre::Math::PI)-Ogre::Math::PI);
+    else
+        rad = Ogre::Radian(std::fmod(rad.valueRadians()-Ogre::Math::PI, 2.0f*Ogre::Math::PI)+Ogre::Math::PI);
+}
+
 std::string getBestAttack (const ESM::Weapon* weapon)
 {
     int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
@@ -1627,6 +1636,8 @@ void CharacterController::update(float duration)
         cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = 0;
         // Can't reset jump state (mPosition[2]) here; we don't know for sure whether the PhysicSystem will actually handle it in this frame
         // due to the fixed minimum timestep used for the physics update. It will be reset in PhysicSystem::move once the jump is handled.
+
+        updateHeadTracking(duration);
     }
     else if(cls.getCreatureStats(mPtr).isDead())
     {
@@ -1843,6 +1854,57 @@ bool CharacterController::isReadyToBlock() const
 bool CharacterController::isKnockedOut() const
 {
     return mHitState == CharState_KnockOut;
+}
+
+void CharacterController::setHeadTrackTarget(const MWWorld::Ptr &target)
+{
+    mHeadTrackTarget = target;
+}
+
+void CharacterController::updateHeadTracking(float duration)
+{
+    Ogre::Node* head = mAnimation->getNode("Bip01 Head");
+    if (!head)
+        return;
+    Ogre::Radian zAngle (0.f);
+    Ogre::Radian xAngle (0.f);
+    if (!mHeadTrackTarget.isEmpty())
+    {
+        Ogre::Vector3 headPos = mPtr.getRefData().getBaseNode()->convertLocalToWorldPosition(head->_getDerivedPosition());
+        Ogre::Vector3 targetPos (mHeadTrackTarget.getRefData().getPosition().pos);
+        if (MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mHeadTrackTarget))
+        {
+            Ogre::Node* targetHead = anim->getNode("Head");
+            if (!targetHead)
+                targetHead = anim->getNode("Bip01 Head");
+            if (targetHead)
+                targetPos = mHeadTrackTarget.getRefData().getBaseNode()->convertLocalToWorldPosition(
+                        targetHead->_getDerivedPosition());
+        }
+
+        Ogre::Vector3 direction = targetPos - headPos;
+        direction.normalise();
+
+        const Ogre::Vector3 actorDirection = mPtr.getRefData().getBaseNode()->getOrientation().yAxis();
+
+        zAngle = Ogre::Math::ATan2(direction.x,direction.y) -
+                Ogre::Math::ATan2(actorDirection.x, actorDirection.y);
+        xAngle = -Ogre::Math::ASin(direction.z);
+        wrap(zAngle);
+        wrap(xAngle);
+        xAngle = Ogre::Degree(std::min(xAngle.valueDegrees(), 40.f));
+        xAngle = Ogre::Degree(std::max(xAngle.valueDegrees(), -40.f));
+        zAngle = Ogre::Degree(std::min(zAngle.valueDegrees(), 30.f));
+        zAngle = Ogre::Degree(std::max(zAngle.valueDegrees(), -30.f));
+
+    }
+    float factor = duration*5;
+    factor = std::min(factor, 1.f);
+    xAngle = (1.f-factor) * mAnimation->getHeadPitch() + factor * (-xAngle);
+    zAngle = (1.f-factor) * mAnimation->getHeadYaw() + factor * (-zAngle);
+
+    mAnimation->setHeadPitch(xAngle);
+    mAnimation->setHeadYaw(zAngle);
 }
 
 }

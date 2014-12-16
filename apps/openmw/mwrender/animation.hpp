@@ -306,6 +306,10 @@ public:
     /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
     /// to indicate the facing orientation of the character.
     virtual void setPitchFactor(float factor) {}
+    virtual void setHeadPitch(Ogre::Radian factor) {}
+    virtual void setHeadYaw(Ogre::Radian factor) {}
+    virtual Ogre::Radian getHeadPitch() const { return Ogre::Radian(0.f); }
+    virtual Ogre::Radian getHeadYaw() const { return Ogre::Radian(0.f); }
 
     virtual Ogre::Vector3 runAnimation(float duration);
 
