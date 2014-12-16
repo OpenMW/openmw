@@ -163,6 +163,7 @@ Bug #2163: OpenMW can't detect death if the NPC die by the post damage effect of
 Bug #2168: Westly's Master Head Pack X – Some hairs aren't rendered correctly.
 Bug #2170: Mods using conversations to update PC inconsistant
 Bug #2180: Editor: Verifier doesn't handle Windows-specific path issues when dealing with resources
+Bug #2212: Crash or unexpected behavior while closing OpenCS cell render window on OS X
 Feature #238: Add UI to run INI-importer from the launcher
 Feature #854: Editor: Add user setting to show status bar
 Feature #987: Launcher: first launch instructions for CD need to be more explicit
