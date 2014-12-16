@@ -300,8 +300,7 @@ namespace MWClass
             if (!ref->mBase->mFaction.empty())
             {
                 std::string faction = ref->mBase->mFaction;
-                const ESM::Faction* fact = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().search(faction);
-                if (fact)
+                if (const ESM::Faction* fact = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().search(faction))
                 {
                     if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
                     {
@@ -313,7 +312,7 @@ namespace MWClass
                     }
                 }
                 else
-                    std::cerr << "Warning: ignoring nonexistent faction '" << fact->mId << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
+                    std::cerr << "Warning: ignoring nonexistent faction '" << faction << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
             }
 
             // creature stats
@@ -366,8 +365,7 @@ namespace MWClass
             for (std::vector<std::string>::const_iterator iter (race->mPowers.mList.begin());
                 iter!=race->mPowers.mList.end(); ++iter)
             {
-                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter);
-                if (spell)
+                if (const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter))
                     data->mNpcStats.getSpells().add (spell);
                 else
                     std::cerr << "Warning: ignoring nonexistent race power '" << *iter << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
@@ -395,8 +393,7 @@ namespace MWClass
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
                 iter!=ref->mBase->mSpells.mList.end(); ++iter)
             {
-                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter);
-                if (spell)
+                if (const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter))
                     data->mNpcStats.getSpells().add (spell);
                 else
                 {
