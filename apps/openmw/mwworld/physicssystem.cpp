@@ -452,7 +452,8 @@ namespace MWWorld
                 Ogre::Vector3 to = newPosition - (physicActor->getOnGround() ?
                              Ogre::Vector3(0,0,sStepSize+2.f) : Ogre::Vector3(0,0,2.f));
                 tracer.doTrace(colobj, from, to, engine);
-                if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
+                if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope
+                        && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != OEngine::Physic::CollisionType_Actor)
                 {
                     const btCollisionObject* standingOn = tracer.mHitObject;
                     if (const OEngine::Physic::RigidBody* body = dynamic_cast<const OEngine::Physic::RigidBody*>(standingOn))
@@ -468,7 +469,25 @@ namespace MWWorld
                     isOnGround = true;
                 }
                 else
+                {
+                    // standing on actors is not allowed (see above).
+                    // in addition to that, apply a sliding effect away from the center of the actor,
+                    // so that we do not stay suspended in air indefinitely.
+                    if (tracer.mFraction < 1.0f && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup == OEngine::Physic::CollisionType_Actor)
+                    {
+                        if (Ogre::Vector3(inertia.x, inertia.y, 0).squaredLength() < 100.f*100.f)
+                        {
+                            btVector3 aabbMin, aabbMax;
+                            tracer.mHitObject->getCollisionShape()->getAabb(tracer.mHitObject->getWorldTransform(), aabbMin, aabbMax);
+                            btVector3 center = (aabbMin + aabbMax) / 2.f;
+                            inertia = Ogre::Vector3(position.x - center.x(), position.y - center.y(), 0);
+                            inertia.normalise();
+                            inertia *= 100;
+                        }
+                    }
+
                     isOnGround = false;
+                }
             }
 
             if(isOnGround || newPosition.z < waterlevel || isFlying)
