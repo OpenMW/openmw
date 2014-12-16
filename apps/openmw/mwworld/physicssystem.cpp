@@ -195,6 +195,9 @@ namespace MWWorld
             stepper.doTrace(colobj, tracer.mEndPos, tracer.mEndPos-Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
             if(stepper.mFraction < 1.0f && getSlope(stepper.mPlaneNormal) <= sMaxSlope)
             {
+                // don't allow stepping up other actors
+                if (stepper.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup == OEngine::Physic::CollisionType_Actor)
+                    return false;
                 // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
                 // TODO: stepper.mPlaneNormal does not appear to be reliable - needs more testing
                 // NOTE: caller's variables 'position' & 'remainingTime' are modified here
