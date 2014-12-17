@@ -91,7 +91,11 @@ namespace MWMechanics
             blockerTerm *= gmst.find("fBlockStillBonus")->getFloat();
         blockerTerm *= blockerStats.getFatigueTerm();
 
-        float attackerSkill = attacker.getClass().getSkill(attacker, weapon.getClass().getEquipmentSkill(weapon));
+        float attackerSkill = 0.f;
+        if (weapon.isEmpty())
+            attackerSkill = attacker.getClass().getSkill(attacker, ESM::Skill::HandToHand);
+        else
+            attackerSkill = attacker.getClass().getSkill(attacker, weapon.getClass().getEquipmentSkill(weapon));
         float attackerTerm = attackerSkill + 0.2 * attackerStats.getAttribute(ESM::Attribute::Agility).getModified()
                 + 0.1 * attackerStats.getAttribute(ESM::Attribute::Luck).getModified();
         attackerTerm *= attackerStats.getFatigueTerm();
@@ -120,7 +124,8 @@ namespace MWMechanics
             float normalizedEncumbrance = blocker.getClass().getNormalizedEncumbrance(blocker);
             normalizedEncumbrance = std::min(1.f, normalizedEncumbrance);
             float fatigueLoss = fFatigueBlockBase + normalizedEncumbrance * fFatigueBlockMult;
-            fatigueLoss += weapon.getClass().getWeight(weapon) * attackerStats.getAttackStrength() * fWeaponFatigueBlockMult;
+            if (!weapon.isEmpty())
+                fatigueLoss += weapon.getClass().getWeight(weapon) * attackerStats.getAttackStrength() * fWeaponFatigueBlockMult;
             fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
             blockerStats.setFatigue(fatigue);
 

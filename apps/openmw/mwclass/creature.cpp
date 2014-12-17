@@ -324,7 +324,7 @@ namespace MWClass
 
         MWMechanics::applyElementalShields(ptr, victim);
 
-        if (!weapon.isEmpty() && MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
+        if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
             damage = 0;
 
         if (damage > 0)
