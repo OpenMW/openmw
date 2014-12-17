@@ -445,6 +445,32 @@ namespace Compiler
             else
                 special = S_minus;
         }
+        else if (static_cast<unsigned char> (c)==0xe2)
+        {
+            /// Workaround for some translator who apparently can't keep his minus in order
+            /// \todo disable for later script formats
+            if (get (c) && static_cast<unsigned char> (c)==0x80 &&
+                get (c) && static_cast<unsigned char> (c)==0x93)
+            {
+                if (get (c))
+                {
+                    if (c=='>')
+                        special = S_ref;
+                    else
+                    {
+                        putback (c);
+                        special = S_minus;
+                    }
+                }
+                else
+                    special = S_minus;
+            }
+            else
+            {
+                mErrorHandler.error ("Invalid character", mLoc);
+                return false;
+            }
+        }
         else if (c=='<')
         {
             if (get (c))
