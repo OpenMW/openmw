@@ -1490,6 +1490,16 @@ namespace MWWorld
         return mStore.insert(record);
     }
 
+    const ESM::CreatureLevList *World::createOverrideRecord(const ESM::CreatureLevList &record)
+    {
+        return mStore.overrideRecord(record);
+    }
+
+    const ESM::ItemLevList *World::createOverrideRecord(const ESM::ItemLevList &record)
+    {
+        return mStore.overrideRecord(record);
+    }
+
     const ESM::NPC *World::createRecord(const ESM::NPC &record)
     {
         bool update = false;

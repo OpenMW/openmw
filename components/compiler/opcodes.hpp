@@ -284,6 +284,10 @@ namespace Compiler
         const int opcodeExplodeSpellExplicit = 0x200022a;
         const int opcodeGetPcInJail = 0x200023e;
         const int opcodeGetPcTraveling = 0x200023f;
+        const int opcodeAddToLevCreature = 0x20002fb;
+        const int opcodeRemoveFromLevCreature = 0x20002fc;
+        const int opcodeAddToLevItem = 0x20002fd;
+        const int opcodeRemoveFromLevItem = 0x20002fe;
     }
 
     namespace Sky

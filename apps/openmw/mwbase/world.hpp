@@ -40,6 +40,8 @@ namespace ESM
     struct Enchantment;
     struct Book;
     struct EffectList;
+    struct CreatureLevList;
+    struct ItemLevList;
 }
 
 namespace MWRender
@@ -357,6 +359,14 @@ namespace MWBase
 
             virtual const ESM::Book *createRecord (const ESM::Book& record) = 0;
             ///< Create a new record (of type book) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::CreatureLevList *createOverrideRecord (const ESM::CreatureLevList& record) = 0;
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
+            virtual const ESM::ItemLevList *createOverrideRecord (const ESM::ItemLevList& record) = 0;
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
             virtual void update (float duration, bool paused) = 0;

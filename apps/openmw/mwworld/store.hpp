@@ -145,15 +145,15 @@ namespace MWWorld
             T item;
             item.mId = Misc::StringUtils::lowerCase(id);
 
+            typename Dynamic::const_iterator dit = mDynamic.find(item.mId);
+            if (dit != mDynamic.end()) {
+                return &dit->second;
+            }
+
             typename std::map<std::string, T>::const_iterator it = mStatic.find(item.mId);
 
             if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
                 return &(it->second);
-            }
-
-            typename Dynamic::const_iterator dit = mDynamic.find(item.mId);
-            if (dit != mDynamic.end()) {
-                return &dit->second;
             }
 
             return 0;

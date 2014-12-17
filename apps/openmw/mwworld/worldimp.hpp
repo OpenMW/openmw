@@ -420,6 +420,14 @@ namespace MWWorld
             ///< Create a new record (of type book) in the ESM store.
             /// \return pointer to created record
 
+            virtual const ESM::CreatureLevList *createOverrideRecord (const ESM::CreatureLevList& record);
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
+            virtual const ESM::ItemLevList *createOverrideRecord (const ESM::ItemLevList& record);
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
             virtual void update (float duration, bool paused);
 
             virtual MWWorld::Ptr placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount);

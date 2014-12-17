@@ -31,6 +31,42 @@
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 
+namespace
+{
+
+    void addToLevList(ESM::LeveledListBase* list, const std::string& itemId, int level)
+    {
+        for (std::vector<ESM::LeveledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
+        {
+            if (it->mLevel == level && itemId == it->mId)
+                return;
+        }
+
+        ESM::LeveledListBase::LevelItem item;
+        item.mId = itemId;
+        item.mLevel = level;
+        list->mList.push_back(item);
+    }
+
+    void removeFromLevList(ESM::LeveledListBase* list, const std::string& itemId, int level)
+    {
+        // level of -1 removes all items with that itemId
+        for (std::vector<ESM::LeveledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
+        {
+            if (level != -1 && it->mLevel != level)
+            {
+                ++it;
+                continue;
+            }
+            if (Misc::StringUtils::ciEqual(itemId, it->mId))
+                it = list->mList.erase(it);
+            else
+                ++it;
+        }
+    }
+
+}
+
 namespace MWScript
 {
     namespace Misc
@@ -1032,6 +1068,78 @@ namespace MWScript
             }
         };
 
+        class OpAddToLevCreature : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                const std::string& levId = runtime.getStringLiteral(runtime[0].mInteger);
+                runtime.pop();
+                const std::string& creatureId = runtime.getStringLiteral(runtime[0].mInteger);
+                runtime.pop();
+                int level = runtime[0].mInteger;
+                runtime.pop();
+
+                ESM::CreatureLevList listCopy = *MWBase::Environment::get().getWorld()->getStore().get<ESM::CreatureLevList>().find(levId);
+                addToLevList(&listCopy, creatureId, level);
+                MWBase::Environment::get().getWorld()->createOverrideRecord(listCopy);
+            }
+        };
+
+        class OpRemoveFromLevCreature : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                const std::string& levId = runtime.getStringLiteral(runtime[0].mInteger);
+                runtime.pop();
+                const std::string& creatureId = runtime.getStringLiteral(runtime[0].mInteger);
+                runtime.pop();
+                int level = runtime[0].mInteger;
+                runtime.pop();
+
+                ESM::CreatureLevList listCopy = *MWBase::Environment::get().getWorld()->getStore().get<ESM::CreatureLevList>().find(levId);
+                removeFromLevList(&listCopy, creatureId, level);
+                MWBase::Environment::get().getWorld()->createOverrideRecord(listCopy);
+            }
+        };
+
+        class OpAddToLevItem : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                const std::string& levId = runtime.getStringLiteral(runtime[0].mInteger);
+                runtime.pop();
+                const std::string& itemId = runtime.getStringLiteral(runtime[0].mInteger);
+                runtime.pop();
+                int level = runtime[0].mInteger;
+                runtime.pop();
+
+                ESM::ItemLevList listCopy = *MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().find(levId);
+                addToLevList(&listCopy, itemId, level);
+                MWBase::Environment::get().getWorld()->createOverrideRecord(listCopy);
+            }
+        };
+
+        class OpRemoveFromLevItem : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                const std::string& levId = runtime.getStringLiteral(runtime[0].mInteger);
+                runtime.pop();
+                const std::string& itemId = runtime.getStringLiteral(runtime[0].mInteger);
+                runtime.pop();
+                int level = runtime[0].mInteger;
+                runtime.pop();
+
+                ESM::ItemLevList listCopy = *MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().find(levId);
+                removeFromLevList(&listCopy, itemId, level);
+                MWBase::Environment::get().getWorld()->createOverrideRecord(listCopy);
+            }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -1121,6 +1229,10 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeGetPcTraveling, new OpGetPcTraveling);
             interpreter.installSegment5 (Compiler::Misc::opcodeBetaComment, new OpBetaComment<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeBetaCommentExplicit, new OpBetaComment<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeAddToLevCreature, new OpAddToLevCreature);
+            interpreter.installSegment5 (Compiler::Misc::opcodeRemoveFromLevCreature, new OpRemoveFromLevCreature);
+            interpreter.installSegment5 (Compiler::Misc::opcodeAddToLevItem, new OpAddToLevItem);
+            interpreter.installSegment5 (Compiler::Misc::opcodeRemoveFromLevItem, new OpRemoveFromLevItem);
         }
     }
 }
