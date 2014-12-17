@@ -304,7 +304,7 @@ namespace Compiler
                             errorDowngrade.reset (new ErrorDowngrade (getErrorHandler()));
 
                         std::vector<Interpreter::Type_Code> code;
-                        int optionals = mExprParser.parseArguments (argumentType, scanner, code);
+                        int optionals = mExprParser.parseArguments (argumentType, scanner, code, keyword);
                         mCode.insert (mCode.end(), code.begin(), code.end());
                         extensions->generateInstructionCode (keyword, mCode, mLiterals,
                             mExplicit, optionals);
