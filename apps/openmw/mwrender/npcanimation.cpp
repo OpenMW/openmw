@@ -626,10 +626,7 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 
         Ogre::Node* node = baseinst->getBone("Bip01 Head");
         if (node)
-        {
-            node->rotate(Ogre::Vector3::UNIT_Z, mHeadYaw, Ogre::Node::TS_WORLD);
-            node->rotate(Ogre::Vector3::UNIT_X, mHeadPitch, Ogre::Node::TS_WORLD);
-        }
+            node->rotate(Ogre::Quaternion(mHeadYaw, Ogre::Vector3::UNIT_Z) * Ogre::Quaternion(mHeadPitch, Ogre::Vector3::UNIT_X), Ogre::Node::TS_WORLD);
     }
     mFirstPersonOffset = 0.f; // reset the X, Y, Z offset for the next frame.
 
