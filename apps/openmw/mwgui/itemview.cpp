@@ -1,5 +1,7 @@
 #include "itemview.hpp"
 
+#include <cmath>
+
 #include <boost/lexical_cast.hpp>
 
 #include <MyGUI_FactoryManager.h>
