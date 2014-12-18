@@ -2476,7 +2476,7 @@ namespace MWWorld
                                                                                getStore().get<ESM::GameSetting>().search("fAlarmRadius")->getFloat(),
                                                                                closeActors);
 
-            bool detected = false;
+            bool detected = false, reported = false;
             for (std::vector<MWWorld::Ptr>::const_iterator it = closeActors.begin(); it != closeActors.end(); ++it)
             {
                 if (*it == actor)
@@ -2486,16 +2486,22 @@ namespace MWWorld
                     continue;
 
                 if (getLOS(*it, actor) && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, *it))
-                {
                     detected = true;
-                    break;
-                }
+                if (it->getClass().getCreatureStats(*it).getAiSetting(MWMechanics::CreatureStats::AI_Alarm).getModified() > 0)
+                    reported = true;
             }
 
             if (detected)
             {
                 windowManager->messageBox("#{sWerewolfAlarmMessage}");
                 setGlobalInt("pcknownwerewolf", 1);
+
+                if (reported)
+                {
+                    npcStats.setBounty(npcStats.getBounty()+
+                                       MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iWereWolfBounty")->getInt());
+                    windowManager->messageBox("#{sCrimeMessage}");
+                }
             }
         }
     }
