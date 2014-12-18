@@ -126,7 +126,7 @@ bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
     if (!info.mCell.empty())
     {
         // supports partial matches, just like getPcCell
-        const std::string& playerCell = player.getCell()->getCell()->mName;
+        const std::string& playerCell = MWBase::Environment::get().getWorld()->getCellName(player.getCell());
         bool match = playerCell.length()>=info.mCell.length() &&
             Misc::StringUtils::ciEqual(playerCell.substr (0, info.mCell.length()), info.mCell);
         if (!match)
@@ -451,7 +451,8 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_NotCell:
 
-            return !Misc::StringUtils::ciEqual(mActor.getCell()->getCell()->mName, select.getName());
+            return !Misc::StringUtils::ciEqual(MWBase::Environment::get().getWorld()->getCellName(mActor.getCell())
+                                               , select.getName());
 
         case SelectWrapper::Function_NotLocal:
         {
