@@ -1001,16 +1001,31 @@ namespace MWMechanics
             victim.getClass().getCreatureStats(victim).notifyMurder();
 
         // Bounty for each type of crime
+        float dispTerm = 0.f, dispTermVictim = 0.f;
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
+        {
             arg = store.find("iCrimeTresspass")->getInt();
+            dispTerm = dispTermVictim = store.find("iDispTresspass")->getInt();
+        }
         else if (type == OT_Pickpocket)
+        {
             arg = store.find("iCrimePickPocket")->getInt();
+            dispTerm = dispTermVictim = store.find("fDispPickPocketMod")->getFloat();
+        }
         else if (type == OT_Assault)
+        {
             arg = store.find("iCrimeAttack")->getInt();
+            dispTerm = store.find("fDispAttacking")->getFloat();
+            dispTermVictim = store.find("iDispAttackMod")->getInt();
+        }
         else if (type == OT_Murder)
+        {
             arg = store.find("iCrimeKilling")->getInt();
+            dispTerm = dispTermVictim = store.find("iDispKilling")->getInt();
+        }
         else if (type == OT_Theft)
         {
+            dispTerm = dispTermVictim = store.find("fDispStealing")->getFloat() * arg;
             arg *= store.find("fCrimeStealing")->getFloat();
             arg = std::max(1, arg); // Minimum bounty of 1, in case items with zero value are stolen
         }
@@ -1049,19 +1064,23 @@ namespace MWMechanics
 
         // What amount of provocation did this crime generate?
         // Controls whether witnesses will engage combat with the criminal.
-        int fight = 0;
+        int fight = 0, fightVictim = 0;
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
-            fight = esmStore.get<ESM::GameSetting>().find("iFightTrespass")->getInt();
+            fight = fightVictim = esmStore.get<ESM::GameSetting>().find("iFightTrespass")->getInt();
         else if (type == OT_Pickpocket)
-            fight = esmStore.get<ESM::GameSetting>().find("iFightPickpocket")->getInt() * 4; // *4 according to research wiki
-        else if (type == OT_Assault) // Note: iFightAttack is for the victim, iFightAttacking for witnesses?
+        {
+            fight = esmStore.get<ESM::GameSetting>().find("iFightPickpocket")->getInt();
+            fightVictim = esmStore.get<ESM::GameSetting>().find("iFightPickpocket")->getInt() * 4; // *4 according to research wiki
+        }
+        else if (type == OT_Assault)
+        {
             fight = esmStore.get<ESM::GameSetting>().find("iFightAttack")->getInt();
+            fightVictim = esmStore.get<ESM::GameSetting>().find("iFightAttacking")->getInt();
+        }
         else if (type == OT_Murder)
-            fight = esmStore.get<ESM::GameSetting>().find("iFightKilling")->getInt();
+            fight = fightVictim = esmStore.get<ESM::GameSetting>().find("iFightKilling")->getInt();
         else if (type == OT_Theft)
-            fight = esmStore.get<ESM::GameSetting>().find("fFightStealing")->getFloat();
-
-        const int iFightAttacking = esmStore.get<ESM::GameSetting>().find("iFightAttacking")->getInt();
+            fight = fightVictim = esmStore.get<ESM::GameSetting>().find("fFightStealing")->getFloat();
 
         // Tell everyone (including the original reporter) in alarm range
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
@@ -1069,11 +1088,7 @@ namespace MWMechanics
             if (   *it == player
                 || !it->getClass().isNpc() || it->getClass().getCreatureStats(*it).isDead()) continue;
 
-            int aggression = fight;
-
-            // Note: iFightAttack is used for the victim, iFightAttacking for witnesses?
-            if (*it != victim && type == OT_Assault)
-                aggression = iFightAttacking;
+            int aggression = (*it == victim) ? fightVictim : fight;
 
             if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
                 continue;
@@ -1091,6 +1106,11 @@ namespace MWMechanics
             }
             else
             {
+                int dispChange = (*it == victim) ? dispTermVictim : dispTerm;
+                NpcStats& observerStats = it->getClass().getNpcStats(*it);
+                int originalDisposition = observerStats.getBaseDisposition();
+                observerStats.setBaseDisposition(originalDisposition+dispChange);
+
                 bool aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(*it, player, aggression, true);
                 if (aggressive)
                 {
@@ -1108,6 +1128,8 @@ namespace MWMechanics
                     // Mark as Alarmed for dialogue
                     it->getClass().getCreatureStats(*it).setAlarmed(true);
                 }
+                else
+                    observerStats.setBaseDisposition(originalDisposition);
             }
         }
     }
