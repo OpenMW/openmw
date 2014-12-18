@@ -314,7 +314,7 @@ namespace Compiler
 
     bool Scanner::scanName (char c, std::string& name)
     {
-        bool first = false;
+        bool first = true;
         bool error = false;
 
         name.clear();
