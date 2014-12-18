@@ -545,7 +545,7 @@ namespace Compiler
     {
         return std::isalpha (c) || std::isdigit (c) || c=='_' ||
             /// \todo disable this when doing more stricter compiling
-            c=='`' ||
+            c=='`' || c=='\'' ||
             /// \todo disable this when doing more stricter compiling. Also, find out who is
             /// responsible for allowing it in the first place and meet up with that person in
             /// a dark alley.
