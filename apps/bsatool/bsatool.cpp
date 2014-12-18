@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <exception>
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
@@ -27,15 +26,15 @@ struct Arguments
 
 void replaceAll(std::string& str, const std::string& needle, const std::string& substitute)
 {
-    int pos = str.find(needle);
-    while(pos != -1)
+    std::size_t pos;
+    do
     {
-        str.replace(pos, needle.size(), substitute);
         pos = str.find(needle);
-    }
+        str.replace(pos, needle.size(), substitute);
+    }while(pos != -1);
 }
 
-bool parseOptions (int argc, char** argv, Arguments &info)
+bool parseOptions (int argc, const char** argv, Arguments &info)
 {
     bpo::options_description desc("Inspect and extract files from Bethesda BSA archives\n\n"
             "Usages:\n"
@@ -138,8 +137,8 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     else if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
         info.outdir = variables["input-file"].as< std::vector<std::string> >()[1];
 
-    info.longformat = variables.count("long");
-    info.fullpath = variables.count("full-path");
+    info.longformat = (bool)variables.count("long");
+    info.fullpath = (bool)variables.count("full-path");
 
     return true;
 }
@@ -148,7 +147,7 @@ int list(Bsa::BSAFile& bsa, Arguments& info);
 int extract(Bsa::BSAFile& bsa, Arguments& info);
 int extractAll(Bsa::BSAFile& bsa, Arguments& info);
 
-int main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
     Arguments info;
     if(!parseOptions (argc, argv, info))
