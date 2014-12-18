@@ -436,7 +436,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     }
     if (mCompileAllDialogue)
     {
-        std::pair<int, int> result = MWDialogue::ScriptTest::compileAll(&mExtensions);
+        std::pair<int, int> result = MWDialogue::ScriptTest::compileAll(&mExtensions, mWarningsMode);
         if (result.first)
             std::cout
                 << "compiled " << result.second << " of " << result.first << " dialogue script/actor combinations a("

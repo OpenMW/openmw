@@ -314,7 +314,7 @@ namespace Compiler
 
     bool Scanner::scanName (char c, std::string& name)
     {
-        bool first = false;
+        bool first = true;
         bool error = false;
 
         name.clear();
@@ -554,8 +554,7 @@ namespace Compiler
 
     bool Scanner::isWhitespace (char c)
     {
-        return c==' ' || c=='\t'
-            || c=='['; ///< \todo disable this when doing more strict compiling
+        return c==' ' || c=='\t';
     }
 
     // constructor
