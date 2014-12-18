@@ -293,6 +293,9 @@ namespace MWMechanics
         if (sqrDist > maxDistance*maxDistance)
             return;
 
+        if (targetActor.getClass().getCreatureStats(targetActor).isDead())
+            return;
+
         // stop tracking when target is behind the actor
         Ogre::Vector3 actorDirection (actor.getRefData().getBaseNode()->getOrientation().yAxis());
         Ogre::Vector3 targetDirection (Ogre::Vector3(actor2Pos.pos) - Ogre::Vector3(actor1Pos.pos));
