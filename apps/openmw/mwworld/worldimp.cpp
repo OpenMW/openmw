@@ -2554,7 +2554,7 @@ namespace MWWorld
 
         if (!selectedSpell.empty())
         {
-            const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
+            const ESM::Spell* spell = getStore().get<ESM::Spell>().find(selectedSpell);
 
             // Check mana
             MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
@@ -2641,7 +2641,7 @@ namespace MWWorld
 
         if (!selectedSpell.empty())
         {
-            const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
+            const ESM::Spell* spell = getStore().get<ESM::Spell>().find(selectedSpell);
 
             // A power can be used once per 24h
             if (spell->mData.mType == ESM::Spell::ST_Power)

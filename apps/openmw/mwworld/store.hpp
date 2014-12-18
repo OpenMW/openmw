@@ -630,9 +630,6 @@ namespace MWWorld
         }
 
         const ESM::Cell *searchOrCreate(int x, int y) {
-            ESM::Cell cell;
-            cell.mData.mX = x, cell.mData.mY = y;
-
             std::pair<int, int> key(x, y);
             DynamicExt::const_iterator it = mExt.find(key);
             if (it != mExt.end()) {
@@ -644,13 +641,15 @@ namespace MWWorld
                 return &dit->second;
             }
 
-            ESM::Cell *newCell = new ESM::Cell;
-            newCell->mData.mX = x;
-            newCell->mData.mY = y;
-            mExt[std::make_pair(x, y)] = *newCell;
-            delete newCell;
-
-            return &mExt[std::make_pair(x, y)];
+            ESM::Cell newCell;
+            newCell.mData.mX = x;
+            newCell.mData.mY = y;
+            newCell.mData.mFlags = ESM::Cell::HasWater;
+            newCell.mAmbi.mAmbient = 0;
+            newCell.mAmbi.mSunlight = 0;
+            newCell.mAmbi.mFog = 0;
+            newCell.mAmbi.mFogDensity = 0;
+            return &mExt.insert(std::make_pair(key, newCell)).first->second;
         }
 
         const ESM::Cell *find(const std::string &id) const {
@@ -852,6 +851,11 @@ namespace MWWorld
         Store<ESM::Cell>* mCells;
 
     public:
+
+        Store<ESM::Pathgrid>()
+            : mCells(NULL)
+        {
+        }
 
         void setCells(Store<ESM::Cell>& cells)
         {

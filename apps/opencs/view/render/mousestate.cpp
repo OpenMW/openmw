@@ -346,7 +346,7 @@ namespace CSVRender
     //plane X, upvector Y, mOffset x : x-z plane, wheel closer/further
     std::pair<Ogre::Vector3, Ogre::Vector3> MouseState::planeAxis()
     {
-        bool screenCoord =  true;
+        const bool screenCoord =  true;
         Ogre::Vector3 dir = getCamera()->getDerivedDirection();
 
         QString wheelDir =  "Closer/Further";

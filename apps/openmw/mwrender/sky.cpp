@@ -104,7 +104,7 @@ BillboardObject::BillboardObject( const String& textureName,
 }
 
 BillboardObject::BillboardObject()
-: mNode(NULL), mMaterial(NULL), mEntity(NULL)
+: mNode(NULL), mMaterial(NULL), mEntity(NULL), mVisibility(1.f)
 {
 }
 
@@ -186,6 +186,7 @@ Moon::Moon( const String& textureName,
                     SceneNode* rootNode,
             const std::string& material)
     : BillboardObject(textureName, initialSize, position, rootNode, material)
+    , mType(Type_Masser)
 {
     setVisibility(1.0);
 

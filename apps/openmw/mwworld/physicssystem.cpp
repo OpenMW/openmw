@@ -283,10 +283,13 @@ namespace MWWorld
                 return position;
 
             OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
+            if (!physicActor)
+                return position;
+
             // Reset per-frame data
             physicActor->setWalkingOnWater(false);
             /* Anything to collide with? */
-            if(!physicActor || !physicActor->getCollisionMode())
+            if(!physicActor->getCollisionMode())
             {
                 return position +  (Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
                                     Ogre::Quaternion(Ogre::Radian(refpos.rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X))

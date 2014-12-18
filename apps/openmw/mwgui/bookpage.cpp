@@ -639,7 +639,8 @@ namespace
                       MyGUI::Vertex* vertices, RenderXform const & renderXform) :
             mZ(Z), mOrigin (left, top),
             mFont (font), mVertices (vertices),
-            mRenderXform (renderXform)
+            mRenderXform (renderXform),
+            mC(0)
         {
             mVertexColourType = MyGUI::RenderManager::getInstance().getVertexFormat();
         }

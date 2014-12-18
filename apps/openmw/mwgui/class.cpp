@@ -770,6 +770,7 @@ namespace MWGui
 
     SelectSkillDialog::SelectSkillDialog()
       : WindowModal("openmw_chargen_select_skill.layout")
+      , mSkillId(ESM::Skill::Block)
     {
         // Centre dialog
         center();

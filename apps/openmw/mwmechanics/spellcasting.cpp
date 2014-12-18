@@ -687,12 +687,11 @@ namespace MWMechanics
 
                 // Failure sound
                 int school = 0;
-                for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment->mEffects.mList.begin());
-                    effectIt!=enchantment->mEffects.mList.end(); ++effectIt)
+                if (!enchantment->mEffects.mList.empty())
                 {
-                    const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
+                    short effectId = enchantment->mEffects.mList.front().mEffectID;
+                    const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
                     school = magicEffect->mData.mSchool;
-                    break;
                 }
                 static const std::string schools[] = {
                     "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"

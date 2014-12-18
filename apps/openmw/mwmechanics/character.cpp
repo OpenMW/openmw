@@ -1644,7 +1644,7 @@ void CharacterController::update(float duration)
         world->queueMovement(mPtr, Ogre::Vector3(0.0f));
     }
 
-    if(mAnimation && !mSkipAnim)
+    if(!mSkipAnim)
     {
         Ogre::Vector3 moved = mAnimation->runAnimation(duration);
         if(duration > 0.0f)
@@ -1762,10 +1762,7 @@ bool CharacterController::kill()
 
     playRandomDeath();
 
-    if(mAnimation)
-    {
-        mAnimation->disable(mCurrentIdle);
-    }
+    mAnimation->disable(mCurrentIdle);
 
     mIdleState = CharState_None;
     mCurrentIdle.clear();

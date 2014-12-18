@@ -28,7 +28,9 @@ namespace SFO
         mWantGrab(false),
         mWantRelative(false),
         mWantMouseVisible(false),
-        mAllowGrab(grab)
+        mAllowGrab(grab),
+        mWarpX(0),
+        mWarpY(0)
     {
         _setupOISKeys();
     }
@@ -117,7 +119,9 @@ namespace SFO
                 case SDL_CLIPBOARDUPDATE:
                     break; // We don't need this event, clipboard is retrieved on demand
                 default:
+                    std::ios::fmtflags f(std::cerr.flags());
                     std::cerr << "Unhandled SDL event of type 0x" << std::hex << evt.type << std::endl;
+                    std::cerr.flags(f);
                     break;
             }
         }

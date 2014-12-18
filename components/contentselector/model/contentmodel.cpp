@@ -177,7 +177,6 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
             return file->fileProperty(static_cast<const EsmFile::FileProperty>(column));
 
         return QVariant();
-        break;
     }
 
     case Qt::TextAlignmentRole:
@@ -193,8 +192,6 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
         default:
             return Qt::AlignLeft + Qt::AlignVCenter;
         }
-        return QVariant();
-        break;
     }
 
     case Qt::ToolTipRole:
@@ -203,7 +200,6 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
             return QVariant();
 
         return file->toolTip();
-        break;
     }
 
     case Qt::CheckStateRole:
@@ -212,8 +208,6 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
             return QVariant();
 
         return mCheckStates[file->filePath()];
-
-        break;
     }
 
     case Qt::UserRole:
@@ -229,7 +223,6 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
 
     case Qt::UserRole + 1:
         return isChecked(file->filePath());
-        break;
     }
     return QVariant();
 }

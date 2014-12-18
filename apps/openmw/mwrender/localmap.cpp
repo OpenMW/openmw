@@ -24,8 +24,9 @@
 using namespace MWRender;
 using namespace Ogre;
 
-LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering) :
-    mInterior(false)
+LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering)
+    : mInterior(false)
+    , mAngle(0.f)
 {
     mRendering = rend;
     mRenderingManager = rendering;

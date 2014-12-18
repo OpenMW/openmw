@@ -928,6 +928,8 @@ class NIFObjectLoader
             particledata = static_cast<const Nif::NiAutoNormalParticles*>(partnode)->data.getPtr();
         else if(partnode->recType == Nif::RC_NiRotatingParticles)
             particledata = static_cast<const Nif::NiRotatingParticles*>(partnode)->data.getPtr();
+        else
+            throw std::runtime_error("Unexpected particle node type");
 
         std::string fullname = name+"@index="+Ogre::StringConverter::toString(partnode->recIndex);
         if(partnode->name.length() > 0)

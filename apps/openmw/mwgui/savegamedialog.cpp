@@ -304,7 +304,7 @@ namespace MWGui
         mOkButton->setEnabled(pos != MyGUI::ITEM_NONE || mSaving);
         mDeleteButton->setEnabled(pos != MyGUI::ITEM_NONE);
 
-        if (pos == MyGUI::ITEM_NONE)
+        if (pos == MyGUI::ITEM_NONE || !mCurrentCharacter)
         {
             mCurrentSlot = NULL;
             mInfoText->setCaption("");

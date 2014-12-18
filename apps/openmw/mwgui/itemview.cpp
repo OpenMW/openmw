@@ -60,7 +60,7 @@ void ItemView::layoutWidgets()
 
     int rows = maxHeight/42;
     rows = std::max(rows, 1);
-    bool showScrollbar = std::ceil(dragArea->getChildCount()/float(rows)) > mScrollView->getWidth()/42;
+    bool showScrollbar = int(std::ceil(dragArea->getChildCount()/float(rows))) > mScrollView->getWidth()/42;
     if (showScrollbar)
         maxHeight -= 18;
 
