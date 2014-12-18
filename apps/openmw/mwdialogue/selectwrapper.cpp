@@ -205,6 +205,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_Reputation, Function_FactionRankDiff,
         Function_WerewolfKills,
         Function_RankLow, Function_RankHigh,
+        Function_CreatureTargetted,
         Function_None // end marker
     };
 
@@ -225,7 +226,6 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_PcVampire, Function_TalkedToPc,
         Function_Alarmed, Function_Detected,
         Function_Attacked, Function_ShouldAttack,
-        Function_CreatureTargetted,
         Function_Werewolf,
         Function_None // end marker
     };

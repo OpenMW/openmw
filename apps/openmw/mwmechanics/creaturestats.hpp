@@ -199,8 +199,6 @@ namespace MWMechanics
         bool getAttacked() const;
         void setAttacked (bool attacked);
 
-        bool getCreatureTargetted() const;
-
         float getEvasion() const;
 
         void setKnockedDown(bool value);

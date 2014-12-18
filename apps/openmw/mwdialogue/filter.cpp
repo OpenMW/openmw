@@ -417,6 +417,21 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
             return value;
         }
 
+        case SelectWrapper::Function_CreatureTargetted:
+
+            {
+                MWWorld::Ptr target;
+                mActor.getClass().getCreatureStats(mActor).getAiSequence().getCombatTarget(target);
+                if (target)
+                {
+                    if (target.getClass().isNpc() && target.getClass().getNpcStats(target).isWerewolf())
+                        return 2;
+                    if (target.getTypeName() == typeid(ESM::Creature).name())
+                        return 1;
+                }
+            }
+            return 0;
+
         default:
 
             throw std::runtime_error ("unknown integer select function");
@@ -531,10 +546,6 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
             return MWBase::Environment::get().getMechanicsManager()->isAggressive(mActor,
                     MWBase::Environment::get().getWorld()->getPlayerPtr());
-
-        case SelectWrapper::Function_CreatureTargetted:
-
-            return mActor.getClass().getCreatureStats (mActor).getCreatureTargetted();
 
         case SelectWrapper::Function_Werewolf:
 
