@@ -56,7 +56,7 @@ void ItemView::layoutWidgets()
     int x = 0;
     int y = 0;
     MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
-    int maxHeight = dragArea->getHeight();
+    int maxHeight = mScrollView->getHeight();
 
     int rows = maxHeight/42;
     rows = std::max(rows, 1);
