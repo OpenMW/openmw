@@ -1053,7 +1053,7 @@ namespace MWMechanics
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
             fight = esmStore.get<ESM::GameSetting>().find("iFightTrespass")->getInt();
         else if (type == OT_Pickpocket)
-            fight = esmStore.get<ESM::GameSetting>().find("iFightPickpocket")->getInt();
+            fight = esmStore.get<ESM::GameSetting>().find("iFightPickpocket")->getInt() * 4; // *4 according to research wiki
         else if (type == OT_Assault) // Note: iFightAttack is for the victim, iFightAttacking for witnesses?
             fight = esmStore.get<ESM::GameSetting>().find("iFightAttack")->getInt();
         else if (type == OT_Murder)
