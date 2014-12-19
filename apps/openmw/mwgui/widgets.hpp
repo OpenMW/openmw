@@ -1,9 +1,11 @@
 #ifndef MWGUI_WIDGETS_H
 #define MWGUI_WIDGETS_H
 
-#include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/stat.hpp"
 #include "controllers.hpp"
+
+#include <components/esm/effectlist.hpp>
+#include <components/esm/loadskil.hpp>
 
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>

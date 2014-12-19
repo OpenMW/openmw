@@ -6,10 +6,10 @@
 #include <boost/shared_ptr.hpp>
 
 #include "livecellref.hpp"
-#include "esmstore.hpp"
 #include "cellreflist.hpp"
 
 #include <components/esm/fogstate.hpp>
+#include <components/esm/records.hpp>
 
 #include "../mwmechanics/pathgrid.hpp"  // TODO: maybe belongs in mwworld
 
@@ -24,7 +24,7 @@ namespace ESM
 namespace MWWorld
 {
     class Ptr;
-
+    class ESMStore;
 
 
     /// \brief Mutable state of a cell
