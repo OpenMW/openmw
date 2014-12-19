@@ -955,6 +955,8 @@ namespace MWMechanics
             {
                 if (type == OT_Theft || type == OT_Pickpocket)
                     MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
+                else if (type == OT_Trespassing)
+                    MWBase::Environment::get().getDialogueManager()->say(*it, "intruder");
 
                 // Crime reporting only applies to NPCs
                 if (!it->getClass().isNpc())

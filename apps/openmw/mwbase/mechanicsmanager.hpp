@@ -113,7 +113,7 @@ namespace MWBase
                 OT_Theft, // Taking items owned by an NPC or a faction you are not a member of
                 OT_Assault, // Attacking a peaceful NPC
                 OT_Murder, // Murdering a peaceful NPC
-                OT_Trespassing, // Staying in a cell you are not allowed in (where is this defined?)
+                OT_Trespassing, // Picking the lock of an owned door/chest
                 OT_SleepingInOwnedBed, // Sleeping in a bed owned by an NPC or a faction you are not a member of
                 OT_Pickpocket // Entering pickpocket mode, leaving it, and being detected. Any items stolen are a separate crime (Theft)
             };
