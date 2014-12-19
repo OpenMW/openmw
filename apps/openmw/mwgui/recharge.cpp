@@ -3,12 +3,15 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
+#include <components/esm/records.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"

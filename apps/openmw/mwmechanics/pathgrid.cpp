@@ -4,6 +4,7 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 namespace
 {

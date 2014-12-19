@@ -3,6 +3,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm/records.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -12,6 +13,7 @@
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/spells.hpp"

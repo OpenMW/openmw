@@ -3,6 +3,7 @@
 #include <iomanip>
 
 #include <boost/lexical_cast.hpp>
+#include <components/esm/records.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -11,6 +12,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "itemselection.hpp"
 #include "container.hpp"

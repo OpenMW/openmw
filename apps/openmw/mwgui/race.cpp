@@ -3,6 +3,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
+#include "../mwworld/esmstore.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"

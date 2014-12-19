@@ -11,6 +11,9 @@
 #include "../mwmechanics/magiceffects.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
+
+#include <components/esm/records.hpp>
 
 #include "inventoryitemmodel.hpp"
 #include "sortfilteritemmodel.hpp"
