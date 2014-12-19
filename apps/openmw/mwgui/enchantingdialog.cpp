@@ -338,9 +338,8 @@ namespace MWGui
                     if (msg.find("%s") != std::string::npos)
                         msg.replace(msg.find("%s"), 2, item.getClass().getName(item));
                     MWBase::Environment::get().getWindowManager()->messageBox(msg);
-                    MWBase::Environment::get().getDialogueManager()->say(mPtr, "Thief");
-                    MWBase::Environment::get().getMechanicsManager()->reportCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
-                                                                                  item.getClass().getValue(item));
+                    MWBase::Environment::get().getMechanicsManager()->commitCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
+                                                                                  item.getClass().getValue(item), true);
                     MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
                     MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
                     return;

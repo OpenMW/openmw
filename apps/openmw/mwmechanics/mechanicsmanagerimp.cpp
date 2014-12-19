@@ -917,24 +917,19 @@ namespace MWMechanics
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
 
-    bool MechanicsManager::commitCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg)
+    bool MechanicsManager::commitCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg, bool victimAware)
     {
-        // NOTE: int arg can be from itemTaken() so DON'T modify it, since it is
-        //  passed to reportCrime later on in this function.
-
         // NOTE: victim may be empty
 
         // Only player can commit crime
         if (player.getRefData().getHandle() != "player")
             return false;
 
-        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
-
-
         // Find all the actors within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
 
         Ogre::Vector3 from = Ogre::Vector3(player.getRefData().getPosition().pos);
+        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
         float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
 
         mActors.getObjectsInRange(from, radius, neighbors);
@@ -943,11 +938,8 @@ namespace MWMechanics
         if (!victim.isEmpty() && from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
             neighbors.push_back(victim);
 
-        bool victimAware = false;
-
-        // Find actors who directly witnessed the crime
+        // Did anyone see it?
         bool crimeSeen = false;
-        bool reported = false;
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
             if (*it == player)
@@ -955,17 +947,13 @@ namespace MWMechanics
             if (it->getClass().getCreatureStats(*it).isDead())
                 continue;
 
-            // Was the crime seen?
-            if ((MWBase::Environment::get().getWorld()->getLOS(player, *it) && awarenessCheck(player, *it) )
+            if ((*it == victim && victimAware)
+                    || (MWBase::Environment::get().getWorld()->getLOS(player, *it) && awarenessCheck(player, *it) )
                     // Murder crime can be reported even if no one saw it (hearing is enough, I guess).
                     // TODO: Add mod support for stealth executions!
                     || (type == OT_Murder && *it != victim))
             {
-                if (*it == victim)
-                    victimAware = true;
-
-                // TODO: are there other messages?
-                if (type == OT_Theft)
+                if (type == OT_Theft || type == OT_Pickpocket)
                     MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
 
                 // Crime reporting only applies to NPCs
@@ -977,20 +965,13 @@ namespace MWMechanics
 
                 crimeSeen = true;
             }
-
-            // Will the witness report the crime?
-            if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= 100)
-            {
-                reported = true;
-            }
         }
 
-        if (crimeSeen && reported)
+        if (crimeSeen)
             reportCrime(player, victim, type, arg);
-        else if (victimAware && !victim.isEmpty() && type == OT_Assault)
-            startCombat(victim, player);
-
-        return reported;
+        else if (type == OT_Assault && !victim.isEmpty())
+            startCombat(victim, player); // TODO: combat should be started with an "unaware" flag, which makes the victim flee?
+        return crimeSeen;
     }
 
     void MechanicsManager::reportCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg)
@@ -1030,22 +1011,6 @@ namespace MWMechanics
             arg = std::max(1, arg); // Minimum bounty of 1, in case items with zero value are stolen
         }
 
-        MWBase::Environment::get().getWindowManager()->messageBox("#{sCrimeMessage}");
-        player.getClass().getNpcStats(player).setBounty(player.getClass().getNpcStats(player).getBounty()
-                                                  + arg);
-
-        // If committing a crime against a faction member, expell from the faction
-        if (!victim.isEmpty() && victim.getClass().isNpc())
-        {
-            std::string factionID;
-            if(!victim.getClass().getNpcStats(victim).getFactionRanks().empty())
-                factionID = victim.getClass().getNpcStats(victim).getFactionRanks().begin()->first;
-            if (player.getClass().getNpcStats(player).isSameFaction(victim.getClass().getNpcStats(victim)))
-            {
-                player.getClass().getNpcStats(player).expell(factionID);
-            }
-        }
-
         // Make surrounding actors within alarm distance respond to the crime
         std::vector<MWWorld::Ptr> neighbors;
 
@@ -1082,6 +1047,8 @@ namespace MWMechanics
         else if (type == OT_Theft)
             fight = fightVictim = esmStore.get<ESM::GameSetting>().find("fFightStealing")->getFloat();
 
+        bool reported = false;
+
         // Tell everyone (including the original reporter) in alarm range
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
@@ -1092,6 +1059,12 @@ namespace MWMechanics
 
             if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
                 continue;
+
+            // Will the witness report the crime?
+            if (it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase() >= 100)
+            {
+                reported = true;
+            }
 
             if (it->getClass().isClass(*it, "guard"))
             {
@@ -1130,6 +1103,25 @@ namespace MWMechanics
                 }
                 else
                     observerStats.setBaseDisposition(originalDisposition);
+            }
+        }
+
+        if (reported)
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sCrimeMessage}");
+            player.getClass().getNpcStats(player).setBounty(player.getClass().getNpcStats(player).getBounty()
+                                                      + arg);
+
+            // If committing a crime against a faction member, expell from the faction
+            if (!victim.isEmpty() && victim.getClass().isNpc())
+            {
+                std::string factionID;
+                if(!victim.getClass().getNpcStats(victim).getFactionRanks().empty())
+                    factionID = victim.getClass().getNpcStats(victim).getFactionRanks().begin()->first;
+                if (player.getClass().getNpcStats(player).isSameFaction(victim.getClass().getNpcStats(victim)))
+                {
+                    player.getClass().getNpcStats(player).expell(factionID);
+                }
             }
         }
     }

@@ -290,10 +290,9 @@ namespace MWGui
                 if (msg.find("%s") != std::string::npos)
                     msg.replace(msg.find("%s"), 2, it->mBase.getClass().getName(it->mBase));
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
-                MWBase::Environment::get().getDialogueManager()->say(mPtr, "Thief");
-                MWBase::Environment::get().getMechanicsManager()->reportCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
+                MWBase::Environment::get().getMechanicsManager()->commitCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
                                                                               it->mBase.getClass().getValue(it->mBase)
-                                                                              * it->mCount);
+                                                                              * it->mCount, true);
                 onCancelButtonClicked(mCancelButton);
                 MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
                 return;

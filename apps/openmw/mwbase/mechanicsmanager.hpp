@@ -118,16 +118,14 @@ namespace MWBase
                 OT_Pickpocket // Entering pickpocket mode, leaving it, and being detected. Any items stolen are a separate crime (Theft)
             };
             /**
-             * @brief Commit a crime. If any actors witness the crime and report it,
-             *        reportCrime will be called automatically.
              * @note victim may be empty
              * @param arg Depends on \a type, e.g. for Theft, the value of the item that was stolen.
-             * @return was the crime reported?
+             * @param victimAware Is the victim already aware of the crime?
+             *                    If this parameter is false, it will be determined by a line-of-sight and awareness check.
+             * @return was the crime seen?
              */
             virtual bool commitCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
-                                      OffenseType type, int arg=0) = 0;
-            virtual void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
-                                      OffenseType type, int arg=0) = 0;
+                                      OffenseType type, int arg=0, bool victimAware=false) = 0;
             /// @return false if the attack was considered a "friendly hit" and forgiven
             virtual bool actorAttacked (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker) = 0;
             /// Utility to check if taking this item is illegal and calling commitCrime if so
