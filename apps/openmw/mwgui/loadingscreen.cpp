@@ -34,6 +34,7 @@ namespace MWGui
 
         getWidget(mLoadingText, "LoadingText");
         getWidget(mProgressBar, "ProgressBar");
+        getWidget(mLoadingBox, "LoadingBox");
 
         mProgressBar->setScrollViewPage(1);
 
@@ -46,6 +47,11 @@ namespace MWGui
     void LoadingScreen::setLabel(const std::string &label)
     {
         mLoadingText->setCaptionWithReplacing(label);
+        int padding = mLoadingBox->getWidth() - mLoadingText->getWidth();
+        MyGUI::IntSize size(mLoadingText->getTextSize().width+padding, mLoadingBox->getHeight());
+        size.width = std::max(300, size.width);
+        mLoadingBox->setSize(size);
+        mLoadingBox->setPosition(mMainWidget->getWidth()/2 - mLoadingBox->getWidth()/2, mLoadingBox->getTop());
     }
 
     LoadingScreen::~LoadingScreen()

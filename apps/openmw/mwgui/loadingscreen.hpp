@@ -47,6 +47,8 @@ namespace MWGui
 
         size_t mProgress;
 
+        MyGUI::Widget* mLoadingBox;
+
         MyGUI::TextBox* mLoadingText;
         MyGUI::ScrollBar* mProgressBar;
         BackgroundImage* mBackgroundImage;
