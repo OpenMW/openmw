@@ -59,7 +59,7 @@ namespace MWClass
                 ptr.get<ESM::Container>();
 
             data->mContainerStore.fill(
-                ref->mBase->mInventory, ptr.getCellRef().getOwner(), ptr.getCellRef().getFaction(), MWBase::Environment::get().getWorld()->getStore());
+                ref->mBase->mInventory, ptr.getCellRef().getOwner(), ptr.getCellRef().getFaction(), ptr.getCellRef().getFactionRank(), MWBase::Environment::get().getWorld()->getStore());
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -81,7 +81,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().getOwner(), ptr.getCellRef().getFaction());
+        store.restock(list, ptr, ptr.getCellRef().getOwner(), ptr.getCellRef().getFaction(), ptr.getCellRef().getFactionRank());
     }
 
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const

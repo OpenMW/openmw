@@ -99,6 +99,15 @@ namespace MWWorld
         return mCellRef.mGlobalVariable;
     }
 
+    void CellRef::setFactionRank(int factionRank)
+    {
+        if (factionRank != mCellRef.mFactionRank)
+        {
+            mChanged = true;
+            mCellRef.mFactionRank = factionRank;
+        }
+    }
+
     int CellRef::getFactionRank() const
     {
         return mCellRef.mFactionRank;

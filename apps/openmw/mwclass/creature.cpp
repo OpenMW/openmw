@@ -139,7 +139,7 @@ namespace MWClass
             // store
             ptr.getRefData().setCustomData(data.release());
 
-            getContainerStore(ptr).fill(ref->mBase->mInventory, getId(ptr), "",
+            getContainerStore(ptr).fill(ref->mBase->mInventory, getId(ptr), "", -1,
                                        MWBase::Environment::get().getWorld()->getStore());
 
             if (ref->mBase->mFlags & ESM::Creature::Weapon)
@@ -888,7 +888,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().getRefId(), ptr.getCellRef().getFaction());
+        store.restock(list, ptr, ptr.getCellRef().getRefId(), "", -1);
     }
 
     int Creature::getBaseFightRating(const MWWorld::Ptr &ptr) const

@@ -403,7 +403,7 @@ namespace MWClass
             }
 
             // inventory
-            data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr), "",
+            data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr), "", -1,
                                        MWBase::Environment::get().getWorld()->getStore());
 
             data->mNpcStats.setGoldPool(gold);
@@ -1376,7 +1376,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().getRefId(), ptr.getCellRef().getFaction());
+        store.restock(list, ptr, ptr.getCellRef().getRefId(), "", -1);
     }
 
     int Npc::getBaseFightRating (const MWWorld::Ptr& ptr) const
