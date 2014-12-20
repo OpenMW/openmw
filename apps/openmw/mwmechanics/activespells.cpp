@@ -195,7 +195,7 @@ namespace MWMechanics
                 float magnitude = effectIt->mMagnitude;
 
                 if (magnitude)
-                    visitor.visit(MWMechanics::EffectKey(effectIt->mEffectId, effectIt->mArg), name, it->second.mCasterActorId, magnitude, remainingTime);
+                    visitor.visit(MWMechanics::EffectKey(effectIt->mEffectId, effectIt->mArg), name, it->second.mCasterActorId, magnitude, remainingTime, effectIt->mDuration);
             }
         }
     }

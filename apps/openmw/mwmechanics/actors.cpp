@@ -102,7 +102,7 @@ public:
 
     virtual void visit (MWMechanics::EffectKey key,
                              const std::string& sourceName, int casterActorId,
-                        float magnitude, float remainingTime = -1)
+                        float magnitude, float remainingTime = -1, float totalTime = -1)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (    ((key.mId == ESM::MagicEffect::CommandHumanoid && mActor.getClass().isNpc())
@@ -200,7 +200,7 @@ namespace MWMechanics
 
         virtual void visit (MWMechanics::EffectKey key,
                                  const std::string& sourceName, int casterActorId,
-                            float magnitude, float remainingTime = -1)
+                            float magnitude, float remainingTime = -1, float totalTime = -1)
         {
             if (key.mId != ESM::MagicEffect::Soultrap)
                 return;
