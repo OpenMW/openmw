@@ -98,6 +98,8 @@ namespace MWGui
             virtual void onReferenceUnavailable();
 
             int getMerchantGold();
+
+            void restock();
     };
 }
 
