@@ -30,7 +30,7 @@ namespace ICS
 {
 	InputControlSystem::InputControlSystem(std::string file, bool active
 		, DetectingBindingListener* detectingBindingListener
-		, InputControlSystemLog* log, std::string controllerdb, size_t channelCount)
+		, InputControlSystemLog* log, size_t channelCount)
 		: mFileName(file)
 		, mDetectingBindingListener(detectingBindingListener)
 		, mDetectingBindingControl(NULL)
@@ -273,40 +273,6 @@ namespace ICS
 			}
 
 			delete xmlDoc;
-		}
-
-		/* Joystick Init */
-
-		//Load controller mappings
-#if SDL_VERSION_ATLEAST(2,0,2)
-        if(!controllerdb.empty())
-        {
-            int res = SDL_GameControllerAddMappingsFromFile(controllerdb.c_str());
-            if(res == -1)
-            {
-                ICS_LOG(std::string("Error loading controller bindings: ")+SDL_GetError());
-            }
-            else
-            {
-                ICS_LOG(std::string("Loaded ")+boost::lexical_cast<std::string>(res)+" Game controller bindings");
-            }
-        }
-#endif
-
-		//Open all presently connected sticks
-		int numSticks = SDL_NumJoysticks();
-		for(int i = 0; i < numSticks; i++)
-		{
-            if(SDL_IsGameController(i))
-            {
-                SDL_ControllerDeviceEvent evt;
-                evt.which = i;
-                controllerAdded(evt);
-            }
-            else
-            {
-                ICS_LOG(std::string("Unusable controller plugged in: ")+SDL_JoystickNameForIndex(i));
-            }
 		}
 
 		ICS_LOG(" - InputControlSystem Created - ");
