@@ -46,10 +46,14 @@ namespace MWBase
             ///Actions available for binding to controller buttons
             virtual std::vector<int> getActionControllerSorting() = 0;
             virtual int getNumActions() = 0;
-            ///If keyboard is true, only pay attention to keyboard events. If false, only pay attention to cntroller events (excluding esc)
+            ///If keyboard is true, only pay attention to keyboard events. If false, only pay attention to controller events (excluding esc)
             virtual void enableDetectingBindingMode (int action, bool keyboard) = 0;
             virtual void resetToDefaultKeyBindings() = 0;
             virtual void resetToDefaultControllerBindings() = 0;
+
+            /// Returns if the last used input device was a joystick or a keyboard
+            /// @return true if joystick, false otherwise
+            virtual bool joystickLastUsed() = 0;
     };
 }
 

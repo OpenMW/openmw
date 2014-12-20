@@ -4,6 +4,7 @@
 #include "../mwgui/mode.hpp"
 
 #include <components/settings/settings.hpp>
+#include <components/files/configurationmanager.hpp>
 
 #include "../mwbase/inputmanager.hpp"
 #include <extern/sdl4ogre/sdlinputwrapper.hpp>
@@ -39,6 +40,11 @@ namespace ICS
 namespace MyGUI
 {
     class MouseButton;
+}
+
+namespace Files
+{
+    struct ConfigurationManager;
 }
 
 #include <extern/oics/ICSChannelListener.h>
@@ -85,14 +91,14 @@ namespace MWInput
         virtual std::string getActionDescription (int action);
         virtual std::string getActionKeyBindingName (int action);
         virtual std::string getActionControllerBindingName (int action);
-        virtual std::string sdlControllerAxisToString(int axis);
-        virtual std::string sdlControllerButtonToString(int button);
         virtual int getNumActions() { return A_Last; }
         virtual std::vector<int> getActionKeySorting();
         virtual std::vector<int> getActionControllerSorting();
         virtual void enableDetectingBindingMode (int action, bool keyboard);
         virtual void resetToDefaultKeyBindings();
         virtual void resetToDefaultControllerBindings();
+
+        virtual bool joystickLastUsed() {return mJoystickLastUsed;}
 
     public:
         virtual void keyPressed(const SDL_KeyboardEvent &arg );
@@ -181,6 +187,9 @@ namespace MWInput
         void adjustMouseRegion(int width, int height);
         MyGUI::MouseButton sdlButtonToMyGUI(Uint8 button);
 
+        virtual std::string sdlControllerAxisToString(int axis);
+        virtual std::string sdlControllerButtonToString(int button);
+
         void resetIdleTime();
         void updateIdleTime(float dt);
 
@@ -200,8 +209,6 @@ namespace MWInput
         void rest();
         void quickLoad();
         void quickSave();
-
-        bool isAReverse(int action);
 
         void quickKey (int index);
         void showQuickKeysMenu();

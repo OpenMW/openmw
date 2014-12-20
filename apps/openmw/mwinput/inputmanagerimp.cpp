@@ -124,6 +124,7 @@ namespace MWInput
         , mAttemptJump(false)
         , mControlsDisabled(false)
         , mJoystickLastUsed(false)
+        , mDetectingKeyboard(false)
     {
 
         Ogre::RenderWindow* window = ogre.getWindow ();
@@ -135,8 +136,7 @@ namespace MWInput
         mInputManager->setControllerEventCallback(this);
 
         std::string file = userFileExists ? userFile : "";
-        std::string controllerdb = Settings::Manager::getString("gamecontrollerdb file", "Input");
-        mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, controllerdb, A_Last);
+        mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
         adjustMouseRegion (window->getWidth(), window->getHeight());
 
         loadKeyDefaults();
@@ -154,6 +154,42 @@ namespace MWInput
         mControlSwitch["playermagic"]         = true;
         mControlSwitch["playerviewswitch"]    = true;
         mControlSwitch["vanitymode"]          = true;
+
+        		/* Joystick Init */
+
+		//Load controller mappings
+#if SDL_VERSION_ATLEAST(2,0,2)
+        Files::ConfigurationManager cfgMgr;
+        std::string db = cfgMgr.getLocalPath().string() + "/gamecontrollerdb.txt";
+        if(boost::filesystem::exists(db))
+        {
+            int res = SDL_GameControllerAddMappingsFromFile(db.c_str());
+            if(res == -1)
+            {
+                //ICS_LOG(std::string("Error loading controller bindings: ")+SDL_GetError());
+            }
+            else
+            {
+                //ICS_LOG(std::string("Loaded ")+boost::lexical_cast<std::string>(res)+" Game controller bindings");
+            }
+        }
+#endif
+
+		//Open all presently connected sticks
+		int numSticks = SDL_NumJoysticks();
+		for(int i = 0; i < numSticks; i++)
+		{
+            if(SDL_IsGameController(i))
+            {
+                SDL_ControllerDeviceEvent evt;
+                evt.which = i;
+                controllerAdded(evt);
+            }
+            else
+            {
+                //ICS_LOG(std::string("Unusable controller plugged in: ")+SDL_JoystickNameForIndex(i));
+            }
+		}
     }
 
     void InputManager::clear()

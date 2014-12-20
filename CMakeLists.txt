@@ -379,6 +379,9 @@ configure_file(${OpenMW_SOURCE_DIR}/files/opencs.ini
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
     "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
 
+configure_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb.txt
+    "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt")
+
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
         "${OpenMW_BINARY_DIR}/openmw.desktop")
