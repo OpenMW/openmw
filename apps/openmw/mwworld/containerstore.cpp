@@ -474,7 +474,7 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
         {
             int currentCount = count(item);
             if (currentCount < std::abs(it->mCount))
-                add (item, std::abs(it->mCount) - currentCount, ptr);
+                addInitialItem(item, owner, faction, std::abs(it->mCount) - currentCount, true);
         }
     }
     flagAsModified();
