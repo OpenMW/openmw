@@ -35,6 +35,8 @@
 #include "aifollow.hpp"
 #include "aipursue.hpp"
 
+#include "actor.hpp"
+
 namespace
 {
 
@@ -920,10 +922,10 @@ namespace MWMechanics
 
     void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
     {
-        PtrControllerMap::iterator it = mActors.find(ptr);
+        PtrActorMap::iterator it = mActors.find(ptr);
         if (it == mActors.end())
             return;
-        CharacterController* ctrl = it->second;
+        CharacterController* ctrl = it->second->getCharacterController();
 
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
         MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -1128,14 +1130,14 @@ namespace MWMechanics
         removeActor(ptr);
 
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
-        mActors.insert(std::make_pair(ptr, new CharacterController(ptr, anim)));
+        mActors.insert(std::make_pair(ptr, new Actor(ptr, anim)));
         if (updateImmediately)
-            mActors[ptr]->update(0);
+            mActors[ptr]->getCharacterController()->update(0);
     }
 
     void Actors::removeActor (const MWWorld::Ptr& ptr)
     {
-        PtrControllerMap::iterator iter = mActors.find(ptr);
+        PtrActorMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
         {
             delete iter->second;
@@ -1145,20 +1147,20 @@ namespace MWMechanics
 
     void Actors::updateActor(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
     {
-        PtrControllerMap::iterator iter = mActors.find(old);
+        PtrActorMap::iterator iter = mActors.find(old);
         if(iter != mActors.end())
         {
-            CharacterController *ctrl = iter->second;
+            Actor *actor = iter->second;
             mActors.erase(iter);
 
-            ctrl->updatePtr(ptr);
-            mActors.insert(std::make_pair(ptr, ctrl));
+            actor->updatePtr(ptr);
+            mActors.insert(std::make_pair(ptr, actor));
         }
     }
 
     void Actors::dropActors (const MWWorld::CellStore *cellStore, const MWWorld::Ptr& ignore)
     {
-        PtrControllerMap::iterator iter = mActors.begin();
+        PtrActorMap::iterator iter = mActors.begin();
         while(iter != mActors.end())
         {
             if(iter->first.getCell()==cellStore && iter->first != ignore)
@@ -1192,8 +1194,10 @@ namespace MWMechanics
             // using higher values will make a quest in Bloodmoon harder or impossible to complete (bug #1876)
             const float sqrProcessingDistance = 7168*7168;
 
+            /// \todo move update logic to Actor class where appropriate
+
              // AI and magic effects update
-            for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {
@@ -1207,7 +1211,7 @@ namespace MWMechanics
                             if (iter->first != player)
                                 adjustCommandedActor(iter->first);
 
-                            for(PtrControllerMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
+                            for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                             {
                                 if (it->first == iter->first || iter->first == player) // player is not AI-controlled
                                     continue;
@@ -1219,13 +1223,13 @@ namespace MWMechanics
                             float sqrHeadTrackDistance = std::numeric_limits<float>::max();
                             MWWorld::Ptr headTrackTarget;
 
-                            for(PtrControllerMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
+                            for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                             {
                                 if (it->first == iter->first)
                                     continue;
                                 updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
                             }
-                            iter->second->setHeadTrackTarget(headTrackTarget);
+                            iter->second->getCharacterController()->setHeadTrackTarget(headTrackTarget);
                         }
 
                         if (iter->first.getClass().isNpc() && iter->first != player)
@@ -1254,12 +1258,12 @@ namespace MWMechanics
             // Reaching the text keys may trigger Hit / Spellcast (and as such, particles),
             // so updating VFX immediately after that would just remove the particle effects instantly.
             // There needs to be a magic effect update in between.
-            for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
-                iter->second->updateContinuousVfx();
+            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+                iter->second->getCharacterController()->updateContinuousVfx();
 
             // Animation/movement update
             CharacterController* playerCharacter = NULL;
-            for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 if (iter->first != player &&
                         Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(iter->first.getRefData().getPosition().pos))
@@ -1268,22 +1272,22 @@ namespace MWMechanics
 
                 if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
                             ESM::MagicEffect::Paralyze).getMagnitude() > 0)
-                    iter->second->skipAnim();
+                    iter->second->getCharacterController()->skipAnim();
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
                 // (would invalidate the iterator)
                 if (iter->first.getCellRef().getRefId() == "player")
                 {
-                    playerCharacter = iter->second;
+                    playerCharacter = iter->second->getCharacterController();
                     continue;
                 }
-                iter->second->update(duration);
+                iter->second->getCharacterController()->update(duration);
             }
 
             if (playerCharacter)
                 playerCharacter->update(duration);
 
-            for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 const MWWorld::Class &cls = iter->first.getClass();
                 CreatureStats &stats = cls.getCreatureStats(iter->first);
@@ -1341,7 +1345,7 @@ namespace MWMechanics
 
                     bool detected = false;
 
-                    for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+                    for (PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
                     {
                         if (iter->first == player)  // not the player
                             continue;
@@ -1384,32 +1388,32 @@ namespace MWMechanics
 
     void Actors::killDeadActors()
     {
-        for(PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+        for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
         {
             const MWWorld::Class &cls = iter->first.getClass();
             CreatureStats &stats = cls.getCreatureStats(iter->first);
 
             if(!stats.isDead())
             {
-                if(iter->second->isDead())
+                if(iter->second->getCharacterController()->isDead())
                 {
                     // Actor has been resurrected. Notify the CharacterController and re-enable collision.
                     MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, true);
-                    iter->second->resurrect();
+                    iter->second->getCharacterController()->resurrect();
                 }
 
                 if(!stats.isDead())
                     continue;
             }
 
-            if (iter->second->kill())
+            if (iter->second->getCharacterController()->kill())
             {
                 iter->first.getClass().getCreatureStats(iter->first).notifyDied();
 
                 ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
 
                 // Make sure spell effects with CasterLinked flag are removed
-                for (PtrControllerMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
+                for (PtrActorMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
                 {
                     MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
                     spells.purge(stats.getActorId());
@@ -1438,7 +1442,7 @@ namespace MWMechanics
 
     void Actors::restoreDynamicStats(bool sleep)
     {
-        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+        for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
             restoreDynamicStats(iter->first, sleep);
     }
 
@@ -1470,35 +1474,35 @@ namespace MWMechanics
 
     void Actors::forceStateUpdate(const MWWorld::Ptr & ptr)
     {
-        PtrControllerMap::iterator iter = mActors.find(ptr);
+        PtrActorMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
-            iter->second->forceStateUpdate();
+            iter->second->getCharacterController()->forceStateUpdate();
     }
 
     void Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
     {
-        PtrControllerMap::iterator iter = mActors.find(ptr);
+        PtrActorMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
-            iter->second->playGroup(groupName, mode, number);
+            iter->second->getCharacterController()->playGroup(groupName, mode, number);
     }
     void Actors::skipAnimation(const MWWorld::Ptr& ptr)
     {
-        PtrControllerMap::iterator iter = mActors.find(ptr);
+        PtrActorMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
-            iter->second->skipAnim();
+            iter->second->getCharacterController()->skipAnim();
     }
 
     bool Actors::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName)
     {
-        PtrControllerMap::iterator iter = mActors.find(ptr);
+        PtrActorMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
-            return iter->second->isAnimPlaying(groupName);
+            return iter->second->getCharacterController()->isAnimPlaying(groupName);
         return false;
     }
 
     void Actors::getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out)
     {
-        for (PtrControllerMap::iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
+        for (PtrActorMap::iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
         {
             if (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(position) <= radius*radius)
                 out.push_back(iter->first);
@@ -1508,7 +1512,7 @@ namespace MWMechanics
     std::list<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actor)
     {
         std::list<MWWorld::Ptr> list;
-        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+        for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
         {
             const MWWorld::Class &cls = iter->first.getClass();
             CreatureStats &stats = cls.getCreatureStats(iter->first);
@@ -1538,7 +1542,7 @@ namespace MWMechanics
     std::list<int> Actors::getActorsFollowingIndices(const MWWorld::Ptr &actor)
     {
         std::list<int> list;
-        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+        for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
         {
             const MWWorld::Class &cls = iter->first.getClass();
             CreatureStats &stats = cls.getCreatureStats(iter->first);
@@ -1611,7 +1615,7 @@ namespace MWMechanics
 
     void Actors::clear()
     {
-        PtrControllerMap::iterator it(mActors.begin());
+        PtrActorMap::iterator it(mActors.begin());
         for (; it != mActors.end(); ++it)
         {
             delete it->second;
@@ -1631,10 +1635,10 @@ namespace MWMechanics
 
     bool Actors::isReadyToBlock(const MWWorld::Ptr &ptr) const
     {
-        PtrControllerMap::const_iterator it = mActors.find(ptr);
+        PtrActorMap::const_iterator it = mActors.find(ptr);
         if (it == mActors.end())
             return false;
 
-        return it->second->isReadyToBlock();
+        return it->second->getCharacterController()->isReadyToBlock();
     }
 }
