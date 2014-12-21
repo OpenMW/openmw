@@ -23,6 +23,33 @@
 
 #include <limits.h>
 
+namespace
+{
+
+    float getFightDistanceBias(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2)
+    {
+        Ogre::Vector3 pos1 (actor1.getRefData().getPosition().pos);
+        Ogre::Vector3 pos2 (actor2.getRefData().getPosition().pos);
+
+        float d = pos1.distance(pos2);
+
+        static const int iFightDistanceBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                    "iFightDistanceBase")->getInt();
+        static const float fFightDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                    "fFightDistanceMultiplier")->getFloat();
+
+        return (iFightDistanceBase - fFightDistanceMultiplier * d);
+    }
+
+    float getFightDispositionBias(float disposition)
+    {
+        static const float fFightDispMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                    "fFightDispMult")->getFloat();
+        return ((50.f - disposition)  * fFightDispMult);
+    }
+
+}
+
 namespace MWMechanics
 {
     void MechanicsManager::buildPlayer()
@@ -983,32 +1010,32 @@ namespace MWMechanics
         if (type == OT_Murder && !victim.isEmpty())
             victim.getClass().getCreatureStats(victim).notifyMurder();
 
-        // Bounty for each type of crime
-        float dispTerm = 0.f, dispTermVictim = 0.f;
+        // Bounty and disposition penalty for each type of crime
+        float disp = 0.f, dispVictim = 0.f;
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
         {
             arg = store.find("iCrimeTresspass")->getInt();
-            dispTerm = dispTermVictim = store.find("iDispTresspass")->getInt();
+            disp = dispVictim = store.find("iDispTresspass")->getInt();
         }
         else if (type == OT_Pickpocket)
         {
             arg = store.find("iCrimePickPocket")->getInt();
-            dispTerm = dispTermVictim = store.find("fDispPickPocketMod")->getFloat();
+            disp = dispVictim = store.find("fDispPickPocketMod")->getFloat();
         }
         else if (type == OT_Assault)
         {
             arg = store.find("iCrimeAttack")->getInt();
-            dispTerm = store.find("fDispAttacking")->getFloat();
-            dispTermVictim = store.find("iDispAttackMod")->getInt();
+            disp = store.find("fDispAttacking")->getFloat();
+            dispVictim = store.find("iDispAttackMod")->getInt();
         }
         else if (type == OT_Murder)
         {
             arg = store.find("iCrimeKilling")->getInt();
-            dispTerm = dispTermVictim = store.find("iDispKilling")->getInt();
+            disp = dispVictim = store.find("iDispKilling")->getInt();
         }
         else if (type == OT_Theft)
         {
-            dispTerm = dispTermVictim = store.find("fDispStealing")->getFloat() * arg;
+            disp = dispVictim = store.find("fDispStealing")->getFloat() * arg;
             arg *= store.find("fCrimeStealing")->getFloat();
             arg = std::max(1, arg); // Minimum bounty of 1, in case items with zero value are stolen
         }
@@ -1057,8 +1084,6 @@ namespace MWMechanics
             if (   *it == player
                 || !it->getClass().isNpc() || it->getClass().getCreatureStats(*it).isDead()) continue;
 
-            int aggression = (*it == victim) ? fightVictim : fight;
-
             if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
                 continue;
 
@@ -1081,30 +1106,41 @@ namespace MWMechanics
             }
             else
             {
-                int dispChange = (*it == victim) ? dispTermVictim : dispTerm;
-                NpcStats& observerStats = it->getClass().getNpcStats(*it);
-                int originalDisposition = observerStats.getBaseDisposition();
-                observerStats.setBaseDisposition(originalDisposition+dispChange);
+                float dispTerm = (*it == victim) ? dispVictim : disp;
 
-                bool aggressive = MWBase::Environment::get().getMechanicsManager()->isAggressive(*it, player, aggression, true);
-                if (aggressive)
+                float alarmTerm = 0.01 * it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase();
+                if (*it != victim)
+                    dispTerm *= alarmTerm;
+
+                float fightTerm = (*it == victim) ? fightVictim : fight;
+                fightTerm += getFightDispositionBias(dispTerm);
+                fightTerm += getFightDistanceBias(*it, player);
+                if (type != OT_Pickpocket) // type check not in the wiki, but this seems to be needed for MW behaviour
+                    fightTerm *= alarmTerm;
+
+                int observerFightRating = it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Fight).getBase();
+                if (observerFightRating + fightTerm > 100)
+                    fightTerm = 100 - observerFightRating;
+                fightTerm = std::max(0.f, fightTerm);
+
+                if (observerFightRating + fightTerm >= 100)
                 {
                     startCombat(*it, player);
 
+                    NpcStats& observerStats = it->getClass().getNpcStats(*it);
                     // Apply aggression value to the base Fight rating, so that the actor can continue fighting
                     // after a Calm spell wears off
-                    int fightBase = it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Fight).getBase();
-                    it->getClass().getCreatureStats(*it).setAiSetting(CreatureStats::AI_Fight, fightBase + aggression);
+                    observerStats.setAiSetting(CreatureStats::AI_Fight, observerFightRating + fightTerm);
+
+                    observerStats.setBaseDisposition(observerStats.getBaseDisposition()+dispTerm);
 
                     // Set the crime ID, which we will use to calm down participants
                     // once the bounty has been paid.
-                    it->getClass().getNpcStats(*it).setCrimeId(id);
+                    observerStats.setCrimeId(id);
 
                     // Mark as Alarmed for dialogue
-                    it->getClass().getCreatureStats(*it).setAlarmed(true);
+                    observerStats.setAlarmed(true);
                 }
-                else
-                    observerStats.setBaseDisposition(originalDisposition);
             }
         }
 
@@ -1318,30 +1354,15 @@ namespace MWMechanics
         mActors.clear();
     }
 
-    bool MechanicsManager::isAggressive(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target, int bias, bool ignoreDistance)
+    bool MechanicsManager::isAggressive(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
     {
-        Ogre::Vector3 pos1 (ptr.getRefData().getPosition().pos);
-        Ogre::Vector3 pos2 (target.getRefData().getPosition().pos);
-
-        float d = 0;
-        if (!ignoreDistance)
-            d = pos1.distance(pos2);
-
-        static int iFightDistanceBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                    "iFightDistanceBase")->getInt();
-        static float fFightDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                    "fFightDistanceMultiplier")->getFloat();
-        static float fFightDispMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                    "fFightDispMult")->getFloat();
-
         int disposition = 50;
         if (ptr.getClass().isNpc())
             disposition = getDerivedDisposition(ptr);
 
         int fight = std::max(0.f, ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified()
-                + (iFightDistanceBase - fFightDistanceMultiplier * d)
-                + ((50 - disposition)  * fFightDispMult))
-                + bias;
+                + getFightDistanceBias(ptr, target)
+                + getFightDispositionBias(disposition));
 
         if (ptr.getClass().isNpc() && target.getClass().isNpc())
         {
