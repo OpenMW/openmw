@@ -1002,6 +1002,9 @@ void Animation::resetActiveGroups()
             break;
         }
     }
+
+    if (mAccumRoot && mNonAccumCtrl)
+        mAccumRoot->setPosition(-mNonAccumCtrl->getTranslation(state->second.mTime)*mAccumulate);
 }
 
 
