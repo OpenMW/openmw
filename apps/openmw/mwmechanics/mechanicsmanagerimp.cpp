@@ -1041,8 +1041,8 @@ namespace MWMechanics
         }
         else if (type == OT_Assault)
         {
-            fight = esmStore.get<ESM::GameSetting>().find("iFightAttack")->getInt();
-            fightVictim = esmStore.get<ESM::GameSetting>().find("iFightAttacking")->getInt();
+            fight = esmStore.get<ESM::GameSetting>().find("iFightAttacking")->getInt();
+            fightVictim = esmStore.get<ESM::GameSetting>().find("iFightAttack")->getInt();
         }
         else if (type == OT_Murder)
             fight = fightVictim = esmStore.get<ESM::GameSetting>().find("iFightKilling")->getInt();
