@@ -325,7 +325,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         mCurrentIdle = idle;
         if(!mCurrentIdle.empty())
             mAnimation->play(mCurrentIdle, Priority_Default, MWRender::Animation::Group_All, false,
-                             1.0f, "start", "stop", 0.0f, ~0ul);
+                             1.0f, "start", "stop", 0.0f, ~0ul, true);
     }
 
     updateIdleStormState();
@@ -1289,7 +1289,7 @@ bool CharacterController::updateWeaponState()
 
     {
         mAnimation->play("torch", Priority_Torch, MWRender::Animation::Group_LeftArm,
-            false, 1.0f, "start", "stop", 0.0f, (~(size_t)0));
+            false, 1.0f, "start", "stop", 0.0f, (~(size_t)0), true);
     }
     else if (mAnimation->isPlaying("torch"))
     {

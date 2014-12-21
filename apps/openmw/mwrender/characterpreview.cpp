@@ -242,7 +242,7 @@ namespace MWRender
         {
             if(!mAnimation->getInfo("torch"))
                 mAnimation->play("torch", 2, MWRender::Animation::Group_LeftArm, false,
-                                 1.0f, "start", "stop", 0.0f, ~0ul);
+                                 1.0f, "start", "stop", 0.0f, ~0ul, true);
         }
         else if(mAnimation->getInfo("torch"))
             mAnimation->disable("torch");

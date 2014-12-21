@@ -613,7 +613,7 @@ void Animation::updatePosition(float oldtime, float newtime, Ogre::Vector3 &posi
     mAccumRoot->setPosition(-off);
 }
 
-bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint)
+bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, bool loopfallback)
 {
     // Look for text keys in reverse. This normally wouldn't matter, but for some reason undeadwolf_2.nif has two
     // separate walkforward keys, and the last one is supposed to be used.
@@ -654,8 +654,16 @@ bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const s
         return false;
 
     state.mStartTime = startkey->first;
-    state.mLoopStartTime = startkey->first;
-    state.mLoopStopTime = stopkey->first;
+    if (loopfallback)
+    {
+        state.mLoopStartTime = startkey->first;
+        state.mLoopStopTime = stopkey->first;
+    }
+    else
+    {
+        state.mLoopStartTime = startkey->first;
+        state.mLoopStopTime = std::numeric_limits<float>::max();
+    }
     state.mStopTime = stopkey->first;
 
     state.mTime = state.mStartTime + ((state.mStopTime - state.mStartTime) * startpoint);
@@ -850,7 +858,7 @@ void Animation::stopLooping(const std::string& groupname)
     }
 }
 
-void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult, const std::string &start, const std::string &stop, float startpoint, size_t loops)
+void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult, const std::string &start, const std::string &stop, float startpoint, size_t loops, bool loopfallback)
 {
     if(!mSkelBase || mAnimSources.empty())
         return;
@@ -886,7 +894,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
     for(;iter != mAnimSources.rend();++iter)
     {
         const NifOgre::TextKeyMap &textkeys = (*iter)->mTextKeys;
-        if(reset(state, textkeys, groupname, start, stop, startpoint))
+        if(reset(state, textkeys, groupname, start, stop, startpoint, loopfallback))
         {
             state.mSource = *iter;
             state.mSpeedMult = speedmult;
