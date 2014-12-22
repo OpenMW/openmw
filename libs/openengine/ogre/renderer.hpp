@@ -37,6 +37,7 @@ namespace OEngine
         {
             bool vsync;
             bool fullscreen;
+            bool borderless;
             int window_x, window_y;
             int screen;
             std::string fsaa;
