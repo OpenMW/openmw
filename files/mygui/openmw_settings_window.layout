@@ -239,6 +239,16 @@
                                 <Property key="Caption" value="VSync"/>
                             </Widget>
                         </Widget>
+                        <Widget type="HBox" skin="" position="182 34 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="BorderlessButton">
+                                <UserString key="SettingCategory" value="Video"/>
+                                <UserString key="SettingName" value="borderless"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 48 16" align="Left Top">
+                                <Property key="Caption" value="Borderless"/>
+                            </Widget>
+                        </Widget>
                         <Widget type="HBox" skin="" position="182 64 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="FPSButton"/>
                             <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 32 16" align="Left Top">

@@ -28,6 +28,7 @@ namespace MWGui
             MyGUI::ListBox* mResolutionList;
             MyGUI::Button* mFullscreenButton;
             MyGUI::Button* mVSyncButton;
+            MyGUI::Button* mBorderlessButton;
             MyGUI::Button* mFPSButton;
             MyGUI::ScrollBar* mFOVSlider;
             MyGUI::ScrollBar* mDifficultySlider;
