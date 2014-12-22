@@ -11,7 +11,6 @@
 #include <errno.h>
 #include <limits.h>
 
-
 #include <pthread.h>
 #include <stdbool.h>
 #include <sys/ptrace.h>
@@ -29,6 +28,7 @@
 #include <signal.h>
 #endif
 
+#define UNUSED(x) (void)(x)
 
 static const char crash_switch[] = "--cc-handle-crash";
 
@@ -160,7 +160,7 @@ static void gdb_info(pid_t pid)
         printf("Executing: %s\n", cmd_buf);
         fflush(stdout);
 
-        system(cmd_buf);
+        int unused = system(cmd_buf); UNUSED(unused);
         /* Clean up */
         remove(respfile);
     }
@@ -406,7 +406,7 @@ int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, co
         snprintf(argv0, sizeof(argv0), "%s", argv[0]);
     else
     {
-        getcwd(argv0, sizeof(argv0));
+        char * unused = getcwd(argv0, sizeof(argv0)); UNUSED(unused);
         retval = strlen(argv0);
         snprintf(argv0+retval, sizeof(argv0)-retval, "/%s", argv[0]);
     }
