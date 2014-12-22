@@ -1025,8 +1025,8 @@ namespace MWMechanics
         else if (type == OT_Assault)
         {
             arg = store.find("iCrimeAttack")->getInt();
-            disp = store.find("fDispAttacking")->getFloat();
-            dispVictim = store.find("iDispAttackMod")->getInt();
+            disp = store.find("iDispAttackMod")->getInt();
+            dispVictim = store.find("fDispAttacking")->getFloat();
         }
         else if (type == OT_Murder)
         {
