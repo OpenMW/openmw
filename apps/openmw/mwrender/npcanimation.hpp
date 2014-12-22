@@ -106,6 +106,7 @@ private:
     void updateNpcBase();
 
     NifOgre::ObjectScenePtr insertBoundedPart(const std::string &model, int group, const std::string &bonename,
+                                              const std::string &bonefilter,
                                           bool enchantedGlow, Ogre::Vector3* glowColor=NULL);
 
     void removeIndividualPart(ESM::PartReferenceType type);

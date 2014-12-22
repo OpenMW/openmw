@@ -160,7 +160,7 @@ static NpcAnimation::PartBoneMap createPartListMap()
 {
     NpcAnimation::PartBoneMap result;
     result.insert(std::make_pair(ESM::PRT_Head, "Head"));
-    result.insert(std::make_pair(ESM::PRT_Hair, "Head"));
+    result.insert(std::make_pair(ESM::PRT_Hair, "Head")); // note it uses "Head" as attach bone, but "Hair" as filter
     result.insert(std::make_pair(ESM::PRT_Neck, "Neck"));
     result.insert(std::make_pair(ESM::PRT_Cuirass, "Chest"));
     result.insert(std::make_pair(ESM::PRT_Groin, "Groin"));
@@ -574,9 +574,9 @@ public:
     }
 };
 
-NifOgre::ObjectScenePtr NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename, bool enchantedGlow, Ogre::Vector3* glowColor)
+NifOgre::ObjectScenePtr NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename, const std::string &bonefilter, bool enchantedGlow, Ogre::Vector3* glowColor)
 {
-    NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
+    NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(mSkelBase, bonename, bonefilter, mInsert, model);
     setRenderProperties(objects, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha, 0,
                         enchantedGlow, glowColor);
 
@@ -690,7 +690,10 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     mPartPriorities[type] = priority;
     try
     {
-        mObjectParts[type] = insertBoundedPart(mesh, group, sPartList.at(type), enchantedGlow, glowColor);
+        const std::string& bonename = sPartList.at(type);
+        // PRT_Hair seems to be the only type that breaks consistency and uses a filter that's different from the attachment bone
+        const std::string bonefilter = (type == ESM::PRT_Hair) ? "hair" : bonename;
+        mObjectParts[type] = insertBoundedPart(mesh, group, bonename, bonefilter, enchantedGlow, glowColor);
     }
     catch (std::exception& e)
     {

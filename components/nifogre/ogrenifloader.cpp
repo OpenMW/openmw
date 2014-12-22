@@ -1383,6 +1383,7 @@ ObjectScenePtr Loader::createObjects(Ogre::SceneNode *parentNode, std::string na
 }
 
 ObjectScenePtr Loader::createObjects(Ogre::Entity *parent, const std::string &bonename,
+                                     const std::string& bonefilter,
                                  Ogre::SceneNode *parentNode,
                                  std::string name, const std::string &group)
 {
@@ -1408,11 +1409,9 @@ ObjectScenePtr Loader::createObjects(Ogre::Entity *parent, const std::string &bo
 
     if(isskinned)
     {
-        // Apparently both are allowed. Sigh.
-        // This could also mean that filters are supposed to work on the actual node
-        // hierarchy, rather than just trishapes, and the 'tri ' should be omitted?
-        std::string filter = "@shape=tri "+bonename;
-        std::string filter2 = "@shape="+bonename;
+        // accepts anything named "filter*" or "tri filter*"
+        std::string filter = "@shape=tri "+bonefilter;
+        std::string filter2 = "@shape="+bonefilter;
         Misc::StringUtils::toLower(filter);
         Misc::StringUtils::toLower(filter2);
         for(size_t i = 0;i < scene->mEntities.size();i++)

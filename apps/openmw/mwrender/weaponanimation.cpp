@@ -55,8 +55,11 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
             return;
         std::string model = ammo->getClass().getModel(*ammo);
 
-        assert(weapon->mSkelBase && "Need a skeleton to attach the arrow to");
-        mAmmunition = NifOgre::Loader::createObjects(weapon->mSkelBase, "ArrowBone", weapon->mSkelBase->getParentSceneNode(), model);
+        if (!weapon->mSkelBase)
+            throw std::runtime_error("Need a skeleton to attach the arrow to");
+
+        const std::string bonename = "ArrowBone";
+        mAmmunition = NifOgre::Loader::createObjects(weapon->mSkelBase, bonename, bonename, weapon->mSkelBase->getParentSceneNode(), model);
         configureAddedObject(mAmmunition, *ammo, MWWorld::InventoryStore::Slot_Ammunition);
     }
 }

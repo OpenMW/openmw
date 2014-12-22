@@ -97,6 +97,7 @@ class Loader
 {
 public:
     static ObjectScenePtr createObjects(Ogre::Entity *parent, const std::string &bonename,
+                                        const std::string& filter,
                                     Ogre::SceneNode *parentNode,
                                     std::string name,
                                     const std::string &group="General");
