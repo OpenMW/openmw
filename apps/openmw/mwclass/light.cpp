@@ -8,6 +8,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
@@ -22,6 +23,7 @@
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
+#include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 namespace
@@ -54,13 +56,12 @@ namespace MWClass
 
     void Light::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        const std::string model = getModel(ptr);
-
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         // Insert even if model is empty, so that the light is added
-        renderingInterface.getObjects().insertModel(ptr, model, false, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
+        MWRender::Actors& actors = renderingInterface.getActors();
+        actors.insertActivator(ptr, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
     }
 
     void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
@@ -78,6 +79,8 @@ namespace MWClass
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0,
                                                                       MWBase::SoundManager::Play_TypeSfx,
                                                                       MWBase::SoundManager::Play_Loop);
+
+        MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
     std::string Light::getModel(const MWWorld::Ptr &ptr) const

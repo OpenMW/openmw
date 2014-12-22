@@ -41,7 +41,7 @@ public:
         , mRootNode(NULL)
     {}
     ~Objects(){}
-    void insertModel(const MWWorld::Ptr& ptr, const std::string &model, bool batch=false, bool addLight=false);
+    void insertModel(const MWWorld::Ptr& ptr, const std::string &model, bool batch=false);
 
     ObjectAnimation* getAnimation(const MWWorld::Ptr &ptr);
 

@@ -346,9 +346,6 @@ class ObjectAnimation : public Animation {
 public:
     ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model);
 
-    void addLight(const ESM::Light *light);
-    void removeParticles();
-
     bool canBatch() const;
     void fillBatch(Ogre::StaticGeometry *sg);
 };
