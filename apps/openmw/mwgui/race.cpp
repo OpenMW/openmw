@@ -345,8 +345,7 @@ namespace MWGui
         const MWWorld::Store<ESM::Race> &races =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>();
 
-
-        int index = 0;
+        std::map<std::string, std::string> items; // ID, name
         MWWorld::Store<ESM::Race>::iterator it = races.begin();
         for (; it != races.end(); ++it)
         {
@@ -354,8 +353,14 @@ namespace MWGui
             if (!playable) // Only display playable races
                 continue;
 
-            mRaceList->addItem(it->mName, it->mId);
-            if (Misc::StringUtils::ciEqual(it->mId, mCurrentRaceId))
+            items[it->mId] = it->mName;
+        }
+
+        int index = 0;
+        for (std::map<std::string, std::string>::const_iterator it = items.begin(); it != items.end(); ++it)
+        {
+            mRaceList->addItem(it->second, it->first);
+            if (Misc::StringUtils::ciEqual(it->first, mCurrentRaceId))
                 mRaceList->setIndexSelected(index);
             ++index;
         }
