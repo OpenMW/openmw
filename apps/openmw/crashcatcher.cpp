@@ -160,7 +160,11 @@ static void gdb_info(pid_t pid)
         printf("Executing: %s\n", cmd_buf);
         fflush(stdout);
 
-        int unused = system(cmd_buf); UNUSED(unused);
+        {   /* another special exception for "ignoring return value..." */
+            int unused;
+            unused = system(cmd_buf);
+            UNUSED(unused);
+        }
         /* Clean up */
         remove(respfile);
     }
@@ -406,7 +410,13 @@ int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, co
         snprintf(argv0, sizeof(argv0), "%s", argv[0]);
     else
     {
-        char * unused = getcwd(argv0, sizeof(argv0)); UNUSED(unused);
+        {
+            /* we don't want to disable "ignoring return value" warnings, so we make
+             * a special exception here. */
+            char * unused;
+            unused = getcwd(argv0, sizeof(argv0));
+            UNUSED(unused);
+        }
         retval = strlen(argv0);
         snprintf(argv0+retval, sizeof(argv0)-retval, "/%s", argv[0]);
     }
