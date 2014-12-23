@@ -64,28 +64,16 @@ void ContentSelectorView::ContentSelector::buildAddonView()
 void ContentSelectorView::ContentSelector::setProfileContent(const QStringList &fileList)
 {
     clearCheckStates();
-    bool foundGamefile = false;
 
     foreach (const QString &filepath, fileList)
     {
-        if (!foundGamefile)
+        const ContentSelectorModel::EsmFile *file = mContentModel->item(filepath);
+        if (file && file->isGameFile())
         {
-            const ContentSelectorModel::EsmFile *file = mContentModel->item(filepath);
-
-            foundGamefile = (file->isGameFile());
-
-            if (foundGamefile)
-            {
-                setGameFile (filepath);
-                break;
-            }
+            setGameFile (filepath);
+            break;
         }
     }
-
-/*        if (!foundGameFile)
-        {
-            //throw gamefile error here.
-        }*/
 
     setCheckStates (fileList);
 }
