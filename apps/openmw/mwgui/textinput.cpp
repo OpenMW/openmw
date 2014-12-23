@@ -61,13 +61,7 @@ namespace MWGui
 
     void TextInputDialog::onTextAccepted(MyGUI::Edit* _sender)
     {
-        if (mTextEdit->getCaption() == "")
-        {
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage37}");
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget (mTextEdit);
-        }
-        else
-            eventDone(this);
+        onOkClicked(_sender);
     }
 
 }

@@ -20,6 +20,12 @@ namespace
         else
             return index;
     }
+
+    bool sortRaces(const std::pair<std::string, std::string>& left, const std::pair<std::string, std::string>& right)
+    {
+        return left.second.compare(right.second) < 0;
+    }
+
 }
 
 namespace MWGui
@@ -122,7 +128,7 @@ namespace MWGui
 
         mPreview.reset(new MWRender::RaceSelectionPreview());
         mPreview->setup();
-        mPreview->update (0);
+        mPreview->update (mCurrentAngle);
 
         const ESM::NPC proto = mPreview->getPrototype();
         setRaceId(proto.mRace);
@@ -143,8 +149,11 @@ namespace MWGui
         mPreviewImage->setImageTexture (textureName);
 
         mPreviewDirty = true;
-    }
 
+        size_t initialPos = mHeadRotate->getScrollRange()/2+mHeadRotate->getScrollRange()/10;
+        mHeadRotate->setScrollPosition(initialPos);
+        onHeadRotate(mHeadRotate, initialPos);
+    }
 
     void RaceDialog::setRaceId(const std::string &raceId)
     {
@@ -156,8 +165,6 @@ namespace MWGui
             if (Misc::StringUtils::ciEqual(*mRaceList->getItemDataAt<std::string>(i), raceId))
             {
                 mRaceList->setIndexSelected(i);
-                MyGUI::Button* okButton;
-                getWidget(okButton, "OKButton");
                 break;
             }
         }
@@ -191,10 +198,9 @@ namespace MWGui
     void RaceDialog::onHeadRotate(MyGUI::ScrollBar* scroll, size_t _position)
     {
         float angle = (float(_position) / (scroll->getScrollRange()-1) - 0.5) * 3.14 * 2;
-        float diff = angle - mCurrentAngle;
-        mPreview->update (diff);
+        mPreview->update (angle);
         mPreviewDirty = true;
-        mCurrentAngle += diff;
+        mCurrentAngle = angle;
     }
 
     void RaceDialog::onSelectPreviousGender(MyGUI::Widget*)
@@ -242,8 +248,6 @@ namespace MWGui
         if (_index == MyGUI::ITEM_NONE)
             return;
 
-        MyGUI::Button* okButton;
-        getWidget(okButton, "OKButton");
         const std::string *raceId = mRaceList->getItemDataAt<std::string>(_index);
         if (Misc::StringUtils::ciEqual(mCurrentRaceId, *raceId))
             return;
@@ -345,7 +349,7 @@ namespace MWGui
         const MWWorld::Store<ESM::Race> &races =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>();
 
-        std::map<std::string, std::string> items; // ID, name
+        std::vector<std::pair<std::string, std::string> > items; // ID, name
         MWWorld::Store<ESM::Race>::iterator it = races.begin();
         for (; it != races.end(); ++it)
         {
@@ -353,11 +357,12 @@ namespace MWGui
             if (!playable) // Only display playable races
                 continue;
 
-            items[it->mId] = it->mName;
+            items.push_back(std::make_pair(it->mId, it->mName));
         }
+        std::sort(items.begin(), items.end(), sortRaces);
 
         int index = 0;
-        for (std::map<std::string, std::string>::const_iterator it = items.begin(); it != items.end(); ++it)
+        for (std::vector<std::pair<std::string, std::string> >::const_iterator it = items.begin(); it != items.end(); ++it)
         {
             mRaceList->addItem(it->second, it->first);
             if (Misc::StringUtils::ciEqual(it->first, mCurrentRaceId))
