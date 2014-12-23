@@ -9,6 +9,16 @@
 #undef min
 #undef max
 
+namespace
+{
+
+    bool sortClasses(const std::pair<std::string, std::string>& left, const std::pair<std::string, std::string>& right)
+    {
+        return left.second.compare(right.second) < 0;
+    }
+
+}
+
 namespace MWGui
 {
 
@@ -129,8 +139,6 @@ namespace MWGui
             if (Misc::StringUtils::ciEqual(*mClassList->getItemDataAt<std::string>(i), classId))
             {
                 mClassList->setIndexSelected(i);
-                MyGUI::Button* okButton;
-                getWidget(okButton, "OKButton");
                 break;
             }
         }
@@ -165,9 +173,6 @@ namespace MWGui
         if (_index == MyGUI::ITEM_NONE)
             return;
 
-        MyGUI::Button* okButton;
-        getWidget(okButton, "OKButton");
-
         const std::string *classId = mClassList->getItemDataAt<std::string>(_index);
         if (Misc::StringUtils::ciEqual(mCurrentClassId, *classId))
             return;
@@ -184,7 +189,7 @@ namespace MWGui
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-        int index = 0;
+        std::vector<std::pair<std::string, std::string> > items; // class id, class name
         MWWorld::Store<ESM::Class>::iterator it = store.get<ESM::Class>().begin();
         for (; it != store.get<ESM::Class>().end(); ++it)
         {
@@ -192,8 +197,15 @@ namespace MWGui
             if (!playable) // Only display playable classes
                 continue;
 
-            const std::string &id = it->mId;
-            mClassList->addItem(it->mName, id);
+            items.push_back(std::make_pair(it->mId, it->mName));
+        }
+        std::sort(items.begin(), items.end(), sortClasses);
+
+        int index = 0;
+        for (std::vector<std::pair<std::string, std::string> >::const_iterator it = items.begin(); it != items.end(); ++it)
+        {
+            const std::string &id = it->first;
+            mClassList->addItem(it->second, id);
             if (mCurrentClassId.empty())
             {
                 mCurrentClassId = id;
