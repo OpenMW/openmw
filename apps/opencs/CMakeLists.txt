@@ -11,7 +11,7 @@ opencs_units (model/doc
     )
 
 opencs_units_noqt (model/doc
-    stage savingstate savingstages blacklist
+    stage savingstate savingstages blacklist messages
     )
 
 opencs_hdrs_noqt (model/doc
@@ -68,7 +68,7 @@ opencs_units (view/world
 
 opencs_units_noqt (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
-    scripthighlighter idvalidator dialoguecreator physicssystem physicsmanager
+    scripthighlighter idvalidator dialoguecreator physicssystem
     )
 
 opencs_units (view/widget
@@ -92,7 +92,7 @@ opencs_hdrs_noqt (view/render
 
 
 opencs_units (view/tools
-    reportsubview
+    reportsubview reporttable
     )
 
 opencs_units_noqt (view/tools

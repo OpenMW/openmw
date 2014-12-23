@@ -67,12 +67,14 @@ material openmw_objects_base
         depth_check $depth_check
         transparent_sorting $transparent_sorting
         polygon_mode $polygon_mode
+        cull_hardware $cullmode
 
         texture_unit diffuseMap
         {
             direct_texture $diffuseMap
             create_in_ffp $use_diffuse_map
             tex_coord_set $diffuseMapUVSet
+            tex_address_mode $diffuseMapClampMode
         }
 
         texture_unit normalMap
@@ -89,6 +91,7 @@ material openmw_objects_base
             alpha_op_ex modulate src_current src_texture
             direct_texture $darkMap
             tex_coord_set $darkMapUVSet
+            tex_address_mode $darkMapClampMode
         }
 
         texture_unit detailMap
@@ -97,6 +100,7 @@ material openmw_objects_base
             colour_op_ex modulate_x2 src_current src_texture
             direct_texture $detailMap
             tex_coord_set $detailMapUVSet
+            tex_address_mode $detailMapClampMode
         }
 
         texture_unit emissiveMap
@@ -105,6 +109,7 @@ material openmw_objects_base
             colour_op add
             direct_texture $emissiveMap
             tex_coord_set $emissiveMapUVSet
+            tex_address_mode $emissiveMapClampMode
         }
 
         texture_unit envMap

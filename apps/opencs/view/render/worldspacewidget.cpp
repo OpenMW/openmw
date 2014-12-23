@@ -16,14 +16,13 @@
 #include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolrun.hpp"
 
-#include "../world/physicsmanager.hpp"
 #include "../world/physicssystem.hpp"
 
 #include "elements.hpp"
 #include "editmode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-: SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0), mPhysics(0), mMouse(0),
+: SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>()), mMouse(0),
   mInteractionMask (0)
 {
     setAcceptDrops(true);
@@ -56,9 +55,7 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     connect (debugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
 
-    // associate WorldSpaceWidgets (and their SceneManagers) with Documents
-    // then create physics if there is a new document
-    mPhysics = CSVWorld::PhysicsManager::instance()->addSceneWidget(document, this);
+    mPhysics = document.getPhysics(); // create physics if one doesn't exist
     mPhysics->addSceneManager(getSceneManager(), this);
     mMouse = new MouseState(this);
 }
@@ -67,7 +64,6 @@ CSVRender::WorldspaceWidget::~WorldspaceWidget ()
 {
     delete mMouse;
     mPhysics->removeSceneManager(getSceneManager());
-    CSVWorld::PhysicsManager::instance()->removeSceneWidget(this);
 }
 
 void CSVRender::WorldspaceWidget::selectNavigationMode (const std::string& mode)
@@ -263,10 +259,8 @@ void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
     tool->addButton (Element_Reference, "References");
-    tool->addButton (Element_Terrain, "Terrain");
     tool->addButton (Element_Water, "Water");
     tool->addButton (Element_Pathgrid, "Pathgrid");
-    tool->addButton (Element_Fog, "Fog");
 }
 
 void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool)
@@ -368,12 +362,6 @@ void CSVRender::WorldspaceWidget::elementSelectionChanged()
 
 void CSVRender::WorldspaceWidget::updateOverlay()
 {
-}
-
-CSVWorld::PhysicsSystem *CSVRender::WorldspaceWidget::getPhysics()
-{
-    assert(mPhysics);
-    return mPhysics;
 }
 
 void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)

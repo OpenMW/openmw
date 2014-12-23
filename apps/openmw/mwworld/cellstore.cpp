@@ -156,7 +156,7 @@ namespace MWWorld
             LiveRef liveCellRef (ref, ptr);
 
             if (deleted)
-                liveCellRef.mData.setCount (0);
+                liveCellRef.mData.setDeleted(true);
 
             if (iter != mList.end())
                 *iter = liveCellRef;
@@ -413,7 +413,7 @@ namespace MWWorld
 
             // TODO: the pathgrid graph only needs to be loaded for active cells, so move this somewhere else.
             // In a simple test, loading the graph for all cells in MW + expansions took 200 ms
-            mPathgridGraph.load(mCell);
+            mPathgridGraph.load(this);
         }
     }
 

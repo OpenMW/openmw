@@ -272,7 +272,7 @@ namespace CSMWorld
         {
             ESXRecordT record2 = record.get();
 
-            record2.mData.mUseValue[mIndex] = data.toInt();
+            record2.mData.mUseValue[mIndex] = data.toFloat();
 
             record.setModified (record2);
         }

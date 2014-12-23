@@ -314,7 +314,7 @@ namespace Compiler
 
     bool Scanner::scanName (char c, std::string& name)
     {
-        bool first = false;
+        bool first = true;
         bool error = false;
 
         name.clear();
@@ -391,6 +391,10 @@ namespace Compiler
         {
             if (get (c))
             {
+                /// \todo hack to allow a space in comparison operators (add option to disable)
+                if (c==' ')
+                    get (c);
+
                 if (c=='=')
                     special = S_cmpEQ;
                 else
@@ -398,7 +402,7 @@ namespace Compiler
                     special = S_cmpEQ;
                     putback (c);
 //                    return false;
-// Allow = as synonym for ==. \todo optionally disable for post-1.0 scripting improvements.
+/// Allow = as synonym for ==. \todo optionally disable for post-1.0 scripting improvements.
                 }
             }
             else
@@ -411,6 +415,10 @@ namespace Compiler
         {
             if (get (c))
             {
+                /// \todo hack to allow a space in comparison operators (add option to disable)
+                if (c==' ' && !get (c))
+                    return false;
+
                 if (c=='=')
                     special = S_cmpNE;
                 else
@@ -437,10 +445,40 @@ namespace Compiler
             else
                 special = S_minus;
         }
+        else if (static_cast<unsigned char> (c)==0xe2)
+        {
+            /// Workaround for some translator who apparently can't keep his minus in order
+            /// \todo disable for later script formats
+            if (get (c) && static_cast<unsigned char> (c)==0x80 &&
+                get (c) && static_cast<unsigned char> (c)==0x93)
+            {
+                if (get (c))
+                {
+                    if (c=='>')
+                        special = S_ref;
+                    else
+                    {
+                        putback (c);
+                        special = S_minus;
+                    }
+                }
+                else
+                    special = S_minus;
+            }
+            else
+            {
+                mErrorHandler.error ("Invalid character", mLoc);
+                return false;
+            }
+        }
         else if (c=='<')
         {
             if (get (c))
             {
+                /// \todo hack to allow a space in comparison operators (add option to disable)
+                if (c==' ')
+                    get (c);
+
                 if (c=='=')
                 {
                     special = S_cmpLE;
@@ -461,6 +499,10 @@ namespace Compiler
         {
             if (get (c))
             {
+                /// \todo hack to allow a space in comparison operators (add option to disable)
+                if (c==' ')
+                    get (c);
+
                 if (c=='=')
                 {
                     special = S_cmpGE;
@@ -503,7 +545,7 @@ namespace Compiler
     {
         return std::isalpha (c) || std::isdigit (c) || c=='_' ||
             /// \todo disable this when doing more stricter compiling
-            c=='`' ||
+            c=='`' || c=='\'' ||
             /// \todo disable this when doing more stricter compiling. Also, find out who is
             /// responsible for allowing it in the first place and meet up with that person in
             /// a dark alley.
@@ -512,8 +554,7 @@ namespace Compiler
 
     bool Scanner::isWhitespace (char c)
     {
-        return c==' ' || c=='\t'
-            || c=='['; ///< \todo disable this when doing more strict compiling
+        return c==' ' || c=='\t';
     }
 
     // constructor

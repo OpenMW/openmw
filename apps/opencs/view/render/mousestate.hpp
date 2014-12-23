@@ -2,6 +2,7 @@
 #define OPENCS_VIEW_MOUSESTATE_H
 
 #include <map>
+#include <boost/shared_ptr.hpp>
 #include <QPoint>
 #include <OgreVector3.h>
 
@@ -43,7 +44,7 @@ namespace CSVRender
             MouseStates mMouseState;
 
             WorldspaceWidget *mParent;
-            CSVWorld::PhysicsSystem *mPhysics; // local copy
+            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
             Ogre::SceneManager *mSceneManager; // local copy
 
             QPoint mOldPos;

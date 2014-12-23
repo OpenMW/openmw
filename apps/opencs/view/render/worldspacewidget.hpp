@@ -1,6 +1,8 @@
 #ifndef OPENCS_VIEW_WORLDSPACEWIDGET_H
 #define OPENCS_VIEW_WORLDSPACEWIDGET_H
 
+#include <boost/shared_ptr.hpp>
+
 #include "scenewidget.hpp"
 #include "mousestate.hpp"
 
@@ -40,7 +42,7 @@ namespace CSVRender
             CSVWidget::SceneToolToggle2 *mSceneElements;
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
-            CSVWorld::PhysicsSystem *mPhysics;
+            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
             MouseState *mMouse;
             unsigned int mInteractionMask;
 
@@ -114,8 +116,6 @@ namespace CSVRender
             CSMDoc::Document& getDocument();
 
             virtual void updateOverlay();
-
-            CSVWorld::PhysicsSystem *getPhysics();
 
             virtual void mouseMoveEvent (QMouseEvent *event);
             virtual void mousePressEvent (QMouseEvent *event);

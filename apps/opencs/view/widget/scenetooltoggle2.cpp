@@ -72,7 +72,7 @@ void CSVWidget::SceneToolToggle2::showPanel (const QPoint& position)
 }
 
 void CSVWidget::SceneToolToggle2::addButton (unsigned int id,
-    const QString& name, const QString& tooltip)
+    const QString& name, const QString& tooltip, bool disabled)
 {
     std::ostringstream stream;
     stream << mSingleIcon << id;
@@ -83,6 +83,9 @@ void CSVWidget::SceneToolToggle2::addButton (unsigned int id,
     button->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
     button->setIconSize (QSize (mIconSize, mIconSize));
     button->setFixedSize (mButtonSize, mButtonSize);
+
+    if (disabled)
+        button->setDisabled (true);
 
     mLayout->addWidget (button);
 
@@ -95,7 +98,7 @@ void CSVWidget::SceneToolToggle2::addButton (unsigned int id,
 
     connect (button, SIGNAL (clicked()), this, SLOT (selected()));
 
-    if (mButtons.size()==1)
+    if (mButtons.size()==1 && !disabled)
         mFirst = button;
 }
 

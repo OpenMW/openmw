@@ -63,6 +63,8 @@ void Dialogue::readInfo(ESMReader &esm, bool merge)
     std::map<std::string, ESM::Dialogue::InfoContainer::iterator>::iterator lookup;
 
     lookup = mLookup.find(id);
+
+    ESM::DialInfo info;
     if (lookup != mLookup.end())
     {
         it = lookup->second;
@@ -70,13 +72,17 @@ void Dialogue::readInfo(ESMReader &esm, bool merge)
         // Merge with existing record. Only the subrecords that are present in
         // the new record will be overwritten.
         it->load(esm);
-        return;
-    }
+        info = *it;
 
-    // New record
-    ESM::DialInfo info;
-    info.mId = id;
-    info.load(esm);
+        // Since the record merging may have changed the next/prev linked list connection, we need to re-insert the record
+        mInfo.erase(it);
+        mLookup.erase(lookup);
+    }
+    else
+    {
+        info.mId = id;
+        info.load(esm);
+    }
 
     if (info.mNext.empty())
     {

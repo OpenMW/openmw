@@ -9,6 +9,7 @@
 #include "../mwworld/actionequip.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadmgef.hpp>
@@ -166,6 +167,9 @@ namespace MWMechanics
     {
         const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
+        if (MWMechanics::getSpellSuccessChance(spell, actor) == 0)
+            return 0.f;
+
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 0.f;
 
@@ -197,12 +201,16 @@ namespace MWMechanics
             return 0.f;
 
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(ptr.getClass().getEnchantment(ptr));
+
         if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
         {
             return rateEffects(enchantment->mEffects, actor, target);
         }
         else
+        {
+            //if (!ptr.getClass().canBeEquipped(ptr, actor))
             return 0.f;
+        }
     }
 
     float rateEffect(const ESM::ENAMstruct &effect, const MWWorld::Ptr &actor, const MWWorld::Ptr &target)
@@ -450,6 +458,11 @@ namespace MWMechanics
         float bestActionRating = 0.f;
         // Default to hand-to-hand combat
         boost::shared_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
+        if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
+        {
+            bestAction->prepare(actor);
+            return bestAction;
+        }
 
         if (actor.getClass().hasInventoryStore(actor))
         {

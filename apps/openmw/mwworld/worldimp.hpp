@@ -104,11 +104,12 @@ namespace MWWorld
 
             void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);
 
-            bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
-            ///< @return true if the active cell (cell player is in) changed
+            Ptr moveObjectImp (const Ptr& ptr, float x, float y, float z);
+            ///< @return an updated Ptr in case the Ptr's cell changes
 
             Ptr copyObjectToCell(const Ptr &ptr, CellStore* cell, ESM::Position pos, bool adjustPos=true);
 
+            void updateSoundListener();
             void updateWindowManager ();
             void performUpdateSceneQueries ();
             void getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer=true);
@@ -338,8 +339,10 @@ namespace MWWorld
             virtual std::pair<MWWorld::Ptr,Ogre::Vector3> getHitContact(const MWWorld::Ptr &ptr, float distance);
 
             virtual void deleteObject (const Ptr& ptr);
+            virtual void undeleteObject (const Ptr& ptr);
 
-            virtual void moveObject (const Ptr& ptr, float x, float y, float z);
+            virtual MWWorld::Ptr moveObject (const Ptr& ptr, float x, float y, float z);
+            ///< @return an updated Ptr in case the Ptr's cell changes
             virtual void moveObject (const Ptr& ptr, CellStore* newCell, float x, float y, float z);
 
             virtual void scaleObject (const Ptr& ptr, float scale);
@@ -417,6 +420,14 @@ namespace MWWorld
             ///< Create a new record (of type book) in the ESM store.
             /// \return pointer to created record
 
+            virtual const ESM::CreatureLevList *createOverrideRecord (const ESM::CreatureLevList& record);
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
+            virtual const ESM::ItemLevList *createOverrideRecord (const ESM::ItemLevList& record);
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
             virtual void update (float duration, bool paused);
 
             virtual MWWorld::Ptr placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount);
@@ -447,6 +458,10 @@ namespace MWWorld
 
             virtual void togglePOV() {
                 mRendering->togglePOV();
+            }
+
+            virtual bool isFirstPerson() const {
+                return mRendering->getCamera()->isFirstPerson();
             }
 
             virtual void togglePreviewMode(bool enable) {

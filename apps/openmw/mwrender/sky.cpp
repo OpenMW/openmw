@@ -34,6 +34,41 @@
 using namespace MWRender;
 using namespace Ogre;
 
+namespace
+{
+
+void setAlpha (NifOgre::ObjectScenePtr scene, Ogre::MovableObject* movable, float alpha)
+{
+    Ogre::MaterialPtr mat = scene->mMaterialControllerMgr.getWritableMaterial(movable);
+    Ogre::Material::TechniqueIterator techs = mat->getTechniqueIterator();
+    while(techs.hasMoreElements())
+    {
+        Ogre::Technique *tech = techs.getNext();
+        Ogre::Technique::PassIterator passes = tech->getPassIterator();
+        while(passes.hasMoreElements())
+        {
+            Ogre::Pass *pass = passes.getNext();
+            Ogre::ColourValue diffuse = pass->getDiffuse();
+            diffuse.a = alpha;
+            pass->setDiffuse(diffuse);
+        }
+    }
+
+}
+
+void setAlpha (NifOgre::ObjectScenePtr scene, float alpha)
+{
+    for(size_t i = 0; i < scene->mParticles.size(); ++i)
+        setAlpha(scene, scene->mParticles[i], alpha);
+    for(size_t i = 0; i < scene->mEntities.size(); ++i)
+    {
+        if (scene->mEntities[i] != scene->mSkelBase)
+            setAlpha(scene, scene->mEntities[i], alpha);
+    }
+}
+
+}
+
 BillboardObject::BillboardObject( const String& textureName,
                     const float initialSize,
                     const Vector3& position,
@@ -660,6 +695,11 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
     mSun->setVisibility(weather.mGlareView * strength);
 
     mAtmosphereNight->setVisible(weather.mNight && mEnabled);
+
+    if (mParticle.get())
+        setAlpha(mParticle, weather.mEffectFade);
+    for (std::map<Ogre::SceneNode*, NifOgre::ObjectScenePtr>::iterator it = mRainModels.begin(); it != mRainModels.end(); ++it)
+        setAlpha(it->second, weather.mEffectFade);
 }
 
 void SkyManager::setGlare(const float glare)

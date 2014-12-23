@@ -28,7 +28,11 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, const Compi
         << ", line " << loc.mLine << ", column " << loc.mColumn
         << " (" << loc.mLiteral << "): " << message;
 
-    mMessages->push_back (std::make_pair (id, stream.str()));
+    std::ostringstream hintStream;
+
+    hintStream << "l:" << loc.mLine << " " << loc.mColumn;
+
+    mMessages->add (id, stream.str(), hintStream.str());
 }
 
 void CSMTools::ScriptCheckStage::report (const std::string& message, Type type)
@@ -58,7 +62,7 @@ int CSMTools::ScriptCheckStage::setup()
     return mDocument.getData().getScripts().getSize();
 }
 
-void CSMTools::ScriptCheckStage::perform (int stage, Messages& messages)
+void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     mId = mDocument.getData().getScripts().getId (stage);
 

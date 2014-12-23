@@ -49,9 +49,7 @@ struct KeyMapT {
         if(count == 0 && !force)
             return;
 
-        //If we aren't forcing things, make sure that read clears any previous keys
-        if(!force)
-            mKeys.clear();
+        mKeys.clear();
 
         mInterpolationType = nif->getUInt();
 
@@ -88,7 +86,7 @@ struct KeyMapT {
         //XYZ keys aren't actually read here.
         //data.hpp sees that the last type read was sXYZInterpolation and:
         //    Eats a floating point number, then
-        //    Re-runs the read function 3 more times, with force enabled so that the previous values aren't cleared.
+        //    Re-runs the read function 3 more times.
         //        When it does that it's reading in a bunch of sLinearInterpolation keys, not sXYZInterpolation.
         else if(mInterpolationType == sXYZInterpolation)
         {

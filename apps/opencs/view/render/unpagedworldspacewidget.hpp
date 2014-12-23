@@ -60,6 +60,10 @@ namespace CSVRender
 
             virtual std::string getStartupInstruction();
 
+        protected:
+
+            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
+
         private slots:
 
             void cellDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);

@@ -42,6 +42,15 @@
 namespace
 {
 
+// Wraps a value to (-PI, PI]
+void wrap(Ogre::Radian& rad)
+{
+    if (rad.valueRadians()>0)
+        rad = Ogre::Radian(std::fmod(rad.valueRadians()+Ogre::Math::PI, 2.0f*Ogre::Math::PI)-Ogre::Math::PI);
+    else
+        rad = Ogre::Radian(std::fmod(rad.valueRadians()-Ogre::Math::PI, 2.0f*Ogre::Math::PI)+Ogre::Math::PI);
+}
+
 std::string getBestAttack (const ESM::Weapon* weapon)
 {
     int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
@@ -90,6 +99,35 @@ MWMechanics::CharacterState runStateToWalkState (MWMechanics::CharacterState sta
             break;
     }
     return ret;
+}
+
+float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
+{
+    MWBase::World *world = MWBase::Environment::get().getWorld();
+    const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
+
+    const float fallDistanceMin = store.find("fFallDamageDistanceMin")->getFloat();
+
+    if (fallHeight >= fallDistanceMin)
+    {
+        const float acrobaticsSkill = ptr.getClass().getSkill(ptr, ESM::Skill::Acrobatics);
+        const float jumpSpellBonus = ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Jump).getMagnitude();
+        const float fallAcroBase = store.find("fFallAcroBase")->getFloat();
+        const float fallAcroMult = store.find("fFallAcroMult")->getFloat();
+        const float fallDistanceBase = store.find("fFallDistanceBase")->getFloat();
+        const float fallDistanceMult = store.find("fFallDistanceMult")->getFloat();
+
+        float x = fallHeight - fallDistanceMin;
+        x -= (1.5 * acrobaticsSkill) + jumpSpellBonus;
+        x = std::max(0.0f, x);
+
+        float a = fallAcroBase + fallAcroMult * (100 - acrobaticsSkill);
+        x = fallDistanceBase + fallDistanceMult * x;
+        x *= a;
+
+        return x;
+    }
+    return 0.f;
 }
 
 }
@@ -619,7 +657,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
                 mAnimation->showWeapons(true);
                 mAnimation->setWeaponGroup(mCurrentWeapon);
             }
-            mAnimation->showCarriedLeft(mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand);
+
+            mAnimation->showCarriedLeft(updateCarriedLeftVisible(mWeaponType));
         }
 
         if(!cls.getCreatureStats(mPtr).isDead())
@@ -807,6 +846,25 @@ bool CharacterController::updateCreatureState()
     return false;
 }
 
+bool CharacterController::updateCarriedLeftVisible(WeaponType weaptype) const
+{
+    // Shields/torches shouldn't be visible during any operation involving two hands
+    // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
+    // but they are also present in weapon drawing animation.
+    switch (weaptype)
+    {
+    case WeapType_Spell:
+    case WeapType_BowAndArrow:
+    case WeapType_Crossbow:
+    case WeapType_HandToHand:
+    case WeapType_TwoHand:
+    case WeapType_TwoWide:
+        return false;
+    default:
+        return true;
+    }
+}
+
 bool CharacterController::updateWeaponState()
 {
     const MWWorld::Class &cls = mPtr.getClass();
@@ -821,10 +879,7 @@ bool CharacterController::updateWeaponState()
     {
         forcestateupdate = true;
 
-        // Shields/torches shouldn't be visible during spellcasting or hand-to-hand
-        // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
-        // but they are also present in weapon drawing animation.
-        mAnimation->showCarriedLeft(weaptype != WeapType_Spell && weaptype != WeapType_HandToHand);
+        mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaptype));
 
         std::string weapgroup;
         if(weaptype == WeapType_None)
@@ -1072,7 +1127,8 @@ bool CharacterController::updateWeaponState()
         }
         else if (mHitState == CharState_KnockDown)
         {
-            mUpperBodyState = UpperCharState_WeapEquiped;
+            if (mUpperBodyState > UpperCharState_WeapEquiped)
+                mUpperBodyState = UpperCharState_WeapEquiped;
             mAnimation->disable(mCurrentWeapon);
         }
     }
@@ -1249,7 +1305,7 @@ void CharacterController::update(float duration)
     const MWWorld::Class &cls = mPtr.getClass();
     Ogre::Vector3 movement(0.0f);
 
-    updateVisibility();
+    updateMagicEffects();
 
     if(!cls.isActor())
     {
@@ -1414,29 +1470,32 @@ void CharacterController::update(float duration)
         {
             // Started a jump.
             float z = cls.getJump(mPtr);
-            if(vec.x == 0 && vec.y == 0)
-                vec = Ogre::Vector3(0.0f, 0.0f, z);
-            else
+            if (z > 0)
             {
-                Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
-                vec = Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
+                if(vec.x == 0 && vec.y == 0)
+                    vec = Ogre::Vector3(0.0f, 0.0f, z);
+                else
+                {
+                    Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
+                    vec = Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
+                }
+
+                // advance acrobatics
+                if (mPtr.getRefData().getHandle() == "player")
+                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
+
+                // decrease fatigue
+                const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+                const float fatigueJumpBase = gmst.find("fFatigueJumpBase")->getFloat();
+                const float fatigueJumpMult = gmst.find("fFatigueJumpMult")->getFloat();
+                float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
+                if (normalizedEncumbrance > 1)
+                    normalizedEncumbrance = 1;
+                const int fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
+                DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
+                fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
+                cls.getCreatureStats(mPtr).setFatigue(fatigue);
             }
-
-            // advance acrobatics
-            if (mPtr.getRefData().getHandle() == "player")
-                cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
-
-            // decrease fatigue
-            const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
-            const float fatigueJumpBase = gmst.find("fFatigueJumpBase")->getFloat();
-            const float fatigueJumpMult = gmst.find("fFatigueJumpMult")->getFloat();
-            float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
-            if (normalizedEncumbrance > 1)
-                normalizedEncumbrance = 1;
-            const int fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
-            DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
-            fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
-            cls.getCreatureStats(mPtr).setFatigue(fatigue);
         }
         else if(mJumpState == JumpState_InAir)
         {
@@ -1445,7 +1504,7 @@ void CharacterController::update(float duration)
             vec.z = 0.0f;
 
             float height = cls.getCreatureStats(mPtr).land();
-            float healthLost = cls.getFallDamage(mPtr, height);
+            float healthLost = getFallDamage(mPtr, height);
             if (healthLost > 0.0f)
             {
                 const float fatigueTerm = cls.getCreatureStats(mPtr).getFatigueTerm();
@@ -1577,6 +1636,8 @@ void CharacterController::update(float duration)
         cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = 0;
         // Can't reset jump state (mPosition[2]) here; we don't know for sure whether the PhysicSystem will actually handle it in this frame
         // due to the fixed minimum timestep used for the physics update. It will be reset in PhysicSystem::move once the jump is handled.
+
+        updateHeadTracking(duration);
     }
     else if(cls.getCreatureStats(mPtr).isDead())
     {
@@ -1645,6 +1706,8 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
         }
         else if(mode == 0)
         {
+            if (!mAnimQueue.empty())
+                mAnimation->stopLooping(mAnimQueue.front().first);
             mAnimQueue.resize(1);
             mAnimQueue.push_back(std::make_pair(groupname, count-1));
         }
@@ -1742,7 +1805,7 @@ void CharacterController::updateContinuousVfx()
     }
 }
 
-void CharacterController::updateVisibility()
+void CharacterController::updateMagicEffects()
 {
     if (!mPtr.getClass().isActor())
         return;
@@ -1759,8 +1822,10 @@ void CharacterController::updateVisibility()
     {
         alpha *= std::max(0.2f, (100.f - chameleon)/100.f);
     }
-
     mAnimation->setAlpha(alpha);
+
+    bool vampire = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0.0f;
+    mAnimation->setVampire(vampire);
 
     float light = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Light).getMagnitude();
     mAnimation->setLightEffect(light);
@@ -1779,6 +1844,67 @@ void CharacterController::determineAttackType()
         else
             mAttackType = "chop";
     }
+}
+
+bool CharacterController::isReadyToBlock() const
+{
+    return updateCarriedLeftVisible(mWeaponType);
+}
+
+bool CharacterController::isKnockedOut() const
+{
+    return mHitState == CharState_KnockOut;
+}
+
+void CharacterController::setHeadTrackTarget(const MWWorld::Ptr &target)
+{
+    mHeadTrackTarget = target;
+}
+
+void CharacterController::updateHeadTracking(float duration)
+{
+    Ogre::Node* head = mAnimation->getNode("Bip01 Head");
+    if (!head)
+        return;
+    Ogre::Radian zAngle (0.f);
+    Ogre::Radian xAngle (0.f);
+    if (!mHeadTrackTarget.isEmpty())
+    {
+        Ogre::Vector3 headPos = mPtr.getRefData().getBaseNode()->convertLocalToWorldPosition(head->_getDerivedPosition());
+        Ogre::Vector3 targetPos (mHeadTrackTarget.getRefData().getPosition().pos);
+        if (MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mHeadTrackTarget))
+        {
+            Ogre::Node* targetHead = anim->getNode("Head");
+            if (!targetHead)
+                targetHead = anim->getNode("Bip01 Head");
+            if (targetHead)
+                targetPos = mHeadTrackTarget.getRefData().getBaseNode()->convertLocalToWorldPosition(
+                        targetHead->_getDerivedPosition());
+        }
+
+        Ogre::Vector3 direction = targetPos - headPos;
+        direction.normalise();
+
+        const Ogre::Vector3 actorDirection = mPtr.getRefData().getBaseNode()->getOrientation().yAxis();
+
+        zAngle = Ogre::Math::ATan2(direction.x,direction.y) -
+                Ogre::Math::ATan2(actorDirection.x, actorDirection.y);
+        xAngle = -Ogre::Math::ASin(direction.z);
+        wrap(zAngle);
+        wrap(xAngle);
+        xAngle = Ogre::Degree(std::min(xAngle.valueDegrees(), 40.f));
+        xAngle = Ogre::Degree(std::max(xAngle.valueDegrees(), -40.f));
+        zAngle = Ogre::Degree(std::min(zAngle.valueDegrees(), 30.f));
+        zAngle = Ogre::Degree(std::max(zAngle.valueDegrees(), -30.f));
+
+    }
+    float factor = duration*5;
+    factor = std::min(factor, 1.f);
+    xAngle = (1.f-factor) * mAnimation->getHeadPitch() + factor * (-xAngle);
+    zAngle = (1.f-factor) * mAnimation->getHeadYaw() + factor * (-zAngle);
+
+    mAnimation->setHeadPitch(xAngle);
+    mAnimation->setHeadYaw(zAngle);
 }
 
 }

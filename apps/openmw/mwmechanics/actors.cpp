@@ -4,6 +4,7 @@
 #include <typeinfo>
 
 #include <OgreVector3.h>
+#include <OgreSceneNode.h>
 
 #include <components/esm/loadnpc.hpp>
 
@@ -273,6 +274,40 @@ namespace MWMechanics
         calculateRestoration(ptr, duration);
     }
 
+    void Actors::updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
+                                    MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance)
+    {
+        static const float fMaxHeadTrackDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                .find("fMaxHeadTrackDistance")->getFloat();
+        static const float fInteriorHeadTrackMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                .find("fInteriorHeadTrackMult")->getFloat();
+        float maxDistance = fMaxHeadTrackDistance;
+        const ESM::Cell* currentCell = actor.getCell()->getCell();
+        if (!currentCell->isExterior() && !(currentCell->mData.mFlags & ESM::Cell::QuasiEx))
+            maxDistance *= fInteriorHeadTrackMult;
+
+        const ESM::Position& actor1Pos = actor.getRefData().getPosition();
+        const ESM::Position& actor2Pos = targetActor.getRefData().getPosition();
+        float sqrDist = Ogre::Vector3(actor1Pos.pos).squaredDistance(Ogre::Vector3(actor2Pos.pos));
+
+        if (sqrDist > maxDistance*maxDistance)
+            return;
+
+        // stop tracking when target is behind the actor
+        Ogre::Vector3 actorDirection (actor.getRefData().getBaseNode()->getOrientation().yAxis());
+        Ogre::Vector3 targetDirection (Ogre::Vector3(actor2Pos.pos) - Ogre::Vector3(actor1Pos.pos));
+        actorDirection.z = 0;
+        targetDirection.z = 0;
+        if (actorDirection.angleBetween(targetDirection) < Ogre::Degree(90)
+            && sqrDist <= sqrHeadTrackDistance
+            && MWBase::Environment::get().getWorld()->getLOS(actor, targetActor) // check LOS and awareness last as it's the most expensive function
+            && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(targetActor, actor))
+        {
+            sqrHeadTrackDistance = sqrDist;
+            headTrackTarget = targetActor;
+        }
+    }
+
     void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer)
     {
         CreatureStats& creatureStats = actor1.getClass().getCreatureStats(actor1);
@@ -396,11 +431,7 @@ namespace MWMechanics
     {
         CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
 
-        int strength     = creatureStats.getAttribute(ESM::Attribute::Strength).getModified();
         int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
-        int willpower    = creatureStats.getAttribute(ESM::Attribute::Willpower).getModified();
-        int agility      = creatureStats.getAttribute(ESM::Attribute::Agility).getModified();
-        int endurance    = creatureStats.getAttribute(ESM::Attribute::Endurance).getModified();
 
         float base = 1.f;
         if (ptr.getCellRef().getRefId() == "player")
@@ -415,11 +446,6 @@ namespace MWMechanics
         float diff = (static_cast<int>(magickaFactor*intelligence)) - magicka.getBase();
         magicka.modify(diff);
         creatureStats.setMagicka(magicka);
-
-        DynamicStat<float> fatigue = creatureStats.getFatigue();
-        diff = (strength+willpower+agility+endurance) - fatigue.getBase();
-        fatigue.modify(diff);
-        creatureStats.setFatigue(fatigue);
     }
 
     void Actors::restoreDynamicStats (const MWWorld::Ptr& ptr, bool sleep)
@@ -686,6 +712,19 @@ namespace MWMechanics
 
         // TODO: dirty flag for magic effects to avoid some unnecessary work below?
 
+        // any value of calm > 0 will stop the actor from fighting
+        if ((creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid).getMagnitude() > 0 && ptr.getClass().isNpc())
+                || (creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmCreature).getMagnitude() > 0 && !ptr.getClass().isNpc()))
+        {
+            for (std::list<AiPackage*>::const_iterator it = creatureStats.getAiSequence().begin(); it != creatureStats.getAiSequence().end(); )
+            {
+                if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+                    it = creatureStats.getAiSequence().erase(it);
+                else
+                    ++it;
+            }
+        }
+
         // Update bound effects
         static std::map<int, std::string> boundItemsMap;
         if (boundItemsMap.empty())
@@ -878,13 +917,19 @@ namespace MWMechanics
 
     void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
     {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
+        PtrControllerMap::iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return;
+        CharacterController* ctrl = it->second;
+
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
-        if(world->isSubmerged(ptr) &&
-           stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), Ogre::Vector3(ptr.getRefData().getPosition().pos)));
+        if((world->isSubmerged(ptr) || knockedOutUnderwater)
+           && stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
         {
             float timeLeft = 0.0f;
-            if(stats.getFatigue().getCurrent() == 0)
+            if(knockedOutUnderwater)
                 stats.setTimeToStartDrowning(0);
             else
             {
@@ -1059,6 +1104,7 @@ namespace MWMechanics
                     // Reset factors to attack
                     creatureStats.setAttacked(false);
                     creatureStats.setAlarmed(false);
+                    creatureStats.setAiSetting(CreatureStats::AI_Fight, ptr.getClass().getBaseFightRating(ptr));
 
                     // Update witness crime id
                     npcStats.setCrimeId(-1);
@@ -1127,18 +1173,11 @@ namespace MWMechanics
         if(!paused)
         {
             static float timerUpdateAITargets = 0;
+            static float timerUpdateHeadTrack = 0;
 
             // target lists get updated once every 1.0 sec
             if (timerUpdateAITargets >= 1.0f) timerUpdateAITargets = 0;
-
-            // Reset data from previous frame
-            for (PtrControllerMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
-            {
-                // Reset last hit object, which is only valid for one frame
-                // Note, the new hit object for this frame may be set by CharacterController::update -> Animation::runAnimation
-                // (below)
-                iter->first.getClass().getCreatureStats(iter->first).setLastHitObject(std::string());
-            }
+            if (timerUpdateHeadTrack >= 0.3f) timerUpdateHeadTrack = 0;
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
@@ -1172,6 +1211,19 @@ namespace MWMechanics
                                 engageCombat(iter->first, it->first, it->first == player);
                             }
                         }
+                        if (timerUpdateHeadTrack == 0)
+                        {
+                            float sqrHeadTrackDistance = std::numeric_limits<float>::max();
+                            MWWorld::Ptr headTrackTarget;
+
+                            for(PtrControllerMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
+                            {
+                                if (it->first == iter->first)
+                                    continue;
+                                updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
+                            }
+                            iter->second->setHeadTrackTarget(headTrackTarget);
+                        }
 
                         if (iter->first.getClass().isNpc() && iter->first != player)
                             updateCrimePersuit(iter->first, duration);
@@ -1192,6 +1244,7 @@ namespace MWMechanics
             }
 
             timerUpdateAITargets += duration;
+            timerUpdateHeadTrack += duration;
 
             // Looping magic VFX update
             // Note: we need to do this before any of the animations are updated.
@@ -1479,6 +1532,36 @@ namespace MWMechanics
         return list;
     }
 
+    std::list<int> Actors::getActorsFollowingIndices(const MWWorld::Ptr &actor)
+    {
+        std::list<int> list;
+        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+        {
+            const MWWorld::Class &cls = iter->first.getClass();
+            CreatureStats &stats = cls.getCreatureStats(iter->first);
+            if (stats.isDead())
+                continue;
+
+            // An actor counts as following if AiFollow is the current AiPackage, or there are only Combat packages before the AiFollow package
+            for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
+            {
+                if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
+                {
+                    MWWorld::Ptr followTarget = dynamic_cast<MWMechanics::AiFollow*>(*it)->getTarget();
+                    if (followTarget.isEmpty())
+                        continue;
+                    if (followTarget == actor)
+                        list.push_back(dynamic_cast<MWMechanics::AiFollow*>(*it)->getFollowIndex());
+                    else
+                        break;
+                }
+                else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
+                    break;
+            }
+        }
+        return list;
+    }
+
     std::list<MWWorld::Ptr> Actors::getActorsFighting(const MWWorld::Ptr& actor) {
         std::list<MWWorld::Ptr> list;
         std::vector<MWWorld::Ptr> neighbors;
@@ -1541,5 +1624,14 @@ namespace MWMechanics
         calculateCreatureStatModifiers(ptr, 0.f);
         if (ptr.getClass().isNpc())
             calculateNpcStatModifiers(ptr, 0.f);
+    }
+
+    bool Actors::isReadyToBlock(const MWWorld::Ptr &ptr) const
+    {
+        PtrControllerMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+
+        return it->second->isReadyToBlock();
     }
 }

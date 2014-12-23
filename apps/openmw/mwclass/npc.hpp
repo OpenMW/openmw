@@ -104,9 +104,6 @@ namespace MWClass
             virtual float getJump(const MWWorld::Ptr &ptr) const;
             ///< Return jump velocity (not accounting for movement)
 
-            virtual float getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const;
-            ///< Return amount of health points lost when falling
-
             virtual MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const;
             ///< Return desired movement.
 
@@ -188,6 +185,8 @@ namespace MWClass
             virtual void respawn (const MWWorld::Ptr& ptr) const;
 
             virtual void restock (const MWWorld::Ptr& ptr) const;
+
+            virtual int getBaseFightRating (const MWWorld::Ptr& ptr) const;
     };
 }
 

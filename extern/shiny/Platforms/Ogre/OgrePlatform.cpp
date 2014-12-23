@@ -54,6 +54,8 @@ namespace sh
 
 	OgrePlatform::~OgrePlatform ()
 	{
+		Ogre::MaterialManager::getSingleton().removeListener(this);
+
 		delete sSerializer;
 	}
 

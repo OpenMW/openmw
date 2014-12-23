@@ -40,11 +40,11 @@ add_openmw_dir (mwgui
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
     itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel controllers savegamedialog
-    recharge mode videowidget backgroundimage itemwidget screenfader debugwindow
+    recharge mode videowidget backgroundimage itemwidget screenfader debugwindow spellmodel spellview
     )
 
 add_openmw_dir (mwdialogue
-    dialoguemanagerimp journalimp journalentry quest topic filter selectwrapper hypertextparser keywordsearch
+    dialoguemanagerimp journalimp journalentry quest topic filter selectwrapper hypertextparser keywordsearch scripttest
     )
 
 add_openmw_dir (mwscript

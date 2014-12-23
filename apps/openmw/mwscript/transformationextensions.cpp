@@ -224,20 +224,23 @@ namespace MWScript
                     float ay = ptr.getRefData().getPosition().pos[1];
                     float az = ptr.getRefData().getPosition().pos[2];
 
+                    MWWorld::Ptr updated = ptr;
                     if(axis == "x")
                     {
-                        MWBase::Environment::get().getWorld()->moveObject(ptr,pos,ay,az);
+                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,pos,ay,az);
                     }
                     else if(axis == "y")
                     {
-                        MWBase::Environment::get().getWorld()->moveObject(ptr,ax,pos,az);
+                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,ax,pos,az);
                     }
                     else if(axis == "z")
                     {
-                        MWBase::Environment::get().getWorld()->moveObject(ptr,ax,ay,pos);
+                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,ax,ay,pos);
                     }
                     else
                         throw std::runtime_error ("invalid axis: " + axis);
+
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(updated);
                 }
         };
 
@@ -317,14 +320,15 @@ namespace MWScript
                     {
                         MWBase::Environment::get().getWorld()->moveObject(ptr,store,x,y,z);
                         ptr = MWWorld::Ptr(ptr.getBase(), store);
+                        dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr);
+
                         float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                         float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
-                        if(ptr.getTypeName() == typeid(ESM::NPC).name())//some morrowind oddity
-                        {
-                            ax = ax/60.;
-                            ay = ay/60.;
+                        // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
+                        // except for when you position the player, then degrees must be used.
+                        // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
+                        if(ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
                             zRot = zRot/60.;
-                        }
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
 
                         ptr.getClass().adjustPosition(ptr, false);
@@ -366,24 +370,26 @@ namespace MWScript
 
                     // another morrowind oddity: player will be moved to the exterior cell at this location,
                     // non-player actors will move within the cell they are in.
+                    MWWorld::Ptr updated;
                     if (ptr.getRefData().getHandle() == "player")
                     {
-                        MWBase::Environment::get().getWorld()->moveObject(ptr,
-                            MWBase::Environment::get().getWorld()->getExterior(cx,cy),x,y,z);
+                        MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                        MWBase::Environment::get().getWorld()->moveObject(ptr,cell,x,y,z);
+                        updated = MWWorld::Ptr(ptr.getBase(), cell);
                     }
                     else
                     {
-                        MWBase::Environment::get().getWorld()->moveObject(ptr, x, y, z);
+                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr, x, y, z);
                     }
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(updated);
 
                     float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
-                    if(ptr.getTypeName() == typeid(ESM::NPC).name())//some morrowind oddity
-                    {
-                        ax = ax/60.;
-                        ay = ay/60.;
+                    // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
+                    // except for when you position the player, then degrees must be used.
+                    // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
+                    if(ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
                         zRot = zRot/60.;
-                    }
                     MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
                     ptr.getClass().adjustPosition(ptr, false);
                 }
@@ -435,7 +441,8 @@ namespace MWScript
                         pos.rot[2]  = zRot;
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
                         ref.getPtr().getCellRef().setPosition(pos);
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
+                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
+                        placed.getClass().adjustPosition(placed, true);
                     }
                     else
                     {
@@ -482,7 +489,8 @@ namespace MWScript
                     pos.rot[2]  = zRot;
                     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
                     ref.getPtr().getCellRef().setPosition(pos);
-                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
+                    MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
+                    placed.getClass().adjustPosition(placed, true);
                 }
         };
 
@@ -640,8 +648,10 @@ namespace MWScript
                     ptr.getRefData().setLocalRotation(rot);
 
                     MWBase::Environment::get().getWorld()->rotateObject(ptr, 0,0,0,true);
-                    MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
-                            ptr.getCellRef().getPosition().pos[1], ptr.getCellRef().getPosition().pos[2]);
+
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
+                            ptr.getCellRef().getPosition().pos[1], ptr.getCellRef().getPosition().pos[2]));
 
                 }
         };
@@ -680,7 +690,8 @@ namespace MWScript
                         throw std::runtime_error ("invalid movement axis: " + axis);
 
                     Ogre::Vector3 worldPos = ptr.getRefData().getBaseNode()->convertLocalToWorldPosition(posChange);
-                    MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x, worldPos.y, worldPos.z);
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(
+                                MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x, worldPos.y, worldPos.z));
                 }
         };
 
@@ -703,17 +714,18 @@ namespace MWScript
 
                     const float *objPos = ptr.getRefData().getPosition().pos;
 
+                    MWWorld::Ptr updated;
                     if (axis == "x")
                     {
-                        MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0]+movement, objPos[1], objPos[2]);
+                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0]+movement, objPos[1], objPos[2]);
                     }
                     else if (axis == "y")
                     {
-                        MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0], objPos[1]+movement, objPos[2]);
+                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0], objPos[1]+movement, objPos[2]);
                     }
                     else if (axis == "z")
                     {
-                        MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0], objPos[1], objPos[2]+movement);
+                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0], objPos[1], objPos[2]+movement);
                     }
                     else
                         throw std::runtime_error ("invalid movement axis: " + axis);

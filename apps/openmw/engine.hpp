@@ -76,6 +76,7 @@ namespace OMW
             bool mSkipMenu;
             bool mUseSound;
             bool mCompileAll;
+            bool mCompileAllDialogue;
             int mWarningsMode;
             std::string mFocusName;
             std::map<std::string,std::string> mFallbackMap;
@@ -177,6 +178,9 @@ namespace OMW
 
             /// Compile all scripts (excludign dialogue scripts) at startup?
             void setCompileAll (bool all);
+
+            /// Compile all dialogue scripts at startup?
+            void setCompileAllDialogue (bool all);
 
             /// Font encoding
             void setEncoding(const ToUTF8::FromType& encoding);

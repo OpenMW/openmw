@@ -78,7 +78,7 @@ namespace MWScript
                 const std::vector<std::string>& buttons);
 
             virtual void report (const std::string& message);
-            ///< By default echo via messageBox.
+            ///< By default, do nothing.
 
             virtual bool menuMode();
 
@@ -168,6 +168,9 @@ namespace MWScript
 
             MWWorld::Ptr getReference(bool required=true);
             ///< Reference, that the script is running from (can be empty)
+
+            void updatePtr(const MWWorld::Ptr& updated);
+            ///< Update the Ptr stored in mReference, if there is one stored there. Should be called after the reference has been moved to a new cell.
 
             virtual std::string getTargetId() const;
     };

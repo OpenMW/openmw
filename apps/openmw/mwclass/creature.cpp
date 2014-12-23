@@ -119,7 +119,12 @@ namespace MWClass
             // spells
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
                 iter!=ref->mBase->mSpells.mList.end(); ++iter)
-                data->mCreatureStats.getSpells().add (*iter);
+            {
+                if (const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter))
+                    data->mCreatureStats.getSpells().add (spell);
+                else /// \todo add option to make this a fatal error message pop-up, but default to warning for vanilla compatibility
+                    std::cerr << "Warning: ignoring nonexistent spell '" << *iter << "' on creature '" << ref->mBase->mId << "'" << std::endl;
+            }
 
             // inventory
             if (ref->mBase->mFlags & ESM::Creature::Weapon)
@@ -346,10 +351,11 @@ namespace MWClass
             setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
+        if(!object.isEmpty())
+            getCreatureStats(ptr).setLastHitAttemptObject(object.getClass().getId(object));
+
         if(!successful)
         {
-            // TODO: Handle HitAttemptOnMe script function
-
             // Missed
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "miss", 1.0f, 1.0f);
             return;
@@ -672,20 +678,25 @@ namespace MWClass
         if(type >= 0)
         {
             std::vector<const ESM::SoundGenerator*> sounds;
-            sounds.reserve(8);
+            std::vector<const ESM::SoundGenerator*> fallbacksounds;
 
-            std::string ptrid = Creature::getId(ptr);
+            MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
+
+            const std::string& ourId = (ref->mBase->mOriginal.empty()) ? getId(ptr) : ref->mBase->mOriginal;
+
             MWWorld::Store<ESM::SoundGenerator>::iterator sound = store.begin();
             while(sound != store.end())
             {
-                if(type == sound->mType && !sound->mCreature.empty() &&
-                   Misc::StringUtils::ciEqual(ptrid.substr(0, sound->mCreature.size()),
-                                              sound->mCreature))
+                if (type == sound->mType && !sound->mCreature.empty() && (Misc::StringUtils::ciEqual(ourId, sound->mCreature)))
                     sounds.push_back(&*sound);
+                if (type == sound->mType && sound->mCreature.empty())
+                    fallbacksounds.push_back(&*sound);
                 ++sound;
             }
             if(!sounds.empty())
                 return sounds[(int)(rand()/(RAND_MAX+1.0)*sounds.size())]->mSound;
+            if (!fallbacksounds.empty())
+                return fallbacksounds[(int)(rand()/(RAND_MAX+1.0)*fallbacksounds.size())]->mSound;
         }
 
         return "";
@@ -878,5 +889,17 @@ namespace MWClass
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
         store.restock(list, ptr, ptr.getCellRef().getRefId(), ptr.getCellRef().getFaction());
+    }
+
+    int Creature::getBaseFightRating(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        return ref->mBase->mAiData.mFight;
+    }
+
+    void Creature::adjustScale(const MWWorld::Ptr &ptr, float &scale) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        scale *= ref->mBase->mScale;
     }
 }

@@ -47,7 +47,7 @@
 namespace MWDialogue
 {
     DialogueManager::DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose, Translation::Storage& translationDataStorage) :
-      mCompilerContext (MWScript::CompilerContext::Type_Dialgoue),
+      mCompilerContext (MWScript::CompilerContext::Type_Dialogue),
         mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
       , mTemporaryDispositionChange(0.f)
       , mPermanentDispositionChange(0.f), mScriptVerbose (scriptVerbose)
@@ -227,7 +227,7 @@ namespace MWDialogue
             success = false;
         }
 
-        if (!success && mScriptVerbose)
+        if (!success)
         {
             std::cerr
                 << "compiling failed (dialogue script)" << std::endl

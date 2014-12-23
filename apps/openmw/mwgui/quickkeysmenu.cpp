@@ -13,7 +13,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
-#include "../mwmechanics/spells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwgui/inventorywindow.hpp"
@@ -23,7 +22,8 @@
 #include "windowmanagerimp.hpp"
 #include "itemselection.hpp"
 
-#include "spellwindow.hpp"
+#include "spellview.hpp"
+
 
 #include "itemwidget.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -326,6 +326,10 @@ namespace MWGui
             if (!item.getClass().getEquipmentSlots(item).first.empty())
             {
                 MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
+
+                // make sure that item was successfully equipped
+                if (!store.isEquipped(item))
+                    return;
             }
 
             store.setSelectedEnchantItem(it);
@@ -495,12 +499,14 @@ namespace MWGui
     MagicSelectionDialog::MagicSelectionDialog(QuickKeysMenu* parent)
         : WindowModal("openmw_magicselection_dialog.layout")
         , mParent(parent)
-        , mWidth(0)
-        , mHeight(0)
     {
         getWidget(mCancelButton, "CancelButton");
         getWidget(mMagicList, "MagicList");
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MagicSelectionDialog::onCancelButtonClicked);
+
+        mMagicList->setShowCostColumn(false);
+        mMagicList->setHighlightSelected(false);
+        mMagicList->eventSpellClicked += MyGUI::newDelegate(this, &MagicSelectionDialog::onModelIndexSelected);
 
         center();
     }
@@ -519,211 +525,17 @@ namespace MWGui
     {
         WindowModal::open();
 
-        while (mMagicList->getChildCount ())
-            MyGUI::Gui::getInstance ().destroyWidget (mMagicList->getChildAt (0));
-
-        mHeight = 0;
-
-        const int spellHeight = 18;
-
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
-        MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
-        MWMechanics::Spells& spells = stats.getSpells();
-
-        /// \todo lots of copy&pasted code from SpellWindow
-
-        // retrieve powers & spells, sort by name
-        std::vector<std::string> spellList;
-
-        for (MWMechanics::Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
-        {
-            spellList.push_back (it->first);
-        }
-
-        const MWWorld::ESMStore &esmStore =
-            MWBase::Environment::get().getWorld()->getStore();
-
-        std::vector<std::string> powers;
-        std::vector<std::string>::iterator it = spellList.begin();
-        while (it != spellList.end())
-        {
-            const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(*it);
-            if (spell->mData.mType == ESM::Spell::ST_Power)
-            {
-                powers.push_back(*it);
-                it = spellList.erase(it);
-            }
-            else if (spell->mData.mType == ESM::Spell::ST_Ability
-                || spell->mData.mType == ESM::Spell::ST_Blight
-                || spell->mData.mType == ESM::Spell::ST_Curse
-                || spell->mData.mType == ESM::Spell::ST_Disease)
-            {
-                it = spellList.erase(it);
-            }
-            else
-                ++it;
-        }
-        std::sort(powers.begin(), powers.end(), sortSpells);
-        std::sort(spellList.begin(), spellList.end(), sortSpells);
-
-        // retrieve usable magic items & sort
-        std::vector<MWWorld::Ptr> items;
-        for (MWWorld::ContainerStoreIterator it(store.begin()); it != store.end(); ++it)
-        {
-            std::string enchantId = it->getClass().getEnchantment(*it);
-            if (enchantId != "")
-            {
-                // only add items with "Cast once" or "Cast on use"
-                const ESM::Enchantment* enchant =
-                    esmStore.get<ESM::Enchantment>().find(enchantId);
-
-                int type = enchant->mData.mType;
-                if (type != ESM::Enchantment::CastOnce
-                    && type != ESM::Enchantment::WhenUsed)
-                    continue;
-
-                items.push_back(*it);
-            }
-        }
-        std::sort(items.begin(), items.end(), sortItems);
-
-
-        int height = estimateHeight(items.size() + powers.size() + spellList.size());
-        bool scrollVisible = height > mMagicList->getHeight();
-        mWidth = mMagicList->getWidth() - scrollVisible * 18;
-
-
-        // powers
-        addGroup("#{sPowers}", "");
-
-        for (std::vector<std::string>::const_iterator it = powers.begin(); it != powers.end(); ++it)
-        {
-            const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(*it);
-            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>("SandTextButton",
-                MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
-            t->setCaption(spell->mName);
-            t->setTextAlign(MyGUI::Align::Left);
-            t->setUserString("ToolTipType", "Spell");
-            t->setUserString("Spell", *it);
-            t->eventMouseWheel += MyGUI::newDelegate(this, &MagicSelectionDialog::onMouseWheel);
-            t->eventMouseButtonClick += MyGUI::newDelegate(this, &MagicSelectionDialog::onSpellSelected);
-
-            mHeight += spellHeight;
-        }
-
-        // other spells
-        addGroup("#{sSpells}", "");
-        for (std::vector<std::string>::const_iterator it = spellList.begin(); it != spellList.end(); ++it)
-        {
-            const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(*it);
-            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>("SandTextButton",
-                MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
-            t->setCaption(spell->mName);
-            t->setTextAlign(MyGUI::Align::Left);
-            t->setUserString("ToolTipType", "Spell");
-            t->setUserString("Spell", *it);
-            t->eventMouseWheel += MyGUI::newDelegate(this, &MagicSelectionDialog::onMouseWheel);
-            t->eventMouseButtonClick += MyGUI::newDelegate(this, &MagicSelectionDialog::onSpellSelected);
-
-            mHeight += spellHeight;
-        }
-
-
-        // enchanted items
-        addGroup("#{sMagicItem}", "");
-
-        for (std::vector<MWWorld::Ptr>::const_iterator it = items.begin(); it != items.end(); ++it)
-        {
-            MWWorld::Ptr item = *it;
-
-            // check if the item is currently equipped (will display in a different color)
-            bool equipped = false;
-            for (int i=0; i < MWWorld::InventoryStore::Slots; ++i)
-            {
-                if (store.getSlot(i) != store.end() && *store.getSlot(i) == item)
-                {
-                    equipped = true;
-                    break;
-                }
-            }
-
-            MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>(equipped ? "SandTextButton" : "SpellTextUnequipped",
-                MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
-            t->setCaption(item.getClass().getName(item));
-            t->setTextAlign(MyGUI::Align::Left);
-            t->setUserData(item);
-            t->setUserString("ToolTipType", "ItemPtr");
-            t->eventMouseButtonClick += MyGUI::newDelegate(this, &MagicSelectionDialog::onEnchantedItemSelected);
-            t->eventMouseWheel += MyGUI::newDelegate(this, &MagicSelectionDialog::onMouseWheel);
-
-            mHeight += spellHeight;
-        }
-
-        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
-        mMagicList->setVisibleVScroll(false);
-        mMagicList->setCanvasSize (mWidth, std::max(mMagicList->getHeight(), mHeight));
-        mMagicList->setVisibleVScroll(true);
+        mMagicList->setModel(new SpellModel(MWBase::Environment::get().getWorld()->getPlayerPtr()));
+        mMagicList->update();
     }
 
-    void MagicSelectionDialog::addGroup(const std::string &label, const std::string& label2)
+    void MagicSelectionDialog::onModelIndexSelected(SpellModel::ModelIndex index)
     {
-        if (mMagicList->getChildCount() > 0)
-        {
-            MyGUI::ImageBox* separator = mMagicList->createWidget<MyGUI::ImageBox>("MW_HLine",
-                MyGUI::IntCoord(4, mHeight, mWidth-8, 18),
-                MyGUI::Align::Left | MyGUI::Align::Top);
-            separator->setNeedMouseFocus(false);
-            mHeight += 18;
-        }
-
-        MyGUI::TextBox* groupWidget = mMagicList->createWidget<MyGUI::TextBox>("SandBrightText",
-            MyGUI::IntCoord(0, mHeight, mWidth, 24),
-            MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
-        groupWidget->setCaptionWithReplacing(label);
-        groupWidget->setTextAlign(MyGUI::Align::Left);
-        groupWidget->setNeedMouseFocus(false);
-
-        if (label2 != "")
-        {
-            MyGUI::TextBox* groupWidget2 = mMagicList->createWidget<MyGUI::TextBox>("SandBrightText",
-                MyGUI::IntCoord(0, mHeight, mWidth-4, 24),
-                MyGUI::Align::Left | MyGUI::Align::Top);
-            groupWidget2->setCaptionWithReplacing(label2);
-            groupWidget2->setTextAlign(MyGUI::Align::Right);
-            groupWidget2->setNeedMouseFocus(false);
-        }
-
-        mHeight += 24;
-    }
-
-
-    void MagicSelectionDialog::onMouseWheel(MyGUI::Widget* _sender, int _rel)
-    {
-        if (mMagicList->getViewOffset().top + _rel*0.3 > 0)
-            mMagicList->setViewOffset(MyGUI::IntPoint(0, 0));
+        const Spell& spell = mMagicList->getModel()->getItem(index);
+        if (spell.mType == Spell::Type_EnchantedItem)
+            mParent->onAssignMagicItem(spell.mItem);
         else
-            mMagicList->setViewOffset(MyGUI::IntPoint(0, mMagicList->getViewOffset().top + _rel*0.3));
-    }
-
-    void MagicSelectionDialog::onEnchantedItemSelected(MyGUI::Widget* _sender)
-    {
-        MWWorld::Ptr item = *_sender->getUserData<MWWorld::Ptr>();
-
-        mParent->onAssignMagicItem (item);
-    }
-
-    void MagicSelectionDialog::onSpellSelected(MyGUI::Widget* _sender)
-    {
-        mParent->onAssignMagic (_sender->getUserString("Spell"));
-    }
-
-    int MagicSelectionDialog::estimateHeight(int numSpells) const
-    {
-        int height = 0;
-        height += 24 * 3 + 18 * 2; // group headings
-        height += numSpells * 18;
-        return height;
+            mParent->onAssignMagic(spell.mId);
     }
 
 }

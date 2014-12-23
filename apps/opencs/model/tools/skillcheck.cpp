@@ -16,7 +16,7 @@ int CSMTools::SkillCheckStage::setup()
     return mSkills.getSize();
 }
 
-void CSMTools::SkillCheckStage::perform (int stage, Messages& messages)
+void CSMTools::SkillCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     const CSMWorld::Record<ESM::Skill>& record = mSkills.getRecord (stage);
 

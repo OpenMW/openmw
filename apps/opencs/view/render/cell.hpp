@@ -5,6 +5,8 @@
 #include <map>
 #include <memory>
 
+#include <boost/shared_ptr.hpp>
+
 #include <OgreVector3.h>
 
 #include <components/terrain/terraingrid.hpp>
@@ -38,7 +40,7 @@ namespace CSVRender
             Ogre::SceneNode *mCellNode;
             std::map<std::string, Object *> mObjects;
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
-            CSVWorld::PhysicsSystem *mPhysics;
+            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
             Ogre::SceneManager *mSceneMgr;
             int mX;
             int mY;
@@ -56,7 +58,7 @@ namespace CSVRender
         public:
 
             Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager, const std::string& id,
-                CSVWorld::PhysicsSystem *physics, const Ogre::Vector3& origin = Ogre::Vector3 (0, 0, 0));
+                boost::shared_ptr<CSVWorld::PhysicsSystem> physics, const Ogre::Vector3& origin = Ogre::Vector3 (0, 0, 0));
 
             ~Cell();
 

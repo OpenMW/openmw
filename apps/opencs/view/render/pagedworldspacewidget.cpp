@@ -22,6 +22,7 @@
 
 #include "../widget/scenetooltoggle.hpp"
 #include "../widget/scenetoolmode.hpp"
+#include "../widget/scenetooltoggle2.hpp"
 
 #include "editmode.hpp"
 #include "elements.hpp"
@@ -111,7 +112,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             mCells.find (*iter)==mCells.end())
         {
             Cell *cell = new Cell (mDocument.getData(), getSceneManager(),
-                    iter->getId (mWorldspace), getPhysics());
+                    iter->getId (mWorldspace), mDocument.getPhysics());
             mCells.insert (std::make_pair (*iter, cell));
 
             float height = cell->getTerrainHeightAt(Ogre::Vector3(
@@ -210,6 +211,14 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
 {
     WorldspaceWidget::mouseDoubleClickEvent(event);
+}
+
+void CSVRender::PagedWorldspaceWidget::addVisibilitySelectorButtons (
+    CSVWidget::SceneToolToggle2 *tool)
+{
+    WorldspaceWidget::addVisibilitySelectorButtons (tool);
+    tool->addButton (Element_Terrain, "Terrain");
+    tool->addButton (Element_Fog, "Fog", "", true);
 }
 
 void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
@@ -362,8 +371,11 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
         delete iter->second;
     }
 
-    removeRenderTargetListener(mOverlayMask);
-    delete mOverlayMask;
+    if(mOverlayMask)
+    {
+        removeRenderTargetListener(mOverlayMask);
+        delete mOverlayMask;
+    }
 }
 
 void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)

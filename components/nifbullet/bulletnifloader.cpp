@@ -133,8 +133,6 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     mResourceName = mShape->getName();
     mShape->mCollide = false;
     mBoundingBox = NULL;
-    mShape->mBoxTranslation = Ogre::Vector3(0,0,0);
-    mShape->mBoxRotation = Ogre::Quaternion::IDENTITY;
     mStaticMesh = NULL;
     mCompoundShape = NULL;
 

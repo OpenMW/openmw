@@ -95,7 +95,7 @@ namespace MWMechanics
      *    +---------------->
      *      high cost
      */
-    bool PathgridGraph::load(const ESM::Cell* cell)
+    bool PathgridGraph::load(const MWWorld::CellStore *cell)
     {
         if(!cell)
             return false;
@@ -103,10 +103,9 @@ namespace MWMechanics
         if(mIsGraphConstructed)
             return true;
 
-        mCell = cell;
-        mIsExterior = cell->isExterior();
-        mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell);
-
+        mCell = cell->getCell();
+        mIsExterior = cell->getCell()->isExterior();
+        mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell->getCell());
         if(!mPathgrid)
             return false;
 

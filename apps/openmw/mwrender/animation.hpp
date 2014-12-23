@@ -228,6 +228,7 @@ public:
     virtual void preRender (Ogre::Camera* camera);
 
     virtual void setAlpha(float alpha) {}
+    virtual void setVampire(bool vampire) {}
 
 public:
     void updatePtr(const MWWorld::Ptr &ptr);
@@ -259,6 +260,10 @@ public:
     void play(const std::string &groupname, int priority, int groups, bool autodisable,
               float speedmult, const std::string &start, const std::string &stop,
               float startpoint, size_t loops);
+
+    /** If the given animation group is currently playing, set its remaining loop count to '0'.
+     */
+    void stopLooping(const std::string& groupName);
 
     /** Adjust the speed multiplier of an already playing animation.
      */
@@ -301,6 +306,10 @@ public:
     /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
     /// to indicate the facing orientation of the character.
     virtual void setPitchFactor(float factor) {}
+    virtual void setHeadPitch(Ogre::Radian factor) {}
+    virtual void setHeadYaw(Ogre::Radian factor) {}
+    virtual Ogre::Radian getHeadPitch() const { return Ogre::Radian(0.f); }
+    virtual Ogre::Radian getHeadYaw() const { return Ogre::Radian(0.f); }
 
     virtual Ogre::Vector3 runAnimation(float duration);
 

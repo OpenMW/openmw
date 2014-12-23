@@ -255,11 +255,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
             {
                 case 0:
                     continue;
-                case 2:
-                    slots_[MWWorld::InventoryStore::Slot_CarriedLeft] = end();
-                    break;
-                case 3:
-                    // Prefer keeping twohanded weapon
+                default:
                     break;
             }
 
@@ -646,4 +642,14 @@ void MWWorld::InventoryStore::clear()
     mSlots.clear();
     initSlots (mSlots);
     ContainerStore::clear();
+}
+
+bool MWWorld::InventoryStore::isEquipped(const MWWorld::Ptr &item)
+{
+    for (int i=0; i < MWWorld::InventoryStore::Slots; ++i)
+    {
+        if (getSlot(i) != end() && *getSlot(i) == item)
+            return true;
+    }
+    return false;
 }

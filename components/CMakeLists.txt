@@ -70,7 +70,7 @@ add_component_dir (compiler
     context controlparser errorhandler exception exprparser extensions fileparser generator
     lineparser literals locals output parser scanner scriptparser skipparser streamerrorhandler
     stringparser tokenloc nullerrorhandler opcodes extensions0 declarationparser
-    quickfileparser discardparser
+    quickfileparser discardparser junkparser
     )
 
 add_component_dir (interpreter
@@ -96,7 +96,7 @@ add_component_dir (ogreinit
     )
 
 add_component_dir (widgets
-    box imagebutton tags list numericeditbox widgets
+    box imagebutton tags list numericeditbox sharedstatebutton widgets
     )
 
 add_component_dir (fontloader
@@ -123,7 +123,7 @@ if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
         launchersettings
         settingsbase
         )
-        
+
     add_component_qt_dir (process
         processinvoker
     )

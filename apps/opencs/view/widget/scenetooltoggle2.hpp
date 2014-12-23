@@ -56,7 +56,7 @@ namespace CSVWidget
             /// \attention After the last button has been added, setSelection must be called at
             /// least once to finalise the layout.
             void addButton (unsigned int id,
-                const QString& name, const QString& tooltip = "");
+                const QString& name, const QString& tooltip = "", bool disabled = false);
 
             unsigned int getSelection() const;
 

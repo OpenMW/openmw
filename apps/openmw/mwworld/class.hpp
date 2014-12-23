@@ -184,9 +184,6 @@ namespace MWWorld
             virtual float getJump(const MWWorld::Ptr &ptr) const;
             ///< Return jump velocity (not accounting for movement)
 
-            virtual float getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const;
-            ///< Return amount of health points lost when falling
-
             virtual MWMechanics::Movement& getMovementSettings (const Ptr& ptr) const;
             ///< Return desired movement.
 
@@ -342,6 +339,8 @@ namespace MWWorld
 
             /// Returns sound id
             virtual std::string getSound(const MWWorld::Ptr& ptr) const;
+
+            virtual int getBaseFightRating (const MWWorld::Ptr& ptr) const;
     };
 }
 

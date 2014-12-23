@@ -7,6 +7,8 @@
 #include <OgreColourValue.h>
 #include <OgreVector3.h>
 
+#include "../mwbase/soundmanager.hpp"
+
 namespace ESM
 {
     struct Region;
@@ -61,10 +63,12 @@ namespace MWWorld
         bool mIsStorm;
 
         std::string mAmbientLoopSoundID;
+        float mAmbientSoundVolume;
 
         std::string mParticleEffect;
-
         std::string mRainEffect;
+        float mEffectFade;
+
         float mRainSpeed;
         float mRainFrequency;
     };
@@ -125,9 +129,6 @@ namespace MWWorld
         // This is used for Blight, Ashstorm and Blizzard (Bloodmoon)
         std::string mAmbientLoopSoundID;
 
-        // Rain sound effect
-        std::string mRainLoopSoundID;
-
         // Is this an ash storm / blight storm? If so, the following will happen:
         // - The particles and clouds will be oriented so they appear to come from the Red Mountain.
         // - Characters will animate their hand to protect eyes from the storm when looking in its direction (idlestorm animation)
@@ -173,7 +174,7 @@ namespace MWWorld
          */
         void update(float duration, bool paused = false);
 
-        void stopSounds(bool stopAll);
+        void stopSounds();
 
         void setHour(const float hour);
 
@@ -206,6 +207,9 @@ namespace MWWorld
         bool mIsStorm;
         Ogre::Vector3 mStormDirection;
 
+        MWBase::SoundPtr mAmbientSound;
+        std::string mPlayingSoundID;
+
         MWWorld::Fallback* mFallback;
         void setFallbackWeather(Weather& weather,const std::string& name);
         MWRender::RenderingManager* mRendering;
@@ -213,8 +217,6 @@ namespace MWWorld
         std::map<std::string, Weather> mWeatherSettings;
 
         std::map<std::string, std::string> mRegionOverrides;
-
-        std::vector<std::string> mSoundsPlaying;
 
         std::string mCurrentWeather;
         std::string mNextWeather;

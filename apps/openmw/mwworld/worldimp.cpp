@@ -1057,7 +1057,7 @@ namespace MWWorld
 
     void World::deleteObject (const Ptr& ptr)
     {
-        if (ptr.getRefData().getCount() > 0)
+        if (!ptr.getRefData().isDeleted())
         {
             ptr.getRefData().setCount(0);
 
@@ -1068,6 +1068,25 @@ namespace MWWorld
                 mWorldScene->removeObjectFromScene (ptr);
                 mLocalScripts.remove (ptr);
                 removeContainerScripts (ptr);
+            }
+        }
+    }
+
+    void World::undeleteObject(const Ptr& ptr)
+    {
+        if (ptr.getCellRef().getRefNum().mContentFile == -1)
+            return;
+        if (ptr.getRefData().isDeleted())
+        {
+            ptr.getRefData().setCount(1);
+            if (mWorldScene->getActiveCells().find(ptr.getCell()) != mWorldScene->getActiveCells().end()
+                    && ptr.getRefData().isEnabled())
+            {
+                mWorldScene->addObjectToScene(ptr);
+                std::string script = ptr.getClass().getScript(ptr);
+                if (!script.empty())
+                    mLocalScripts.add(script, ptr);
+                addContainerScripts(ptr, ptr.getCell());
             }
         }
     }
@@ -1139,6 +1158,7 @@ namespace MWWorld
                         ptr.getClass().copyToCell(ptr, *newCell, pos);
 
                     mRendering->updateObjectCell(ptr, copy);
+                    ptr.getRefData().setBaseNode(NULL);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, copy);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
@@ -1168,7 +1188,7 @@ namespace MWWorld
         }
     }
 
-    bool World::moveObjectImp(const Ptr& ptr, float x, float y, float z)
+    MWWorld::Ptr World::moveObjectImp(const Ptr& ptr, float x, float y, float z)
     {
         CellStore *cell = ptr.getCell();
 
@@ -1181,12 +1201,14 @@ namespace MWWorld
 
         moveObject(ptr, cell, x, y, z);
 
-        return cell != ptr.getCell();
+        MWWorld::Ptr updated = ptr;
+        updated.mCell = cell;
+        return updated;
     }
 
-    void World::moveObject (const Ptr& ptr, float x, float y, float z)
+    MWWorld::Ptr World::moveObject (const Ptr& ptr, float x, float y, float z)
     {
-        moveObjectImp(ptr, x, y, z);
+        return moveObjectImp(ptr, x, y, z);
     }
 
     void World::scaleObject (const Ptr& ptr, float scale)
@@ -1468,6 +1490,16 @@ namespace MWWorld
         return mStore.insert(record);
     }
 
+    const ESM::CreatureLevList *World::createOverrideRecord(const ESM::CreatureLevList &record)
+    {
+        return mStore.overrideRecord(record);
+    }
+
+    const ESM::ItemLevList *World::createOverrideRecord(const ESM::ItemLevList &record)
+    {
+        return mStore.overrideRecord(record);
+    }
+
     const ESM::NPC *World::createRecord(const ESM::NPC &record)
     {
         bool update = false;
@@ -1541,11 +1573,25 @@ namespace MWWorld
 
         updateWindowManager ();
 
+        updateSoundListener();
+
         if (!paused && mPlayer->getPlayer().getCell()->isExterior())
         {
             ESM::Position pos = mPlayer->getPlayer().getRefData().getPosition();
             mPlayer->setLastKnownExteriorPosition(Ogre::Vector3(pos.pos));
         }
+    }
+
+    void World::updateSoundListener()
+    {
+        Ogre::Vector3 playerPos = mPlayer->getPlayer().getRefData().getBaseNode()->getPosition();
+        const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(getPlayerPtr().getRefData().getHandle());
+        if(actor) playerPos.z += 1.85*actor->getHalfExtents().z;
+        Ogre::Quaternion playerOrient = Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
+                    Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X) *
+                    Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[1]), Ogre::Vector3::NEGATIVE_UNIT_Y);
+        MWBase::Environment::get().getSoundManager()->setListenerPosDir(playerPos, playerOrient.yAxis(),
+                                                                        playerOrient.zAxis());
     }
 
     void World::updateWindowManager ()

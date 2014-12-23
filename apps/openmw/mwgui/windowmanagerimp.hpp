@@ -325,11 +325,11 @@ namespace MWGui
     virtual void pinWindow (MWGui::GuiWindow window);
 
     /// Fade the screen in, over \a time seconds
-    virtual void fadeScreenIn(const float time);
+    virtual void fadeScreenIn(const float time, bool clearQueue);
     /// Fade the screen out to black, over \a time seconds
-    virtual void fadeScreenOut(const float time);
+    virtual void fadeScreenOut(const float time, bool clearQueue);
     /// Fade the screen to a specified percentage of black, over \a time seconds
-    virtual void fadeScreenTo(const int percent, const float time);
+    virtual void fadeScreenTo(const int percent, const float time, bool clearQueue);
     /// Darken the screen to a specified percentage
     virtual void setBlindness(const int percent);
 
@@ -337,6 +337,11 @@ namespace MWGui
     virtual void setWerewolfOverlay(bool set);
 
     virtual void toggleDebugWindow();
+
+    /// Cycle to next or previous spell
+    virtual void cycleSpell(bool next);
+    /// Cycle to next or previous weapon
+    virtual void cycleWeapon(bool next);
 
   private:
     bool mConsoleOnlyScripts;

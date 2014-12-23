@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <algorithm>
 
 #include <OgreResourceGroupManager.h>
 
@@ -55,7 +56,9 @@ CSMWorld::Resources::Resources (const std::string& baseDirectory, UniversalId::T
 
             std::string file = iter->substr (baseSize+1);
             mFiles.push_back (file);
-            mIndex.insert (std::make_pair (file, static_cast<int> (mFiles.size())-1));
+            std::replace (file.begin(), file.end(), '\\', '/');
+            mIndex.insert (std::make_pair (
+                Misc::StringUtils::lowerCase (file), static_cast<int> (mFiles.size())-1));
         }
     }
 }
@@ -88,6 +91,8 @@ int CSMWorld::Resources::getIndex (const std::string& id) const
 int CSMWorld::Resources::searchId (const std::string& id) const
 {
     std::string id2 = Misc::StringUtils::lowerCase (id);
+
+    std::replace (id2.begin(), id2.end(), '\\', '/');
 
     std::map<std::string, int>::const_iterator iter = mIndex.find (id2);
 

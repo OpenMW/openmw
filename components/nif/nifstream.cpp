@@ -76,13 +76,18 @@ Transformation NIFStream::getTrafo()
 {
     Transformation t;
     t.pos = getVector3();
-    t.rotationScale = getMatrix3();
+    t.rotation = getMatrix3();
     t.scale = getFloat();
     return t;
 }
 
 std::string NIFStream::getString(size_t length)
 {
+    //Make sure we're not reading in too large of a string
+    unsigned int fileSize = inp->size();
+    if(fileSize != 0 && fileSize < length)
+        file->fail("Attempted to read a string with " + Ogre::StringConverter::toString(length) + " characters , but file is only "+Ogre::StringConverter::toString(fileSize)+ " bytes!");
+
     std::vector<char> str (length+1, 0);
 
     if(inp->read(&str[0], length) != length)
@@ -95,6 +100,10 @@ std::string NIFStream::getString()
 {
     size_t size = read_le32();
     return getString(size);
+}
+std::string NIFStream::getVersionString()
+{
+    return inp->getLine();
 }
 
 void NIFStream::getShorts(std::vector<short> &vec, size_t size)

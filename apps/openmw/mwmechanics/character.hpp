@@ -175,6 +175,8 @@ class CharacterController
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
+    MWWorld::Ptr mHeadTrackTarget;
+
     float mTurnAnimationThreshold; // how long to continue playing turning animation after actor stopped turning
 
     std::string mAttackType; // slash, chop or thrust
@@ -188,9 +190,11 @@ class CharacterController
     bool updateCreatureState();
     void updateIdleStormState();
 
+    void updateHeadTracking(float duration);
+
     void castSpell(const std::string& spellid);
 
-    void updateVisibility();
+    void updateMagicEffects();
 
     void playDeath(float startpoint, CharacterState death);
     void playRandomDeath(float startpoint = 0.0f);
@@ -198,6 +202,8 @@ class CharacterController
     /// choose a random animation group with \a prefix and numeric suffix
     /// @param num if non-NULL, the chosen animation number will be written here
     std::string chooseRandomGroup (const std::string& prefix, int* num = NULL);
+
+    bool updateCarriedLeftVisible(WeaponType weaptype) const;
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
@@ -224,6 +230,12 @@ public:
     void forceStateUpdate();
     
     AiState& getAiState() { return mAiState; }
+
+    bool isReadyToBlock() const;
+    bool isKnockedOut() const;
+
+    /// Make this character turn its head towards \a target. To turn off head tracking, pass an empty Ptr.
+    void setHeadTrackTarget(const MWWorld::Ptr& target);
 };
 
     void getWeaponGroup(WeaponType weaptype, std::string &group);

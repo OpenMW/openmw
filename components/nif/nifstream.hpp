@@ -81,6 +81,8 @@ public:
     std::string getString(size_t length);
     ///Read in a string of the length specified in the file
     std::string getString();
+    ///This is special since the version string doesn't start with a number, and ends with "\n"
+    std::string getVersionString();
 
     void getShorts(std::vector<short> &vec, size_t size);
     void getFloats(std::vector<float> &vec, size_t size);
