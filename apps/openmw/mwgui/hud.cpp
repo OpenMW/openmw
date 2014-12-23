@@ -162,7 +162,7 @@ namespace MWGui
         getWidget(mTriangleCounter, "TriangleCounter");
         getWidget(mBatchCounter, "BatchCounter");
 
-        LocalMapBase::init(mMinimap, mCompass);
+        LocalMapBase::init(mMinimap, mCompass, Settings::Manager::getInt("local map hud widget size", "Map"));
 
         mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
         mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
