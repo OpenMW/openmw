@@ -21,6 +21,12 @@ ContentSelectorModel::ContentModel::ContentModel(QObject *parent) :
     uncheckAll();
 }
 
+ContentSelectorModel::ContentModel::~ContentModel()
+{
+    qDeleteAll(mFiles);
+    mFiles.clear();
+}
+
 void ContentSelectorModel::ContentModel::setEncoding(const QString &encoding)
 {
     mEncoding = encoding;
@@ -444,7 +450,9 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     foreach (const QString &path, dir.entryList())
     {
         QFileInfo info(dir.absoluteFilePath(path));
-        EsmFile *file = new EsmFile(path);
+
+        if (item(info.absoluteFilePath()) != 0)
+            continue;
 
         try {
             ESM::ESMReader fileReader;
@@ -452,6 +460,8 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             ToUTF8::calculateEncoding(mEncoding.toStdString());
             fileReader.setEncoder(&encoder);
             fileReader.open(dir.absoluteFilePath(path).toStdString());
+
+            EsmFile *file = new EsmFile(path);
 
             foreach (const ESM::Header::MasterData &item, fileReader.getGameFiles())
                 file->addGameFile(QString::fromStdString(item.name));
@@ -462,10 +472,8 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             file->setFilePath       (info.absoluteFilePath());
             file->setDescription(decoder->toUnicode(fileReader.getDesc().c_str()));
 
-
             // Put the file in the table
-            if (item(file->filePath()) == 0)
-                addFile(file);
+            addFile(file);
 
         } catch(std::runtime_error &e) {
             // An error occurred while reading the .esp
