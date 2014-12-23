@@ -27,6 +27,7 @@ using namespace Ogre;
 LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering)
     : mInterior(false)
     , mAngle(0.f)
+    , mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
 {
     mRendering = rend;
     mRenderingManager = rendering;
@@ -50,7 +51,7 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManag
                     "localmap/rtt",
                     ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                     TEX_TYPE_2D,
-                    sMapResolution, sMapResolution,
+                    mMapResolution, mMapResolution,
                     0,
                     PF_R8G8B8,
                     TU_RENDERTARGET);
@@ -413,7 +414,7 @@ void LocalMap::render(const float x, const float y,
                         texture,
                         ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                         TEX_TYPE_2D,
-                        sMapResolution, sMapResolution,
+                        mMapResolution, mMapResolution,
                         0,
                         PF_R8G8B8);
         tex->getBuffer()->blit(mRenderTexture->getBuffer());
