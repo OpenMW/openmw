@@ -1109,14 +1109,16 @@ namespace MWMechanics
                 float dispTerm = (*it == victim) ? dispVictim : disp;
 
                 float alarmTerm = 0.01 * it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase();
+                if (type == OT_Pickpocket && alarmTerm <= 0)
+                    alarmTerm = 1.0;
+
                 if (*it != victim)
                     dispTerm *= alarmTerm;
 
                 float fightTerm = (*it == victim) ? fightVictim : fight;
                 fightTerm += getFightDispositionBias(dispTerm);
                 fightTerm += getFightDistanceBias(*it, player);
-                if (type != OT_Pickpocket) // type check not in the wiki, but this seems to be needed for MW behaviour
-                    fightTerm *= alarmTerm;
+                fightTerm *= alarmTerm;
 
                 int observerFightRating = it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Fight).getBase();
                 if (observerFightRating + fightTerm > 100)
