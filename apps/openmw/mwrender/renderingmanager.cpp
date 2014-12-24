@@ -753,6 +753,8 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
                 || it->second == "resolution y"
                 || it->second == "fullscreen"))
             changeRes = true;
+        else if (it->first == "Video" && it->second == "window border")
+            changeRes = true;
         else if (it->second == "field of view" && it->first == "General")
             mRendering.setFov(Settings::Manager::getFloat("field of view", "General"));
         else if ((it->second == "texture filtering" && it->first == "General")
@@ -810,6 +812,7 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         unsigned int x = Settings::Manager::getInt("resolution x", "Video");
         unsigned int y = Settings::Manager::getInt("resolution y", "Video");
         bool fullscreen = Settings::Manager::getBool("fullscreen", "Video");
+        bool windowBorder = Settings::Manager::getBool("window border", "Video");
 
         SDL_Window* window = mRendering.getSDLWindow();
 
@@ -828,7 +831,10 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             SDL_SetWindowFullscreen(window, fullscreen);
         }
         else
+        {
             SDL_SetWindowSize(window, x, y);
+            SDL_SetWindowBordered(window, windowBorder ? SDL_TRUE : SDL_FALSE);
+        }
     }
 
     mWater->processChangedSettings(settings);

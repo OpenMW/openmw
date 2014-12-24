@@ -51,9 +51,9 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QCheckBox" name="borderlessCheckBox">
+       <widget class="QCheckBox" name="windowBorderCheckBox">
         <property name="text">
-         <string>Borderless</string>
+         <string>Window border</string>
         </property>
        </widget>
       </item>

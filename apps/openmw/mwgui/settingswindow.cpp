@@ -166,7 +166,7 @@ namespace MWGui
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mFullscreenButton, "FullscreenButton");
         getWidget(mVSyncButton, "VSyncButton");
-        getWidget(mBorderlessButton, "BorderlessButton");
+        getWidget(mWindowBorderButton, "WindowBorderButton");
         getWidget(mFPSButton, "FPSButton");
         getWidget(mFOVSlider, "FOVSlider");
         getWidget(mAnisotropySlider, "AnisotropySlider");

@@ -350,7 +350,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     OEngine::Render::WindowSettings windowSettings;
     windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
-    windowSettings.borderless = settings.getBool("borderless", "Video");
+    windowSettings.window_border = settings.getBool("window border", "Video");
     windowSettings.window_x = settings.getInt("resolution x", "Video");
     windowSettings.window_y = settings.getInt("resolution y", "Video");
     windowSettings.screen = settings.getInt("screen", "Video");

@@ -240,13 +240,13 @@
                             </Widget>
                         </Widget>
                         <Widget type="HBox" skin="" position="182 64 300 24">
-                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="BorderlessButton">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="WindowBorderButton">
                                 <UserString key="SettingCategory" value="Video"/>
-                                <UserString key="SettingName" value="borderless"/>
+                                <UserString key="SettingName" value="window border"/>
                                 <UserString key="SettingType" value="CheckButton"/>
                             </Widget>
                             <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 48 16" align="Left Top">
-                                <Property key="Caption" value="Borderless"/>
+                                <Property key="Caption" value="Window border"/>
                             </Widget>
                         </Widget>
                         <Widget type="HBox" skin="" position="182 94 300 24">

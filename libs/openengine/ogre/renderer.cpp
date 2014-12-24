@@ -130,7 +130,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
       SDL_WINDOW_SHOWN
         | SDL_WINDOW_RESIZABLE
         | (settings.fullscreen ? SDL_WINDOW_FULLSCREEN : 0)
-        | (settings.borderless ? SDL_WINDOW_BORDERLESS : 0)
+        | (settings.window_border ? 0 : SDL_WINDOW_BORDERLESS)
     );
 
     SFO::SDLWindowHelper helper(mSDLWindow, settings.window_x, settings.window_y, title, settings.fullscreen, params);
