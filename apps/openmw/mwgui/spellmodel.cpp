@@ -21,8 +21,10 @@ namespace
         if (left.mType != right.mType)
             return left.mType < right.mType;
 
-        int cmp = left.mName.compare(right.mName);
-        return cmp < 0;
+        std::string leftName = Misc::StringUtils::lowerCase(left.mName);
+        std::string rightName = Misc::StringUtils::lowerCase(right.mName);
+
+        return leftName.compare(rightName) < 0;
     }
 
 }
