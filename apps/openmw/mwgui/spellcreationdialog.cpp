@@ -594,14 +594,6 @@ namespace MWGui
 
         int buttonId = *sender->getUserData<int>();
         mSelectedKnownEffectId = mButtonMapping[buttonId];
-        for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
-        {
-            if (it->mEffectID == mSelectedKnownEffectId)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
-                return;
-            }
-        }
 
         const ESM::MagicEffect* effect =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
@@ -624,6 +616,15 @@ namespace MWGui
         }
         else
         {
+            for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+            {
+                if (it->mEffectID == mSelectedKnownEffectId)
+                {
+                    MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
+                    return;
+                }
+            }
+
             mAddEffectDialog.newEffect(effect);
         }
     }
