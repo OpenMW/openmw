@@ -166,6 +166,7 @@ namespace MWGui
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mFullscreenButton, "FullscreenButton");
         getWidget(mVSyncButton, "VSyncButton");
+        getWidget(mWindowBorderButton, "WindowBorderButton");
         getWidget(mFPSButton, "FPSButton");
         getWidget(mFOVSlider, "FOVSlider");
         getWidget(mAnisotropySlider, "AnisotropySlider");
@@ -239,6 +240,8 @@ namespace MWGui
         MyGUI::TextBox* diffText;
         getWidget(diffText, "DifficultyText");
         diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
+
+        mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
@@ -354,6 +357,8 @@ namespace MWGui
                 _sender->castType<MyGUI::Button>()->setCaption(off);
                 return;
             }
+
+            mWindowBorderButton->setEnabled(!newState);
         }
 
         if (getSettingType(_sender) == checkButtonType)
