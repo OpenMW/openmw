@@ -185,7 +185,7 @@ void Wizard::InstallationPage::installationFinished()
     msgBox.setWindowTitle(tr("Installation finished"));
     msgBox.setIcon(QMessageBox::Information);
     msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setText(tr("Installation completed sucessfully!"));
+    msgBox.setText(tr("Installation completed successfully!"));
 
     msgBox.exec();
 
