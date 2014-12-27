@@ -584,11 +584,11 @@ namespace MWMechanics
             }
             else if (effectId == ESM::MagicEffect::DamageFatigue || effectId == ESM::MagicEffect::RestoreFatigue)
             {
-                applyDynamicStatsEffect(1, target, magnitude);
+                applyDynamicStatsEffect(2, target, magnitude);
             }
             else if (effectId == ESM::MagicEffect::DamageMagicka || effectId == ESM::MagicEffect::RestoreMagicka)
             {
-                applyDynamicStatsEffect(2, target, magnitude);
+                applyDynamicStatsEffect(1, target, magnitude);
             }
             else if (effectId == ESM::MagicEffect::DamageSkill || effectId == ESM::MagicEffect::RestoreSkill)
             {
