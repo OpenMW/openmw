@@ -7,8 +7,8 @@ find_package(GMock REQUIRED)
 
 if (GTEST_FOUND AND GMOCK_FOUND)
 
-    include_directories(${GTEST_INCLUDE_DIRS})
-    include_directories(${GMOCK_INCLUDE_DIRS})
+    include_directories(SYSTEM ${GTEST_INCLUDE_DIRS})
+    include_directories(SYSTEM ${GMOCK_INCLUDE_DIRS})
 
     file(GLOB UNITTEST_SRC_FILES
         components/misc/test_*.cpp

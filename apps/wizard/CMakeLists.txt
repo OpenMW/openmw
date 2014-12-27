@@ -99,7 +99,7 @@ include(${QT_USE_FILE})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if (OPENMW_USE_UNSHIELD)
-    include_directories(${LIBUNSHIELD_INCLUDE_DIR})
+    include_directories(SYSTEM ${LIBUNSHIELD_INCLUDE_DIR})
 endif()
 
 add_executable(openmw-wizard
