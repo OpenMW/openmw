@@ -342,9 +342,13 @@ namespace MWGui
     {
         MyGUI::TextBox* skillNameWidget;
 
-        skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>("SandText", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
+        skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Default);
+
         skillNameWidget->setCaption(text);
         skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
+
+        int textWidth = skillNameWidget->getTextSize().width;
+        skillNameWidget->setSize(textWidth, skillNameWidget->getHeight());
 
         mSkillWidgets.push_back(skillNameWidget);
 
