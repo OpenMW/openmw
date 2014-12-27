@@ -580,30 +580,15 @@ namespace MWMechanics
             }
             else if (effectId == ESM::MagicEffect::DamageHealth || effectId == ESM::MagicEffect::RestoreHealth)
             {
-                MWMechanics::DynamicStat<float> health = target.getClass().getCreatureStats(target).getHealth();
-                if (effectId == ESM::MagicEffect::DamageHealth)
-                    health.setCurrent(health.getCurrent() - magnitude);
-                else
-                    health.setCurrent(health.getCurrent() + magnitude);
-                target.getClass().getCreatureStats(target).setHealth(health);
+                applyDynamicStatsEffect(0, target, magnitude);
             }
             else if (effectId == ESM::MagicEffect::DamageFatigue || effectId == ESM::MagicEffect::RestoreFatigue)
             {
-                MWMechanics::DynamicStat<float> fatigue = target.getClass().getCreatureStats(target).getFatigue();
-                if (effectId == ESM::MagicEffect::DamageFatigue)
-                    fatigue.setCurrent(fatigue.getCurrent() - magnitude);
-                else
-                    fatigue.setCurrent(fatigue.getCurrent() + magnitude);
-                target.getClass().getCreatureStats(target).setHealth(fatigue);
+                applyDynamicStatsEffect(1, target, magnitude);
             }
             else if (effectId == ESM::MagicEffect::DamageMagicka || effectId == ESM::MagicEffect::RestoreMagicka)
             {
-                MWMechanics::DynamicStat<float> magicka = target.getClass().getCreatureStats(target).getMagicka();
-                if (effectId == ESM::MagicEffect::DamageMagicka)
-                    magicka.setCurrent(magicka.getCurrent() - magnitude);
-                else
-                    magicka.setCurrent(magicka.getCurrent() + magnitude);
-                target.getClass().getCreatureStats(target).setHealth(magicka);
+                applyDynamicStatsEffect(2, target, magnitude);
             }
             else if (effectId == ESM::MagicEffect::DamageSkill || effectId == ESM::MagicEffect::RestoreSkill)
             {
@@ -665,6 +650,13 @@ namespace MWMechanics
                 }
             }
         }
+    }
+    
+    void CastSpell::applyDynamicStatsEffect(int attribute, const MWWorld::Ptr& target, float magnitude)
+    {
+        DynamicStat<float> value = target.getClass().getCreatureStats(target).getDynamic(attribute);
+        value.modify(magnitude);
+        target.getClass().getCreatureStats(target).setDynamic(attribute, value);
     }
 
     bool CastSpell::cast(const std::string &id)
