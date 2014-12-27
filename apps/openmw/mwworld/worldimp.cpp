@@ -1699,8 +1699,9 @@ namespace MWWorld
         MWWorld::LiveCellRef<ESM::Static>* ref = statics.find("northmarker");
         if (!ref)
             return Vector2(0, 1);
-        Ogre::SceneNode* node = ref->mData.getBaseNode();
-        Vector3 dir = node->_getDerivedOrientation() * Ogre::Vector3(0,1,0);
+
+        Ogre::Quaternion orient (Ogre::Radian(-ref->mData.getPosition().rot[2]), Ogre::Vector3::UNIT_Z);
+        Vector3 dir = orient * Ogre::Vector3(0,1,0);
         Vector2 d = Vector2(dir.x, dir.y);
         return d;
     }
