@@ -168,7 +168,7 @@ if(USE_SYSTEM_TINYXML)
     message(STATUS "Found TinyXML: ${TINYXML_LIBRARIES} ${TINYXML_INCLUDE_DIR}")
     add_definitions (-DTIXML_USE_STL)
     if(TINYXML_LIBRARIES AND TINYXML_INCLUDE_DIR)
-        include_directories(${TINYXML_INCLUDE_DIR})
+        include_directories(SYSTEM ${TINYXML_INCLUDE_DIR})
         message(STATUS "Using system TinyXML library.")
     else()
         message(FATAL_ERROR "Detection of system TinyXML incomplete.")
@@ -272,15 +272,19 @@ endif ()
     endif(WIN32)
 endif(OGRE_STATIC)
 
-include_directories("."
+include_directories(SYSTEM
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_INCLUDE_DIRS} ${OGRE_PLUGIN_INCLUDE_DIRS}
     ${OGRE_INCLUDE_DIR}/Overlay ${OGRE_Overlay_INCLUDE_DIR}
     ${SDL2_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
-    ${PLATFORM_INCLUDE_DIR}
     ${MYGUI_INCLUDE_DIRS}
     ${MYGUI_PLATFORM_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
+)
+
+include_directories(
+    .
+    ${PLATFORM_INCLUDE_DIR}
     ${LIBS_DIR}
 )
 
