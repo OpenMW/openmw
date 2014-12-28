@@ -1285,7 +1285,7 @@ bool CharacterController::updateWeaponState()
 
     MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
     if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name()
-            && mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand)
+            && updateCarriedLeftVisible(mWeaponType))
 
     {
         mAnimation->play("torch", Priority_Torch, MWRender::Animation::Group_LeftArm,
