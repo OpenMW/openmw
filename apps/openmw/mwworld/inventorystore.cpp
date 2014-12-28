@@ -418,6 +418,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
 void MWWorld::InventoryStore::flagAsModified()
 {
     ContainerStore::flagAsModified();
+    mRechargingItemsUpToDate = false;
 }
 
 bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
