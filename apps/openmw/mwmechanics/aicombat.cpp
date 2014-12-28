@@ -300,6 +300,14 @@ namespace MWMechanics
 
         //Update with period = tReaction
 
+        // Stop attacking if target is not seen
+        if (target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude() > 0
+                || target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude() > 75)
+        {
+            movement.mPosition[1] = movement.mPosition[0] = 0;
+            return false; // TODO: run away instead of doing nothing
+        }
+
         timerReact = 0;
         const MWWorld::CellStore*& currentCell = storage.mCell;
         bool cellChange = currentCell && (actor.getCell() != currentCell);
@@ -325,10 +333,6 @@ namespace MWMechanics
             currentAction = prepareNextAction(actor, target);
             actionCooldown = currentAction->getActionCooldown();
         }
-
-        // Stop attacking if target is not seen
-        if (!MWBase::Environment::get().getMechanicsManager()->awarenessCheck(target, actor))
-            return true;
 
         if (currentAction.get())
             currentAction->getCombatRange(rangeAttack, rangeFollow);
