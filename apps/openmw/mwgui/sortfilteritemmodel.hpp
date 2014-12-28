@@ -26,6 +26,9 @@ namespace MWGui
         void setFilter (int filter);
         void setShowEquipped (bool show) { mShowEquipped = show; }
 
+        /// Use ItemStack::Type for sorting?
+        void setSortByType(bool sort) { mSortByType = sort; }
+
         static const int Category_Weapon = (1<<1);
         static const int Category_Apparel = (1<<2);
         static const int Category_Misc = (1<<3);
@@ -47,6 +50,7 @@ namespace MWGui
         int mCategory;
         int mFilter;
         bool mShowEquipped;
+        bool mSortByType;
     };
 
 }

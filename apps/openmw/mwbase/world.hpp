@@ -40,6 +40,8 @@ namespace ESM
     struct Enchantment;
     struct Book;
     struct EffectList;
+    struct CreatureLevList;
+    struct ItemLevList;
 }
 
 namespace MWRender
@@ -279,8 +281,10 @@ namespace MWBase
             ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
 
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
+            virtual void undeleteObject (const MWWorld::Ptr& ptr) = 0;
 
-            virtual void moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
+            virtual MWWorld::Ptr moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
+            ///< @return an updated Ptr in case the Ptr's cell changes
 
             virtual void
             moveObject(const MWWorld::Ptr &ptr, MWWorld::CellStore* newCell, float x, float y, float z) = 0;
@@ -357,6 +361,14 @@ namespace MWBase
             ///< Create a new record (of type book) in the ESM store.
             /// \return pointer to created record
 
+            virtual const ESM::CreatureLevList *createOverrideRecord (const ESM::CreatureLevList& record) = 0;
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
+            virtual const ESM::ItemLevList *createOverrideRecord (const ESM::ItemLevList& record) = 0;
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
             virtual void update (float duration, bool paused) = 0;
 
             virtual MWWorld::Ptr placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount) = 0;
@@ -386,6 +398,7 @@ namespace MWBase
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
 
             virtual void togglePOV() = 0;
+            virtual bool isFirstPerson() const = 0;
             virtual void togglePreviewMode(bool enable) = 0;
             virtual bool toggleVanityMode(bool enable) = 0;
             virtual void allowVanityMode(bool allow) = 0;

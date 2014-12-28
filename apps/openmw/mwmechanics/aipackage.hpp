@@ -3,7 +3,6 @@
 
 #include "pathfinding.hpp"
 #include <components/esm/defs.hpp>
-#include "../mwbase/world.hpp"
 
 #include "obstacle.hpp"
 #include "aistate.hpp"
@@ -69,6 +68,7 @@ namespace MWMechanics
             /** \return If the actor has arrived at his destination **/
             bool pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Point dest, float duration);
 
+            // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;
             ObstacleCheck mObstacleCheck;
 

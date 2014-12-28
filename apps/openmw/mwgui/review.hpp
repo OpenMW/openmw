@@ -1,6 +1,8 @@
 #ifndef MWGUI_REVIEW_H
 #define MWGUI_REVIEW_H
 
+#include <components/esm/attr.hpp>
+#include <components/esm/loadclas.hpp>
 #include "windowbase.hpp"
 #include "widgets.hpp"
 

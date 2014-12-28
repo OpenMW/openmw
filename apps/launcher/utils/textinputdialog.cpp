@@ -16,14 +16,14 @@ Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString &
     mButtonBox->addButton(QDialogButtonBox::Cancel);
     mButtonBox->button(QDialogButtonBox::Ok)->setEnabled (false);
 
+    QLabel *label = new QLabel(this);
+    label->setText(text);
+
     // Line edit
     QValidator *validator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
-    mLineEdit = new DialogLineEdit(this);
+    mLineEdit = new LineEdit(this);
     mLineEdit->setValidator(validator);
     mLineEdit->setCompleter(0);
-
-    QLabel *label = new QLabel(this);
-    label->setText(text); 
 
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
     dialogLayout->addWidget(label);
@@ -41,8 +41,10 @@ Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString &
 
     connect(mButtonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(mButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
-    connect(mLineEdit, SIGNAL(textChanged(QString)), this, SLOT(slotUpdateOkButton(QString)));
+}
 
+Launcher::TextInputDialog::~TextInputDialog()
+{
 }
 
 int Launcher::TextInputDialog::exec()
@@ -52,36 +54,18 @@ int Launcher::TextInputDialog::exec()
     return QDialog::exec();
 }
 
-QString Launcher::TextInputDialog::getText() const
+void Launcher::TextInputDialog::setOkButtonEnabled(bool enabled)
 {
-    return mLineEdit->text();
-}
+    QPushButton *okButton = mButtonBox->button(QDialogButtonBox::Ok);
+    okButton->setEnabled(enabled);
 
-void Launcher::TextInputDialog::slotUpdateOkButton(QString text)
-{
-    bool enabled = !(text.isEmpty());
-    mButtonBox->button(QDialogButtonBox::Ok)->setEnabled(enabled);
+    QPalette palette;
+    palette.setColor(QPalette::Text, Qt::red);
 
-    if (enabled)
+    if (enabled) {
         mLineEdit->setPalette(QApplication::palette());
-    else
-    {
+    } else {
         // Existing profile name, make the text red
-        QPalette *palette = new QPalette();
-        palette->setColor(QPalette::Text,Qt::red);
-        mLineEdit->setPalette(*palette);
+        mLineEdit->setPalette(palette);
     }
-}
-
-Launcher::TextInputDialog::DialogLineEdit::DialogLineEdit (QWidget *parent) :
-    LineEdit (parent)
-{
-    int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
-
-    setObjectName(QString("LineEdit"));
-    setStyleSheet(QString("LineEdit { padding-right: %1px; } ").arg(mClearButton->sizeHint().width() + frameWidth + 1));
-    QSize msz = minimumSizeHint();
-    setMinimumSize(qMax(msz.width(), mClearButton->sizeHint().height() + frameWidth * 2 + 2),
-                   qMax(msz.height(), mClearButton->sizeHint().height() + frameWidth * 2 + 2));
-
 }

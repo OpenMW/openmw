@@ -16,7 +16,6 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../world/subviews.hpp"
-#include "../world/physicsmanager.hpp"
 
 #include "../tools/subviews.hpp"
 
@@ -407,8 +406,6 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     mSubViewFactory.add (CSMWorld::UniversalId::Type_RunLog, new SubViewFactory<RunLogSubView>);
 
     connect (mOperations, SIGNAL (abortOperation (int)), this, SLOT (abortOperation (int)));
-
-    CSVWorld::PhysicsManager::instance()->setupPhysics(document);
 }
 
 CSVDoc::View::~View()
@@ -464,8 +461,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
 {
     CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
 
-    const std::vector<CSMWorld::UniversalId::Type> referenceables(CSMWorld::UniversalId::listReferenceableTypes());
-    bool isReferenceable = std::find(referenceables.begin(), referenceables.end(), id.getType()) != referenceables.end();
+    bool isReferenceable = id.getClass() == CSMWorld::UniversalId::Class_RefRecord;
 
     // User setting to reuse sub views (on a per top level view basis)
     bool reuse =
@@ -474,10 +470,14 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     {
         foreach(SubView *sb, mSubViews)
         {
-            if((isReferenceable && (CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, id.getId()) == CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, sb->getUniversalId().getId())))
-                || (!isReferenceable && (id == sb->getUniversalId())))
+            bool isSubViewReferenceable =
+                sb->getUniversalId().getType() == CSMWorld::UniversalId::Type_Referenceable;
+
+            if((isReferenceable && isSubViewReferenceable && id.getId() == sb->getUniversalId().getId())
+               ||
+               (!isReferenceable && id == sb->getUniversalId()))
             {
-                sb->setFocus(Qt::OtherFocusReason); // FIXME: focus not quite working
+                sb->setFocus();
                 return;
             }
         }
@@ -497,7 +497,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     }
 
     SubView *view = NULL;
-    if(std::find(referenceables.begin(), referenceables.end(), id.getType()) != referenceables.end())
+    if(isReferenceable)
     {
         view = mSubViewFactory.makeSubView (CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, id.getId()), *mDocument);
     }

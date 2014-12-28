@@ -50,9 +50,6 @@ namespace MWRender
         bool mVanityToggleQueued;
         bool mViewModeToggleQueued;
 
-        /// Updates sound manager listener data
-        void updateListener();
-
         void setPosition(const Ogre::Vector3& position);
         void setPosition(float x, float y, float z);
 

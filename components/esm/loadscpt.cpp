@@ -30,7 +30,14 @@ void Script::load(ESMReader &esm)
         int s = mData.mStringTableSize;
 
         std::vector<char> tmp (s);
-        esm.getHExact (&tmp[0], s);
+        // not using getHExact, vanilla doesn't seem to mind unused bytes at the end
+        esm.getSubHeader();
+        int left = esm.getSubSize();
+        if (left < s)
+            esm.fail("SCVR string list is smaller than specified");
+        esm.getExact(&tmp[0], s);
+        if (left > s)
+            esm.skip(left-s); // skip the leftover junk
 
         // Set up the list of variable names
         mVarNames.resize(mData.mNumShorts + mData.mNumLongs + mData.mNumFloats);

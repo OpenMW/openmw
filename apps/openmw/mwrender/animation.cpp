@@ -114,10 +114,6 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
     mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, mdlname) :
                                NifOgre::Loader::createObjectBase(mInsert, mdlname));
 
-    // Fast forward auto-play particles, which will have been set up as Emitting by the loader.
-    for (unsigned int i=0; i<mObjectRoot->mParticles.size(); ++i)
-        mObjectRoot->mParticles[i]->fastForward(1, 0.1);
-
     if(mObjectRoot->mSkelBase)
     {
         mSkelBase = mObjectRoot->mSkelBase;
@@ -574,7 +570,8 @@ float Animation::getVelocity(const std::string &groupname) const
 
 static void updateBoneTree(const Ogre::SkeletonInstance *skelsrc, Ogre::Bone *bone)
 {
-    if(skelsrc->hasBone(bone->getName()))
+    if(bone->getName() != " " // really should be != "", but see workaround in skeleton.cpp for empty node names
+            && skelsrc->hasBone(bone->getName()))
     {
         Ogre::Bone *srcbone = skelsrc->getBone(bone->getName());
         if(!srcbone->getParent() || !bone->getParent())
@@ -842,6 +839,17 @@ void Animation::changeGroups(const std::string &groupname, int groups)
         return;
     }
 }
+
+void Animation::stopLooping(const std::string& groupname)
+{
+    AnimStateMap::iterator stateiter = mStates.find(groupname);
+    if(stateiter != mStates.end())
+    {
+        stateiter->second.mLoopCount = 0;
+        return;
+    }
+}
+
 void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
     if(!mSkelBase || mAnimSources.empty())

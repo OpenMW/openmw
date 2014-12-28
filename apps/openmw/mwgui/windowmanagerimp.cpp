@@ -73,6 +73,7 @@
 #include "itemwidget.hpp"
 #include "screenfader.hpp"
 #include "debugwindow.hpp"
+#include "spellview.hpp"
 
 namespace MWGui
 {
@@ -179,6 +180,7 @@ namespace MWGui
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
         ItemWidget::registerComponents();
+        SpellView::registerComponents();
         Gui::registerAllWidgets();
 
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatEvent>("Controller");
@@ -444,6 +446,7 @@ namespace MWGui
         mVideoBackground->setVisible(false);
 
         mHud->setVisible(mHudEnabled && mGuiEnabled);
+        mToolTips->setVisible(mGuiEnabled);
 
         bool gameMode = !isGuiMode();
 
@@ -587,16 +590,11 @@ namespace MWGui
                     mJournal->setVisible(true);
                     break;
                 case GM_LoadingWallpaper:
-                    mHud->setVisible(false);
-                    setCursorVisible(false);
-                    break;
                 case GM_Loading:
-                    // Show the pinned windows
-                    mMap->setVisible(mMap->pinned() && !(mForceHidden & GW_Map));
-                    mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats));
-                    mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory));
-                    mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic));
-
+                    // Don't need to show anything here - GM_LoadingWallpaper covers everything else anyway,
+                    // GM_Loading uses a texture of the last rendered frame so everything previously visible will be rendered.
+                    mHud->setVisible(false);
+                    mToolTips->setVisible(false);
                     setCursorVisible(false);
                     break;
                 default:
@@ -1748,21 +1746,24 @@ namespace MWGui
         updateVisible();
     }
 
-    void WindowManager::fadeScreenIn(const float time)
+    void WindowManager::fadeScreenIn(const float time, bool clearQueue)
     {
-        mScreenFader->clearQueue();
+        if (clearQueue)
+            mScreenFader->clearQueue();
         mScreenFader->fadeOut(time);
     }
 
-    void WindowManager::fadeScreenOut(const float time)
+    void WindowManager::fadeScreenOut(const float time, bool clearQueue)
     {
-        mScreenFader->clearQueue();
+        if (clearQueue)
+            mScreenFader->clearQueue();
         mScreenFader->fadeIn(time);
     }
 
-    void WindowManager::fadeScreenTo(const int percent, const float time)
+    void WindowManager::fadeScreenTo(const int percent, const float time, bool clearQueue)
     {
-        mScreenFader->clearQueue();
+        if (clearQueue)
+            mScreenFader->clearQueue();
         mScreenFader->fadeTo(percent, time);
     }
 
@@ -1817,6 +1818,16 @@ namespace MWGui
     void WindowManager::toggleDebugWindow()
     {
         mDebugWindow->setVisible(!mDebugWindow->isVisible());
+    }
+
+    void WindowManager::cycleSpell(bool next)
+    {
+        mSpellWindow->cycle(next);
+    }
+
+    void WindowManager::cycleWeapon(bool next)
+    {
+        mInventoryWindow->cycle(next);
     }
 
 }

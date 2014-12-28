@@ -603,6 +603,17 @@ const ESM::DialInfo* MWDialogue::Filter::search (const ESM::Dialogue& dialogue, 
         return suitableInfos[0];
 }
 
+std::vector<const ESM::DialInfo *> MWDialogue::Filter::listAll (const ESM::Dialogue& dialogue) const
+{
+    std::vector<const ESM::DialInfo *> infos;
+    for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin(); iter!=dialogue.mInfo.end(); ++iter)
+    {
+        if (testActor (*iter))
+            infos.push_back(&*iter);
+    }
+    return infos;
+}
+
 std::vector<const ESM::DialInfo *> MWDialogue::Filter::list (const ESM::Dialogue& dialogue,
     bool fallbackToInfoRefusal, bool searchAll, bool invertDisposition) const
 {

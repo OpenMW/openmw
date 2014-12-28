@@ -18,6 +18,7 @@ namespace Nif
     class NiZBufferProperty;
     class NiSpecularProperty;
     class NiWireframeProperty;
+    class NiStencilProperty;
 }
 
 namespace NifOgre
@@ -41,6 +42,7 @@ public:
                                     const Nif::NiZBufferProperty *zprop,
                                     const Nif::NiSpecularProperty *specprop,
                                     const Nif::NiWireframeProperty *wireprop,
+                                    const Nif::NiStencilProperty *stencilprop,
                                     bool &needTangents, bool particleMaterial=false);
 };
 

@@ -15,6 +15,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwdialogue/dialoguemanagerimp.hpp"
 
@@ -533,9 +534,11 @@ namespace MWGui
 
         if (mGoodbye)
         {
+            Goodbye* link = new Goodbye();
+            mLinks.push_back(link);
             std::string goodbye = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->getString();
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, linkNormal, linkHot, linkActive,
-                                                                              TypesetBook::InteractiveId(mLinks.back()));
+                                                                              TypesetBook::InteractiveId(link));
             typesetter->lineBreak();
             typesetter->write(questionStyle, to_utf8_span(goodbye.c_str()));
         }
@@ -654,7 +657,6 @@ namespace MWGui
 
     void DialogueWindow::goodbye()
     {
-        mLinks.push_back(new Goodbye());
         mGoodbye = true;
         mEnabled = false;
         updateHistory();

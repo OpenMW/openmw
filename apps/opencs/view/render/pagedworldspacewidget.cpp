@@ -21,7 +21,10 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetoolmode.hpp"
+#include "../widget/scenetooltoggle2.hpp"
 
+#include "editmode.hpp"
 #include "elements.hpp"
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
@@ -109,7 +112,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             mCells.find (*iter)==mCells.end())
         {
             Cell *cell = new Cell (mDocument.getData(), getSceneManager(),
-                    iter->getId (mWorldspace), getPhysics());
+                    iter->getId (mWorldspace), mDocument.getPhysics());
             mCells.insert (std::make_pair (*iter, cell));
 
             float height = cell->getTerrainHeightAt(Ogre::Vector3(
@@ -208,6 +211,34 @@ void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
 {
     WorldspaceWidget::mouseDoubleClickEvent(event);
+}
+
+void CSVRender::PagedWorldspaceWidget::addVisibilitySelectorButtons (
+    CSVWidget::SceneToolToggle2 *tool)
+{
+    WorldspaceWidget::addVisibilitySelectorButtons (tool);
+    tool->addButton (Element_Terrain, "Terrain");
+    tool->addButton (Element_Fog, "Fog", "", true);
+}
+
+void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
+    CSVWidget::SceneToolMode *tool)
+{
+    WorldspaceWidget::addEditModeSelectorButtons (tool);
+
+    /// \todo replace EditMode with suitable subclasses
+    tool->addButton (
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain shape editing"),
+        "terrain-shape");
+    tool->addButton (
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain texture editing"),
+        "terrain-texture");
+    tool->addButton (
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain vertex paint editing"),
+        "terrain-vertex");
+    tool->addButton (
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain movement"),
+        "terrain-move");
 }
 
 void CSVRender::PagedWorldspaceWidget::updateOverlay()
@@ -340,8 +371,11 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
         delete iter->second;
     }
 
-    removeRenderTargetListener(mOverlayMask);
-    delete mOverlayMask;
+    if(mOverlayMask)
+    {
+        removeRenderTargetListener(mOverlayMask);
+        delete mOverlayMask;
+    }
 }
 
 void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
@@ -445,21 +479,21 @@ CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::g
     }
 }
 
-unsigned int CSVRender::PagedWorldspaceWidget::getElementMask() const
+unsigned int CSVRender::PagedWorldspaceWidget::getVisibilityMask() const
 {
-    return WorldspaceWidget::getElementMask() | mControlElements->getSelection();
+    return WorldspaceWidget::getVisibilityMask() | mControlElements->getSelection();
 }
 
 CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (
     CSVWidget::SceneToolbar *parent)
 {
     mControlElements = new CSVWidget::SceneToolToggle (parent,
-        "Controls & Guides Visibility", ":door.png");
+        "Controls & Guides Visibility", ":placeholder");
 
-    mControlElements->addButton (":activator.png", Element_CellMarker, ":activator.png",
+    mControlElements->addButton (":placeholder", Element_CellMarker, ":placeholder",
         "Cell marker");
-    mControlElements->addButton (":armor.png", Element_CellArrow, ":armor.png", "Cell arrows");
-    mControlElements->addButton (":armor.png", Element_CellBorder, ":armor.png", "Cell border");
+    mControlElements->addButton (":placeholder", Element_CellArrow, ":placeholder", "Cell arrows");
+    mControlElements->addButton (":placeholder", Element_CellBorder, ":placeholder", "Cell border");
 
     mControlElements->setSelection (0xffffffff);
 

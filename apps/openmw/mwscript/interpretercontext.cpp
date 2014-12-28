@@ -205,7 +205,6 @@ namespace MWScript
 
     void InterpreterContext::report (const std::string& message)
     {
-        messageBox (message);
     }
 
     bool InterpreterContext::menuMode()
@@ -589,5 +588,11 @@ namespace MWScript
     std::string InterpreterContext::getTargetId() const
     {
         return mTargetId;
+    }
+
+    void InterpreterContext::updatePtr(const MWWorld::Ptr& updated)
+    {
+        if (!mReference.isEmpty())
+            mReference = updated;
     }
 }

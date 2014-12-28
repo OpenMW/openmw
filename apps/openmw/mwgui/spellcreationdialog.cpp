@@ -3,6 +3,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm/records.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -12,6 +13,7 @@
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/spells.hpp"
@@ -89,15 +91,22 @@ namespace MWGui
 
     void EditEffectDialog::newEffect (const ESM::MagicEffect *effect)
     {
+        bool allowSelf = effect->mData.mFlags & ESM::MagicEffect::CastSelf;
+        bool allowTouch = (effect->mData.mFlags & ESM::MagicEffect::CastTouch) && !constantEffect;
+        bool allowTarget = (effect->mData.mFlags & ESM::MagicEffect::CastTarget) && !constantEffect;
+
+        if (!allowSelf && !allowTouch && !allowTarget)
+            return; // TODO: Show an error message popup?
+
         setMagicEffect(effect);
         mEditing = false;
 
         mDeleteButton->setVisible (false);
 
         mEffect.mRange = ESM::RT_Self;
-        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf))
+        if (!allowSelf)
             mEffect.mRange = ESM::RT_Touch;
-        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch))
+        if (!allowTouch)
             mEffect.mRange = ESM::RT_Target;
         mEffect.mMagnMin = 1;
         mEffect.mMagnMax = 1;
@@ -118,6 +127,8 @@ namespace MWGui
         mMagnitudeMinValue->setCaption("1");
         mMagnitudeMaxValue->setCaption("- 1");
         mAreaValue->setCaption("0");
+
+        setVisible(true);
     }
 
     void EditEffectDialog::editEffect (ESM::ENAMstruct effect)
@@ -190,6 +201,24 @@ namespace MWGui
     {
         mEffect.mRange = (mEffect.mRange+1)%3;
 
+        // cycle through range types until we find something that's allowed
+        // does not handle the case where nothing is allowed (this should be prevented before opening the Add Effect dialog)
+        bool allowSelf = mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf;
+        bool allowTouch = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch) && !constantEffect;
+        bool allowTarget = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget) && !constantEffect;
+        if (mEffect.mRange == ESM::RT_Self && !allowSelf)
+            mEffect.mRange = (mEffect.mRange+1)%3;
+        if (mEffect.mRange == ESM::RT_Touch && !allowTouch)
+            mEffect.mRange = (mEffect.mRange+1)%3;
+        if (mEffect.mRange == ESM::RT_Target && !allowTarget)
+            mEffect.mRange = (mEffect.mRange+1)%3;
+
+        if(mEffect.mRange == ESM::RT_Self)
+        {
+            mAreaSlider->setScrollPosition(0);
+            onAreaChanged(mAreaSlider,0);
+        }
+
         if (mEffect.mRange == ESM::RT_Self)
             mRangeButton->setCaptionWithReplacing ("#{sRangeSelf}");
         else if (mEffect.mRange == ESM::RT_Target)
@@ -197,19 +226,6 @@ namespace MWGui
         else if (mEffect.mRange == ESM::RT_Touch)
             mRangeButton->setCaptionWithReplacing ("#{sRangeTouch}");
 
-        // cycle through range types until we find something that's allowed
-        if (mEffect.mRange == ESM::RT_Target && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget))
-            onRangeButtonClicked(sender);
-        if (mEffect.mRange == ESM::RT_Self && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf))
-            onRangeButtonClicked(sender);
-        if (mEffect.mRange == ESM::RT_Touch && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch))
-            onRangeButtonClicked(sender);
-
-        if(mEffect.mRange == ESM::RT_Self)
-        {
-            mAreaSlider->setScrollPosition(0);
-            onAreaChanged(mAreaSlider,0);
-        }
         updateBoxes();
         eventEffectModified(mEffect);
     }
@@ -542,7 +558,6 @@ namespace MWGui
 
         mAddEffectDialog.newEffect(effect);
         mAddEffectDialog.setAttribute (mSelectAttributeDialog->getAttributeId());
-        mAddEffectDialog.setVisible(true);
         MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectAttributeDialog);
         mSelectAttributeDialog = 0;
     }
@@ -554,7 +569,6 @@ namespace MWGui
 
         mAddEffectDialog.newEffect(effect);
         mAddEffectDialog.setSkill (mSelectSkillDialog->getSkillId());
-        mAddEffectDialog.setVisible(true);
         MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectSkillDialog);
         mSelectSkillDialog = 0;
     }
@@ -580,14 +594,6 @@ namespace MWGui
 
         int buttonId = *sender->getUserData<int>();
         mSelectedKnownEffectId = mButtonMapping[buttonId];
-        for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
-        {
-            if (it->mEffectID == mSelectedKnownEffectId)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
-                return;
-            }
-        }
 
         const ESM::MagicEffect* effect =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
@@ -610,8 +616,16 @@ namespace MWGui
         }
         else
         {
+            for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+            {
+                if (it->mEffectID == mSelectedKnownEffectId)
+                {
+                    MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
+                    return;
+                }
+            }
+
             mAddEffectDialog.newEffect(effect);
-            mAddEffectDialog.setVisible(true);
         }
     }
 

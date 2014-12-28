@@ -10,7 +10,7 @@ class QHBoxLayout;
 namespace CSVWidget
 {
     class SceneToolbar;
-    class PushButton;
+    class ModeButton;
 
     ///< \brief Mode selector tool
     class SceneToolMode : public SceneTool
@@ -19,13 +19,15 @@ namespace CSVWidget
 
             QWidget *mPanel;
             QHBoxLayout *mLayout;
-            std::map<PushButton *, std::string> mButtons; // widget, id
+            std::map<ModeButton *, std::string> mButtons; // widget, id
             int mButtonSize;
             int mIconSize;
             QString mToolTip;
             PushButton *mFirst;
+            ModeButton *mCurrent;
+            SceneToolbar *mToolbar;
 
-            void adjustToolTip (const PushButton *activeMode);
+            void adjustToolTip (const ModeButton *activeMode);
 
         public:
 
@@ -35,6 +37,9 @@ namespace CSVWidget
 
             void addButton (const std::string& icon, const std::string& id,
                 const QString& tooltip = "");
+
+            /// The ownership of \a button is transferred to *this.
+            void addButton (ModeButton *button, const std::string& id);
 
         signals:
 

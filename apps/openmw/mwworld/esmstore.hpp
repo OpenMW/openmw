@@ -141,6 +141,8 @@ namespace MWWorld
             mStores[ESM::REC_SSCR] = &mStartScripts;
             mStores[ESM::REC_STAT] = &mStatics;
             mStores[ESM::REC_WEAP] = &mWeapons;
+
+            mPathgrids.setCells(mCells);
         }
 
         void clearDynamic ()
@@ -165,6 +167,7 @@ namespace MWWorld
             throw std::runtime_error("Storage for this type not exist");
         }
 
+        /// Insert a custom record (i.e. with a generated ID that will not clash will pre-existing records)
         template <class T>
         const T *insert(const T &x) {
             std::ostringstream id;
@@ -181,6 +184,20 @@ namespace MWWorld
             record.mId = id.str();
 
             T *ptr = store.insert(record);
+            for (iterator it = mStores.begin(); it != mStores.end(); ++it) {
+                if (it->second == &store) {
+                    mIds[ptr->mId] = it->first;
+                }
+            }
+            return ptr;
+        }
+
+        /// Insert a record with set ID, and allow it to override a pre-existing static record.
+        template <class T>
+        const T *overrideRecord(const T &x) {
+            Store<T> &store = const_cast<Store<T> &>(get<T>());
+
+            T *ptr = store.insert(x);
             for (iterator it = mStores.begin(); it != mStores.end(); ++it) {
                 if (it->second == &store) {
                     mIds[ptr->mId] = it->first;

@@ -9,13 +9,14 @@
 </qresource>
 <qresource prefix="icons/tango">
     <file alias="index.theme">icons/tango/index.theme</file>
-    <file alias="video-display.png">icons/tango/video-display.png</file>
-    <file alias="16x16/document-new.png">icons/tango/document-new.png</file>
-    <file alias="16x16/edit-copy.png">icons/tango/edit-copy.png</file>
-    <file alias="16x16/edit-delete.png">icons/tango/edit-delete.png</file>
-    <file alias="16x16/go-bottom.png">icons/tango/go-bottom.png</file>
-    <file alias="16x16/go-down.png">icons/tango/go-down.png</file>
-    <file alias="16x16/go-top.png">icons/tango/go-top.png</file>
-    <file alias="16x16/go-up.png">icons/tango/go-up.png</file>
+    <file alias="48x48/video-display.png">icons/tango/48x48/video-display.png</file>
+    <file alias="48x48/preferences-system.png">icons/tango/48x48/preferences-system.png</file>
+    <file alias="16x16/document-new.png">icons/tango/16x16/document-new.png</file>
+    <file alias="16x16/edit-copy.png">icons/tango/16x16/edit-copy.png</file>
+    <file alias="16x16/edit-delete.png">icons/tango/16x16/edit-delete.png</file>
+    <file alias="16x16/go-bottom.png">icons/tango/16x16/go-bottom.png</file>
+    <file alias="16x16/go-down.png">icons/tango/16x16/go-down.png</file>
+    <file alias="16x16/go-top.png">icons/tango/16x16/go-top.png</file>
+    <file alias="16x16/go-up.png">icons/tango/16x16/go-up.png</file>
 </qresource>
 </RCC>

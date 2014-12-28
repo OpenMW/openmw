@@ -15,6 +15,7 @@
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/actiondoor.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actiontrap.hpp"

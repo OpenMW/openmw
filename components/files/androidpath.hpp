@@ -7,12 +7,15 @@
 /**
  * \namespace Files
  */
+
+
 namespace Files
 {
 
 struct AndroidPath
 {
     AndroidPath(const std::string& application_name);
+    
 
     /**
      * \brief Return path to the user directory.

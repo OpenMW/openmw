@@ -10,6 +10,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "ptr.hpp"
 #include "refdata.hpp"
@@ -178,11 +179,6 @@ namespace MWWorld
     int Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error ("class does not support enchanting");
-    }
-
-    float Class::getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const
-    {
-        return 0;
     }
 
     MWMechanics::Movement& Class::getMovementSettings (const Ptr& ptr) const
@@ -433,5 +429,10 @@ namespace MWWorld
     std::string Class::getSound(const MWWorld::Ptr&) const
     {
       return std::string();
+    }
+
+    int Class::getBaseFightRating(const Ptr &ptr) const
+    {
+        throw std::runtime_error("class does not support fight rating");
     }
 }

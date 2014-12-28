@@ -36,17 +36,9 @@ void NIFSkeletonLoader::buildBones(Ogre::Skeleton *skel, const Nif::Node *node, 
     if(parent) parent->addChild(bone);
     mNifToOgreHandleMap[node->recIndex] = bone->getHandle();
 
-    // decompose the local transform into position, scale and orientation.
-    // this is required for cases where the rotationScale matrix includes scaling, which the NIF format allows :(
-    // the code would look a bit nicer if Ogre allowed setting the transform matrix of a Bone directly, but we can't do that.
-    Ogre::Matrix4 mat(node->getLocalTransform());
-    Ogre::Vector3 position, scale;
-    Ogre::Quaternion orientation;
-    mat.decomposition(position, scale, orientation);
-    bone->setOrientation(orientation);
-    bone->setPosition(position);
-    bone->setScale(scale);
-
+    bone->setOrientation(node->trafo.rotation);
+    bone->setPosition(node->trafo.pos);
+    bone->setScale(Ogre::Vector3(node->trafo.scale));
     bone->setBindingPose();
 
     if(!(node->recType == Nif::RC_NiNode || /* Nothing special; children traversed below */
@@ -111,7 +103,7 @@ bool NIFSkeletonLoader::needSkeleton(const Nif::Node *node)
     /* We need to be a little aggressive here, since some NIFs have a crap-ton
      * of nodes and Ogre only supports 256 bones. We will skip a skeleton if:
      * There are no bones used for skinning, there are no keyframe controllers, there
-     * are no nodes named "AttachLight", and the tree consists of NiNode,
+     * are no nodes named "AttachLight" or "ArrowBone", and the tree consists of NiNode,
      * NiTriShape, and RootCollisionNode types only.
      */
     if(node->boneTrafo)
@@ -126,7 +118,7 @@ bool NIFSkeletonLoader::needSkeleton(const Nif::Node *node)
         } while(!(ctrl=ctrl->next).empty());
     }
 
-    if (node->name == "AttachLight")
+    if (node->name == "AttachLight" || node->name == "ArrowBone")
         return true;
 
     if(node->recType == Nif::RC_NiNode || node->recType == Nif::RC_RootCollisionNode)

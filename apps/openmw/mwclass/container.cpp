@@ -7,6 +7,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/failedaction.hpp"
@@ -14,6 +15,7 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/actionopen.hpp"
 #include "../mwworld/actiontrap.hpp"
 #include "../mwworld/physicssystem.hpp"
@@ -21,7 +23,7 @@
 
 #include "../mwgui/tooltips.hpp"
 
-#include "../mwrender/objects.hpp"
+#include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
@@ -87,7 +89,8 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if (!model.empty()) {
-            renderingInterface.getObjects().insertModel(ptr, model);
+            MWRender::Actors& actors = renderingInterface.getActors();
+            actors.insertActivator(ptr);
         }
     }
 
@@ -96,6 +99,7 @@ namespace MWClass
         const std::string model = getModel(ptr);
         if(!model.empty())
             physics.addObject(ptr);
+        MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
     std::string Container::getModel(const MWWorld::Ptr &ptr) const

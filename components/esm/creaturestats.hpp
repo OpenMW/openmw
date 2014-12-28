@@ -56,6 +56,7 @@ namespace ESM
         float mAttackStrength;
         float mFallHeight;
         std::string mLastHitObject;
+        std::string mLastHitAttemptObject;
         bool mRecalcDynamicStats;
         int mDrawState;
         unsigned char mDeathAnimation;

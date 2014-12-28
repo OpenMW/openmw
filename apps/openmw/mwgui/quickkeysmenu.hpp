@@ -5,6 +5,8 @@
 
 #include "windowbase.hpp"
 
+#include "spellmodel.hpp"
+
 namespace MWGui
 {
 
@@ -12,6 +14,7 @@ namespace MWGui
     class ItemSelectionDialog;
     class MagicSelectionDialog;
     class ItemWidget;
+    class SpellView;
 
     class QuickKeysMenu : public WindowBase
     {
@@ -94,21 +97,12 @@ namespace MWGui
 
     private:
         MyGUI::Button* mCancelButton;
-        MyGUI::ScrollView* mMagicList;
-
-        int mWidth;
-        int mHeight;
+        SpellView* mMagicList;
 
         QuickKeysMenu* mParent;
 
         void onCancelButtonClicked (MyGUI::Widget* sender);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
-        void onEnchantedItemSelected(MyGUI::Widget* _sender);
-        void onSpellSelected(MyGUI::Widget* _sender);
-        int estimateHeight(int numSpells) const;
-
-
-        void addGroup(const std::string& label, const std::string& label2);
+        void onModelIndexSelected(SpellModel::ModelIndex index);
     };
 }
 

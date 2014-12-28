@@ -13,16 +13,17 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../widget/scenetoolmode.hpp"
-#include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolrun.hpp"
 
-#include "../world/physicsmanager.hpp"
 #include "../world/physicssystem.hpp"
 
 #include "elements.hpp"
+#include "editmode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-: SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0), mPhysics(0), mMouse(0)
+: SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>()), mMouse(0),
+  mInteractionMask (0)
 {
     setAcceptDrops(true);
 
@@ -54,9 +55,7 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     connect (debugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
 
-    // associate WorldSpaceWidgets (and their SceneManagers) with Documents
-    // then create physics if there is a new document
-    mPhysics = CSVWorld::PhysicsManager::instance()->addSceneWidget(document, this);
+    mPhysics = document.getPhysics(); // create physics if one doesn't exist
     mPhysics->addSceneManager(getSceneManager(), this);
     mMouse = new MouseState(this);
 }
@@ -65,7 +64,6 @@ CSVRender::WorldspaceWidget::~WorldspaceWidget ()
 {
     delete mMouse;
     mPhysics->removeSceneManager(getSceneManager());
-    CSVWorld::PhysicsManager::instance()->removeSceneWidget(this);
 }
 
 void CSVRender::WorldspaceWidget::selectNavigationMode (const std::string& mode)
@@ -125,10 +123,10 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
     return tool;
 }
 
-CSVWidget::SceneToolToggle *CSVRender::WorldspaceWidget::makeSceneVisibilitySelector (CSVWidget::SceneToolbar *parent)
+CSVWidget::SceneToolToggle2 *CSVRender::WorldspaceWidget::makeSceneVisibilitySelector (CSVWidget::SceneToolbar *parent)
 {
-    mSceneElements= new CSVWidget::SceneToolToggle (parent,
-        "Scene Element Visibility", ":door.png");
+    mSceneElements = new CSVWidget::SceneToolToggle2 (parent,
+        "Scene Element Visibility", ":scenetoolbar/scene-view-c", ":scenetoolbar/scene-view-");
 
     addVisibilitySelectorButtons (mSceneElements);
 
@@ -170,12 +168,22 @@ CSVWidget::SceneToolRun *CSVRender::WorldspaceWidget::makeRunTool (
     std::sort (profiles.begin(), profiles.end());
 
     mRun = new CSVWidget::SceneToolRun (parent, "Run OpenMW from the current camera position",
-        ":door.png", ":faction.png", profiles);
+        ":scenetoolbar/play", profiles);
 
     connect (mRun, SIGNAL (runRequest (const std::string&)),
         this, SLOT (runRequest (const std::string&)));
 
     return mRun;
+}
+
+CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeEditModeSelector (
+    CSVWidget::SceneToolbar *parent)
+{
+    CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent, "Edit Mode");
+
+    addEditModeSelectorButtons (tool);
+
+    return tool;
 }
 
 CSVRender::WorldspaceWidget::DropType CSVRender::WorldspaceWidget::getDropType (
@@ -232,18 +240,38 @@ bool CSVRender::WorldspaceWidget::handleDrop (const std::vector<CSMWorld::Univer
     return false;
 }
 
-unsigned int CSVRender::WorldspaceWidget::getElementMask() const
+unsigned int CSVRender::WorldspaceWidget::getVisibilityMask() const
 {
     return mSceneElements->getSelection();
 }
 
-void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
-    CSVWidget::SceneToolToggle *tool)
+void CSVRender::WorldspaceWidget::setInteractionMask (unsigned int mask)
 {
-    tool->addButton (":activator.png", Element_Reference, ":activator.png", "References");
-    tool->addButton (":armor.png", Element_Terrain, ":armor.png", "Terrain");
-    tool->addButton (":armor.png", Element_Water, ":armor.png", "Water");
-    tool->addButton (":armor.png", Element_Pathgrid, ":armor.png", "Pathgrid");
+    mInteractionMask = mask | Element_CellMarker | Element_CellArrow;
+}
+
+unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
+{
+    return mInteractionMask & getVisibilityMask();
+}
+
+void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
+    CSVWidget::SceneToolToggle2 *tool)
+{
+    tool->addButton (Element_Reference, "References");
+    tool->addButton (Element_Water, "Water");
+    tool->addButton (Element_Pathgrid, "Pathgrid");
+}
+
+void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool)
+{
+    /// \todo replace EditMode with suitable subclasses
+    tool->addButton (
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Reference editing"),
+        "object");
+    tool->addButton (
+        new EditMode (this, QIcon (":placeholder"), Element_Pathgrid, "Pathgrid editing"),
+        "pathgrid");
 }
 
 CSMDoc::Document& CSVRender::WorldspaceWidget::getDocument()
@@ -327,19 +355,13 @@ void CSVRender::WorldspaceWidget::debugProfileAboutToBeRemoved (const QModelInde
 
 void CSVRender::WorldspaceWidget::elementSelectionChanged()
 {
-    setVisibilityMask (getElementMask());
+    setVisibilityMask (getVisibilityMask());
     flagAsModified();
     updateOverlay();
 }
 
 void CSVRender::WorldspaceWidget::updateOverlay()
 {
-}
-
-CSVWorld::PhysicsSystem *CSVRender::WorldspaceWidget::getPhysics()
-{
-    assert(mPhysics);
-    return mPhysics;
 }
 
 void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)

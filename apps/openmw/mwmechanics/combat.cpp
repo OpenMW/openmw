@@ -62,17 +62,10 @@ namespace MWMechanics
                 || blockerStats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
             return false;
 
-        // Don't block when in spellcasting state (shield is equipped, but not visible)
-        if (blockerStats.getDrawState() == DrawState_Spell)
+        if (!MWBase::Environment::get().getMechanicsManager()->isReadyToBlock(blocker))
             return false;
 
         MWWorld::InventoryStore& inv = blocker.getClass().getInventoryStore(blocker);
-
-        // Don't block when in hand-to-hand combat (shield is equipped, but not visible)
-        if (blockerStats.getDrawState() == DrawState_Weapon &&
-                inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight) == inv.end())
-            return false;
-
         MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if (shield == inv.end() || shield->getTypeName() != typeid(ESM::Armor).name())
             return false;

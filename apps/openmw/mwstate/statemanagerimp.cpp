@@ -27,6 +27,7 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
@@ -352,6 +353,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_PROJ:
                 case ESM::REC_MPRJ:
                 case ESM::REC_ENAB:
+                case ESM::REC_LEVC:
+                case ESM::REC_LEVI:
 
                     MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
                     break;

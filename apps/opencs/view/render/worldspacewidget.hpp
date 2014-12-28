@@ -1,6 +1,8 @@
 #ifndef OPENCS_VIEW_WORLDSPACEWIDGET_H
 #define OPENCS_VIEW_WORLDSPACEWIDGET_H
 
+#include <boost/shared_ptr.hpp>
+
 #include "scenewidget.hpp"
 #include "mousestate.hpp"
 
@@ -18,7 +20,7 @@ namespace CSMWorld
 namespace CSVWidget
 {
     class SceneToolMode;
-    class SceneToolToggle;
+    class SceneToolToggle2;
     class SceneToolbar;
     class SceneToolRun;
 }
@@ -37,11 +39,12 @@ namespace CSVRender
             CSVRender::Navigation1st m1st;
             CSVRender::NavigationFree mFree;
             CSVRender::NavigationOrbit mOrbit;
-            CSVWidget::SceneToolToggle *mSceneElements;
+            CSVWidget::SceneToolToggle2 *mSceneElements;
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
-            CSVWorld::PhysicsSystem *mPhysics;
+            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
             MouseState *mMouse;
+            unsigned int mInteractionMask;
 
         public:
 
@@ -70,12 +73,16 @@ namespace CSVRender
 
             /// \attention The created tool is not added to the toolbar (via addTool). Doing
             /// that is the responsibility of the calling function.
-            CSVWidget::SceneToolToggle *makeSceneVisibilitySelector (
+            CSVWidget::SceneToolToggle2 *makeSceneVisibilitySelector (
                 CSVWidget::SceneToolbar *parent);
 
             /// \attention The created tool is not added to the toolbar (via addTool). Doing
             /// that is the responsibility of the calling function.
             CSVWidget::SceneToolRun *makeRunTool (CSVWidget::SceneToolbar *parent);
+
+            /// \attention The created tool is not added to the toolbar (via addTool). Doing
+            /// that is the responsibility of the calling function.
+            CSVWidget::SceneToolMode *makeEditModeSelector (CSVWidget::SceneToolbar *parent);
 
             void selectDefaultNavigationMode();
 
@@ -90,17 +97,25 @@ namespace CSVRender
             virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
                 DropType type);
 
-            virtual unsigned int getElementMask() const;
+            virtual unsigned int getVisibilityMask() const;
+
+            /// \note This function will implicitly add elements that are independent of the
+            /// selected edit mode.
+            virtual void setInteractionMask (unsigned int mask);
+
+            /// \note This function will only return those elements that are both visible and
+            /// marked for interaction.
+            unsigned int getInteractionMask() const;
 
         protected:
 
-            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle *tool);
+            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
+
+            virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
 
             CSMDoc::Document& getDocument();
 
             virtual void updateOverlay();
-
-            CSVWorld::PhysicsSystem *getPhysics();
 
             virtual void mouseMoveEvent (QMouseEvent *event);
             virtual void mousePressEvent (QMouseEvent *event);

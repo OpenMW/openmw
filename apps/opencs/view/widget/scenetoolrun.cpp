@@ -26,7 +26,7 @@ void CSVWidget::SceneToolRun::adjustToolTips()
 
 void CSVWidget::SceneToolRun::updateIcon()
 {
-    setIcon (QIcon (mSelected==mProfiles.end() ? mIconDisabled : mIcon));
+    setDisabled (mSelected==mProfiles.end());
 }
 
 void CSVWidget::SceneToolRun::updatePanel()
@@ -46,11 +46,11 @@ void CSVWidget::SceneToolRun::updatePanel()
 }
 
 CSVWidget::SceneToolRun::SceneToolRun (SceneToolbar *parent, const QString& toolTip,
-    const QString& icon, const QString& iconDisabled, const std::vector<std::string>& profiles)
+    const QString& icon, const std::vector<std::string>& profiles)
 : SceneTool (parent, Type_TopAction), mProfiles (profiles.begin(), profiles.end()),
-  mSelected (mProfiles.begin()), mToolTip (toolTip), mIcon (icon),
-  mIconDisabled (iconDisabled)
+  mSelected (mProfiles.begin()), mToolTip (toolTip)
 {
+    setIcon (QIcon (icon));
     updateIcon();
     adjustToolTips();
 

@@ -64,6 +64,7 @@
         <file>edit-preview.png</file>
         <file>edit-clone.png</file>
         <file>add.png</file>
+        <file alias="placeholder">placeholder.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="create-addon">raster/startup/big/create-addon.png</file>
@@ -78,5 +79,43 @@
         <file alias="1st-person">eyeballdude.png</file>
         <file alias="free-camera">flying eye.png</file>
         <file alias="orbiting-camera">orbit2.png</file>
+        <file alias="play">scene-play.png</file>
+        <file alias="scene-view-1">scene-view-references.png</file>
+        <file alias="scene-view-16">scene-view-terrain.png</file>
+        <file alias="scene-view-4">scene-view-water.png</file>
+        <file alias="scene-view-2">scene-view-pathgrid.png</file>
+        <file alias="scene-view-8">scene-view-fog.png</file>
+        <file alias="scene-view-c0">scene-view-status-0.png</file>
+        <file alias="scene-view-c1">scene-view-status-1.png</file>
+        <file alias="scene-view-c2">scene-view-status-2.png</file>
+        <file alias="scene-view-c3">scene-view-status-3.png</file>
+        <file alias="scene-view-c4">scene-view-status-4.png</file>
+        <file alias="scene-view-c5">scene-view-status-5.png</file>
+        <file alias="scene-view-c6">scene-view-status-6.png</file>
+        <file alias="scene-view-c7">scene-view-status-7.png</file>
+        <file alias="scene-view-c8">scene-view-status-8.png</file>
+        <file alias="scene-view-c9">scene-view-status-9.png</file>
+        <file alias="scene-view-c10">scene-view-status-10.png</file>
+        <file alias="scene-view-c11">scene-view-status-11.png</file>
+        <file alias="scene-view-c12">scene-view-status-12.png</file>
+        <file alias="scene-view-c13">scene-view-status-13.png</file>
+        <file alias="scene-view-c14">scene-view-status-14.png</file>
+        <file alias="scene-view-c15">scene-view-status-15.png</file>
+        <file alias="scene-view-c16">scene-view-status-16.png</file>
+        <file alias="scene-view-c17">scene-view-status-17.png</file>
+        <file alias="scene-view-c18">scene-view-status-18.png</file>
+        <file alias="scene-view-c19">scene-view-status-19.png</file>
+        <file alias="scene-view-c20">scene-view-status-20.png</file>
+        <file alias="scene-view-c21">scene-view-status-21.png</file>
+        <file alias="scene-view-c22">scene-view-status-22.png</file>
+        <file alias="scene-view-c23">scene-view-status-23.png</file>
+        <file alias="scene-view-c24">scene-view-status-24.png</file>
+        <file alias="scene-view-c25">scene-view-status-25.png</file>
+        <file alias="scene-view-c26">scene-view-status-26.png</file>
+        <file alias="scene-view-c27">scene-view-status-27.png</file>
+        <file alias="scene-view-c28">scene-view-status-28.png</file>
+        <file alias="scene-view-c29">scene-view-status-29.png</file>
+        <file alias="scene-view-c30">scene-view-status-30.png</file>
+        <file alias="scene-view-c31">scene-view-status-31.png</file>
     </qresource>
 </RCC>

@@ -9,6 +9,8 @@
 
 #include <SDL_video.h>
 
+#include <components/widgets/sharedstatebutton.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -164,6 +166,7 @@ namespace MWGui
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mFullscreenButton, "FullscreenButton");
         getWidget(mVSyncButton, "VSyncButton");
+        getWidget(mWindowBorderButton, "WindowBorderButton");
         getWidget(mFPSButton, "FPSButton");
         getWidget(mFOVSlider, "FOVSlider");
         getWidget(mAnisotropySlider, "AnisotropySlider");
@@ -237,6 +240,8 @@ namespace MWGui
         MyGUI::TextBox* diffText;
         getWidget(diffText, "DifficultyText");
         diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
+
+        mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
@@ -352,6 +357,8 @@ namespace MWGui
                 _sender->castType<MyGUI::Button>()->setCaption(off);
                 return;
             }
+
+            mWindowBorderButton->setEnabled(!newState);
         }
 
         if (getSettingType(_sender) == checkButtonType)
@@ -454,16 +461,21 @@ namespace MWGui
 
             std::string binding = MWBase::Environment::get().getInputManager()->getActionBindingName (*it);
 
-            MyGUI::TextBox* leftText = mControlsBox->createWidget<MyGUI::TextBox>("SandText", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
+            Gui::SharedStateButton* leftText = mControlsBox->createWidget<Gui::SharedStateButton>("SandTextButton", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
             leftText->setCaptionWithReplacing(desc);
 
-            MyGUI::Button* rightText = mControlsBox->createWidget<MyGUI::Button>("SandTextButton", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
+            Gui::SharedStateButton* rightText = mControlsBox->createWidget<Gui::SharedStateButton>("SandTextButton", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
             rightText->setCaptionWithReplacing(binding);
             rightText->setTextAlign (MyGUI::Align::Right);
             rightText->setUserData(*it); // save the action id for callbacks
             rightText->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onRebindAction);
             rightText->eventMouseWheel += MyGUI::newDelegate(this, &SettingsWindow::onInputTabMouseWheel);
             curH += h;
+
+            Gui::ButtonGroup group;
+            group.push_back(leftText);
+            group.push_back(rightText);
+            Gui::SharedStateButton::createButtonGroup(group);
         }
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden

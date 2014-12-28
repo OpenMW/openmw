@@ -20,6 +20,7 @@
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolrun.hpp"
 
 #include "tablebottombox.hpp"
@@ -109,7 +110,7 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
     CSVWidget::SceneToolMode *lightingTool = widget->makeLightingSelector (toolbar);
     toolbar->addTool (lightingTool);
 
-    CSVWidget::SceneToolToggle *sceneVisibilityTool =
+    CSVWidget::SceneToolToggle2 *sceneVisibilityTool =
         widget->makeSceneVisibilitySelector (toolbar);
     toolbar->addTool (sceneVisibilityTool);
 
@@ -124,6 +125,9 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
 
     CSVWidget::SceneToolRun *runTool = widget->makeRunTool (toolbar);
     toolbar->addTool (runTool);
+
+    CSVWidget::SceneToolMode *editModeTool = widget->makeEditModeSelector (toolbar);
+    toolbar->addTool (editModeTool);
 
     return toolbar;
 }

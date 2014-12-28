@@ -35,7 +35,7 @@ namespace Nif
 struct Transformation
 {
     Ogre::Vector3 pos;
-    Ogre::Matrix3 rotationScale;
+    Ogre::Matrix3 rotation;
     float scale;
 
     static const Transformation& getIdentity()

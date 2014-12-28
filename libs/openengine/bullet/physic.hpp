@@ -348,6 +348,15 @@ namespace Physic
         bool isDebugCreated;
         bool mDebugActive;
 
+        // for OpenCS with multiple engines per document
+        std::map<Ogre::SceneManager *, BtOgre::DebugDrawer *> mDebugDrawers;
+        std::map<Ogre::SceneManager *, Ogre::SceneNode *> mDebugSceneNodes;
+
+        int toggleDebugRendering(Ogre::SceneManager *sceneMgr);
+        void stepDebug(Ogre::SceneManager *sceneMgr);
+        void createDebugDraw(Ogre::SceneManager *sceneMgr);
+        void removeDebugDraw(Ogre::SceneManager *sceneMgr);
+
     private:
         PhysicEngine(const PhysicEngine&);
         PhysicEngine& operator=(const PhysicEngine&);

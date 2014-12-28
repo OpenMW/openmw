@@ -8,10 +8,10 @@ namespace CSVRender
     {
         // elements that are part of the actual scene
         Element_Reference = 0x1,
-        Element_Terrain = 0x2,
+        Element_Pathgrid = 0x2,
         Element_Water = 0x4,
-        Element_Pathgrid = 0x8,
-        Element_Fog = 0x10,
+        Element_Fog = 0x8,
+        Element_Terrain = 0x10,
 
         // control elements
         Element_CellMarker = 0x10000,

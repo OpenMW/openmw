@@ -56,7 +56,7 @@ namespace CSVRender
     //
 
     MouseState::MouseState(WorldspaceWidget *parent)
-        : mParent(parent), mPhysics(parent->getPhysics()), mSceneManager(parent->getSceneManager())
+        : mParent(parent), mPhysics(parent->mDocument.getPhysics()), mSceneManager(parent->getSceneManager())
         , mCurrentObj(""), mMouseState(Mouse_Default), mOldPos(0,0), mMouseEventTimer(0), mPlane(0)
         , mGrabbedSceneNode(""), mOrigObjPos(Ogre::Vector3()), mOrigMousePos(Ogre::Vector3())
         , mCurrentMousePos(Ogre::Vector3()), mOffset(0.0f)
@@ -255,7 +255,7 @@ namespace CSVRender
                 std::pair<std::string, Ogre::Vector3> result = terrainUnderCursor(event->x(), event->y());
                 if(result.first != "")
                 {
-                    // FIXME: terrain editing
+                    // FIXME: terrain editing goes here
                 }
                 break;
             }
@@ -267,6 +267,8 @@ namespace CSVRender
     void MouseState::mouseDoubleClickEvent (QMouseEvent *event)
     {
         event->ignore();
+        //mPhysics->toggleDebugRendering(mSceneManager);
+        //mParent->flagAsModified();
     }
 
     bool MouseState::wheelEvent (QWheelEvent *event)

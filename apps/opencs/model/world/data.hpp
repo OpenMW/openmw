@@ -98,6 +98,7 @@ namespace CSMWorld
             bool mBase;
             bool mProject;
             std::map<std::string, std::map<ESM::RefNum, std::string> > mRefLoadCache;
+            int mReaderIndex;
 
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
@@ -243,7 +244,7 @@ namespace CSMWorld
             ///
             ///< \return estimated number of records
 
-            bool continueLoading (CSMDoc::Stage::Messages& messages);
+            bool continueLoading (CSMDoc::Messages& messages);
             ///< \return Finished?
 
             bool hasId (const std::string& id) const;

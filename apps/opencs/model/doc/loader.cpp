@@ -52,7 +52,7 @@ void CSMDoc::Loader::load()
     {
         if (iter->second.mRecordsLeft)
         {
-            CSMDoc::Stage::Messages messages;
+            CSMDoc::Messages messages;
             for (int i=0; i<batchingSize; ++i) // do not flood the system with update signals
                 if (document->getData().continueLoading (messages))
                 {
@@ -65,11 +65,11 @@ void CSMDoc::Loader::load()
             CSMWorld::UniversalId log (CSMWorld::UniversalId::Type_LoadErrorLog, 0);
 
             { // silence a g++ warning
-            for (CSMDoc::Stage::Messages::const_iterator iter (messages.begin());
+            for (CSMDoc::Messages::Iterator iter (messages.begin());
                 iter!=messages.end(); ++iter)
             {
-                document->getReport (log)->add (iter->first, iter->second);
-                emit loadMessage (document, iter->second);
+                document->getReport (log)->add (iter->mId, iter->mMessage);
+                emit loadMessage (document, iter->mMessage);
             }
             }
 

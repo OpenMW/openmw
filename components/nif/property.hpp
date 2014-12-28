@@ -155,6 +155,22 @@ public:
     }
 };
 
+class NiFogProperty : public Property
+{
+public:
+    float mFogDepth;
+    Ogre::Vector3 mColour;
+
+
+    void read(NIFStream *nif)
+    {
+        Property::read(nif);
+
+        mFogDepth = nif->getFloat();
+        mColour = nif->getVector3();
+    }
+};
+
 // These contain no other data than the 'flags' field in Property
 class NiShadeProperty : public Property { };
 class NiDitherProperty : public Property { };

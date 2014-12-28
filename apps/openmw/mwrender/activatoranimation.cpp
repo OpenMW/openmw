@@ -4,6 +4,8 @@
 
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/class.hpp"
+
 #include "renderconst.hpp"
 
 namespace MWRender
@@ -16,17 +18,14 @@ ActivatorAnimation::~ActivatorAnimation()
 ActivatorAnimation::ActivatorAnimation(const MWWorld::Ptr &ptr)
   : Animation(ptr, ptr.getRefData().getBaseNode())
 {
-    MWWorld::LiveCellRef<ESM::Activator> *ref = mPtr.get<ESM::Activator>();
+    const std::string& model = mPtr.getClass().getModel(mPtr);
 
-    assert(ref->mBase != NULL);
-    if(!ref->mBase->mModel.empty())
+    if(!model.empty())
     {
-        const std::string name = "meshes\\"+ref->mBase->mModel;
-
-        setObjectRoot(name, false);
+        setObjectRoot(model, false);
         setRenderProperties(mObjectRoot, RV_Misc, RQG_Main, RQG_Alpha);
 
-        addAnimSource(name);
+        addAnimSource(model);
     }
 }
 

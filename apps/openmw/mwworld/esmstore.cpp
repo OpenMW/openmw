@@ -149,7 +149,9 @@ void ESMStore::setUp()
             +mEnchants.getDynamicSize()
             +mNpcs.getDynamicSize()
             +mSpells.getDynamicSize()
-            +mWeapons.getDynamicSize();
+            +mWeapons.getDynamicSize()
+            +mCreatureLists.getDynamicSize()
+            +mItemLists.getDynamicSize();
     }
 
     void ESMStore::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -170,6 +172,8 @@ void ESMStore::setUp()
         mSpells.write (writer, progress);
         mWeapons.write (writer, progress);
         mNpcs.write (writer, progress);
+        mItemLists.write (writer, progress);
+        mCreatureLists.write (writer, progress);
     }
 
     bool ESMStore::readRecord (ESM::ESMReader& reader, int32_t type)
@@ -185,6 +189,8 @@ void ESMStore::setUp()
             case ESM::REC_SPEL:
             case ESM::REC_WEAP:
             case ESM::REC_NPC_:
+            case ESM::REC_LEVI:
+            case ESM::REC_LEVC:
 
                 mStores[type]->read (reader);
 

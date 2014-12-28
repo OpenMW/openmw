@@ -1,4 +1,5 @@
 #include "widgets.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include <boost/lexical_cast.hpp>
 

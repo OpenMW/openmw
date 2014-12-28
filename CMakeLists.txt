@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
-set(OPENMW_VERSION_MINOR 33)
+set(OPENMW_VERSION_MINOR 34)
 set(OPENMW_VERSION_RELEASE 0)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -25,24 +25,28 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
         find_package(Git)
 
         if(GIT_FOUND)
-            include(GetGitRevisionDescription)
-            get_git_tag_revision(TAGHASH --tags --max-count=1)
-            get_git_head_revision(REFSPEC COMMITHASH)
-            git_describe(VERSION --tags ${TAGHASH})
+            execute_process (
+                COMMAND "${GIT_EXECUTABLE}" rev-list --tags --max-count=1
+                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+                RESULT_VARIABLE EXITCODE1
+                OUTPUT_VARIABLE TAGHASH
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-            string(REGEX MATCH "^openmw-[^0-9]*[0-9]+\\.[0-9]+\\.[0-9]+.*" MATCH "${VERSION}")
-            if(MATCH)
-                string(REGEX REPLACE "^openmw-([0-9]+)\\..*" "\\1" GIT_VERSION_MAJOR "${VERSION}")
-                string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_MINOR "${VERSION}")
-                string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_RELEASE "${VERSION}")
+            execute_process (
+                COMMAND "${GIT_EXECUTABLE}" rev-parse HEAD
+                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+                RESULT_VARIABLE EXITCODE2
+                OUTPUT_VARIABLE COMMITHASH
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+            string (COMPARE EQUAL "${EXITCODE1}:${EXITCODE2}" "0:0" SUCCESS)
+            if (SUCCESS)
                 set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
                 set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
-
                 message(STATUS "OpenMW version ${OPENMW_VERSION}")
-            else(MATCH)
+            else (SUCCESS)
                 message(WARNING "Failed to get valid version information from Git")
-            endif(MATCH)
+            endif (SUCCESS)
         else(GIT_FOUND)
             message(WARNING "Git executable not found")
         endif(GIT_FOUND)
@@ -75,6 +79,7 @@ option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
 option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
 option(BUILD_OPENCS "build OpenMW Construction Set" ON)
+option(BUILD_WIZARD "build Installation Wizard" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest and GMock frameworks" OFF)
 option(BUILD_NIFTEST "build nif file tester" OFF)
@@ -433,6 +438,9 @@ IF(NOT WIN32 AND NOT APPLE)
     IF(BUILD_NIFTEST)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/niftest" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_NIFTEST)
+    IF(BUILD_WIZARD)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw-wizard" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_WIZARD)
     if(BUILD_MYGUI_PLUGIN)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Plugin_MyGUI_OpenMW_Resources.so" DESTINATION "${LIBDIR}" )
     ENDIF(BUILD_MYGUI_PLUGIN)
@@ -485,6 +493,9 @@ if(WIN32)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/opencs.exe" DESTINATION ".")
         INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION ".")
     ENDIF(BUILD_OPENCS)
+    IF(BUILD_WIZARD)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/openmw-wizard.exe" DESTINATION ".")
+    ENDIF(BUILD_WIZARD)
     if(BUILD_MYGUI_PLUGIN)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/Plugin_MyGUI_OpenMW_Resources.dll" DESTINATION ".")
     ENDIF(BUILD_MYGUI_PLUGIN)
@@ -505,6 +516,9 @@ if(WIN32)
     IF(BUILD_OPENCS)
         SET(CPACK_PACKAGE_EXECUTABLES "${CPACK_PACKAGE_EXECUTABLES};opencs;OpenMW Construction Set")
     ENDIF(BUILD_OPENCS)
+    IF(BUILD_WIZARD)
+        SET(CPACK_PACKAGE_EXECUTABLES "${CPACK_PACKAGE_EXECUTABLES};openmw-wizard;OpenMW Wizard")
+    ENDIF(BUILD_WIZARD)
     SET(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\readme.txt'")
     SET(CPACK_NSIS_DELETE_ICONS_EXTRA "
         !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
@@ -578,13 +592,6 @@ if (BUILD_ESMTOOL)
 endif()
 
 if (BUILD_LAUNCHER)
-    if(NOT WIN32)
-        find_package(LIBUNSHIELD REQUIRED)
-        if(NOT LIBUNSHIELD_FOUND)
-               message(SEND_ERROR "Failed to find libunshield")
-        endif(NOT LIBUNSHIELD_FOUND)
-    endif(NOT WIN32)
-
    add_subdirectory( apps/launcher )
 endif()
 
@@ -594,6 +601,10 @@ endif()
 
 if (BUILD_OPENCS)
    add_subdirectory (apps/opencs)
+endif()
+
+if (BUILD_WIZARD)
+   add_subdirectory(apps/wizard)
 endif()
 
 # UnitTests
@@ -698,6 +709,9 @@ if (WIN32)
     if (BUILD_ESMTOOL)
         set_target_properties(esmtool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     endif (BUILD_ESMTOOL)
+    if (BUILD_WIZARD)
+        set_target_properties(openmw-wizard PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    endif (BUILD_WIZARD)
     if (BUILD_OPENCS)
         # QT triggers an informational warning that the object layout may differ when compiled with /vd2
         set(OPENCS_WARNINGS "${WARNINGS} ${MT_BUILD} /wd4435")

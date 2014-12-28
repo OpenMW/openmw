@@ -37,6 +37,8 @@ namespace MWWorld
             bool mEnabled;
             int mCount; // 0: deleted
 
+            bool mDeleted; // separate delete flag used for deletion by a content file
+
             ESM::Position mPosition;
 
             LocalRotation mLocalRotation;
@@ -86,11 +88,20 @@ namespace MWWorld
             void setLocals (const ESM::Script& script);
 
             void setCount (int count);
-            /// Set object count (an object pile is a simple object with a count >1).
+            ///< Set object count (an object pile is a simple object with a count >1).
             ///
             /// \warning Do not call setCount() to add or remove objects from a
             /// container or an actor's inventory. Call ContainerStore::add() or
             /// ContainerStore::remove() instead.
+
+            /// This flag is only used for content stack loading and will not be stored in the savegame.
+            /// If the object was deleted by gameplay, then use setCount(0) instead.
+            void setDeleted(bool deleted);
+
+            /// Returns true if the object was either deleted by the content file or by gameplay.
+            bool isDeleted() const;
+            /// Returns true if the object was deleted by a content file.
+            bool isDeletedByContentFile() const;
 
             MWScript::Locals& getLocals();
 

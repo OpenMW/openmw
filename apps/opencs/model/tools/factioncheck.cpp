@@ -18,7 +18,7 @@ int CSMTools::FactionCheckStage::setup()
     return mFactions.getSize();
 }
 
-void CSMTools::FactionCheckStage::perform (int stage, Messages& messages)
+void CSMTools::FactionCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     const CSMWorld::Record<ESM::Faction>& record = mFactions.getRecord (stage);
 

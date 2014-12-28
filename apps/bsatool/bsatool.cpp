@@ -51,7 +51,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
         ("help,h", "print help message.")
         ("version,v", "print version information and quit.")
         ("long,l", "Include extra information in archive listing.")
-        ("full-path,f", "Create diretory hierarchy on file extraction "
+        ("full-path,f", "Create directory hierarchy on file extraction "
          "(always true for extractall).")
         ;
 

@@ -3,6 +3,7 @@
 #include <iomanip>
 
 #include <boost/lexical_cast.hpp>
+#include <components/esm/records.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -11,6 +12,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "itemselection.hpp"
 #include "container.hpp"
@@ -109,8 +111,8 @@ namespace MWGui
         mCharge->setCaption(boost::lexical_cast<std::string>(mEnchanting.getGemCharge()));
 
         std::stringstream castCost;
-        castCost << std::setprecision(1) << std::fixed << mEnchanting.getCastCost();
-        mCastCost->setCaption(boost::lexical_cast<std::string>(castCost.str()));
+        castCost << mEnchanting.getCastCost();
+        mCastCost->setCaption(castCost.str());
 
         mPrice->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantPrice()));
 

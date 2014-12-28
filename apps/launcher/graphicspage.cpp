@@ -137,6 +137,7 @@ bool Launcher::GraphicsPage::setupSDL()
         return false;
     }
 
+    screenComboBox->clear();
     for (int i = 0; i < displays; i++)
     {
         screenComboBox->addItem(QString(tr("Screen ")) + QString::number(i + 1));
@@ -149,7 +150,7 @@ bool Launcher::GraphicsPage::loadSettings()
 {
     if (!setupSDL())
         return false;
-    if (!setupOgre())
+    if (!mOgre && !setupOgre())
         return false;
 
     if (mGraphicsSettings.value(QString("Video/vsync")) == QLatin1String("true"))
@@ -157,6 +158,9 @@ bool Launcher::GraphicsPage::loadSettings()
 
     if (mGraphicsSettings.value(QString("Video/fullscreen")) == QLatin1String("true"))
         fullScreenCheckBox->setCheckState(Qt::Checked);
+
+    if (mGraphicsSettings.value(QString("Video/window border")) == QLatin1String("true"))
+        windowBorderCheckBox->setCheckState(Qt::Checked);
 
     int aaIndex = antiAliasingComboBox->findText(mGraphicsSettings.value(QString("Video/antialiasing")));
     if (aaIndex != -1)
@@ -191,6 +195,9 @@ void Launcher::GraphicsPage::saveSettings()
 
     fullScreenCheckBox->checkState() ? mGraphicsSettings.setValue(QString("Video/fullscreen"), QString("true"))
                                       : mGraphicsSettings.setValue(QString("Video/fullscreen"), QString("false"));
+
+    windowBorderCheckBox->checkState() ? mGraphicsSettings.setValue(QString("Video/window border"), QString("true"))
+                                      : mGraphicsSettings.setValue(QString("Video/window border"), QString("false"));
 
     mGraphicsSettings.setValue(QString("Video/antialiasing"), antiAliasingComboBox->currentText());
     mGraphicsSettings.setValue(QString("Video/render system"), rendererComboBox->currentText());
@@ -330,10 +337,12 @@ void Launcher::GraphicsPage::slotFullScreenChanged(int state)
         customRadioButton->setEnabled(false);
         customWidthSpinBox->setEnabled(false);
         customHeightSpinBox->setEnabled(false);
+        windowBorderCheckBox->setEnabled(false);
     } else {
         customRadioButton->setEnabled(true);
         customWidthSpinBox->setEnabled(true);
         customHeightSpinBox->setEnabled(true);
+        windowBorderCheckBox->setEnabled(true);
     }
 }
 

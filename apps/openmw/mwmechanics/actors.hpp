@@ -34,7 +34,7 @@ namespace MWMechanics
             void calculateDynamicStats (const MWWorld::Ptr& ptr);
 
             void calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration);
-            void calculateNpcStatModifiers (const MWWorld::Ptr& ptr);
+            void calculateNpcStatModifiers (const MWWorld::Ptr& ptr, float duration);
 
             void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
 
@@ -89,6 +89,9 @@ namespace MWMechanics
             */
             void engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer);
 
+            void updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
+                                            MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance);
+
             void restoreDynamicStats(bool sleep);
             ///< If the player is sleeping, this should be called every hour.
 
@@ -112,6 +115,9 @@ namespace MWMechanics
             /**ie AiFollow is active and the target is the actor **/
             std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
 
+            /// Get the list of AiFollow::mFollowIndex for all actors following this target
+            std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor);
+
             ///Returns the list of actors which are fighting the given actor
             /**ie AiCombat is active and the target is the actor **/
             std::list<MWWorld::Ptr> getActorsFighting(const MWWorld::Ptr& actor);
@@ -121,6 +127,8 @@ namespace MWMechanics
             void readRecord (ESM::ESMReader& reader, int32_t type);
 
             void clear(); // Clear death counter
+
+            bool isReadyToBlock(const MWWorld::Ptr& ptr) const;
 
     private:
         PtrControllerMap mActors;

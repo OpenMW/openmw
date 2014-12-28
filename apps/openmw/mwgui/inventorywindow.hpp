@@ -49,6 +49,9 @@ namespace MWGui
 
             void setGuiMode(GuiMode mode);
 
+            /// Cycle to previous/next weapon
+            void cycle(bool next);
+
         private:
             DragAndDrop* mDragAndDrop;
 

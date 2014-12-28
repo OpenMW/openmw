@@ -190,14 +190,12 @@ namespace MWInput
 
         int action = channel->getNumber();
 
-        if (action == A_Use)
+        if (mControlSwitch["playercontrols"])
         {
-            mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
-        }
-
-        if (action == A_Jump)
-        {
-            mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
+            if (action == A_Use)
+                mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
+            else if (action == A_Jump)
+                mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
         }
 
         if (currentValue == 1)
@@ -288,6 +286,18 @@ namespace MWInput
             case A_QuickLoad:
                 quickLoad();
                 break;
+            case A_CycleSpellLeft:
+                MWBase::Environment::get().getWindowManager()->cycleSpell(false);
+                break;
+            case A_CycleSpellRight:
+                MWBase::Environment::get().getWindowManager()->cycleSpell(true);
+                break;
+            case A_CycleWeaponLeft:
+                MWBase::Environment::get().getWindowManager()->cycleWeapon(false);
+                break;
+            case A_CycleWeaponRight:
+                MWBase::Environment::get().getWindowManager()->cycleWeapon(true);
+                break;
             }
         }
     }
@@ -373,6 +383,7 @@ namespace MWInput
                 {
                     mPlayer->setUpDown (1);
                     triedToMove = true;
+                    mOverencumberedMessageDelay = 0.f;
                 }
 
                 if (mAlwaysRunActive)
@@ -603,7 +614,7 @@ namespace MWInput
             MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
         }
 
-        if (mMouseLookEnabled)
+        if (mMouseLookEnabled && !mControlsDisabled)
         {
             resetIdleTime();
 
@@ -622,10 +633,12 @@ namespace MWInput
                 mPlayer->pitch(y);
             }
 
-            if (arg.zrel && mControlSwitch["playerviewswitch"]) //Check to make sure you are allowed to zoomout and there is a change
+            if (arg.zrel && mControlSwitch["playerviewswitch"] && mControlSwitch["playercontrols"]) //Check to make sure you are allowed to zoomout and there is a change
             {
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.zrel);
-                MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
+
+                if (Settings::Manager::getBool("allow third person zoom", "Input"))
+                    MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
             }
         }
     }
@@ -680,7 +693,7 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
 
         // Not allowed before the magic window is accessible
-        if (!mControlSwitch["playermagic"])
+        if (!mControlSwitch["playermagic"] || !mControlSwitch["playercontrols"])
             return;
 
         // Not allowed if no spell selected
@@ -701,7 +714,7 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
 
         // Not allowed before the inventory window is accessible
-        if (!mControlSwitch["playerfighting"])
+        if (!mControlSwitch["playerfighting"] || !mControlSwitch["playercontrols"])
             return;
 
         MWMechanics::DrawState_ state = mPlayer->getDrawState();
@@ -713,6 +726,9 @@ namespace MWInput
 
     void InputManager::rest()
     {
+        if (!mControlSwitch["playercontrols"])
+            return;
+
         if (!MWBase::Environment::get().getWindowManager()->getRestEnabled () || MWBase::Environment::get().getWindowManager()->isGuiMode ())
             return;
 
@@ -734,6 +750,9 @@ namespace MWInput
 
     void InputManager::toggleInventory()
     {
+        if (!mControlSwitch["playercontrols"])
+            return;
+
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
@@ -770,6 +789,8 @@ namespace MWInput
 
     void InputManager::toggleJournal()
     {
+        if (!mControlSwitch["playercontrols"])
+            return;
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
@@ -787,6 +808,8 @@ namespace MWInput
 
     void InputManager::quickKey (int index)
     {
+        if (!mControlSwitch["playercontrols"])
+            return;
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (player.getClass().getNpcStats(player).isWerewolf())
         {
@@ -883,6 +906,11 @@ namespace MWInput
         defaultKeyBindings[A_MoveRight] = SDL_SCANCODE_D;
         defaultKeyBindings[A_ToggleWeapon] = SDL_SCANCODE_F;
         defaultKeyBindings[A_ToggleSpell] = SDL_SCANCODE_R;
+        defaultKeyBindings[A_CycleSpellLeft] = SDL_SCANCODE_MINUS;
+        defaultKeyBindings[A_CycleSpellRight] = SDL_SCANCODE_EQUALS;
+        defaultKeyBindings[A_CycleWeaponLeft] = SDL_SCANCODE_LEFTBRACKET;
+        defaultKeyBindings[A_CycleWeaponRight] = SDL_SCANCODE_RIGHTBRACKET;
+
         defaultKeyBindings[A_QuickKeysMenu] = SDL_SCANCODE_F1;
         defaultKeyBindings[A_Console] = SDL_SCANCODE_GRAVE;
         defaultKeyBindings[A_Run] = SDL_SCANCODE_LSHIFT;
@@ -961,6 +989,10 @@ namespace MWInput
         descriptions[A_MoveRight] = "sRight";
         descriptions[A_ToggleWeapon] = "sReady_Weapon";
         descriptions[A_ToggleSpell] = "sReady_Magic";
+        descriptions[A_CycleSpellLeft] = "sPrevSpell";
+        descriptions[A_CycleSpellRight] = "sNextSpell";
+        descriptions[A_CycleWeaponLeft] = "sPrevWeapon";
+        descriptions[A_CycleWeaponRight] = "sNextWeapon";
         descriptions[A_Console] = "sConsoleTitle";
         descriptions[A_Run] = "sRun";
         descriptions[A_Sneak] = "sCrouch_Sneak";
@@ -1021,6 +1053,10 @@ namespace MWInput
         ret.push_back(A_Use);
         ret.push_back(A_ToggleWeapon);
         ret.push_back(A_ToggleSpell);
+        ret.push_back(A_CycleSpellLeft);
+        ret.push_back(A_CycleSpellRight);
+        ret.push_back(A_CycleWeaponLeft);
+        ret.push_back(A_CycleWeaponRight);
         ret.push_back(A_AutoMove);
         ret.push_back(A_Jump);
         ret.push_back(A_Inventory);

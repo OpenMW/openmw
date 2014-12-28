@@ -40,6 +40,7 @@
 
 #include "mwdialogue/dialoguemanagerimp.hpp"
 #include "mwdialogue/journalimp.hpp"
+#include "mwdialogue/scripttest.hpp"
 
 #include "mwmechanics/mechanicsmanagerimp.hpp"
 
@@ -79,8 +80,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 {
     try
     {
-        float frametime = std::min(evt.timeSinceLastFrame, 0.2f);
-
+        float frametime = evt.timeSinceLastFrame;
         mEnvironment.setFrameDuration (frametime);
 
         // update input
@@ -175,6 +175,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mSkipMenu (false)
   , mUseSound (true)
   , mCompileAll (false)
+  , mCompileAllDialogue (false)
   , mWarningsMode (1)
   , mScriptContext (0)
   , mFSStrict (false)
@@ -349,6 +350,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     OEngine::Render::WindowSettings windowSettings;
     windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
+    windowSettings.window_border = settings.getBool("window border", "Video");
     windowSettings.window_x = settings.getInt("resolution x", "Video");
     windowSettings.window_y = settings.getInt("resolution y", "Video");
     windowSettings.screen = settings.getInt("screen", "Video");
@@ -426,10 +428,19 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     if (mCompileAll)
     {
         std::pair<int, int> result = MWBase::Environment::get().getScriptManager()->compileAll();
-
         if (result.first)
             std::cout
                 << "compiled " << result.second << " of " << result.first << " scripts ("
+                << 100*static_cast<double> (result.second)/result.first
+                << "%)"
+                << std::endl;
+    }
+    if (mCompileAllDialogue)
+    {
+        std::pair<int, int> result = MWDialogue::ScriptTest::compileAll(&mExtensions, mWarningsMode);
+        if (result.first)
+            std::cout
+                << "compiled " << result.second << " of " << result.first << " dialogue script/actor combinations a("
                 << 100*static_cast<double> (result.second)/result.first
                 << "%)"
                 << std::endl;
@@ -478,9 +489,15 @@ void OMW::Engine::go()
     }
 
     // Start the main rendering loop
+    Ogre::Timer timer;
     while (!MWBase::Environment::get().getStateManager()->hasQuitRequest())
-        Ogre::Root::getSingleton().renderOneFrame();
+    {
+        float dt = timer.getMilliseconds()/1000.f;
+        dt = std::min(dt, 0.2f);
 
+        timer.reset();
+        Ogre::Root::getSingleton().renderOneFrame(dt);
+    }
     // Save user settings
     settings.saveUser(settingspath);
 
@@ -499,6 +516,14 @@ void OMW::Engine::activate()
 
     if (ptr.getClass().getName(ptr) == "") // objects without name presented to user can never be activated
         return;
+
+    if (ptr.getClass().isActor())
+    {
+        MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
+
+        if (stats.getAiSequence().isInCombat() && !stats.isDead())
+            return;
+    }
 
     MWBase::Environment::get().getWorld()->activate(ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
 }
@@ -528,6 +553,11 @@ void OMW::Engine::screenshot()
 void OMW::Engine::setCompileAll (bool all)
 {
     mCompileAll = all;
+}
+
+void OMW::Engine::setCompileAllDialogue (bool all)
+{
+    mCompileAllDialogue = all;
 }
 
 void OMW::Engine::setSoundUsage(bool soundUsage)

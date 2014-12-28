@@ -124,6 +124,8 @@ namespace MWGui
         if (targetView)
             targetView->update();
 
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
+
         // We need to update the view since an other item could be auto-equipped.
         mSourceView->update();
     }

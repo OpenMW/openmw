@@ -2,6 +2,8 @@
 #include "util.hpp"
 
 #include <stdexcept>
+#include <climits>
+#include <cfloat>
 
 #include <QUndoStack>
 #include <QMetaProperty>
@@ -157,16 +159,24 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             return new QLineEdit(parent);
 
         case CSMWorld::ColumnBase::Display_Integer:
-
-            return new QSpinBox(parent);
+        {
+            QSpinBox *sb = new QSpinBox(parent);
+            sb->setRange(INT_MIN, INT_MAX);
+            return sb;
+        }
 
         case CSMWorld::ColumnBase::Display_Var:
 
             return new QLineEdit(parent);
 
         case CSMWorld::ColumnBase::Display_Float:
-
-            return new QDoubleSpinBox(parent);
+        {
+            QDoubleSpinBox *dsb = new QDoubleSpinBox(parent);
+            dsb->setRange(FLT_MIN, FLT_MAX);
+            dsb->setSingleStep(0.01f);
+            dsb->setDecimals(3);
+            return dsb;
+        }
 
         case CSMWorld::ColumnBase::Display_LongString:
         {

@@ -11,6 +11,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 
 #include "mapwindow.hpp"
@@ -633,8 +634,8 @@ namespace MWGui
         MWWorld::Store<ESM::Skill>::iterator it = skills.begin();
         for (; it != skills.end(); ++it)
         {
-            if (it->mData.mSpecialization == specId)
-                specText += std::string("\n#{") + ESM::Skill::sSkillNameIds[it->mIndex] + "}";
+            if (it->second.mData.mSpecialization == specId)
+                specText += std::string("\n#{") + ESM::Skill::sSkillNameIds[it->first] + "}";
         }
         widget->setUserString("Caption_CenteredCaptionText", specText);
         widget->setUserString("ToolTipLayout", "TextWithCenteredCaptionToolTip");
