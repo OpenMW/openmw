@@ -1384,4 +1384,9 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         return ref->mBase->mAiData.mFight;
     }
+
+    bool Npc::isBipedal(const MWWorld::Ptr &ptr) const
+    {
+        return true;
+    }
 }

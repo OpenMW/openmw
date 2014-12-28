@@ -1586,7 +1586,14 @@ void CharacterController::update(float duration)
             clearAnimQueue();
 
         if(mAnimQueue.empty())
+        {
             idlestate = (inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle));
+            if ((mUpperBodyState != UpperCharState_Nothing
+                    || mMovementState != CharState_None
+                    || mHitState != CharState_None)
+                    && !mPtr.getClass().isBipedal(mPtr))
+                idlestate = CharState_None;
+        }
         else if(mAnimQueue.size() > 1)
         {
             if(mAnimation->isPlaying(mAnimQueue.front().first) == false)
