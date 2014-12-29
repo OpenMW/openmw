@@ -182,10 +182,16 @@ namespace MWGui
         mCompass->setDepth(Local_CompassLayer);
         mCompass->setNeedMouseFocus(false);
 
-        // create 3x3 map widgets, 512x512 each, holding a 1024x1024 texture each
-        for (int mx=0; mx<3; ++mx)
+        mLocalMapViewDistance = Settings::Manager::getInt("localMapViewDistance", "Windows");
+
+        // Make sure the view distance value is at least 3, otherwise the map doesn't work properly
+        if (mLocalMapViewDistance < 3)
+            mLocalMapViewDistance = 3;
+
+        // create a variable size grid of map widgets, 512x512 each, holding a 1024x1024 texture each
+        for (int mx=0; mx<mLocalMapViewDistance; ++mx)
         {
-            for (int my=0; my<3; ++my)
+            for (int my=0; my<mLocalMapViewDistance; ++my)
             {
                 MyGUI::ImageBox* map = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
                     MyGUI::IntCoord(mx*widgetSize, my*widgetSize, widgetSize, widgetSize),
@@ -204,6 +210,18 @@ namespace MWGui
                 mFogWidgets.push_back(fog);
             }
         }
+
+        // Adjust the Scroll Window's canvas size so that we can actually see the new tiles
+        // Getting the current canvas size is just a bit of future proofing in the event
+        // the default size changes for some reason.
+        MyGUI::IntSize currentMapCanvasSize = mLocalMap->getCanvasSize();
+        float canvasSizeMultiplier = (float)mLocalMapViewDistance / 3.0f; // 3x3 is the minimum grid size
+
+        // Boo, no *= operator on the MyGUI::IntSize type
+        currentMapCanvasSize.width *= canvasSizeMultiplier;
+        currentMapCanvasSize.height *= canvasSizeMultiplier;
+
+        mLocalMap->setCanvasSize(currentMapCanvasSize);
     }
 
     void LocalMapBase::setCellPrefix(const std::string& prefix)
@@ -221,13 +239,15 @@ namespace MWGui
 
     void LocalMapBase::applyFogOfWar()
     {
-        for (int mx=0; mx<3; ++mx)
+        const int mapOffset = (mLocalMapViewDistance - 2) / 2;
+
+        for (int mx=0; mx<mLocalMapViewDistance; ++mx)
         {
-            for (int my=0; my<3; ++my)
+            for (int my=0; my<mLocalMapViewDistance; ++my)
             {
-                std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(mCurX + (mx-1)) + "_"
-                        + boost::lexical_cast<std::string>(mCurY + (-1*(my-1)));
-                MyGUI::ImageBox* fog = mFogWidgets[my + 3*mx];
+                std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(mCurX + (mx - mapOffset)) + "_"
+                        + boost::lexical_cast<std::string>(mCurY + (-1*(my - mapOffset)));
+                MyGUI::ImageBox* fog = mFogWidgets[my + mLocalMapViewDistance*mx];
                 fog->setImageTexture(mFogOfWar ?
                     ((MyGUI::RenderManager::getInstance().getTexture(image+"_fog") != 0) ? image+"_fog"
                     : "black.png" )
@@ -287,6 +307,7 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(*it);
         mCustomMarkerWidgets.clear();
 
+        const int markerOffset = (mLocalMapViewDistance - 3) * (256 - 4);
         for (std::vector<CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
         {
             const CustomMarker& marker = *it;
@@ -309,8 +330,8 @@ namespace MWGui
             MarkerPosition markerPos;
             MyGUI::IntPoint widgetPos = getMarkerPosition(marker.mWorldX, marker.mWorldY, markerPos);
 
-            MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
-                                        widgetPos.top - 4,
+            MyGUI::IntCoord widgetCoord(widgetPos.left + markerOffset,
+                                        widgetPos.top + markerOffset,
                                         8, 8);
             MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("MarkerButton",
                 widgetCoord, MyGUI::Align::Default);
@@ -346,16 +367,17 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(*it);
         mDoorMarkerWidgets.clear();
 
-        // Update the map textures
-        for (int mx=0; mx<3; ++mx)
+
+        const int mapOffset = (mLocalMapViewDistance - 2) / 2;
+        for (int mx=0; mx<mLocalMapViewDistance; ++mx)
         {
-            for (int my=0; my<3; ++my)
+            for (int my=0; my<mLocalMapViewDistance; ++my)
             {
                 // map
-                std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(x + (mx-1)) + "_"
-                        + boost::lexical_cast<std::string>(y + (-1*(my-1)));
+                std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(x + (mx - mapOffset)) + "_"
+                        + boost::lexical_cast<std::string>(y + (-1*(my - mapOffset)));
 
-                MyGUI::ImageBox* box = mMapWidgets[my + 3*mx];
+                MyGUI::ImageBox* box = mMapWidgets[my + mLocalMapViewDistance * mx];
 
                 if (MyGUI::RenderManager::getInstance().getTexture(image) != 0)
                     box->setImageTexture(image);
@@ -375,9 +397,11 @@ namespace MWGui
         }
         else
         {
-            for (int dX=-1; dX<2; ++dX)
+            int halfViewDistance = mLocalMapViewDistance / 2;
+
+            for (int dX = -halfViewDistance; dX < halfViewDistance; ++dX)
             {
-                for (int dY=-1; dY<2; ++dY)
+                for (int dY = -halfViewDistance; dY < halfViewDistance; ++dY)
                 {
                     MWWorld::CellStore* cell = world->getExterior (mCurX+dX, mCurY+dY);
                     world->getDoorMarkers(cell, doors);
@@ -387,14 +411,16 @@ namespace MWGui
 
         // Create a widget for each marker
         int counter = 0;
+        const int doorOffset = (256 - 16) * (mLocalMapViewDistance - 3) + 16;
+
         for (std::vector<MWBase::World::DoorMarker>::iterator it = doors.begin(); it != doors.end(); ++it)
         {
             MWBase::World::DoorMarker marker = *it;
 
             MarkerPosition markerPos;
             MyGUI::IntPoint widgetPos = getMarkerPosition(marker.x, marker.y, markerPos);
-            MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
-                                        widgetPos.top - 4,
+            MyGUI::IntCoord widgetCoord(widgetPos.left + doorOffset,
+                                        widgetPos.top + doorOffset,
                                         8, 8);
             ++counter;
             MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("MarkerButton",
@@ -426,7 +452,10 @@ namespace MWGui
 
     void LocalMapBase::setPlayerPos(int cellX, int cellY, const float nx, const float ny)
     {
-        MyGUI::IntPoint pos(widgetSize+nx*widgetSize-16, widgetSize+ny*widgetSize-16);
+        // Calculate the offset of the player icon on map
+        const int iconOffset = (mLocalMapViewDistance - 3) * (256 - 16);
+
+        MyGUI::IntPoint pos(widgetSize + nx * widgetSize + iconOffset, widgetSize + ny *widgetSize + iconOffset);
         pos.left += (cellX - mCurX) * widgetSize;
         pos.top -= (cellY - mCurY) * widgetSize;
 
@@ -435,9 +464,10 @@ namespace MWGui
             notifyPlayerUpdate ();
 
             mCompass->setPosition(pos);
-            MyGUI::IntPoint middle (pos.left+16, pos.top+16);
+
+            MyGUI::IntPoint middle (pos.left + 16, pos.top + 16);
                     MyGUI::IntCoord viewsize = mLocalMap->getCoord();
-            MyGUI::IntPoint viewOffset(0.5*viewsize.width - middle.left, 0.5*viewsize.height - middle.top);
+            MyGUI::IntPoint viewOffset(0.5 * viewsize.width - middle.left, 0.5 * viewsize.height - middle.top);
             mLocalMap->setViewOffset(viewOffset);
         }
     }
@@ -539,8 +569,8 @@ namespace MWGui
         {
             MarkerPosition markerPos;
             MyGUI::IntPoint widgetPos = getMarkerPosition(markedPosition.pos[0], markedPosition.pos[1], markerPos);
-            MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
-                                        widgetPos.top - 4,
+            MyGUI::IntCoord widgetCoord(widgetPos.left - 8,
+                                        widgetPos.top - 8,
                                         8, 8);
             MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
                 widgetCoord, MyGUI::Align::Default);
