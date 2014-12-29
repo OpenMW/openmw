@@ -13,6 +13,7 @@
 #include <OgreControllerManager.h>
 #include <OgreMeshManager.h>
 #include <OgreRenderTexture.h>
+#include <OgreCompositorManager.h> // for post-processing effects
 
 #include <SDL_video.h>
 
@@ -136,6 +137,9 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 
     Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
+	Ogre::CompositorManager::getSingleton().addCompositor(mRendering.getViewport(), "brightness_contrast_gamma");
+	Ogre::CompositorManager::getSingleton().setCompositorEnabled(mRendering.getViewport(), "brightness_contrast_gamma", true);
+
     // disable unsupported effects
     if (!Settings::Manager::getBool("shaders", "Objects"))
         Settings::Manager::setBool("enabled", "Shadows", false);
@@ -155,6 +159,8 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     sh::Factory::getInstance ().setGlobalSetting ("refraction", Settings::Manager::getBool("refraction", "Water") ? "true" : "false");
     sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
     sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh::Vector4> (new sh::Vector4(0,0,0,0)));
+	sh::Factory::getInstance ().setSharedParameter ("contrast_invGamma", sh::makeProperty<sh::Vector2>(new sh::Vector2(
+		Settings::Manager::getFloat("contrast", "General"), 1.0f/Settings::Manager::getFloat("gamma", "General"))));
 
     mRootNode = mRendering.getScene()->getRootSceneNode();
     mRootNode->createChildSceneNode("player");
@@ -757,6 +763,11 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             changeRes = true;
         else if (it->second == "field of view" && it->first == "General")
             mRendering.setFov(Settings::Manager::getFloat("field of view", "General"));
+		else if ((it->second == "gamma" || it->second == "contrast") && it->first == "General")
+		{
+			sh::Factory::getInstance ().setSharedParameter ("contrast_invGamma", sh::makeProperty<sh::Vector2>(new sh::Vector2(
+				Settings::Manager::getFloat("contrast", "General"), 1.0f/Settings::Manager::getFloat("gamma", "General"))));
+		}
         else if ((it->second == "texture filtering" && it->first == "General")
             || (it->second == "anisotropy" && it->first == "General"))
         {

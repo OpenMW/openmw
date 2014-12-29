@@ -1,0 +1,14 @@
+material mat_brightness_contrast_gamma
+{
+    pass
+    {
+        vertex_program transform_vertex
+        fragment_program openmw_brightness_contrast_gamma_fragment
+
+        depth_check off
+
+        texture_unit SceneBuffer
+        {
+        }
+    }
+}

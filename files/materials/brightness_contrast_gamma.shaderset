@@ -1,0 +1,7 @@
+shader_set openmw_brightness_contrast_gamma_fragment
+{
+    source brightness_contrast_gamma.shader
+    type fragment
+    profiles_cg ps_2_x ps_2_0 ps fp40 arbfp1
+    profiles_hlsl ps_2_0
+}

@@ -1,0 +1,24 @@
+compositor brightness_contrast_gamma
+{
+    technique
+    {
+        // render scene into texture
+        texture SceneBuffer target_width target_height PF_A8R8G8B8
+
+        target SceneBuffer
+        {
+            input previous
+        }
+
+        target_output
+        {	
+            input none
+
+            pass render_quad
+            {
+                material mat_brightness_contrast_gamma
+                input 0 SceneBuffer
+            }
+        }
+    }
+}
