@@ -428,7 +428,10 @@ namespace MWWorld
                 Ogre::Vector3 oldPosition = newPosition;
                 // We hit something. Try to step up onto it. (NOTE: stepMove does not allow stepping over)
                 // NOTE: stepMove modifies newPosition if successful
-                if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
+                bool result = stepMove(colobj, newPosition, velocity, remainingTime, engine);
+                if (!result)
+                    result = stepMove(colobj, newPosition, velocity.normalisedCopy()*300.f, remainingTime, engine);
+                if(result)
                 {
                     // don't let pure water creatures move out of water after stepMove
                     if((ptr.getClass().canSwim(ptr) && !ptr.getClass().canWalk(ptr)) 
