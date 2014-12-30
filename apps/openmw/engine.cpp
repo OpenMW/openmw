@@ -358,6 +358,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     windowSettings.icon = "openmw.png";
     std::string aa = settings.getString("antialiasing", "Video");
     windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
+    windowSettings.gamma = Settings::Manager::getFloat("gamma", "General");
+    windowSettings.contrast = Settings::Manager::getFloat("contrast", "General");
 
     SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS,
                 settings.getBool("minimize on focus loss", "Video") ? "1" : "0");

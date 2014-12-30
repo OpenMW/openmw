@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout" version="3.2.0">
-    <Widget type="Window" skin="MW_Window" position="0 0 400 426" layer="Windows" name="_Main">
+    <Widget type="Window" skin="MW_Window" position="0 0 400 505" layer="Windows" name="_Main">
         <Property key="MinSize" value="430 446"/>
-        <Widget type="TabControl" skin="TabControl" position="8 8 368 340" align="Stretch" name="SettingsTab">
+        <Widget type="TabControl" skin="TabControl" position="8 8 368 430" align="Stretch" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
             <Widget type="TabItem" skin="" position="4 32 360 308">
                 <Property key="Caption" value="  #{sPrefs}  "/>
@@ -214,7 +214,7 @@
             </Widget>
             <Widget type="TabItem" skin="" position="4 32 360 308">
                 <Property key="Caption" value="  #{sVideo}  "/>
-                <Widget type="TabControl" skin="TabControlInner" position="4 4 352 296" align="Stretch">
+                <Widget type="TabControl" skin="TabControlInner" position="4 4 352 390" align="Stretch">
                     <Property key="ButtonAutoWidth" value="true"/>
                     <Widget type="TabItem" skin="" position="0 28 352 268" align="Stretch">
                         <Property key="Caption" value="  Video  "/>
@@ -291,6 +291,32 @@
                         <Widget type="TextBox" skin="SandText" position="0 246 329 18" align="Right Top">
                             <Property key="Caption" value="#{sHigh}"/>
                             <Property key="TextAlign" value="Right"/>
+                        </Widget>
+                        <Widget type="TextBox" skin="NormalText" position="0 268 329 18" align="Left Top" name="GammaText">
+                            <Property key="Caption" value="Gamma Correction"/>
+                        </Widget>
+                        <Widget type="MWScrollBar" skin="MW_HScroll" position="0 292 329 18" align="HStretch Top" name="GammaSlider">
+                            <Property key="Range" value="10000"/>
+                            <Property key="Page" value="300"/>
+                            <UserString key="SettingType" value="Slider"/>
+                            <UserString key="SettingCategory" value="General"/>
+                            <UserString key="SettingName" value="gamma"/>
+                            <UserString key="SettingValueType" value="Float"/>
+                            <UserString key="SettingMin" value="0.1"/>
+                            <UserString key="SettingMax" value="3.0"/>
+                        </Widget>
+                        <Widget type="TextBox" skin="NormalText" position="0 314 329 18" align="Left Top" name="ContrastText">
+                            <Property key="Caption" value="Contrast"/>
+                        </Widget>
+                        <Widget type="MWScrollBar" skin="MW_HScroll" position="0 336 329 18" align="HStretch Top" name="ContrastSlider">
+                            <Property key="Range" value="10000"/>
+                            <Property key="Page" value="300"/>
+                            <UserString key="SettingType" value="Slider"/>
+                            <UserString key="SettingCategory" value="General"/>
+                            <UserString key="SettingName" value="contrast"/>
+                            <UserString key="SettingValueType" value="Float"/>
+                            <UserString key="SettingMin" value="0.1"/>
+                            <UserString key="SettingMax" value="2.0"/>
                         </Widget>
                     </Widget>
                     <Widget type="TabItem" skin="" position="0 28 352 268">
@@ -470,7 +496,7 @@
                 </Widget>
             </Widget>
         </Widget>
-        <Widget type="AutoSizedButton" skin="MW_Button" position="321 355 56 24" align="Right Bottom" name="OkButton">
+        <Widget type="AutoSizedButton" skin="MW_Button" position="320 440 56 24" align="Right Bottom" name="OkButton">
             <Property key="ExpandDirection" value="Left"/>
             <Property key="Caption" value="#{sOK}"/>
         </Widget>

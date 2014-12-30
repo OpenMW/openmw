@@ -23,6 +23,12 @@
 using namespace Ogre;
 using namespace OEngine::Render;
 
+OgreRenderer::~OgreRenderer()
+{
+    cleanup();
+    // restore system gamma ramp
+    SDL_SetWindowGammaRamp(mSDLWindow, mOldSystemGammaRamp, &mOldSystemGammaRamp[256], &mOldSystemGammaRamp[512]);
+}
 
 void OgreRenderer::cleanup()
 {
@@ -138,6 +144,8 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
         helper.setWindowIcon(settings.icon);
     mWindow = helper.getWindow();
 
+    SDL_GetWindowGammaRamp(mSDLWindow, mOldSystemGammaRamp, &mOldSystemGammaRamp[256], &mOldSystemGammaRamp[512]);
+    setWindowGammaContrast(settings.gamma, settings.contrast);
 
     // create the semi-transparent black background texture used by the GUI.
     // has to be created in code with TU_DYNAMIC_WRITE_ONLY param
@@ -159,6 +167,24 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     mView = mWindow->addViewport(mCamera);
     // Alter the camera aspect ratio to match the viewport
     mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
+}
+
+void OgreRenderer::setWindowGammaContrast(float gamma, float contrast)
+{
+    Uint16 red[256], green[256], blue[256];
+    for (int i = 0; i < 256; i++)
+    {
+        float k = i/256.0f;
+        k = (k - 0.5f) * contrast + 0.5f;
+        k = pow(k, 1.f/gamma);
+        k *= 256;
+        float value = k*256;
+        if (value > 65535)  value = 65535;
+        else if (value < 0) value = 0;
+
+        red[i] = green[i] = blue[i] = value;
+    }
+    SDL_SetWindowGammaRamp(mSDLWindow, red, green, blue);
 }
 
 void OgreRenderer::adjustCamera(float fov, float nearClip)

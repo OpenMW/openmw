@@ -42,6 +42,8 @@ namespace OEngine
             int screen;
             std::string fsaa;
             std::string icon;
+            float gamma;
+            float contrast;
         };
 
         class WindowSizeListener
@@ -67,6 +69,9 @@ namespace OEngine
             int mWindowHeight;
             bool mOutstandingResize;
 
+            // Store system gamma ramp on window creation. Restore system gamma ramp on exit
+            uint16_t mOldSystemGammaRamp[256*3];
+
         public:
             OgreRenderer()
             : mRoot(NULL)
@@ -83,7 +88,7 @@ namespace OEngine
             {
             }
 
-            ~OgreRenderer() { cleanup(); }
+            ~OgreRenderer();
 
             /** Configure the renderer. This will load configuration files and
             set up the Root and logging classes. */
@@ -94,6 +99,8 @@ namespace OEngine
 
             /// Create a window with the given title
             void createWindow(const std::string &title, const WindowSettings& settings);
+
+            void setWindowGammaContrast(float gamma, float contrast);
 
             /// Set up the scene manager, camera and viewport
             void adjustCamera(
