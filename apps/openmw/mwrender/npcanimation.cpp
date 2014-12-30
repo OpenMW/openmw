@@ -361,6 +361,8 @@ void NpcAnimation::updateParts()
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
+    bool wasArrowAttached = (mAmmunition.get());
+
     MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
     {
@@ -555,6 +557,9 @@ void NpcAnimation::updateParts()
                                            "meshes\\"+bodypart->mModel);
         }
     }
+
+    if (wasArrowAttached)
+        attachArrow();
 }
 
 void NpcAnimation::addFirstPersonOffset(const Ogre::Vector3 &offset)

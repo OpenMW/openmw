@@ -49,6 +49,8 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
     else
     {
         NifOgre::ObjectScenePtr weapon = getWeapon();
+        if (!weapon.get())
+            return;
 
         MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
         if (ammo == inv.end())
@@ -66,6 +68,9 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
 
 void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
 {
+    if (!mAmmunition.get())
+        return;
+
     MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
     MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     if (weapon == inv.end())
