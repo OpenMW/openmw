@@ -2,11 +2,13 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/esm/records.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "widgets.hpp"
 

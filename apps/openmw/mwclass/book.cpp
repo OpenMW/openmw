@@ -11,6 +11,7 @@
 #include "../mwworld/actionread.hpp"
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 
 #include "../mwrender/objects.hpp"

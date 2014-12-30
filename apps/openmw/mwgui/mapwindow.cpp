@@ -11,6 +11,7 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwrender/globalmap.hpp"
 

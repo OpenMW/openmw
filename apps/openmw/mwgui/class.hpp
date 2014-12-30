@@ -1,7 +1,8 @@
 #ifndef MWGUI_CLASS_H
 #define MWGUI_CLASS_H
 
-
+#include <components/esm/attr.hpp>
+#include <components/esm/loadclas.hpp>
 #include "widgets.hpp"
 #include "windowbase.hpp"
 

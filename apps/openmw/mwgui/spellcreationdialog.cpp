@@ -3,6 +3,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
+#include <components/esm/records.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -12,6 +13,7 @@
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/spells.hpp"
@@ -590,14 +592,6 @@ namespace MWGui
 
         int buttonId = *sender->getUserData<int>();
         mSelectedKnownEffectId = mButtonMapping[buttonId];
-        for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
-        {
-            if (it->mEffectID == mSelectedKnownEffectId)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
-                return;
-            }
-        }
 
         const ESM::MagicEffect* effect =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
@@ -620,6 +614,15 @@ namespace MWGui
         }
         else
         {
+            for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+            {
+                if (it->mEffectID == mSelectedKnownEffectId)
+                {
+                    MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
+                    return;
+                }
+            }
+
             mAddEffectDialog.newEffect(effect);
         }
     }

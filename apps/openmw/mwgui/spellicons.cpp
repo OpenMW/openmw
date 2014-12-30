@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iomanip>
 
+#include <components/esm/loadmgef.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/world.hpp"
@@ -12,6 +13,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"

@@ -13,6 +13,7 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/fallback.hpp"
+#include "../mwworld/esmstore.hpp"
 
 namespace
 {

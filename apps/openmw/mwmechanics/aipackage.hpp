@@ -3,7 +3,6 @@
 
 #include "pathfinding.hpp"
 #include <components/esm/defs.hpp>
-#include "../mwbase/world.hpp"
 
 #include "obstacle.hpp"
 #include "aistate.hpp"

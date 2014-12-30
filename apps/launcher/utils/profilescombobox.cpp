@@ -47,13 +47,13 @@ void ProfilesComboBox::setEditEnabled(bool editable)
 
 void ProfilesComboBox::slotTextChanged(const QString &text)
 {
-    QPalette *palette = new QPalette();
-    palette->setColor(QPalette::Text,Qt::red);
+    QPalette palette;
+    palette.setColor(QPalette::Text,Qt::red);
 
     int index = findText(text);
 
     if (text.isEmpty() || (index != -1 && index != currentIndex())) {
-        lineEdit()->setPalette(*palette);
+        lineEdit()->setPalette(palette);
     } else {
         lineEdit()->setPalette(QApplication::palette());
     }

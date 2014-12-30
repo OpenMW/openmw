@@ -11,6 +11,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 
 #include "mapwindow.hpp"
