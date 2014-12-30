@@ -130,6 +130,8 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
       SDL_WINDOW_SHOWN
         | (settings.fullscreen ? SDL_WINDOW_FULLSCREEN : 0) | SDL_WINDOW_RESIZABLE
     );
+    if (mSDLWindow == 0)
+        throw std::runtime_error("Failed to create window: " + std::string(SDL_GetError()));
 
     SFO::SDLWindowHelper helper(mSDLWindow, settings.window_x, settings.window_y, title, settings.fullscreen, params);
     if (settings.icon != "")
