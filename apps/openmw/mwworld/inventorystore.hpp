@@ -205,6 +205,10 @@ namespace MWWorld
 
             virtual void clear();
             ///< Empty container.
+
+            virtual void writeState (ESM::InventoryState& state) const;
+
+            virtual void readState (const ESM::InventoryState& state);
     };
 }
 

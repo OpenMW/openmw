@@ -170,9 +170,9 @@ namespace MWWorld
 
             Ptr search (const std::string& id);
 
-            void writeState (ESM::InventoryState& state) const;
+            virtual void writeState (ESM::InventoryState& state) const;
 
-            void readState (const ESM::InventoryState& state);
+            virtual void readState (const ESM::InventoryState& state);
 
         friend class ContainerStoreIterator;
     };

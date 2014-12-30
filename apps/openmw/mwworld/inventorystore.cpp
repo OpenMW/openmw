@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include <components/esm/loadench.hpp>
+#include <components/esm/inventorystate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -653,4 +654,40 @@ bool MWWorld::InventoryStore::isEquipped(const MWWorld::Ptr &item)
             return true;
     }
     return false;
+}
+
+void MWWorld::InventoryStore::writeState(ESM::InventoryState &state) const
+{
+    MWWorld::ContainerStore::writeState(state);
+
+    for (TEffectMagnitudes::const_iterator it = mPermanentMagicEffectMagnitudes.begin(); it != mPermanentMagicEffectMagnitudes.end(); ++it)
+    {
+        std::vector<std::pair<float, float> > params;
+        for (std::vector<EffectParams>::const_iterator pIt = it->second.begin(); pIt != it->second.end(); ++pIt)
+        {
+            params.push_back(std::make_pair(pIt->mRandom, pIt->mMultiplier));
+        }
+
+        state.mPermanentMagicEffectMagnitudes[it->first] = params;
+    }
+}
+
+void MWWorld::InventoryStore::readState(const ESM::InventoryState &state)
+{
+    MWWorld::ContainerStore::readState(state);
+
+    for (ESM::InventoryState::TEffectMagnitudes::const_iterator it = state.mPermanentMagicEffectMagnitudes.begin();
+         it != state.mPermanentMagicEffectMagnitudes.end(); ++it)
+    {
+        std::vector<EffectParams> params;
+        for (std::vector<std::pair<float, float> >::const_iterator pIt = it->second.begin(); pIt != it->second.end(); ++pIt)
+        {
+            EffectParams p;
+            p.mRandom = pIt->first;
+            p.mMultiplier = pIt->second;
+            params.push_back(p);
+        }
+
+        mPermanentMagicEffectMagnitudes[it->first] = params;
+    }
 }
