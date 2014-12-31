@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QTextCodec>
 #include <QDebug>
+#include <qbrush>
 
 #include "components/esm/esmreader.hpp"
 
@@ -176,6 +177,16 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
 
     switch (role)
     {
+    case Qt::ForegroundRole:
+    {
+        if (isLoadOrderError(file->filePath()))
+        {
+            QBrush redBackground(Qt::red, Qt::SolidPattern);
+            return redBackground;
+        }
+        break;
+    }
+
     case Qt::EditRole:
     case Qt::DisplayRole:
     {
@@ -208,7 +219,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
         if (column != 0)
             return QVariant();
 
-        return file->toolTip();
+        return isLoadOrderError(file->filePath()) ? getLoadOrderError(file->filePath()).toolTip() : file->toolTip();
         break;
     }
 
@@ -347,6 +358,8 @@ bool ContentSelectorModel::ContentModel::removeRows(int position, int rows, cons
 
     } endRemoveRows();
 
+    // at this point we know that drag and drop has finished.
+    checkForLoadOrderErrors();
     return true;
 }
 
@@ -538,11 +551,83 @@ bool ContentSelectorModel::ContentModel::isEnabled (QModelIndex index) const
     return (flags(index) & Qt::ItemIsEnabled);
 }
 
-void ContentSelectorModel::ContentModel::setCheckStates (const QStringList &fileList, bool isChecked)
+bool ContentSelectorModel::ContentModel::isLoadOrderError(const QString& filepath) const
 {
-    foreach (const QString &file, fileList)
+    return !(getLoadOrderError(filepath) == LoadOrderError::sNoError);
+}
+
+ContentSelectorModel::LoadOrderError ContentSelectorModel::ContentModel::getLoadOrderError(const QString& filepath) const
+{
+    return mLoadOrderErrors.contains(filepath) ? mLoadOrderErrors[filepath] : ContentSelectorModel::LoadOrderError::sNoError;
+}
+
+void ContentSelectorModel::ContentModel::setLoadOrderError(const QString& filepath, const ContentSelectorModel::LoadOrderError& loadOrderError)
+{
+    mLoadOrderErrors[filepath] = loadOrderError;
+    int filePosition = indexFromItem(item(filepath)).row();
+    emit dataChanged(index(filePosition, 0, QModelIndex()), index(filePosition, 0, QModelIndex()));
+}
+
+void ContentSelectorModel::ContentModel::setContentList(const QStringList &fileList, bool isChecked)
+{
+    mLoadOrderErrors.clear();
+    int previousPosition = -1;
+    foreach (const QString &filepath, fileList)
     {
-        setCheckState (file, isChecked);
+        if (setCheckState(filepath, isChecked))
+        {
+            // as necessary, move plug-ins in visible list to match sequence of supplied filelist
+            const EsmFile* file = item(filepath);
+            int filePosition = indexFromItem(file).row();
+            if (filePosition < previousPosition)
+            {
+                mFiles.move(filePosition, previousPosition);
+                emit dataChanged(index(filePosition, 0, QModelIndex()), index(previousPosition, 0, QModelIndex()));
+            }
+            else
+            {
+                previousPosition = filePosition;
+            }
+        }
+    }
+    checkForLoadOrderErrors();
+}
+
+void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()
+{
+    for (int row = 0; row < mFiles.count(); ++row)
+    {
+        EsmFile* file = item(row);
+        bool isRowInError = isLoadOrderError(file->filePath());
+        LoadOrderError::ErrorCode error = LoadOrderError::ErrorCode_None;
+        foreach(QString dependantfileName, file->gameFiles())
+        {
+            const EsmFile* dependentFile = item(dependantfileName);
+
+            if (!dependentFile)
+            {
+                error = LoadOrderError::ErrorCode_MissingDependency;
+            }
+            else if (!isChecked(dependentFile->filePath()))
+            {
+                error = LoadOrderError::ErrorCode_InactiveDependency;
+            }
+            else if (row < indexFromItem(dependentFile).row())
+            {
+                error = LoadOrderError::ErrorCode_LoadOrder;
+            }
+
+            if (!isRowInError && (error != LoadOrderError::ErrorCode_None))
+            {
+                setLoadOrderError(file->filePath(), LoadOrderError(error, dependantfileName));
+                break;
+            }
+        }
+
+        if (isRowInError && (error == LoadOrderError::ErrorCode_None))
+        {
+            setLoadOrderError(file->filePath(), LoadOrderError::sNoError);
+        }
     }
 }
 
