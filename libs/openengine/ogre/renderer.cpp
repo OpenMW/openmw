@@ -26,8 +26,7 @@ using namespace OEngine::Render;
 OgreRenderer::~OgreRenderer()
 {
     cleanup();
-    // restore system gamma ramp
-    SDL_SetWindowGammaRamp(mSDLWindow, mOldSystemGammaRamp, &mOldSystemGammaRamp[256], &mOldSystemGammaRamp[512]);
+    restoreWindowGammaRamp();
 }
 
 void OgreRenderer::cleanup()
@@ -145,7 +144,6 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     mWindow = helper.getWindow();
 
     SDL_GetWindowGammaRamp(mSDLWindow, mOldSystemGammaRamp, &mOldSystemGammaRamp[256], &mOldSystemGammaRamp[512]);
-    setWindowGammaContrast(settings.gamma, settings.contrast);
 
     // create the semi-transparent black background texture used by the GUI.
     // has to be created in code with TU_DYNAMIC_WRITE_ONLY param
@@ -171,6 +169,8 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
 
 void OgreRenderer::setWindowGammaContrast(float gamma, float contrast)
 {
+    if (mSDLWindow == NULL) return;
+
     Uint16 red[256], green[256], blue[256];
     for (int i = 0; i < 256; i++)
     {
@@ -184,7 +184,16 @@ void OgreRenderer::setWindowGammaContrast(float gamma, float contrast)
 
         red[i] = green[i] = blue[i] = value;
     }
-    SDL_SetWindowGammaRamp(mSDLWindow, red, green, blue);
+    if (SDL_SetWindowGammaRamp(mSDLWindow, red, green, blue) < 0)
+        std::cout << "Couldn't set gamma: " << SDL_GetError() << std::endl;
+}
+
+void OgreRenderer::restoreWindowGammaRamp()
+{
+    if (mSDLWindow != NULL)
+    {
+        SDL_SetWindowGammaRamp(mSDLWindow, mOldSystemGammaRamp, &mOldSystemGammaRamp[256], &mOldSystemGammaRamp[512]);
+    }
 }
 
 void OgreRenderer::adjustCamera(float fov, float nearClip)

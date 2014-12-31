@@ -208,6 +208,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
+    mOgre->restoreWindowGammaRamp();
     mEnvironment.cleanup();
     delete mScriptContext;
     delete mOgre;
@@ -358,8 +359,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     windowSettings.icon = "openmw.png";
     std::string aa = settings.getString("antialiasing", "Video");
     windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
-    windowSettings.gamma = Settings::Manager::getFloat("gamma", "General");
-    windowSettings.contrast = Settings::Manager::getFloat("contrast", "General");
 
     SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS,
                 settings.getBool("minimize on focus loss", "Video") ? "1" : "0");
@@ -383,6 +382,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
+
+    mOgre->setWindowGammaContrast(Settings::Manager::getFloat("gamma", "General"), Settings::Manager::getFloat("contrast", "General"));
 
     if (!mSkipMenu)
     {

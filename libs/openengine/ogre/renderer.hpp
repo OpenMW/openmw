@@ -42,8 +42,6 @@ namespace OEngine
             int screen;
             std::string fsaa;
             std::string icon;
-            float gamma;
-            float contrast;
         };
 
         class WindowSizeListener
@@ -101,6 +99,7 @@ namespace OEngine
             void createWindow(const std::string &title, const WindowSettings& settings);
 
             void setWindowGammaContrast(float gamma, float contrast);
+            void restoreWindowGammaRamp();
 
             /// Set up the scene manager, camera and viewport
             void adjustCamera(
