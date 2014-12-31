@@ -1640,7 +1640,8 @@ void CharacterController::update(float duration)
         else
             forcestateupdate = updateCreatureState() || forcestateupdate;
 
-        refreshCurrentAnims(idlestate, movestate, forcestateupdate);
+        if (!mSkipAnim)
+            refreshCurrentAnims(idlestate, movestate, forcestateupdate);
         if (inJump)
             mMovementAnimationControlled = false;
 
@@ -1672,47 +1673,47 @@ void CharacterController::update(float duration)
         // Can't reset jump state (mPosition[2]) here; we don't know for sure whether the PhysicSystem will actually handle it in this frame
         // due to the fixed minimum timestep used for the physics update. It will be reset in PhysicSystem::move once the jump is handled.
 
-        updateHeadTracking(duration);
+        if (!mSkipAnim)
+            updateHeadTracking(duration);
     }
     else if(cls.getCreatureStats(mPtr).isDead())
     {
         world->queueMovement(mPtr, Ogre::Vector3(0.0f));
     }
 
-    if(!mSkipAnim)
-    {
-        Ogre::Vector3 moved = mAnimation->runAnimation(duration);
-        if(duration > 0.0f)
-            moved /= duration;
-        else
-            moved = Ogre::Vector3(0.0f);
-
-        // Ensure we're moving in generally the right direction...
-        if(mMovementSpeed > 0.f)
-        {
-            float l = moved.length();
-
-            if((movement.x < 0.0f && movement.x < moved.x*2.0f) ||
-               (movement.x > 0.0f && movement.x > moved.x*2.0f))
-                moved.x = movement.x;
-            if((movement.y < 0.0f && movement.y < moved.y*2.0f) ||
-               (movement.y > 0.0f && movement.y > moved.y*2.0f))
-                moved.y = movement.y;
-            if((movement.z < 0.0f && movement.z < moved.z*2.0f) ||
-               (movement.z > 0.0f && movement.z > moved.z*2.0f))
-                moved.z = movement.z;
-            // but keep the original speed
-            float newLength = moved.length();
-            if (newLength > 0)
-                moved *= (l / newLength);
-        }
-
-        // Update movement
-        if(mMovementAnimationControlled && mPtr.getClass().isActor())
-            world->queueMovement(mPtr, moved);
-    }
+    Ogre::Vector3 moved = mAnimation->runAnimation(mSkipAnim ? 0.f : duration);
+    if(duration > 0.0f)
+        moved /= duration;
     else
+        moved = Ogre::Vector3(0.0f);
+
+    // Ensure we're moving in generally the right direction...
+    if(mMovementSpeed > 0.f)
+    {
+        float l = moved.length();
+
+        if((movement.x < 0.0f && movement.x < moved.x*2.0f) ||
+           (movement.x > 0.0f && movement.x > moved.x*2.0f))
+            moved.x = movement.x;
+        if((movement.y < 0.0f && movement.y < moved.y*2.0f) ||
+           (movement.y > 0.0f && movement.y > moved.y*2.0f))
+            moved.y = movement.y;
+        if((movement.z < 0.0f && movement.z < moved.z*2.0f) ||
+           (movement.z > 0.0f && movement.z > moved.z*2.0f))
+            moved.z = movement.z;
+        // but keep the original speed
+        float newLength = moved.length();
+        if (newLength > 0)
+            moved *= (l / newLength);
+    }
+
+    if (mSkipAnim)
         mAnimation->updateEffects(duration);
+
+    // Update movement
+    if(mMovementAnimationControlled && mPtr.getClass().isActor())
+        world->queueMovement(mPtr, moved);
+
     mSkipAnim = false;
 
     mAnimation->enableHeadAnimation(cls.isActor() && !cls.getCreatureStats(mPtr).isDead());
@@ -1781,6 +1782,8 @@ void CharacterController::forceStateUpdate()
     {
         playRandomDeath();
     }
+
+    mAnimation->runAnimation(0.f);
 }
 
 bool CharacterController::kill()
