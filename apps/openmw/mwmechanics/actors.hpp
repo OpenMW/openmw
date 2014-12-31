@@ -101,6 +101,9 @@ namespace MWMechanics
             int getHoursToRest(const MWWorld::Ptr& ptr) const;
             ///< Calculate how many hours the given actor needs to rest in order to be fully healed
 
+            void fastForwardAi();
+            ///< Simulate the passing of time
+
             int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
 

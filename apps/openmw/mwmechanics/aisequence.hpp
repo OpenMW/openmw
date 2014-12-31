@@ -97,6 +97,9 @@ namespace MWMechanics
             /// Execute current package, switching if needed.
             void execute (const MWWorld::Ptr& actor, MWMechanics::AiState& state, float duration);
 
+            /// Simulate the passing of time using the currently active AI package
+            void fastForward(const MWWorld::Ptr &actor, AiState &state);
+
             /// Remove all packages.
             void clear();
 

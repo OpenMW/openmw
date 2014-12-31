@@ -390,4 +390,13 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
     }
 }
 
+void AiSequence::fastForward(const MWWorld::Ptr& actor, AiState& state)
+{
+    if (!mPackages.empty())
+    {
+        MWMechanics::AiPackage* package = mPackages.front();
+        package->fastForward(actor, state);
+    }
+}
+
 } // namespace MWMechanics

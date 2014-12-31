@@ -1641,4 +1641,18 @@ namespace MWMechanics
 
         return it->second->getCharacterController()->isReadyToBlock();
     }
+
+    void Actors::fastForwardAi()
+    {
+        if (!MWBase::Environment::get().getMechanicsManager()->isAIActive())
+            return;
+        for (PtrActorMap::iterator it = mActors.begin(); it != mActors.end(); ++it)
+        {
+            MWWorld::Ptr ptr = it->first;
+            if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                continue;
+            MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+            seq.fastForward(ptr, it->second->getAiState());
+        }
+    }
 }

@@ -40,16 +40,9 @@ namespace MWMechanics
         
         AiWander::GreetingState mSaidGreeting;
         int mGreetingTimer;
-        
-        // Cached current cell location
-        int mCellX;
-        int mCellY;
-        // Cell location multiplied by ESM::Land::REAL_SIZE
-        float mXCell;
-        float mYCell;
-        
+
         const MWWorld::CellStore* mCell; // for detecting cell change
-        
+
         // AiWander states
         bool mChooseAction;
         bool mIdleNow;
@@ -66,10 +59,6 @@ namespace MWMechanics
             mReaction(0),
             mSaidGreeting(AiWander::Greet_None),
             mGreetingTimer(0),
-            mCellX(std::numeric_limits<int>::max()),
-            mCellY(std::numeric_limits<int>::max()),
-            mXCell(0),
-            mYCell(0),
             mCell(NULL),
             mChooseAction(true),
             mIdleNow(false),
@@ -183,7 +172,6 @@ namespace MWMechanics
             currentCell = actor.getCell();
             mStoredAvailableNodes = false; // prob. not needed since mDistance = 0
         }
-        const ESM::Cell *cell = currentCell->getCell();
 
         cStats.setDrawState(DrawState_Nothing);
         cStats.setMovementFlag(CreatureStats::Flag_Run, false);
@@ -371,81 +359,10 @@ namespace MWMechanics
             }
         }
 
-
-        
-        int& cachedCellX = storage.mCellX;
-        int& cachedCellY = storage.mCellY;
-        float& cachedCellXposition = storage.mXCell;
-        float& cachedCellYposition = storage.mYCell;
         // Initialization to discover & store allowed node points for this actor.
         if(!mStoredAvailableNodes)
         {
-            // infrequently used, therefore no benefit in caching it as a member
-            const ESM::Pathgrid *
-                pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell);
-
-            // cache the current cell location
-            cachedCellX = cell->mData.mX;
-            cachedCellY = cell->mData.mY;
-
-            // If there is no path this actor doesn't go anywhere. See:
-            // https://forum.openmw.org/viewtopic.php?t=1556
-            // http://www.fliggerty.com/phpBB3/viewtopic.php?f=30&t=5833
-            if(!pathgrid || pathgrid->mPoints.empty())
-                mDistance = 0;
-
-            // A distance value passed into the constructor indicates how far the
-            // actor can  wander from the spawn position.  AiWander assumes that
-            // pathgrid points are available, and uses them to randomly select wander
-            // destinations within the allowed set of pathgrid points (nodes).
-            if(mDistance)
-            {
-                cachedCellXposition = 0;
-                cachedCellYposition = 0;
-                if(cell->isExterior())
-                {
-                    cachedCellXposition = cachedCellX * ESM::Land::REAL_SIZE;
-                    cachedCellYposition = cachedCellY * ESM::Land::REAL_SIZE;
-                }
-
-                // FIXME: There might be a bug here.  The allowed node points are
-                // based on the actor's current position rather than the actor's
-                // spawn point.  As a result the allowed nodes for wander can change
-                // between saves, for example.
-                //
-                // convert npcPos to local (i.e. cell) co-ordinates
-                Ogre::Vector3 npcPos(pos.pos);
-                npcPos[0] = npcPos[0] - cachedCellXposition;
-                npcPos[1] = npcPos[1] - cachedCellYposition;
-
-                // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
-                // NOTE: mPoints and mAllowedNodes are in local co-ordinates
-                for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
-                {
-                    Ogre::Vector3 nodePos(pathgrid->mPoints[counter].mX, pathgrid->mPoints[counter].mY,
-                        pathgrid->mPoints[counter].mZ);
-                    if(npcPos.squaredDistance(nodePos) <= mDistance * mDistance)
-                        mAllowedNodes.push_back(pathgrid->mPoints[counter]);
-                }
-                if(!mAllowedNodes.empty())
-                {
-                    Ogre::Vector3 firstNodePos(mAllowedNodes[0].mX, mAllowedNodes[0].mY, mAllowedNodes[0].mZ);
-                    float closestNode = npcPos.squaredDistance(firstNodePos);
-                    unsigned int index = 0;
-                    for(unsigned int counterThree = 1; counterThree < mAllowedNodes.size(); counterThree++)
-                    {
-                        Ogre::Vector3 nodePos(mAllowedNodes[counterThree].mX, mAllowedNodes[counterThree].mY,
-                            mAllowedNodes[counterThree].mZ);
-                        float tempDist = npcPos.squaredDistance(nodePos);
-                        if(tempDist < closestNode)
-                            index = counterThree;
-                    }
-                    mCurrentNode = mAllowedNodes[index];
-                    mAllowedNodes.erase(mAllowedNodes.begin() + index);
-
-                    mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
-                }
-            }
+            getAllowedNodes(actor, currentCell->getCell());
         }
 
         // Actor becomes stationary - see above URL's for previous research
@@ -581,8 +498,8 @@ namespace MWMechanics
 
                 // convert dest to use world co-ordinates
                 ESM::Pathgrid::Point dest;
-                dest.mX = destNodePos[0] + cachedCellXposition;
-                dest.mY = destNodePos[1] + cachedCellYposition;
+                dest.mX = destNodePos[0] + currentCell->getCell()->mData.mX * ESM::Land::REAL_SIZE;
+                dest.mY = destNodePos[1] + currentCell->getCell()->mData.mY * ESM::Land::REAL_SIZE;
                 dest.mZ = destNodePos[2];
 
                 // actor position is already in world co-ordinates
@@ -728,6 +645,96 @@ namespace MWMechanics
             {
                 playedIdle = counter+2;
                 idleRoll = randSelect;
+            }
+        }
+    }
+
+    void AiWander::fastForward(const MWWorld::Ptr& actor, AiState &state)
+    {
+        if (mDistance == 0)
+            return;
+
+        if (!mStoredAvailableNodes)
+            getAllowedNodes(actor, actor.getCell()->getCell());
+
+        if (mAllowedNodes.empty())
+            return;
+
+        state.moveIn(new AiWanderStorage());
+
+        int index = std::rand() / (static_cast<double> (RAND_MAX) + 1) * mAllowedNodes.size();
+        ESM::Pathgrid::Point dest = mAllowedNodes[index];
+
+        // apply a slight offset to prevent overcrowding
+        dest.mX += Ogre::Math::RangeRandom(-64, 64);
+        dest.mY += Ogre::Math::RangeRandom(-64, 64);
+
+        MWBase::Environment::get().getWorld()->moveObject(actor, dest.mX, dest.mY, dest.mZ);
+        actor.getClass().adjustPosition(actor, false);
+    }
+
+    void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell)
+    {
+        // infrequently used, therefore no benefit in caching it as a member
+        const ESM::Pathgrid *
+            pathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell);
+
+        // If there is no path this actor doesn't go anywhere. See:
+        // https://forum.openmw.org/viewtopic.php?t=1556
+        // http://www.fliggerty.com/phpBB3/viewtopic.php?f=30&t=5833
+        if(!pathgrid || pathgrid->mPoints.empty())
+            mDistance = 0;
+
+        // A distance value passed into the constructor indicates how far the
+        // actor can  wander from the spawn position.  AiWander assumes that
+        // pathgrid points are available, and uses them to randomly select wander
+        // destinations within the allowed set of pathgrid points (nodes).
+        if(mDistance)
+        {
+            float cellXOffset = 0;
+            float cellYOffset = 0;
+            if(cell->isExterior())
+            {
+                cellXOffset = cell->mData.mX * ESM::Land::REAL_SIZE;
+                cellYOffset = cell->mData.mY * ESM::Land::REAL_SIZE;
+            }
+
+            // FIXME: There might be a bug here.  The allowed node points are
+            // based on the actor's current position rather than the actor's
+            // spawn point.  As a result the allowed nodes for wander can change
+            // between saves, for example.
+            //
+            // convert npcPos to local (i.e. cell) co-ordinates
+            Ogre::Vector3 npcPos(actor.getRefData().getPosition().pos);
+            npcPos[0] = npcPos[0] - cellXOffset;
+            npcPos[1] = npcPos[1] - cellYOffset;
+
+            // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
+            // NOTE: mPoints and mAllowedNodes are in local co-ordinates
+            for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
+            {
+                Ogre::Vector3 nodePos(pathgrid->mPoints[counter].mX, pathgrid->mPoints[counter].mY,
+                    pathgrid->mPoints[counter].mZ);
+                if(npcPos.squaredDistance(nodePos) <= mDistance * mDistance)
+                    mAllowedNodes.push_back(pathgrid->mPoints[counter]);
+            }
+            if(!mAllowedNodes.empty())
+            {
+                Ogre::Vector3 firstNodePos(mAllowedNodes[0].mX, mAllowedNodes[0].mY, mAllowedNodes[0].mZ);
+                float closestNode = npcPos.squaredDistance(firstNodePos);
+                unsigned int index = 0;
+                for(unsigned int counterThree = 1; counterThree < mAllowedNodes.size(); counterThree++)
+                {
+                    Ogre::Vector3 nodePos(mAllowedNodes[counterThree].mX, mAllowedNodes[counterThree].mY,
+                        mAllowedNodes[counterThree].mZ);
+                    float tempDist = npcPos.squaredDistance(nodePos);
+                    if(tempDist < closestNode)
+                        index = counterThree;
+                }
+                mCurrentNode = mAllowedNodes[index];
+                mAllowedNodes.erase(mAllowedNodes.begin() + index);
+
+                mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
             }
         }
     }

@@ -113,6 +113,11 @@ namespace MWMechanics
         return TypeIdTravel;
     }
 
+    void AiTravel::fastForward(const MWWorld::Ptr& actor, AiState& state)
+    {
+
+    }
+
     void AiTravel::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
         std::auto_ptr<ESM::AiSequence::AiTravel> travel(new ESM::AiSequence::AiTravel());
