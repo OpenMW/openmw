@@ -677,13 +677,13 @@ void RenderingManager::writeFog(MWWorld::CellStore* cell)
 
 void RenderingManager::disableLights(bool sun)
 {
-    mObjects->disableLights();
+    mActors->disableLights();
     sunDisable(sun);
 }
 
 void RenderingManager::enableLights(bool sun)
 {
-    mObjects->enableLights();
+    mActors->enableLights();
     sunEnable(sun);
 }
 

@@ -198,4 +198,18 @@ void Actors::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     mRendering->updateWaterRippleEmitterPtr (old, cur);
 }
 
+void Actors::enableLights()
+{
+    PtrAnimationMap::const_iterator it = mAllActors.begin();
+    for(;it != mAllActors.end();++it)
+        it->second->enableLights(true);
+}
+
+void Actors::disableLights()
+{
+    PtrAnimationMap::const_iterator it = mAllActors.begin();
+    for(;it != mAllActors.end();++it)
+        it->second->enableLights(false);
+}
+
 }
