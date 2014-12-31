@@ -299,37 +299,6 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     if (!mPtr.getClass().isBipedal(mPtr))
         weap = sWeaponTypeListEnd;
 
-    if(force || idle != mIdleState)
-    {
-        mIdleState = idle;
-
-        std::string idle;
-        // Only play "idleswim" or "idlesneak" if they exist. Otherwise, fallback to
-        // "idle"+weapon or "idle".
-        if(mIdleState == CharState_IdleSwim && mAnimation->hasAnimation("idleswim"))
-            idle = "idleswim";
-        else if(mIdleState == CharState_IdleSneak && mAnimation->hasAnimation("idlesneak"))
-            idle = "idlesneak";
-        else if(mIdleState != CharState_None)
-        {
-            idle = "idle";
-            if(weap != sWeaponTypeListEnd)
-            {
-                idle += weap->shortgroup;
-                if(!mAnimation->hasAnimation(idle))
-                    idle = "idle";
-            }
-        }
-
-        mAnimation->disable(mCurrentIdle);
-        mCurrentIdle = idle;
-        if(!mCurrentIdle.empty())
-            mAnimation->play(mCurrentIdle, Priority_Default, MWRender::Animation::Group_All, false,
-                             1.0f, "start", "stop", 0.0f, ~0ul, true);
-    }
-
-    updateIdleStormState();
-
     if(force && mJumpState != JumpState_None)
     {
         std::string jump;
@@ -470,6 +439,44 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                              speedmult, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
         }
     }
+
+    // idle handled last as it can depend on the other states
+    if ((mUpperBodyState != UpperCharState_Nothing
+            || mMovementState != CharState_None
+            || mHitState != CharState_None)
+            && !mPtr.getClass().isBipedal(mPtr))
+        idle = CharState_None;
+
+    if(force || idle != mIdleState)
+    {
+        mIdleState = idle;
+
+        std::string idle;
+        // Only play "idleswim" or "idlesneak" if they exist. Otherwise, fallback to
+        // "idle"+weapon or "idle".
+        if(mIdleState == CharState_IdleSwim && mAnimation->hasAnimation("idleswim"))
+            idle = "idleswim";
+        else if(mIdleState == CharState_IdleSneak && mAnimation->hasAnimation("idlesneak"))
+            idle = "idlesneak";
+        else if(mIdleState != CharState_None)
+        {
+            idle = "idle";
+            if(weap != sWeaponTypeListEnd)
+            {
+                idle += weap->shortgroup;
+                if(!mAnimation->hasAnimation(idle))
+                    idle = "idle";
+            }
+        }
+
+        mAnimation->disable(mCurrentIdle);
+        mCurrentIdle = idle;
+        if(!mCurrentIdle.empty())
+            mAnimation->play(mCurrentIdle, Priority_Default, MWRender::Animation::Group_All, false,
+                             1.0f, "start", "stop", 0.0f, ~0ul, true);
+    }
+
+    updateIdleStormState();
 }
 
 
@@ -1616,11 +1623,6 @@ void CharacterController::update(float duration)
         if(mAnimQueue.empty())
         {
             idlestate = (inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle));
-            if ((mUpperBodyState != UpperCharState_Nothing
-                    || mMovementState != CharState_None
-                    || mHitState != CharState_None)
-                    && !mPtr.getClass().isBipedal(mPtr))
-                idlestate = CharState_None;
         }
         else if(mAnimQueue.size() > 1)
         {
