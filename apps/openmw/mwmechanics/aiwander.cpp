@@ -70,6 +70,7 @@ namespace MWMechanics
     
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
+      , mStoredInitialActorPosition(false)
     {
         mIdle.resize(8, 0);
         init();
@@ -675,6 +676,12 @@ namespace MWMechanics
 
     void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell)
     {
+        if (!mStoredInitialActorPosition)
+        {
+            mInitialActorPosition = Ogre::Vector3(actor.getRefData().getPosition().pos);
+            mStoredInitialActorPosition = true;
+        }
+
         // infrequently used, therefore no benefit in caching it as a member
         const ESM::Pathgrid *
             pathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell);
@@ -699,13 +706,8 @@ namespace MWMechanics
                 cellYOffset = cell->mData.mY * ESM::Land::REAL_SIZE;
             }
 
-            // FIXME: There might be a bug here.  The allowed node points are
-            // based on the actor's current position rather than the actor's
-            // spawn point.  As a result the allowed nodes for wander can change
-            // between saves, for example.
-            //
             // convert npcPos to local (i.e. cell) co-ordinates
-            Ogre::Vector3 npcPos(actor.getRefData().getPosition().pos);
+            Ogre::Vector3 npcPos(mInitialActorPosition);
             npcPos[0] = npcPos[0] - cellXOffset;
             npcPos[1] = npcPos[1] - cellYOffset;
 
@@ -750,6 +752,9 @@ namespace MWMechanics
         for (int i=0; i<8; ++i)
             wander->mData.mIdle[i] = mIdle[i];
         wander->mData.mShouldRepeat = mRepeat;
+        wander->mStoredInitialActorPosition = mStoredInitialActorPosition;
+        if (mStoredInitialActorPosition)
+            wander->mInitialActorPosition = mInitialActorPosition;
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Wander;
@@ -763,6 +768,7 @@ namespace MWMechanics
         , mStartTime(MWWorld::TimeStamp(wander->mStartTime))
         , mTimeOfDay(wander->mData.mTimeOfDay)
         , mRepeat(wander->mData.mShouldRepeat)
+        , mStoredInitialActorPosition(wander->mStoredInitialActorPosition)
     {
         for (int i=0; i<8; ++i)
             mIdle.push_back(wander->mData.mIdle[i]);

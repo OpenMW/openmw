@@ -84,7 +84,8 @@ namespace MWMechanics
                                     // if we had the actor in the AiWander constructor...
             Ogre::Vector3 mReturnPosition;
 
-
+            Ogre::Vector3 mInitialActorPosition;
+            bool mStoredInitialActorPosition;
 
            
 

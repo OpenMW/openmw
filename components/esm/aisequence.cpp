@@ -16,12 +16,20 @@ namespace AiSequence
     {
         esm.getHNT (mData, "DATA");
         esm.getHNT(mStartTime, "STAR");
+        mStoredInitialActorPosition = false;
+        if (esm.isNextSub("POS_"))
+        {
+            mStoredInitialActorPosition = true;
+            esm.getHT(mInitialActorPosition);
+        }
     }
 
     void AiWander::save(ESMWriter &esm) const
     {
         esm.writeHNT ("DATA", mData);
         esm.writeHNT ("STAR", mStartTime);
+        if (mStoredInitialActorPosition)
+            esm.writeHNT ("POS_", mInitialActorPosition);
     }
 
     void AiTravel::load(ESMReader &esm)

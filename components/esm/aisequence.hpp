@@ -6,6 +6,8 @@
 
 #include "defs.hpp"
 
+#include "util.hpp"
+
 namespace ESM
 {
     class ESMReader;
@@ -60,6 +62,9 @@ namespace ESM
     {
         AiWanderData mData;
         ESM::TimeStamp mStartTime;
+
+        bool mStoredInitialActorPosition;
+        ESM::Vector3 mInitialActorPosition;
 
         /// \todo add more AiWander state
 
