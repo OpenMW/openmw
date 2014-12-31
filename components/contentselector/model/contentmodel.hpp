@@ -54,8 +54,8 @@ namespace ContentSelectorModel
         void uncheckAll();
 
         bool isLoadOrderError(const QString& filepath) const;
-        ContentSelectorModel::LoadOrderError ContentSelectorModel::ContentModel::getLoadOrderError(const QString& filepath) const;
-        void ContentSelectorModel::ContentModel::setLoadOrderError(const QString& filepath, const ContentSelectorModel::LoadOrderError& loadOrderError);
+        LoadOrderError getLoadOrderError(const QString& filepath) const;
+        void setLoadOrderError(const QString& filepath, const LoadOrderError& loadOrderError);
 
         void refreshModel();
 
