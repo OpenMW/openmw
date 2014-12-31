@@ -332,4 +332,39 @@ namespace MWMechanics
             damage *= (float(weaphealth) / weapmaxhealth);
         }
     }
+
+    void getHandToHandDamage(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, float &damage, bool &healthdmg)
+    {
+        // Note: MCP contains an option to include Strength in hand-to-hand damage
+        // calculations. Some mods recommend using it, so we may want to include an
+        // option for it.
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        float minstrike = store.get<ESM::GameSetting>().find("fMinHandToHandMult")->getFloat();
+        float maxstrike = store.get<ESM::GameSetting>().find("fMaxHandToHandMult")->getFloat();
+        damage  = attacker.getClass().getSkill(attacker, ESM::Skill::HandToHand);
+        damage *= minstrike + ((maxstrike-minstrike)*attacker.getClass().getCreatureStats(attacker).getAttackStrength());
+
+        MWMechanics::CreatureStats& otherstats = victim.getClass().getCreatureStats(victim);
+        healthdmg = (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                || otherstats.getKnockedDown();
+        bool isWerewolf = (attacker.getClass().isNpc() && attacker.getClass().getNpcStats(attacker).isWerewolf());
+        if(isWerewolf)
+        {
+            healthdmg = true;
+            // GLOB instead of GMST because it gets updated during a quest
+            damage *= MWBase::Environment::get().getWorld()->getGlobalFloat("werewolfclawmult");
+        }
+        if(healthdmg)
+            damage *= store.get<ESM::GameSetting>().find("fHandtoHandHealthPer")->getFloat();
+
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+        if(isWerewolf)
+        {
+            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfHit");
+            if(sound)
+                sndMgr->playSound3D(victim, sound->mId, 1.0f, 1.0f);
+        }
+        else
+            sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
+    }
 }

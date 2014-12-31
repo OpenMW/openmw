@@ -32,6 +32,8 @@ void reduceWeaponCondition (float damage, bool hit, MWWorld::Ptr& weapon, const 
 /// Adjust weapon damage based on its condition. A used weapon will be less effective.
 void adjustWeaponDamage (float& damage, const MWWorld::Ptr& weapon);
 
+void getHandToHandDamage (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, float& damage, bool& healthdmg);
+
 }
 
 #endif

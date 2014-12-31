@@ -288,7 +288,7 @@ namespace MWClass
         }
 
         float damage = min + (max - min) * stats.getAttackStrength();
-
+        bool healthdmg = true;
         if (!weapon.isEmpty())
         {
             const unsigned char *attack = NULL;
@@ -321,6 +321,10 @@ namespace MWClass
                 }
             }
         }
+        else if (isBipedal(ptr))
+        {
+            MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg);
+        }
 
         MWMechanics::applyElementalShields(ptr, victim);
 
@@ -332,7 +336,7 @@ namespace MWClass
 
         MWMechanics::diseaseContact(victim, ptr);
 
-        victim.getClass().onHit(victim, damage, true, weapon, ptr, true);
+        victim.getClass().onHit(victim, damage, healthdmg, weapon, ptr, true);
     }
 
     void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const

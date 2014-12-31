@@ -577,34 +577,7 @@ namespace MWClass
         }
         else
         {
-            // Note: MCP contains an option to include Strength in hand-to-hand damage
-            // calculations. Some mods recommend using it, so we may want to include am
-            // option for it.
-            float minstrike = store.find("fMinHandToHandMult")->getFloat();
-            float maxstrike = store.find("fMaxHandToHandMult")->getFloat();
-            damage  = stats.getSkill(weapskill).getModified();
-            damage *= minstrike + ((maxstrike-minstrike)*stats.getAttackStrength());
-
-            healthdmg = (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
-                    || otherstats.getKnockedDown();
-            if(stats.isWerewolf())
-            {
-                healthdmg = true;
-                // GLOB instead of GMST because it gets updated during a quest
-                damage *= world->getGlobalFloat("werewolfclawmult");
-            }
-            if(healthdmg)
-                damage *= store.find("fHandtoHandHealthPer")->getFloat();
-
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            if(stats.isWerewolf())
-            {
-                const ESM::Sound *sound = world->getStore().get<ESM::Sound>().searchRandom("WolfHit");
-                if(sound)
-                    sndMgr->playSound3D(victim, sound->mId, 1.0f, 1.0f);
-            }
-            else
-                sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
+            MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg);
         }
         if(ptr.getRefData().getHandle() == "player")
         {
