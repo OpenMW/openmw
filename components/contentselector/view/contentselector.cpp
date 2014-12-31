@@ -75,7 +75,7 @@ void ContentSelectorView::ContentSelector::setProfileContent(const QStringList &
         }
     }
 
-    setCheckStates (fileList);
+    setContentList(fileList);
 }
 
 void ContentSelectorView::ContentSelector::setGameFile(const QString &filename)
@@ -103,14 +103,14 @@ void ContentSelectorView::ContentSelector::clearCheckStates()
     mContentModel->uncheckAll();
 }
 
-void ContentSelectorView::ContentSelector::setCheckStates(const QStringList &list)
+void ContentSelectorView::ContentSelector::setContentList(const QStringList &list)
 {
     if (list.isEmpty())
     {
         slotCurrentGameFileIndexChanged (ui.gameFileView->currentIndex());
     }
     else
-        mContentModel->setCheckStates (list, true);
+        mContentModel->setContentList(list, true);
 }
 
 ContentSelectorModel::ContentFileList

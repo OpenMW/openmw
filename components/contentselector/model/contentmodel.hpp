@@ -4,6 +4,8 @@
 #include <QAbstractTableModel>
 #include <QStringList>
 
+#include "loadordererror.hpp"
+
 namespace ContentSelectorModel
 {
     class EsmFile;
@@ -47,9 +49,13 @@ namespace ContentSelectorModel
         bool isEnabled (QModelIndex index) const;
         bool isChecked(const QString &filepath) const;
         bool setCheckState(const QString &filepath, bool isChecked);
-        void setCheckStates (const QStringList &fileList, bool isChecked);
+        void setContentList(const QStringList &fileList, bool isChecked);
         ContentFileList checkedItems() const;
         void uncheckAll();
+
+        bool isLoadOrderError(const QString& filepath) const;
+        ContentSelectorModel::LoadOrderError ContentSelectorModel::ContentModel::getLoadOrderError(const QString& filepath) const;
+        void ContentSelectorModel::ContentModel::setLoadOrderError(const QString& filepath, const ContentSelectorModel::LoadOrderError& loadOrderError);
 
         void refreshModel();
 
@@ -60,9 +66,12 @@ namespace ContentSelectorModel
         EsmFile *item(int row);
 
         void sortFiles();
+        void checkForLoadOrderErrors();
+
 
         ContentFileList mFiles;
         QHash<QString, Qt::CheckState> mCheckStates;
+        QHash<QString, LoadOrderError> mLoadOrderErrors;
         QTextCodec *mCodec;
         QString mEncoding;
 

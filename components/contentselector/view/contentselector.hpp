@@ -32,7 +32,7 @@ namespace ContentSelectorView
         void setProfileContent (const QStringList &fileList);
 
         void clearCheckStates();
-        void setCheckStates (const QStringList &list);
+        void setContentList(const QStringList &list);
 
         ContentSelectorModel::ContentFileList selectedFiles() const;
 
