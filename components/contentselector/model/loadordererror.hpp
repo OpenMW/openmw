@@ -14,7 +14,7 @@ namespace ContentSelectorModel
             ErrorCode_None               = 0,
             ErrorCode_MissingDependency  = 1,
             ErrorCode_InactiveDependency = 2,
-            ErrorCode_LoadOrder          = 3,
+            ErrorCode_LoadOrder          = 3
         };
 
         inline LoadOrderError() : mErrorCode(ErrorCode_None) {};

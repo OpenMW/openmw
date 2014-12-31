@@ -6,7 +6,7 @@
 #include <QDir>
 #include <QTextCodec>
 #include <QDebug>
-#include <qbrush>
+#include <QBrush>
 
 #include "components/esm/esmreader.hpp"
 
