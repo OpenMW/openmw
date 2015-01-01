@@ -5,7 +5,7 @@
 
 namespace ContentSelectorModel
 {
-    /// \Details of a suspected Load Order problem a plug-in will have. This is basically a POD
+    /// \brief Details of a suspected Load Order problem a plug-in will have. This is basically a POD.
     class LoadOrderError
     {
     public:
@@ -28,7 +28,7 @@ namespace ContentSelectorModel
         bool operator==(const LoadOrderError& rhs) const;
         QString toolTip() const;
 
-        /// \Sentinal to represent a "No Load Order Error" condition
+        /// Sentinel to represent a "No Load Order Error" condition
         static LoadOrderError sNoError;
 
     private:

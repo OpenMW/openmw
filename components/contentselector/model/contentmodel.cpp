@@ -592,9 +592,9 @@ void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()
         EsmFile* file = item(row);
         bool isRowInError = isLoadOrderError(file->filePath());
         LoadOrderError::ErrorCode error = LoadOrderError::ErrorCode_None;
-        foreach(QString dependantfileName, file->gameFiles())
+        foreach(QString dependentfileName, file->gameFiles())
         {
-            const EsmFile* dependentFile = item(dependantfileName);
+            const EsmFile* dependentFile = item(dependentfileName);
 
             if (!dependentFile)
             {
@@ -611,7 +611,7 @@ void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()
 
             if (!isRowInError && (error != LoadOrderError::ErrorCode_None))
             {
-                setLoadOrderError(file->filePath(), LoadOrderError(error, dependantfileName));
+                setLoadOrderError(file->filePath(), LoadOrderError(error, dependentfileName));
                 break;
             }
         }
