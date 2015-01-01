@@ -1653,7 +1653,10 @@ namespace MWMechanics
     {
         if (!MWBase::Environment::get().getMechanicsManager()->isAIActive())
             return;
-        for (PtrActorMap::iterator it = mActors.begin(); it != mActors.end(); ++it)
+
+        // making a copy since fast-forward could move actor to a different cell and invalidate the mActors iterator
+        PtrActorMap map = mActors;
+        for (PtrActorMap::iterator it = map.begin(); it != map.end(); ++it)
         {
             MWWorld::Ptr ptr = it->first;
             if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())

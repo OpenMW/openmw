@@ -499,9 +499,14 @@ namespace MWMechanics
 
                 // convert dest to use world co-ordinates
                 ESM::Pathgrid::Point dest;
-                dest.mX = destNodePos[0] + currentCell->getCell()->mData.mX * ESM::Land::REAL_SIZE;
-                dest.mY = destNodePos[1] + currentCell->getCell()->mData.mY * ESM::Land::REAL_SIZE;
+                dest.mX = destNodePos[0];
+                dest.mY = destNodePos[1];
                 dest.mZ = destNodePos[2];
+                if (currentCell->getCell()->isExterior())
+                {
+                    dest.mX += currentCell->getCell()->mData.mX * ESM::Land::REAL_SIZE;
+                    dest.mY += currentCell->getCell()->mData.mY * ESM::Land::REAL_SIZE;
+                }
 
                 // actor position is already in world co-ordinates
                 ESM::Pathgrid::Point start;
@@ -669,6 +674,12 @@ namespace MWMechanics
         // apply a slight offset to prevent overcrowding
         dest.mX += Ogre::Math::RangeRandom(-64, 64);
         dest.mY += Ogre::Math::RangeRandom(-64, 64);
+
+        if (actor.getCell()->isExterior())
+        {
+            dest.mX += actor.getCell()->getCell()->mData.mX * ESM::Land::REAL_SIZE;
+            dest.mY += actor.getCell()->getCell()->mData.mY * ESM::Land::REAL_SIZE;
+        }
 
         MWBase::Environment::get().getWorld()->moveObject(actor, dest.mX, dest.mY, dest.mZ);
         actor.getClass().adjustPosition(actor, false);
