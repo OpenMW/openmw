@@ -393,6 +393,8 @@ namespace MWWorld
         gmst["sTauntFail"] = ESM::Variant("Taunt Fail");
         gmst["sBribeSuccess"] = ESM::Variant("Bribe Success");
         gmst["sBribeFail"] = ESM::Variant("Bribe Fail");
+        gmst["fNPCHealthBarTime"] = ESM::Variant(5.f);
+        gmst["fNPCHealthBarFade"] = ESM::Variant(1.f);
 
         // Werewolf (BM)
         gmst["fWereWolfRunMult"] = ESM::Variant(1.f);
