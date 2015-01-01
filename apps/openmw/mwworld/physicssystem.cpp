@@ -108,7 +108,7 @@ namespace MWWorld
         }
 
         static bool stepMove(btCollisionObject *colobj, Ogre::Vector3 &position,
-                             const Ogre::Vector3 &velocity, float &remainingTime,
+                             const Ogre::Vector3 &toMove, float &remainingTime,
                              OEngine::Physic::PhysicEngine *engine)
         {
             /*
@@ -124,7 +124,7 @@ namespace MWWorld
              * If not successful return 'false'.  May fail for these reasons:
              *    - can't move directly up from current position
              *    - having moved up by between epsilon() and sStepSize, can't move forward
-             *    - having moved forward by between epsilon() and velocity*remainingTime,
+             *    - having moved forward by between epsilon() and toMove,
              *        = moved down between 0 and just under sStepSize but slope was too steep, or
              *        = moved the full sStepSize down (FIXME: this could be a bug)
              *
@@ -133,7 +133,7 @@ namespace MWWorld
              * Starting position.  Obstacle or stairs with height upto sStepSize in front.
              *
              *     +--+                          +--+       |XX
-             *     |  | -------> velocity        |  |    +--+XX
+             *     |  | -------> toMove          |  |    +--+XX
              *     |  |                          |  |    |XXXXX
              *     |  | +--+                     |  | +--+XXXXX
              *     |  | |XX|                     |  | |XXXXXXXX
@@ -171,11 +171,11 @@ namespace MWWorld
              *                          |  |
              *     <------------------->|  |
              *          +--+            +--+
-             *          |XX|      the moved amount is velocity*remainingTime*tracer.mFraction
+             *          |XX|      the moved amount is toMove*tracer.mFraction
              *          +--+
              *    ==============================================
              */
-            tracer.doTrace(colobj, stepper.mEndPos, stepper.mEndPos + velocity*remainingTime, engine);
+            tracer.doTrace(colobj, stepper.mEndPos, stepper.mEndPos + toMove, engine);
             if(tracer.mFraction < std::numeric_limits<float>::epsilon())
                 return false; // didn't even move the smallest representable amount
 
@@ -428,9 +428,9 @@ namespace MWWorld
                 Ogre::Vector3 oldPosition = newPosition;
                 // We hit something. Try to step up onto it. (NOTE: stepMove does not allow stepping over)
                 // NOTE: stepMove modifies newPosition if successful
-                bool result = stepMove(colobj, newPosition, velocity, remainingTime, engine);
-                if (!result)
-                    result = stepMove(colobj, newPosition, velocity.normalisedCopy()*300.f, remainingTime, engine);
+                bool result = stepMove(colobj, newPosition, velocity*remainingTime, remainingTime, engine);
+                if (!result) // to make sure the maximum stepping distance isn't framerate-dependent or movement-speed dependent
+                    result = stepMove(colobj, newPosition, velocity.normalisedCopy()*10.f, remainingTime, engine);
                 if(result)
                 {
                     // don't let pure water creatures move out of water after stepMove
