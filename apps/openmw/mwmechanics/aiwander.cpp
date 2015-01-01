@@ -781,6 +781,8 @@ namespace MWMechanics
         , mRepeat(wander->mData.mShouldRepeat)
         , mStoredInitialActorPosition(wander->mStoredInitialActorPosition)
     {
+        if (mStoredInitialActorPosition)
+            mInitialActorPosition = wander->mInitialActorPosition;
         for (int i=0; i<8; ++i)
             mIdle.push_back(wander->mData.mIdle[i]);
 
