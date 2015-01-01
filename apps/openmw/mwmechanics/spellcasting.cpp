@@ -578,15 +578,27 @@ namespace MWMechanics
                     value.restore(magnitude);
                 target.getClass().getCreatureStats(target).setAttribute(attribute, value);
             }
-            else if (effectId == ESM::MagicEffect::DamageHealth || effectId == ESM::MagicEffect::RestoreHealth)
+            else if (effectId == ESM::MagicEffect::DamageHealth)
             {
-                applyDynamicStatsEffect(0, target, magnitude);
+                applyDynamicStatsEffect(0, target, magnitude * -1);
             }
-            else if (effectId == ESM::MagicEffect::DamageFatigue || effectId == ESM::MagicEffect::RestoreFatigue)
+            else if (effectId == ESM::MagicEffect::RestoreHealth)
             {
                 applyDynamicStatsEffect(2, target, magnitude);
             }
-            else if (effectId == ESM::MagicEffect::DamageMagicka || effectId == ESM::MagicEffect::RestoreMagicka)
+            else if (effectId == ESM::MagicEffect::DamageFatigue)
+            {
+                applyDynamicStatsEffect(2, target, magnitude * -1);
+            }
+            else if (effectId == ESM::MagicEffect::RestoreFatigue)
+            {
+                applyDynamicStatsEffect(2, target, magnitude);
+            }
+            else if (effectId == ESM::MagicEffect::DamageMagicka)
+            {
+                applyDynamicStatsEffect(1, target, magnitude * -1);
+            }
+            else if (effectId == ESM::MagicEffect::RestoreMagicka)
             {
                 applyDynamicStatsEffect(1, target, magnitude);
             }
