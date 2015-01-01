@@ -73,6 +73,8 @@ bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
             if (charge == 0)
                 return false;
 
+            // FIXME: charge should be a float, not int so that damage < 1 per frame can be applied.
+            // This was also a bug in the original engine.
             charge -=
                     std::min(disintegrate,
                              static_cast<float>(charge));
@@ -522,6 +524,9 @@ namespace MWMechanics
 
         bool wasDead = creatureStats.isDead();
 
+        // FIXME: effect ticks should go into separate functions so they can be used with either
+        // magnitude (instant effect) or magnitude*duration
+
         // attributes
         for(int i = 0;i < ESM::Attribute::Length;++i)
         {
@@ -731,6 +736,8 @@ namespace MWMechanics
         }
 
         // Update bound effects
+        // Note: in vanilla MW multiple bound items of the same type can be created by different spells.
+        // As these extra copies are kinda useless this may or may not be important.
         static std::map<int, std::string> boundItemsMap;
         if (boundItemsMap.empty())
         {
