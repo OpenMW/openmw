@@ -74,6 +74,7 @@ BillboardObject::BillboardObject( const String& textureName,
                     const Vector3& position,
                     SceneNode* rootNode,
                     const std::string& material)
+: mVisibility(1.0f)
 {
     SceneManager* sceneMgr = rootNode->getCreator();
 
