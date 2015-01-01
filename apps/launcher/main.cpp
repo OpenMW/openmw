@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <QApplication>
 #include <QTextCodec>
 #include <QDir>
