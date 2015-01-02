@@ -440,7 +440,6 @@ void CSMWorld::MiscRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
 
 CSMWorld::NpcColumns::NpcColumns (const ActorColumns& actorColumns)
 : ActorColumns (actorColumns),
-  mFlags(std::map<const RefIdColumn *, unsigned int>()),
   mRace(NULL),
   mClass(NULL),
   mFaction(NULL),
