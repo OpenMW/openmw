@@ -36,12 +36,12 @@ public:
     {
         next.read(nif);
 
-        flags = nif->getUShort();
+        flags = nif->get<unsigned short>();
 
-        frequency = nif->getFloat();
-        phase = nif->getFloat();
-        timeStart = nif->getFloat();
-        timeStop = nif->getFloat();
+        frequency = nif->get<float>();
+        phase = nif->get<float>();
+        timeStart = nif->get<float>();
+        timeStop = nif->get<float>();
 
         target.read(nif);
     }
@@ -81,7 +81,7 @@ public:
 
     void read(NIFStream *nif)
     {
-        name = nif->getString();
+        name = nif->get<std::string>();
         Controlled::read(nif);
     }
 };
