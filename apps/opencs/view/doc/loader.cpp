@@ -9,7 +9,6 @@
 #include <QCloseEvent>
 #include <QListWidget>
 #include <QMessageBox>
-#include <QApplication>
 
 #include "../../model/doc/document.hpp"
 
