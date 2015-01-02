@@ -104,11 +104,6 @@ BillboardObject::BillboardObject( const String& textureName,
     bodyCount++;
 }
 
-BillboardObject::BillboardObject()
-: mNode(NULL), mMaterial(NULL), mEntity(NULL), mVisibility(1.f)
-{
-}
-
 void BillboardObject::requestedConfiguration (sh::MaterialInstance* m, const std::string& configuration)
 {
 }
