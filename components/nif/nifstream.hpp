@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 #include <stdexcept>
+#include <typeinfo>
+#include <string>
 
 #include <OgreDataStream.h>
 #include <OgreVector2.h>
@@ -86,7 +88,7 @@ public:
 
     //Templated functions to handle reads
     template <typename T>
-    T get(){throw std::runtime_error("Can not get this type of data from a NIF File!");}
+    T get(){throw std::runtime_error("Can not read a <"+std::string(typeid(T).name())+"> from a NIF File!  The get() function was called with the wrong template!");}
 
     ///Return a vector of whatever object is needed
     template <typename T>
