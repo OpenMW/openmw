@@ -757,7 +757,7 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             changeRes = true;
         else if (it->second == "field of view" && it->first == "General")
             mRendering.setFov(Settings::Manager::getFloat("field of view", "General"));
-        else if ((it->second == "gamma" || it->second == "contrast") && it->first == "General")
+        else if (it->second == "gamma" && it->first == "General")
         {
             mRendering.setWindowGammaContrast(Settings::Manager::getFloat("gamma", "General"), Settings::Manager::getFloat("contrast", "General"));
         }
