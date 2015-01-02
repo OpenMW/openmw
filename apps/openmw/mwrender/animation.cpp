@@ -988,7 +988,11 @@ void Animation::resetActiveGroups()
 
     AnimStateMap::const_iterator state = mStates.find(mAnimationTimePtr[0]->getAnimName());
     if(state == mStates.end())
+    {
+        if (mAccumRoot && mNonAccumRoot)
+            mAccumRoot->setPosition(-mNonAccumRoot->getPosition()*mAccumulate);
         return;
+    }
 
     const Ogre::SharedPtr<AnimSource> &animsrc = state->second.mSource;
     const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = animsrc->mControllers[0];
@@ -1142,9 +1146,6 @@ Ogre::Vector3 Animation::runAnimation(float duration)
 
         if(!state.mPlaying && state.mAutoDisable)
         {
-            if(mNonAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
-                mAccumRoot->setPosition(0.f,0.f,0.f);
-
             mStates.erase(stateiter++);
 
             resetActiveGroups();

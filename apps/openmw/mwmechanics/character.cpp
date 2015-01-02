@@ -441,6 +441,8 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     }
 
     // idle handled last as it can depend on the other states
+    // FIXME: if one of the below states is close to their last animation frame (i.e. will be disabled in the coming update),
+    // the idle animation should be displayed
     if ((mUpperBodyState != UpperCharState_Nothing
             || mMovementState != CharState_None
             || mHitState != CharState_None)
