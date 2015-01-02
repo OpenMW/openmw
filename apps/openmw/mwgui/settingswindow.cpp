@@ -182,6 +182,20 @@ namespace MWGui
         getWidget(mRefractionButton, "RefractionButton");
         getWidget(mDifficultySlider, "DifficultySlider");
 
+#ifndef WIN32
+        // hide gamma controls since it currently does not work under Linux
+        MyGUI::ScrollBar *gammaSlider;
+        getWidget(gammaSlider, "GammaSlider");
+        gammaSlider->setVisible(false);
+        MyGUI::TextBox *textBox;
+        getWidget(textBox, "GammaText");
+        textBox->setVisible(false);
+        getWidget(textBox, "GammaTextDark");
+        textBox->setVisible(false);
+        getWidget(textBox, "GammaTextLight");
+        textBox->setVisible(false);
+#endif
+
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SettingsWindow::onWindowResize);
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);

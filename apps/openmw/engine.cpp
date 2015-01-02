@@ -208,6 +208,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
+    mOgre->restoreWindowGammaRamp();
     mEnvironment.cleanup();
     delete mScriptContext;
     delete mOgre;
@@ -381,6 +382,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
+
+    mOgre->setWindowGammaContrast(Settings::Manager::getFloat("gamma", "General"), Settings::Manager::getFloat("contrast", "General"));
 
     if (!mSkipMenu)
     {
