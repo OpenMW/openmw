@@ -8,7 +8,6 @@
 #include <QDialogButtonBox>
 #include <QCloseEvent>
 #include <QListWidget>
-#include <QMessageBox>
 
 #include "../../model/doc/document.hpp"
 
@@ -107,8 +106,6 @@ void CSVDoc::LoadingDocument::abort (const std::string& error)
     mAborted = true;
     mError->setText (QString::fromUtf8 (("<font color=red>Loading failed: " + error + "</font>").c_str()));
     mButtons->setStandardButtons (QDialogButtonBox::Close);
-    QMessageBox::critical(this, tr("OpenCS Loading Failed"),
-        QString::fromUtf8 (("Loading failed:\n" + error).c_str()));
 }
 
 void CSVDoc::LoadingDocument::addMessage (const std::string& message)
