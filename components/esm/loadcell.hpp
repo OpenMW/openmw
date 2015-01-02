@@ -70,15 +70,27 @@ struct Cell
   {
     int mFlags;
     int mX, mY;
+
+    DATAstruct() : mFlags(0), mX(0), mY(0) {}
   };
 
   struct AMBIstruct
   {
     Color mAmbient, mSunlight, mFog;
     float mFogDensity;
+
+    AMBIstruct() : mAmbient(0), mSunlight(0), mFog(0), mFogDensity(0) {}
   };
 
-  Cell() : mWater(0) {}
+  Cell() : mWater(0),
+           mName(""),
+           mRegion(""),
+           mData(DATAstruct()),
+           mAmbi(AMBIstruct()),
+           mWaterInt(false),
+           mMapColor(0),
+           mRefNumCounter(0)
+  {}
 
   // Interior cells are indexed by this (it's the 'id'), for exterior
   // cells it is optional.
