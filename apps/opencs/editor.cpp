@@ -236,6 +236,7 @@ void CS::Editor::showSettings()
     if (mSettings.isHidden())
         mSettings.show();
 
+    mSettings.move (QCursor::pos());
     mSettings.raise();
     mSettings.activateWindow();
 }
