@@ -314,12 +314,10 @@ namespace Compiler
 
     bool Scanner::scanName (char c, std::string& name)
     {
-        bool first = true;
         bool error = false;
 
         name.clear();
-
-        putback (c);
+        name += c;
 
         while (get (c))
         {
@@ -352,13 +350,9 @@ namespace Compiler
                     putback (c);
                     break;
                 }
-
-                if (first && (std::isdigit (c) || c=='`' || c=='-'))
-                    error = true;
             }
 
             name += c;
-            first = false;
         }
 
         return !error;
