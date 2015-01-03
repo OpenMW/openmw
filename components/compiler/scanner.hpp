@@ -89,7 +89,8 @@ namespace Compiler
 
             bool scanName (char c, Parser& parser, bool& cont);
 
-            bool scanName (char c, std::string& name);
+            /// \param name May contain the start of the name (one or more characters)
+            bool scanName (std::string& name);
 
             bool scanSpecial (char c, Parser& parser, bool& cont);
 

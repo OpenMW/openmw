@@ -270,8 +270,9 @@ namespace Compiler
     bool Scanner::scanName (char c, Parser& parser, bool& cont)
     {
         std::string name;
+        name += c;
 
-        if (!scanName (c, name))
+        if (!scanName (name))
             return false;
 
         TokenLoc loc (mLoc);
@@ -312,12 +313,10 @@ namespace Compiler
         return true;
     }
 
-    bool Scanner::scanName (char c, std::string& name)
+    bool Scanner::scanName (std::string& name)
     {
+        char c;
         bool error = false;
-
-        name.clear();
-        name += c;
 
         while (get (c))
         {
@@ -333,12 +332,14 @@ namespace Compiler
 //                {
 //                    if (!get (c))
 //                    {
+//                        error = true;
 //                        mErrorHandler.error ("incomplete escape sequence", mLoc);
 //                        break;
 //                    }
 //                }
                 else if (c=='\n')
                 {
+                    error = true;
                     mErrorHandler.error ("incomplete string or name", mLoc);
                     break;
                 }
