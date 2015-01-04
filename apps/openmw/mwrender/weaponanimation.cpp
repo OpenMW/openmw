@@ -68,9 +68,6 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
 
 void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
 {
-    if (!mAmmunition.get())
-        return;
-
     MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
     MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     if (weapon == inv.end())
@@ -129,6 +126,9 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
         // With bows and crossbows only the used arrow/bolt gets detached
         MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
         if (ammo == inv.end())
+            return;
+
+        if (!mAmmunition.get())
             return;
 
         Ogre::Vector3 launchPos(0,0,0);
