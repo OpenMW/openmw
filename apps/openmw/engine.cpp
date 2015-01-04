@@ -208,7 +208,8 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
-    mOgre->restoreWindowGammaRamp();
+    if (mOgre)
+        mOgre->restoreWindowGammaRamp();
     mEnvironment.cleanup();
     delete mScriptContext;
     delete mOgre;
