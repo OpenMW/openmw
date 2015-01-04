@@ -900,7 +900,8 @@ bool CharacterController::updateWeaponState()
     }
 
     bool forcestateupdate = false;
-    if(weaptype != mWeaponType && mHitState != CharState_KnockDown)
+    if(weaptype != mWeaponType && mHitState != CharState_KnockDown && mHitState != CharState_KnockOut
+                                && mHitState != CharState_Hit)
     {
         forcestateupdate = true;
 
