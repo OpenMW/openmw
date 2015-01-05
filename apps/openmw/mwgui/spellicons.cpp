@@ -25,7 +25,7 @@ namespace MWGui
 {
 
     void EffectSourceVisitor::visit (MWMechanics::EffectKey key,
-                                           const std::string& sourceName, int casterActorId,
+                                           const std::string& sourceName, const std::string& sourceId, int casterActorId,
                                      float magnitude, float remainingTime, float totalTime)
     {
         MagicEffectInfo newEffectSource;

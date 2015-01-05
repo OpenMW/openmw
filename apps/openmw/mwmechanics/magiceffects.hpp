@@ -73,7 +73,7 @@ namespace MWMechanics
     struct EffectSourceVisitor
     {
         virtual void visit (MWMechanics::EffectKey key,
-                                 const std::string& sourceName, int casterActorId,
+                                 const std::string& sourceName, const std::string& sourceId, int casterActorId,
                             float magnitude, float remainingTime = -1, float totalTime = -1) = 0;
     };
 

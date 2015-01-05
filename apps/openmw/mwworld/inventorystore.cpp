@@ -583,7 +583,8 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
             const EffectParams& params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().getRefId()][i];
             float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params.mRandom;
             magnitude *= params.mMultiplier;
-            visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), -1, magnitude);
+            if (magnitude > 0)
+                visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), (**iter).getCellRef().getRefId(), -1, magnitude);
 
             ++i;
         }
@@ -637,6 +638,52 @@ void MWWorld::InventoryStore::rechargeItems(float duration)
 void MWWorld::InventoryStore::purgeEffect(short effectId)
 {
     mMagicEffects.remove(MWMechanics::EffectKey(effectId));
+}
+
+void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sourceId)
+{
+    TEffectMagnitudes::iterator effectMagnitudeIt = mPermanentMagicEffectMagnitudes.find(sourceId);
+    if (effectMagnitudeIt == mPermanentMagicEffectMagnitudes.end())
+        return;
+
+    for (TSlots::const_iterator iter (mSlots.begin()); iter!=mSlots.end(); ++iter)
+    {
+        if (*iter==end())
+            continue;
+
+        if ((*iter)->getClass().getId(**iter) != sourceId)
+            continue;
+
+        std::string enchantmentId = (*iter)->getClass().getEnchantment (**iter);
+
+        if (!enchantmentId.empty())
+        {
+            const ESM::Enchantment& enchantment =
+                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find (enchantmentId);
+
+            if (enchantment.mData.mType != ESM::Enchantment::ConstantEffect)
+                continue;
+
+            std::vector<EffectParams>& params = effectMagnitudeIt->second;
+
+            int i=0;
+            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
+                effectIt!=enchantment.mEffects.mList.end(); ++effectIt, ++i)
+            {
+                if (effectIt->mEffectID != effectId)
+                    continue;
+
+                float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params[i].mRandom;
+                magnitude *= params[i].mMultiplier;
+
+                if (magnitude)
+                    mMagicEffects.add (*effectIt, -magnitude);
+
+                params[i].mMultiplier = 0;
+                break;
+            }
+        }
+    }
 }
 
 void MWWorld::InventoryStore::clear()

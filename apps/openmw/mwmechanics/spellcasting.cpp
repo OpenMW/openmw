@@ -21,6 +21,7 @@
 
 #include "magiceffects.hpp"
 #include "npcstats.hpp"
+#include "summoning.hpp"
 
 namespace
 {
