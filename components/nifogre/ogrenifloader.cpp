@@ -973,7 +973,10 @@ class NIFObjectLoader
             {
                 const Nif::NiParticleSystemController *partctrl = static_cast<const Nif::NiParticleSystemController*>(ctrl.getPtr());
 
-                partsys->setDefaultDimensions(partctrl->size*2, partctrl->size*2);
+                float size = partctrl->size*2;
+                // HACK: don't allow zero-sized particles which can rarely cause an AABB assertion in Ogre to fail
+                size = std::max(size, 0.00001f);
+                partsys->setDefaultDimensions(size, size);
 
                 if(!partctrl->emitter.empty())
                 {
