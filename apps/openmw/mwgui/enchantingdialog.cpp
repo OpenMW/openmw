@@ -120,19 +120,19 @@ namespace MWGui
         {
             case ESM::Enchantment::CastOnce:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce","Cast Once"));
-                mAddEffectDialog.constantEffect=false;
+                setConstantEffect(false);
                 break;
             case ESM::Enchantment::WhenStrikes:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenStrikes", "When Strikes"));
-                mAddEffectDialog.constantEffect=false;
+                setConstantEffect(false);
                 break;
             case ESM::Enchantment::WhenUsed:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenUsed", "When Used"));
-                mAddEffectDialog.constantEffect=false;
+                setConstantEffect(false);
                 break;
             case ESM::Enchantment::ConstantEffect:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastConstant", "Cast Constant"));
-                mAddEffectDialog.constantEffect=true;
+                setConstantEffect(true);
                 break;
         }
     }
@@ -283,6 +283,7 @@ namespace MWGui
     {
         mEnchanting.nextCastStyle();
         updateLabels();
+        updateEffectsView();
     }
 
     void EnchantingDialog::onBuyButtonClicked(MyGUI::Widget* sender)

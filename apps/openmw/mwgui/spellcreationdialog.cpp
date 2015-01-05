@@ -42,6 +42,7 @@ namespace MWGui
         : WindowModal("openmw_edit_effect.layout")
         , mEditing(false)
         , mMagicEffect(NULL)
+        , mConstantEffect(false)
     {
         getWidget(mCancelButton, "CancelButton");
         getWidget(mOkButton, "OkButton");
@@ -71,7 +72,11 @@ namespace MWGui
         mMagnitudeMaxSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onMagnitudeMaxChanged);
         mDurationSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onDurationChanged);
         mAreaSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onAreaChanged);
-        constantEffect=false;
+    }
+
+    void EditEffectDialog::setConstantEffect(bool constant)
+    {
+        mConstantEffect = constant;
     }
 
     void EditEffectDialog::open()
@@ -92,8 +97,8 @@ namespace MWGui
     void EditEffectDialog::newEffect (const ESM::MagicEffect *effect)
     {
         bool allowSelf = effect->mData.mFlags & ESM::MagicEffect::CastSelf;
-        bool allowTouch = (effect->mData.mFlags & ESM::MagicEffect::CastTouch) && !constantEffect;
-        bool allowTarget = (effect->mData.mFlags & ESM::MagicEffect::CastTarget) && !constantEffect;
+        bool allowTouch = (effect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
+        bool allowTarget = (effect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
 
         if (!allowSelf && !allowTouch && !allowTarget)
             return; // TODO: Show an error message popup?
@@ -183,7 +188,7 @@ namespace MWGui
             mMagnitudeBox->setVisible (true);
             curY += mMagnitudeBox->getSize().height;
         }
-        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)&&constantEffect==false)
+        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)&&mConstantEffect==false)
         {
             mDurationBox->setPosition(mDurationBox->getPosition().left, curY);
             mDurationBox->setVisible (true);
@@ -204,8 +209,8 @@ namespace MWGui
         // cycle through range types until we find something that's allowed
         // does not handle the case where nothing is allowed (this should be prevented before opening the Add Effect dialog)
         bool allowSelf = mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf;
-        bool allowTouch = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch) && !constantEffect;
-        bool allowTarget = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget) && !constantEffect;
+        bool allowTouch = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
+        bool allowTarget = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
         if (mEffect.mRange == ESM::RT_Self && !allowSelf)
             mEffect.mRange = (mEffect.mRange+1)%3;
         if (mEffect.mRange == ESM::RT_Touch && !allowTouch)
@@ -468,6 +473,7 @@ namespace MWGui
         , mSelectedEffect(0)
         , mSelectedKnownEffectId(0)
         , mType(type)
+        , mConstantEffect(false)
     {
         mAddEffectDialog.eventEffectAdded += MyGUI::newDelegate(this, &EffectEditorBase::onEffectAdded);
         mAddEffectDialog.eventEffectModified += MyGUI::newDelegate(this, &EffectEditorBase::onEffectModified);
@@ -659,6 +665,7 @@ namespace MWGui
             params.mMagnMax = it->mMagnMax;
             params.mRange = it->mRange;
             params.mArea = it->mArea;
+            params.mIsConstant = mConstantEffect;
 
             MyGUI::Button* button = mUsedEffectsView->createWidget<MyGUI::Button>("", MyGUI::IntCoord(0, size.height, 0, 24), MyGUI::Align::Default);
             button->setUserData(i);
@@ -702,5 +709,11 @@ namespace MWGui
 
         mAddEffectDialog.editEffect (mEffects[id]);
         mAddEffectDialog.setVisible (true);
+    }
+
+    void EffectEditorBase::setConstantEffect(bool constant)
+    {
+        mAddEffectDialog.setConstantEffect(constant);
+        mConstantEffect = constant;
     }
 }
