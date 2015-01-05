@@ -1164,6 +1164,19 @@ namespace MWMechanics
                     player.getClass().getNpcStats(player).expell(factionID);
                 }
             }
+
+            if (type == OT_Assault && !victim.isEmpty()
+                    && !victim.getClass().getCreatureStats(victim).getAiSequence().isInCombat(player)
+                    && victim.getClass().isNpc())
+            {
+                // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
+                // Note: accidental or collateral damage attacks are ignored.
+                startCombat(victim, player);
+
+                // Set the crime ID, which we will use to calm down participants
+                // once the bounty has been paid.
+                victim.getClass().getNpcStats(victim).setCrimeId(id);
+            }
         }
     }
 
