@@ -870,7 +870,13 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct CellColumn : public Column<ESXRecordT>
     {
-        CellColumn() : Column<ESXRecordT> (Columns::ColumnId_Cell, ColumnBase::Display_Cell) {}
+        bool mBlocked;
+
+        /// \param blocked Do not allow user-modification
+        CellColumn (bool blocked = false)
+        : Column<ESXRecordT> (Columns::ColumnId_Cell, ColumnBase::Display_Cell),
+          mBlocked (blocked)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -893,7 +899,7 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const
         {
-            return true;
+            return !mBlocked;
         }
     };
 
