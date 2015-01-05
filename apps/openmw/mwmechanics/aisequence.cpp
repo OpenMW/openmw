@@ -125,19 +125,23 @@ bool AiSequence::isInCombat(const MWWorld::Ptr &actor) const
 
 void AiSequence::stopCombat()
 {
-    while (getTypeId() == AiPackage::TypeIdCombat)
+    for(std::list<AiPackage*>::iterator it = mPackages.begin(); it != mPackages.end(); )
     {
-        delete *mPackages.begin();
-        mPackages.erase (mPackages.begin());
+        if ((*it)->getTypeId() == AiPackage::TypeIdCombat)
+            it = mPackages.erase(it);
+        else
+            ++it;
     }
 }
 
 void AiSequence::stopPursuit()
 {
-    while (getTypeId() == AiPackage::TypeIdPursue)
+    for(std::list<AiPackage*>::iterator it = mPackages.begin(); it != mPackages.end(); )
     {
-        delete *mPackages.begin();
-        mPackages.erase (mPackages.begin());
+        if ((*it)->getTypeId() == AiPackage::TypeIdPursue)
+            it = mPackages.erase(it);
+        else
+            ++it;
     }
 }
 
