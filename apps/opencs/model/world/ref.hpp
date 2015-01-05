@@ -12,6 +12,7 @@ namespace CSMWorld
     {
         std::string mId;
         std::string mCell;
+        std::string mOriginalCell;
 
         CellRef();
     };

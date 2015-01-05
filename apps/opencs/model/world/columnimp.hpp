@@ -904,6 +904,38 @@ namespace CSMWorld
     };
 
     template<typename ESXRecordT>
+    struct OriginalCellColumn : public Column<ESXRecordT>
+    {
+        OriginalCellColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_OriginalCell, ColumnBase::Display_Cell)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mOriginalCell.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mOriginalCell = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+
+        virtual bool isUserEditable() const
+        {
+            return false;
+        }
+    };
+
+    template<typename ESXRecordT>
     struct IdColumn : public Column<ESXRecordT>
     {
         IdColumn() : Column<ESXRecordT> (Columns::ColumnId_ReferenceableId,

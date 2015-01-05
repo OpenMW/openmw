@@ -194,6 +194,7 @@ namespace CSMWorld
             ColumnId_HitSound = 178,
             ColumnId_AreaSound = 179,
             ColumnId_BoltSound = 180,
+            ColumnId_OriginalCell = 181,
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,

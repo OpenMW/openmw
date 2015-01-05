@@ -23,6 +23,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
     while (ESM::Cell::getNextRef (reader, ref, deleted))
     {
+        ref.mOriginalCell = cell2.mId;
         ref.mCell = cell2.mId;
 
         /// \todo handle moved references

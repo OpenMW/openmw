@@ -201,6 +201,7 @@ namespace CSMWorld
             { ColumnId_HitSound, "Hit Sound" },
             { ColumnId_AreaSound, "Area Sound" },
             { ColumnId_BoltSound, "Bolt Sound" },
+            { ColumnId_OriginalCell, "Original Cell" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
