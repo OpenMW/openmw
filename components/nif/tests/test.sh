@@ -9,7 +9,7 @@ find "$DATAFILESDIR" -iname *nif >> nifs.txt
 
 sed -e 's/.*/\"&\"/' nifs.txt > quoted_nifs.txt
 
-nice -n 10 xargs --arg-file=quoted_nifs.txt ../../../niftest
+xargs --arg-file=quoted_nifs.txt ../../../niftest
 
 rm nifs.txt
 rm quoted_nifs.txt

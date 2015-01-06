@@ -106,33 +106,41 @@ std::string NIFStream::getVersionString()
     return inp->getLine();
 }
 
-template <>
-char NIFStream::get<char>(){ return getChar(); }
-template <>
-short NIFStream::get<short>(){ return getShort(); }
-template <>
-unsigned short NIFStream::get<unsigned short>(){ return getUShort(); }
-template <>
-int NIFStream::get<int>(){ return getInt(); }
-template <>
-unsigned int NIFStream::get<unsigned int>(){ return getUInt(); }
-template <>
-float NIFStream::get<float>(){ return getFloat(); }
-
-template <>
-Ogre::Vector2 NIFStream::get<Ogre::Vector2>(){ return getVector2(); }
-template <>
-Ogre::Vector3 NIFStream::get<Ogre::Vector3>(){ return getVector3(); }
-template <>
-Ogre::Vector4 NIFStream::get<Ogre::Vector4>(){ return getVector4(); }
-template <>
-Ogre::Matrix3 NIFStream::get<Ogre::Matrix3>(){ return getMatrix3(); }
-template <>
-Ogre::Quaternion NIFStream::get<Ogre::Quaternion>(){ return getQuaternion(); }
-template <>
-Transformation NIFStream::get<Transformation>(){ return getTrafo(); }
-
-template <>
-std::string NIFStream::get<std::string>(){ return getString(); }
+void NIFStream::getShorts(std::vector<short> &vec, size_t size)
+{
+    vec.resize(size);
+    for(size_t i = 0;i < vec.size();i++)
+        vec[i] = getShort();
+}
+void NIFStream::getFloats(std::vector<float> &vec, size_t size)
+{
+    vec.resize(size);
+    for(size_t i = 0;i < vec.size();i++)
+        vec[i] = getFloat();
+}
+void NIFStream::getVector2s(std::vector<Ogre::Vector2> &vec, size_t size)
+{
+    vec.resize(size);
+    for(size_t i = 0;i < vec.size();i++)
+        vec[i] = getVector2();
+}
+void NIFStream::getVector3s(std::vector<Ogre::Vector3> &vec, size_t size)
+{
+    vec.resize(size);
+    for(size_t i = 0;i < vec.size();i++)
+        vec[i] = getVector3();
+}
+void NIFStream::getVector4s(std::vector<Ogre::Vector4> &vec, size_t size)
+{
+    vec.resize(size);
+    for(size_t i = 0;i < vec.size();i++)
+        vec[i] = getVector4();
+}
+void NIFStream::getQuaternions(std::vector<Ogre::Quaternion> &quat, size_t size)
+{
+    quat.resize(size);
+    for(size_t i = 0;i < quat.size();i++)
+        quat[i] = getQuaternion();
+}
 
 }
