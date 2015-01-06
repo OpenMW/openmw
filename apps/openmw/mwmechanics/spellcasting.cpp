@@ -435,7 +435,7 @@ namespace MWMechanics
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
                 magnitude *= magnitudeMult;
 
-                bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
+                bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration) && effectIt->mDuration > 0;
                 if (target.getClass().isActor() && hasDuration)
                 {
                     ActiveSpells::ActiveEffect effect;
@@ -579,6 +579,30 @@ namespace MWMechanics
                     value.restore(magnitude);
                 target.getClass().getCreatureStats(target).setAttribute(attribute, value);
             }
+            else if (effectId == ESM::MagicEffect::DamageHealth)
+            {
+                applyDynamicStatsEffect(0, target, magnitude * -1);
+            }
+            else if (effectId == ESM::MagicEffect::RestoreHealth)
+            {
+                applyDynamicStatsEffect(0, target, magnitude);
+            }
+            else if (effectId == ESM::MagicEffect::DamageFatigue)
+            {
+                applyDynamicStatsEffect(2, target, magnitude * -1);
+            }
+            else if (effectId == ESM::MagicEffect::RestoreFatigue)
+            {
+                applyDynamicStatsEffect(2, target, magnitude);
+            }
+            else if (effectId == ESM::MagicEffect::DamageMagicka)
+            {
+                applyDynamicStatsEffect(1, target, magnitude * -1);
+            }
+            else if (effectId == ESM::MagicEffect::RestoreMagicka)
+            {
+                applyDynamicStatsEffect(1, target, magnitude);
+            }
             else if (effectId == ESM::MagicEffect::DamageSkill || effectId == ESM::MagicEffect::RestoreSkill)
             {
                 if (target.getTypeName() != typeid(ESM::NPC).name())
@@ -639,6 +663,13 @@ namespace MWMechanics
                 }
             }
         }
+    }
+    
+    void CastSpell::applyDynamicStatsEffect(int attribute, const MWWorld::Ptr& target, float magnitude)
+    {
+        DynamicStat<float> value = target.getClass().getCreatureStats(target).getDynamic(attribute);
+        value.modify(magnitude);
+        target.getClass().getCreatureStats(target).setDynamic(attribute, value);
     }
 
     bool CastSpell::cast(const std::string &id)
