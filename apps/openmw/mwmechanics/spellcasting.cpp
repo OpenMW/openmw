@@ -471,6 +471,20 @@ namespace MWMechanics
                 else
                     applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude);
 
+                // Re-casting a summon effect will remove the creature from previous castings of that effect.
+                if (effectIt->mEffectID >= ESM::MagicEffect::SummonScamp
+                        && effectIt->mEffectID <= ESM::MagicEffect::SummonStormAtronach
+                        && !target.isEmpty() && target.getClass().isActor())
+                {
+                    CreatureStats& targetStats = target.getClass().getCreatureStats(target);
+                    std::map<CreatureStats::SummonKey, int>::iterator found = targetStats.getSummonedCreatureMap().find(std::make_pair(effectIt->mEffectID, mId));
+                    if (found != targetStats.getSummonedCreatureMap().end())
+                    {
+                        cleanupSummonedCreature(targetStats, found->second);
+                        targetStats.getSummonedCreatureMap().erase(found);
+                    }
+                }
+
                 // HACK: Damage attribute/skill actually has a duration, even though the actual effect is instant and permanent.
                 // This was probably just done to have the effect visible in the magic menu for a while
                 // to notify the player they've been damaged?
