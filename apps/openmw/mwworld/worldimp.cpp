@@ -201,6 +201,7 @@ namespace MWWorld
         setupPlayer();
 
         renderPlayer();
+        mRendering->resetCamera();
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
 
@@ -304,7 +305,8 @@ namespace MWWorld
             +1 // player record
             +1 // weather record
             +1 // actorId counter
-            +1; // levitation/teleport enabled state
+            +1 // levitation/teleport enabled state
+            +1; // camera
     }
 
     void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -333,6 +335,11 @@ namespace MWWorld
         writer.writeHNT("LEVT", mLevitationEnabled);
         writer.endRecord(ESM::REC_ENAB);
         progress.increaseProgress();
+
+        writer.startRecord(ESM::REC_CAM_);
+        writer.writeHNT("FIRS", isFirstPerson());
+        writer.endRecord(ESM::REC_CAM_);
+        progress.increaseProgress();
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type,
@@ -347,6 +354,12 @@ namespace MWWorld
                 reader.getHNT(mTeleportEnabled, "TELE");
                 reader.getHNT(mLevitationEnabled, "LEVT");
                 return;
+            case ESM::REC_CAM_:
+                bool firstperson;
+                reader.getHNT(firstperson, "FIRS");
+                if (firstperson != isFirstPerson())
+                    togglePOV();
+                break;
             default:
                 if (!mStore.readRecord (reader, type) &&
                     !mGlobalVariables.readRecord (reader, type) &&
@@ -2073,7 +2086,6 @@ namespace MWWorld
         MWBase::Environment::get().getMechanicsManager()->add(mPlayer->getPlayer());
 
         mPhysics->addActor(mPlayer->getPlayer());
-        mRendering->resetCamera();
     }
 
     int World::canRest ()
