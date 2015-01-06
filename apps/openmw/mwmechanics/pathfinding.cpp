@@ -297,13 +297,13 @@ namespace MWMechanics
         return false;
     }
 
-    bool PathFinder::checkPathCompleted(float x, float y, float z)
+    bool PathFinder::checkPathCompleted(float x, float y, float z, float tolerance)
     {
         if(mPath.empty())
             return true;
 
         ESM::Pathgrid::Point nextPoint = *mPath.begin();
-        if(sqrDistanceZCorrected(nextPoint, x, y, z) < 64*64)
+        if(sqrDistanceZCorrected(nextPoint, x, y, z) < tolerance*tolerance)
         {
             mPath.pop_front();
             if(mPath.empty())
