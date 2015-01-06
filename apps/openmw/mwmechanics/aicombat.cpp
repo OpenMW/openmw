@@ -580,7 +580,7 @@ namespace MWMechanics
                 buildNewPath(actor, target); //may fail to build a path, check before use
 
                 //delete visited path node
-                mPathFinder.checkWaypoint(pos.pos[0],pos.pos[1],pos.pos[2]);
+                mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]);
 
                 // This works on the borders between the path grid and areas with no waypoints.
                 if(inLOS && mPathFinder.getPath().size() > 1)

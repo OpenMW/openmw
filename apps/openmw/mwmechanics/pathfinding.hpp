@@ -42,9 +42,6 @@ namespace MWMechanics
             bool checkPathCompleted(float x, float y, float z, float tolerance=32.f);
             ///< \Returns true if we are within \a tolerance units of the last path point.
 
-            bool checkWaypoint(float x, float y, float z);
-            ///< \Returns true if a way point was reached
-
             float getZAngleToNext(float x, float y) const;
 
             bool isPathConstructed() const
