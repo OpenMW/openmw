@@ -584,7 +584,7 @@ namespace MWMechanics
             }
             else if (effectId == ESM::MagicEffect::RestoreHealth)
             {
-                applyDynamicStatsEffect(2, target, magnitude);
+                applyDynamicStatsEffect(0, target, magnitude);
             }
             else if (effectId == ESM::MagicEffect::DamageFatigue)
             {
