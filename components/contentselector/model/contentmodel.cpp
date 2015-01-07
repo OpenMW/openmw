@@ -173,7 +173,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
     {
     case Qt::ForegroundRole:
     {
-        if (isLoadOrderError(file->filePath()))
+        if (isLoadOrderError(file))
         {
             QBrush redBackground(Qt::red, Qt::SolidPattern);
             return redBackground;
@@ -213,7 +213,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
         if (column != 0)
             return QVariant();
 
-        return isLoadOrderError(file->filePath()) ? getLoadOrderError(file->filePath()).toolTip() : file->toolTip();
+        return toolTip(file);
         break;
     }
 
@@ -302,7 +302,7 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const
             {
                 setCheckState(file->filePath(), success);
                 emit dataChanged(index, index);
-
+                checkForLoadOrderErrors();
             }
             else
                 return success;
@@ -543,26 +543,14 @@ bool ContentSelectorModel::ContentModel::isEnabled (QModelIndex index) const
     return (flags(index) & Qt::ItemIsEnabled);
 }
 
-bool ContentSelectorModel::ContentModel::isLoadOrderError(const QString& filepath) const
+bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile *file) const
 {
-    return !(getLoadOrderError(filepath) == LoadOrderError::sNoError);
-}
-
-ContentSelectorModel::LoadOrderError ContentSelectorModel::ContentModel::getLoadOrderError(const QString& filepath) const
-{
-    return mLoadOrderErrors.contains(filepath) ? mLoadOrderErrors[filepath] : ContentSelectorModel::LoadOrderError::sNoError;
-}
-
-void ContentSelectorModel::ContentModel::setLoadOrderError(const QString& filepath, const ContentSelectorModel::LoadOrderError& loadOrderError)
-{
-    mLoadOrderErrors[filepath] = loadOrderError;
-    int filePosition = indexFromItem(item(filepath)).row();
-    emit dataChanged(index(filePosition, 0, QModelIndex()), index(filePosition, 0, QModelIndex()));
+    return mPluginsWithLoadOrderError.contains(file->filePath());
 }
 
 void ContentSelectorModel::ContentModel::setContentList(const QStringList &fileList, bool isChecked)
 {
-    mLoadOrderErrors.clear();
+    mPluginsWithLoadOrderError.clear();
     int previousPosition = -1;
     foreach (const QString &filepath, fileList)
     {
@@ -590,36 +578,60 @@ void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()
     for (int row = 0; row < mFiles.count(); ++row)
     {
         EsmFile* file = item(row);
-        bool isRowInError = isLoadOrderError(file->filePath());
-        LoadOrderError::ErrorCode error = LoadOrderError::ErrorCode_None;
-        foreach(QString dependentfileName, file->gameFiles())
+        bool isRowInError = checkForLoadOrderErrors(file, row).count() != 0;
+        if (isRowInError)
         {
-            const EsmFile* dependentFile = item(dependentfileName);
-
-            if (!dependentFile)
-            {
-                error = LoadOrderError::ErrorCode_MissingDependency;
-            }
-            else if (!isChecked(dependentFile->filePath()))
-            {
-                error = LoadOrderError::ErrorCode_InactiveDependency;
-            }
-            else if (row < indexFromItem(dependentFile).row())
-            {
-                error = LoadOrderError::ErrorCode_LoadOrder;
-            }
-
-            if (!isRowInError && (error != LoadOrderError::ErrorCode_None))
-            {
-                setLoadOrderError(file->filePath(), LoadOrderError(error, dependentfileName));
-                break;
-            }
+            mPluginsWithLoadOrderError.insert(file->filePath());
         }
-
-        if (isRowInError && (error == LoadOrderError::ErrorCode_None))
+        else
         {
-            setLoadOrderError(file->filePath(), LoadOrderError::sNoError);
+            mPluginsWithLoadOrderError.remove(file->filePath());
         }
+    }
+}
+
+QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::checkForLoadOrderErrors(const EsmFile *file, int row) const
+{
+    QList<LoadOrderError> errors = QList<LoadOrderError>();
+    foreach(QString dependentfileName, file->gameFiles())
+    {
+        const EsmFile* dependentFile = item(dependentfileName);
+
+        if (!dependentFile)
+        {
+            errors.append(LoadOrderError(LoadOrderError::ErrorCode_MissingDependency, dependentfileName));
+        }
+        if (!isChecked(dependentFile->filePath()))
+        {
+            errors.append(LoadOrderError(LoadOrderError::ErrorCode_InactiveDependency, dependentfileName));
+        }
+        if (row < indexFromItem(dependentFile).row())
+        {
+            errors.append(LoadOrderError(LoadOrderError::ErrorCode_LoadOrder, dependentfileName));
+        }
+    }
+    return errors;
+}
+
+QString ContentSelectorModel::ContentModel::toolTip(const EsmFile *file) const
+{
+    if (isLoadOrderError(file))
+    {
+        QString text("<font color=#840000><b>");
+        int index = indexFromItem(item(file->filePath())).row();
+        foreach(const LoadOrderError& error, checkForLoadOrderErrors(file, index))
+        {
+            text += "<p>";
+            text += error.toolTip();
+            text += "</p>";
+        }
+        text += ("</b></font>");
+        text += file->toolTip();
+        return text;
+    }
+    else
+    {
+        return file->toolTip();
     }
 }
 

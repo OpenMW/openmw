@@ -25,11 +25,7 @@ namespace ContentSelectorModel
         }
         inline ErrorCode errorCode() const { return mErrorCode; }
         inline QString fileName() const { return mFileName; }
-        bool operator==(const LoadOrderError& rhs) const;
         QString toolTip() const;
-
-        /// Sentinel to represent a "No Load Order Error" condition
-        static LoadOrderError sNoError;
 
     private:
         ErrorCode mErrorCode;

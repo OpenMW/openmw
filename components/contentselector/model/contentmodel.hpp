@@ -3,6 +3,7 @@
 
 #include <QAbstractTableModel>
 #include <QStringList>
+#include <QSet>
 
 #include "loadordererror.hpp"
 
@@ -53,10 +54,6 @@ namespace ContentSelectorModel
         ContentFileList checkedItems() const;
         void uncheckAll();
 
-        bool isLoadOrderError(const QString& filepath) const;
-        LoadOrderError getLoadOrderError(const QString& filepath) const;
-        void setLoadOrderError(const QString& filepath, const LoadOrderError& loadOrderError);
-
         void refreshModel();
 
     private:
@@ -66,12 +63,22 @@ namespace ContentSelectorModel
         EsmFile *item(int row);
 
         void sortFiles();
+
+        /// Checks all plug-ins for load order errors and updates mPluginsWithLoadOrderError with plug-ins with issues
         void checkForLoadOrderErrors();
 
+        /// Checks a specific plug-in for load order errors
+        /// \return all errors found for specific plug-in
+        QList<LoadOrderError> checkForLoadOrderErrors(const EsmFile *file, int row) const;
+
+        ///  \return true if plug-in has a Load Order error
+        bool isLoadOrderError(const EsmFile *file) const;
+
+        QString toolTip(const EsmFile *file) const;
 
         ContentFileList mFiles;
         QHash<QString, Qt::CheckState> mCheckStates;
-        QHash<QString, LoadOrderError> mLoadOrderErrors;
+        QSet<QString> mPluginsWithLoadOrderError;
         QTextCodec *mCodec;
         QString mEncoding;
 

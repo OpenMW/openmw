@@ -8,15 +8,8 @@ QString ContentSelectorModel::LoadOrderError::sErrorToolTips[ErrorCode_LoadOrder
     QString("This file needs to load after %1")
 };
 
-ContentSelectorModel::LoadOrderError ContentSelectorModel::LoadOrderError::sNoError = ContentSelectorModel::LoadOrderError();
-
 QString ContentSelectorModel::LoadOrderError::toolTip() const
 {
     assert(mErrorCode);
     return sErrorToolTips[mErrorCode - 1].arg(mFileName);
-}
-
-bool ContentSelectorModel::LoadOrderError::operator== (const ContentSelectorModel::LoadOrderError& rhs) const
-{
-    return (mErrorCode == rhs.mErrorCode) && ((mErrorCode == ErrorCode_None) || (mFileName == rhs.mFileName));
 }
