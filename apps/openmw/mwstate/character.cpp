@@ -190,3 +190,8 @@ ESM::SavedGame MWState::Character::getSignature() const
 
     return slot.mProfile;
 }
+
+const boost::filesystem::path& MWState::Character::getPath() const
+{
+    return mPath;
+}
