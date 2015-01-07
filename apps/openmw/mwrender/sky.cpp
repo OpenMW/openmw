@@ -8,6 +8,7 @@
 #include <OgreSceneManager.h>
 #include <OgreHardwareVertexBuffer.h>
 #include <OgreHighLevelGpuProgramManager.h>
+#include <OgreParticle.h>
 #include <OgreParticleSystem.h>
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
@@ -431,7 +432,10 @@ void SkyManager::updateRain(float dt)
         Ogre::Vector3 pos = it->first->getPosition();
         pos.z -= mRainSpeed * dt;
         it->first->setPosition(pos);
-        if (pos.z < -minHeight)
+        if (pos.z < -minHeight
+                // Here we might want to add a "splash" effect later
+                || MWBase::Environment::get().getWorld()->isUnderwater(
+                    MWBase::Environment::get().getWorld()->getPlayerPtr().getCell(), it->first->_getDerivedPosition()))
         {
             it->second.setNull();
             mSceneMgr->destroySceneNode(it->first);
@@ -458,6 +462,12 @@ void SkyManager::updateRain(float dt)
             // Create a separate node to control the offset, since a node with setInheritOrientation(false) will still
             // consider the orientation of the parent node for its position, just not for its orientation
             float startHeight = 700;
+            Ogre::Vector3 worldPos = mParticleNode->_getDerivedPosition();
+            worldPos += Ogre::Vector3(xOffs, yOffs, startHeight);
+            if (MWBase::Environment::get().getWorld()->isUnderwater(
+                                        MWBase::Environment::get().getWorld()->getPlayerPtr().getCell(), worldPos))
+                return;
+
             Ogre::SceneNode* offsetNode = mParticleNode->createChildSceneNode(Ogre::Vector3(xOffs,yOffs,startHeight));
 
             // Spawn a new rain object for each instance.
@@ -489,6 +499,30 @@ void SkyManager::update(float duration)
     {
         for (unsigned int i=0; i<mParticle->mControllers.size(); ++i)
             mParticle->mControllers[i].update();
+
+        for (unsigned int i=0; i<mParticle->mParticles.size(); ++i)
+        {
+            Ogre::ParticleSystem* psys = mParticle->mParticles[i];
+            Ogre::ParticleIterator pi = psys->_getIterator();
+            while (!pi.end())
+            {
+                Ogre::Particle *p = pi.getNext();
+                #if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+                Ogre::Vector3 pos = p->mPosition;
+                Ogre::Real& timeToLive = p->mTimeToLive;
+                #else
+                Ogre::Vector3 pos = p->position;
+                Ogre::Real& timeToLive = p->timeToLive;
+                #endif
+
+                if (psys->getKeepParticlesInLocalSpace() && psys->getParentNode())
+                    pos = psys->getParentNode()->convertLocalToWorldPosition(pos);
+
+                if (MWBase::Environment::get().getWorld()->isUnderwater(
+                            MWBase::Environment::get().getWorld()->getPlayerPtr().getCell(), pos))
+                    timeToLive = 0;
+            }
+        }
 
         if (mIsStorm)
             mParticleNode->setOrientation(Ogre::Vector3::UNIT_Y.getRotationTo(mStormDirection));
