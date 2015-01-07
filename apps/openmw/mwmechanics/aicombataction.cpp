@@ -294,7 +294,10 @@ namespace MWMechanics
                 // Effect doesn't heal more than we need, *or* we are below 1/2 health
                 if (current.getModified() - current.getCurrent() > toHeal
                         || current.getCurrent() < current.getModified()*0.5)
-                    return 10000.f * priority;
+                {
+                    return 10000.f * priority
+                            - (toHeal - (current.getModified()-current.getCurrent())); // prefer the most fitting potion
+                }
                 else
                     return -10000.f * priority; // Save for later
             }

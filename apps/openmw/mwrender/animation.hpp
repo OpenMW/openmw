@@ -173,7 +173,7 @@ protected:
      */
     bool reset(AnimState &state, const NifOgre::TextKeyMap &keys,
                const std::string &groupname, const std::string &start, const std::string &stop,
-               float startpoint);
+               float startpoint, bool loopfallback);
 
     void handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key,
                        const NifOgre::TextKeyMap& map);
@@ -255,11 +255,14 @@ public:
      *                   at the start marker, 1 starts at the stop marker.
      * \param loops How many times to loop the animation. This will use the
      *              "loop start" and "loop stop" markers if they exist,
-     *              otherwise it will use "start" and "stop".
+     *              otherwise it may fall back to "start" and "stop", but only if
+     *              the \a loopFallback parameter is true.
+     * \param loopFallback Allow looping an animation that has no loop keys, i.e. fall back to use
+     *                     the "start" and "stop" keys for looping?
      */
     void play(const std::string &groupname, int priority, int groups, bool autodisable,
               float speedmult, const std::string &start, const std::string &stop,
-              float startpoint, size_t loops);
+              float startpoint, size_t loops, bool loopfallback=false);
 
     /** If the given animation group is currently playing, set its remaining loop count to '0'.
      */
@@ -342,9 +345,6 @@ public:
 class ObjectAnimation : public Animation {
 public:
     ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model);
-
-    void addLight(const ESM::Light *light);
-    void removeParticles();
 
     bool canBatch() const;
     void fillBatch(Ogre::StaticGeometry *sg);

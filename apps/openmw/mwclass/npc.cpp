@@ -403,7 +403,7 @@ namespace MWClass
             }
 
             // inventory
-            data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr), "",
+            data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr), "", -1,
                                        MWBase::Environment::get().getWorld()->getStore());
 
             data->mNpcStats.setGoldPool(gold);
@@ -577,34 +577,7 @@ namespace MWClass
         }
         else
         {
-            // Note: MCP contains an option to include Strength in hand-to-hand damage
-            // calculations. Some mods recommend using it, so we may want to include am
-            // option for it.
-            float minstrike = store.find("fMinHandToHandMult")->getFloat();
-            float maxstrike = store.find("fMaxHandToHandMult")->getFloat();
-            damage  = stats.getSkill(weapskill).getModified();
-            damage *= minstrike + ((maxstrike-minstrike)*stats.getAttackStrength());
-
-            healthdmg = (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
-                    || otherstats.getKnockedDown();
-            if(stats.isWerewolf())
-            {
-                healthdmg = true;
-                // GLOB instead of GMST because it gets updated during a quest
-                damage *= world->getGlobalFloat("werewolfclawmult");
-            }
-            if(healthdmg)
-                damage *= store.find("fHandtoHandHealthPer")->getFloat();
-
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            if(stats.isWerewolf())
-            {
-                const ESM::Sound *sound = world->getStore().get<ESM::Sound>().searchRandom("WolfHit");
-                if(sound)
-                    sndMgr->playSound3D(victim, sound->mId, 1.0f, 1.0f);
-            }
-            else
-                sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
+            MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg);
         }
         if(ptr.getRefData().getHandle() == "player")
         {
@@ -641,7 +614,7 @@ namespace MWClass
 
         MWMechanics::applyElementalShields(ptr, victim);
 
-        if (!weapon.isEmpty() && MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
+        if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
             damage = 0;
 
         if (healthdmg && damage > 0)
@@ -1376,12 +1349,17 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().getRefId(), ptr.getCellRef().getFaction());
+        store.restock(list, ptr, ptr.getCellRef().getRefId(), "", -1);
     }
 
     int Npc::getBaseFightRating (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         return ref->mBase->mAiData.mFight;
+    }
+
+    bool Npc::isBipedal(const MWWorld::Ptr &ptr) const
+    {
+        return true;
     }
 }

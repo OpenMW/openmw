@@ -126,7 +126,7 @@ bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
     if (!info.mCell.empty())
     {
         // supports partial matches, just like getPcCell
-        const std::string& playerCell = player.getCell()->getCell()->mName;
+        const std::string& playerCell = MWBase::Environment::get().getWorld()->getCellName(player.getCell());
         bool match = playerCell.length()>=info.mCell.length() &&
             Misc::StringUtils::ciEqual(playerCell.substr (0, info.mCell.length()), info.mCell);
         if (!match)
@@ -417,6 +417,21 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
             return value;
         }
 
+        case SelectWrapper::Function_CreatureTargetted:
+
+            {
+                MWWorld::Ptr target;
+                mActor.getClass().getCreatureStats(mActor).getAiSequence().getCombatTarget(target);
+                if (target)
+                {
+                    if (target.getClass().isNpc() && target.getClass().getNpcStats(target).isWerewolf())
+                        return 2;
+                    if (target.getTypeName() == typeid(ESM::Creature).name())
+                        return 1;
+                }
+            }
+            return 0;
+
         default:
 
             throw std::runtime_error ("unknown integer select function");
@@ -451,7 +466,8 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_NotCell:
 
-            return !Misc::StringUtils::ciEqual(mActor.getCell()->getCell()->mName, select.getName());
+            return !Misc::StringUtils::ciEqual(MWBase::Environment::get().getWorld()->getCellName(mActor.getCell())
+                                               , select.getName());
 
         case SelectWrapper::Function_NotLocal:
         {
@@ -530,10 +546,6 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
             return MWBase::Environment::get().getMechanicsManager()->isAggressive(mActor,
                     MWBase::Environment::get().getWorld()->getPlayerPtr());
-
-        case SelectWrapper::Function_CreatureTargetted:
-
-            return mActor.getClass().getCreatureStats (mActor).getCreatureTargetted();
 
         case SelectWrapper::Function_Werewolf:
 

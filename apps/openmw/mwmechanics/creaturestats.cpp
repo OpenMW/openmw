@@ -329,16 +329,6 @@ namespace MWMechanics
         mAttacked = attacked;
     }
 
-    bool CreatureStats::getCreatureTargetted() const
-    {
-        MWWorld::Ptr targetPtr;
-        if (mAiSequence.getCombatTarget(targetPtr))
-        {
-            return targetPtr.getTypeName() == typeid(ESM::Creature).name();
-        }
-        return false;
-    }
-
     float CreatureStats::getEvasion() const
     {
         float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
@@ -648,7 +638,7 @@ namespace MWMechanics
         mDeathAnimation = index;
     }
 
-    std::map<int, int>& CreatureStats::getSummonedCreatureMap()
+    std::map<CreatureStats::SummonKey, int>& CreatureStats::getSummonedCreatureMap()
     {
         return mSummonedCreatures;
     }

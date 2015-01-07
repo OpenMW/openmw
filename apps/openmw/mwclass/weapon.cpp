@@ -12,6 +12,7 @@
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
 
@@ -385,7 +386,7 @@ namespace MWClass
 
     std::pair<int, std::string> Weapon::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
-        if (ptr.getCellRef().getCharge() == 0)
+        if (hasItemHealth(ptr) && ptr.getCellRef().getCharge() == 0)
             return std::make_pair(0, "#{sInventoryMessage1}");
 
         std::pair<std::vector<int>, bool> slots_ = ptr.getClass().getEquipmentSlots(ptr);

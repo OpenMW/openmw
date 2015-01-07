@@ -1,5 +1,7 @@
 #include "sortfilteritemmodel.hpp"
 
+#include <components/misc/stringops.hpp>
+
 #include <components/esm/loadalch.hpp>
 #include <components/esm/loadappa.hpp>
 #include <components/esm/loadarmo.hpp>
@@ -52,9 +54,10 @@ namespace
 
             if (left.mBase.getTypeName() == right.mBase.getTypeName())
             {
-                int cmp = left.mBase.getClass().getName(left.mBase).compare(
-                            right.mBase.getClass().getName(right.mBase));
-                return cmp < 0;
+                std::string leftName = Misc::StringUtils::lowerCase(left.mBase.getClass().getName(left.mBase));
+                std::string rightName = Misc::StringUtils::lowerCase(right.mBase.getClass().getName(right.mBase));
+
+                return leftName.compare(rightName) < 0;
             }
             else
                 return compareType(left.mBase.getTypeName(), right.mBase.getTypeName());

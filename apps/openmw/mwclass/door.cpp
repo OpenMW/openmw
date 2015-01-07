@@ -8,6 +8,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
@@ -15,6 +16,7 @@
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/actiondoor.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actiontrap.hpp"
@@ -22,7 +24,7 @@
 
 #include "../mwgui/tooltips.hpp"
 
-#include "../mwrender/objects.hpp"
+#include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 namespace
@@ -51,7 +53,8 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if (!model.empty()) {
-            renderingInterface.getObjects().insertModel(ptr, model);
+            MWRender::Actors& actors = renderingInterface.getActors();
+            actors.insertActivator(ptr);
         }
     }
 
@@ -70,6 +73,8 @@ namespace MWClass
                 MWBase::Environment::get().getWorld()->activateDoor(ptr, customData.mDoorState);
             }
         }
+
+        MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
     std::string Door::getModel(const MWWorld::Ptr &ptr) const

@@ -8,7 +8,8 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld//cellstore.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/action.hpp"

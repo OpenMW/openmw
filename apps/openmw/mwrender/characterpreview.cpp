@@ -72,14 +72,15 @@ namespace MWRender
         l->setDirection (Ogre::Vector3(0.3, -0.7, 0.3));
         l->setDiffuseColour (Ogre::ColourValue(1,1,1));
 
-        mSceneMgr->setAmbientLight (Ogre::ColourValue(0.5, 0.5, 0.5));
+        mSceneMgr->setAmbientLight (Ogre::ColourValue(0.25, 0.25, 0.25));
 
         mCamera = mSceneMgr->createCamera (mName);
+        mCamera->setFOVy(Ogre::Degree(12.3));
         mCamera->setAspectRatio (float(mSizeX) / float(mSizeY));
 
         Ogre::SceneNode* renderRoot = mSceneMgr->getRootSceneNode()->createChildSceneNode("renderRoot");
 
-        //we do this with mwRoot in renderingManager, do it here too.
+        // leftover of old coordinate system. TODO: remove this and adjust positions/orientations to match
         renderRoot->pitch(Ogre::Degree(-90));
 
         mNode = renderRoot->createChildSceneNode();
@@ -91,7 +92,7 @@ namespace MWRender
         mCamera->setPosition(mPosition * scale);
         mCamera->lookAt(mLookAt * scale);
 
-        mCamera->setNearClipDistance (0.01);
+        mCamera->setNearClipDistance (1);
         mCamera->setFarClipDistance (1000);
 
         mTexture = Ogre::TextureManager::getSingleton().createManual(mName,
@@ -159,7 +160,7 @@ namespace MWRender
 
 
     InventoryPreview::InventoryPreview(MWWorld::Ptr character)
-        : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 65, -180), Ogre::Vector3(0,65,0))
+        : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 71, -700), Ogre::Vector3(0,71,0))
         , mSelectionBuffer(NULL)
         , mSizeX(0)
         , mSizeY(0)
@@ -238,11 +239,11 @@ namespace MWRender
         mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, 1.0f, "start", "stop", 0.0f, 0);
 
         MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
+        if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name() && showCarriedLeft)
         {
             if(!mAnimation->getInfo("torch"))
                 mAnimation->play("torch", 2, MWRender::Animation::Group_LeftArm, false,
-                                 1.0f, "start", "stop", 0.0f, ~0ul);
+                                 1.0f, "start", "stop", 0.0f, ~0ul, true);
         }
         else if(mAnimation->getInfo("torch"))
             mAnimation->disable("torch");
@@ -288,9 +289,10 @@ namespace MWRender
 
     RaceSelectionPreview::RaceSelectionPreview()
         : CharacterPreview(MWBase::Environment::get().getWorld()->getPlayerPtr(),
-            512, 512, "CharacterHeadPreview", Ogre::Vector3(0, 6, -35), Ogre::Vector3(0,125,0))
+            512, 512, "CharacterHeadPreview", Ogre::Vector3(0, 8, -125), Ogre::Vector3(0,127,0))
         , mBase (*mCharacter.get<ESM::NPC>()->mBase)
         , mRef(&mBase)
+        , mPitch(Ogre::Degree(6))
     {
         mCharacter = MWWorld::Ptr(&mRef, NULL);
     }
@@ -298,7 +300,9 @@ namespace MWRender
     void RaceSelectionPreview::update(float angle)
     {
         mAnimation->runAnimation(0.0f);
-        mNode->roll(Ogre::Radian(angle), Ogre::SceneNode::TS_LOCAL);
+
+        mNode->setOrientation(Ogre::Quaternion(Ogre::Radian(angle), Ogre::Vector3::UNIT_Z)
+                              * Ogre::Quaternion(mPitch, Ogre::Vector3::UNIT_X));
 
         updateCamera();
     }
@@ -317,7 +321,8 @@ namespace MWRender
         mBase = proto;
         mBase.mId = "player";
         rebuild();
-        update(0);
+        mAnimation->runAnimation(0.0f);
+        updateCamera();
     }
 
     void RaceSelectionPreview::onSetup ()
@@ -330,7 +335,10 @@ namespace MWRender
     void RaceSelectionPreview::updateCamera()
     {
         Ogre::Vector3 scale = mNode->getScale();
-        Ogre::Vector3 headOffset = mAnimation->getNode("Bip01 Head")->_getDerivedPosition();
+        Ogre::Node* headNode = mAnimation->getNode("Bip01 Head");
+        if (!headNode)
+            return;
+        Ogre::Vector3 headOffset = headNode->_getDerivedPosition();
         headOffset = mNode->convertLocalToWorldPosition(headOffset);
 
         mCamera->setPosition(headOffset + mPosition * scale);

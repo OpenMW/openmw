@@ -24,7 +24,7 @@ ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
 
 void ContentSelectorView::ContentSelector::buildContentModel()
 {
-    mContentModel = new ContentSelectorModel::ContentModel();
+    mContentModel = new ContentSelectorModel::ContentModel(this);
 }
 
 void ContentSelectorView::ContentSelector::buildGameFileView()

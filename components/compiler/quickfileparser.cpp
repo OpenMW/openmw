@@ -19,6 +19,12 @@ bool Compiler::QuickFileParser::parseName (const std::string& name, const TokenL
 
 bool Compiler::QuickFileParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
 {
+    if (keyword==Scanner::K_begin)
+    {
+        scanner.allowNameStartingwithDigit();
+        return true;
+    }
+
     if (keyword==Scanner::K_end)
         return false;
 

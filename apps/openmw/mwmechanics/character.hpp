@@ -6,7 +6,6 @@
 #include <components/esm/loadmgef.hpp>
 
 #include "../mwworld/ptr.hpp"
-#include "aistate.hpp"
 
 namespace MWWorld
 {
@@ -140,9 +139,6 @@ class CharacterController
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
     
-    //
-    AiState mAiState;
-
     typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
     AnimationQueue mAnimQueue;
 
@@ -229,8 +225,6 @@ public:
 
     void forceStateUpdate();
     
-    AiState& getAiState() { return mAiState; }
-
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
 

@@ -11,6 +11,7 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwrender/globalmap.hpp"
 
@@ -21,8 +22,6 @@
 
 namespace
 {
-
-    const int widgetSize = 512;
 
     const int cellSize = 8192;
 
@@ -164,6 +163,7 @@ namespace MWGui
         , mCompass(NULL)
         , mMarkerUpdateTimer(0.0f)
         , mCustomMarkers(markers)
+        , mMapWidgetSize(0)
     {
         mCustomMarkers.eventMarkersChanged += MyGUI::newDelegate(this, &LocalMapBase::updateCustomMarkers);
     }
@@ -173,26 +173,28 @@ namespace MWGui
         mCustomMarkers.eventMarkersChanged -= MyGUI::newDelegate(this, &LocalMapBase::updateCustomMarkers);
     }
 
-    void LocalMapBase::init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass)
+    void LocalMapBase::init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int mapWidgetSize)
     {
         mLocalMap = widget;
         mCompass = compass;
+        mMapWidgetSize = mapWidgetSize;
+
+        mLocalMap->setCanvasSize(mMapWidgetSize*3, mMapWidgetSize*3);
 
         mCompass->setDepth(Local_CompassLayer);
         mCompass->setNeedMouseFocus(false);
 
-        // create 3x3 map widgets, 512x512 each, holding a 1024x1024 texture each
         for (int mx=0; mx<3; ++mx)
         {
             for (int my=0; my<3; ++my)
             {
                 MyGUI::ImageBox* map = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
-                    MyGUI::IntCoord(mx*widgetSize, my*widgetSize, widgetSize, widgetSize),
+                    MyGUI::IntCoord(mx*mMapWidgetSize, my*mMapWidgetSize, mMapWidgetSize, mMapWidgetSize),
                     MyGUI::Align::Top | MyGUI::Align::Left);
                 map->setDepth(Local_MapLayer);
 
                 MyGUI::ImageBox* fog = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
-                    MyGUI::IntCoord(mx*widgetSize, my*widgetSize, widgetSize, widgetSize),
+                    MyGUI::IntCoord(mx*mMapWidgetSize, my*mMapWidgetSize, mMapWidgetSize, mMapWidgetSize),
                     MyGUI::Align::Top | MyGUI::Align::Left);
                 fog->setDepth(Local_FogLayer);
 
@@ -258,8 +260,8 @@ namespace MWGui
             markerPos.cellX = cellX;
             markerPos.cellY = cellY;
 
-            widgetPos = MyGUI::IntPoint(nX * widgetSize + (1+cellDx) * widgetSize,
-                                        nY * widgetSize - (cellDy-1) * widgetSize);
+            widgetPos = MyGUI::IntPoint(nX * mMapWidgetSize + (1+cellDx) * mMapWidgetSize,
+                                        nY * mMapWidgetSize - (cellDy-1) * mMapWidgetSize);
         }
         else
         {
@@ -271,8 +273,8 @@ namespace MWGui
             markerPos.cellY = cellY;
 
             // Image space is -Y up, cells are Y up
-            widgetPos = MyGUI::IntPoint(nX * widgetSize + (1+(cellX-mCurX)) * widgetSize,
-                                        nY * widgetSize + (1-(cellY-mCurY)) * widgetSize);
+            widgetPos = MyGUI::IntPoint(nX * mMapWidgetSize + (1+(cellX-mCurX)) * mMapWidgetSize,
+                                        nY * mMapWidgetSize + (1-(cellY-mCurY)) * mMapWidgetSize);
         }
 
         markerPos.nX = nX;
@@ -425,9 +427,9 @@ namespace MWGui
 
     void LocalMapBase::setPlayerPos(int cellX, int cellY, const float nx, const float ny)
     {
-        MyGUI::IntPoint pos(widgetSize+nx*widgetSize-16, widgetSize+ny*widgetSize-16);
-        pos.left += (cellX - mCurX) * widgetSize;
-        pos.top -= (cellY - mCurY) * widgetSize;
+        MyGUI::IntPoint pos(mMapWidgetSize+nx*mMapWidgetSize-16, mMapWidgetSize+ny*mMapWidgetSize-16);
+        pos.left += (cellX - mCurX) * mMapWidgetSize;
+        pos.top -= (cellY - mCurY) * mMapWidgetSize;
 
         if (pos != mCompass->getPosition())
         {
@@ -612,8 +614,7 @@ namespace MWGui
         mEventBoxLocal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
         mEventBoxLocal->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &MapWindow::onMapDoubleClicked);
 
-        LocalMapBase::init(mLocalMap, mPlayerArrowLocal);
-    }
+        LocalMapBase::init(mLocalMap, mPlayerArrowLocal, Settings::Manager::getInt("local map widget size", "Map"));    }
 
     void MapWindow::onNoteEditOk()
     {
@@ -657,10 +658,10 @@ namespace MWGui
         MyGUI::IntPoint clickedPos = MyGUI::InputManager::getInstance().getMousePosition();
 
         MyGUI::IntPoint widgetPos = clickedPos - mEventBoxLocal->getAbsolutePosition();
-        int x = int(widgetPos.left/float(widgetSize))-1;
-        int y = (int(widgetPos.top/float(widgetSize))-1)*-1;
-        float nX = widgetPos.left/float(widgetSize) - int(widgetPos.left/float(widgetSize));
-        float nY = widgetPos.top/float(widgetSize) - int(widgetPos.top/float(widgetSize));
+        int x = int(widgetPos.left/float(mMapWidgetSize))-1;
+        int y = (int(widgetPos.top/float(mMapWidgetSize))-1)*-1;
+        float nX = widgetPos.left/float(mMapWidgetSize) - int(widgetPos.left/float(mMapWidgetSize));
+        float nY = widgetPos.top/float(mMapWidgetSize) - int(widgetPos.top/float(mMapWidgetSize));
         x += mCurX;
         y += mCurY;
 

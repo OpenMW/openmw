@@ -301,10 +301,9 @@ namespace MWGui
             MWMechanics::Pickpocket pickpocket(player, mPtr);
             if (pickpocket.finish())
             {
-                MWBase::Environment::get().getMechanicsManager()->reportCrime(
-                            player, mPtr, MWBase::MechanicsManager::OT_Pickpocket);
+                MWBase::Environment::get().getMechanicsManager()->commitCrime(
+                            player, mPtr, MWBase::MechanicsManager::OT_Pickpocket, 0, true);
                 MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
-                MWBase::Environment::get().getDialogueManager()->say(mPtr, "Thief");
                 mPickpocketDetected = true;
                 return;
             }
@@ -384,10 +383,9 @@ namespace MWGui
             if (pickpocket.pick(item.mBase, count))
             {
                 int value = item.mBase.getClass().getValue(item.mBase) * count;
-                MWBase::Environment::get().getMechanicsManager()->reportCrime(
-                            player, MWWorld::Ptr(), MWBase::MechanicsManager::OT_Theft, value);
+                MWBase::Environment::get().getMechanicsManager()->commitCrime(
+                            player, MWWorld::Ptr(), MWBase::MechanicsManager::OT_Theft, value, true);
                 MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
-                MWBase::Environment::get().getDialogueManager()->say(mPtr, "Thief");
                 mPickpocketDetected = true;
                 return false;
             }

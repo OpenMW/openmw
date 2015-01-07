@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout" version="3.2.0">
-    <Widget type="Window" skin="MW_Window" position="0 0 400 426" layer="Windows" name="_Main">
+    <Widget type="Window" skin="MW_Window" position="0 0 400 485" layer="Windows" name="_Main">
         <Property key="MinSize" value="430 446"/>
-        <Widget type="TabControl" skin="TabControl" position="8 8 368 340" align="Stretch" name="SettingsTab">
+        <Widget type="TabControl" skin="TabControl" position="8 8 368 405" align="Stretch" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
             <Widget type="TabItem" skin="" position="4 32 360 308">
                 <Property key="Caption" value="  #{sPrefs}  "/>
@@ -214,7 +214,7 @@
             </Widget>
             <Widget type="TabItem" skin="" position="4 32 360 308">
                 <Property key="Caption" value="  #{sVideo}  "/>
-                <Widget type="TabControl" skin="TabControlInner" position="4 4 352 296" align="Stretch">
+                <Widget type="TabControl" skin="TabControlInner" position="4 4 352 390" align="Stretch">
                     <Property key="ButtonAutoWidth" value="true"/>
                     <Widget type="TabItem" skin="" position="0 28 352 268" align="Stretch">
                         <Property key="Caption" value="  Video  "/>
@@ -240,12 +240,22 @@
                             </Widget>
                         </Widget>
                         <Widget type="HBox" skin="" position="182 64 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="WindowBorderButton">
+                                <UserString key="SettingCategory" value="Video"/>
+                                <UserString key="SettingName" value="window border"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 48 16" align="Left Top">
+                                <Property key="Caption" value="Window border"/>
+                            </Widget>
+                        </Widget>
+                        <Widget type="HBox" skin="" position="182 94 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="FPSButton"/>
                             <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 32 16" align="Left Top">
                                 <Property key="Caption" value="FPS"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" skin="" position="182 94 300 24">
+                        <Widget type="HBox" skin="" position="182 124 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ShadersButton">
                                 <UserString key="SettingCategory" value="Objects"/>
                                 <UserString key="SettingName" value="shaders"/>
@@ -255,7 +265,7 @@
                                 <Property key="Caption" value="Object shaders"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" skin="" position="182 124 300 24">
+                        <Widget type="HBox" skin="" position="182 154 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ShaderModeButton"/>
                             <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 93 16" align="Left Top">
                                 <Property key="Caption" value="Shader mode"/>
@@ -280,6 +290,27 @@
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 246 329 18" align="Right Top">
                             <Property key="Caption" value="#{sHigh}"/>
+                            <Property key="TextAlign" value="Right"/>
+                        </Widget>
+                        <Widget type="TextBox" skin="NormalText" position="0 268 329 18" align="Left Top" name="GammaText">
+                            <Property key="Caption" value="#{sGamma_Correction}"/>
+                        </Widget>
+                        <Widget type="MWScrollBar" skin="MW_HScroll" position="0 292 329 18" align="HStretch Top" name="GammaSlider">
+                            <Property key="Range" value="10000"/>
+                            <Property key="Page" value="300"/>
+                            <UserString key="SettingType" value="Slider"/>
+                            <UserString key="SettingCategory" value="General"/>
+                            <UserString key="SettingName" value="gamma"/>
+                            <UserString key="SettingValueType" value="Float"/>
+                            <UserString key="SettingMin" value="0.1"/>
+                            <UserString key="SettingMax" value="3.0"/>
+                        </Widget>
+                        <Widget type="TextBox" skin="SandText" position="0 316 329 18" align="Left Top" name="GammaTextDark">
+                            <Property key="Caption" value="#{sDark_Gamma}"/>
+                            <Property key="TextAlign" value="Left"/>
+                        </Widget>
+                        <Widget type="TextBox" skin="SandText" position="0 316 329 18" align="Right Top" name="GammaTextLight">
+                            <Property key="Caption" value="#{sLight_Gamma}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
                     </Widget>
@@ -460,7 +491,7 @@
                 </Widget>
             </Widget>
         </Widget>
-        <Widget type="AutoSizedButton" skin="MW_Button" position="321 355 56 24" align="Right Bottom" name="OkButton">
+        <Widget type="AutoSizedButton" skin="MW_Button" position="320 420 56 24" align="Right Bottom" name="OkButton">
             <Property key="ExpandDirection" value="Left"/>
             <Property key="Caption" value="#{sOK}"/>
         </Widget>

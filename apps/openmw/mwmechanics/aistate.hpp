@@ -76,24 +76,6 @@ namespace MWMechanics
             mStorage = p;
         }
         
-        /// \brief gives away ownership of object. Throws exception if storage does not contain Derived or is empty.
-        template< class Derived >
-        Derived* moveOut()
-        {
-            assert_derived<Derived>();
-            
-            
-            if(!mStorage)
-                throw std::runtime_error("Cant move out: empty storage.");
-            
-            Derived* result = dynamic_cast<Derived*>(mStorage);
-            
-            if(!mStorage)
-                throw std::runtime_error("Cant move out: wrong type requested.");
-            
-            return result;
-        }
-        
         bool empty() const
         {
             return mStorage == NULL;
@@ -120,7 +102,7 @@ namespace MWMechanics
     /// \brief base class for the temporary storage of AiPackages.
     /**
      * Each AI package with temporary values needs a AiPackageStorage class
-     * which is derived from AiTemporaryBase. The CharacterController holds a container
+     * which is derived from AiTemporaryBase. The Actor holds a container
      * AiState where one of these storages can be stored at a time.
      * The execute(...) member function takes this container as an argument.
      * */

@@ -24,6 +24,9 @@ namespace ESM
 
         std::map<std::string, int> mLevelledItemMap;
 
+        typedef std::map<std::string, std::vector<std::pair<float, float> > > TEffectMagnitudes;
+        TEffectMagnitudes mPermanentMagicEffectMagnitudes;
+
         virtual ~InventoryState() {}
 
         virtual void load (ESMReader &esm);

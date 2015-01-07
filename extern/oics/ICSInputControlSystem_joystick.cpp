@@ -299,7 +299,7 @@ namespace ICS
 			{
 				if(it->second.find(axis) != it->second.end())
 				{
-					mControlsJoystickPOVBinderMap[deviceId].find(index)->second.erase( it->second.find(axis) );
+                    it->second.erase( it->second.find(axis) );
 				}
 			}
 		}

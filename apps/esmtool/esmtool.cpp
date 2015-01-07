@@ -203,19 +203,27 @@ int comp(Arguments& info);
 
 int main(int argc, char**argv)
 {
-    Arguments info;
-    if(!parseOptions (argc, argv, info))
-        return 1;
-
-    if (info.mode == "dump")
-        return load(info);
-    else if (info.mode == "clone")
-        return clone(info);
-    else if (info.mode == "comp")
-        return comp(info);
-    else
+    try
     {
-        std::cout << "Invalid or no mode specified, dying horribly. Have a nice day." << std::endl;
+        Arguments info;
+        if(!parseOptions (argc, argv, info))
+            return 1;
+
+        if (info.mode == "dump")
+            return load(info);
+        else if (info.mode == "clone")
+            return clone(info);
+        else if (info.mode == "comp")
+            return comp(info);
+        else
+        {
+            std::cout << "Invalid or no mode specified, dying horribly. Have a nice day." << std::endl;
+            return 1;
+        }
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "ERROR: " << e.what() << std::endl;
         return 1;
     }
 
@@ -273,8 +281,10 @@ void printRaw(ESM::ESMReader &esm)
             esm.getSubName();
             esm.skipHSub();
             n = esm.retSubName();
+            std::ios::fmtflags f(std::cout.flags());
             std::cout << "    " << n.toString() << " - " << esm.getSubSize()
                  << " bytes @ 0x" << std::hex << offs << "\n";
+            std::cout.flags(f);
         }
     }
 }

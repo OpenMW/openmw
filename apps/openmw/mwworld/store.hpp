@@ -99,7 +99,9 @@ namespace MWWorld
     class Store : public StoreBase
     {
         std::map<std::string, T>      mStatic;
-        std::vector<T *>    mShared;
+        std::vector<T *>    mShared; // Preserves the record order as it came from the content files (this
+                                     // is relevant for the spell autocalc code and selection order
+                                     // for heads/hairs in the character creation)
         std::map<std::string, T> mDynamic;
 
         typedef std::map<std::string, T> Dynamic;
@@ -137,8 +139,9 @@ namespace MWWorld
         // setUp needs to be called again after
         virtual void clearDynamic()
         {
+            // remove the dynamic part of mShared
+            mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
             mDynamic.clear();
-            mShared.clear();
         }
 
         const T *search(const std::string &id) const {
@@ -203,18 +206,18 @@ namespace MWWorld
 
         void load(ESM::ESMReader &esm, const std::string &id) {
             std::string idLower = Misc::StringUtils::lowerCase(id);
-            mStatic[idLower] = T();
-            mStatic[idLower].mId = idLower;
-            mStatic[idLower].load(esm);
+
+            std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(idLower, T()));
+            if (inserted.second)
+                mShared.push_back(&inserted.first->second);
+
+            inserted.first->second.mId = idLower;
+            inserted.first->second.load(esm);
         }
 
         void setUp() {
-            mShared.clear();
-            mShared.reserve(mStatic.size());
-            typename std::map<std::string, T>::iterator it = mStatic.begin();
-            for (; it != mStatic.end(); ++it) {
-                mShared.push_back(&(it->second));
-            }
+            // remove the dynamic part of mShared
+            mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
         }
 
         iterator begin() const {
@@ -356,10 +359,9 @@ namespace MWWorld
         std::map<std::string, ESM::Dialogue>::iterator it = mStatic.find(idLower);
         if (it == mStatic.end()) {
             it = mStatic.insert( std::make_pair( idLower, ESM::Dialogue() ) ).first;
-            it->second.mId = id; // don't smash case here, as this line is printed... I think
+            it->second.mId = id; // don't smash case here, as this line is printed
         }
 
-        //I am not sure is it need to load the dialog from a plugin if it was already loaded from prevois plugins
         it->second.load(esm);
     }
 
@@ -368,7 +370,10 @@ namespace MWWorld
         ESM::Script scpt;
         scpt.load(esm);
         Misc::StringUtils::toLower(scpt.mId);
-        mStatic[scpt.mId] = scpt;
+
+        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(scpt.mId, scpt));
+        if (inserted.second)
+            mShared.push_back(&inserted.first->second);
     }
 
     template <>
@@ -376,7 +381,10 @@ namespace MWWorld
         ESM::StartScript s;
         s.load(esm);
         s.mId = Misc::StringUtils::toLower(s.mScript);
-        mStatic[s.mId] = s;
+
+        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(s.mId, s));
+        if (inserted.second)
+            mShared.push_back(&inserted.first->second);
     }
 
     template <>
@@ -630,9 +638,6 @@ namespace MWWorld
         }
 
         const ESM::Cell *searchOrCreate(int x, int y) {
-            ESM::Cell cell;
-            cell.mData.mX = x, cell.mData.mY = y;
-
             std::pair<int, int> key(x, y);
             DynamicExt::const_iterator it = mExt.find(key);
             if (it != mExt.end()) {
@@ -644,13 +649,15 @@ namespace MWWorld
                 return &dit->second;
             }
 
-            ESM::Cell *newCell = new ESM::Cell;
-            newCell->mData.mX = x;
-            newCell->mData.mY = y;
-            mExt[std::make_pair(x, y)] = *newCell;
-            delete newCell;
-
-            return &mExt[std::make_pair(x, y)];
+            ESM::Cell newCell;
+            newCell.mData.mX = x;
+            newCell.mData.mY = y;
+            newCell.mData.mFlags = ESM::Cell::HasWater;
+            newCell.mAmbi.mAmbient = 0;
+            newCell.mAmbi.mSunlight = 0;
+            newCell.mAmbi.mFog = 0;
+            newCell.mAmbi.mFogDensity = 0;
+            return &mExt.insert(std::make_pair(key, newCell)).first->second;
         }
 
         const ESM::Cell *find(const std::string &id) const {
@@ -852,6 +859,11 @@ namespace MWWorld
         Store<ESM::Cell>* mCells;
 
     public:
+
+        Store<ESM::Pathgrid>()
+            : mCells(NULL)
+        {
+        }
 
         void setCells(Store<ESM::Cell>& cells)
         {
@@ -1062,37 +1074,6 @@ namespace MWWorld
             return mStatic.end();
         }
     };
-
-
-    // Specialisation for ESM::Spell to preserve record order as it was in the content files.
-    // The NPC spell autocalc code heavily depends on this order.
-    // We could also do this in the base class, but it's usually not a good idea to depend on record order.
-    template<>
-    inline void Store<ESM::Spell>::clearDynamic()
-    {
-        // remove the dynamic part of mShared
-        mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
-        mDynamic.clear();
-    }
-
-    template<>
-    inline void Store<ESM::Spell>::load(ESM::ESMReader &esm, const std::string &id) {
-        std::string idLower = Misc::StringUtils::lowerCase(id);
-
-        std::pair<Static::iterator, bool> inserted = mStatic.insert(std::make_pair(idLower, ESM::Spell()));
-        if (inserted.second)
-            mShared.push_back(&mStatic[idLower]);
-
-        inserted.first->second.mId = idLower;
-        inserted.first->second.load(esm);
-    }
-
-    template<>
-    inline void Store<ESM::Spell>::setUp()
-    {
-        // remove the dynamic part of mShared
-        mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
-    }
 
     template<>
     inline void Store<ESM::Dialogue>::setUp()

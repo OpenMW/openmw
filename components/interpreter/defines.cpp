@@ -47,10 +47,10 @@ namespace Interpreter{
                         retval << context.getActionBinding("#{sReady_Magic}");
                     }
                     else if((found = check(temp, "actionprevweapon", &i, &start))){
-                        retval << "PLACEHOLDER_ACTION_PREV_WEAPON";
+                        retval << context.getActionBinding("#{sPrevWeapon}");
                     }
                     else if((found = check(temp, "actionnextweapon", &i, &start))){
-                        retval << "PLACEHOLDER_ACTION_PREV_WEAPON";
+                        retval << context.getActionBinding("#{sNextWeapon}");
                     }
                     else if((found = check(temp, "actiontogglerun", &i, &start))){
                         retval << context.getActionBinding("#{sAuto_Run}");
@@ -62,10 +62,10 @@ namespace Interpreter{
                         retval << context.getActionBinding("#{sReady_Weapon}");
                     }
                     else if((found = check(temp, "actionprevspell", &i, &start))){
-                        retval << "PLACEHOLDER_ACTION_PREV_SPELL";
+                        retval << context.getActionBinding("#{sPrevSpell}");
                     }
                     else if((found = check(temp, "actionnextspell", &i, &start))){
-                        retval << "PLACEHOLDER_ACTION_NEXT_SPELL";
+                        retval << context.getActionBinding("#{sNextSpell}");
                     }
                     else if((found = check(temp, "actionrestmenu", &i, &start))){
                         retval << context.getActionBinding("#{sRestKey}");

@@ -94,9 +94,10 @@ void ESM::CreatureStats::load (ESMReader &esm)
     {
         int magicEffect;
         esm.getHT(magicEffect);
+        std::string source = esm.getHNOString("SOUR");
         int actorId;
         esm.getHNT (actorId, "ACID");
-        mSummonedCreatureMap[magicEffect] = actorId;
+        mSummonedCreatureMap[std::make_pair(magicEffect, source)] = actorId;
     }
 
     while (esm.isNextSub("GRAV"))
@@ -204,9 +205,10 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     mAiSequence.save(esm);
     mMagicEffects.save(esm);
 
-    for (std::map<int, int>::const_iterator it = mSummonedCreatureMap.begin(); it != mSummonedCreatureMap.end(); ++it)
+    for (std::map<std::pair<int, std::string>, int>::const_iterator it = mSummonedCreatureMap.begin(); it != mSummonedCreatureMap.end(); ++it)
     {
-        esm.writeHNT ("SUMM", it->first);
+        esm.writeHNT ("SUMM", it->first.first);
+        esm.writeHNString ("SOUR", it->first.second);
         esm.writeHNT ("ACID", it->second);
     }
 

@@ -182,6 +182,8 @@ namespace MWClass
                 return true;
             }
 
+            virtual bool isBipedal (const MWWorld::Ptr &ptr) const;
+
             virtual void respawn (const MWWorld::Ptr& ptr) const;
 
             virtual void restock (const MWWorld::Ptr& ptr) const;

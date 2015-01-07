@@ -928,6 +928,8 @@ class NIFObjectLoader
             particledata = static_cast<const Nif::NiAutoNormalParticles*>(partnode)->data.getPtr();
         else if(partnode->recType == Nif::RC_NiRotatingParticles)
             particledata = static_cast<const Nif::NiRotatingParticles*>(partnode)->data.getPtr();
+        else
+            throw std::runtime_error("Unexpected particle node type");
 
         std::string fullname = name+"@index="+Ogre::StringConverter::toString(partnode->recIndex);
         if(partnode->name.length() > 0)
@@ -971,7 +973,10 @@ class NIFObjectLoader
             {
                 const Nif::NiParticleSystemController *partctrl = static_cast<const Nif::NiParticleSystemController*>(ctrl.getPtr());
 
-                partsys->setDefaultDimensions(partctrl->size*2, partctrl->size*2);
+                float size = partctrl->size*2;
+                // HACK: don't allow zero-sized particles which can rarely cause an AABB assertion in Ogre to fail
+                size = std::max(size, 0.00001f);
+                partsys->setDefaultDimensions(size, size);
 
                 if(!partctrl->emitter.empty())
                 {
@@ -1381,6 +1386,7 @@ ObjectScenePtr Loader::createObjects(Ogre::SceneNode *parentNode, std::string na
 }
 
 ObjectScenePtr Loader::createObjects(Ogre::Entity *parent, const std::string &bonename,
+                                     const std::string& bonefilter,
                                  Ogre::SceneNode *parentNode,
                                  std::string name, const std::string &group)
 {
@@ -1406,11 +1412,9 @@ ObjectScenePtr Loader::createObjects(Ogre::Entity *parent, const std::string &bo
 
     if(isskinned)
     {
-        // Apparently both are allowed. Sigh.
-        // This could also mean that filters are supposed to work on the actual node
-        // hierarchy, rather than just trishapes, and the 'tri ' should be omitted?
-        std::string filter = "@shape=tri "+bonename;
-        std::string filter2 = "@shape="+bonename;
+        // accepts anything named "filter*" or "tri filter*"
+        std::string filter = "@shape=tri "+bonefilter;
+        std::string filter2 = "@shape="+bonefilter;
         Misc::StringUtils::toLower(filter);
         Misc::StringUtils::toLower(filter2);
         for(size_t i = 0;i < scene->mEntities.size();i++)

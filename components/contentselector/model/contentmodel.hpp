@@ -24,6 +24,7 @@ namespace ContentSelectorModel
         Q_OBJECT
     public:
         explicit ContentModel(QObject *parent = 0);
+        ~ContentModel();
 
         void setEncoding(const QString &encoding);
 

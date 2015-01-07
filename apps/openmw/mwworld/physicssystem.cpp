@@ -93,7 +93,9 @@ namespace MWWorld
 {
 
     static const float sMaxSlope = 49.0f;
-    static const float sStepSize = 32.0f;
+    static const float sStepSizeUp = 34.0f;
+    static const float sStepSizeDown = 62.0f;
+
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
 
@@ -106,7 +108,7 @@ namespace MWWorld
         }
 
         static bool stepMove(btCollisionObject *colobj, Ogre::Vector3 &position,
-                             const Ogre::Vector3 &velocity, float &remainingTime,
+                             const Ogre::Vector3 &toMove, float &remainingTime,
                              OEngine::Physic::PhysicEngine *engine)
         {
             /*
@@ -122,7 +124,7 @@ namespace MWWorld
              * If not successful return 'false'.  May fail for these reasons:
              *    - can't move directly up from current position
              *    - having moved up by between epsilon() and sStepSize, can't move forward
-             *    - having moved forward by between epsilon() and velocity*remainingTime,
+             *    - having moved forward by between epsilon() and toMove,
              *        = moved down between 0 and just under sStepSize but slope was too steep, or
              *        = moved the full sStepSize down (FIXME: this could be a bug)
              *
@@ -131,7 +133,7 @@ namespace MWWorld
              * Starting position.  Obstacle or stairs with height upto sStepSize in front.
              *
              *     +--+                          +--+       |XX
-             *     |  | -------> velocity        |  |    +--+XX
+             *     |  | -------> toMove          |  |    +--+XX
              *     |  |                          |  |    |XXXXX
              *     |  | +--+                     |  | +--+XXXXX
              *     |  | |XX|                     |  | |XXXXXXXX
@@ -155,7 +157,7 @@ namespace MWWorld
              */
             OEngine::Physic::ActorTracer tracer, stepper;
 
-            stepper.doTrace(colobj, position, position+Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
+            stepper.doTrace(colobj, position, position+Ogre::Vector3(0.0f,0.0f,sStepSizeUp), engine);
             if(stepper.mFraction < std::numeric_limits<float>::epsilon())
                 return false; // didn't even move the smallest representable amount
                               // (TODO: shouldn't this be larger? Why bother with such a small amount?)
@@ -169,16 +171,16 @@ namespace MWWorld
              *                          |  |
              *     <------------------->|  |
              *          +--+            +--+
-             *          |XX|      the moved amount is velocity*remainingTime*tracer.mFraction
+             *          |XX|      the moved amount is toMove*tracer.mFraction
              *          +--+
              *    ==============================================
              */
-            tracer.doTrace(colobj, stepper.mEndPos, stepper.mEndPos + velocity*remainingTime, engine);
+            tracer.doTrace(colobj, stepper.mEndPos, stepper.mEndPos + toMove, engine);
             if(tracer.mFraction < std::numeric_limits<float>::epsilon())
                 return false; // didn't even move the smallest representable amount
 
             /*
-             * Try moving back down sStepSize using stepper.
+             * Try moving back down sStepSizeDown using stepper.
              * NOTE: if there is an obstacle below (e.g. stairs), we'll be "stepping up".
              * Below diagram is the case where we "stepped over" an obstacle in front.
              *
@@ -192,7 +194,7 @@ namespace MWWorld
              *          +--+            +--+
              *    ==============================================
              */
-            stepper.doTrace(colobj, tracer.mEndPos, tracer.mEndPos-Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
+            stepper.doTrace(colobj, tracer.mEndPos, tracer.mEndPos-Ogre::Vector3(0.0f,0.0f,sStepSizeDown), engine);
             if(stepper.mFraction < 1.0f && getSlope(stepper.mPlaneNormal) <= sMaxSlope)
             {
                 // don't allow stepping up other actors
@@ -283,10 +285,13 @@ namespace MWWorld
                 return position;
 
             OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
+            if (!physicActor)
+                return position;
+
             // Reset per-frame data
             physicActor->setWalkingOnWater(false);
             /* Anything to collide with? */
-            if(!physicActor || !physicActor->getCollisionMode())
+            if(!physicActor->getCollisionMode())
             {
                 return position +  (Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
                                     Ogre::Quaternion(Ogre::Radian(refpos.rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X))
@@ -423,7 +428,10 @@ namespace MWWorld
                 Ogre::Vector3 oldPosition = newPosition;
                 // We hit something. Try to step up onto it. (NOTE: stepMove does not allow stepping over)
                 // NOTE: stepMove modifies newPosition if successful
-                if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
+                bool result = stepMove(colobj, newPosition, velocity*remainingTime, remainingTime, engine);
+                if (!result) // to make sure the maximum stepping distance isn't framerate-dependent or movement-speed dependent
+                    result = stepMove(colobj, newPosition, velocity.normalisedCopy()*10.f, remainingTime, engine);
+                if(result)
                 {
                     // don't let pure water creatures move out of water after stepMove
                     if((ptr.getClass().canSwim(ptr) && !ptr.getClass().canWalk(ptr)) 
@@ -450,7 +458,7 @@ namespace MWWorld
             {
                 Ogre::Vector3 from = newPosition;
                 Ogre::Vector3 to = newPosition - (physicActor->getOnGround() ?
-                             Ogre::Vector3(0,0,sStepSize+2.f) : Ogre::Vector3(0,0,2.f));
+                             Ogre::Vector3(0,0,sStepSizeDown+2.f) : Ogre::Vector3(0,0,2.f));
                 tracer.doTrace(colobj, from, to, engine);
                 if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope
                         && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != OEngine::Physic::CollisionType_Actor)

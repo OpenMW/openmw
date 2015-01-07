@@ -59,6 +59,21 @@ void ESM::InventoryState::load (ESMReader &esm)
         esm.getHNT (count, "COUN");
         mLevelledItemMap[id] = count;
     }
+
+    while (esm.isNextSub("MAGI"))
+    {
+        std::string id = esm.getHString();
+
+        std::vector<std::pair<float, float> > params;
+        while (esm.isNextSub("RAND"))
+        {
+            float rand, multiplier;
+            esm.getHT (rand);
+            esm.getHNT (multiplier, "MULT");
+            params.push_back(std::make_pair(rand, multiplier));
+        }
+        mPermanentMagicEffectMagnitudes[id] = params;
+    }
 }
 
 void ESM::InventoryState::save (ESMWriter &esm) const
@@ -74,5 +89,17 @@ void ESM::InventoryState::save (ESMWriter &esm) const
     {
         esm.writeHNString ("LEVM", it->first);
         esm.writeHNT ("COUN", it->second);
+    }
+
+    for (TEffectMagnitudes::const_iterator it = mPermanentMagicEffectMagnitudes.begin(); it != mPermanentMagicEffectMagnitudes.end(); ++it)
+    {
+        esm.writeHNString("MAGI", it->first);
+
+        const std::vector<std::pair<float, float> >& params = it->second;
+        for (std::vector<std::pair<float, float> >::const_iterator pIt = params.begin(); pIt != params.end(); ++pIt)
+        {
+            esm.writeHNT ("RAND", pIt->first);
+            esm.writeHNT ("MULT", pIt->second);
+        }
     }
 }

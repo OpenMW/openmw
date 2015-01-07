@@ -201,6 +201,7 @@ namespace MWWorld
         setupPlayer();
 
         renderPlayer();
+        mRendering->resetCamera();
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
 
@@ -304,7 +305,8 @@ namespace MWWorld
             +1 // player record
             +1 // weather record
             +1 // actorId counter
-            +1; // levitation/teleport enabled state
+            +1 // levitation/teleport enabled state
+            +1; // camera
     }
 
     void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -333,6 +335,11 @@ namespace MWWorld
         writer.writeHNT("LEVT", mLevitationEnabled);
         writer.endRecord(ESM::REC_ENAB);
         progress.increaseProgress();
+
+        writer.startRecord(ESM::REC_CAM_);
+        writer.writeHNT("FIRS", isFirstPerson());
+        writer.endRecord(ESM::REC_CAM_);
+        progress.increaseProgress();
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type,
@@ -347,6 +354,12 @@ namespace MWWorld
                 reader.getHNT(mTeleportEnabled, "TELE");
                 reader.getHNT(mLevitationEnabled, "LEVT");
                 return;
+            case ESM::REC_CAM_:
+                bool firstperson;
+                reader.getHNT(firstperson, "FIRS");
+                if (firstperson != isFirstPerson())
+                    togglePOV();
+                break;
             default:
                 if (!mStore.readRecord (reader, type) &&
                     !mGlobalVariables.readRecord (reader, type) &&
@@ -393,6 +406,8 @@ namespace MWWorld
         gmst["sTauntFail"] = ESM::Variant("Taunt Fail");
         gmst["sBribeSuccess"] = ESM::Variant("Bribe Success");
         gmst["sBribeFail"] = ESM::Variant("Bribe Fail");
+        gmst["fNPCHealthBarTime"] = ESM::Variant(5.f);
+        gmst["fNPCHealthBarFade"] = ESM::Variant(1.f);
 
         // Werewolf (BM)
         gmst["fWereWolfRunMult"] = ESM::Variant(1.f);
@@ -1699,8 +1714,9 @@ namespace MWWorld
         MWWorld::LiveCellRef<ESM::Static>* ref = statics.find("northmarker");
         if (!ref)
             return Vector2(0, 1);
-        Ogre::SceneNode* node = ref->mData.getBaseNode();
-        Vector3 dir = node->_getDerivedOrientation() * Ogre::Vector3(0,1,0);
+
+        Ogre::Quaternion orient (Ogre::Radian(-ref->mData.getPosition().rot[2]), Ogre::Vector3::UNIT_Z);
+        Vector3 dir = orient * Ogre::Vector3(0,1,0);
         Vector2 d = Vector2(dir.x, dir.y);
         return d;
     }
@@ -2070,7 +2086,6 @@ namespace MWWorld
         MWBase::Environment::get().getMechanicsManager()->add(mPlayer->getPlayer());
 
         mPhysics->addActor(mPlayer->getPlayer());
-        mRendering->resetCamera();
     }
 
     int World::canRest ()
@@ -2259,6 +2274,8 @@ namespace MWWorld
             for (CellRefList<ESM::Container>::List::iterator container = refList.begin(); container != refList.end(); ++container)
             {
                 MWWorld::Ptr ptr (&*container, *cellIt);
+                if (ptr.getRefData().isDeleted())
+                    continue;
                 if (Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), npc.getCellRef().getRefId()))
                     out.push_back(ptr);
             }
@@ -2476,7 +2493,7 @@ namespace MWWorld
                                                                                getStore().get<ESM::GameSetting>().search("fAlarmRadius")->getFloat(),
                                                                                closeActors);
 
-            bool detected = false;
+            bool detected = false, reported = false;
             for (std::vector<MWWorld::Ptr>::const_iterator it = closeActors.begin(); it != closeActors.end(); ++it)
             {
                 if (*it == actor)
@@ -2486,16 +2503,22 @@ namespace MWWorld
                     continue;
 
                 if (getLOS(*it, actor) && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, *it))
-                {
                     detected = true;
-                    break;
-                }
+                if (it->getClass().getCreatureStats(*it).getAiSetting(MWMechanics::CreatureStats::AI_Alarm).getModified() > 0)
+                    reported = true;
             }
 
             if (detected)
             {
                 windowManager->messageBox("#{sWerewolfAlarmMessage}");
                 setGlobalInt("pcknownwerewolf", 1);
+
+                if (reported)
+                {
+                    npcStats.setBounty(npcStats.getBounty()+
+                                       MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iWereWolfBounty")->getInt());
+                    windowManager->messageBox("#{sCrimeMessage}");
+                }
             }
         }
     }
@@ -2554,7 +2577,7 @@ namespace MWWorld
 
         if (!selectedSpell.empty())
         {
-            const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
+            const ESM::Spell* spell = getStore().get<ESM::Spell>().find(selectedSpell);
 
             // Check mana
             MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
@@ -2641,7 +2664,7 @@ namespace MWWorld
 
         if (!selectedSpell.empty())
         {
-            const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
+            const ESM::Spell* spell = getStore().get<ESM::Spell>().find(selectedSpell);
 
             // A power can be used once per 24h
             if (spell->mData.mType == ESM::Spell::ST_Power)
@@ -3085,7 +3108,7 @@ namespace MWWorld
         mRendering->spawnEffect(model, textureOverride, worldPos);
     }
 
-    void World::explodeSpell(const Vector3 &origin, const ESM::EffectList &effects, const Ptr &caster,
+    void World::explodeSpell(const Vector3 &origin, const ESM::EffectList &effects, const Ptr &caster, int rangeType,
                              const std::string& id, const std::string& sourceName)
     {
         std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
@@ -3121,7 +3144,6 @@ namespace MWWorld
             std::vector<MWWorld::Ptr> objects;
             MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
                         origin, feetToGameUnits(effectIt->mArea), objects);
-
             for (std::vector<MWWorld::Ptr>::iterator affected = objects.begin(); affected != objects.end(); ++affected)
                 toApply[*affected].push_back(*effectIt);
         }
@@ -3145,7 +3167,7 @@ namespace MWWorld
             cast.mStack = false;
             ESM::EffectList effects;
             effects.mList = apply->second;
-            cast.inflict(apply->first, caster, effects, ESM::RT_Target, false, true);
+            cast.inflict(apply->first, caster, effects, (ESM::RangeType)rangeType, false, true);
         }
     }
 

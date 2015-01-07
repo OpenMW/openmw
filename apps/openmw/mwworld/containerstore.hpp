@@ -74,7 +74,7 @@ namespace MWWorld
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
             ContainerStoreIterator addImp (const Ptr& ptr, int count);
-            void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int count, bool topLevel=true, const std::string& levItem = "");
+            void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int factionRank, int count, bool topLevel=true, const std::string& levItem = "");
 
             template<typename T>
             ContainerStoreIterator getState (CellRefList<T>& collection,
@@ -153,10 +153,10 @@ namespace MWWorld
             virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, const MWWorld::ESMStore& store);
+            void fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, int factionRank, const MWWorld::ESMStore& store);
             ///< Insert items into *this.
 
-            void restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner, const std::string& faction);
+            void restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner, const std::string& faction, int factionRank);
 
             virtual void clear();
             ///< Empty container.
@@ -170,9 +170,9 @@ namespace MWWorld
 
             Ptr search (const std::string& id);
 
-            void writeState (ESM::InventoryState& state) const;
+            virtual void writeState (ESM::InventoryState& state) const;
 
-            void readState (const ESM::InventoryState& state);
+            virtual void readState (const ESM::InventoryState& state);
 
         friend class ContainerStoreIterator;
     };

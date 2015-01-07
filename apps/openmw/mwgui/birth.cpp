@@ -2,11 +2,13 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/esm/records.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "widgets.hpp"
 
@@ -80,8 +82,6 @@ namespace MWGui
             if (Misc::StringUtils::ciEqual(*mBirthList->getItemDataAt<std::string>(i), birthId))
             {
                 mBirthList->setIndexSelected(i);
-                MyGUI::Button* okButton;
-                getWidget(okButton, "OKButton");
                 break;
             }
         }
@@ -115,9 +115,6 @@ namespace MWGui
     {
         if (_index == MyGUI::ITEM_NONE)
             return;
-
-        MyGUI::Button* okButton;
-        getWidget(okButton, "OKButton");
 
         const std::string *birthId = mBirthList->getItemDataAt<std::string>(_index);
         if (Misc::StringUtils::ciEqual(mCurrentBirthId, *birthId))

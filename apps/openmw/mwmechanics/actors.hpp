@@ -6,7 +6,6 @@
 #include <string>
 #include <map>
 
-#include "character.hpp"
 #include "movement.hpp"
 #include "../mwbase/world.hpp"
 
@@ -23,6 +22,8 @@ namespace MWWorld
 
 namespace MWMechanics
 {
+    class Actor;
+
     class Actors
     {
             std::map<std::string, int> mDeathCount;
@@ -51,10 +52,10 @@ namespace MWMechanics
             Actors();
             ~Actors();
 
-            typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
+            typedef std::map<MWWorld::Ptr,Actor*> PtrActorMap;
 
-            PtrControllerMap::const_iterator begin() { return mActors.begin(); }
-            PtrControllerMap::const_iterator end() { return mActors.end(); }
+            PtrActorMap::const_iterator begin() { return mActors.begin(); }
+            PtrActorMap::const_iterator end() { return mActors.end(); }
 
             /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
             /// paused we may want to do it manually (after equipping permanent enchantment)
@@ -100,6 +101,9 @@ namespace MWMechanics
             int getHoursToRest(const MWWorld::Ptr& ptr) const;
             ///< Calculate how many hours the given actor needs to rest in order to be fully healed
 
+            void fastForwardAi();
+            ///< Simulate the passing of time
+
             int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
 
@@ -131,7 +135,7 @@ namespace MWMechanics
             bool isReadyToBlock(const MWWorld::Ptr& ptr) const;
 
     private:
-        PtrControllerMap mActors;
+        PtrActorMap mActors;
 
     };
 }

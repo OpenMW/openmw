@@ -296,15 +296,17 @@ namespace MWWorld
         std::string loadingExteriorText = "#{sLoadingMessage3}";
         loadingListener->setLabel(loadingExteriorText);
 
+        const int halfGridSize = Settings::Manager::getInt("exterior grid size", "Cells")/2;
+
         CellStoreCollection::iterator active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
             if ((*active)->getCell()->isExterior())
             {
-                if (std::abs (X-(*active)->getCell()->getGridX())<=1 &&
-                    std::abs (Y-(*active)->getCell()->getGridY())<=1)
+                if (std::abs (X-(*active)->getCell()->getGridX())<=halfGridSize &&
+                    std::abs (Y-(*active)->getCell()->getGridY())<=halfGridSize)
                 {
-                    // keep cells within the new 3x3 grid
+                    // keep cells within the new grid
                     ++active;
                     continue;
                 }
@@ -314,9 +316,9 @@ namespace MWWorld
 
         int refsToLoad = 0;
         // get the number of refs to load
-        for (int x=X-1; x<=X+1; ++x)
+        for (int x=X-halfGridSize; x<=X+halfGridSize; ++x)
         {
-            for (int y=Y-1; y<=Y+1; ++y)
+            for (int y=Y-halfGridSize; y<=Y+halfGridSize; ++y)
             {
                 CellStoreCollection::iterator iter = mActiveCells.begin();
 
@@ -339,9 +341,9 @@ namespace MWWorld
         loadingListener->setProgressRange(refsToLoad);
 
         // Load cells
-        for (int x=X-1; x<=X+1; ++x)
+        for (int x=X-halfGridSize; x<=X+halfGridSize; ++x)
         {
-            for (int y=Y-1; y<=Y+1; ++y)
+            for (int y=Y-halfGridSize; y<=Y+halfGridSize; ++y)
             {
                 CellStoreCollection::iterator iter = mActiveCells.begin();
 

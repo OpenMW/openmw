@@ -15,11 +15,13 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwrender/animation.hpp"
 
 #include "magiceffects.hpp"
 #include "npcstats.hpp"
+#include "summoning.hpp"
 
 namespace
 {
@@ -434,7 +436,7 @@ namespace MWMechanics
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
                 magnitude *= magnitudeMult;
 
-                bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
+                bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration) && effectIt->mDuration > 0;
                 if (target.getClass().isActor() && hasDuration)
                 {
                     ActiveSpells::ActiveEffect effect;
@@ -468,6 +470,20 @@ namespace MWMechanics
                 }
                 else
                     applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude);
+
+                // Re-casting a summon effect will remove the creature from previous castings of that effect.
+                if (effectIt->mEffectID >= ESM::MagicEffect::SummonScamp
+                        && effectIt->mEffectID <= ESM::MagicEffect::SummonStormAtronach
+                        && !target.isEmpty() && target.getClass().isActor())
+                {
+                    CreatureStats& targetStats = target.getClass().getCreatureStats(target);
+                    std::map<CreatureStats::SummonKey, int>::iterator found = targetStats.getSummonedCreatureMap().find(std::make_pair(effectIt->mEffectID, mId));
+                    if (found != targetStats.getSummonedCreatureMap().end())
+                    {
+                        cleanupSummonedCreature(targetStats, found->second);
+                        targetStats.getSummonedCreatureMap().erase(found);
+                    }
+                }
 
                 // HACK: Damage attribute/skill actually has a duration, even though the actual effect is instant and permanent.
                 // This was probably just done to have the effect visible in the magic menu for a while
@@ -514,7 +530,7 @@ namespace MWMechanics
         }
 
         if (!exploded)
-            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, effects, caster, mId, mSourceName);
+            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, effects, caster, range, mId, mSourceName);
 
         if (!reflectedEffects.mList.empty())
             inflict(caster, target, reflectedEffects, range, true, exploded);
@@ -578,6 +594,30 @@ namespace MWMechanics
                     value.restore(magnitude);
                 target.getClass().getCreatureStats(target).setAttribute(attribute, value);
             }
+            else if (effectId == ESM::MagicEffect::DamageHealth)
+            {
+                applyDynamicStatsEffect(0, target, magnitude * -1);
+            }
+            else if (effectId == ESM::MagicEffect::RestoreHealth)
+            {
+                applyDynamicStatsEffect(0, target, magnitude);
+            }
+            else if (effectId == ESM::MagicEffect::DamageFatigue)
+            {
+                applyDynamicStatsEffect(2, target, magnitude * -1);
+            }
+            else if (effectId == ESM::MagicEffect::RestoreFatigue)
+            {
+                applyDynamicStatsEffect(2, target, magnitude);
+            }
+            else if (effectId == ESM::MagicEffect::DamageMagicka)
+            {
+                applyDynamicStatsEffect(1, target, magnitude * -1);
+            }
+            else if (effectId == ESM::MagicEffect::RestoreMagicka)
+            {
+                applyDynamicStatsEffect(1, target, magnitude);
+            }
             else if (effectId == ESM::MagicEffect::DamageSkill || effectId == ESM::MagicEffect::RestoreSkill)
             {
                 if (target.getTypeName() != typeid(ESM::NPC).name())
@@ -639,6 +679,13 @@ namespace MWMechanics
             }
         }
     }
+    
+    void CastSpell::applyDynamicStatsEffect(int attribute, const MWWorld::Ptr& target, float magnitude)
+    {
+        DynamicStat<float> value = target.getClass().getCreatureStats(target).getDynamic(attribute);
+        value.modify(magnitude);
+        target.getClass().getCreatureStats(target).setDynamic(attribute, value);
+    }
 
     bool CastSpell::cast(const std::string &id)
     {
@@ -673,9 +720,7 @@ namespace MWMechanics
         // Check if there's enough charge left
         if (enchantment->mData.mType == ESM::Enchantment::WhenUsed || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
         {
-            const float enchantCost = enchantment->mData.mCost;
-            int eSkill = mCaster.getClass().getSkill(mCaster, ESM::Skill::Enchant);
-            const int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
+            const int castCost = getEffectiveEnchantmentCastCost(enchantment->mData.mCost, mCaster);
 
             if (item.getCellRef().getEnchantmentCharge() == -1)
                 item.getCellRef().setEnchantmentCharge(enchantment->mData.mCharge);
@@ -687,12 +732,11 @@ namespace MWMechanics
 
                 // Failure sound
                 int school = 0;
-                for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment->mEffects.mList.begin());
-                    effectIt!=enchantment->mEffects.mList.end(); ++effectIt)
+                if (!enchantment->mEffects.mList.empty())
                 {
-                    const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
+                    short effectId = enchantment->mEffects.mList.front().mEffectID;
+                    const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
                     school = magicEffect->mData.mSchool;
-                    break;
                 }
                 static const std::string schools[] = {
                     "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
@@ -899,5 +943,17 @@ namespace MWMechanics
         inflict(mCaster, mCaster, effects, ESM::RT_Self);
 
         return true;
+    }
+
+    int getEffectiveEnchantmentCastCost(float castCost, const MWWorld::Ptr &actor)
+    {
+        /*
+         * Each point of enchant skill above/under 10 subtracts/adds
+         * one percent of enchantment cost while minimum is 1.
+         */
+        int eSkill = actor.getClass().getSkill(actor, ESM::Skill::Enchant);
+        const float result = castCost - (castCost / 100) * (eSkill - 10);
+
+        return static_cast<int>((result < 1) ? 1 : result);
     }
 }

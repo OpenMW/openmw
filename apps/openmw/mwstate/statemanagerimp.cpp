@@ -27,6 +27,7 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
@@ -290,16 +291,47 @@ void MWState::StateManager::quickSave (std::string name)
     saveGame(name, slot);
 }
 
-void MWState::StateManager::loadGame (const Character *character, const Slot *slot)
+void MWState::StateManager::loadGame(const std::string& filepath)
+{
+    for (CharacterIterator it = mCharacterManager.begin(); it != mCharacterManager.end(); ++it)
+    {
+        const MWState::Character& character = *it;
+        for (MWState::Character::SlotIterator slotIt = character.begin(); slotIt != character.end(); ++slotIt)
+        {
+            const MWState::Slot& slot = *slotIt;
+            if (slot.mPath == boost::filesystem::path(filepath))
+            {
+                loadGame(&character, slot.mPath.string());
+                return;
+            }
+        }
+    }
+
+    // have to peek into the save file to get the player name
+    ESM::ESMReader reader;
+    reader.open (filepath);
+    if (reader.getFormat()>ESM::Header::CurrentFormat)
+        return; // format is too new -> ignore
+    if (reader.getRecName()!=ESM::REC_SAVE)
+        return; // invalid save file -> ignore
+    reader.getRecHeader();
+    ESM::SavedGame profile;
+    profile.load (reader);
+    reader.close();
+
+    MWState::Character* character = mCharacterManager.getCurrentCharacter(true, profile.mPlayerName);
+    loadGame(character, filepath);
+    mTimePlayed = profile.mTimePlayed;
+}
+
+void MWState::StateManager::loadGame (const Character *character, const std::string& filepath)
 {
     try
     {
         cleanup();
 
-        mTimePlayed = slot->mProfile.mTimePlayed;
-
         ESM::ESMReader reader;
-        reader.open (slot->mPath.string());
+        reader.open (filepath);
 
         std::map<int, int> contentFileMap = buildContentFileIndexMap (reader);
 
@@ -318,9 +350,11 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
             switch (n.val)
             {
                 case ESM::REC_SAVE:
-
-                    // don't need to read that here
-                    reader.skipRecord();
+                    {
+                        ESM::SavedGame profile;
+                        profile.load(reader);
+                        mTimePlayed = profile.mTimePlayed;
+                    }
                     break;
 
                 case ESM::REC_JOUR:
@@ -354,6 +388,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 case ESM::REC_ENAB:
                 case ESM::REC_LEVC:
                 case ESM::REC_LEVI:
+                case ESM::REC_CAM_:
 
                     MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
                     break;
@@ -390,7 +425,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
         mState = State_Running;
 
         Settings::Manager::setString ("character", "Saves",
-            slot->mPath.parent_path().filename().string());
+                                      character->getPath().filename().string());
 
         MWBase::Environment::get().getWindowManager()->setNewGame(false);
         MWBase::Environment::get().getWorld()->setupPlayer();
@@ -405,6 +440,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
         // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
         MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false);
 
+        // Vanilla MW will restart startup scripts when a save game is loaded. This is unintuive,
+        // but some mods may be using it as a reload detector.
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
 
         // Do not trigger erroneous cellChanged events
@@ -430,7 +467,7 @@ void MWState::StateManager::quickLoad()
 {
     if (Character* mCurrentCharacter = getCurrentCharacter (false))
         if (const MWState::Slot* slot = &*mCurrentCharacter->begin()) //Get newest save
-            loadGame (mCurrentCharacter, slot);
+            loadGame (mCurrentCharacter, slot->mPath.string());
 }
 
 void MWState::StateManager::deleteGame(const MWState::Character *character, const MWState::Slot *slot)
@@ -471,7 +508,7 @@ void MWState::StateManager::update (float duration)
             //Load last saved game for current character
 
             MWState::Slot lastSave = *curCharacter->begin();
-            loadGame(curCharacter, &lastSave);
+            loadGame(curCharacter, lastSave.mPath.string());
         }
         else if(iButton==1)
         {

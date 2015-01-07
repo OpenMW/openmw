@@ -1,6 +1,8 @@
 #ifndef MWGUI_SPELLCREATION_H
 #define MWGUI_SPELLCREATION_H
 
+#include <components/esm/loadmgef.hpp>
+#include <components/esm/loadspel.hpp>
 #include <components/widgets/list.hpp>
 
 #include "windowbase.hpp"
@@ -21,12 +23,13 @@ namespace MWGui
         virtual void open();
         virtual void exit();
 
+        void setConstantEffect(bool constant);
+
         void setSkill(int skill);
         void setAttribute(int attribute);
 
         void newEffect (const ESM::MagicEffect* effect);
         void editEffect (ESM::ENAMstruct effect);
-        bool constantEffect;
         typedef MyGUI::delegates::CMultiDelegate1<ESM::ENAMstruct> EventHandle_Effect;
 
         EventHandle_Effect eventEffectAdded;
@@ -80,6 +83,8 @@ namespace MWGui
         ESM::ENAMstruct mOldEffect;
 
         const ESM::MagicEffect* mMagicEffect;
+
+        bool mConstantEffect;
     };
 
 
@@ -95,6 +100,8 @@ namespace MWGui
         EffectEditorBase(Type type);
         virtual ~EffectEditorBase();
 
+        void setConstantEffect(bool constant);
+
     protected:
         std::map<int, short> mButtonMapping; // maps button ID to effect ID
 
@@ -107,6 +114,8 @@ namespace MWGui
 
         int mSelectedEffect;
         short mSelectedKnownEffectId;
+
+        bool mConstantEffect;
 
         std::vector<ESM::ENAMstruct> mEffects;
 

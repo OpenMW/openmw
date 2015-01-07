@@ -70,7 +70,7 @@ namespace MWGui
     public:
         LocalMapBase(CustomMarkerCollection& markers);
         virtual ~LocalMapBase();
-        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass);
+        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int mapWidgetSize);
 
         void setCellPrefix(const std::string& prefix);
         void setActiveCell(const int x, const int y, bool interior=false);
@@ -98,6 +98,8 @@ namespace MWGui
         std::string mPrefix;
         bool mChanged;
         bool mFogOfWar;
+
+        int mMapWidgetSize;
 
         // Stores markers that were placed by a player. May be shared between multiple map views.
         CustomMarkerCollection& mCustomMarkers;

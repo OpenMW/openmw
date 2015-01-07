@@ -20,29 +20,13 @@ set(OPENMW_VERSION_TAGHASH "")
 
 set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
+set(GIT_CHECKOUT FALSE)
 if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
     if(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
         find_package(Git)
 
         if(GIT_FOUND)
-            include(GetGitRevisionDescription)
-            get_git_tag_revision(TAGHASH --tags --max-count=1)
-            get_git_head_revision(REFSPEC COMMITHASH)
-            git_describe(VERSION --tags ${TAGHASH})
-
-            string(REGEX MATCH "^openmw-[^0-9]*[0-9]+\\.[0-9]+\\.[0-9]+.*" MATCH "${VERSION}")
-            if(MATCH)
-                string(REGEX REPLACE "^openmw-([0-9]+)\\..*" "\\1" GIT_VERSION_MAJOR "${VERSION}")
-                string(REGEX REPLACE "^openmw-[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_MINOR "${VERSION}")
-                string(REGEX REPLACE "^openmw-[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" GIT_VERSION_RELEASE "${VERSION}")
-
-                set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
-                set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
-
-                message(STATUS "OpenMW version ${OPENMW_VERSION}")
-            else(MATCH)
-                message(WARNING "Failed to get valid version information from Git")
-            endif(MATCH)
+            set(GIT_CHECKOUT TRUE)
         else(GIT_FOUND)
             message(WARNING "Git executable not found")
         endif(GIT_FOUND)
@@ -870,4 +854,3 @@ if (DOXYGEN_FOUND)
         WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
         COMMENT "Generating documentation for the github-pages at ${DOXYGEN_PAGES_OUTPUT_DIR}" VERBATIM)
 endif ()
-

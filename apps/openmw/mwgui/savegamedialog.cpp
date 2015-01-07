@@ -12,6 +12,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwstate/character.hpp"
 
@@ -245,7 +246,7 @@ namespace MWGui
         else
         {
             assert (mCurrentCharacter && mCurrentSlot);
-            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot);
+            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot->mPath.string());
         }
     }
 
@@ -304,7 +305,7 @@ namespace MWGui
         mOkButton->setEnabled(pos != MyGUI::ITEM_NONE || mSaving);
         mDeleteButton->setEnabled(pos != MyGUI::ITEM_NONE);
 
-        if (pos == MyGUI::ITEM_NONE)
+        if (pos == MyGUI::ITEM_NONE || !mCurrentCharacter)
         {
             mCurrentSlot = NULL;
             mInfoText->setCaption("");

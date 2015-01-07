@@ -15,6 +15,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwdialogue/dialoguemanagerimp.hpp"
 
@@ -415,19 +416,10 @@ namespace MWGui
         MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
         float delay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fBarterGoldResetDelay")->getFloat();
 
+        // Gold is restocked every 24h
         if (MWBase::Environment::get().getWorld()->getTimeStamp() >= sellerStats.getLastRestockTime() + delay)
         {
             sellerStats.setGoldPool(mPtr.getClass().getBaseGold(mPtr));
-
-            mPtr.getClass().restock(mPtr);
-
-            // Also restock any containers owned by this merchant, which are also available to buy in the trade window
-            std::vector<MWWorld::Ptr> itemSources;
-            MWBase::Environment::get().getWorld()->getContainersOwnedBy(mPtr, itemSources);
-            for (std::vector<MWWorld::Ptr>::iterator it = itemSources.begin(); it != itemSources.end(); ++it)
-            {
-                it->getClass().restock(*it);
-            }
 
             sellerStats.setLastRestockTime(MWBase::Environment::get().getWorld()->getTimeStamp());
         }

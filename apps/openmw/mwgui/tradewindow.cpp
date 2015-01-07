@@ -94,12 +94,28 @@ namespace MWGui
         setCoord(400, 0, 400, 300);
     }
 
+    void TradeWindow::restock()
+    {
+        // Restock items on the actor inventory
+        mPtr.getClass().restock(mPtr);
+
+        // Also restock any containers owned by this merchant, which are also available to buy in the trade window
+        std::vector<MWWorld::Ptr> itemSources;
+        MWBase::Environment::get().getWorld()->getContainersOwnedBy(mPtr, itemSources);
+        for (std::vector<MWWorld::Ptr>::iterator it = itemSources.begin(); it != itemSources.end(); ++it)
+        {
+            it->getClass().restock(*it);
+        }
+    }
+
     void TradeWindow::startTrade(const MWWorld::Ptr& actor)
     {
         mPtr = actor;
 
         mCurrentBalance = 0;
         mCurrentMerchantOffer = 0;
+
+        restock();
 
         std::vector<MWWorld::Ptr> itemSources;
         MWBase::Environment::get().getWorld()->getContainersOwnedBy(actor, itemSources);
@@ -290,10 +306,9 @@ namespace MWGui
                 if (msg.find("%s") != std::string::npos)
                     msg.replace(msg.find("%s"), 2, it->mBase.getClass().getName(it->mBase));
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
-                MWBase::Environment::get().getDialogueManager()->say(mPtr, "Thief");
-                MWBase::Environment::get().getMechanicsManager()->reportCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
+                MWBase::Environment::get().getMechanicsManager()->commitCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
                                                                               it->mBase.getClass().getValue(it->mBase)
-                                                                              * it->mCount);
+                                                                              * it->mCount, true);
                 onCancelButtonClicked(mCancelButton);
                 MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
                 return;

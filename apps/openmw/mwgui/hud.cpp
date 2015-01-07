@@ -7,8 +7,10 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -162,7 +164,7 @@ namespace MWGui
         getWidget(mTriangleCounter, "TriangleCounter");
         getWidget(mBatchCounter, "BatchCounter");
 
-        LocalMapBase::init(mMinimap, mCompass);
+        LocalMapBase::init(mMinimap, mCompass, Settings::Manager::getInt("local map hud widget size", "Map"));
 
         mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
         mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
@@ -618,6 +620,11 @@ namespace MWGui
         // Health is usually cast to int before displaying. Actors die whenever they are < 1 health.
         // Therefore any value < 1 should show as an empty health bar. We do the same in statswindow :)
         mEnemyHealth->setProgressPosition(int(stats.getHealth().getCurrent()) / stats.getHealth().getModified() * 100);
+
+        static const float fNPCHealthBarFade = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCHealthBarFade")->getFloat();
+        if (fNPCHealthBarFade > 0.f)
+            mEnemyHealth->setAlpha(std::max(0.f, std::min(1.f, mEnemyHealthTimer/fNPCHealthBarFade)));
+
     }
 
     void HUD::update()
@@ -639,7 +646,7 @@ namespace MWGui
     void HUD::setEnemy(const MWWorld::Ptr &enemy)
     {
         mEnemyActorId = enemy.getClass().getCreatureStats(enemy).getActorId();
-        mEnemyHealthTimer = 5;
+        mEnemyHealthTimer = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCHealthBarTime")->getFloat();
         if (!mEnemyHealth->getVisible())
             mWeaponSpellBox->setPosition(mWeaponSpellBox->getPosition() - MyGUI::IntPoint(0,20));
         mEnemyHealth->setVisible(true);

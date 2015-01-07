@@ -21,8 +21,10 @@ namespace
         if (left.mType != right.mType)
             return left.mType < right.mType;
 
-        int cmp = left.mName.compare(right.mName);
-        return cmp < 0;
+        std::string leftName = Misc::StringUtils::lowerCase(left.mName);
+        std::string rightName = Misc::StringUtils::lowerCase(right.mName);
+
+        return leftName.compare(rightName) < 0;
     }
 
 }
@@ -101,9 +103,7 @@ namespace MWGui
                         && item.getClass().canBeEquipped(item, mActor).first == 0)
                     continue;
 
-                float enchantCost = enchant->mData.mCost;
-                int eSkill = mActor.getClass().getSkill(mActor, ESM::Skill::Enchant);
-                int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
+                int castCost = MWMechanics::getEffectiveEnchantmentCastCost(enchant->mData.mCost, mActor);
 
                 std::string cost = boost::lexical_cast<std::string>(castCost);
                 int currentCharge = int(item.getCellRef().getEnchantmentCharge());

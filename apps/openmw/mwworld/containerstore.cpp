@@ -396,19 +396,19 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
     return count - toRemove;
 }
 
-void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, const MWWorld::ESMStore& store)
+void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, int factionRank, const MWWorld::ESMStore& store)
 {
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
         ++iter)
     {
         std::string id = Misc::StringUtils::lowerCase(iter->mItem.toString());
-        addInitialItem(id, owner, faction, iter->mCount);
+        addInitialItem(id, owner, faction, factionRank, iter->mCount);
     }
 
     flagAsModified();
 }
 
-void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, const std::string& faction,
+void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int factionRank,
                                               int count, bool topLevel, const std::string& levItem)
 {
     ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
@@ -420,7 +420,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
         if (topLevel && std::abs(count) > 1 && levItem->mFlags & ESM::ItemLevList::Each)
         {
             for (int i=0; i<std::abs(count); ++i)
-                addInitialItem(id, owner, faction, count > 0 ? 1 : -1, true, levItem->mId);
+                addInitialItem(id, owner, faction, factionRank, count > 0 ? 1 : -1, true, levItem->mId);
             return;
         }
         else
@@ -428,7 +428,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
             std::string id = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
             if (id.empty())
                 return;
-            addInitialItem(id, owner, faction, count, false, levItem->mId);
+            addInitialItem(id, owner, faction, factionRank, count, false, levItem->mId);
         }
     }
     else
@@ -445,11 +445,12 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 
         ref.getPtr().getCellRef().setOwner(owner);
         ref.getPtr().getCellRef().setFaction(faction);
+        ref.getPtr().getCellRef().setFactionRank(factionRank);
         addImp (ref.getPtr(), count);
     }
 }
 
-void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner, const std::string& faction)
+void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner, const std::string& faction, int factionRank)
 {
     // Remove the items already spawned by levelled items that will restock
     for (std::map<std::string, int>::iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
@@ -468,13 +469,13 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
 
         if (MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().search(it->mItem.toString()))
         {
-            addInitialItem(item, owner, faction, it->mCount, true);
+            addInitialItem(item, owner, faction, factionRank, it->mCount, true);
         }
         else
         {
             int currentCount = count(item);
             if (currentCount < std::abs(it->mCount))
-                add (item, std::abs(it->mCount) - currentCount, ptr);
+                addInitialItem(item, owner, faction, factionRank, std::abs(it->mCount) - currentCount, true);
         }
     }
     flagAsModified();

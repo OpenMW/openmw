@@ -15,6 +15,9 @@ namespace MWRender
     public:
         ActivatorAnimation(const MWWorld::Ptr& ptr);
         virtual ~ActivatorAnimation();
+
+        void addLight(const ESM::Light *light);
+        void removeParticles();
     };
 }
 

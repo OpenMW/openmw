@@ -203,8 +203,15 @@ namespace MWWorld
             void purgeEffect (short effectId);
             ///< Remove a magic effect
 
+            void purgeEffect (short effectId, const std::string& sourceId);
+            ///< Remove a magic effect
+
             virtual void clear();
             ///< Empty container.
+
+            virtual void writeState (ESM::InventoryState& state) const;
+
+            virtual void readState (const ESM::InventoryState& state);
     };
 }
 

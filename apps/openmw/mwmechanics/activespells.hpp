@@ -82,6 +82,9 @@ namespace MWMechanics
             /// Remove all active effects with this effect id
             void purgeEffect (short effectId);
 
+            /// Remove all active effects with this effect id and source id
+            void purgeEffect (short effectId, const std::string& sourceId);
+
             /// Remove all active effects, if roll succeeds (for each effect)
             void purgeAll (float chance);
 

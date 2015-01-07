@@ -106,7 +106,7 @@ void CreatureWeaponAnimation::updatePart(NifOgre::ObjectScenePtr& scene, int slo
     else
         bonename = "Shield Bone";
 
-    scene = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, item.getClass().getModel(item));
+    scene = NifOgre::Loader::createObjects(mSkelBase, bonename, bonename, mInsert, item.getClass().getModel(item));
     Ogre::Vector3 glowColor = getEnchantmentColor(item);
 
     setRenderProperties(scene, RV_Actors, RQG_Main, RQG_Alpha, 0,

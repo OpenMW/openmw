@@ -4,6 +4,29 @@
 
 #include <OgreResourceGroupManager.h>
 
+namespace
+{
+
+
+    struct MatchPathSeparator
+    {
+        bool operator()( char ch ) const
+        {
+            return ch == '\\' || ch == '/';
+        }
+    };
+
+    std::string
+    getBasename( std::string const& pathname )
+    {
+        return std::string(
+            std::find_if( pathname.rbegin(), pathname.rend(),
+                          MatchPathSeparator() ).base(),
+            pathname.end() );
+    }
+
+}
+
 bool Misc::ResourceHelpers::changeExtensionToDds(std::string &path)
 {
     Ogre::String::size_type pos = path.rfind('.');
@@ -40,14 +63,24 @@ std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLev
 
     // since we know all (GOTY edition or less) textures end
     // in .dds, we change the extension
-    if (changeExtensionToDds(correctedPath))
+    bool changedToDds = changeExtensionToDds(correctedPath);
+    if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(correctedPath))
+        return correctedPath;
+    // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
+    // verify, and revert if false (this call succeeds quickly, but fails slowly)
+    if (changedToDds && Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(origExt))
+        return origExt;
+
+    // fall back to a resource in the top level directory if it exists
+    std::string fallback = topLevelDirectory + "\\" + getBasename(correctedPath);
+    if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(fallback))
+        return fallback;
+
+    if (changedToDds)
     {
-        // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
-        // verify, and revert if false (this call succeeds quickly, but fails slowly)
-        if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(correctedPath))
-        {
-            return origExt;
-        }
+        fallback = topLevelDirectory + "\\" + getBasename(origExt);
+        if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(fallback))
+            return fallback;
     }
 
     return correctedPath;
