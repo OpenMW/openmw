@@ -20,33 +20,13 @@ set(OPENMW_VERSION_TAGHASH "")
 
 set(OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
+set(GIT_CHECKOUT FALSE)
 if(EXISTS ${PROJECT_SOURCE_DIR}/.git)
     if(NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/shallow)
         find_package(Git)
 
         if(GIT_FOUND)
-            execute_process (
-                COMMAND "${GIT_EXECUTABLE}" rev-list --tags --max-count=1
-                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-                RESULT_VARIABLE EXITCODE1
-                OUTPUT_VARIABLE TAGHASH
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-            execute_process (
-                COMMAND "${GIT_EXECUTABLE}" rev-parse HEAD
-                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-                RESULT_VARIABLE EXITCODE2
-                OUTPUT_VARIABLE COMMITHASH
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-            string (COMPARE EQUAL "${EXITCODE1}:${EXITCODE2}" "0:0" SUCCESS)
-            if (SUCCESS)
-                set(OPENMW_VERSION_COMMITHASH "${COMMITHASH}")
-                set(OPENMW_VERSION_TAGHASH "${TAGHASH}")
-                message(STATUS "OpenMW version ${OPENMW_VERSION}")
-            else (SUCCESS)
-                message(WARNING "Failed to get valid version information from Git")
-            endif (SUCCESS)
+            set(GIT_CHECKOUT TRUE)
         else(GIT_FOUND)
             message(WARNING "Git executable not found")
         endif(GIT_FOUND)
@@ -874,4 +854,3 @@ if (DOXYGEN_FOUND)
         WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
         COMMENT "Generating documentation for the github-pages at ${DOXYGEN_PAGES_OUTPUT_DIR}" VERBATIM)
 endif ()
-

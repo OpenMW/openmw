@@ -2,7 +2,24 @@ project (Components)
 set (CMAKE_BUILD_TYPE DEBUG)
 
 # Version file
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp")
+set (VERSION_HPP_IN ${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp.cmake)
+set (VERSION_HPP ${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp)
+if (GIT_CHECKOUT)
+    add_custom_target (git-version
+        COMMAND ${CMAKE_COMMAND}
+	    -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
+            -DPROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}
+	    -DVERSION_HPP_IN=${VERSION_HPP_IN}
+	    -DVERSION_HPP=${VERSION_HPP}
+	    -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
+	    -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
+	    -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
+	    -DOPENMW_VERSION=${OPENMW_VERSION}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/GitVersion.cmake
+	    VERBATIM)
+else (GIT_CHECKOUT)
+    configure_file(${VERSION_HPP_IN} ${VERSION_HPP})
+endif (GIT_CHECKOUT)
 
 # source files
 
@@ -144,6 +161,10 @@ include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 target_link_libraries(components ${Boost_LIBRARIES} ${OGRE_LIBRARIES})
+
+if (GIT_CHECKOUT)
+    add_dependencies (components git-version)
+endif (GIT_CHECKOUT)
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
