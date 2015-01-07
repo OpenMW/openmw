@@ -689,9 +689,7 @@ namespace MWMechanics
         // Check if there's enough charge left
         if (enchantment->mData.mType == ESM::Enchantment::WhenUsed || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
         {
-            const float enchantCost = enchantment->mData.mCost;
-            int eSkill = mCaster.getClass().getSkill(mCaster, ESM::Skill::Enchant);
-            const int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
+            const int castCost = getEffectiveEnchantmentCastCost(enchantment->mData.mCost, mCaster);
 
             if (item.getCellRef().getEnchantmentCharge() == -1)
                 item.getCellRef().setEnchantmentCharge(enchantment->mData.mCharge);
@@ -914,5 +912,17 @@ namespace MWMechanics
         inflict(mCaster, mCaster, effects, ESM::RT_Self);
 
         return true;
+    }
+
+    int getEffectiveEnchantmentCastCost(float castCost, const MWWorld::Ptr &actor)
+    {
+        /*
+         * Each point of enchant skill above/under 10 subtracts/adds
+         * one percent of enchantment cost while minimum is 1.
+         */
+        int eSkill = actor.getClass().getSkill(actor, ESM::Skill::Enchant);
+        const float result = castCost - (castCost / 100) * (eSkill - 10);
+
+        return static_cast<int>((result < 1) ? 1 : result);
     }
 }
