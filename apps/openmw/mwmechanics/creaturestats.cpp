@@ -638,7 +638,7 @@ namespace MWMechanics
         mDeathAnimation = index;
     }
 
-    std::map<int, int>& CreatureStats::getSummonedCreatureMap()
+    std::map<CreatureStats::SummonKey, int>& CreatureStats::getSummonedCreatureMap()
     {
         return mSummonedCreatures;
     }

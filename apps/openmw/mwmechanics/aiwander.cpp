@@ -202,7 +202,7 @@ namespace MWMechanics
         // Are we there yet?
         bool& chooseAction = storage.mChooseAction;
         if(walking &&
-           storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
+           storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2], 64.f))
         {
             stopWalking(actor, storage);
             moveNow = false;

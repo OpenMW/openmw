@@ -6,6 +6,7 @@
 
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
+#include "spellcasting.hpp"
 
 namespace MWMechanics
 {
@@ -55,7 +56,7 @@ namespace MWMechanics
         enchantment.mData.mCharge = getGemCharge();
         enchantment.mData.mAutocalc = 0;
         enchantment.mData.mType = mCastStyle;
-        enchantment.mData.mCost = getCastCost();
+        enchantment.mData.mCost = getBaseCastCost();
 
         store.remove(mSoulGemPtr, 1, player);
 
@@ -65,7 +66,7 @@ namespace MWMechanics
 
         if(mSelfEnchanting)
         {
-            if(std::rand()/static_cast<double> (RAND_MAX)*100 < getEnchantChance())
+            if(getEnchantChance()<std::rand()/static_cast<double> (RAND_MAX)*100)
                 return false;
 
             mEnchanter.getClass().skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 2);
@@ -199,23 +200,19 @@ namespace MWMechanics
     }
 
 
-    int Enchanting::getCastCost() const
+    int Enchanting::getBaseCastCost() const
     {
         if (mCastStyle == ESM::Enchantment::ConstantEffect)
             return 0;
 
-        const float enchantCost = getEnchantPoints();
+        return getEnchantPoints();
+    }
+
+    int Enchanting::getEffectiveCastCost() const
+    {
+        int baseCost = getBaseCastCost();
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWMechanics::NpcStats &stats = player.getClass().getNpcStats(player);
-        int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
-
-        /*
-         * Each point of enchant skill above/under 10 subtracts/adds
-         * one percent of enchantment cost while minimum is 1.
-         */
-        const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
-
-        return static_cast<int>((castCost < 1) ? 1 : castCost);
+        return getEffectiveEnchantmentCastCost(baseCost, player);
     }
 
 

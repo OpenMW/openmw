@@ -114,6 +114,7 @@ enum RecNameInts
     REC_DCOU = FourCC<'D','C','O','U'>::value,
     REC_MARK = FourCC<'M','A','R','K'>::value,
     REC_ENAB = FourCC<'E','N','A','B'>::value,
+    REC_CAM_ = FourCC<'C','A','M','_'>::value,
 
     // format 1
     REC_FILT = 0x544C4946,

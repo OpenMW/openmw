@@ -58,6 +58,8 @@ namespace MWMechanics
     float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
                               const ESM::Spell* spell = NULL, const MagicEffects* effects = NULL);
 
+    int getEffectiveEnchantmentCastCost (float castCost, const MWWorld::Ptr& actor);
+
     class CastSpell
     {
     private:
