@@ -472,9 +472,13 @@ void OMW::Engine::go()
     // Play some good 'ol tunes
     MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
 
-    // start in main menu
-    if (!mSkipMenu)
+    if (!mSaveGameFile.empty())
     {
+        MWBase::Environment::get().getStateManager()->loadGame(mSaveGameFile);
+    }
+    else if (!mSkipMenu)
+    {
+        // start in main menu
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         try
         {
@@ -621,4 +625,9 @@ void OMW::Engine::setScriptBlacklistUse (bool use)
 void OMW::Engine::enableFontExport(bool exportFonts)
 {
     mExportFonts = exportFonts;
+}
+
+void OMW::Engine::setSaveGameFile(const std::string &savegame)
+{
+    mSaveGameFile = savegame;
 }

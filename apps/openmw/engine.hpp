@@ -83,6 +83,7 @@ namespace OMW
             bool mScriptConsoleMode;
             std::string mStartupScript;
             int mActivationDistanceOverride;
+            std::string mSaveGameFile;
             // Grab mouse?
             bool mGrab;
 
@@ -203,6 +204,9 @@ namespace OMW
             void setScriptBlacklistUse (bool use);
 
             void enableFontExport(bool exportFonts);
+
+            /// Set the save game file to load after initialising the engine.
+            void setSaveGameFile(const std::string& savegame);
 
         private:
             Files::ConfigurationManager& mCfgMgr;
