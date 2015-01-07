@@ -386,6 +386,8 @@ configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
         "${OpenMW_BINARY_DIR}/openmw.desktop")
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw-mimeinfo.xml
+        "${OpenMW_BINARY_DIR}/openmw-mimeinfo.xml")
     configure_file(${OpenMW_SOURCE_DIR}/files/opencs.desktop
         "${OpenMW_BINARY_DIR}/opencs.desktop")
 endif()
@@ -451,6 +453,7 @@ IF(NOT WIN32 AND NOT APPLE)
 
     # Install icon and desktop file
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-mimeinfo.xml" DESTINATION "${DATAROOTDIR}/mime/packages" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     IF(BUILD_OPENCS)
         INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.desktop" DESTINATION "${DATAROOTDIR}/applications" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
