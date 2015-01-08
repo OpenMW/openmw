@@ -140,7 +140,8 @@ namespace MWWorld
         virtual void clearDynamic()
         {
             // remove the dynamic part of mShared
-            mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
+            if (mShared.size() > mStatic.size())
+                mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
             mDynamic.clear();
         }
 
@@ -217,7 +218,8 @@ namespace MWWorld
 
         void setUp() {
             // remove the dynamic part of mShared
-            mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
+            if (mShared.size() > mStatic.size())
+                mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
         }
 
         iterator begin() const {
@@ -305,7 +307,8 @@ namespace MWWorld
             mDynamic.erase(it);
 
             // have to reinit the whole shared part
-            mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
+            if (mShared.size() > mStatic.size())
+                mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
             for (it = mDynamic.begin(); it != mDynamic.end(); ++it) {
                 mShared.push_back(&it->second);
             }
@@ -337,20 +340,6 @@ namespace MWWorld
             insert (record);
         }
     };
-
-    template <>
-    inline void Store<ESM::NPC>::clearDynamic()
-    {
-        std::map<std::string, ESM::NPC>::iterator iter = mDynamic.begin();
-
-        while (iter!=mDynamic.end())
-            if (iter->first=="player")
-                ++iter;
-            else
-                mDynamic.erase (iter++);
-
-        mShared.clear();
-    }
 
     template <>
     inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
