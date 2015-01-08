@@ -30,7 +30,7 @@ namespace MWWorld
 
         virtual void write (ESM::ESMWriter& writer) const {}
 
-        virtual void read (ESM::ESMReader& reader) {}
+        virtual void read (ESM::ESMReader& reader, const std::string& id) {}
         ///< Read into dynamic storage
     };
 
@@ -329,10 +329,10 @@ namespace MWWorld
             }
         }
 
-        void read (ESM::ESMReader& reader)
+        void read (ESM::ESMReader& reader, const std::string& id)
         {
             T record;
-            record.mId = reader.getHNString ("NAME");
+            record.mId = id;
             record.load (reader);
             insert (record);
         }
