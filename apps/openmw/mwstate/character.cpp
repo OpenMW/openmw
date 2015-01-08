@@ -61,7 +61,8 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
             stream << "_";
     }
 
-    slot.mPath = mPath / stream.str();
+    const std::string ext = ".omwsave";
+    slot.mPath = mPath / (stream.str() + ext);
 
     // Append an index if necessary to ensure a unique file
     int i=0;
@@ -70,7 +71,7 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
            std::ostringstream test;
            test << stream.str();
            test << " - " << ++i;
-           slot.mPath = mPath / test.str();
+           slot.mPath = mPath / (test.str() + ext);
     }
 
     slot.mProfile = profile;
