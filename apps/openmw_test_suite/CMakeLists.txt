@@ -5,6 +5,7 @@ if (GTEST_FOUND)
 
     file(GLOB UNITTEST_SRC_FILES
         components/misc/test_*.cpp
+        mwdialogue/test_*.cpp
     )
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
