@@ -1978,7 +1978,8 @@ namespace MWWorld
 
     bool World::isSubmerged(const MWWorld::Ptr &object) const
     {
-        return isUnderwater(object, 1.85f);
+        const float neckDeep = 1.85f;
+        return isUnderwater(object, neckDeep);
     }
 
     bool
@@ -1992,11 +1993,12 @@ namespace MWWorld
     bool
     World::isWading(const MWWorld::Ptr &object) const
     {
-        return isUnderwater(object, 0.5f);
+        const float kneeDeep = 0.5f;
+        return isUnderwater(object, kneeDeep);
     }
 
     bool
-    World::isUnderwater(const MWWorld::Ptr &object, const float hightRatio) const
+    World::isUnderwater(const MWWorld::Ptr &object, const float heightRatio) const
     {
         const float *fpos = object.getRefData().getPosition().pos;
         Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
@@ -2004,7 +2006,7 @@ namespace MWWorld
         const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
         if (actor)
         {
-            pos.z += hightRatio*actor->getHalfExtents().z;
+            pos.z += heightRatio*actor->getHalfExtents().z;
         }
 
         return isUnderwater(object.getCell(), pos);

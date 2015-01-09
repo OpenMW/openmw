@@ -139,7 +139,7 @@ namespace MWWorld
             void loadContentFiles(const Files::Collections& fileCollections,
                 const std::vector<std::string>& content, ContentLoader& contentLoader);
 
-            bool isUnderwater(const MWWorld::Ptr &object, const float hightRatio) const;
+            bool isUnderwater(const MWWorld::Ptr &object, const float heightRatio) const;
             ///< helper function for implementing isSwimming(), isSubmerged(), isWading()
 
             bool mTeleportEnabled;
