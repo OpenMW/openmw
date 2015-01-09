@@ -140,8 +140,8 @@ namespace MWWorld
         virtual void clearDynamic()
         {
             // remove the dynamic part of mShared
-            if (mShared.size() > mStatic.size())
-                mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
+            assert(mShared.size() >= mStatic.size());
+            mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
             mDynamic.clear();
         }
 
@@ -304,8 +304,8 @@ namespace MWWorld
             mDynamic.erase(it);
 
             // have to reinit the whole shared part
-            if (mShared.size() > mStatic.size())
-                mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
+            assert(mShared.size() >= mStatic.size());
+            mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
             for (it = mDynamic.begin(); it != mDynamic.end(); ++it) {
                 mShared.push_back(&it->second);
             }
