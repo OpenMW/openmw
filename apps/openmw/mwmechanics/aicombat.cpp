@@ -209,7 +209,7 @@ namespace MWMechanics
         if (!actorClass.isNpc() &&
             // 1. pure water creature and Player moved out of water
             ((target == world->getPlayerPtr() &&
-            actorClass.canSwim(actor) && !actor.getClass().canWalk(actor) && !world->isSwimming(target))
+            actorClass.isPureWaterCreature(actor) && !world->isWading(target))
             // 2. creature can't swim to target
             || (!actorClass.canSwim(actor) && world->isSwimming(target))))
         {

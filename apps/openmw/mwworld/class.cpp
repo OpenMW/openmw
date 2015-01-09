@@ -383,6 +383,16 @@ namespace MWWorld
         return false;
     }
 
+    bool Class::isPureWaterCreature(const MWWorld::Ptr& ptr) const
+    {
+        return canSwim(ptr) && !canWalk(ptr);
+    }
+
+    bool Class::isMobile(const MWWorld::Ptr& ptr) const
+    {
+        return canSwim(ptr) || canWalk(ptr) || canFly(ptr);
+    }
+
     int Class::getSkill(const MWWorld::Ptr& ptr, int skill) const
     {
         throw std::runtime_error("class does not support skills");

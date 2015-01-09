@@ -139,6 +139,9 @@ namespace MWWorld
             void loadContentFiles(const Files::Collections& fileCollections,
                 const std::vector<std::string>& content, ContentLoader& contentLoader);
 
+            bool isUnderwater(const MWWorld::Ptr &object, const float hightRatio) const;
+            ///< helper function for implementing isSwimming(), isSubmerged(), isWading()
+
             bool mTeleportEnabled;
             bool mLevitationEnabled;
             bool mGoToJail;
@@ -454,6 +457,7 @@ namespace MWWorld
             virtual bool isSubmerged(const MWWorld::Ptr &object) const;
             virtual bool isSwimming(const MWWorld::Ptr &object) const;
             virtual bool isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const;
+            virtual bool isWading(const MWWorld::Ptr &object) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
 
             virtual void togglePOV() {
