@@ -134,6 +134,8 @@ namespace Launcher
             }
 
         };
+
+        QStringList filesInProfile(const QString& profileName, PathIterator& pathIterator);
     };
 }
 #endif

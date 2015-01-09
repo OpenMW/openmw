@@ -94,20 +94,28 @@ bool Launcher::DataFilesPage::loadSettings()
     if (!currentProfile.isEmpty())
         addProfile(currentProfile, true);
 
-    QStringList files = mLauncherSettings.values(QString("Profiles/") + currentProfile + QString("/content"), Qt::MatchExactly);
+    mSelector->setProfileContent(filesInProfile(currentProfile, pathIterator));
+
+    return true;
+}
+
+QStringList Launcher::DataFilesPage::filesInProfile(const QString& profileName, PathIterator& pathIterator)
+{
+    QStringList files = mLauncherSettings.values(QString("Profiles/") + profileName + QString("/content"), Qt::MatchExactly);
     QStringList filepaths;
 
-    foreach (const QString &file, files)
+    // mLauncherSettings.values() returns the files in reverse load order
+    QListIterator<QString> i(files);
+    i.toBack();
+    while (i.hasPrevious())
     {
-        QString filepath = pathIterator.findFirstPath (file);
+        QString filepath = pathIterator.findFirstPath(i.previous());
 
         if (!filepath.isEmpty())
             filepaths << filepath;
     }
 
-    mSelector->setProfileContent (filepaths);
-
-    return true;
+    return filepaths;
 }
 
 void Launcher::DataFilesPage::saveSettings(const QString &profile)

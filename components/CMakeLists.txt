@@ -133,6 +133,7 @@ if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
     add_component_qt_dir (contentselector
         model/modelitem model/esmfile
         model/naturalsort model/contentmodel
+		model/loadordererror
         view/combobox view/contentselector
         )
     add_component_qt_dir (config
