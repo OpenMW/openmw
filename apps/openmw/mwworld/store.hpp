@@ -217,9 +217,6 @@ namespace MWWorld
         }
 
         void setUp() {
-            // remove the dynamic part of mShared
-            if (mShared.size() > mStatic.size())
-                mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
         }
 
         iterator begin() const {
