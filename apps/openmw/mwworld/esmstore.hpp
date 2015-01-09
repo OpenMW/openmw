@@ -99,9 +99,6 @@ namespace MWWorld
         ESMStore()
           : mDynamicCount(0)
         {
-            // Cell store needs access to this for tracking moved references
-            mCells.mEsmStore = this;
-
             mStores[ESM::REC_ACTI] = &mActivators;
             mStores[ESM::REC_ALCH] = &mPotions;
             mStores[ESM::REC_APPA] = &mAppas;

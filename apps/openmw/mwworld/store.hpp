@@ -582,13 +582,7 @@ namespace MWWorld
         void handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell);
 
     public:
-        ESMStore *mEsmStore;
-
         typedef SharedIterator<ESM::Cell> iterator;
-
-        Store<ESM::Cell>()
-        : mEsmStore(NULL)
-        {}
 
         const ESM::Cell *search(const std::string &id) const {
             ESM::Cell cell;
