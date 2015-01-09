@@ -24,9 +24,19 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
     while (ESM::Cell::getNextRef (reader, ref, deleted))
     {
         ref.mOriginalCell = cell2.mId;
-        ref.mCell = cell2.mId;
 
-        /// \todo handle moved references
+        if (cell.get().isExterior())
+        {
+            // ignoring moved references sub-record; instead calculate cell from coordinates
+            std::pair<int, int> index = ref.getCellIndex();
+
+            std::ostringstream stream;
+            stream << "#" << index.first << " " << index.second;
+
+            ref.mCell = stream.str();
+        }
+        else
+            ref.mCell = cell2.mId;
 
         std::map<ESM::RefNum, std::string>::iterator iter = cache.find (ref.mRefNum);
 
