@@ -348,9 +348,9 @@ namespace MWClass
 
         // Self defense
         bool setOnPcHitMe = true; // Note OnPcHitMe is not set for friendly hits.
-        if ((canWalk(ptr) || canFly(ptr) || canSwim(ptr)) // No retaliation for totally static creatures
-                                                              // (they have no movement or attacks anyway)
-            && !attacker.isEmpty())
+        
+        // No retaliation for totally static creatures (they have no movement or attacks anyway)
+        if (isMobile(ptr) && !attacker.isEmpty())
         {
             setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }

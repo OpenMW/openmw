@@ -1978,25 +1978,36 @@ namespace MWWorld
 
     bool World::isSubmerged(const MWWorld::Ptr &object) const
     {
-        const float *fpos = object.getRefData().getPosition().pos;
-        Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
-
-        const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
-        if(actor) pos.z += 1.85*actor->getHalfExtents().z;
-
-        return isUnderwater(object.getCell(), pos);
+        const float neckDeep = 1.85f;
+        return isUnderwater(object, neckDeep);
     }
 
     bool
     World::isSwimming(const MWWorld::Ptr &object) const
     {
         /// \todo add check ifActor() - only actors can swim
+        /// \fixme 3/4ths submerged?
+        return isUnderwater(object, 1.5f);
+    }
+
+    bool
+    World::isWading(const MWWorld::Ptr &object) const
+    {
+        const float kneeDeep = 0.5f;
+        return isUnderwater(object, kneeDeep);
+    }
+
+    bool
+    World::isUnderwater(const MWWorld::Ptr &object, const float heightRatio) const
+    {
         const float *fpos = object.getRefData().getPosition().pos;
         Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
-        /// \fixme 3/4ths submerged?
         const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
-        if(actor) pos.z += actor->getHalfExtents().z * 1.5;
+        if (actor)
+        {
+            pos.z += heightRatio*actor->getHalfExtents().z;
+        }
 
         return isUnderwater(object.getCell(), pos);
     }

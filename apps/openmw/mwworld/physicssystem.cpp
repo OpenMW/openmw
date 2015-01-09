@@ -281,7 +281,7 @@ namespace MWWorld
 
             // Early-out for totally static creatures
             // (Not sure if gravity should still apply?)
-            if (!ptr.getClass().canWalk(ptr) && !ptr.getClass().canFly(ptr) && !ptr.getClass().canSwim(ptr))
+            if (!ptr.getClass().isMobile(ptr))
                 return position;
 
             OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
@@ -434,7 +434,7 @@ namespace MWWorld
                 if(result)
                 {
                     // don't let pure water creatures move out of water after stepMove
-                    if((ptr.getClass().canSwim(ptr) && !ptr.getClass().canWalk(ptr)) 
+                    if (ptr.getClass().isPureWaterCreature(ptr)
                             && newPosition.z > (waterlevel - halfExtents.z * 0.5))
                         newPosition = oldPosition;
                 }
