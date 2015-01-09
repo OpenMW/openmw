@@ -66,18 +66,19 @@ public:
         return false;
     }
 
-    bool search (Point beg, Point end, Match & match, Point start)
+    void highlightKeywords (Point beg, Point end, std::vector<Match>& out)
     {
         for (Point i = beg; i != end; ++i)
         {
             // check if previous character marked start of new word
-            if (i != start)
+            if (i != beg)
             {
                 Point prev = i;
-                --prev; 
+                --prev;
                 if(isalpha(*prev))
                     continue;
             }
+
 
             // check first character
             typename Entry::childen_t::iterator candidate = mRoot.mChildren.find (std::tolower (*i, mLocale));
@@ -137,16 +138,48 @@ public:
                 if (t != candidate->second.mKeyword.end ())
                     continue;
 
-                // we did it, report the good news
+                // found a keyword, but there might still be longer keywords that start somewhere _within_ this keyword
+                // we will resolve these overlapping keywords later, choosing the longest one in case of conflict
+                Match match;
                 match.mValue = candidate->second.mValue;
                 match.mBeg = i;
                 match.mEnd = k;
-                return true;
+                out.push_back(match);
+                break;
             }
         }
 
-        // no match in range, report the bad news
-        return false;
+        // resolve overlapping keywords
+        for (typename std::vector<Match>::iterator it = out.begin(); it != out.end();)
+        {
+            typename std::vector<Match>::iterator next = it;
+            ++next;
+
+            if (next == out.end())
+                break;
+
+            if (it->mEnd <= next->mBeg)
+            {
+                ++it;
+                continue; // no overlap
+            }
+            else
+            {
+                // prefer the longer keyword
+                int size = it->mEnd - it->mBeg;
+                int nextSize = next->mEnd - next->mBeg;
+                if (size >= nextSize) // if both are the same length, then prefer the first keyword
+                {
+                    out.erase(next);
+                    continue;
+                }
+                else
+                {
+                    it = out.erase(it);
+                    continue;
+                }
+            }
+        }
     }
 
 private:
