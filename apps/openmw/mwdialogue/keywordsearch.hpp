@@ -66,8 +66,14 @@ public:
         return false;
     }
 
+    static bool sortMatches(const Match& left, const Match& right)
+    {
+        return left.mBeg < right.mBeg;
+    }
+
     void highlightKeywords (Point beg, Point end, std::vector<Match>& out)
     {
+        std::vector<Match> matches;
         for (Point i = beg; i != end; ++i)
         {
             // check if previous character marked start of new word
@@ -144,42 +150,51 @@ public:
                 match.mValue = candidate->second.mValue;
                 match.mBeg = i;
                 match.mEnd = k;
-                out.push_back(match);
+                matches.push_back(match);
                 break;
             }
         }
 
         // resolve overlapping keywords
-        for (typename std::vector<Match>::iterator it = out.begin(); it != out.end();)
+        while (matches.size())
         {
-            typename std::vector<Match>::iterator next = it;
-            ++next;
-
-            if (next == out.end())
-                break;
-
-            if (it->mEnd <= next->mBeg)
+            int longestKeywordSize = 0;
+            typename std::vector<Match>::iterator longestKeyword;
+            for (typename std::vector<Match>::iterator it = matches.begin(); it != matches.end(); ++it)
             {
-                ++it;
-                continue; // no overlap
-            }
-            else
-            {
-                // prefer the longer keyword
                 int size = it->mEnd - it->mBeg;
-                int nextSize = next->mEnd - next->mBeg;
-                if (size >= nextSize) // if both are the same length, then prefer the first keyword
+                if (size > longestKeywordSize)
                 {
-                    out.erase(next);
-                    continue;
+                    longestKeywordSize = size;
+                    longestKeyword = it;
                 }
+
+                typename std::vector<Match>::iterator next = it;
+                ++next;
+
+                if (next == matches.end())
+                    break;
+
+                if (it->mEnd <= next->mBeg)
+                {
+                    break; // no overlap
+                }
+            }
+
+            Match keyword = *longestKeyword;
+            matches.erase(longestKeyword);
+            out.push_back(keyword);
+            // erase anything that overlaps with the keyword we just added to the output
+            for (typename std::vector<Match>::iterator it = matches.begin(); it != matches.end();)
+            {
+                if (it->mBeg < keyword.mEnd && it->mEnd > keyword.mBeg)
+                    it = matches.erase(it);
                 else
-                {
-                    it = out.erase(it);
-                    continue;
-                }
+                    ++it;
             }
         }
+
+        std::sort(out.begin(), out.end(), sortMatches);
     }
 
 private:
