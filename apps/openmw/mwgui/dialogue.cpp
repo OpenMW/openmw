@@ -177,11 +177,13 @@ namespace MWGui
         }
         else
         {
-            std::string::const_iterator i = text.begin ();
-            KeywordSearchT::Match match;
+            std::vector<KeywordSearchT::Match> matches;
+            keywordSearch->highlightKeywords(text.begin(), text.end(), matches);
 
-            while (i != text.end () && keywordSearch->search (i, text.end (), match, text.begin ()))
+            std::string::const_iterator i = text.begin ();
+            for (std::vector<KeywordSearchT::Match>::iterator it = matches.begin(); it != matches.end(); ++it)
             {
+                KeywordSearchT::Match match = *it;
                 if (i != match.mBeg)
                     addTopicLink (typesetter, 0, i - text.begin (), match.mBeg - text.begin ());
 
@@ -189,7 +191,6 @@ namespace MWGui
 
                 i = match.mEnd;
             }
-
             if (i != text.end ())
                 addTopicLink (typesetter, 0, i - text.begin (), text.size ());
         }

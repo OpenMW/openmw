@@ -30,7 +30,7 @@ namespace MWWorld
 
         virtual void write (ESM::ESMWriter& writer) const {}
 
-        virtual void read (ESM::ESMReader& reader) {}
+        virtual void read (ESM::ESMReader& reader, const std::string& id) {}
         ///< Read into dynamic storage
     };
 
@@ -140,6 +140,7 @@ namespace MWWorld
         virtual void clearDynamic()
         {
             // remove the dynamic part of mShared
+            assert(mShared.size() >= mStatic.size());
             mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
             mDynamic.clear();
         }
@@ -216,8 +217,6 @@ namespace MWWorld
         }
 
         void setUp() {
-            // remove the dynamic part of mShared
-            mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
         }
 
         iterator begin() const {
@@ -305,6 +304,7 @@ namespace MWWorld
             mDynamic.erase(it);
 
             // have to reinit the whole shared part
+            assert(mShared.size() >= mStatic.size());
             mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
             for (it = mDynamic.begin(); it != mDynamic.end(); ++it) {
                 mShared.push_back(&it->second);
@@ -329,28 +329,14 @@ namespace MWWorld
             }
         }
 
-        void read (ESM::ESMReader& reader)
+        void read (ESM::ESMReader& reader, const std::string& id)
         {
             T record;
-            record.mId = reader.getHNString ("NAME");
+            record.mId = id;
             record.load (reader);
             insert (record);
         }
     };
-
-    template <>
-    inline void Store<ESM::NPC>::clearDynamic()
-    {
-        std::map<std::string, ESM::NPC>::iterator iter = mDynamic.begin();
-
-        while (iter!=mDynamic.end())
-            if (iter->first=="player")
-                ++iter;
-            else
-                mDynamic.erase (iter++);
-
-        mShared.clear();
-    }
 
     template <>
     inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
@@ -593,13 +579,7 @@ namespace MWWorld
         void handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell);
 
     public:
-        ESMStore *mEsmStore;
-
         typedef SharedIterator<ESM::Cell> iterator;
-
-        Store<ESM::Cell>()
-        : mEsmStore(NULL)
-        {}
 
         const ESM::Cell *search(const std::string &id) const {
             ESM::Cell cell;

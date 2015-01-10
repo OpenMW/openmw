@@ -1455,6 +1455,8 @@ namespace MWGui
     void WindowManager::showSoulgemDialog(MWWorld::Ptr item)
     {
         mSoulgemDialog->show(item);
+        MWBase::Environment::get().getInputManager()->changeInputMode(isGuiMode());
+        updateVisible();
     }
 
     void WindowManager::frameStarted (float dt)

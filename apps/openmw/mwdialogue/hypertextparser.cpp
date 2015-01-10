@@ -56,13 +56,17 @@ namespace MWDialogue
             keywordList.sort(Misc::StringUtils::ciLess);
 
             KeywordSearch<std::string, int /*unused*/> keywordSearch;
-            KeywordSearch<std::string, int /*unused*/>::Match match;
 
             for (std::list<std::string>::const_iterator it = keywordList.begin(); it != keywordList.end(); ++it)
                 keywordSearch.seed(*it, 0 /*unused*/);
 
-            for (std::string::const_iterator it = text.begin(); it != text.end() && keywordSearch.search(it, text.end(), match, text.begin()); it = match.mEnd)
-                tokens.push_back(Token(std::string(match.mBeg, match.mEnd), Token::ImplicitKeyword));
+            std::vector<KeywordSearch<std::string, int /*unused*/>::Match> matches;
+            keywordSearch.highlightKeywords(text.begin(), text.end(), matches);
+
+            for (std::vector<KeywordSearch<std::string, int /*unused*/>::Match>::const_iterator it = matches.begin(); it != matches.end(); ++it)
+            {
+                tokens.push_back(Token(std::string(it->mBeg, it->mEnd), Token::ImplicitKeyword));
+            }
         }
 
         size_t removePseudoAsterisks(std::string & phrase)

@@ -37,7 +37,7 @@ struct Light
         int mValue;
         int mTime; // Duration
         int mRadius;
-        int mColor; // 4-byte rgba value
+        unsigned int mColor; // 4-byte rgba value
         int mFlags;
     }; // Size = 24 bytes
 

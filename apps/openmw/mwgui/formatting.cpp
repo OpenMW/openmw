@@ -340,7 +340,7 @@ namespace MWGui
         {
             if (attr.find("color") != attr.end())
             {
-                int color;
+                unsigned int color;
                 std::stringstream ss;
                 ss << attr.at("color");
                 ss >> std::hex >> color;

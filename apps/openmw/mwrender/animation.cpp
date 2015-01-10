@@ -336,7 +336,7 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScene
 {
     const MWWorld::Fallback *fallback = MWBase::Environment::get().getWorld()->getFallback();
 
-    const int clr = light->mData.mColor;
+    const unsigned int clr = light->mData.mColor;
     Ogre::ColourValue color(((clr >> 0) & 0xFF) / 255.0f,
                             ((clr >> 8) & 0xFF) / 255.0f,
                             ((clr >> 16) & 0xFF) / 255.0f);

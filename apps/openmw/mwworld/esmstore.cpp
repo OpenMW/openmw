@@ -192,7 +192,15 @@ void ESMStore::setUp()
             case ESM::REC_LEVI:
             case ESM::REC_LEVC:
 
-                mStores[type]->read (reader);
+                {
+                    std::string id = reader.getHNString ("NAME");
+                    mStores[type]->read (reader, id);
+
+                    // FIXME: there might be stale dynamic IDs in mIds from an earlier savegame
+                    // that really should be cleared instead of just overwritten
+
+                    mIds[id] = type;
+                }
 
                 if (type==ESM::REC_NPC_)
                 {
