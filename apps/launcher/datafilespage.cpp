@@ -302,7 +302,7 @@ bool Launcher::DataFilesPage::showDeleteMessageBox (const QString &text)
     msgBox.setWindowTitle(tr("Delete Content List"));
     msgBox.setIcon(QMessageBox::Warning);
     msgBox.setStandardButtons(QMessageBox::Cancel);
-    msgBox.setText(tr("Are you sure you want to delete <b>%0</b>?").arg(text));
+    msgBox.setText(tr("Are you sure you want to delete <b>%1</b>?").arg(text));
 
     QAbstractButton *deleteButton =
     msgBox.addButton(tr("Delete"), QMessageBox::ActionRole);
