@@ -9,12 +9,12 @@ OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
 * Version: 0.34.0
-* License: GPL (see GPL3.txt for more information)
+* License: GPL (see docs/license/GPL3.txt for more information)
 * Website: http://www.openmw.org
 * IRC: #openmw on irc.freenode.net
 
 Font Licenses:
-* DejaVuLGCSansMono.ttf: custom (see DejaVu Font License.txt for more information)
+* DejaVuLGCSansMono.ttf: custom (see docs/license/DejaVu Font License.txt for more information)
 
 Installation
 ============
