@@ -1,6 +1,8 @@
 OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 ==============================================================
 
+[![Build Status](https://travis-ci.org/OpenMW/openmw.svg?branch=coverity_scan)](https://travis-ci.org/OpenMW/openmw)
+
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
