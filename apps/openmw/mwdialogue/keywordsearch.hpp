@@ -28,6 +28,8 @@ public:
 
     void seed (string_t keyword, value_t value)
     {
+        if (keyword.empty())
+            return;
         seed_impl  (/*std::move*/ (keyword), /*std::move*/ (value), 0, mRoot);
     }
 
