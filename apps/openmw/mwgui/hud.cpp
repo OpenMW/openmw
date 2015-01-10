@@ -19,7 +19,7 @@
 #include "console.hpp"
 #include "spellicons.hpp"
 #include "itemmodel.hpp"
-#include "container.hpp"
+#include "draganddrop.hpp"
 
 #include "itemmodel.hpp"
 #include "itemwidget.hpp"

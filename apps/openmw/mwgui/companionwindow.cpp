@@ -13,7 +13,7 @@
 #include "itemview.hpp"
 #include "sortfilteritemmodel.hpp"
 #include "companionitemmodel.hpp"
-#include "container.hpp"
+#include "draganddrop.hpp"
 #include "countdialog.hpp"
 
 namespace MWGui

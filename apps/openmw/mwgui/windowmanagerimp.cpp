@@ -74,6 +74,8 @@
 #include "screenfader.hpp"
 #include "debugwindow.hpp"
 #include "spellview.hpp"
+#include "draganddrop.hpp"
+#include "container.hpp"
 
 namespace MWGui
 {

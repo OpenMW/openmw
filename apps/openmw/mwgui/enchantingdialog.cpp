@@ -15,7 +15,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "itemselection.hpp"
-#include "container.hpp"
 #include "itemwidget.hpp"
 
 #include "sortfilteritemmodel.hpp"

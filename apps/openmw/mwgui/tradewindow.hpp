@@ -1,7 +1,8 @@
 #ifndef MWGUI_TRADEWINDOW_H
 #define MWGUI_TRADEWINDOW_H
 
-#include "container.hpp"
+#include "referenceinterface.hpp"
+#include "windowbase.hpp"
 
 namespace Gui
 {

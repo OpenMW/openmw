@@ -25,7 +25,7 @@
 #include "tradeitemmodel.hpp"
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
-#include "container.hpp"
+#include "draganddrop.hpp"
 
 namespace
 {
