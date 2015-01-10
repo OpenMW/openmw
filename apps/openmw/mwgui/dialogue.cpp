@@ -1,7 +1,6 @@
 #include "dialogue.hpp"
 
 #include <boost/bind.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_Window.h>
@@ -100,7 +99,7 @@ namespace MWGui
         mBribe100Button->setEnabled (playerGold >= 100);
         mBribe1000Button->setEnabled (playerGold >= 1000);
 
-        mGoldLabel->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(playerGold));
+        mGoldLabel->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
     }
 
     void PersuasionDialog::exit()
@@ -630,7 +629,7 @@ namespace MWGui
             dispositionVisible = true;
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr));
-            mDispositionText->setCaption(boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100"));
+            mDispositionText->setCaption(MyGUI::utility::toString(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100"));
         }
 
         bool dispositionWasVisible = mDispositionBar->getVisible();
@@ -672,7 +671,7 @@ namespace MWGui
                     + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()));
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(disp);
-            mDispositionText->setCaption(boost::lexical_cast<std::string>(disp)+std::string("/100"));
+            mDispositionText->setCaption(MyGUI::utility::toString(disp)+std::string("/100"));
         }
     }
 }

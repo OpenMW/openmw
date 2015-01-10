@@ -3,8 +3,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include <boost/lexical_cast.hpp>
-
 #include <MyGUI_ImageBox.h>
 
 #include <components/esm/loadmgef.hpp>
@@ -117,7 +115,7 @@ namespace MWGui
                 }
                 else if ( displayType != ESM::MagicEffect::MDT_None )
                 {
-                    sourcesDescription += ": " + boost::lexical_cast<std::string>(effectIt->mMagnitude);
+                    sourcesDescription += ": " + MyGUI::utility::toString(effectIt->mMagnitude);
 
                     if ( displayType == ESM::MagicEffect::MDT_Percentage )
                         sourcesDescription += MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", "");

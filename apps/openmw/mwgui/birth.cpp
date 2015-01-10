@@ -4,8 +4,6 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
 
-#include <boost/lexical_cast.hpp>
-
 #include <components/esm/records.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
@@ -234,7 +232,7 @@ namespace MWGui
                 for (std::vector<std::string>::const_iterator it = categories[category].spells.begin(); it != end; ++it)
                 {
                     const std::string &spellId = *it;
-                    spellWidget = mSpellArea->createWidget<Widgets::MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("Spell") + boost::lexical_cast<std::string>(i));
+                    spellWidget = mSpellArea->createWidget<Widgets::MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("Spell") + MyGUI::utility::toString(i));
                     spellWidget->setSpellId(spellId);
 
                     mSpellItems.push_back(spellWidget);

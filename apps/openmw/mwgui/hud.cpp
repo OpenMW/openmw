@@ -1,7 +1,5 @@
 #include "hud.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 #include <OgreMath.h>
 
 #include <MyGUI_RenderManager.h>
@@ -214,17 +212,17 @@ namespace MWGui
     void HUD::setFPS(float fps)
     {
         if (mFpsCounter)
-            mFpsCounter->setCaption(boost::lexical_cast<std::string>((int)fps));
+            mFpsCounter->setCaption(MyGUI::utility::toString((int)fps));
     }
 
     void HUD::setTriangleCount(unsigned int count)
     {
-        mTriangleCounter->setCaption(boost::lexical_cast<std::string>(count));
+        mTriangleCounter->setCaption(MyGUI::utility::toString(count));
     }
 
     void HUD::setBatchCount(unsigned int count)
     {
-        mBatchCounter->setCaption(boost::lexical_cast<std::string>(count));
+        mBatchCounter->setCaption(MyGUI::utility::toString(count));
     }
 
     void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
@@ -233,7 +231,7 @@ namespace MWGui
         int modified = static_cast<int>(value.getModified());
 
         MyGUI::Widget* w;
-        std::string valStr = boost::lexical_cast<std::string>(current) + "/" + boost::lexical_cast<std::string>(modified);
+        std::string valStr = MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(modified);
         if (id == "HBar")
         {
             mHealth->setProgressRange(modified);

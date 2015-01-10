@@ -1,7 +1,5 @@
 #include "container.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 #include <MyGUI_InputManager.h>
 #include <MyGUI_Button.h>
 

@@ -105,15 +105,15 @@ namespace MWGui
     {
         std::stringstream enchantCost;
         enchantCost << std::setprecision(1) << std::fixed << mEnchanting.getEnchantPoints();
-        mEnchantmentPoints->setCaption(enchantCost.str() + " / " + boost::lexical_cast<std::string>(mEnchanting.getMaxEnchantValue()));
+        mEnchantmentPoints->setCaption(enchantCost.str() + " / " + MyGUI::utility::toString(mEnchanting.getMaxEnchantValue()));
 
-        mCharge->setCaption(boost::lexical_cast<std::string>(mEnchanting.getGemCharge()));
+        mCharge->setCaption(MyGUI::utility::toString(mEnchanting.getGemCharge()));
 
         std::stringstream castCost;
         castCost << mEnchanting.getEffectiveCastCost();
         mCastCost->setCaption(castCost.str());
 
-        mPrice->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantPrice()));
+        mPrice->setCaption(MyGUI::utility::toString(mEnchanting.getEnchantPrice()));
 
         switch(mEnchanting.getCastStyle())
         {

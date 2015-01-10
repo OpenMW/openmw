@@ -10,7 +10,6 @@
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <components/widgets/imagebutton.hpp>
 #include <components/widgets/list.hpp>
@@ -74,7 +73,7 @@ namespace
         void setText (char const * name, value_type const & value)
         {
             getWidget <MyGUI::TextBox> (name) ->
-                setCaption (boost::lexical_cast <std::string> (value));
+                setCaption (MyGUI::utility::toString (value));
         }
 
         void setVisible (char const * name, bool visible)

@@ -2,8 +2,6 @@
 
 #include <iomanip>
 
-#include <boost/lexical_cast.hpp>
-
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 
@@ -68,7 +66,7 @@ void Repair::updateRepairView()
     std::stringstream qualityStr;
     qualityStr << std::setprecision(3) << quality;
 
-    mUsesLabel->setCaptionWithReplacing("#{sUses} " + boost::lexical_cast<std::string>(uses));
+    mUsesLabel->setCaptionWithReplacing("#{sUses} " + MyGUI::utility::toString(uses));
     mQualityLabel->setCaptionWithReplacing("#{sQuality} " + qualityStr.str());
 
     bool toolBoxVisible = (mRepair.getTool().getRefData().getCount() != 0);

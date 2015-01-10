@@ -1,7 +1,5 @@
 #include "spellcreationdialog.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
 
@@ -269,7 +267,7 @@ namespace MWGui
 
     void EditEffectDialog::onMagnitudeMinChanged (MyGUI::ScrollBar* sender, size_t pos)
     {
-        mMagnitudeMinValue->setCaption(boost::lexical_cast<std::string>(pos+1));
+        mMagnitudeMinValue->setCaption(MyGUI::utility::toString(pos+1));
         mEffect.mMagnMin = pos+1;
 
         // trigger the check again (see below)
@@ -289,21 +287,21 @@ namespace MWGui
 
         mEffect.mMagnMax = pos+1;
 
-        mMagnitudeMaxValue->setCaption("- " + boost::lexical_cast<std::string>(pos+1));
+        mMagnitudeMaxValue->setCaption("- " + MyGUI::utility::toString(pos+1));
 
         eventEffectModified(mEffect);
     }
 
     void EditEffectDialog::onDurationChanged (MyGUI::ScrollBar* sender, size_t pos)
     {
-        mDurationValue->setCaption(boost::lexical_cast<std::string>(pos+1));
+        mDurationValue->setCaption(MyGUI::utility::toString(pos+1));
         mEffect.mDuration = pos+1;
         eventEffectModified(mEffect);
     }
 
     void EditEffectDialog::onAreaChanged (MyGUI::ScrollBar* sender, size_t pos)
     {
-        mAreaValue->setCaption(boost::lexical_cast<std::string>(pos));
+        mAreaValue->setCaption(MyGUI::utility::toString(pos));
         mEffect.mArea = pos;
         eventEffectModified(mEffect);
     }
@@ -365,7 +363,7 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-        if (boost::lexical_cast<int>(mPriceLabel->getCaption()) > playerGold)
+        if (MyGUI::utility::parseInt(mPriceLabel->getCaption()) > playerGold)
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;
@@ -373,7 +371,7 @@ namespace MWGui
 
         mSpell.mName = mNameEdit->getCaption();
 
-        int price = boost::lexical_cast<int>(mPriceLabel->getCaption());
+        int price = MyGUI::utility::parseInt(mPriceLabel->getCaption());
 
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
@@ -451,17 +449,17 @@ namespace MWGui
         mSpell.mData.mType = ESM::Spell::ST_Spell;
         mSpell.mData.mFlags = 0;
 
-        mMagickaCost->setCaption(boost::lexical_cast<std::string>(int(y)));
+        mMagickaCost->setCaption(MyGUI::utility::toString(int(y)));
 
         float fSpellMakingValueMult =
             store.get<ESM::GameSetting>().find("fSpellMakingValueMult")->getFloat();
 
         int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,int(y) * fSpellMakingValueMult,true);
 
-        mPriceLabel->setCaption(boost::lexical_cast<std::string>(int(price)));
+        mPriceLabel->setCaption(MyGUI::utility::toString(int(price)));
 
         float chance = MWMechanics::getSpellSuccessChance(&mSpell, MWBase::Environment::get().getWorld()->getPlayerPtr());
-        mSuccessChance->setCaption(boost::lexical_cast<std::string>(int(chance)));
+        mSuccessChance->setCaption(MyGUI::utility::toString(int(chance)));
     }
 
     // ------------------------------------------------------------------------------------------------

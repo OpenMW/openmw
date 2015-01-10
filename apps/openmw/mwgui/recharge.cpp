@@ -1,6 +1,5 @@
 #include "recharge.hpp"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
 #include <MyGUI_ScrollView.h>
@@ -66,7 +65,7 @@ void Recharge::updateView()
     std::string soul = gem.getCellRef().getSoul();
     const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(soul);
 
-    mChargeLabel->setCaptionWithReplacing("#{sCharges} " + boost::lexical_cast<std::string>(creature->mData.mSoul));
+    mChargeLabel->setCaptionWithReplacing("#{sCharges} " + MyGUI::utility::toString(creature->mData.mSoul));
 
     bool toolBoxVisible = (gem.getRefData().getCount() != 0);
     mGemBox->setVisible(toolBoxVisible);
