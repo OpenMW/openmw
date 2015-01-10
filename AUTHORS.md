@@ -1,4 +1,5 @@
 Contributors
+============
 
 The OpenMW project was started in 2008 by Nicolay Korslund.
 In the course of years many people have contributed to the project.
@@ -7,7 +8,9 @@ If you feel your name is missing from this list,
 please notify a developer.
 
 
-Programmers:
+Programmers
+-----------
+
 Marc Zinnschlag (Zini) - Lead Programmer/Project Manager
 
 Adam Hogan (aurix)
@@ -103,7 +106,8 @@ viadanna
 Vincent Heuken
 vocollapse
 
-Packagers:
+Packagers
+---------
 Alexander Olofsson (Ace) - Windows
 Bret Curtis (psi29a) - Ubuntu Linux
 Edmondo Tommasina (edmondo) - Gentoo Linux
@@ -113,7 +117,8 @@ Kenny Armstrong (artorius) - Fedora Linux
 Nikolay Kasyanov (corristo) - Mac OS X
 Sandy Carter (bwrsandman) - Arch Linux
 
-Public Relations and Translations:
+Public Relations and Translations
+---------------------------------
 Alex McKibben (WeirdSexy) - Podcaster
 Artem Kotsynyak (greye) - Russian News Writer
 Jim Clauwaert (Zedd) - Public Outreach
@@ -125,12 +130,14 @@ Pithorn - Chinese News Writer
 sir_herrbatka - Polish News Writer
 Dawid Lakomy (Vedyimyn) - Polish News Writer
 
-Website:
+Website
+-------
 Lukasz Gromanowski (Lgro) - Website Administrator
 Ryan Sardonic (Wry) - Wiki Editor
 sir_herrbatka - Forum Administrator
 
-Formula Research:
+Formula Research
+----------------
 Hrnchamd
 Epsilon
 fragonard
@@ -141,12 +148,14 @@ Myckel
 natirips
 Sadler
 
-Artwork:
+Artwork
+-------
 Necrod - OpenMW Logo
 Mickey Lyle (raevol) - Wordpress Theme
 Tom Koenderink (Okulo), SirHerrbatka, crysthala, Shnatsel - OpenMW Editor Icons
 
-Inactive Contributors:
+Inactive Contributors
+---------------------
 Ardekantur
 Armin Preiml
 Berulacks
@@ -174,7 +183,8 @@ Thoronador
 Yuri Krupenin
 
 
-Additional Credits:
+Additional Credits
+------------------
 In this section we would like to thank people not part of OpenMW for their work.
 
 Thanks to Maxim Nikolaev,
