@@ -4,6 +4,11 @@
 #include <OgreImage.h>
 #include <OgreTextureManager.h>
 
+#include <MyGUI_ComboBox.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_ListBox.h>
+#include <MyGUI_InputManager.h>
+
 #include <components/misc/stringops.hpp>
 
 #include <components/settings/settings.hpp>

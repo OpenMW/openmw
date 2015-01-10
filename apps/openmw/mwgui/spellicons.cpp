@@ -1,9 +1,11 @@
 #include "spellicons.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 #include <sstream>
 #include <iomanip>
+
+#include <boost/lexical_cast.hpp>
+
+#include <MyGUI_ImageBox.h>
 
 #include <components/esm/loadmgef.hpp>
 #include <components/misc/resourcehelpers.hpp>

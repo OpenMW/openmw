@@ -2,6 +2,9 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_Gui.h>
+
 #include <components/misc/resourcehelpers.hpp>
 #include <components/esm/records.hpp>
 

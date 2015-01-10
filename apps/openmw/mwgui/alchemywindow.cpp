@@ -2,6 +2,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <MyGUI_Gui.h>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"

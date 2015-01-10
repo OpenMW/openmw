@@ -3,6 +3,9 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 
+#include <MyGUI_EditBox.h>
+#include <MyGUI_Button.h>
+
 namespace MWGui
 {
 
@@ -63,5 +66,16 @@ namespace MWGui
     {
         onOkClicked(_sender);
     }
+
+    std::string TextInputDialog::getTextInput() const
+    {
+        return mTextEdit->getCaption();
+    }
+
+    void TextInputDialog::setTextInput(const std::string &text)
+    {
+        mTextEdit->setCaption(text);
+    }
+
 
 }

@@ -1,5 +1,9 @@
 #include "review.hpp"
 
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_Gui.h>
+
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -11,6 +15,16 @@
 
 #undef min
 #undef max
+
+namespace
+{
+    void adjustButtonSize(MyGUI::Button *button)
+    {
+        // adjust size of button to fit its text
+        MyGUI::IntSize size = button->getTextSize();
+        button->setSize(size.width + 24, button->getSize().height);
+    }
+}
 
 namespace MWGui
 {

@@ -4,6 +4,10 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <MyGUI_Button.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_Gui.h>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

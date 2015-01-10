@@ -3,6 +3,10 @@
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <MyGUI_LanguageManager.h>
+#include <MyGUI_Window.h>
+#include <MyGUI_ProgressBar.h>
+
 #include <components/widgets/list.hpp>
 
 #include "../mwbase/environment.hpp"

@@ -3,6 +3,9 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_Gui.h>
+
 #include <components/esm/records.hpp>
 
 #include "../mwbase/world.hpp"

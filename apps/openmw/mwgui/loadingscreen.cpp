@@ -9,6 +9,11 @@
 #include <OgreViewport.h>
 #include <OgreHardwarePixelBuffer.h>
 
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_ScrollBar.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_TextBox.h>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/statemanager.hpp"

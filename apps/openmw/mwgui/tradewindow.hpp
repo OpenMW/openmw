@@ -9,11 +9,10 @@ namespace Gui
     class NumericEditBox;
 }
 
-namespace MWGui
+namespace MyGUI
 {
-    class WindowManager;
+    class ControllerItem;
 }
-
 
 namespace MWGui
 {

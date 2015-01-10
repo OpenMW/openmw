@@ -1,5 +1,7 @@
 #include "scrollwindow.hpp"
 
+#include <MyGUI_ScrollView.h>
+
 #include <components/esm/loadbook.hpp>
 
 #include "../mwbase/environment.hpp"

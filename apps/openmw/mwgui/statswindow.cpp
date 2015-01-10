@@ -1,5 +1,11 @@
 #include "statswindow.hpp"
 
+#include <MyGUI_Window.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_ProgressBar.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_Gui.h>
+
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"

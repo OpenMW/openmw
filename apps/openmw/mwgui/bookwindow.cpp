@@ -1,5 +1,7 @@
 #include "bookwindow.hpp"
 
+#include <MyGUI_TextBox.h>
+
 #include <boost/lexical_cast.hpp>
 
 #include <components/esm/loadbook.hpp>

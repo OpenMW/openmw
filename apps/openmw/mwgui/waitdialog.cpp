@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <MyGUI_ProgressBar.h>
+
 #include <components/widgets/box.hpp>
 
 #include "../mwbase/windowmanager.hpp"

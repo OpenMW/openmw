@@ -1,6 +1,8 @@
 #include "tradewindow.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Button.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_ControllerManager.h>
 
 #include <components/widgets/numericeditbox.hpp>
 
@@ -484,7 +486,7 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-        mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + boost::lexical_cast<std::string>(playerGold));
+        mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + MyGUI::utility::toString(playerGold));
 
         if (mCurrentBalance > 0)
         {
@@ -497,7 +499,7 @@ namespace MWGui
 
         mTotalBalance->setValue(std::abs(mCurrentBalance));
 
-        mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + boost::lexical_cast<std::string>(getMerchantGold()));
+        mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + MyGUI::utility::toString(getMerchantGold()));
     }
 
     void TradeWindow::updateOffer()

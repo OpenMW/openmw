@@ -1,21 +1,24 @@
 #include "journalwindow.hpp"
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/soundmanager.hpp"
-#include "../mwbase/windowmanager.hpp"
-#include "../mwbase/journal.hpp"
-
 #include <sstream>
 #include <set>
 #include <stack>
 #include <string>
 #include <utility>
+
+#include <MyGUI_TextBox.h>
+
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
-#include "boost/lexical_cast.hpp"
+#include <boost/lexical_cast.hpp>
 
 #include <components/widgets/imagebutton.hpp>
 #include <components/widgets/list.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/journal.hpp"
 
 #include "bookpage.hpp"
 #include "windowbase.hpp"

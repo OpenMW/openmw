@@ -2,6 +2,10 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <MyGUI_EditBox.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_Gui.h>
+
 #include <components/esm/quickkeys.hpp>
 #include <components/misc/resourcehelpers.hpp>
 

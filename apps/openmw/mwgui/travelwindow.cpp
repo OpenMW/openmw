@@ -2,6 +2,10 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <MyGUI_Button.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_Gui.h>
+
 #include <OgreVector3.h>
 
 #include "../mwbase/environment.hpp"

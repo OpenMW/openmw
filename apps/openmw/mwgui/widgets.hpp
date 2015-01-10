@@ -2,7 +2,6 @@
 #define MWGUI_WIDGETS_H
 
 #include "../mwmechanics/stat.hpp"
-#include "controllers.hpp"
 
 #include <components/esm/effectlist.hpp>
 #include <components/esm/loadskil.hpp>
@@ -14,6 +13,7 @@
 namespace MyGUI
 {
     class ImageBox;
+    class ControllerItem;
 }
 
 namespace MWBase

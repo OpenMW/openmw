@@ -2,6 +2,15 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <OgreMath.h>
+
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_ProgressBar.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_ScrollView.h>
+
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"

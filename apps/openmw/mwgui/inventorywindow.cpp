@@ -2,6 +2,12 @@
 
 #include <stdexcept>
 
+#include <MyGUI_Window.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_Button.h>
+
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/world.hpp"
@@ -15,6 +21,7 @@
 #include "../mwworld/action.hpp"
 #include "../mwscript/interpretercontext.hpp"
 #include "../mwbase/scriptmanager.hpp"
+#include "../mwrender/characterpreview.hpp"
 
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
@@ -26,6 +33,7 @@
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
 #include "draganddrop.hpp"
+#include "widgets.hpp"
 
 namespace
 {
@@ -666,5 +674,10 @@ namespace MWGui
         }
 
         useItem(model.getItem(cycled).mBase);
+    }
+
+    void InventoryWindow::rebuildAvatar()
+    {
+        mPreview->rebuild();
     }
 }

@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <MyGUI_Gui.h>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

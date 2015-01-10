@@ -1,5 +1,9 @@
 #include "birth.hpp"
 
+#include <MyGUI_ListBox.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_Gui.h>
+
 #include <boost/lexical_cast.hpp>
 
 #include <components/esm/records.hpp>

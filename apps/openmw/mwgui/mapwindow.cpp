@@ -5,6 +5,15 @@
 #include <OgreSceneNode.h>
 #include <OgreVector2.h>
 
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_LanguageManager.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_RotatingSkin.h>
+#include <MyGUI_FactoryManager.h>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -15,7 +24,7 @@
 
 #include "../mwrender/globalmap.hpp"
 
-#include "../components/esm/globalmap.hpp"
+#include <components/esm/globalmap.hpp>
 
 #include "widgets.hpp"
 #include "confirmationdialog.hpp"

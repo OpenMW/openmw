@@ -1,19 +1,23 @@
 #include "formatting.hpp"
 
-#include <components/interpreter/defines.hpp>
-#include <components/misc/resourcehelpers.hpp>
-#include <components/misc/stringops.hpp>
+#include <OgreUTFString.h>
+#include <OgreResourceGroupManager.h>
 
-#include "../mwscript/interpretercontext.hpp"
+#include <MyGUI_EditText.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_FontManager.h>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <OgreUTFString.h>
-#include <OgreResourceGroupManager.h>
+#include <components/interpreter/defines.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/misc/stringops.hpp>
 
-#include <MyGUI_EditText.h>
+#include "../mwscript/interpretercontext.hpp"
 
 namespace MWGui
 {

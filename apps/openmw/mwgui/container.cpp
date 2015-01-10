@@ -2,6 +2,9 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <MyGUI_InputManager.h>
+#include <MyGUI_Button.h>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"

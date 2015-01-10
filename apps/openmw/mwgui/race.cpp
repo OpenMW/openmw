@@ -1,5 +1,10 @@
 #include "race.hpp"
 
+#include <MyGUI_ListBox.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_Gui.h>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 

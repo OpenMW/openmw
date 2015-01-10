@@ -1,5 +1,8 @@
 #include "draganddrop.hpp"
 
+#include <MyGUI_Gui.h>
+#include <MyGUI_ControllerManager.h>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -10,6 +13,7 @@
 #include "inventorywindow.hpp"
 #include "itemwidget.hpp"
 #include "itemview.hpp"
+#include "controllers.hpp"
 
 namespace MWGui
 {
