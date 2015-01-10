@@ -1,19 +1,25 @@
 #include "charactercreation.hpp"
 
+#include <boost/lexical_cast.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
+
+#include "../mwmechanics/npcstats.hpp"
+
+#include "../mwworld/class.hpp"
+#include "../mwworld/fallback.hpp"
+#include "../mwworld/esmstore.hpp"
+
 #include "textinput.hpp"
 #include "race.hpp"
 #include "class.hpp"
 #include "birth.hpp"
 #include "review.hpp"
 #include "inventorywindow.hpp"
-#include <boost/lexical_cast.hpp>
-#include "../mwbase/environment.hpp"
-#include "../mwbase/soundmanager.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
-#include "../mwmechanics/npcstats.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/fallback.hpp"
-#include "../mwworld/esmstore.hpp"
 
 namespace
 {

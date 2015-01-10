@@ -18,6 +18,7 @@
 #include <components/esm/loadweap.hpp>
 
 #include "ptr.hpp"
+#include "cellreflist.hpp"
 
 namespace ESM
 {
