@@ -30,7 +30,7 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
     setObjectName ("DataFilesPage");
     mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget);
 
-    mProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
+    mProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
 
     connect(mProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
             this, SLOT(updateOkButton(QString)));
@@ -44,12 +44,12 @@ void Launcher::DataFilesPage::buildView()
     ui.verticalLayout->insertWidget (0, mSelector->uiWidget());
 
     //tool buttons
-    ui.newProfileButton->setToolTip ("Create a new profile");
-    ui.deleteProfileButton->setToolTip ("Delete an existing profile");
+    ui.newProfileButton->setToolTip ("Create a new Content List");
+    ui.deleteProfileButton->setToolTip ("Delete an existing Content List");
 
     //combo box
     ui.profilesComboBox->addItem ("Default");
-    ui.profilesComboBox->setPlaceholderText (QString("Select a profile..."));
+    ui.profilesComboBox->setPlaceholderText (QString("Select a Content List..."));
     ui.profilesComboBox->setCurrentIndex(ui.profilesComboBox->findText(QLatin1String("Default")));
 
     // Add the actions to the toolbuttons
@@ -306,7 +306,7 @@ void Launcher::DataFilesPage::checkForDefaultProfile()
 bool Launcher::DataFilesPage::showDeleteMessageBox (const QString &text)
 {
     QMessageBox msgBox(this);
-    msgBox.setWindowTitle(tr("Delete Profile"));
+    msgBox.setWindowTitle(tr("Delete Content List"));
     msgBox.setIcon(QMessageBox::Warning);
     msgBox.setStandardButtons(QMessageBox::Cancel);
     msgBox.setText(tr("Are you sure you want to delete <b>%0</b>?").arg(text));

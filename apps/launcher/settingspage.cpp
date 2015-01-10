@@ -51,7 +51,7 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
     connect(mImporterInvoker->getProcess(), SIGNAL(finished(int,QProcess::ExitStatus)),
             this, SLOT(importerFinished(int,QProcess::ExitStatus)));
 
-    mProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
+    mProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
 
     connect(mProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
             this, SLOT(updateOkButton(QString)));
