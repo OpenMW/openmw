@@ -3,8 +3,6 @@
 
 #include "windowbase.hpp"
 
-#include "../mwbase/windowmanager.hpp"
-
 #undef MessageBox
 
 namespace MyGUI

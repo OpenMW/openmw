@@ -1,7 +1,7 @@
 #ifndef MWGUI_FORMATTING_H
 #define MWGUI_FORMATTING_H
 
-#include <MyGUI.h>
+#include <MyGUI_Colour.h>
 #include <map>
 
 namespace MWGui

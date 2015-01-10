@@ -1,5 +1,7 @@
 #include "console.hpp"
 
+#include <MyGUI_EditBox.h>
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 

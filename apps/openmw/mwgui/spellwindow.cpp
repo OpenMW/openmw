@@ -2,6 +2,8 @@
 
 #include <boost/format.hpp>
 
+#include <MyGUI_InputManager.h>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

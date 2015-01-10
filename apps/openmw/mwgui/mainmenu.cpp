@@ -2,6 +2,10 @@
 
 #include <OgreResourceGroupManager.h>
 
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_RenderManager.h>
+
 #include <components/version/version.hpp>
 
 #include <components/widgets/imagebutton.hpp>

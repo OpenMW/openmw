@@ -2,8 +2,6 @@
 
 #include <cmath>
 
-#include <boost/lexical_cast.hpp>
-
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>

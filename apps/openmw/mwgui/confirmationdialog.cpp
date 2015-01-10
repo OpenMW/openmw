@@ -1,5 +1,8 @@
 #include "confirmationdialog.hpp"
 
+#include <MyGUI_Button.h>
+#include <MyGUI_EditBox.h>
+
 namespace MWGui
 {
     ConfirmationDialog::ConfirmationDialog() :

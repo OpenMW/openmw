@@ -2,7 +2,11 @@
 
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Window.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_Button.h>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -15,6 +19,7 @@
 #include "../mwworld/action.hpp"
 #include "../mwscript/interpretercontext.hpp"
 #include "../mwbase/scriptmanager.hpp"
+#include "../mwrender/characterpreview.hpp"
 
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
@@ -25,7 +30,8 @@
 #include "tradeitemmodel.hpp"
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
-#include "container.hpp"
+#include "draganddrop.hpp"
+#include "widgets.hpp"
 
 namespace
 {
@@ -534,9 +540,9 @@ namespace MWGui
         if (mPreviewResize || mPreviewDirty)
         {
             mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
-                + boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
+                + MyGUI::utility::toString(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
             if (mArmorRating->getTextSize().width > mArmorRating->getSize().width)
-                mArmorRating->setCaptionWithReplacing (boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
+                mArmorRating->setCaptionWithReplacing (MyGUI::utility::toString(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
         }
         if (mPreviewResize)
         {
@@ -666,5 +672,10 @@ namespace MWGui
         }
 
         useItem(model.getItem(cycled).mBase);
+    }
+
+    void InventoryWindow::rebuildAvatar()
+    {
+        mPreview->rebuild();
     }
 }

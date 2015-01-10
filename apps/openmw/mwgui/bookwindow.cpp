@@ -1,6 +1,6 @@
 #include "bookwindow.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_TextBox.h>
 
 #include <components/esm/loadbook.hpp>
 
@@ -140,8 +140,8 @@ namespace MWGui
 
     void BookWindow::updatePages()
     {
-        mLeftPageNumber->setCaption( boost::lexical_cast<std::string>(mCurrentPage*2 + 1) );
-        mRightPageNumber->setCaption( boost::lexical_cast<std::string>(mCurrentPage*2 + 2) );
+        mLeftPageNumber->setCaption( MyGUI::utility::toString(mCurrentPage*2 + 1) );
+        mRightPageNumber->setCaption( MyGUI::utility::toString(mCurrentPage*2 + 2) );
 
         //If it is the last page, hide the button "Next Page"
         if (   (mCurrentPage+1)*2 == mPages.size()

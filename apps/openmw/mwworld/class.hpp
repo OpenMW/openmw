@@ -43,7 +43,6 @@ namespace ESM
 
 namespace MWWorld
 {
-    class Ptr;
     class ContainerStore;
     class InventoryStore;
     class PhysicsSystem;

@@ -1,12 +1,17 @@
 #include "race.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_ListBox.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_Gui.h>
+
 #include <boost/format.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwrender/characterpreview.hpp"
 
 #include "tooltips.hpp"
 
@@ -397,7 +402,7 @@ namespace MWGui
                 continue;
 
             skillWidget = mSkillList->createWidget<Widgets::MWSkill>("MW_StatNameValue", coord1, MyGUI::Align::Default,
-                                                           std::string("Skill") + boost::lexical_cast<std::string>(i));
+                                                           std::string("Skill") + MyGUI::utility::toString(i));
             skillWidget->setSkillNumber(skillId);
             skillWidget->setSkillValue(Widgets::MWSkill::SkillValue(race->mData.mBonus[i].mBonus));
             ToolTips::createSkillToolTip(skillWidget, skillId);
@@ -431,7 +436,7 @@ namespace MWGui
         for (int i = 0; it != end; ++it)
         {
             const std::string &spellpower = *it;
-            Widgets::MWSpellPtr spellPowerWidget = mSpellPowerList->createWidget<Widgets::MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + boost::lexical_cast<std::string>(i));
+            Widgets::MWSpellPtr spellPowerWidget = mSpellPowerList->createWidget<Widgets::MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + MyGUI::utility::toString(i));
             spellPowerWidget->setSpellId(spellpower);
             spellPowerWidget->setUserString("ToolTipType", "Spell");
             spellPowerWidget->setUserString("Spell", spellpower);
@@ -441,5 +446,10 @@ namespace MWGui
             coord.top += lineHeight;
             ++i;
         }
+    }
+
+    const ESM::NPC& RaceDialog::getResult() const
+    {
+        return mPreview->getPrototype();
     }
 }

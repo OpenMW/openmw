@@ -101,7 +101,7 @@ set(OENGINE_OGRE
 set(OENGINE_GUI
   ${LIBS_DIR}/openengine/gui/loglistener.cpp
   ${LIBS_DIR}/openengine/gui/manager.cpp
-  ${LIBS_DIR}/openengine/gui/layout.hpp
+  ${LIBS_DIR}/openengine/gui/layout.cpp
 )
 
 set(OENGINE_BULLET

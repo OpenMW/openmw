@@ -3,7 +3,12 @@
 #include <iomanip>
 
 #include <boost/lexical_cast.hpp>
+
+#include <MyGUI_Button.h>
+#include <MyGUI_ScrollView.h>
+
 #include <components/esm/records.hpp>
+#include <components/widgets/list.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -15,7 +20,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "itemselection.hpp"
-#include "container.hpp"
 #include "itemwidget.hpp"
 
 #include "sortfilteritemmodel.hpp"
@@ -106,15 +110,15 @@ namespace MWGui
     {
         std::stringstream enchantCost;
         enchantCost << std::setprecision(1) << std::fixed << mEnchanting.getEnchantPoints();
-        mEnchantmentPoints->setCaption(enchantCost.str() + " / " + boost::lexical_cast<std::string>(mEnchanting.getMaxEnchantValue()));
+        mEnchantmentPoints->setCaption(enchantCost.str() + " / " + MyGUI::utility::toString(mEnchanting.getMaxEnchantValue()));
 
-        mCharge->setCaption(boost::lexical_cast<std::string>(mEnchanting.getGemCharge()));
+        mCharge->setCaption(MyGUI::utility::toString(mEnchanting.getGemCharge()));
 
         std::stringstream castCost;
         castCost << mEnchanting.getEffectiveCastCost();
         mCastCost->setCaption(castCost.str());
 
-        mPrice->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantPrice()));
+        mPrice->setCaption(MyGUI::utility::toString(mEnchanting.getEnchantPrice()));
 
         switch(mEnchanting.getCastStyle())
         {

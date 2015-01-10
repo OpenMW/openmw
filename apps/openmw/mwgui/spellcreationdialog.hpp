@@ -3,11 +3,14 @@
 
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadspel.hpp>
-#include <components/widgets/list.hpp>
 
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
-#include "widgets.hpp"
+
+namespace Gui
+{
+    class MWList;
+}
 
 namespace MWGui
 {

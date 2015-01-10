@@ -1,6 +1,6 @@
 #include "waitdialog.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_ProgressBar.h>
 
 #include <components/widgets/box.hpp>
 
@@ -18,6 +18,8 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "../mwstate/charactermanager.hpp"
+
+#include "widgets.hpp"
 
 namespace MWGui
 {
@@ -38,7 +40,7 @@ namespace MWGui
     {
         mProgressBar->setProgressRange (total);
         mProgressBar->setProgressPosition (cur);
-        mProgressText->setCaption(boost::lexical_cast<std::string>(cur) + "/" + boost::lexical_cast<std::string>(total));
+        mProgressText->setCaption(MyGUI::utility::toString(cur) + "/" + MyGUI::utility::toString(total));
     }
 
     // ---------------------------------------------------------------------------------------------------------
@@ -104,9 +106,9 @@ namespace MWGui
         if (hour == 0) hour = 12;
 
         std::string dateTimeText =
-                boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getDay ()) + " "
-                + month + " (#{sDay} " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getTimeStamp ().getDay())
-                + ") " + boost::lexical_cast<std::string>(hour) + " " + (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
+                MyGUI::utility::toString(MWBase::Environment::get().getWorld ()->getDay ()) + " "
+                + month + " (#{sDay} " + MyGUI::utility::toString(MWBase::Environment::get().getWorld ()->getTimeStamp ().getDay())
+                + ") " + MyGUI::utility::toString(hour) + " " + (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
         mDateTimeText->setCaptionWithReplacing (dateTimeText);
     }
@@ -172,7 +174,7 @@ namespace MWGui
 
     void WaitDialog::onHourSliderChangedPosition(MyGUI::ScrollBar* sender, size_t position)
     {
-        mHourText->setCaptionWithReplacing (boost::lexical_cast<std::string>(position+1) + " #{sRestMenu2}");
+        mHourText->setCaptionWithReplacing (MyGUI::utility::toString(position+1) + " #{sRestMenu2}");
         mManualHours = position+1;
     }
 

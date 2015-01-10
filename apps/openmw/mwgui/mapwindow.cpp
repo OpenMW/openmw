@@ -1,9 +1,16 @@
 #include "mapwindow.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 #include <OgreSceneNode.h>
 #include <OgreVector2.h>
+
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_LanguageManager.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_RotatingSkin.h>
+#include <MyGUI_FactoryManager.h>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -15,7 +22,7 @@
 
 #include "../mwrender/globalmap.hpp"
 
-#include "../components/esm/globalmap.hpp"
+#include <components/esm/globalmap.hpp>
 
 #include "widgets.hpp"
 #include "confirmationdialog.hpp"
@@ -226,8 +233,8 @@ namespace MWGui
         {
             for (int my=0; my<3; ++my)
             {
-                std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(mCurX + (mx-1)) + "_"
-                        + boost::lexical_cast<std::string>(mCurY + (-1*(my-1)));
+                std::string image = mPrefix+"_"+ MyGUI::utility::toString(mCurX + (mx-1)) + "_"
+                        + MyGUI::utility::toString(mCurY + (-1*(my-1)));
                 MyGUI::ImageBox* fog = mFogWidgets[my + 3*mx];
                 fog->setImageTexture(mFogOfWar ?
                     ((MyGUI::RenderManager::getInstance().getTexture(image+"_fog") != 0) ? image+"_fog"
@@ -353,8 +360,8 @@ namespace MWGui
             for (int my=0; my<3; ++my)
             {
                 // map
-                std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(x + (mx-1)) + "_"
-                        + boost::lexical_cast<std::string>(y + (-1*(my-1)));
+                std::string image = mPrefix+"_"+ MyGUI::utility::toString(x + (mx-1)) + "_"
+                        + MyGUI::utility::toString(y + (-1*(my-1)));
 
                 MyGUI::ImageBox* box = mMapWidgets[my + 3*mx];
 

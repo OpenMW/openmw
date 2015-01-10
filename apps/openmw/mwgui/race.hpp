@@ -1,8 +1,6 @@
 #ifndef MWGUI_RACE_H
 #define MWGUI_RACE_H
 
-#include "../mwrender/characterpreview.hpp"
-
 #include "windowbase.hpp"
 
 
@@ -11,10 +9,15 @@ namespace MWGui
     class WindowManager;
 }
 
-/*
-  This file contains the dialog for choosing a race.
-  Layout is defined by resources/mygui/openmw_chargen_race.layout.
- */
+namespace MWRender
+{
+    class RaceSelectionPreview;
+}
+
+namespace ESM
+{
+    struct NPC;
+}
 
 namespace MWGui
 {
@@ -29,7 +32,7 @@ namespace MWGui
             GM_Female
         };
 
-        const ESM::NPC &getResult() const { return mPreview->getPrototype(); }
+        const ESM::NPC &getResult() const;
         const std::string &getRaceId() const { return mCurrentRaceId; }
         Gender getGender() const { return mGenderIndex == 0 ? GM_Male : GM_Female; }
         // getFace()

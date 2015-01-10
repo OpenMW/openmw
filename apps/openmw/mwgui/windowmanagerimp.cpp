@@ -5,11 +5,19 @@
 
 #include <OgreTextureManager.h>
 #include <OgreRenderWindow.h>
+#include <OgreSceneManager.h>
 
-#include "MyGUI_UString.h"
-#include "MyGUI_IPointer.h"
-#include "MyGUI_ResourceImageSetPointer.h"
-#include "MyGUI_TextureUtility.h"
+#include <MyGUI_UString.h>
+#include <MyGUI_IPointer.h>
+#include <MyGUI_ResourceImageSetPointer.h>
+#include <MyGUI_TextureUtility.h>
+#include <MyGUI_FactoryManager.h>
+#include <MyGUI_LanguageManager.h>
+#include <MyGUI_PointerManager.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_ClipboardManager.h>
+#include <MyGUI_RenderManager.h>
 
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
@@ -27,6 +35,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -74,6 +83,9 @@
 #include "screenfader.hpp"
 #include "debugwindow.hpp"
 #include "spellview.hpp"
+#include "draganddrop.hpp"
+#include "container.hpp"
+#include "controllers.hpp"
 
 namespace MWGui
 {

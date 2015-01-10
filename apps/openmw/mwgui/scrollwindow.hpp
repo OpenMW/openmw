@@ -3,9 +3,12 @@
 
 #include "windowbase.hpp"
 
-#include <components/widgets/imagebutton.hpp>
-
 #include "../mwworld/ptr.hpp"
+
+namespace Gui
+{
+    class ImageButton;
+}
 
 namespace MWGui
 {

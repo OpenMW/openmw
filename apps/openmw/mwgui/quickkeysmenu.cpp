@@ -1,6 +1,8 @@
 #include "quickkeysmenu.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_Gui.h>
 
 #include <components/esm/quickkeys.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -53,7 +55,7 @@ namespace MWGui
         for (int i = 0; i < 10; ++i)
         {
             ItemWidget* button;
-            getWidget(button, "QuickKey" + boost::lexical_cast<std::string>(i+1));
+            getWidget(button, "QuickKey" + MyGUI::utility::toString(i+1));
 
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onQuickKeyButtonClicked);
 
@@ -96,7 +98,7 @@ namespace MWGui
 
         MyGUI::TextBox* textBox = key->createWidgetReal<MyGUI::TextBox>("SandText", MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Default);
         textBox->setTextAlign (MyGUI::Align::Center);
-        textBox->setCaption (boost::lexical_cast<std::string>(index+1));
+        textBox->setCaption (MyGUI::utility::toString(index+1));
         textBox->setNeedMouseFocus (false);
     }
 

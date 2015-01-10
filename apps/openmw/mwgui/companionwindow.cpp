@@ -1,9 +1,10 @@
 #include "companionwindow.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_InputManager.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -13,7 +14,7 @@
 #include "itemview.hpp"
 #include "sortfilteritemmodel.hpp"
 #include "companionitemmodel.hpp"
-#include "container.hpp"
+#include "draganddrop.hpp"
 #include "countdialog.hpp"
 
 namespace MWGui
@@ -120,7 +121,7 @@ void CompanionWindow::updateEncumbranceBar()
     else
     {
         MWMechanics::NpcStats& stats = mPtr.getClass().getNpcStats(mPtr);
-        mProfitLabel->setCaptionWithReplacing("#{sProfitValue} " + boost::lexical_cast<std::string>(stats.getProfit()));
+        mProfitLabel->setCaptionWithReplacing("#{sProfitValue} " + MyGUI::utility::toString(stats.getProfit()));
     }
 }
 

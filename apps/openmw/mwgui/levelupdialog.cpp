@@ -1,6 +1,8 @@
 #include "levelupdialog.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Button.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_EditBox.h>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -34,17 +36,17 @@ namespace MWGui
         for (int i=1; i<9; ++i)
         {
             MyGUI::TextBox* t;
-            getWidget(t, "AttribVal" + boost::lexical_cast<std::string>(i));
+            getWidget(t, "AttribVal" + MyGUI::utility::toString(i));
 
             MyGUI::Button* b;
-            getWidget(b, "Attrib" + boost::lexical_cast<std::string>(i));
+            getWidget(b, "Attrib" + MyGUI::utility::toString(i));
             b->setUserData (i-1);
             b->eventMouseButtonClick += MyGUI::newDelegate(this, &LevelupDialog::onAttributeClicked);
             mAttributes.push_back(b);
 
             mAttributeValues.push_back(t);
 
-            getWidget(t, "AttribMultiplier" + boost::lexical_cast<std::string>(i));
+            getWidget(t, "AttribMultiplier" + MyGUI::utility::toString(i));
 
             mAttributeMultipliers.push_back(t);
         }
@@ -76,7 +78,7 @@ namespace MWGui
             if (val >= 100)
                 val = 100;
 
-            mAttributeValues[i]->setCaption(boost::lexical_cast<std::string>(val));
+            mAttributeValues[i]->setCaption(MyGUI::utility::toString(val));
         }
     }
 
@@ -154,13 +156,13 @@ namespace MWGui
         mClassImage->setImageTexture ("textures\\levelup\\" + cls->mId + ".dds");
 
         int level = creatureStats.getLevel ()+1;
-        mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + boost::lexical_cast<std::string>(level));
+        mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + MyGUI::utility::toString(level));
 
         std::string levelupdescription;
         if(level > 20)
             levelupdescription=world->getFallback()->getFallbackString("Level_Up_Default");
         else
-            levelupdescription=world->getFallback()->getFallbackString("Level_Up_Level"+boost::lexical_cast<std::string>(level));
+            levelupdescription=world->getFallback()->getFallbackString("Level_Up_Level"+MyGUI::utility::toString(level));
 
         mLevelDescription->setCaption (levelupdescription);
 
@@ -174,7 +176,7 @@ namespace MWGui
                 availableAttributes++;
 
                 int mult = pcStats.getLevelupAttributeMultiplier (i);
-                text->setCaption(mult <= 1 ? "" : "x" + boost::lexical_cast<std::string>(mult));
+                text->setCaption(mult <= 1 ? "" : "x" + MyGUI::utility::toString(mult));
             }
             else
             {
