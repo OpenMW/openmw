@@ -23,10 +23,13 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
     while (ESM::Cell::getNextRef (reader, ref, deleted))
     {
-        ref.mOriginalCell = cell2.mId;
+        // Keep mOriginalCell empty when in modified (as an indicator that the
+        // original cell will always be equal the current cell).
+        ref.mOriginalCell = base ? cell2.mId : "";
 
         if (cell.get().isExterior())
         {
+
             // ignoring moved references sub-record; instead calculate cell from coordinates
             std::pair<int, int> index = ref.getCellIndex();
 
