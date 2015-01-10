@@ -19,6 +19,8 @@
 
 #include "../mwstate/charactermanager.hpp"
 
+#include "widgets.hpp"
+
 namespace MWGui
 {
 

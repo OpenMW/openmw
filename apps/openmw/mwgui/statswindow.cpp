@@ -12,6 +12,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 

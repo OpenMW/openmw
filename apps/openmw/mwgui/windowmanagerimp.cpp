@@ -5,6 +5,7 @@
 
 #include <OgreTextureManager.h>
 #include <OgreRenderWindow.h>
+#include <OgreSceneManager.h>
 
 #include <MyGUI_UString.h>
 #include <MyGUI_IPointer.h>
@@ -34,6 +35,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 

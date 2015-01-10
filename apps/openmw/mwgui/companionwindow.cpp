@@ -4,6 +4,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 

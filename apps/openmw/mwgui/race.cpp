@@ -11,6 +11,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwrender/characterpreview.hpp"
 
 #include "tooltips.hpp"
 
@@ -445,5 +446,10 @@ namespace MWGui
             coord.top += lineHeight;
             ++i;
         }
+    }
+
+    const ESM::NPC& RaceDialog::getResult() const
+    {
+        return mPreview->getPrototype();
     }
 }

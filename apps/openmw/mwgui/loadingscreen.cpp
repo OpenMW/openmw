@@ -8,6 +8,7 @@
 #include <OgreTextureManager.h>
 #include <OgreViewport.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreSceneManager.h>
 
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_ScrollBar.h>

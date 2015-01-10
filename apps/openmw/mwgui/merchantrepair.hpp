@@ -4,8 +4,6 @@
 #include "windowbase.hpp"
 #include "../mwworld/ptr.hpp"
 
-
-
 namespace MWGui
 {
 

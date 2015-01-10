@@ -3,7 +3,12 @@
 #include <iomanip>
 
 #include <boost/lexical_cast.hpp>
+
+#include <MyGUI_Button.h>
+#include <MyGUI_ScrollView.h>
+
 #include <components/esm/records.hpp>
+#include <components/widgets/list.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

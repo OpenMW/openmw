@@ -5,6 +5,7 @@
 
 #include <components/misc/resourcehelpers.hpp>
 #include <components/esm/records.hpp>
+#include <components/widgets/list.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -22,6 +23,7 @@
 
 #include "tooltips.hpp"
 #include "class.hpp"
+#include "widgets.hpp"
 
 namespace
 {

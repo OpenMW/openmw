@@ -2,10 +2,14 @@
 #define MWGUI_WAIT_DIALOG_H
 
 #include "windowbase.hpp"
-#include "widgets.hpp"
 
 namespace MWGui
 {
+
+    namespace Widgets
+    {
+        class MWScrollBar;
+    }
 
     class WaitDialogProgressBar : public WindowBase
     {

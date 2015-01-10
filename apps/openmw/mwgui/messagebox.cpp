@@ -10,6 +10,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 namespace MWGui
 {

@@ -18,11 +18,6 @@ namespace MWGui
     class WindowManager;
 }
 
-/*
-  This file contains the dialouge window
-  Layout is defined by resources/mygui/openmw_dialogue_window.layout.
- */
-
 namespace MWGui
 {
     class DialogueHistoryViewModel;
