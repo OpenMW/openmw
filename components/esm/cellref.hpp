@@ -13,8 +13,12 @@ namespace ESM
 
     struct RefNum
     {
-        int mIndex;
-        int mContentFile; // -1 no content file
+        unsigned int mIndex;
+        int mContentFile;
+
+        enum { RefNum_NoContentFile = -1 };
+        inline bool hasContentFile() const { return mContentFile != RefNum_NoContentFile; }
+        inline void unset() { mIndex = 0; mContentFile = RefNum_NoContentFile; }
     };
 
     /* Cell reference. This represents ONE object (of many) inside the

@@ -28,6 +28,9 @@ namespace MWWorld
         // Set RefNum to its default state.
         void unsetRefNum();
 
+        /// Does the RefNum have a content file?
+        bool hasContentFile() const;
+
         // Id of object being referenced
         std::string getRefId() const;
 

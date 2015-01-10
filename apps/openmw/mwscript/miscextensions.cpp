@@ -1035,7 +1035,7 @@ namespace MWScript
 
                 msg << "Content file: ";
 
-                if (ptr.getCellRef().getRefNum().mContentFile == -1)
+                if (!ptr.getCellRef().hasContentFile())
                     msg << "[None]" << std::endl;
                 else
                 {

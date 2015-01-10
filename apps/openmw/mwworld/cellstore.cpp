@@ -72,12 +72,12 @@ namespace
                 iter (collection.mList.begin());
                 iter!=collection.mList.end(); ++iter)
             {
-                if (!iter->mData.hasChanged() && !iter->mRef.hasChanged() && iter->mRef.getRefNum().mContentFile != -1)
+                if (!iter->mData.hasChanged() && !iter->mRef.hasChanged() && iter->mRef.hasContentFile())
                 {
                     // Reference that came from a content file and has not been changed -> ignore
                     continue;
                 }
-                if (iter->mData.getCount()==0 && iter->mRef.getRefNum().mContentFile==-1)
+                if (iter->mData.getCount()==0 && !iter->mRef.hasContentFile())
                 {
                     // Deleted reference that did not come from a content file -> ignore
                     continue;
@@ -102,7 +102,7 @@ namespace
         state.load (reader);
 
         // If the reference came from a content file, make sure this content file is loaded
-        if (state.mRef.mRefNum.mContentFile != -1)
+        if (state.mRef.mRefNum.hasContentFile())
         {
             std::map<int, int>::const_iterator iter =
                 contentFileMap.find (state.mRef.mRefNum.mContentFile);
@@ -121,7 +121,7 @@ namespace
         if (!record)
             return;
 
-        if (state.mRef.mRefNum.mContentFile != -1)
+        if (state.mRef.mRefNum.hasContentFile())
         {
             for (typename MWWorld::CellRefList<T>::List::iterator iter (collection.mList.begin());
                 iter!=collection.mList.end(); ++iter)
@@ -487,7 +487,7 @@ namespace MWWorld
             mCell->restore (esm[index], i);
 
             ESM::CellRef ref;
-            ref.mRefNum.mContentFile = -1;
+            ref.mRefNum.mContentFile = ESM::RefNum::RefNum_NoContentFile;
 
             // Get each reference in turn
             bool deleted = false;

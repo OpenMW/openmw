@@ -24,8 +24,7 @@ namespace MWWorld
                 const T* base = list.find(name);
 
                 ESM::CellRef cellRef;
-                cellRef.mRefNum.mIndex = 0;
-                cellRef.mRefNum.mContentFile = -1;
+                cellRef.mRefNum.unset();
                 cellRef.mRefID = name;
                 cellRef.mScale = 1;
                 cellRef.mFactionRank = 0;

@@ -129,8 +129,7 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
 
 void ESM::CellRef::blank()
 {
-    mRefNum.mIndex = 0;
-    mRefNum.mContentFile = -1;
+    mRefNum.unset();
     mRefID.clear();
     mScale = 1;
     mOwner.clear();
