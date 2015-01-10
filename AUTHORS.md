@@ -196,17 +196,10 @@ Thanks to Maxim Nikolaev,
 for allowing us to use his excellent Morrowind fan-art on our website and in other places.
 
 Thanks to DokterDume,
-for kindly providing us with the Moon and Star logo,
-used as the application icon and project logo.
+for kindly providing us with the Moon and Star logo, used as the application icon and project logo.
 
 Thanks to Kevin Ryan,
 for creating the icon used for the Data Files tab of the OpenMW Launcher.
-
-Thanks to Georg Duffner,
-for his EB Garamond fontface, see OFL.txt for his license terms.
-
-Thanks to Dongle,
-for his Daedric fontface, see Daedric Font License.txt for his license terms.
 
 Thanks to DejaVu team,
 for their DejaVuLGCSansMono fontface, see DejaVu Font License.txt for their license terms.
