@@ -607,7 +607,7 @@ namespace MWGui
                     // GM_Loading uses a texture of the last rendered frame so everything previously visible will be rendered.
                     mHud->setVisible(false);
                     mToolTips->setVisible(false);
-                    setCursorVisible(false);
+                    setCursorVisible(mMessageBoxManager && mMessageBoxManager->isInteractiveMessageBox());
                     break;
                 default:
                     // Unsupported mode, switch back to game
@@ -813,9 +813,10 @@ namespace MWGui
 
         if (block)
         {
-            while (mMessageBoxManager->readPressedButton() == -1
+            while (mMessageBoxManager->readPressedButton(false) == -1
                    && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
             {
+                mMessageBoxManager->onFrame(0.f);
                 MWBase::Environment::get().getInputManager()->update(0, true, false);
 
                 mRendering->getWindow()->update();

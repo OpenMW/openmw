@@ -146,10 +146,11 @@ namespace MWGui
         return false;
     }
 
-    int MessageBoxManager::readPressedButton ()
+    int MessageBoxManager::readPressedButton (bool reset)
     {
         int pressed = mLastButtonPressed;
-        mLastButtonPressed = -1;
+        if (reset)
+            mLastButtonPressed = -1;
         return pressed;
     }
 

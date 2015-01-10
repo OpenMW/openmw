@@ -353,6 +353,12 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                     {
                         ESM::SavedGame profile;
                         profile.load(reader);
+                        if (!verifyProfile(profile))
+                        {
+                            cleanup (true);
+                            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+                            return;
+                        }
                         mTimePlayed = profile.mTimePlayed;
                     }
                     break;
@@ -516,4 +522,31 @@ void MWState::StateManager::update (float duration)
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         }
     }
+}
+
+bool MWState::StateManager::verifyProfile(const ESM::SavedGame& profile) const
+{
+    const std::vector<std::string>& selectedContentFiles = MWBase::Environment::get().getWorld()->getContentFiles();
+    bool notFound = false;
+    for (std::vector<std::string>::const_iterator it = profile.mContentFiles.begin();
+         it != profile.mContentFiles.end(); ++it)
+    {
+        if (std::find(selectedContentFiles.begin(), selectedContentFiles.end(), *it)
+                == selectedContentFiles.end())
+        {
+            notFound = true;
+            break;
+        }
+    }
+    if (notFound)
+    {
+        std::vector<std::string> buttons;
+        buttons.push_back("#{sYes}");
+        buttons.push_back("#{sNo}");
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox("#{sMissingMastersMsg}", buttons, true);
+        int selectedButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
+        if (selectedButton == 1 || selectedButton == -1)
+            return false;
+    }
+    return true;
 }
