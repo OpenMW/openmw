@@ -169,6 +169,9 @@ struct AddGlow
 
         instance->setProperty("env_map", sh::makeProperty(new sh::BooleanValue(true)));
         instance->setProperty("env_map_color", sh::makeProperty(new sh::Vector3(mColor->x, mColor->y, mColor->z)));
+        // Workaround for crash in Ogre (https://bitbucket.org/sinbad/ogre/pull-request/447/fix-shadows-crash-for-textureunitstates/diff)
+        // Remove when the fix is merged
+        instance->getMaterial()->setShadowCasterMaterial("openmw_shadowcaster_noalpha");
     }
 };
 
