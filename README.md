@@ -1,18 +1,19 @@
 OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
+==============================================================
 
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.34.0
-License: GPL (see GPL3.txt for more information)
-Website: http://www.openmw.org
+* Version: 0.34.0
+* License: GPL (see GPL3.txt for more information)
+* Website: http://www.openmw.org
 
 Font Licenses:
 DejaVuLGCSansMono.ttf: custom (see DejaVu Font License.txt for more information)
 
 
-
-INSTALLATION
+Installation
+============
 
 Windows:
 Run the installer.
@@ -28,18 +29,21 @@ https://www.archlinux.org/packages/?sort=&q=openmw
 OS X:
 Open DMG file, copy OpenMW folder anywhere, for example in /Applications
 
-BUILD FROM SOURCE
+Build from source
+=================
 
 https://wiki.openmw.org/index.php?title=Development_Environment_Setup
 
 
-THE DATA PATH
+The data path
+=============
 
 The data path tells OpenMW where to find your Morrowind files. If you run the launcher, OpenMW should be able to
 pick up the location of these files on its own, if both Morrowind and OpenMW are installed properly
 (installing Morrowind under WINE is considered a proper install).
 
-COMMAND LINE OPTIONS
+Command line options
+====================
 
 Syntax: openmw <options>
 Allowed options:
@@ -96,7 +100,8 @@ Allowed options:
   --no-grab                             Don't grab mouse cursor
   --activate-dist arg (=-1)             activation distance override
 
-CHANGELOG
+Changelog
+=========
 
 0.34.0
 
