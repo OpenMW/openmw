@@ -11,6 +11,7 @@ Morrowind by Bethesda Softworks. You need to own and install the original game f
 * Version: 0.34.0
 * License: GPL (see GPL3.txt for more information)
 * Website: http://www.openmw.org
+* IRC: #openmw on irc.freenode.net
 
 Font Licenses:
 * DejaVuLGCSansMono.ttf: custom (see DejaVu Font License.txt for more information)
