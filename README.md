@@ -18,18 +18,18 @@ Font Licenses:
 Installation
 ============
 
-Windows:
+Windows
+-------
 Run the installer.
 
-Linux:
-Ubuntu (and most others)
-Download the .deb file and install it in the usual way.
+Linux
+-----
+* Ubuntu (and most others): Download the .deb file and install it in the usual way.
 
-Arch Linux
-There's an OpenMW package available in the [community] Repository:
-https://www.archlinux.org/packages/?sort=&q=openmw
+* Arch Linux: There's an OpenMW package available in the [community] Repository: https://www.archlinux.org/packages/?sort=&q=openmw
 
-OS X:
+OS X
+----
 Open DMG file, copy OpenMW folder anywhere, for example in /Applications
 
 Build from source
