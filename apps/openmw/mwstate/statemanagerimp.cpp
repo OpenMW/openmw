@@ -118,7 +118,7 @@ void MWState::StateManager::askLoadRecent()
             std::string message = MWBase::Environment::get().getWindowManager()->getGameSettingString("sLoadLastSaveMsg", tag);
             size_t pos = message.find(tag);
             message.replace(pos, tag.length(), lastSave.mProfile.mDescription);
-            MWBase::Environment::get().getWindowManager()->messageBox(message, buttons);
+            MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);
             mAskLoadRecent = true;
         }
     }
@@ -259,7 +259,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         std::vector<std::string> buttons;
         buttons.push_back("#{sOk}");
-        MWBase::Environment::get().getWindowManager()->messageBox(error.str(), buttons);
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
 
         // If no file was written, clean up the slot
         if (slot && !boost::filesystem::exists(slot->mPath))
@@ -459,7 +459,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
         std::vector<std::string> buttons;
         buttons.push_back("#{sOk}");
-        MWBase::Environment::get().getWindowManager()->messageBox(error.str(), buttons);
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
     }
 }
 

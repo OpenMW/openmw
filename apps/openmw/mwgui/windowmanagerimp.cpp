@@ -805,19 +805,30 @@ namespace MWGui
         }
     }
 
-    void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons, enum MWGui::ShowInDialogueMode showInDialogueMode)
+    void WindowManager::interactiveMessageBox(const std::string &message, const std::vector<std::string> &buttons, bool block)
     {
-        if (buttons.empty()) {
-            /* If there are no buttons, and there is a dialogue window open, messagebox goes to the dialogue window */
-            if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never) {
-                mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
-            } else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only) {
-                mMessageBoxManager->createMessageBox(message);
+        mMessageBoxManager->createInteractiveMessageBox(message, buttons);
+        MWBase::Environment::get().getInputManager()->changeInputMode(isGuiMode());
+        updateVisible();
+
+        if (block)
+        {
+            while (mMessageBoxManager->readPressedButton() == -1
+                   && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
+            {
+                MWBase::Environment::get().getInputManager()->update(0, true, false);
+
+                mRendering->getWindow()->update();
             }
-        } else {
-            mMessageBoxManager->createInteractiveMessageBox(message, buttons);
-            MWBase::Environment::get().getInputManager()->changeInputMode(isGuiMode());
-            updateVisible();
+        }
+    }
+
+    void WindowManager::messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode)
+    {
+        if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never) {
+            mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
+        } else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only) {
+            mMessageBoxManager->createMessageBox(message);
         }
     }
 

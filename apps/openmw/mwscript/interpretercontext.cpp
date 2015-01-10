@@ -200,7 +200,10 @@ namespace MWScript
     void InterpreterContext::messageBox (const std::string& message,
         const std::vector<std::string>& buttons)
     {
-        MWBase::Environment::get().getWindowManager()->messageBox (message, buttons);
+        if (buttons.empty())
+            MWBase::Environment::get().getWindowManager()->messageBox (message);
+        else
+            MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);
     }
 
     void InterpreterContext::report (const std::string& message)
