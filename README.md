@@ -1,5 +1,5 @@
-OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
-==============================================================
+OpenMW
+======
 
 [![Build Status](https://travis-ci.org/OpenMW/openmw.svg?branch=coverity_scan)](https://travis-ci.org/OpenMW/openmw)
 
@@ -17,23 +17,23 @@ Font Licenses:
 * DejaVuLGCSansMono.ttf: custom (see docs/license/DejaVu Font License.txt for more information)
 
 Getting Started
-===============
+---------------
 
 * [Official forums](https://forum.openmw.org/)
 * [Installation instructions](https://wiki.openmw.org/index.php?title=Installation_Instructions)
 * [Build from source](https://wiki.openmw.org/index.php?title=Development_Environment_Setup)
 * [Testing the game](https://wiki.openmw.org/index.php?title=Testing)
 * [How to contribute](https://wiki.openmw.org/index.php?title=Contribution_Wanted)
-* [Report a bug](http://bugs.openmw.org/projects/openmw) - read the [guidelines](before submitting your first bug!)
+* [Report a bug](http://bugs.openmw.org/projects/openmw) - read the [guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) before submitting your first bug!
 * [Known issues] (http://bugs.openmw.org/projects/openmw/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=7&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=1&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&group_by=tracker)
 
 The data path
-=============
+-------------
 
 The data path tells OpenMW where to find your Morrowind files. If you run the launcher, OpenMW should be able to pick up the location of these files on its own, if both Morrowind and OpenMW are installed properly (installing Morrowind under WINE is considered a proper install).
 
 Command line options
-====================
+--------------------
 
 <pre>
 Syntax: openmw <options>
@@ -91,8 +91,3 @@ Allowed options:
   --no-grab                             Don't grab mouse cursor
   --activate-dist arg (=-1)             activation distance override
 </pre>
-
-Changelog
-=========
-
-See CHANGELOG.md
