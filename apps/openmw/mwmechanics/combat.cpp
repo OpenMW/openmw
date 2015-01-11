@@ -367,4 +367,24 @@ namespace MWMechanics
         else
             sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
     }
+
+    bool isEnvironmentCompatible(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim)
+    {
+        const MWWorld::Class& attackerClass = attacker.getClass();
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+
+        // If attacker is fish, victim must be in water
+        if (attackerClass.isPureWaterCreature(attacker))
+        {
+            return world->isWading(victim);
+        }
+        
+        // If attacker can't swim, victim must not be in water
+        if (!attackerClass.canSwim(attacker))
+        {
+            return !world->isSwimming(victim);
+        }
+
+        return true;
+    }
 }

@@ -23,6 +23,7 @@
 #include "character.hpp" // fixme: for getActiveWeapon
 
 #include "aicombataction.hpp"
+#include "combat.hpp"
 
 namespace
 {
@@ -206,12 +207,8 @@ namespace MWMechanics
         const MWWorld::Class& actorClass = actor.getClass();
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
-        if (!actorClass.isNpc() &&
-            // 1. pure water creature and Player moved out of water
-            ((target == world->getPlayerPtr() &&
-            actorClass.isPureWaterCreature(actor) && !world->isWading(target))
-            // 2. creature can't swim to target
-            || (!actorClass.canSwim(actor) && world->isSwimming(target))))
+        // can't fight if attacker can't go where target is.  E.g. A fish can't attack person on land.
+        if (!actorClass.isNpc() && !MWMechanics::isEnvironmentCompatible(actor, target))
         {
             actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
             return true;

@@ -37,6 +37,7 @@
 
 #include "actor.hpp"
 #include "summoning.hpp"
+#include "combat.hpp"
 
 namespace
 {
@@ -309,10 +310,10 @@ namespace MWMechanics
         // pure water creatures won't try to fight with the target on the ground
         // except that creature is already hostile
         if ((againstPlayer || !creatureStats.getAiSequence().isInCombat())
-                && ((actor1.getClass().isPureWaterCreature(actor1)
-                && !MWBase::Environment::get().getWorld()->isWading(actor2))
-                || (!actor1.getClass().canSwim(actor1) && MWBase::Environment::get().getWorld()->isSwimming(actor2)))) // creature can't swim to target
+            && !MWMechanics::isEnvironmentCompatible(actor1, actor2)) // creature can't swim to target
+        {
             return;
+        }
 
         bool aggressive;
 
