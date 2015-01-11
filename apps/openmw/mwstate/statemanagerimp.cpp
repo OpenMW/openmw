@@ -337,11 +337,13 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
 
-        listener.setProgressRange(reader.getRecordCount());
+        listener.setProgressRange(100);
         listener.setLabel("#{sLoadingMessage14}");
 
         Loading::ScopedLoad load(&listener);
 
+        size_t total = reader.getFileSize();
+        int currentPercent = 0;
         while (reader.hasMoreRecs())
         {
             ESM::NAME n = reader.getRecName();
@@ -423,7 +425,12 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                     std::cerr << "Ignoring unknown record: " << n.name << std::endl;
                     reader.skipRecord();
             }
-            listener.increaseProgress();
+            int progressPercent = static_cast<int>(float(reader.getFileOffset())/total*100);
+            if (progressPercent > currentPercent)
+            {
+                listener.increaseProgress(progressPercent-currentPercent);
+                currentPercent = progressPercent;
+            }
         }
 
         mCharacterManager.setCurrentCharacter(character);
@@ -446,7 +453,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
         MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false);
 
-        // Vanilla MW will restart startup scripts when a save game is loaded. This is unintuive,
+        // Vanilla MW will restart startup scripts when a save game is loaded. This is unintuitive,
         // but some mods may be using it as a reload detector.
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
 
@@ -472,8 +479,11 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 void MWState::StateManager::quickLoad()
 {
     if (Character* mCurrentCharacter = getCurrentCharacter (false))
-        if (const MWState::Slot* slot = &*mCurrentCharacter->begin()) //Get newest save
-            loadGame (mCurrentCharacter, slot->mPath.string());
+    {
+        if (mCurrentCharacter->begin() == mCurrentCharacter->end())
+            return;
+        loadGame (mCurrentCharacter, mCurrentCharacter->begin()->mPath.string()); //Get newest save
+    }
 }
 
 void MWState::StateManager::deleteGame(const MWState::Character *character, const MWState::Slot *slot)
