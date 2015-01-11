@@ -161,7 +161,6 @@ void ESMStore::setUp()
         writer.writeT(mDynamicCount);
         writer.endRecord("COUN");
         writer.endRecord(ESM::REC_DYNA);
-        progress.increaseProgress();
 
         mPotions.write (writer, progress);
         mArmors.write (writer, progress);

@@ -157,7 +157,6 @@ namespace MWRender
                             data[texelY * mWidth * 3 + texelX * 3+2] = b;
                         }
                     }
-                    loadingListener->increaseProgress(1);
                 }
             }
 

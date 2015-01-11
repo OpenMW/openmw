@@ -104,6 +104,7 @@ namespace MWBase
             virtual void clear() = 0;
 
             virtual int countSavedGameRecords() const = 0;
+            virtual int countSavedGameCells() const = 0;
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& listener) const = 0;
 

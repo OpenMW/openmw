@@ -309,6 +309,11 @@ namespace MWWorld
             +1; // camera
     }
 
+    int World::countSavedGameCells() const
+    {
+        return mCells.countSavedGameRecords();
+    }
+
     void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
         // Active cells could have a dirty fog of war, sync it to the CellStore first
@@ -320,7 +325,6 @@ namespace MWWorld
         }
 
         MWMechanics::CreatureStats::writeActorIdCounter(writer);
-        progress.increaseProgress();
 
         mStore.write (writer, progress); // dynamic Store must be written (and read) before Cells, so that
                                          // references to custom made records will be recognized
@@ -334,12 +338,10 @@ namespace MWWorld
         writer.writeHNT("TELE", mTeleportEnabled);
         writer.writeHNT("LEVT", mLevitationEnabled);
         writer.endRecord(ESM::REC_ENAB);
-        progress.increaseProgress();
 
         writer.startRecord(ESM::REC_CAM_);
         writer.writeHNT("FIRS", isFirstPerson());
         writer.endRecord(ESM::REC_CAM_);
-        progress.increaseProgress();
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type,

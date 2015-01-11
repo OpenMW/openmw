@@ -221,7 +221,8 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         writer.save (stream);
 
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
-        listener.setProgressRange(recordCount);
+        // Using only Cells for progress information, since they typically have the largest records by far
+        listener.setProgressRange(MWBase::Environment::get().getWorld()->countSavedGameCells());
         listener.setLabel("#{sNotifyMessage4}");
 
         Loading::ScopedLoad load(&listener);
@@ -229,7 +230,6 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         writer.startRecord (ESM::REC_SAVE);
         slot->mProfile.save (writer);
         writer.endRecord (ESM::REC_SAVE);
-        listener.increaseProgress();
 
         MWBase::Environment::get().getJournal()->write (writer, listener);
         MWBase::Environment::get().getDialogueManager()->write (writer, listener);

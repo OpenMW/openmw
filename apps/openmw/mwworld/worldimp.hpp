@@ -166,6 +166,7 @@ namespace MWWorld
             virtual void clear();
 
             virtual int countSavedGameRecords() const;
+            virtual int countSavedGameCells() const;
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 

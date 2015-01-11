@@ -1460,8 +1460,6 @@ namespace MWMechanics
             writer.writeHNT ("COUN", it->second);
         }
         writer.endRecord(ESM::REC_DCOU);
-
-        listener.increaseProgress(1);
     }
 
     void Actors::readRecord (ESM::ESMReader& reader, int32_t type)

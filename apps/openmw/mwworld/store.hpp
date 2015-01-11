@@ -325,7 +325,6 @@ namespace MWWorld
                 writer.writeHNString ("NAME", iter->second.mId);
                 iter->second.save (writer);
                 writer.endRecord (T::sRecordId);
-                progress.increaseProgress();
             }
         }
 
