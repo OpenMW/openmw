@@ -534,8 +534,8 @@ bool MWState::StateManager::verifyProfile(const ESM::SavedGame& profile) const
         if (std::find(selectedContentFiles.begin(), selectedContentFiles.end(), *it)
                 == selectedContentFiles.end())
         {
+            std::cerr << "Savegame dependency " << *it << " is missing." << std::endl;
             notFound = true;
-            break;
         }
     }
     if (notFound)
