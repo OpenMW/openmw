@@ -3047,7 +3047,7 @@ namespace MWWorld
 
             std::vector<std::string> buttons;
             buttons.push_back("#{sOk}");
-            MWBase::Environment::get().getWindowManager()->messageBox(message, buttons);
+            MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);
         }
     }
 

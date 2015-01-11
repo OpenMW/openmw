@@ -23,6 +23,8 @@ namespace MWState
 
             void cleanup (bool force = false);
 
+            bool verifyProfile (const ESM::SavedGame& profile) const;
+
             std::map<int, int> buildContentFileIndexMap (const ESM::ESMReader& reader) const;
 
         public:

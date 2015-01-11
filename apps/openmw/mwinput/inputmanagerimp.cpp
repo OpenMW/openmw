@@ -743,8 +743,7 @@ namespace MWInput
     {
         mEngine.screenshot();
 
-        std::vector<std::string> empty;
-        MWBase::Environment::get().getWindowManager()->messageBox ("Screenshot saved", empty);
+        MWBase::Environment::get().getWindowManager()->messageBox ("Screenshot saved");
     }
 
     void InputManager::toggleInventory()

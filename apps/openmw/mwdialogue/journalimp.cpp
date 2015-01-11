@@ -92,9 +92,7 @@ namespace MWDialogue
 
         quest.addEntry (entry); // we are doing slicing on purpose here
 
-        std::vector<std::string> empty;
-        std::string notification = "#{sJournalEntry}";
-        MWBase::Environment::get().getWindowManager()->messageBox (notification, empty);
+        MWBase::Environment::get().getWindowManager()->messageBox ("#{sJournalEntry}");
     }
 
     void Journal::setJournalIndex (const std::string& id, int index)
