@@ -30,7 +30,7 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
     setObjectName ("DataFilesPage");
     mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget);
 
-    mProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
+    mProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
 
     connect(mProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
             this, SLOT(updateOkButton(QString)));
@@ -44,12 +44,12 @@ void Launcher::DataFilesPage::buildView()
     ui.verticalLayout->insertWidget (0, mSelector->uiWidget());
 
     //tool buttons
-    ui.newProfileButton->setToolTip ("Create a new profile");
-    ui.deleteProfileButton->setToolTip ("Delete an existing profile");
+    ui.newProfileButton->setToolTip ("Create a new Content List");
+    ui.deleteProfileButton->setToolTip ("Delete an existing Content List");
 
     //combo box
     ui.profilesComboBox->addItem ("Default");
-    ui.profilesComboBox->setPlaceholderText (QString("Select a profile..."));
+    ui.profilesComboBox->setPlaceholderText (QString("Select a Content List..."));
     ui.profilesComboBox->setCurrentIndex(ui.profilesComboBox->findText(QLatin1String("Default")));
 
     // Add the actions to the toolbuttons
@@ -82,8 +82,8 @@ bool Launcher::DataFilesPage::loadSettings()
     paths.insert (0, mDataLocal);
     PathIterator pathIterator (paths);
 
-    QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
-    QString currentProfile = mLauncherSettings.getSettings().value("Profiles/currentprofile");
+    QStringList profiles = mLauncherSettings.getContentLists();
+    QString currentProfile = mLauncherSettings.getCurrentContentListName();
 
     qDebug() << "current profile is: " << currentProfile;
 
@@ -101,15 +101,12 @@ bool Launcher::DataFilesPage::loadSettings()
 
 QStringList Launcher::DataFilesPage::filesInProfile(const QString& profileName, PathIterator& pathIterator)
 {
-    QStringList files = mLauncherSettings.values(QString("Profiles/") + profileName + QString("/content"), Qt::MatchExactly);
+    QStringList files = mLauncherSettings.getContentListFiles(profileName);
     QStringList filepaths;
 
-    // mLauncherSettings.values() returns the files in reverse load order
-    QListIterator<QString> i(files);
-    i.toBack();
-    while (i.hasPrevious())
+    foreach(const QString& file, files)
     {
-        QString filepath = pathIterator.findFirstPath(i.previous());
+        QString filepath = pathIterator.findFirstPath(file);
 
         if (!filepath.isEmpty())
             filepaths << filepath;
@@ -128,24 +125,20 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
    //retrieve the files selected for the profile
    ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
 
-   removeProfile (profileName);
-
-    mGameSettings.remove(QString("content"));
-
     //set the value of the current profile (not necessarily the profile being saved!)
-    mLauncherSettings.setValue(QString("Profiles/currentprofile"), ui.profilesComboBox->currentText());
+    mLauncherSettings.setCurrentContentListName(ui.profilesComboBox->currentText());
 
+    QStringList fileNames;
     foreach(const ContentSelectorModel::EsmFile *item, items) {
-        mLauncherSettings.setMultiValue(QString("Profiles/") + profileName + QString("/content"), item->fileName());
-        mGameSettings.setMultiValue(QString("content"), item->fileName());
+        fileNames.append(item->fileName());
     }
-
+    mLauncherSettings.setContentList(profileName, fileNames);
+    mGameSettings.setContentList(fileNames);
 }
 
 void Launcher::DataFilesPage::removeProfile(const QString &profile)
 {
-    mLauncherSettings.remove(QString("Profiles/") + profile);
-    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/content"));
+    mLauncherSettings.removeContentList(profile);
 }
 
 QAbstractItemModel *Launcher::DataFilesPage::profilesModel() const
@@ -233,7 +226,7 @@ void Launcher::DataFilesPage::on_newProfileAction_triggered()
 
     saveSettings();
 
-    mLauncherSettings.setValue(QString("Profiles/currentprofile"), profile);
+    mLauncherSettings.setCurrentContentListName(profile);
 
     addProfile(profile, true);
     mSelector->clearCheckStates();
@@ -306,10 +299,10 @@ void Launcher::DataFilesPage::checkForDefaultProfile()
 bool Launcher::DataFilesPage::showDeleteMessageBox (const QString &text)
 {
     QMessageBox msgBox(this);
-    msgBox.setWindowTitle(tr("Delete Profile"));
+    msgBox.setWindowTitle(tr("Delete Content List"));
     msgBox.setIcon(QMessageBox::Warning);
     msgBox.setStandardButtons(QMessageBox::Cancel);
-    msgBox.setText(tr("Are you sure you want to delete <b>%0</b>?").arg(text));
+    msgBox.setText(tr("Are you sure you want to delete <b>%1</b>?").arg(text));
 
     QAbstractButton *deleteButton =
     msgBox.addButton(tr("Delete"), QMessageBox::ActionRole);
