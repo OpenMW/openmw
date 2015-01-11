@@ -356,12 +356,6 @@ namespace MWWorld
                 reader.getHNT(mTeleportEnabled, "TELE");
                 reader.getHNT(mLevitationEnabled, "LEVT");
                 return;
-            case ESM::REC_CAM_:
-                bool firstperson;
-                reader.getHNT(firstperson, "FIRS");
-                if (firstperson != isFirstPerson())
-                    togglePOV();
-                break;
             default:
                 if (!mStore.readRecord (reader, type) &&
                     !mGlobalVariables.readRecord (reader, type) &&

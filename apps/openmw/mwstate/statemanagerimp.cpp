@@ -342,6 +342,8 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
         Loading::ScopedLoad load(&listener);
 
+        bool firstPersonCam = false;
+
         size_t total = reader.getFileSize();
         int currentPercent = 0;
         while (reader.hasMoreRecs())
@@ -396,9 +398,11 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 case ESM::REC_ENAB:
                 case ESM::REC_LEVC:
                 case ESM::REC_LEVI:
-                case ESM::REC_CAM_:
+                    MWBase::Environment::get().getWorld()->readRecord(reader, n.val, contentFileMap);
+                    break;
 
-                    MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
+                case ESM::REC_CAM_:
+                    reader.getHNT(firstPersonCam, "FIRS");
                     break;
 
                 case ESM::REC_GSCR:
@@ -445,6 +449,9 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         MWBase::Environment::get().getWorld()->renderPlayer();
         MWBase::Environment::get().getWindowManager()->updatePlayer();
         MWBase::Environment::get().getMechanicsManager()->playerLoaded();
+
+        if (firstPersonCam != MWBase::Environment::get().getWorld()->isFirstPerson())
+            MWBase::Environment::get().getWorld()->togglePOV();
 
         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
