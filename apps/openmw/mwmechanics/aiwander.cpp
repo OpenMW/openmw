@@ -477,10 +477,8 @@ namespace MWMechanics
             
             if (greetingState == MWMechanics::AiWander::Greet_Done)
             {
-                static float fGreetDistanceReset = MWBase::Environment::get().getWorld()->getStore()
-                        .get<ESM::GameSetting>().find("fGreetDistanceReset")->getFloat();
-
-                if (playerDistSqr >= fGreetDistanceReset*fGreetDistanceReset)
+                float resetDist = 2*helloDistance;
+                if (playerDistSqr >= resetDist*resetDist)
                     greetingState = Greet_None;
             }
         }
