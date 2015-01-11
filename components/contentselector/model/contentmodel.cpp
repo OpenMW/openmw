@@ -7,6 +7,7 @@
 #include <QTextCodec>
 #include <QDebug>
 #include <QBrush>
+#include <QIcon>
 
 #include "components/esm/esmreader.hpp"
 
@@ -177,14 +178,9 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
 
     switch (role)
     {
-    case Qt::ForegroundRole:
+    case Qt::DecorationRole:
     {
-        if (isLoadOrderError(file))
-        {
-            QBrush redBackground(Qt::red, Qt::SolidPattern);
-            return redBackground;
-        }
-        break;
+        return isLoadOrderError(file) ? QIcon::fromTheme("edit-delete") : QVariant();
     }
 
     case Qt::EditRole:
@@ -618,7 +614,7 @@ QString ContentSelectorModel::ContentModel::toolTip(const EsmFile *file) const
 {
     if (isLoadOrderError(file))
     {
-        QString text("<font color=#840000><b>");
+        QString text("<b>");
         int index = indexFromItem(item(file->filePath())).row();
         foreach(const LoadOrderError& error, checkForLoadOrderErrors(file, index))
         {
@@ -626,7 +622,7 @@ QString ContentSelectorModel::ContentModel::toolTip(const EsmFile *file) const
             text += error.toolTip();
             text += "</p>";
         }
-        text += ("</b></font>");
+        text += ("</b>");
         text += file->toolTip();
         return text;
     }
