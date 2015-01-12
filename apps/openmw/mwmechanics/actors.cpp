@@ -131,7 +131,7 @@ void adjustCommandedActor (const MWWorld::Ptr& actor)
     for (it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
     {
         if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow &&
-                dynamic_cast<MWMechanics::AiFollow*>(*it)->isCommanded())
+                static_cast<MWMechanics::AiFollow*>(*it)->isCommanded())
         {
             hasCommandPackage = true;
             break;
@@ -355,7 +355,7 @@ namespace MWMechanics
         {
             if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
             {
-                MWWorld::Ptr followTarget = dynamic_cast<MWMechanics::AiFollow*>(*it)->getTarget();
+                MWWorld::Ptr followTarget = static_cast<MWMechanics::AiFollow*>(*it)->getTarget();
                 if (followTarget.isEmpty())
                     continue;
 
@@ -1389,7 +1389,7 @@ namespace MWMechanics
             {
                 if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
                 {
-                    MWWorld::Ptr followTarget = dynamic_cast<MWMechanics::AiFollow*>(*it)->getTarget();
+                    MWWorld::Ptr followTarget = static_cast<MWMechanics::AiFollow*>(*it)->getTarget();
                     if (followTarget.isEmpty())
                         continue;
                     if (followTarget == actor)
@@ -1419,11 +1419,11 @@ namespace MWMechanics
             {
                 if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
                 {
-                    MWWorld::Ptr followTarget = dynamic_cast<MWMechanics::AiFollow*>(*it)->getTarget();
+                    MWWorld::Ptr followTarget = static_cast<MWMechanics::AiFollow*>(*it)->getTarget();
                     if (followTarget.isEmpty())
                         continue;
                     if (followTarget == actor)
-                        list.push_back(dynamic_cast<MWMechanics::AiFollow*>(*it)->getFollowIndex());
+                        list.push_back(static_cast<MWMechanics::AiFollow*>(*it)->getFollowIndex());
                     else
                         break;
                 }

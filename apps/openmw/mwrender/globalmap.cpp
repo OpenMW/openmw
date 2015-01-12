@@ -245,7 +245,7 @@ namespace MWRender
 
     void GlobalMap::loadResource(Ogre::Resource *resource)
     {
-        Ogre::Texture* tex = dynamic_cast<Ogre::Texture*>(resource);
+        Ogre::Texture* tex = static_cast<Ogre::Texture*>(resource);
         Ogre::ConstImagePtrList list;
         list.push_back(&mOverlayImage);
         tex->_loadImages(list);

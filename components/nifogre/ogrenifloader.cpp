@@ -799,7 +799,7 @@ class NIFObjectLoader
             {
                 if (ctrls->recType == Nif::RC_NiAlphaController)
                 {
-                    const Nif::NiAlphaController *alphaCtrl = dynamic_cast<const Nif::NiAlphaController*>(ctrls.getPtr());
+                    const Nif::NiAlphaController *alphaCtrl = static_cast<const Nif::NiAlphaController*>(ctrls.getPtr());
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW AlphaController::Value(movable, alphaCtrl->data.getPtr(), &scene->mMaterialControllerMgr));
                     AlphaController::Function* function = OGRE_NEW AlphaController::Function(alphaCtrl, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
                     scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
@@ -808,7 +808,7 @@ class NIFObjectLoader
                 }
                 else if (ctrls->recType == Nif::RC_NiMaterialColorController)
                 {
-                    const Nif::NiMaterialColorController *matCtrl = dynamic_cast<const Nif::NiMaterialColorController*>(ctrls.getPtr());
+                    const Nif::NiMaterialColorController *matCtrl = static_cast<const Nif::NiMaterialColorController*>(ctrls.getPtr());
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW MaterialColorController::Value(movable, matCtrl->data.getPtr(), &scene->mMaterialControllerMgr));
                     MaterialColorController::Function* function = OGRE_NEW MaterialColorController::Function(matCtrl, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
                     scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
@@ -826,7 +826,7 @@ class NIFObjectLoader
             {
                 if (ctrls->recType == Nif::RC_NiFlipController)
                 {
-                    const Nif::NiFlipController *flipCtrl = dynamic_cast<const Nif::NiFlipController*>(ctrls.getPtr());
+                    const Nif::NiFlipController *flipCtrl = static_cast<const Nif::NiFlipController*>(ctrls.getPtr());
 
 
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW FlipController::Value(

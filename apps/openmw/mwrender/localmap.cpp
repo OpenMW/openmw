@@ -494,7 +494,7 @@ void LocalMap::loadResource(Ogre::Resource* resource)
 
     std::vector<uint32>& buffer = mBuffers[resourceName];
 
-    Ogre::Texture* tex = dynamic_cast<Ogre::Texture*>(resource);
+    Ogre::Texture* tex = static_cast<Ogre::Texture*>(resource);
     tex->createInternalResources();
     memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
     tex->getBuffer()->unlock();

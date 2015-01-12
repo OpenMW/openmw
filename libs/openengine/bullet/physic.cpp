@@ -35,7 +35,7 @@ btCollisionShape *duplicateCollisionShape(btCollisionShape *shape)
 
     if(btBvhTriangleMeshShape *trishape = dynamic_cast<btBvhTriangleMeshShape*>(shape))
     {
-        btTriangleMesh* oldMesh = dynamic_cast<btTriangleMesh*>(trishape->getMeshInterface());
+        btTriangleMesh* oldMesh = static_cast<btTriangleMesh*>(trishape->getMeshInterface());
         btTriangleMesh* newMesh = new btTriangleMesh(*oldMesh);
         NifBullet::TriangleMeshShape *newShape = new NifBullet::TriangleMeshShape(newMesh, true);
 
