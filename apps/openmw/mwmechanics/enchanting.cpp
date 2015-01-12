@@ -171,7 +171,6 @@ namespace MWMechanics
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
             float baseCost = (store.get<ESM::MagicEffect>().find(it->mEffectID))->mData.mBaseCost;
-            // To reflect vanilla behavior
             int magMin = (it->mMagnMin == 0) ? 1 : it->mMagnMin;
             int magMax = (it->mMagnMax == 0) ? 1 : it->mMagnMax;
             int area = (it->mArea == 0) ? 1 : it->mArea;
@@ -184,17 +183,18 @@ namespace MWMechanics
             else
             {
                 magnitudeCost *= it->mDuration;
-                if(it->mRange == ESM::RT_Target)
-                    magnitudeCost *= 1.5;
             }
 
             float areaCost = area * 0.05 * baseCost;
-            if (it->mRange == ESM::RT_Target)
-                areaCost *= 1.5;
 
             const float fEffectCostMult = store.get<ESM::GameSetting>().find("fEffectCostMult")->getFloat();
 
-            enchantmentCost += (magnitudeCost + areaCost) * fEffectCostMult * effectsLeftCnt;
+            float cost = (magnitudeCost + areaCost) * fEffectCostMult;
+            if (it->mRange == ESM::RT_Target)
+                cost *= 1.5;
+
+            enchantmentCost += cost * effectsLeftCnt;
+            enchantmentCost = std::max(1.f, enchantmentCost);
             --effectsLeftCnt;
         }
 
