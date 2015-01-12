@@ -1,15 +1,20 @@
 #include "physic.hpp"
+
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include <components/nifbullet/bulletnifloader.hpp>
-#include "OgreRoot.h"
-#include "BtOgrePG.h"
-#include "BtOgreGP.h"
-#include "BtOgreExtras.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+
+#include <OgreSceneManager.h>
+
+#include <components/nifbullet/bulletnifloader.hpp>
+#include <components/misc/stringops.hpp>
+
+#include "BtOgrePG.h"
+#include "BtOgreGP.h"
+#include "BtOgreExtras.h"
 
 namespace
 {

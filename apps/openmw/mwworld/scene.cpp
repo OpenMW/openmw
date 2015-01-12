@@ -3,6 +3,7 @@
 #include <OgreSceneNode.h>
 
 #include <components/nif/niffile.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -79,8 +80,9 @@ namespace
         {
             try
             {
-                mRendering.addObject (ptr);
-                ptr.getClass().insertObject (ptr, mPhysics);
+                const std::string& model = Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr));
+                mRendering.addObject(ptr, model);
+                ptr.getClass().insertObject (ptr, model, mPhysics);
 
                 updateObjectLocalRotation(ptr, mPhysics, mRendering);
                 if (ptr.getRefData().getBaseNode())
@@ -486,8 +488,7 @@ namespace MWWorld
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();
 
-        mCellChanged = true;
-        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
+        mCellChanged = true; MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
 
@@ -529,8 +530,9 @@ namespace MWWorld
 
     void Scene::addObjectToScene (const Ptr& ptr)
     {
-        mRendering.addObject(ptr);
-        ptr.getClass().insertObject(ptr, *mPhysics);
+        const std::string& model = Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr));
+        mRendering.addObject(ptr, model);
+        ptr.getClass().insertObject (ptr, model, *mPhysics);
         MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
         MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
     }

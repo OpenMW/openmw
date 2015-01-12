@@ -128,6 +128,8 @@ private:
     btTriangleMesh* mStaticMesh;
 
     btBoxShape *mBoundingBox;
+
+    std::set<std::string> mControlledNodes;
 };
 
 

@@ -48,6 +48,57 @@ http://www.gnu.org/licenses/ .
 
 typedef unsigned char ubyte;
 
+// Extract a list of keyframe-controlled nodes from a .kf file
+// FIXME: this is a similar copy of OgreNifLoader::loadKf
+void extractControlledNodes(Nif::NIFFilePtr kfFile, std::set<std::string>& controlled)
+{
+    if(kfFile->numRoots() < 1)
+    {
+        kfFile->warn("Found no root nodes in "+kfFile->getFilename()+".");
+        return;
+    }
+
+    const Nif::Record *r = kfFile->getRoot(0);
+    assert(r != NULL);
+
+    if(r->recType != Nif::RC_NiSequenceStreamHelper)
+    {
+        kfFile->warn("First root was not a NiSequenceStreamHelper, but a "+
+                  r->recName+".");
+        return;
+    }
+    const Nif::NiSequenceStreamHelper *seq = static_cast<const Nif::NiSequenceStreamHelper*>(r);
+
+    Nif::ExtraPtr extra = seq->extra;
+    if(extra.empty() || extra->recType != Nif::RC_NiTextKeyExtraData)
+    {
+        kfFile->warn("First extra data was not a NiTextKeyExtraData, but a "+
+                  (extra.empty() ? std::string("nil") : extra->recName)+".");
+        return;
+    }
+
+    extra = extra->extra;
+    Nif::ControllerPtr ctrl = seq->controller;
+    for(;!extra.empty() && !ctrl.empty();(extra=extra->extra),(ctrl=ctrl->next))
+    {
+        if(extra->recType != Nif::RC_NiStringExtraData || ctrl->recType != Nif::RC_NiKeyframeController)
+        {
+            kfFile->warn("Unexpected extra data "+extra->recName+" with controller "+ctrl->recName);
+            continue;
+        }
+
+        if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+            continue;
+
+        const Nif::NiStringExtraData *strdata = static_cast<const Nif::NiStringExtraData*>(extra.getPtr());
+        const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
+
+        if(key->data.empty())
+            continue;
+        controlled.insert(strdata->string);
+    }
+}
+
 namespace NifBullet
 {
 
@@ -72,16 +123,25 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     mCompoundShape = NULL;
     mStaticMesh = NULL;
 
-    // Load the NIF. TODO: Wrap this in a try-catch block once we're out
-    // of the early stages of development. Right now we WANT to catch
-    // every error as early and intrusively as possible, as it's most
-    // likely a sign of incomplete code rather than faulty input.
     Nif::NIFFilePtr pnif (Nif::Cache::getInstance().load(mResourceName.substr(0, mResourceName.length()-7)));
     Nif::NIFFile & nif = *pnif.get ();
     if (nif.numRoots() < 1)
     {
         warn("Found no root nodes in NIF.");
         return;
+    }
+
+    // Have to load controlled nodes from the .kf
+    // FIXME: the .kf has to be loaded both for rendering and physics, ideally it should be opened once and then reused
+    mControlledNodes.clear();
+    std::string kfname = mResourceName.substr(0, mResourceName.length()-7);
+    Misc::StringUtils::toLower(kfname);
+    if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
+        kfname.replace(kfname.size()-4, 4, ".kf");
+    if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(kfname))
+    {
+        Nif::NIFFilePtr kf (Nif::Cache::getInstance().load(kfname));
+        extractControlledNodes(kf, mControlledNodes);
     }
 
     Nif::Record *r = nif.getRoot(0);
@@ -180,6 +240,9 @@ void ManualBulletShapeLoader::handleNode(const Nif::Node *node, int flags,
 
     if (!node->controller.empty() && node->controller->recType == Nif::RC_NiKeyframeController
             && (node->controller->flags & Nif::NiNode::ControllerFlag_Active))
+        isAnimated = true;
+
+    if (mControlledNodes.find(node->name) != mControlledNodes.end())
         isAnimated = true;
 
     if (!raycasting)
@@ -318,9 +381,9 @@ void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int
         btTransform trans(btQuaternion(q.x, q.y, q.z, q.w), btVector3(v.x, v.y, v.z));
 
         if (raycasting)
-            mShape->mAnimatedRaycastingShapes.insert(std::make_pair(shape->name, mCompoundShape->getNumChildShapes()));
+            mShape->mAnimatedRaycastingShapes.insert(std::make_pair(shape->recIndex, mCompoundShape->getNumChildShapes()));
         else
-            mShape->mAnimatedShapes.insert(std::make_pair(shape->name, mCompoundShape->getNumChildShapes()));
+            mShape->mAnimatedShapes.insert(std::make_pair(shape->recIndex, mCompoundShape->getNumChildShapes()));
 
         mCompoundShape->addChildShape(trans, childShape);
     }

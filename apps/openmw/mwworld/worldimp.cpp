@@ -18,6 +18,7 @@
 #include <components/files/collections.hpp>
 #include <components/compiler/locals.hpp>
 #include <components/esm/cellid.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <boost/math/special_functions/sign.hpp>
 
@@ -2092,7 +2093,9 @@ namespace MWWorld
         // so we should make sure not to use a "stale" controller for that.
         MWBase::Environment::get().getMechanicsManager()->add(mPlayer->getPlayer());
 
-        mPhysics->addActor(mPlayer->getPlayer());
+        std::string model = getPlayerPtr().getClass().getModel(getPlayerPtr());
+        model = Misc::ResourceHelpers::correctActorModelPath(model);
+        mPhysics->addActor(mPlayer->getPlayer(), model);
     }
 
     int World::canRest ()

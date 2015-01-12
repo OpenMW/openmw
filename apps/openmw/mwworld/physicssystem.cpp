@@ -17,6 +17,8 @@
 #include <openengine/bullet/BulletShapeLoader.h>
 
 #include <components/nifbullet/bulletnifloader.hpp>
+#include <components/nifogre/skeleton.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <components/esm/loadgmst.hpp>
 
@@ -51,25 +53,22 @@ void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Phys
             throw std::runtime_error("can't find Ptr");
 
         MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
-        if (!animation) // Shouldn't happen either, since keyframe-controlled objects are not batched in StaticGeometry
-            throw std::runtime_error("can't find Animation for " + ptr.getCellRef().getRefId());
+        if (!animation)
+            continue;
 
         OEngine::Physic::AnimatedShapeInstance& instance = it->second;
 
-        std::map<std::string, int>& shapes = instance.mAnimatedShapes;
-        for (std::map<std::string, int>::iterator shapeIt = shapes.begin();
+        std::map<int, int>& shapes = instance.mAnimatedShapes;
+        for (std::map<int, int>::iterator shapeIt = shapes.begin();
              shapeIt != shapes.end(); ++shapeIt)
         {
 
-            Ogre::Node* bone;
-            if (shapeIt->first.empty())
-                // HACK: see NifSkeletonLoader::buildBones
-                bone = animation->getNode(" ");
-            else
-                bone = animation->getNode(shapeIt->first);
+            const std::string& mesh = animation->getObjectRootName();
+            int boneHandle = NifOgre::NIFSkeletonLoader::lookupOgreBoneHandle(mesh, shapeIt->first);
+            Ogre::Node* bone = animation->getNode(boneHandle);
 
             if (bone == NULL)
-                throw std::runtime_error("can't find bone");
+                continue;
 
             btCompoundShape* compound = dynamic_cast<btCompoundShape*>(instance.mCompound);
 
@@ -689,9 +688,8 @@ namespace MWWorld
         mEngine->removeHeightField(x, y);
     }
 
-    void PhysicsSystem::addObject (const Ptr& ptr, bool placeable)
+    void PhysicsSystem::addObject (const Ptr& ptr, const std::string& mesh, bool placeable)
     {
-        std::string mesh = ptr.getClass().getModel(ptr);
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         handleToMesh[node->getName()] = mesh;
         mEngine->createAndAdjustRigidBody(
@@ -700,9 +698,8 @@ namespace MWWorld
             mesh, node->getName(), ptr.getCellRef().getScale(), node->getPosition(), node->getOrientation(), 0, 0, true, placeable);
     }
 
-    void PhysicsSystem::addActor (const Ptr& ptr)
+    void PhysicsSystem::addActor (const Ptr& ptr, const std::string& mesh)
     {
-        std::string mesh = ptr.getClass().getModel(ptr);
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         //TODO:optimize this. Searching the std::map isn't very efficient i think.
         mEngine->addCharacter(node->getName(), mesh, node->getPosition(), node->getScale().x, node->getOrientation());
@@ -773,13 +770,16 @@ namespace MWWorld
         const std::string &handle = node->getName();
         if(handleToMesh.find(handle) != handleToMesh.end())
         {
+            std::string model = ptr.getClass().getModel(ptr);
+            model = Misc::ResourceHelpers::correctActorModelPath(model); // FIXME: scaling shouldn't require model
+
             bool placeable = false;
             if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle,true))
                 placeable = body->mPlaceable;
             else if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle,false))
                 placeable = body->mPlaceable;
             removeObject(handle);
-            addObject(ptr, placeable);
+            addObject(ptr, model, placeable);
         }
 
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
@@ -820,6 +820,7 @@ namespace MWWorld
     bool PhysicsSystem::getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max)
     {
         std::string model = ptr.getClass().getModel(ptr);
+        model = Misc::ResourceHelpers::correctActorModelPath(model);
         if (model.empty()) {
             return false;
         }

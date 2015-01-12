@@ -256,10 +256,10 @@ void RenderingManager::cellAdded (MWWorld::CellStore *store)
     mDebugging->cellAdded(store);
 }
 
-void RenderingManager::addObject (const MWWorld::Ptr& ptr){
+void RenderingManager::addObject (const MWWorld::Ptr& ptr, const std::string& model){
     const MWWorld::Class& class_ =
             ptr.getClass();
-    class_.insertObjectRendering(ptr, *this);
+    class_.insertObjectRendering(ptr, model, *this);
 }
 
 void RenderingManager::removeObject (const MWWorld::Ptr& ptr)

@@ -54,26 +54,24 @@ namespace MWClass
         return ptr.get<ESM::Light>()->mBase->mId;
     }
 
-    void Light::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Light::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         // Insert even if model is empty, so that the light is added
         MWRender::Actors& actors = renderingInterface.getActors();
-        actors.insertActivator(ptr, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
+        actors.insertActivator(ptr, model, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
     }
 
-    void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Light::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
         assert (ref->mBase != NULL);
 
-        const std::string &model = ref->mBase->mModel;
-
         if(!model.empty())
-            physics.addObject(ptr,ref->mBase->mData.mFlags & ESM::Light::Carry);
+            physics.addObject(ptr, model, ref->mBase->mData.mFlags & ESM::Light::Carry);
 
         if (!ref->mBase->mSound.empty() && !(ref->mBase->mData.mFlags & ESM::Light::OffDefault))
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0,

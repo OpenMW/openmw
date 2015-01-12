@@ -160,20 +160,19 @@ namespace MWClass
         MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
     }
 
-    void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         MWRender::Actors& actors = renderingInterface.getActors();
-        actors.insertCreature(ptr, ref->mBase->mFlags & ESM::Creature::Weapon);
+        actors.insertCreature(ptr, model, ref->mBase->mFlags & ESM::Creature::Weapon);
     }
 
-    void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Creature::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
         {
-            physics.addActor(ptr);
+            physics.addActor(ptr, model);
             if (getCreatureStats(ptr).isDead())
                 MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
         }

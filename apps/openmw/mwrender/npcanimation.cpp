@@ -12,6 +12,8 @@
 
 #include <extern/shiny/Main/Factory.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
@@ -282,6 +284,7 @@ void NpcAnimation::updateNpcBase()
                          (!isWerewolf ? !isBeast ? "meshes\\base_anim.1st.nif"
                                                  : "meshes\\base_animkna.1st.nif"
                                       : "meshes\\wolf\\skin.1st.nif");
+    smodel = Misc::ResourceHelpers::correctActorModelPath(smodel);
     setObjectRoot(smodel, true);
 
     if(mViewMode != VM_FirstPerson)
@@ -290,11 +293,11 @@ void NpcAnimation::updateNpcBase()
         if(!isWerewolf)
         {
             if(Misc::StringUtils::lowerCase(mNpc->mRace).find("argonian") != std::string::npos)
-                addAnimSource("meshes\\argonian_swimkna.nif");
+                addAnimSource("meshes\\xargonian_swimkna.nif");
             else if(!mNpc->isMale() && !isBeast)
-                addAnimSource("meshes\\base_anim_female.nif");
+                addAnimSource("meshes\\xbase_anim_female.nif");
             if(mNpc->mModel.length() > 0)
-                addAnimSource("meshes\\"+mNpc->mModel);
+                addAnimSource("meshes\\x"+mNpc->mModel);
         }
     }
     else
@@ -306,11 +309,11 @@ void NpcAnimation::updateNpcBase()
             /* A bit counter-intuitive, but unlike third-person anims, it seems
              * beast races get both base_anim.1st.nif and base_animkna.1st.nif.
              */
-            addAnimSource("meshes\\base_anim.1st.nif");
+            addAnimSource("meshes\\xbase_anim.1st.nif");
             if(isBeast)
-                addAnimSource("meshes\\base_animkna.1st.nif");
+                addAnimSource("meshes\\xbase_animkna.1st.nif");
             if(!mNpc->isMale() && !isBeast)
-                addAnimSource("meshes\\base_anim_female.1st.nif");
+                addAnimSource("meshes\\xbase_anim_female.1st.nif");
         }
     }
 

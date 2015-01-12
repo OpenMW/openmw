@@ -81,8 +81,8 @@ namespace MWWorld
             ///< Return ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
 
-            virtual void insertObjectRendering (const Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
-            virtual void insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
+            virtual void insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const;
+            virtual void insertObject(const Ptr& ptr, const std::string& mesh, MWWorld::PhysicsSystem& physics) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
             virtual std::string getName (const Ptr& ptr) const = 0;

@@ -121,3 +121,20 @@ std::string Misc::ResourceHelpers::correctBookartPath(const std::string &resPath
 
     return image;
 }
+
+std::string Misc::ResourceHelpers::correctActorModelPath(const std::string &resPath)
+{
+    std::string mdlname = resPath;
+    std::string::size_type p = mdlname.rfind('\\');
+    if(p == std::string::npos)
+        p = mdlname.rfind('/');
+    if(p != std::string::npos)
+        mdlname.insert(mdlname.begin()+p+1, 'x');
+    else
+        mdlname.insert(mdlname.begin(), 'x');
+    if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(mdlname))
+    {
+        return resPath;
+    }
+    return mdlname;
+}
