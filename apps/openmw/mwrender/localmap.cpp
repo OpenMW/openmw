@@ -200,7 +200,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
 
     // Get the cell's NorthMarker rotation. This is used to rotate the entire map.
     const Vector2& north = MWBase::Environment::get().getWorld()->getNorthVector(cell);
-    Radian angle = Ogre::Math::ATan2 (north.x, north.y) + Ogre::Degree(2);
+    Radian angle = Ogre::Math::ATan2 (north.x, north.y);
     mAngle = angle.valueRadians();
 
     // Rotate the cell and merge the rotated corners to the bounding box
