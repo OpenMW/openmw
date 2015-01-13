@@ -39,7 +39,7 @@ namespace Terrain
         return buffer;
     }
 
-    Ogre::HardwareIndexBufferSharedPtr BufferCache::getIndexBuffer(int flags)
+    Ogre::HardwareIndexBufferSharedPtr BufferCache::getIndexBuffer(unsigned int flags)
     {
         unsigned int verts = mNumVerts;
 
