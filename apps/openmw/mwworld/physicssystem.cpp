@@ -289,7 +289,7 @@ namespace MWWorld
 
             // Reset per-frame data
             physicActor->setWalkingOnWater(false);
-            /* Anything to collide with? */
+            // Anything to collide with?
             if(!physicActor->getCollisionMode())
             {
                 return position +  (Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
@@ -317,12 +317,11 @@ namespace MWWorld
              */
 
             OEngine::Physic::ActorTracer tracer;
-            Ogre::Vector3 inertia(0.0f);
+            Ogre::Vector3 inertia = physicActor->getInertialForce();
             Ogre::Vector3 velocity;
 
-            if(position.z < waterlevel || isFlying) // under water by 3/4 or can fly
+            if(position.z < waterlevel || isFlying)
             {
-                // TODO: Shouldn't water have higher drag in calculating velocity?
                 velocity = (Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z)*
                             Ogre::Quaternion(Ogre::Radian(refpos.rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X)) * movement;
             }
@@ -330,25 +329,12 @@ namespace MWWorld
             {
                 velocity = Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) * movement;
 
-                // not in water nor can fly, so need to deal with gravity
-                if(!physicActor->getOnGround()) // if current OnGround status is false, must be falling or jumping
+                if (velocity.z > 0.f)
+                    inertia = velocity;
+                if(!physicActor->getOnGround())
                 {
-                    // If falling or jumping up, add part of the incoming velocity with the current inertia,
-                    // but don't allow increasing inertia beyond actor's speed (except on the initial jump impulse)
-                    float actorSpeed = ptr.getClass().getSpeed(ptr);
-                    float cap = std::max(actorSpeed, Ogre::Vector2(physicActor->getInertialForce().x, physicActor->getInertialForce().y).length());
-                    Ogre::Vector3 newVelocity = velocity + physicActor->getInertialForce();
-                    if (Ogre::Vector2(newVelocity.x, newVelocity.y).squaredLength() > cap*cap)
-                    {
-                        velocity = newVelocity;
-                        float speedXY = Ogre::Vector2(velocity.x, velocity.y).length();
-                        velocity.x *= cap / speedXY;
-                        velocity.y *= cap / speedXY;
-                    }
-                    else
-                        velocity = newVelocity;
+                    velocity = velocity + physicActor->getInertialForce();
                 }
-                inertia = velocity; // NOTE: velocity is for z axis only in this code block
             }
             ptr.getClass().getMovementSettings(ptr).mPosition[2] = 0;
 
@@ -371,7 +357,6 @@ namespace MWWorld
             float remainingTime = time;
             for(int iterations = 0; iterations < sMaxIterations && remainingTime > 0.01f; ++iterations)
             {
-                // NOTE: velocity is either z axis only or x & z axis
                 Ogre::Vector3 nextpos = newPosition + velocity * remainingTime;
 
                 // If not able to fly, don't allow to swim up into the air
@@ -482,7 +467,7 @@ namespace MWWorld
                     // so that we do not stay suspended in air indefinitely.
                     if (tracer.mFraction < 1.0f && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup == OEngine::Physic::CollisionType_Actor)
                     {
-                        if (Ogre::Vector3(inertia.x, inertia.y, 0).squaredLength() < 100.f*100.f)
+                        if (Ogre::Vector3(velocity.x, velocity.y, 0).squaredLength() < 100.f*100.f)
                         {
                             btVector3 aabbMin, aabbMax;
                             tracer.mHitObject->getCollisionShape()->getAabb(tracer.mHitObject->getWorldTransform(), aabbMin, aabbMax);
@@ -508,7 +493,7 @@ namespace MWWorld
             }
             physicActor->setOnGround(isOnGround);
 
-            newPosition.z -= halfExtents.z; // remove what was added at the beggining
+            newPosition.z -= halfExtents.z; // remove what was added at the beginning
             return newPosition;
         }
     };

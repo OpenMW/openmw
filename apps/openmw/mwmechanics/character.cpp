@@ -1496,12 +1496,12 @@ void CharacterController::update(float duration)
             forcestateupdate = (mJumpState != JumpState_InAir);
             mJumpState = JumpState_InAir;
 
-            // This is a guess. All that seems to be known is that "While the player is in the
-            // air, fJumpMoveBase and fJumpMoveMult governs air control". What does fJumpMoveMult do?
             static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->getFloat();
-
-            vec.x *= fJumpMoveBase;
-            vec.y *= fJumpMoveBase;
+            static const float fJumpMoveMult = gmst.find("fJumpMoveMult")->getFloat();
+            float factor = fJumpMoveBase + fJumpMoveMult * mPtr.getClass().getSkill(mPtr, ESM::Skill::Acrobatics)/100.f;
+            factor = std::min(1.f, factor);
+            vec.x *= factor;
+            vec.y *= factor;
             vec.z  = 0.0f;
         }
         else if(vec.z > 0.0f && mJumpState == JumpState_None)
