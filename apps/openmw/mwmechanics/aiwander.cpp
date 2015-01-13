@@ -311,14 +311,18 @@ namespace MWMechanics
                 && actor.getRefData().getPosition().pos[2] < 3000 &&
                 MWBase::Environment::get().getSoundManager()->sayDone(actor))
         {
-            float roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 10000; // [0, 9999]
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
-            // Don't bother if the player is out of hearing range
             static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
                     .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
 
-            float x = fVoiceIdleOdds * MWBase::Environment::get().getFrameDuration();
+            float roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 10000;
+
+            // In vanilla MW the chance was FPS dependent, and did not allow proper changing of fVoiceIdleOdds
+            // due to the roll being an integer.
+            // Our implementation does not have these issues, so needs to be recalibrated. We chose to
+            // use the chance MW would have when run at 60 FPS with the default value of the GMST for calibration.
+            float x = fVoiceIdleOdds * 0.6 * (MWBase::Environment::get().getFrameDuration() / 0.1);
 
             // Only say Idle voices when player is in LOS
             // A bit counterintuitive, likely vanilla did this to reduce the appearance of
