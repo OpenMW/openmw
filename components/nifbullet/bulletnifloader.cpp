@@ -274,10 +274,9 @@ void ManualBulletShapeLoader::handleNode(const Nif::Node *node, int flags,
                 // No collision. Use an internal flag setting to mark this.
                 flags |= 0x800;
             }
-            else if (sd->string == "MRK")
+            else if (sd->string == "MRK" && !mShowMarkers)
                 // Marker objects. These are only visible in the
-                // editor. Until and unless we add an editor component to
-                // the engine, just skip this entire node.
+                // editor.
                 return;
         }
     }

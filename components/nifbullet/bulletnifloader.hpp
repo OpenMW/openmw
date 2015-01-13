@@ -67,11 +67,12 @@ struct TriangleMeshShape : public btBvhTriangleMeshShape
 class ManualBulletShapeLoader : public OEngine::Physic::BulletShapeLoader
 {
 public:
-    ManualBulletShapeLoader()
+    ManualBulletShapeLoader(bool showMarkers=false)
       : mShape(NULL)
       , mStaticMesh(NULL)
       , mCompoundShape(NULL)
       , mBoundingBox(NULL)
+      , mShowMarkers(showMarkers)
     {
     }
 
@@ -130,6 +131,8 @@ private:
     btBoxShape *mBoundingBox;
 
     std::set<std::string> mControlledNodes;
+
+    bool mShowMarkers;
 };
 
 

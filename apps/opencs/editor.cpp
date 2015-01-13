@@ -15,7 +15,7 @@
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
 #include <components/ogreinit/ogreinit.hpp>
-
+#include <components/nifogre/ogrenifloader.hpp>
 #include <components/bsa/resources.hpp>
 
 #include "model/doc/document.hpp"
@@ -34,6 +34,8 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     mSettings.setModel (CSMSettings::UserSettings::instance());
 
     ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
+
+    NifOgre::Loader::setShowMarkers(true);
 
     mOverlaySystem.reset (new CSVRender::OverlaySystem);
 

@@ -110,10 +110,18 @@ public:
                                        std::string name,
                                        const std::string &group="General");
 
+    /// Set whether or not nodes marked as "MRK" should be shown.
+    /// These should be hidden ingame, but visible in the editior.
+    /// Default: false.
+    static void setShowMarkers(bool show);
+
     static void createKfControllers(Ogre::Entity *skelBase,
                                     const std::string &name,
                                     TextKeyMap &textKeys,
                                     std::vector<Ogre::Controller<Ogre::Real> > &ctrls);
+
+private:
+    static bool sShowMarkers;
 };
 
 // FIXME: Should be with other general Ogre extensions.
