@@ -342,49 +342,49 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
         case ESM::AiSequence::Ai_Wander:
         {
             MWMechanics::AiWander* wander = new AiWander(
-                        dynamic_cast<ESM::AiSequence::AiWander*>(it->mPackage));
+                        static_cast<ESM::AiSequence::AiWander*>(it->mPackage));
             mPackages.push_back(wander);
             break;
         }
         case ESM::AiSequence::Ai_Travel:
         {
             MWMechanics::AiTravel* travel = new AiTravel(
-                        dynamic_cast<ESM::AiSequence::AiTravel*>(it->mPackage));
+                        static_cast<ESM::AiSequence::AiTravel*>(it->mPackage));
             mPackages.push_back(travel);
             break;
         }
         case ESM::AiSequence::Ai_Escort:
         {
             MWMechanics::AiEscort* escort = new AiEscort(
-                        dynamic_cast<ESM::AiSequence::AiEscort*>(it->mPackage));
+                        static_cast<ESM::AiSequence::AiEscort*>(it->mPackage));
             mPackages.push_back(escort);
             break;
         }
         case ESM::AiSequence::Ai_Follow:
         {
             MWMechanics::AiFollow* follow = new AiFollow(
-                        dynamic_cast<ESM::AiSequence::AiFollow*>(it->mPackage));
+                        static_cast<ESM::AiSequence::AiFollow*>(it->mPackage));
             mPackages.push_back(follow);
             break;
         }
         case ESM::AiSequence::Ai_Activate:
         {
             MWMechanics::AiActivate* activate = new AiActivate(
-                        dynamic_cast<ESM::AiSequence::AiActivate*>(it->mPackage));
+                        static_cast<ESM::AiSequence::AiActivate*>(it->mPackage));
             mPackages.push_back(activate);
             break;
         }
         case ESM::AiSequence::Ai_Combat:
         {
             MWMechanics::AiCombat* combat = new AiCombat(
-                        dynamic_cast<ESM::AiSequence::AiCombat*>(it->mPackage));
+                        static_cast<ESM::AiSequence::AiCombat*>(it->mPackage));
             mPackages.push_back(combat);
             break;
         }
         case ESM::AiSequence::Ai_Pursue:
         {
             MWMechanics::AiPursue* pursue = new AiPursue(
-                        dynamic_cast<ESM::AiSequence::AiPursue*>(it->mPackage));
+                        static_cast<ESM::AiSequence::AiPursue*>(it->mPackage));
             mPackages.push_back(pursue);
             break;
         }

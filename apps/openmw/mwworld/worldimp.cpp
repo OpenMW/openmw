@@ -18,6 +18,7 @@
 #include <components/files/collections.hpp>
 #include <components/compiler/locals.hpp>
 #include <components/esm/cellid.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <boost/math/special_functions/sign.hpp>
 
@@ -309,6 +310,11 @@ namespace MWWorld
             +1; // camera
     }
 
+    int World::countSavedGameCells() const
+    {
+        return mCells.countSavedGameRecords();
+    }
+
     void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
         // Active cells could have a dirty fog of war, sync it to the CellStore first
@@ -320,7 +326,6 @@ namespace MWWorld
         }
 
         MWMechanics::CreatureStats::writeActorIdCounter(writer);
-        progress.increaseProgress();
 
         mStore.write (writer, progress); // dynamic Store must be written (and read) before Cells, so that
                                          // references to custom made records will be recognized
@@ -334,12 +339,10 @@ namespace MWWorld
         writer.writeHNT("TELE", mTeleportEnabled);
         writer.writeHNT("LEVT", mLevitationEnabled);
         writer.endRecord(ESM::REC_ENAB);
-        progress.increaseProgress();
 
         writer.startRecord(ESM::REC_CAM_);
         writer.writeHNT("FIRS", isFirstPerson());
         writer.endRecord(ESM::REC_CAM_);
-        progress.increaseProgress();
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type,
@@ -354,12 +357,6 @@ namespace MWWorld
                 reader.getHNT(mTeleportEnabled, "TELE");
                 reader.getHNT(mLevitationEnabled, "LEVT");
                 return;
-            case ESM::REC_CAM_:
-                bool firstperson;
-                reader.getHNT(firstperson, "FIRS");
-                if (firstperson != isFirstPerson())
-                    togglePOV();
-                break;
             default:
                 if (!mStore.readRecord (reader, type) &&
                     !mGlobalVariables.readRecord (reader, type) &&
@@ -2096,7 +2093,9 @@ namespace MWWorld
         // so we should make sure not to use a "stale" controller for that.
         MWBase::Environment::get().getMechanicsManager()->add(mPlayer->getPlayer());
 
-        mPhysics->addActor(mPlayer->getPlayer());
+        std::string model = getPlayerPtr().getClass().getModel(getPlayerPtr());
+        model = Misc::ResourceHelpers::correctActorModelPath(model);
+        mPhysics->addActor(mPlayer->getPlayer(), model);
     }
 
     int World::canRest ()

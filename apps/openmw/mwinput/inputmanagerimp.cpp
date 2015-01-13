@@ -302,22 +302,8 @@ namespace MWInput
         }
     }
 
-    void InputManager::update(float dt, bool disableControls, bool disableEvents)
+    void InputManager::updateCursorMode()
     {
-        mControlsDisabled = disableControls;
-
-        mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
-
-        mInputManager->capture(disableEvents);
-        // inject some fake mouse movement to force updating MyGUI's widget states
-        MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
-
-        if (mControlsDisabled)
-            return;
-
-        // update values of channels (as a result of pressed keys)
-        mInputBinder->update(dt);
-
         bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
              && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console;
 
@@ -337,6 +323,28 @@ namespace MWInput
         {
             mInputManager->warpMouse(mMouseX, mMouseY);
         }
+    }
+
+    void InputManager::update(float dt, bool disableControls, bool disableEvents)
+    {
+        mControlsDisabled = disableControls;
+
+        mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
+
+        mInputManager->capture(disableEvents);
+        // inject some fake mouse movement to force updating MyGUI's widget states
+        MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
+
+        if (mControlsDisabled)
+        {
+            updateCursorMode();
+            return;
+        }
+
+        // update values of channels (as a result of pressed keys)
+        mInputBinder->update(dt);
+
+        updateCursorMode();
 
         // Disable movement in Gui mode
         if (!(MWBase::Environment::get().getWindowManager()->isGuiMode()

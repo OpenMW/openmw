@@ -142,7 +142,6 @@ namespace MWScript
             writer.startRecord (ESM::REC_GSCR);
             script.save (writer);
             writer.endRecord (ESM::REC_GSCR);
-            progress.increaseProgress();
         }
     }
 

@@ -38,12 +38,12 @@ namespace MWWorld
         throw std::runtime_error ("class does not support ID retrieval");
     }
 
-    void Class::insertObjectRendering (const Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Class::insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const
     {
 
     }
 
-    void Class::insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Class::insertObject(const Ptr& ptr, const std::string& mesh, MWWorld::PhysicsSystem& physics) const
     {
 
     }

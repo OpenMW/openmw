@@ -318,8 +318,6 @@ namespace MWWorld
             state.save(writer);
 
             writer.endRecord(ESM::REC_PROJ);
-
-            progress.increaseProgress();
         }
 
         for (std::vector<MagicBoltState>::const_iterator it = mMagicBolts.begin(); it != mMagicBolts.end(); ++it)
@@ -342,8 +340,6 @@ namespace MWWorld
             state.save(writer);
 
             writer.endRecord(ESM::REC_MPRJ);
-
-            progress.increaseProgress();
         }
     }
 

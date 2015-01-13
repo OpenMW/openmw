@@ -17,6 +17,8 @@
 #include <openengine/bullet/BulletShapeLoader.h>
 
 #include <components/nifbullet/bulletnifloader.hpp>
+#include <components/nifogre/skeleton.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <components/esm/loadgmst.hpp>
 
@@ -51,25 +53,22 @@ void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Phys
             throw std::runtime_error("can't find Ptr");
 
         MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
-        if (!animation) // Shouldn't happen either, since keyframe-controlled objects are not batched in StaticGeometry
-            throw std::runtime_error("can't find Animation for " + ptr.getCellRef().getRefId());
+        if (!animation)
+            continue;
 
         OEngine::Physic::AnimatedShapeInstance& instance = it->second;
 
-        std::map<std::string, int>& shapes = instance.mAnimatedShapes;
-        for (std::map<std::string, int>::iterator shapeIt = shapes.begin();
+        std::map<int, int>& shapes = instance.mAnimatedShapes;
+        for (std::map<int, int>::iterator shapeIt = shapes.begin();
              shapeIt != shapes.end(); ++shapeIt)
         {
 
-            Ogre::Node* bone;
-            if (shapeIt->first.empty())
-                // HACK: see NifSkeletonLoader::buildBones
-                bone = animation->getNode(" ");
-            else
-                bone = animation->getNode(shapeIt->first);
+            const std::string& mesh = animation->getObjectRootName();
+            int boneHandle = NifOgre::NIFSkeletonLoader::lookupOgreBoneHandle(mesh, shapeIt->first);
+            Ogre::Node* bone = animation->getNode(boneHandle);
 
             if (bone == NULL)
-                throw std::runtime_error("can't find bone");
+                continue;
 
             btCompoundShape* compound = dynamic_cast<btCompoundShape*>(instance.mCompound);
 
@@ -290,7 +289,7 @@ namespace MWWorld
 
             // Reset per-frame data
             physicActor->setWalkingOnWater(false);
-            /* Anything to collide with? */
+            // Anything to collide with?
             if(!physicActor->getCollisionMode())
             {
                 return position +  (Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
@@ -318,12 +317,11 @@ namespace MWWorld
              */
 
             OEngine::Physic::ActorTracer tracer;
-            Ogre::Vector3 inertia(0.0f);
+            Ogre::Vector3 inertia = physicActor->getInertialForce();
             Ogre::Vector3 velocity;
 
-            if(position.z < waterlevel || isFlying) // under water by 3/4 or can fly
+            if(position.z < waterlevel || isFlying)
             {
-                // TODO: Shouldn't water have higher drag in calculating velocity?
                 velocity = (Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z)*
                             Ogre::Quaternion(Ogre::Radian(refpos.rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X)) * movement;
             }
@@ -331,25 +329,12 @@ namespace MWWorld
             {
                 velocity = Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) * movement;
 
-                // not in water nor can fly, so need to deal with gravity
-                if(!physicActor->getOnGround()) // if current OnGround status is false, must be falling or jumping
+                if (velocity.z > 0.f)
+                    inertia = velocity;
+                if(!physicActor->getOnGround())
                 {
-                    // If falling or jumping up, add part of the incoming velocity with the current inertia,
-                    // but don't allow increasing inertia beyond actor's speed (except on the initial jump impulse)
-                    float actorSpeed = ptr.getClass().getSpeed(ptr);
-                    float cap = std::max(actorSpeed, Ogre::Vector2(physicActor->getInertialForce().x, physicActor->getInertialForce().y).length());
-                    Ogre::Vector3 newVelocity = velocity + physicActor->getInertialForce();
-                    if (Ogre::Vector2(newVelocity.x, newVelocity.y).squaredLength() > cap*cap)
-                    {
-                        velocity = newVelocity;
-                        float speedXY = Ogre::Vector2(velocity.x, velocity.y).length();
-                        velocity.x *= cap / speedXY;
-                        velocity.y *= cap / speedXY;
-                    }
-                    else
-                        velocity = newVelocity;
+                    velocity = velocity + physicActor->getInertialForce();
                 }
-                inertia = velocity; // NOTE: velocity is for z axis only in this code block
             }
             ptr.getClass().getMovementSettings(ptr).mPosition[2] = 0;
 
@@ -372,7 +357,6 @@ namespace MWWorld
             float remainingTime = time;
             for(int iterations = 0; iterations < sMaxIterations && remainingTime > 0.01f; ++iterations)
             {
-                // NOTE: velocity is either z axis only or x & z axis
                 Ogre::Vector3 nextpos = newPosition + velocity * remainingTime;
 
                 // If not able to fly, don't allow to swim up into the air
@@ -483,7 +467,7 @@ namespace MWWorld
                     // so that we do not stay suspended in air indefinitely.
                     if (tracer.mFraction < 1.0f && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup == OEngine::Physic::CollisionType_Actor)
                     {
-                        if (Ogre::Vector3(inertia.x, inertia.y, 0).squaredLength() < 100.f*100.f)
+                        if (Ogre::Vector3(velocity.x, velocity.y, 0).squaredLength() < 100.f*100.f)
                         {
                             btVector3 aabbMin, aabbMax;
                             tracer.mHitObject->getCollisionShape()->getAabb(tracer.mHitObject->getWorldTransform(), aabbMin, aabbMax);
@@ -509,7 +493,7 @@ namespace MWWorld
             }
             physicActor->setOnGround(isOnGround);
 
-            newPosition.z -= halfExtents.z; // remove what was added at the beggining
+            newPosition.z -= halfExtents.z; // remove what was added at the beginning
             return newPosition;
         }
     };
@@ -689,9 +673,8 @@ namespace MWWorld
         mEngine->removeHeightField(x, y);
     }
 
-    void PhysicsSystem::addObject (const Ptr& ptr, bool placeable)
+    void PhysicsSystem::addObject (const Ptr& ptr, const std::string& mesh, bool placeable)
     {
-        std::string mesh = ptr.getClass().getModel(ptr);
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         handleToMesh[node->getName()] = mesh;
         mEngine->createAndAdjustRigidBody(
@@ -700,9 +683,8 @@ namespace MWWorld
             mesh, node->getName(), ptr.getCellRef().getScale(), node->getPosition(), node->getOrientation(), 0, 0, true, placeable);
     }
 
-    void PhysicsSystem::addActor (const Ptr& ptr)
+    void PhysicsSystem::addActor (const Ptr& ptr, const std::string& mesh)
     {
-        std::string mesh = ptr.getClass().getModel(ptr);
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         //TODO:optimize this. Searching the std::map isn't very efficient i think.
         mEngine->addCharacter(node->getName(), mesh, node->getPosition(), node->getScale().x, node->getOrientation());
@@ -773,13 +755,16 @@ namespace MWWorld
         const std::string &handle = node->getName();
         if(handleToMesh.find(handle) != handleToMesh.end())
         {
+            std::string model = ptr.getClass().getModel(ptr);
+            model = Misc::ResourceHelpers::correctActorModelPath(model); // FIXME: scaling shouldn't require model
+
             bool placeable = false;
             if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle,true))
                 placeable = body->mPlaceable;
             else if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle,false))
                 placeable = body->mPlaceable;
             removeObject(handle);
-            addObject(ptr, placeable);
+            addObject(ptr, model, placeable);
         }
 
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
@@ -820,6 +805,7 @@ namespace MWWorld
     bool PhysicsSystem::getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max)
     {
         std::string model = ptr.getClass().getModel(ptr);
+        model = Misc::ResourceHelpers::correctActorModelPath(model);
         if (model.empty()) {
             return false;
         }

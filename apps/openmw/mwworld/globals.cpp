@@ -85,7 +85,6 @@ namespace MWWorld
             writer.writeHNString ("NAME", iter->first);
             iter->second.write (writer, ESM::Variant::Format_Global);
             writer.endRecord (ESM::REC_GLOB);
-            progress.increaseProgress();
         }
     }
 

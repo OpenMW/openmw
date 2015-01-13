@@ -221,7 +221,8 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         writer.save (stream);
 
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
-        listener.setProgressRange(recordCount);
+        // Using only Cells for progress information, since they typically have the largest records by far
+        listener.setProgressRange(MWBase::Environment::get().getWorld()->countSavedGameCells());
         listener.setLabel("#{sNotifyMessage4}");
 
         Loading::ScopedLoad load(&listener);
@@ -229,7 +230,6 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         writer.startRecord (ESM::REC_SAVE);
         slot->mProfile.save (writer);
         writer.endRecord (ESM::REC_SAVE);
-        listener.increaseProgress();
 
         MWBase::Environment::get().getJournal()->write (writer, listener);
         MWBase::Environment::get().getDialogueManager()->write (writer, listener);
@@ -337,11 +337,15 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
 
-        listener.setProgressRange(reader.getRecordCount());
+        listener.setProgressRange(100);
         listener.setLabel("#{sLoadingMessage14}");
 
         Loading::ScopedLoad load(&listener);
 
+        bool firstPersonCam = false;
+
+        size_t total = reader.getFileSize();
+        int currentPercent = 0;
         while (reader.hasMoreRecs())
         {
             ESM::NAME n = reader.getRecName();
@@ -394,9 +398,11 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 case ESM::REC_ENAB:
                 case ESM::REC_LEVC:
                 case ESM::REC_LEVI:
-                case ESM::REC_CAM_:
+                    MWBase::Environment::get().getWorld()->readRecord(reader, n.val, contentFileMap);
+                    break;
 
-                    MWBase::Environment::get().getWorld()->readRecord (reader, n.val, contentFileMap);
+                case ESM::REC_CAM_:
+                    reader.getHNT(firstPersonCam, "FIRS");
                     break;
 
                 case ESM::REC_GSCR:
@@ -423,7 +429,12 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                     std::cerr << "Ignoring unknown record: " << n.name << std::endl;
                     reader.skipRecord();
             }
-            listener.increaseProgress();
+            int progressPercent = static_cast<int>(float(reader.getFileOffset())/total*100);
+            if (progressPercent > currentPercent)
+            {
+                listener.increaseProgress(progressPercent-currentPercent);
+                currentPercent = progressPercent;
+            }
         }
 
         mCharacterManager.setCurrentCharacter(character);
@@ -439,6 +450,9 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         MWBase::Environment::get().getWindowManager()->updatePlayer();
         MWBase::Environment::get().getMechanicsManager()->playerLoaded();
 
+        if (firstPersonCam != MWBase::Environment::get().getWorld()->isFirstPerson())
+            MWBase::Environment::get().getWorld()->togglePOV();
+
         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
@@ -446,7 +460,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
         MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false);
 
-        // Vanilla MW will restart startup scripts when a save game is loaded. This is unintuive,
+        // Vanilla MW will restart startup scripts when a save game is loaded. This is unintuitive,
         // but some mods may be using it as a reload detector.
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
 
@@ -472,8 +486,11 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 void MWState::StateManager::quickLoad()
 {
     if (Character* mCurrentCharacter = getCurrentCharacter (false))
-        if (const MWState::Slot* slot = &*mCurrentCharacter->begin()) //Get newest save
-            loadGame (mCurrentCharacter, slot->mPath.string());
+    {
+        if (mCurrentCharacter->begin() == mCurrentCharacter->end())
+            return;
+        loadGame (mCurrentCharacter, mCurrentCharacter->begin()->mPath.string()); //Get newest save
+    }
 }
 
 void MWState::StateManager::deleteGame(const MWState::Character *character, const MWState::Slot *slot)
@@ -534,8 +551,8 @@ bool MWState::StateManager::verifyProfile(const ESM::SavedGame& profile) const
         if (std::find(selectedContentFiles.begin(), selectedContentFiles.end(), *it)
                 == selectedContentFiles.end())
         {
+            std::cerr << "Savegame dependency " << *it << " is missing." << std::endl;
             notFound = true;
-            break;
         }
     }
     if (notFound)

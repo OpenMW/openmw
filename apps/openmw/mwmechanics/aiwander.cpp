@@ -9,6 +9,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -301,26 +302,30 @@ namespace MWMechanics
                 playIdle(actor, playedIdle);
                 chooseAction = false;
                 idleNow = true;
-
-                // Play idle voiced dialogue entries randomly
-                int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
-                if (hello > 0)
-                {
-                    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
-                    // Don't bother if the player is out of hearing range
-                    static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
-                            .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
-
-                    // Only say Idle voices when player is in LOS
-                    // A bit counterintuitive, likely vanilla did this to reduce the appearance of
-                    // voices going through walls?
-                    if (roll < fVoiceIdleOdds && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos)) < 1500*1500
-                            && MWBase::Environment::get().getWorld()->getLOS(player, actor))
-                        MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
-                }
             }
+        }
+
+        // Play idle voiced dialogue entries randomly
+        int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
+        if (hello > 0 && !MWBase::Environment::get().getWorld()->isSwimming(actor)
+                && actor.getRefData().getPosition().pos[2] < 3000 &&
+                MWBase::Environment::get().getSoundManager()->sayDone(actor))
+        {
+            float roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 10000; // [0, 9999]
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+            // Don't bother if the player is out of hearing range
+            static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
+                    .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
+
+            float x = fVoiceIdleOdds * MWBase::Environment::get().getFrameDuration();
+
+            // Only say Idle voices when player is in LOS
+            // A bit counterintuitive, likely vanilla did this to reduce the appearance of
+            // voices going through walls?
+            if (roll < x && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos)) < 1500*1500
+                    && MWBase::Environment::get().getWorld()->getLOS(player, actor))
+                MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
         }
 
         float& lastReaction = storage.mReaction;
@@ -477,10 +482,8 @@ namespace MWMechanics
             
             if (greetingState == MWMechanics::AiWander::Greet_Done)
             {
-                static float fGreetDistanceReset = MWBase::Environment::get().getWorld()->getStore()
-                        .get<ESM::GameSetting>().find("fGreetDistanceReset")->getFloat();
-
-                if (playerDistSqr >= fGreetDistanceReset*fGreetDistanceReset)
+                float resetDist = 2*helloDistance;
+                if (playerDistSqr >= resetDist*resetDist)
                     greetingState = Greet_None;
             }
         }

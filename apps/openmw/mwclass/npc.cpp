@@ -428,14 +428,14 @@ namespace MWClass
         MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
     }
 
-    void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         renderingInterface.getActors().insertNPC(ptr);
     }
 
-    void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Npc::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        physics.addActor(ptr);
+        physics.addActor(ptr, model);
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
         if (getCreatureStats(ptr).isDead())
             MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);

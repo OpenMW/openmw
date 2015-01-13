@@ -86,6 +86,12 @@ Animation::~Animation()
     mAnimSources.clear();
 }
 
+std::string Animation::getObjectRootName() const
+{
+    if (mSkelBase)
+        return mSkelBase->getMesh()->getName();
+    return std::string();
+}
 
 void Animation::setObjectRoot(const std::string &model, bool baseonly)
 {
@@ -97,22 +103,8 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
     if(model.empty())
         return;
 
-    std::string mdlname = Misc::StringUtils::lowerCase(model);
-    std::string::size_type p = mdlname.rfind('\\');
-    if(p == std::string::npos)
-        p = mdlname.rfind('/');
-    if(p != std::string::npos)
-        mdlname.insert(mdlname.begin()+p+1, 'x');
-    else
-        mdlname.insert(mdlname.begin(), 'x');
-    if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(mdlname))
-    {
-        mdlname = model;
-        Misc::StringUtils::toLower(mdlname);
-    }
-
-    mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, mdlname) :
-                               NifOgre::Loader::createObjectBase(mInsert, mdlname));
+    mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, model) :
+                               NifOgre::Loader::createObjectBase(mInsert, model));
 
     if(mObjectRoot->mSkelBase)
     {
@@ -255,14 +247,8 @@ void Animation::addAnimSource(const std::string &model)
     if(!mSkelBase)
         return;
 
-    std::string kfname = Misc::StringUtils::lowerCase(model);
-    std::string::size_type p = kfname.rfind('\\');
-    if(p == std::string::npos)
-        p = kfname.rfind('/');
-    if(p != std::string::npos)
-        kfname.insert(kfname.begin()+p+1, 'x');
-    else
-        kfname.insert(kfname.begin(), 'x');
+    std::string kfname = model;
+    Misc::StringUtils::toLower(kfname);
 
     if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
         kfname.replace(kfname.size()-4, 4, ".kf");
@@ -417,13 +403,23 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScene
 }
 
 
-Ogre::Node *Animation::getNode(const std::string &name)
+Ogre::Node* Animation::getNode(const std::string &name)
 {
     if(mSkelBase)
     {
         Ogre::SkeletonInstance *skel = mSkelBase->getSkeleton();
         if(skel->hasBone(name))
             return skel->getBone(name);
+    }
+    return NULL;
+}
+
+Ogre::Node* Animation::getNode(int handle)
+{
+    if (mSkelBase)
+    {
+        Ogre::SkeletonInstance *skel = mSkelBase->getSkeleton();
+        return skel->getBone(handle);
     }
     return NULL;
 }

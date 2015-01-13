@@ -1604,14 +1604,12 @@ namespace MWGui
         mMap->write(writer, progress);
 
         mQuickKeysMenu->write(writer);
-        progress.increaseProgress();
 
         if (!mSelectedSpell.empty())
         {
             writer.startRecord(ESM::REC_ASPL);
             writer.writeHNString("ID__", mSelectedSpell);
             writer.endRecord(ESM::REC_ASPL);
-            progress.increaseProgress();
         }
 
         for (std::vector<CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
@@ -1619,7 +1617,6 @@ namespace MWGui
             writer.startRecord(ESM::REC_MARK);
             (*it).save(writer);
             writer.endRecord(ESM::REC_MARK);
-            progress.increaseProgress();
         }
     }
 

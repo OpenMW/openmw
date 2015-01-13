@@ -36,6 +36,18 @@ namespace
         return gmst.find(ESM::MagicEffect::effectIdToString (id1))->getString()
                 < gmst.find(ESM::MagicEffect::effectIdToString  (id2))->getString();
     }
+
+    void init(ESM::ENAMstruct& effect)
+    {
+        effect.mArea = 0;
+        effect.mDuration = 0;
+        effect.mEffectID = -1;
+        effect.mMagnMax = 0;
+        effect.mMagnMin = 0;
+        effect.mRange = 0;
+        effect.mSkill = -1;
+        effect.mAttribute = -1;
+    }
 }
 
 namespace MWGui
@@ -47,6 +59,9 @@ namespace MWGui
         , mMagicEffect(NULL)
         , mConstantEffect(false)
     {
+        init(mEffect);
+        init(mOldEffect);
+
         getWidget(mCancelButton, "CancelButton");
         getWidget(mOkButton, "OkButton");
         getWidget(mDeleteButton, "DeleteButton");
