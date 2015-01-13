@@ -1176,11 +1176,6 @@ class NIFObjectLoader
         if(node->recType == Nif::RC_RootCollisionNode)
             isRootCollisionNode = true;
 
-        // Marker objects: just skip the entire node branch
-        /// \todo don't do this in the editor
-        if (node->name.find("marker") != std::string::npos)
-            return;
-
         if(node->recType == Nif::RC_NiBSAnimationNode)
             animflags |= node->flags;
         else if(node->recType == Nif::RC_NiBSParticleNode)

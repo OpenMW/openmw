@@ -107,7 +107,7 @@ private:
     *Parse a node.
     */
     void handleNode(Nif::Node const *node, int flags, bool isCollisionNode,
-                    bool raycasting, bool isMarker, bool isAnimated=false);
+                    bool raycasting, bool isAnimated=false);
 
     /**
     *Helper function

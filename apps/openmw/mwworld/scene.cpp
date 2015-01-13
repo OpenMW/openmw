@@ -21,6 +21,18 @@
 
 namespace
 {
+
+    void addObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics,
+                   MWRender::RenderingManager& rendering)
+    {
+        std::string model = Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr));
+        std::string id = ptr.getClass().getId(ptr);
+        if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
+            model = "";
+        rendering.addObject(ptr, model);
+        ptr.getClass().insertObject (ptr, model, physics);
+    }
+
     void updateObjectLocalRotation (const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics,
                                     MWRender::RenderingManager& rendering)
     {
@@ -80,10 +92,7 @@ namespace
         {
             try
             {
-                const std::string& model = Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr));
-                mRendering.addObject(ptr, model);
-                ptr.getClass().insertObject (ptr, model, mPhysics);
-
+                addObject(ptr, mPhysics, mRendering);
                 updateObjectLocalRotation(ptr, mPhysics, mRendering);
                 if (ptr.getRefData().getBaseNode())
                 {
@@ -530,9 +539,7 @@ namespace MWWorld
 
     void Scene::addObjectToScene (const Ptr& ptr)
     {
-        const std::string& model = Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr));
-        mRendering.addObject(ptr, model);
-        ptr.getClass().insertObject (ptr, model, *mPhysics);
+        addObject(ptr, *mPhysics, mRendering);
         MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
         MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
     }
