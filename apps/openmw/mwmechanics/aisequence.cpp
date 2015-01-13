@@ -152,8 +152,7 @@ bool AiSequence::isPackageDone() const
 
 void AiSequence::execute (const MWWorld::Ptr& actor, AiState& state,float duration)
 {
-    if(actor != MWBase::Environment::get().getWorld()->getPlayerPtr()
-            && !actor.getClass().getCreatureStats(actor).getKnockedDown())
+    if(actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
     {
         if (!mPackages.empty())
         {
