@@ -73,10 +73,12 @@ void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Phys
             btCompoundShape* compound = dynamic_cast<btCompoundShape*>(instance.mCompound);
 
             btTransform trans;
-            trans.setOrigin(BtOgre::Convert::toBullet(bone->_getDerivedPosition()));
+            trans.setOrigin(BtOgre::Convert::toBullet(bone->_getDerivedPosition()) * compound->getLocalScaling());
             trans.setRotation(BtOgre::Convert::toBullet(bone->_getDerivedOrientation()));
 
-            compound->getChildShape(shapeIt->second)->setLocalScaling(BtOgre::Convert::toBullet(bone->_getDerivedScale()));
+            compound->getChildShape(shapeIt->second)->setLocalScaling(
+                        compound->getLocalScaling() *
+                        BtOgre::Convert::toBullet(bone->_getDerivedScale()));
             compound->updateChildTransform(shapeIt->second, trans);
         }
 
