@@ -365,10 +365,17 @@ void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int
 
         TriangleMeshShape* childShape = new TriangleMeshShape(childMesh,true);
 
-        childShape->setLocalScaling(btVector3(transform[0][0], transform[1][1], transform[2][2]));
-
+        float scale = shape->trafo.scale;
+        const Nif::Node* parent = shape;
+        while (parent->parent)
+        {
+            parent = parent->parent;
+            scale *= parent->trafo.scale;
+        }
         Ogre::Quaternion q = transform.extractQuaternion();
         Ogre::Vector3 v = transform.getTrans();
+        childShape->setLocalScaling(btVector3(scale, scale, scale));
+
         btTransform trans(btQuaternion(q.x, q.y, q.z, q.w), btVector3(v.x, v.y, v.z));
 
         if (raycasting)
