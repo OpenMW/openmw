@@ -308,8 +308,7 @@ namespace MWMechanics
         // Play idle voiced dialogue entries randomly
         int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
         if (hello > 0 && !MWBase::Environment::get().getWorld()->isSwimming(actor)
-                && actor.getRefData().getPosition().pos[2] < 3000 &&
-                MWBase::Environment::get().getSoundManager()->sayDone(actor))
+                && MWBase::Environment::get().getSoundManager()->sayDone(actor))
         {
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
@@ -327,7 +326,8 @@ namespace MWMechanics
             // Only say Idle voices when player is in LOS
             // A bit counterintuitive, likely vanilla did this to reduce the appearance of
             // voices going through walls?
-            if (roll < x && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos)) < 1500*1500
+            if (roll < x && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos))
+                    < 3000*3000 // maybe should be fAudioVoiceDefaultMaxDistance*fAudioMaxDistanceMult instead
                     && MWBase::Environment::get().getWorld()->getLOS(player, actor))
                 MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
         }
