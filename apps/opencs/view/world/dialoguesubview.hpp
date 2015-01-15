@@ -101,14 +101,16 @@ namespace CSVWorld
 
         CSMWorld::IdTable* mTable;
 
-            CSMDoc::Document& mDocument;
+        CSMWorld::CommandDispatcher& mCommandDispatcher;
+        CSMDoc::Document& mDocument;
 
         NotEditableSubDelegate mNotEditableDelegate;
 
         std::vector<DialogueDelegateDispatcherProxy*> mProxys; //once we move to the C++11 we should use unique_ptr
 
     public:
-        DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table, CSMDoc::Document& document);
+        DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table,
+            CSMWorld::CommandDispatcher& commandDispatcher,  CSMDoc::Document& document);
 
         ~DialogueDelegateDispatcher();
 
@@ -145,11 +147,11 @@ namespace CSVWorld
             DialogueDelegateDispatcher mDispatcher;
             QWidget* mMainWidget;
             CSMWorld::IdTable* mTable;
-            CSMDoc::Document& mDocument;
+            CSMWorld::CommandDispatcher& mCommandDispatcher;
 
         public:
 
-            EditWidget (QWidget *parent, int row, CSMWorld::IdTable* table, CSMDoc::Document& document, bool createAndDelete = false);
+            EditWidget (QWidget *parent, int row, CSMWorld::IdTable* table, CSMWorld::CommandDispatcher& commandDispatcher, CSMDoc::Document& document, bool createAndDelete = false);
 
             void remake(int row);
 

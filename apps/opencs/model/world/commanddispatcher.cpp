@@ -131,6 +131,14 @@ std::vector<CSMWorld::UniversalId> CSMWorld::CommandDispatcher::getExtendedTypes
     return tables;
 }
 
+void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, const QModelIndex& index, const QVariant& new_)
+{
+    if (mLocked)
+        return;
+
+    mDocument.getUndoStack().push (new CSMWorld::ModifyCommand (*model, index, new_));
+}
+
 void CSMWorld::CommandDispatcher::executeDelete()
 {
     if (mLocked)

@@ -167,10 +167,10 @@ void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::
 ==============================DialogueDelegateDispatcher==========================================
 */
 
-CSVWorld::DialogueDelegateDispatcher::DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table, CSMDoc::Document& document) :
+CSVWorld::DialogueDelegateDispatcher::DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table, CSMWorld::CommandDispatcher& commandDispatcher, CSMDoc::Document& document) :
 mParent(parent),
 mTable(table),
-mDocument (document),
+mCommandDispatcher (commandDispatcher), mDocument (document),
 mNotEditableDelegate(table, parent)
 {
 }
@@ -182,7 +182,7 @@ CSVWorld::CommandDelegate* CSVWorld::DialogueDelegateDispatcher::makeDelegate(CS
     if (delegateIt == mDelegates.end())
     {
         delegate = CommandDelegateFactoryCollection::get().makeDelegate (
-                                    display, mDocument, mParent);
+                                    display, &mCommandDispatcher, mDocument, mParent);
         mDelegates.insert(std::make_pair(display, delegate));
     } else
     {
@@ -309,12 +309,12 @@ CSVWorld::DialogueDelegateDispatcher::~DialogueDelegateDispatcher()
 =============================================================EditWidget=====================================================
 */
 
-CSVWorld::EditWidget::EditWidget(QWidget *parent, int row, CSMWorld::IdTable* table, CSMDoc::Document& document, bool createAndDelete) :
-mDispatcher(this, table, document),
+CSVWorld::EditWidget::EditWidget(QWidget *parent, int row, CSMWorld::IdTable* table, CSMWorld::CommandDispatcher& commandDispatcher, CSMDoc::Document& document, bool createAndDelete) :
+mDispatcher(this, table, commandDispatcher, document),
 QScrollArea(parent),
 mWidgetMapper(NULL),
 mMainWidget(NULL),
-mDocument (document),
+mCommandDispatcher (commandDispatcher),
 mTable(table)
 {
     remake (row);
@@ -471,7 +471,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     mMainLayout = new QVBoxLayout(mainWidget);
 
-    mEditWidget = new EditWidget(mainWidget, mRow, mTable, document, false);
+    mEditWidget = new EditWidget(mainWidget, mRow, mTable, mCommandDispatcher, document, false);
     connect(mEditWidget, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
             this, SLOT(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
 

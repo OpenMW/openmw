@@ -35,8 +35,8 @@ void CSVWorld::EnumDelegate::addCommands (QAbstractItemModel *model,
 
 
 CSVWorld::EnumDelegate::EnumDelegate (const std::vector<std::pair<int, QString> >& values,
-    CSMDoc::Document& document, QObject *parent)
-: CommandDelegate (document, parent), mValues (values)
+    CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent)
+: CommandDelegate (dispatcher, document, parent), mValues (values)
 {
 
 }
@@ -141,9 +141,9 @@ CSVWorld::EnumDelegateFactory::EnumDelegateFactory (const std::vector<std::strin
 }
 
 CSVWorld::CommandDelegate *CSVWorld::EnumDelegateFactory::makeDelegate (
-    CSMDoc::Document& document, QObject *parent) const
+    CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const
 {
-    return new EnumDelegate (mValues, document, parent);
+    return new EnumDelegate (mValues, dispatcher, document, parent);
 }
 
 void CSVWorld::EnumDelegateFactory::add (int value, const QString& name)

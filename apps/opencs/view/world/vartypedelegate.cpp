@@ -47,8 +47,8 @@ void CSVWorld::VarTypeDelegate::addCommands (QAbstractItemModel *model, const QM
 }
 
 CSVWorld::VarTypeDelegate::VarTypeDelegate (const std::vector<std::pair<int, QString> >& values,
-    CSMDoc::Document& document, QObject *parent)
-: EnumDelegate (values, document, parent)
+    CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent)
+: EnumDelegate (values, dispatcher, document, parent)
 {}
 
 
@@ -69,9 +69,9 @@ CSVWorld::VarTypeDelegateFactory::VarTypeDelegateFactory (ESM::VarType type0,
 }
 
 CSVWorld::CommandDelegate *CSVWorld::VarTypeDelegateFactory::makeDelegate (
-    CSMDoc::Document& document, QObject *parent) const
+    CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const
 {
-    return new VarTypeDelegate (mValues, document, parent);
+    return new VarTypeDelegate (mValues, dispatcher, document, parent);
 }
 
 void CSVWorld::VarTypeDelegateFactory::add (ESM::VarType type)
