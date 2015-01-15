@@ -2108,7 +2108,7 @@ namespace MWWorld
 
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
         if (!physactor)
-            return 0; // shouldn't happen
+            throw std::runtime_error("can't find player");
 
         if((!physactor->getOnGround()&&physactor->getCollisionMode()) || isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
             return 2;
