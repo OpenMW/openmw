@@ -77,7 +77,8 @@ CS::Editor::~Editor ()
     mPidFile.close();
 
     if(mServer && boost::filesystem::exists(mPid))
-        remove(mPid.string().c_str()); // ignore any error
+        static_cast<void> ( // silence coverity warning
+        remove(mPid.string().c_str())); // ignore any error
 
     // cleanup global resources used by OEngine
     delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
