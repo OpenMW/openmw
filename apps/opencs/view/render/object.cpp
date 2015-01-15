@@ -35,7 +35,8 @@ void CSVRender::Object::clear()
 {
     mObject.setNull();
 
-    clearSceneNode (mBase);
+    if (mBase)
+        clearSceneNode (mBase);
 }
 
 void CSVRender::Object::update()
