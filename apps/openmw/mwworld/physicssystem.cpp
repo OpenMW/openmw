@@ -70,13 +70,15 @@ void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Phys
             if (bone == NULL)
                 continue;
 
-            btCompoundShape* compound = dynamic_cast<btCompoundShape*>(instance.mCompound);
+            btCompoundShape* compound = static_cast<btCompoundShape*>(instance.mCompound);
 
             btTransform trans;
-            trans.setOrigin(BtOgre::Convert::toBullet(bone->_getDerivedPosition()));
+            trans.setOrigin(BtOgre::Convert::toBullet(bone->_getDerivedPosition()) * compound->getLocalScaling());
             trans.setRotation(BtOgre::Convert::toBullet(bone->_getDerivedOrientation()));
 
-            compound->getChildShape(shapeIt->second)->setLocalScaling(BtOgre::Convert::toBullet(bone->_getDerivedScale()));
+            compound->getChildShape(shapeIt->second)->setLocalScaling(
+                        compound->getLocalScaling() *
+                        BtOgre::Convert::toBullet(bone->_getDerivedScale()));
             compound->updateChildTransform(shapeIt->second, trans);
         }
 
@@ -348,6 +350,8 @@ namespace MWWorld
                 velocity *= 1.f-(fStromWalkMult * (angle.valueDegrees()/180.f));
             }
 
+            Ogre::Vector3 origVelocity = velocity;
+
             Ogre::Vector3 newPosition = position;
             /*
              * A loop to find newPosition using tracer, if successful different from the starting position.
@@ -425,10 +429,18 @@ namespace MWWorld
                 else
                 {
                     // Can't move this way, try to find another spot along the plane
-                    Ogre::Real movelen = velocity.normalise();
+                    Ogre::Vector3 direction = velocity;
+                    Ogre::Real movelen = direction.normalise();
                     Ogre::Vector3 reflectdir = velocity.reflect(tracer.mPlaneNormal);
                     reflectdir.normalise();
-                    velocity = slide(reflectdir, tracer.mPlaneNormal)*movelen;
+
+                    Ogre::Vector3 newVelocity = slide(reflectdir, tracer.mPlaneNormal)*movelen;
+                    if ((newVelocity-velocity).squaredLength() < 0.01)
+                        break;
+                    if (velocity.dotProduct(origVelocity) <= 0.f)
+                        break;
+
+                    velocity = newVelocity;
 
                     // Do not allow sliding upward if there is gravity. Stepping will have taken
                     // care of that.

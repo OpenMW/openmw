@@ -42,6 +42,12 @@
 namespace
 {
 
+bool isConscious(const MWWorld::Ptr& ptr)
+{
+    const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+    return !stats.isDead() && !stats.getKnockedDown();
+}
+
 void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& actor)
 {
     if (bound)
@@ -1101,12 +1107,12 @@ namespace MWMechanics
                             updateCrimePersuit(iter->first, duration);
 
                         if (iter->first != player)
-                            iter->first.getClass().getCreatureStats(iter->first).getAiSequence().execute(iter->first,iter->second->getAiState(), duration);
-
-                        CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
-                        if(!stats.isDead())
                         {
-                            if (stats.getAiSequence().isInCombat()) hostilesCount++;
+                            CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
+                            if (isConscious(iter->first))
+                                stats.getAiSequence().execute(iter->first,iter->second->getAiState(), duration);
+
+                            if (stats.getAiSequence().isInCombat() && !stats.isDead()) hostilesCount++;
                         }
                     }
 
@@ -1515,7 +1521,9 @@ namespace MWMechanics
         for (PtrActorMap::iterator it = map.begin(); it != map.end(); ++it)
         {
             MWWorld::Ptr ptr = it->first;
-            if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr()
+                    || !isConscious(ptr)
+                    || ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
                 continue;
             MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
             seq.fastForward(ptr, it->second->getAiState());

@@ -689,6 +689,14 @@ public:
  */
 class NIFObjectLoader
 {
+    static bool sShowMarkers;
+public:
+    static void setShowMarkers(bool show)
+    {
+        sShowMarkers = show;
+    }
+private:
+
     static void warn(const std::string &msg)
     {
         std::cerr << "NIFObjectLoader: Warn: " << msg << std::endl;
@@ -1176,11 +1184,6 @@ class NIFObjectLoader
         if(node->recType == Nif::RC_RootCollisionNode)
             isRootCollisionNode = true;
 
-        // Marker objects: just skip the entire node branch
-        /// \todo don't do this in the editor
-        if (node->name.find("marker") != std::string::npos)
-            return;
-
         if(node->recType == Nif::RC_NiBSAnimationNode)
             animflags |= node->flags;
         else if(node->recType == Nif::RC_NiBSParticleNode)
@@ -1213,7 +1216,7 @@ class NIFObjectLoader
                 const Nif::NiStringExtraData *sd = static_cast<const Nif::NiStringExtraData*>(e.getPtr());
                 // String markers may contain important information
                 // affecting the entire subtree of this obj
-                if(sd->string == "MRK")
+                if(sd->string == "MRK" && !sShowMarkers)
                 {
                     // Marker objects. These meshes are only visible in the
                     // editor.
@@ -1474,6 +1477,15 @@ void Loader::createKfControllers(Ogre::Entity *skelBase,
                                  std::vector<Ogre::Controller<Ogre::Real> > &ctrls)
 {
     NIFObjectLoader::loadKf(skelBase->getSkeleton(), name, textKeys, ctrls);
+}
+
+bool Loader::sShowMarkers = false;
+bool NIFObjectLoader::sShowMarkers = false;
+
+void Loader::setShowMarkers(bool show)
+{
+    sShowMarkers = show;
+    NIFObjectLoader::setShowMarkers(show);
 }
 
 

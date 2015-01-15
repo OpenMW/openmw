@@ -67,11 +67,12 @@ struct TriangleMeshShape : public btBvhTriangleMeshShape
 class ManualBulletShapeLoader : public OEngine::Physic::BulletShapeLoader
 {
 public:
-    ManualBulletShapeLoader()
+    ManualBulletShapeLoader(bool showMarkers=false)
       : mShape(NULL)
       , mStaticMesh(NULL)
       , mCompoundShape(NULL)
       , mBoundingBox(NULL)
+      , mShowMarkers(showMarkers)
     {
     }
 
@@ -107,7 +108,7 @@ private:
     *Parse a node.
     */
     void handleNode(Nif::Node const *node, int flags, bool isCollisionNode,
-                    bool raycasting, bool isMarker, bool isAnimated=false);
+                    bool raycasting, bool isAnimated=false);
 
     /**
     *Helper function
@@ -130,6 +131,8 @@ private:
     btBoxShape *mBoundingBox;
 
     std::set<std::string> mControlledNodes;
+
+    bool mShowMarkers;
 };
 
 

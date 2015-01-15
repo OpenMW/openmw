@@ -2107,6 +2107,9 @@ namespace MWWorld
         Ogre::Vector3 playerPos(refdata.getPosition().pos);
 
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
+        if (!physactor)
+            throw std::runtime_error("can't find player");
+
         if((!physactor->getOnGround()&&physactor->getCollisionMode()) || isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
             return 2;
         if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) ||
@@ -2326,9 +2329,15 @@ namespace MWWorld
         if (!targetActor.getRefData().getBaseNode() || !targetActor.getRefData().getBaseNode())
             return false; // not in active cell
 
-        Ogre::Vector3 halfExt1 = mPhysEngine->getCharacter(actor.getRefData().getHandle())->getHalfExtents();
+        OEngine::Physic::PhysicActor* actor1 = mPhysEngine->getCharacter(actor.getRefData().getHandle());
+        OEngine::Physic::PhysicActor* actor2 = mPhysEngine->getCharacter(targetActor.getRefData().getHandle());
+
+        if (!actor1 || !actor2)
+            return false;
+
+        Ogre::Vector3 halfExt1 = actor1->getHalfExtents();
         const float* pos1 = actor.getRefData().getPosition().pos;
-        Ogre::Vector3 halfExt2 = mPhysEngine->getCharacter(targetActor.getRefData().getHandle())->getHalfExtents();
+        Ogre::Vector3 halfExt2 = actor2->getHalfExtents();
         const float* pos2 = targetActor.getRefData().getPosition().pos;
 
         btVector3 from(pos1[0],pos1[1],pos1[2]+halfExt1.z*2*0.9); // eye level
