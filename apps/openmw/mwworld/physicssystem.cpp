@@ -70,7 +70,7 @@ void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Phys
             if (bone == NULL)
                 continue;
 
-            btCompoundShape* compound = dynamic_cast<btCompoundShape*>(instance.mCompound);
+            btCompoundShape* compound = static_cast<btCompoundShape*>(instance.mCompound);
 
             btTransform trans;
             trans.setOrigin(BtOgre::Convert::toBullet(bone->_getDerivedPosition()) * compound->getLocalScaling());
