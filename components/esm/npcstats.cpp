@@ -75,8 +75,9 @@ void ESM::NpcStats::load (ESMReader &esm)
     mTimeToStartDrowning = 0;
     esm.getHNOT (mTimeToStartDrowning, "DRTI");
 
-    mLastDrowningHit = 0;
-    esm.getHNOT (mLastDrowningHit, "DRLH");
+    // No longer used
+    float lastDrowningHit = 0;
+    esm.getHNOT (lastDrowningHit, "DRLH");
 
     // No longer used
     float levelHealthBonus = 0;
@@ -145,9 +146,6 @@ void ESM::NpcStats::save (ESMWriter &esm) const
 
     if (mTimeToStartDrowning)
         esm.writeHNT ("DRTI", mTimeToStartDrowning);
-
-    if (mLastDrowningHit)
-        esm.writeHNT ("DRLH", mLastDrowningHit);
 
     if (mCrimeId != -1)
         esm.writeHNT ("CRID", mCrimeId);

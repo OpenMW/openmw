@@ -46,8 +46,6 @@ namespace MWMechanics
 
             /// Countdown to getting damage while underwater
             float mTimeToStartDrowning;
-            /// time since last hit from drowning
-            float mLastDrowningHit;
 
         public:
 

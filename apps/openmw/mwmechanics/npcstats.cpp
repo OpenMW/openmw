@@ -33,7 +33,6 @@ MWMechanics::NpcStats::NpcStats()
 , mWerewolfKills (0)
 , mProfit(0)
 , mTimeToStartDrowning(20.0)
-, mLastDrowningHit(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
 }
@@ -522,7 +521,6 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
     std::copy (mUsedIds.begin(), mUsedIds.end(), std::back_inserter (state.mUsedIds));
 
     state.mTimeToStartDrowning = mTimeToStartDrowning;
-    state.mLastDrowningHit = mLastDrowningHit;
 }
 
 void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
@@ -573,5 +571,4 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
             mUsedIds.insert (*iter);
 
     mTimeToStartDrowning = state.mTimeToStartDrowning;
-    mLastDrowningHit = state.mLastDrowningHit;
 }
