@@ -108,8 +108,10 @@ namespace MWMechanics
             ///  Called at character creation.
 
             void flagAsUsed (const std::string& id);
+            ///< @note Id must be lower-case
 
             bool hasBeenUsed (const std::string& id) const;
+            ///< @note Id must be lower-case
 
             int getBounty() const;
 
