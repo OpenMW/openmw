@@ -45,6 +45,25 @@ void ESM::Header::load (ESMReader &esm)
         m.size = esm.getHNLong ("DATA");
         mMaster.push_back (m);
     }
+
+    if (esm.isNextSub("GMDT"))
+    {
+        esm.getHT(mGameData);
+    }
+    if (esm.isNextSub("SCRD"))
+    {
+        esm.getSubHeader();
+        mSCRD.resize(esm.getSubSize());
+        if (mSCRD.size())
+            esm.getExact(&mSCRD[0], mSCRD.size());
+    }
+    if (esm.isNextSub("SCRS"))
+    {
+        esm.getSubHeader();
+        mSCRS.resize(esm.getSubSize());
+        if (mSCRS.size())
+            esm.getExact(&mSCRS[0], mSCRS.size());
+    }
 }
 
 void ESM::Header::save (ESMWriter &esm)

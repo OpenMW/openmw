@@ -111,6 +111,11 @@ void Cell::loadData(ESMReader &esm)
     }
 
     esm.getHNT(mData, "DATA", 12);
+
+    // ess only, unknown
+    char nam8[32];
+    if (esm.isNextSub("NAM8"))
+        esm.getHExact(nam8, 32);
 }
 
 void Cell::postLoad(ESMReader &esm)

@@ -36,6 +36,7 @@ public:
   const std::string getAuthor() const { return mHeader.mData.author.toString(); }
   const std::string getDesc() const { return mHeader.mData.desc.toString(); }
   const std::vector<Header::MasterData> &getGameFiles() const { return mHeader.mMaster; }
+  const Header& getHeader() const { return mHeader; }
   int getFormat() const;
   const NAME &retSubName() const { return mCtx.subName; }
   uint32_t getSubSize() const { return mCtx.leftSub; }
