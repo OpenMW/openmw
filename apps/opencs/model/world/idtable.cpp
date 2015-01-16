@@ -27,9 +27,15 @@ int CSMWorld::IdTable::columnCount (const QModelIndex & parent) const
     return mIdCollection->getColumns();
 }
 
-QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
+QVariant CSMWorld::IdTable::data (const QModelIndex & index, int role) const
 {
-    if ((role!=Qt::DisplayRole && role!=Qt::EditRole) || index.row() < 0 || index.column() < 0)
+    if (index.row() < 0 || index.column() < 0)
+        return QVariant();
+
+    if (role==ColumnBase::Role_ColumnId)
+        return QVariant (getColumnId (index.column()));
+
+    if ((role!=Qt::DisplayRole && role!=Qt::EditRole))
         return QVariant();
 
     if (role==Qt::EditRole && !mIdCollection->getColumn (index.column()).isEditable())
@@ -51,6 +57,9 @@ QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation
 
     if (role==ColumnBase::Role_Display)
         return mIdCollection->getColumn (section).mDisplayType;
+
+    if (role==ColumnBase::Role_ColumnId)
+        return getColumnId (section);
 
     return QVariant();
 }
