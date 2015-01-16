@@ -2,6 +2,7 @@
 #include "commanddispatcher.hpp"
 
 #include <algorithm>
+#include <memory>
 
 #include <components/misc/stringops.hpp>
 
@@ -10,6 +11,7 @@
 #include "idtable.hpp"
 #include "record.hpp"
 #include "commands.hpp"
+#include "idtableproxymodel.hpp"
 
 std::vector<std::string> CSMWorld::CommandDispatcher::getDeletableRecords() const
 {
@@ -136,7 +138,47 @@ void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, cons
     if (mLocked)
         return;
 
-    mDocument.getUndoStack().push (new CSMWorld::ModifyCommand (*model, index, new_));
+    std::auto_ptr<CSMWorld::UpdateCellCommand> modifyCell;
+
+    int columnId = model->data (index, ColumnBase::Role_ColumnId).toInt();
+
+    if (columnId==Columns::ColumnId_PositionXPos || columnId==Columns::ColumnId_PositionYPos)
+    {
+        IdTableProxyModel *proxy = dynamic_cast<IdTableProxyModel *> (model);
+
+        int row = proxy ? proxy->mapToSource (index).row() : index.row();
+
+        // This is not guaranteed to be the same as \a model, since a proxy could be used.
+        IdTable& model2 = dynamic_cast<IdTable&> (*mDocument.getData().getTableModel (mId));
+
+        int cellColumn = model2.searchColumnIndex (Columns::ColumnId_Cell);
+
+        if (cellColumn!=-1)
+        {
+            QModelIndex cellIndex = model2.index (row, cellColumn);
+
+            std::string cellId = model2.data (cellIndex).toString().toUtf8().data();
+
+            if (cellId.find ('#')!=std::string::npos)
+            {
+                // Need to recalculate the cell
+                modifyCell.reset (new UpdateCellCommand (model2, row));
+            }
+        }
+    }
+
+    std::auto_ptr<CSMWorld::ModifyCommand> modifyData (
+        new CSMWorld::ModifyCommand (*model, index, new_));
+
+    if (modifyCell.get())
+    {
+        mDocument.getUndoStack().beginMacro (modifyData->text());
+        mDocument.getUndoStack().push (modifyData.release());
+        mDocument.getUndoStack().push (modifyCell.release());
+        mDocument.getUndoStack().endMacro();
+    }
+    else
+        mDocument.getUndoStack().push (modifyData.release());
 }
 
 void CSMWorld::CommandDispatcher::executeDelete()

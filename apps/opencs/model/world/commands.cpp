@@ -1,10 +1,15 @@
 
 #include "commands.hpp"
 
+#include <cmath>
+
+#include <sstream>
+
 #include <QAbstractItemModel>
 
-#include "idtable.hpp"
 #include <components/misc/stringops.hpp>
+
+#include "idtable.hpp"
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
                                         const QVariant& new_, QUndoCommand* parent)
@@ -170,4 +175,44 @@ void CSMWorld::CloneCommand::redo()
 void CSMWorld::CloneCommand::undo()
 {
     mModel.removeRow (mModel.getModelIndex (mId, 0).row());
+}
+
+
+CSMWorld::UpdateCellCommand::UpdateCellCommand (IdTable& model, int row, QUndoCommand *parent)
+: QUndoCommand (parent), mModel (model), mRow (row)
+{
+    setText ("Update cell ID");
+}
+
+void CSMWorld::UpdateCellCommand::redo()
+{
+    if (!mNew.isValid())
+    {
+        int cellColumn = mModel.searchColumnIndex (Columns::ColumnId_Cell);
+        mIndex = mModel.index (mRow, cellColumn);
+
+        const int cellSize = 8192;
+
+        QModelIndex xIndex = mModel.index (
+            mRow, mModel.findColumnIndex (Columns::ColumnId_PositionXPos));
+
+        QModelIndex yIndex = mModel.index (
+            mRow, mModel.findColumnIndex (Columns::ColumnId_PositionYPos));
+
+        int x = std::floor (mModel.data (xIndex).toFloat() / cellSize);
+        int y = std::floor (mModel.data (yIndex).toFloat() / cellSize);
+
+        std::ostringstream stream;
+
+        stream << "#" << x << " " << y;
+
+        mNew = QString::fromUtf8 (stream.str().c_str());
+    }
+
+    mModel.setData (mIndex, mNew);
+}
+
+void CSMWorld::UpdateCellCommand::undo()
+{
+    mModel.setData (mIndex, mOld);
 }
