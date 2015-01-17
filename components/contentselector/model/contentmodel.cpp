@@ -597,13 +597,16 @@ QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::
         {
             errors.append(LoadOrderError(LoadOrderError::ErrorCode_MissingDependency, dependentfileName));
         }
-        if (!isChecked(dependentFile->filePath()))
+        else
         {
-            errors.append(LoadOrderError(LoadOrderError::ErrorCode_InactiveDependency, dependentfileName));
-        }
-        if (row < indexFromItem(dependentFile).row())
-        {
-            errors.append(LoadOrderError(LoadOrderError::ErrorCode_LoadOrder, dependentfileName));
+            if (!isChecked(dependentFile->filePath()))
+            {
+                errors.append(LoadOrderError(LoadOrderError::ErrorCode_InactiveDependency, dependentfileName));
+            }
+            if (row < indexFromItem(dependentFile).row())
+            {
+                errors.append(LoadOrderError(LoadOrderError::ErrorCode_LoadOrder, dependentfileName));
+            }
         }
     }
     return errors;
