@@ -6,13 +6,12 @@
 #include <QDir>
 #include <QTextCodec>
 #include <QDebug>
-#include <QBrush>
-#include <QIcon>
 
 #include "components/esm/esmreader.hpp"
 
-ContentSelectorModel::ContentModel::ContentModel(QObject *parent) :
+ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon) :
     QAbstractTableModel(parent),
+    mWarningIcon(warningIcon),
     mMimeType ("application/omwcontent"),
     mMimeTypes (QStringList() << mMimeType),
     mColumnCount (1),
@@ -180,7 +179,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
     {
     case Qt::DecorationRole:
     {
-        return isLoadOrderError(file) ? QIcon::fromTheme("edit-delete") : QVariant();
+        return isLoadOrderError(file) ? mWarningIcon : QVariant();
     }
 
     case Qt::EditRole:

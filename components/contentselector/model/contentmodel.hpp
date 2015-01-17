@@ -4,7 +4,7 @@
 #include <QAbstractTableModel>
 #include <QStringList>
 #include <QSet>
-
+#include <QIcon>
 #include "loadordererror.hpp"
 
 namespace ContentSelectorModel
@@ -23,7 +23,7 @@ namespace ContentSelectorModel
     {
         Q_OBJECT
     public:
-        explicit ContentModel(QObject *parent = 0);
+        explicit ContentModel(QObject *parent, QIcon warningIcon);
         ~ContentModel();
 
         void setEncoding(const QString &encoding);
@@ -57,6 +57,9 @@ namespace ContentSelectorModel
 
         void refreshModel();
 
+        /// Checks all plug-ins for load order errors and updates mPluginsWithLoadOrderError with plug-ins with issues
+        void checkForLoadOrderErrors();
+
     private:
 
         void addFile(EsmFile *file);
@@ -64,9 +67,6 @@ namespace ContentSelectorModel
         EsmFile *item(int row);
 
         void sortFiles();
-
-        /// Checks all plug-ins for load order errors and updates mPluginsWithLoadOrderError with plug-ins with issues
-        void checkForLoadOrderErrors();
 
         /// Checks a specific plug-in for load order errors
         /// \return all errors found for specific plug-in
@@ -82,6 +82,7 @@ namespace ContentSelectorModel
         QSet<QString> mPluginsWithLoadOrderError;
         QTextCodec *mCodec;
         QString mEncoding;
+        QIcon mWarningIcon;
 
     public:
 
