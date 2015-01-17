@@ -99,16 +99,18 @@ namespace ESSImport
 
     void Importer::compare()
     {
-        // data that always changes should be blacklisted
+        // data that always changes (and/or is already fully decoded) should be blacklisted
         std::set<std::pair<std::string, std::string> > blacklist;
         blacklist.insert(std::make_pair("GLOB", "FLTV")); // gamehour
         blacklist.insert(std::make_pair("REFR", "DATA")); // player position
+        blacklist.insert(std::make_pair("CELL", "NAM8")); // fog of war
 
         File file1;
         read(mEssFile, file1);
         File file2;
         read(mOutFile, file2); // todo rename variable
 
+        // FIXME: use max(size1, size2)
         for (unsigned int i=0; i<file1.mRecords.size(); ++i)
         {
             File::Record rec = file1.mRecords[i];
@@ -182,8 +184,6 @@ namespace ESSImport
         esm.open(mEssFile);
 
         Context context;
-
-        std::map<std::string, ESM::Global> globals;
 
         const unsigned int recREFR = ESM::FourCC<'R','E','F','R'>::value;
         const unsigned int recPCDT = ESM::FourCC<'P','C','D','T'>::value;

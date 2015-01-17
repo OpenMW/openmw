@@ -8,6 +8,7 @@
 #include <components/esm/loadbook.hpp>
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadglob.hpp>
+#include <components/esm/cellstate.hpp>
 #include "importcrec.hpp"
 
 #include "importercontext.hpp"
@@ -241,19 +242,35 @@ public:
 class ConvertCell : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader& esm)
+    virtual void read(ESM::ESMReader& esm);
+
+    virtual void write(ESM::ESMWriter& esm)
     {
-        ESM::Cell cell;
-        std::string id = esm.getHNString("NAME");
-        cell.load(esm, false);
-        CellRef ref;
-        while (esm.hasMoreSubs())
+        for (std::map<std::string, Cell>::const_iterator it = mCells.begin(); it != mCells.end(); ++it)
         {
-            ref.load (esm);
-            if (esm.isNextSub("DELE"))
-                std::cout << "deleted ref " << ref.mIndexedRefId << std::endl;
+            const ESM::Cell& cell = it->second.mCell;
+            esm.startRecord(ESM::REC_CSTA);
+            ESM::CellState csta;
+            csta.mHasFogOfWar = 0;
+            csta.mId = cell.getCellId();
+            csta.mId.save(esm);
+            // TODO csta.mLastRespawn;
+            // shouldn't be needed if we respawn on global schedule like in original MW
+            csta.mWaterLevel = cell.mWater;
+            csta.save(esm);
+            esm.endRecord(ESM::REC_CSTA);
         }
     }
+
+private:
+    struct Cell
+    {
+        ESM::Cell mCell;
+        std::vector<CellRef> mRefs;
+        std::vector<unsigned int> mFogOfWar;
+    };
+
+    std::map<std::string, Cell> mCells;
 
 };
 
