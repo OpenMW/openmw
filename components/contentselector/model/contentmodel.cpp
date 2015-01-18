@@ -6,13 +6,12 @@
 #include <QDir>
 #include <QTextCodec>
 #include <QDebug>
-#include <QBrush>
-#include <QIcon>
 
 #include "components/esm/esmreader.hpp"
 
-ContentSelectorModel::ContentModel::ContentModel(QObject *parent) :
+ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon) :
     QAbstractTableModel(parent),
+    mWarningIcon(warningIcon),
     mMimeType ("application/omwcontent"),
     mMimeTypes (QStringList() << mMimeType),
     mColumnCount (1),
@@ -180,7 +179,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
     {
     case Qt::DecorationRole:
     {
-        return isLoadOrderError(file) ? QIcon::fromTheme("edit-delete") : QVariant();
+        return isLoadOrderError(file) ? mWarningIcon : QVariant();
     }
 
     case Qt::EditRole:
@@ -598,13 +597,16 @@ QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::
         {
             errors.append(LoadOrderError(LoadOrderError::ErrorCode_MissingDependency, dependentfileName));
         }
-        if (!isChecked(dependentFile->filePath()))
+        else
         {
-            errors.append(LoadOrderError(LoadOrderError::ErrorCode_InactiveDependency, dependentfileName));
-        }
-        if (row < indexFromItem(dependentFile).row())
-        {
-            errors.append(LoadOrderError(LoadOrderError::ErrorCode_LoadOrder, dependentfileName));
+            if (!isChecked(dependentFile->filePath()))
+            {
+                errors.append(LoadOrderError(LoadOrderError::ErrorCode_InactiveDependency, dependentfileName));
+            }
+            if (row < indexFromItem(dependentFile).row())
+            {
+                errors.append(LoadOrderError(LoadOrderError::ErrorCode_LoadOrder, dependentfileName));
+            }
         }
     }
     return errors;

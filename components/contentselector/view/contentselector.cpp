@@ -24,7 +24,8 @@ ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
 
 void ContentSelectorView::ContentSelector::buildContentModel()
 {
-    mContentModel = new ContentSelectorModel::ContentModel(this);
+    QIcon warningIcon(ui.addonView->style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(QSize(16, 15)));
+    mContentModel = new ContentSelectorModel::ContentModel(this, warningIcon);
 }
 
 void ContentSelectorView::ContentSelector::buildGameFileView()
@@ -161,6 +162,7 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
         oldIndex = index;
 
         model->setData(model->index(index, 0), true, Qt::UserRole + 1);
+        mContentModel->checkForLoadOrderErrors();
     }
 
     if (proxy)

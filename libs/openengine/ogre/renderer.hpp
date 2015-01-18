@@ -6,6 +6,7 @@
  */
 
 #include <string>
+#include <stdint.h>
 
 #include <OgreTexture.h>
 
