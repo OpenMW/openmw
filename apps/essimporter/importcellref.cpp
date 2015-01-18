@@ -7,7 +7,8 @@ namespace ESSImport
 
     void CellRef::load(ESM::ESMReader &esm)
     {
-        esm.getHNT(mRefNum.mIndex, "FRMR");
+        // (FRMR subrecord name is already read by the loop in ConvertCell)
+        esm.getHT(mRefNum.mIndex); // FRMR
 
         // this is required since openmw supports more than 255 content files
         int pluginIndex = (mRefNum.mIndex & 0xff000000) >> 24;

@@ -49,6 +49,13 @@ namespace ESSImport
         while (esm.isNextSub("FGTN"))
             esm.getHString(); // fight target?
 
+        // unsure at which point between TGTN and CRED
+        if (esm.isNextSub("AADT"))
+        {
+            // occured when a creature was in the middle of its attack, 44 bytes
+            esm.skipHSub();
+        }
+
         // unsure at which point between FGTN and CHRD
         if (esm.isNextSub("PWPC"))
             esm.skipHSub();

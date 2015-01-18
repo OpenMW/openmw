@@ -1612,7 +1612,7 @@ namespace MWGui
             writer.endRecord(ESM::REC_ASPL);
         }
 
-        for (std::vector<CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
+        for (std::vector<ESM::CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
         {
             writer.startRecord(ESM::REC_MARK);
             (*it).save(writer);
@@ -1633,7 +1633,7 @@ namespace MWGui
         }
         else if (type == ESM::REC_MARK)
         {
-            CustomMarker marker;
+            ESM::CustomMarker marker;
             marker.load(reader);
             mCustomMarkers.addMarker(marker, false);
         }

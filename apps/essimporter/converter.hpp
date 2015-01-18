@@ -9,6 +9,8 @@
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadglob.hpp>
 #include <components/esm/cellstate.hpp>
+#include <components/esm/custommarkerstate.hpp>
+
 #include "importcrec.hpp"
 
 #include "importercontext.hpp"
@@ -240,6 +242,7 @@ private:
 
     std::map<std::string, Cell> mCells;
 
+    std::vector<ESM::CustomMarker> mMarkers;
 };
 
 }

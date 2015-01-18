@@ -213,6 +213,7 @@ namespace ESSImport
         converters[ESM::REC_LEVC] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::CreatureLevList>());
         converters[ESM::REC_LEVI] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::ItemLevList>());
 
+        std::set<unsigned int> unknownRecords;
 
         for (std::map<unsigned int, boost::shared_ptr<Converter> >::const_iterator it = converters.begin();
              it != converters.end(); ++it)
@@ -232,7 +233,9 @@ namespace ESSImport
             }
             else
             {
-                std::cerr << "unknown record " << n.toString() << std::endl;
+                if (unknownRecords.insert(n.val).second)
+                    std::cerr << "unknown record " << n.toString() << std::endl;
+
                 esm.skipRecord();
             }
         }

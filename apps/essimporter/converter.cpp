@@ -108,7 +108,7 @@ namespace ESSImport
         }
 
         std::vector<CellRef> cellrefs;
-        while (esm.hasMoreSubs())
+        while (esm.hasMoreSubs() && esm.isNextSub("FRMR"))
         {
             CellRef ref;
             ref.load (esm);
@@ -119,6 +119,36 @@ namespace ESSImport
                 esm.skipHSub();
             }
             cellrefs.push_back(ref);
+        }
+
+        while (esm.isNextSub("MPCD"))
+        {
+            float notepos[3];
+            esm.getHT(notepos, 3*sizeof(float));
+
+            // Markers seem to be arranged in a 32*32 grid, notepos has grid-indices.
+            // This seems to be the reason markers can't be placed everywhere in interior cells,
+            // i.e. when the grid is exceeded.
+            // Converting the interior markers correctly could be rather tricky, but is probably similar logic
+            // as used for the FoW texture placement, which we need to figure out anyway
+            notepos[1] += 31.f;
+            notepos[0] += 0.5;
+            notepos[1] += 0.5;
+            notepos[0] = 8192 * notepos[0] / 32.f;
+            notepos[1] = 8192 * notepos[1] / 32.f;
+            if (cell.isExterior())
+            {
+                notepos[0] += 8192 * cell.mData.mX;
+                notepos[1] += 8192 * cell.mData.mY;
+            }
+            // TODO: what encoding is this in?
+            std::string note = esm.getHNString("MPNT");
+            ESM::CustomMarker marker;
+            marker.mWorldX = notepos[0];
+            marker.mWorldY = notepos[1];
+            marker.mNote = note;
+            marker.mCell = cell.getCellId();
+            mMarkers.push_back(marker);
         }
 
         newcell.mRefs = cellrefs;
@@ -198,6 +228,13 @@ namespace ESSImport
             }
 
             esm.endRecord(ESM::REC_CSTA);
+        }
+
+        for (std::vector<ESM::CustomMarker>::const_iterator it = mMarkers.begin(); it != mMarkers.end(); ++it)
+        {
+            esm.startRecord(ESM::REC_MARK);
+            it->save(esm);
+            esm.endRecord(ESM::REC_MARK);
         }
     }
 

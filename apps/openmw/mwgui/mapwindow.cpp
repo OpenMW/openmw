@@ -86,35 +86,16 @@ namespace
 namespace MWGui
 {
 
-    void CustomMarker::save(ESM::ESMWriter &esm) const
-    {
-        esm.writeHNT("POSX", mWorldX);
-        esm.writeHNT("POSY", mWorldY);
-        mCell.save(esm);
-        if (!mNote.empty())
-            esm.writeHNString("NOTE", mNote);
-    }
-
-    void CustomMarker::load(ESM::ESMReader &esm)
-    {
-        esm.getHNT(mWorldX, "POSX");
-        esm.getHNT(mWorldY, "POSY");
-        mCell.load(esm);
-        mNote = esm.getHNOString("NOTE");
-    }
-
-    // ------------------------------------------------------
-
-    void CustomMarkerCollection::addMarker(const CustomMarker &marker, bool triggerEvent)
+    void CustomMarkerCollection::addMarker(const ESM::CustomMarker &marker, bool triggerEvent)
     {
         mMarkers.push_back(marker);
         if (triggerEvent)
             eventMarkersChanged();
     }
 
-    void CustomMarkerCollection::deleteMarker(const CustomMarker &marker)
+    void CustomMarkerCollection::deleteMarker(const ESM::CustomMarker &marker)
     {
-        std::vector<CustomMarker>::iterator it = std::find(mMarkers.begin(), mMarkers.end(), marker);
+        std::vector<ESM::CustomMarker>::iterator it = std::find(mMarkers.begin(), mMarkers.end(), marker);
         if (it != mMarkers.end())
             mMarkers.erase(it);
         else
@@ -123,9 +104,9 @@ namespace MWGui
         eventMarkersChanged();
     }
 
-    void CustomMarkerCollection::updateMarker(const CustomMarker &marker, const std::string &newNote)
+    void CustomMarkerCollection::updateMarker(const ESM::CustomMarker &marker, const std::string &newNote)
     {
-        std::vector<CustomMarker>::iterator it = std::find(mMarkers.begin(), mMarkers.end(), marker);
+        std::vector<ESM::CustomMarker>::iterator it = std::find(mMarkers.begin(), mMarkers.end(), marker);
         if (it != mMarkers.end())
             it->mNote = newNote;
         else
@@ -140,12 +121,12 @@ namespace MWGui
         eventMarkersChanged();
     }
 
-    std::vector<CustomMarker>::const_iterator CustomMarkerCollection::begin() const
+    std::vector<ESM::CustomMarker>::const_iterator CustomMarkerCollection::begin() const
     {
         return mMarkers.begin();
     }
 
-    std::vector<CustomMarker>::const_iterator CustomMarkerCollection::end() const
+    std::vector<ESM::CustomMarker>::const_iterator CustomMarkerCollection::end() const
     {
         return mMarkers.end();
     }
@@ -295,9 +276,9 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(*it);
         mCustomMarkerWidgets.clear();
 
-        for (std::vector<CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
+        for (std::vector<ESM::CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
         {
-            const CustomMarker& marker = *it;
+            const ESM::CustomMarker& marker = *it;
 
             if (marker.mCell.mPaged != !mInterior)
                 continue;
@@ -654,7 +635,7 @@ namespace MWGui
 
     void MapWindow::onCustomMarkerDoubleClicked(MyGUI::Widget *sender)
     {
-        mEditingMarker = *sender->getUserData<CustomMarker>();
+        mEditingMarker = *sender->getUserData<ESM::CustomMarker>();
         mEditNoteDialog.setText(mEditingMarker.mNote);
         mEditNoteDialog.showDeleteButton(true);
         mEditNoteDialog.setVisible(true);
