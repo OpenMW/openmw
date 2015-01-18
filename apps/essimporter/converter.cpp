@@ -2,6 +2,8 @@
 
 #include <OgreImage.h>
 
+#include <components/esm/creaturestate.hpp>
+
 namespace
 {
 
@@ -81,10 +83,68 @@ namespace ESSImport
             ref.load (esm);
             if (esm.isNextSub("DELE"))
                 std::cout << "deleted ref " << ref.mIndexedRefId << std::endl;
+            cellrefs.push_back(ref);
         }
 
         newcell.mRefs = cellrefs;
         mCells[id] = newcell;
+    }
+
+    void ConvertCell::write(ESM::ESMWriter &esm)
+    {
+        for (std::map<std::string, Cell>::const_iterator it = mCells.begin(); it != mCells.end(); ++it)
+        {
+            const ESM::Cell& cell = it->second.mCell;
+            esm.startRecord(ESM::REC_CSTA);
+            ESM::CellState csta;
+            csta.mHasFogOfWar = 0;
+            csta.mId = cell.getCellId();
+            csta.mId.save(esm);
+            // TODO csta.mLastRespawn;
+            // shouldn't be needed if we respawn on global schedule like in original MW
+            csta.mWaterLevel = cell.mWater;
+            csta.save(esm);
+
+            for (std::vector<CellRef>::const_iterator refIt = it->second.mRefs.begin(); refIt != it->second.mRefs.end(); ++refIt)
+            {
+                const CellRef& cellref = *refIt;
+                ESM::CellRef out;
+                out.blank();
+
+                if (cellref.mIndexedRefId.size() < 8)
+                {
+                    std::cerr << "CellRef with no index?" << std::endl;
+                    continue;
+                }
+                std::stringstream stream;
+                stream << cellref.mIndexedRefId.substr(cellref.mIndexedRefId.size()-8,8);
+                int refIndex;
+                stream >> refIndex;
+
+                out.mRefID = cellref.mIndexedRefId.substr(0,cellref.mIndexedRefId.size()-8);
+
+                std::map<std::pair<int, std::string>, CREC>::const_iterator crecIt = mContext->mCreatureChanges.find(
+                            std::make_pair(refIndex, out.mRefID));
+                if (crecIt != mContext->mCreatureChanges.end())
+                {
+                    std::cerr << "Can't' find CREC for " << refIndex << " " << out.mRefID << std::endl;
+                    continue;
+                }
+
+                ESM::CreatureState objstate;
+                objstate.mCount = 1;
+                objstate.mEnabled = cellref.mEnabled;
+                objstate.mHasLocals = 0;
+                objstate.mLocalRotation[0] = objstate.mLocalRotation[1] = objstate.mLocalRotation[2] = 0;
+                objstate.mPosition = cellref.mPos;
+                objstate.mRef = out;
+                objstate.mRef.mRefNum = cellref.mRefNum;
+                esm.writeHNT ("OBJE", ESM::REC_CREA);
+                objstate.save(esm);
+            }
+
+            esm.endRecord(ESM::REC_CSTA);
+        }
     }
 
 }

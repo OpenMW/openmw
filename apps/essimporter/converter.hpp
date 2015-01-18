@@ -153,6 +153,7 @@ public:
         {
             mContext->mPlayer.mObject.mNpcStats.mReputation = npcc.mNPDT.mReputation;
         }
+        //mContext->mNpcChanges.insert(std::make_pair(std::make_pair(npcc.mIndex,id), crec));
     }
 };
 
@@ -230,6 +231,8 @@ public:
         std::string id = esm.getHNString("NAME");
         CREC crec;
         crec.load(esm);
+
+        mContext->mCreatureChanges.insert(std::make_pair(std::make_pair(crec.mIndex,id), crec));
     }
 };
 
@@ -243,24 +246,7 @@ class ConvertCell : public Converter
 {
 public:
     virtual void read(ESM::ESMReader& esm);
-
-    virtual void write(ESM::ESMWriter& esm)
-    {
-        for (std::map<std::string, Cell>::const_iterator it = mCells.begin(); it != mCells.end(); ++it)
-        {
-            const ESM::Cell& cell = it->second.mCell;
-            esm.startRecord(ESM::REC_CSTA);
-            ESM::CellState csta;
-            csta.mHasFogOfWar = 0;
-            csta.mId = cell.getCellId();
-            csta.mId.save(esm);
-            // TODO csta.mLastRespawn;
-            // shouldn't be needed if we respawn on global schedule like in original MW
-            csta.mWaterLevel = cell.mWater;
-            csta.save(esm);
-            esm.endRecord(ESM::REC_CSTA);
-        }
-    }
+    virtual void write(ESM::ESMWriter& esm);
 
 private:
     struct Cell

@@ -1,12 +1,16 @@
 #ifndef OPENMW_ESSIMPORT_CONTEXT_H
 #define OPENMW_ESSIMPORT_CONTEXT_H
 
+#include <map>
+
 #include <components/esm/loadnpc.hpp>
+#include <components/esm/player.hpp>
 
 #include "importnpcc.hpp"
+#include "importcrec.hpp"
 #include "importplayer.hpp"
 
-#include <components/esm/player.hpp>
+
 
 namespace ESSImport
 {
@@ -19,6 +23,10 @@ namespace ESSImport
 
         int mDay, mMonth, mYear;
         float mHour;
+
+        // key <refIndex, refId>
+        std::map<std::pair<int, std::string>, CREC> mCreatureChanges;
+        std::map<std::pair<int, std::string>, NPCC> mNpcChanges;
 
         Context()
         {

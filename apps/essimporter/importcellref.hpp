@@ -25,6 +25,8 @@ namespace ESSImport
 
         ESM::Position mPos;
 
+        bool mEnabled;
+
         void load(ESM::ESMReader& esm);
     };
 
