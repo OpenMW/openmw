@@ -16,22 +16,19 @@ namespace ESSImport
 
         mIndexedRefId = esm.getHNString("NAME");
 
-        esm.getHNT(mACDT, "ACDT");
+        // the following two occur in ESM::CellRef too (Charge and Gold),
+        // but may have entirely different meanings here
+        int intv;
+        esm.getHNOT(intv, "INTV");
+        int nam9;
+        esm.getHNOT(nam9, "NAM9");
 
-        ACSC acsc;
-        esm.getHNOT(acsc, "ACSC");
-        esm.getHNOT(acsc, "ACSL");
-
-        if (esm.isNextSub("CRED"))
-            esm.skipHSub();
-
-        if (esm.isNextSub("ND3D"))
-            esm.skipHSub();
+        mActorData.load(esm);
 
         mEnabled = true;
         esm.getHNOT(mEnabled, "ZNAM");
 
-        esm.getHNOT(mPos, "DATA", 24);
+        esm.getHNT(mPos, "DATA", 24);
     }
 
 }

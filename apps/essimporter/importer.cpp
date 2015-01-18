@@ -185,6 +185,9 @@ namespace ESSImport
 
         Context context;
 
+        const ESM::Header& header = esm.getHeader();
+        context.mPlayerCellName = header.mGameData.mCurrentCell.toString();
+
         const unsigned int recREFR = ESM::FourCC<'R','E','F','R'>::value;
         const unsigned int recPCDT = ESM::FourCC<'P','C','D','T'>::value;
         const unsigned int recFMAP = ESM::FourCC<'F','M','A','P'>::value;
@@ -234,8 +237,6 @@ namespace ESSImport
             }
         }
 
-        const ESM::Header& header = esm.getHeader();
-
         ESM::ESMWriter writer;
 
         writer.setFormat (ESM::Header::CurrentFormat);
@@ -247,6 +248,11 @@ namespace ESSImport
         writer.setAuthor("");
         writer.setDescription("");
         writer.setRecordCount (0);
+
+        for (std::vector<ESM::Header::MasterData>::const_iterator it = header.mMaster.begin();
+             it != header.mMaster.end(); ++it)
+            writer.addMaster (it->name, 0); // not using the size information anyway -> use value of 0
+
         writer.save (stream);
 
         ESM::SavedGame profile;
@@ -298,6 +304,15 @@ namespace ESSImport
         }
 
         writer.startRecord(ESM::REC_PLAY);
+        if (context.mPlayer.mCellId.mPaged)
+        {
+            // exterior cell -> determine cell coordinates based on position
+            const int cellSize = 8192;
+            int cellX = std::floor(context.mPlayer.mObject.mPosition.pos[0]/cellSize);
+            int cellY = std::floor(context.mPlayer.mObject.mPosition.pos[1]/cellSize);
+            context.mPlayer.mCellId.mIndex.mX = cellX;
+            context.mPlayer.mCellId.mIndex.mY = cellY;
+        }
         context.mPlayer.save(writer);
         writer.endRecord(ESM::REC_PLAY);
     }

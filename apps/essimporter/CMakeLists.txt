@@ -5,9 +5,11 @@ set(ESSIMPORTER_FILES
     importnpcc.cpp
     importcrec.cpp
     importcellref.cpp
-    importacdt.hpp
+    importacdt.cpp
     importercontext.cpp
     converter.cpp
+    convertacdt.cpp
+    convertnpcc.cpp
 )
 
 add_executable(openmw-essimporter

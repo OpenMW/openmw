@@ -21,9 +21,11 @@ namespace ESSImport
         std::string mIndexedRefId;
         ESM::RefNum mRefNum;
 
-        ACDT mACDT;
+        ActorData mActorData;
 
         ESM::Position mPos;
+
+        std::string mScript;
 
         bool mEnabled;
 

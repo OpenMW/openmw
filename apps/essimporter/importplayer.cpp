@@ -14,16 +14,7 @@ namespace ESSImport
         if (esm.isNextSub("STPR"))
             esm.skipHSub(); // ESS TODO
 
-        esm.getHNT(mACDT, "ACDT");
-
-        ACSC acsc;
-        esm.getHNOT(acsc, "ACSC");
-        esm.getHNOT(acsc, "ACSL");
-
-        esm.getHNExact(mSkills, 27*2*sizeof(int), "CHRD");
-
-        if (esm.isNextSub("ND3D"))
-            esm.skipHSub(); // ESS TODO (1 byte)
+        mActorData.load(esm);
 
         esm.getHNOT(mPos, "DATA", 24);
     }
@@ -43,6 +34,9 @@ namespace ESSImport
         mBirthsign = esm.getHNOString("BNAM");
 
         if (esm.isNextSub("ENAM"))
+            esm.skipHSub();
+
+        if (esm.isNextSub("LNAM"))
             esm.skipHSub();
 
         while (esm.isNextSub("FNAM"))

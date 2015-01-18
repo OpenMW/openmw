@@ -150,3 +150,18 @@ void ESM::NpcStats::save (ESMWriter &esm) const
     if (mCrimeId != -1)
         esm.writeHNT ("CRID", mCrimeId);
 }
+
+void ESM::NpcStats::blank()
+{
+    mIsWerewolf = false;
+    mDisposition = 0;
+    mBounty = 0;
+    mReputation = 0;
+    mWerewolfKills = 0;
+    mProfit = 0;
+    mLevelProgress = 0;
+    for (int i=0; i<8; ++i)
+        mSkillIncrease[i] = 0;
+    mTimeToStartDrowning = 20;
+    mCrimeId = -1;
+}

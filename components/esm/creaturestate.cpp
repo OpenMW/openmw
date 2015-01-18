@@ -18,3 +18,9 @@ void ESM::CreatureState::save (ESMWriter &esm, bool inInventory) const
 
     mCreatureStats.save (esm);
 }
+
+void ESM::CreatureState::blank()
+{
+    ObjectState::blank();
+    mCreatureStats.blank();
+}

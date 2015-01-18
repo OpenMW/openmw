@@ -43,7 +43,14 @@ namespace ESSImport
     {
         ESM::Cell cell;
         std::string id = esm.getHNString("NAME");
+        cell.mName = id;
         cell.load(esm, false);
+
+        // note if the player is in a nameless exterior cell, we will assign the cellId later based on player position
+        if (id == mContext->mPlayerCellName)
+        {
+            mContext->mPlayer.mCellId = cell.getCellId();
+        }
 
         Cell newcell;
         newcell.mCell = cell;
@@ -55,7 +62,12 @@ namespace ESSImport
         unsigned char nam8[32];
         if (esm.isNextSub("NAM8"))
         {
-            esm.getHExact(nam8, 32);
+            esm.getSubHeader();
+            // FIXME: different size in interior cells for some reason
+            if (esm.getSubSize() == 36)
+                esm.skip(4);
+
+            esm.getExact(nam8, 32);
 
             newcell.mFogOfWar.reserve(16*16);
             for (int x=0; x<16; ++x)
@@ -87,6 +99,8 @@ namespace ESSImport
         }
 
         newcell.mRefs = cellrefs;
+
+        // FIXME: map by ID for exterior cells
         mCells[id] = newcell;
     }
 
@@ -127,20 +141,36 @@ namespace ESSImport
                             std::make_pair(refIndex, out.mRefID));
                 if (crecIt != mContext->mCreatureChanges.end())
                 {
-                    std::cerr << "Can't' find CREC for " << refIndex << " " << out.mRefID << std::endl;
+                    ESM::CreatureState objstate;
+                    objstate.blank();
+                    convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
+                    objstate.mEnabled = cellref.mEnabled;
+                    objstate.mPosition = cellref.mPos;
+                    objstate.mRef = out;
+                    objstate.mRef.mRefNum = cellref.mRefNum;
+                    esm.writeHNT ("OBJE", ESM::REC_CREA);
+                    objstate.save(esm);
                     continue;
                 }
 
-                ESM::CreatureState objstate;
-                objstate.mCount = 1;
-                objstate.mEnabled = cellref.mEnabled;
-                objstate.mHasLocals = 0;
-                objstate.mLocalRotation[0] = objstate.mLocalRotation[1] = objstate.mLocalRotation[2] = 0;
-                objstate.mPosition = cellref.mPos;
-                objstate.mRef = out;
-                objstate.mRef.mRefNum = cellref.mRefNum;
-                esm.writeHNT ("OBJE", ESM::REC_CREA);
-                objstate.save(esm);
+                std::map<std::pair<int, std::string>, NPCC>::const_iterator npccIt = mContext->mNpcChanges.find(
+                            std::make_pair(refIndex, out.mRefID));
+                if (npccIt != mContext->mNpcChanges.end())
+                {
+                    ESM::NpcState objstate;
+                    objstate.blank();
+                    convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
+                    convertNpcData(cellref.mActorData, objstate.mNpcStats);
+                    objstate.mEnabled = cellref.mEnabled;
+                    objstate.mPosition = cellref.mPos;
+                    objstate.mRef = out;
+                    objstate.mRef.mRefNum = cellref.mRefNum;
+                    esm.writeHNT ("OBJE", ESM::REC_NPC_);
+                    objstate.save(esm);
+                    continue;
+                }
+
+                std::cerr << "Can't find type for " << refIndex << " " << out.mRefID << std::endl;
             }
 
             esm.endRecord(ESM::REC_CSTA);

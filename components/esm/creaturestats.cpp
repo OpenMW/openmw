@@ -218,6 +218,38 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     }
 
     esm.writeHNT("AISE", mHasAiSettings);
-    for (int i=0; i<4; ++i)
-        mAiSettings[i].save(esm);
+    if (mHasAiSettings)
+    {
+        for (int i=0; i<4; ++i)
+            mAiSettings[i].save(esm);
+    }
+}
+
+void ESM::CreatureStats::blank()
+{
+    mTradeTime.mHour = 0;
+    mTradeTime.mDay = 0;
+    mGoldPool = 0;
+    mActorId = 0;
+    mHasAiSettings = false;
+    mDead = false;
+    mDied = false;
+    mMurdered = false;
+    mFriendlyHits = 0;
+    mTalkedTo = false;
+    mAlarmed = false;
+    mAttacked = false;
+    mAttackingOrSpell = false;
+    mKnockdown = false;
+    mKnockdownOneFrame = false;
+    mKnockdownOverOneFrame = false;
+    mHitRecovery = false;
+    mBlock = false;
+    mMovementFlags = 0;
+    mAttackStrength = 0.f;
+    mFallHeight = 0.f;
+    mRecalcDynamicStats = false;
+    mDrawState = 0;
+    mDeathAnimation = 0;
+    mLevel = 1;
 }

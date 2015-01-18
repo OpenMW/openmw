@@ -14,6 +14,9 @@
 #include "importercontext.hpp"
 #include "importcellref.hpp"
 
+#include "convertacdt.hpp"
+#include "convertnpcc.hpp"
+
 namespace ESSImport
 {
 
@@ -151,9 +154,10 @@ public:
         npcc.load(esm);
         if (id == "PlayerSaveGame")
         {
-            mContext->mPlayer.mObject.mNpcStats.mReputation = npcc.mNPDT.mReputation;
+            convertNPCC(npcc, mContext->mPlayer.mObject);
         }
-        //mContext->mNpcChanges.insert(std::make_pair(std::make_pair(npcc.mIndex,id), crec));
+        else
+            mContext->mNpcChanges.insert(std::make_pair(std::make_pair(npcc.mIndex,id), npcc));
     }
 };
 
@@ -168,36 +172,10 @@ public:
         mContext->mPlayer.mObject.mPosition = refr.mPos;
 
         ESM::CreatureStats& cStats = mContext->mPlayer.mObject.mCreatureStats;
-        for (int i=0; i<3; ++i)
-        {
-            int writeIndex = translateDynamicIndex(i);
-            cStats.mDynamic[writeIndex].mBase = refr.mACDT.mDynamic[i][1];
-            cStats.mDynamic[writeIndex].mMod = refr.mACDT.mDynamic[i][1];
-            cStats.mDynamic[writeIndex].mCurrent = refr.mACDT.mDynamic[i][0];
-        }
-        for (int i=0; i<8; ++i)
-        {
-            cStats.mAttributes[i].mBase = refr.mACDT.mAttributes[i][1];
-            cStats.mAttributes[i].mMod = refr.mACDT.mAttributes[i][0];
-            cStats.mAttributes[i].mCurrent = refr.mACDT.mAttributes[i][0];
-        }
-        ESM::NpcStats& npcStats = mContext->mPlayer.mObject.mNpcStats;
-        for (int i=0; i<ESM::Skill::Length; ++i)
-        {
-            npcStats.mSkills[i].mRegular.mMod = refr.mSkills[i][1];
-            npcStats.mSkills[i].mRegular.mCurrent = refr.mSkills[i][1];
-            npcStats.mSkills[i].mRegular.mBase = refr.mSkills[i][0];
-        }
-    }
+        convertACDT(refr.mActorData.mACDT, cStats);
 
-    // OpenMW uses Health,Magicka,Fatigue, MW uses Health,Fatigue,Magicka
-    int translateDynamicIndex(int mwIndex)
-    {
-        if (mwIndex == 1)
-            return 2;
-        else if (mwIndex == 2)
-            return 1;
-        return mwIndex;
+        ESM::NpcStats& npcStats = mContext->mPlayer.mObject.mNpcStats;
+        convertNpcData(refr.mActorData, npcStats);
     }
 };
 

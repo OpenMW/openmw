@@ -47,6 +47,9 @@ namespace ESM
         float mTimeToStartDrowning;
         int mCrimeId;
 
+        /// Initialize to default state
+        void blank();
+
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;
     };

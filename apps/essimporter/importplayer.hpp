@@ -21,14 +21,11 @@ namespace ESSImport
 /// Player-agnostic player data
 struct REFR
 {
-    ACDT mACDT;
+    ActorData mActorData;
 
     std::string mRefID;
     ESM::Position mPos;
     ESM::RefNum mRefNum;
-
-    int mSkills[27][2];
-    float mAttributes[8][2];
 
     void load(ESM::ESMReader& esm);
 };
