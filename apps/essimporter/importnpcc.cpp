@@ -12,24 +12,14 @@ namespace ESSImport
 
         esm.getHNT(mNPDT, "NPDT");
 
-        while (esm.isNextSub("NPCO"))
-        {
-            InventoryItem item;
-            item.mId = esm.getHString();
-
-            if (esm.isNextSub("XIDX"))
-                esm.skipHSub();
-
-            item.mCondition = -1;
-            esm.getHNOT(item.mCondition, "XHLT");
-            mInventory.push_back(item);
-        }
-
-        while (esm.isNextSub("WIDX"))
-        {
-            // equipping?
+        if (esm.isNextSub("AI_E"))
             esm.skipHSub();
-        }
+        if (esm.isNextSub("AI_T"))
+            esm.skipHSub();
+        if (esm.isNextSub("AI_F"))
+            esm.skipHSub();
+
+        mInventory.load(esm);
     }
 
 }

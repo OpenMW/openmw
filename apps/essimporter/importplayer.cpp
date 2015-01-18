@@ -11,9 +11,6 @@ namespace ESSImport
 
         mRefID = esm.getHNString("NAME");
 
-        if (esm.isNextSub("STPR"))
-            esm.skipHSub(); // ESS TODO
-
         mActorData.load(esm);
 
         esm.getHNOT(mPos, "DATA", 24);
@@ -21,6 +18,12 @@ namespace ESSImport
 
     void PCDT::load(ESM::ESMReader &esm)
     {
+        while (esm.isNextSub("DNAM"))
+        {
+            // TODO: deal with encoding?
+            mKnownDialogueTopics.push_back(esm.getHString());
+        }
+
         if (esm.isNextSub("PNAM"))
             esm.skipHSub();
         if (esm.isNextSub("SNAM"))
@@ -32,6 +35,17 @@ namespace ESSImport
         esm.getHNOT(mBounty, "CNAM");
 
         mBirthsign = esm.getHNOString("BNAM");
+
+        // Holds the names of the last used Alchemy apparatus. Don't need to import this ATM,
+        // because our GUI auto-selects the best apparatus.
+        if (esm.isNextSub("NAM0"))
+            esm.skipHSub();
+        if (esm.isNextSub("NAM1"))
+            esm.skipHSub();
+        if (esm.isNextSub("NAM2"))
+            esm.skipHSub();
+        if (esm.isNextSub("NAM3"))
+            esm.skipHSub();
 
         if (esm.isNextSub("ENAM"))
             esm.skipHSub();
@@ -48,6 +62,14 @@ namespace ESSImport
 
         if (esm.isNextSub("KNAM"))
             esm.skipHSub();
+
+        if (esm.isNextSub("WERE"))
+        {
+            // some werewolf data, 152 bytes
+            // maybe current skills and attributes for werewolf form
+            esm.getSubHeader();
+            esm.skip(152);
+        }
     }
 
 }

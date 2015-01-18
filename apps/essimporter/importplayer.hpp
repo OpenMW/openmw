@@ -36,6 +36,8 @@ struct PCDT
     int mBounty;
     std::string mBirthsign;
 
+    std::vector<std::string> mKnownDialogueTopics;
+
     struct FNAM
     {
         unsigned char mRank;

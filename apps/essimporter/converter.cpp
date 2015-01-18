@@ -60,12 +60,17 @@ namespace ESSImport
         // TODO: add bleeding of FOW into neighbouring cells (openmw handles this by writing to the textures,
         // MW handles it when rendering only)
         unsigned char nam8[32];
-        if (esm.isNextSub("NAM8"))
+        // exterior has 1 NAM8, interior can have multiple ones, and have an extra 4 byte flag at the start
+        // (probably offset of that specific fog texture?)
+        while (esm.isNextSub("NAM8"))
         {
             esm.getSubHeader();
-            // FIXME: different size in interior cells for some reason
+
             if (esm.getSubSize() == 36)
+            {
+                // flag on interiors
                 esm.skip(4);
+            }
 
             esm.getExact(nam8, 32);
 
@@ -82,10 +87,24 @@ namespace ESSImport
                 }
             }
 
-            std::ostringstream filename;
-            filename << "fog_" << cell.mData.mX << "_" << cell.mData.mY << ".tga";
+            if (cell.isExterior())
+            {
+                std::ostringstream filename;
+                filename << "fog_" << cell.mData.mX << "_" << cell.mData.mY << ".tga";
 
-            convertImage((char*)&newcell.mFogOfWar[0], newcell.mFogOfWar.size()*4, 16, 16, Ogre::PF_BYTE_RGBA, filename.str());
+                convertImage((char*)&newcell.mFogOfWar[0], newcell.mFogOfWar.size()*4, 16, 16, Ogre::PF_BYTE_RGBA, filename.str());
+            }
+        }
+
+        // moved reference, not handled yet
+        // NOTE: MVRF can also occur in within normal references (importcellref.cpp)?
+        // this does not match the ESM file implementation,
+        // verify if that can happen with ESM files too
+        while (esm.isNextSub("MVRF"))
+        {
+            esm.skipHSub(); // skip MVRF
+            esm.getSubName();
+            esm.skipHSub(); // skip CNDT
         }
 
         std::vector<CellRef> cellrefs;
@@ -94,7 +113,11 @@ namespace ESSImport
             CellRef ref;
             ref.load (esm);
             if (esm.isNextSub("DELE"))
+            {
+                // strangely this can be e.g. 52 instead of just 1,
                 std::cout << "deleted ref " << ref.mIndexedRefId << std::endl;
+                esm.skipHSub();
+            }
             cellrefs.push_back(ref);
         }
 
@@ -148,6 +171,7 @@ namespace ESSImport
                     objstate.mPosition = cellref.mPos;
                     objstate.mRef = out;
                     objstate.mRef.mRefNum = cellref.mRefNum;
+                    // FIXME: change save format to not require object type, instead look up it up using the RefId
                     esm.writeHNT ("OBJE", ESM::REC_CREA);
                     objstate.save(esm);
                     continue;

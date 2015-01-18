@@ -3,6 +3,10 @@
 
 #include <components/esm/loadcont.hpp>
 
+#include <components/esm/aipackage.hpp>
+
+#include "importinventory.hpp"
+
 namespace ESM
 {
     class ESMReader;
@@ -20,12 +24,7 @@ namespace ESSImport
             unsigned char unknown2[5];
         } mNPDT;
 
-        struct InventoryItem
-        {
-            std::string mId;
-            int mCondition;
-        };
-        std::vector<InventoryItem> mInventory;
+        Inventory mInventory;
 
         int mIndex;
 

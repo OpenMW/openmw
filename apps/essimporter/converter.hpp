@@ -83,13 +83,17 @@ public:
         // this is always the player
         ESM::NPC npc;
         std::string id = esm.getHNString("NAME");
-        assert (id == "player");
         npc.load(esm);
-        mContext->mPlayer.mObject.mCreatureStats.mLevel = npc.mNpdt52.mLevel;
-        mContext->mPlayerBase = npc;
-        std::map<const int, float> empty;
-        for (std::vector<std::string>::const_iterator it = npc.mSpells.mList.begin(); it != npc.mSpells.mList.end(); ++it)
-            mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[*it] = empty;
+        if (id != "player") // seems to occur sometimes, with "chargen X" names
+            std::cerr << "non-player NPC record: " << id << std::endl;
+        else
+        {
+            mContext->mPlayer.mObject.mCreatureStats.mLevel = npc.mNpdt52.mLevel;
+            mContext->mPlayerBase = npc;
+            std::map<const int, float> empty;
+            for (std::vector<std::string>::const_iterator it = npc.mSpells.mList.begin(); it != npc.mSpells.mList.end(); ++it)
+                mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[*it] = empty;
+        }
     }
 };
 

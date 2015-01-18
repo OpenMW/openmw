@@ -7,7 +7,7 @@ namespace ESSImport
 
     void CellRef::load(ESM::ESMReader &esm)
     {
-        esm.getHNT(mRefNum.mIndex, "FRMR"); // TODO: adjust RefNum
+        esm.getHNT(mRefNum.mIndex, "FRMR");
 
         // this is required since openmw supports more than 255 content files
         int pluginIndex = (mRefNum.mIndex & 0xff000000) >> 24;
@@ -16,19 +16,27 @@ namespace ESSImport
 
         mIndexedRefId = esm.getHNString("NAME");
 
-        // the following two occur in ESM::CellRef too (Charge and Gold),
-        // but may have entirely different meanings here
-        int intv;
-        esm.getHNOT(intv, "INTV");
-        int nam9;
-        esm.getHNOT(nam9, "NAM9");
+        if (esm.isNextSub("LVCR"))
+            esm.skipHSub();
 
         mActorData.load(esm);
 
         mEnabled = true;
         esm.getHNOT(mEnabled, "ZNAM");
 
-        esm.getHNT(mPos, "DATA", 24);
+        // should occur for all references but not levelled creature spawners
+        esm.getHNOT(mPos, "DATA", 24);
+
+        // i've seen DATA record TWICE on a creature record - and with the exact same content too! weird
+        // alarmvoi0000.ess
+        esm.getHNOT(mPos, "DATA", 24);
+
+        if (esm.isNextSub("MVRF"))
+        {
+            esm.skipHSub();
+            esm.getSubName();
+            esm.skipHSub();
+        }
     }
 
 }
