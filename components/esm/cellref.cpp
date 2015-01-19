@@ -142,8 +142,8 @@ void ESM::CellRef::blank()
     mSoul.clear();
     mFaction.clear();
     mFactionRank = -2;
-    mCharge = 0;
-    mEnchantmentCharge = 0;
+    mCharge = -1;
+    mEnchantmentCharge = -1;
     mGoldValue = 0;
     mDestCell.clear();
     mLockLevel = 0;

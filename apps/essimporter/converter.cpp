@@ -4,6 +4,8 @@
 
 #include <components/esm/creaturestate.hpp>
 
+#include "convertcrec.hpp"
+
 namespace
 {
 
@@ -197,6 +199,7 @@ namespace ESSImport
                     ESM::CreatureState objstate;
                     objstate.blank();
                     convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
+                    convertCREC(crecIt->second, objstate);
                     objstate.mEnabled = cellref.mEnabled;
                     objstate.mPosition = cellref.mPos;
                     objstate.mRef = out;
@@ -215,6 +218,7 @@ namespace ESSImport
                     objstate.blank();
                     convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
                     convertNpcData(cellref.mActorData, objstate.mNpcStats);
+                    convertNPCC(npccIt->second, objstate);
                     objstate.mEnabled = cellref.mEnabled;
                     objstate.mPosition = cellref.mPos;
                     objstate.mRef = out;
