@@ -97,7 +97,7 @@ namespace SFO
                     break;
                 case SDL_CONTROLLERDEVICEADDED:
                     if(mConListener)
-                        mConListener->controllerAdded(evt.cdevice);
+                        mConListener->controllerAdded(1, evt.cdevice); //We only support one joystick, so give everything a generic deviceID
                     break;
                 case SDL_CONTROLLERDEVICEREMOVED:
                     if(mConListener)
@@ -105,15 +105,15 @@ namespace SFO
                     break;
                 case SDL_CONTROLLERBUTTONDOWN:
                     if(mConListener)
-                        mConListener->buttonPressed(evt.cbutton);
+                        mConListener->buttonPressed(1, evt.cbutton);
                     break;
                 case SDL_CONTROLLERBUTTONUP:
                     if(mConListener)
-                        mConListener->buttonReleased(evt.cbutton);
+                        mConListener->buttonReleased(1, evt.cbutton);
                     break;
                 case SDL_CONTROLLERAXISMOTION:
                     if(mConListener)
-                        mConListener->axisMoved(evt.caxis);
+                        mConListener->axisMoved(1, evt.caxis);
                     break;
                 case SDL_WINDOWEVENT:
                     handleWindowEvent(evt);

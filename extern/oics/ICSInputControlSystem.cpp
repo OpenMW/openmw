@@ -537,64 +537,70 @@ namespace ICS
 				binder.SetAttribute( "direction", "DECREASE" );
 				control.InsertEndChild(binder);
 			}
-            if(getJoystickAxisBinding(*o, Control/*::ControlChangingDirection*/::INCREASE)
-                != /*NamedAxis::*/UNASSIGNED)
-            {
-                TiXmlElement binder( "JoystickAxisBinder" );
+			JoystickIDList::const_iterator it = mJoystickIDList.begin();
+			while(it!=mJoystickIDList.end())
+			{
+                int deviceID = *it;
+                if(getJoystickAxisBinding(*o, deviceID, Control/*::ControlChangingDirection*/::INCREASE)
+                    != /*NamedAxis::*/UNASSIGNED)
+                {
+                    TiXmlElement binder( "JoystickAxisBinder" );
 
-                binder.SetAttribute( "axis", ToString<int>(
-                    getJoystickAxisBinding(*o, Control/*::ControlChangingDirection*/::INCREASE)).c_str() );
+                    binder.SetAttribute( "axis", ToString<int>(
+                        getJoystickAxisBinding(*o, deviceID, Control/*::ControlChangingDirection*/::INCREASE)).c_str() );
 
-                binder.SetAttribute( "direction", "INCREASE" );
+                    binder.SetAttribute( "direction", "INCREASE" );
 
-                binder.SetAttribute( "deviceId", "1" ); //completely useless, but required for backwards compatability
+                    binder.SetAttribute( "deviceId", deviceID ); //completely useless, but required for backwards compatability
 
-                control.InsertEndChild(binder);
-            }
+                    control.InsertEndChild(binder);
+                }
 
-            if(getJoystickAxisBinding(*o, Control/*::ControlChangingDirection*/::DECREASE)
-                != /*NamedAxis::*/UNASSIGNED)
-            {
-                TiXmlElement binder( "JoystickAxisBinder" );
+                if(getJoystickAxisBinding(*o, deviceID, Control/*::ControlChangingDirection*/::DECREASE)
+                    != /*NamedAxis::*/UNASSIGNED)
+                {
+                    TiXmlElement binder( "JoystickAxisBinder" );
 
-                binder.SetAttribute( "axis", ToString<int>(
-                    getJoystickAxisBinding(*o, Control/*::ControlChangingDirection*/::DECREASE)).c_str() );
+                    binder.SetAttribute( "axis", ToString<int>(
+                        getJoystickAxisBinding(*o, deviceID, Control/*::ControlChangingDirection*/::DECREASE)).c_str() );
 
-                binder.SetAttribute( "direction", "DECREASE" );
+                    binder.SetAttribute( "direction", "DECREASE" );
 
-                binder.SetAttribute( "deviceId", "1" ); //completely useless, but required for backwards compatability
+                    binder.SetAttribute( "deviceId", deviceID ); //completely useless, but required for backwards compatability
 
-                control.InsertEndChild(binder);
-            }
+                    control.InsertEndChild(binder);
+                }
 
-            if(getJoystickButtonBinding(*o, Control/*::ControlChangingDirection*/::INCREASE)
-                != ICS_MAX_DEVICE_BUTTONS)
-            {
-                TiXmlElement binder( "JoystickButtonBinder" );
+                if(getJoystickButtonBinding(*o, deviceID, Control/*::ControlChangingDirection*/::INCREASE)
+                    != ICS_MAX_DEVICE_BUTTONS)
+                {
+                    TiXmlElement binder( "JoystickButtonBinder" );
 
-                binder.SetAttribute( "button", ToString<unsigned int>(
-                    getJoystickButtonBinding(*o, Control/*::ControlChangingDirection*/::INCREASE)).c_str() );
+                    binder.SetAttribute( "button", ToString<unsigned int>(
+                        getJoystickButtonBinding(*o, deviceID, Control/*::ControlChangingDirection*/::INCREASE)).c_str() );
 
-                binder.SetAttribute( "direction", "INCREASE" );
+                    binder.SetAttribute( "direction", "INCREASE" );
 
-                binder.SetAttribute( "deviceId", "1" ); //completely useless, but required for backwards compatability
+                    binder.SetAttribute( "deviceId", deviceID ); //completely useless, but required for backwards compatability
 
-                control.InsertEndChild(binder);
-            }
+                    control.InsertEndChild(binder);
+                }
 
-            if(getJoystickButtonBinding(*o, Control/*::ControlChangingDirection*/::DECREASE)
-                != ICS_MAX_DEVICE_BUTTONS)
-            {
-                TiXmlElement binder( "JoystickButtonBinder" );
+                if(getJoystickButtonBinding(*o, deviceID, Control/*::ControlChangingDirection*/::DECREASE)
+                    != ICS_MAX_DEVICE_BUTTONS)
+                {
+                    TiXmlElement binder( "JoystickButtonBinder" );
 
-                binder.SetAttribute( "button", ToString<unsigned int>(
-                    getJoystickButtonBinding(*o, Control/*::ControlChangingDirection*/::DECREASE)).c_str() );
+                    binder.SetAttribute( "button", ToString<unsigned int>(
+                        getJoystickButtonBinding(*o, deviceID, Control/*::ControlChangingDirection*/::DECREASE)).c_str() );
 
-                binder.SetAttribute( "direction", "DECREASE" );
+                    binder.SetAttribute( "direction", "DECREASE" );
 
-                binder.SetAttribute( "deviceId", "1" ); //completely useless, but required for backwards compatability
+                    binder.SetAttribute( "deviceId", deviceID ); //completely useless, but required for backwards compatability
 
-                control.InsertEndChild(binder);
+                    control.InsertEndChild(binder);
+                }
+                it++;
             }
 
 

@@ -109,11 +109,11 @@ namespace MWInput
         virtual void mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual void mouseMoved( const SFO::MouseMotionEvent &arg );
 
-        virtual void buttonPressed( const SDL_ControllerButtonEvent &arg);
-        virtual void buttonReleased( const SDL_ControllerButtonEvent &arg);
-        virtual void axisMoved( const SDL_ControllerAxisEvent &arg);
-        virtual void controllerAdded( const SDL_ControllerDeviceEvent &arg);
-        virtual void controllerRemoved( const SDL_ControllerDeviceEvent &arg);
+        virtual void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg);
+        virtual void buttonReleased(int deviceID, const SDL_ControllerButtonEvent &arg);
+        virtual void axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg);
+        virtual void controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg);
+        virtual void controllerRemoved(const SDL_ControllerDeviceEvent &arg);
 
         virtual void windowVisibilityChange( bool visible );
         virtual void windowFocusChange( bool have_focus );
@@ -131,10 +131,10 @@ namespace MWInput
         virtual void mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
             , unsigned int button, ICS::Control::ControlChangingDirection direction);
 
-        virtual void joystickAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+        virtual void joystickAxisBindingDetected(ICS::InputControlSystem* ICS, int deviceID, ICS::Control* control
             , int axis, ICS::Control::ControlChangingDirection direction);
 
-        virtual void joystickButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+        virtual void joystickButtonBindingDetected(ICS::InputControlSystem* ICS, int deviceID, ICS::Control* control
             , unsigned int button, ICS::Control::ControlChangingDirection direction);
 
         void clearAllKeyBindings (ICS::Control* control);
@@ -217,6 +217,8 @@ namespace MWInput
 
         void loadKeyDefaults(bool force = false);
         void loadControllerDefaults(bool force = false);
+
+        int mFakeDeviceID; //As we only support one controller at a time, use a fake deviceID so we don't lose bindings when switching controllers
 
     private:
         enum Actions

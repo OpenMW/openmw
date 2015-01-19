@@ -48,7 +48,7 @@ namespace ICS
 				dir = Control::DECREASE;
 			}
 
-			addJoystickAxisBinding(mControls.back(), FromString<int>(xmlJoystickBinder->Attribute("axis")), dir);
+			addJoystickAxisBinding(mControls.back(), FromString<int>(xmlJoystickBinder->Attribute("deviceId")), FromString<int>(xmlJoystickBinder->Attribute("axis")), dir);
 
 			xmlJoystickBinder = xmlJoystickBinder->NextSiblingElement("JoystickAxisBinder");
 		}
@@ -69,113 +69,130 @@ namespace ICS
 				dir = Control::DECREASE;
 			}
 
-			addJoystickButtonBinding(mControls.back(), FromString<int>(xmlJoystickButtonBinder->Attribute("button")), dir);
+			addJoystickButtonBinding(mControls.back(), FromString<int>(xmlJoystickButtonBinder->Attribute("deviceId")), FromString<int>(xmlJoystickButtonBinder->Attribute("button")), dir);
 
 			xmlJoystickButtonBinder = xmlJoystickButtonBinder->NextSiblingElement("JoystickButtonBinder");
 		}
 	}
 
 	// add bindings
-	void InputControlSystem::addJoystickAxisBinding(Control* control, int axis, Control::ControlChangingDirection direction)
+	void InputControlSystem::addJoystickAxisBinding(Control* control, int deviceID, int axis, Control::ControlChangingDirection direction)
 	{
 		ICS_LOG("\tAdding AxisBinder [axis="
-			+ ToString<int>(axis) + ", direction="
-			+ ToString<int>(direction) + "]");
+			+ ToString<int>(axis)       + ", deviceID="
+			+ ToString<int>(deviceID)   + ", direction="
+			+ ToString<int>(direction)  + "]");
 
         control->setValue(0.5f); //all joystick axis start at .5, so do that
 
 		ControlAxisBinderItem controlAxisBinderItem;
 		controlAxisBinderItem.control = control;
 		controlAxisBinderItem.direction = direction;
-		mControlsJoystickAxisBinderMap[ axis ] = controlAxisBinderItem;
+		mControlsJoystickAxisBinderMap[deviceID][axis] = controlAxisBinderItem;
 	}
 
-	void InputControlSystem::addJoystickButtonBinding(Control* control, unsigned int button, Control::ControlChangingDirection direction)
+	void InputControlSystem::addJoystickButtonBinding(Control* control, int deviceID, unsigned int button, Control::ControlChangingDirection direction)
 	{
 		ICS_LOG("\tAdding JoystickButtonBinder [button="
-			+ ToString<int>(button) + ", direction="
-			+ ToString<int>(direction) + "]");
+			+ ToString<int>(button)     + ", deviceID="
+			+ ToString<int>(deviceID)   + ", direction="
+			+ ToString<int>(direction)  + "]");
 
 		ControlButtonBinderItem controlJoystickButtonBinderItem;
 		controlJoystickButtonBinderItem.direction = direction;
 		controlJoystickButtonBinderItem.control = control;
-		mControlsJoystickButtonBinderMap[ button ] = controlJoystickButtonBinderItem;
+		mControlsJoystickButtonBinderMap[deviceID][button] = controlJoystickButtonBinderItem;
 	}
 
 	// get bindings
-	int InputControlSystem::getJoystickAxisBinding(Control* control, ICS::Control::ControlChangingDirection direction)
+	int InputControlSystem::getJoystickAxisBinding(Control* control, int deviceID, ICS::Control::ControlChangingDirection direction)
 	{
-        ControlsAxisBinderMapType::iterator it = mControlsJoystickAxisBinderMap.begin();
-        while(it != mControlsJoystickAxisBinderMap.end())
-        {
-            if(it->first >= 0 && it->second.control == control && it->second.direction == direction)
+        if(mControlsJoystickAxisBinderMap.find(deviceID) != mControlsJoystickAxisBinderMap.end())
+		{
+            ControlsAxisBinderMapType::iterator it = mControlsJoystickAxisBinderMap[deviceID].begin();
+            while(it != mControlsJoystickAxisBinderMap[deviceID].end())
             {
-                return it->first;
+                if(it->first >= 0 && it->second.control == control && it->second.direction == direction)
+                {
+                    return it->first;
+                }
+                ++it;
             }
-            ++it;
         }
 
 		return /*NamedAxis::*/UNASSIGNED;
 	}
 
-	unsigned int InputControlSystem::getJoystickButtonBinding(Control* control, ICS::Control::ControlChangingDirection direction)
+	unsigned int InputControlSystem::getJoystickButtonBinding(Control* control, int deviceID, ICS::Control::ControlChangingDirection direction)
 	{
-        ControlsButtonBinderMapType::iterator it = mControlsJoystickButtonBinderMap.begin();
-        while(it != mControlsJoystickButtonBinderMap.end())
-        {
-            if(it->second.control == control && it->second.direction == direction)
+        if(mControlsJoystickButtonBinderMap.find(deviceID) != mControlsJoystickButtonBinderMap.end())
+		{
+            ControlsButtonBinderMapType::iterator it = mControlsJoystickButtonBinderMap[deviceID].begin();
+            while(it != mControlsJoystickButtonBinderMap[deviceID].end())
             {
-                return it->first;
+                if(it->second.control == control && it->second.direction == direction)
+                {
+                    return it->first;
+                }
+                ++it;
             }
-            ++it;
         }
 
 		return ICS_MAX_DEVICE_BUTTONS;
 	}
 
 	// remove bindings
-	void InputControlSystem::removeJoystickAxisBinding(int axis)
+	void InputControlSystem::removeJoystickAxisBinding(int deviceID, int axis)
 	{
-        ControlsButtonBinderMapType::iterator it = mControlsJoystickAxisBinderMap.find(axis);
-        if(it != mControlsJoystickAxisBinderMap.end())
-        {
-            mControlsJoystickAxisBinderMap.erase(it);
+        if(mControlsJoystickAxisBinderMap.find(deviceID) != mControlsJoystickAxisBinderMap.end())
+		{
+            ControlsAxisBinderMapType::iterator it = mControlsJoystickAxisBinderMap[deviceID].find(axis);
+            if(it != mControlsJoystickAxisBinderMap[deviceID].end())
+            {
+                mControlsJoystickAxisBinderMap[deviceID].erase(it);
+            }
         }
 	}
 
-	void InputControlSystem::removeJoystickButtonBinding(unsigned int button)
+	void InputControlSystem::removeJoystickButtonBinding(int deviceID, unsigned int button)
 	{
-        ControlsButtonBinderMapType::iterator it = mControlsJoystickButtonBinderMap.find(button);
-        if(it != mControlsJoystickButtonBinderMap.end())
-        {
-            mControlsJoystickButtonBinderMap.erase(it);
+        if(mControlsJoystickButtonBinderMap.find(deviceID) != mControlsJoystickButtonBinderMap.end())
+		{
+            ControlsButtonBinderMapType::iterator it = mControlsJoystickButtonBinderMap[deviceID].find(button);
+            if(it != mControlsJoystickButtonBinderMap[deviceID].end())
+            {
+                mControlsJoystickButtonBinderMap[deviceID].erase(it);
+            }
         }
 	}
 
 	// joyStick listeners
-    void InputControlSystem::buttonPressed(const SDL_ControllerButtonEvent &evt)
+    void InputControlSystem::buttonPressed(int deviceID, const SDL_ControllerButtonEvent &evt)
 	{
 		if(mActive)
 		{
 			if(!mDetectingBindingControl)
 			{
-                ControlsButtonBinderMapType::const_iterator it = mControlsJoystickButtonBinderMap.find(evt.button);
-                if(it != mControlsJoystickButtonBinderMap.end())
+                if(mControlsJoystickButtonBinderMap.find(deviceID) != mControlsJoystickButtonBinderMap.end())
                 {
-                    it->second.control->setIgnoreAutoReverse(false);
-                    if(!it->second.control->getAutoChangeDirectionOnLimitsAfterStop())
+                    ControlsButtonBinderMapType::const_iterator it = mControlsJoystickButtonBinderMap[deviceID].find(evt.button);
+                    if(it != mControlsJoystickButtonBinderMap[deviceID].end())
                     {
-                        it->second.control->setChangingDirection(it->second.direction);
-                    }
-                    else
-                    {
-                        if(it->second.control->getValue() == 1)
+                        it->second.control->setIgnoreAutoReverse(false);
+                        if(!it->second.control->getAutoChangeDirectionOnLimitsAfterStop())
                         {
-                            it->second.control->setChangingDirection(Control::DECREASE);
+                            it->second.control->setChangingDirection(it->second.direction);
                         }
-                        else if(it->second.control->getValue() == 0)
+                        else
                         {
-                            it->second.control->setChangingDirection(Control::INCREASE);
+                            if(it->second.control->getValue() == 1)
+                            {
+                                it->second.control->setChangingDirection(Control::DECREASE);
+                            }
+                            else if(it->second.control->getValue() == 0)
+                            {
+                                it->second.control->setChangingDirection(Control::INCREASE);
+                            }
                         }
                     }
                 }
@@ -183,55 +200,61 @@ namespace ICS
 		}
 	}
 
-    void InputControlSystem::buttonReleased(const SDL_ControllerButtonEvent &evt)
+    void InputControlSystem::buttonReleased(int deviceID, const SDL_ControllerButtonEvent &evt)
 	{
 		if(mActive)
 		{
             if(!mDetectingBindingControl)
             {
-                ControlsButtonBinderMapType::const_iterator it = mControlsJoystickButtonBinderMap.find(evt.button);
-                if(it != mControlsJoystickButtonBinderMap.end())
+                if(mControlsJoystickButtonBinderMap.find(deviceID) != mControlsJoystickButtonBinderMap.end())
                 {
-                    it->second.control->setChangingDirection(Control::STOP);
+                    ControlsButtonBinderMapType::const_iterator it = mControlsJoystickButtonBinderMap[deviceID].find(evt.button);
+                    if(it != mControlsJoystickButtonBinderMap[deviceID].end())
+                    {
+                        it->second.control->setChangingDirection(Control::STOP);
+                    }
                 }
             }
             else if(mDetectingBindingListener)
 			{
-				mDetectingBindingListener->joystickButtonBindingDetected(this,
+				mDetectingBindingListener->joystickButtonBindingDetected(this, deviceID,
 					mDetectingBindingControl, evt.button, mDetectingBindingDirection);
 			}
 		}
 	}
 
-    void InputControlSystem::axisMoved(const SDL_ControllerAxisEvent &evt)
+    void InputControlSystem::axisMoved(int deviceID, const SDL_ControllerAxisEvent &evt)
 	{
 		if(mActive)
 		{
 			if(!mDetectingBindingControl)
 			{
-                ControlAxisBinderItem joystickBinderItem = mControlsJoystickAxisBinderMap[evt.axis]; // joystic axis start at 0 index
-                Control* ctrl = joystickBinderItem.control;
-                if(ctrl)
+                if(mControlsJoystickAxisBinderMap.find(deviceID) != mControlsJoystickAxisBinderMap.end())
                 {
-                    ctrl->setIgnoreAutoReverse(true);
-
-                    float axisRange = SDL_JOY_AXIS_MAX - SDL_JOY_AXIS_MIN;
-                    float valDisplaced = (float)(evt.value - SDL_JOY_AXIS_MIN);
-                    float percent = valDisplaced / axisRange * (1+DEADZONE*2) - DEADZONE; //Assures all values, 0 through 1, are seen
-                    if(percent > .5-DEADZONE && percent < .5+DEADZONE) //close enough to center
-                        percent = .5;
-                    else if(percent > .5)
-                        percent -= DEADZONE;
-                    else
-                        percent += DEADZONE;
-
-                    if(joystickBinderItem.direction == Control::INCREASE)
+                    ControlAxisBinderItem joystickBinderItem = mControlsJoystickAxisBinderMap[deviceID][evt.axis]; // joystic axis start at 0 index
+                    Control* ctrl = joystickBinderItem.control;
+                    if(ctrl)
                     {
-                        ctrl->setValue( percent );
-                    }
-                    else if(joystickBinderItem.direction == Control::DECREASE)
-                    {
-                        ctrl->setValue( 1 - ( percent ) );
+                        ctrl->setIgnoreAutoReverse(true);
+
+                        float axisRange = SDL_JOY_AXIS_MAX - SDL_JOY_AXIS_MIN;
+                        float valDisplaced = (float)(evt.value - SDL_JOY_AXIS_MIN);
+                        float percent = valDisplaced / axisRange * (1+DEADZONE*2) - DEADZONE; //Assures all values, 0 through 1, are seen
+                        if(percent > .5-DEADZONE && percent < .5+DEADZONE) //close enough to center
+                            percent = .5;
+                        else if(percent > .5)
+                            percent -= DEADZONE;
+                        else
+                            percent += DEADZONE;
+
+                        if(joystickBinderItem.direction == Control::INCREASE)
+                        {
+                            ctrl->setValue( percent );
+                        }
+                        else if(joystickBinderItem.direction == Control::DECREASE)
+                        {
+                            ctrl->setValue( 1 - ( percent ) );
+                        }
                     }
                 }
 			}
@@ -244,7 +267,7 @@ namespace ICS
 				{
 					if( abs( evt.value ) > ICS_JOYSTICK_AXIS_BINDING_MARGIN)
 					{
-						mDetectingBindingListener->joystickAxisBindingDetected(this,
+						mDetectingBindingListener->joystickAxisBindingDetected(this, deviceID,
 							mDetectingBindingControl, evt.axis, mDetectingBindingDirection);
 					}
 				}
@@ -252,67 +275,68 @@ namespace ICS
 		}
 	}
 
-    void InputControlSystem::controllerAdded(const SDL_ControllerDeviceEvent &args)
+    void InputControlSystem::controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &args)
 	{
 		ICS_LOG("Adding joystick (index: " + ToString<int>(args.which) + ")");
 		SDL_GameController* cntrl = SDL_GameControllerOpen(args.which);
         int instanceID = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(cntrl));
-        if(mJoystickIDList.empty()) //
+        if(std::find(mJoystickIDList.begin(), mJoystickIDList.end(), deviceID)==mJoystickIDList.end())
         {
             for(int j = 0 ; j < ICS_MAX_JOYSTICK_AXIS ; j++)
             {
-                if(mControlsJoystickAxisBinderMap.find(j) == mControlsJoystickAxisBinderMap.end())
+                if(mControlsJoystickAxisBinderMap[deviceID].find(j) == mControlsJoystickAxisBinderMap[deviceID].end())
                 {
                     ControlAxisBinderItem controlJoystickBinderItem;
                     controlJoystickBinderItem.direction = Control::STOP;
                     controlJoystickBinderItem.control = NULL;
-                    mControlsJoystickAxisBinderMap[j] = controlJoystickBinderItem;
+                    mControlsJoystickAxisBinderMap[deviceID][j] = controlJoystickBinderItem;
                 }
             }
+            mJoystickIDList.push_front(deviceID);
 		}
 
-		mJoystickIDList[instanceID] = cntrl;
+		mJoystickInstanceMap[instanceID] = cntrl;
 	}
 	void InputControlSystem::controllerRemoved(const SDL_ControllerDeviceEvent &args)
 	{
         ICS_LOG("Removing joystick (instance id: " + ToString<int>(args.which) + ")");
-        if(mJoystickIDList.count(args.which)!=0)
+        if(mJoystickInstanceMap.count(args.which)!=0)
         {
-            SDL_GameControllerClose(mJoystickIDList.at(args.which));
-            mJoystickIDList.erase(args.which);
+            SDL_GameControllerClose(mJoystickInstanceMap.at(args.which));
+            mJoystickInstanceMap.erase(args.which);
         }
 	}
 
 	// joystick auto bindings
-	void DetectingBindingListener::joystickAxisBindingDetected(InputControlSystem* ICS, Control* control, int axis, Control::ControlChangingDirection direction)
+	void DetectingBindingListener::joystickAxisBindingDetected(InputControlSystem* ICS, int deviceID, Control* control, int axis, Control::ControlChangingDirection direction)
 	{
 		// if the joystick axis is used by another control, remove it
-		ICS->removeJoystickAxisBinding(axis);
+		ICS->removeJoystickAxisBinding(deviceID, axis);
 
 		// if the control has an axis assigned, remove it
-		int oldAxis = ICS->getJoystickAxisBinding(control, direction);
+		int oldAxis = ICS->getJoystickAxisBinding(control, deviceID, direction);
 		if(oldAxis != InputControlSystem::UNASSIGNED)
 		{
-			ICS->removeJoystickAxisBinding(oldAxis);
+			ICS->removeJoystickAxisBinding(deviceID, oldAxis);
 		}
 
-		ICS->addJoystickAxisBinding(control, axis, direction);
+		ICS->addJoystickAxisBinding(control, deviceID, axis, direction);
 		ICS->cancelDetectingBindingState();
 	}
-	void DetectingBindingListener::joystickButtonBindingDetected(InputControlSystem* ICS, Control* control
+	void DetectingBindingListener::joystickButtonBindingDetected(InputControlSystem* ICS, int deviceID, Control* control
 		, unsigned int button, Control::ControlChangingDirection direction)
 	{
 		// if the joystick button is used by another control, remove it
-		ICS->removeJoystickButtonBinding(button);
+		ICS->removeJoystickButtonBinding(deviceID, button);
 
 		// if the control has a joystick button assigned, remove it
-		unsigned int oldButton = ICS->getJoystickButtonBinding(control, direction);
+		unsigned int oldButton = ICS->getJoystickButtonBinding(control, deviceID, direction);
 		if(oldButton != ICS_MAX_DEVICE_BUTTONS)
 		{
-			ICS->removeJoystickButtonBinding(oldButton);
+			ICS->removeJoystickButtonBinding(deviceID, oldButton);
 		}
 
-		ICS->addJoystickButtonBinding(control, button, direction);
+		ICS->addJoystickButtonBinding(control, deviceID, button, direction);
 		ICS->cancelDetectingBindingState();
 	}
 }
