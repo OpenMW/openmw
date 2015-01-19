@@ -15,6 +15,7 @@
 
 #include "importercontext.hpp"
 #include "importcellref.hpp"
+#include "importklst.hpp"
 
 #include "convertacdt.hpp"
 #include "convertnpcc.hpp"
@@ -93,6 +94,7 @@ public:
             mContext->mPlayer.mObject.mCreatureStats.mLevel = npc.mNpdt52.mLevel;
             mContext->mPlayerBase = npc;
             std::map<const int, float> empty;
+            // FIXME: not working?
             for (std::vector<std::string>::const_iterator it = npc.mSpells.mList.begin(); it != npc.mSpells.mList.end(); ++it)
                 mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[*it] = empty;
         }
@@ -243,6 +245,33 @@ private:
     std::map<std::string, Cell> mCells;
 
     std::vector<ESM::CustomMarker> mMarkers;
+};
+
+class ConvertKLST : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader& esm)
+    {
+        KLST klst;
+        klst.load(esm);
+        mKillCounter = klst.mKillCounter;
+
+        mContext->mPlayer.mObject.mNpcStats.mWerewolfKills = klst.mWerewolfKills;
+    }
+
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        esm.startRecord(ESM::REC_DCOU);
+        for (std::map<std::string, int>::const_iterator it = mKillCounter.begin(); it != mKillCounter.end(); ++it)
+        {
+            esm.writeHNString("ID__", it->first);
+            esm.writeHNT ("COUN", it->second);
+        }
+        esm.endRecord(ESM::REC_DCOU);
+    }
+
+private:
+    std::map<std::string, int> mKillCounter;
 };
 
 }

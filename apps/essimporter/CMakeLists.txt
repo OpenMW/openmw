@@ -7,6 +7,7 @@ set(ESSIMPORTER_FILES
     importcellref.cpp
     importacdt.cpp
     importinventory.cpp
+    importklst.cpp
     importercontext.cpp
     converter.cpp
     convertacdt.cpp

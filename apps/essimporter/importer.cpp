@@ -146,7 +146,7 @@ namespace ESSImport
                 {
                     std::cout << "Different subrecord name (" << rec.mName << "." << sub.mName << " vs. " << sub2.mName << ") at (1) 0x" << std::hex << sub.mFileOffset
                               << " (2) 0x" << sub2.mFileOffset << std::endl;
-                    return; // TODO: try to recover
+                    break; // TODO: try to recover
                 }
 
                 if (sub.mData != sub2.mData)
@@ -177,6 +177,7 @@ namespace ESSImport
 
     void Importer::run()
     {
+        // construct Ogre::Root to gain access to image codecs
         Ogre::LogManager logman;
         Ogre::Root root;
 
@@ -191,6 +192,7 @@ namespace ESSImport
         const unsigned int recREFR = ESM::FourCC<'R','E','F','R'>::value;
         const unsigned int recPCDT = ESM::FourCC<'P','C','D','T'>::value;
         const unsigned int recFMAP = ESM::FourCC<'F','M','A','P'>::value;
+        const unsigned int recKLST = ESM::FourCC<'K','L','S','T'>::value;
 
         std::map<unsigned int, boost::shared_ptr<Converter> > converters;
         converters[ESM::REC_GLOB] = boost::shared_ptr<Converter>(new ConvertGlobal());
@@ -201,6 +203,7 @@ namespace ESSImport
         converters[recREFR] = boost::shared_ptr<Converter>(new ConvertREFR());
         converters[recPCDT] = boost::shared_ptr<Converter>(new ConvertPCDT());
         converters[recFMAP] = boost::shared_ptr<Converter>(new ConvertFMAP());
+        converters[recKLST] = boost::shared_ptr<Converter>(new ConvertKLST());
         converters[ESM::REC_CELL] = boost::shared_ptr<Converter>(new ConvertCell());
         converters[ESM::REC_ALCH] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::Potion>());
         converters[ESM::REC_CLAS] = boost::shared_ptr<Converter>(new ConvertClass());
