@@ -125,6 +125,7 @@ namespace MWInput
         , mControlsDisabled(false)
         , mJoystickLastUsed(false)
         , mDetectingKeyboard(false)
+        , mFakeDeviceID(1)
     {
 
         Ogre::RenderWindow* window = ogre.getWindow ();
@@ -183,7 +184,7 @@ namespace MWInput
             {
                 SDL_ControllerDeviceEvent evt;
                 evt.which = i;
-                controllerAdded(evt);
+                controllerAdded(mFakeDeviceID, evt);
             }
             else
             {
@@ -768,7 +769,7 @@ namespace MWInput
         }
     }
 
-    void InputManager::buttonPressed( const SDL_ControllerButtonEvent &arg )
+    void InputManager::buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg )
     {
         mJoystickLastUsed = true;
         bool guiMode = false;
@@ -798,14 +799,14 @@ namespace MWInput
         setPlayerControlsEnabled(!guiFocus);
 
         if (!mControlsDisabled)
-            mInputBinder->buttonPressed(arg);
+            mInputBinder->buttonPressed(deviceID, arg);
     }
 
-    void InputManager::buttonReleased( const SDL_ControllerButtonEvent &arg )
+    void InputManager::buttonReleased(int deviceID, const SDL_ControllerButtonEvent &arg )
     {
         mJoystickLastUsed = true;
         if(mInputBinder->detectingBindingState())
-            mInputBinder->buttonReleased(arg);
+            mInputBinder->buttonReleased(deviceID, arg);
         else if(arg.button == SDL_CONTROLLER_BUTTON_A || arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
@@ -814,26 +815,26 @@ namespace MWInput
             if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
 
             setPlayerControlsEnabled(!guiMode);
-            mInputBinder->buttonReleased(arg);
+            mInputBinder->buttonReleased(deviceID, arg);
         }
         else
-            mInputBinder->buttonReleased(arg);
+            mInputBinder->buttonReleased(deviceID, arg);
 
         //to escape inital movie
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
         setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
     }
 
-    void InputManager::axisMoved( const SDL_ControllerAxisEvent &arg )
+    void InputManager::axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg )
     {
         mJoystickLastUsed = true;
         if (!mControlsDisabled)
-            mInputBinder->axisMoved(arg);
+            mInputBinder->axisMoved(deviceID, arg);
     }
 
-    void InputManager::controllerAdded(const SDL_ControllerDeviceEvent &arg)
+    void InputManager::controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg)
     {
-        mInputBinder->controllerAdded(arg);
+        mInputBinder->controllerAdded(deviceID, arg);
     }
     void InputManager::controllerRemoved(const SDL_ControllerDeviceEvent &arg)
     {
@@ -1221,20 +1222,20 @@ namespace MWInput
                 control = mInputBinder->getChannel(i)->getAttachedControls ().front().control;
             }
 
-            if (!controlExists || force || ( mInputBinder->getJoystickAxisBinding (control, ICS::Control::INCREASE) == ICS::InputControlSystem::UNASSIGNED && mInputBinder->getJoystickButtonBinding (control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS ))
+            if (!controlExists || force || ( mInputBinder->getJoystickAxisBinding (control, mFakeDeviceID, ICS::Control::INCREASE) == ICS::InputControlSystem::UNASSIGNED && mInputBinder->getJoystickButtonBinding (control, mFakeDeviceID, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS ))
             {
                 clearAllControllerBindings(control);
 
                 if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
                 {
                     control->setInitialValue(0.0f);
-                    mInputBinder->addJoystickButtonBinding(control, defaultButtonBindings[i], ICS::Control::INCREASE);
+                    mInputBinder->addJoystickButtonBinding(control, mFakeDeviceID, defaultButtonBindings[i], ICS::Control::INCREASE);
                 }
                 else if (defaultAxisBindings.find(i) != defaultAxisBindings.end())
                 {
                     control->setValue(0.5f);
                     control->setInitialValue(0.5f);
-                    mInputBinder->addJoystickAxisBinding(control, defaultAxisBindings[i], ICS::Control::INCREASE);
+                    mInputBinder->addJoystickAxisBinding(control, mFakeDeviceID, defaultAxisBindings[i], ICS::Control::INCREASE);
                 }
             }
         }
@@ -1307,10 +1308,10 @@ namespace MWInput
 
         ICS::Control* c = mInputBinder->getChannel (action)->getAttachedControls ().front().control;
 
-        if (mInputBinder->getJoystickAxisBinding (c, ICS::Control::INCREASE) != ICS::InputControlSystem::UNASSIGNED)
-            return sdlControllerAxisToString(mInputBinder->getJoystickAxisBinding (c, ICS::Control::INCREASE));
-        else if (mInputBinder->getJoystickButtonBinding (c, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS )
-            return sdlControllerButtonToString(mInputBinder->getJoystickButtonBinding (c, ICS::Control::INCREASE));
+        if (mInputBinder->getJoystickAxisBinding (c, mFakeDeviceID, ICS::Control::INCREASE) != ICS::InputControlSystem::UNASSIGNED)
+            return sdlControllerAxisToString(mInputBinder->getJoystickAxisBinding (c, mFakeDeviceID, ICS::Control::INCREASE));
+        else if (mInputBinder->getJoystickButtonBinding (c, mFakeDeviceID, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS )
+            return sdlControllerButtonToString(mInputBinder->getJoystickButtonBinding (c, mFakeDeviceID, ICS::Control::INCREASE));
         else
             return "#{sNone}";
     }
@@ -1489,7 +1490,7 @@ namespace MWInput
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
     }
 
-    void InputManager::joystickAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+    void InputManager::joystickAxisBindingDetected(ICS::InputControlSystem* ICS, int deviceID, ICS::Control* control
         , int axis, ICS::Control::ControlChangingDirection direction)
     {
         //only allow binding to the trigers
@@ -1501,18 +1502,18 @@ namespace MWInput
         clearAllControllerBindings(control);
         control->setValue(0.5f); //axis bindings must start at 0.5
         control->setInitialValue(0.5f);
-        ICS::DetectingBindingListener::joystickAxisBindingDetected (ICS, control, axis, direction);
+        ICS::DetectingBindingListener::joystickAxisBindingDetected (ICS, deviceID, control, axis, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
     }
 
-    void InputManager::joystickButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+    void InputManager::joystickButtonBindingDetected(ICS::InputControlSystem* ICS, int deviceID, ICS::Control* control
         , unsigned int button, ICS::Control::ControlChangingDirection direction)
     {
         if(mDetectingKeyboard)
             return;
         clearAllControllerBindings(control);
         control->setInitialValue(0.0f);
-        ICS::DetectingBindingListener::joystickButtonBindingDetected (ICS, control, button, direction);
+        ICS::DetectingBindingListener::joystickButtonBindingDetected (ICS, deviceID, control, button, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
     }
 
@@ -1528,10 +1529,10 @@ namespace MWInput
     void InputManager::clearAllControllerBindings (ICS::Control* control)
     {
         // right now we don't really need multiple bindings for the same action, so remove all others first
-        if (mInputBinder->getJoystickAxisBinding (control, ICS::Control::INCREASE) != SDL_SCANCODE_UNKNOWN)
-            mInputBinder->removeJoystickAxisBinding (mInputBinder->getJoystickAxisBinding (control, ICS::Control::INCREASE));
-        if (mInputBinder->getJoystickButtonBinding (control, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
-            mInputBinder->removeJoystickButtonBinding (mInputBinder->getJoystickButtonBinding (control, ICS::Control::INCREASE));
+        if (mInputBinder->getJoystickAxisBinding (control, mFakeDeviceID, ICS::Control::INCREASE) != SDL_SCANCODE_UNKNOWN)
+            mInputBinder->removeJoystickAxisBinding (mFakeDeviceID, mInputBinder->getJoystickAxisBinding (control, mFakeDeviceID, ICS::Control::INCREASE));
+        if (mInputBinder->getJoystickButtonBinding (control, mFakeDeviceID, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
+            mInputBinder->removeJoystickButtonBinding (mFakeDeviceID, mInputBinder->getJoystickButtonBinding (control, mFakeDeviceID, ICS::Control::INCREASE));
     }
 
     void InputManager::resetToDefaultKeyBindings()
