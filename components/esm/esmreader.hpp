@@ -195,6 +195,9 @@ public:
   // Skip sub record and check its size
   void skipHSubSize(int size);
 
+  // Skip all subrecords until the given subrecord or no more subrecords remaining
+  void skipHSubUntil(const char* name);
+
   /* Sub-record header. This updates leftRec beyond the current
      sub-record as well. leftSub contains size of current sub-record.
   */

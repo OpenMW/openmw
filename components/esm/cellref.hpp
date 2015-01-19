@@ -89,7 +89,10 @@ namespace ESM
             // Position and rotation of this object within the cell
             Position mPos;
 
+            /// Calls loadId and loadData
             void load (ESMReader& esm, bool wideRefNum = false);
+
+            void loadId (ESMReader& esm, bool wideRefNum = false);
 
             /// Implicitly called by load
             void loadData (ESMReader& esm);

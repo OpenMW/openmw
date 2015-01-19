@@ -6,6 +6,12 @@
 
 void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
 {
+    loadId(esm, wideRefNum);
+    loadData(esm);
+}
+
+void ESM::CellRef::loadId(ESMReader &esm, bool wideRefNum)
+{
     // According to Hrnchamd, this does not belong to the actual ref. Instead, it is a marker indicating that
     // the following refs are part of a "temp refs" section. A temp ref is not being tracked by the moved references system.
     // Its only purpose is a performance optimization for "immovable" things. We don't need this, and it's problematic anyway,
@@ -19,8 +25,6 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
         esm.getHNT (mRefNum.mIndex, "FRMR");
 
     mRefID = esm.getHNString ("NAME");
-
-    loadData(esm);
 }
 
 void ESM::CellRef::loadData(ESMReader &esm)

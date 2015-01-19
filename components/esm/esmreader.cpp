@@ -210,6 +210,17 @@ void ESMReader::skipHSubSize(int size)
         fail("skipHSubSize() mismatch");
 }
 
+void ESMReader::skipHSubUntil(const char *name)
+{
+    while (hasMoreSubs() && !isNextSub(name))
+    {
+        mCtx.subCached = false;
+        skipHSub();
+    }
+    if (hasMoreSubs())
+        mCtx.subCached = true;
+}
+
 void ESMReader::getSubHeader()
 {
     if (mCtx.leftRec < 4)

@@ -6,7 +6,7 @@
 
 void ESM::ObjectState::load (ESMReader &esm)
 {
-    mRef.load (esm, true);
+    mRef.loadData(esm);
 
     mHasLocals = 0;
     esm.getHNOT (mHasLocals, "HLOC");
@@ -27,6 +27,10 @@ void ESM::ObjectState::load (ESMReader &esm)
     // used for lights only
     mTime = 0;
     esm.getHNOT (mTime, "LTIM");
+
+    // FIXME: assuming "false" as default would make more sense, but also break compatibility with older save files
+    mHasCustomState = true;
+    esm.getHNOT (mHasCustomState, "HCUS");
 }
 
 void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
@@ -53,6 +57,9 @@ void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
 
     if (mTime)
         esm.writeHNT ("LTIM", mTime);
+
+    if (!mHasCustomState)
+        esm.writeHNT ("HCUS", false);
 }
 
 void ESM::ObjectState::blank()
@@ -68,6 +75,7 @@ void ESM::ObjectState::blank()
         mLocalRotation[i] = 0;
     }
     mTime = 0;
+    mHasCustomState = true;
 }
 
 ESM::ObjectState::~ObjectState() {}

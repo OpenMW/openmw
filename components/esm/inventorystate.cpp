@@ -11,6 +11,7 @@ namespace
         slot = -1;
         esm.getHNOT (slot, "SLOT");
 
+        state.mRef.loadId(esm, true);
         state.load (esm);
     }
 

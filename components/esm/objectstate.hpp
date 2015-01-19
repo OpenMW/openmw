@@ -28,7 +28,15 @@ namespace ESM
 
         float mTime; // Used for lights only. Overhead should not be so awful, besides CellRef isn't OO either
 
+        // Is there any class-specific state following the ObjectState
+        bool mHasCustomState;
+
+        ObjectState() : mHasCustomState(true)
+        {}
+
+        /// @note Does not load the CellRef ID, it should already be loaded before calling this method
         virtual void load (ESMReader &esm);
+
         virtual void save (ESMWriter &esm, bool inInventory = false) const;
 
         /// Initialize to default state
