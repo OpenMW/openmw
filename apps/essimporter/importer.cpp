@@ -215,6 +215,7 @@ namespace ESSImport
         converters[ESM::REC_WEAP] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::Weapon>());
         converters[ESM::REC_LEVC] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::CreatureLevList>());
         converters[ESM::REC_LEVI] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::ItemLevList>());
+        converters[ESM::REC_CNTC] = boost::shared_ptr<Converter>(new ConvertCNTC());
 
         std::set<unsigned int> unknownRecords;
 

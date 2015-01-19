@@ -12,6 +12,7 @@
 #include <components/esm/custommarkerstate.hpp>
 
 #include "importcrec.hpp"
+#include "importcntc.hpp"
 
 #include "importercontext.hpp"
 #include "importcellref.hpp"
@@ -94,7 +95,8 @@ public:
             mContext->mPlayer.mObject.mCreatureStats.mLevel = npc.mNpdt52.mLevel;
             mContext->mPlayerBase = npc;
             std::map<const int, float> empty;
-            // FIXME: not working?
+            // FIXME: player start spells, racial spells and birthsign spells aren't listed here,
+            // need to fix openmw to account for this
             for (std::vector<std::string>::const_iterator it = npc.mSpells.mList.begin(); it != npc.mSpells.mList.end(); ++it)
                 mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[*it] = empty;
         }
@@ -209,6 +211,17 @@ public:
     }
 };
 
+class ConvertCNTC : public Converter
+{
+    virtual void read(ESM::ESMReader &esm)
+    {
+        std::string id = esm.getHNString("NAME");
+        CNTC cntc;
+        cntc.load(esm);
+        mContext->mContainerChanges.insert(std::make_pair(std::make_pair(cntc.mIndex,id), cntc));
+    }
+};
+
 class ConvertCREC : public Converter
 {
 public:
@@ -242,9 +255,12 @@ private:
         std::vector<unsigned int> mFogOfWar;
     };
 
-    std::map<std::string, Cell> mCells;
+    std::map<std::string, Cell> mIntCells;
+    std::map<std::pair<int, int>, Cell> mExtCells;
 
     std::vector<ESM::CustomMarker> mMarkers;
+
+    void writeCell(const Cell& cell, ESM::ESMWriter &esm);
 };
 
 class ConvertKLST : public Converter

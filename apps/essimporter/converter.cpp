@@ -3,8 +3,10 @@
 #include <OgreImage.h>
 
 #include <components/esm/creaturestate.hpp>
+#include <components/esm/containerstate.hpp>
 
 #include "convertcrec.hpp"
+#include "convertcntc.hpp"
 
 namespace
 {
@@ -17,6 +19,13 @@ namespace
         screenshot.save(out);
     }
 
+
+    void convertCellRef(const ESSImport::CellRef& cellref, ESM::ObjectState& objstate)
+    {
+        objstate.mEnabled = cellref.mEnabled;
+        objstate.mPosition = cellref.mPos;
+        objstate.mRef.mRefNum = cellref.mRefNum;
+    }
 }
 
 namespace ESSImport
@@ -116,8 +125,9 @@ namespace ESSImport
             ref.load (esm);
             if (esm.isNextSub("DELE"))
             {
+                // TODO
                 // strangely this can be e.g. 52 instead of just 1,
-                std::cout << "deleted ref " << ref.mIndexedRefId << std::endl;
+                //std::cout << "deleted ref " << ref.mIndexedRefId << std::endl;
                 esm.skipHSub();
             }
             cellrefs.push_back(ref);
@@ -155,84 +165,103 @@ namespace ESSImport
 
         newcell.mRefs = cellrefs;
 
-        // FIXME: map by ID for exterior cells
-        mCells[id] = newcell;
+
+        if (cell.isExterior())
+            mExtCells[std::make_pair(cell.mData.mX, cell.mData.mY)] = newcell;
+        else
+            mIntCells[id] = newcell;
+    }
+
+    void ConvertCell::writeCell(const Cell &cell, ESM::ESMWriter& esm)
+    {
+        ESM::Cell esmcell = cell.mCell;
+        esm.startRecord(ESM::REC_CSTA);
+        ESM::CellState csta;
+        csta.mHasFogOfWar = 0;
+        csta.mId = esmcell.getCellId();
+        csta.mId.save(esm);
+        // TODO csta.mLastRespawn;
+        // shouldn't be needed if we respawn on global schedule like in original MW
+        csta.mWaterLevel = esmcell.mWater;
+        csta.save(esm);
+
+        for (std::vector<CellRef>::const_iterator refIt = cell.mRefs.begin(); refIt != cell.mRefs.end(); ++refIt)
+        {
+            const CellRef& cellref = *refIt;
+            ESM::CellRef out;
+            out.blank();
+
+            if (cellref.mIndexedRefId.size() < 8)
+            {
+                std::cerr << "CellRef with no index?" << std::endl;
+                continue;
+            }
+            std::stringstream stream;
+            stream << cellref.mIndexedRefId.substr(cellref.mIndexedRefId.size()-8,8);
+            int refIndex;
+            stream >> refIndex;
+
+            out.mRefID = cellref.mIndexedRefId.substr(0,cellref.mIndexedRefId.size()-8);
+
+            std::map<std::pair<int, std::string>, CREC>::const_iterator crecIt = mContext->mCreatureChanges.find(
+                        std::make_pair(refIndex, out.mRefID));
+            if (crecIt != mContext->mCreatureChanges.end())
+            {
+                ESM::CreatureState objstate;
+                objstate.blank();
+                objstate.mRef = out;
+                convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
+                convertCREC(crecIt->second, objstate);
+                convertCellRef(cellref, objstate);
+                // FIXME: change save format to not require object type, instead look up it up using the RefId
+                esm.writeHNT ("OBJE", ESM::REC_CREA);
+                objstate.save(esm);
+                continue;
+            }
+
+            std::map<std::pair<int, std::string>, NPCC>::const_iterator npccIt = mContext->mNpcChanges.find(
+                        std::make_pair(refIndex, out.mRefID));
+            if (npccIt != mContext->mNpcChanges.end())
+            {
+                ESM::NpcState objstate;
+                objstate.blank();
+                objstate.mRef = out;
+                convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
+                convertNpcData(cellref.mActorData, objstate.mNpcStats);
+                convertNPCC(npccIt->second, objstate);
+                convertCellRef(cellref, objstate);
+                esm.writeHNT ("OBJE", ESM::REC_NPC_);
+                objstate.save(esm);
+                continue;
+            }
+
+            std::map<std::pair<int, std::string>, CNTC>::const_iterator cntcIt = mContext->mContainerChanges.find(
+                        std::make_pair(refIndex, out.mRefID));
+            if (cntcIt != mContext->mContainerChanges.end())
+            {
+                ESM::ContainerState objstate;
+                objstate.blank();
+                objstate.mRef = out;
+                convertCNTC(cntcIt->second, objstate);
+                convertCellRef(cellref, objstate);
+                esm.writeHNT ("OBJE", ESM::REC_CONT);
+                objstate.save(esm);
+                continue;
+            }
+
+            std::cerr << "Can't find type for " << refIndex << " " << out.mRefID << std::endl;
+        }
+
+        esm.endRecord(ESM::REC_CSTA);
     }
 
     void ConvertCell::write(ESM::ESMWriter &esm)
     {
-        for (std::map<std::string, Cell>::const_iterator it = mCells.begin(); it != mCells.end(); ++it)
-        {
-            const ESM::Cell& cell = it->second.mCell;
-            esm.startRecord(ESM::REC_CSTA);
-            ESM::CellState csta;
-            csta.mHasFogOfWar = 0;
-            csta.mId = cell.getCellId();
-            csta.mId.save(esm);
-            // TODO csta.mLastRespawn;
-            // shouldn't be needed if we respawn on global schedule like in original MW
-            csta.mWaterLevel = cell.mWater;
-            csta.save(esm);
+        for (std::map<std::string, Cell>::const_iterator it = mIntCells.begin(); it != mIntCells.end(); ++it)
+            writeCell(it->second, esm);
 
-            for (std::vector<CellRef>::const_iterator refIt = it->second.mRefs.begin(); refIt != it->second.mRefs.end(); ++refIt)
-            {
-                const CellRef& cellref = *refIt;
-                ESM::CellRef out;
-                out.blank();
-
-                if (cellref.mIndexedRefId.size() < 8)
-                {
-                    std::cerr << "CellRef with no index?" << std::endl;
-                    continue;
-                }
-                std::stringstream stream;
-                stream << cellref.mIndexedRefId.substr(cellref.mIndexedRefId.size()-8,8);
-                int refIndex;
-                stream >> refIndex;
-
-                out.mRefID = cellref.mIndexedRefId.substr(0,cellref.mIndexedRefId.size()-8);
-
-                std::map<std::pair<int, std::string>, CREC>::const_iterator crecIt = mContext->mCreatureChanges.find(
-                            std::make_pair(refIndex, out.mRefID));
-                if (crecIt != mContext->mCreatureChanges.end())
-                {
-                    ESM::CreatureState objstate;
-                    objstate.blank();
-                    convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
-                    convertCREC(crecIt->second, objstate);
-                    objstate.mEnabled = cellref.mEnabled;
-                    objstate.mPosition = cellref.mPos;
-                    objstate.mRef = out;
-                    objstate.mRef.mRefNum = cellref.mRefNum;
-                    // FIXME: change save format to not require object type, instead look up it up using the RefId
-                    esm.writeHNT ("OBJE", ESM::REC_CREA);
-                    objstate.save(esm);
-                    continue;
-                }
-
-                std::map<std::pair<int, std::string>, NPCC>::const_iterator npccIt = mContext->mNpcChanges.find(
-                            std::make_pair(refIndex, out.mRefID));
-                if (npccIt != mContext->mNpcChanges.end())
-                {
-                    ESM::NpcState objstate;
-                    objstate.blank();
-                    convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
-                    convertNpcData(cellref.mActorData, objstate.mNpcStats);
-                    convertNPCC(npccIt->second, objstate);
-                    objstate.mEnabled = cellref.mEnabled;
-                    objstate.mPosition = cellref.mPos;
-                    objstate.mRef = out;
-                    objstate.mRef.mRefNum = cellref.mRefNum;
-                    esm.writeHNT ("OBJE", ESM::REC_NPC_);
-                    objstate.save(esm);
-                    continue;
-                }
-
-                std::cerr << "Can't find type for " << refIndex << " " << out.mRefID << std::endl;
-            }
-
-            esm.endRecord(ESM::REC_CSTA);
-        }
+        for (std::map<std::pair<int, int>, Cell>::const_iterator it = mExtCells.begin(); it != mExtCells.end(); ++it)
+            writeCell(it->second, esm);
 
         for (std::vector<ESM::CustomMarker>::const_iterator it = mMarkers.begin(); it != mMarkers.end(); ++it)
         {
