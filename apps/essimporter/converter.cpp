@@ -26,6 +26,17 @@ namespace
         objstate.mPosition = cellref.mPos;
         objstate.mRef.mRefNum = cellref.mRefNum;
     }
+
+    bool isIndexedRefId(const std::string& indexedRefId)
+    {
+        if (indexedRefId.size() <= 8)
+            return false;
+
+        std::string index = indexedRefId.substr(indexedRefId.size()-8);
+        if(index.find_first_not_of("0123456789ABCDEF") == std::string::npos )
+            return true;
+        return false;
+    }
 }
 
 namespace ESSImport
@@ -191,65 +202,87 @@ namespace ESSImport
             ESM::CellRef out;
             out.blank();
 
-            if (cellref.mIndexedRefId.size() < 8)
+            if (!isIndexedRefId(cellref.mIndexedRefId))
             {
-                std::cerr << "CellRef with no index?" << std::endl;
-                continue;
-            }
-            std::stringstream stream;
-            stream << cellref.mIndexedRefId.substr(cellref.mIndexedRefId.size()-8,8);
-            int refIndex;
-            stream >> refIndex;
+                // non-indexed RefNum, i.e. no CREC/NPCC/CNTC record associated with it
+                // this could be any type of object really (even creatures/npcs too)
+                out.mRefID = cellref.mIndexedRefId;
+                std::string idLower = Misc::StringUtils::lowerCase(out.mRefID);
 
-            out.mRefID = cellref.mIndexedRefId.substr(0,cellref.mIndexedRefId.size()-8);
-
-            std::map<std::pair<int, std::string>, CREC>::const_iterator crecIt = mContext->mCreatureChanges.find(
-                        std::make_pair(refIndex, out.mRefID));
-            if (crecIt != mContext->mCreatureChanges.end())
-            {
-                ESM::CreatureState objstate;
+                ESM::ObjectState objstate;
                 objstate.blank();
                 objstate.mRef = out;
-                convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
-                convertCREC(crecIt->second, objstate);
+                objstate.mRef.mRefID = idLower;
+                objstate.mHasCustomState = false;
                 convertCellRef(cellref, objstate);
-                // FIXME: change save format to not require object type, instead look up it up using the RefId
-                esm.writeHNT ("OBJE", ESM::REC_CREA);
+                esm.writeHNT ("OBJE", 0);
                 objstate.save(esm);
                 continue;
             }
-
-            std::map<std::pair<int, std::string>, NPCC>::const_iterator npccIt = mContext->mNpcChanges.find(
-                        std::make_pair(refIndex, out.mRefID));
-            if (npccIt != mContext->mNpcChanges.end())
+            else
             {
-                ESM::NpcState objstate;
-                objstate.blank();
-                objstate.mRef = out;
-                convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
-                convertNpcData(cellref.mActorData, objstate.mNpcStats);
-                convertNPCC(npccIt->second, objstate);
-                convertCellRef(cellref, objstate);
-                esm.writeHNT ("OBJE", ESM::REC_NPC_);
-                objstate.save(esm);
-                continue;
-            }
+                std::stringstream stream;
+                stream << std::hex << cellref.mIndexedRefId.substr(cellref.mIndexedRefId.size()-8,8);
+                int refIndex;
+                stream >> refIndex;
 
-            std::map<std::pair<int, std::string>, CNTC>::const_iterator cntcIt = mContext->mContainerChanges.find(
-                        std::make_pair(refIndex, out.mRefID));
-            if (cntcIt != mContext->mContainerChanges.end())
-            {
-                ESM::ContainerState objstate;
-                objstate.blank();
-                objstate.mRef = out;
-                convertCNTC(cntcIt->second, objstate);
-                convertCellRef(cellref, objstate);
-                esm.writeHNT ("OBJE", ESM::REC_CONT);
-                objstate.save(esm);
-                continue;
-            }
+                out.mRefID = cellref.mIndexedRefId.substr(0,cellref.mIndexedRefId.size()-8);
+                std::string idLower = Misc::StringUtils::lowerCase(out.mRefID);
 
-            std::cerr << "Can't find type for " << refIndex << " " << out.mRefID << std::endl;
+                std::map<std::pair<int, std::string>, NPCC>::const_iterator npccIt = mContext->mNpcChanges.find(
+                            std::make_pair(refIndex, out.mRefID));
+                if (npccIt != mContext->mNpcChanges.end())
+                {
+                    ESM::NpcState objstate;
+                    objstate.blank();
+                    objstate.mRef = out;
+                    objstate.mRef.mRefID = idLower;
+                    // probably need more micromanagement here so we don't overwrite values
+                    // from the ESM with default values
+                    convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
+                    convertNpcData(cellref.mActorData, objstate.mNpcStats);
+                    convertNPCC(npccIt->second, objstate);
+                    convertCellRef(cellref, objstate);
+                    esm.writeHNT ("OBJE", ESM::REC_NPC_);
+                    objstate.save(esm);
+                    continue;
+                }
+
+                std::map<std::pair<int, std::string>, CNTC>::const_iterator cntcIt = mContext->mContainerChanges.find(
+                            std::make_pair(refIndex, out.mRefID));
+                if (cntcIt != mContext->mContainerChanges.end())
+                {
+                    ESM::ContainerState objstate;
+                    objstate.blank();
+                    objstate.mRef = out;
+                    objstate.mRef.mRefID = idLower;
+                    convertCNTC(cntcIt->second, objstate);
+                    convertCellRef(cellref, objstate);
+                    esm.writeHNT ("OBJE", ESM::REC_CONT);
+                    objstate.save(esm);
+                    continue;
+                }
+
+                std::map<std::pair<int, std::string>, CREC>::const_iterator crecIt = mContext->mCreatureChanges.find(
+                            std::make_pair(refIndex, out.mRefID));
+                if (crecIt != mContext->mCreatureChanges.end())
+                {
+                    ESM::CreatureState objstate;
+                    objstate.blank();
+                    objstate.mRef = out;
+                    objstate.mRef.mRefID = idLower;
+                    convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
+                    // probably need more micromanagement here so we don't overwrite values
+                    // from the ESM with default values
+                    convertCREC(crecIt->second, objstate);
+                    convertCellRef(cellref, objstate);
+                    esm.writeHNT ("OBJE", ESM::REC_CREA);
+                    objstate.save(esm);
+                    continue;
+                }
+
+                std::cerr << "Can't find type for " << cellref.mIndexedRefId << std::endl;
+            }
         }
 
         esm.endRecord(ESM::REC_CSTA);

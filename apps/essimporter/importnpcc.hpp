@@ -26,8 +26,6 @@ namespace ESSImport
 
         Inventory mInventory;
 
-        int mIndex;
-
         void load(ESM::ESMReader &esm);
     };
 

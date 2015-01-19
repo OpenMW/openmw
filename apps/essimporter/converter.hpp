@@ -167,8 +167,14 @@ public:
             convertNPCC(npcc, mContext->mPlayer.mObject);
         }
         else
-            mContext->mNpcChanges.insert(std::make_pair(std::make_pair(npcc.mIndex,id), npcc));
+        {
+            int index = mIndexCounter[id]++;
+            mContext->mNpcChanges.insert(std::make_pair(std::make_pair(index,id), npcc)).second;
+        }
     }
+
+private:
+    std::map<std::string, int> mIndexCounter;
 };
 
 class ConvertREFR : public Converter
@@ -230,7 +236,6 @@ public:
         std::string id = esm.getHNString("NAME");
         CREC crec;
         crec.load(esm);
-
         mContext->mCreatureChanges.insert(std::make_pair(std::make_pair(crec.mIndex,id), crec));
     }
 };
