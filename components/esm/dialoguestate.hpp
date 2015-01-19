@@ -16,7 +16,7 @@ namespace ESM
     {
         std::vector<std::string> mKnownTopics;
 
-        std::map<std::string, std::map<std::string, int> > mModFactionReaction;
+        std::map<std::string, std::map<std::string, int> > mChangedFactionReaction;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

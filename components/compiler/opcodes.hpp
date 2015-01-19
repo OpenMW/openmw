@@ -167,6 +167,7 @@ namespace Compiler
         const int opcodeSameFaction = 0x20001b5;
         const int opcodeSameFactionExplicit = 0x20001b6;
         const int opcodeModFactionReaction = 0x2000242;
+        const int opcodeSetFactionReaction = 0x20002ff;
         const int opcodeGetFactionReaction = 0x2000243;
         const int opcodeClearInfoActor = 0x2000245;
         const int opcodeClearInfoActorExplicit = 0x2000246;

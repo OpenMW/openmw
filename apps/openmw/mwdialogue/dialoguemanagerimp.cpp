@@ -640,7 +640,7 @@ namespace MWDialogue
             if (iter->second)
                 state.mKnownTopics.push_back (iter->first);
 
-        state.mModFactionReaction = mModFactionReaction;
+        state.mChangedFactionReaction = mChangedFactionReaction;
 
         writer.startRecord (ESM::REC_DIAS);
         state.save (writer);
@@ -661,7 +661,7 @@ namespace MWDialogue
                 if (store.get<ESM::Dialogue>().search (*iter))
                     mKnownTopics.insert (std::make_pair (*iter, true));
 
-            mModFactionReaction = state.mModFactionReaction;
+            mChangedFactionReaction = state.mChangedFactionReaction;
         }
     }
 
@@ -674,10 +674,23 @@ namespace MWDialogue
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact2);
 
-        std::map<std::string, int>& map = mModFactionReaction[fact1];
-        if (map.find(fact2) == map.end())
-            map[fact2] = 0;
-        map[fact2] += diff;
+        int newValue = getFactionReaction(faction1, faction2) + diff;
+
+        std::map<std::string, int>& map = mChangedFactionReaction[fact1];
+        map[fact2] = newValue;
+    }
+
+    void DialogueManager::setFactionReaction(const std::string &faction1, const std::string &faction2, int absolute)
+    {
+        std::string fact1 = Misc::StringUtils::lowerCase(faction1);
+        std::string fact2 = Misc::StringUtils::lowerCase(faction2);
+
+        // Make sure the factions exist
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact2);
+
+        std::map<std::string, int>& map = mChangedFactionReaction[fact1];
+        map[fact2] = absolute;
     }
 
     int DialogueManager::getFactionReaction(const std::string &faction1, const std::string &faction2) const
@@ -685,10 +698,9 @@ namespace MWDialogue
         std::string fact1 = Misc::StringUtils::lowerCase(faction1);
         std::string fact2 = Misc::StringUtils::lowerCase(faction2);
 
-        ModFactionReactionMap::const_iterator map = mModFactionReaction.find(fact1);
-        int diff = 0;
-        if (map != mModFactionReaction.end() && map->second.find(fact2) != map->second.end())
-            diff = map->second.at(fact2);
+        ModFactionReactionMap::const_iterator map = mChangedFactionReaction.find(fact1);
+        if (map != mChangedFactionReaction.end() && map->second.find(fact2) != map->second.end())
+            return map->second.at(fact2);
 
         const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
 
@@ -696,9 +708,9 @@ namespace MWDialogue
         for (; it != faction->mReactions.end(); ++it)
         {
             if (Misc::StringUtils::ciEqual(it->first, fact2))
-                    return it->second + diff;
+                    return it->second;
         }
-        return diff;
+        return 0;
     }
 
     void DialogueManager::clearInfoActor(const MWWorld::Ptr &actor) const
