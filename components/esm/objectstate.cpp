@@ -23,6 +23,10 @@ void ESM::ObjectState::load (ESMReader &esm)
     esm.getHNOT (mPosition, "POS_", 24);
 
     esm.getHNOT (mLocalRotation, "LROT", 12);
+
+    // used for lights only
+    mTime = 0;
+    esm.getHNOT (mTime, "LTIM");
 }
 
 void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
@@ -46,6 +50,9 @@ void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
         esm.writeHNT ("POS_", mPosition, 24);
         esm.writeHNT ("LROT", mLocalRotation, 12);
     }
+
+    if (mTime)
+        esm.writeHNT ("LTIM", mTime);
 }
 
 void ESM::ObjectState::blank()
@@ -60,6 +67,7 @@ void ESM::ObjectState::blank()
         mPosition.rot[i] = 0;
         mLocalRotation[i] = 0;
     }
+    mTime = 0;
 }
 
 ESM::ObjectState::~ObjectState() {}

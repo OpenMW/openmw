@@ -86,7 +86,7 @@ namespace MWWorld
 
             template<typename T>
             void storeStates (const CellRefList<T>& collection,
-                std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states,
+                std::vector<std::pair<ESM::ObjectState, int> >& states,
                 bool equipable = false) const;
 
             virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;

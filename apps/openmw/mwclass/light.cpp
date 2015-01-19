@@ -2,7 +2,7 @@
 #include "light.hpp"
 
 #include <components/esm/loadligh.hpp>
-#include <components/esm/lightstate.hpp>
+#include <components/esm/objectstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -285,21 +285,17 @@ namespace MWClass
     void Light::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
         const
     {
-        const ESM::LightState& state2 = dynamic_cast<const ESM::LightState&> (state);
-
         ensureCustomData (ptr);
 
-        dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime = state2.mTime;
+        dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime = state.mTime;
     }
 
     void Light::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
         const
     {
-        ESM::LightState& state2 = dynamic_cast<ESM::LightState&> (state);
-
         ensureCustomData (ptr);
 
-        state2.mTime = dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime;
+        state.mTime = dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime;
     }
 
     std::string Light::getSound(const MWWorld::Ptr& ptr) const

@@ -87,7 +87,7 @@ void MWWorld::ContainerStore::storeState (const LiveCellRef<T>& ref, ESM::Object
 
 template<typename T>
 void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
-    std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states, bool equipable) const
+    std::vector<std::pair<ESM::ObjectState, int> >& states, bool equipable) const
 {
     for (typename CellRefList<T>::List::const_iterator iter (collection.mList.begin());
         iter!=collection.mList.end(); ++iter)
@@ -97,7 +97,7 @@ void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
         ESM::ObjectState state;
         storeState (*iter, state);
         int slot = equipable ? getSlot (*iter) : -1;
-        states.push_back (std::make_pair (state, std::make_pair (T::sRecordId, slot)));
+        states.push_back (std::make_pair (state, slot));
     }
 }
 
@@ -656,30 +656,25 @@ void MWWorld::ContainerStore::writeState (ESM::InventoryState& state) const
     storeStates (probes, state.mItems, true);
     storeStates (repairs, state.mItems);
     storeStates (weapons, state.mItems, true);
-
-    state.mLights.clear();
+    storeStates (lights, state.mItems, true);
 
     state.mLevelledItemMap = mLevelledItemMap;
-
-    for (MWWorld::CellRefList<ESM::Light>::List::const_iterator iter (lights.mList.begin());
-        iter!=lights.mList.end(); ++iter)
-    {
-        ESM::LightState objectState;
-        storeState (*iter, objectState);
-        state.mLights.push_back (std::make_pair (objectState, getSlot (*iter)));
-    }
 }
 
 void MWWorld::ContainerStore::readState (const ESM::InventoryState& state)
 {
     clear();
 
-    for (std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >::const_iterator
+    for (std::vector<std::pair<ESM::ObjectState, int> >::const_iterator
         iter (state.mItems.begin()); iter!=state.mItems.end(); ++iter)
     {
-        int slot = iter->second.second;
+        int slot = iter->second;
 
-        switch (iter->second.first)
+        const ESM::ObjectState& state = iter->first;
+
+        int type = MWBase::Environment::get().getWorld()->getStore().find(state.mRef.mRefID);
+
+        switch (type)
         {
             case ESM::REC_ALCH: getState (potions, iter->first); break;
             case ESM::REC_APPA: getState (appas, iter->first); break;
@@ -692,19 +687,14 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& state)
             case ESM::REC_PROB: setSlot (getState (probes, iter->first), slot); break;
             case ESM::REC_REPA: getState (repairs, iter->first); break;
             case ESM::REC_WEAP: setSlot (getState (weapons, iter->first), slot); break;
+            case ESM::REC_LIGH: setSlot (getState (lights, iter->first), slot); break;
 
             default:
-
-                std::cerr << "invalid item type in inventory state" << std::endl;
+                std::cerr << "invalid item type in inventory state, refid " << state.mRef.mRefID << std::endl;
+                break;
         }
     }
 
-    for (std::vector<std::pair<ESM::LightState, int> >::const_iterator iter (state.mLights.begin());
-        iter!=state.mLights.end(); ++iter)
-    {
-        int slot = iter->second;
-        setSlot (getState (lights, iter->first), slot);
-    }
 
     mLevelledItemMap = state.mLevelledItemMap;
 }
