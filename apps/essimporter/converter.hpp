@@ -215,6 +215,8 @@ public:
             faction.mReputation = it->mReputation;
             mContext->mPlayer.mObject.mNpcStats.mFactions[it->mFactionName.toString()] = faction;
         }
+        for (int i=0; i<8; ++i)
+            mContext->mPlayer.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];
 
         for (std::vector<std::string>::const_iterator it = pcdt.mKnownDialogueTopics.begin();
              it != pcdt.mKnownDialogueTopics.end(); ++it)

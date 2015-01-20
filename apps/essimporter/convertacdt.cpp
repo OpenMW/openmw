@@ -37,6 +37,8 @@ namespace ESSImport
             npcStats.mSkills[i].mRegular.mCurrent = actorData.mSkills[i][1];
             npcStats.mSkills[i].mRegular.mBase = actorData.mSkills[i][0];
         }
+
+        npcStats.mTimeToStartDrowning = actorData.mACDT.mBreathMeter;
     }
 
 }

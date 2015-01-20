@@ -104,6 +104,11 @@ namespace ESSImport
         blacklist.insert(std::make_pair("GLOB", "FLTV")); // gamehour
         blacklist.insert(std::make_pair("REFR", "DATA")); // player position
         blacklist.insert(std::make_pair("CELL", "NAM8")); // fog of war
+        blacklist.insert(std::make_pair("GAME", "GMDT")); // weather data, current time always changes
+
+         // this changes way too often, name suggests some renderer internal data?
+        blacklist.insert(std::make_pair("CELL", "ND3D"));
+        blacklist.insert(std::make_pair("REFR", "ND3D"));
 
         File file1;
         read(mEssFile, file1);

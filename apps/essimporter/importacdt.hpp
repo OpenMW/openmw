@@ -13,14 +13,24 @@ namespace ESSImport
 
 
     /// Actor data, shared by (at least) REFR and CellRef
+#pragma pack(push)
+#pragma pack(1)
     struct ACDT
     {
-        unsigned char mUnknown1[40];
+        // Note, not stored at *all*:
+        // - Level changes are lost on reload, except for the player (there it's in the NPC record).
+        unsigned char mUnknown1[16];
+        float mBreathMeter; // Seconds left before drowning
+        unsigned char mUnknown2[20];
         float mDynamic[3][2];
-        unsigned char mUnknown2[16];
+        unsigned char mUnknown3[16];
         float mAttributes[8][2];
-        unsigned char mUnknown3[120];
+        unsigned char mUnknown4[109];
+        // This seems to increase when purchasing training, though I don't see it anywhere ingame.
+        int mGold;
+        unsigned char mUnknown5[7];
     };
+#pragma pack(pop)
 
     struct ActorData
     {
