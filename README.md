@@ -41,51 +41,58 @@ Command line options
       --version                             print version information and quit
       --data arg (=data)                    set data directories (later directories
                                             have higher priority)
-      --data-local arg                      set local data directory (highest
+      --data-local arg                      set local data directory (highest 
                                             priority)
       --fallback-archive arg (=fallback-archive)
-                                            set fallback BSA archives (later
+                                            set fallback BSA archives (later 
                                             archives have higher priority)
       --resources arg (=resources)          set resources directory
-      --start arg (=Beshara)                set initial cell
-      --content arg                         content file(s): esm/esp, or
+      --start arg                           set initial cell
+      --content arg                         content file(s): esm/esp, or 
                                             omwgame/omwaddon
-      --anim-verbose [=arg(=1)] (=0)        output animation indices files
       --no-sound [=arg(=1)] (=0)            disable all sounds
       --script-verbose [=arg(=1)] (=0)      verbose script output
       --script-all [=arg(=1)] (=0)          compile all scripts (excluding dialogue
                                             scripts) at startup
-      --script-console [=arg(=1)] (=0)      enable console-only script
+      --script-all-dialogue [=arg(=1)] (=0) compile all dialogue scripts at startup
+      --script-console [=arg(=1)] (=0)      enable console-only script 
                                             functionality
-      --script-run arg                      select a file containing a list of
-                                            console commands that is executed on
+      --script-run arg                      select a file containing a list of 
+                                            console commands that is executed on 
                                             startup
-       --script-warn [=arg(=1)] (=1)        handling of warnings when compiling
+      --script-warn [=arg(=1)] (=1)         handling of warnings when compiling 
                                             scripts
                                             0 - ignore warning
                                             1 - show warning but consider script as
                                             correctly compiled anyway
                                             2 - treat warnings as errors
+      --script-blacklist arg                ignore the specified script (if the use
+                                            of the blacklist is enabled)
+      --script-blacklist-use [=arg(=1)] (=1)
+                                            enable script blacklisting
+      --load-savegame arg                   load a save game file on game startup
       --skip-menu [=arg(=1)] (=0)           skip main menu on game startup
-      --new-game [=arg(=1)] (=0)            run new game sequence (ignored if
+      --new-game [=arg(=1)] (=0)            run new game sequence (ignored if 
                                             skip-menu=0)
-      --fs-strict [=arg(=1)] (=0)           strict file system handling (no case
+      --fs-strict [=arg(=1)] (=0)           strict file system handling (no case 
                                             folding)
-      --encoding arg (=win1252)             Character encoding used in OpenMW game
+      --encoding arg (=win1252)             Character encoding used in OpenMW game 
                                             messages:
-
-                                            win1250 - Central and Eastern European
-                                            such as Polish, Czech, Slovak,
-                                            Hungarian, Slovene, Bosnian, Croatian,
-                                            Serbian (Latin script), Romanian and
+                                            
+                                            win1250 - Central and Eastern European 
+                                            such as Polish, Czech, Slovak, 
+                                            Hungarian, Slovene, Bosnian, Croatian, 
+                                            Serbian (Latin script), Romanian and 
                                             Albanian languages
-
-                                            win1251 - Cyrillic alphabet such as
-                                            Russian, Bulgarian, Serbian Cyrillic
+                                            
+                                            win1251 - Cyrillic alphabet such as 
+                                            Russian, Bulgarian, Serbian Cyrillic 
                                             and other languages
-
-                                            win1252 - Western European (Latin)
+                                            
+                                            win1252 - Western European (Latin) 
                                             alphabet, used by default
       --fallback arg                        fallback values
       --no-grab                             Don't grab mouse cursor
+      --export-fonts [=arg(=1)] (=0)        Export Morrowind .fnt fonts to PNG 
+                                            image and XML file in current directory
       --activate-dist arg (=-1)             activation distance override
