@@ -233,14 +233,26 @@ namespace MWInput
 
         int action = channel->getNumber();
 
-        if(currentValue > .8) currentValue = 1.0;
-        else if(currentValue < .6) currentValue = 0.0;
-        else return;
-
-        if(previousValue > .8) previousValue = 1.0;
-        else if(previousValue < .6) previousValue = 0.0;
-
-        if(currentValue == previousValue) return;
+        if((previousValue == 1 || previousValue == 0) && (currentValue==1 || currentValue==0))
+        {
+            //Is a normal button press, so don't change it at all
+        }
+        //Otherwise only trigger button presses as they go through specific points
+        else if(previousValue >= .8 && currentValue < .8)
+        {
+            currentValue = 0.0;
+            previousValue = 1.0;
+        }
+        else if(previousValue <= .6 && currentValue > .6)
+        {
+            currentValue = 1.0;
+            previousValue = 0.0;
+        }
+        else
+        {
+            //If it's not switching between those values, ignore the channel change.
+            return;
+        }
 
         if (mControlSwitch["playercontrols"])
         {
@@ -271,7 +283,6 @@ namespace MWInput
                 break;
             case A_Activate:
                 resetIdleTime();
-
                 if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
                     activate();
                 break;
