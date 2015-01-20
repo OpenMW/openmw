@@ -68,7 +68,8 @@ namespace MWInput
     public:
         InputManager(OEngine::Render::OgreRenderer &_ogre,
             OMW::Engine& engine,
-            const std::string& userFile, bool userFileExists, bool grab);
+            const std::string& userFile, bool userFileExists,
+            const std::string& controllerBindingsFile, bool grab);
 
         virtual ~InputManager();
 

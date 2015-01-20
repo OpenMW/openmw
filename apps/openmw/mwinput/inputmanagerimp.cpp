@@ -100,7 +100,8 @@ namespace MWInput
 {
     InputManager::InputManager(OEngine::Render::OgreRenderer &ogre,
             OMW::Engine& engine,
-            const std::string& userFile, bool userFileExists, bool grab)
+            const std::string& userFile, bool userFileExists,
+            const std::string& controllerBindingsFile, bool grab)
         : mOgre(ogre)
         , mPlayer(NULL)
         , mEngine(engine)
@@ -160,19 +161,9 @@ namespace MWInput
 
 		//Load controller mappings
 #if SDL_VERSION_ATLEAST(2,0,2)
-        Files::ConfigurationManager cfgMgr;
-        std::string db = cfgMgr.getLocalPath().string() + "/gamecontrollerdb.txt";
-        if(boost::filesystem::exists(db))
+        if(controllerBindingsFile!="")
         {
-            int res = SDL_GameControllerAddMappingsFromFile(db.c_str());
-            if(res == -1)
-            {
-                //ICS_LOG(std::string("Error loading controller bindings: ")+SDL_GetError());
-            }
-            else
-            {
-                //ICS_LOG(std::string("Loaded ")+boost::lexical_cast<std::string>(res)+" Game controller bindings");
-            }
+            SDL_GameControllerAddMappingsFromFile(controllerBindingsFile.c_str());
         }
 #endif
 
