@@ -181,6 +181,8 @@ namespace ESSImport
         Ogre::LogManager logman;
         Ogre::Root root;
 
+        // TODO: set up encoding on ESMReader based on openmw.cfg / --encoding switch
+
         ESM::ESMReader esm;
         esm.open(mEssFile);
 
@@ -216,6 +218,7 @@ namespace ESSImport
         converters[ESM::REC_LEVC] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::CreatureLevList>());
         converters[ESM::REC_LEVI] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::ItemLevList>());
         converters[ESM::REC_CNTC] = boost::shared_ptr<Converter>(new ConvertCNTC());
+        converters[ESM::REC_FACT] = boost::shared_ptr<Converter>(new ConvertFACT());
 
         std::set<unsigned int> unknownRecords;
 
@@ -322,6 +325,10 @@ namespace ESSImport
         }
         context.mPlayer.save(writer);
         writer.endRecord(ESM::REC_PLAY);
+
+        writer.startRecord (ESM::REC_DIAS);
+        context.mDialogueState.save(writer);
+        writer.endRecord(ESM::REC_DIAS);
     }
 
 

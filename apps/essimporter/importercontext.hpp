@@ -5,6 +5,7 @@
 
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/player.hpp>
+#include <components/esm/dialoguestate.hpp>
 
 #include "importnpcc.hpp"
 #include "importcrec.hpp"
@@ -24,6 +25,8 @@ namespace ESSImport
         ESM::Player mPlayer;
         ESM::NPC mPlayerBase;
         std::string mCustomPlayerClassName;
+
+        ESM::DialogueState mDialogueState;
 
         int mDay, mMonth, mYear;
         float mHour;

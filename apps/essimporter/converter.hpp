@@ -9,6 +9,8 @@
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadglob.hpp>
 #include <components/esm/cellstate.hpp>
+#include <components/esm/loadfact.hpp>
+#include <components/esm/dialoguestate.hpp>
 #include <components/esm/custommarkerstate.hpp>
 
 #include "importcrec.hpp"
@@ -214,6 +216,12 @@ public:
             mContext->mPlayer.mObject.mNpcStats.mFactions[it->mFactionName.toString()] = faction;
         }
 
+        for (std::vector<std::string>::const_iterator it = pcdt.mKnownDialogueTopics.begin();
+             it != pcdt.mKnownDialogueTopics.end(); ++it)
+        {
+            mContext->mDialogueState.mKnownTopics.push_back(Misc::StringUtils::lowerCase(*it));
+        }
+
     }
 };
 
@@ -293,6 +301,24 @@ public:
 
 private:
     std::map<std::string, int> mKillCounter;
+};
+
+class ConvertFACT : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader& esm)
+    {
+        std::string id = esm.getHNString("NAME");
+        ESM::Faction faction;
+        faction.load(esm);
+
+        Misc::StringUtils::toLower(id);
+        for (std::map<std::string, int>::const_iterator it = faction.mReactions.begin(); it != faction.mReactions.end(); ++it)
+        {
+            std::string faction2 = Misc::StringUtils::lowerCase(it->first);
+            mContext->mDialogueState.mChangedFactionReaction[id].insert(std::make_pair(faction2, it->second));
+        }
+    }
 };
 
 }
