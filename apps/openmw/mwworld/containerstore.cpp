@@ -85,28 +85,29 @@ void MWWorld::ContainerStore::storeState (const LiveCellRef<T>& ref, ESM::Object
     ref.save (state);
 }
 
+/// \todo make this method const once const-correct ContainerStoreIterators are available
 template<typename T>
-void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
-    std::vector<std::pair<ESM::ObjectState, int> >& states, bool equipable) const
+void MWWorld::ContainerStore::storeStates (CellRefList<T>& collection,
+    std::vector<std::pair<ESM::ObjectState, int> >& states, bool equipable)
 {
-    for (typename CellRefList<T>::List::const_iterator iter (collection.mList.begin());
+    for (typename CellRefList<T>::List::iterator iter (collection.mList.begin());
         iter!=collection.mList.end(); ++iter)
     {
         if (iter->mData.getCount() == 0)
             continue;
         ESM::ObjectState state;
         storeState (*iter, state);
-        int slot = equipable ? getSlot (*iter) : -1;
+        int slot = equipable ? getRelativeSlot (MWWorld::ContainerStoreIterator(this, iter)) : -1;
         states.push_back (std::make_pair (state, slot));
     }
 }
 
-int MWWorld::ContainerStore::getSlot (const MWWorld::LiveCellRefBase& ref) const
+int MWWorld::ContainerStore::getRelativeSlot (const MWWorld::ContainerStoreIterator& iter) const
 {
     return -1;
 }
 
-void MWWorld::ContainerStore::setSlot (const MWWorld::ContainerStoreIterator& iter, int slot) {}
+void MWWorld::ContainerStore::setRelativeSlot (const MWWorld::ContainerStoreIterator& iter, int slot) {}
 
 const std::string MWWorld::ContainerStore::sGoldId = "gold_001";
 
@@ -641,7 +642,7 @@ MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
     return Ptr();
 }
 
-void MWWorld::ContainerStore::writeState (ESM::InventoryState& state) const
+void MWWorld::ContainerStore::writeState (ESM::InventoryState& state)
 {
     state.mItems.clear();
 
@@ -678,16 +679,16 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& state)
         {
             case ESM::REC_ALCH: getState (potions, iter->first); break;
             case ESM::REC_APPA: getState (appas, iter->first); break;
-            case ESM::REC_ARMO: setSlot (getState (armors, iter->first), slot); break;
+            case ESM::REC_ARMO: setRelativeSlot (getState (armors, iter->first), slot); break;
             case ESM::REC_BOOK: getState (books, iter->first); break;
-            case ESM::REC_CLOT: setSlot (getState (clothes, iter->first), slot); break;
+            case ESM::REC_CLOT: setRelativeSlot (getState (clothes, iter->first), slot); break;
             case ESM::REC_INGR: getState (ingreds, iter->first); break;
-            case ESM::REC_LOCK: setSlot (getState (lockpicks, iter->first), slot); break;
+            case ESM::REC_LOCK: setRelativeSlot (getState (lockpicks, iter->first), slot); break;
             case ESM::REC_MISC: getState (miscItems, iter->first); break;
-            case ESM::REC_PROB: setSlot (getState (probes, iter->first), slot); break;
+            case ESM::REC_PROB: setRelativeSlot (getState (probes, iter->first), slot); break;
             case ESM::REC_REPA: getState (repairs, iter->first); break;
-            case ESM::REC_WEAP: setSlot (getState (weapons, iter->first), slot); break;
-            case ESM::REC_LIGH: setSlot (getState (lights, iter->first), slot); break;
+            case ESM::REC_WEAP: setRelativeSlot (getState (weapons, iter->first), slot); break;
+            case ESM::REC_LIGH: setRelativeSlot (getState (lights, iter->first), slot); break;
 
             default:
                 std::cerr << "invalid item type in inventory state, refid " << state.mRef.mRefID << std::endl;

@@ -113,10 +113,10 @@ namespace MWWorld
 
             void fireEquipmentChangedEvent();
 
-            virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
+            virtual int getRelativeSlot (const MWWorld::ContainerStoreIterator& iter);
             ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).
 
-            virtual void setSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
+            virtual void setRelativeSlot (const MWWorld::ContainerStoreIterator& iter, int relativeSlot);
             ///< Set slot for \a iter. Ignored if \a iter is an end iterator or if slot==-1.
 
         public:
@@ -209,7 +209,7 @@ namespace MWWorld
             virtual void clear();
             ///< Empty container.
 
-            virtual void writeState (ESM::InventoryState& state) const;
+            virtual void writeState (ESM::InventoryState& state);
 
             virtual void readState (const ESM::InventoryState& state);
     };

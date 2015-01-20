@@ -49,19 +49,40 @@ void MWWorld::InventoryStore::initSlots (TSlots& slots_)
         slots_.push_back (end());
 }
 
-int MWWorld::InventoryStore::getSlot (const MWWorld::LiveCellRefBase& ref) const
+int MWWorld::InventoryStore::getRelativeSlot (const MWWorld::ContainerStoreIterator& iter)
 {
     for (int i = 0; i<static_cast<int> (mSlots.size()); ++i)
-        if (mSlots[i].getType()!=-1 && mSlots[i]->getBase()==&ref)
-            return i;
+        if (mSlots[i].getType()!=-1 && mSlots[i] == iter)
+        {
+            // linear complexity, but allowedSlots is most of the time just 1 anyway
+            std::vector<int> allowedSlots = iter->getClass().getEquipmentSlots(*iter).first;
+            std::vector<int>::iterator found = std::find(allowedSlots.begin(),allowedSlots.end(),i);
+            if (found == allowedSlots.end())
+                return -1;
+            else
+                return std::distance(allowedSlots.begin(), found);
+        }
 
     return -1;
 }
 
-void MWWorld::InventoryStore::setSlot (const MWWorld::ContainerStoreIterator& iter, int slot)
+void MWWorld::InventoryStore::setRelativeSlot (const MWWorld::ContainerStoreIterator& iter, int relativeSlot)
 {
-    if (iter!=end() && slot>=0 && slot<Slots)
-        mSlots[slot] = iter;
+    if (relativeSlot < 0 || iter == end())
+        return;
+
+    std::pair<std::vector<int>, bool> allowedSlots = iter->getClass().getEquipmentSlots(*iter);
+    relativeSlot = std::min(int(allowedSlots.first.size()-1), relativeSlot);
+
+    // unstack if required
+    if (!allowedSlots.second && iter->getRefData().getCount() > 1)
+    {
+        MWWorld::ContainerStoreIterator newIter = addNewStack(*iter, 1);
+        iter->getRefData().setCount(iter->getRefData().getCount()-1);
+        mSlots[allowedSlots.first[relativeSlot]] = newIter;
+    }
+    else
+        mSlots[allowedSlots.first[relativeSlot]] = iter;
 }
 
 MWWorld::InventoryStore::InventoryStore()
@@ -703,7 +724,7 @@ bool MWWorld::InventoryStore::isEquipped(const MWWorld::Ptr &item)
     return false;
 }
 
-void MWWorld::InventoryStore::writeState(ESM::InventoryState &state) const
+void MWWorld::InventoryStore::writeState(ESM::InventoryState &state)
 {
     MWWorld::ContainerStore::writeState(state);
 
