@@ -368,7 +368,19 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v2.xml").string();
     bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
-    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, mGrab);
+
+    // find correct path to the game controller bindings
+    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/gamecontrollerdb.cfg";
+    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/gamecontrollerdb.cfg";
+    std::string gameControllerdb;
+    if (boost::filesystem::exists(localdefault))
+        gameControllerdb = localdefault;
+    else if (boost::filesystem::exists(globaldefault))
+        gameControllerdb = globaldefault;
+    else
+        gameControllerdb = ""; //if it doesn't exist, pass in an empty string
+
+    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
     mEnvironment.setInputManager (input);
 
     MWGui::WindowManager* window = new MWGui::WindowManager(
