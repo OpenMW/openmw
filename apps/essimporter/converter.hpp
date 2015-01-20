@@ -217,6 +217,7 @@ public:
         }
         for (int i=0; i<8; ++i)
             mContext->mPlayer.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];
+        mContext->mPlayer.mObject.mNpcStats.mLevelProgress = pcdt.mPNAM.mLevelProgress;
 
         for (std::vector<std::string>::const_iterator it = pcdt.mKnownDialogueTopics.begin();
              it != pcdt.mKnownDialogueTopics.end(); ++it)

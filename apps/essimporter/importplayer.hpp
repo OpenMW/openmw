@@ -51,9 +51,11 @@ struct PCDT
     };
     struct PNAM
     {
-        unsigned char mUnknown1[116];
+        unsigned char mUnknown1[4];
+        unsigned char mLevelProgress;
+        unsigned char mUnknown2[111];
         unsigned char mSkillIncreases[8]; // number of skill increases for each attribute
-        unsigned char mUnknown2[88];
+        unsigned char mUnknown3[88];
     };
 #pragma pack(pop)
 
