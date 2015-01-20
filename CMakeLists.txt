@@ -457,8 +457,9 @@ if(WIN32)
     FILE(GLOB dll_files "${OpenMW_BINARY_DIR}/Release/*.dll")
     INSTALL(FILES ${dll_files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
     INSTALL(FILES
-        "${OpenMW_SOURCE_DIR}/readme.txt"
         "${OpenMW_SOURCE_DIR}/Docs/license/GPL3.txt"
         "${OpenMW_SOURCE_DIR}/Docs/license/DejaVu Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
@@ -502,13 +503,13 @@ if(WIN32)
     IF(BUILD_WIZARD)
         SET(CPACK_PACKAGE_EXECUTABLES "${CPACK_PACKAGE_EXECUTABLES};openmw-wizard;OpenMW Wizard")
     ENDIF(BUILD_WIZARD)
-    SET(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\readme.txt'")
+    SET(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\README.txt'")
     SET(CPACK_NSIS_DELETE_ICONS_EXTRA "
         !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
         Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\Readme.lnk\\\"
         ")
-    SET(CPACK_RESOURCE_FILE_README "${OpenMW_SOURCE_DIR}/readme.txt")
-    SET(CPACK_PACKAGE_DESCRIPTION_FILE "${OpenMW_SOURCE_DIR}/readme.txt")
+    SET(CPACK_RESOURCE_FILE_README "${OpenMW_SOURCE_DIR}/README.md")
+    SET(CPACK_PACKAGE_DESCRIPTION_FILE "${OpenMW_SOURCE_DIR}/README.md")
     SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
     SET(CPACK_NSIS_DISPLAY_NAME "OpenMW ${OPENMW_VERSION}")
     SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.openmw.org")
