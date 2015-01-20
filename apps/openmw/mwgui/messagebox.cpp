@@ -12,6 +12,8 @@
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#undef MessageBox
+
 namespace MWGui
 {
 
