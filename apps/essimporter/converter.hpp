@@ -321,6 +321,30 @@ public:
     }
 };
 
+/// Stolen items
+class ConvertSTLN : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader &esm)
+    {
+        std::string itemid = esm.getHNString("NAME");
+
+        while (esm.isNextSub("ONAM"))
+        {
+            std::string ownerid = esm.getHString();
+            mStolenItems.insert(std::make_pair(itemid, ownerid));
+        }
+        while (esm.isNextSub("FNAM"))
+        {
+            std::string factionid = esm.getHString();
+            mFactionStolenItems.insert(std::make_pair(itemid, factionid));
+        }
+    }
+private:
+    std::multimap<std::string, std::string> mStolenItems;
+    std::multimap<std::string, std::string> mFactionStolenItems;
+};
+
 }
 
 #endif
