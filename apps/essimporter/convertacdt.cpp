@@ -27,6 +27,8 @@ namespace ESSImport
             cStats.mAttributes[i].mMod = acdt.mAttributes[i][0];
             cStats.mAttributes[i].mCurrent = acdt.mAttributes[i][0];
         }
+        cStats.mGoldPool = acdt.mGoldPool;
+        cStats.mTalkedTo = acdt.mFlags & TalkedToPlayer;
     }
 
     void convertNpcData (const ActorData& actorData, ESM::NpcStats& npcStats)

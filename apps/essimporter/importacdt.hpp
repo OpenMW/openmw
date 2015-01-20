@@ -11,6 +11,10 @@ namespace ESM
 namespace ESSImport
 {
 
+    enum ACDTFlags
+    {
+        TalkedToPlayer = 0x4
+    };
 
     /// Actor data, shared by (at least) REFR and CellRef
 #pragma pack(push)
@@ -19,16 +23,17 @@ namespace ESSImport
     {
         // Note, not stored at *all*:
         // - Level changes are lost on reload, except for the player (there it's in the NPC record).
-        unsigned char mUnknown1[16];
+        unsigned char mUnknown[12];
+        unsigned char mFlags; // ACDTFlags
+        unsigned char mUnknown1[3];
         float mBreathMeter; // Seconds left before drowning
         unsigned char mUnknown2[20];
         float mDynamic[3][2];
         unsigned char mUnknown3[16];
         float mAttributes[8][2];
-        unsigned char mUnknown4[109];
-        // This seems to increase when purchasing training, though I don't see it anywhere ingame.
-        int mGold;
-        unsigned char mUnknown5[7];
+        unsigned char mUnknown4[112];
+        unsigned int mGoldPool;
+        unsigned char mUnknown5[4];
     };
 #pragma pack(pop)
 
