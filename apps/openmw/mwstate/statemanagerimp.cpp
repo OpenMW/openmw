@@ -426,7 +426,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                 default:
 
                     // ignore invalid records
-                    std::cerr << "Ignoring unknown record: " << n.name << std::endl;
+                    std::cerr << "Ignoring unknown record: " << n.toString() << std::endl;
                     reader.skipRecord();
             }
             int progressPercent = static_cast<int>(float(reader.getFileOffset())/total*100);

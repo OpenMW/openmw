@@ -7,6 +7,8 @@
 
 #include <components/esm/cellid.hpp>
 
+#include <components/esm/custommarkerstate.hpp>
+
 namespace MWRender
 {
     class GlobalMap;
@@ -26,43 +28,25 @@ namespace Loading
 namespace MWGui
 {
 
-    struct CustomMarker
-    {
-        float mWorldX;
-        float mWorldY;
-
-        ESM::CellId mCell;
-
-        std::string mNote;
-
-        bool operator == (const CustomMarker& other)
-        {
-            return mNote == other.mNote && mCell == other.mCell && mWorldX == other.mWorldX && mWorldY == other.mWorldY;
-        }
-
-        void load (ESM::ESMReader& reader);
-        void save (ESM::ESMWriter& writer) const;
-    };
-
     class CustomMarkerCollection
     {
     public:
-        void addMarker(const CustomMarker& marker, bool triggerEvent=true);
-        void deleteMarker (const CustomMarker& marker);
-        void updateMarker(const CustomMarker& marker, const std::string& newNote);
+        void addMarker(const ESM::CustomMarker& marker, bool triggerEvent=true);
+        void deleteMarker (const ESM::CustomMarker& marker);
+        void updateMarker(const ESM::CustomMarker& marker, const std::string& newNote);
 
         void clear();
 
         size_t size() const;
 
-        std::vector<CustomMarker>::const_iterator begin() const;
-        std::vector<CustomMarker>::const_iterator end() const;
+        std::vector<ESM::CustomMarker>::const_iterator begin() const;
+        std::vector<ESM::CustomMarker>::const_iterator end() const;
 
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
         EventHandle_Void eventMarkersChanged;
 
     private:
-        std::vector<CustomMarker> mMarkers;
+        std::vector<ESM::CustomMarker> mMarkers;
     };
 
     class LocalMapBase
@@ -233,7 +217,7 @@ namespace MWGui
         MWRender::GlobalMap* mGlobalMapRender;
 
         EditNoteDialog mEditNoteDialog;
-        CustomMarker mEditingMarker;
+        ESM::CustomMarker mEditingMarker;
 
         virtual void onPinToggled();
         virtual void onTitleDoubleClicked();

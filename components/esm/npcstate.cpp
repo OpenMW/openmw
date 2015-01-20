@@ -22,3 +22,10 @@ void ESM::NpcState::save (ESMWriter &esm, bool inInventory) const
 
     mCreatureStats.save (esm);
 }
+
+void ESM::NpcState::blank()
+{
+    ObjectState::blank();
+    mNpcStats.blank();
+    mCreatureStats.blank();
+}

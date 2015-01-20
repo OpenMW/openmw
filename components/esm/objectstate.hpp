@@ -29,6 +29,9 @@ namespace ESM
         virtual void load (ESMReader &esm);
         virtual void save (ESMWriter &esm, bool inInventory = false) const;
 
+        /// Initialize to default state
+        void blank();
+
         virtual ~ObjectState();
     };
 }

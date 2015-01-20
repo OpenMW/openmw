@@ -20,6 +20,11 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
 
     mRefID = esm.getHNString ("NAME");
 
+    loadData(esm);
+}
+
+void ESM::CellRef::loadData(ESMReader &esm)
+{
     // Again, UNAM sometimes appears after NAME and sometimes later.
     // Or perhaps this UNAM means something different?
     mReferenceBlocked = -1;

@@ -66,6 +66,9 @@ namespace ESM
         SpellState mSpells;
         ActiveSpells mActiveSpells;
 
+        /// Initialize to default state
+        void blank();
+
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;
     };
