@@ -18,28 +18,35 @@ namespace ESSImport
             item.mId = contItem.mItem.toString();
             item.mCount = contItem.mCount;
 
-            if (esm.isNextSub("XIDX"))
-                esm.skipHSub();
-
-            std::string script = esm.getHNOString("SCRI");
-            // script variables?
-            // unsure if before or after ESM::CellRef
-            if (!script.empty())
+            // seems that a stack of items can have a set of subrecords for each item? rings0000.ess
+            // doesn't make any sense to me, if the values were different then the items shouldn't stack in the first place?
+            // I guess we should double check the stacking logic in OpenMW
+            for (int i=0;i<std::abs(item.mCount);++i)
             {
-                if (esm.isNextSub("SLCS"))
+                if (esm.isNextSub("XIDX")) // index in the stack?
                     esm.skipHSub();
-                if (esm.isNextSub("SLSD")) // Short Data?
-                    esm.skipHSub();
-                if (esm.isNextSub("SLFD")) // Float Data?
-                    esm.skipHSub();
+
+                std::string script = esm.getHNOString("SCRI");
+                // script variables?
+                // unsure if before or after ESM::CellRef
+                if (!script.empty())
+                {
+                    if (esm.isNextSub("SLCS"))
+                        esm.skipHSub();
+                    if (esm.isNextSub("SLSD")) // Short Data?
+                        esm.skipHSub();
+                    if (esm.isNextSub("SLFD")) // Float Data?
+                        esm.skipHSub();
+                }
+
+                // for XSOL and XCHG seen so far, but probably others too
+                item.ESM::CellRef::loadData(esm);
+
+                item.mCondition = -1;
+                // FIXME: for Lights, this is actually a float
+                esm.getHNOT(item.mCondition, "XHLT");
             }
 
-            // for XSOL and XCHG seen so far, but probably others too
-            item.ESM::CellRef::loadData(esm);
-
-            item.mCondition = -1;
-            // FIXME: for Lights, this is actually a float
-            esm.getHNOT(item.mCondition, "XHLT");
             mItems.push_back(item);
         }
 
