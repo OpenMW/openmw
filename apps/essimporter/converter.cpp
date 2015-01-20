@@ -1,5 +1,7 @@
 #include "converter.hpp"
 
+#include <stdexcept>
+
 #include <OgreImage.h>
 
 #include <components/esm/creaturestate.hpp>
@@ -281,7 +283,9 @@ namespace ESSImport
                     continue;
                 }
 
-                std::cerr << "Can't find type for " << cellref.mIndexedRefId << std::endl;
+                std::stringstream error;
+                error << "Can't find type for " << cellref.mIndexedRefId << std::endl;
+                throw std::runtime_error(error.str());
             }
         }
 

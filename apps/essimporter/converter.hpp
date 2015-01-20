@@ -170,13 +170,10 @@ public:
         }
         else
         {
-            int index = mIndexCounter[id]++;
+            int index = npcc.mNPDT.mIndex;
             mContext->mNpcChanges.insert(std::make_pair(std::make_pair(index,id), npcc)).second;
         }
     }
-
-private:
-    std::map<std::string, int> mIndexCounter;
 };
 
 class ConvertREFR : public Converter
