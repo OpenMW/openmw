@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <components/esm/cellref.hpp>
+
 namespace ESM
 {
     struct ESMReader;
@@ -37,7 +39,7 @@ namespace ESSImport
     };
 #pragma pack(pop)
 
-    struct ActorData
+    struct ActorData : public ESM::CellRef
     {
         ACDT mACDT;
 

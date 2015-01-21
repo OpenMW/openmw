@@ -90,14 +90,19 @@ public:
         ESM::NPC npc;
         std::string id = esm.getHNString("NAME");
         npc.load(esm);
-        if (id != "player") // seems to occur sometimes, with "chargen X" names
+        if (id != "player")
+        {
+            // this handles changes to the NPC struct, but since there is no index here
+            // it will apply to ALL instances of the class. seems to be the reason for the
+            // "feature" in MW where changing AI settings of one guard will change it for all guards of that refID.
             std::cerr << "non-player NPC record: " << id << std::endl;
+        }
         else
         {
             mContext->mPlayer.mObject.mCreatureStats.mLevel = npc.mNpdt52.mLevel;
             mContext->mPlayerBase = npc;
             std::map<const int, float> empty;
-            // FIXME: player start spells, racial spells and birthsign spells aren't listed here,
+            // FIXME: player start spells and birthsign spells aren't listed here,
             // need to fix openmw to account for this
             for (std::vector<std::string>::const_iterator it = npc.mSpells.mList.begin(); it != npc.mSpells.mList.end(); ++it)
                 mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[*it] = empty;

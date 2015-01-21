@@ -9,18 +9,16 @@ namespace ESSImport
 
     void ActorData::load(ESM::ESMReader &esm)
     {
-         // unsure at which point between NAME and ESM::CellRef
-        if (esm.isNextSub("MNAM"))
-            esm.skipHSub();
-
         if (esm.isNextSub("ACTN"))
             esm.skipHSub();
 
         if (esm.isNextSub("STPR"))
             esm.skipHSub();
 
-        ESM::CellRef bla;
-        bla.ESM::CellRef::loadData(esm);
+        if (esm.isNextSub("MNAM"))
+           esm.skipHSub();
+
+        ESM::CellRef::loadData(esm);
 
         // FIXME: not all actors have this, add flag
         esm.getHNOT(mACDT, "ACDT");

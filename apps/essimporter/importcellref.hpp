@@ -15,19 +15,15 @@ namespace ESM
 namespace ESSImport
 {
 
-    // Not sure if we can share any code with ESM::CellRef here
-    struct CellRef
+    struct CellRef : public ActorData
     {
         std::string mIndexedRefId;
-        ESM::RefNum mRefNum;
-
-        ActorData mActorData;
-
-        ESM::Position mPos;
 
         std::string mScript;
 
         bool mEnabled;
+
+        bool mDeleted;
 
         void load(ESM::ESMReader& esm);
     };
