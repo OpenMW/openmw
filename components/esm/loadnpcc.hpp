@@ -20,24 +20,7 @@ class ESMWriter;
  * SCPT records do not define new scripts, but assign values to the
  * variables of existing ones.
  *
- * STLN - stolen items, ONAM is the owner
- *
- * GAME - weather data
- *  struct GMDT
-    {
-        char mCellName[64];
-        int mFogColour;
-        float mFogDensity;
-        int mCurrentWeather, mNextWeather;
-        int mWeatherTransition; // 0-100 transition between weathers, top 3 bytes may be garbage
-        float mTimeOfNextTransition; // weather changes when gamehour == timeOfNextTransition
-        int masserPhase, secundaPhase; // top 3 bytes may be garbage
-    };
- *
  * VFXM, SPLM  - no clue
- * KLST - kill counter
- *
- * PCDT - seems to contain a lot of DNAMs, strings?
  *
  * FMAP - MAPH and MAPD, global map image.
  *

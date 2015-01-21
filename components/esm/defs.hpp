@@ -97,7 +97,7 @@ enum RecNameInts
 
     // format 0 - saved games
     REC_SAVE = 0x45564153,
-    REC_JOUR = 0x524f55a4,
+    REC_JOUR = 0x524f55a4, // TODO: this is actually "\nOUR" rather than "JOUR", fix
     REC_QUES = 0x53455551,
     REC_GSCR = 0x52435347,
     REC_PLAY = 0x59414c50,

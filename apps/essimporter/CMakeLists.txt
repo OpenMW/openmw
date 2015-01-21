@@ -9,6 +9,11 @@ set(ESSIMPORTER_FILES
     importinventory.cpp
     importklst.cpp
     importcntc.cpp
+    importgame.cpp
+    importinfo.cpp
+    importdial.cpp
+    importques.cpp
+    importjour.cpp
     importercontext.cpp
     converter.cpp
     convertacdt.cpp

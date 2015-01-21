@@ -12,6 +12,7 @@
 #include <components/esm/loadfact.hpp>
 #include <components/esm/dialoguestate.hpp>
 #include <components/esm/custommarkerstate.hpp>
+#include <components/esm/loadcrea.hpp>
 
 #include "importcrec.hpp"
 #include "importcntc.hpp"
@@ -19,6 +20,11 @@
 #include "importercontext.hpp"
 #include "importcellref.hpp"
 #include "importklst.hpp"
+#include "importgame.hpp"
+#include "importinfo.hpp"
+#include "importdial.hpp"
+#include "importques.hpp"
+#include "importjour.hpp"
 
 #include "convertacdt.hpp"
 #include "convertnpcc.hpp"
@@ -86,16 +92,15 @@ class ConvertNPC : public Converter
 public:
     virtual void read(ESM::ESMReader &esm)
     {
-        // this is always the player
         ESM::NPC npc;
         std::string id = esm.getHNString("NAME");
         npc.load(esm);
         if (id != "player")
         {
-            // this handles changes to the NPC struct, but since there is no index here
+            // TODO:
+            // this should handle changes to the NPC struct, but since there is no index here
             // it will apply to ALL instances of the class. seems to be the reason for the
             // "feature" in MW where changing AI settings of one guard will change it for all guards of that refID.
-            std::cerr << "non-player NPC record: " << id << std::endl;
         }
         else
         {
@@ -107,6 +112,18 @@ public:
             for (std::vector<std::string>::const_iterator it = npc.mSpells.mList.begin(); it != npc.mSpells.mList.end(); ++it)
                 mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[*it] = empty;
         }
+    }
+};
+
+class ConvertCREA : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader &esm)
+    {
+        // See comment in ConvertNPC
+        ESM::Creature creature;
+        std::string id = esm.getHNString("NAME");
+        creature.load(esm);
     }
 };
 
@@ -348,6 +365,64 @@ public:
 private:
     std::multimap<std::string, std::string> mStolenItems;
     std::multimap<std::string, std::string> mFactionStolenItems;
+};
+
+/// Seen responses for a dialogue topic?
+/// Each DIAL record is followed by a number of INFO records, I believe, just like in ESMs
+/// Dialogue conversion problems (probably have to adjust OpenMW format) -
+/// - Journal is stored in one continuous HTML markup rather than each entry separately with associated info ID.
+/// - Seen dialogue responses only store the INFO id, rather than the fulltext.
+/// - Quest stages only store the INFO id, rather than the journal entry fulltext.
+class ConvertINFO : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader& esm)
+    {
+        INFO info;
+        info.load(esm);
+    }
+};
+
+class ConvertDIAL : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader& esm)
+    {
+        std::string id = esm.getHNString("NAME");
+        DIAL dial;
+        dial.load(esm);
+    }
+};
+
+class ConvertQUES : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader& esm)
+    {
+        std::string id = esm.getHNString("NAME");
+        QUES quest;
+        quest.load(esm);
+    }
+};
+
+class ConvertJOUR : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader& esm)
+    {
+        JOUR journal;
+        journal.load(esm);
+    }
+};
+
+class ConvertGAME : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader &esm)
+    {
+        GAME game;
+        game.load(esm);
+    }
 };
 
 }
