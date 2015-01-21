@@ -60,8 +60,11 @@ namespace MWWorld
 
         // For weapon or armor, this is the remaining item health.
         // For tools (lockpicks, probes, repair hammer) it is the remaining uses.
+        // If this returns int(-1) it means full health.
         int getCharge() const;
+        float getChargeFloat() const; // Implemented as union with int charge
         void setCharge(int charge);
+        void setChargeFloat(float charge);
 
         // The NPC that owns this object (and will get angry if you steal it)
         std::string getOwner() const;

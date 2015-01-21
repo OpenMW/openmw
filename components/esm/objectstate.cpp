@@ -24,9 +24,9 @@ void ESM::ObjectState::load (ESMReader &esm)
 
     esm.getHNOT (mLocalRotation, "LROT", 12);
 
-    // used for lights only
-    mTime = 0;
-    esm.getHNOT (mTime, "LTIM");
+    // obsolete
+    int unused;
+    esm.getHNOT(unused, "LTIM");
 
     // FIXME: assuming "false" as default would make more sense, but also break compatibility with older save files
     mHasCustomState = true;
@@ -55,9 +55,6 @@ void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
         esm.writeHNT ("LROT", mLocalRotation, 12);
     }
 
-    if (mTime)
-        esm.writeHNT ("LTIM", mTime);
-
     if (!mHasCustomState)
         esm.writeHNT ("HCUS", false);
 }
@@ -74,7 +71,6 @@ void ESM::ObjectState::blank()
         mPosition.rot[i] = 0;
         mLocalRotation[i] = 0;
     }
-    mTime = 0;
     mHasCustomState = true;
 }
 
