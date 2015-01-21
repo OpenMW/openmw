@@ -312,21 +312,17 @@ namespace MWMechanics
 
     void Spells::readState(const ESM::SpellState &state)
     {
-        mSpells = state.mSpells;
-        mSelectedSpell = state.mSelectedSpell;
-
-        // Discard spells that are no longer available due to changed content files
-        for (TContainer::iterator iter = mSpells.begin(); iter!=mSpells.end();)
+        for (TContainer::const_iterator it = state.mSpells.begin(); it != state.mSpells.end(); ++it)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(iter->first);
-            if (!spell)
+            // Discard spells that are no longer available due to changed content files
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);
+            if (spell)
             {
-                if (iter->first == mSelectedSpell)
-                    mSelectedSpell = "";
-                mSpells.erase(iter++);
+                mSpells[it->first] = it->second;
+
+                if (it->first == state.mSelectedSpell)
+                    mSelectedSpell = it->first;
             }
-            else
-                ++iter;
         }
 
         // No need to discard spells here (doesn't really matter if non existent ids are kept)

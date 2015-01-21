@@ -23,6 +23,10 @@ namespace ESSImport
             mKnownDialogueTopics.push_back(esm.getHString());
         }
 
+        if (esm.isNextSub("MNAM"))
+            esm.skipHSub(); // If this field is here it seems to specify the interior cell the player is in,
+                            // but it's not always here, so it's kinda useless
+
         esm.getHNT(mPNAM, "PNAM");
 
         if (esm.isNextSub("SNAM"))
