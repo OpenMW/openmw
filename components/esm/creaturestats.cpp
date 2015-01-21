@@ -230,7 +230,7 @@ void ESM::CreatureStats::blank()
     mTradeTime.mHour = 0;
     mTradeTime.mDay = 0;
     mGoldPool = 0;
-    mActorId = 0;
+    mActorId = -1;
     mHasAiSettings = false;
     mDead = false;
     mDied = false;
