@@ -38,6 +38,8 @@ struct PCDT
 
     std::vector<std::string> mKnownDialogueTopics;
 
+#pragma pack(push)
+#pragma pack(1)
     struct FNAM
     {
         unsigned char mRank;
@@ -47,7 +49,18 @@ struct PCDT
         unsigned char mUnknown2[3];
         ESM::NAME32 mFactionName;
     };
+    struct PNAM
+    {
+        unsigned char mUnknown1[4];
+        unsigned char mLevelProgress;
+        unsigned char mUnknown2[111];
+        unsigned char mSkillIncreases[8]; // number of skill increases for each attribute
+        unsigned char mUnknown3[88];
+    };
+#pragma pack(pop)
+
     std::vector<FNAM> mFactions;
+    PNAM mPNAM;
 
     void load(ESM::ESMReader& esm);
 };

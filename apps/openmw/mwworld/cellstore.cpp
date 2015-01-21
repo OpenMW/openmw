@@ -7,7 +7,6 @@
 #include <components/esm/cellid.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/objectstate.hpp>
-#include <components/esm/lightstate.hpp>
 #include <components/esm/containerstate.hpp>
 #include <components/esm/npcstate.hpp>
 #include <components/esm/creaturestate.hpp>
@@ -86,7 +85,9 @@ namespace
                 RecordType state;
                 iter->save (state);
 
+                // recordId currently unused
                 writer.writeHNT ("OBJE", collection.mList.front().mBase->sRecordId);
+
                 state.save (writer);
             }
         }
@@ -94,12 +95,13 @@ namespace
 
     template<typename RecordType, typename T>
     void readReferenceCollection (ESM::ESMReader& reader,
-        MWWorld::CellRefList<T>& collection, const std::map<int, int>& contentFileMap)
+        MWWorld::CellRefList<T>& collection, const ESM::CellRef& cref, const std::map<int, int>& contentFileMap)
     {
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
         RecordType state;
-        state.load (reader);
+        state.mRef = cref;
+        state.load(reader);
 
         // If the reference came from a content file, make sure this content file is loaded
         if (state.mRef.mRefNum.hasContentFile())
@@ -464,7 +466,7 @@ namespace MWWorld
         // List moved references, from separately tracked list.
         for (ESM::CellRefTracker::const_iterator it = mCell->mLeasedRefs.begin(); it != mCell->mLeasedRefs.end(); ++it)
         {
-            ESM::CellRef &ref = const_cast<ESM::CellRef&>(*it);
+            const ESM::CellRef &ref = *it;
 
             mIds.push_back(Misc::StringUtils::lowerCase(ref.mRefID));
         }
@@ -624,7 +626,7 @@ namespace MWWorld
         writeReferenceCollection<ESM::ObjectState> (writer, mIngreds);
         writeReferenceCollection<ESM::CreatureLevListState> (writer, mCreatureLists);
         writeReferenceCollection<ESM::ObjectState> (writer, mItemLists);
-        writeReferenceCollection<ESM::LightState> (writer, mLights);
+        writeReferenceCollection<ESM::ObjectState> (writer, mLights);
         writeReferenceCollection<ESM::ObjectState> (writer, mLockpicks);
         writeReferenceCollection<ESM::ObjectState> (writer, mMiscItems);
         writeReferenceCollection<ESM::NpcState> (writer, mNpcs);
@@ -641,109 +643,121 @@ namespace MWWorld
 
         while (reader.isNextSub ("OBJE"))
         {
-            unsigned int id = 0;
-            reader.getHT (id);
+            unsigned int unused;
+            reader.getHT (unused);
 
-            switch (id)
+            // load the RefID first so we know what type of object it is
+            ESM::CellRef cref;
+            cref.loadId(reader, true);
+
+            int type = MWBase::Environment::get().getWorld()->getStore().find(cref.mRefID);
+            if (type == 0)
+            {
+                std::cerr << "Dropping reference to '" << cref.mRefID << "' (object no longer exists)" << std::endl;
+                reader.skipHSubUntil("OBJE");
+                continue;
+            }
+
+            switch (type)
             {
                 case ESM::REC_ACTI:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mActivators, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mActivators, cref, contentFileMap);
                     break;
 
                 case ESM::REC_ALCH:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mPotions, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mPotions, cref, contentFileMap);
                     break;
 
                 case ESM::REC_APPA:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mAppas, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mAppas, cref, contentFileMap);
                     break;
 
                 case ESM::REC_ARMO:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mArmors, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mArmors, cref, contentFileMap);
                     break;
 
                 case ESM::REC_BOOK:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mBooks, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mBooks, cref, contentFileMap);
                     break;
 
                 case ESM::REC_CLOT:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mClothes, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mClothes, cref, contentFileMap);
                     break;
 
                 case ESM::REC_CONT:
 
-                    readReferenceCollection<ESM::ContainerState> (reader, mContainers, contentFileMap);
+                    readReferenceCollection<ESM::ContainerState> (reader, mContainers, cref, contentFileMap);
                     break;
 
                 case ESM::REC_CREA:
 
-                    readReferenceCollection<ESM::CreatureState> (reader, mCreatures, contentFileMap);
+                    readReferenceCollection<ESM::CreatureState> (reader, mCreatures, cref, contentFileMap);
                     break;
 
                 case ESM::REC_DOOR:
 
-                    readReferenceCollection<ESM::DoorState> (reader, mDoors, contentFileMap);
+                    readReferenceCollection<ESM::DoorState> (reader, mDoors, cref, contentFileMap);
                     break;
 
                 case ESM::REC_INGR:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mIngreds, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mIngreds, cref, contentFileMap);
                     break;
 
                 case ESM::REC_LEVC:
 
-                    readReferenceCollection<ESM::CreatureLevListState> (reader, mCreatureLists, contentFileMap);
+                    readReferenceCollection<ESM::CreatureLevListState> (reader, mCreatureLists, cref, contentFileMap);
                     break;
 
                 case ESM::REC_LEVI:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mItemLists, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mItemLists, cref, contentFileMap);
                     break;
 
                 case ESM::REC_LIGH:
 
-                    readReferenceCollection<ESM::LightState> (reader, mLights, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mLights, cref, contentFileMap);
                     break;
 
                 case ESM::REC_LOCK:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mLockpicks, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mLockpicks, cref, contentFileMap);
                     break;
 
                 case ESM::REC_MISC:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mMiscItems, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mMiscItems, cref, contentFileMap);
                     break;
 
                 case ESM::REC_NPC_:
 
-                    readReferenceCollection<ESM::NpcState> (reader, mNpcs, contentFileMap);
+                    readReferenceCollection<ESM::NpcState> (reader, mNpcs, cref, contentFileMap);
                     break;
 
                 case ESM::REC_PROB:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mProbes, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mProbes, cref, contentFileMap);
                     break;
 
                 case ESM::REC_REPA:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mRepairs, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mRepairs, cref, contentFileMap);
                     break;
 
                 case ESM::REC_STAT:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mStatics, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mStatics, cref, contentFileMap);
                     break;
 
                 case ESM::REC_WEAP:
 
-                    readReferenceCollection<ESM::ObjectState> (reader, mWeapons, contentFileMap);
+                    readReferenceCollection<ESM::ObjectState> (reader, mWeapons, cref, contentFileMap);
                     break;
 
                 default:

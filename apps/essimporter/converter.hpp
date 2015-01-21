@@ -9,9 +9,12 @@
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadglob.hpp>
 #include <components/esm/cellstate.hpp>
+#include <components/esm/loadfact.hpp>
+#include <components/esm/dialoguestate.hpp>
 #include <components/esm/custommarkerstate.hpp>
 
 #include "importcrec.hpp"
+#include "importcntc.hpp"
 
 #include "importercontext.hpp"
 #include "importcellref.hpp"
@@ -94,7 +97,8 @@ public:
             mContext->mPlayer.mObject.mCreatureStats.mLevel = npc.mNpdt52.mLevel;
             mContext->mPlayerBase = npc;
             std::map<const int, float> empty;
-            // FIXME: not working?
+            // FIXME: player start spells, racial spells and birthsign spells aren't listed here,
+            // need to fix openmw to account for this
             for (std::vector<std::string>::const_iterator it = npc.mSpells.mList.begin(); it != npc.mSpells.mList.end(); ++it)
                 mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[*it] = empty;
         }
@@ -165,7 +169,10 @@ public:
             convertNPCC(npcc, mContext->mPlayer.mObject);
         }
         else
-            mContext->mNpcChanges.insert(std::make_pair(std::make_pair(npcc.mIndex,id), npcc));
+        {
+            int index = npcc.mNPDT.mIndex;
+            mContext->mNpcChanges.insert(std::make_pair(std::make_pair(index,id), npcc)).second;
+        }
     }
 };
 
@@ -205,7 +212,27 @@ public:
             faction.mReputation = it->mReputation;
             mContext->mPlayer.mObject.mNpcStats.mFactions[it->mFactionName.toString()] = faction;
         }
+        for (int i=0; i<8; ++i)
+            mContext->mPlayer.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];
+        mContext->mPlayer.mObject.mNpcStats.mLevelProgress = pcdt.mPNAM.mLevelProgress;
 
+        for (std::vector<std::string>::const_iterator it = pcdt.mKnownDialogueTopics.begin();
+             it != pcdt.mKnownDialogueTopics.end(); ++it)
+        {
+            mContext->mDialogueState.mKnownTopics.push_back(Misc::StringUtils::lowerCase(*it));
+        }
+
+    }
+};
+
+class ConvertCNTC : public Converter
+{
+    virtual void read(ESM::ESMReader &esm)
+    {
+        std::string id = esm.getHNString("NAME");
+        CNTC cntc;
+        cntc.load(esm);
+        mContext->mContainerChanges.insert(std::make_pair(std::make_pair(cntc.mIndex,id), cntc));
     }
 };
 
@@ -217,7 +244,6 @@ public:
         std::string id = esm.getHNString("NAME");
         CREC crec;
         crec.load(esm);
-
         mContext->mCreatureChanges.insert(std::make_pair(std::make_pair(crec.mIndex,id), crec));
     }
 };
@@ -242,9 +268,12 @@ private:
         std::vector<unsigned int> mFogOfWar;
     };
 
-    std::map<std::string, Cell> mCells;
+    std::map<std::string, Cell> mIntCells;
+    std::map<std::pair<int, int>, Cell> mExtCells;
 
     std::vector<ESM::CustomMarker> mMarkers;
+
+    void writeCell(const Cell& cell, ESM::ESMWriter &esm);
 };
 
 class ConvertKLST : public Converter
@@ -272,6 +301,48 @@ public:
 
 private:
     std::map<std::string, int> mKillCounter;
+};
+
+class ConvertFACT : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader& esm)
+    {
+        std::string id = esm.getHNString("NAME");
+        ESM::Faction faction;
+        faction.load(esm);
+
+        Misc::StringUtils::toLower(id);
+        for (std::map<std::string, int>::const_iterator it = faction.mReactions.begin(); it != faction.mReactions.end(); ++it)
+        {
+            std::string faction2 = Misc::StringUtils::lowerCase(it->first);
+            mContext->mDialogueState.mChangedFactionReaction[id].insert(std::make_pair(faction2, it->second));
+        }
+    }
+};
+
+/// Stolen items
+class ConvertSTLN : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader &esm)
+    {
+        std::string itemid = esm.getHNString("NAME");
+
+        while (esm.isNextSub("ONAM"))
+        {
+            std::string ownerid = esm.getHString();
+            mStolenItems.insert(std::make_pair(itemid, ownerid));
+        }
+        while (esm.isNextSub("FNAM"))
+        {
+            std::string factionid = esm.getHString();
+            mFactionStolenItems.insert(std::make_pair(itemid, factionid));
+        }
+    }
+private:
+    std::multimap<std::string, std::string> mStolenItems;
+    std::multimap<std::string, std::string> mFactionStolenItems;
 };
 
 }

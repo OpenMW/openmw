@@ -1275,6 +1275,9 @@ namespace MWClass
     void Npc::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
         const
     {
+        if (!state.mHasCustomState)
+            return;
+
         const ESM::NpcState& state2 = dynamic_cast<const ESM::NpcState&> (state);
 
         ensureCustomData(ptr);
@@ -1301,6 +1304,12 @@ namespace MWClass
         const
     {
         ESM::NpcState& state2 = dynamic_cast<ESM::NpcState&> (state);
+
+        if (!ptr.getRefData().getCustomData())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
 
         ensureCustomData (ptr);
 

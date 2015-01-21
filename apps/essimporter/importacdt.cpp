@@ -22,7 +22,7 @@ namespace ESSImport
         ESM::CellRef bla;
         bla.ESM::CellRef::loadData(esm);
 
-        // FIXME: actually should be required for all actors?, but ActorData is currently in base CellRef
+        // FIXME: not all actors have this, add flag
         esm.getHNOT(mACDT, "ACDT");
 
         ACSC acsc;
@@ -76,6 +76,7 @@ namespace ESSImport
                 esm.skipHSub(); // 4 byte, 0
         }
 
+        // FIXME: not all actors have this, add flag
         if (esm.isNextSub("CHRD")) // npc only
                 esm.getHExact(mSkills, 27*2*sizeof(int));
 

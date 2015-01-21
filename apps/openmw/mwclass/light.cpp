@@ -2,7 +2,7 @@
 #include "light.hpp"
 
 #include <components/esm/loadligh.hpp>
-#include <components/esm/lightstate.hpp>
+#include <components/esm/objectstate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -25,27 +25,6 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"
-
-namespace
-{
-    struct LightCustomData : public MWWorld::CustomData
-    {
-        float mTime;
-        ///< Time remaining
-
-        LightCustomData(MWWorld::Ptr ptr)
-        {
-            MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
-            mTime = ref->mBase->mData.mTime;
-        }
-        ///< Constructs this CustomData from the base values for Ptr.
-
-        virtual MWWorld::CustomData *clone() const
-        {
-            return new LightCustomData (*this);
-        }
-    };
-}
 
 namespace MWClass
 {
@@ -219,17 +198,16 @@ namespace MWClass
 
     void Light::setRemainingUsageTime (const MWWorld::Ptr& ptr, float duration) const
     {
-        ensureCustomData(ptr);
-
-        float &timeRemaining = dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime;
-        timeRemaining = duration;
+        ptr.getCellRef().setChargeFloat(duration);
     }
 
     float Light::getRemainingUsageTime (const MWWorld::Ptr& ptr) const
     {
-        ensureCustomData(ptr);
-
-        return dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime;
+        MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        if (ptr.getCellRef().getCharge() == -1)
+            return ref->mBase->mData.mTime;
+        else
+            return ptr.getCellRef().getChargeFloat();
     }
 
     MWWorld::Ptr
@@ -239,12 +217,6 @@ namespace MWClass
             ptr.get<ESM::Light>();
 
         return MWWorld::Ptr(&cell.get<ESM::Light>().insert(*ref), &cell);
-    }
-
-    void Light::ensureCustomData (const MWWorld::Ptr& ptr) const
-    {
-        if (!ptr.getRefData().getCustomData())
-            ptr.getRefData().setCustomData(new LightCustomData(ptr));
     }
 
     bool Light::canSell (const MWWorld::Ptr& item, int npcServices) const
@@ -280,26 +252,6 @@ namespace MWClass
             return std::make_pair(3,"");
         }
         return std::make_pair(1,"");
-    }
-
-    void Light::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
-        const
-    {
-        const ESM::LightState& state2 = dynamic_cast<const ESM::LightState&> (state);
-
-        ensureCustomData (ptr);
-
-        dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime = state2.mTime;
-    }
-
-    void Light::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
-        const
-    {
-        ESM::LightState& state2 = dynamic_cast<ESM::LightState&> (state);
-
-        ensureCustomData (ptr);
-
-        state2.mTime = dynamic_cast<LightCustomData&> (*ptr.getRefData().getCustomData()).mTime;
     }
 
     std::string Light::getSound(const MWWorld::Ptr& ptr) const

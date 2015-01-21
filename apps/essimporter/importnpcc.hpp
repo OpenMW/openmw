@@ -19,14 +19,14 @@ namespace ESSImport
     {
         struct NPDT
         {
-            unsigned char unknown[2];
+            unsigned char mDisposition;
+            unsigned char unknown;
             unsigned char mReputation;
-            unsigned char unknown2[5];
+            unsigned char unknown2;
+            int mIndex;
         } mNPDT;
 
         Inventory mInventory;
-
-        int mIndex;
 
         void load(ESM::ESMReader &esm);
     };

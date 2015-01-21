@@ -137,7 +137,11 @@ public:
   {
       getSubHeader();
       if (mCtx.leftSub != sizeof(X))
-          fail("getHT(): subrecord size mismatch");
+      {
+          std::stringstream error;
+          error << "getHT(): subrecord size mismatch (requested " << sizeof(X) << ", got " << mCtx.leftSub << ")";
+          fail(error.str());
+      }
       getT(x);
   }
 
@@ -194,6 +198,9 @@ public:
 
   // Skip sub record and check its size
   void skipHSubSize(int size);
+
+  // Skip all subrecords until the given subrecord or no more subrecords remaining
+  void skipHSubUntil(const char* name);
 
   /* Sub-record header. This updates leftRec beyond the current
      sub-record as well. leftSub contains size of current sub-record.

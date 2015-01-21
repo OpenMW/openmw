@@ -84,15 +84,16 @@ namespace MWWorld
             template<typename T>
             void storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
 
+            /// \todo make this method const once const-correct ContainerStoreIterators are available
             template<typename T>
-            void storeStates (const CellRefList<T>& collection,
-                std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states,
-                bool equipable = false) const;
+            void storeStates (CellRefList<T>& collection,
+                std::vector<std::pair<ESM::ObjectState, int> >& states,
+                bool equipable = false);
 
-            virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
+            virtual int getRelativeSlot (const MWWorld::ContainerStoreIterator& iter) const;
             ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).
 
-            virtual void setSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
+            virtual void setRelativeSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
             ///< Set slot for \a iter. Ignored if \a iter is an end iterator or if slot==-1.
 
         public:
@@ -171,7 +172,8 @@ namespace MWWorld
 
             Ptr search (const std::string& id);
 
-            virtual void writeState (ESM::InventoryState& state) const;
+            /// \todo make this method const once const-correct ContainerStoreIterators are available
+            virtual void writeState (ESM::InventoryState& state);
 
             virtual void readState (const ESM::InventoryState& state);
 

@@ -104,6 +104,11 @@ namespace ESSImport
         blacklist.insert(std::make_pair("GLOB", "FLTV")); // gamehour
         blacklist.insert(std::make_pair("REFR", "DATA")); // player position
         blacklist.insert(std::make_pair("CELL", "NAM8")); // fog of war
+        blacklist.insert(std::make_pair("GAME", "GMDT")); // weather data, current time always changes
+
+         // this changes way too often, name suggests some renderer internal data?
+        blacklist.insert(std::make_pair("CELL", "ND3D"));
+        blacklist.insert(std::make_pair("REFR", "ND3D"));
 
         File file1;
         read(mEssFile, file1);
@@ -181,6 +186,8 @@ namespace ESSImport
         Ogre::LogManager logman;
         Ogre::Root root;
 
+        // TODO: set up encoding on ESMReader based on openmw.cfg / --encoding switch
+
         ESM::ESMReader esm;
         esm.open(mEssFile);
 
@@ -193,6 +200,7 @@ namespace ESSImport
         const unsigned int recPCDT = ESM::FourCC<'P','C','D','T'>::value;
         const unsigned int recFMAP = ESM::FourCC<'F','M','A','P'>::value;
         const unsigned int recKLST = ESM::FourCC<'K','L','S','T'>::value;
+        const unsigned int recSTLN = ESM::FourCC<'S','T','L','N'>::value;
 
         std::map<unsigned int, boost::shared_ptr<Converter> > converters;
         converters[ESM::REC_GLOB] = boost::shared_ptr<Converter>(new ConvertGlobal());
@@ -200,10 +208,11 @@ namespace ESSImport
         converters[ESM::REC_NPC_] = boost::shared_ptr<Converter>(new ConvertNPC());
         converters[ESM::REC_NPCC] = boost::shared_ptr<Converter>(new ConvertNPCC());
         converters[ESM::REC_CREC] = boost::shared_ptr<Converter>(new ConvertCREC());
-        converters[recREFR] = boost::shared_ptr<Converter>(new ConvertREFR());
-        converters[recPCDT] = boost::shared_ptr<Converter>(new ConvertPCDT());
-        converters[recFMAP] = boost::shared_ptr<Converter>(new ConvertFMAP());
-        converters[recKLST] = boost::shared_ptr<Converter>(new ConvertKLST());
+        converters[recREFR      ] = boost::shared_ptr<Converter>(new ConvertREFR());
+        converters[recPCDT      ] = boost::shared_ptr<Converter>(new ConvertPCDT());
+        converters[recFMAP      ] = boost::shared_ptr<Converter>(new ConvertFMAP());
+        converters[recKLST      ] = boost::shared_ptr<Converter>(new ConvertKLST());
+        converters[recSTLN      ] = boost::shared_ptr<Converter>(new ConvertSTLN());
         converters[ESM::REC_CELL] = boost::shared_ptr<Converter>(new ConvertCell());
         converters[ESM::REC_ALCH] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::Potion>());
         converters[ESM::REC_CLAS] = boost::shared_ptr<Converter>(new ConvertClass());
@@ -215,6 +224,8 @@ namespace ESSImport
         converters[ESM::REC_WEAP] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::Weapon>());
         converters[ESM::REC_LEVC] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::CreatureLevList>());
         converters[ESM::REC_LEVI] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::ItemLevList>());
+        converters[ESM::REC_CNTC] = boost::shared_ptr<Converter>(new ConvertCNTC());
+        converters[ESM::REC_FACT] = boost::shared_ptr<Converter>(new ConvertFACT());
 
         std::set<unsigned int> unknownRecords;
 
@@ -321,6 +332,10 @@ namespace ESSImport
         }
         context.mPlayer.save(writer);
         writer.endRecord(ESM::REC_PLAY);
+
+        writer.startRecord (ESM::REC_DIAS);
+        context.mDialogueState.save(writer);
+        writer.endRecord(ESM::REC_DIAS);
     }
 
 

@@ -8,10 +8,14 @@ set(ESSIMPORTER_FILES
     importacdt.cpp
     importinventory.cpp
     importklst.cpp
+    importcntc.cpp
     importercontext.cpp
     converter.cpp
     convertacdt.cpp
     convertnpcc.cpp
+    convertinventory.cpp
+    convertcrec.cpp
+    convertcntc.cpp
 )
 
 add_executable(openmw-essimporter

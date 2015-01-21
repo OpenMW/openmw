@@ -134,7 +134,11 @@ void ESMReader::getHExact(void*p, int size)
 {
     getSubHeader();
     if (size != static_cast<int> (mCtx.leftSub))
-        fail("getHExact() size mismatch");
+    {
+        std::stringstream error;
+        error << "getHExact(): size mismatch (requested " << size << ", got " << mCtx.leftSub << ")";
+        fail(error.str());
+    }
     getExact(p, size);
 }
 
@@ -208,6 +212,17 @@ void ESMReader::skipHSubSize(int size)
     skipHSub();
     if (static_cast<int> (mCtx.leftSub) != size)
         fail("skipHSubSize() mismatch");
+}
+
+void ESMReader::skipHSubUntil(const char *name)
+{
+    while (hasMoreSubs() && !isNextSub(name))
+    {
+        mCtx.subCached = false;
+        skipHSub();
+    }
+    if (hasMoreSubs())
+        mCtx.subCached = true;
 }
 
 void ESMReader::getSubHeader()

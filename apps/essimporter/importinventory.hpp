@@ -19,7 +19,8 @@ namespace ESSImport
         struct InventoryItem : public ESM::CellRef
         {
             std::string mId;
-            int mCondition;
+            int mCount;
+            int mRelativeEquipmentSlot;
         };
         std::vector<InventoryItem> mItems;
 

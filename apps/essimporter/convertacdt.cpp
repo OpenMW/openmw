@@ -27,6 +27,8 @@ namespace ESSImport
             cStats.mAttributes[i].mMod = acdt.mAttributes[i][0];
             cStats.mAttributes[i].mCurrent = acdt.mAttributes[i][0];
         }
+        cStats.mGoldPool = acdt.mGoldPool;
+        cStats.mTalkedTo = acdt.mFlags & TalkedToPlayer;
     }
 
     void convertNpcData (const ActorData& actorData, ESM::NpcStats& npcStats)
@@ -37,6 +39,8 @@ namespace ESSImport
             npcStats.mSkills[i].mRegular.mCurrent = actorData.mSkills[i][1];
             npcStats.mSkills[i].mRegular.mBase = actorData.mSkills[i][0];
         }
+
+        npcStats.mTimeToStartDrowning = actorData.mACDT.mBreathMeter;
     }
 
 }

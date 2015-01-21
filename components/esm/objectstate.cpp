@@ -6,7 +6,7 @@
 
 void ESM::ObjectState::load (ESMReader &esm)
 {
-    mRef.load (esm, true);
+    mRef.loadData(esm);
 
     mHasLocals = 0;
     esm.getHNOT (mHasLocals, "HLOC");
@@ -23,6 +23,14 @@ void ESM::ObjectState::load (ESMReader &esm)
     esm.getHNOT (mPosition, "POS_", 24);
 
     esm.getHNOT (mLocalRotation, "LROT", 12);
+
+    // obsolete
+    int unused;
+    esm.getHNOT(unused, "LTIM");
+
+    // FIXME: assuming "false" as default would make more sense, but also break compatibility with older save files
+    mHasCustomState = true;
+    esm.getHNOT (mHasCustomState, "HCUS");
 }
 
 void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
@@ -46,6 +54,9 @@ void ESM::ObjectState::save (ESMWriter &esm, bool inInventory) const
         esm.writeHNT ("POS_", mPosition, 24);
         esm.writeHNT ("LROT", mLocalRotation, 12);
     }
+
+    if (!mHasCustomState)
+        esm.writeHNT ("HCUS", false);
 }
 
 void ESM::ObjectState::blank()
@@ -60,6 +71,7 @@ void ESM::ObjectState::blank()
         mPosition.rot[i] = 0;
         mLocalRotation[i] = 0;
     }
+    mHasCustomState = true;
 }
 
 ESM::ObjectState::~ObjectState() {}

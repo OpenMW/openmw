@@ -5,9 +5,11 @@
 
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/player.hpp>
+#include <components/esm/dialoguestate.hpp>
 
 #include "importnpcc.hpp"
 #include "importcrec.hpp"
+#include "importcntc.hpp"
 #include "importplayer.hpp"
 
 
@@ -24,12 +26,15 @@ namespace ESSImport
         ESM::NPC mPlayerBase;
         std::string mCustomPlayerClassName;
 
+        ESM::DialogueState mDialogueState;
+
         int mDay, mMonth, mYear;
         float mHour;
 
         // key <refIndex, refId>
         std::map<std::pair<int, std::string>, CREC> mCreatureChanges;
         std::map<std::pair<int, std::string>, NPCC> mNpcChanges;
+        std::map<std::pair<int, std::string>, CNTC> mContainerChanges;
 
         Context()
         {

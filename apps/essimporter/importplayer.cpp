@@ -20,12 +20,11 @@ namespace ESSImport
     {
         while (esm.isNextSub("DNAM"))
         {
-            // TODO: deal with encoding?
             mKnownDialogueTopics.push_back(esm.getHString());
         }
 
-        if (esm.isNextSub("PNAM"))
-            esm.skipHSub();
+        esm.getHNT(mPNAM, "PNAM");
+
         if (esm.isNextSub("SNAM"))
             esm.skipHSub();
         if (esm.isNextSub("NAM9"))

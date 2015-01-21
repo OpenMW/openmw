@@ -59,7 +59,11 @@ namespace ESM
 
             // For weapon or armor, this is the remaining item health.
             // For tools (lockpicks, probes, repair hammer) it is the remaining uses.
-            int mCharge;
+            union
+            {
+                int mChargeInt;
+                float mChargeFloat;
+            };
 
             // Remaining enchantment charge. This could be -1 if the charge was not touched yet (i.e. full).
             float mEnchantmentCharge;
@@ -89,7 +93,10 @@ namespace ESM
             // Position and rotation of this object within the cell
             Position mPos;
 
+            /// Calls loadId and loadData
             void load (ESMReader& esm, bool wideRefNum = false);
+
+            void loadId (ESMReader& esm, bool wideRefNum = false);
 
             /// Implicitly called by load
             void loadData (ESMReader& esm);

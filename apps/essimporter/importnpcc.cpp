@@ -7,9 +7,6 @@ namespace ESSImport
 
     void NPCC::load(ESM::ESMReader &esm)
     {
-        mIndex = 0;
-        esm.getHNOT(mIndex, "INDX");
-
         esm.getHNT(mNPDT, "NPDT");
 
         if (esm.isNextSub("AI_E"))

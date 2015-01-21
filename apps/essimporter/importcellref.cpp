@@ -18,8 +18,13 @@ namespace ESSImport
         mIndexedRefId = esm.getHNString("NAME");
 
         if (esm.isNextSub("LVCR"))
-            esm.skipHSub();
-
+        {
+            // occurs on leveled creature spawner references
+            // probably some identifier for the the creature that has been spawned?
+            unsigned char lvcr;
+            esm.getHT(lvcr);
+            //std::cout << "LVCR: " << (int)lvcr << std::endl;
+        }
         mActorData.load(esm);
 
         mEnabled = true;
