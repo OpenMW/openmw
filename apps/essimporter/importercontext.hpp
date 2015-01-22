@@ -6,6 +6,7 @@
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/player.hpp>
 #include <components/esm/dialoguestate.hpp>
+#include <components/esm/globalmap.hpp>
 
 #include "importnpcc.hpp"
 #include "importcrec.hpp"
@@ -28,6 +29,8 @@ namespace ESSImport
 
         ESM::DialogueState mDialogueState;
 
+        ESM::GlobalMap mGlobalMapState;
+
         int mDay, mMonth, mYear;
         float mHour;
 
@@ -48,6 +51,11 @@ namespace ESSImport
             mPlayer.mCurrentCrimeId = 0; // TODO
             mPlayer.mObject.blank();
             mPlayer.mObject.mRef.mRefID = "player"; // REFR.mRefID would be PlayerSaveGame
+
+            mGlobalMapState.mBounds.mMinX = 0;
+            mGlobalMapState.mBounds.mMaxX = 0;
+            mGlobalMapState.mBounds.mMinY = 0;
+            mGlobalMapState.mBounds.mMaxY = 0;
         }
     };
 

@@ -76,6 +76,12 @@ namespace ESSImport
         cell.mName = id;
         cell.load(esm, false);
 
+        // I wonder what 0x40 does?
+        if (cell.isExterior() && cell.mData.mFlags & 0x20)
+        {
+            mContext->mGlobalMapState.mMarkers.insert(std::make_pair(cell.mData.mX, cell.mData.mY));
+        }
+
         // note if the player is in a nameless exterior cell, we will assign the cellId later based on player position
         if (id == mContext->mPlayerCellName)
         {
@@ -304,6 +310,10 @@ namespace ESSImport
             it->save(esm);
             esm.endRecord(ESM::REC_MARK);
         }
+
+        esm.startRecord(ESM::REC_GMAP);
+        mContext->mGlobalMapState.save(esm);
+        esm.endRecord(ESM::REC_GMAP);
     }
 
 }

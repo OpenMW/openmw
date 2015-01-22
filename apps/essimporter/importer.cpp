@@ -123,7 +123,7 @@ namespace ESSImport
 
             if (i >= file2.mRecords.size())
             {
-                std::cout << "Record in file1 not present in file2: (1) 0x" << std::hex << rec.mFileOffset;
+                std::cout << "Record in file1 not present in file2: (1) 0x" << std::hex << rec.mFileOffset << std::endl;
                 return;
             }
 
@@ -142,7 +142,7 @@ namespace ESSImport
 
                 if (j >= rec2.mSubrecords.size())
                 {
-                    std::cout << "Subrecord in file1 not present in file2: (1) 0x" << std::hex << sub.mFileOffset;
+                    std::cout << "Subrecord in file1 not present in file2: (1) 0x" << std::hex << sub.mFileOffset << std::endl;
                     return;
                 }
 
