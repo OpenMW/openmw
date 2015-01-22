@@ -443,5 +443,6 @@ op 0x20002fc: RemoveFromLevCreature
 op 0x20002fd: AddToLevItem
 op 0x20002fe: RemoveFromLevItem
 op 0x20002ff: SetFactionReaction
+op 0x2000300: EnableLevelupMenu
 
-opcodes 0x2000300-0x3ffffff unused
+opcodes 0x2000301-0x3ffffff unused
