@@ -17,7 +17,11 @@ void ESM::RefNum::save (ESMWriter &esm, bool wide) const
     if (wide)
         esm.writeHNT ("FRMR", *this, 8);
     else
-        esm.writeHNT ("FRMR", mIndex, 4);
+    {
+        int refNum = (mIndex & 0xffffff) | ((mContentFile==-1 ? 0xff : mContentFile)<<24);
+
+        esm.writeHNT ("FRMR", refNum, 4);
+    }
 }
 
 

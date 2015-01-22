@@ -231,8 +231,18 @@ void CSMDoc::CollectionReferencesStage::perform (int stage, Messages& messages)
             record.mState==CSMWorld::RecordBase::State_Modified ||
             record.mState==CSMWorld::RecordBase::State_ModifiedOnly)
         {
-            mState.getSubRecords()[Misc::StringUtils::lowerCase (record.get().mCell)]
-                .push_back (i);
+            std::string cellId = record.get().mOriginalCell.empty() ?
+                record.get().mCell : record.get().mOriginalCell;
+
+            std::deque<int>& indices =
+                mState.getSubRecords()[Misc::StringUtils::lowerCase (cellId)];
+
+            // collect moved references at the end of the container
+            if (!record.get().mOriginalCell.empty() &&
+                record.get().mOriginalCell!=record.get().mCell)
+                indices.push_back (i);
+            else
+                indices.push_front (i);
         }
     }
 }
@@ -253,7 +263,7 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
     const CSMWorld::Record<CSMWorld::Cell>& cell =
         mDocument.getData().getCells().getRecord (stage);
 
-    std::map<std::string, std::vector<int> >::const_iterator references =
+    std::map<std::string, std::deque<int> >::const_iterator references =
         mState.getSubRecords().find (Misc::StringUtils::lowerCase (cell.get().mId));
 
     if (cell.mState==CSMWorld::RecordBase::State_Modified ||
@@ -284,7 +294,7 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
         // write references
         if (references!=mState.getSubRecords().end())
         {
-            for (std::vector<int>::const_iterator iter (references->second.begin());
+            for (std::deque<int>::const_iterator iter (references->second.begin());
                 iter!=references->second.end(); ++iter)
             {
                 const CSMWorld::Record<CSMWorld::CellRef>& ref =
@@ -293,6 +303,24 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                 if (ref.mState==CSMWorld::RecordBase::State_Modified ||
                     ref.mState==CSMWorld::RecordBase::State_ModifiedOnly)
                 {
+                    if (!ref.get().mOriginalCell.empty() &&
+                        ref.get().mOriginalCell!=ref.get().mCell)
+                    {
+                        ESM::MovedCellRef moved;
+                        moved.mRefNum = ref.get().mRefNum;
+
+                        std::istringstream stream (ref.get().mCell.c_str());
+
+                        char ignore;
+                        stream >> ignore >> moved.mTarget[0] >> moved.mTarget[1];
+
+                        mState.getWriter().startSubRecord ("MVRF");
+
+                        mState.getWriter().endRecord ("MVRF");
+                        mState.getWriter().writeHNT ("FRMR", moved.mRefNum.mIndex, 4);
+                        mState.getWriter().writeHNT ("CNDT", moved.mTarget, 8);
+                    }
+
                     ref.get().save (mState.getWriter());
                 }
                 else if (ref.mState==CSMWorld::RecordBase::State_Deleted)
