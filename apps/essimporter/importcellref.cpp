@@ -19,6 +19,7 @@ namespace ESSImport
 
         mIndexedRefId = esm.getHNString("NAME");
 
+        ActorData::load(esm);
         if (esm.isNextSub("LVCR"))
         {
             // occurs on leveled creature spawner references
@@ -27,7 +28,6 @@ namespace ESSImport
             esm.getHT(lvcr);
             //std::cout << "LVCR: " << (int)lvcr << std::endl;
         }
-        ActorData::load(esm);
 
         mEnabled = true;
         esm.getHNOT(mEnabled, "ZNAM");
