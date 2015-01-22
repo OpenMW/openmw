@@ -364,15 +364,18 @@ public:
     {
         std::string itemid = esm.getHNString("NAME");
 
-        while (esm.isNextSub("ONAM"))
+        while (esm.isNextSub("FNAM") || esm.isNextSub("ONAM"))
         {
-            std::string ownerid = esm.getHString();
-            mStolenItems.insert(std::make_pair(itemid, ownerid));
-        }
-        while (esm.isNextSub("FNAM"))
-        {
-            std::string factionid = esm.getHString();
-            mFactionStolenItems.insert(std::make_pair(itemid, factionid));
+            if (esm.retSubName().toString() == "FNAM")
+            {
+                std::string factionid = esm.getHString();
+                mFactionStolenItems.insert(std::make_pair(itemid, factionid));
+            }
+            else
+            {
+                std::string ownerid = esm.getHString();
+                mStolenItems.insert(std::make_pair(itemid, ownerid));
+            }
         }
     }
 private:
