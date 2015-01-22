@@ -368,6 +368,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                     break;
 
                 case ESM::REC_JOUR:
+                case ESM::REC_JOUR_LEGACY:
                 case ESM::REC_QUES:
 
                     MWBase::Environment::get().getJournal()->readRecord (reader, n.val);

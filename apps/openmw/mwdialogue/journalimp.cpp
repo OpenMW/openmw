@@ -229,7 +229,7 @@ namespace MWDialogue
 
     void Journal::readRecord (ESM::ESMReader& reader, int32_t type)
     {
-        if (type==ESM::REC_JOUR)
+        if (type==ESM::REC_JOUR || type==ESM::REC_JOUR_LEGACY)
         {
             ESM::JournalEntry record;
             record.load (reader);
