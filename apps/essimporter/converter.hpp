@@ -111,6 +111,14 @@ public:
             // need to fix openmw to account for this
             for (std::vector<std::string>::const_iterator it = npc.mSpells.mList.begin(); it != npc.mSpells.mList.end(); ++it)
                 mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[*it] = empty;
+
+            // Clear the list now that we've written it, this prevents issues cropping up with
+            // ensureCustomData() in OpenMW tripping over no longer existing spells, where an error would be fatal.
+            mContext->mPlayerBase.mSpells.mList.clear();
+
+            // Same with inventory. Actually it's strange this would contain something, since there's already an
+            // inventory list in NPCC. There seems to be a fair amount of redundancy in this format.
+            mContext->mPlayerBase.mInventory.mList.clear();
         }
     }
 };
@@ -126,6 +134,10 @@ public:
         creature.load(esm);
     }
 };
+
+// Do we need ConvertCONT?
+// I've seen a CONT record in a certain save file, but the container contents in it
+// were identical to a corresponding CNTC record. See previous comment about redundancy...
 
 class ConvertGlobal : public DefaultConverter<ESM::Global>
 {
