@@ -41,11 +41,9 @@ namespace ESSImport
         mDeleted = 0;
         if (esm.isNextSub("DELE"))
         {
-            int deleted;
+            unsigned int deleted;
             esm.getHT(deleted);
-            // Neither of this seems to work right...
-            //mDeleted = (deleted != 0);
-            //mDeleted = (deleted&0x1);
+            mDeleted = (deleted >> 24) & 0x2; // the other 3 bytes seem to be uninitialized garbage
         }
 
         if (esm.isNextSub("MVRF"))

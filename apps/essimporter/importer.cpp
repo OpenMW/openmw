@@ -105,6 +105,7 @@ namespace ESSImport
         blacklist.insert(std::make_pair("REFR", "DATA")); // player position
         blacklist.insert(std::make_pair("CELL", "NAM8")); // fog of war
         blacklist.insert(std::make_pair("GAME", "GMDT")); // weather data, current time always changes
+        blacklist.insert(std::make_pair("CELL", "DELE")); // first 3 bytes are uninitialized
 
          // this changes way too often, name suggests some renderer internal data?
         blacklist.insert(std::make_pair("CELL", "ND3D"));
