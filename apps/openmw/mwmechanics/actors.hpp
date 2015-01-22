@@ -128,7 +128,7 @@ namespace MWMechanics
 
             void write (ESM::ESMWriter& writer, Loading::Listener& listener) const;
 
-            void readRecord (ESM::ESMReader& reader, int32_t type);
+            void readRecord (ESM::ESMReader& reader, uint32_t type);
 
             void clear(); // Clear death counter
 

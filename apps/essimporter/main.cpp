@@ -12,7 +12,7 @@ namespace bfs = boost::filesystem;
 
 
 
-int main(int argc, const char** argv)
+int main(int argc, char** argv)
 {
     try
     {

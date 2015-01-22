@@ -92,7 +92,7 @@ namespace MWDialogue
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+            virtual void readRecord (ESM::ESMReader& reader, uint32_t type);
 
             /// Changes faction1's opinion of faction2 by \a diff.
             virtual void modFactionReaction (const std::string& faction1, const std::string& faction2, int diff);

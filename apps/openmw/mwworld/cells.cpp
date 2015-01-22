@@ -299,7 +299,7 @@ void MWWorld::Cells::write (ESM::ESMWriter& writer, Loading::Listener& progress)
         }
 }
 
-bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, int32_t type,
+bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, uint32_t type,
     const std::map<int, int>& contentFileMap)
 {
     if (type==ESM::REC_CSTA)

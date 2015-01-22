@@ -175,7 +175,7 @@ void ESMStore::setUp()
         mCreatureLists.write (writer, progress);
     }
 
-    bool ESMStore::readRecord (ESM::ESMReader& reader, int32_t type)
+    bool ESMStore::readRecord (ESM::ESMReader& reader, uint32_t type)
     {
         switch (type)
         {

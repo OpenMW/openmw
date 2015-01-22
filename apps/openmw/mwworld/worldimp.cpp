@@ -345,7 +345,7 @@ namespace MWWorld
         writer.endRecord(ESM::REC_CAM_);
     }
 
-    void World::readRecord (ESM::ESMReader& reader, int32_t type,
+    void World::readRecord (ESM::ESMReader& reader, uint32_t type,
         const std::map<int, int>& contentFileMap)
     {
         switch (type)

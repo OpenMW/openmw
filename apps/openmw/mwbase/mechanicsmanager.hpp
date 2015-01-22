@@ -193,7 +193,7 @@ namespace MWBase
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& listener) const = 0;
 
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
+            virtual void readRecord (ESM::ESMReader& reader, uint32_t type) = 0;
 
             virtual void clear() = 0;
 

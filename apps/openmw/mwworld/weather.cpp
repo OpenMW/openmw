@@ -762,7 +762,7 @@ void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
     writer.endRecord(ESM::REC_WTHR);
 }
 
-bool WeatherManager::readRecord(ESM::ESMReader& reader, int32_t type)
+bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
 {
     if(ESM::REC_WTHR == type)
     {

@@ -177,7 +177,7 @@ namespace MWGui
         void clear();
 
         void write (ESM::ESMWriter& writer, Loading::Listener& progress);
-        void readRecord (ESM::ESMReader& reader, int32_t type);
+        void readRecord (ESM::ESMReader& reader, uint32_t type);
 
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
