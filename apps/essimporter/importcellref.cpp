@@ -23,7 +23,7 @@ namespace ESSImport
         if (esm.isNextSub("LVCR"))
         {
             // occurs on leveled creature spawner references
-            // probably some identifier for the the creature that has been spawned?
+            // probably some identifier for the creature that has been spawned?
             unsigned char lvcr;
             esm.getHT(lvcr);
             //std::cout << "LVCR: " << (int)lvcr << std::endl;

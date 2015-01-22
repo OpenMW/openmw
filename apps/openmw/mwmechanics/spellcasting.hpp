@@ -22,6 +22,8 @@ namespace MWMechanics
 
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
 
+    bool isSummoningEffect(int effectId);
+
     /**
      * @param spell spell to cast
      * @param actor calculate spell success chance for this actor (depends on actor's skills)
