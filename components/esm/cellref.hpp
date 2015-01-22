@@ -15,6 +15,10 @@ namespace ESM
     {
         int mIndex;
         int mContentFile; // -1 no content file
+
+        void load (ESMReader& esm, bool wide = false);
+
+        void save (ESMWriter &esm, bool wide = false) const;
     };
 
     /* Cell reference. This represents ONE object (of many) inside the

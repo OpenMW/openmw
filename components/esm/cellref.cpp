@@ -4,6 +4,23 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+void ESM::RefNum::load (ESMReader& esm, bool wide)
+{
+    if (wide)
+        esm.getHNT (*this, "FRMR", 8);
+    else
+        esm.getHNT (mIndex, "FRMR");
+}
+
+void ESM::RefNum::save (ESMWriter &esm, bool wide) const
+{
+    if (wide)
+        esm.writeHNT ("FRMR", *this, 8);
+    else
+        esm.writeHNT ("FRMR", mIndex, 4);
+}
+
+
 void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
 {
     // According to Hrnchamd, this does not belong to the actual ref. Instead, it is a marker indicating that
@@ -13,10 +30,7 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
     if (esm.isNextSub ("NAM0"))
         esm.skipHSub();
 
-    if (wideRefNum)
-        esm.getHNT (mRefNum, "FRMR", 8);
-    else
-        esm.getHNT (mRefNum.mIndex, "FRMR");
+    mRefNum.load (esm, wideRefNum);
 
     mRefID = esm.getHNString ("NAME");
 
@@ -74,10 +88,7 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
 
 void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) const
 {
-    if (wideRefNum)
-        esm.writeHNT ("FRMR", mRefNum, 8);
-    else
-        esm.writeHNT ("FRMR", mRefNum.mIndex, 4);
+    mRefNum.save (esm, wideRefNum);
 
     esm.writeHNCString("NAME", mRefID);
 
