@@ -688,8 +688,11 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& state)
             case ESM::REC_REPA: getState (repairs, iter->first); break;
             case ESM::REC_WEAP: setSlot (getState (weapons, iter->first), slot); break;
             case ESM::REC_LIGH: setSlot (getState (lights, iter->first), slot); break;
+            case 0:
+                std::cerr << "Dropping reference to '" << state.mRef.mRefID << "' (object no longer exists)" << std::endl;
+                break;
             default:
-                std::cerr << "invalid item type in inventory state, refid " << state.mRef.mRefID << std::endl;
+                std::cerr << "Invalid item type in inventory state, refid " << state.mRef.mRefID << std::endl;
                 break;
         }
     }
