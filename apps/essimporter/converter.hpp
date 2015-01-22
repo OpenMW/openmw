@@ -25,6 +25,7 @@
 #include "importdial.hpp"
 #include "importques.hpp"
 #include "importjour.hpp"
+#include "importscpt.hpp"
 
 #include "convertacdt.hpp"
 #include "convertnpcc.hpp"
@@ -434,6 +435,17 @@ public:
     {
         GAME game;
         game.load(esm);
+    }
+};
+
+/// Running global script
+class ConvertSCPT : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader &esm)
+    {
+        SCPT script;
+        script.load(esm);
     }
 };
 

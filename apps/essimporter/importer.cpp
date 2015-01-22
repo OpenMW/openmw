@@ -234,6 +234,7 @@ namespace ESSImport
         converters[ESM::REC_DIAL] = boost::shared_ptr<Converter>(new ConvertDIAL());
         converters[ESM::REC_QUES] = boost::shared_ptr<Converter>(new ConvertQUES());
         converters[recJOUR      ] = boost::shared_ptr<Converter>(new ConvertJOUR());
+        converters[ESM::REC_SCPT] = boost::shared_ptr<Converter>(new ConvertSCPT());
 
         std::set<unsigned int> unknownRecords;
 

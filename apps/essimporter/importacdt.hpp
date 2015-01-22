@@ -5,6 +5,8 @@
 
 #include <components/esm/cellref.hpp>
 
+#include "importscri.hpp"
+
 namespace ESM
 {
     struct ESMReader;
@@ -50,7 +52,7 @@ namespace ESSImport
         // to change them ingame
         int mCombatStats[3][2];
 
-        std::string mScript;
+        SCRI mSCRI;
 
         void load(ESM::ESMReader& esm);
     };

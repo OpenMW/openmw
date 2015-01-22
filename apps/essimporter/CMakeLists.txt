@@ -14,6 +14,8 @@ set(ESSIMPORTER_FILES
     importdial.cpp
     importques.cpp
     importjour.cpp
+    importscri.cpp
+    importscpt.cpp
     importercontext.cpp
     converter.cpp
     convertacdt.cpp

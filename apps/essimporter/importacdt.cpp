@@ -81,18 +81,7 @@ namespace ESSImport
         if (esm.isNextSub("CRED")) // creature only
             esm.getHExact(mCombatStats, 3*2*sizeof(int));
 
-        mScript = esm.getHNOString("SCRI");
-
-        // script variables?
-        if (!mScript.empty())
-        {
-            if (esm.isNextSub("SLCS"))
-                esm.skipHSub();
-            if (esm.isNextSub("SLSD")) // Short Data?
-                esm.skipHSub();
-            if (esm.isNextSub("SLFD")) // Float Data?
-                esm.skipHSub();
-        }
+        mSCRI.load(esm);
 
         if (esm.isNextSub("ND3D"))
             esm.skipHSub();
