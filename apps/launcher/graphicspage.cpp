@@ -12,6 +12,9 @@
 
 #include <SDL.h>
 
+#include <OgreRoot.h>
+#include <OgreRenderSystem.h>
+
 #include <boost/math/common_factor.hpp>
 
 #include <components/files/configurationmanager.hpp>
