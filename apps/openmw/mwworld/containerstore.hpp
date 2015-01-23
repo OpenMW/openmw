@@ -85,7 +85,7 @@ namespace MWWorld
             void storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
 
             template<typename T>
-            void storeStates (const CellRefList<T>& collection,
+            void storeStates (CellRefList<T>& collection,
                 std::vector<std::pair<ESM::ObjectState, int> >& states,
                 bool equipable = false) const;
 
@@ -171,7 +171,8 @@ namespace MWWorld
 
             Ptr search (const std::string& id);
 
-            virtual void writeState (ESM::InventoryState& state) const;
+            /// \todo make this method const once const-correct ContainerStoreIterators are available
+            virtual void writeState (ESM::InventoryState& state);
 
             virtual void readState (const ESM::InventoryState& state);
 

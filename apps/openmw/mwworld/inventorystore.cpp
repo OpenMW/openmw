@@ -58,10 +58,24 @@ int MWWorld::InventoryStore::getSlot (const MWWorld::LiveCellRefBase& ref) const
     return -1;
 }
 
-void MWWorld::InventoryStore::setSlot (const MWWorld::ContainerStoreIterator& iter, int slot)
+void MWWorld::InventoryStore::setSlot (const MWWorld::ContainerStoreIterator& iter, int relativeSlot)
 {
-    if (iter!=end() && slot>=0 && slot<Slots)
-        mSlots[slot] = iter;
+    if (relativeSlot < 0 || iter == end())
+        return;
+
+    // make sure the item can actually be equipped in this slot
+    std::pair<std::vector<int>, bool> allowedSlots = iter->getClass().getEquipmentSlots(*iter);
+    relativeSlot = std::min(int(allowedSlots.first.size()-1), relativeSlot);
+
+    // unstack if required
+    if (!allowedSlots.second && iter->getRefData().getCount() > 1)
+    {
+        MWWorld::ContainerStoreIterator newIter = addNewStack(*iter, 1);
+        iter->getRefData().setCount(iter->getRefData().getCount()-1);
+        mSlots[allowedSlots.first[relativeSlot]] = newIter;
+    }
+    else
+        mSlots[allowedSlots.first[relativeSlot]] = iter;
 }
 
 MWWorld::InventoryStore::InventoryStore()
@@ -703,7 +717,7 @@ bool MWWorld::InventoryStore::isEquipped(const MWWorld::Ptr &item)
     return false;
 }
 
-void MWWorld::InventoryStore::writeState(ESM::InventoryState &state) const
+void MWWorld::InventoryStore::writeState(ESM::InventoryState &state)
 {
     MWWorld::ContainerStore::writeState(state);
 

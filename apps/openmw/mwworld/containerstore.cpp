@@ -86,7 +86,7 @@ void MWWorld::ContainerStore::storeState (const LiveCellRef<T>& ref, ESM::Object
 }
 
 template<typename T>
-void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
+void MWWorld::ContainerStore::storeStates (CellRefList<T>& collection,
     std::vector<std::pair<ESM::ObjectState, int> >& states, bool equipable) const
 {
     for (typename CellRefList<T>::List::const_iterator iter (collection.mList.begin());
@@ -641,7 +641,7 @@ MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
     return Ptr();
 }
 
-void MWWorld::ContainerStore::writeState (ESM::InventoryState& state) const
+void MWWorld::ContainerStore::writeState (ESM::InventoryState& state)
 {
     state.mItems.clear();
 
@@ -688,7 +688,6 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& state)
             case ESM::REC_REPA: getState (repairs, iter->first); break;
             case ESM::REC_WEAP: setSlot (getState (weapons, iter->first), slot); break;
             case ESM::REC_LIGH: setSlot (getState (lights, iter->first), slot); break;
-
             default:
                 std::cerr << "invalid item type in inventory state, refid " << state.mRef.mRefID << std::endl;
                 break;
