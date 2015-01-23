@@ -15,7 +15,6 @@ namespace ESM
     /// \brief State for inventories and containers
     struct InventoryState
     {
-        /// <ObjectState, relative equipment slot>
         std::vector<std::pair<ObjectState, int> > mItems;
 
         std::map<std::string, int> mLevelledItemMap;

@@ -2031,7 +2031,7 @@ namespace MWWorld
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
     {
         RefData &refdata = ptr.getRefData();
-        OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
+        const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
 
         if(!physactor)
             return false;
@@ -2049,7 +2049,7 @@ namespace MWWorld
                               mPhysEngine);
             if(tracer.mFraction < 1.0f) // collision, must be close to something below
             {
-                physactor->setOnGround(true);
+                const_cast<OEngine::Physic::PhysicActor *> (physactor)->setOnGround(true);
                 return true;
             }
             else

@@ -466,7 +466,7 @@ namespace MWWorld
         // List moved references, from separately tracked list.
         for (ESM::CellRefTracker::const_iterator it = mCell->mLeasedRefs.begin(); it != mCell->mLeasedRefs.end(); ++it)
         {
-            const ESM::CellRef &ref = *it;
+            ESM::CellRef &ref = const_cast<ESM::CellRef&>(*it);
 
             mIds.push_back(Misc::StringUtils::lowerCase(ref.mRefID));
         }
