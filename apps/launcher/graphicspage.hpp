@@ -3,8 +3,10 @@
 
 #include <QWidget>
 
+#ifndef Q_MOC_RUN
 #include <OgreRoot.h>
 #include <OgreRenderSystem.h>
+#endif
 
 #include <components/ogreinit/ogreinit.hpp>
 
