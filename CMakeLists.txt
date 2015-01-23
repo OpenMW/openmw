@@ -51,6 +51,8 @@ option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binarie
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
 
+set(CUSTOM_OGRE_PLUGIN_DIR "" CACHE PATH "Specify a custom directory for Ogre plugins (autodetected by default)")
+
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 
 # Apps and tools
@@ -323,8 +325,10 @@ if (APPLE AND OPENMW_OSX_DEPLOYMENT)
     # make it empty so plugin loading code can check this and try to find plugins inside app bundle
     add_definitions(-DOGRE_PLUGIN_DIR="")
 else()
-    if (NOT DEFINED ${OGRE_PLUGIN_DIR})
+    if (CUSTOM_OGRE_PLUGIN_DIR STREQUAL "")
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
+    else()
+        set(OGRE_PLUGIN_DIR ${CUSTOM_OGRE_PLUGIN_DIR})
     endif()
 
     add_definitions(-DOGRE_PLUGIN_DIR="${OGRE_PLUGIN_DIR}")
