@@ -1,7 +1,5 @@
 #include "importinventory.hpp"
 
-#include <stdexcept>
-
 #include <components/esm/esmreader.hpp>
 
 #include <components/esm/loadcont.hpp>
@@ -19,7 +17,6 @@ namespace ESSImport
             InventoryItem item;
             item.mId = contItem.mItem.toString();
             item.mCount = contItem.mCount;
-            item.mRelativeEquipmentSlot = -1;
 
             // seems that a stack of items can have a set of subrecords for each item? rings0000.ess
             // doesn't make any sense to me, if the values were different then the items shouldn't stack in the first place?
@@ -58,21 +55,14 @@ namespace ESSImport
         {
             // note: same item can be equipped 2 items (e.g. 2 rings)
             // and will be *stacked* in the NPCO list, unlike openmw!
-            // this is currently not handled properly.
-
             esm.getSubHeader();
             int itemIndex; // index of the item in the NPCO list
             esm.getT(itemIndex);
 
-            if (itemIndex < 0 || itemIndex >= int(mItems.size()))
-                esm.fail("equipment item index out of range");
-
             // appears to be a relative index for only the *possible* slots this item can be equipped in,
-            // i.e. 0 most of the time
+            // i.e. 0 most of the time, unlike openmw slot enum index
             int slotIndex;
             esm.getT(slotIndex);
-
-            mItems[itemIndex].mRelativeEquipmentSlot = slotIndex;
         }
     }
 
