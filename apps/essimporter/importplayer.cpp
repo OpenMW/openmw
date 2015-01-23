@@ -63,8 +63,11 @@ namespace ESSImport
             mFactions.push_back(fnam);
         }
 
+        if (esm.isNextSub("AADT"))
+            esm.skipHSub(); // 44 bytes, no clue
+
         if (esm.isNextSub("KNAM"))
-            esm.skipHSub();
+            esm.skipHSub(); // assigned Quick Keys, I think
 
         if (esm.isNextSub("WERE"))
         {
@@ -73,6 +76,10 @@ namespace ESSImport
             esm.getSubHeader();
             esm.skip(152);
         }
+
+        // unsure if before or after WERE
+        if (esm.isNextSub("ANIS"))
+            esm.skipHSub();
     }
 
 }

@@ -60,6 +60,10 @@ namespace ESSImport
         if (esm.isNextSub("PWPS"))
             esm.skipHSub();
 
+        // unsure at which point between LSTN and CHRD
+        if (esm.isNextSub("APUD"))
+            esm.skipHSub(); // 40 bytes, starts with string "ancestor guardian"...
+
         if (esm.isNextSub("WNAM"))
         {
             esm.skipHSub(); // seen values: "ancestor guardian", "bound dagger_en". Summoned creature / bound weapons?
