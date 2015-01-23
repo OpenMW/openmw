@@ -4,42 +4,33 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-namespace
-{
-    void read (ESM::ESMReader &esm, ESM::ObjectState& state, int& slot)
-    {
-        slot = -1;
-        esm.getHNOT (slot, "SLOT");
-
-        state.mRef.loadId(esm, true);
-        state.load (esm);
-    }
-
-    void write (ESM::ESMWriter &esm, const ESM::ObjectState& state, int slot)
-    {
-        int unused = 0;
-        esm.writeHNT ("IOBJ", unused);
-
-        if (slot!=-1)
-            esm.writeHNT ("SLOT", slot);
-
-        state.save (esm, true);
-    }
-}
-
 void ESM::InventoryState::load (ESMReader &esm)
 {
+    int index = 0;
     while (esm.isNextSub ("IOBJ"))
     {
         int unused; // no longer used
         esm.getHT(unused);
 
         ObjectState state;
-        int slot;
-        read (esm, state, slot);
+
+        // obsolete
+        if (esm.isNextSub("SLOT"))
+        {
+            int slot;
+            esm.getHT(slot);
+            mEquipmentSlots[index] = slot;
+        }
+
+        state.mRef.loadId(esm, true);
+        state.load (esm);
+
         if (state.mCount == 0)
             continue;
-        mItems.push_back (std::make_pair (state, slot));
+
+        mItems.push_back (state);
+
+        ++index;
     }
 
     while (esm.isNextSub("LEVM"))
@@ -64,12 +55,30 @@ void ESM::InventoryState::load (ESMReader &esm)
         }
         mPermanentMagicEffectMagnitudes[id] = params;
     }
+
+    while (esm.isNextSub("EQUI"))
+    {
+        esm.getSubHeader();
+        int index;
+        esm.getT(index);
+        int slot;
+        esm.getT(slot);
+        mEquipmentSlots[index] = slot;
+    }
+
+    mSelectedEnchantItem = -1;
+    esm.getHNOT(mSelectedEnchantItem, "SELE");
 }
 
 void ESM::InventoryState::save (ESMWriter &esm) const
 {
-    for (std::vector<std::pair<ObjectState, int> >::const_iterator iter (mItems.begin()); iter!=mItems.end(); ++iter)
-        write (esm, iter->first, iter->second);
+    for (std::vector<ObjectState>::const_iterator iter (mItems.begin()); iter!=mItems.end(); ++iter)
+    {
+        int unused = 0;
+        esm.writeHNT ("IOBJ", unused);
+
+        iter->save (esm, true);
+    }
 
     for (std::map<std::string, int>::const_iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
     {
@@ -88,4 +97,15 @@ void ESM::InventoryState::save (ESMWriter &esm) const
             esm.writeHNT ("MULT", pIt->second);
         }
     }
+
+    for (std::map<int, int>::const_iterator it = mEquipmentSlots.begin(); it != mEquipmentSlots.end(); ++it)
+    {
+        esm.startSubRecord("EQUI");
+        esm.writeT(it->first);
+        esm.writeT(it->second);
+        esm.endRecord("EQUI");
+    }
+
+    if (mSelectedEnchantItem != -1)
+        esm.writeHNT ("SELE", mSelectedEnchantItem);
 }

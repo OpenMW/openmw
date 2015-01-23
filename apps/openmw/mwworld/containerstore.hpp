@@ -86,15 +86,12 @@ namespace MWWorld
 
             template<typename T>
             void storeStates (CellRefList<T>& collection,
-                std::vector<std::pair<ESM::ObjectState, int> >& states,
+                ESM::InventoryState& inventory, int& index,
                 bool equipable = false) const;
 
-            virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
-            ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).
+            virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
 
-            virtual void setSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
-            ///< Set slot for \a iter. Ignored if \a iter is an end iterator or if slot==-1.
-
+            virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
         public:
 
             ContainerStore();

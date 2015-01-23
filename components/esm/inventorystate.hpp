@@ -15,14 +15,19 @@ namespace ESM
     /// \brief State for inventories and containers
     struct InventoryState
     {
-        /// <ObjectState, relative equipment slot>
-        std::vector<std::pair<ObjectState, int> > mItems;
+        std::vector<ObjectState> mItems;
+
+        // <Index in mItems, equipment slot>
+        std::map<int, int> mEquipmentSlots;
 
         std::map<std::string, int> mLevelledItemMap;
 
         typedef std::map<std::string, std::vector<std::pair<float, float> > > TEffectMagnitudes;
         TEffectMagnitudes mPermanentMagicEffectMagnitudes;
 
+        int mSelectedEnchantItem; // For inventories only
+
+        InventoryState() : mSelectedEnchantItem(-1) {}
         virtual ~InventoryState() {}
 
         virtual void load (ESMReader &esm);
