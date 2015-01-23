@@ -52,6 +52,9 @@ namespace ESSImport
         // to change them ingame
         int mCombatStats[3][2];
 
+        std::string mSelectedSpell;
+        std::string mSelectedEnchantItem;
+
         SCRI mSCRI;
 
         void load(ESM::ESMReader& esm);

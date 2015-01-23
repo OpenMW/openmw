@@ -62,17 +62,16 @@ namespace ESSImport
 
         // unsure at which point between LSTN and CHRD
         if (esm.isNextSub("APUD"))
-            esm.skipHSub(); // 40 bytes, starts with string "ancestor guardian"...
+            esm.skipHSub(); // 40 bytes, starts with string "ancestor guardian". maybe spellcasting in progress?
 
         if (esm.isNextSub("WNAM"))
         {
-            esm.skipHSub(); // seen values: "ancestor guardian", "bound dagger_en". Summoned creature / bound weapons?
+            std::string id = esm.getHString();
 
             if (esm.isNextSub("XNAM"))
-            {
-                // "demon tanto", probably the ID of spell/item that created the bound weapon/crature?
-                esm.skipHSub();
-            }
+                mSelectedEnchantItem = esm.getHString();
+            else
+                mSelectedSpell = id;
 
             if (esm.isNextSub("YNAM"))
                 esm.skipHSub(); // 4 byte, 0

@@ -226,7 +226,28 @@ public:
 
         ESM::NpcStats& npcStats = mContext->mPlayer.mObject.mNpcStats;
         convertNpcData(refr.mActorData, npcStats);
+
+        mSelectedSpell = refr.mActorData.mSelectedSpell;
+        if (!refr.mActorData.mSelectedEnchantItem.empty())
+        {
+            ESM::InventoryState& invState = mContext->mPlayer.mObject.mInventory;
+
+            for (unsigned int i=0; i<invState.mItems.size(); ++i)
+            {
+                // FIXME: in case of conflict (multiple items with this refID) use the already equipped one?
+                if (Misc::StringUtils::ciEqual(invState.mItems[i].mRef.mRefID, refr.mActorData.mSelectedEnchantItem))
+                    invState.mSelectedEnchantItem = i;
+            }
+        }
     }
+    virtual void write(ESM::ESMWriter& esm)
+    {
+        esm.startRecord(ESM::REC_ASPL);
+        esm.writeHNString("ID__", mSelectedSpell);
+        esm.endRecord(ESM::REC_ASPL);
+    }
+private:
+    std::string mSelectedSpell;
 };
 
 class ConvertPCDT : public Converter
