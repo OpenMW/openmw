@@ -3,16 +3,11 @@
 
 #include <QWidget>
 
-#ifndef Q_MOC_RUN
-#include <OgreRoot.h>
-#include <OgreRenderSystem.h>
-#endif
-
 #include <components/ogreinit/ogreinit.hpp>
-
 
 #include "ui_graphicspage.h"
 
+namespace Ogre { class Root; class RenderSystem; }
 
 namespace Files { struct ConfigurationManager; }
 
