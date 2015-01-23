@@ -20,6 +20,7 @@ namespace ESSImport
         {
             std::string mId;
             int mCount;
+            int mCondition;
             int mRelativeEquipmentSlot;
         };
         std::vector<InventoryItem> mItems;

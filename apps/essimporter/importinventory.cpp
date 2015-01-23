@@ -45,9 +45,9 @@ namespace ESSImport
                 // for XSOL and XCHG seen so far, but probably others too
                 item.ESM::CellRef::loadData(esm);
 
-                int charge=-1;
-                esm.getHNOT(charge, "XHLT");
-                item.mChargeInt = charge;
+                item.mCondition = -1;
+                // FIXME: for Lights, this is actually a float
+                esm.getHNOT(item.mCondition, "XHLT");
             }
 
             mItems.push_back(item);

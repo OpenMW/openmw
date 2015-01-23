@@ -26,6 +26,8 @@ namespace ESM
         ESM::Position mPosition;
         float mLocalRotation[3];
 
+        float mTime; // Used for lights only. Overhead should not be so awful, besides CellRef isn't OO either
+
         // Is there any class-specific state following the ObjectState
         bool mHasCustomState;
 

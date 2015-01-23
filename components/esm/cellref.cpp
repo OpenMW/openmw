@@ -46,12 +46,12 @@ void ESM::CellRef::loadData(ESMReader &esm)
     esm.getHNOT (mFactionRank, "INDX");
 
     mGoldValue = 1;
-    mChargeInt = -1;
+    mCharge = -1;
     mEnchantmentCharge = -1;
 
     esm.getHNOT (mEnchantmentCharge, "XCHG");
 
-    esm.getHNOT (mChargeInt, "INTV");
+    esm.getHNOT (mCharge, "INTV");
 
     esm.getHNOT (mGoldValue, "NAM9");
 
@@ -106,8 +106,8 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
     if (mEnchantmentCharge != -1)
         esm.writeHNT("XCHG", mEnchantmentCharge);
 
-    if (mChargeInt != -1)
-        esm.writeHNT("INTV", mChargeInt);
+    if (mCharge != -1)
+        esm.writeHNT("INTV", mCharge);
 
     if (mGoldValue != 1) {
         esm.writeHNT("NAM9", mGoldValue);
@@ -146,7 +146,7 @@ void ESM::CellRef::blank()
     mSoul.clear();
     mFaction.clear();
     mFactionRank = -2;
-    mChargeInt = -1;
+    mCharge = -1;
     mEnchantmentCharge = -1;
     mGoldValue = 0;
     mDestCell.clear();
