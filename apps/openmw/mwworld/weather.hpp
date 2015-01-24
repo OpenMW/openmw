@@ -201,6 +201,8 @@ namespace MWWorld
 
         bool readRecord(ESM::ESMReader& reader, uint32_t type);
 
+        void clear();
+
     private:
         float mHour;
         float mWindSpeed;

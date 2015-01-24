@@ -265,6 +265,7 @@ namespace MWWorld
 
     void World::clear()
     {
+        mWeatherManager->clear();
         mRendering->clear();
 
         mProjectileManager->clear();

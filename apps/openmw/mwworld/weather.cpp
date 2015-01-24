@@ -770,14 +770,6 @@ bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
         ESM::WeatherState state;
         state.load(reader);
 
-        // reset other temporary state, now that we loaded successfully
-        stopSounds(); // let's hope this never throws
-        mRegionOverrides.clear();
-        mRegionMods.clear();
-        mThunderFlash = 0.0;
-        mThunderChance = 0.0;
-        mThunderChanceNeeded = 50.0;
-
         // swap in the loaded values now that we can't fail
         mHour = state.mHour;
         mWindSpeed = state.mWindSpeed;
@@ -792,6 +784,16 @@ bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
     }
 
     return false;
+}
+
+void WeatherManager::clear()
+{
+    stopSounds();
+    mRegionOverrides.clear();
+    mRegionMods.clear();
+    mThunderFlash = 0.0;
+    mThunderChance = 0.0;
+    mThunderChanceNeeded = 50.0;
 }
 
 void WeatherManager::switchToNextWeather(bool instantly)
