@@ -4,11 +4,15 @@
 #include <vector>
 
 #include "contentloader.hpp"
-#include "components/esm/esmreader.hpp"
 
 namespace ToUTF8
 {
   class Utf8Encoder;
+}
+
+namespace ESM
+{
+    class ESMReader;
 }
 
 namespace MWWorld

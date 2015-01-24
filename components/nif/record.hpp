@@ -44,6 +44,7 @@ enum RecordType
   RC_NiBSParticleNode,
   RC_NiCamera,
   RC_NiTexturingProperty,
+  RC_NiFogProperty,
   RC_NiMaterialProperty,
   RC_NiZBufferProperty,
   RC_NiAlphaProperty,

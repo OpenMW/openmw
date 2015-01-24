@@ -5,11 +5,19 @@
 
 #include <OgreTextureManager.h>
 #include <OgreRenderWindow.h>
+#include <OgreSceneManager.h>
 
-#include "MyGUI_UString.h"
-#include "MyGUI_IPointer.h"
-#include "MyGUI_ResourceImageSetPointer.h"
-#include "MyGUI_TextureUtility.h"
+#include <MyGUI_UString.h>
+#include <MyGUI_IPointer.h>
+#include <MyGUI_ResourceImageSetPointer.h>
+#include <MyGUI_TextureUtility.h>
+#include <MyGUI_FactoryManager.h>
+#include <MyGUI_LanguageManager.h>
+#include <MyGUI_PointerManager.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_ClipboardManager.h>
+#include <MyGUI_RenderManager.h>
 
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
@@ -27,6 +35,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -73,6 +82,10 @@
 #include "itemwidget.hpp"
 #include "screenfader.hpp"
 #include "debugwindow.hpp"
+#include "spellview.hpp"
+#include "draganddrop.hpp"
+#include "container.hpp"
+#include "controllers.hpp"
 
 namespace MWGui
 {
@@ -179,6 +192,7 @@ namespace MWGui
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
         ItemWidget::registerComponents();
+        SpellView::registerComponents();
         Gui::registerAllWidgets();
 
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatEvent>("Controller");
@@ -444,6 +458,7 @@ namespace MWGui
         mVideoBackground->setVisible(false);
 
         mHud->setVisible(mHudEnabled && mGuiEnabled);
+        mToolTips->setVisible(mGuiEnabled);
 
         bool gameMode = !isGuiMode();
 
@@ -587,17 +602,12 @@ namespace MWGui
                     mJournal->setVisible(true);
                     break;
                 case GM_LoadingWallpaper:
-                    mHud->setVisible(false);
-                    setCursorVisible(false);
-                    break;
                 case GM_Loading:
-                    // Show the pinned windows
-                    mMap->setVisible(mMap->pinned() && !(mForceHidden & GW_Map));
-                    mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats));
-                    mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory));
-                    mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic));
-
-                    setCursorVisible(false);
+                    // Don't need to show anything here - GM_LoadingWallpaper covers everything else anyway,
+                    // GM_Loading uses a texture of the last rendered frame so everything previously visible will be rendered.
+                    mHud->setVisible(false);
+                    mToolTips->setVisible(false);
+                    setCursorVisible(mMessageBoxManager && mMessageBoxManager->isInteractiveMessageBox());
                     break;
                 default:
                     // Unsupported mode, switch back to game
@@ -795,19 +805,31 @@ namespace MWGui
         }
     }
 
-    void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons, enum MWGui::ShowInDialogueMode showInDialogueMode)
+    void WindowManager::interactiveMessageBox(const std::string &message, const std::vector<std::string> &buttons, bool block)
     {
-        if (buttons.empty()) {
-            /* If there are no buttons, and there is a dialogue window open, messagebox goes to the dialogue window */
-            if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never) {
-                mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
-            } else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only) {
-                mMessageBoxManager->createMessageBox(message);
+        mMessageBoxManager->createInteractiveMessageBox(message, buttons);
+        MWBase::Environment::get().getInputManager()->changeInputMode(isGuiMode());
+        updateVisible();
+
+        if (block)
+        {
+            while (mMessageBoxManager->readPressedButton(false) == -1
+                   && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
+            {
+                mMessageBoxManager->onFrame(0.f);
+                MWBase::Environment::get().getInputManager()->update(0, true, false);
+
+                mRendering->getWindow()->update();
             }
-        } else {
-            mMessageBoxManager->createInteractiveMessageBox(message, buttons);
-            MWBase::Environment::get().getInputManager()->changeInputMode(isGuiMode());
-            updateVisible();
+        }
+    }
+
+    void WindowManager::messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode)
+    {
+        if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never) {
+            mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
+        } else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only) {
+            mMessageBoxManager->createMessageBox(message);
         }
     }
 
@@ -1457,6 +1479,8 @@ namespace MWGui
     void WindowManager::showSoulgemDialog(MWWorld::Ptr item)
     {
         mSoulgemDialog->show(item);
+        MWBase::Environment::get().getInputManager()->changeInputMode(isGuiMode());
+        updateVisible();
     }
 
     void WindowManager::frameStarted (float dt)
@@ -1580,26 +1604,23 @@ namespace MWGui
         mMap->write(writer, progress);
 
         mQuickKeysMenu->write(writer);
-        progress.increaseProgress();
 
         if (!mSelectedSpell.empty())
         {
             writer.startRecord(ESM::REC_ASPL);
             writer.writeHNString("ID__", mSelectedSpell);
             writer.endRecord(ESM::REC_ASPL);
-            progress.increaseProgress();
         }
 
-        for (std::vector<CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
+        for (std::vector<ESM::CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
         {
             writer.startRecord(ESM::REC_MARK);
             (*it).save(writer);
             writer.endRecord(ESM::REC_MARK);
-            progress.increaseProgress();
         }
     }
 
-    void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)
+    void WindowManager::readRecord(ESM::ESMReader &reader, uint32_t type)
     {
         if (type == ESM::REC_GMAP)
             mMap->readRecord(reader, type);
@@ -1612,7 +1633,7 @@ namespace MWGui
         }
         else if (type == ESM::REC_MARK)
         {
-            CustomMarker marker;
+            ESM::CustomMarker marker;
             marker.load(reader);
             mCustomMarkers.addMarker(marker, false);
         }
@@ -1693,13 +1714,16 @@ namespace MWGui
         // Use black bars to correct aspect ratio
         mVideoBackground->setSize(screenWidth, screenHeight);
 
-        double imageaspect = static_cast<double>(mVideoWidget->getVideoWidth())/mVideoWidget->getVideoHeight();
+        if (mVideoWidget->getVideoHeight() > 0)
+        {
+            double imageaspect = static_cast<double>(mVideoWidget->getVideoWidth())/mVideoWidget->getVideoHeight();
 
-        int leftPadding = std::max(0.0, (screenWidth - screenHeight * imageaspect) / 2);
-        int topPadding = std::max(0.0, (screenHeight - screenWidth / imageaspect) / 2);
+            int leftPadding = std::max(0.0, (screenWidth - screenHeight * imageaspect) / 2);
+            int topPadding = std::max(0.0, (screenHeight - screenWidth / imageaspect) / 2);
 
-        mVideoWidget->setCoord(leftPadding, topPadding,
-                               screenWidth - leftPadding*2, screenHeight - topPadding*2);
+            mVideoWidget->setCoord(leftPadding, topPadding,
+                                   screenWidth - leftPadding*2, screenHeight - topPadding*2);
+        }
     }
 
     WindowModal* WindowManager::getCurrentModal() const
@@ -1820,6 +1844,16 @@ namespace MWGui
     void WindowManager::toggleDebugWindow()
     {
         mDebugWindow->setVisible(!mDebugWindow->isVisible());
+    }
+
+    void WindowManager::cycleSpell(bool next)
+    {
+        mSpellWindow->cycle(next);
+    }
+
+    void WindowManager::cycleWeapon(bool next)
+    {
+        mInventoryWindow->cycle(next);
     }
 
 }

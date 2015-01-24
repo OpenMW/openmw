@@ -57,6 +57,7 @@ namespace MWMechanics
 
             virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
+            virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
             
             enum GreetingState {
                 Greet_None,
@@ -77,14 +78,14 @@ namespace MWMechanics
             int mTimeOfDay;
             std::vector<unsigned char> mIdle;
             bool mRepeat;
-
             
 
             bool mHasReturnPosition; // NOTE: Could be removed if mReturnPosition was initialized to actor position,
                                     // if we had the actor in the AiWander constructor...
             Ogre::Vector3 mReturnPosition;
 
-
+            Ogre::Vector3 mInitialActorPosition;
+            bool mStoredInitialActorPosition;
 
            
 
@@ -98,6 +99,9 @@ namespace MWMechanics
 
             // allowed pathgrid nodes based on mDistance from the spawn point
             std::vector<ESM::Pathgrid::Point> mAllowedNodes;
+
+            void getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell);
+
             ESM::Pathgrid::Point mCurrentNode;
             bool mTrimCurrentNode;
             void trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,

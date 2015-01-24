@@ -45,8 +45,10 @@ namespace ESM
         int mSkillIncrease[8];
         std::vector<std::string> mUsedIds;
         float mTimeToStartDrowning;
-        float mLastDrowningHit;
         int mCrimeId;
+
+        /// Initialize to default state
+        void blank();
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

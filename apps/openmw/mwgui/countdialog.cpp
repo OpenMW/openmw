@@ -1,6 +1,8 @@
 #include "countdialog.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Button.h>
+#include <MyGUI_ScrollBar.h>
+#include <MyGUI_RenderManager.h>
 
 #include <components/widgets/numericeditbox.hpp>
 

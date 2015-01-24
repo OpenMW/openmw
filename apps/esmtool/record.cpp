@@ -25,7 +25,7 @@ void printAIPackage(ESM::AIPackage p)
     {
         std::cout << "    Travel Coordinates: (" << p.mTravel.mX << ","
                   << p.mTravel.mY << "," << p.mTravel.mZ << ")" << std::endl;
-        std::cout << "    Travel Unknown: " << (int)p.mTravel.mUnk << std::endl;
+        std::cout << "    Travel Unknown: " << p.mTravel.mUnk << std::endl;
     }
     else if (p.mType == ESM::AI_Follow || p.mType == ESM::AI_Escort)
     {
@@ -33,12 +33,12 @@ void printAIPackage(ESM::AIPackage p)
                   << p.mTarget.mY << "," << p.mTarget.mZ << ")" << std::endl;
         std::cout << "    Duration: " << p.mTarget.mDuration << std::endl;
         std::cout << "    Target ID: " << p.mTarget.mId.toString() << std::endl;
-        std::cout << "    Unknown: " << (int)p.mTarget.mUnk << std::endl;
+        std::cout << "    Unknown: " << p.mTarget.mUnk << std::endl;
     }
     else if (p.mType == ESM::AI_Activate)
     {
         std::cout << "    Name: " << p.mActivate.mName.toString() << std::endl;
-        std::cout << "    Activate Unknown: " << (int)p.mActivate.mUnk << std::endl;
+        std::cout << "    Activate Unknown: " << p.mActivate.mUnk << std::endl;
     }
     else {
         std::cout << "    BadPackage: " << boost::format("0x%08x") % p.mType << std::endl;
@@ -89,6 +89,7 @@ std::string ruleString(ESM::DialInfo::SelectStruct ss)
     case 'A': if (indicator == 'R') type_str = "Not Race"; break;
     case 'B': if (indicator == 'L') type_str = "Not Cell"; break;
     case 'C': if (indicator == 's') type_str = "Not Local"; break;
+    default: break;
     }
 
     // Append the variable name to the function string if any.
@@ -110,6 +111,7 @@ std::string ruleString(ESM::DialInfo::SelectStruct ss)
     case '3': oper_str = ">="; break;
     case '4': oper_str = "< "; break;
     case '5': oper_str = "<="; break;
+    default: break;
     }
 
     std::ostringstream stream;
@@ -430,7 +432,7 @@ void Record<ESM::Apparatus>::print()
     std::cout << "  Icon: " << mData.mIcon << std::endl;
     std::cout << "  Script: " << mData.mScript << std::endl;
     std::cout << "  Type: " << apparatusTypeLabel(mData.mData.mType)
-              << " (" << (int)mData.mData.mType << ")" << std::endl;
+              << " (" << mData.mData.mType << ")" << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;
@@ -816,7 +818,7 @@ void Record<ESM::Land>::print()
     // Seems like this should done with reference counting in the
     // loader to me.  But I'm not really knowledgable about this
     // record type yet. --Cory
-    bool wasLoaded = mData.mDataLoaded;
+    bool wasLoaded = (mData.mDataLoaded != 0);
     if (mData.mDataTypes) mData.loadData(mData.mDataTypes);
     if (mData.mDataLoaded)
     {
@@ -999,7 +1001,7 @@ void Record<ESM::NPC>::print()
                   << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown2) << std::endl;
         std::cout << "  Unknown3: "
                   << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown3) << std::endl;
-        std::cout << "  Gold: " << (int)mData.mNpdt12.mGold << std::endl;
+        std::cout << "  Gold: " << mData.mNpdt12.mGold << std::endl;
     }
     else {
         std::cout << "  Level: " << mData.mNpdt52.mLevel << std::endl;
@@ -1021,7 +1023,7 @@ void Record<ESM::NPC>::print()
         std::cout << "  Skills:" << std::endl;
         for (int i = 0; i != ESM::Skill::Length; i++)
             std::cout << "    " << skillLabel(i) << ": "
-                      << (int)((unsigned char)mData.mNpdt52.mSkills[i]) << std::endl;
+                      << (int)(mData.mNpdt52.mSkills[i]) << std::endl;
 
         std::cout << "  Health: " << mData.mNpdt52.mHealth << std::endl;
         std::cout << "  Magicka: " << mData.mNpdt52.mMana << std::endl;
@@ -1123,9 +1125,9 @@ void Record<ESM::Race>::print()
 
         std::cout << (male ? "  Male:" : "  Female:") << std::endl;
 
-        for (int i=0; i<8; ++i)
-            std::cout << "    " << sAttributeNames[i] << ": "
-                << mData.mData.mAttributeValues[i].getValue (male) << std::endl;
+        for (int j=0; j<8; ++j)
+            std::cout << "    " << sAttributeNames[j] << ": "
+                << mData.mData.mAttributeValues[j].getValue (male) << std::endl;
 
         std::cout << "    Height: " << mData.mData.mHeight.getValue (male) << std::endl;
         std::cout << "    Weight: " << mData.mData.mWeight.getValue (male) << std::endl;

@@ -18,6 +18,7 @@
 #include <components/esm/loadweap.hpp>
 
 #include "ptr.hpp"
+#include "cellreflist.hpp"
 
 namespace ESM
 {
@@ -74,7 +75,7 @@ namespace MWWorld
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
             ContainerStoreIterator addImp (const Ptr& ptr, int count);
-            void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int count, bool topLevel=true, const std::string& levItem = "");
+            void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int factionRank, int count, bool topLevel=true, const std::string& levItem = "");
 
             template<typename T>
             ContainerStoreIterator getState (CellRefList<T>& collection,
@@ -84,16 +85,13 @@ namespace MWWorld
             void storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
 
             template<typename T>
-            void storeStates (const CellRefList<T>& collection,
-                std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states,
+            void storeStates (CellRefList<T>& collection,
+                ESM::InventoryState& inventory, int& index,
                 bool equipable = false) const;
 
-            virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
-            ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).
+            virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
 
-            virtual void setSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
-            ///< Set slot for \a iter. Ignored if \a iter is an end iterator or if slot==-1.
-
+            virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
         public:
 
             ContainerStore();
@@ -153,10 +151,10 @@ namespace MWWorld
             virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, const MWWorld::ESMStore& store);
+            void fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, int factionRank, const MWWorld::ESMStore& store);
             ///< Insert items into *this.
 
-            void restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner, const std::string& faction);
+            void restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner, const std::string& faction, int factionRank);
 
             virtual void clear();
             ///< Empty container.
@@ -170,9 +168,10 @@ namespace MWWorld
 
             Ptr search (const std::string& id);
 
-            void writeState (ESM::InventoryState& state) const;
+            /// \todo make this method const once const-correct ContainerStoreIterators are available
+            virtual void writeState (ESM::InventoryState& state);
 
-            void readState (const ESM::InventoryState& state);
+            virtual void readState (const ESM::InventoryState& state);
 
         friend class ContainerStoreIterator;
     };

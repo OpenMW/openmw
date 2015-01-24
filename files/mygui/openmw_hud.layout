@@ -108,8 +108,6 @@
             <Widget type="Widget" skin="HUD_Box" position="0 0 65 65" align="Center">
 
                 <Widget type="ScrollView" skin="MW_MapView" position="2 2 61 61" align="Left Bottom" name="MiniMap">
-                    <Property key="CanvasSize" value="1536 1536"/>
-
                     <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="Bottom Left" name="Compass">
                         <Property key="ImageTexture" value="textures\compass.dds"/>
                     </Widget>

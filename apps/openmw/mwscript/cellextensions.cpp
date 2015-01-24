@@ -117,18 +117,9 @@ namespace MWScript
                         runtime.push(0);
                         return;
                     }
-                    const ESM::Cell *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell()->getCell();
+                    const MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayerPtr().getCell();
 
-                    std::string current = cell->mName;
-
-                    if (!(cell->mData.mFlags & ESM::Cell::Interior) && current.empty()
-                            && !cell->mRegion.empty())
-                    {
-                        const ESM::Region *region =
-                            MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().find (cell->mRegion);
-
-                        current = region->mName;
-                    }
+                    std::string current = MWBase::Environment::get().getWorld()->getCellName(cell);
                     Misc::StringUtils::toLower(current);
 
                     bool match = current.length()>=name.length() &&

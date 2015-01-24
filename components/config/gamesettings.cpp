@@ -1,4 +1,5 @@
 #include "gamesettings.hpp"
+#include "launchersettings.hpp"
 
 #include <QTextStream>
 #include <QDir>
@@ -26,6 +27,7 @@ namespace boost
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
 
+const char Config::GameSettings::sContentKey[] = "content";
 
 Config::GameSettings::GameSettings(Files::ConfigurationManager &cfg)
     : mCfgMgr(cfg)
@@ -81,7 +83,7 @@ void Config::GameSettings::validatePaths()
     }
 }
 
-QStringList Config::GameSettings::values(const QString &key, const QStringList &defaultValues)
+QStringList Config::GameSettings::values(const QString &key, const QStringList &defaultValues) const
 {
     if (!mSettings.values(key).isEmpty())
         return mSettings.values(key);
@@ -149,9 +151,6 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
     while (i.hasPrevious()) {
         i.previous();
 
-        if (i.key() == QLatin1String("content"))
-            continue;
-
         // Quote paths with spaces
         if (i.key() == QLatin1String("data")
             || i.key() == QLatin1String("data-local")
@@ -171,18 +170,13 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
 
     }
 
-    QStringList content = mUserSettings.values(QString("content"));
-    for (int i = content.count(); i--;) {
-        stream << "content=" << content.at(i) << "\n";
-    }
-
     return true;
 }
 
 bool Config::GameSettings::hasMaster()
 {
     bool result = false;
-    QStringList content = mSettings.values(QString("content"));
+    QStringList content = mSettings.values(QString(Config::GameSettings::sContentKey));
     for (int i = 0; i < content.count(); ++i) {
         if (content.at(i).contains(".omwgame") || content.at(i).contains(".esm")) {
             result = true;
@@ -192,3 +186,19 @@ bool Config::GameSettings::hasMaster()
 
     return result;
 }
+
+void Config::GameSettings::setContentList(const QStringList& fileNames)
+{
+    remove(sContentKey);
+    foreach(const QString& fileName, fileNames)
+    {
+        setMultiValue(sContentKey, fileName);
+    }
+}
+
+QStringList Config::GameSettings::getContentList() const
+{
+    // QMap returns multiple rows in LIFO order, so need to reverse
+    return Config::LauncherSettings::reverse(values(sContentKey));
+}
+

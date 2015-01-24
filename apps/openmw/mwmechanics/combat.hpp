@@ -32,6 +32,12 @@ void reduceWeaponCondition (float damage, bool hit, MWWorld::Ptr& weapon, const 
 /// Adjust weapon damage based on its condition. A used weapon will be less effective.
 void adjustWeaponDamage (float& damage, const MWWorld::Ptr& weapon);
 
+void getHandToHandDamage (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, float& damage, bool& healthdmg);
+
+/// Can attacker operate in victim's environment?
+/// e.g. If attacker is a fish, is victim in water? Or, if attacker can't swim, is victim on land?
+bool isEnvironmentCompatible(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim);
+
 }
 
 #endif

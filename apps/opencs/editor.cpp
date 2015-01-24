@@ -15,7 +15,7 @@
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
 #include <components/ogreinit/ogreinit.hpp>
-
+#include <components/nifogre/ogrenifloader.hpp>
 #include <components/bsa/resources.hpp>
 
 #include "model/doc/document.hpp"
@@ -34,6 +34,8 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     mSettings.setModel (CSMSettings::UserSettings::instance());
 
     ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
+
+    NifOgre::Loader::setShowMarkers(true);
 
     mOverlaySystem.reset (new CSVRender::OverlaySystem);
 
@@ -75,7 +77,8 @@ CS::Editor::~Editor ()
     mPidFile.close();
 
     if(mServer && boost::filesystem::exists(mPid))
-        remove(mPid.string().c_str()); // ignore any error
+        static_cast<void> ( // silence coverity warning
+        remove(mPid.string().c_str())); // ignore any error
 
     // cleanup global resources used by OEngine
     delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
@@ -236,6 +239,7 @@ void CS::Editor::showSettings()
     if (mSettings.isHidden())
         mSettings.show();
 
+    mSettings.move (QCursor::pos());
     mSettings.raise();
     mSettings.activateWindow();
 }

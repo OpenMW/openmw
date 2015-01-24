@@ -16,7 +16,7 @@ namespace CSVWorld
     PhysicsSystem::PhysicsSystem()
     {
         // Create physics. shapeLoader is deleted by the physic engine
-        NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
+        NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader(true);
         mEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
     }
 

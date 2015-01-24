@@ -52,6 +52,7 @@ namespace MWMechanics
         float mFallHeight;
 
         std::string mLastHitObject; // The last object to hit this actor
+        std::string mLastHitAttemptObject; // The last object to attempt to hit this actor
 
         bool mRecalcMagicka;
 
@@ -66,8 +67,11 @@ namespace MWMechanics
         // The index of the death animation that was played
         unsigned char mDeathAnimation;
 
-        // <ESM::MagicEffect index, ActorId>
-        std::map<int, int> mSummonedCreatures;
+    public:
+        typedef std::pair<int, std::string> SummonKey; // <ESM::MagicEffect index, spell ID>
+    private:
+        std::map<SummonKey, int> mSummonedCreatures; // <SummonKey, ActorId>
+
         // Contains ActorIds of summoned creatures with an expired lifetime that have not been deleted yet.
         // This may be necessary when the creature is in an inactive cell.
         std::vector<int> mSummonGraveyard;
@@ -198,8 +202,6 @@ namespace MWMechanics
         bool getAttacked() const;
         void setAttacked (bool attacked);
 
-        bool getCreatureTargetted() const;
-
         float getEvasion() const;
 
         void setKnockedDown(bool value);
@@ -217,8 +219,8 @@ namespace MWMechanics
         void setBlock(bool value);
         bool getBlock() const;
 
-        std::map<int, int>& getSummonedCreatureMap();
-        std::vector<int>& getSummonedCreatureGraveyard();
+        std::map<SummonKey, int>& getSummonedCreatureMap(); // <SummonKey, ActorId of summoned creature>
+        std::vector<int>& getSummonedCreatureGraveyard(); // ActorIds
 
         enum Flag
         {
@@ -241,7 +243,9 @@ namespace MWMechanics
         bool getStance (Stance flag) const;
 
         void setLastHitObject(const std::string &objectid);
+        void setLastHitAttemptObject(const std::string &objectid);
         const std::string &getLastHitObject() const;
+        const std::string &getLastHitAttemptObject() const;
 
         // Note, this is just a cache to avoid checking the whole container store every frame. We don't need to store it in saves.
         // TODO: Put it somewhere else?

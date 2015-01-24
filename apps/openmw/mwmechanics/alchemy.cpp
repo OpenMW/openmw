@@ -286,7 +286,8 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
         if (!iter->isEmpty())
             newRecord.mData.mWeight += iter->get<ESM::Ingredient>()->mBase->mData.mWeight;
 
-    newRecord.mData.mWeight /= countIngredients();
+    if (countIngredients() > 0)
+        newRecord.mData.mWeight /= countIngredients();
 
     newRecord.mData.mValue = mValue;
     newRecord.mData.mAutoCalc = 0;

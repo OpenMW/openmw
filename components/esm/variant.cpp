@@ -13,6 +13,7 @@ namespace
     const uint32_t STRV = ESM::FourCC<'S','T','R','V'>::value;
     const uint32_t INTV = ESM::FourCC<'I','N','T','V'>::value;
     const uint32_t FLTV = ESM::FourCC<'F','L','T','V'>::value;
+    const uint32_t STTV = ESM::FourCC<'S','T','T','V'>::value;
 }
 
 ESM::Variant::Variant() : mType (VT_None), mData (0) {}
@@ -141,7 +142,7 @@ void ESM::Variant::read (ESMReader& esm, Format format)
                 esm.fail ("invalid subrecord: " + name.toString());
         }
     }
-    else // info
+    else if (format == Format_Info)
     {
         esm.getSubName();
         NAME name = esm.retSubName();
@@ -153,6 +154,26 @@ void ESM::Variant::read (ESMReader& esm, Format format)
         else if (name==FLTV)
         {
             type = VT_Float;
+        }
+        else
+            esm.fail ("invalid subrecord: " + name.toString());
+    }
+    else if (format == Format_Local)
+    {
+        esm.getSubName();
+        NAME name = esm.retSubName();
+
+        if (name==INTV)
+        {
+            type = VT_Int;
+        }
+        else if (name==FLTV)
+        {
+            type = VT_Float;
+        }
+        else if (name==STTV)
+        {
+            type = VT_Short;
         }
         else
             esm.fail ("invalid subrecord: " + name.toString());
@@ -178,6 +199,9 @@ void ESM::Variant::write (ESMWriter& esm, Format format) const
 
         if (format==Format_Info)
             throw std::runtime_error ("can not serialise variant of type none to info format");
+
+        if (format==Format_Local)
+            throw std::runtime_error ("can not serialise variant of type none to local format");
 
         // nothing to do here for GMST format
     }

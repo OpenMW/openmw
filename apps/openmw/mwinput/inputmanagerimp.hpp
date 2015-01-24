@@ -196,6 +196,8 @@ namespace MWInput
 
         void setPlayerControlsEnabled(bool enabled);
 
+        void updateCursorMode();
+
     private:
         void toggleMainMenu();
         void toggleSpell();

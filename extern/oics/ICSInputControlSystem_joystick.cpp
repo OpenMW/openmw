@@ -158,12 +158,48 @@ namespace ICS
 	{
         if(mControlsJoystickButtonBinderMap.find(deviceID) != mControlsJoystickButtonBinderMap.end())
 		{
+<<<<<<< HEAD
             ControlsButtonBinderMapType::iterator it = mControlsJoystickButtonBinderMap[deviceID].find(button);
             if(it != mControlsJoystickButtonBinderMap[deviceID].end())
             {
                 mControlsJoystickButtonBinderMap[deviceID].erase(it);
             }
         }
+=======
+			ControlsButtonBinderMapType::iterator it = mControlsJoystickButtonBinderMap[deviceId].find(button);
+			if(it != mControlsJoystickButtonBinderMap[deviceId].end())
+			{
+				mControlsJoystickButtonBinderMap[deviceId].erase(it);
+			}
+		}
+	}
+
+	void InputControlSystem::removeJoystickPOVBinding(int deviceId, int index, POVAxis axis)
+	{
+		if(mControlsJoystickPOVBinderMap.find(deviceId) != mControlsJoystickPOVBinderMap.end())
+		{
+			std::map<int, ControlsPOVBinderMapType>::iterator it = mControlsJoystickPOVBinderMap[deviceId].find(index);
+			if(it != mControlsJoystickPOVBinderMap[deviceId].end())
+			{
+				if(it->second.find(axis) != it->second.end())
+				{
+                    it->second.erase( it->second.find(axis) );
+				}
+			}
+		}
+	}
+
+	void InputControlSystem::removeJoystickSliderBinding(int deviceId, int index)
+	{
+		if(mControlsJoystickSliderBinderMap.find(deviceId) != mControlsJoystickSliderBinderMap.end())
+		{
+			ControlsButtonBinderMapType::iterator it = mControlsJoystickSliderBinderMap[deviceId].find(index);
+			if(it != mControlsJoystickSliderBinderMap[deviceId].end())
+			{
+				mControlsJoystickSliderBinderMap[deviceId].erase(it);
+			}
+		}
+>>>>>>> b44fc1904bd58b9143793bc7e1e750ae02f774fc
 	}
 
 	// joyStick listeners

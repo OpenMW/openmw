@@ -14,6 +14,7 @@
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -30,19 +31,17 @@ namespace MWClass
         return ptr.get<ESM::Armor>()->mBase->mId;
     }
 
-    void Armor::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Armor::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        const std::string model = getModel(ptr);
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    void Armor::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Armor::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr,true);
+            physics.addObject(ptr, model, true);
     }
 
     std::string Armor::getModel(const MWWorld::Ptr &ptr) const

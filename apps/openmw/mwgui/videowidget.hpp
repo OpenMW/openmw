@@ -3,7 +3,10 @@
 
 #include <MyGUI_ImageBox.h>
 
-#include <extern/ogre-ffmpeg-videoplayer/videoplayer.hpp>
+namespace Video
+{
+    class VideoPlayer;
+}
 
 namespace MWGui
 {
@@ -33,7 +36,7 @@ namespace MWGui
         void stop();
 
     private:
-        Video::VideoPlayer mPlayer;
+        std::auto_ptr<Video::VideoPlayer> mPlayer;
     };
 
 }

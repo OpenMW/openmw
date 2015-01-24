@@ -2,7 +2,11 @@
 
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Window.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_Button.h>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -15,6 +19,7 @@
 #include "../mwworld/action.hpp"
 #include "../mwscript/interpretercontext.hpp"
 #include "../mwbase/scriptmanager.hpp"
+#include "../mwrender/characterpreview.hpp"
 
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
@@ -25,7 +30,21 @@
 #include "tradeitemmodel.hpp"
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
-#include "container.hpp"
+#include "draganddrop.hpp"
+#include "widgets.hpp"
+
+namespace
+{
+
+    bool isRightHandWeapon(const MWWorld::Ptr& item)
+    {
+        if (item.getClass().getTypeName() != typeid(ESM::Weapon).name())
+            return false;
+        std::vector<int> equipmentSlots = item.getClass().getEquipmentSlots(item).first;
+        return (!equipmentSlots.empty() && equipmentSlots.front() == MWWorld::InventoryStore::Slot_CarriedRight);
+    }
+
+}
 
 namespace MWGui
 {
@@ -296,6 +315,9 @@ namespace MWGui
 
     void InventoryWindow::updateItemView()
     {
+        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
+            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+
         mItemView->update();
         mPreviewDirty = true;
     }
@@ -514,6 +536,14 @@ namespace MWGui
     void InventoryWindow::doRenderUpdate ()
     {
         mPreview->onFrame();
+
+        if (mPreviewResize || mPreviewDirty)
+        {
+            mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
+                + MyGUI::utility::toString(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
+            if (mArmorRating->getTextSize().width > mArmorRating->getSize().width)
+                mArmorRating->setCaptionWithReplacing (MyGUI::utility::toString(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
+        }
         if (mPreviewResize)
         {
             mPreviewResize = false;
@@ -530,11 +560,6 @@ namespace MWGui
             mPreview->update ();
 
             mAvatarImage->setImageTexture("CharacterPreview");
-
-            mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
-                + boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
-            if (mArmorRating->getTextSize().width > mArmorRating->getSize().width)
-                mArmorRating->setCaptionWithReplacing (boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
         }
     }
 
@@ -598,5 +623,59 @@ namespace MWGui
         mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, newObject, count);
+
+        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
+            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+    }
+
+    void InventoryWindow::cycle(bool next)
+    {
+        ItemModel::ModelIndex selected = -1;
+        // not using mSortFilterModel as we only need sorting, not filtering
+        SortFilterItemModel model(new InventoryItemModel(MWBase::Environment::get().getWorld()->getPlayerPtr()));
+        model.setSortByType(false);
+        model.update();
+        if (model.getItemCount() == 0)
+            return;
+
+        for (ItemModel::ModelIndex i=0; i<int(model.getItemCount()); ++i)
+        {
+            MWWorld::Ptr item = model.getItem(i).mBase;
+            if (model.getItem(i).mType & ItemStack::Type_Equipped && isRightHandWeapon(item))
+                selected = i;
+        }
+
+        int incr = next ? 1 : -1;
+        bool found = false;
+        std::string lastId;
+        if (selected != -1)
+            lastId = model.getItem(selected).mBase.getCellRef().getRefId();
+        ItemModel::ModelIndex cycled = selected;
+        while (!found)
+        {
+            cycled += incr;
+            cycled = (cycled + model.getItemCount()) % model.getItemCount();
+
+            MWWorld::Ptr item = model.getItem(cycled).mBase;
+
+            if (cycled == selected) // we've been through all items, nothing found
+                return;
+
+            // skip different stacks of the same item, or we will get stuck as stacking/unstacking them may change their relative ordering
+            if (Misc::StringUtils::ciEqual(lastId, item.getCellRef().getRefId()))
+                continue;
+
+            lastId = item.getCellRef().getRefId();
+
+            if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() && isRightHandWeapon(item))
+                found = true;
+        }
+
+        useItem(model.getItem(cycled).mBase);
+    }
+
+    void InventoryWindow::rebuildAvatar()
+    {
+        mPreview->rebuild();
     }
 }

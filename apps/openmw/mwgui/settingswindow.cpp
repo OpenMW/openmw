@@ -1,9 +1,14 @@
 #include "settingswindow.hpp"
 
 #include <OgreRoot.h>
-#include <OgrePlugin.h>
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_ScrollBar.h>
+#include <MyGUI_Window.h>
+#include <MyGUI_ComboBox.h>
+#include <MyGUI_ListBox.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_Gui.h>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/math/common_factor_rt.hpp>
 
@@ -48,8 +53,8 @@ namespace
         assert (split.size() >= 2);
         boost::trim(split[0]);
         boost::trim(split[1]);
-        x = boost::lexical_cast<int> (split[0]);
-        y = boost::lexical_cast<int> (split[1]);
+        x = MyGUI::utility::parseInt (split[0]);
+        y = MyGUI::utility::parseInt (split[1]);
     }
 
     bool sortResolutions (std::pair<int, int> left, std::pair<int, int> right)
@@ -67,7 +72,7 @@ namespace
         // special case: 8 : 5 is usually referred to as 16:10
         if (xaspect == 8 && yaspect == 5)
             return "16 : 10";
-        return boost::lexical_cast<std::string>(xaspect) + " : " + boost::lexical_cast<std::string>(yaspect);
+        return MyGUI::utility::toString(xaspect) + " : " + MyGUI::utility::toString(yaspect);
     }
 
     std::string hlslGlsl ()
@@ -105,9 +110,9 @@ namespace
         min = 0.f;
         max = 1.f;
         if (!widget->getUserString(settingMin).empty())
-            min = boost::lexical_cast<float>(widget->getUserString(settingMin));
+            min = MyGUI::utility::parseFloat(widget->getUserString(settingMin));
         if (!widget->getUserString(settingMax).empty())
-            max = boost::lexical_cast<float>(widget->getUserString(settingMax));
+            max = MyGUI::utility::parseFloat(widget->getUserString(settingMax));
     }
 }
 
@@ -167,6 +172,7 @@ namespace MWGui
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mFullscreenButton, "FullscreenButton");
         getWidget(mVSyncButton, "VSyncButton");
+        getWidget(mWindowBorderButton, "WindowBorderButton");
         getWidget(mFPSButton, "FPSButton");
         getWidget(mFOVSlider, "FOVSlider");
         getWidget(mAnisotropySlider, "AnisotropySlider");
@@ -183,6 +189,20 @@ namespace MWGui
         getWidget(mDifficultySlider, "DifficultySlider");
         getWidget(mKeyboardSwitch, "KeyboardButton");
         getWidget(mControllerSwitch, "ControllerButton");
+
+#ifndef WIN32
+        // hide gamma controls since it currently does not work under Linux
+        MyGUI::ScrollBar *gammaSlider;
+        getWidget(gammaSlider, "GammaSlider");
+        gammaSlider->setVisible(false);
+        MyGUI::TextBox *textBox;
+        getWidget(textBox, "GammaText");
+        textBox->setVisible(false);
+        getWidget(textBox, "GammaTextDark");
+        textBox->setVisible(false);
+        getWidget(textBox, "GammaTextLight");
+        textBox->setVisible(false);
+#endif
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SettingsWindow::onWindowResize);
 
@@ -215,7 +235,7 @@ namespace MWGui
         for (std::vector < std::pair<int, int> >::const_iterator it=resolutions.begin();
              it!=resolutions.end(); ++it)
         {
-            std::string str = boost::lexical_cast<std::string>(it->first) + " x " + boost::lexical_cast<std::string>(it->second)
+            std::string str = MyGUI::utility::toString(it->first) + " x " + MyGUI::utility::toString(it->second)
                     + " (" + getAspect(it->first,it->second) + ")";
 
             if (mResolutionList->findItemIndexWith(str) == MyGUI::ITEM_NONE)
@@ -224,7 +244,7 @@ namespace MWGui
 
         std::string tf = Settings::Manager::getString("texture filtering", "General");
         mTextureFilteringButton->setCaption(textureFilteringToStr(tf));
-        mAnisotropyLabel->setCaption("Anisotropy (" + boost::lexical_cast<std::string>(Settings::Manager::getInt("anisotropy", "General")) + ")");
+        mAnisotropyLabel->setCaption("Anisotropy (" + MyGUI::utility::toString(Settings::Manager::getInt("anisotropy", "General")) + ")");
 
         mShadowsTextureSize->setCaption (Settings::Manager::getString ("texture size", "Shadows"));
 
@@ -240,14 +260,20 @@ namespace MWGui
 
         MyGUI::TextBox* fovText;
         getWidget(fovText, "FovText");
-        fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("field of view", "General"))) + ")");
+        fovText->setCaption("Field of View (" + MyGUI::utility::toString(int(Settings::Manager::getInt("field of view", "General"))) + ")");
 
         MyGUI::TextBox* diffText;
         getWidget(diffText, "DifficultyText");
+<<<<<<< HEAD
         diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
 
         mKeyboardSwitch->setStateSelected(true);
         mControllerSwitch->setStateSelected(false);
+=======
+        diffText->setCaptionWithReplacing("#{sDifficulty} (" + MyGUI::utility::toString(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
+
+        mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
+>>>>>>> b44fc1904bd58b9143793bc7e1e750ae02f774fc
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
@@ -363,6 +389,8 @@ namespace MWGui
                 _sender->castType<MyGUI::Button>()->setCaption(off);
                 return;
             }
+
+            mWindowBorderButton->setEnabled(!newState);
         }
 
         if (getSettingType(_sender) == checkButtonType)
@@ -415,13 +443,13 @@ namespace MWGui
                 {
                     MyGUI::TextBox* fovText;
                     getWidget(fovText, "FovText");
-                    fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int(value)) + ")");
+                    fovText->setCaption("Field of View (" + MyGUI::utility::toString(int(value)) + ")");
                 }
                 if (scroller == mDifficultySlider)
                 {
                     MyGUI::TextBox* diffText;
                     getWidget(diffText, "DifficultyText");
-                    diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(value)) + ")");
+                    diffText->setCaptionWithReplacing("#{sDifficulty} (" + MyGUI::utility::toString(int(value)) + ")");
                 }
             }
             else
@@ -429,7 +457,7 @@ namespace MWGui
                 Settings::Manager::setInt(getSettingName(scroller), getSettingCategory(scroller), pos);
                 if (scroller == mAnisotropySlider)
                 {
-                    mAnisotropyLabel->setCaption("Anisotropy (" + boost::lexical_cast<std::string>(pos) + ")");
+                    mAnisotropyLabel->setCaption("Anisotropy (" + MyGUI::utility::toString(pos) + ")");
                 }
             }
             apply();

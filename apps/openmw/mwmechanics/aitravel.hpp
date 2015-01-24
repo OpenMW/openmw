@@ -23,6 +23,9 @@ namespace MWMechanics
             AiTravel(float x, float y, float z);
             AiTravel(const ESM::AiSequence::AiTravel* travel);
 
+            /// Simulates the passing of time
+            virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
+
             void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
             virtual AiTravel *clone() const;

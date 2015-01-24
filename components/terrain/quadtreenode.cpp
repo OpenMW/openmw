@@ -415,7 +415,7 @@ void QuadTreeNode::updateIndexBuffers()
         // Fetch a suitable index buffer (which may be shared)
         size_t ourLod = getActualLodLevel();
 
-        int flags = 0;
+        unsigned int flags = 0;
 
         for (int i=0; i<4; ++i)
         {
@@ -436,7 +436,7 @@ void QuadTreeNode::updateIndexBuffers()
             if (lod > 0)
             {
                 assert (lod - ourLod < (1 << 4));
-                flags |= int(lod - ourLod) << (4*i);
+                flags |= static_cast<unsigned int>(lod - ourLod) << (4*i);
             }
         }
         flags |= 0 /*((int)mAdditionalLod)*/ << (4*4);

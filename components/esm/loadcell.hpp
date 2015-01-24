@@ -78,7 +78,13 @@ struct Cell
     float mFogDensity;
   };
 
-  Cell() : mWater(0) {}
+  Cell() : mWater(0),
+           mName(""),
+           mRegion(""),
+           mWaterInt(false),
+           mMapColor(0),
+           mRefNumCounter(0)
+  {}
 
   // Interior cells are indexed by this (it's the 'id'), for exterior
   // cells it is optional.

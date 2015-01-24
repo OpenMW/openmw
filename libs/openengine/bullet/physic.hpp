@@ -182,8 +182,8 @@ namespace Physic
     {
         btCollisionShape* mCompound;
 
-        // Maps bone name to child index in the compound shape
-        std::map<std::string, int> mAnimatedShapes;
+        // Maps node record index to child index in the compound shape
+        std::map<int, int> mAnimatedShapes;
     };
 
     /**

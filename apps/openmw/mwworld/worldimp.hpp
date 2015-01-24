@@ -104,11 +104,12 @@ namespace MWWorld
 
             void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);
 
-            bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
-            ///< @return true if the active cell (cell player is in) changed
+            Ptr moveObjectImp (const Ptr& ptr, float x, float y, float z);
+            ///< @return an updated Ptr in case the Ptr's cell changes
 
             Ptr copyObjectToCell(const Ptr &ptr, CellStore* cell, ESM::Position pos, bool adjustPos=true);
 
+            void updateSoundListener();
             void updateWindowManager ();
             void performUpdateSceneQueries ();
             void getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer=true);
@@ -138,6 +139,9 @@ namespace MWWorld
             void loadContentFiles(const Files::Collections& fileCollections,
                 const std::vector<std::string>& content, ContentLoader& contentLoader);
 
+            bool isUnderwater(const MWWorld::Ptr &object, const float heightRatio) const;
+            ///< helper function for implementing isSwimming(), isSubmerged(), isWading()
+
             bool mTeleportEnabled;
             bool mLevitationEnabled;
             bool mGoToJail;
@@ -162,10 +166,11 @@ namespace MWWorld
             virtual void clear();
 
             virtual int countSavedGameRecords() const;
+            virtual int countSavedGameCells() const;
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type,
+            virtual void readRecord (ESM::ESMReader& reader, uint32_t type,
                 const std::map<int, int>& contentFileMap);
 
             virtual CellStore *getExterior (int x, int y);
@@ -340,7 +345,8 @@ namespace MWWorld
             virtual void deleteObject (const Ptr& ptr);
             virtual void undeleteObject (const Ptr& ptr);
 
-            virtual void moveObject (const Ptr& ptr, float x, float y, float z);
+            virtual MWWorld::Ptr moveObject (const Ptr& ptr, float x, float y, float z);
+            ///< @return an updated Ptr in case the Ptr's cell changes
             virtual void moveObject (const Ptr& ptr, CellStore* newCell, float x, float y, float z);
 
             virtual void scaleObject (const Ptr& ptr, float scale);
@@ -418,6 +424,14 @@ namespace MWWorld
             ///< Create a new record (of type book) in the ESM store.
             /// \return pointer to created record
 
+            virtual const ESM::CreatureLevList *createOverrideRecord (const ESM::CreatureLevList& record);
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
+            virtual const ESM::ItemLevList *createOverrideRecord (const ESM::ItemLevList& record);
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
             virtual void update (float duration, bool paused);
 
             virtual MWWorld::Ptr placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount);
@@ -444,10 +458,15 @@ namespace MWWorld
             virtual bool isSubmerged(const MWWorld::Ptr &object) const;
             virtual bool isSwimming(const MWWorld::Ptr &object) const;
             virtual bool isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const;
+            virtual bool isWading(const MWWorld::Ptr &object) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
 
             virtual void togglePOV() {
                 mRendering->togglePOV();
+            }
+
+            virtual bool isFirstPerson() const {
+                return mRendering->getCamera()->isFirstPerson();
             }
 
             virtual void togglePreviewMode(bool enable) {
@@ -608,7 +627,7 @@ namespace MWWorld
             virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const Ogre::Vector3& worldPos);
 
             virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
-                                       const MWWorld::Ptr& caster, const std::string& id, const std::string& sourceName);
+                                       const MWWorld::Ptr& caster, int rangeType, const std::string& id, const std::string& sourceName);
 
             virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor);
 

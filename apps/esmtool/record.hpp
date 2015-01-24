@@ -19,7 +19,7 @@ namespace EsmTool
     {
     protected:
         std::string mId;
-        int mFlags;
+        uint32_t mFlags;
         ESM::NAME mType;
         bool mPrintPlain;
 
@@ -40,20 +40,16 @@ namespace EsmTool
             mId = id;
         }
 
-        int getFlags() const {
+        uint32_t getFlags() const {
             return mFlags;
         }
 
-        void setFlags(int flags) {
+        void setFlags(uint32_t flags) {
             mFlags = flags;
         }
 
         ESM::NAME getType() const {
             return mType;
-        }
-
-        bool getPrintPlain() const {
-        	return mPrintPlain;
         }
 
         void setPrintPlain(bool plain) {

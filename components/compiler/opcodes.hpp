@@ -167,6 +167,7 @@ namespace Compiler
         const int opcodeSameFaction = 0x20001b5;
         const int opcodeSameFactionExplicit = 0x20001b6;
         const int opcodeModFactionReaction = 0x2000242;
+        const int opcodeSetFactionReaction = 0x20002ff;
         const int opcodeGetFactionReaction = 0x2000243;
         const int opcodeClearInfoActor = 0x2000245;
         const int opcodeClearInfoActorExplicit = 0x2000246;
@@ -184,6 +185,7 @@ namespace Compiler
         const int opcodeEnableMapMenu = 0x2000015;
         const int opcodeEnableStatsMenu = 0x2000016;
         const int opcodeEnableRest = 0x2000017;
+        const int opcodeEnableLevelupMenu = 0x2000300;
         const int opcodeShowRestMenu = 0x2000018;
         const int opcodeShowRestMenuExplicit = 0x2000234;
         const int opcodeGetButtonPressed = 0x2000137;
@@ -215,6 +217,9 @@ namespace Compiler
         const int opcodeToggleWorld = 0x20002f5;
         const int opcodeTogglePathgrid = 0x2000146;
         const int opcodeDontSaveObject = 0x2000153;
+        const int opcodePcForce1stPerson = 0x20002f6;
+        const int opcodePcForce3rdPerson = 0x20002f7;
+        const int opcodePcGet3rdPerson = 0x20002f8;
         const int opcodeToggleVanityMode = 0x2000174;
         const int opcodeGetPcSleep = 0x200019f;
         const int opcodeGetPcJumping = 0x2000233;
@@ -266,6 +271,8 @@ namespace Compiler
         const int opcodePayFineThief = 0x2000237;
         const int opcodeHitOnMe = 0x2000213;
         const int opcodeHitOnMeExplicit = 0x2000214;
+        const int opcodeHitAttemptOnMe = 0x20002f9;
+        const int opcodeHitAttemptOnMeExplicit = 0x20002fa;
         const int opcodeDisableTeleporting = 0x2000215;
         const int opcodeEnableTeleporting = 0x2000216;
         const int opcodeShowVars = 0x200021d;
@@ -279,6 +286,10 @@ namespace Compiler
         const int opcodeExplodeSpellExplicit = 0x200022a;
         const int opcodeGetPcInJail = 0x200023e;
         const int opcodeGetPcTraveling = 0x200023f;
+        const int opcodeAddToLevCreature = 0x20002fb;
+        const int opcodeRemoveFromLevCreature = 0x20002fc;
+        const int opcodeAddToLevItem = 0x20002fd;
+        const int opcodeRemoveFromLevItem = 0x20002fe;
     }
 
     namespace Sky

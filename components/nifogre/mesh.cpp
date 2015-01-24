@@ -382,7 +382,7 @@ NIFMeshLoader::NIFMeshLoader(const std::string &name, const std::string &group, 
 
 void NIFMeshLoader::loadResource(Ogre::Resource *resource)
 {
-    Ogre::Mesh *mesh = dynamic_cast<Ogre::Mesh*>(resource);
+    Ogre::Mesh *mesh = static_cast<Ogre::Mesh*>(resource);
     OgreAssert(mesh, "Attempting to load a mesh into a non-mesh resource!");
 
     Nif::NIFFilePtr nif = Nif::Cache::getInstance().load(mName);
@@ -395,7 +395,7 @@ void NIFMeshLoader::loadResource(Ogre::Resource *resource)
     }
 
     const Nif::Record *record = nif->getRecord(mShapeIndex);
-    createSubMesh(mesh, dynamic_cast<const Nif::NiTriShape*>(record));
+    createSubMesh(mesh, static_cast<const Nif::NiTriShape*>(record));
 }
 
 

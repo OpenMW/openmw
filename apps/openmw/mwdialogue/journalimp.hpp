@@ -71,7 +71,7 @@ namespace MWDialogue
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+            virtual void readRecord (ESM::ESMReader& reader, uint32_t type);
     };
 }
 

@@ -39,7 +39,6 @@ namespace MWRender
                         Ogre::SceneNode* rootNode,
                           const std::string& material
                     );
-        BillboardObject();
 
         void requestedConfiguration (sh::MaterialInstance* m, const std::string& configuration);
         void createdConfiguration (sh::MaterialInstance* m, const std::string& configuration);

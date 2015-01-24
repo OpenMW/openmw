@@ -209,6 +209,8 @@ bool Launcher::MainDialog::setup()
     if (!setupGameSettings())
         return false;
 
+    mLauncherSettings.setContentList(mGameSettings);
+
     if (!setupGraphicsSettings())
         return false;
 
@@ -231,6 +233,8 @@ bool Launcher::MainDialog::reloadSettings()
 
     if (!setupGameSettings())
         return false;
+
+    mLauncherSettings.setContentList(mGameSettings);
 
     if (!setupGraphicsSettings())
         return false;
@@ -280,8 +284,8 @@ bool Launcher::MainDialog::setupLauncherSettings()
     QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
 
     QStringList paths;
-    paths.append(QString("launcher.cfg"));
-    paths.append(userPath + QString("launcher.cfg"));
+    paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
+    paths.append(userPath + QString(Config::LauncherSettings::sLauncherConfigFileName));
 
     foreach (const QString &path, paths) {
         qDebug() << "Loading config file:" << qPrintable(path);
@@ -562,7 +566,7 @@ bool Launcher::MainDialog::writeSettings()
     file.close();
 
     // Launcher settings
-    file.setFileName(userPath + QString("launcher.cfg"));
+    file.setFileName(userPath + QString(Config::LauncherSettings::sLauncherConfigFileName));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created

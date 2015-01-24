@@ -22,7 +22,7 @@ struct ESMData
 {
     std::string author;
     std::string description;
-    int version;
+    unsigned int version;
     std::vector<ESM::Header::MasterData> masters;
 
     std::deque<EsmTool::RecordBase *> mRecords;
@@ -48,9 +48,9 @@ const std::set<int> ESMData::sLabeledRec =
 // Based on the legacy struct
 struct Arguments
 {
-    unsigned int raw_given;
-    unsigned int quiet_given;
-    unsigned int loadcells_given;
+    bool raw_given;
+    bool quiet_given;
+    bool loadcells_given;
     bool plain_given;
 
     std::string mode;
@@ -177,10 +177,10 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
         info.outname = variables["input-file"].as< std::vector<std::string> >()[1];
 
-    info.raw_given = variables.count ("raw");
-    info.quiet_given = variables.count ("quiet");
-    info.loadcells_given = variables.count ("loadcells");
-    info.plain_given = (variables.count("plain") > 0);
+    info.raw_given = variables.count ("raw") != 0;
+    info.quiet_given = variables.count ("quiet") != 0;
+    info.loadcells_given = variables.count ("loadcells") != 0;
+    info.plain_given = variables.count("plain") != 0;
 
     // Font encoding settings
     info.encoding = variables["encoding"].as<std::string>();
@@ -203,19 +203,27 @@ int comp(Arguments& info);
 
 int main(int argc, char**argv)
 {
-    Arguments info;
-    if(!parseOptions (argc, argv, info))
-        return 1;
-
-    if (info.mode == "dump")
-        return load(info);
-    else if (info.mode == "clone")
-        return clone(info);
-    else if (info.mode == "comp")
-        return comp(info);
-    else
+    try
     {
-        std::cout << "Invalid or no mode specified, dying horribly. Have a nice day." << std::endl;
+        Arguments info;
+        if(!parseOptions (argc, argv, info))
+            return 1;
+
+        if (info.mode == "dump")
+            return load(info);
+        else if (info.mode == "clone")
+            return clone(info);
+        else if (info.mode == "comp")
+            return comp(info);
+        else
+        {
+            std::cout << "Invalid or no mode specified, dying horribly. Have a nice day." << std::endl;
+            return 1;
+        }
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "ERROR: " << e.what() << std::endl;
         return 1;
     }
 
@@ -253,7 +261,7 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
         std::cout << "    Faction: '" << ref.mFaction << "'" << std::endl;
         std::cout << "    Faction rank: '" << ref.mFactionRank << "'" << std::endl;
         std::cout << "    Enchantment charge: '" << ref.mEnchantmentCharge << "'\n";
-        std::cout << "    Uses/health: '" << ref.mCharge << "'\n";
+        std::cout << "    Uses/health: '" << ref.mChargeInt << "'\n";
         std::cout << "    Gold value: '" << ref.mGoldValue << "'\n";
         std::cout << "    Blocked: '" << static_cast<int>(ref.mReferenceBlocked) << "'" << std::endl;
         std::cout << "    Deleted: " << deleted << std::endl;
@@ -273,8 +281,10 @@ void printRaw(ESM::ESMReader &esm)
             esm.getSubName();
             esm.skipHSub();
             n = esm.retSubName();
+            std::ios::fmtflags f(std::cout.flags());
             std::cout << "    " << n.toString() << " - " << esm.getSubSize()
                  << " bytes @ 0x" << std::hex << offs << "\n";
+            std::cout.flags(f);
         }
     }
 }
@@ -420,7 +430,7 @@ int clone(Arguments& info)
         return 1;
     }
 
-    int recordCount = info.data.mRecords.size();
+    size_t recordCount = info.data.mRecords.size();
 
     int digitCount = 1; // For a nicer output
     if (recordCount > 9) ++digitCount;
@@ -491,9 +501,9 @@ int clone(Arguments& info)
             if (!info.data.mCellRefs[ptr].empty()) {
                 typedef std::deque<ESM::CellRef> RefList;
                 RefList &refs = info.data.mCellRefs[ptr];
-                for (RefList::iterator it = refs.begin(); it != refs.end(); ++it)
+                for (RefList::iterator refIt = refs.begin(); refIt != refs.end(); ++refIt)
                 {
-                    it->save(esm);
+                    refIt->save(esm);
                 }
             }
         }
@@ -501,7 +511,7 @@ int clone(Arguments& info)
         esm.endRecord(name.toString());
 
         saved++;
-        int perc = (saved / (float)recordCount)*100;
+        int perc = (int)((saved / (float)recordCount)*100);
         if (perc % 10 == 0)
         {
             std::cerr << "\r" << perc << "%";

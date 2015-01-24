@@ -6,6 +6,12 @@
 
 void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
 {
+    loadId(esm, wideRefNum);
+    loadData(esm);
+}
+
+void ESM::CellRef::loadId(ESMReader &esm, bool wideRefNum)
+{
     // According to Hrnchamd, this does not belong to the actual ref. Instead, it is a marker indicating that
     // the following refs are part of a "temp refs" section. A temp ref is not being tracked by the moved references system.
     // Its only purpose is a performance optimization for "immovable" things. We don't need this, and it's problematic anyway,
@@ -19,7 +25,10 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
         esm.getHNT (mRefNum.mIndex, "FRMR");
 
     mRefID = esm.getHNString ("NAME");
+}
 
+void ESM::CellRef::loadData(ESMReader &esm)
+{
     // Again, UNAM sometimes appears after NAME and sometimes later.
     // Or perhaps this UNAM means something different?
     mReferenceBlocked = -1;
@@ -37,12 +46,12 @@ void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
     esm.getHNOT (mFactionRank, "INDX");
 
     mGoldValue = 1;
-    mCharge = -1;
+    mChargeInt = -1;
     mEnchantmentCharge = -1;
 
     esm.getHNOT (mEnchantmentCharge, "XCHG");
 
-    esm.getHNOT (mCharge, "INTV");
+    esm.getHNOT (mChargeInt, "INTV");
 
     esm.getHNOT (mGoldValue, "NAM9");
 
@@ -97,8 +106,8 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
     if (mEnchantmentCharge != -1)
         esm.writeHNT("XCHG", mEnchantmentCharge);
 
-    if (mCharge != -1)
-        esm.writeHNT("INTV", mCharge);
+    if (mChargeInt != -1)
+        esm.writeHNT("INTV", mChargeInt);
 
     if (mGoldValue != 1) {
         esm.writeHNT("NAM9", mGoldValue);
@@ -129,8 +138,7 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
 
 void ESM::CellRef::blank()
 {
-    mRefNum.mIndex = 0;
-    mRefNum.mContentFile = -1;
+    mRefNum.unset();
     mRefID.clear();
     mScale = 1;
     mOwner.clear();
@@ -138,8 +146,8 @@ void ESM::CellRef::blank()
     mSoul.clear();
     mFaction.clear();
     mFactionRank = -2;
-    mCharge = 0;
-    mEnchantmentCharge = 0;
+    mChargeInt = -1;
+    mEnchantmentCharge = -1;
     mGoldValue = 0;
     mDestCell.clear();
     mLockLevel = 0;
