@@ -23,6 +23,10 @@ namespace ESSImport
             mKnownDialogueTopics.push_back(esm.getHString());
         }
 
+        if (esm.isNextSub("MNAM"))
+            esm.skipHSub(); // If this field is here it seems to specify the interior cell the player is in,
+                            // but it's not always here, so it's kinda useless
+
         esm.getHNT(mPNAM, "PNAM");
 
         if (esm.isNextSub("SNAM"))
@@ -59,8 +63,11 @@ namespace ESSImport
             mFactions.push_back(fnam);
         }
 
+        if (esm.isNextSub("AADT"))
+            esm.skipHSub(); // 44 bytes, no clue
+
         if (esm.isNextSub("KNAM"))
-            esm.skipHSub();
+            esm.skipHSub(); // assigned Quick Keys, I think
 
         if (esm.isNextSub("WERE"))
         {
@@ -69,6 +76,10 @@ namespace ESSImport
             esm.getSubHeader();
             esm.skip(152);
         }
+
+        // unsure if before or after WERE
+        if (esm.isNextSub("ANIS"))
+            esm.skipHSub();
     }
 
 }

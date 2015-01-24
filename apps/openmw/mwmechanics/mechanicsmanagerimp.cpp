@@ -1360,7 +1360,7 @@ namespace MWMechanics
         mActors.write(writer, listener);
     }
 
-    void MechanicsManager::readRecord(ESM::ESMReader &reader, int32_t type)
+    void MechanicsManager::readRecord(ESM::ESMReader &reader, uint32_t type)
     {
         mActors.readRecord(reader, type);
     }

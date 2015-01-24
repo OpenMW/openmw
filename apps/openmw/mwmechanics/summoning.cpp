@@ -5,6 +5,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwmechanics/spellcasting.hpp"
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/manualref.hpp"
@@ -51,8 +53,7 @@ namespace MWMechanics
 
     void UpdateSummonedCreatures::visit(EffectKey key, const std::string &sourceName, const std::string &sourceId, int casterActorId, float magnitude, float remainingTime, float totalTime)
     {
-        if (key.mId >= ESM::MagicEffect::SummonScamp
-                && key.mId <= ESM::MagicEffect::SummonStormAtronach && magnitude > 0)
+        if (isSummoningEffect(key.mId) && magnitude > 0)
         {
             mActiveEffects.insert(std::make_pair(key.mId, sourceId));
         }

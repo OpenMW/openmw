@@ -96,15 +96,17 @@ enum RecNameInts
     REC_WEAP = 0x50414557,
 
     // format 0 - saved games
-    REC_SAVE = 0x45564153,
-    REC_JOUR = 0x524f55a4,
-    REC_QUES = 0x53455551,
-    REC_GSCR = 0x52435347,
-    REC_PLAY = 0x59414c50,
-    REC_CSTA = 0x41545343,
-    REC_GMAP = 0x50414d47,
-    REC_DIAS = 0x53414944,
-    REC_WTHR = 0x52485457,
+    REC_SAVE = FourCC<'S','A','V','E'>::value,
+    REC_JOUR_LEGACY = FourCC<0xa4,'U','O','R'>::value, // "\xa4UOR", rather than "JOUR", little oversight when magic numbers were
+                                                       // calculated by hand, needs to be supported for older files now
+    REC_JOUR = FourCC<'J','O','U','R'>::value,
+    REC_QUES = FourCC<'Q','U','E','S'>::value,
+    REC_GSCR = FourCC<'G','S','C','R'>::value,
+    REC_PLAY = FourCC<'P','L','A','Y'>::value,
+    REC_CSTA = FourCC<'C','S','T','A'>::value,
+    REC_GMAP = FourCC<'G','M','A','P'>::value,
+    REC_DIAS = FourCC<'D','I','A','S'>::value,
+    REC_WTHR = FourCC<'W','T','H','R'>::value,
     REC_KEYS = FourCC<'K','E','Y','S'>::value,
     REC_DYNA = FourCC<'D','Y','N','A'>::value,
     REC_ASPL = FourCC<'A','S','P','L'>::value,
@@ -117,7 +119,7 @@ enum RecNameInts
     REC_CAM_ = FourCC<'C','A','M','_'>::value,
 
     // format 1
-    REC_FILT = 0x544C4946,
+    REC_FILT = FourCC<'F','I','L','T'>::value,
     REC_DBGP = FourCC<'D','B','G','P'>::value ///< only used in project files
 };
 

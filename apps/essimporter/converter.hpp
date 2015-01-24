@@ -12,6 +12,7 @@
 #include <components/esm/loadfact.hpp>
 #include <components/esm/dialoguestate.hpp>
 #include <components/esm/custommarkerstate.hpp>
+#include <components/esm/loadcrea.hpp>
 
 #include "importcrec.hpp"
 #include "importcntc.hpp"
@@ -19,6 +20,12 @@
 #include "importercontext.hpp"
 #include "importcellref.hpp"
 #include "importklst.hpp"
+#include "importgame.hpp"
+#include "importinfo.hpp"
+#include "importdial.hpp"
+#include "importques.hpp"
+#include "importjour.hpp"
+#include "importscpt.hpp"
 
 #include "convertacdt.hpp"
 #include "convertnpcc.hpp"
@@ -86,24 +93,52 @@ class ConvertNPC : public Converter
 public:
     virtual void read(ESM::ESMReader &esm)
     {
-        // this is always the player
         ESM::NPC npc;
         std::string id = esm.getHNString("NAME");
         npc.load(esm);
-        if (id != "player") // seems to occur sometimes, with "chargen X" names
-            std::cerr << "non-player NPC record: " << id << std::endl;
+        if (id != "player")
+        {
+            // TODO:
+            // this should handle changes to the NPC struct, but since there is no index here
+            // it will apply to ALL instances of the class. seems to be the reason for the
+            // "feature" in MW where changing AI settings of one guard will change it for all guards of that refID.
+        }
         else
         {
             mContext->mPlayer.mObject.mCreatureStats.mLevel = npc.mNpdt52.mLevel;
             mContext->mPlayerBase = npc;
             std::map<const int, float> empty;
-            // FIXME: player start spells, racial spells and birthsign spells aren't listed here,
+            // FIXME: player start spells and birthsign spells aren't listed here,
             // need to fix openmw to account for this
             for (std::vector<std::string>::const_iterator it = npc.mSpells.mList.begin(); it != npc.mSpells.mList.end(); ++it)
                 mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[*it] = empty;
+
+            // Clear the list now that we've written it, this prevents issues cropping up with
+            // ensureCustomData() in OpenMW tripping over no longer existing spells, where an error would be fatal.
+            mContext->mPlayerBase.mSpells.mList.clear();
+
+            // Same with inventory. Actually it's strange this would contain something, since there's already an
+            // inventory list in NPCC. There seems to be a fair amount of redundancy in this format.
+            mContext->mPlayerBase.mInventory.mList.clear();
         }
     }
 };
+
+class ConvertCREA : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader &esm)
+    {
+        // See comment in ConvertNPC
+        ESM::Creature creature;
+        std::string id = esm.getHNString("NAME");
+        creature.load(esm);
+    }
+};
+
+// Do we need ConvertCONT?
+// I've seen a CONT record in a certain save file, but the container contents in it
+// were identical to a corresponding CNTC record. See previous comment about redundancy...
 
 class ConvertGlobal : public DefaultConverter<ESM::Global>
 {
@@ -191,7 +226,28 @@ public:
 
         ESM::NpcStats& npcStats = mContext->mPlayer.mObject.mNpcStats;
         convertNpcData(refr.mActorData, npcStats);
+
+        mSelectedSpell = refr.mActorData.mSelectedSpell;
+        if (!refr.mActorData.mSelectedEnchantItem.empty())
+        {
+            ESM::InventoryState& invState = mContext->mPlayer.mObject.mInventory;
+
+            for (unsigned int i=0; i<invState.mItems.size(); ++i)
+            {
+                // FIXME: in case of conflict (multiple items with this refID) use the already equipped one?
+                if (Misc::StringUtils::ciEqual(invState.mItems[i].mRef.mRefID, refr.mActorData.mSelectedEnchantItem))
+                    invState.mSelectedEnchantItem = i;
+            }
+        }
     }
+    virtual void write(ESM::ESMWriter& esm)
+    {
+        esm.startRecord(ESM::REC_ASPL);
+        esm.writeHNString("ID__", mSelectedSpell);
+        esm.endRecord(ESM::REC_ASPL);
+    }
+private:
+    std::string mSelectedSpell;
 };
 
 class ConvertPCDT : public Converter
@@ -329,20 +385,92 @@ public:
     {
         std::string itemid = esm.getHNString("NAME");
 
-        while (esm.isNextSub("ONAM"))
+        while (esm.isNextSub("FNAM") || esm.isNextSub("ONAM"))
         {
-            std::string ownerid = esm.getHString();
-            mStolenItems.insert(std::make_pair(itemid, ownerid));
-        }
-        while (esm.isNextSub("FNAM"))
-        {
-            std::string factionid = esm.getHString();
-            mFactionStolenItems.insert(std::make_pair(itemid, factionid));
+            if (esm.retSubName().toString() == "FNAM")
+            {
+                std::string factionid = esm.getHString();
+                mFactionStolenItems.insert(std::make_pair(itemid, factionid));
+            }
+            else
+            {
+                std::string ownerid = esm.getHString();
+                mStolenItems.insert(std::make_pair(itemid, ownerid));
+            }
         }
     }
 private:
     std::multimap<std::string, std::string> mStolenItems;
     std::multimap<std::string, std::string> mFactionStolenItems;
+};
+
+/// Seen responses for a dialogue topic?
+/// Each DIAL record is followed by a number of INFO records, I believe, just like in ESMs
+/// Dialogue conversion problems (probably have to adjust OpenMW format) -
+/// - Journal is stored in one continuous HTML markup rather than each entry separately with associated info ID.
+/// - Seen dialogue responses only store the INFO id, rather than the fulltext.
+/// - Quest stages only store the INFO id, rather than the journal entry fulltext.
+class ConvertINFO : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader& esm)
+    {
+        INFO info;
+        info.load(esm);
+    }
+};
+
+class ConvertDIAL : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader& esm)
+    {
+        std::string id = esm.getHNString("NAME");
+        DIAL dial;
+        dial.load(esm);
+    }
+};
+
+class ConvertQUES : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader& esm)
+    {
+        std::string id = esm.getHNString("NAME");
+        QUES quest;
+        quest.load(esm);
+    }
+};
+
+class ConvertJOUR : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader& esm)
+    {
+        JOUR journal;
+        journal.load(esm);
+    }
+};
+
+class ConvertGAME : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader &esm)
+    {
+        GAME game;
+        game.load(esm);
+    }
+};
+
+/// Running global script
+class ConvertSCPT : public Converter
+{
+public:
+    virtual void read(ESM::ESMReader &esm)
+    {
+        SCPT script;
+        script.load(esm);
+    }
 };
 
 }

@@ -647,7 +647,7 @@ namespace MWDialogue
         writer.endRecord (ESM::REC_DIAS);
     }
 
-    void DialogueManager::readRecord (ESM::ESMReader& reader, int32_t type)
+    void DialogueManager::readRecord (ESM::ESMReader& reader, uint32_t type)
     {
         if (type==ESM::REC_DIAS)
         {

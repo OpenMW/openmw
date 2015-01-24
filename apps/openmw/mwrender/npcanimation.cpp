@@ -263,17 +263,27 @@ void NpcAnimation::updateNpcBase()
     }
     else
     {
-        if (isVampire)
+        mHeadModel = "";
+        if (isVampire) // FIXME: fall back to regular head when getVampireHead fails?
             mHeadModel = getVampireHead(mNpc->mRace, mNpc->mFlags & ESM::NPC::Female);
         else if (!mNpc->mHead.empty())
-            mHeadModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHead)->mModel;
-        else
-            mHeadModel = "";
+        {
+            const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(mNpc->mHead);
+            if (bp)
+                mHeadModel = "meshes\\" + bp->mModel;
+            else
+                std::cerr << "Failed to load body part '" << mNpc->mHead << "'" << std::endl;
+        }
 
+        mHairModel = "";
         if (!mNpc->mHair.empty())
-            mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHair)->mModel;
-        else
-            mHairModel = "";
+        {
+            const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(mNpc->mHair);
+            if (bp)
+                mHairModel = "meshes\\" + bp->mModel;
+            else
+                std::cerr << "Failed to load body part '" << mNpc->mHair << "'" << std::endl;
+        }
     }
 
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
@@ -801,6 +811,8 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
                     bodypart = NULL;
             }
+            else if (!bodypart)
+                std::cerr << "Failed to find body part '" << part->mFemale << "'" << std::endl;
         }
         if(!bodypart && !part->mMale.empty())
         {
@@ -814,6 +826,8 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
                     bodypart = NULL;
             }
+            else if (!bodypart)
+                std::cerr << "Failed to find body part '" << part->mMale << "'" << std::endl;
         }
 
         if(bodypart)

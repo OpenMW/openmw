@@ -431,7 +431,7 @@ namespace MWGui
         writer.endRecord(ESM::REC_KEYS);
     }
 
-    void QuickKeysMenu::readRecord(ESM::ESMReader &reader, int32_t type)
+    void QuickKeysMenu::readRecord(ESM::ESMReader &reader, uint32_t type)
     {
         if (type != ESM::REC_KEYS)
             return;

@@ -9,18 +9,16 @@ namespace ESSImport
 
     void ActorData::load(ESM::ESMReader &esm)
     {
-         // unsure at which point between NAME and ESM::CellRef
-        if (esm.isNextSub("MNAM"))
-            esm.skipHSub();
-
         if (esm.isNextSub("ACTN"))
             esm.skipHSub();
 
         if (esm.isNextSub("STPR"))
             esm.skipHSub();
 
-        ESM::CellRef bla;
-        bla.ESM::CellRef::loadData(esm);
+        if (esm.isNextSub("MNAM"))
+           esm.skipHSub();
+
+        ESM::CellRef::loadData(esm);
 
         // FIXME: not all actors have this, add flag
         esm.getHNOT(mACDT, "ACDT");
@@ -62,15 +60,18 @@ namespace ESSImport
         if (esm.isNextSub("PWPS"))
             esm.skipHSub();
 
+        // unsure at which point between LSTN and CHRD
+        if (esm.isNextSub("APUD"))
+            esm.skipHSub(); // 40 bytes, starts with string "ancestor guardian". maybe spellcasting in progress?
+
         if (esm.isNextSub("WNAM"))
         {
-            esm.skipHSub(); // seen values: "ancestor guardian", "bound dagger_en". Summoned creature / bound weapons?
+            std::string id = esm.getHString();
 
             if (esm.isNextSub("XNAM"))
-            {
-                // "demon tanto", probably the ID of spell/item that created the bound weapon/crature?
-                esm.skipHSub();
-            }
+                mSelectedEnchantItem = esm.getHString();
+            else
+                mSelectedSpell = id;
 
             if (esm.isNextSub("YNAM"))
                 esm.skipHSub(); // 4 byte, 0
@@ -83,18 +84,7 @@ namespace ESSImport
         if (esm.isNextSub("CRED")) // creature only
             esm.getHExact(mCombatStats, 3*2*sizeof(int));
 
-        mScript = esm.getHNOString("SCRI");
-
-        // script variables?
-        if (!mScript.empty())
-        {
-            if (esm.isNextSub("SLCS"))
-                esm.skipHSub();
-            if (esm.isNextSub("SLSD")) // Short Data?
-                esm.skipHSub();
-            if (esm.isNextSub("SLFD")) // Float Data?
-                esm.skipHSub();
-        }
+        mSCRI.load(esm);
 
         if (esm.isNextSub("ND3D"))
             esm.skipHSub();

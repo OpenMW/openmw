@@ -7,6 +7,8 @@ namespace ESSImport
 
     void CellRef::load(ESM::ESMReader &esm)
     {
+        blank();
+
         // (FRMR subrecord name is already read by the loop in ConvertCell)
         esm.getHT(mRefNum.mIndex); // FRMR
 
@@ -17,25 +19,32 @@ namespace ESSImport
 
         mIndexedRefId = esm.getHNString("NAME");
 
+        ActorData::load(esm);
         if (esm.isNextSub("LVCR"))
         {
             // occurs on leveled creature spawner references
-            // probably some identifier for the the creature that has been spawned?
+            // probably some identifier for the creature that has been spawned?
             unsigned char lvcr;
             esm.getHT(lvcr);
             //std::cout << "LVCR: " << (int)lvcr << std::endl;
         }
-        mActorData.load(esm);
 
         mEnabled = true;
         esm.getHNOT(mEnabled, "ZNAM");
 
-        // should occur for all references but not levelled creature spawners
-        esm.getHNOT(mPos, "DATA", 24);
-
-        // i've seen DATA record TWICE on a creature record - and with the exact same content too! weird
+        // DATA should occur for all references, except leveled creature spawners
+        // I've seen DATA *twice* on a creature record, and with the exact same content too! weird
         // alarmvoi0000.ess
         esm.getHNOT(mPos, "DATA", 24);
+        esm.getHNOT(mPos, "DATA", 24);
+
+        mDeleted = 0;
+        if (esm.isNextSub("DELE"))
+        {
+            unsigned int deleted;
+            esm.getHT(deleted);
+            mDeleted = (deleted >> 24) & 0x2; // the other 3 bytes seem to be uninitialized garbage
+        }
 
         if (esm.isNextSub("MVRF"))
         {

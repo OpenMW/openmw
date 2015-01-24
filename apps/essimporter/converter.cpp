@@ -9,6 +9,7 @@
 
 #include "convertcrec.hpp"
 #include "convertcntc.hpp"
+#include "convertscri.hpp"
 
 namespace
 {
@@ -27,12 +28,20 @@ namespace
         objstate.mEnabled = cellref.mEnabled;
         objstate.mPosition = cellref.mPos;
         objstate.mRef.mRefNum = cellref.mRefNum;
+        if (cellref.mDeleted)
+            objstate.mCount = 0;
+        convertSCRI(cellref.mSCRI, objstate.mLocals);
+        objstate.mHasLocals = !objstate.mLocals.mVariables.empty();
     }
 
     bool isIndexedRefId(const std::string& indexedRefId)
     {
         if (indexedRefId.size() <= 8)
             return false;
+
+        if (indexedRefId.find_first_not_of("0123456789") == std::string::npos)
+            return false; // entirely numeric refid, this is a reference to
+                          // a dynamically created record e.g. player-enchanted weapon
 
         std::string index = indexedRefId.substr(indexedRefId.size()-8);
         if(index.find_first_not_of("0123456789ABCDEF") == std::string::npos )
@@ -69,6 +78,12 @@ namespace ESSImport
         std::string id = esm.getHNString("NAME");
         cell.mName = id;
         cell.load(esm, false);
+
+        // I wonder what 0x40 does?
+        if (cell.isExterior() && cell.mData.mFlags & 0x20)
+        {
+            mContext->mGlobalMapState.mMarkers.insert(std::make_pair(cell.mData.mX, cell.mData.mY));
+        }
 
         // note if the player is in a nameless exterior cell, we will assign the cellId later based on player position
         if (id == mContext->mPlayerCellName)
@@ -136,13 +151,6 @@ namespace ESSImport
         {
             CellRef ref;
             ref.load (esm);
-            if (esm.isNextSub("DELE"))
-            {
-                // TODO
-                // strangely this can be e.g. 52 instead of just 1,
-                //std::cout << "deleted ref " << ref.mIndexedRefId << std::endl;
-                esm.skipHSub();
-            }
             cellrefs.push_back(ref);
         }
 
@@ -201,8 +209,7 @@ namespace ESSImport
         for (std::vector<CellRef>::const_iterator refIt = cell.mRefs.begin(); refIt != cell.mRefs.end(); ++refIt)
         {
             const CellRef& cellref = *refIt;
-            ESM::CellRef out;
-            out.blank();
+            ESM::CellRef out (cellref);
 
             if (!isIndexedRefId(cellref.mIndexedRefId))
             {
@@ -241,8 +248,8 @@ namespace ESSImport
                     objstate.mRef.mRefID = idLower;
                     // probably need more micromanagement here so we don't overwrite values
                     // from the ESM with default values
-                    convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
-                    convertNpcData(cellref.mActorData, objstate.mNpcStats);
+                    convertACDT(cellref.mACDT, objstate.mCreatureStats);
+                    convertNpcData(cellref, objstate.mNpcStats);
                     convertNPCC(npccIt->second, objstate);
                     convertCellRef(cellref, objstate);
                     esm.writeHNT ("OBJE", ESM::REC_NPC_);
@@ -273,7 +280,7 @@ namespace ESSImport
                     objstate.blank();
                     objstate.mRef = out;
                     objstate.mRef.mRefID = idLower;
-                    convertACDT(cellref.mActorData.mACDT, objstate.mCreatureStats);
+                    convertACDT(cellref.mACDT, objstate.mCreatureStats);
                     // probably need more micromanagement here so we don't overwrite values
                     // from the ESM with default values
                     convertCREC(crecIt->second, objstate);
@@ -306,6 +313,10 @@ namespace ESSImport
             it->save(esm);
             esm.endRecord(ESM::REC_MARK);
         }
+
+        esm.startRecord(ESM::REC_GMAP);
+        mContext->mGlobalMapState.save(esm);
+        esm.endRecord(ESM::REC_GMAP);
     }
 
 }

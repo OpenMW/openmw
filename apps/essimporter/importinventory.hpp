@@ -5,6 +5,7 @@
 #include <string>
 
 #include <components/esm/cellref.hpp>
+#include "importscri.hpp"
 
 namespace ESM
 {
@@ -20,7 +21,8 @@ namespace ESSImport
         {
             std::string mId;
             int mCount;
-            int mCondition;
+            int mRelativeEquipmentSlot;
+            SCRI mSCRI;
         };
         std::vector<InventoryItem> mItems;
 

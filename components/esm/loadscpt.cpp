@@ -7,12 +7,6 @@
 namespace ESM
 {
 
-struct SCHD
-{
-    NAME32              mName;
-    Script::SCHDstruct  mData;
-};
-
     unsigned int Script::sRecordId = REC_SCPT;
 
 void Script::load(ESMReader &esm)
@@ -91,32 +85,6 @@ void Script::load(ESMReader &esm)
     // appear here.
     if (esm.isNextSub("SCVR")) {
         esm.skipHSub();
-    }
-
-    // ESS only, TODO: move
-    if (esm.isNextSub("SLCS"))
-    {
-        esm.getSubHeader();
-        char unknown[12];
-        esm.getExact(unknown, 12);
-    }
-    if (esm.isNextSub("SLSD"))
-    {
-        float read;
-        esm.getSubHeader();
-        // values of variables?
-        for (int i=0; i<mData.mNumShorts; ++i)
-            esm.getExact(&read, 2);
-        for (int i=0; i<mData.mNumLongs; ++i)
-            esm.getExact(&read, 4);
-        for (int i=0; i<mData.mNumFloats; ++i)
-            esm.getExact(&read, 4);
-    }
-    if (esm.isNextSub("RNAM"))
-    {
-        // RefNum? something to do with targetted scripts?
-        int refnum;
-        esm.getHT(refnum);
     }
 }
 void Script::save(ESMWriter &esm) const

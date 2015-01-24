@@ -105,6 +105,7 @@ namespace ESSImport
         blacklist.insert(std::make_pair("REFR", "DATA")); // player position
         blacklist.insert(std::make_pair("CELL", "NAM8")); // fog of war
         blacklist.insert(std::make_pair("GAME", "GMDT")); // weather data, current time always changes
+        blacklist.insert(std::make_pair("CELL", "DELE")); // first 3 bytes are uninitialized
 
          // this changes way too often, name suggests some renderer internal data?
         blacklist.insert(std::make_pair("CELL", "ND3D"));
@@ -122,7 +123,7 @@ namespace ESSImport
 
             if (i >= file2.mRecords.size())
             {
-                std::cout << "Record in file1 not present in file2: (1) 0x" << std::hex << rec.mFileOffset;
+                std::cout << "Record in file1 not present in file2: (1) 0x" << std::hex << rec.mFileOffset << std::endl;
                 return;
             }
 
@@ -141,7 +142,7 @@ namespace ESSImport
 
                 if (j >= rec2.mSubrecords.size())
                 {
-                    std::cout << "Subrecord in file1 not present in file2: (1) 0x" << std::hex << sub.mFileOffset;
+                    std::cout << "Subrecord in file1 not present in file2: (1) 0x" << std::hex << sub.mFileOffset << std::endl;
                     return;
                 }
 
@@ -201,11 +202,14 @@ namespace ESSImport
         const unsigned int recFMAP = ESM::FourCC<'F','M','A','P'>::value;
         const unsigned int recKLST = ESM::FourCC<'K','L','S','T'>::value;
         const unsigned int recSTLN = ESM::FourCC<'S','T','L','N'>::value;
+        const unsigned int recGAME = ESM::FourCC<'G','A','M','E'>::value;
+        const unsigned int recJOUR = ESM::FourCC<'J','O','U','R'>::value;
 
         std::map<unsigned int, boost::shared_ptr<Converter> > converters;
         converters[ESM::REC_GLOB] = boost::shared_ptr<Converter>(new ConvertGlobal());
         converters[ESM::REC_BOOK] = boost::shared_ptr<Converter>(new ConvertBook());
         converters[ESM::REC_NPC_] = boost::shared_ptr<Converter>(new ConvertNPC());
+        converters[ESM::REC_CREA] = boost::shared_ptr<Converter>(new ConvertCREA());
         converters[ESM::REC_NPCC] = boost::shared_ptr<Converter>(new ConvertNPCC());
         converters[ESM::REC_CREC] = boost::shared_ptr<Converter>(new ConvertCREC());
         converters[recREFR      ] = boost::shared_ptr<Converter>(new ConvertREFR());
@@ -213,6 +217,7 @@ namespace ESSImport
         converters[recFMAP      ] = boost::shared_ptr<Converter>(new ConvertFMAP());
         converters[recKLST      ] = boost::shared_ptr<Converter>(new ConvertKLST());
         converters[recSTLN      ] = boost::shared_ptr<Converter>(new ConvertSTLN());
+        converters[recGAME      ] = boost::shared_ptr<Converter>(new ConvertGAME());
         converters[ESM::REC_CELL] = boost::shared_ptr<Converter>(new ConvertCell());
         converters[ESM::REC_ALCH] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::Potion>());
         converters[ESM::REC_CLAS] = boost::shared_ptr<Converter>(new ConvertClass());
@@ -226,6 +231,17 @@ namespace ESSImport
         converters[ESM::REC_LEVI] = boost::shared_ptr<Converter>(new DefaultConverter<ESM::ItemLevList>());
         converters[ESM::REC_CNTC] = boost::shared_ptr<Converter>(new ConvertCNTC());
         converters[ESM::REC_FACT] = boost::shared_ptr<Converter>(new ConvertFACT());
+        converters[ESM::REC_INFO] = boost::shared_ptr<Converter>(new ConvertINFO());
+        converters[ESM::REC_DIAL] = boost::shared_ptr<Converter>(new ConvertDIAL());
+        converters[ESM::REC_QUES] = boost::shared_ptr<Converter>(new ConvertQUES());
+        converters[recJOUR      ] = boost::shared_ptr<Converter>(new ConvertJOUR());
+        converters[ESM::REC_SCPT] = boost::shared_ptr<Converter>(new ConvertSCPT());
+
+        // TODO:
+        // - REGN (weather in certain regions?)
+        // - VFXM
+        // - SPLM (active spell effects)
+        // - PROJ (magic projectiles in air)
 
         std::set<unsigned int> unknownRecords;
 
@@ -248,7 +264,7 @@ namespace ESSImport
             else
             {
                 if (unknownRecords.insert(n.val).second)
-                    std::cerr << "unknown record " << n.toString() << std::endl;
+                    std::cerr << "unknown record " << n.toString() << " (0x" << std::hex << esm.getFileOffset() << ")" << std::endl;
 
                 esm.skipRecord();
             }

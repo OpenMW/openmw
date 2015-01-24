@@ -49,19 +49,47 @@ void MWWorld::InventoryStore::initSlots (TSlots& slots_)
         slots_.push_back (end());
 }
 
-int MWWorld::InventoryStore::getSlot (const MWWorld::LiveCellRefBase& ref) const
+void MWWorld::InventoryStore::storeEquipmentState(const MWWorld::LiveCellRefBase &ref, int index, ESM::InventoryState &inventory) const
 {
     for (int i = 0; i<static_cast<int> (mSlots.size()); ++i)
         if (mSlots[i].getType()!=-1 && mSlots[i]->getBase()==&ref)
-            return i;
+        {
+            inventory.mEquipmentSlots[index] = i;
+        }
 
-    return -1;
+    if (mSelectedEnchantItem.getType()!=-1 && mSelectedEnchantItem->getBase() == &ref)
+        inventory.mSelectedEnchantItem = index;
 }
 
-void MWWorld::InventoryStore::setSlot (const MWWorld::ContainerStoreIterator& iter, int slot)
+void MWWorld::InventoryStore::readEquipmentState(const MWWorld::ContainerStoreIterator &iter, int index, const ESM::InventoryState &inventory)
 {
-    if (iter!=end() && slot>=0 && slot<Slots)
-        mSlots[slot] = iter;
+    if (index == inventory.mSelectedEnchantItem)
+        mSelectedEnchantItem = iter;
+
+    std::map<int, int>::const_iterator found = inventory.mEquipmentSlots.find(index);
+    if (found != inventory.mEquipmentSlots.end())
+    {
+        if (found->second < 0 || found->second >= MWWorld::InventoryStore::Slots)
+            throw std::runtime_error("Invalid slot index in inventory state");
+
+        // make sure the item can actually be equipped in this slot
+        int slot = found->second;
+        std::pair<std::vector<int>, bool> allowedSlots = iter->getClass().getEquipmentSlots(*iter);
+        if (!allowedSlots.first.size())
+            return;
+        if (std::find(allowedSlots.first.begin(), allowedSlots.first.end(), slot) == allowedSlots.first.end())
+            slot = allowedSlots.first.front();
+
+        // unstack if required
+        if (!allowedSlots.second && iter->getRefData().getCount() > 1)
+        {
+            MWWorld::ContainerStoreIterator newIter = addNewStack(*iter, 1);
+            iter->getRefData().setCount(iter->getRefData().getCount()-1);
+            mSlots[slot] = newIter;
+        }
+        else
+            mSlots[slot] = iter;
+    }
 }
 
 MWWorld::InventoryStore::InventoryStore()
@@ -703,7 +731,7 @@ bool MWWorld::InventoryStore::isEquipped(const MWWorld::Ptr &item)
     return false;
 }
 
-void MWWorld::InventoryStore::writeState(ESM::InventoryState &state) const
+void MWWorld::InventoryStore::writeState(ESM::InventoryState &state)
 {
     MWWorld::ContainerStore::writeState(state);
 

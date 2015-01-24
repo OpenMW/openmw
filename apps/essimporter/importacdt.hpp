@@ -3,6 +3,10 @@
 
 #include <string>
 
+#include <components/esm/cellref.hpp>
+
+#include "importscri.hpp"
+
 namespace ESM
 {
     struct ESMReader;
@@ -37,7 +41,7 @@ namespace ESSImport
     };
 #pragma pack(pop)
 
-    struct ActorData
+    struct ActorData : public ESM::CellRef
     {
         ACDT mACDT;
 
@@ -48,7 +52,10 @@ namespace ESSImport
         // to change them ingame
         int mCombatStats[3][2];
 
-        std::string mScript;
+        std::string mSelectedSpell;
+        std::string mSelectedEnchantItem;
+
+        SCRI mSCRI;
 
         void load(ESM::ESMReader& esm);
     };

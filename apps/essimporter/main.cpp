@@ -12,7 +12,7 @@ namespace bfs = boost::filesystem;
 
 
 
-int main(int argc, const char** argv)
+int main(int argc, char** argv)
 {
     try
     {
@@ -50,7 +50,15 @@ int main(int argc, const char** argv)
         if (vm.count("compare"))
             importer.compare();
         else
+        {
+            const std::string& ext = ".omwsave";
+            if (boost::filesystem::exists(boost::filesystem::path(outputFile))
+                    && (outputFile.size() < ext.size() || outputFile.substr(outputFile.size()-ext.size()) != ext))
+            {
+                throw std::runtime_error("Output file already exists and does not end in .omwsave. Did you mean to use --compare?");
+            }
             importer.run();
+        }
     }
     catch (std::exception& e)
     {

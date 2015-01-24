@@ -59,7 +59,11 @@ namespace ESM
 
             // For weapon or armor, this is the remaining item health.
             // For tools (lockpicks, probes, repair hammer) it is the remaining uses.
-            int mCharge;
+            union
+            {
+                int mChargeInt;
+                float mChargeFloat;
+            };
 
             // Remaining enchantment charge. This could be -1 if the charge was not touched yet (i.e. full).
             float mEnchantmentCharge;

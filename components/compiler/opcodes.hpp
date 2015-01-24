@@ -185,6 +185,7 @@ namespace Compiler
         const int opcodeEnableMapMenu = 0x2000015;
         const int opcodeEnableStatsMenu = 0x2000016;
         const int opcodeEnableRest = 0x2000017;
+        const int opcodeEnableLevelupMenu = 0x2000300;
         const int opcodeShowRestMenu = 0x2000018;
         const int opcodeShowRestMenuExplicit = 0x2000234;
         const int opcodeGetButtonPressed = 0x2000137;

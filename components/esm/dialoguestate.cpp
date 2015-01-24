@@ -25,7 +25,7 @@ void ESM::DialogueState::load (ESMReader &esm)
         while (esm.isNextSub ("REAC"))
         {
             esm.skipHSub();
-            esm.getSubHeader();
+            esm.getSubName();
             esm.skipHSub();
         }
     }

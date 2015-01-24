@@ -158,7 +158,7 @@ namespace MWMechanics
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& listener) const;
 
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+            virtual void readRecord (ESM::ESMReader& reader, uint32_t type);
 
             virtual void clear();
 

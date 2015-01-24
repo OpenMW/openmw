@@ -27,8 +27,8 @@ struct Arguments
 
 void replaceAll(std::string& str, const std::string& needle, const std::string& substitute)
 {
-    int pos = str.find(needle);
-    while(pos != -1)
+    size_t pos = str.find(needle);
+    while(pos != std::string::npos)
     {
         str.replace(pos, needle.size(), substitute);
         pos = str.find(needle);
@@ -138,8 +138,8 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     else if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
         info.outdir = variables["input-file"].as< std::vector<std::string> >()[1];
 
-    info.longformat = variables.count("long");
-    info.fullpath = variables.count("full-path");
+    info.longformat = variables.count("long") != 0;
+    info.fullpath = variables.count("full-path") != 0;
 
     return true;
 }

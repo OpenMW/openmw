@@ -265,6 +265,7 @@ namespace MWWorld
 
     void World::clear()
     {
+        mWeatherManager->clear();
         mRendering->clear();
 
         mProjectileManager->clear();
@@ -345,7 +346,7 @@ namespace MWWorld
         writer.endRecord(ESM::REC_CAM_);
     }
 
-    void World::readRecord (ESM::ESMReader& reader, int32_t type,
+    void World::readRecord (ESM::ESMReader& reader, uint32_t type,
         const std::map<int, int>& contentFileMap)
     {
         switch (type)
@@ -2031,7 +2032,7 @@ namespace MWWorld
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
     {
         RefData &refdata = ptr.getRefData();
-        const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
+        OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
 
         if(!physactor)
             return false;
@@ -2049,7 +2050,7 @@ namespace MWWorld
                               mPhysEngine);
             if(tracer.mFraction < 1.0f) // collision, must be close to something below
             {
-                const_cast<OEngine::Physic::PhysicActor *> (physactor)->setOnGround(true);
+                physactor->setOnGround(true);
                 return true;
             }
             else

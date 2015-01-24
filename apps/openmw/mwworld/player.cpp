@@ -227,7 +227,7 @@ namespace MWWorld
         writer.endRecord (ESM::REC_PLAY);
     }
 
-    bool Player::readRecord (ESM::ESMReader& reader, int32_t type)
+    bool Player::readRecord (ESM::ESMReader& reader, uint32_t type)
     {
         if (type==ESM::REC_PLAY)
         {

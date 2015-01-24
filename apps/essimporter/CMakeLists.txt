@@ -9,6 +9,13 @@ set(ESSIMPORTER_FILES
     importinventory.cpp
     importklst.cpp
     importcntc.cpp
+    importgame.cpp
+    importinfo.cpp
+    importdial.cpp
+    importques.cpp
+    importjour.cpp
+    importscri.cpp
+    importscpt.cpp
     importercontext.cpp
     converter.cpp
     convertacdt.cpp
@@ -16,6 +23,7 @@ set(ESSIMPORTER_FILES
     convertinventory.cpp
     convertcrec.cpp
     convertcntc.cpp
+    convertscri.cpp
 )
 
 add_executable(openmw-essimporter

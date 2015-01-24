@@ -108,7 +108,7 @@ namespace MWBase
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& listener) const = 0;
 
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type,
+            virtual void readRecord (ESM::ESMReader& reader, uint32_t type,
                 const std::map<int, int>& contentFileMap) = 0;
 
             virtual MWWorld::CellStore *getExterior (int x, int y) = 0;

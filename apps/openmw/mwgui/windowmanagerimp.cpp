@@ -1620,7 +1620,7 @@ namespace MWGui
         }
     }
 
-    void WindowManager::readRecord(ESM::ESMReader &reader, int32_t type)
+    void WindowManager::readRecord(ESM::ESMReader &reader, uint32_t type)
     {
         if (type == ESM::REC_GMAP)
             mMap->readRecord(reader, type);

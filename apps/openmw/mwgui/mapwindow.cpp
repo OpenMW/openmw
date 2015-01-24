@@ -886,7 +886,7 @@ namespace MWGui
         writer.endRecord(ESM::REC_GMAP);
     }
 
-    void MapWindow::readRecord(ESM::ESMReader &reader, int32_t type)
+    void MapWindow::readRecord(ESM::ESMReader &reader, uint32_t type)
     {
         if (type == ESM::REC_GMAP)
         {
