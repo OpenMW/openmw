@@ -113,7 +113,7 @@ add_component_dir (ogreinit
     )
 
 add_component_dir (widgets
-    box imagebutton tags list numericeditbox sharedstatebutton widgets
+    box imagebutton tags list numericeditbox sharedstatebutton windowcaption widgets
     )
 
 add_component_dir (fontloader

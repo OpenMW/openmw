@@ -108,7 +108,6 @@ namespace MWGui
     void StatsWindow::setPlayerName(const std::string& playerName)
     {
         mMainWidget->castType<MyGUI::Window>()->setCaption(playerName);
-        adjustWindowCaption();
     }
 
     void StatsWindow::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
