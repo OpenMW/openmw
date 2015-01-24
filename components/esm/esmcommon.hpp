@@ -23,7 +23,7 @@ template <int LEN>
 union NAME_T
 {
     char name[LEN];
-    int32_t val;
+    uint32_t val;
 
   bool operator==(const char *str) const
   {

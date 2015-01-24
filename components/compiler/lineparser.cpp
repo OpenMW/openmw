@@ -304,7 +304,7 @@ namespace Compiler
                             errorDowngrade.reset (new ErrorDowngrade (getErrorHandler()));
 
                         std::vector<Interpreter::Type_Code> code;
-                        int optionals = mExprParser.parseArguments (argumentType, scanner, code);
+                        int optionals = mExprParser.parseArguments (argumentType, scanner, code, keyword);
                         mCode.insert (mCode.end(), code.begin(), code.end());
                         extensions->generateInstructionCode (keyword, mCode, mLiterals,
                             mExplicit, optionals);
@@ -489,6 +489,13 @@ namespace Compiler
 
     bool LineParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
     {
+        if (mState==EndState && code==Scanner::S_open)
+        {
+            getErrorHandler().warning ("stray '[' or '(' at the end of the line (ignoring it)",
+                loc);
+            return true;
+        }
+
         if (code==Scanner::S_newline &&
             (mState==EndState || mState==BeginState || mState==PotentialEndState))
             return false;

@@ -157,6 +157,15 @@
         </Child>
     </Resource>
 
+    <Resource type="ResourceSkin" name="MW_SpellView" size="516 516" align="Left Top">
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
+
+        <Child type="ScrollView" skin="MW_ScrollView" offset="3 3 509 509" align="Stretch" name="ScrollView">
+            <Property key="CanvasAlign" value="Left Top"/>
+            <Property key="NeedMouse" value="true"/>
+        </Child>
+    </Resource>
+
     <Resource type="ResourceSkin" name="MW_SimpleList" size="516 516" align="Left Top">
         <Property key="ListItemSkin" value="MW_ListLine"/>
 

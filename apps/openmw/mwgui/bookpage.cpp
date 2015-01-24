@@ -246,7 +246,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
     Style* createHotStyle (Style* baseStyle, Colour normalColour, Colour hoverColour, Colour activeColour, InteractiveId id, bool unique)
     {
-        StyleImpl* BaseStyle = dynamic_cast <StyleImpl*> (baseStyle);
+        StyleImpl* BaseStyle = static_cast <StyleImpl*> (baseStyle);
 
         if (!unique)
             for (Styles::iterator i = mBook->mStyles.begin (); i != mBook->mStyles.end (); ++i)
@@ -268,7 +268,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
     {
         Range range = mBook->addContent (text);
 
-        writeImpl (dynamic_cast <StyleImpl*> (style), range.first, range.second);
+        writeImpl (static_cast <StyleImpl*> (style), range.first, range.second);
     }
 
     intptr_t addContent (Utf8Span text, bool select)
@@ -295,7 +295,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         Utf8Point begin_ = &mCurrentContent->front () + begin;
         Utf8Point end_   = &mCurrentContent->front () + end  ;
 
-        writeImpl (dynamic_cast <StyleImpl*> (style), begin_, end_);
+        writeImpl (static_cast <StyleImpl*> (style), begin_, end_);
     }
     
     void lineBreak (float margin)
@@ -639,7 +639,8 @@ namespace
                       MyGUI::Vertex* vertices, RenderXform const & renderXform) :
             mZ(Z), mOrigin (left, top),
             mFont (font), mVertices (vertices),
-            mRenderXform (renderXform)
+            mRenderXform (renderXform),
+            mC(0)
         {
             mVertexColourType = MyGUI::RenderManager::getInstance().getVertexFormat();
         }

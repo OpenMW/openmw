@@ -1,14 +1,10 @@
 #ifndef MWGUI_CLASS_H
 #define MWGUI_CLASS_H
 
-
+#include <components/esm/attr.hpp>
+#include <components/esm/loadclas.hpp>
 #include "widgets.hpp"
 #include "windowbase.hpp"
-
-/*
-  This file contains the dialogs for choosing a class.
-  Layout is defined by resources/mygui/openmw_chargen_class.layout.
- */
 
 namespace MWGui
 {

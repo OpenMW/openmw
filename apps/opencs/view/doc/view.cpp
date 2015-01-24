@@ -375,17 +375,20 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
       mViewTotal (totalViews)
 {
-    QString width = CSMSettings::UserSettings::instance().settingValue
-                                    ("window/default-width");
+    int width = CSMSettings::UserSettings::instance().settingValue
+                                    ("window/default-width").toInt();
 
-    QString height = CSMSettings::UserSettings::instance().settingValue
-                                    ("window/default-height");
+    int height = CSMSettings::UserSettings::instance().settingValue
+                                    ("window/default-height").toInt();
+
+    width = std::max(width, 300);
+    height = std::max(height, 300);
 
     // trick to get the window decorations and their sizes
     show();
     hide();
-    resize (width.toInt() - (frameGeometry().width() - geometry().width()),
-            height.toInt() - (frameGeometry().height() - geometry().height()));
+    resize (width - (frameGeometry().width() - geometry().width()),
+            height - (frameGeometry().height() - geometry().height()));
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 

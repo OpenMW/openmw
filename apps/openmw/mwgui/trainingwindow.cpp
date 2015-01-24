@@ -1,6 +1,6 @@
 #include "trainingwindow.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Gui.h>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -10,6 +10,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -64,7 +65,7 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(playerGold));
+        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
 
         MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats (actor);
 
@@ -99,7 +100,7 @@ namespace MWGui
             button->setUserData(skills[i].first);
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &TrainingWindow::onTrainingSelected);
 
-            button->setCaptionWithReplacing("#{" + ESM::Skill::sSkillNameIds[skills[i].first] + "} - " + boost::lexical_cast<std::string>(price));
+            button->setCaptionWithReplacing("#{" + ESM::Skill::sSkillNameIds[skills[i].first] + "} - " + MyGUI::utility::toString(price));
 
             button->setSize(button->getTextSize ().width+12, button->getSize().height);
 

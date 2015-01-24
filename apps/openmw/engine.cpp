@@ -40,6 +40,7 @@
 
 #include "mwdialogue/dialoguemanagerimp.hpp"
 #include "mwdialogue/journalimp.hpp"
+#include "mwdialogue/scripttest.hpp"
 
 #include "mwmechanics/mechanicsmanagerimp.hpp"
 
@@ -174,6 +175,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mSkipMenu (false)
   , mUseSound (true)
   , mCompileAll (false)
+  , mCompileAllDialogue (false)
   , mWarningsMode (1)
   , mScriptContext (0)
   , mFSStrict (false)
@@ -206,6 +208,8 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
+    if (mOgre)
+        mOgre->restoreWindowGammaRamp();
     mEnvironment.cleanup();
     delete mScriptContext;
     delete mOgre;
@@ -348,6 +352,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     OEngine::Render::WindowSettings windowSettings;
     windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
+    windowSettings.window_border = settings.getBool("window border", "Video");
     windowSettings.window_x = settings.getInt("resolution x", "Video");
     windowSettings.window_y = settings.getInt("resolution y", "Video");
     windowSettings.screen = settings.getInt("screen", "Video");
@@ -390,6 +395,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
+
+    mOgre->setWindowGammaContrast(Settings::Manager::getFloat("gamma", "General"), Settings::Manager::getFloat("contrast", "General"));
 
     if (!mSkipMenu)
     {
@@ -437,10 +444,19 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     if (mCompileAll)
     {
         std::pair<int, int> result = MWBase::Environment::get().getScriptManager()->compileAll();
-
         if (result.first)
             std::cout
                 << "compiled " << result.second << " of " << result.first << " scripts ("
+                << 100*static_cast<double> (result.second)/result.first
+                << "%)"
+                << std::endl;
+    }
+    if (mCompileAllDialogue)
+    {
+        std::pair<int, int> result = MWDialogue::ScriptTest::compileAll(&mExtensions, mWarningsMode);
+        if (result.first)
+            std::cout
+                << "compiled " << result.second << " of " << result.first << " dialogue script/actor combinations a("
                 << 100*static_cast<double> (result.second)/result.first
                 << "%)"
                 << std::endl;
@@ -468,9 +484,13 @@ void OMW::Engine::go()
     // Play some good 'ol tunes
     MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
 
-    // start in main menu
-    if (!mSkipMenu)
+    if (!mSaveGameFile.empty())
     {
+        MWBase::Environment::get().getStateManager()->loadGame(mSaveGameFile);
+    }
+    else if (!mSkipMenu)
+    {
+        // start in main menu
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         try
         {
@@ -509,6 +529,11 @@ void OMW::Engine::activate()
     if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         return;
 
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    if (player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0
+            || player.getClass().getCreatureStats(player).getKnockedDown())
+        return;
+
     MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getFacedObject();
 
     if (ptr.isEmpty())
@@ -516,6 +541,14 @@ void OMW::Engine::activate()
 
     if (ptr.getClass().getName(ptr) == "") // objects without name presented to user can never be activated
         return;
+
+    if (ptr.getClass().isActor())
+    {
+        MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
+
+        if (stats.getAiSequence().isInCombat() && !stats.isDead())
+            return;
+    }
 
     MWBase::Environment::get().getWorld()->activate(ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
 }
@@ -545,6 +578,11 @@ void OMW::Engine::screenshot()
 void OMW::Engine::setCompileAll (bool all)
 {
     mCompileAll = all;
+}
+
+void OMW::Engine::setCompileAllDialogue (bool all)
+{
+    mCompileAllDialogue = all;
 }
 
 void OMW::Engine::setSoundUsage(bool soundUsage)
@@ -600,4 +638,9 @@ void OMW::Engine::setScriptBlacklistUse (bool use)
 void OMW::Engine::enableFontExport(bool exportFonts)
 {
     mExportFonts = exportFonts;
+}
+
+void OMW::Engine::setSaveGameFile(const std::string &savegame)
+{
+    mSaveGameFile = savegame;
 }

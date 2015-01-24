@@ -2,7 +2,10 @@
 
 #include <iomanip>
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Gui.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_ImageBox.h>
 
 #include <components/misc/resourcehelpers.hpp>
 
@@ -11,6 +14,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 
 #include "mapwindow.hpp"
@@ -550,7 +554,7 @@ namespace MWGui
         if (value == 1)
             return "";
         else
-            return " (" + boost::lexical_cast<std::string>(value) + ")";
+            return " (" + MyGUI::utility::toString(value) + ")";
     }
 
     std::string ToolTips::getCellRefString(const MWWorld::CellRef& cellref)

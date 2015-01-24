@@ -2,7 +2,24 @@ project (Components)
 set (CMAKE_BUILD_TYPE DEBUG)
 
 # Version file
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp")
+set (VERSION_HPP_IN ${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp.cmake)
+set (VERSION_HPP ${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp)
+if (GIT_CHECKOUT)
+    add_custom_target (git-version
+        COMMAND ${CMAKE_COMMAND}
+	    -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
+            -DPROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}
+	    -DVERSION_HPP_IN=${VERSION_HPP_IN}
+	    -DVERSION_HPP=${VERSION_HPP}
+	    -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
+	    -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
+	    -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
+	    -DOPENMW_VERSION=${OPENMW_VERSION}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/GitVersion.cmake
+	    VERBATIM)
+else (GIT_CHECKOUT)
+    configure_file(${VERSION_HPP_IN} ${VERSION_HPP})
+endif (GIT_CHECKOUT)
 
 # source files
 
@@ -40,13 +57,13 @@ add_component_dir (to_utf8
 
 add_component_dir (esm
     attr defs esmcommon esmreader esmwriter loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
-    loadclas loadclot loadcont loadcrea loadcrec loaddial loaddoor loadench loadfact loadglob loadgmst
+    loadclas loadclot loadcont loadcrea loaddial loaddoor loadench loadfact loadglob loadgmst
     loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc loadnpcc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
-    savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap lightstate inventorystate containerstate npcstate creaturestate dialoguestate statstate
+    savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap inventorystate containerstate npcstate creaturestate dialoguestate statstate
     npcstats creaturestats weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
-    aisequence magiceffects
+    aisequence magiceffects util custommarkerstate
     )
 
 add_component_dir (esmterrain
@@ -70,7 +87,7 @@ add_component_dir (compiler
     context controlparser errorhandler exception exprparser extensions fileparser generator
     lineparser literals locals output parser scanner scriptparser skipparser streamerrorhandler
     stringparser tokenloc nullerrorhandler opcodes extensions0 declarationparser
-    quickfileparser discardparser
+    quickfileparser discardparser junkparser
     )
 
 add_component_dir (interpreter
@@ -116,6 +133,7 @@ if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
     add_component_qt_dir (contentselector
         model/modelitem model/esmfile
         model/naturalsort model/contentmodel
+		model/loadordererror
         view/combobox view/contentselector
         )
     add_component_qt_dir (config
@@ -123,7 +141,7 @@ if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
         launchersettings
         settingsbase
         )
-        
+
     add_component_qt_dir (process
         processinvoker
     )
@@ -144,6 +162,10 @@ include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 target_link_libraries(components ${Boost_LIBRARIES} ${OGRE_LIBRARIES})
+
+if (GIT_CHECKOUT)
+    add_dependencies (components git-version)
+endif (GIT_CHECKOUT)
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)

@@ -1,19 +1,22 @@
 #include "formatting.hpp"
 
+#include <OgreUTFString.h>
+#include <OgreResourceGroupManager.h>
+
+#include <MyGUI_EditText.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_FontManager.h>
+
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+
 #include <components/interpreter/defines.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "../mwscript/interpretercontext.hpp"
-
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/lexical_cast.hpp>
-
-#include <OgreUTFString.h>
-#include <OgreResourceGroupManager.h>
-
-#include <MyGUI_EditText.h>
 
 namespace MWGui
 {
@@ -193,6 +196,9 @@ namespace MWGui
                 MyGUI::Gui::getInstance().destroyWidget(parent->getChildAt(0));
             }
 
+            mTextStyle = TextStyle();
+            mBlockStyle = BlockStyle();
+
             MyGUI::Widget * paper = parent->createWidget<MyGUI::Widget>("Widget", MyGUI::IntCoord(0, 0, pag.getPageWidth(), pag.getPageHeight()), MyGUI::Align::Left | MyGUI::Align::Top);
             paper->setNeedMouseFocus(false);
 
@@ -207,8 +213,25 @@ namespace MWGui
                     continue;
 
                 std::string plainText = parser.getReadyText();
+
+                // for cases when linebreaks are used to cause a shift to the next page
+                // if the split text block ends in an empty line, proceeding text block(s) should have leading empty lines removed
+                if (pag.getIgnoreLeadingEmptyLines())
+                {
+                    while (!plainText.empty())
+                    {
+                        if (plainText[0] == '\n')
+                            plainText.erase(plainText.begin());
+                        else
+                        {
+                            pag.setIgnoreLeadingEmptyLines(false);
+                            break;
+                        }
+                    }
+                }
+
                 if (plainText.empty())
-                    brBeforeLastTag = false;
+                    brBeforeLastTag = true;
                 else
                 {
                     // Each block of text (between two tags / boundary and tag) will be displayed in a separate editbox widget,
@@ -252,14 +275,16 @@ namespace MWGui
                 {
                     case BookTextParser::Event_ImgTag:
                     {
+                        pag.setIgnoreLeadingEmptyLines(false);
+
                         const BookTextParser::Attributes & attr = parser.getAttributes();
 
                         if (attr.find("src") == attr.end() || attr.find("width") == attr.end() || attr.find("height") == attr.end())
                             continue;
 
                         std::string src = attr.at("src");
-                        int width = boost::lexical_cast<int>(attr.at("width"));
-                        int height = boost::lexical_cast<int>(attr.at("height"));
+                        int width = MyGUI::utility::parseInt(attr.at("width"));
+                        int height = MyGUI::utility::parseInt(attr.at("height"));
 
                         ImageElement elem(paper, pag, mBlockStyle,
                                           src, width, height);
@@ -318,7 +343,7 @@ namespace MWGui
         {
             if (attr.find("color") != attr.end())
             {
-                int color;
+                unsigned int color;
                 std::stringstream ss;
                 ss << attr.at("color");
                 ss >> std::hex >> color;
@@ -331,9 +356,7 @@ namespace MWGui
             if (attr.find("face") != attr.end())
             {
                 std::string face = attr.at("face");
-
-                if (face != "Magic Cards")
-                    mTextStyle.mFont = face;
+                mTextStyle.mFont = face;
             }
             if (attr.find("size") != attr.end())
             {
@@ -373,7 +396,7 @@ namespace MWGui
         {
             MyGUI::EditBox* box = parent->createWidget<MyGUI::EditBox>("NormalText",
                 MyGUI::IntCoord(0, pag.getCurrentTop(), pag.getPageWidth(), 0), MyGUI::Align::Left | MyGUI::Align::Top,
-                parent->getName() + boost::lexical_cast<std::string>(parent->getChildCount()));
+                parent->getName() + MyGUI::utility::toString(parent->getChildCount()));
             box->setProperty("Static", "true");
             box->setProperty("MultiLine", "true");
             box->setProperty("WordWrap", "true");
@@ -408,13 +431,18 @@ namespace MWGui
             // first empty lines that would go to the next page should be ignored
             // unfortunately, getLineInfo method won't be available until 3.2.2
 #if (MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3, 2, 2))
+            mPaginator.setIgnoreLeadingEmptyLines(true);
+
             const MyGUI::VectorLineInfo & lines = mEditBox->getSubWidgetText()->castType<MyGUI::EditText>()->getLineInfo();
             for (unsigned int i = lastLine; i < lines.size(); ++i)
             {
                 if (lines[i].width == 0)
                     ret += lineHeight;
                 else
+                {
+                    mPaginator.setIgnoreLeadingEmptyLines(false);
                     break;
+                }
             }
 #endif
             return ret;
@@ -436,7 +464,7 @@ namespace MWGui
 
             mImageBox = parent->createWidget<MyGUI::ImageBox> ("ImageBox",
                 MyGUI::IntCoord(left, pag.getCurrentTop(), width, mImageHeight), MyGUI::Align::Left | MyGUI::Align::Top,
-                parent->getName() + boost::lexical_cast<std::string>(parent->getChildCount()));
+                parent->getName() + MyGUI::utility::toString(parent->getChildCount()));
 
             std::string image = Misc::ResourceHelpers::correctBookartPath(src, width, mImageHeight);
             mImageBox->setImageTexture(image);

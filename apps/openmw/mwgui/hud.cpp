@@ -1,14 +1,23 @@
 #include "hud.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <OgreMath.h>
+
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_ProgressBar.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_ScrollView.h>
 
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -17,7 +26,7 @@
 #include "console.hpp"
 #include "spellicons.hpp"
 #include "itemmodel.hpp"
-#include "container.hpp"
+#include "draganddrop.hpp"
 
 #include "itemmodel.hpp"
 #include "itemwidget.hpp"
@@ -162,7 +171,7 @@ namespace MWGui
         getWidget(mTriangleCounter, "TriangleCounter");
         getWidget(mBatchCounter, "BatchCounter");
 
-        LocalMapBase::init(mMinimap, mCompass);
+        LocalMapBase::init(mMinimap, mCompass, Settings::Manager::getInt("local map hud widget size", "Map"));
 
         mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
         mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
@@ -203,17 +212,17 @@ namespace MWGui
     void HUD::setFPS(float fps)
     {
         if (mFpsCounter)
-            mFpsCounter->setCaption(boost::lexical_cast<std::string>((int)fps));
+            mFpsCounter->setCaption(MyGUI::utility::toString((int)fps));
     }
 
     void HUD::setTriangleCount(unsigned int count)
     {
-        mTriangleCounter->setCaption(boost::lexical_cast<std::string>(count));
+        mTriangleCounter->setCaption(MyGUI::utility::toString(count));
     }
 
     void HUD::setBatchCount(unsigned int count)
     {
-        mBatchCounter->setCaption(boost::lexical_cast<std::string>(count));
+        mBatchCounter->setCaption(MyGUI::utility::toString(count));
     }
 
     void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
@@ -222,7 +231,7 @@ namespace MWGui
         int modified = static_cast<int>(value.getModified());
 
         MyGUI::Widget* w;
-        std::string valStr = boost::lexical_cast<std::string>(current) + "/" + boost::lexical_cast<std::string>(modified);
+        std::string valStr = MyGUI::utility::toString(current) + "/" + MyGUI::utility::toString(modified);
         if (id == "HBar")
         {
             mHealth->setProgressRange(modified);
@@ -618,6 +627,11 @@ namespace MWGui
         // Health is usually cast to int before displaying. Actors die whenever they are < 1 health.
         // Therefore any value < 1 should show as an empty health bar. We do the same in statswindow :)
         mEnemyHealth->setProgressPosition(int(stats.getHealth().getCurrent()) / stats.getHealth().getModified() * 100);
+
+        static const float fNPCHealthBarFade = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCHealthBarFade")->getFloat();
+        if (fNPCHealthBarFade > 0.f)
+            mEnemyHealth->setAlpha(std::max(0.f, std::min(1.f, mEnemyHealthTimer/fNPCHealthBarFade)));
+
     }
 
     void HUD::update()
@@ -639,7 +653,7 @@ namespace MWGui
     void HUD::setEnemy(const MWWorld::Ptr &enemy)
     {
         mEnemyActorId = enemy.getClass().getCreatureStats(enemy).getActorId();
-        mEnemyHealthTimer = 5;
+        mEnemyHealthTimer = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCHealthBarTime")->getFloat();
         if (!mEnemyHealth->getVisible())
             mWeaponSpellBox->setPosition(mWeaponSpellBox->getPosition() - MyGUI::IntPoint(0,20));
         mEnemyHealth->setVisible(true);

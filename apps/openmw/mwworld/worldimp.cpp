@@ -18,6 +18,7 @@
 #include <components/files/collections.hpp>
 #include <components/compiler/locals.hpp>
 #include <components/esm/cellid.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <boost/math/special_functions/sign.hpp>
 
@@ -201,6 +202,7 @@ namespace MWWorld
         setupPlayer();
 
         renderPlayer();
+        mRendering->resetCamera();
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
 
@@ -263,6 +265,7 @@ namespace MWWorld
 
     void World::clear()
     {
+        mWeatherManager->clear();
         mRendering->clear();
 
         mProjectileManager->clear();
@@ -304,7 +307,13 @@ namespace MWWorld
             +1 // player record
             +1 // weather record
             +1 // actorId counter
-            +1; // levitation/teleport enabled state
+            +1 // levitation/teleport enabled state
+            +1; // camera
+    }
+
+    int World::countSavedGameCells() const
+    {
+        return mCells.countSavedGameRecords();
     }
 
     void World::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -318,7 +327,6 @@ namespace MWWorld
         }
 
         MWMechanics::CreatureStats::writeActorIdCounter(writer);
-        progress.increaseProgress();
 
         mStore.write (writer, progress); // dynamic Store must be written (and read) before Cells, so that
                                          // references to custom made records will be recognized
@@ -332,10 +340,13 @@ namespace MWWorld
         writer.writeHNT("TELE", mTeleportEnabled);
         writer.writeHNT("LEVT", mLevitationEnabled);
         writer.endRecord(ESM::REC_ENAB);
-        progress.increaseProgress();
+
+        writer.startRecord(ESM::REC_CAM_);
+        writer.writeHNT("FIRS", isFirstPerson());
+        writer.endRecord(ESM::REC_CAM_);
     }
 
-    void World::readRecord (ESM::ESMReader& reader, int32_t type,
+    void World::readRecord (ESM::ESMReader& reader, uint32_t type,
         const std::map<int, int>& contentFileMap)
     {
         switch (type)
@@ -393,6 +404,8 @@ namespace MWWorld
         gmst["sTauntFail"] = ESM::Variant("Taunt Fail");
         gmst["sBribeSuccess"] = ESM::Variant("Bribe Success");
         gmst["sBribeFail"] = ESM::Variant("Bribe Fail");
+        gmst["fNPCHealthBarTime"] = ESM::Variant(5.f);
+        gmst["fNPCHealthBarFade"] = ESM::Variant(1.f);
 
         // Werewolf (BM)
         gmst["fWereWolfRunMult"] = ESM::Variant(1.f);
@@ -1074,7 +1087,7 @@ namespace MWWorld
 
     void World::undeleteObject(const Ptr& ptr)
     {
-        if (ptr.getCellRef().getRefNum().mContentFile == -1)
+        if (!ptr.getCellRef().hasContentFile())
             return;
         if (ptr.getRefData().isDeleted())
         {
@@ -1158,6 +1171,7 @@ namespace MWWorld
                         ptr.getClass().copyToCell(ptr, *newCell, pos);
 
                     mRendering->updateObjectCell(ptr, copy);
+                    ptr.getRefData().setBaseNode(NULL);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, copy);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
@@ -1187,7 +1201,7 @@ namespace MWWorld
         }
     }
 
-    bool World::moveObjectImp(const Ptr& ptr, float x, float y, float z)
+    MWWorld::Ptr World::moveObjectImp(const Ptr& ptr, float x, float y, float z)
     {
         CellStore *cell = ptr.getCell();
 
@@ -1200,12 +1214,14 @@ namespace MWWorld
 
         moveObject(ptr, cell, x, y, z);
 
-        return cell != ptr.getCell();
+        MWWorld::Ptr updated = ptr;
+        updated.mCell = cell;
+        return updated;
     }
 
-    void World::moveObject (const Ptr& ptr, float x, float y, float z)
+    MWWorld::Ptr World::moveObject (const Ptr& ptr, float x, float y, float z)
     {
-        moveObjectImp(ptr, x, y, z);
+        return moveObjectImp(ptr, x, y, z);
     }
 
     void World::scaleObject (const Ptr& ptr, float scale)
@@ -1487,6 +1503,16 @@ namespace MWWorld
         return mStore.insert(record);
     }
 
+    const ESM::CreatureLevList *World::createOverrideRecord(const ESM::CreatureLevList &record)
+    {
+        return mStore.overrideRecord(record);
+    }
+
+    const ESM::ItemLevList *World::createOverrideRecord(const ESM::ItemLevList &record)
+    {
+        return mStore.overrideRecord(record);
+    }
+
     const ESM::NPC *World::createRecord(const ESM::NPC &record)
     {
         bool update = false;
@@ -1560,11 +1586,25 @@ namespace MWWorld
 
         updateWindowManager ();
 
+        updateSoundListener();
+
         if (!paused && mPlayer->getPlayer().getCell()->isExterior())
         {
             ESM::Position pos = mPlayer->getPlayer().getRefData().getPosition();
             mPlayer->setLastKnownExteriorPosition(Ogre::Vector3(pos.pos));
         }
+    }
+
+    void World::updateSoundListener()
+    {
+        Ogre::Vector3 playerPos = mPlayer->getPlayer().getRefData().getBaseNode()->getPosition();
+        const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(getPlayerPtr().getRefData().getHandle());
+        if(actor) playerPos.z += 1.85*actor->getHalfExtents().z;
+        Ogre::Quaternion playerOrient = Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
+                    Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X) *
+                    Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[1]), Ogre::Vector3::NEGATIVE_UNIT_Y);
+        MWBase::Environment::get().getSoundManager()->setListenerPosDir(playerPos, playerOrient.yAxis(),
+                                                                        playerOrient.zAxis());
     }
 
     void World::updateWindowManager ()
@@ -1672,8 +1712,9 @@ namespace MWWorld
         MWWorld::LiveCellRef<ESM::Static>* ref = statics.find("northmarker");
         if (!ref)
             return Vector2(0, 1);
-        Ogre::SceneNode* node = ref->mData.getBaseNode();
-        Vector3 dir = node->_getDerivedOrientation() * Ogre::Vector3(0,1,0);
+
+        Ogre::Quaternion orient (Ogre::Radian(-ref->mData.getPosition().rot[2]), Ogre::Vector3::UNIT_Z);
+        Vector3 dir = orient * Ogre::Vector3(0,1,0);
         Vector2 d = Vector2(dir.x, dir.y);
         return d;
     }
@@ -1935,25 +1976,36 @@ namespace MWWorld
 
     bool World::isSubmerged(const MWWorld::Ptr &object) const
     {
-        const float *fpos = object.getRefData().getPosition().pos;
-        Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
-
-        const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
-        if(actor) pos.z += 1.85*actor->getHalfExtents().z;
-
-        return isUnderwater(object.getCell(), pos);
+        const float neckDeep = 1.85f;
+        return isUnderwater(object, neckDeep);
     }
 
     bool
     World::isSwimming(const MWWorld::Ptr &object) const
     {
         /// \todo add check ifActor() - only actors can swim
+        /// \fixme 3/4ths submerged?
+        return isUnderwater(object, 1.5f);
+    }
+
+    bool
+    World::isWading(const MWWorld::Ptr &object) const
+    {
+        const float kneeDeep = 0.5f;
+        return isUnderwater(object, kneeDeep);
+    }
+
+    bool
+    World::isUnderwater(const MWWorld::Ptr &object, const float heightRatio) const
+    {
         const float *fpos = object.getRefData().getPosition().pos;
         Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
-        /// \fixme 3/4ths submerged?
         const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
-        if(actor) pos.z += actor->getHalfExtents().z * 1.5;
+        if (actor)
+        {
+            pos.z += heightRatio*actor->getHalfExtents().z;
+        }
 
         return isUnderwater(object.getCell(), pos);
     }
@@ -1980,7 +2032,7 @@ namespace MWWorld
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
     {
         RefData &refdata = ptr.getRefData();
-        const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
+        OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
 
         if(!physactor)
             return false;
@@ -1998,7 +2050,7 @@ namespace MWWorld
                               mPhysEngine);
             if(tracer.mFraction < 1.0f) // collision, must be close to something below
             {
-                const_cast<OEngine::Physic::PhysicActor *> (physactor)->setOnGround(true);
+                physactor->setOnGround(true);
                 return true;
             }
             else
@@ -2042,8 +2094,9 @@ namespace MWWorld
         // so we should make sure not to use a "stale" controller for that.
         MWBase::Environment::get().getMechanicsManager()->add(mPlayer->getPlayer());
 
-        mPhysics->addActor(mPlayer->getPlayer());
-        mRendering->resetCamera();
+        std::string model = getPlayerPtr().getClass().getModel(getPlayerPtr());
+        model = Misc::ResourceHelpers::correctActorModelPath(model);
+        mPhysics->addActor(mPlayer->getPlayer(), model);
     }
 
     int World::canRest ()
@@ -2055,6 +2108,9 @@ namespace MWWorld
         Ogre::Vector3 playerPos(refdata.getPosition().pos);
 
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
+        if (!physactor)
+            throw std::runtime_error("can't find player");
+
         if((!physactor->getOnGround()&&physactor->getCollisionMode()) || isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
             return 2;
         if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) ||
@@ -2232,6 +2288,8 @@ namespace MWWorld
             for (CellRefList<ESM::Container>::List::iterator container = refList.begin(); container != refList.end(); ++container)
             {
                 MWWorld::Ptr ptr (&*container, *cellIt);
+                if (ptr.getRefData().isDeleted())
+                    continue;
                 if (Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), npc.getCellRef().getRefId()))
                     out.push_back(ptr);
             }
@@ -2272,9 +2330,15 @@ namespace MWWorld
         if (!targetActor.getRefData().getBaseNode() || !targetActor.getRefData().getBaseNode())
             return false; // not in active cell
 
-        Ogre::Vector3 halfExt1 = mPhysEngine->getCharacter(actor.getRefData().getHandle())->getHalfExtents();
+        OEngine::Physic::PhysicActor* actor1 = mPhysEngine->getCharacter(actor.getRefData().getHandle());
+        OEngine::Physic::PhysicActor* actor2 = mPhysEngine->getCharacter(targetActor.getRefData().getHandle());
+
+        if (!actor1 || !actor2)
+            return false;
+
+        Ogre::Vector3 halfExt1 = actor1->getHalfExtents();
         const float* pos1 = actor.getRefData().getPosition().pos;
-        Ogre::Vector3 halfExt2 = mPhysEngine->getCharacter(targetActor.getRefData().getHandle())->getHalfExtents();
+        Ogre::Vector3 halfExt2 = actor2->getHalfExtents();
         const float* pos2 = targetActor.getRefData().getPosition().pos;
 
         btVector3 from(pos1[0],pos1[1],pos1[2]+halfExt1.z*2*0.9); // eye level
@@ -2449,7 +2513,7 @@ namespace MWWorld
                                                                                getStore().get<ESM::GameSetting>().search("fAlarmRadius")->getFloat(),
                                                                                closeActors);
 
-            bool detected = false;
+            bool detected = false, reported = false;
             for (std::vector<MWWorld::Ptr>::const_iterator it = closeActors.begin(); it != closeActors.end(); ++it)
             {
                 if (*it == actor)
@@ -2459,16 +2523,22 @@ namespace MWWorld
                     continue;
 
                 if (getLOS(*it, actor) && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, *it))
-                {
                     detected = true;
-                    break;
-                }
+                if (it->getClass().getCreatureStats(*it).getAiSetting(MWMechanics::CreatureStats::AI_Alarm).getModified() > 0)
+                    reported = true;
             }
 
             if (detected)
             {
                 windowManager->messageBox("#{sWerewolfAlarmMessage}");
                 setGlobalInt("pcknownwerewolf", 1);
+
+                if (reported)
+                {
+                    npcStats.setBounty(npcStats.getBounty()+
+                                       MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iWereWolfBounty")->getInt());
+                    windowManager->messageBox("#{sCrimeMessage}");
+                }
             }
         }
     }
@@ -2527,7 +2597,7 @@ namespace MWWorld
 
         if (!selectedSpell.empty())
         {
-            const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
+            const ESM::Spell* spell = getStore().get<ESM::Spell>().find(selectedSpell);
 
             // Check mana
             MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
@@ -2614,7 +2684,7 @@ namespace MWWorld
 
         if (!selectedSpell.empty())
         {
-            const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
+            const ESM::Spell* spell = getStore().get<ESM::Spell>().find(selectedSpell);
 
             // A power can be used once per 24h
             if (spell->mData.mType == ESM::Spell::ST_Power)
@@ -2986,7 +3056,7 @@ namespace MWWorld
 
             std::vector<std::string> buttons;
             buttons.push_back("#{sOk}");
-            MWBase::Environment::get().getWindowManager()->messageBox(message, buttons);
+            MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);
         }
     }
 
@@ -3058,7 +3128,7 @@ namespace MWWorld
         mRendering->spawnEffect(model, textureOverride, worldPos);
     }
 
-    void World::explodeSpell(const Vector3 &origin, const ESM::EffectList &effects, const Ptr &caster,
+    void World::explodeSpell(const Vector3 &origin, const ESM::EffectList &effects, const Ptr &caster, int rangeType,
                              const std::string& id, const std::string& sourceName)
     {
         std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
@@ -3094,7 +3164,6 @@ namespace MWWorld
             std::vector<MWWorld::Ptr> objects;
             MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
                         origin, feetToGameUnits(effectIt->mArea), objects);
-
             for (std::vector<MWWorld::Ptr>::iterator affected = objects.begin(); affected != objects.end(); ++affected)
                 toApply[*affected].push_back(*effectIt);
         }
@@ -3118,7 +3187,7 @@ namespace MWWorld
             cast.mStack = false;
             ESM::EffectList effects;
             effects.mList = apply->second;
-            cast.inflict(apply->first, caster, effects, ESM::RT_Target, false, true);
+            cast.inflict(apply->first, caster, effects, (ESM::RangeType)rangeType, false, true);
         }
     }
 
@@ -3146,7 +3215,7 @@ namespace MWWorld
         {
             // Can't reset actors that were moved to a different cell, because we don't know what cell they came from.
             // This could be fixed once we properly track actor cell changes, but may not be desirable behaviour anyhow.
-            if (ptr.getClass().isActor() && ptr.getCellRef().getRefNum().mContentFile != -1)
+            if (ptr.getClass().isActor() && ptr.getCellRef().hasContentFile())
             {
                 const ESM::Position& origPos = ptr.getCellRef().getPosition();
                 MWBase::Environment::get().getWorld()->moveObject(ptr, origPos.pos[0], origPos.pos[1], origPos.pos[2]);

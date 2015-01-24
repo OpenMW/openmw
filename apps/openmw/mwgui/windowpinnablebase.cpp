@@ -1,5 +1,7 @@
 #include "windowpinnablebase.hpp"
 
+#include <MyGUI_Button.h>
+
 #include "exposedwindow.hpp"
 
 namespace MWGui

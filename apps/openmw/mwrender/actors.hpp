@@ -40,10 +40,13 @@ namespace MWRender
         void setRootNode(Ogre::SceneNode* root);
 
         void insertNPC(const MWWorld::Ptr& ptr);
-        void insertCreature (const MWWorld::Ptr& ptr, bool weaponsShields);
-        void insertActivator (const MWWorld::Ptr& ptr);
-         bool deleteObject (const MWWorld::Ptr& ptr);
+        void insertCreature (const MWWorld::Ptr& ptr, const std::string& model, bool weaponsShields);
+        void insertActivator (const MWWorld::Ptr& ptr, const std::string& model, bool addLight=false);
+        bool deleteObject (const MWWorld::Ptr& ptr);
         ///< \return found?
+
+        void enableLights();
+        void disableLights();
 
         void removeCell(MWWorld::CellStore* store);
 

@@ -30,6 +30,8 @@ namespace Terrain
         /// Fill vertex buffers for a terrain chunk.
         /// @note May be called from background threads. Make sure to only call thread-safe functions from here!
         /// @note returned colors need to be in render-system specific format! Use RenderSystem::convertColourValue.
+        /// @note Vertices should be written in row-major order (a row is defined as parallel to the x-axis).
+        ///       The specified positions should be in local space, i.e. relative to the center of the terrain chunk.
         /// @param lodLevel LOD level, 0 = most detailed
         /// @param size size of the terrain chunk in cell units
         /// @param center center of the chunk in cell units

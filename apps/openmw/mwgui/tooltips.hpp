@@ -7,6 +7,12 @@
 
 #include "widgets.hpp"
 
+namespace ESM
+{
+    class Class;
+    struct Race;
+}
+
 namespace MWGui
 {
     // Info about tooltip that is supplied by the MWWorld::Class object

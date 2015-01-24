@@ -17,7 +17,7 @@ namespace Config
         SettingsBase() { mMultiValue = false; }
         ~SettingsBase() {}
 
-        inline QString value(const QString &key, const QString &defaultValue = QString())
+        inline QString value(const QString &key, const QString &defaultValue = QString()) const
         {
             return mSettings.value(key).isEmpty() ? defaultValue : mSettings.value(key);
         }
@@ -46,11 +46,11 @@ namespace Config
             mSettings.remove(key);
         }
 
-        Map getSettings() {return mSettings;}
+        Map getSettings() const {return mSettings;} 
 
         bool readFile(QTextStream &stream)
         {
-            mCache.clear();
+            Map cache;
 
             QString sectionPrefix;
 
@@ -79,31 +79,30 @@ namespace Config
 
                     mSettings.remove(key);
 
-                    QStringList values = mCache.values(key);
+                    QStringList values = cache.values(key);
 
                     if (!values.contains(value)) {
                         if (mMultiValue) {
-                            mCache.insertMulti(key, value);
+                            cache.insertMulti(key, value);
                         } else {
-                            mCache.insert(key, value);
+                            cache.insert(key, value);
                         }
                     }
                 }
             }
 
             if (mSettings.isEmpty()) {
-                mSettings = mCache; // This is the first time we read a file
+                mSettings = cache; // This is the first time we read a file
                 return true;
             }
 
             // Merge the changed keys with those which didn't
-            mSettings.unite(mCache);
+            mSettings.unite(cache);
             return true;
         }
 
     private:
         Map mSettings;
-        Map mCache;
 
         bool mMultiValue;
     };

@@ -174,12 +174,14 @@ struct JournalViewModelImpl : JournalViewModel
             }
             else
             {
+                std::vector<KeywordSearchT::Match> matches;
+                mModel->mKeywordSearch.highlightKeywords(utf8text.begin(), utf8text.end(), matches);
+
                 std::string::const_iterator i = utf8text.begin ();
-
-                KeywordSearchT::Match match;
-
-                while (i != utf8text.end () && mModel->mKeywordSearch.search (i, utf8text.end (), match, utf8text.begin()))
+                for (std::vector<KeywordSearchT::Match>::const_iterator it = matches.begin(); it != matches.end(); ++it)
                 {
+                    const KeywordSearchT::Match& match = *it;
+
                     if (i != match.mBeg)
                         visitor (0, i - utf8text.begin (), match.mBeg - utf8text.begin ());
 

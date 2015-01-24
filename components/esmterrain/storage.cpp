@@ -402,8 +402,8 @@ namespace ESMTerrain
         int endX = startX + 1;
         int endY = startY + 1;
 
-        assert(endX < ESM::Land::LAND_SIZE);
-        assert(endY < ESM::Land::LAND_SIZE);
+        endX = std::min(endX, ESM::Land::LAND_SIZE-1);
+        endY = std::min(endY, ESM::Land::LAND_SIZE-1);
 
         // now get points in terrain space (effectively rounding them to boundaries)
         float startXTS = startX * invFactor;

@@ -103,6 +103,9 @@ public:
         mVertexProgramOneTexture(NULL),
         mFragmentProgramOneTexture(NULL)
     {
+        mTextureAddressMode.u = Ogre::TextureUnitState::TAM_CLAMP;
+        mTextureAddressMode.v = Ogre::TextureUnitState::TAM_CLAMP;
+        mTextureAddressMode.w = Ogre::TextureUnitState::TAM_CLAMP;
     }
 
     void initialise(Ogre::RenderWindow* _window, Ogre::SceneManager* _scene)

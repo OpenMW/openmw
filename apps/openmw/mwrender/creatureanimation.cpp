@@ -16,39 +16,37 @@ namespace MWRender
 {
 
 
-CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
+CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr, const std::string& model)
   : Animation(ptr, ptr.getRefData().getBaseNode())
 {
     MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
 
-    std::string model = ptr.getClass().getModel(ptr);
     if(!model.empty())
     {
         setObjectRoot(model, false);
         setRenderProperties(mObjectRoot, RV_Actors, RQG_Main, RQG_Alpha);
 
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))
-            addAnimSource("meshes\\base_anim.nif");
+            addAnimSource("meshes\\xbase_anim.nif");
         addAnimSource(model);
     }
 }
 
 
-CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr)
+CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const std::string& model)
     : Animation(ptr, ptr.getRefData().getBaseNode())
     , mShowWeapons(false)
     , mShowCarriedLeft(false)
 {
     MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
 
-    std::string model = ptr.getClass().getModel(ptr);
     if(!model.empty())
     {
         setObjectRoot(model, false);
         setRenderProperties(mObjectRoot, RV_Actors, RQG_Main, RQG_Alpha);
 
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))
-            addAnimSource("meshes\\base_anim.nif");
+            addAnimSource("meshes\\xbase_anim.nif");
         addAnimSource(model);
 
         mPtr.getClass().getInventoryStore(mPtr).setListener(this, mPtr);
@@ -106,7 +104,7 @@ void CreatureWeaponAnimation::updatePart(NifOgre::ObjectScenePtr& scene, int slo
     else
         bonename = "Shield Bone";
 
-    scene = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, item.getClass().getModel(item));
+    scene = NifOgre::Loader::createObjects(mSkelBase, bonename, bonename, mInsert, item.getClass().getModel(item));
     Ogre::Vector3 glowColor = getEnchantmentColor(item);
 
     setRenderProperties(scene, RV_Actors, RQG_Main, RQG_Alpha, 0,

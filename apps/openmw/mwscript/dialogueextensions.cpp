@@ -236,6 +236,25 @@ namespace MWScript
             }
         };
 
+        class OpSetFactionReaction : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                std::string faction1 = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                std::string faction2 = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                int newValue = runtime[0].mInteger;
+                runtime.pop();
+
+                MWBase::Environment::get().getDialogueManager()->setFactionReaction(faction1, faction2, newValue);
+            }
+        };
+
         template <class R>
         class OpClearInfoActor : public Interpreter::Opcode0
         {
@@ -268,6 +287,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFaction, new OpSameFaction<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFactionExplicit, new OpSameFaction<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeModFactionReaction, new OpModFactionReaction);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeSetFactionReaction, new OpSetFactionReaction);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeGetFactionReaction, new OpGetFactionReaction);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeClearInfoActor, new OpClearInfoActor<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeClearInfoActorExplicit, new OpClearInfoActor<ExplicitRef>);

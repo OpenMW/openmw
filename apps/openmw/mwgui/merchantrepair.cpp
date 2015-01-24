@@ -2,7 +2,9 @@
 
 #include <components/esm/loadgmst.hpp>
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Button.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_Gui.h>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -67,7 +69,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
 
             std::string name = iter->getClass().getName(*iter)
-                    + " - " + boost::lexical_cast<std::string>(price)
+                    + " - " + MyGUI::utility::toString(price)
                     + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                     .find("sgp")->getString();
 
@@ -83,7 +85,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
             currentY += 18;
 
-            button->setUserString("Price", boost::lexical_cast<std::string>(price));
+            button->setUserString("Price", MyGUI::utility::toString(price));
             button->setUserData(*iter);
             button->setCaptionWithReplacing(name);
             button->setSize(button->getTextSize().width,18);
@@ -98,7 +100,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
     mList->setVisibleVScroll(true);
 
     mGoldLabel->setCaptionWithReplacing("#{sGold}: "
-        + boost::lexical_cast<std::string>(playerGold));
+        + MyGUI::utility::toString(playerGold));
 }
 
 void MerchantRepair::onMouseWheel(MyGUI::Widget* _sender, int _rel)
@@ -123,7 +125,7 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 {
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
-    int price = boost::lexical_cast<int>(sender->getUserString("Price"));
+    int price = MyGUI::utility::parseInt(sender->getUserString("Price"));
     if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
         return;
 

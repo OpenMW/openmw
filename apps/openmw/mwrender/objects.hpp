@@ -41,12 +41,9 @@ public:
         , mRootNode(NULL)
     {}
     ~Objects(){}
-    void insertModel(const MWWorld::Ptr& ptr, const std::string &model, bool batch=false, bool addLight=false);
+    void insertModel(const MWWorld::Ptr& ptr, const std::string &model, bool batch=false);
 
     ObjectAnimation* getAnimation(const MWWorld::Ptr &ptr);
-
-    void enableLights();
-    void disableLights();
 
     void update (float dt, Ogre::Camera* camera);
     ///< per-frame update

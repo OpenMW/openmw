@@ -116,7 +116,7 @@ namespace Compiler
             extensions.registerInstruction ("additem", "clX", opcodeAddItem, opcodeAddItemExplicit);
             extensions.registerFunction ("getitemcount", 'l', "c", opcodeGetItemCount,
                 opcodeGetItemCountExplicit);
-            extensions.registerInstruction ("removeitem", "cl", opcodeRemoveItem,
+            extensions.registerInstruction ("removeitem", "clX", opcodeRemoveItem,
                 opcodeRemoveItemExplicit);
             extensions.registerInstruction ("equip", "cX", opcodeEquip, opcodeEquipExplicit);
             extensions.registerFunction ("getarmortype", 'l', "l", opcodeGetArmorType, opcodeGetArmorTypeExplicit);
@@ -179,7 +179,7 @@ namespace Compiler
             extensions.registerInstruction ("setjournalindex", "cl", opcodeSetJournalIndex);
             extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
             extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);
-            extensions.registerInstruction ("choice", "/SlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSl", opcodeChoice);
+            extensions.registerInstruction ("choice", "j/SlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSl", opcodeChoice);
             extensions.registerInstruction("forcegreeting","",opcodeForceGreeting,
                 opcodeForceGreetingExplicit);
             extensions.registerInstruction("goodbye", "", opcodeGoodbye);
@@ -192,6 +192,7 @@ namespace Compiler
             extensions.registerFunction("samefaction", 'l', "", opcodeSameFaction,
                 opcodeSameFactionExplicit);
             extensions.registerInstruction("modfactionreaction", "ccl", opcodeModFactionReaction);
+            extensions.registerInstruction("setfactionreaction", "ccl", opcodeSetFactionReaction);
             extensions.registerFunction("getfactionreaction", 'l', "ccX", opcodeGetFactionReaction);
             extensions.registerInstruction("clearinfoactor", "", opcodeClearInfoActor, opcodeClearInfoActorExplicit);
         }
@@ -214,7 +215,7 @@ namespace Compiler
             extensions.registerInstruction ("enablestatsmenu", "", opcodeEnableStatsMenu);
 
             extensions.registerInstruction ("enablerest", "", opcodeEnableRest);
-            extensions.registerInstruction ("enablelevelupmenu", "", opcodeEnableRest);
+            extensions.registerInstruction ("enablelevelupmenu", "", opcodeEnableLevelupMenu);
 
             extensions.registerInstruction ("showrestmenu", "", opcodeShowRestMenu, opcodeShowRestMenuExplicit);
 
@@ -261,6 +262,9 @@ namespace Compiler
             extensions.registerInstruction ("togglepathgrid", "", opcodeTogglePathgrid);
             extensions.registerInstruction ("tpg", "", opcodeTogglePathgrid);
             extensions.registerInstruction ("dontsaveobject", "", opcodeDontSaveObject);
+            extensions.registerInstruction ("pcforce1stperson", "", opcodePcForce1stPerson);
+            extensions.registerInstruction ("pcforce3rdperson", "", opcodePcForce3rdPerson);
+            extensions.registerFunction ("pcget3rdperson", 'l', "", opcodePcGet3rdPerson);
             extensions.registerInstruction ("togglevanitymode", "", opcodeToggleVanityMode);
             extensions.registerInstruction ("tvm", "", opcodeToggleVanityMode);
             extensions.registerFunction ("getpcsleep", 'l', "", opcodeGetPcSleep);
@@ -292,6 +296,7 @@ namespace Compiler
             extensions.registerInstruction ("hurtcollidingactor", "f", opcodeHurtCollidingActor, opcodeHurtCollidingActorExplicit);
             extensions.registerFunction ("getwindspeed", 'f', "", opcodeGetWindSpeed);
             extensions.registerFunction ("hitonme", 'l', "S", opcodeHitOnMe, opcodeHitOnMeExplicit);
+            extensions.registerFunction ("hitattemptonme", 'l', "S", opcodeHitAttemptOnMe, opcodeHitAttemptOnMeExplicit);
             extensions.registerInstruction ("disableteleporting", "", opcodeDisableTeleporting);
             extensions.registerInstruction ("enableteleporting", "", opcodeEnableTeleporting);
             extensions.registerInstruction ("showvars", "", opcodeShowVars, opcodeShowVarsExplicit);
@@ -304,6 +309,10 @@ namespace Compiler
             extensions.registerFunction ("getpctraveling", 'l', "", opcodeGetPcTraveling);
             extensions.registerInstruction ("betacomment", "S", opcodeBetaComment, opcodeBetaCommentExplicit);
             extensions.registerInstruction ("bc", "S", opcodeBetaComment, opcodeBetaCommentExplicit);
+            extensions.registerInstruction ("addtolevcreature", "ccl", opcodeAddToLevCreature);
+            extensions.registerInstruction ("removefromlevcreature", "ccl", opcodeRemoveFromLevCreature);
+            extensions.registerInstruction ("addtolevitem", "ccl", opcodeAddToLevItem);
+            extensions.registerInstruction ("removefromlevitem", "ccl", opcodeRemoveFromLevItem);
         }
     }
 

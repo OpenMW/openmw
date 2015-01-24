@@ -25,12 +25,10 @@ namespace MWMechanics
         return mSpells.end();
     }
 
-    void Spells::add (const std::string& spellId)
+    void Spells::add (const ESM::Spell* spell)
     {
-        if (mSpells.find (spellId)==mSpells.end())
+        if (mSpells.find (spell->mId)==mSpells.end())
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-
             std::map<const int, float> random;
 
             // Determine the random magnitudes (unless this is a castable spell, in which case
@@ -50,11 +48,17 @@ namespace MWMechanics
                 corprus.mWorsenings = 0;
                 corprus.mNextWorsening = MWBase::Environment::get().getWorld()->getTimeStamp() + CorprusStats::sWorseningPeriod;
 
-                mCorprusSpells[spellId] = corprus;
+                mCorprusSpells[spell->mId] = corprus;
             }
 
-            mSpells.insert (std::make_pair (Misc::StringUtils::lowerCase(spellId), random));
+            mSpells.insert (std::make_pair (spell->mId, random));
         }
+    }
+
+    void Spells::add (const std::string& spellId)
+    {
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+        add(spell);
     }
 
     void Spells::remove (const std::string& spellId)
@@ -245,7 +249,7 @@ namespace MWMechanics
                     random = it->second.at(i);
 
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
-                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, -1, magnitude);
+                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, spell->mId, -1, magnitude);
             }
         }
     }
@@ -308,21 +312,17 @@ namespace MWMechanics
 
     void Spells::readState(const ESM::SpellState &state)
     {
-        mSpells = state.mSpells;
-        mSelectedSpell = state.mSelectedSpell;
-
-        // Discard spells that are no longer available due to changed content files
-        for (TContainer::iterator iter = mSpells.begin(); iter!=mSpells.end();)
+        for (TContainer::const_iterator it = state.mSpells.begin(); it != state.mSpells.end(); ++it)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(iter->first);
-            if (!spell)
+            // Discard spells that are no longer available due to changed content files
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);
+            if (spell)
             {
-                if (iter->first == mSelectedSpell)
-                    mSelectedSpell = "";
-                mSpells.erase(iter++);
+                mSpells[it->first] = it->second;
+
+                if (it->first == state.mSelectedSpell)
+                    mSelectedSpell = it->first;
             }
-            else
-                ++iter;
         }
 
         // No need to discard spells here (doesn't really matter if non existent ids are kept)

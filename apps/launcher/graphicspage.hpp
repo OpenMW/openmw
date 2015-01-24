@@ -3,14 +3,11 @@
 
 #include <QWidget>
 
-#include <OgreRoot.h>
-#include <OgreRenderSystem.h>
-
 #include <components/ogreinit/ogreinit.hpp>
-
 
 #include "ui_graphicspage.h"
 
+namespace Ogre { class Root; class RenderSystem; }
 
 namespace Files { struct ConfigurationManager; }
 

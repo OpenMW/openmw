@@ -10,6 +10,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "ptr.hpp"
 #include "refdata.hpp"
@@ -37,12 +38,12 @@ namespace MWWorld
         throw std::runtime_error ("class does not support ID retrieval");
     }
 
-    void Class::insertObjectRendering (const Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Class::insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const
     {
 
     }
 
-    void Class::insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Class::insertObject(const Ptr& ptr, const std::string& mesh, MWWorld::PhysicsSystem& physics) const
     {
 
     }
@@ -178,11 +179,6 @@ namespace MWWorld
     int Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error ("class does not support enchanting");
-    }
-
-    float Class::getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const
-    {
-        return 0;
     }
 
     MWMechanics::Movement& Class::getMovementSettings (const Ptr& ptr) const
@@ -387,6 +383,16 @@ namespace MWWorld
         return false;
     }
 
+    bool Class::isPureWaterCreature(const MWWorld::Ptr& ptr) const
+    {
+        return canSwim(ptr) && !canWalk(ptr);
+    }
+
+    bool Class::isMobile(const MWWorld::Ptr& ptr) const
+    {
+        return canSwim(ptr) || canWalk(ptr) || canFly(ptr);
+    }
+
     int Class::getSkill(const MWWorld::Ptr& ptr, int skill) const
     {
         throw std::runtime_error("class does not support skills");
@@ -433,5 +439,10 @@ namespace MWWorld
     std::string Class::getSound(const MWWorld::Ptr&) const
     {
       return std::string();
+    }
+
+    int Class::getBaseFightRating(const Ptr &ptr) const
+    {
+        throw std::runtime_error("class does not support fight rating");
     }
 }

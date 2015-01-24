@@ -101,7 +101,7 @@
 </string>
         </property>
         <property name="text">
-         <string>Current Profile:</string>
+         <string>Current Content List:</string>
         </property>
        </widget>
       </item>

@@ -287,7 +287,7 @@ void MWWorld::Cells::write (ESM::ESMWriter& writer, Loading::Listener& progress)
         if (iter->second.hasState())
         {
             writeCell (writer, iter->second);
-            progress.increaseProgress(); // Assumes that each cell writes one record
+            progress.increaseProgress();
         }
 
     for (std::map<std::string, CellStore>::iterator iter (mInteriors.begin());
@@ -295,11 +295,11 @@ void MWWorld::Cells::write (ESM::ESMWriter& writer, Loading::Listener& progress)
         if (iter->second.hasState())
         {
             writeCell (writer, iter->second);
-            progress.increaseProgress(); // Assumes that each cell writes one record
+            progress.increaseProgress();
         }
 }
 
-bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, int32_t type,
+bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, uint32_t type,
     const std::map<int, int>& contentFileMap)
 {
     if (type==ESM::REC_CSTA)

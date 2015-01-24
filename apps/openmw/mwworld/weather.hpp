@@ -199,7 +199,9 @@ namespace MWWorld
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress);
 
-        bool readRecord(ESM::ESMReader& reader, int32_t type);
+        bool readRecord(ESM::ESMReader& reader, uint32_t type);
+
+        void clear();
 
     private:
         float mHour;

@@ -51,20 +51,27 @@
        </widget>
       </item>
       <item row="2" column="0">
+       <widget class="QCheckBox" name="windowBorderCheckBox">
+        <property name="text">
+         <string>Window border</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
        <widget class="QLabel" name="antiAliasingLabel">
         <property name="text">
          <string>Anti-aliasing:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="screenLabel">
         <property name="text">
          <string>Screen:</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="resolutionLabel">
         <property name="text">
          <string>Resolution:</string>
@@ -74,13 +81,13 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="QComboBox" name="antiAliasingComboBox"/>
       </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <widget class="QComboBox" name="screenComboBox"/>
       </item>
-      <item row="4" column="1">
+      <item row="5" column="1">
        <layout class="QGridLayout" name="resolutionLayout">
         <item row="1" column="2">
          <layout class="QHBoxLayout" name="customResolutionLayout" stretch="1,0,1">

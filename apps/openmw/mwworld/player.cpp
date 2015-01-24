@@ -225,11 +225,9 @@ namespace MWWorld
         writer.startRecord (ESM::REC_PLAY);
         player.save (writer);
         writer.endRecord (ESM::REC_PLAY);
-
-        progress.increaseProgress();
     }
 
-    bool Player::readRecord (ESM::ESMReader& reader, int32_t type)
+    bool Player::readRecord (ESM::ESMReader& reader, uint32_t type)
     {
         if (type==ESM::REC_PLAY)
         {

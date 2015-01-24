@@ -452,6 +452,8 @@ public:
         {
             Ogre::Real scale = (life_time-particle_time) / mGrowTime;
             assert (scale >= 0);
+            // HACK: don't allow zero-sized particles which can rarely cause an AABB assertion in Ogre to fail
+            scale = std::max(scale, 0.00001f);
             width *= scale;
             height *= scale;
         }
@@ -459,6 +461,8 @@ public:
         {
             Ogre::Real scale = particle_time / mFadeTime;
             assert (scale >= 0);
+            // HACK: don't allow zero-sized particles which can rarely cause an AABB assertion in Ogre to fail
+            scale = std::max(scale, 0.00001f);
             width *= scale;
             height *= scale;
         }
@@ -485,6 +489,8 @@ public:
             {
                 Ogre::Real scale = (life_time-particle_time) / mGrowTime;
                 assert (scale >= 0);
+                // HACK: don't allow zero-sized particles which can rarely cause an AABB assertion in Ogre to fail
+                scale = std::max(scale, 0.00001f);
                 width *= scale;
                 height *= scale;
             }
@@ -492,6 +498,8 @@ public:
             {
                 Ogre::Real scale = particle_time / mFadeTime;
                 assert (scale >= 0);
+                // HACK: don't allow zero-sized particles which can rarely cause an AABB assertion in Ogre to fail
+                scale = std::max(scale, 0.00001f);
                 width *= scale;
                 height *= scale;
             }

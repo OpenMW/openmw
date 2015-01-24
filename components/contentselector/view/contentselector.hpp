@@ -32,7 +32,7 @@ namespace ContentSelectorView
         void setProfileContent (const QStringList &fileList);
 
         void clearCheckStates();
-        void setCheckStates (const QStringList &list);
+        void setContentList(const QStringList &list);
 
         ContentSelectorModel::ContentFileList selectedFiles() const;
 
@@ -55,13 +55,13 @@ namespace ContentSelectorView
 
     signals:
         void signalCurrentGamefileIndexChanged (int);
-        void signalAddonFileSelected (int);
-        void signalAddonFileUnselected (int);
+
+        void signalAddonDataChanged (const QModelIndex& topleft, const QModelIndex& bottomright);
 
     private slots:
 
         void slotCurrentGameFileIndexChanged(int index);
-        void slotAddonTableItemClicked(const QModelIndex &index);
+        void slotAddonTableItemActivated(const QModelIndex& index);
     };
 }
 

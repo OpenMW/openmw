@@ -17,26 +17,12 @@ class ESMWriter;
  *
  * Some general observations about savegames:
  *
- * Magical items/potions/spells/etc are added normally as new ALCH,
- * SPEL, etc. records, with unique numeric identifiers.
- *
- * Books with ability enhancements are listed in the save if they have
- * been read.
- *
- * GLOB records set global variables.
- *
  * SCPT records do not define new scripts, but assign values to the
  * variables of existing ones.
  *
- * STLN - stolen items, ONAM is the owner
+ * VFXM, SPLM  - no clue
  *
- * GAME - contains a GMDT (game data) of unknown format
- *
- * VFXM, SPLM, KLST - no clue
- *
- * PCDT - seems to contain a lot of DNAMs, strings?
- *
- * FMAP - MAPH and MAPD, probably map data.
+ * FMAP - MAPH and MAPD, global map image.
  *
  * JOUR - the entire journal in html
  *
@@ -44,6 +30,8 @@ class ESMWriter;
  * ones you have done or begun.
  *
  * REGN - lists all regions in the game, even unvisited ones.
+ * notable differences to Regions in ESM files: mMapColor may be missing, and includes an unknown WNAM subrecord.
+ *
  *
  * The DIAL/INFO blocks contain changes to characters' dialog status.
  *

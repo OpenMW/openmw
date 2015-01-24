@@ -238,9 +238,12 @@ namespace MWGui
     ///Gracefully attempts to exit the topmost GUI mode
     virtual void exitCurrentGuiMode();
 
-    virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible);
+    virtual void messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible);
     virtual void staticMessageBox(const std::string& message);
     virtual void removeStaticMessageBox();
+    virtual void interactiveMessageBox (const std::string& message,
+                                        const std::vector<std::string>& buttons = std::vector<std::string>(), bool block=false);
+
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
     virtual void onFrame (float frameDuration);
@@ -303,7 +306,7 @@ namespace MWGui
     virtual void clear();
 
     virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress);
-    virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+    virtual void readRecord (ESM::ESMReader& reader, uint32_t type);
     virtual int countSavedGameRecords() const;
 
     /// Does the current stack of GUI-windows permit saving?
@@ -337,6 +340,11 @@ namespace MWGui
     virtual void setWerewolfOverlay(bool set);
 
     virtual void toggleDebugWindow();
+
+    /// Cycle to next or previous spell
+    virtual void cycleSpell(bool next);
+    /// Cycle to next or previous weapon
+    virtual void cycleWeapon(bool next);
 
   private:
     bool mConsoleOnlyScripts;

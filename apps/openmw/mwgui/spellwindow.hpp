@@ -4,13 +4,12 @@
 #include "windowpinnablebase.hpp"
 #include "../mwworld/ptr.hpp"
 
+#include "spellmodel.hpp"
+
 namespace MWGui
 {
     class SpellIcons;
-
-    bool sortItems(const MWWorld::Ptr& left, const MWWorld::Ptr& right);
-
-    bool sortSpells(const std::string& left, const std::string& right);
+    class SpellView;
 
     class SpellWindow : public WindowPinnableBase, public NoDrop
     {
@@ -22,31 +21,24 @@ namespace MWGui
 
         void onFrame(float dt) { NoDrop::onFrame(dt); }
 
+        /// Cycle to next/previous spell
+        void cycle(bool next);
+
     protected:
-        MyGUI::ScrollView* mSpellView;
         MyGUI::Widget* mEffectBox;
-
-        int mHeight;
-        int mWidth;
-
-        MyGUI::IntSize mWindowSize;
 
         std::string mSpellToDelete;
 
-        void addGroup(const std::string& label, const std::string& label2);
-
-        int estimateHeight(int numSpells) const;
-
-        void onWindowResize(MyGUI::Window* _sender);
-        void onEnchantedItemSelected(MyGUI::Widget* _sender);
-        void onSpellSelected(MyGUI::Widget* _sender);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onEnchantedItemSelected(MWWorld::Ptr item, bool alreadyEquipped);
+        void onSpellSelected(const std::string& spellId);
+        void onModelIndexSelected(SpellModel::ModelIndex index);
         void onDeleteSpellAccept();
 
         virtual void onPinToggled();
         virtual void onTitleDoubleClicked();
         virtual void open();
 
+        SpellView* mSpellView;
         SpellIcons* mSpellIcons;
     };
 }

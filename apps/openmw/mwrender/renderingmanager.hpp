@@ -111,7 +111,7 @@ public:
     /// Write current fog of war for this cell to the CellStore
     void writeFog (MWWorld::CellStore* store);
 
-    void addObject (const MWWorld::Ptr& ptr);
+    void addObject (const MWWorld::Ptr& ptr, const std::string& model);
     void removeObject (const MWWorld::Ptr& ptr);
 
     void moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position);

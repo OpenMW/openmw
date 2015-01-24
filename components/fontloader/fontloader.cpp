@@ -1,5 +1,7 @@
 #include "fontloader.hpp"
 
+#include <stdexcept>
+
 #include <OgreResourceGroupManager.h>
 #include <OgreTextureManager.h>
 
@@ -121,6 +123,15 @@ namespace
             return encoder.getUtf8(std::string(1, c));
     }
 
+    void fail (Ogre::DataStreamPtr file, const std::string& fileName, const std::string& message)
+    {
+        std::stringstream error;
+        error << "Font loading error: " << message;
+        error << "\n  File: " << fileName;
+        error << "\n  Offset: 0x" << std::hex << file->tell();
+        throw std::runtime_error(error.str());
+    }
+
 }
 
 namespace Gui
@@ -173,20 +184,30 @@ namespace Gui
         Ogre::DataStreamPtr file = Ogre::ResourceGroupManager::getSingleton().openResource(fileName);
 
         float fontSize;
-        int one;
-        file->read(&fontSize, sizeof(fontSize));
+        if (file->read(&fontSize, sizeof(fontSize)) < sizeof(fontSize))
+            fail(file, fileName, "File too small to be a valid font");
 
-        file->read(&one, sizeof(int));
-        assert(one == 1);
-        file->read(&one, sizeof(int));
-        assert(one == 1);
+        int one;
+        if (file->read(&one, sizeof(int)) < sizeof(int))
+            fail(file, fileName, "File too small to be a valid font");
+
+        if (one != 1)
+            fail(file, fileName, "Unexpected value");
+
+        if (file->read(&one, sizeof(int)) < sizeof(int))
+            fail(file, fileName, "File too small to be a valid font");
+
+        if (one != 1)
+            fail(file, fileName, "Unexpected value");
 
         char name_[284];
-        file->read(name_, sizeof(name_));
+        if (file->read(name_, sizeof(name_)) < sizeof(name_))
+            fail(file, fileName, "File too small to be a valid font");
         std::string name(name_);
 
         GlyphInfo data[256];
-        file->read(data, sizeof(data));
+        if (file->read(data, sizeof(data)) < sizeof(data))
+            fail(file, fileName, "File too small to be a valid font");
         file->close();
 
         // Create the font texture
@@ -194,12 +215,19 @@ namespace Gui
         Ogre::DataStreamPtr bitmapFile = Ogre::ResourceGroupManager::getSingleton().openResource(bitmapFilename);
 
         int width, height;
-        bitmapFile->read(&width, sizeof(int));
-        bitmapFile->read(&height, sizeof(int));
+        if (bitmapFile->read(&width, sizeof(int)) < sizeof(int))
+            fail(bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
+
+        if (bitmapFile->read(&height, sizeof(int)) < sizeof(int))
+            fail(bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
+
+        if (width <= 0 || height <= 0)
+            fail(bitmapFile, bitmapFilename, "Width and height must be positive");
 
         std::vector<Ogre::uchar> textureData;
         textureData.resize(width*height*4);
-        bitmapFile->read(&textureData[0], width*height*4);
+        if (bitmapFile->read(&textureData[0], width*height*4) < (size_t)(width*height*4))
+            fail(bitmapFile, bitmapFilename, "Bitmap does not contain the specified number of pixels");
         bitmapFile->close();
 
         std::string resourceName;

@@ -6,7 +6,7 @@
 #include <string>
 #include <sstream>
 
-#include "cellreflist.hpp"
+#include "livecellref.hpp"
 
 namespace MWWorld
 {

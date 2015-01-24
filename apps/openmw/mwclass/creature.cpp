@@ -119,7 +119,12 @@ namespace MWClass
             // spells
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
                 iter!=ref->mBase->mSpells.mList.end(); ++iter)
-                data->mCreatureStats.getSpells().add (*iter);
+            {
+                if (const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter))
+                    data->mCreatureStats.getSpells().add (spell);
+                else /// \todo add option to make this a fatal error message pop-up, but default to warning for vanilla compatibility
+                    std::cerr << "Warning: ignoring nonexistent spell '" << *iter << "' on creature '" << ref->mBase->mId << "'" << std::endl;
+            }
 
             // inventory
             if (ref->mBase->mFlags & ESM::Creature::Weapon)
@@ -134,7 +139,7 @@ namespace MWClass
             // store
             ptr.getRefData().setCustomData(data.release());
 
-            getContainerStore(ptr).fill(ref->mBase->mInventory, getId(ptr), "",
+            getContainerStore(ptr).fill(ref->mBase->mInventory, getId(ptr), "", -1,
                                        MWBase::Environment::get().getWorld()->getStore());
 
             if (ref->mBase->mFlags & ESM::Creature::Weapon)
@@ -155,20 +160,19 @@ namespace MWClass
         MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
     }
 
-    void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         MWRender::Actors& actors = renderingInterface.getActors();
-        actors.insertCreature(ptr, ref->mBase->mFlags & ESM::Creature::Weapon);
+        actors.insertCreature(ptr, model, ref->mBase->mFlags & ESM::Creature::Weapon);
     }
 
-    void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Creature::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
         {
-            physics.addActor(ptr);
+            physics.addActor(ptr, model);
             if (getCreatureStats(ptr).isDead())
                 MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
         }
@@ -283,7 +287,7 @@ namespace MWClass
         }
 
         float damage = min + (max - min) * stats.getAttackStrength();
-
+        bool healthdmg = true;
         if (!weapon.isEmpty())
         {
             const unsigned char *attack = NULL;
@@ -316,10 +320,14 @@ namespace MWClass
                 }
             }
         }
+        else if (isBipedal(ptr))
+        {
+            MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg);
+        }
 
         MWMechanics::applyElementalShields(ptr, victim);
 
-        if (!weapon.isEmpty() && MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
+        if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
             damage = 0;
 
         if (damage > 0)
@@ -327,7 +335,7 @@ namespace MWClass
 
         MWMechanics::diseaseContact(victim, ptr);
 
-        victim.getClass().onHit(victim, damage, true, weapon, ptr, true);
+        victim.getClass().onHit(victim, damage, healthdmg, weapon, ptr, true);
     }
 
     void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
@@ -339,17 +347,18 @@ namespace MWClass
 
         // Self defense
         bool setOnPcHitMe = true; // Note OnPcHitMe is not set for friendly hits.
-        if ((canWalk(ptr) || canFly(ptr) || canSwim(ptr)) // No retaliation for totally static creatures
-                                                              // (they have no movement or attacks anyway)
-            && !attacker.isEmpty())
+        
+        // No retaliation for totally static creatures (they have no movement or attacks anyway)
+        if (isMobile(ptr) && !attacker.isEmpty())
         {
             setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
+        if(!object.isEmpty())
+            getCreatureStats(ptr).setLastHitAttemptObject(object.getClass().getId(object));
+
         if(!successful)
         {
-            // TODO: Handle HitAttemptOnMe script function
-
             // Missed
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "miss", 1.0f, 1.0f);
             return;
@@ -672,21 +681,24 @@ namespace MWClass
         if(type >= 0)
         {
             std::vector<const ESM::SoundGenerator*> sounds;
-            sounds.reserve(8);
 
-            std::string ptrid = Creature::getId(ptr);
+            MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
+
+            const std::string& ourId = (ref->mBase->mOriginal.empty()) ? getId(ptr) : ref->mBase->mOriginal;
+
             MWWorld::Store<ESM::SoundGenerator>::iterator sound = store.begin();
             while(sound != store.end())
             {
-                if(type == sound->mType && !sound->mCreature.empty() &&
-                   Misc::StringUtils::ciEqual(ptrid.substr(0, sound->mCreature.size()),
-                                              sound->mCreature))
+                if (type == sound->mType && !sound->mCreature.empty() && (Misc::StringUtils::ciEqual(ourId, sound->mCreature)))
                     sounds.push_back(&*sound);
                 ++sound;
             }
             if(!sounds.empty())
                 return sounds[(int)(rand()/(RAND_MAX+1.0)*sounds.size())]->mSound;
         }
+
+        if (type == ESM::SoundGenerator::Land)
+            return "Body Fall Large";
 
         return "";
     }
@@ -804,6 +816,9 @@ namespace MWClass
     void Creature::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
         const
     {
+        if (!state.mHasCustomState)
+            return;
+
         const ESM::CreatureState& state2 = dynamic_cast<const ESM::CreatureState&> (state);
 
         ensureCustomData(ptr);
@@ -832,13 +847,18 @@ namespace MWClass
 
         customData.mContainerStore->readState (state2.mInventory);
         customData.mCreatureStats.readState (state2.mCreatureStats);
-
     }
 
     void Creature::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
         const
     {
         ESM::CreatureState& state2 = dynamic_cast<ESM::CreatureState&> (state);
+
+        if (!ptr.getRefData().getCustomData())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
 
         ensureCustomData (ptr);
 
@@ -859,7 +879,7 @@ namespace MWClass
         {
             // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
             // This also means we cannot respawn dynamically placed references with no content file connection.
-            if (ptr.getCellRef().getRefNum().mContentFile != -1)
+            if (ptr.getCellRef().hasContentFile())
             {
                 if (ptr.getRefData().getCount() == 0)
                     ptr.getRefData().setCount(1);
@@ -877,6 +897,18 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().getRefId(), ptr.getCellRef().getFaction());
+        store.restock(list, ptr, ptr.getCellRef().getRefId(), "", -1);
+    }
+
+    int Creature::getBaseFightRating(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        return ref->mBase->mAiData.mFight;
+    }
+
+    void Creature::adjustScale(const MWWorld::Ptr &ptr, float &scale) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        scale *= ref->mBase->mScale;
     }
 }

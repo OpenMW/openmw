@@ -240,9 +240,11 @@ namespace MWBase
             /** No guarentee of actually closing the window **/
             virtual void exitCurrentGuiMode() = 0;
 
-            virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
+            virtual void messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
             virtual void staticMessageBox(const std::string& message) = 0;
             virtual void removeStaticMessageBox() = 0;
+            virtual void interactiveMessageBox (const std::string& message,
+                                                const std::vector<std::string>& buttons = std::vector<std::string>(), bool block=false) = 0;
 
             /// returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
             virtual int readPressedButton() = 0;
@@ -308,7 +310,7 @@ namespace MWBase
             virtual void clear() = 0;
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
+            virtual void readRecord (ESM::ESMReader& reader, uint32_t type) = 0;
             virtual int countSavedGameRecords() const = 0;
 
             /// Does the current stack of GUI-windows permit saving?
@@ -342,6 +344,11 @@ namespace MWBase
             virtual void setWerewolfOverlay(bool set) = 0;
 
             virtual void toggleDebugWindow() = 0;
+
+            /// Cycle to next or previous spell
+            virtual void cycleSpell(bool next) = 0;
+            /// Cycle to next or previous weapon
+            virtual void cycleWeapon(bool next) = 0;
     };
 }
 

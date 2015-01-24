@@ -10,10 +10,7 @@
         </Widget>
 
         <!-- Spell list -->
-        <Widget type="Widget" skin="MW_Box" position="8 38 268 518" align="Left Top Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 260 510" align="Left Top Stretch" name="SpellView">
-                <Property key="CanvasAlign" value="Left Top"/>
-            </Widget>
+        <Widget type="SpellView" skin="MW_SpellView" position="8 38 268 518" align="Left Top Stretch" name="SpellView">
         </Widget>
 
     </Widget>

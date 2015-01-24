@@ -12,6 +12,7 @@
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
 
@@ -29,19 +30,17 @@ namespace MWClass
         return ref->mBase->mId;
     }
 
-    void Weapon::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Weapon::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        const std::string model = getModel(ptr);
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    void Weapon::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Weapon::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr,true);
+            physics.addObject(ptr, model, true);
     }
 
     std::string Weapon::getModel(const MWWorld::Ptr &ptr) const
@@ -385,7 +384,7 @@ namespace MWClass
 
     std::pair<int, std::string> Weapon::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
-        if (ptr.getCellRef().getCharge() == 0)
+        if (hasItemHealth(ptr) && ptr.getCellRef().getCharge() == 0)
             return std::make_pair(0, "#{sInventoryMessage1}");
 
         std::pair<std::vector<int>, bool> slots_ = ptr.getClass().getEquipmentSlots(ptr);

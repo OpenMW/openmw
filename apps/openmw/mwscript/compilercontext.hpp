@@ -12,7 +12,7 @@ namespace MWScript
             enum Type
             {
                 Type_Full, // global, local, targetted
-                Type_Dialgoue,
+                Type_Dialogue,
                 Type_Console
             };
 

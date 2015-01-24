@@ -4,8 +4,6 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_TextBox.h>
 
-#include <boost/lexical_cast.hpp>
-
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwworld/class.hpp"
@@ -17,9 +15,9 @@ namespace
         if (count == 1)
             return "";
         if (count > 9999)
-            return boost::lexical_cast<std::string>(int(count/1000.f)) + "k";
+            return MyGUI::utility::toString(int(count/1000.f)) + "k";
         else
-            return boost::lexical_cast<std::string>(count);
+            return MyGUI::utility::toString(count);
     }
 }
 

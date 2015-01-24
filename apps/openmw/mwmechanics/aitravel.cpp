@@ -14,6 +14,19 @@
 #include "movement.hpp"
 #include "creaturestats.hpp"
 
+namespace
+{
+
+bool isWithinMaxRange(const Ogre::Vector3& pos1, const Ogre::Vector3& pos2)
+{
+    // Maximum travel distance for vanilla compatibility.
+    // Was likely meant to prevent NPCs walking into non-loaded exterior cells, but for some reason is used in interior cells as well.
+    // We can make this configurable at some point, but the default *must* be the below value. Anything else will break shoddily-written content (*cough* MW *cough*) in bizarre ways.
+    return (pos1.squaredDistance(pos2) <= 7168*7168);
+}
+
+}
+
 namespace MWMechanics
 {
     AiTravel::AiTravel(float x, float y, float z)
@@ -71,10 +84,7 @@ namespace MWMechanics
             }
         }
 
-        // Maximum travel distance for vanilla compatibility.
-        // Was likely meant to prevent NPCs walking into non-loaded exterior cells, but for some reason is used in interior cells as well.
-        // We can make this configurable at some point, but the default *must* be the below value. Anything else will break shoddily-written content (*cough* MW *cough*) in bizarre ways.
-        if (Ogre::Vector3(mX, mY, mZ).squaredDistance(Ogre::Vector3(pos.pos)) > 7168*7168)
+        if (!isWithinMaxRange(Ogre::Vector3(mX, mY, mZ), Ogre::Vector3(pos.pos)))
             return false;
 
         bool cellChange = cell->mData.mX != mCellX || cell->mData.mY != mCellY;
@@ -111,6 +121,16 @@ namespace MWMechanics
     int AiTravel::getTypeId() const
     {
         return TypeIdTravel;
+    }
+
+    void AiTravel::fastForward(const MWWorld::Ptr& actor, AiState& state)
+    {
+        if (!isWithinMaxRange(Ogre::Vector3(mX, mY, mZ), Ogre::Vector3(actor.getRefData().getPosition().pos)))
+            return;
+        // does not do any validation on the travel target (whether it's in air, inside collision geometry, etc),
+        // that is the user's responsibility
+        MWBase::Environment::get().getWorld()->moveObject(actor, mX, mY, mZ);
+        actor.getClass().adjustPosition(actor, false);
     }
 
     void AiTravel::writeState(ESM::AiSequence::AiSequence &sequence) const

@@ -28,6 +28,9 @@ namespace MWWorld
         // Set RefNum to its default state.
         void unsetRefNum();
 
+        /// Does the RefNum have a content file?
+        bool hasContentFile() const;
+
         // Id of object being referenced
         std::string getRefId() const;
 
@@ -57,8 +60,11 @@ namespace MWWorld
 
         // For weapon or armor, this is the remaining item health.
         // For tools (lockpicks, probes, repair hammer) it is the remaining uses.
+        // If this returns int(-1) it means full health.
         int getCharge() const;
+        float getChargeFloat() const; // Implemented as union with int charge
         void setCharge(int charge);
+        void setChargeFloat(float charge);
 
         // The NPC that owns this object (and will get angry if you steal it)
         std::string getOwner() const;
@@ -79,6 +85,7 @@ namespace MWWorld
         void setFaction (const std::string& faction);
 
         // PC faction rank required to use the item. Sometimes is -1, which means "any rank".
+        void setFactionRank(int factionRank);
         int getFactionRank() const;
 
         // Lock level for doors and containers

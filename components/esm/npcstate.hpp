@@ -16,6 +16,9 @@ namespace ESM
         NpcStats mNpcStats;
         CreatureStats mCreatureStats;
 
+        /// Initialize to default state
+        void blank();
+
         virtual void load (ESMReader &esm);
         virtual void save (ESMWriter &esm, bool inInventory = false) const;
     };

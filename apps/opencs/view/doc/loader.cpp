@@ -18,7 +18,7 @@ void CSVDoc::LoadingDocument::closeEvent (QCloseEvent *event)
 }
 
 CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
-: mDocument (document), mAborted (false), mMessages (0)
+: mDocument (document), mAborted (false), mMessages (0), mTotalRecords (0)
 {
     setWindowTitle (("Opening " + document->getSavePath().filename().string()).c_str());
 
@@ -104,7 +104,7 @@ void CSVDoc::LoadingDocument::nextRecord (int records)
 void CSVDoc::LoadingDocument::abort (const std::string& error)
 {
     mAborted = true;
-    mError->setText (QString::fromUtf8 (("Loading failed: " + error).c_str()));
+    mError->setText (QString::fromUtf8 (("<font color=red>Loading failed: " + error + "</font>").c_str()));
     mButtons->setStandardButtons (QDialogButtonBox::Close);
 }
 
