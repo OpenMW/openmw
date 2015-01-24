@@ -18,7 +18,7 @@ namespace ESM
 
         void load (ESMReader& esm, bool wide = false);
 
-        void save (ESMWriter &esm, bool wide = false) const;
+        void save (ESMWriter &esm, bool wide = false, const std::string& tag = "FRMR") const;
     };
 
     /* Cell reference. This represents ONE object (of many) inside the

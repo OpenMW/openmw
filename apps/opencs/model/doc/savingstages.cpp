@@ -314,10 +314,7 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                         char ignore;
                         stream >> ignore >> moved.mTarget[0] >> moved.mTarget[1];
 
-                        mState.getWriter().startSubRecord ("MVRF");
-
-                        mState.getWriter().endRecord ("MVRF");
-                        mState.getWriter().writeHNT ("FRMR", moved.mRefNum.mIndex, 4);
+                        ref.get().mRefNum.save (mState.getWriter(), false, "MVRF");
                         mState.getWriter().writeHNT ("CNDT", moved.mTarget, 8);
                     }
 

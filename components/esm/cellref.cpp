@@ -12,15 +12,15 @@ void ESM::RefNum::load (ESMReader& esm, bool wide)
         esm.getHNT (mIndex, "FRMR");
 }
 
-void ESM::RefNum::save (ESMWriter &esm, bool wide) const
+void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
 {
     if (wide)
-        esm.writeHNT ("FRMR", *this, 8);
+        esm.writeHNT (tag, *this, 8);
     else
     {
         int refNum = (mIndex & 0xffffff) | ((mContentFile==-1 ? 0xff : mContentFile)<<24);
 
-        esm.writeHNT ("FRMR", refNum, 4);
+        esm.writeHNT (tag, refNum, 4);
     }
 }
 
