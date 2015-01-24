@@ -156,7 +156,8 @@ struct Cell
      All fields of the CellRef struct are overwritten. You can safely
      reuse one memory location without blanking it between calls.
   */
-  static bool getNextRef(ESMReader &esm, CellRef &ref, bool& deleted);
+  /// \param ignoreMoves ignore MVRF record and read reference like a regular CellRef.
+  static bool getNextRef(ESMReader &esm, CellRef &ref, bool& deleted, bool ignoreMoves = false);
 
   /* This fetches an MVRF record, which is used to track moved references.
    * Since they are comparably rare, we use a separate method for this.
