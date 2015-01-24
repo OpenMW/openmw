@@ -804,7 +804,7 @@
         </Child>
 
         <!-- Caption -->
-        <Child type="WindowCaption" skin="MW_Caption" offset="4 4 248 20" align="HStretch Top" name="Caption">
+        <Child type="WindowCaption" skin="MW_Caption" offset="4 4 228 20" align="HStretch Top" name="Caption">
         </Child>
 
         <!-- This invisible button makes it possible to move the
