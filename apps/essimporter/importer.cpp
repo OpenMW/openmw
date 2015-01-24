@@ -237,6 +237,12 @@ namespace ESSImport
         converters[recJOUR      ] = boost::shared_ptr<Converter>(new ConvertJOUR());
         converters[ESM::REC_SCPT] = boost::shared_ptr<Converter>(new ConvertSCPT());
 
+        // TODO:
+        // - REGN (weather in certain regions?)
+        // - VFXM
+        // - SPLM (active spell effects)
+        // - PROJ (magic projectiles in air)
+
         std::set<unsigned int> unknownRecords;
 
         for (std::map<unsigned int, boost::shared_ptr<Converter> >::const_iterator it = converters.begin();

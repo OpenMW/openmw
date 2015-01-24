@@ -9,6 +9,7 @@
 
 #include "convertcrec.hpp"
 #include "convertcntc.hpp"
+#include "convertscri.hpp"
 
 namespace
 {
@@ -29,6 +30,8 @@ namespace
         objstate.mRef.mRefNum = cellref.mRefNum;
         if (cellref.mDeleted)
             objstate.mCount = 0;
+        convertSCRI(cellref.mSCRI, objstate.mLocals);
+        objstate.mHasLocals = !objstate.mLocals.mVariables.empty();
     }
 
     bool isIndexedRefId(const std::string& indexedRefId)
