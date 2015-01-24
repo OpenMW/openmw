@@ -373,6 +373,11 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v3.xml").string();
     bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
+    if(!keybinderUserExists)
+    {
+        boost::filesystem::copy_file(mCfgMgr.getUserConfigPath() / "input_v2.xml", mCfgMgr.getUserConfigPath() / "input_v3.xml");
+        keybinderUserExists=true;
+    }
 
     // find correct path to the game controller bindings
     const std::string localdefault = mCfgMgr.getLocalPath().string() + "/gamecontrollerdb.cfg";
