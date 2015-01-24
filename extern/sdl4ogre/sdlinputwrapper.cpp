@@ -30,7 +30,8 @@ namespace SFO
         mWantMouseVisible(false),
         mAllowGrab(grab),
         mWarpX(0),
-        mWarpY(0)
+        mWarpY(0),
+        mFirstMouseMove(true)
     {
         _setupOISKeys();
     }
@@ -316,6 +317,13 @@ namespace SFO
             pack_evt.y = mMouseY = evt.motion.y;
             pack_evt.xrel = evt.motion.xrel;
             pack_evt.yrel = evt.motion.yrel;
+            if (mFirstMouseMove)
+            {
+                // first event should be treated as non-relative, since there's no point of reference
+                // SDL then (incorrectly) uses (0,0) as point of reference, on Linux at least...
+                pack_evt.xrel = pack_evt.yrel = 0;
+                mFirstMouseMove = false;
+            }
         }
         else if(evt.type == SDL_MOUSEWHEEL)
         {
