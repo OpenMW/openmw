@@ -366,7 +366,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
-    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v2.xml").string();
+    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v3.xml").string();
     bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
 
     // find correct path to the game controller bindings
