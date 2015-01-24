@@ -14,6 +14,7 @@
 #include <components/esm/custommarkerstate.hpp>
 #include <components/esm/loadcrea.hpp>
 #include <components/esm/weatherstate.hpp>
+#include <components/esm/globalscript.hpp>
 
 #include "importcrec.hpp"
 #include "importcntc.hpp"
@@ -30,6 +31,7 @@
 
 #include "convertacdt.hpp"
 #include "convertnpcc.hpp"
+#include "convertscpt.hpp"
 
 namespace ESSImport
 {
@@ -529,7 +531,21 @@ public:
     {
         SCPT script;
         script.load(esm);
+        ESM::GlobalScript out;
+        convertSCPT(script, out);
+        mScripts.push_back(out);
     }
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        for (std::vector<ESM::GlobalScript>::const_iterator it = mScripts.begin(); it != mScripts.end(); ++it)
+        {
+            esm.startRecord(ESM::REC_GSCR);
+            it->save(esm);
+            esm.endRecord(ESM::REC_GSCR);
+        }
+    }
+private:
+    std::vector<ESM::GlobalScript> mScripts;
 };
 
 }

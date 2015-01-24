@@ -22,6 +22,7 @@ namespace ESSImport
         // values of local variables
         SCRI mSCRI;
 
+        bool mHasRNAM;
         int mRNAM; // unknown, seems to be -1 for some scripts, some huge integer for others
 
         void load(ESM::ESMReader& esm);
