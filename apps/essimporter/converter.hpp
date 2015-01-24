@@ -13,6 +13,7 @@
 #include <components/esm/dialoguestate.hpp>
 #include <components/esm/custommarkerstate.hpp>
 #include <components/esm/loadcrea.hpp>
+#include <components/esm/weatherstate.hpp>
 
 #include "importcrec.hpp"
 #include "importcntc.hpp"
@@ -455,11 +456,69 @@ public:
 class ConvertGAME : public Converter
 {
 public:
+    ConvertGAME() : mHasGame(false) {}
+
+    std::string toString(int weatherId)
+    {
+        switch (weatherId)
+        {
+        case 0:
+            return "clear";
+        case 1:
+            return "cloudy";
+        case 2:
+            return "foggy";
+        case 3:
+            return "overcast";
+        case 4:
+            return "rain";
+        case 5:
+            return "thunderstorm";
+        case 6:
+            return "ashstorm";
+        case 7:
+            return "blight";
+        case 8:
+            return "snow";
+        case 9:
+            return "blizzard";
+        case -1:
+            return "";
+        default:
+            {
+                std::stringstream error;
+                error << "unknown weather id: " << weatherId;
+                throw std::runtime_error(error.str());
+            }
+        }
+    }
+
     virtual void read(ESM::ESMReader &esm)
     {
-        GAME game;
-        game.load(esm);
+        mGame.load(esm);
+        mHasGame = true;
     }
+
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        if (!mHasGame)
+            return;
+        esm.startRecord(ESM::REC_WTHR);
+        ESM::WeatherState weather;
+        weather.mCurrentWeather = toString(mGame.mGMDT.mCurrentWeather);
+        weather.mNextWeather = toString(mGame.mGMDT.mNextWeather);
+        weather.mRemainingTransitionTime = mGame.mGMDT.mWeatherTransition/100.f*(0.015*24*3600);
+        weather.mHour = mContext->mHour;
+        weather.mWindSpeed = 0.f;
+        weather.mTimePassed = 0.0;
+        weather.mFirstUpdate = false;
+        weather.save(esm);
+        esm.endRecord(ESM::REC_WTHR);
+    }
+
+private:
+    bool mHasGame;
+    GAME mGame;
 };
 
 /// Running global script
