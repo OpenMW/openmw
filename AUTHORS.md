@@ -75,6 +75,7 @@ Programmers
     Michał Bień (Glorf)
     Miroslav Puda (pakanek)
     MiroslavR
+    naclander
     Narmo
     Nathan Jeffords (blunted2night)
     Nikolay Kasyanov (corristo)
