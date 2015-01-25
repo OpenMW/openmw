@@ -40,8 +40,8 @@ union NAME_T
   }
   bool operator!=(const std::string &str) const { return !((*this)==str); }
 
-  bool operator==(int v) const { return v == val; }
-  bool operator!=(int v) const { return v != val; }
+  bool operator==(uint32_t v) const { return v == val; }
+  bool operator!=(uint32_t v) const { return v != val; }
 
   std::string toString() const { return std::string(name, strnlen(name, LEN)); }
 
