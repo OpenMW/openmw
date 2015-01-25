@@ -59,6 +59,7 @@ struct Arguments
     std::string outname;
 
     std::vector<std::string> types;
+    std::string name;
 
     ESMData data;
     ESM::ESMReader reader;
@@ -78,6 +79,8 @@ bool parseOptions (int argc, char** argv, Arguments &info)
         ("type,t", bpo::value< std::vector<std::string> >(),
          "Show only records of this type (four character record code).  May "
          "be specified multiple times.  Only affects dump mode.")
+        ("name,n", bpo::value<std::string>(),
+         "Show only the record with this name.  Only affects dump mode.")
         ("plain,p", "Print contents of dialogs, books and scripts. "
          "(skipped by default)"
          "Only affects dump mode.")
@@ -148,7 +151,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     }
 
     if (variables.count("type") > 0)
-      info.types = variables["type"].as< std::vector<std::string> >();
+        info.types = variables["type"].as< std::vector<std::string> >();
+    if (variables.count("name") > 0)
+        info.name = variables["name"].as<std::string>();
 
     info.mode = variables["mode"].as<std::string>();
     if (!(info.mode == "dump" || info.mode == "clone" || info.mode == "comp"))
@@ -265,6 +270,8 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
         std::cout << "    Gold value: '" << ref.mGoldValue << "'\n";
         std::cout << "    Blocked: '" << static_cast<int>(ref.mReferenceBlocked) << "'" << std::endl;
         std::cout << "    Deleted: " << deleted << std::endl;
+        if (!ref.mKey.empty())
+            std::cout << "    Key: '" << ref.mKey << "'" << std::endl;
     }
 }
 
@@ -358,6 +365,9 @@ int load(Arguments& info)
             if (id.empty())
                 id = esm.getHNOString("INAM");
 
+            if (!info.name.empty() && !Misc::StringUtils::ciEqual(info.name, id))
+                interested = false;
+
             if(!quiet && interested)
                 std::cout << "\nRecord: " << n.toString()
                      << " '" << id << "'\n";
@@ -385,7 +395,7 @@ int load(Arguments& info)
                 record->load(esm);
                 if (!quiet && interested) record->print();
 
-                if (record->getType().val == ESM::REC_CELL && loadCells) {
+                if (record->getType().val == ESM::REC_CELL && loadCells && interested) {
                     loadCell(record->cast<ESM::Cell>()->get(), esm, info);
                 }
 
