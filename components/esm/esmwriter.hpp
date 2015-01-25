@@ -4,10 +4,13 @@
 #include <iosfwd>
 #include <list>
 
-#include <components/to_utf8/to_utf8.hpp>
-
 #include "esmcommon.hpp"
 #include "loadtes3.hpp"
+
+namespace ToUTF8
+{
+    class Utf8Encoder;
+}
 
 namespace ESM {
 

@@ -2,6 +2,8 @@
 #include "labels.hpp"
 
 #include <iostream>
+#include <sstream>
+
 #include <boost/format.hpp>
 
 void printAIPackage(ESM::AIPackage p)

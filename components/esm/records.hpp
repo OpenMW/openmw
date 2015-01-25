@@ -32,7 +32,6 @@
 #include "loadmgef.hpp"
 #include "loadmisc.hpp"
 #include "loadnpc.hpp"
-#include "loadnpcc.hpp"
 #include "loadpgrd.hpp"
 #include "loadrace.hpp"
 #include "loadregn.hpp"

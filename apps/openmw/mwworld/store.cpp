@@ -1,6 +1,8 @@
 #include "store.hpp"
 #include "esmstore.hpp"
 
+#include <components/esm/esmreader.hpp>
+
 namespace MWWorld {
 
 void Store<ESM::Cell>::handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell)
@@ -115,6 +117,11 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
             mExt[std::make_pair(cell.mData.mX, cell.mData.mY)] = cell;
         }
     }
+}
+
+void Store<ESM::LandTexture>::load(ESM::ESMReader &esm, const std::string &id)
+{
+    load(esm, id, esm.getIndex());
 }
 
 }
