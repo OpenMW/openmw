@@ -376,7 +376,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     if(!keybinderUserExists)
     {
         boost::filesystem::copy_file(mCfgMgr.getUserConfigPath() / "input_v2.xml", mCfgMgr.getUserConfigPath() / "input_v3.xml");
-        keybinderUserExists=true;
+        keybinderUserExists = boost::filesystem::exists(keybinderUser);
     }
 
     // find correct path to the game controller bindings
