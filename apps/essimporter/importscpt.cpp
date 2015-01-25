@@ -13,14 +13,14 @@ namespace ESSImport
 
         mSCRI.load(esm);
 
-        mRNAM = -1;
+        mRefNum = -1;
         if (esm.isNextSub("RNAM"))
         {
-            mHasRNAM = true;
-            esm.getHT(mRNAM);
+            mRunning = true;
+            esm.getHT(mRefNum);
         }
         else
-            mHasRNAM = false;
+            mRunning = false;
     }
 
 }
