@@ -263,7 +263,7 @@ public:
         for (std::vector<PCDT::FNAM>::const_iterator it = pcdt.mFactions.begin(); it != pcdt.mFactions.end(); ++it)
         {
             ESM::NpcStats::Faction faction;
-            faction.mExpelled = it->mFlags & 0x2;
+            faction.mExpelled = (it->mFlags & 0x2) != 0;
             faction.mRank = it->mRank;
             faction.mReputation = it->mReputation;
             mContext->mPlayer.mObject.mNpcStats.mFactions[it->mFactionName.toString()] = faction;

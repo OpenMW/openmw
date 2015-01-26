@@ -137,7 +137,7 @@ struct Cell
 
   bool hasWater() const
   {
-      return (mData.mFlags&HasWater);
+      return (mData.mFlags&HasWater) != 0;
   }
 
   // Restore the given reader to the stored position. Will try to open
