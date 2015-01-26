@@ -82,6 +82,7 @@ namespace Launcher
         bool showDeleteMessageBox (const QString &text);
         void addProfile (const QString &profile, bool setAsCurrent);
         void checkForDefaultProfile();
+        void populateFileViews(const QString& contentModelName);
 
         class PathIterator
         {
