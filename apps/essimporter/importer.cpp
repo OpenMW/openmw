@@ -342,8 +342,8 @@ namespace ESSImport
         {
             // exterior cell -> determine cell coordinates based on position
             const int cellSize = 8192;
-            int cellX = std::floor(context.mPlayer.mObject.mPosition.pos[0]/cellSize);
-            int cellY = std::floor(context.mPlayer.mObject.mPosition.pos[1]/cellSize);
+            int cellX = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[0]/cellSize));
+            int cellY = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[1] / cellSize));
             context.mPlayer.mCellId.mIndex.mX = cellX;
             context.mPlayer.mCellId.mIndex.mY = cellY;
         }
