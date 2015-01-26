@@ -18,7 +18,7 @@ namespace ESM
 {
 class ESMReader;
 class ESMWriter;
-    class CellId;
+struct CellId;
 
 /* Moved cell reference tracking object. This mainly stores the target cell
         of the reference, so we can easily know where it has been moved when another

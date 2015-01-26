@@ -9,7 +9,7 @@
 
 namespace ESM
 {
-    struct ESMReader;
+    class ESMReader;
 }
 
 namespace ESSImport
