@@ -15,6 +15,7 @@
 #include <components/esm/loadcrea.hpp>
 #include <components/esm/weatherstate.hpp>
 #include <components/esm/globalscript.hpp>
+#include <components/esm/queststate.hpp>
 
 #include "importcrec.hpp"
 #include "importcntc.hpp"
@@ -431,7 +432,24 @@ public:
         std::string id = esm.getHNString("NAME");
         DIAL dial;
         dial.load(esm);
+        if (dial.mIndex > 0)
+            mDials[id] = dial;
     }
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        for (std::map<std::string, DIAL>::const_iterator it = mDials.begin(); it != mDials.end(); ++it)
+        {
+            esm.startRecord(ESM::REC_QUES);
+            ESM::QuestState state;
+            state.mFinished = 0;
+            state.mState = it->second.mIndex;
+            state.mTopic = Misc::StringUtils::lowerCase(it->first);
+            state.save(esm);
+            esm.endRecord(ESM::REC_QUES);
+        }
+    }
+private:
+    std::map<std::string, DIAL> mDials;
 };
 
 class ConvertQUES : public Converter
