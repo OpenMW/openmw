@@ -145,6 +145,7 @@ namespace ICS
 	void InputControlSystem::removeJoystickAxisBinding(int deviceID, int axis)
 	{
         if(mControlsJoystickAxisBinderMap.find(deviceID) != mControlsJoystickAxisBinderMap.end())
+<<<<<<< HEAD
 		{
             ControlsAxisBinderMapType::iterator it = mControlsJoystickAxisBinderMap[deviceID].find(axis);
             if(it != mControlsJoystickAxisBinderMap[deviceID].end())
@@ -177,22 +178,22 @@ namespace ICS
 	void InputControlSystem::removeJoystickPOVBinding(int deviceId, int index, POVAxis axis)
 	{
 		if(mControlsJoystickPOVBinderMap.find(deviceId) != mControlsJoystickPOVBinderMap.end())
+=======
+>>>>>>> 3066b9aa6c8efda57064a86d7153cc69465c0a47
 		{
-			std::map<int, ControlsPOVBinderMapType>::iterator it = mControlsJoystickPOVBinderMap[deviceId].find(index);
-			if(it != mControlsJoystickPOVBinderMap[deviceId].end())
-			{
-				if(it->second.find(axis) != it->second.end())
-				{
-                    it->second.erase( it->second.find(axis) );
-				}
-			}
-		}
+            ControlsAxisBinderMapType::iterator it = mControlsJoystickAxisBinderMap[deviceID].find(axis);
+            if(it != mControlsJoystickAxisBinderMap[deviceID].end())
+            {
+                mControlsJoystickAxisBinderMap[deviceID].erase(it);
+            }
+        }
 	}
 
-	void InputControlSystem::removeJoystickSliderBinding(int deviceId, int index)
+	void InputControlSystem::removeJoystickButtonBinding(int deviceID, unsigned int button)
 	{
-		if(mControlsJoystickSliderBinderMap.find(deviceId) != mControlsJoystickSliderBinderMap.end())
+        if(mControlsJoystickButtonBinderMap.find(deviceID) != mControlsJoystickButtonBinderMap.end())
 		{
+<<<<<<< HEAD
 			ControlsButtonBinderMapType::iterator it = mControlsJoystickSliderBinderMap[deviceId].find(index);
 			if(it != mControlsJoystickSliderBinderMap[deviceId].end())
 			{
@@ -200,6 +201,14 @@ namespace ICS
 			}
 		}
 >>>>>>> b44fc1904bd58b9143793bc7e1e750ae02f774fc
+=======
+            ControlsButtonBinderMapType::iterator it = mControlsJoystickButtonBinderMap[deviceID].find(button);
+            if(it != mControlsJoystickButtonBinderMap[deviceID].end())
+            {
+                mControlsJoystickButtonBinderMap[deviceID].erase(it);
+            }
+        }
+>>>>>>> 3066b9aa6c8efda57064a86d7153cc69465c0a47
 	}
 
 	// joyStick listeners
