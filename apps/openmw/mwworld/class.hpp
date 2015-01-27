@@ -342,6 +342,9 @@ namespace MWWorld
             virtual std::string getSound(const MWWorld::Ptr& ptr) const;
 
             virtual int getBaseFightRating (const MWWorld::Ptr& ptr) const;
+
+            virtual std::string getPrimaryFaction (const MWWorld::Ptr& ptr) const;
+            virtual int getPrimaryFactionRank (const MWWorld::Ptr& ptr) const;
     };
 }
 

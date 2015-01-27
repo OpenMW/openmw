@@ -270,7 +270,7 @@ public:
             faction.mExpelled = (it->mFlags & 0x2) != 0;
             faction.mRank = it->mRank;
             faction.mReputation = it->mReputation;
-            mContext->mPlayer.mObject.mNpcStats.mFactions[it->mFactionName.toString()] = faction;
+            mContext->mPlayer.mObject.mNpcStats.mFactions[Misc::StringUtils::lowerCase(it->mFactionName.toString())] = faction;
         }
         for (int i=0; i<8; ++i)
             mContext->mPlayer.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];

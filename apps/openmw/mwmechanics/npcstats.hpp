@@ -33,9 +33,7 @@ namespace MWMechanics
             // ----- used by the player only, maybe should be moved at some point -------
             int mBounty;
             int mWerewolfKills;
-            /// NPCs other than the player can only have one faction. But for the sake of consistency
-            /// we use the same data structure for the PC and the NPCs.
-            /// \note the faction key must be in lowercase
+            /// Used for the player only; NPCs have maximum one faction defined in their NPC record
             std::map<std::string, int> mFactionRank;
             std::set<std::string> mExpelled;
             std::map<std::string, int> mFactionReputation;
@@ -74,17 +72,13 @@ namespace MWMechanics
             void lowerRank(const std::string& faction);
             /// Join this faction, setting the initial rank to 0.
             void joinFaction(const std::string& faction);
-            /// Warning: this function performs no check whether the rank exists,
-            /// and should be used in initial actor setup only.
-            void setFactionRank(const std::string& faction, int rank);
 
             const std::set<std::string>& getExpelled() const { return mExpelled; }
             bool getExpelled(const std::string& factionID) const;
             void expell(const std::string& factionID);
             void clearExpelled(const std::string& factionID);
 
-            bool isSameFaction (const NpcStats& npcStats) const;
-            ///< Do *this and \a npcStats share a faction?
+            bool isInFaction (const std::string& faction) const;
 
             float getSkillGain (int skillIndex, const ESM::Class& class_, int usageType = -1,
                 int level = -1, float extraFactor=1.f) const;

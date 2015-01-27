@@ -144,4 +144,14 @@ void NPC::save(ESMWriter &esm) const
         mHair.clear();
         mHead.clear();
     }
+
+    int NPC::getFactionRank() const
+    {
+        if (mFaction.empty())
+            return -1;
+        else if (mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+            return mNpdt12.mRank;
+        else // NPC_DEFAULT
+            return mNpdt52.mRank;
+    }
 }

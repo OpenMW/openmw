@@ -572,8 +572,7 @@ namespace MWMechanics
 
         float reaction = 0;
         int rank = 0;
-        std::string npcFaction = "";
-        if(!npcSkill.getFactionRanks().empty()) npcFaction = npcSkill.getFactionRanks().begin()->first;
+        std::string npcFaction = ptr.getClass().getPrimaryFaction(ptr);
 
         Misc::StringUtils::toLower(npcFaction);
 
@@ -1156,10 +1155,10 @@ namespace MWMechanics
             // If committing a crime against a faction member, expell from the faction
             if (!victim.isEmpty() && victim.getClass().isNpc())
             {
-                std::string factionID;
-                if(!victim.getClass().getNpcStats(victim).getFactionRanks().empty())
-                    factionID = victim.getClass().getNpcStats(victim).getFactionRanks().begin()->first;
-                if (player.getClass().getNpcStats(player).isSameFaction(victim.getClass().getNpcStats(victim)))
+                std::string factionID = victim.getClass().getPrimaryFaction(victim);
+
+                const std::map<std::string, int>& playerRanks = player.getClass().getNpcStats(player).getFactionRanks();
+                if (playerRanks.find(Misc::StringUtils::lowerCase(factionID)) != playerRanks.end())
                 {
                     player.getClass().getNpcStats(player).expell(factionID);
                 }

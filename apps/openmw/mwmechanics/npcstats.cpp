@@ -91,12 +91,6 @@ void MWMechanics::NpcStats::lowerRank(const std::string &faction)
     }
 }
 
-void MWMechanics::NpcStats::setFactionRank(const std::string &faction, int rank)
-{
-    const std::string lower = Misc::StringUtils::lowerCase(faction);
-    mFactionRank[lower] = rank;
-}
-
 void MWMechanics::NpcStats::joinFaction(const std::string& faction)
 {
     const std::string lower = Misc::StringUtils::lowerCase(faction);
@@ -127,14 +121,9 @@ void MWMechanics::NpcStats::clearExpelled(const std::string& factionID)
     mExpelled.erase(Misc::StringUtils::lowerCase(factionID));
 }
 
-bool MWMechanics::NpcStats::isSameFaction (const NpcStats& npcStats) const
+bool MWMechanics::NpcStats::isInFaction (const std::string& faction) const
 {
-    for (std::map<std::string, int>::const_iterator iter (mFactionRank.begin()); iter!=mFactionRank.end();
-        ++iter)
-        if (npcStats.mFactionRank.find (iter->first)!=npcStats.mFactionRank.end())
-            return true;
-
-    return false;
+    return (mFactionRank.find(Misc::StringUtils::lowerCase(faction)) != mFactionRank.end());
 }
 
 float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& class_, int usageType,
