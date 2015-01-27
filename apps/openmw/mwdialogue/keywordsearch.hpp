@@ -161,7 +161,7 @@ public:
         while (matches.size())
         {
             int longestKeywordSize = 0;
-            typename std::vector<Match>::iterator longestKeyword;
+            typename std::vector<Match>::iterator longestKeyword = matches.begin();
             for (typename std::vector<Match>::iterator it = matches.begin(); it != matches.end(); ++it)
             {
                 int size = it->mEnd - it->mBeg;
