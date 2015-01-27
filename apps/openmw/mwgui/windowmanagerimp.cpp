@@ -1712,18 +1712,9 @@ namespace MWGui
     void WindowManager::sizeVideo(int screenWidth, int screenHeight)
     {
         // Use black bars to correct aspect ratio
+        bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
         mVideoBackground->setSize(screenWidth, screenHeight);
-
-        if (mVideoWidget->getVideoHeight() > 0)
-        {
-            double imageaspect = static_cast<double>(mVideoWidget->getVideoWidth())/mVideoWidget->getVideoHeight();
-
-            int leftPadding = std::max(0.0, (screenWidth - screenHeight * imageaspect) / 2);
-            int topPadding = std::max(0.0, (screenHeight - screenWidth / imageaspect) / 2);
-
-            mVideoWidget->setCoord(leftPadding, topPadding,
-                                   screenWidth - leftPadding*2, screenHeight - topPadding*2);
-        }
+        mVideoWidget->autoResize(stretch);
     }
 
     WindowModal* WindowManager::getCurrentModal() const
