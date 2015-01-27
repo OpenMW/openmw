@@ -32,7 +32,11 @@ struct DialInfo
     struct DATAstruct
     {
         int mUnknown1;
-        int mDisposition;
+        union
+        {
+            int mDisposition; // Used for dialogue responses
+            int mJournalIndex;  // Used for journal entries
+        };
         signed char mRank; // Rank of NPC
         signed char mGender; // See Gender enum
         signed char mPCrank; // Player rank

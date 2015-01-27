@@ -754,7 +754,7 @@ void Record<ESM::DialInfo>::print()
     if (mData.mCell != "")
         std::cout << "  Cell: " << mData.mCell << std::endl;
     if (mData.mData.mDisposition > 0)
-        std::cout << "  Disposition: " << mData.mData.mDisposition << std::endl;
+        std::cout << "  Disposition/Journal index: " << mData.mData.mDisposition << std::endl;
     if (mData.mData.mGender != ESM::DialInfo::NA)
         std::cout << "  Gender: " << mData.mData.mGender << std::endl;
     if (mData.mSound != "")
