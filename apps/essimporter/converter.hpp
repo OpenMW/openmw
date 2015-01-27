@@ -209,7 +209,7 @@ public:
         else
         {
             int index = npcc.mNPDT.mIndex;
-            mContext->mNpcChanges.insert(std::make_pair(std::make_pair(index,id), npcc)).second;
+            mContext->mNpcChanges.insert(std::make_pair(std::make_pair(index,id), npcc));
         }
     }
 };
