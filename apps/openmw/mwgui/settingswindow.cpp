@@ -264,16 +264,12 @@ namespace MWGui
 
         MyGUI::TextBox* diffText;
         getWidget(diffText, "DifficultyText");
-<<<<<<< HEAD
-        diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
-
-        mKeyboardSwitch->setStateSelected(true);
-        mControllerSwitch->setStateSelected(false);
-=======
         diffText->setCaptionWithReplacing("#{sDifficulty} (" + MyGUI::utility::toString(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
 
+		mKeyboardSwitch->setStateSelected(true);
+        mControllerSwitch->setStateSelected(false);
+
         mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
->>>>>>> b44fc1904bd58b9143793bc7e1e750ae02f774fc
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
