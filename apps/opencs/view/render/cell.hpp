@@ -9,7 +9,9 @@
 
 #include <OgreVector3.h>
 
+#ifndef Q_MOC_RUN
 #include <components/terrain/terraingrid.hpp>
+#endif
 
 #include "object.hpp"
 
