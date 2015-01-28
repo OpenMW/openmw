@@ -201,22 +201,12 @@ namespace MWGui
             layoutWidgets();
     }
 
-    void SpellView::setSize(int _width, int _height)
-    {
-        setSize(MyGUI::IntSize(_width, _height));
-    }
-
     void SpellView::setCoord(const MyGUI::IntCoord &_value)
     {
         bool changed = (_value.width != getWidth() || _value.height != getHeight());
         Base::setCoord(_value);
         if (changed)
             layoutWidgets();
-    }
-
-    void SpellView::setCoord(int _left, int _top, int _width, int _height)
-    {
-        setCoord(MyGUI::IntCoord(_left, _top, _width, _height));
     }
 
     void SpellView::adjustSpellWidget(const Spell &spell, SpellModel::ModelIndex index, MyGUI::Widget *widget)
