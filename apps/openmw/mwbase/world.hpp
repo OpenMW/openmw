@@ -453,6 +453,7 @@ namespace MWBase
 
             /// \todo Probably shouldn't be here
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) = 0;
+            virtual void reattachPlayerCamera() = 0;
 
             /// \todo this does not belong here
             virtual void frameStarted (float dt, bool paused) = 0;

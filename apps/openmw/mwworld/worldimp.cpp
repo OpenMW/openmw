@@ -2457,6 +2457,11 @@ namespace MWWorld
         return mLevitationEnabled;
     }
 
+    void World::reattachPlayerCamera()
+    {
+        mRendering->rebuildPtr(getPlayerPtr());
+    }
+
     void World::setWerewolf(const MWWorld::Ptr& actor, bool werewolf)
     {
         MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats(actor);
