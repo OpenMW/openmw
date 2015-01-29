@@ -85,12 +85,9 @@ struct Land
         char mColours[3 * LAND_NUM_VERTS];
         int mDataTypes;
 
-        // WNAM appears to contain the global map image for this cell. Probably a palette-based format,
-        // since there's only 1 byte for each pixel.
-        // Currently unused (global map is drawn on the fly in OpenMW, takes ~1/2 second at startup for Morrowind.esm).
-        // The problem with using the original data is that we would need to exactly replicate the TES CS's algorithm
-        // for drawing the global map in OpenCS, in order to get seamless edges when creating landmass mods.
-        uint8_t mWnam[81];
+        // low-LOD heightmap (used for rendering the global map)
+        signed char mWnam[81];
+
         short mUnk1;
         uint8_t mUnk2;
 
