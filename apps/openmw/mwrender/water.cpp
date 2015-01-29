@@ -210,10 +210,10 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend) :
 
     mWaterPlane = Plane(Vector3::UNIT_Z, 0);
 
-    int waterScale = 300;
+    int waterScale = 30;
 
     MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, mWaterPlane,
-        CELL_SIZE*5*waterScale, CELL_SIZE*5*waterScale, 10, 10, true, 1, 3*waterScale,3*waterScale, Vector3::UNIT_Y);
+        CELL_SIZE*5*waterScale, CELL_SIZE*5*waterScale, 40, 40, true, 1, 3*waterScale,3*waterScale, Vector3::UNIT_Y);
 
     mWater = mSceneMgr->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);
@@ -305,11 +305,7 @@ Water::~Water()
 
 void Water::changeCell(const ESM::Cell* cell)
 {
-    mTop = cell->mWater;
-
-    setHeight(mTop);
-
-    if(!(cell->mData.mFlags & cell->Interior))
+    if(cell->isExterior())
         mWaterNode->setPosition(getSceneNodeCoordinates(cell->mData.mX, cell->mData.mY));
 }
 

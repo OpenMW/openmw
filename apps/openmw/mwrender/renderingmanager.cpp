@@ -409,6 +409,7 @@ void RenderingManager::update (float duration, bool paused)
 
     mSkyManager->setGlare(mOcclusionQuery->getSunVisibility());
 
+    mWater->changeCell(player.getCell()->getCell());
 
     mWater->updateUnderwater(world->isUnderwater(player.getCell(), cam));
 

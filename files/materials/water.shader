@@ -71,8 +71,6 @@
 
     SH_BEGIN_PROGRAM
         shUniform(float4x4, wvp)                @shAutoConstant(wvp, worldviewproj_matrix)
-        shVertexInput(float2, uv0)
-        shOutput(float2, UV)
         
         shOutput(float3, screenCoordsPassthrough)
         shOutput(float4, position)
@@ -98,7 +96,6 @@
     SH_START_PROGRAM
     {
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
-	    UV = uv0;
 	   
 	   
 	    #if !SH_GLSL
@@ -187,7 +184,6 @@
     }
 
     SH_BEGIN_PROGRAM
-		shInput(float2, UV)
 		shInput(float3, screenCoordsPassthrough)
 		shInput(float4, position)
 		shInput(float, depthPassthrough)
@@ -206,9 +202,10 @@
 		shSampler2D(depthMap)
 		shSampler2D(normalMap)
 
+    shUniform(float4x4, wMat) @shAutoConstant(wMat, world_matrix)
+
             #if RIPPLES
                 shSampler2D(rippleNormalMap)
-                shUniform(float4x4, wMat) @shAutoConstant(wMat, world_matrix)
             #endif
 		
 		shUniform(float3, windDir_windSpeed) @shSharedParameter(windDir_windSpeed)
@@ -251,6 +248,10 @@
 
     SH_START_PROGRAM
     {
+            float3 worldPos = shMatrixMult (wMat, position).xyz;
+            float2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
+            UV.y *= -1.0;
+
 #if SHADOWS
             float shadow = depthShadowPCF (shadowMap0, lightSpacePos0, invShadowmapSize0);
 #endif
