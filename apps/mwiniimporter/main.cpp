@@ -59,7 +59,7 @@ int wmain(int argc, wchar_t *wargv[]) {
 
     try
     {
-        bpo::options_description desc("Syntax: mwiniimporter <options> inifile configfile\nAllowed options");
+        bpo::options_description desc("Syntax: openmw-iniimporter <options> inifile configfile\nAllowed options");
         bpo::positional_options_description p_desc;
         desc.add_options()
             ("help,h", "produce help message")

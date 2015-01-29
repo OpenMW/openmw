@@ -140,7 +140,7 @@ void Launcher::SettingsPage::on_importerButton_clicked()
 
     qDebug() << "arguments " << arguments;
 
-    if (!mImporterInvoker->startProcess(QLatin1String("mwiniimport"), arguments, false))
+    if (!mImporterInvoker->startProcess(QLatin1String("openmw-iniimporter"), arguments, false))
         return;
 }
 
