@@ -31,7 +31,7 @@ namespace ESMTerrain
         int cellY = origin.y;
 
         const ESM::Land* land = getLand(cellX, cellY);
-        if (!land)
+        if (!land || !(land->mDataTypes&ESM::Land::DATA_VHGT))
             return false;
 
         min = std::numeric_limits<float>::max();
@@ -73,7 +73,7 @@ namespace ESMTerrain
             row += ESM::Land::LAND_SIZE-1;
         }
         ESM::Land* land = getLand(cellX, cellY);
-        if (land && land->mHasData)
+        if (land && land->mDataTypes&ESM::Land::DATA_VNML)
         {
             normal.x = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3];
             normal.y = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+1];
@@ -108,7 +108,7 @@ namespace ESMTerrain
             row = 0;
         }
         ESM::Land* land = getLand(cellX, cellY);
-        if (land && land->mLandData->mUsingColours)
+        if (land && land->mDataTypes&ESM::Land::DATA_VCLR)
         {
             color.r = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3] / 255.f;
             color.g = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3+1] / 255.f;
@@ -157,9 +157,8 @@ namespace ESMTerrain
             for (int cellX = startX; cellX < startX + std::ceil(size); ++cellX)
             {
                 ESM::Land* land = getLand(cellX, cellY);
-                if (land && !land->mHasData)
+                if (land && !(land->mDataTypes&ESM::Land::DATA_VHGT))
                     land = NULL;
-                bool hasColors = land && land->mLandData->mUsingColours;
 
                 int rowStart = 0;
                 int colStart = 0;
@@ -183,7 +182,7 @@ namespace ESMTerrain
                         else
                             positions[vertX*numVerts*3 + vertY*3 + 2] = -2048;
 
-                        if (land)
+                        if (land && land->mDataTypes&ESM::Land::DATA_VNML)
                         {
                             normal.x = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3];
                             normal.y = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+1];
@@ -207,7 +206,7 @@ namespace ESMTerrain
                         normals[vertX*numVerts*3 + vertY*3 + 1] = normal.y;
                         normals[vertX*numVerts*3 + vertY*3 + 2] = normal.z;
 
-                        if (hasColors)
+                        if (land && land->mDataTypes&ESM::Land::DATA_VCLR)
                         {
                             color.r = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3] / 255.f;
                             color.g = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3+1] / 255.f;
@@ -263,7 +262,7 @@ namespace ESMTerrain
         assert(y<ESM::Land::LAND_TEXTURE_SIZE);
 
         ESM::Land* land = getLand(cellX, cellY);
-        if (land)
+        if (land && (land->mDataTypes&ESM::Land::DATA_VTEX))
         {
             int tex = land->mLandData->mTextures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
             if (tex == 0)

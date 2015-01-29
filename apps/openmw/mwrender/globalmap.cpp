@@ -76,7 +76,7 @@ namespace MWRender
 
                 if (land)
                 {
-                    int mask = ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX | ESM::Land::DATA_WNAM;
+                    int mask = ESM::Land::DATA_WNAM;
                     if (!land->isDataLoaded(mask))
                         land->loadData(mask);
                 }
@@ -133,6 +133,8 @@ namespace MWRender
                     }
                 }
                 loadingListener->increaseProgress();
+                if (land)
+                    land->unloadData();
             }
         }
 

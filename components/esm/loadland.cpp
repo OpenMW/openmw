@@ -72,7 +72,6 @@ Land::Land()
     , mDataLoaded(false)
     , mLandData(NULL)
     , mPlugin(0)
-    , mHasData(false)
 {
 }
 
@@ -96,8 +95,6 @@ void Land::load(ESMReader &esm)
 
     // Store the file position
     mContext = esm.getContext();
-
-    mHasData = false;
 
     // Skip these here. Load the actual data when the cell is loaded.
     if (esm.isNextSub("VNML"))
@@ -126,10 +123,6 @@ void Land::load(ESMReader &esm)
         mDataTypes |= DATA_VTEX;
     }
 
-    // We need all three of VNML, VHGT and VTEX in order to use the
-    // landscape. (Though Morrowind seems to accept terrain without VTEX/VCLR entries)
-    mHasData = mDataTypes & (DATA_VNML|DATA_VHGT|DATA_WNAM);
-
     mDataLoaded = 0;
     mLandData = NULL;
 }
@@ -144,13 +137,12 @@ void Land::save(ESMWriter &esm) const
     esm.writeHNT("DATA", mFlags);
 }
 
-/// \todo remove memory allocation when only defaults needed
 void Land::loadData(int flags)
 {
     // Try to load only available data
-    int actual = flags & mDataTypes;
+    flags = flags & mDataTypes;
     // Return if all required data is loaded
-    if (flags == 0 || (actual != 0 && (mDataLoaded & actual) == actual)) {
+    if ((mDataLoaded & flags) == flags) {
         return;
     }
     // Create storage if nothing is loaded
@@ -160,15 +152,13 @@ void Land::loadData(int flags)
     }
     mEsm->restoreContext(mContext);
 
-    memset(mLandData->mNormals, 0, sizeof(mLandData->mNormals));
-
     if (mEsm->isNextSub("VNML")) {
-        condLoad(actual, DATA_VNML, mLandData->mNormals, sizeof(mLandData->mNormals));
+        condLoad(flags, DATA_VNML, mLandData->mNormals, sizeof(mLandData->mNormals));
     }
 
     if (mEsm->isNextSub("VHGT")) {
         static VHGT vhgt;
-        if (condLoad(actual, DATA_VHGT, &vhgt, sizeof(vhgt))) {
+        if (condLoad(flags, DATA_VHGT, &vhgt, sizeof(vhgt))) {
             float rowOffset = vhgt.mHeightOffset;
             for (int y = 0; y < LAND_SIZE; y++) {
                 rowOffset += vhgt.mHeightData[y * LAND_SIZE];
@@ -184,30 +174,18 @@ void Land::loadData(int flags)
             mLandData->mUnk1 = vhgt.mUnk1;
             mLandData->mUnk2 = vhgt.mUnk2;
         }
-    } else if ((flags & DATA_VHGT) && (mDataLoaded & DATA_VHGT) == 0) {
-        for (int i = 0; i < LAND_NUM_VERTS; ++i) {
-            mLandData->mHeights[i] = -256.0f * HEIGHT_SCALE;
-        }
-        mDataLoaded |= DATA_VHGT;
     }
 
     if (mEsm->isNextSub("WNAM")) {
-        condLoad(actual, DATA_WNAM, mLandData->mWnam, 81);
+        condLoad(flags, DATA_WNAM, mLandData->mWnam, 81);
     }
-    if (mEsm->isNextSub("VCLR")) {
-        mLandData->mUsingColours = true;
-        condLoad(actual, DATA_VCLR, mLandData->mColours, 3 * LAND_NUM_VERTS);
-    } else {
-        mLandData->mUsingColours = false;
-    }
+    if (mEsm->isNextSub("VCLR"))
+        condLoad(flags, DATA_VCLR, mLandData->mColours, 3 * LAND_NUM_VERTS);
     if (mEsm->isNextSub("VTEX")) {
         static uint16_t vtex[LAND_NUM_TEXTURES];
-        if (condLoad(actual, DATA_VTEX, vtex, sizeof(vtex))) {
+        if (condLoad(flags, DATA_VTEX, vtex, sizeof(vtex))) {
             LandData::transposeTextureData(vtex, mLandData->mTextures);
         }
-    } else if ((flags & DATA_VTEX) && (mDataLoaded & DATA_VTEX) == 0) {
-        memset(mLandData->mTextures, 0, sizeof(mLandData->mTextures));
-        mDataLoaded |= DATA_VTEX;
     }
 }
 
@@ -230,6 +208,11 @@ bool Land::condLoad(int flags, int dataFlag, void *ptr, unsigned int size)
     }
     mEsm->skipHSubSize(size);
     return false;
+}
+
+bool Land::isDataLoaded(int flags) const
+{
+    return (mDataLoaded & flags) == (flags & mDataTypes);
 }
 
 }

@@ -1036,10 +1036,10 @@ void RenderingManager::enableTerrain(bool enable)
         if (!mTerrain)
         {
             if (Settings::Manager::getBool("distant land", "Terrain"))
-                mTerrain = new Terrain::DefaultWorld(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                mTerrain = new Terrain::DefaultWorld(mRendering.getScene(), new MWRender::TerrainStorage(true), RV_Terrain,
                                                 Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY, 1, 64);
             else
-                mTerrain = new Terrain::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                mTerrain = new Terrain::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(false), RV_Terrain,
                                                 Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY);
             mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
                                      Settings::Manager::getBool("split", "Shadows"));

@@ -814,7 +814,6 @@ void Record<ESM::Land>::print()
 {
     std::cout << "  Coordinates: (" << mData.mX << "," << mData.mY << ")" << std::endl;
     std::cout << "  Flags: " << landFlags(mData.mFlags) << std::endl;
-    std::cout << "  HasData: " << mData.mHasData << std::endl;
     std::cout << "  DataTypes: " << mData.mDataTypes << std::endl;
 
     // Seems like this should done with reference counting in the

@@ -14,6 +14,10 @@ namespace MWRender
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin);
     public:
 
+        ///@param preload Preload all Land records at startup? If using the multithreaded terrain component, this
+        /// should be set to "true" in order to avoid race conditions.
+        TerrainStorage(bool preload);
+
         /// Get bounds of the whole terrain in cell units
         virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY);
     };
