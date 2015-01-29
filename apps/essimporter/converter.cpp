@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include <OgreImage.h>
+#include <OgreColourValue.h>
 
 #include <components/esm/creaturestate.hpp>
 #include <components/esm/containerstate.hpp>
@@ -69,7 +70,65 @@ namespace ESSImport
         esm.getSubHeader();
         data.resize(esm.getSubSize());
         esm.getExact(&data[0], data.size());
-        convertImage(&data[0], data.size(), maph.size, maph.size, Ogre::PF_BYTE_RGB, "map.tga");
+
+        Ogre::DataStreamPtr stream (new Ogre::MemoryDataStream(&data[0], data.size()));
+        mGlobalMapImage.loadRawData(stream, maph.size, maph.size, 1, Ogre::PF_BYTE_RGB);
+        // to match openmw size
+        mGlobalMapImage.resize(maph.size*2, maph.size*2, Ogre::Image::FILTER_BILINEAR);
+    }
+
+    void ConvertFMAP::write(ESM::ESMWriter &esm)
+    {
+        int numcells = mGlobalMapImage.getWidth() / 18; // NB truncating, doesn't divide perfectly
+                                                       // with the 512x512 map the game has by default
+        int cellSize = mGlobalMapImage.getWidth()/numcells;
+
+        // Note the upper left corner of the (0,0) cell should be at (width/2, height/2)
+
+        mContext->mGlobalMapState.mBounds.mMinX = -numcells/2;
+        mContext->mGlobalMapState.mBounds.mMaxX = (numcells-1)/2;
+        mContext->mGlobalMapState.mBounds.mMinY = -(numcells-1)/2;
+        mContext->mGlobalMapState.mBounds.mMaxY = numcells/2;
+
+        Ogre::Image image2;
+        std::vector<Ogre::uint8> data;
+        int width = cellSize*numcells;
+        int height = cellSize*numcells;
+        data.resize(width*height*4, 0);
+        image2.loadDynamicImage(&data[0], width, height, Ogre::PF_BYTE_RGBA);
+
+        for (std::set<std::pair<int, int> >::const_iterator it = mContext->mExploredCells.begin(); it != mContext->mExploredCells.end(); ++it)
+        {
+            if (it->first > mContext->mGlobalMapState.mBounds.mMaxX
+                    || it->first < mContext->mGlobalMapState.mBounds.mMinX
+                    || it->second > mContext->mGlobalMapState.mBounds.mMaxY
+                    || it->second < mContext->mGlobalMapState.mBounds.mMinY)
+            {
+                // out of bounds, I think this could happen, since the original engine had a fixed-size map
+                continue;
+            }
+
+            int imageLeftSrc = mGlobalMapImage.getWidth()/2;
+            int imageTopSrc = mGlobalMapImage.getHeight()/2;
+            imageLeftSrc += it->first * cellSize;
+            imageTopSrc -= it->second * cellSize;
+            int imageLeftDst = width/2;
+            int imageTopDst = height/2;
+            imageLeftDst += it->first * cellSize;
+            imageTopDst -= it->second * cellSize;
+            for (int x=0; x<cellSize; ++x)
+                for (int y=0; y<cellSize; ++y)
+                    image2.setColourAt(mGlobalMapImage.getColourAt(imageLeftSrc+x, imageTopSrc+y, 0)
+                                       , imageLeftDst+x, imageTopDst+y, 0);
+        }
+
+        Ogre::DataStreamPtr encoded = image2.encode("png");
+        mContext->mGlobalMapState.mImageData.resize(encoded->size());
+        encoded->read(&mContext->mGlobalMapState.mImageData[0], encoded->size());
+
+        esm.startRecord(ESM::REC_GMAP);
+        mContext->mGlobalMapState.save(esm);
+        esm.endRecord(ESM::REC_GMAP);
     }
 
     void ConvertCell::read(ESM::ESMReader &esm)
@@ -103,6 +162,10 @@ namespace ESSImport
         // (probably offset of that specific fog texture?)
         while (esm.isNextSub("NAM8"))
         {
+            if (cell.isExterior()) // TODO: NAM8 occasionally exists for cells that haven't been explored.
+                                   // are there any flags marking explored cells?
+                mContext->mExploredCells.insert(std::make_pair(cell.mData.mX, cell.mData.mY));
+
             esm.getSubHeader();
 
             if (esm.getSubSize() == 36)
@@ -313,10 +376,6 @@ namespace ESSImport
             it->save(esm);
             esm.endRecord(ESM::REC_MARK);
         }
-
-        esm.startRecord(ESM::REC_GMAP);
-        mContext->mGlobalMapState.save(esm);
-        esm.endRecord(ESM::REC_GMAP);
     }
 
 }

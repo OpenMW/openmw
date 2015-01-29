@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <stdexcept>
+#include <sstream>
 
 #include <components/esm/esmwriter.hpp>
 
@@ -436,9 +437,7 @@ namespace MWWorld
             ltexl[lt.mIndex] = lt;
         }
 
-        void load(ESM::ESMReader &esm, const std::string &id) {
-            load(esm, id, esm.getIndex());
-        }
+        void load(ESM::ESMReader &esm, const std::string &id);
 
         iterator begin(size_t plugin) const {
             assert(plugin < mStatic.size());

@@ -34,7 +34,7 @@ namespace ESM
         StatState<int> mWerewolfAttributes[8];
         bool mIsWerewolf;
 
-        std::map<std::string, Faction> mFactions;
+        std::map<std::string, Faction> mFactions; // lower case IDs
         int mDisposition;
         Skill mSkills[27];
         int mBounty;
@@ -43,7 +43,7 @@ namespace ESM
         int mProfit;
         int mLevelProgress;
         int mSkillIncrease[8];
-        std::vector<std::string> mUsedIds;
+        std::vector<std::string> mUsedIds; // lower case IDs
         float mTimeToStartDrowning;
         int mCrimeId;
 

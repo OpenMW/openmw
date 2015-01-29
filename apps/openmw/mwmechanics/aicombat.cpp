@@ -58,7 +58,7 @@ namespace
     // magnitude of pits/obstacles is defined by PATHFIND_Z_REACH
     bool checkWayIsClear(const Ogre::Vector3& from, const Ogre::Vector3& to, float offsetXY)
     {
-        if((to - from).length() >= PATHFIND_CAUTION_DIST || abs(from.z - to.z) <= PATHFIND_Z_REACH)
+        if((to - from).length() >= PATHFIND_CAUTION_DIST || std::abs(from.z - to.z) <= PATHFIND_Z_REACH)
         {
             Ogre::Vector3 dir = to - from;
             dir.z = 0;
@@ -69,7 +69,7 @@ namespace
             // cast up-down ray and find height in world space of hit
             float h = _from.z - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(_from, -Ogre::Vector3::UNIT_Z, verticalOffset + PATHFIND_Z_REACH + 1);
 
-            if(abs(from.z - h) <= PATHFIND_Z_REACH)
+            if(std::abs(from.z - h) <= PATHFIND_Z_REACH)
                 return true;
         }
 

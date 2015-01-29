@@ -18,9 +18,9 @@ namespace MWGui
 
         /**
          * @param fixedRatio Use a fixed ratio of 4:3, regardless of the image dimensions
-         * @param correct Add black bars?
+         * @param stretch Stretch to fill the whole screen, or add black bars?
          */
-        void setBackgroundImage (const std::string& image, bool fixedRatio=true, bool correct=true);
+        void setBackgroundImage (const std::string& image, bool fixedRatio=true, bool stretch=true);
 
         virtual void setSize (const MyGUI::IntSize &_value);
         virtual void setCoord (const MyGUI::IntCoord &_value);

@@ -67,14 +67,11 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
         if (isCreature)
             return false;
 
-        MWMechanics::NpcStats& stats = mActor.getClass().getNpcStats (mActor);
-        std::map<std::string, int>::const_iterator iter = stats.getFactionRanks().find ( Misc::StringUtils::lowerCase (info.mFaction));
-
-        if (iter==stats.getFactionRanks().end())
+        if (!Misc::StringUtils::ciEqual(mActor.getClass().getPrimaryFaction(mActor), info.mFaction))
             return false;
 
         // check rank
-        if (iter->second < info.mData.mRank)
+        if (mActor.getClass().getPrimaryFactionRank(mActor) < info.mData.mRank)
             return false;
     }
     else if (info.mData.mRank != -1)
@@ -83,13 +80,8 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
             return false;
 
         // Rank requirement, but no faction given. Use the actor's faction, if there is one.
-        MWMechanics::NpcStats& stats = mActor.getClass().getNpcStats (mActor);
-
-        if (!stats.getFactionRanks().size())
-            return false;
-
         // check rank
-        if (stats.getFactionRanks().begin()->second < info.mData.mRank)
+        if (mActor.getClass().getPrimaryFactionRank(mActor) < info.mData.mRank)
             return false;
     }
 
@@ -336,11 +328,9 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
         case SelectWrapper::Function_RankRequirement:
         {
-            if (mActor.getClass().getNpcStats (mActor).getFactionRanks().empty())
+            std::string faction = mActor.getClass().getPrimaryFaction(mActor);
+            if (faction.empty())
                 return 0;
-
-            std::string faction =
-                mActor.getClass().getNpcStats (mActor).getFactionRanks().begin()->first;
 
             int rank = getFactionRank (player, faction);
 
@@ -376,15 +366,14 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
         case SelectWrapper::Function_FactionRankDiff:
         {
-            if (mActor.getClass().getNpcStats (mActor).getFactionRanks().empty())
+            std::string faction = mActor.getClass().getPrimaryFaction(mActor);
+
+            if (faction.empty())
                 return 0;
 
-            const std::pair<std::string, int> faction =
-                *mActor.getClass().getNpcStats (mActor).getFactionRanks().begin();
-
-            int rank = getFactionRank (player, faction.first);
-
-            return rank-faction.second;
+            int rank = getFactionRank (player, faction);
+            int npcRank = mActor.getClass().getPrimaryFactionRank(mActor);
+            return rank-npcRank;
         }
 
         case SelectWrapper::Function_WerewolfKills:
@@ -396,11 +385,10 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
         {
             bool low = select.getFunction()==SelectWrapper::Function_RankLow;
 
-            if (mActor.getClass().getNpcStats (mActor).getFactionRanks().empty())
-                return 0;
+            std::string factionId = mActor.getClass().getPrimaryFaction(mActor);
 
-            std::string factionId =
-                mActor.getClass().getNpcStats (mActor).getFactionRanks().begin()->first;
+            if (factionId.empty())
+                return 0;
 
             int value = 0;
 
@@ -454,7 +442,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_NotFaction:
 
-            return !Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mFaction, select.getName());
+            return !Misc::StringUtils::ciEqual(mActor.getClass().getPrimaryFaction(mActor), select.getName());
 
         case SelectWrapper::Function_NotClass:
 
@@ -494,8 +482,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_SameFaction:
 
-            return mActor.getClass().getNpcStats (mActor).isSameFaction (
-                player.getClass().getNpcStats (player));
+            return player.getClass().getNpcStats (player).isInFaction(mActor.getClass().getPrimaryFaction(mActor));
 
         case SelectWrapper::Function_PcCommonDisease:
 
@@ -512,11 +499,10 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_PcExpelled:
         {
-            if (mActor.getClass().getNpcStats (mActor).getFactionRanks().empty())
-                return false;
+            std::string faction = mActor.getClass().getPrimaryFaction(mActor);
 
-            std::string faction =
-                mActor.getClass().getNpcStats (mActor).getFactionRanks().begin()->first;
+            if (faction.empty())
+                return false;
 
             return player.getClass().getNpcStats(player).getExpelled(faction);
         }
@@ -561,7 +547,7 @@ int MWDialogue::Filter::getFactionRank (const MWWorld::Ptr& actor, const std::st
 {
     MWMechanics::NpcStats& stats = actor.getClass().getNpcStats (actor);
 
-    std::map<std::string, int>::const_iterator iter = stats.getFactionRanks().find (factionId);
+    std::map<std::string, int>::const_iterator iter = stats.getFactionRanks().find (Misc::StringUtils::lowerCase(factionId));
 
     if (iter==stats.getFactionRanks().end())
         return -1;

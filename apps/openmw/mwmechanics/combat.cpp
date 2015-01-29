@@ -29,7 +29,7 @@ Ogre::Radian signedAngle(Ogre::Vector3 v1, Ogre::Vector3 v2, Ogre::Vector3 norma
                 );
 }
 
-void applyEnchantment (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object, const Ogre::Vector3& hitPosition)
+bool applyEnchantment (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object, const Ogre::Vector3& hitPosition)
 {
     std::string enchantmentName = !object.isEmpty() ? object.getClass().getEnchantment(object) : "";
     if (!enchantmentName.empty())
@@ -41,8 +41,10 @@ void applyEnchantment (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim,
             MWMechanics::CastSpell cast(attacker, victim);
             cast.mHitPosition = hitPosition;
             cast.cast(object);
+            return true;
         }
     }
+    return false;
 }
 
 }
@@ -216,15 +218,16 @@ namespace MWMechanics
             damage *= gmst.find("fCombatKODamageMult")->getFloat();
 
         // Apply "On hit" effect of the weapon
-        applyEnchantment(attacker, victim, weapon, hitPosition);
+        bool appliedEnchantment = applyEnchantment(attacker, victim, weapon, hitPosition);
         if (weapon != projectile)
-            applyEnchantment(attacker, victim, projectile, hitPosition);
+            appliedEnchantment = applyEnchantment(attacker, victim, projectile, hitPosition);
 
         if (damage > 0)
             MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
-        // Arrows shot at enemies have a chance to turn up in their inventory
-        if (victim != MWBase::Environment::get().getWorld()->getPlayerPtr())
+        // Non-enchanted arrows shot at enemies have a chance to turn up in their inventory
+        if (victim != MWBase::Environment::get().getWorld()->getPlayerPtr()
+                && !appliedEnchantment)
         {
             float fProjectileThrownStoreChance = gmst.find("fProjectileThrownStoreChance")->getFloat();
             if ((::rand()/(RAND_MAX+1.0)) < fProjectileThrownStoreChance/100.f)

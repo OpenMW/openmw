@@ -58,7 +58,7 @@ add_component_dir (to_utf8
 add_component_dir (esm
     attr defs esmcommon esmreader esmwriter loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
     loadclas loadclot loadcont loadcrea loaddial loaddoor loadench loadfact loadglob loadgmst
-    loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc loadnpcc
+    loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
     savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap inventorystate containerstate npcstate creaturestate dialoguestate statstate
@@ -113,7 +113,7 @@ add_component_dir (ogreinit
     )
 
 add_component_dir (widgets
-    box imagebutton tags list numericeditbox sharedstatebutton widgets
+    box imagebutton tags list numericeditbox sharedstatebutton windowcaption widgets
     )
 
 add_component_dir (fontloader

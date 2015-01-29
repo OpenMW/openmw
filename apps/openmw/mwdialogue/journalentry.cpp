@@ -89,7 +89,7 @@ namespace MWDialogue
 
         for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
-            if (iter->mData.mDisposition==index) /// \todo cleanup info structure
+            if (iter->mData.mJournalIndex==index)
             {
                 return iter->mId;
             }

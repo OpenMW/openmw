@@ -53,18 +53,6 @@ typedef NAME_T<32> NAME32;
 typedef NAME_T<64> NAME64;
 typedef NAME_T<256> NAME256;
 
-#pragma pack(push)
-#pragma pack(1)
-// Data that is only present in save game files
-struct SaveData
-{
-  float pos[6];     // Player position and rotation
-  NAME64 cell;      // Cell name
-  float unk2;       // Unknown value - possibly game time?
-  NAME32 player;    // Player name
-};
-#pragma pack(pop)
-
 /* This struct defines a file 'context' which can be saved and later
    restored by an ESMReader instance. It will save the position within
    a file, and when restored will let you read from that position as

@@ -2,6 +2,8 @@
 
 #include <extern/ogre-ffmpeg-videoplayer/videoplayer.hpp>
 
+#include <MyGUI_RenderManager.h>
+
 #include "../mwsound/movieaudiofactory.hpp"
 
 namespace MWGui
@@ -44,6 +46,26 @@ void VideoWidget::stop()
 bool VideoWidget::hasAudioStream()
 {
     return mPlayer->hasAudioStream();
+}
+
+void VideoWidget::autoResize(bool stretch)
+{
+    MyGUI::IntSize screenSize = MyGUI::RenderManager::getInstance().getViewSize();
+    if (getParent())
+        screenSize = getParent()->getSize();
+
+    if (getVideoHeight() > 0 && !stretch)
+    {
+        double imageaspect = static_cast<double>(getVideoWidth())/getVideoHeight();
+
+        int leftPadding = std::max(0.0, (screenSize.width - screenSize.height * imageaspect) / 2);
+        int topPadding = std::max(0.0, (screenSize.height - screenSize.width / imageaspect) / 2);
+
+        setCoord(leftPadding, topPadding,
+                               screenSize.width - leftPadding*2, screenSize.height - topPadding*2);
+    }
+    else
+        setCoord(0,0,screenSize.width,screenSize.height);
 }
 
 }

@@ -196,7 +196,7 @@ namespace MWScript
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
-                    runtime.push (ptr.getClass().getNpcStats (ptr).isSameFaction (player.getClass().getNpcStats (player)));
+                    player.getClass().getNpcStats (player).isInFaction(ptr.getClass().getPrimaryFaction(ptr));
                 }
         };
 

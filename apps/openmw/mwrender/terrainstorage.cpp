@@ -9,6 +9,22 @@
 namespace MWRender
 {
 
+    TerrainStorage::TerrainStorage(bool preload)
+    {
+        if (preload)
+        {
+            const MWWorld::ESMStore &esmStore =
+                MWBase::Environment::get().getWorld()->getStore();
+
+            MWWorld::Store<ESM::Land>::iterator it = esmStore.get<ESM::Land>().begin();
+            for (; it != esmStore.get<ESM::Land>().end(); ++it)
+            {
+                ESM::Land* land = const_cast<ESM::Land*>(&*it); // TODO: fix store interface
+                land->loadData(ESM::Land::DATA_VCLR|ESM::Land::DATA_VHGT|ESM::Land::DATA_VNML|ESM::Land::DATA_VTEX);
+            }
+        }
+    }
+
     void TerrainStorage::getBounds(float& minX, float& maxX, float& minY, float& maxY)
     {
         minX = 0, minY = 0, maxX = 0, maxY = 0;
@@ -39,6 +55,12 @@ namespace MWRender
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
         ESM::Land* land = esmStore.get<ESM::Land>().search(cellX, cellY);
+        if (!land)
+            return NULL;
+
+        const int flags = ESM::Land::DATA_VCLR|ESM::Land::DATA_VHGT|ESM::Land::DATA_VNML|ESM::Land::DATA_VTEX;
+        if (!land->isDataLoaded(flags))
+            land->loadData(flags);
         return land;
     }
 

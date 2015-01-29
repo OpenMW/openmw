@@ -60,10 +60,6 @@ namespace ESSImport
         if (esm.isNextSub("PWPS"))
             esm.skipHSub();
 
-        // unsure at which point between LSTN and CHRD
-        if (esm.isNextSub("APUD"))
-            esm.skipHSub(); // 40 bytes, starts with string "ancestor guardian". maybe spellcasting in progress?
-
         if (esm.isNextSub("WNAM"))
         {
             std::string id = esm.getHString();
@@ -75,6 +71,20 @@ namespace ESSImport
 
             if (esm.isNextSub("YNAM"))
                 esm.skipHSub(); // 4 byte, 0
+        }
+
+        while (esm.isNextSub("APUD"))
+        {
+            // used power
+            esm.getSubHeader();
+            std::string id = esm.getString(32);
+            (void)id;
+            // timestamp can't be used: this is the total hours passed, calculated by
+            // timestamp = 24 * (365 * year + cumulativeDays[month] + day)
+            // unfortunately cumulativeDays[month] is not clearly defined,
+            // in the (non-MCP) vanilla version the first month was missing, but MCP added it.
+            double timestamp;
+            esm.getT(timestamp);
         }
 
         // FIXME: not all actors have this, add flag

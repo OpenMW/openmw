@@ -29,6 +29,9 @@ namespace ESSImport
 
         ESM::DialogueState mDialogueState;
 
+        // cells which should show an explored overlay on the global map
+        std::set<std::pair<int, int> > mExploredCells;
+
         ESM::GlobalMap mGlobalMapState;
 
         int mDay, mMonth, mYear;

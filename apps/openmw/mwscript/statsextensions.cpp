@@ -32,13 +32,12 @@ namespace
 {
     std::string getDialogueActorFaction(MWWorld::Ptr actor)
     {
-        const MWMechanics::NpcStats &stats = actor.getClass().getNpcStats (actor);
-
-        if (stats.getFactionRanks().empty())
+        std::string factionId = actor.getClass().getPrimaryFaction(actor);
+        if (factionId.empty())
             throw std::runtime_error (
                 "failed to determine dialogue actors faction (because actor is factionless)");
 
-        return stats.getFactionRanks().begin()->first;
+        return factionId;
     }
 }
 
@@ -665,14 +664,7 @@ namespace MWScript
                     }
                     else
                     {
-                        if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
-                        {
-                            factionID = "";
-                        }
-                        else
-                        {
-                            factionID = ptr.getClass().getNpcStats(ptr).getFactionRanks().begin()->first;
-                        }
+                        factionID = ptr.getClass().getPrimaryFaction(ptr);
                     }
                     ::Misc::StringUtils::toLower(factionID);
                     // Make sure this faction exists
@@ -779,8 +771,7 @@ namespace MWScript
                     }
                     else
                     {
-                        if (!ptr.getClass().getNpcStats (ptr).getFactionRanks().empty())
-                            factionId = ptr.getClass().getNpcStats (ptr).getFactionRanks().begin()->first;
+                        factionId = getDialogueActorFaction(ptr);
                     }
 
                     if (factionId.empty())
@@ -815,8 +806,7 @@ namespace MWScript
                     }
                     else
                     {
-                        if (!ptr.getClass().getNpcStats (ptr).getFactionRanks().empty())
-                            factionId = ptr.getClass().getNpcStats (ptr).getFactionRanks().begin()->first;
+                        factionId = getDialogueActorFaction(ptr);
                     }
 
                     if (factionId.empty())
@@ -850,8 +840,7 @@ namespace MWScript
                     }
                     else
                     {
-                        if (!ptr.getClass().getNpcStats (ptr).getFactionRanks().empty())
-                            factionId = ptr.getClass().getNpcStats (ptr).getFactionRanks().begin()->first;
+                        factionId = getDialogueActorFaction(ptr);
                     }
 
                     if (factionId.empty())
@@ -941,14 +930,7 @@ namespace MWScript
                     }
                     else
                     {
-                        if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
-                        {
-                            factionID = "";
-                        }
-                        else
-                        {
-                            factionID = ptr.getClass().getNpcStats(ptr).getFactionRanks().begin()->first;
-                        }
+                        factionID = ptr.getClass().getPrimaryFaction(ptr);
                     }
                     ::Misc::StringUtils::toLower(factionID);
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -980,14 +962,7 @@ namespace MWScript
                     }
                     else
                     {
-                        if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
-                        {
-                            factionID = "";
-                        }
-                        else
-                        {
-                            factionID = ptr.getClass().getNpcStats(ptr).getFactionRanks().begin()->first;
-                        }
+                        factionID = ptr.getClass().getPrimaryFaction(ptr);
                     }
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                     if(factionID!="")
@@ -1014,14 +989,7 @@ namespace MWScript
                     }
                     else
                     {
-                        if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
-                        {
-                            factionID = "";
-                        }
-                        else
-                        {
-                            factionID = ptr.getClass().getNpcStats(ptr).getFactionRanks().begin()->first;
-                        }
+                        factionID = ptr.getClass().getPrimaryFaction(ptr);
                     }
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
                     if(factionID!="")
@@ -1038,13 +1006,10 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string factionID = "";
-                    if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
+                    std::string factionID = ptr.getClass().getPrimaryFaction(ptr);
+                    if(factionID.empty())
                         return;
-                    else
-                    {
-                        factionID = ptr.getClass().getNpcStats(ptr).getFactionRanks().begin()->first;
-                    }
+
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
                     // no-op when executed on the player
@@ -1064,13 +1029,10 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string factionID = "";
-                    if(ptr.getClass().getNpcStats(ptr).getFactionRanks().empty())
+                    std::string factionID = ptr.getClass().getPrimaryFaction(ptr);
+                    if(factionID.empty())
                         return;
-                    else
-                    {
-                        factionID = ptr.getClass().getNpcStats(ptr).getFactionRanks().begin()->first;
-                    }
+
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
                     // no-op when executed on the player

@@ -133,8 +133,6 @@ namespace MWGui
 
         updateLabels();
 
-        // Careful here. setTitle may cause size updates, causing itemview redraw, so make sure to do it last
-        // or we end up using a possibly invalid model.
         setTitle(actor.getClass().getName(actor));
 
         onFilterChanged(mFilterAll);

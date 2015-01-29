@@ -2,6 +2,8 @@
 #include "labels.hpp"
 
 #include <iostream>
+#include <sstream>
+
 #include <boost/format.hpp>
 
 void printAIPackage(ESM::AIPackage p)
@@ -752,7 +754,7 @@ void Record<ESM::DialInfo>::print()
     if (mData.mCell != "")
         std::cout << "  Cell: " << mData.mCell << std::endl;
     if (mData.mData.mDisposition > 0)
-        std::cout << "  Disposition: " << mData.mData.mDisposition << std::endl;
+        std::cout << "  Disposition/Journal index: " << mData.mData.mDisposition << std::endl;
     if (mData.mData.mGender != ESM::DialInfo::NA)
         std::cout << "  Gender: " << mData.mData.mGender << std::endl;
     if (mData.mSound != "")
@@ -812,7 +814,6 @@ void Record<ESM::Land>::print()
 {
     std::cout << "  Coordinates: (" << mData.mX << "," << mData.mY << ")" << std::endl;
     std::cout << "  Flags: " << landFlags(mData.mFlags) << std::endl;
-    std::cout << "  HasData: " << mData.mHasData << std::endl;
     std::cout << "  DataTypes: " << mData.mDataTypes << std::endl;
 
     // Seems like this should done with reference counting in the

@@ -313,17 +313,19 @@ namespace MWScript
 
     std::string InterpreterContext::getNPCRank() const
     {
-        if (getReferenceImp().getClass().getNpcStats(getReferenceImp()).getFactionRanks().empty())
+        const MWWorld::Ptr& ptr = getReferenceImp();
+        std::string faction = ptr.getClass().getPrimaryFaction(ptr);
+        if (faction.empty())
             throw std::runtime_error("getNPCRank(): NPC is not in a faction");
 
-        const std::map<std::string, int>& ranks = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks();
-        std::map<std::string, int>::const_iterator it = ranks.begin();
+        int rank = ptr.getClass().getPrimaryFactionRank(ptr);
+        if (rank < 0 || rank > 9)
+            throw std::runtime_error("getNPCRank(): invalid rank");
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::ESMStore &store = world->getStore();
-        const ESM::Faction *faction = store.get<ESM::Faction>().find(it->first);
-
-        return faction->mRanks[it->second];
+        const ESM::Faction *fact = store.get<ESM::Faction>().find(faction);
+        return fact->mRanks[rank];
     }
 
     std::string InterpreterContext::getPCName() const
@@ -352,13 +354,12 @@ namespace MWScript
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
 
-        if (getReferenceImp().getClass().getNpcStats(getReferenceImp()).getFactionRanks().empty())
+        std::string factionId = getReferenceImp().getClass().getPrimaryFaction(getReferenceImp());
+        if (factionId.empty())
             throw std::runtime_error("getPCRank(): NPC is not in a faction");
 
-        std::string factionId = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks().begin()->first;
-
         const std::map<std::string, int>& ranks = player.getClass().getNpcStats (player).getFactionRanks();
-        std::map<std::string, int>::const_iterator it = ranks.find(factionId);
+        std::map<std::string, int>::const_iterator it = ranks.find(Misc::StringUtils::lowerCase(factionId));
         int rank = -1;
         if (it != ranks.end())
             rank = it->second;
@@ -382,13 +383,12 @@ namespace MWScript
         MWBase::World *world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
 
-        if (getReferenceImp().getClass().getNpcStats(getReferenceImp()).getFactionRanks().empty())
+        std::string factionId = getReferenceImp().getClass().getPrimaryFaction(getReferenceImp());
+        if (factionId.empty())
             throw std::runtime_error("getPCNextRank(): NPC is not in a faction");
 
-        std::string factionId = getReferenceImp().getClass().getNpcStats (getReferenceImp()).getFactionRanks().begin()->first;
-
         const std::map<std::string, int>& ranks = player.getClass().getNpcStats (player).getFactionRanks();
-        std::map<std::string, int>::const_iterator it = ranks.find(factionId);
+        std::map<std::string, int>::const_iterator it = ranks.find(Misc::StringUtils::lowerCase(factionId));
         int rank = -1;
         if (it != ranks.end())
             rank = it->second;

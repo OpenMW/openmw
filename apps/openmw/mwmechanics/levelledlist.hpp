@@ -70,9 +70,9 @@ namespace MWMechanics
         else
         {
             if (ref.getPtr().getTypeName() == typeid(ESM::ItemLevList).name())
-                return getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, failChance);
+                return getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false, failChance);
             else
-                return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, failChance);
+                return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, true, failChance);
         }
     }
 

@@ -20,7 +20,7 @@ namespace ESSImport
            int mCurrentWeather, mNextWeather;
            int mWeatherTransition; // 0-100 transition between weathers, top 3 bytes may be garbage
            float mTimeOfNextTransition; // weather changes when gamehour == timeOfNextTransition
-           int masserPhase, secundaPhase; // top 3 bytes may be garbage
+           int mMasserPhase, mSecundaPhase; // top 3 bytes may be garbage
         };
 
         GMDT mGMDT;

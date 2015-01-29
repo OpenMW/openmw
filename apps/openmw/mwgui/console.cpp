@@ -290,7 +290,8 @@ namespace MWGui
 
         // Add the command to the history, and set the current pointer to
         // the end of the list
-        mCommandHistory.push_back(cm);
+        if (mCommandHistory.empty() || mCommandHistory.back() != cm)
+            mCommandHistory.push_back(cm);
         mCurrent = mCommandHistory.end();
         mEditString.clear();
 

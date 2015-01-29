@@ -1372,7 +1372,7 @@ void CharacterController::update(float duration)
 
         //Force Jump Logic
 
-        bool isMoving = (std::abs(cls.getMovementSettings(mPtr).mPosition[0]) > .5 || abs(cls.getMovementSettings(mPtr).mPosition[1]) > .5);
+        bool isMoving = (std::abs(cls.getMovementSettings(mPtr).mPosition[0]) > .5 || std::abs(cls.getMovementSettings(mPtr).mPosition[1]) > .5);
         if(!inwater && !flying)
         {
             //Force Jump

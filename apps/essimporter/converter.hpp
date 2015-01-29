@@ -1,6 +1,8 @@
 #ifndef OPENMW_ESSIMPORT_CONVERTER_H
 #define OPENMW_ESSIMPORT_CONVERTER_H
 
+#include <OgreImage.h>
+
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 
@@ -13,6 +15,9 @@
 #include <components/esm/dialoguestate.hpp>
 #include <components/esm/custommarkerstate.hpp>
 #include <components/esm/loadcrea.hpp>
+#include <components/esm/weatherstate.hpp>
+#include <components/esm/globalscript.hpp>
+#include <components/esm/queststate.hpp>
 
 #include "importcrec.hpp"
 #include "importcntc.hpp"
@@ -29,6 +34,7 @@
 
 #include "convertacdt.hpp"
 #include "convertnpcc.hpp"
+#include "convertscpt.hpp"
 
 namespace ESSImport
 {
@@ -206,7 +212,7 @@ public:
         else
         {
             int index = npcc.mNPDT.mIndex;
-            mContext->mNpcChanges.insert(std::make_pair(std::make_pair(index,id), npcc)).second;
+            mContext->mNpcChanges.insert(std::make_pair(std::make_pair(index,id), npcc));
         }
     }
 };
@@ -266,7 +272,7 @@ public:
             faction.mExpelled = (it->mFlags & 0x2) != 0;
             faction.mRank = it->mRank;
             faction.mReputation = it->mReputation;
-            mContext->mPlayer.mObject.mNpcStats.mFactions[it->mFactionName.toString()] = faction;
+            mContext->mPlayer.mObject.mNpcStats.mFactions[Misc::StringUtils::lowerCase(it->mFactionName.toString())] = faction;
         }
         for (int i=0; i<8; ++i)
             mContext->mPlayer.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];
@@ -308,6 +314,10 @@ class ConvertFMAP : public Converter
 {
 public:
     virtual void read(ESM::ESMReader &esm);
+    virtual void write(ESM::ESMWriter &esm);
+
+private:
+    Ogre::Image mGlobalMapImage;
 };
 
 class ConvertCell : public Converter
@@ -428,7 +438,24 @@ public:
         std::string id = esm.getHNString("NAME");
         DIAL dial;
         dial.load(esm);
+        if (dial.mIndex > 0)
+            mDials[id] = dial;
     }
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        for (std::map<std::string, DIAL>::const_iterator it = mDials.begin(); it != mDials.end(); ++it)
+        {
+            esm.startRecord(ESM::REC_QUES);
+            ESM::QuestState state;
+            state.mFinished = 0;
+            state.mState = it->second.mIndex;
+            state.mTopic = Misc::StringUtils::lowerCase(it->first);
+            state.save(esm);
+            esm.endRecord(ESM::REC_QUES);
+        }
+    }
+private:
+    std::map<std::string, DIAL> mDials;
 };
 
 class ConvertQUES : public Converter
@@ -455,11 +482,69 @@ public:
 class ConvertGAME : public Converter
 {
 public:
+    ConvertGAME() : mHasGame(false) {}
+
+    std::string toString(int weatherId)
+    {
+        switch (weatherId)
+        {
+        case 0:
+            return "clear";
+        case 1:
+            return "cloudy";
+        case 2:
+            return "foggy";
+        case 3:
+            return "overcast";
+        case 4:
+            return "rain";
+        case 5:
+            return "thunderstorm";
+        case 6:
+            return "ashstorm";
+        case 7:
+            return "blight";
+        case 8:
+            return "snow";
+        case 9:
+            return "blizzard";
+        case -1:
+            return "";
+        default:
+            {
+                std::stringstream error;
+                error << "unknown weather id: " << weatherId;
+                throw std::runtime_error(error.str());
+            }
+        }
+    }
+
     virtual void read(ESM::ESMReader &esm)
     {
-        GAME game;
-        game.load(esm);
+        mGame.load(esm);
+        mHasGame = true;
     }
+
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        if (!mHasGame)
+            return;
+        esm.startRecord(ESM::REC_WTHR);
+        ESM::WeatherState weather;
+        weather.mCurrentWeather = toString(mGame.mGMDT.mCurrentWeather);
+        weather.mNextWeather = toString(mGame.mGMDT.mNextWeather);
+        weather.mRemainingTransitionTime = mGame.mGMDT.mWeatherTransition/100.f*(0.015*24*3600);
+        weather.mHour = mContext->mHour;
+        weather.mWindSpeed = 0.f;
+        weather.mTimePassed = 0.0;
+        weather.mFirstUpdate = false;
+        weather.save(esm);
+        esm.endRecord(ESM::REC_WTHR);
+    }
+
+private:
+    bool mHasGame;
+    GAME mGame;
 };
 
 /// Running global script
@@ -470,7 +555,21 @@ public:
     {
         SCPT script;
         script.load(esm);
+        ESM::GlobalScript out;
+        convertSCPT(script, out);
+        mScripts.push_back(out);
     }
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        for (std::vector<ESM::GlobalScript>::const_iterator it = mScripts.begin(); it != mScripts.end(); ++it)
+        {
+            esm.startRecord(ESM::REC_GSCR);
+            it->save(esm);
+            esm.endRecord(ESM::REC_GSCR);
+        }
+    }
+private:
+    std::vector<ESM::GlobalScript> mScripts;
 };
 
 }

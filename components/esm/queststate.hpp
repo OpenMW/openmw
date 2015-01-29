@@ -12,7 +12,7 @@ namespace ESM
 
     struct QuestState
     {
-        std::string mTopic;
+        std::string mTopic; // lower case id
         int mState;
         unsigned char mFinished;
 

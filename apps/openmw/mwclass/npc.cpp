@@ -296,25 +296,6 @@ namespace MWClass
 
             MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
-            // NPC stats
-            if (!ref->mBase->mFaction.empty())
-            {
-                std::string faction = ref->mBase->mFaction;
-                if (const ESM::Faction* fact = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().search(faction))
-                {
-                    if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
-                    {
-                        data->mNpcStats.setFactionRank(fact->mId, (int)ref->mBase->mNpdt52.mRank);
-                    }
-                    else
-                    {
-                        data->mNpcStats.setFactionRank(fact->mId, (int)ref->mBase->mNpdt12.mRank);
-                    }
-                }
-                else
-                    std::cerr << "Warning: ignoring nonexistent faction '" << faction << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
-            }
-
             // creature stats
             int gold=0;
             if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
@@ -371,13 +352,13 @@ namespace MWClass
                     std::cerr << "Warning: ignoring nonexistent race power '" << *iter << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
             }
 
-            if (data->mNpcStats.getFactionRanks().size())
+            if (!ref->mBase->mFaction.empty())
             {
                 static const int iAutoRepFacMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("iAutoRepFacMod")->getInt();
                 static const int iAutoRepLevMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("iAutoRepLevMod")->getInt();
-                int rank = data->mNpcStats.getFactionRanks().begin()->second;
+                int rank = ref->mBase->getFactionRank();
 
                 data->mNpcStats.setReputation(iAutoRepFacMod * (rank+1) + iAutoRepLevMod * (data->mNpcStats.getLevel()-1));
             }
@@ -1370,5 +1351,17 @@ namespace MWClass
     bool Npc::isBipedal(const MWWorld::Ptr &ptr) const
     {
         return true;
+    }
+
+    std::string Npc::getPrimaryFaction (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        return ref->mBase->mFaction;
+    }
+
+    int Npc::getPrimaryFactionRank (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        return ref->mBase->getFactionRank();
     }
 }
