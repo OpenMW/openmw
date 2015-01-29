@@ -187,6 +187,8 @@ Moon::Moon( const String& textureName,
 {
     setVisibility(1.0);
 
+    mMaterial->setProperty("alphatexture", sh::makeProperty(new sh::StringValue(textureName + "_alpha")));
+
     mPhase = Moon::Phase_Full;
 }
 
@@ -215,9 +217,15 @@ void Moon::setPhase(const Moon::Phase& phase)
     textureName += ".dds";
 
     if (mType == Moon::Type_Secunda)
+    {
         sh::Factory::getInstance ().setTextureAlias ("secunda_texture", textureName);
+        sh::Factory::getInstance ().setTextureAlias ("secunda_texture_alpha", "textures\\tx_mooncircle_full_s.dds");
+    }
     else
+    {
         sh::Factory::getInstance ().setTextureAlias ("masser_texture", textureName);
+        sh::Factory::getInstance ().setTextureAlias ("masser_texture_alpha", "textures\\tx_mooncircle_full_m.dds");
+    }
 
     mPhase = phase;
 }
