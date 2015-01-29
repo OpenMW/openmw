@@ -1,6 +1,8 @@
 #ifndef OPENMW_ESSIMPORT_CONVERTER_H
 #define OPENMW_ESSIMPORT_CONVERTER_H
 
+#include <OgreImage.h>
+
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 
@@ -312,6 +314,10 @@ class ConvertFMAP : public Converter
 {
 public:
     virtual void read(ESM::ESMReader &esm);
+    virtual void write(ESM::ESMWriter &esm);
+
+private:
+    Ogre::Image mGlobalMapImage;
 };
 
 class ConvertCell : public Converter
