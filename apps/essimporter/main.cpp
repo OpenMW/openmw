@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
         bpo::notify(variables);
 
-        Files::ConfigurationManager cfgManager;
+        Files::ConfigurationManager cfgManager(true);
         cfgManager.readConfiguration(variables, desc);
 
         std::string essFile = variables["mwsave"].as<std::string>();
