@@ -170,14 +170,30 @@ namespace ESSImport
                     std::cout << "Data 1:" << std::endl;
                     for (unsigned int k=0; k<sub.mData.size(); ++k)
                     {
+                        bool different = false;
+                        if (k >= sub2.mData.size() || sub2.mData[k] != sub.mData[k])
+                            different = true;
+
+                        if (different)
+                            std::cout << "\033[033m";
                         std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)sub.mData[k] << " ";
+                        if (different)
+                            std::cout << "\033[0m";
                     }
                     std::cout << std::endl;
 
                     std::cout << "Data 2:" << std::endl;
                     for (unsigned int k=0; k<sub2.mData.size(); ++k)
                     {
+                        bool different = false;
+                        if (k >= sub.mData.size() || sub.mData[k] != sub2.mData[k])
+                            different = true;
+
+                        if (different)
+                            std::cout << "\033[033m";
                         std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)sub2.mData[k] << " ";
+                        if (different)
+                            std::cout << "\033[0m";
                     }
                     std::cout << std::endl;
                 }
