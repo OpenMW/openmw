@@ -29,6 +29,7 @@ namespace ESSImport
         }
         cStats.mGoldPool = acdt.mGoldPool;
         cStats.mTalkedTo = acdt.mFlags & TalkedToPlayer;
+        cStats.mAttacked = acdt.mFlags & Attacked;
     }
 
     void convertNpcData (const ActorData& actorData, ESM::NpcStats& npcStats)

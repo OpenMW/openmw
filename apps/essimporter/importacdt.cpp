@@ -24,7 +24,7 @@ namespace ESSImport
         esm.getHNOT(mACDT, "ACDT");
 
         ACSC acsc;
-        esm.getHNOT(acsc, "ACSC");
+        esm.getHNOT(acsc, "ACSC"); // skill progress?
         esm.getHNOT(acsc, "ACSL");
 
         if (esm.isNextSub("CSTN"))

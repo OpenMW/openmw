@@ -17,7 +17,8 @@ namespace ESSImport
 
     enum ACDTFlags
     {
-        TalkedToPlayer = 0x4
+        TalkedToPlayer = 0x4,
+        Attacked = 0x100
     };
 
     /// Actor data, shared by (at least) REFR and CellRef
@@ -28,8 +29,7 @@ namespace ESSImport
         // Note, not stored at *all*:
         // - Level changes are lost on reload, except for the player (there it's in the NPC record).
         unsigned char mUnknown[12];
-        unsigned char mFlags; // ACDTFlags
-        unsigned char mUnknown1[3];
+        unsigned int mFlags;
         float mBreathMeter; // Seconds left before drowning
         unsigned char mUnknown2[20];
         float mDynamic[3][2];
