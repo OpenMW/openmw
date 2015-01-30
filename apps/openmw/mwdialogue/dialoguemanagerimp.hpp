@@ -4,7 +4,7 @@
 #include "../mwbase/dialoguemanager.hpp"
 
 #include <map>
-#include <list>
+#include <set>
 
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/translation/translation.hpp>
@@ -23,13 +23,13 @@ namespace MWDialogue
     class DialogueManager : public MWBase::DialogueManager
     {
             std::map<std::string, ESM::Dialogue> mDialogueMap;
-            std::map<std::string, bool> mKnownTopics;// Those are the topics the player knows.
+            std::set<std::string> mKnownTopics;// Those are the topics the player knows.
 
             // Modified faction reactions. <Faction1, <Faction2, Difference> >
             typedef std::map<std::string, std::map<std::string, int> > ModFactionReactionMap;
             ModFactionReactionMap mChangedFactionReaction;
 
-            std::list<std::string> mActorKnownTopics;
+            std::set<std::string> mActorKnownTopics;
 
             Translation::Storage& mTranslationDataStorage;
             MWScript::CompilerContext mCompilerContext;

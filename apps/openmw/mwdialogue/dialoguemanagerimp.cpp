@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <iterator>
+#include <list>
 
 #include <components/esm/loaddial.hpp>
 #include <components/esm/loadinfo.hpp>
@@ -78,7 +79,7 @@ namespace MWDialogue
 
     void DialogueManager::addTopic (const std::string& topic)
     {
-        mKnownTopics[Misc::StringUtils::lowerCase(topic)] = true;
+        mKnownTopics.insert( Misc::StringUtils::lowerCase(topic) );
     }
 
     void DialogueManager::parseText (const std::string& text)
@@ -102,8 +103,8 @@ namespace MWDialogue
             if (tok->isImplicitKeyword() && mTranslationDataStorage.hasTranslation())
                 continue;
 
-            if (std::find(mActorKnownTopics.begin(), mActorKnownTopics.end(), topicId) != mActorKnownTopics.end())
-                mKnownTopics[topicId] = true;
+            if (mActorKnownTopics.count( topicId ))
+                mKnownTopics.insert( topicId );
         }
 
         updateTopics();
@@ -341,10 +342,10 @@ namespace MWDialogue
                 if (filter.responseAvailable (*iter))
                 {
                     std::string lower = Misc::StringUtils::lowerCase(iter->mId);
-                    mActorKnownTopics.push_back (lower);
+                    mActorKnownTopics.insert (lower);
 
                     //does the player know the topic?
-                    if (mKnownTopics.find (lower) != mKnownTopics.end())
+                    if (mKnownTopics.count(lower))
                     {
                         keywordList.push_back (iter->mId);
                     }
@@ -635,10 +636,11 @@ namespace MWDialogue
     {
         ESM::DialogueState state;
 
-        for (std::map<std::string, bool>::const_iterator iter (mKnownTopics.begin());
+        for (std::set<std::string>::const_iterator iter (mKnownTopics.begin());
             iter!=mKnownTopics.end(); ++iter)
-            if (iter->second)
-                state.mKnownTopics.push_back (iter->first);
+        {
+            state.mKnownTopics.push_back (*iter);
+        }
 
         state.mChangedFactionReaction = mChangedFactionReaction;
 
@@ -659,7 +661,7 @@ namespace MWDialogue
             for (std::vector<std::string>::const_iterator iter (state.mKnownTopics.begin());
                 iter!=state.mKnownTopics.end(); ++iter)
                 if (store.get<ESM::Dialogue>().search (*iter))
-                    mKnownTopics.insert (std::make_pair (*iter, true));
+                    mKnownTopics.insert (*iter);
 
             mChangedFactionReaction = state.mChangedFactionReaction;
         }
