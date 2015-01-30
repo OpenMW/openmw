@@ -35,6 +35,7 @@
 #include "convertacdt.hpp"
 #include "convertnpcc.hpp"
 #include "convertscpt.hpp"
+#include "convertplayer.hpp"
 
 namespace ESSImport
 {
@@ -265,26 +266,7 @@ public:
         PCDT pcdt;
         pcdt.load(esm);
 
-        mContext->mPlayer.mBirthsign = pcdt.mBirthsign;
-        mContext->mPlayer.mObject.mNpcStats.mBounty = pcdt.mBounty;
-        for (std::vector<PCDT::FNAM>::const_iterator it = pcdt.mFactions.begin(); it != pcdt.mFactions.end(); ++it)
-        {
-            ESM::NpcStats::Faction faction;
-            faction.mExpelled = (it->mFlags & 0x2) != 0;
-            faction.mRank = it->mRank;
-            faction.mReputation = it->mReputation;
-            mContext->mPlayer.mObject.mNpcStats.mFactions[Misc::StringUtils::lowerCase(it->mFactionName.toString())] = faction;
-        }
-        for (int i=0; i<8; ++i)
-            mContext->mPlayer.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];
-        mContext->mPlayer.mObject.mNpcStats.mLevelProgress = pcdt.mPNAM.mLevelProgress;
-
-        for (std::vector<std::string>::const_iterator it = pcdt.mKnownDialogueTopics.begin();
-             it != pcdt.mKnownDialogueTopics.end(); ++it)
-        {
-            mContext->mDialogueState.mKnownTopics.push_back(Misc::StringUtils::lowerCase(*it));
-        }
-
+        convertPCDT(pcdt, mContext->mPlayer, mContext->mDialogueState.mKnownTopics);
     }
 };
 

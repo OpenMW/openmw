@@ -38,6 +38,12 @@ struct PCDT
 
     std::vector<std::string> mKnownDialogueTopics;
 
+    enum DrawState_
+    {
+        DrawState_Weapon = 0x80,
+        DrawState_Spell = 0x100
+    };
+
 #pragma pack(push)
 #pragma pack(1)
     struct FNAM
@@ -49,9 +55,10 @@ struct PCDT
         unsigned char mUnknown2[3];
         ESM::NAME32 mFactionName;
     };
+
     struct PNAM
     {
-        unsigned char mUnknown1[4];
+        int mDrawState; // DrawState
         unsigned char mLevelProgress;
         unsigned char mUnknown2[111];
         unsigned char mSkillIncreases[8]; // number of skill increases for each attribute
