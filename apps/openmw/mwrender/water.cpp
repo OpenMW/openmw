@@ -420,6 +420,7 @@ void Water::applyVisibilityMask()
     mVisibilityFlags = RV_Terrain * Settings::Manager::getBool("reflect terrain", "Water")
                         + (RV_Statics + RV_StaticsSmall + RV_Misc) * Settings::Manager::getBool("reflect statics", "Water")
                         + RV_Actors * Settings::Manager::getBool("reflect actors", "Water")
+                        + RV_Effects
                         + RV_Sky;
 
     if (mReflection)
