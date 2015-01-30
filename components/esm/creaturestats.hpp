@@ -42,7 +42,6 @@ namespace ESM
         bool mDead;
         bool mDied;
         bool mMurdered;
-        int mFriendlyHits;
         bool mTalkedTo;
         bool mAlarmed;
         bool mAttacked;
