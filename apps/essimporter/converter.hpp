@@ -261,13 +261,23 @@ private:
 class ConvertPCDT : public Converter
 {
 public:
+    ConvertPCDT() : mFirstPersonCam(true) {}
+
     virtual void read(ESM::ESMReader &esm)
     {
         PCDT pcdt;
         pcdt.load(esm);
 
-        convertPCDT(pcdt, mContext->mPlayer, mContext->mDialogueState.mKnownTopics);
+        convertPCDT(pcdt, mContext->mPlayer, mContext->mDialogueState.mKnownTopics, mFirstPersonCam);
     }
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        esm.startRecord(ESM::REC_CAM_);
+        esm.writeHNT("FIRS", mFirstPersonCam);
+        esm.endRecord(ESM::REC_CAM_);
+    }
+private:
+    bool mFirstPersonCam;
 };
 
 class ConvertCNTC : public Converter

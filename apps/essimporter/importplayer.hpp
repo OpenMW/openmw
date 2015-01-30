@@ -43,6 +43,11 @@ struct PCDT
         DrawState_Weapon = 0x80,
         DrawState_Spell = 0x100
     };
+    enum CameraState
+    {
+        CameraState_FirstPerson = 0x8,
+        CameraState_ThirdPerson = 0xa
+    };
 
 #pragma pack(push)
 #pragma pack(1)
@@ -58,7 +63,8 @@ struct PCDT
 
     struct PNAM
     {
-        int mDrawState; // DrawState
+        short mDrawState; // DrawState
+        short mCameraState; // CameraState
         unsigned char mLevelProgress;
         unsigned char mUnknown2[111];
         unsigned char mSkillIncreases[8]; // number of skill increases for each attribute

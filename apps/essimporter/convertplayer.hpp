@@ -8,7 +8,7 @@
 namespace ESSImport
 {
 
-    void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<std::string>& outDialogueTopics);
+    void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<std::string>& outDialogueTopics, bool& firstPersonCam);
 
 }
 
