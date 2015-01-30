@@ -18,7 +18,12 @@ namespace ESSImport
     enum ACDTFlags
     {
         TalkedToPlayer = 0x4,
-        Attacked = 0x100
+        Attacked = 0x100,
+        Unknown = 0x200
+    };
+    enum ACSCFlags
+    {
+        Dead = 0x2
     };
 
     /// Actor data, shared by (at least) REFR and CellRef
@@ -35,15 +40,26 @@ namespace ESSImport
         float mDynamic[3][2];
         unsigned char mUnknown3[16];
         float mAttributes[8][2];
-        unsigned char mUnknown4[112];
+        float mMagicEffects[27]; // Effect attributes: https://wiki.openmw.org/index.php?title=Research:Magic#Effect_attributes
+        unsigned char mUnknown4[4];
         unsigned int mGoldPool;
         unsigned char mUnknown5[4];
+    };
+    struct ACSC
+    {
+        unsigned char mUnknown1[17];
+        unsigned char mFlags; // ACSCFlags
+        unsigned char mUnknown2[94];
     };
 #pragma pack(pop)
 
     struct ActorData : public ESM::CellRef
     {
+        bool mHasACDT;
         ACDT mACDT;
+
+        bool mHasACSC;
+        ACSC mACSC;
 
         int mSkills[27][2];
 
@@ -58,12 +74,6 @@ namespace ESSImport
         SCRI mSCRI;
 
         void load(ESM::ESMReader& esm);
-    };
-
-    /// Unknown, shared by (at least) REFR and CellRef
-    struct ACSC
-    {
-        unsigned char unknown[112];
     };
 
 }

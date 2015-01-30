@@ -104,10 +104,10 @@ public:
         npc.load(esm);
         if (id != "player")
         {
-            // TODO:
-            // this should handle changes to the NPC struct, but since there is no index here
+            // Handles changes to the NPC struct, but since there is no index here
             // it will apply to ALL instances of the class. seems to be the reason for the
             // "feature" in MW where changing AI settings of one guard will change it for all guards of that refID.
+            mContext->mNpcs[Misc::StringUtils::lowerCase(id)] = npc;
         }
         else
         {
@@ -139,6 +139,7 @@ public:
         ESM::Creature creature;
         std::string id = esm.getHNString("NAME");
         creature.load(esm);
+        mContext->mCreatures[Misc::StringUtils::lowerCase(id)] = creature;
     }
 };
 

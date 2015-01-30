@@ -274,6 +274,8 @@ namespace ESSImport
             const CellRef& cellref = *refIt;
             ESM::CellRef out (cellref);
 
+            // TODO: use mContext->mCreatures/mNpcs
+
             if (!isIndexedRefId(cellref.mIndexedRefId))
             {
                 // non-indexed RefNum, i.e. no CREC/NPCC/CNTC record associated with it
@@ -309,9 +311,12 @@ namespace ESSImport
                     objstate.blank();
                     objstate.mRef = out;
                     objstate.mRef.mRefID = idLower;
-                    // probably need more micromanagement here so we don't overwrite values
+                    // TODO: need more micromanagement here so we don't overwrite values
                     // from the ESM with default values
-                    convertACDT(cellref.mACDT, objstate.mCreatureStats);
+                    if (cellref.mHasACDT)
+                        convertACDT(cellref.mACDT, objstate.mCreatureStats);
+                    if (cellref.mHasACSC)
+                        convertACSC(cellref.mACSC, objstate.mCreatureStats);
                     convertNpcData(cellref, objstate.mNpcStats);
                     convertNPCC(npccIt->second, objstate);
                     convertCellRef(cellref, objstate);
@@ -343,9 +348,12 @@ namespace ESSImport
                     objstate.blank();
                     objstate.mRef = out;
                     objstate.mRef.mRefID = idLower;
-                    convertACDT(cellref.mACDT, objstate.mCreatureStats);
-                    // probably need more micromanagement here so we don't overwrite values
+                    // TODO: need more micromanagement here so we don't overwrite values
                     // from the ESM with default values
+                    if (cellref.mHasACDT)
+                        convertACDT(cellref.mACDT, objstate.mCreatureStats);
+                    if (cellref.mHasACSC)
+                        convertACSC(cellref.mACSC, objstate.mCreatureStats);
                     convertCREC(crecIt->second, objstate);
                     convertCellRef(cellref, objstate);
                     esm.writeHNT ("OBJE", ESM::REC_CREA);

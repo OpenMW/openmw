@@ -32,6 +32,11 @@ namespace ESSImport
         cStats.mAttacked = acdt.mFlags & Attacked;
     }
 
+    void convertACSC (const ACSC& acsc, ESM::CreatureStats& cStats)
+    {
+        cStats.mDead = acsc.mFlags & Dead;
+    }
+
     void convertNpcData (const ActorData& actorData, ESM::NpcStats& npcStats)
     {
         for (int i=0; i<ESM::Skill::Length; ++i)
