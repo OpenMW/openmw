@@ -24,6 +24,9 @@ namespace ESSImport
         if (pcdt.mPNAM.mDrawState & PCDT::DrawState_Spell)
             out.mObject.mCreatureStats.mDrawState = 2;
 
+        // TODO: convert PNAM.mSkillProgress, needs to be converted to uniform scale
+        // (or change openmw to accept non-uniform skill progress)
+
         firstPersonCam = (pcdt.mPNAM.mCameraState == PCDT::CameraState_FirstPerson);
 
         for (std::vector<std::string>::const_iterator it = pcdt.mKnownDialogueTopics.begin();

@@ -409,7 +409,7 @@ private:
 
 /// Seen responses for a dialogue topic?
 /// Each DIAL record is followed by a number of INFO records, I believe, just like in ESMs
-/// Dialogue conversion problems (probably have to adjust OpenMW format) -
+/// Dialogue conversion problems:
 /// - Journal is stored in one continuous HTML markup rather than each entry separately with associated info ID.
 /// - Seen dialogue responses only store the INFO id, rather than the fulltext.
 /// - Quest stages only store the INFO id, rather than the journal entry fulltext.

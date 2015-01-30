@@ -65,8 +65,8 @@ struct PCDT
     {
         short mDrawState; // DrawState
         short mCameraState; // CameraState
-        unsigned char mLevelProgress;
-        unsigned char mUnknown2[111];
+        unsigned int mLevelProgress;
+        float mSkillProgress[27]; // skill progress, non-uniform scaled
         unsigned char mSkillIncreases[8]; // number of skill increases for each attribute
         unsigned char mUnknown3[88];
     };
