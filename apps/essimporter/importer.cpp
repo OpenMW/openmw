@@ -21,6 +21,8 @@
 #include <components/esm/loadlevlist.hpp>
 #include <components/esm/loadglob.hpp>
 
+#include <components/to_utf8/to_utf8.hpp>
+
 #include "importercontext.hpp"
 
 #include "converter.hpp"
@@ -44,9 +46,10 @@ namespace
 namespace ESSImport
 {
 
-    Importer::Importer(const std::string &essfile, const std::string &outfile)
+    Importer::Importer(const std::string &essfile, const std::string &outfile, const std::string &encoding)
         : mEssFile(essfile)
         , mOutFile(outfile)
+        , mEncoding(encoding)
     {
 
     }
@@ -188,10 +191,10 @@ namespace ESSImport
         Ogre::LogManager logman;
         Ogre::Root root;
 
-        // TODO: set up encoding on ESMReader based on openmw.cfg / --encoding switch
-
+        ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncoding));
         ESM::ESMReader esm;
         esm.open(mEssFile);
+        esm.setEncoder(&encoder);
 
         Context context;
 

@@ -153,7 +153,7 @@ void ESM::CellRef::blank()
     mLockLevel = 0;
     mKey.clear();
     mTrap.clear();
-    mReferenceBlocked = 0;
+    mReferenceBlocked = -1;
     mTeleport = false;
 
     for (int i=0; i<3; ++i)
