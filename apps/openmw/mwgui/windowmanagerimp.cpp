@@ -352,8 +352,11 @@ namespace MWGui
 
     WindowManager::~WindowManager()
     {
+        MyGUI::LanguageManager::getInstance().eventRequestTag.clear();
         MyGUI::PointerManager::getInstance().eventChangeMousePointer.clear();
         MyGUI::InputManager::getInstance().eventChangeKeyFocus.clear();
+        MyGUI::ClipboardManager::getInstance().eventClipboardChanged.clear();
+        MyGUI::ClipboardManager::getInstance().eventClipboardRequested.clear();
 
         delete mConsole;
         delete mMessageBoxManager;
