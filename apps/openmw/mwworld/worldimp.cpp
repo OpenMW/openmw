@@ -2623,7 +2623,7 @@ namespace MWWorld
 
             // Check mana
             MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
-            if (magicka.getCurrent() < spell->mData.mCost)
+            if (magicka.getCurrent() < spell->mData.mCost && !(isPlayer && getGodModeState()))
             {
                 message = "#{sMagicInsufficientSP}";
                 fail = true;
