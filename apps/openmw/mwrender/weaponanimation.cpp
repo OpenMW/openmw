@@ -45,7 +45,12 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
 {
     MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
     MWWorld::ContainerStoreIterator weaponSlot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if (weaponSlot != inv.end() && weaponSlot->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
+    if (weaponSlot == inv.end())
+        return;
+    if (weaponSlot->getTypeName() != typeid(ESM::Weapon).name())
+        return;
+    int weaponType = weaponSlot->get<ESM::Weapon>()->mBase->mData.mType;
+    if (weaponType == ESM::Weapon::MarksmanThrown)
     {
         std::string soundid = weaponSlot->getClass().getUpSoundId(*weaponSlot);
         if(!soundid.empty())
@@ -55,7 +60,7 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
         }
         showWeapon(true);
     }
-    else
+    else if (weaponType == ESM::Weapon::MarksmanBow || weaponType == ESM::Weapon::MarksmanCrossbow)
     {
         NifOgre::ObjectScenePtr weapon = getWeapon();
         if (!weapon.get())
@@ -80,6 +85,8 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
     MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
     MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     if (weapon == inv.end())
+        return;
+    if (weapon->getTypeName() != typeid(ESM::Weapon).name())
         return;
 
     // The orientation of the launched projectile. Always the same as the actor orientation, even if the ArrowBone's orientation dictates otherwise.
