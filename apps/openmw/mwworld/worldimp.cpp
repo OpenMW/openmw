@@ -187,6 +187,8 @@ namespace MWWorld
         mStore.setUp();
         mStore.movePlayerRecord();
 
+        mSwimHeightScale = mStore.get<ESM::GameSetting>().find("fSwimHeightScale")->getFloat();
+
         mGlobalVariables.fill (mStore);
 
         mWorldScene = new Scene(*mRendering, mPhysics);
@@ -1952,8 +1954,7 @@ namespace MWWorld
         mRendering->getTriangleBatchCount(triangles, batches);
     }
 
-    bool
-    World::isFlying(const MWWorld::Ptr &ptr) const
+    bool World::isFlying(const MWWorld::Ptr &ptr) const
     {
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
         bool isParalyzed = (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0);
@@ -1978,8 +1979,7 @@ namespace MWWorld
         return false;
     }
 
-    bool
-    World::isSlowFalling(const MWWorld::Ptr &ptr) const
+    bool World::isSlowFalling(const MWWorld::Ptr &ptr) const
     {
         if(!ptr.getClass().isActor())
             return false;
@@ -1993,27 +1993,21 @@ namespace MWWorld
 
     bool World::isSubmerged(const MWWorld::Ptr &object) const
     {
-        const float neckDeep = 1.85f;
-        return isUnderwater(object, neckDeep);
+        return isUnderwater(object, 1.0/mSwimHeightScale);
     }
 
-    bool
-    World::isSwimming(const MWWorld::Ptr &object) const
+    bool World::isSwimming(const MWWorld::Ptr &object) const
     {
-        /// \todo add check ifActor() - only actors can swim
-        /// \fixme 3/4ths submerged?
-        return isUnderwater(object, 1.5f);
+        return isUnderwater(object, mSwimHeightScale);
     }
 
-    bool
-    World::isWading(const MWWorld::Ptr &object) const
+    bool World::isWading(const MWWorld::Ptr &object) const
     {
-        const float kneeDeep = 0.5f;
+        const float kneeDeep = 0.25f;
         return isUnderwater(object, kneeDeep);
     }
 
-    bool
-    World::isUnderwater(const MWWorld::Ptr &object, const float heightRatio) const
+    bool World::isUnderwater(const MWWorld::Ptr &object, const float heightRatio) const
     {
         const float *fpos = object.getRefData().getPosition().pos;
         Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
@@ -2021,14 +2015,13 @@ namespace MWWorld
         const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
         if (actor)
         {
-            pos.z += heightRatio*actor->getHalfExtents().z;
+            pos.z += heightRatio*2*actor->getHalfExtents().z;
         }
 
         return isUnderwater(object.getCell(), pos);
     }
 
-    bool
-    World::isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const
+    bool World::isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const
     {
         if (!(cell->getCell()->mData.mFlags & ESM::Cell::HasWater)) {
             return false;
