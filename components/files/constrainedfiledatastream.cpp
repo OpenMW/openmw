@@ -15,6 +15,7 @@ public:
     static const size_t sBufferThreshold = 1024; // reads larger than this bypass buffering as cost of memcpy outweighs cost of system call
 
     ConstrainedDataStream(const Ogre::String &fname, size_t start, size_t length)
+        : Ogre::DataStream(fname)
     {
         mFile.open (fname.c_str ());
         mSize  = length != 0xFFFFFFFF ? length : mFile.size () - start;
@@ -30,63 +31,72 @@ public:
 
     size_t read(void* buf, size_t count)
     {
-        assert (mPos <= mSize);
-
-        uint8_t * out = reinterpret_cast <uint8_t *> (buf);
-
-        size_t posBeg = mOrigin + mPos;
-        size_t posEnd = posBeg + count;
-
-        if (posEnd > mExtent)
-            posEnd = mExtent;
-
-        size_t posCur = posBeg;
-
-        while (posCur != posEnd)
+        try
         {
-            size_t readLeft = posEnd - posCur;
+            assert (mPos <= mSize);
 
-            if (posCur < mBufferOrigin || posCur >= mBufferExtent)
+            uint8_t * out = reinterpret_cast <uint8_t *> (buf);
+
+            size_t posBeg = mOrigin + mPos;
+            size_t posEnd = posBeg + count;
+
+            if (posEnd > mExtent)
+                posEnd = mExtent;
+
+            size_t posCur = posBeg;
+
+            while (posCur != posEnd)
             {
-                if (readLeft >= sBufferThreshold || (posCur == mOrigin && posEnd == mExtent))
+                size_t readLeft = posEnd - posCur;
+
+                if (posCur < mBufferOrigin || posCur >= mBufferExtent)
                 {
-                    assert (mFile.tell () == mBufferExtent);
+                    if (readLeft >= sBufferThreshold || (posCur == mOrigin && posEnd == mExtent))
+                    {
+                        assert (mFile.tell () == mBufferExtent);
 
-                    if (posCur != mBufferExtent)
-                        mFile.seek (posCur);
+                        if (posCur != mBufferExtent)
+                            mFile.seek (posCur);
 
-                    posCur += mFile.read (out, readLeft);
+                        posCur += mFile.read (out, readLeft);
 
-                    mBufferOrigin = mBufferExtent = posCur;
+                        mBufferOrigin = mBufferExtent = posCur;
 
-                    mPos = posCur - mOrigin;
+                        mPos = posCur - mOrigin;
 
-                    return posCur - posBeg;
-                }
-                else
-                {
-                    size_t newBufferOrigin;
-
-                    if ((posCur < mBufferOrigin) && (mBufferOrigin - posCur < sBufferSize))
-                        newBufferOrigin = std::max (mOrigin, mBufferOrigin > sBufferSize ? mBufferOrigin - sBufferSize : 0);
+                        return posCur - posBeg;
+                    }
                     else
-                        newBufferOrigin = posCur;
+                    {
+                        size_t newBufferOrigin;
 
-                    fill (newBufferOrigin);
+                        if ((posCur < mBufferOrigin) && (mBufferOrigin - posCur < sBufferSize))
+                            newBufferOrigin = std::max (mOrigin, mBufferOrigin > sBufferSize ? mBufferOrigin - sBufferSize : 0);
+                        else
+                            newBufferOrigin = posCur;
+
+                        fill (newBufferOrigin);
+                    }
                 }
+
+                size_t xfer = std::min (readLeft, mBufferExtent - posCur);
+
+                memcpy (out, mBuffer + (posCur - mBufferOrigin), xfer);
+
+                posCur += xfer;
+                out += xfer;
             }
 
-            size_t xfer = std::min (readLeft, mBufferExtent - posCur);
-
-            memcpy (out, mBuffer + (posCur - mBufferOrigin), xfer);
-
-            posCur += xfer;
-            out += xfer;
+            count = posEnd - posBeg;
+            mPos += count;
+            return count;
         }
-
-        count = posEnd - posBeg;
-        mPos += count;
-        return count;
+        catch (std::exception& e)
+        {
+            std::stringstream error;
+            error << "Failed to read '" << mName << "': " << e.what();
+            throw std::runtime_error(error.str());
+        }
     }
 
     void skip(long count)
