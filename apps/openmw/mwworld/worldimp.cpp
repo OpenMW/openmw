@@ -1735,6 +1735,23 @@ namespace MWWorld
                 World::DoorMarker newMarker;
                 newMarker.name = MWClass::Door::getDestination(ref);
 
+                ESM::CellId cellid;
+                if (!ref.mRef.getDestCell().empty())
+                {
+                    cellid.mWorldspace = ref.mRef.getDestCell();
+                    cellid.mPaged = false;
+                }
+                else
+                {
+                    cellid.mPaged = true;
+                    MWBase::Environment::get().getWorld()->positionToIndex(
+                                ref.mRef.getDoorDest().pos[0],
+                                ref.mRef.getDoorDest().pos[1],
+                                cellid.mIndex.mX,
+                                cellid.mIndex.mY);
+                }
+                newMarker.dest = cellid;
+
                 ESM::Position pos = ref.mData.getPosition ();
 
                 newMarker.x = pos.pos[0];

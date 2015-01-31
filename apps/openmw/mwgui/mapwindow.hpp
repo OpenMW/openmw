@@ -65,13 +65,15 @@ namespace MWGui
 
         bool toggleFogOfWar();
 
-        struct MarkerPosition
+        struct MarkerUserData
         {
             bool interior;
             int cellX;
             int cellY;
             float nX;
             float nY;
+            std::vector<std::string> notes;
+            std::string caption;
         };
 
     protected:
@@ -100,7 +102,7 @@ namespace MWGui
 
         void applyFogOfWar();
 
-        MyGUI::IntPoint getMarkerPosition (float worldX, float worldY, MarkerPosition& markerPos);
+        MyGUI::IntPoint getMarkerPosition (float worldX, float worldY, MarkerUserData& markerPos);
 
         virtual void notifyPlayerUpdate() {}
         virtual void notifyMapChanged() {}
