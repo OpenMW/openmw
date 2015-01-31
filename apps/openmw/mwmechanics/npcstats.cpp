@@ -31,7 +31,6 @@ MWMechanics::NpcStats::NpcStats()
 , mReputation(0)
 , mCrimeId(-1)
 , mWerewolfKills (0)
-, mProfit(0)
 , mTimeToStartDrowning(20.0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
@@ -448,16 +447,6 @@ void MWMechanics::NpcStats::addWerewolfKill()
     ++mWerewolfKills;
 }
 
-int MWMechanics::NpcStats::getProfit() const
-{
-    return mProfit;
-}
-
-void MWMechanics::NpcStats::modifyProfit(int diff)
-{
-    mProfit += diff;
-}
-
 float MWMechanics::NpcStats::getTimeToStartDrowning() const
 {
     return mTimeToStartDrowning;
@@ -501,7 +490,6 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
 
     state.mReputation = mReputation;
     state.mWerewolfKills = mWerewolfKills;
-    state.mProfit = mProfit;
     state.mLevelProgress = mLevelProgress;
 
     for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -548,7 +536,6 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
     mBounty = state.mBounty;
     mReputation = state.mReputation;
     mWerewolfKills = state.mWerewolfKills;
-    mProfit = state.mProfit;
     mLevelProgress = state.mLevelProgress;
 
     for (int i=0; i<ESM::Attribute::Length; ++i)

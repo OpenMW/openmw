@@ -17,6 +17,21 @@
 #include "draganddrop.hpp"
 #include "countdialog.hpp"
 
+namespace
+{
+
+    int getProfit(const MWWorld::Ptr& actor)
+    {
+        std::string script = actor.getClass().getScript(actor);
+        if (!script.empty())
+        {
+            return actor.getRefData().getLocals().getIntVar(script, "minimumprofit");
+        }
+        return 0;
+    }
+
+}
+
 namespace MWGui
 {
 
@@ -116,13 +131,12 @@ void CompanionWindow::updateEncumbranceBar()
     float encumbrance = mPtr.getClass().getEncumbrance(mPtr);
     mEncumbranceBar->setValue(encumbrance, capacity);
 
-    if (mPtr.getTypeName() != typeid(ESM::NPC).name())
-        mProfitLabel->setCaption("");
-    else
+    if (mModel && mModel->hasProfit(mPtr))
     {
-        MWMechanics::NpcStats& stats = mPtr.getClass().getNpcStats(mPtr);
-        mProfitLabel->setCaptionWithReplacing("#{sProfitValue} " + MyGUI::utility::toString(stats.getProfit()));
+        mProfitLabel->setCaptionWithReplacing("#{sProfitValue} " + MyGUI::utility::toString(getProfit(mPtr)));
     }
+    else
+        mProfitLabel->setCaption("");
 }
 
 void CompanionWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
@@ -132,7 +146,7 @@ void CompanionWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
 
 void CompanionWindow::exit()
 {
-    if (mPtr.getTypeName() == typeid(ESM::NPC).name() && mPtr.getClass().getNpcStats(mPtr).getProfit() < 0)
+    if (mModel && mModel->hasProfit(mPtr) && getProfit(mPtr) < 0)
     {
         std::vector<std::string> buttons;
         buttons.push_back("#{sCompanionWarningButtonOne}");
@@ -148,9 +162,6 @@ void CompanionWindow::onMessageBoxButtonClicked(int button)
 {
     if (button == 0)
     {
-        mPtr.getRefData().getLocals().setVarByInt(mPtr.getClass().getScript(mPtr),
-            "minimumprofit", mPtr.getClass().getNpcStats(mPtr).getProfit());
-
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);
         // Important for Calvus' contract script to work properly
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);

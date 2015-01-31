@@ -28,8 +28,6 @@ namespace MWMechanics
             int mReputation;
             int mCrimeId;
 
-            int mProfit;
-
             // ----- used by the player only, maybe should be moved at some point -------
             int mBounty;
             int mWerewolfKills;
@@ -48,10 +46,6 @@ namespace MWMechanics
         public:
 
             NpcStats();
-
-            /// for mercenary companions. starts out as 0, and changes when items are added or removed through the UI.
-            int getProfit() const;
-            void modifyProfit(int diff);
 
             int getBaseDisposition() const;
             void setBaseDisposition(int disposition);
