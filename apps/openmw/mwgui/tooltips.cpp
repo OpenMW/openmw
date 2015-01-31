@@ -8,6 +8,7 @@
 #include <MyGUI_ImageBox.h>
 
 #include <components/misc/resourcehelpers.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"

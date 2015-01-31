@@ -4,25 +4,21 @@
 #include <vector>
 #include <map>
 
-#include <components/settings/settings.hpp>
-
 #include <components/esm/cellid.hpp>
 
-#include "../mwworld/globals.hpp"
 #include "../mwworld/ptr.hpp"
 
 namespace Ogre
 {
     class Vector2;
     class Vector3;
+    class Quaternion;
+    class Image;
 }
 
-namespace OEngine
+namespace Loading
 {
-    namespace Physic
-    {
-        class PhysicEngine;
-    }
+    class Listener;
 }
 
 namespace ESM
@@ -390,7 +386,7 @@ namespace MWBase
             virtual bool canPlaceObject (float cursorX, float cursorY) = 0;
             ///< @return true if it is possible to place on object at specified cursor location
 
-            virtual void processChangedSettings (const Settings::CategorySettingVector& settings) = 0;
+            virtual void processChangedSettings (const std::vector< std::pair<std::string, std::string> >& settings) = 0;
 
             virtual bool isFlying(const MWWorld::Ptr &ptr) const = 0;
             virtual bool isSlowFalling(const MWWorld::Ptr &ptr) const = 0;

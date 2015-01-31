@@ -9,6 +9,7 @@
 #include <components/version/version.hpp>
 
 #include <components/widgets/imagebutton.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

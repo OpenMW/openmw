@@ -10,6 +10,7 @@
 #include <MyGUI_ScrollView.h>
 
 #include <components/misc/resourcehelpers.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"

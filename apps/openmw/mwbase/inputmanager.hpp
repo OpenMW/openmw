@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include <components/settings/settings.hpp>
-
 namespace MWBase
 {
     /// \brief Interface for input manager (implemented in MWInput)
@@ -29,7 +27,7 @@ namespace MWBase
 
             virtual void changeInputMode(bool guiMode) = 0;
 
-            virtual void processChangedSettings(const Settings::CategorySettingVector& changed) = 0;
+            virtual void processChangedSettings(const std::vector< std::pair<std::string, std::string> >& changed) = 0;
 
             virtual void setDragDrop(bool dragDrop) = 0;
 

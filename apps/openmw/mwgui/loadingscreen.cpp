@@ -15,6 +15,8 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_TextBox.h>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/statemanager.hpp"

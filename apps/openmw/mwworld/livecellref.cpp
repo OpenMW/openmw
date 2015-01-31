@@ -1,5 +1,6 @@
-
 #include "livecellref.hpp"
+
+#include <iostream>
 
 #include <components/esm/objectstate.hpp>
 

@@ -1,8 +1,8 @@
 #ifndef _SFO_EVENTS_H
 #define _SFO_EVENTS_H
 
-#include <SDL.h>
-
+#include <SDL_types.h>
+#include <SDL_events.h>
 
 ////////////
 // Events //
@@ -65,7 +65,7 @@ public:
     virtual ~WindowListener() {}
 
     /** @remarks The window's visibility changed */
-    virtual void windowVisibilityChange( bool visible ) {};
+    virtual void windowVisibilityChange( bool visible ) {}
 
     /** @remarks The window got / lost input focus */
     virtual void windowFocusChange( bool have_focus ) {}

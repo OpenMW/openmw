@@ -5,8 +5,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <components/settings/settings.hpp>
-
 #include "../mwworld/ptr.hpp"
 
 namespace Ogre
@@ -74,7 +72,7 @@ namespace MWBase
 
             virtual ~SoundManager() {}
 
-            virtual void processChangedSettings(const Settings::CategorySettingVector& settings) = 0;
+            virtual void processChangedSettings(const std::vector< std::pair<std::string, std::string> >& settings) = 0;
 
             virtual void stopMusic() = 0;
             ///< Stops music if it's playing

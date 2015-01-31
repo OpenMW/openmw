@@ -18,6 +18,7 @@
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadstat.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/settings/settings.hpp>
 
 #include <libs/openengine/ogre/lights.hpp>
 

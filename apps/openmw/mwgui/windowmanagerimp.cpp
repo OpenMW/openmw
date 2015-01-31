@@ -19,12 +19,17 @@
 #include <MyGUI_ClipboardManager.h>
 #include <MyGUI_RenderManager.h>
 
+#include <SDL_keyboard.h>
+#include <SDL_clipboard.h>
+
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
 
 #include <extern/sdl4ogre/sdlcursormanager.hpp>
 
 #include <components/fontloader/fontloader.hpp>
+
+#include <components/translation/translation.hpp>
 
 #include <components/widgets/widgets.hpp>
 #include <components/widgets/tags.hpp>

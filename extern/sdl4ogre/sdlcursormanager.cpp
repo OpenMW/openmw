@@ -4,6 +4,9 @@
 #include <OgreTextureManager.h>
 #include <OgreRoot.h>
 
+#include <SDL_mouse.h>
+#include <SDL_endian.h>
+
 #include <openengine/ogre/imagerotate.hpp>
 
 namespace SFO

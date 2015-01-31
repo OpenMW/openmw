@@ -8,6 +8,8 @@
 
 #include <components/misc/utf8stream.hpp>
 
+#include <components/translation/translation.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
 #include "../mwbase/environment.hpp"

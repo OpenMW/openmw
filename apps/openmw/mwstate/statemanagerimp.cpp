@@ -13,6 +13,7 @@
 #include <OgreImage.h>
 
 #include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

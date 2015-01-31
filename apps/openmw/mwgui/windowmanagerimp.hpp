@@ -5,12 +5,13 @@
    This class owns and controls all the MW specific windows in the
    GUI. It can enable/disable Gui mode, and is responsible for sending
    and retrieving information from the Gui.
-
-   MyGUI should be initialized separately before creating instances of
-   this class.
 **/
 
+#include <stack>
+
 #include "../mwbase/windowmanager.hpp"
+
+#include <components/settings/settings.hpp>
 
 #include "mapwindow.hpp"
 

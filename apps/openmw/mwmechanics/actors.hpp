@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <list>
 
 #include "movement.hpp"
 #include "../mwbase/world.hpp"
