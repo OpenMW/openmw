@@ -544,9 +544,16 @@ namespace MWWorld
 
     void Scene::addObjectToScene (const Ptr& ptr)
     {
-        addObject(ptr, *mPhysics, mRendering);
-        MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
-        MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
+        try
+        {
+            addObject(ptr, *mPhysics, mRendering);
+            MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
+            MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << "error during rendering: " << e.what() << std::endl;
+        }
     }
 
     void Scene::removeObjectFromScene (const Ptr& ptr)
