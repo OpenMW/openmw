@@ -7,7 +7,7 @@
 namespace ESM
 {
 
-void LeveledListBase::load(ESMReader &esm)
+void LevelledListBase::load(ESMReader &esm)
 {
     esm.getHNT(mFlags, "DATA");
     esm.getHNT(mChanceNone, "NNAM");
@@ -34,7 +34,7 @@ void LeveledListBase::load(ESMReader &esm)
         esm.getHNT(li.mLevel, "INTV");
     }
 }
-void LeveledListBase::save(ESMWriter &esm) const
+void LevelledListBase::save(ESMWriter &esm) const
 {
     esm.writeHNT("DATA", mFlags);
     esm.writeHNT("NNAM", mChanceNone);
@@ -47,7 +47,7 @@ void LeveledListBase::save(ESMWriter &esm) const
     }
 }
 
-    void LeveledListBase::blank()
+    void LevelledListBase::blank()
     {
         mFlags = 0;
         mChanceNone = 0;

@@ -34,24 +34,24 @@
 namespace
 {
 
-    void addToLevList(ESM::LeveledListBase* list, const std::string& itemId, int level)
+    void addToLevList(ESM::LevelledListBase* list, const std::string& itemId, int level)
     {
-        for (std::vector<ESM::LeveledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
+        for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
         {
             if (it->mLevel == level && itemId == it->mId)
                 return;
         }
 
-        ESM::LeveledListBase::LevelItem item;
+        ESM::LevelledListBase::LevelItem item;
         item.mId = itemId;
         item.mLevel = level;
         list->mList.push_back(item);
     }
 
-    void removeFromLevList(ESM::LeveledListBase* list, const std::string& itemId, int level)
+    void removeFromLevList(ESM::LevelledListBase* list, const std::string& itemId, int level)
     {
         // level of -1 removes all items with that itemId
-        for (std::vector<ESM::LeveledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
+        for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
         {
             if (level != -1 && it->mLevel != level)
             {

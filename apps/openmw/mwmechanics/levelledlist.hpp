@@ -12,9 +12,9 @@ namespace MWMechanics
 {
 
     /// @return ID of resulting item, or empty if none
-    inline std::string getLevelledItem (const ESM::LeveledListBase* levItem, bool creature, unsigned char failChance=0)
+    inline std::string getLevelledItem (const ESM::LevelledListBase* levItem, bool creature, unsigned char failChance=0)
     {
-        const std::vector<ESM::LeveledListBase::LevelItem>& items = levItem->mList;
+        const std::vector<ESM::LevelledListBase::LevelItem>& items = levItem->mList;
 
         const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         int playerLevel = player.getClass().getCreatureStats(player).getLevel();
@@ -27,7 +27,7 @@ namespace MWMechanics
 
         std::vector<std::string> candidates;
         int highestLevel = 0;
-        for (std::vector<ESM::LeveledListBase::LevelItem>::const_iterator it = items.begin(); it != items.end(); ++it)
+        for (std::vector<ESM::LevelledListBase::LevelItem>::const_iterator it = items.begin(); it != items.end(); ++it)
         {
             if (it->mLevel > highestLevel && it->mLevel <= playerLevel)
                 highestLevel = it->mLevel;
@@ -39,7 +39,7 @@ namespace MWMechanics
             allLevels = levItem->mFlags & ESM::CreatureLevList::AllLevels;
 
         std::pair<int, std::string> highest = std::make_pair(-1, "");
-        for (std::vector<ESM::LeveledListBase::LevelItem>::const_iterator it = items.begin(); it != items.end(); ++it)
+        for (std::vector<ESM::LevelledListBase::LevelItem>::const_iterator it = items.begin(); it != items.end(); ++it)
         {
             if (playerLevel >= it->mLevel
                     && (allLevels || it->mLevel == highestLevel))

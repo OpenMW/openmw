@@ -200,7 +200,7 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
 
     if (value.getProgress()>=1)
     {
-        // skill leveled up
+        // skill levelled up
         increaseSkill(skillIndex, class_, false);
     }
 }
