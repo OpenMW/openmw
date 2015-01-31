@@ -1126,7 +1126,7 @@ bool CharacterController::updateWeaponState()
                 attackStrength = std::min(1.f, 0.1f + std::rand() / float(RAND_MAX));
             }
 
-            if(mAttackType != "shoot")
+            if(mWeaponType != WeapType_Crossbow && mWeaponType != WeapType_BowAndArrow)
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
 
