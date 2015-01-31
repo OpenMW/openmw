@@ -14,6 +14,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/combat.hpp"
 
 #include "animation.hpp"
 
@@ -96,19 +97,7 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-    // Reduce fatigue
-    // somewhat of a guess, but using the weapon weight makes sense
-    const float fFatigueAttackBase = gmst.find("fFatigueAttackBase")->getFloat();
-    const float fFatigueAttackMult = gmst.find("fFatigueAttackMult")->getFloat();
-    const float fWeaponFatigueMult = gmst.find("fWeaponFatigueMult")->getFloat();
-    MWMechanics::CreatureStats& attackerStats = actor.getClass().getCreatureStats(actor);
-    MWMechanics::DynamicStat<float> fatigue = attackerStats.getFatigue();
-    const float normalizedEncumbrance = actor.getClass().getNormalizedEncumbrance(actor);
-    float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
-    if (!weapon->isEmpty())
-        fatigueLoss += weapon->getClass().getWeight(*weapon) * attackerStats.getAttackStrength() * fWeaponFatigueMult;
-    fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
-    attackerStats.setFatigue(fatigue);
+    MWMechanics::applyFatigueLoss(actor, *weapon);
 
     if (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
     {
