@@ -352,6 +352,9 @@ namespace MWGui
 
     WindowManager::~WindowManager()
     {
+        MyGUI::PointerManager::getInstance().eventChangeMousePointer.clear();
+        MyGUI::InputManager::getInstance().eventChangeKeyFocus.clear();
+
         delete mConsole;
         delete mMessageBoxManager;
         delete mHud;
@@ -385,7 +388,6 @@ namespace MWGui
         delete mMerchantRepair;
         delete mRepair;
         delete mSoulgemDialog;
-        delete mCursorManager;
         delete mRecharge;
         delete mCompanionWindow;
         delete mHitFader;
@@ -393,6 +395,8 @@ namespace MWGui
         delete mScreenFader;
         delete mBlindnessFader;
         delete mDebugWindow;
+
+        delete mCursorManager;
 
         cleanupGarbage();
 
