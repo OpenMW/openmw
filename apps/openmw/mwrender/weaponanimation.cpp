@@ -7,6 +7,7 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
@@ -45,7 +46,15 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
     MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
     MWWorld::ContainerStoreIterator weaponSlot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     if (weaponSlot != inv.end() && weaponSlot->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
+    {
+        std::string soundid = weaponSlot->getClass().getUpSoundId(*weaponSlot);
+        if(!soundid.empty())
+        {
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            sndMgr->playSound3D(actor, soundid, 1.0f, 1.0f);
+        }
         showWeapon(true);
+    }
     else
     {
         NifOgre::ObjectScenePtr weapon = getWeapon();
