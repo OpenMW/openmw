@@ -37,31 +37,7 @@ public:
 
     NIFStream (NIFFile * file, Ogre::DataStreamPtr inp): file (file), inp (inp) {}
 
-    /*************************************************
-               Parser functions
-    ****************************************************/
-
-    template <typename T>
-    struct GetHandler
-    {
-        typedef T (NIFStream::*fn_t)();
-
-        static const fn_t sValue; // this is specialized per supported type in the .cpp file
-
-        static T read (NIFStream* nif)
-        {
-            return (nif->*sValue) ();
-        }
-    };
-
-    template <typename T>
-    void read (NIFStream* nif, T & Value)
-    {
-        Value = GetHandler <T>::read (nif);
-    }
-
     void skip(size_t size) { inp->skip(size); }
-    void read (void * data, size_t size) { inp->read (data, size); }
 
     char getChar() { return read_byte(); }
     short getShort() { return read_le16(); }
