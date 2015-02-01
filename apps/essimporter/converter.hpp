@@ -35,6 +35,7 @@
 #include "convertacdt.hpp"
 #include "convertnpcc.hpp"
 #include "convertscpt.hpp"
+#include "convertplayer.hpp"
 
 namespace ESSImport
 {
@@ -104,10 +105,10 @@ public:
         npc.load(esm);
         if (id != "player")
         {
-            // TODO:
-            // this should handle changes to the NPC struct, but since there is no index here
+            // Handles changes to the NPC struct, but since there is no index here
             // it will apply to ALL instances of the class. seems to be the reason for the
             // "feature" in MW where changing AI settings of one guard will change it for all guards of that refID.
+            mContext->mNpcs[Misc::StringUtils::lowerCase(id)] = npc;
         }
         else
         {
@@ -139,6 +140,7 @@ public:
         ESM::Creature creature;
         std::string id = esm.getHNString("NAME");
         creature.load(esm);
+        mContext->mCreatures[Misc::StringUtils::lowerCase(id)] = creature;
     }
 };
 
@@ -259,32 +261,23 @@ private:
 class ConvertPCDT : public Converter
 {
 public:
+    ConvertPCDT() : mFirstPersonCam(true) {}
+
     virtual void read(ESM::ESMReader &esm)
     {
         PCDT pcdt;
         pcdt.load(esm);
 
-        mContext->mPlayer.mBirthsign = pcdt.mBirthsign;
-        mContext->mPlayer.mObject.mNpcStats.mBounty = pcdt.mBounty;
-        for (std::vector<PCDT::FNAM>::const_iterator it = pcdt.mFactions.begin(); it != pcdt.mFactions.end(); ++it)
-        {
-            ESM::NpcStats::Faction faction;
-            faction.mExpelled = (it->mFlags & 0x2) != 0;
-            faction.mRank = it->mRank;
-            faction.mReputation = it->mReputation;
-            mContext->mPlayer.mObject.mNpcStats.mFactions[Misc::StringUtils::lowerCase(it->mFactionName.toString())] = faction;
-        }
-        for (int i=0; i<8; ++i)
-            mContext->mPlayer.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];
-        mContext->mPlayer.mObject.mNpcStats.mLevelProgress = pcdt.mPNAM.mLevelProgress;
-
-        for (std::vector<std::string>::const_iterator it = pcdt.mKnownDialogueTopics.begin();
-             it != pcdt.mKnownDialogueTopics.end(); ++it)
-        {
-            mContext->mDialogueState.mKnownTopics.push_back(Misc::StringUtils::lowerCase(*it));
-        }
-
+        convertPCDT(pcdt, mContext->mPlayer, mContext->mDialogueState.mKnownTopics, mFirstPersonCam);
     }
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        esm.startRecord(ESM::REC_CAM_);
+        esm.writeHNT("FIRS", mFirstPersonCam);
+        esm.endRecord(ESM::REC_CAM_);
+    }
+private:
+    bool mFirstPersonCam;
 };
 
 class ConvertCNTC : public Converter
@@ -416,7 +409,7 @@ private:
 
 /// Seen responses for a dialogue topic?
 /// Each DIAL record is followed by a number of INFO records, I believe, just like in ESMs
-/// Dialogue conversion problems (probably have to adjust OpenMW format) -
+/// Dialogue conversion problems:
 /// - Journal is stored in one continuous HTML markup rather than each entry separately with associated info ID.
 /// - Seen dialogue responses only store the INFO id, rather than the fulltext.
 /// - Quest stages only store the INFO id, rather than the journal entry fulltext.

@@ -44,7 +44,7 @@ namespace MWWorld
                 state.mObject->mControllers[i].setSource(Ogre::SharedPtr<MWRender::EffectAnimationTime> (new MWRender::EffectAnimationTime()));
         }
 
-        MWRender::Animation::setRenderProperties(state.mObject, MWRender::RV_Misc,
+        MWRender::Animation::setRenderProperties(state.mObject, MWRender::RV_Effects,
                             MWRender::RQG_Main, MWRender::RQG_Alpha, 0.f, false, NULL);
     }
 

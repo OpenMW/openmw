@@ -40,7 +40,6 @@ namespace ESM
         int mBounty;
         int mReputation;
         int mWerewolfKills;
-        int mProfit;
         int mLevelProgress;
         int mSkillIncrease[8];
         std::vector<std::string> mUsedIds; // lower case IDs

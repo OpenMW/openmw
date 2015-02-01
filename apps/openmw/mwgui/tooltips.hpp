@@ -38,6 +38,9 @@ namespace MWGui
         // effects (for potions, ingredients)
         Widgets::SpellEffectList effects;
 
+        // local map notes
+        std::vector<std::string> notes;
+
         bool isPotion; // potions do not show target in the tooltip
         bool wordWrap;
     };

@@ -371,6 +371,23 @@ namespace MWMechanics
             sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
     }
 
+    void applyFatigueLoss(const MWWorld::Ptr &attacker, const MWWorld::Ptr &weapon)
+    {
+        // somewhat of a guess, but using the weapon weight makes sense
+        const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const float fFatigueAttackBase = store.find("fFatigueAttackBase")->getFloat();
+        const float fFatigueAttackMult = store.find("fFatigueAttackMult")->getFloat();
+        const float fWeaponFatigueMult = store.find("fWeaponFatigueMult")->getFloat();
+        CreatureStats& stats = attacker.getClass().getCreatureStats(attacker);
+        MWMechanics::DynamicStat<float> fatigue = stats.getFatigue();
+        const float normalizedEncumbrance = attacker.getClass().getNormalizedEncumbrance(attacker);
+        float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
+        if (!weapon.isEmpty())
+            fatigueLoss += weapon.getClass().getWeight(weapon) * stats.getAttackStrength() * fWeaponFatigueMult;
+        fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
+        stats.setFatigue(fatigue);
+    }
+
     bool isEnvironmentCompatible(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim)
     {
         const MWWorld::Class& attackerClass = attacker.getClass();

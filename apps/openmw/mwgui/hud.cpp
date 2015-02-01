@@ -182,6 +182,10 @@ namespace MWGui
 
     HUD::~HUD()
     {
+        mMainWidget->eventMouseLostFocus.clear();
+        mMainWidget->eventMouseMove.clear();
+        mMainWidget->eventMouseButtonClick.clear();
+
         delete mSpellIcons;
     }
 

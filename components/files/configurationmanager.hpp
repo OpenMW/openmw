@@ -25,7 +25,7 @@ namespace Files
  */
 struct ConfigurationManager
 {
-    ConfigurationManager();
+    ConfigurationManager(bool silent=false); /// @param silent Emit log messages to cout?
     virtual ~ConfigurationManager();
 
     void readConfiguration(boost::program_options::variables_map& variables,
@@ -69,6 +69,8 @@ struct ConfigurationManager
         boost::filesystem::path mLogPath;
 
         TokensMappingContainer mTokensMapping;
+
+        bool mSilent;
 };
 
 } /* namespace Cfg */

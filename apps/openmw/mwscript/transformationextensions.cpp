@@ -518,42 +518,41 @@ namespace MWScript
                     if (count<0)
                         throw std::runtime_error ("count must be non-negative");
 
-                    // no-op
-                    if (count == 0)
-                        return;
-
-                    ESM::Position ipos = actor.getRefData().getPosition();
-                    Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
-                    Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
-                    if(direction == 0) pos = pos + distance*rot.yAxis();
-                    else if(direction == 1) pos = pos - distance*rot.yAxis();
-                    else if(direction == 2) pos = pos - distance*rot.xAxis();
-                    else if(direction == 3) pos = pos + distance*rot.xAxis();
-                    else throw std::runtime_error ("direction must be 0,1,2 or 3");
-
-                    ipos.pos[0] = pos.x;
-                    ipos.pos[1] = pos.y;
-                    ipos.pos[2] = pos.z;
-
-                    if (actor.getClass().isActor())
+                    for (int i=0; i<count; ++i)
                     {
-                        // TODO: should this depend on the 'direction' parameter?
-                        ipos.rot[0] = 0;
-                        ipos.rot[1] = 0;
-                        ipos.rot[2] = 0;
-                    }
-                    else
-                    {
-                        ipos.rot[0] = actor.getRefData().getPosition().rot[0];
-                        ipos.rot[1] = actor.getRefData().getPosition().rot[1];
-                        ipos.rot[2] = actor.getRefData().getPosition().rot[2];
-                    }
-                    // create item
-                    MWWorld::CellStore* store = actor.getCell();
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, count);
-                    ref.getPtr().getCellRef().setPosition(ipos);
+                        ESM::Position ipos = actor.getRefData().getPosition();
+                        Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
+                        Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
+                        if(direction == 0) pos = pos + distance*rot.yAxis();
+                        else if(direction == 1) pos = pos - distance*rot.yAxis();
+                        else if(direction == 2) pos = pos - distance*rot.xAxis();
+                        else if(direction == 3) pos = pos + distance*rot.xAxis();
+                        else throw std::runtime_error ("direction must be 0,1,2 or 3");
 
-                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
+                        ipos.pos[0] = pos.x;
+                        ipos.pos[1] = pos.y;
+                        ipos.pos[2] = pos.z;
+
+                        if (actor.getClass().isActor())
+                        {
+                            // TODO: should this depend on the 'direction' parameter?
+                            ipos.rot[0] = 0;
+                            ipos.rot[1] = 0;
+                            ipos.rot[2] = 0;
+                        }
+                        else
+                        {
+                            ipos.rot[0] = actor.getRefData().getPosition().rot[0];
+                            ipos.rot[1] = actor.getRefData().getPosition().rot[1];
+                            ipos.rot[2] = actor.getRefData().getPosition().rot[2];
+                        }
+                        // create item
+                        MWWorld::CellStore* store = actor.getCell();
+                        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, 1);
+                        ref.getPtr().getCellRef().setPosition(ipos);
+
+                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
+                    }
                 }
         };
 

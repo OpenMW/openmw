@@ -93,9 +93,6 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
-        if (ptr.getCellRef().getTeleport() && !ptr.getCellRef().getDestCell().empty()) // TODO doors that lead to exteriors
-            return ptr.getCellRef().getDestCell();
-
         return ref->mBase->mName;
     }
 

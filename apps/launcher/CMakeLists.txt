@@ -78,7 +78,7 @@ if(NOT WIN32)
 endif(NOT WIN32)
 
 # Main executable
-add_executable(omwlauncher
+add_executable(openmw-launcher
     ${GUI_TYPE}
     ${LAUNCHER}
     ${LAUNCHER_HEADER}
@@ -87,7 +87,7 @@ add_executable(omwlauncher
     ${UI_HDRS}
 )
 
-target_link_libraries(omwlauncher
+target_link_libraries(openmw-launcher
     ${Boost_LIBRARIES}
     ${OGRE_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
@@ -99,6 +99,6 @@ target_link_libraries(omwlauncher
 
 if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
-  target_link_libraries(omwlauncher gcov)
+  target_link_libraries(openmw-launcher gcov)
 endif()
 

@@ -20,12 +20,22 @@ namespace ESSImport
 
         ESM::CellRef::loadData(esm);
 
-        // FIXME: not all actors have this, add flag
-        esm.getHNOT(mACDT, "ACDT");
+        mHasACDT = false;
+        if (esm.isNextSub("ACDT"))
+        {
+            mHasACDT = true;
+            esm.getHT(mACDT);
+        }
 
-        ACSC acsc;
-        esm.getHNOT(acsc, "ACSC");
-        esm.getHNOT(acsc, "ACSL");
+        mHasACSC = false;
+        if (esm.isNextSub("ACSC"))
+        {
+            mHasACSC = true;
+            esm.getHT(mACSC);
+        }
+
+        if (esm.isNextSub("ACSL"))
+            esm.skipHSubSize(112);
 
         if (esm.isNextSub("CSTN"))
             esm.skipHSub(); // "PlayerSaveGame", link to some object?

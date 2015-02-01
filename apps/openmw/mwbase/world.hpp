@@ -6,6 +6,8 @@
 
 #include <components/settings/settings.hpp>
 
+#include <components/esm/cellid.hpp>
+
 #include "../mwworld/globals.hpp"
 #include "../mwworld/ptr.hpp"
 
@@ -33,7 +35,6 @@ namespace ESM
     struct Potion;
     struct Spell;
     struct NPC;
-    struct CellId;
     struct Armor;
     struct Weapon;
     struct Clothing;
@@ -92,6 +93,7 @@ namespace MWBase
             {
                 std::string name;
                 float x, y; // world position
+                ESM::CellId dest;
             };
 
             World() {}

@@ -5,6 +5,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
 
+#include <components/files/configurationmanager.hpp>
+
 #include "importer.hpp"
 
 namespace bpo = boost::program_options;
@@ -23,31 +25,36 @@ int main(int argc, char** argv)
             ("mwsave,m", bpo::value<std::string>(), "morrowind .ess save file")
             ("output,o", bpo::value<std::string>(), "output file (.omwsave)")
             ("compare,c", "compare two .ess files")
+            ("encoding", boost::program_options::value<std::string>()->default_value("win1252"), "encoding of the save file")
         ;
         p_desc.add("mwsave", 1).add("output", 1);
 
-        bpo::variables_map vm;
+        bpo::variables_map variables;
 
         bpo::parsed_options parsed = bpo::command_line_parser(argc, argv)
             .options(desc)
             .positional(p_desc)
             .run();
 
-        bpo::store(parsed, vm);
+        bpo::store(parsed, variables);
 
-        if(vm.count("help") || !vm.count("mwsave") || !vm.count("output")) {
+        if(variables.count("help") || !variables.count("mwsave") || !variables.count("output")) {
             std::cout << desc;
             return 0;
         }
 
-        bpo::notify(vm);
+        bpo::notify(variables);
 
-        std::string essFile = vm["mwsave"].as<std::string>();
-        std::string outputFile = vm["output"].as<std::string>();
+        Files::ConfigurationManager cfgManager(true);
+        cfgManager.readConfiguration(variables, desc);
 
-        ESSImport::Importer importer(essFile, outputFile);
+        std::string essFile = variables["mwsave"].as<std::string>();
+        std::string outputFile = variables["output"].as<std::string>();
+        std::string encoding = variables["encoding"].as<std::string>();
 
-        if (vm.count("compare"))
+        ESSImport::Importer importer(essFile, outputFile, encoding);
+
+        if (variables.count("compare"))
             importer.compare();
         else
         {

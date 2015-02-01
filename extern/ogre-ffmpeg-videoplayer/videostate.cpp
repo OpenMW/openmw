@@ -175,13 +175,27 @@ void PacketQueue::clear()
 int VideoState::OgreResource_Read(void *user_data, uint8_t *buf, int buf_size)
 {
     Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
-    return stream->read(buf, buf_size);
+    try
+    {
+        return stream->read(buf, buf_size);
+    }
+    catch (std::exception& e)
+    {
+        return 0;
+    }
 }
 
 int VideoState::OgreResource_Write(void *user_data, uint8_t *buf, int buf_size)
 {
     Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
-    return stream->write(buf, buf_size);
+    try
+    {
+        return stream->write(buf, buf_size);
+    }
+    catch (std::exception& e)
+    {
+        return 0;
+    }
 }
 
 int64_t VideoState::OgreResource_Seek(void *user_data, int64_t offset, int whence)

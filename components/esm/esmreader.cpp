@@ -123,7 +123,7 @@ std::string ESMReader::getHString()
         // Skip the following zero byte
         mCtx.leftRec--;
         char c;
-        mEsm->read(&c, 1);
+        getExact(&c, 1);
         return "";
     }
 
@@ -186,7 +186,7 @@ void ESMReader::getSubName()
     }
 
     // reading the subrecord data anyway.
-    mEsm->read(mCtx.subName.name, 4);
+    getExact(mCtx.subName.name, 4);
     mCtx.leftRec -= 4;
 }
 
@@ -194,7 +194,7 @@ bool ESMReader::isEmptyOrGetName()
 {
     if (mCtx.leftRec)
     {
-        mEsm->read(mCtx.subName.name, 4);
+        getExact(mCtx.subName.name, 4);
         mCtx.leftRec -= 4;
         return false;
     }
@@ -294,9 +294,16 @@ void ESMReader::getRecHeader(uint32_t &flags)
 
 void ESMReader::getExact(void*x, int size)
 {
-    int t = mEsm->read(x, size);
-    if (t != size)
-        fail("Read error");
+    try
+    {
+        int t = mEsm->read(x, size);
+        if (t != size)
+            fail("Read error");
+    }
+    catch (std::exception& e)
+    {
+        fail(std::string("Read error: ") + e.what());
+    }
 }
 
 std::string ESMReader::getString(int size)

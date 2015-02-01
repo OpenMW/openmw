@@ -9,16 +9,16 @@ set(MWINIIMPORT_HEADER
 
 source_group(launcher FILES ${MWINIIMPORT} ${MWINIIMPORT_HEADER})
 
-add_executable(mwiniimport
+add_executable(openmw-iniimporter
     ${MWINIIMPORT}
 )
 
-target_link_libraries(mwiniimport
+target_link_libraries(openmw-iniimporter
     ${Boost_LIBRARIES}
     components
 )
 
 if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
-  target_link_libraries(mwiniimport gcov)
+  target_link_libraries(openmw-iniimporter gcov)
 endif()

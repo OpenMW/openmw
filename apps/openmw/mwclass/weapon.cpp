@@ -189,9 +189,8 @@ namespace MWClass
         {
             return std::string("Item Weapon Longblade Up");
         }
-        // Shortblade and thrown weapons
-        // thrown weapons may not be entirely correct
-        if (type == 0 || type == 11)
+        // Shortblade
+        if (type == 0)
         {
             return std::string("Item Weapon Shortblade Up");
         }
@@ -200,8 +199,8 @@ namespace MWClass
         {
             return std::string("Item Weapon Spear Up");
         }
-        // Blunts and Axes
-        if (type == 3 || type == 4 || type == 5 || type == 7 || type == 8)
+        // Blunts, Axes and Thrown weapons
+        if (type == 3 || type == 4 || type == 5 || type == 7 || type == 8 || type == 11)
         {
             return std::string("Item Weapon Blunt Up");
         }
@@ -235,9 +234,8 @@ namespace MWClass
         {
             return std::string("Item Weapon Longblade Down");
         }
-        // Shortblade and thrown weapons
-        // thrown weapons may not be entirely correct
-        if (type == 0 || type == 11)
+        // Shortblade
+        if (type == 0)
         {
             return std::string("Item Weapon Shortblade Down");
         }
@@ -246,8 +244,8 @@ namespace MWClass
         {
             return std::string("Item Weapon Spear Down");
         }
-        // Blunts and Axes
-        if (type == 3 || type == 4 || type == 5 || type == 7 || type == 8)
+        // Blunts, Axes and Thrown weapons
+        if (type == 3 || type == 4 || type == 5 || type == 7 || type == 8 || type == 11)
         {
             return std::string("Item Weapon Blunt Down");
         }

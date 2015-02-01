@@ -15,6 +15,7 @@ namespace ESSImport
 
 
     void convertACDT (const ACDT& acdt, ESM::CreatureStats& cStats);
+    void convertACSC (const ACSC& acsc, ESM::CreatureStats& cStats);
 
     void convertNpcData (const ActorData& actorData, ESM::NpcStats& npcStats);
 }

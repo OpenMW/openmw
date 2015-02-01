@@ -360,6 +360,8 @@ namespace MWWorld
         std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(scpt.mId, scpt));
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
+        else
+            inserted.first->second = scpt;
     }
 
     template <>
@@ -371,6 +373,8 @@ namespace MWWorld
         std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(s.mId, s));
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
+        else
+            inserted.first->second = s;
     }
 
     template <>
