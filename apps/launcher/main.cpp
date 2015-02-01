@@ -1,4 +1,5 @@
 #include <iostream>
+#include <csignal>
 
 #include <QApplication>
 #include <QTextCodec>
@@ -26,6 +27,8 @@ int main(int argc, char *argv[])
             qDebug() << "SDL_Init failed: " << QString::fromStdString(SDL_GetError());
             return 0;
         }
+        signal(SIGINT, SIG_DFL); // We don't want to use the SDL event loop in the launcher,
+                                 // so reset SIGINT which SDL wants to redirect to an SDL_Quit event.
 
         QApplication app(argc, argv);
 
