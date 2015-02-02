@@ -292,14 +292,10 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
     else
         throw std::runtime_error ("No default settings file found! Make sure the file \"settings-default.cfg\" was properly installed.");
 
-    // load user settings if they exist, otherwise just load the default settings as user settings
+    // load user settings if they exist
     const std::string settingspath = mCfgMgr.getUserConfigPath().string() + "/settings.cfg";
     if (boost::filesystem::exists(settingspath))
         settings.loadUser(settingspath);
-    else if (boost::filesystem::exists(localdefault))
-        settings.loadUser(localdefault);
-    else if (boost::filesystem::exists(globaldefault))
-        settings.loadUser(globaldefault);
 
     mFpsLevel = settings.getInt("fps", "HUD");
 

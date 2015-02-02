@@ -2,7 +2,7 @@
 #define GAME_MWBASE_SOUNDMANAGER_H
 
 #include <string>
-
+#include <set>
 #include <boost/shared_ptr.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -72,7 +72,7 @@ namespace MWBase
 
             virtual ~SoundManager() {}
 
-            virtual void processChangedSettings(const std::vector< std::pair<std::string, std::string> >& settings) = 0;
+            virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& settings) = 0;
 
             virtual void stopMusic() = 0;
             ///< Stops music if it's playing

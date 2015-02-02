@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 
 #include <components/esm/cellid.hpp>
 
@@ -386,7 +387,7 @@ namespace MWBase
             virtual bool canPlaceObject (float cursorX, float cursorY) = 0;
             ///< @return true if it is possible to place on object at specified cursor location
 
-            virtual void processChangedSettings (const std::vector< std::pair<std::string, std::string> >& settings) = 0;
+            virtual void processChangedSettings (const std::set< std::pair<std::string, std::string> >& settings) = 0;
 
             virtual bool isFlying(const MWWorld::Ptr &ptr) const = 0;
             virtual bool isSlowFalling(const MWWorld::Ptr &ptr) const = 0;

@@ -271,7 +271,7 @@ namespace MWBase
              */
             virtual std::string getGameSettingString(const std::string &id, const std::string &default_) = 0;
 
-            virtual void processChangedSettings(const std::vector< std::pair<std::string, std::string> >& changed) = 0;
+            virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& changed) = 0;
 
             virtual void windowResized(int x, int y) = 0;
 
