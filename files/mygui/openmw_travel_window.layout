@@ -1,31 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 450 300" name="_Main">
+    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 458 284" name="_Main">
         <Property key="Visible" value="false"/>
+        <Property key="Caption" value="#{sServiceTravelTitle}"/>
+        <Property key="MinSize" value="280 186"/>
 
-
-        <Widget type="TextBox" skin="SandText" position="8 10 24 24" name="Select" align="Right Top">
-            <Property key="TextAlign" value="Right"/>
+        <Widget type="TextBox" skin="SandText" position="8 10 400 18" name="Select" align="Left Top">
+            <Property key="TextAlign" value="Left"/>
             <Property key="Caption" value="#{sTravelServiceTitle}"/>
         </Widget>
-        <Widget type="TextBox" skin="SandText" position="0 0 24 24" name="Travel" align="Right Top">
-            <Property key="TextAlign" value="Right"/>
-            <Property key="Caption" value="#D8C09A#{sServiceTravelTitle}"/>
-        </Widget>
 
+        <Widget type="TextBox" skin="SandText" position="0 0 24 24" name="Travel" align="Right Top"/>
 
-        <Widget type="Widget" skin="MW_Box" position="6 31 430 225" align="Left Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 422 217" align="Left Top Stretch" name="DestinationsView">
-                <Property key="CanvasAlign" value="Left"/>
+        <Widget type="Widget" skin="MW_Box" position="8 31 426 177" align="Left Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 419 169" align="Left Top Stretch" name="DestinationsView">
+                <Property key="CanvasAlign" value="Left Top"/>
             </Widget>
         </Widget>
 
-
-        <Widget type="TextBox" skin="SandText" position="8 255 24 24" name="PlayerGold" align="Right Top">
-            <Property key="TextAlign" value="Right"/>
+        <Widget type="TextBox" skin="SandText" position="18 212 24 24" name="PlayerGold" align="Left Bottom">
+            <Property key="TextAlign" value="Left"/>
         </Widget>
-        <Widget type="AutoSizedButton" skin="MW_Button" position="375 260 60 24" name="CancelButton" align="Right Top">
+        <Widget type="AutoSizedButton" skin="MW_Button" position="373 216 60 24" name="CancelButton" align="Right Bottom">
             <Property key="ExpandDirection" value="Left"/>
             <Property key="Caption" value="#{sCancel}"/>
         </Widget>

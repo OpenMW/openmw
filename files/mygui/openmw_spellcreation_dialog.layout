@@ -70,7 +70,7 @@
             </Widget>
         </Widget>
 
-        <Widget type="HBox" position="0 340 560 60">
+        <Widget type="HBox" position="0 340 558 60">
             <Property key="Padding" value="16"/>
 
             <Widget type="Widget" position="0 0 0 0">
@@ -83,9 +83,8 @@
                 <UserString key="ToolTipLayout" value="TextToolTip"/>
                 <UserString key="Caption_Text" value="#{sSpellmakingHelp4}"/>
             </Widget>
-            <Widget type="AutoSizedTextBox" skin="SandText" name="PriceLabel">
-            </Widget>
 
+            <Widget type="AutoSizedTextBox" skin="SandText" name="PriceLabel"/>
 
             <Widget type="AutoSizedButton" skin="MW_Button" name="BuyButton">
                 <Property key="Caption" value="#{sBuy}"/>
