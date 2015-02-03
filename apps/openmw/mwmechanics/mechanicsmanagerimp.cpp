@@ -936,11 +936,29 @@ namespace MWMechanics
         commitCrime(ptr, victim, OT_Trespassing);
     }
 
-    void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, int count)
+    void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, const MWWorld::Ptr& container,
+                                     int count)
     {
         MWWorld::Ptr victim;
-        if (isAllowedToUse(ptr, item, victim))
-            return;
+
+        if (!container.isEmpty())
+        {
+            // Inherit the owner of the container
+            if (isAllowedToUse(ptr, container, victim))
+                return;
+        }
+        else
+        {
+            if (isAllowedToUse(ptr, item, victim))
+                return;
+
+            if (!item.getCellRef().hasContentFile())
+            {
+                // this is a manually placed item, which means it was already stolen
+                return;
+            }
+        }
+
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
 
