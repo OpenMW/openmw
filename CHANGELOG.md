@@ -1,3 +1,127 @@
+0.35.0
+------
+
+    Bug #244: Clipping/static in relation to the ghostgate/fence sound.
+    Bug #531: Missing transparent menu items
+    Bug #811: Content Lists in openmw.cfg are overwritten
+    Bug #925: OpenCS doesn't launch because it thinks its already started
+    Bug #969: Water shader strange behaviour on AMD card
+    Bug #1049: Partially highlighted word in dialogue may cause incorrect line break
+    Bug #1069: omwlauncher.exe crashes due to file lock
+    Bug #1192: It is possible to jump on top of hostile creatures in combat
+    Bug #1342: Loud ambient sounds
+    Bug #1431: Creatures can climb the player
+    Bug #1605: Guard in CharGen doesn't turn around to face you when reaching stairs
+    Bug #1624: Moon edges don't transition properly
+    Bug #1634: Items dropped by PC have collision
+    Bug #1637: Weird NPC behaviour in Vivec, Hlaalu Ancestral Vaults?
+    Bug #1638: Cannot climb staircases
+    Bug #1648: Enchanted equipment badly handled at game reload
+    Bug #1663: Crash when casting spell at enemy near you
+    Bug #1683: Scale doesn't apply to animated collision nodes
+    Bug #1702: Active enchanted item forgotten
+    Bug #1730: Scripts names starting with digit(s) fail to compile
+    Bug #1743: Moons are transparent
+    Bug #1745: Shadows crash: Assertion `mEffects.empty()' failed.
+    Bug #1785: Can't equip two-handed weapon and shield
+    Bug #1809: Player falls too easily
+    Bug #1825: Sword of Perithia can´t run in OpenMW
+    Bug #1899: The launcher resets any alterations you´ve made in the mod list order,
+    Bug #1964: Idle voices/dialogs not triggered correctly
+    Bug #1980: Please, change default click behavior in OpenMW Launchers Data Files list
+    Bug #1984: Vampire corpses standing up when looting the first item
+    Bug #1985: Calm spell does nothing
+    Bug #1986: Spell name lights up on mouseover but spell cost does not
+    Bug #1989: Tooltip still shown when menu toggled off
+    Bug #2010: Raindrops Displayed While Underwater
+    Bug #2023: Walking into plants causes massive framedrop
+    Bug #2031: [MOD: Shrines - Restore Health and Cancel Options]: Restore health option doesn't work
+    Bug #2039: Lake Fjalding pillar of fire not rendered
+    Bug #2040: AI_follow should stop further from the target
+    Bug #2076: Slaughterfish AI
+    Bug #2077: Direction of long jump can be changed much more than it is possible in vanilla
+    Bug #2078: error during rendering: Object '' not found (const)
+    Bug #2105: Lockpicking causes screen sync glitch
+    Bug #2113: [MOD: Julan Ashlander Companion] Julan does not act correctly within the Ghostfence.
+    Bug #2123: Window glow mod: Collision issues
+    Bug #2133: Missing collision for bridges in Balmora when using Morrowind Rebirth 2.81
+    Bug #2135: Casting a summon spell while the summon is active does not reset the summon.
+    Bug #2144: Changing equipment will unequip drawn arrows/bolts
+    Bug #2169: Yellow on faces when using opengl renderer and mods from overhaul on windows
+    Bug #2175: Pathgrid mods do not overwrite the existing pathgrid
+    Bug #2176: Morrowind -Russian localization end add-on ChaosHeart. Error in framelistener;object ;frenzying toush; not found <const>
+    Bug #2181: Mod Morrowind crafting merchants die.
+    Bug #2182: mods changing skill progression double the bonus for class specialization
+    Bug #2183: Editor: Skills "use value" only allows integer between 0 and 99
+    Bug #2184: Animated Morrowind Expanded produces an error on Open MW Launch
+    Bug #2185: Conditional Operator formats
+    Bug #2193: Quest: Gateway Ghost
+    Bug #2194: Cannot summon multiples of the same creature
+    Bug #2195: Pathgrid in the (0,0) exterior cell not loaded
+    Bug #2200: Outdoor NPCs can stray away and keep walking into a wall
+    Bug #2201: Creatures do not receive fall damage
+    Bug #2202: The enchantment the item can hold is calculated incorrectly
+    Bug #2203: Having the mod Living Cities of Vvardenfall running causes the game world to fail to load after leaving the prison ship
+    Bug #2204: Abot's Water Life - Book rendered incorrectly
+    Bug #2205: sound_waterfall script no longer compiles
+    Bug #2206: Dialogue script fails to compile (extra .)
+    Bug #2207: Script using – instead of - character does not compile
+    Bug #2208: Failing dialogue scripts in french Morrowind.esm
+    Bug #2214: LGNPC Vivec Redoran 1.62 and The King Rat (Size and inventory Issues)
+    Bug #2215: Beast races can use enchanted boots
+    Bug #2218: Incorrect names body parts in 3D models for open helmet with skinning
+    Bug #2219: Orcs in Ghorak Manor in Caldera don't attack if you pick their pockets.
+    Bug #2220: Chargen race preview head incorrect orientation
+    Bug #2223: Reseting rock falling animation
+    Bug #2224: Fortify Attribute effects do not stack when Spellmaking.
+    Bug #2226: OpenCS pseudo-crash
+    Bug #2230: segfaulting when entering Ald'ruhn with a specific mod: "fermeture la nuit" (closed by night)
+    Bug #2233: Area effect spells on touch do not have the area effect
+    Bug #2234: Dwarven Crossbow clips through the ground when dropped
+    Bug #2235: class SettingsBase<> reverses the order of entries with multiple keys.
+    Bug #2236: Weird two handed longsword + torch interaction
+    Bug #2237: Shooting arrows while sneaking do not agro
+    Bug #2238: Bipedal creatures not using weapons are not handled properly
+    Bug #2245: Incorrect topic highlighting in HT_SpyBaladas quest
+    Bug #2252: Tab completion incomplete for places using COC from the console.
+    Bug #2255: Camera reverts to first person on load
+    Bug #2259: enhancement: the save/load progress bar is not very progressive
+    Bug #2263: TogglePOV can not be bound to Alt key
+    Bug #2267: dialogue disabling via mod
+    Bug #2268: Highlighting Files with load order problems in Data Files tab of Launcher
+    Bug #2276: [Mod]ShotN issues with Karthwasten
+    Bug #2283: Count argument for PlaceAt functions not working
+    Bug #2284: Local map notes should be visible on door marker leading to the cell with the note
+    Bug #2293: There is a graphical glitch at the end of the spell's animation in 3rd Person (looking over the shoulder) view
+    Bug #2294: When using Skyrim UI Overhaul, the tops of pinnable menus are invisible
+    Bug #2302: Random leveled items repeat way too often in a single dungeon
+    Bug #2306: Enchanted arrows should not be retrievable from corpses
+    Bug #2308: No sound effect when drawing the next throwing knife
+    Bug #2309: Guards chase see the player character even if they're invisible
+    Bug #2319: Inverted controls and other issues after becoming a vampire
+    Bug #2324: Spells cast when crossing cell border are imprinted on the local map
+    Bug #2330: Actors with Drain Health effect retain health after dying
+    Bug #2331: tgm (god mode) won't allow the player to cast spells if the player doesn't have enough mana
+    Bug #2332: Error in framelistener: Need a skeleton to attach the arrow to
+    Feature #114: ess-Importer
+    Feature #504: Editor: Delete selected rows from result windows
+    Feature #1024: Addition of remaining equipping hotkeys
+    Feature #1067: Handle NIF interpolation type 4 (XYZ_ROTATION_KEY)
+    Feature #1125: AI fast-forward
+    Feature #1228: Drowning while knocked out
+    Feature #1325: Editor: Opening window and User Settings window cleanup
+    Feature #1537: Ability to change the grid size from 3x3 to 5x5 (or more with good pc)
+    Feature #1546: Leveled list script functions
+    Feature #1659: Test dialogue scripts in --script-all
+    Feature #1720: NPC lookAt controller
+    Feature #2178: Load initial particle system state from NIF files
+    Feature #2197: Editor: When clicking on a script error in the report window set cursor in script editor to the respective line/column
+    Feature #2261: Warn when loading save games with mod mismatch
+    Feature #2313: ess-Importer: convert global map exploration overlay
+    Feature #2318: Add commandline option to load a save game
+    Task #810: Rename "profile" to "content list"
+    Task #2196: Label local/global openmw.cfg files via comments
+
 0.34.0
 ------
 
