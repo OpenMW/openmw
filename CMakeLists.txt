@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
-set(OPENMW_VERSION_MINOR 34)
+set(OPENMW_VERSION_MINOR 35)
 set(OPENMW_VERSION_RELEASE 0)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -714,7 +714,7 @@ if (WIN32)
     if (BUILD_OPENCS)
         # QT triggers an informational warning that the object layout may differ when compiled with /vd2
         set(OPENCS_WARNINGS "${WARNINGS} ${MT_BUILD} /wd4435")
-        set_target_properties(opencs PROPERTIES COMPILE_FLAGS ${OPENCS_WARNINGS})
+        set_target_properties(openmw-cs PROPERTIES COMPILE_FLAGS ${OPENCS_WARNINGS})
     endif (BUILD_OPENCS)
     if (BUILD_MWINIIMPORTER)
         set_target_properties(openmw-iniimporter PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
