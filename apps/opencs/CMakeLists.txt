@@ -185,7 +185,7 @@ add_executable(openmw-cs
 )
 
 if(APPLE)
-    set_target_properties(opencs PROPERTIES
+    set_target_properties(openmw-cs PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}"
         OUTPUT_NAME "OpenMW-CS"
         MACOSX_BUNDLE_ICON_FILE "openmw-cs.icns"
@@ -211,5 +211,5 @@ target_link_libraries(openmw-cs
 )
 
 if(APPLE)
-    INSTALL(TARGETS opencs BUNDLE DESTINATION OpenMW-CS COMPONENT BUNDLE)
+    INSTALL(TARGETS openmw-cs BUNDLE DESTINATION OpenMW-CS COMPONENT BUNDLE)
 endif()
