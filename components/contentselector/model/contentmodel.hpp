@@ -89,7 +89,6 @@ namespace ContentSelectorModel
         QString mMimeType;
         QStringList mMimeTypes;
         int mColumnCount;
-        Qt::ItemFlags mDragDropFlags;
         Qt::DropActions mDropActions;
     };
 }

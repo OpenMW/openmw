@@ -15,8 +15,7 @@ ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningI
     mMimeType ("application/omwcontent"),
     mMimeTypes (QStringList() << mMimeType),
     mColumnCount (1),
-    mDragDropFlags (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled),
-    mDropActions (Qt::CopyAction | Qt::MoveAction)
+    mDropActions (Qt::MoveAction)
 {
     setEncoding ("win1252");
     uncheckAll();
@@ -104,7 +103,7 @@ QModelIndex ContentSelectorModel::ContentModel::indexFromItem(const EsmFile *ite
 Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-        return Qt::NoItemFlags;
+        return Qt::ItemIsDropEnabled;
 
     const EsmFile *file = item(index.row());
 
@@ -152,7 +151,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     if (gamefileChecked)
     {
         if (allDependenciesFound)
-            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | mDragDropFlags;
+            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled;
         else
             returnFlags = Qt::ItemIsSelectable;
     }

@@ -15,7 +15,8 @@
 ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
     QObject(parent)
 {
-    ui.setupUi (parent);
+    ui.setupUi(parent);
+    ui.addonView->setDragDropMode(QAbstractItemView::InternalMove);
 
     buildContentModel();
     buildGameFileView();
