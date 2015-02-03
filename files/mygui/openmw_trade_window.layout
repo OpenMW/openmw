@@ -29,10 +29,10 @@
         </Widget>
 
         <Widget type="Widget" skin="" position="8 231 566 92" name="BottomPane" align="Left Bottom HStretch">
-            <Widget type="TextBox" skin="SandText" position="192 0 375 24" name="PlayerGold" align="Left Top HStretch">
+            <Widget type="TextBox" skin="SandText" position="192 0 374 24" name="PlayerGold" align="Left Top HStretch">
                 <Property key="TextAlign" value="Right"/>
             </Widget>
-            <Widget type="TextBox" skin="SandText" position="192 28 375 24" name="MerchantGold" align="Left Top HStretch">
+            <Widget type="TextBox" skin="SandText" position="192 28 374 24" name="MerchantGold" align="Left Top HStretch">
                 <Property key="TextAlign" value="Right"/>
             </Widget>
 
@@ -63,7 +63,6 @@
             <Widget type="AutoSizedButton" skin="MW_Button" position="0 60 60 24" name="MaxSaleButton" align="Left Top">
                 <Property key="Caption" value="Max. Sale"/> <!-- GMST sMaxSale doesn't work -->
             </Widget>
-
         </Widget>
 
     </Widget>

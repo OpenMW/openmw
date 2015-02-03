@@ -141,8 +141,6 @@
                 <Property key="Caption" value="0"/>
             </Widget>
 
-
-
             <Widget type="AutoSizedButton" skin="MW_Button" name="BuyButton">
                 <Property key="Caption" value="#{sBuy}"/>
             </Widget>
