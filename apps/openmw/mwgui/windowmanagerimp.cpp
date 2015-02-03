@@ -96,7 +96,7 @@ namespace MWGui
 {
 
     WindowManager::WindowManager(
-        const Compiler::Extensions& extensions, int fpsLevel, OEngine::Render::OgreRenderer *ogre,
+        const Compiler::Extensions& extensions, OEngine::Render::OgreRenderer *ogre,
             const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
             Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap)
       : mConsoleOnlyScripts(consoleOnlyScripts)
@@ -167,7 +167,6 @@ namespace MWGui
       , mForceHidden(GW_None)
       , mAllowed(GW_ALL)
       , mRestAllowed(true)
-      , mShowFPSLevel(fpsLevel)
       , mFPS(0.0f)
       , mTriangleCount(0)
       , mBatchCount(0)
@@ -269,7 +268,7 @@ namespace MWGui
         trackWindow(mDialogueWindow, "dialogue");
         mContainerWindow = new ContainerWindow(mDragAndDrop);
         trackWindow(mContainerWindow, "container");
-        mHud = new HUD(mCustomMarkers, mShowFPSLevel, mDragAndDrop);
+        mHud = new HUD(mCustomMarkers, Settings::Manager::getInt("fps", "HUD"), mDragAndDrop);
         mToolTips = new ToolTips();
         mScrollWindow = new ScrollWindow();
         mBookWindow = new BookWindow();

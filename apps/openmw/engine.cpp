@@ -170,7 +170,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   : mOgre (0)
-  , mFpsLevel(0)
   , mVerboseScripts (false)
   , mSkipMenu (false)
   , mUseSound (true)
@@ -297,8 +296,6 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
     if (boost::filesystem::exists(settingspath))
         settings.loadUser(settingspath);
 
-    mFpsLevel = settings.getInt("fps", "HUD");
-
     // load nif overrides
     NifOverrides::Overrides nifOverrides;
     std::string transparencyOverrides = "/transparency-overrides.cfg";
@@ -373,7 +370,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mEnvironment.setInputManager (input);
 
     MWGui::WindowManager* window = new MWGui::WindowManager(
-                mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
+                mExtensions, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
                 mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap);
     mEnvironment.setWindowManager (window);
 
@@ -572,11 +569,6 @@ void OMW::Engine::setCompileAllDialogue (bool all)
 void OMW::Engine::setSoundUsage(bool soundUsage)
 {
     mUseSound = soundUsage;
-}
-
-void OMW::Engine::showFPS(int level)
-{
-    mFpsLevel = level;
 }
 
 void OMW::Engine::setEncoding(const ToUTF8::FromType& encoding)
