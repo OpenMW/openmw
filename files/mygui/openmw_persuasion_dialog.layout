@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 220 194" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 220 192" name="_Main">
 
-        <Widget type="TextBox" skin="NormalText" position="0 6 220 24">
+        <Widget type="TextBox" skin="NormalText" position="0 4 220 24">
             <Property key="Caption" value="#{sPersuasionMenuTitle}"/>
             <Property key="TextAlign" value="Center"/>
-        </Widget>
-
-        <Widget type="TextBox" skin="SandText" position="8 156 208 24" name="GoldLabel">
-            <Property key="TextAlign" value="Left VCenter"/>
         </Widget>
 
         <Widget type="Widget" skin="MW_Box" position="8 32 196 115">
@@ -39,7 +35,11 @@
             </Widget>
         </Widget>
 
-        <Widget type="AutoSizedButton" skin="MW_Button" position="204 156 0 24" name="CancelButton">
+        <Widget type="TextBox" skin="SandText" position="8 152 208 24" name="GoldLabel">
+            <Property key="TextAlign" value="Left VCenter"/>
+        </Widget>
+
+        <Widget type="AutoSizedButton" skin="MW_Button" position="204 154 0 24" name="CancelButton">
             <Property key="ExpandDirection" value="Left"/>
             <Property key="Caption" value="#{sCancel}"/>
         </Widget>

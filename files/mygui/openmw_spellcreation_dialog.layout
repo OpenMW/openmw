@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 560 400" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 560 394" name="_Main">
 
         <Widget type="HBox" position="12 12 250 30">
-
             <Widget type="AutoSizedTextBox" skin="NormalText">
                 <Property key="Caption" value="#{sName}"/>
                 <UserString key="ToolTipType" value="Layout"/>
@@ -16,9 +15,7 @@
                 <UserString key="HStretch" value="true"/>
             </Widget>
 
-            <Widget type="Widget">
-            </Widget>
-
+            <Widget type="Widget"/>
         </Widget>
 
         <Widget type="TextBox" skin="NormalText" position="280 0 300 24">
@@ -33,7 +30,6 @@
             <Property key="NeedMouse" value="false"/>
         </Widget>
 
-
         <Widget type="TextBox" skin="NormalText" position="280 24 300 24">
             <Property key="Caption" value="#{sSpellmakingMenu1}"/>
             <Property key="TextAlign" value="Left HCenter"/>
@@ -45,7 +41,6 @@
             <Property key="TextAlign" value="Right HCenter"/>
             <Property key="NeedMouse" value="false"/>
         </Widget>
-
 
         <!-- Available effects -->
         <Widget type="TextBox" skin="NormalText" position="12 48 300 24">
@@ -70,7 +65,7 @@
             </Widget>
         </Widget>
 
-        <Widget type="HBox" position="0 340 560 60">
+        <Widget type="HBox" position="0 336 558 60">
             <Property key="Padding" value="16"/>
 
             <Widget type="Widget" position="0 0 0 0">

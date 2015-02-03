@@ -117,7 +117,7 @@
             </Widget>
         </Widget>
 
-        <Widget type="HBox" position="0 340 560 60">
+        <Widget type="HBox" position="0 340 558 60">
             <Property key="Padding" value="16"/>
 
             <Widget type="AutoSizedButton" skin="MW_Button" name="TypeButton">
@@ -140,8 +140,6 @@
             <Widget type="AutoSizedTextBox" skin="SandText" name="PriceLabel">
                 <Property key="Caption" value="0"/>
             </Widget>
-
-
 
             <Widget type="AutoSizedButton" skin="MW_Button" name="BuyButton">
                 <Property key="Caption" value="#{sBuy}"/>
