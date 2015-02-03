@@ -96,7 +96,7 @@ void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
 std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig()
 {
     boost::program_options::variables_map variables;
-    boost::program_options::options_description desc("Syntax: opencs <options>\nAllowed options");
+    boost::program_options::options_description desc("Syntax: openmw-cs <options>\nAllowed options");
 
     desc.add_options()
     ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken()->composing())
@@ -249,7 +249,7 @@ bool CS::Editor::makeIPCServer()
     try
     {
         mPid = boost::filesystem::temp_directory_path();
-        mPid /= "opencs.pid";
+        mPid /= "openmw-cs.pid";
         bool pidExists = boost::filesystem::exists(mPid);
 
         mPidFile.open(mPid);
