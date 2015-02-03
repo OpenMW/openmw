@@ -133,12 +133,11 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
     const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr, setOwner);
 
     // Auto-equip items if an armor/clothing or weapon item is added, but not for the player nor werewolves
-    if ((actorPtr.getRefData().getHandle() != "player")
-            && !(actorPtr.getClass().isNpc() && actorPtr.getClass().getNpcStats(actorPtr).isWerewolf())
-            && !actorPtr.getClass().getCreatureStats(actorPtr).isDead())
+    if (actorPtr.getRefData().getHandle() != "player"
+            && !(actorPtr.getClass().isNpc() && actorPtr.getClass().getNpcStats(actorPtr).isWerewolf()))
     {
         std::string type = itemPtr.getTypeName();
-        if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()) || (type == typeid(ESM::Weapon).name()))
+        if (type == typeid(ESM::Armor).name() || type == typeid(ESM::Clothing).name())
             autoEquip(actorPtr);
     }
 
@@ -234,7 +233,9 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
         // ...unless this is a companion, he should always equip items given to him.
         if (!Misc::StringUtils::ciEqual(test.getCellRef().getOwner(), actor.getCellRef().getRefId()) &&
                 (actor.getClass().getScript(actor).empty() ||
-                !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion")))
+                !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion"))
+                && !actor.getClass().getCreatureStats(actor).isDead() // Corpses can be dressed up by the player as desired
+                )
         {
             continue;
         }
@@ -506,8 +507,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
             && !(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf()))
     {
         std::string type = item.getTypeName();
-        if (((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()))
-                && !actor.getClass().getCreatureStats(actor).isDead())
+        if (type == typeid(ESM::Armor).name() || type == typeid(ESM::Clothing).name())
             autoEquip(actor);
     }
 
