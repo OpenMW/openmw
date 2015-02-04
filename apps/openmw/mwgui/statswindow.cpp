@@ -383,10 +383,14 @@ namespace MWGui
             const MWMechanics::SkillValue &stat = mSkillValues.find(skillId)->second;
             int base = stat.getBase();
             int modified = stat.getModified();
-            int progressPercent = stat.getProgress() * 100;
 
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             const MWWorld::ESMStore &esmStore =
                 MWBase::Environment::get().getWorld()->getStore();
+
+            int progressRequirement = player.getClass().getNpcStats(player).getSkillProgressRequirement(skillId,
+                *esmStore.get<ESM::Class>().find(player.get<ESM::NPC>()->mBase->mClass));
+            int progressPercent = int(int(stat.getProgress()) / float(progressRequirement) * 100.f);
 
             const ESM::Skill* skill = esmStore.get<ESM::Skill>().find(skillId);
 

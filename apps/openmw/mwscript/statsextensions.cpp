@@ -348,29 +348,12 @@ namespace MWScript
 
                     MWMechanics::NpcStats& stats = ptr.getClass().getNpcStats (ptr);
 
-                    MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
-
-                    assert (ref);
-
-                    const ESM::Class& class_ =
-                        *MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find (ref->mBase->mClass);
-
-                    float level = stats.getSkill(mIndex).getBase();
-                    float progress = stats.getSkill(mIndex).getProgress();
-
                     int newLevel = value - (stats.getSkill(mIndex).getModified() - stats.getSkill(mIndex).getBase());
 
                     if (newLevel<0)
                         newLevel = 0;
 
-                    progress = (progress / stats.getSkillGain (mIndex, class_, -1, level))
-                        * stats.getSkillGain (mIndex, class_, -1, newLevel);
-
-                    if (progress>=1)
-                        progress = 0.999999999;
-
                     stats.getSkill (mIndex).setBase (newLevel);
-                    stats.getSkill (mIndex).setProgress(progress);
                 }
         };
 

@@ -125,32 +125,9 @@ bool MWMechanics::NpcStats::isInFaction (const std::string& faction) const
     return (mFactionRank.find(Misc::StringUtils::lowerCase(faction)) != mFactionRank.end());
 }
 
-float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& class_, int usageType,
-    int level, float extraFactor) const
+float MWMechanics::NpcStats::getSkillProgressRequirement (int skillIndex, const ESM::Class& class_) const
 {
-    if (level<0)
-        level = static_cast<int> (getSkill (skillIndex).getBase());
-
-    const ESM::Skill *skill =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find (skillIndex);
-
-    float skillFactor = 1;
-
-    if (usageType>=4)
-        throw std::runtime_error ("skill usage type out of range");
-
-    if (usageType>=0)
-    {
-        skillFactor = skill->mData.mUseValue[usageType];
-
-        if (skillFactor<0)
-            throw std::runtime_error ("invalid skill gain factor");
-
-        if (skillFactor==0)
-            return 0;
-    }
-
-    skillFactor *= extraFactor;
+    float progressRequirement = 1 + getSkill (skillIndex).getBase();
 
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -173,11 +150,15 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
             break;
         }
 
+    progressRequirement *= typeFactor;
+
     if (typeFactor<=0)
         throw std::runtime_error ("invalid skill type factor");
 
     float specialisationFactor = 1;
 
+    const ESM::Skill *skill =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find (skillIndex);
     if (skill->mData.mSpecialization==class_.mData.mSpecialization)
     {
         specialisationFactor = gmst.find ("fSpecialSkillBonus")->getFloat();
@@ -185,7 +166,9 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
         if (specialisationFactor<=0)
             throw std::runtime_error ("invalid skill specialisation factor");
     }
-    return 1.0 / ((level+1) * (1.0/skillFactor) * typeFactor * specialisationFactor);
+    progressRequirement *= specialisationFactor;
+
+    return progressRequirement;
 }
 
 void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType, float extraFactor)
@@ -194,11 +177,24 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
     if(mIsWerewolf)
         return;
 
+    const ESM::Skill *skill =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find (skillIndex);
+    float skillGain = 1;
+    if (usageType>=4)
+        throw std::runtime_error ("skill usage type out of range");
+    if (usageType>=0)
+    {
+        skillGain = skill->mData.mUseValue[usageType];
+        if (skillGain<0)
+            throw std::runtime_error ("invalid skill gain factor");
+    }
+    skillGain *= extraFactor;
+
     MWMechanics::SkillValue& value = getSkill (skillIndex);
 
-    value.setProgress(value.getProgress() + getSkillGain (skillIndex, class_, usageType, -1, extraFactor));
+    value.setProgress(value.getProgress() + skillGain);
 
-    if (value.getProgress()>=1)
+    if (int(value.getProgress())>=int(getSkillProgressRequirement(skillIndex, class_)))
     {
         // skill levelled up
         increaseSkill(skillIndex, class_, false);
@@ -256,7 +252,7 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
         MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", MWGui::ShowInDialogueMode_Never);
     }
 
-    getSkill (skillIndex).setBase (base);
+    getSkill(skillIndex).setBase (base);
     if (!preserveProgress)
         getSkill(skillIndex).setProgress(0);
 }
