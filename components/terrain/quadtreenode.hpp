@@ -98,7 +98,6 @@ namespace Terrain
         DefaultWorld* getTerrain() { return mTerrain; }
 
         /// Adjust LODs for the given camera position, possibly splitting up chunks or merging them.
-        /// @param force Always choose to render this node, even if not the perfect LOD.
         /// @return Did we (or all of our children) choose to render?
         bool update (const Ogre::Vector3& cameraPos);
 
@@ -124,7 +123,6 @@ namespace Terrain
         /// call this method on their children.
         /// @note Do not call this before World::areLayersLoaded() == true
         /// @param area area in image space to put the quad
-        /// @param quads collect quads here so they can be deleted later
         void prepareForCompositeMap(Ogre::TRect<float> area);
 
         /// Create a chunk for this node from the given data.
