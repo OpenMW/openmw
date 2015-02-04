@@ -75,6 +75,8 @@ namespace MWWorld
         // Used by bed rent scripts to allow the player to use the bed for the duration of the rent.
         std::string getGlobalVariable() const;
 
+        void resetGlobalVariable();
+
         // ID of creature trapped in this soul gem
         std::string getSoul() const;
         void setSoul(const std::string& soul);

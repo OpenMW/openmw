@@ -138,9 +138,6 @@ namespace MWBase
             /// @return was it illegal, and someone saw you doing it?
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed) = 0;
 
-            /// @return is \a ptr allowed to take/use \a item or is it a crime?
-            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim) = 0;
-
             enum PersuasionType
             {
                 PT_Admire,
@@ -205,6 +202,15 @@ namespace MWBase
             virtual void keepPlayerAlive() = 0;
 
             virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const = 0;
+
+            virtual void confiscateStolenItems (const MWWorld::Ptr& player, const MWWorld::Ptr& targetContainer) = 0;
+
+            /// List the owners that the player has stolen this item from (the owner can be an NPC or a faction).
+            /// <Owner, item count>
+            virtual std::vector<std::pair<std::string, int> > getStolenItemOwners(const std::string& itemid) = 0;
+
+            /// Has the player stolen this item from the given owner?
+            virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid) = 0;
     };
 }
 

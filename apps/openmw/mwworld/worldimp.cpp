@@ -2980,18 +2980,10 @@ namespace MWWorld
 
         if (!closestChest.isEmpty()) //Found a close chest
         {
-            ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-            for (ContainerStoreIterator it = store.begin(); it != store.end(); ++it) //Move all stolen stuff into chest
-            {
-                MWWorld::Ptr dummy;
-                if (!MWBase::Environment::get().getMechanicsManager()->isAllowedToUse(getPlayerPtr(), *it, dummy))
-                {
-                    closestChest.getClass().getContainerStore(closestChest).add(*it, it->getRefData().getCount(), closestChest);
-                    store.remove(*it, it->getRefData().getCount(), ptr);
-                }
-            }
-            closestChest.getClass().lock(closestChest,50);
+            MWBase::Environment::get().getMechanicsManager()->confiscateStolenItems(ptr, closestChest);
         }
+        else
+            std::cerr << "Failed to confiscate items: no stolen_goods container found" << std::endl;
     }
 
     void World::goToJail()

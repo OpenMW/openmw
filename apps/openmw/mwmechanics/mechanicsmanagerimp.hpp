@@ -35,6 +35,11 @@ namespace MWMechanics
             Objects mObjects;
             Actors mActors;
 
+            typedef std::pair<std::string, bool> Owner; // < Owner id, bool isFaction >
+            typedef std::map<Owner, int> OwnerMap; // < Owner, number of stolen items with this id from this owner >
+            typedef std::map<std::string, OwnerMap> StolenItemsMap;
+            StolenItemsMap mStolenItems;
+
         public:
 
             void buildPlayer();
@@ -130,9 +135,6 @@ namespace MWMechanics
             /// @return was it illegal, and someone saw you doing it? Also returns fail when enemies are nearby
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed);
 
-            /// @return is \a ptr allowed to take/use \a item or is it a crime?
-            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim);
-
             virtual void forceStateUpdate(const MWWorld::Ptr &ptr);
 
             virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
@@ -170,9 +172,21 @@ namespace MWMechanics
 
             virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const;
 
+            virtual void confiscateStolenItems (const MWWorld::Ptr& player, const MWWorld::Ptr& targetContainer);
+
+            /// List the owners that the player has stolen this item from (the owner can be an NPC or a faction).
+            /// <Owner, item count>
+            virtual std::vector<std::pair<std::string, int> > getStolenItemOwners(const std::string& itemid);
+
+            /// Has the player stolen this item from the given owner?
+            virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid);
+
         private:
             void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0);
+
+            /// @return is \a ptr allowed to take/use \a cellref or is it a crime?
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim);
     };
 }
 

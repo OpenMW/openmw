@@ -13,6 +13,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -586,6 +587,15 @@ namespace MWGui
         ret += getMiscString(cellref.getFaction(), "Faction");
         if (cellref.getFactionRank() > 0)
             ret += getValueString(cellref.getFactionRank(), "Rank");
+
+        std::vector<std::pair<std::string, int> > itemOwners =
+                MWBase::Environment::get().getMechanicsManager()->getStolenItemOwners(cellref.getRefId());
+
+        for (std::vector<std::pair<std::string, int> >::const_iterator it = itemOwners.begin(); it != itemOwners.end(); ++it)
+        {
+            ret += std::string("\nStolen ") + MyGUI::utility::toString(it->second) + " from " + it->first;
+        }
+
         ret += getMiscString(cellref.getGlobalVariable(), "Global");
         return ret;
     }
