@@ -18,6 +18,7 @@
 #include <components/esm/weatherstate.hpp>
 #include <components/esm/globalscript.hpp>
 #include <components/esm/queststate.hpp>
+#include <components/esm/stolenitems.hpp>
 
 #include "importcrec.hpp"
 #include "importcntc.hpp"
@@ -387,24 +388,50 @@ public:
     virtual void read(ESM::ESMReader &esm)
     {
         std::string itemid = esm.getHNString("NAME");
+        Misc::StringUtils::toLower(itemid);
 
         while (esm.isNextSub("FNAM") || esm.isNextSub("ONAM"))
         {
             if (esm.retSubName().toString() == "FNAM")
             {
                 std::string factionid = esm.getHString();
-                mFactionStolenItems.insert(std::make_pair(itemid, factionid));
+                mStolenItems[itemid].insert(std::make_pair(Misc::StringUtils::lowerCase(factionid), true));
             }
             else
             {
                 std::string ownerid = esm.getHString();
-                mStolenItems.insert(std::make_pair(itemid, ownerid));
+                mStolenItems[itemid].insert(std::make_pair(Misc::StringUtils::lowerCase(ownerid), false));
             }
         }
     }
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        ESM::StolenItems items;
+        for (std::map<std::string, std::set<Owner> >::const_iterator it = mStolenItems.begin(); it != mStolenItems.end(); ++it)
+        {
+            std::map<std::pair<std::string, bool>, int> owners;
+            for (std::set<Owner>::const_iterator ownerIt = it->second.begin(); ownerIt != it->second.end(); ++ownerIt)
+            {
+                owners.insert(std::make_pair(std::make_pair(ownerIt->first, ownerIt->second)
+                                             // Since OpenMW doesn't suffer from the owner contamination bug,
+                                             // it needs a count argument. But for legacy savegames, we don't know
+                                             // this count, so must assume all items of that ID are stolen,
+                                             // like vanilla MW did.
+                                             ,std::numeric_limits<int>::max()));
+            }
+
+            items.mStolenItems.insert(std::make_pair(it->first, owners));
+        }
+
+        esm.startRecord(ESM::REC_STLN);
+        items.write(esm);
+        esm.endRecord(ESM::REC_STLN);
+    }
+
 private:
-    std::multimap<std::string, std::string> mStolenItems;
-    std::multimap<std::string, std::string> mFactionStolenItems;
+    typedef std::pair<std::string, bool> Owner; // <owner id, bool isFaction>
+
+    std::map<std::string, std::set<Owner> > mStolenItems;
 };
 
 /// Seen responses for a dialogue topic?
