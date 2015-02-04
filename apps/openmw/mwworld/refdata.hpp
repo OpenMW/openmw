@@ -33,9 +33,14 @@ namespace MWWorld
             MWScript::Locals mLocals; // if we find the overhead of heaving a locals
                                       // object in the refdata of refs without a script,
                                       // we can make this a pointer later.
+#ifdef ANDROID
+            bool mDeleted,mHasLocals,mEnabled,mChanged;
+#else
             bool mHasLocals;
             bool mEnabled;
+#endif
             int mCount; // 0: deleted
+
 #ifndef ANDROID
             bool mDeleted; // separate delete flag used for deletion by a content file
 #endif
@@ -48,9 +53,9 @@ namespace MWWorld
             void copy (const RefData& refData);
 
             void cleanup();
-
+#ifndef ANDROID
             bool mChanged;
-
+#endif
         public:
 
             RefData();
@@ -96,13 +101,10 @@ namespace MWWorld
 
             /// This flag is only used for content stack loading and will not be stored in the savegame.
             /// If the object was deleted by gameplay, then use setCount(0) instead.
-#ifndef ANDROID
             void setDeleted(bool deleted);
-#endif
+
             /// Returns true if the object was either deleted by the content file or by gameplay.
-#ifndef ANDROID
             bool isDeleted() const;
-#endif
             /// Returns true if the object was deleted by a content file.
             bool isDeletedByContentFile() const;
 

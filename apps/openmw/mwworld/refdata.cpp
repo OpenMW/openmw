@@ -23,9 +23,8 @@ namespace MWWorld
         mPosition = refData.mPosition;
         mLocalRotation = refData.mLocalRotation;
         mChanged = refData.mChanged;
-#ifndef ANDROID
         mDeleted = refData.mDeleted;
-#endif
+
         mCustomData = refData.mCustomData ? refData.mCustomData->clone() : 0;
     }
 
@@ -38,11 +37,7 @@ namespace MWWorld
     }
 
     RefData::RefData()
-#ifdef ANDROID
-    : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false)
-#else
     : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false), mDeleted(false)
-#endif
     {
         for (int i=0; i<3; ++i)
         {
@@ -55,12 +50,8 @@ namespace MWWorld
     RefData::RefData (const ESM::CellRef& cellRef)
     : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mPosition (cellRef.mPos),
       mCustomData (0),
-#ifdef ANDROID
-      mChanged(false) // Loading from ESM/ESP files -> assume unchanged
-#else
       mChanged(false), // Loading from ESM/ESP files -> assume unchanged
       mDeleted(false)
-#endif
     {
         mLocalRotation.rot[0]=0;
         mLocalRotation.rot[1]=0;
@@ -70,12 +61,8 @@ namespace MWWorld
     RefData::RefData (const ESM::ObjectState& objectState)
     : mBaseNode (0), mHasLocals (false), mEnabled (objectState.mEnabled),
       mCount (objectState.mCount), mPosition (objectState.mPosition), mCustomData (0),
-#ifdef ANDROID
-      mChanged(true) // Loading from a savegame -> assume changed
-#else
       mChanged(true), // Loading from a savegame -> assume changed
       mDeleted(false)
-#endif
     {   
         for (int i=0; i<3; ++i)
             mLocalRotation.rot[i] = objectState.mLocalRotation[i];
@@ -182,7 +169,7 @@ namespace MWWorld
 
         mCount = count;
     }
-#ifndef ANDROID
+
     void RefData::setDeleted(bool deleted)
     {
         mDeleted = deleted;
@@ -192,15 +179,10 @@ namespace MWWorld
     {
         return mDeleted || mCount == 0;
     }
-#endif
 
     bool RefData::isDeletedByContentFile() const
     {
-#ifdef ANDROID
-        return false;
-#else
         return mDeleted;
-#endif
     }
 
     MWScript::Locals& RefData::getLocals()

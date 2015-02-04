@@ -1072,11 +1072,7 @@ namespace MWWorld
 
     void World::deleteObject (const Ptr& ptr)
     {
-#ifdef ANDROID
-        if (ptr.getRefData().getCount() > 0)
-#else
         if (!ptr.getRefData().isDeleted())
-#endif
         {
             ptr.getRefData().setCount(0);
 
@@ -1095,7 +1091,6 @@ namespace MWWorld
     {
         if (!ptr.getCellRef().hasContentFile())
             return;
-#ifndef ANDROID
         if (ptr.getRefData().isDeleted())
         {
             ptr.getRefData().setCount(1);
@@ -1109,7 +1104,6 @@ namespace MWWorld
                 addContainerScripts(ptr, ptr.getCell());
             }
         }
-#endif
     }
 
     void World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z)
@@ -2304,10 +2298,8 @@ namespace MWWorld
             for (CellRefList<ESM::Container>::List::iterator container = refList.begin(); container != refList.end(); ++container)
             {
                 MWWorld::Ptr ptr (&*container, *cellIt);
-#ifndef ANDROID
                 if (ptr.getRefData().isDeleted())
                     continue;
-#endif
                 if (Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), npc.getCellRef().getRefId()))
                     out.push_back(ptr);
             }

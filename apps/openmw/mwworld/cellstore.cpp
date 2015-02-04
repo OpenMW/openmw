@@ -158,11 +158,8 @@ namespace MWWorld
             LiveRef liveCellRef (ref, ptr);
 
             if (deleted)
-#ifdef ANDROID
-                liveCellRef.mData.setCount (0);
-#else
                 liveCellRef.mData.setDeleted(true);
-#endif
+
             if (iter != mList.end())
                 *iter = liveCellRef;
             else

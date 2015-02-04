@@ -196,11 +196,7 @@ namespace MWWorld
                 for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
                     ++iter)
                 {
-#ifdef ANDROID
-                    if (!iter->mData.getCount())
-#else
                     if (iter->mData.isDeletedByContentFile())
-#endif
                         continue;
                     if (!functor (MWWorld::Ptr(&*iter, this)))
                         return false;

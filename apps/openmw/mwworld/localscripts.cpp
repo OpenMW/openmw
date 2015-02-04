@@ -19,11 +19,7 @@ namespace
             cellRefList.mList.begin());
             iter!=cellRefList.mList.end(); ++iter)
         {
-#ifdef ANDROID
-            if (!iter->mBase->mScript.empty() && iter->mData.getCount())
-#else
             if (!iter->mBase->mScript.empty() && !iter->mData.isDeleted())
-#endif
             {
                 localScripts.add (iter->mBase->mScript, MWWorld::Ptr (&*iter, cell));
             }
