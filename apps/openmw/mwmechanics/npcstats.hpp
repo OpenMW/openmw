@@ -23,7 +23,7 @@ namespace MWMechanics
     class NpcStats : public CreatureStats
     {
             int mDisposition;
-            SkillValue mSkill[ESM::Skill::Length];
+            SkillValue mSkill[ESM::Skill::Length]; // SkillValue.mProgress used by the player only
             SkillValue mWerewolfSkill[ESM::Skill::Length];
             int mReputation;
             int mCrimeId;
