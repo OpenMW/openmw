@@ -61,7 +61,7 @@ namespace ESSImport
         bool mHasACSC;
         ACSC mACSC;
 
-        int mSkills[27][2];
+        int mSkills[27][2]; // skills, base and modified
 
         // creature combat stats, base and modified
         // I think these can be ignored in the conversion, because it is not possible
