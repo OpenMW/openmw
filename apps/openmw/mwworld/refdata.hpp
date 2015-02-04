@@ -36,9 +36,9 @@ namespace MWWorld
             bool mHasLocals;
             bool mEnabled;
             int mCount; // 0: deleted
-
+#ifndef ANDROID
             bool mDeleted; // separate delete flag used for deletion by a content file
-
+#endif
             ESM::Position mPosition;
 
             LocalRotation mLocalRotation;
@@ -96,10 +96,13 @@ namespace MWWorld
 
             /// This flag is only used for content stack loading and will not be stored in the savegame.
             /// If the object was deleted by gameplay, then use setCount(0) instead.
+#ifndef ANDROID
             void setDeleted(bool deleted);
-
+#endif
             /// Returns true if the object was either deleted by the content file or by gameplay.
+#ifndef ANDROID
             bool isDeleted() const;
+#endif
             /// Returns true if the object was deleted by a content file.
             bool isDeletedByContentFile() const;
 

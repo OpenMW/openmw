@@ -87,8 +87,11 @@ namespace
             else if (ptr.getCellRef().getScale()>2)
                 ptr.getCellRef().setScale(2);
         }
-
+#ifdef ANDROID
+        if (ptr.getRefData().getCount() && ptr.getRefData().isEnabled())
+#else
         if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
+#endif
         {
             try
             {
