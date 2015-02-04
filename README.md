@@ -68,7 +68,9 @@ Command line options
                                             of the blacklist is enabled)
       --script-blacklist-use [=arg(=1)] (=1)
                                             enable script blacklisting
-      --load-savegame arg                   load a save game file on game startup
+      --load-savegame arg                   load a save game file on game startup 
+                                            (specify an absolute or relative 
+                                            filename for this option)
       --skip-menu [=arg(=1)] (=0)           skip main menu on game startup
       --new-game [=arg(=1)] (=0)            run new game sequence (ignored if
                                             skip-menu=0)

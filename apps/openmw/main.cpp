@@ -153,7 +153,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             ->default_value(true), "enable script blacklisting")
 
         ("load-savegame", bpo::value<std::string>()->default_value(""),
-            "load a save game file on game startup")
+            "load a save game file on game startup (specify an absolute or relative filename for this option)")
 
         ("skip-menu", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "skip main menu on game startup")
