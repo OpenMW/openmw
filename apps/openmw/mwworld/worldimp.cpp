@@ -2383,6 +2383,7 @@ namespace MWWorld
     bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)
     {
         typedef MWWorld::CellRefList<ESM::Door>::List DoorList;
+        typedef MWWorld::CellRefList<ESM::Static>::List StaticList;
 
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
         pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
@@ -2427,6 +2428,13 @@ namespace MWWorld
                 }
             }
         }
+        // Fall back to the first static location.
+        const StaticList &statics = cellStore->get<ESM::Static>().mList;
+        if ( statics.begin() != statics.end() ) {
+            pos = statics.begin()->mRef.getPosition();
+            return true;
+        }
+
         return false;
     }
 
