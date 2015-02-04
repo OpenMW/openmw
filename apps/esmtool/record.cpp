@@ -535,10 +535,10 @@ void Record<ESM::Class>::print()
     std::cout << "  Specialization: " << specializationLabel(mData.mData.mSpecialization)
               << " (" << mData.mData.mSpecialization << ")" << std::endl;
     for (int i = 0; i != 5; i++)
-        std::cout << "  Major Skill: " << skillLabel(mData.mData.mSkills[i][0])
+        std::cout << "  Minor Skill: " << skillLabel(mData.mData.mSkills[i][0])
                   << " (" << mData.mData.mSkills[i][0] << ")" << std::endl;
     for (int i = 0; i != 5; i++)
-        std::cout << "  Minor Skill: " << skillLabel(mData.mData.mSkills[i][1])
+        std::cout << "  Major Skill: " << skillLabel(mData.mData.mSkills[i][1])
                   << " (" << mData.mData.mSkills[i][1] << ")" << std::endl;
 }
 
