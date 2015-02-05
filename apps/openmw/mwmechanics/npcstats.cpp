@@ -264,12 +264,13 @@ int MWMechanics::NpcStats::getLevelProgress () const
 
 void MWMechanics::NpcStats::levelUp()
 {
-    mLevelProgress -= 10;
-    for (int i=0; i<ESM::Attribute::Length; ++i)
-        mSkillIncreases[i] = 0;
-
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+    mLevelProgress -= gmst.find("iLevelUpTotal")->getInt();
+
+    for (int i=0; i<ESM::Attribute::Length; ++i)
+        mSkillIncreases[i] = 0;
 
     const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
 
