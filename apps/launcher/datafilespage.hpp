@@ -58,6 +58,10 @@ namespace Launcher
         void on_newProfileAction_triggered();
         void on_deleteProfileAction_triggered();
 
+    public:
+        /// Content List that is aways present
+        const static char *mDefaultContentListName;
+
     private:
 
         TextInputDialog *mProfileDialog;

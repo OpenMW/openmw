@@ -11,6 +11,7 @@
 #include <components/config/launchersettings.hpp>
 
 #include "utils/textinputdialog.hpp"
+#include "datafilespage.hpp"
 
 using namespace Process;
 
@@ -198,22 +199,33 @@ void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
         return;
 
-    // Re-read the settings in their current state
+    // Importer may have changed settings, so refresh
     mMain->reloadSettings();
 
     // Import selected data files from openmw.cfg
     if (addonsCheckBox->isChecked())
     {
+        // Because we've reloaded settings, the current content list matches content in OpenMW.cfg
+        QString oldContentListName = mLauncherSettings.getCurrentContentListName();
         if (mProfileDialog->exec() == QDialog::Accepted)
         {
-            const QString profile(mProfileDialog->lineEdit()->text());
+            // remove the current content list to prevent duplication
+            //... except, not allowed to delete the Default content list
+            if (oldContentListName.compare(DataFilesPage::mDefaultContentListName) != 0)
+            {
+                mLauncherSettings.removeContentList(oldContentListName);
+            }
+
+            const QString newContentListName(mProfileDialog->lineEdit()->text());
             const QStringList files(mGameSettings.getContentList());
-            mLauncherSettings.setCurrentContentListName(profile);
-            mLauncherSettings.setContentList(profile, files);
+            mLauncherSettings.setCurrentContentListName(newContentListName);
+            mLauncherSettings.setContentList(newContentListName, files);
+
+            // Make DataFiles Page load the new content list.
+            mMain->reloadSettings();
         }
     }
 
-    mMain->reloadSettings();
     importerButton->setEnabled(true);
 }
 
