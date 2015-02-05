@@ -176,6 +176,7 @@ namespace MWGui
                 availableAttributes++;
 
                 int mult = pcStats.getLevelupAttributeMultiplier (i);
+                mult = std::min(mult, 100-pcStats.getAttribute(i).getBase());
                 text->setCaption(mult <= 1 ? "" : "x" + MyGUI::utility::toString(mult));
             }
             else

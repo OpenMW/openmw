@@ -268,6 +268,7 @@ void MWMechanics::NpcStats::levelUp()
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
     mLevelProgress -= gmst.find("iLevelUpTotal")->getInt();
+    mLevelProgress = std::max(0, mLevelProgress); // might be necessary when levelup was invoked via console
 
     for (int i=0; i<ESM::Attribute::Length; ++i)
         mSkillIncreases[i] = 0;
