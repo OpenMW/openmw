@@ -442,11 +442,6 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
     dir.setNameFilters(filters);
 
-    QTextCodec *codec = QTextCodec::codecForName("UTF8");
-
-    // Create a decoder for non-latin characters in esx metadata
-    QTextDecoder *decoder = codec->makeDecoder();
-
     foreach (const QString &path, dir.entryList())
     {
         QFileInfo info(dir.absoluteFilePath(path));
@@ -466,11 +461,11 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             foreach (const ESM::Header::MasterData &item, fileReader.getGameFiles())
                 file->addGameFile(QString::fromStdString(item.name));
 
-            file->setAuthor     (decoder->toUnicode(fileReader.getAuthor().c_str()));
+            file->setAuthor     (QString::fromUtf8(fileReader.getAuthor().c_str()));
             file->setDate       (info.lastModified());
             file->setFormat     (fileReader.getFormat());
             file->setFilePath       (info.absoluteFilePath());
-            file->setDescription(decoder->toUnicode(fileReader.getDesc().c_str()));
+            file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
 
             // Put the file in the table
             addFile(file);
@@ -482,8 +477,6 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
         }
 
     }
-
-    delete decoder;
 
     sortFiles();
 }
