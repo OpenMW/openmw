@@ -19,7 +19,10 @@ void LevelledListBase::load(ESMReader &esm)
         mList.resize(len);
     }
     else
+    {
+        esm.skipRecord();
         return;
+    }
 
     // TODO: Merge with an existing lists here. This can be done
     // simply by adding the lists together, making sure that they are
