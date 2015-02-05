@@ -59,7 +59,7 @@ namespace Launcher
         void on_deleteProfileAction_triggered();
 
     public:
-        /// Content List that is aways present
+        /// Content List that is always present
         const static char *mDefaultContentListName;
 
     private:
