@@ -33,6 +33,23 @@ namespace MWMechanics
         MagicEffects mMagicEffects;
         Stat<int> mAiSettings[4];
         AiSequence mAiSequence;
+#ifdef ANDROID
+        bool mDead,
+        mDied,
+        mMurdered,
+        mTalkedTo,
+        mAlarmed,
+        Attacked,
+        mAttackingOrSpell,
+        mKnockdown,
+        mKnockdownOneFrame,
+        mKnockdownOverOneFrame,
+        mHitRecovery,
+        mBlock,
+        mRecalcMagicka;
+        int mFriendlyHits;
+
+#else
         bool mDead;
         bool mDied;
         bool mMurdered;
@@ -46,6 +63,8 @@ namespace MWMechanics
         bool mKnockdownOverOneFrame;
         bool mHitRecovery;
         bool mBlock;
+        bool mRecalcMagicka;
+#endif
         unsigned int mMovementFlags;
         float mAttackStrength; // Note only some creatures attack with weapons
 
@@ -54,8 +73,7 @@ namespace MWMechanics
         std::string mLastHitObject; // The last object to hit this actor
         std::string mLastHitAttemptObject; // The last object to attempt to hit this actor
 
-        bool mRecalcMagicka;
-
+ 
         // For merchants: the last time items were restocked and gold pool refilled.
         MWWorld::TimeStamp mLastRestock;
 
