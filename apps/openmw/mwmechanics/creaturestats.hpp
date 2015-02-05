@@ -39,7 +39,7 @@ namespace MWMechanics
         mMurdered,
         mTalkedTo,
         mAlarmed,
-        Attacked,
+        mAttacked,
         mAttackingOrSpell,
         mKnockdown,
         mKnockdownOneFrame,
