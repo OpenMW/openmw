@@ -459,7 +459,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             EsmFile *file = new EsmFile(path);
 
             foreach (const ESM::Header::MasterData &item, fileReader.getGameFiles())
-                file->addGameFile(QString::fromStdString(item.name));
+                file->addGameFile(QString::fromUtf8(item.name.c_str()));
 
             file->setAuthor     (QString::fromUtf8(fileReader.getAuthor().c_str()));
             file->setDate       (info.lastModified());
