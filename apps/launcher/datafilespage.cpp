@@ -20,6 +20,9 @@
 #include "utils/textinputdialog.hpp"
 #include "utils/profilescombobox.hpp"
 
+
+const char *Launcher::DataFilesPage::mDefaultContentListName = "Default";
+
 Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings, Config::LauncherSettings &launcherSettings, QWidget *parent)
     : mCfgMgr(cfg)
     , mGameSettings(gameSettings)
@@ -48,9 +51,9 @@ void Launcher::DataFilesPage::buildView()
     ui.deleteProfileButton->setToolTip ("Delete an existing Content List");
 
     //combo box
-    ui.profilesComboBox->addItem ("Default");
+    ui.profilesComboBox->addItem(mDefaultContentListName);
     ui.profilesComboBox->setPlaceholderText (QString("Select a Content List..."));
-    ui.profilesComboBox->setCurrentIndex(ui.profilesComboBox->findText(QLatin1String("Default")));
+    ui.profilesComboBox->setCurrentIndex(ui.profilesComboBox->findText(QLatin1String(mDefaultContentListName)));
 
     // Add the actions to the toolbuttons
     ui.newProfileButton->setDefaultAction (ui.newProfileAction);
@@ -284,7 +287,7 @@ void Launcher::DataFilesPage::updateOkButton(const QString &text)
 void Launcher::DataFilesPage::checkForDefaultProfile()
 {
     //don't allow deleting "Default" profile
-    bool success = (ui.profilesComboBox->currentText() != "Default");
+    bool success = (ui.profilesComboBox->currentText() != mDefaultContentListName);
 
     ui.deleteProfileAction->setEnabled (success);
     ui.profilesComboBox->setEditEnabled (success);
