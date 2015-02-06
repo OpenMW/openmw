@@ -1,7 +1,7 @@
 OpenMW
 ======
 
-[![Build Status](https://img.shields.io/travis/OpenMW/openmw.svg)](https://travis-ci.org/OpenMW/openmw) [![Coverity Scan Build Status](https://scan.coverity.com/projects/3740/badge.svg)](https://scan.coverity.com/projects/3740)
+[![Build Status](https://img.shields.io/travis/OpenMW/openmw.svg?style=plastic)](https://travis-ci.org/OpenMW/openmw) [![Coverity Scan Build Status](https://scan.coverity.com/projects/3740/badge.svg)](https://scan.coverity.com/projects/3740)
 
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
@@ -68,7 +68,10 @@ Command line options
                                             of the blacklist is enabled)
       --script-blacklist-use [=arg(=1)] (=1)
                                             enable script blacklisting
-      --load-savegame arg                   load a save game file on game startup
+      --load-savegame arg                   load a save game file on game startup 
+                                            (specify an absolute filename or a 
+                                            filename relative to the current 
+                                            working directory)
       --skip-menu [=arg(=1)] (=0)           skip main menu on game startup
       --new-game [=arg(=1)] (=0)            run new game sequence (ignored if
                                             skip-menu=0)

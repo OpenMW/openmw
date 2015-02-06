@@ -11,6 +11,7 @@
 #include <OgreHardwarePixelBuffer.h>
 
 #include <components/loadinglistener/loadinglistener.hpp>
+#include <components/settings/settings.hpp>
 
 #include <components/esm/globalmap.hpp>
 

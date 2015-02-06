@@ -3,6 +3,7 @@
 #include <MyGUI_ProgressBar.h>
 
 #include <components/widgets/box.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"

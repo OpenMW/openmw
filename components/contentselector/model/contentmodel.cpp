@@ -15,8 +15,7 @@ ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningI
     mMimeType ("application/omwcontent"),
     mMimeTypes (QStringList() << mMimeType),
     mColumnCount (1),
-    mDragDropFlags (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled),
-    mDropActions (Qt::CopyAction | Qt::MoveAction)
+    mDropActions (Qt::MoveAction)
 {
     setEncoding ("win1252");
     uncheckAll();
@@ -104,7 +103,7 @@ QModelIndex ContentSelectorModel::ContentModel::indexFromItem(const EsmFile *ite
 Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-        return Qt::NoItemFlags;
+        return Qt::ItemIsDropEnabled;
 
     const EsmFile *file = item(index.row());
 
@@ -152,7 +151,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     if (gamefileChecked)
     {
         if (allDependenciesFound)
-            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | mDragDropFlags;
+            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled;
         else
             returnFlags = Qt::ItemIsSelectable;
     }
@@ -443,11 +442,6 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
     dir.setNameFilters(filters);
 
-    QTextCodec *codec = QTextCodec::codecForName("UTF8");
-
-    // Create a decoder for non-latin characters in esx metadata
-    QTextDecoder *decoder = codec->makeDecoder();
-
     foreach (const QString &path, dir.entryList())
     {
         QFileInfo info(dir.absoluteFilePath(path));
@@ -467,11 +461,11 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             foreach (const ESM::Header::MasterData &item, fileReader.getGameFiles())
                 file->addGameFile(QString::fromStdString(item.name));
 
-            file->setAuthor     (decoder->toUnicode(fileReader.getAuthor().c_str()));
+            file->setAuthor     (QString::fromUtf8(fileReader.getAuthor().c_str()));
             file->setDate       (info.lastModified());
             file->setFormat     (fileReader.getFormat());
             file->setFilePath       (info.absoluteFilePath());
-            file->setDescription(decoder->toUnicode(fileReader.getDesc().c_str()));
+            file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
 
             // Put the file in the table
             addFile(file);
@@ -483,8 +477,6 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
         }
 
     }
-
-    delete decoder;
 
     sortFiles();
 }

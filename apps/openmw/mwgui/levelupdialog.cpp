@@ -139,7 +139,6 @@ namespace MWGui
 
         if(world->getStore().get<ESM::Class>().isDynamic(cls->mId))
         {
-            // Vanilla uses thief.dds for custom classes.
             // Choosing Stealth specialization and Speed/Agility as attributes, if possible. Otherwise fall back to first class found.
             MWWorld::SharedIterator<ESM::Class> it = world->getStore().get<ESM::Class>().begin();
             for(; it != world->getStore().get<ESM::Class>().end(); ++it)
@@ -173,14 +172,17 @@ namespace MWGui
             if (pcStats.getAttribute(i).getBase() < 100)
             {
                 mAttributes[i]->setEnabled(true);
+                mAttributeValues[i]->setEnabled(true);
                 availableAttributes++;
 
                 int mult = pcStats.getLevelupAttributeMultiplier (i);
+                mult = std::min(mult, 100-pcStats.getAttribute(i).getBase());
                 text->setCaption(mult <= 1 ? "" : "x" + MyGUI::utility::toString(mult));
             }
             else
             {
                 mAttributes[i]->setEnabled(false);
+                mAttributeValues[i]->setEnabled(false);
 
                 text->setCaption("");
             }

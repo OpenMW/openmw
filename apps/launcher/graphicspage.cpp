@@ -10,7 +10,7 @@
 #define MAC_OS_X_VERSION_MIN_REQUIRED __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #endif // MAC_OS_X_VERSION_MIN_REQUIRED
 
-#include <SDL.h>
+#include <SDL_video.h>
 
 #include <OgreRoot.h>
 #include <OgreRenderSystem.h>

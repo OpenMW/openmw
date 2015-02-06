@@ -222,28 +222,21 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
 
     MWWorld::ContainerStoreIterator it = end();
 
-    if (setOwner && actorPtr.getClass().isActor())
+    // HACK: Set owner on the original item, then reset it after we have copied it
+    // If we set the owner on the copied item, it would not stack correctly...
+    std::string oldOwner = itemPtr.getCellRef().getOwner();
+    if (!setOwner || actorPtr == MWBase::Environment::get().getWorld()->getPlayerPtr()) // No point in setting owner to the player - NPCs will not respect this anyway
     {
-        // HACK: Set owner on the original item, then reset it after we have copied it
-        // If we set the owner on the copied item, it would not stack correctly...
-        std::string oldOwner = itemPtr.getCellRef().getOwner();
-        if (actorPtr == player)
-        {
-            // No point in setting owner to the player - NPCs will not respect this anyway
-            // Additionally, setting it to "player" would make those items not stack with items that don't have an owner
-            itemPtr.getCellRef().setOwner("");
-        }
-        else
-            itemPtr.getCellRef().setOwner(actorPtr.getCellRef().getRefId());
-
-        it = addImp(itemPtr, count);
-
-        itemPtr.getCellRef().setOwner(oldOwner);
+        itemPtr.getCellRef().setOwner("");
     }
     else
     {
-        it = addImp(itemPtr, count);
+        itemPtr.getCellRef().setOwner(actorPtr.getCellRef().getRefId());
     }
+
+    it = addImp(itemPtr, count);
+
+    itemPtr.getCellRef().setOwner(oldOwner);
 
     // The copy of the original item we just made
     MWWorld::Ptr item = *it;
@@ -258,6 +251,14 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     pos.pos[1] = 0;
     pos.pos[2] = 0;
     item.getCellRef().setPosition(pos);
+
+    // reset ownership stuff, owner was already handled above
+    item.getCellRef().resetGlobalVariable();
+    item.getCellRef().setFaction("");
+    item.getCellRef().setFactionRank(-1);
+
+    // must reset the RefNum on the copied item, so that the RefNum on the original item stays unique
+    // maybe we should do this in the copy constructor instead?
     item.getCellRef().unsetRefNum(); // destroy link to content file
 
     std::string script = item.getClass().getScript(item);
@@ -399,19 +400,19 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
     return count - toRemove;
 }
 
-void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, int factionRank, const MWWorld::ESMStore& store)
+void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner)
 {
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
         ++iter)
     {
         std::string id = Misc::StringUtils::lowerCase(iter->mItem.toString());
-        addInitialItem(id, owner, faction, factionRank, iter->mCount);
+        addInitialItem(id, owner, iter->mCount);
     }
 
     flagAsModified();
 }
 
-void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int factionRank,
+void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner,
                                               int count, bool topLevel, const std::string& levItem)
 {
     ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
@@ -423,7 +424,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
         if (topLevel && std::abs(count) > 1 && levItem->mFlags & ESM::ItemLevList::Each)
         {
             for (int i=0; i<std::abs(count); ++i)
-                addInitialItem(id, owner, faction, factionRank, count > 0 ? 1 : -1, true, levItem->mId);
+                addInitialItem(id, owner, count > 0 ? 1 : -1, true, levItem->mId);
             return;
         }
         else
@@ -431,7 +432,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
             std::string id = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
             if (id.empty())
                 return;
-            addInitialItem(id, owner, faction, factionRank, count, false, levItem->mId);
+            addInitialItem(id, owner, count, false, levItem->mId);
         }
     }
     else
@@ -447,13 +448,11 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
         count = std::abs(count);
 
         ref.getPtr().getCellRef().setOwner(owner);
-        ref.getPtr().getCellRef().setFaction(faction);
-        ref.getPtr().getCellRef().setFactionRank(factionRank);
         addImp (ref.getPtr(), count);
     }
 }
 
-void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner, const std::string& faction, int factionRank)
+void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner)
 {
     // Remove the items already spawned by levelled items that will restock
     for (std::map<std::string, int>::iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
@@ -472,13 +471,13 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
 
         if (MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().search(it->mItem.toString()))
         {
-            addInitialItem(item, owner, faction, factionRank, it->mCount, true);
+            addInitialItem(item, owner, it->mCount, true);
         }
         else
         {
             int currentCount = count(item);
             if (currentCount < std::abs(it->mCount))
-                addInitialItem(item, owner, faction, factionRank, std::abs(it->mCount) - currentCount, true);
+                addInitialItem(item, owner, std::abs(it->mCount) - currentCount, true);
         }
     }
     flagAsModified();

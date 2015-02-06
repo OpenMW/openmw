@@ -691,10 +691,10 @@ namespace MWScript
                     if (!ptr.getRefData().getBaseNode())
                         return;
 
-                    Ogre::Vector3 worldPos = ptr.getRefData().getBaseNode()->convertLocalToWorldPosition(posChange);
-
-                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(
-                                MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x, worldPos.y, worldPos.z));
+                    Ogre::Vector3 diff = ptr.getRefData().getBaseNode()->getOrientation() * posChange;
+                    Ogre::Vector3 worldPos(ptr.getRefData().getPosition().pos);
+                    worldPos += diff;
+                    MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x, worldPos.y, worldPos.z);
                 }
         };
 

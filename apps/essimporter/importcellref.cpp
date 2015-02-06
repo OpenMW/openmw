@@ -22,7 +22,7 @@ namespace ESSImport
         ActorData::load(esm);
         if (esm.isNextSub("LVCR"))
         {
-            // occurs on leveled creature spawner references
+            // occurs on levelled creature spawner references
             // probably some identifier for the creature that has been spawned?
             unsigned char lvcr;
             esm.getHT(lvcr);
@@ -32,7 +32,7 @@ namespace ESSImport
         mEnabled = true;
         esm.getHNOT(mEnabled, "ZNAM");
 
-        // DATA should occur for all references, except leveled creature spawners
+        // DATA should occur for all references, except levelled creature spawners
         // I've seen DATA *twice* on a creature record, and with the exact same content too! weird
         // alarmvoi0000.ess
         esm.getHNOT(mPos, "DATA", 24);

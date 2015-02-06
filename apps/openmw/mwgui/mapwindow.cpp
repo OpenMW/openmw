@@ -13,6 +13,7 @@
 #include <MyGUI_FactoryManager.h>
 
 #include <components/esm/globalmap.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"

@@ -23,7 +23,7 @@ namespace MWMechanics
     class NpcStats : public CreatureStats
     {
             int mDisposition;
-            SkillValue mSkill[ESM::Skill::Length];
+            SkillValue mSkill[ESM::Skill::Length]; // SkillValue.mProgress used by the player only
             SkillValue mWerewolfSkill[ESM::Skill::Length];
             int mReputation;
             int mCrimeId;
@@ -74,11 +74,7 @@ namespace MWMechanics
 
             bool isInFaction (const std::string& faction) const;
 
-            float getSkillGain (int skillIndex, const ESM::Class& class_, int usageType = -1,
-                int level = -1, float extraFactor=1.f) const;
-            ///< \param usageType: Usage specific factor, specified in the respective skill record;
-            /// -1: use a factor of 1.0 instead.
-            /// \param level Level to base calculation on; -1: use current level.
+            float getSkillProgressRequirement (int skillIndex, const ESM::Class& class_) const;
 
             void useSkill (int skillIndex, const ESM::Class& class_, int usageType = -1, float extraFactor=1.f);
             ///< Increase skill by usage.

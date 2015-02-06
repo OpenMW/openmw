@@ -535,10 +535,10 @@ void Record<ESM::Class>::print()
     std::cout << "  Specialization: " << specializationLabel(mData.mData.mSpecialization)
               << " (" << mData.mData.mSpecialization << ")" << std::endl;
     for (int i = 0; i != 5; i++)
-        std::cout << "  Major Skill: " << skillLabel(mData.mData.mSkills[i][0])
+        std::cout << "  Minor Skill: " << skillLabel(mData.mData.mSkills[i][0])
                   << " (" << mData.mData.mSkills[i][0] << ")" << std::endl;
     for (int i = 0; i != 5; i++)
-        std::cout << "  Minor Skill: " << skillLabel(mData.mData.mSkills[i][1])
+        std::cout << "  Major Skill: " << skillLabel(mData.mData.mSkills[i][1])
                   << " (" << mData.mData.mSkills[i][1] << ")" << std::endl;
 }
 
@@ -837,7 +837,7 @@ void Record<ESM::CreatureLevList>::print()
     std::cout << "  Chance for None: " << (int)mData.mChanceNone << std::endl;
     std::cout << "  Flags: " << creatureListFlags(mData.mFlags) << std::endl;
     std::cout << "  Number of items: " << mData.mList.size() << std::endl;
-    std::vector<ESM::LeveledListBase::LevelItem>::iterator iit;
+    std::vector<ESM::LevelledListBase::LevelItem>::iterator iit;
     for (iit = mData.mList.begin(); iit != mData.mList.end(); ++iit)
         std::cout << "  Creature: Level: " << iit->mLevel
                   << " Creature: " << iit->mId << std::endl;
@@ -849,7 +849,7 @@ void Record<ESM::ItemLevList>::print()
     std::cout << "  Chance for None: " << (int)mData.mChanceNone << std::endl;
     std::cout << "  Flags: " << itemListFlags(mData.mFlags) << std::endl;
     std::cout << "  Number of items: " << mData.mList.size() << std::endl;
-    std::vector<ESM::LeveledListBase::LevelItem>::iterator iit;
+    std::vector<ESM::LevelledListBase::LevelItem>::iterator iit;
     for (iit = mData.mList.begin(); iit != mData.mList.end(); ++iit)
         std::cout << "  Inventory: Level: " << iit->mLevel
                   << " Item: " << iit->mId << std::endl;

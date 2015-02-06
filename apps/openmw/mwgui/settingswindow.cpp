@@ -15,6 +15,7 @@
 #include <SDL_video.h>
 
 #include <components/widgets/sharedstatebutton.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

@@ -5,12 +5,13 @@
    This class owns and controls all the MW specific windows in the
    GUI. It can enable/disable Gui mode, and is responsible for sending
    and retrieving information from the Gui.
-
-   MyGUI should be initialized separately before creating instances of
-   this class.
 **/
 
+#include <stack>
+
 #include "../mwbase/windowmanager.hpp"
+
+#include <components/settings/settings.hpp>
 
 #include "mapwindow.hpp"
 
@@ -96,7 +97,7 @@ namespace MWGui
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(const Compiler::Extensions& extensions, int fpsLevel,
+    WindowManager(const Compiler::Extensions& extensions,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
                   Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap);
@@ -450,7 +451,6 @@ namespace MWGui
 
     void updateVisible(); // Update visibility of all windows based on mode, shown and allowed settings
 
-    int mShowFPSLevel;
     float mFPS;
     unsigned int mTriangleCount;
     unsigned int mBatchCount;

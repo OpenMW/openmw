@@ -71,7 +71,6 @@ namespace OMW
             OEngine::Render::OgreRenderer *mOgre;
             std::string mCellName;
             std::vector<std::string> mContentFiles;
-            int mFpsLevel;
             bool mVerboseScripts;
             bool mSkipMenu;
             bool mUseSound;
@@ -150,9 +149,6 @@ namespace OMW
              * @param file - filename (extension is required)
              */
             void addContentFile(const std::string& file);
-
-            /// Enable fps counter
-            void showFPS(int level);
 
             /// Enable or disable verbose script output
             void setScriptsVerbosity(bool scriptsVerbosity);

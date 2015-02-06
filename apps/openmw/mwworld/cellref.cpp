@@ -117,6 +117,15 @@ namespace MWWorld
         return mCellRef.mGlobalVariable;
     }
 
+    void CellRef::resetGlobalVariable()
+    {
+        if (!mCellRef.mGlobalVariable.empty())
+        {
+            mChanged = true;
+            mCellRef.mGlobalVariable.erase();
+        }
+    }
+
     void CellRef::setFactionRank(int factionRank)
     {
         if (factionRank != mCellRef.mFactionRank)

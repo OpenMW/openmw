@@ -1,5 +1,7 @@
 #include "scripttest.hpp"
 
+#include <iostream>
+
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 

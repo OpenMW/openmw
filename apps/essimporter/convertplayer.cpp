@@ -17,15 +17,14 @@ namespace ESSImport
         }
         for (int i=0; i<8; ++i)
             out.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];
+        for (int i=0; i<27; ++i)
+            out.mObject.mNpcStats.mSkills[i].mRegular.mProgress = pcdt.mPNAM.mSkillProgress[i];
         out.mObject.mNpcStats.mLevelProgress = pcdt.mPNAM.mLevelProgress;
 
         if (pcdt.mPNAM.mDrawState & PCDT::DrawState_Weapon)
             out.mObject.mCreatureStats.mDrawState = 1;
         if (pcdt.mPNAM.mDrawState & PCDT::DrawState_Spell)
             out.mObject.mCreatureStats.mDrawState = 2;
-
-        // TODO: convert PNAM.mSkillProgress, needs to be converted to uniform scale
-        // (or change openmw to accept non-uniform skill progress)
 
         firstPersonCam = (pcdt.mPNAM.mCameraState == PCDT::CameraState_FirstPerson);
 

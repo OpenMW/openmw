@@ -285,7 +285,7 @@ namespace MWGui
             if (mPtr.getClass().isActor() && mPtr.getClass().getCreatureStats(mPtr).isDead())
                 return true;
             else
-                MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item.mBase, count);
+                MWBase::Environment::get().getMechanicsManager()->itemTaken(player, item.mBase, mPtr, count);
         }
         return true;
     }

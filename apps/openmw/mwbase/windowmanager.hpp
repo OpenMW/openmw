@@ -5,15 +5,19 @@
 #include <vector>
 #include <map>
 
-#include <components/settings/settings.hpp>
-
-#include <components/translation/translation.hpp>
-
-#include <components/loadinglistener/loadinglistener.hpp>
-
 #include "../mwmechanics/stat.hpp"
 
 #include "../mwgui/mode.hpp"
+
+namespace Loading
+{
+    class Listener;
+}
+
+namespace Translation
+{
+    class Storage;
+}
 
 namespace MyGUI
 {
@@ -267,7 +271,7 @@ namespace MWBase
              */
             virtual std::string getGameSettingString(const std::string &id, const std::string &default_) = 0;
 
-            virtual void processChangedSettings(const Settings::CategorySettingVector& changed) = 0;
+            virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& changed) = 0;
 
             virtual void windowResized(int x, int y) = 0;
 
