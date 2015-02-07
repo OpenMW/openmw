@@ -1,5 +1,7 @@
 #include "weather.hpp"
 
+#include <cmath>
+
 #include <components/esm/weatherstate.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -427,29 +429,33 @@ void WeatherManager::update(float duration, bool paused)
     else
         mRendering->getSkyManager()->sunEnable();
 
-    // sun angle
-    float height;
+    // Update the sun direction.  Run it east to west at 15 degrees south from overhead.
+    // The sun's speed at day and night will differ, since mSunriseTime and mNightStart
+    // mark when the sun is level with the horizon.
+    {
+        assert( mNightStart > mSunriseTime );
 
-    //Day duration
-    float dayDuration = (mNightStart - 1) - mSunriseTime;
+        float adjustedHour = mHour;
+        if ( mHour < mSunriseTime )
+            adjustedHour += 24.f;
 
-    // rise at 6, set at 20
-    if (mHour >= mSunriseTime && mHour <= mNightStart)
-        height = 1 - std::abs(((mHour - dayDuration) / 7.f));
-    else if (mHour > mNightStart)
-        height = (mHour - mNightStart) / 4.f;
-    else //if (mHour > 0 && mHour < 6)
-        height = 1 - (mHour / mSunriseTime);
+        const bool is_night = mHour >= mNightStart || mHour <= mSunriseTime;
+        const float dayDuration = mNightStart - mSunriseTime;
+        const float nightDuration = 24.f - dayDuration;
 
-    int facing = (mHour > 13.f) ? 1 : -1;
+        double theta;
+        if ( !is_night ) {
+            theta = M_PI * (adjustedHour - mSunriseTime) / dayDuration;
+        } else {
+            theta = M_PI * (adjustedHour - mNightStart) / nightDuration;
+        }
 
-    bool is_night = mHour >= mNightStart || mHour <= mSunriseTime;
-
-    Vector3 final(
-            (height - 1) * facing,
-            (height - 1) * facing,
-            height);
-    mRendering->setSunDirection(final, is_night);
+        Vector3 final(
+            cos( theta ),
+            -0.268, // approx tan( 15 degrees )
+            sin( theta ) );
+        mRendering->setSunDirection( final, is_night );
+    }
 
     /*
      * TODO: import separated fadeInStart/Finish, fadeOutStart/Finish
