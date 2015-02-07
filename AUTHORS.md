@@ -84,6 +84,7 @@ Programmers
     Paul McElroy (Greendogo)
     Pieter van der Kloet (pvdk)
     Radu-Marius Popovici (rpopovici)
+    rdimesio
     riothamus
     Robert MacGregor (Ragora)
     Rohit Nirmal
