@@ -46,6 +46,7 @@ namespace MWGui
       
       GM_Loading,
       GM_LoadingWallpaper,
+      GM_Jail,
 
       GM_QuickKeysMenu
     };

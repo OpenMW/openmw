@@ -90,6 +90,7 @@ namespace MWGui
   class WindowModal;
   class ScreenFader;
   class DebugWindow;
+  class JailScreen;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -127,6 +128,8 @@ namespace MWGui
     virtual void pushGuiMode(GuiMode mode);
     virtual void popGuiMode();
     virtual void removeGuiMode(GuiMode mode); ///< can be anywhere in the stack
+
+    virtual void goToJail(int days);
 
     virtual GuiMode getMode() const;
     virtual bool containsMode(GuiMode mode) const;
@@ -404,6 +407,7 @@ namespace MWGui
     ScreenFader* mHitFader;
     ScreenFader* mScreenFader;
     DebugWindow* mDebugWindow;
+    JailScreen* mJailScreen;
 
     Translation::Storage& mTranslationDataStorage;
 

@@ -40,12 +40,18 @@ namespace MWGui
     TrainingWindow::TrainingWindow()
         : WindowBase("openmw_trainingwindow.layout")
         , mFadeTimeRemaining(0)
+        , mTimeAdvancer(0.05)
     {
         getWidget(mTrainingOptions, "TrainingOptions");
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TrainingWindow::onCancelButtonClicked);
+
+        mTimeAdvancer.eventProgressChanged += MyGUI::newDelegate(this, &TrainingWindow::onTrainingProgressChanged);
+        mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &TrainingWindow::onTrainingFinished);
+
+        mProgressBar.setVisible(false);
     }
 
     void TrainingWindow::open()
@@ -173,12 +179,28 @@ namespace MWGui
         MWBase::Environment::get().getMechanicsManager()->rest(false);
         MWBase::Environment::get().getMechanicsManager()->rest(false);
 
+        mProgressBar.setVisible(true);
+        mProgressBar.setProgress(0, 2);
+        mTimeAdvancer.run(2);
+
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.25);
         mFadeTimeRemaining = 0.5;
     }
 
+    void TrainingWindow::onTrainingProgressChanged(int cur, int total)
+    {
+        mProgressBar.setProgress(cur, total);
+    }
+
+    void TrainingWindow::onTrainingFinished()
+    {
+        mProgressBar.setVisible(false);
+    }
+
     void TrainingWindow::onFrame(float dt)
     {
+        mTimeAdvancer.onFrame(dt);
+
         if (mFadeTimeRemaining <= 0)
             return;
 
