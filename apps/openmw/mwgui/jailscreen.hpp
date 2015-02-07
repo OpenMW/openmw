@@ -19,8 +19,6 @@ namespace MWGui
 
             float mFadeTimeRemaining;
 
-            MyGUI::Widget* mLoadingBox;
-            MyGUI::TextBox* mLoadingText;
             MyGUI::ScrollBar* mProgressBar;
 
             void onJailProgressChanged(int cur, int total);

@@ -1,7 +1,4 @@
-#include <MyGUI_RenderManager.h>
 #include <MyGUI_ScrollBar.h>
-#include <MyGUI_Gui.h>
-#include <MyGUI_TextBox.h>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -19,21 +16,17 @@
 namespace MWGui
 {
     JailScreen::JailScreen()
-        : WindowBase("openmw_loading_screen.layout"),
+        : WindowBase("openmw_jail_screen.layout"),
           mTimeAdvancer(0.0125),
           mDays(1),
           mFadeTimeRemaining(0)
     {
-        getWidget(mLoadingText, "LoadingText");
         getWidget(mProgressBar, "ProgressBar");
-        getWidget(mLoadingBox, "LoadingBox");
 
         setVisible(false);
 
         mTimeAdvancer.eventProgressChanged += MyGUI::newDelegate(this, &JailScreen::onJailProgressChanged);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &JailScreen::onJailFinished);
-
-        mLoadingText->setCaptionWithReplacing("#{sInPrisonTitle}");
 
         center();
     }
@@ -78,7 +71,7 @@ namespace MWGui
 
     void JailScreen::onJailFinished()
     {
-        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Jail);
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
