@@ -443,13 +443,13 @@ void WeatherManager::update(float duration, bool paused)
 
     int facing = (mHour > 13.f) ? 1 : -1;
 
-    bool sun_is_moon = mHour >= mNightStart || mHour <= mSunriseTime;
+    bool is_night = mHour >= mNightStart || mHour <= mSunriseTime;
 
     Vector3 final(
             (height - 1) * facing,
             (height - 1) * facing,
             height);
-    mRendering->setSunDirection(final, sun_is_moon);
+    mRendering->setSunDirection(final, is_night);
 
     /*
      * TODO: import separated fadeInStart/Finish, fadeOutStart/Finish

@@ -153,7 +153,7 @@ namespace MWRender
 
         void setStormDirection(const Ogre::Vector3& direction);
 
-        void setSunDirection(const Ogre::Vector3& direction, bool is_moon);
+        void setSunDirection(const Ogre::Vector3& direction, bool is_night);
 
         void setMasserDirection(const Ogre::Vector3& direction);
 
