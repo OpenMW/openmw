@@ -429,30 +429,32 @@ void WeatherManager::update(float duration, bool paused)
     else
         mRendering->getSkyManager()->sunEnable();
 
-    // Update the sun direction.  Run it east to west at 15 degrees south from overhead.
-    // The sun's speed at day and night will differ, since mSunriseTime and mNightStart
+    // Update the sun direction.  Run it east to west at a fixed angle from overhead.
+    // The sun's speed at day and night may differ, since mSunriseTime and mNightStart
     // mark when the sun is level with the horizon.
     {
-        assert( mNightStart > mSunriseTime );
-
+        // Shift times into a 24-hour window beginning at mSunriseTime...
         float adjustedHour = mHour;
+        float adjustedNightStart = mNightStart;
         if ( mHour < mSunriseTime )
             adjustedHour += 24.f;
+        if ( mNightStart < mSunriseTime )
+            adjustedNightStart += 24.f;
 
-        const bool is_night = mHour >= mNightStart || mHour <= mSunriseTime;
-        const float dayDuration = mNightStart - mSunriseTime;
+        const bool is_night = adjustedHour >= adjustedNightStart;
+        const float dayDuration = adjustedNightStart - mSunriseTime;
         const float nightDuration = 24.f - dayDuration;
 
         double theta;
         if ( !is_night ) {
             theta = M_PI * (adjustedHour - mSunriseTime) / dayDuration;
         } else {
-            theta = M_PI * (adjustedHour - mNightStart) / nightDuration;
+            theta = M_PI * (adjustedHour - adjustedNightStart) / nightDuration;
         }
 
         Vector3 final(
             cos( theta ),
-            -0.268, // approx tan( 15 degrees )
+            -0.268f, // approx tan( -15 degrees )
             sin( theta ) );
         mRendering->setSunDirection( final, is_night );
     }
