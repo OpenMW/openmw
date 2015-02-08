@@ -515,7 +515,7 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
                 mFactionRank[iter->first] = iter->second.mRank;
 
             if (iter->second.mReputation)
-                mFactionReputation[iter->first] = iter->second.mReputation;
+                mFactionReputation[Misc::StringUtils::lowerCase(iter->first)] = iter->second.mReputation;
         }
 
     mDisposition = state.mDisposition;
