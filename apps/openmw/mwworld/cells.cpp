@@ -241,26 +241,30 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
 
 void MWWorld::Cells::getExteriorPtrs(const std::string &name, std::vector<MWWorld::Ptr> &out)
 {
-    for (std::map<std::pair<int, int>, CellStore>::iterator iter = mExteriors.begin();
-        iter!=mExteriors.end(); ++iter)
+    const MWWorld::Store<ESM::Cell> &cells = mStore.get<ESM::Cell>();
+    for (MWWorld::Store<ESM::Cell>::iterator iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
     {
-        Ptr ptr = getPtrAndCache (name, iter->second);
+        CellStore *cellStore = getCellStore (&(*iter));
+
+        Ptr ptr = getPtrAndCache (name, *cellStore);
+
         if (!ptr.isEmpty())
             out.push_back(ptr);
     }
-
 }
 
 void MWWorld::Cells::getInteriorPtrs(const std::string &name, std::vector<MWWorld::Ptr> &out)
 {
-    for (std::map<std::string, CellStore>::iterator iter = mInteriors.begin();
-        iter!=mInteriors.end(); ++iter)
+    const MWWorld::Store<ESM::Cell> &cells = mStore.get<ESM::Cell>();
+    for (MWWorld::Store<ESM::Cell>::iterator iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
     {
-        Ptr ptr = getPtrAndCache (name, iter->second);
+        CellStore *cellStore = getCellStore (&(*iter));
+
+        Ptr ptr = getPtrAndCache (name, *cellStore);
+
         if (!ptr.isEmpty())
             out.push_back(ptr);
     }
-
 }
 
 int MWWorld::Cells::countSavedGameRecords() const

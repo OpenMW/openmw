@@ -125,6 +125,21 @@ bool MWMechanics::NpcStats::isInFaction (const std::string& faction) const
     return (mFactionRank.find(Misc::StringUtils::lowerCase(faction)) != mFactionRank.end());
 }
 
+int MWMechanics::NpcStats::getFactionReputation (const std::string& faction) const
+{
+    std::map<std::string, int>::const_iterator iter = mFactionReputation.find (Misc::StringUtils::lowerCase(faction));
+
+    if (iter==mFactionReputation.end())
+        return 0;
+
+    return iter->second;
+}
+
+void MWMechanics::NpcStats::setFactionReputation (const std::string& faction, int value)
+{
+    mFactionReputation[Misc::StringUtils::lowerCase(faction)] = value;
+}
+
 float MWMechanics::NpcStats::getSkillProgressRequirement (int skillIndex, const ESM::Class& class_) const
 {
     float progressRequirement = 1 + getSkill (skillIndex).getBase();
@@ -327,21 +342,6 @@ void MWMechanics::NpcStats::setBounty (int bounty)
     mBounty = bounty;
 }
 
-int MWMechanics::NpcStats::getFactionReputation (const std::string& faction) const
-{
-    std::map<std::string, int>::const_iterator iter = mFactionReputation.find (faction);
-
-    if (iter==mFactionReputation.end())
-        return 0;
-
-    return iter->second;
-}
-
-void MWMechanics::NpcStats::setFactionReputation (const std::string& faction, int value)
-{
-    mFactionReputation[faction] = value;
-}
-
 int MWMechanics::NpcStats::getReputation() const
 {
     return mReputation;
@@ -513,7 +513,7 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
                 mFactionRank[iter->first] = iter->second.mRank;
 
             if (iter->second.mReputation)
-                mFactionReputation[iter->first] = iter->second.mReputation;
+                mFactionReputation[Misc::StringUtils::lowerCase(iter->first)] = iter->second.mReputation;
         }
 
     mDisposition = state.mDisposition;

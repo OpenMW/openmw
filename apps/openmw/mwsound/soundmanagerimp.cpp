@@ -723,9 +723,9 @@ namespace MWSound
 
         MWWorld::Ptr player =
             MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const ESM::Cell *cell = player.getCell()->getCell();
+        const MWWorld::CellStore *cell = player.getCell();
 
-        mListenerUnderwater = ((cell->mData.mFlags&cell->HasWater) && mListenerPos.z < cell->mWater);
+        mListenerUnderwater = ((cell->getCell()->mData.mFlags&ESM::Cell::HasWater) && mListenerPos.z < cell->getWaterLevel());
     }
 
     void SoundManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)

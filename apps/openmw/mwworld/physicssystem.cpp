@@ -862,9 +862,9 @@ namespace MWWorld
             for(;iter != mMovementQueue.end();++iter)
             {
                 float waterlevel = -std::numeric_limits<float>::max();
-                const ESM::Cell *cell = iter->first.getCell()->getCell();
-                if(cell->hasWater())
-                    waterlevel = cell->mWater;
+                const MWWorld::CellStore *cell = iter->first.getCell();
+                if(cell->getCell()->hasWater())
+                    waterlevel = cell->getWaterLevel();
 
                 float oldHeight = iter->first.getRefData().getPosition().pos[2];
 
@@ -872,7 +872,7 @@ namespace MWWorld
 
                 bool waterCollision = false;
                 if (effects.get(ESM::MagicEffect::WaterWalking).getMagnitude()
-                        && cell->hasWater()
+                        && cell->getCell()->hasWater()
                         && !world->isUnderwater(iter->first.getCell(),
                                                Ogre::Vector3(iter->first.getRefData().getPosition().pos)))
                     waterCollision = true;

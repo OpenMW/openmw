@@ -211,5 +211,5 @@ target_link_libraries(openmw-cs
 )
 
 if(APPLE)
-    INSTALL(TARGETS openmw-cs BUNDLE DESTINATION OpenMW-CS COMPONENT BUNDLE)
+    INSTALL(TARGETS openmw-cs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)
 endif()
