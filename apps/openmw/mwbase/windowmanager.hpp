@@ -1,11 +1,11 @@
 #ifndef GAME_MWBASE_WINDOWMANAGER_H
 #define GAME_MWBASE_WINDOWMANAGER_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <map>
-
-#include "../mwmechanics/stat.hpp"
+#include <set>
 
 #include "../mwgui/mode.hpp"
 
@@ -40,6 +40,14 @@ namespace ESM
     class ESMReader;
     class ESMWriter;
     struct CellId;
+}
+
+namespace MWMechanics
+{
+    class AttributeValue;
+    template<typename T>
+    class DynamicStat;
+    class SkillValue;
 }
 
 namespace MWWorld

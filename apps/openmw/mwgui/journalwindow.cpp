@@ -11,6 +11,7 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 
+#include <components/misc/stringops.hpp>
 #include <components/widgets/imagebutton.hpp>
 #include <components/widgets/list.hpp>
 

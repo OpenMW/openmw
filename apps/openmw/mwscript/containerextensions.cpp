@@ -14,6 +14,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include <components/misc/stringops.hpp>
+
 #include <components/esm/loadskil.hpp>
 
 #include "../mwbase/environment.hpp"

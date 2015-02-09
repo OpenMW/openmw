@@ -12,6 +12,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include <components/settings/settings.hpp>
+#include <components/to_utf8/to_utf8.hpp>
 
 #include "mapwindow.hpp"
 
