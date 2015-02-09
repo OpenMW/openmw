@@ -12,7 +12,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-
+#include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "interpretercontext.hpp"

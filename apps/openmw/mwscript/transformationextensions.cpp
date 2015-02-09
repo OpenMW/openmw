@@ -10,6 +10,7 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
