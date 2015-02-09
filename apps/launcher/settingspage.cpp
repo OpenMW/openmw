@@ -197,7 +197,10 @@ void Launcher::SettingsPage::importerStarted()
 void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
+    {
+        giveImportFeedback(false);
         return;
+    }
 
     // Importer may have changed settings, so refresh
     mMain->reloadSettings();
@@ -225,8 +228,30 @@ void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus
             mMain->reloadSettings();
         }
     }
+    else
+    {
+        giveImportFeedback(true);
+    }
 
     importerButton->setEnabled(true);
+}
+
+void Launcher::SettingsPage::giveImportFeedback(bool success)
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(tr("Importer finished"));
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    if (success)
+    {
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setText(tr("Settings were successfully imported."));
+    }
+    else
+    {
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText(tr("Failed to import settings from INI file."));
+    }
+    msgBox.exec();
 }
 
 void Launcher::SettingsPage::updateOkButton(const QString &text)

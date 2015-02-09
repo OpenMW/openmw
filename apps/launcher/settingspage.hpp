@@ -45,6 +45,8 @@ namespace Launcher
         void updateOkButton(const QString &text);
 
     private:
+        /// Tell user how the import of the INI file went.
+        void giveImportFeedback(bool success);
 
         Process::ProcessInvoker *mWizardInvoker;
         Process::ProcessInvoker *mImporterInvoker;
