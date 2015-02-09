@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "../mwworld/manualref.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwbase/environment.hpp"

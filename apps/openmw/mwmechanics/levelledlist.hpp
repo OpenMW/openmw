@@ -2,6 +2,7 @@
 #define OPENMW_MECHANICS_LEVELLEDLIST_H
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwbase/world.hpp"
