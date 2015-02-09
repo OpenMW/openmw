@@ -9,9 +9,7 @@
 namespace CSMWorld
 {
     struct Cell;
-    template<typename T>
-    struct IdAccessor;
-    template<typename T, typename AT = IdAccessor<T> >
+    template<typename T, typename AT>
     class IdCollection;
 
     /// \brief Wrapper for Pathgrid record
