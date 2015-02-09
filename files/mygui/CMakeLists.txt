@@ -86,6 +86,7 @@ set(MYGUI_FILES
     openmw_edit_note.layout
     openmw_debug_window.layout
     openmw_debug_window.skin.xml
+    openmw_jail_screen.layout
     DejaVuLGCSansMono.ttf
     ../launcher/images/openmw.png
     OpenMWResourcePlugin.xml

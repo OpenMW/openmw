@@ -3,6 +3,8 @@
 
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
+#include "timeadvancer.hpp"
+#include "waitdialog.hpp"
 
 namespace MWGui
 {
@@ -26,11 +28,17 @@ namespace MWGui
         void onCancelButtonClicked (MyGUI::Widget* sender);
         void onTrainingSelected(MyGUI::Widget* sender);
 
+        void onTrainingProgressChanged(int cur, int total);
+        void onTrainingFinished();
+
         MyGUI::Widget* mTrainingOptions;
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPlayerGold;
 
         float mFadeTimeRemaining;
+
+        WaitDialogProgressBar mProgressBar;
+        TimeAdvancer mTimeAdvancer;
     };
 
 }
