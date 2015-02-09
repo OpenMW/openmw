@@ -44,6 +44,7 @@
 
 #include "player.hpp"
 #include "manualref.hpp"
+#include "cellstore.hpp"
 #include "cellfunctors.hpp"
 #include "containerstore.hpp"
 #include "inventorystore.hpp"
