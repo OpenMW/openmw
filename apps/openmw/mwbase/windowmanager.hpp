@@ -1,7 +1,7 @@
 #ifndef GAME_MWBASE_WINDOWMANAGER_H
 #define GAME_MWBASE_WINDOWMANAGER_H
 
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 #include <vector>
 #include <map>
