@@ -175,7 +175,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     mDebugging = new Debugging(mRootNode, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
 
-    mWater = new MWRender::Water(mRendering.getCamera(), this);
+    mWater = new MWRender::Water(mRendering.getCamera(), this, mFallback);
 
     setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
 }
@@ -693,6 +693,7 @@ void RenderingManager::enableLights(bool sun)
 void RenderingManager::notifyWorldSpaceChanged()
 {
     mEffectManager->clear();
+    mWater->clearRipples();
 }
 
 Ogre::Vector4 RenderingManager::boundingBoxToScreen(Ogre::AxisAlignedBox bounds)
