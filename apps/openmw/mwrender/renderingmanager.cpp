@@ -297,6 +297,8 @@ void RenderingManager::rotateObject(const MWWorld::Ptr &ptr)
 void
 RenderingManager::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
+    if (!old.getRefData().getBaseNode())
+        return;
     Ogre::SceneNode *child =
         mRendering.getScene()->getSceneNode(old.getRefData().getHandle());
 

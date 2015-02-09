@@ -9,6 +9,7 @@
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwbase/soundmanager.hpp"

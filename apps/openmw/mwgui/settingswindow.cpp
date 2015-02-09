@@ -14,6 +14,7 @@
 
 #include <SDL_video.h>
 
+#include <components/misc/stringops.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 #include <components/settings/settings.hpp>
 

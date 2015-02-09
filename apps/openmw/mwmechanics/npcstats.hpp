@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "stat.hpp"
-
 #include "creaturestats.hpp"
 
 namespace ESM

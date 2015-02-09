@@ -8,16 +8,3 @@ TryExec=openmw-launcher
 Exec=openmw-launcher
 Icon=openmw
 Categories=Game;RolePlaying;
-
-[Desktop Entry]
-Type=Application
-Name=OpenMW
-GenericName=Role Playing Game
-Comment=An engine replacement for The Elder Scrolls III: Morrowind
-Keywords=Morrowind;Reimplementation Mods;esm;bsa;
-Exec=openmw --load-savegame=%f
-Icon=openmw
-Categories=Game;RolePlaying;
-Terminal=false
-NoDisplay=true
-MimeType=application/x-openmw-savegame;
