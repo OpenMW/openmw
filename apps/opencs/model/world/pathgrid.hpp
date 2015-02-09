@@ -6,11 +6,14 @@
 
 #include <components/esm/loadpgrd.hpp>
 
-#include "idcollection.hpp"
-#include "cell.hpp"
-
 namespace CSMWorld
 {
+    struct Cell;
+    template<typename T>
+    struct IdAccessor;
+    template<typename T, typename AT = IdAccessor<T>>
+    class IdCollection;
+
     /// \brief Wrapper for Pathgrid record
     ///
     /// \attention The mData.mX and mData.mY fields of the ESM::Pathgrid struct are not used.
