@@ -33,7 +33,7 @@ Programmers
     Douglas Diniz (Dgdiniz)
     Douglas Mencken (dougmencken)
     dreamer-dead
-    dteviot
+    David Teviotdale (dteviot)
     Edmondo Tommasina (edmondo)
     Eduard Cot (trombonecot)
     Eli2
