@@ -826,7 +826,7 @@ void MwIniImporter::importArchives(multistrmap &cfg, const multistrmap &ini) con
 }
 
 void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, const boost::filesystem::path& iniFilename) const {
-    std::vector<std::pair<std::time_t, std::string>> contentFiles;
+    std::vector<std::pair<std::time_t, std::string> > contentFiles;
     std::string baseGameFile("Game Files:GameFile");
     std::string gameFile("");
     std::time_t defaultTime = 0;
@@ -863,7 +863,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
 
     // this will sort files by time order first, then alphabetical (maybe), I suspect non ASCII filenames will be stuffed.
     sort(contentFiles.begin(), contentFiles.end());
-    for(std::vector<std::pair<std::time_t, std::string>>::const_iterator it=contentFiles.begin(); it!=contentFiles.end(); ++it) {
+    for(std::vector<std::pair<std::time_t, std::string> >::const_iterator it=contentFiles.begin(); it!=contentFiles.end(); ++it) {
         cfg["content"].push_back(it->second);
     }
 }
