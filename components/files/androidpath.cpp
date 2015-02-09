@@ -27,7 +27,7 @@ char const * Buffer::getData()
 }
 
 
-JNIEXPORT void JNICALL Java_org_libsdl_app_SDLActivity_getPathToJni(JNIEnv *env, jobject obj, jstring prompt)
+JNIEXPORT void JNICALL Java_com_libopenmw_openmw_GameActivity_getPathToJni(JNIEnv *env, jobject obj, jstring prompt)
 {
     jboolean iscopy;
     Buffer::setData((env)->GetStringUTFChars(prompt, &iscopy));
