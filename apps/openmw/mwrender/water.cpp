@@ -20,9 +20,6 @@
 #include <extern/shiny/Main/Factory.hpp>
 #include <extern/shiny/Platforms/Ogre/OgreMaterial.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-
 using namespace Ogre;
 
 namespace MWRender
@@ -187,7 +184,7 @@ void PlaneReflection::setVisibilityMask (int flags)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Water::Water (Ogre::Camera *camera, RenderingManager* rend) :
+Water::Water (Ogre::Camera *camera, RenderingManager* rend, const MWWorld::Fallback* fallback) :
     mCamera (camera), mSceneMgr (camera->getSceneManager()),
     mIsUnderwater(false), mVisibilityFlags(0),
     mActive(1), mToggled(1),
@@ -198,7 +195,7 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend) :
     mSimulation(NULL),
     mPlayer(0,0)
 {
-    mSimulation = new RippleSimulation(mSceneMgr);
+    mSimulation = new RippleSimulation(mSceneMgr, fallback);
 
     mSky = rend->getSkyManager();
 
@@ -313,6 +310,8 @@ void Water::setHeight(const float height)
 {
     mTop = height;
 
+    mSimulation->setWaterHeight(height);
+
     mWaterPlane = Plane(Vector3::UNIT_Z, -height);
 
     if (mReflection)
@@ -382,9 +381,13 @@ void Water::update(float dt, Ogre::Vector3 player)
 
 void Water::frameStarted(float dt)
 {
+    if (!mActive)
+        return;
+
+    mSimulation->update(dt, mPlayer);
+
     if (mReflection)
     {
-        mSimulation->update(dt, mPlayer);
         mReflection->update();
     }
 }
@@ -495,6 +498,11 @@ void Water::removeEmitter (const MWWorld::Ptr& ptr)
 void Water::updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr)
 {
     mSimulation->updateEmitterPtr(old, ptr);
+}
+
+void Water::clearRipples()
+{
+    mSimulation->clear();
 }
 
 } // namespace

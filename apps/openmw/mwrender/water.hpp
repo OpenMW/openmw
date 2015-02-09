@@ -30,6 +30,11 @@ namespace Ogre
     struct RenderTargetEvent;
 }
 
+namespace MWWorld
+{
+    class Fallback;
+}
+
 namespace MWRender {
 
     class SkyManager;
@@ -145,8 +150,10 @@ namespace MWRender {
         Ogre::Vector2 mPlayer;
 
     public:
-        Water (Ogre::Camera *camera, RenderingManager* rend);
+        Water (Ogre::Camera *camera, RenderingManager* rend, const MWWorld::Fallback* fallback);
         ~Water();
+
+        void clearRipples();
 
         void setActive(bool active);
 

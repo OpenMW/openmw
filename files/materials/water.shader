@@ -64,7 +64,6 @@
     #include "shadows.h"
 #endif
 
-#define RIPPLES 1
 #define REFRACTION @shGlobalSettingBool(refraction)
 
 #ifdef SH_VERTEX_SHADER
@@ -187,11 +186,6 @@
 		shInput(float4, position)
 		shInput(float, depthPassthrough)
 
-            #if RIPPLES
-                shUniform(float3, rippleCenter) @shSharedParameter(rippleCenter, rippleCenter)
-                shUniform(float, rippleAreaLength) @shSharedParameter(rippleAreaLength, rippleAreaLength)
-            #endif
-
 		shUniform(float, far) @shAutoConstant(far, far_clip_distance)
 
 		shSampler2D(reflectionMap)
@@ -202,11 +196,6 @@
 		shSampler2D(normalMap)
 
     shUniform(float4x4, wMat) @shAutoConstant(wMat, world_matrix)
-
-            #if RIPPLES
-                shSampler2D(rippleNormalMap)
-            #endif
-
 		shUniform(float3, windDir_windSpeed) @shSharedParameter(windDir_windSpeed)
 		#define WIND_SPEED windDir_windSpeed.z
 		#define WIND_DIR windDir_windSpeed.xy
@@ -295,12 +284,7 @@
                                 normal2 * MID_WAVES_X + normal3 * MID_WAVES_Y +
                                 normal4 * SMALL_WAVES_X + normal5 * SMALL_WAVES_Y);
 
-        float4 worldPosition = shMatrixMult(wMat, float4(position.xyz, 1));
-        float2 relPos = (worldPosition.xy - rippleCenter.xy) / rippleAreaLength + 0.5;
-        float3 normal_ripple = normalize(shSample(rippleNormalMap, relPos.xy).xyz * 2.0 - 1.0);
-
-        //normal = normalize(normal + normal_ripple);
-        normal = normalize(float3(normal.x * BUMP + normal_ripple.x, normal.y * BUMP + normal_ripple.y, normal.z));
+        normal = normalize(float3(normal.x * BUMP, normal.y * BUMP, normal.z));
         normal = float3(normal.x, normal.y, -normal.z);
 
 	    // normal for sunlight scattering
