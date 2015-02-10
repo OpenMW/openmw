@@ -1,6 +1,7 @@
-#include "weather.hpp"
-
+#define _USE_MATH_DEFINES
 #include <cmath>
+
+#include "weather.hpp"
 
 #include <components/esm/weatherstate.hpp>
 
