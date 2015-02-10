@@ -191,7 +191,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
     std::srand ( std::time(NULL) );
     MWClass::registerClasses();
 
-    Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE;
+    Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE|SDL_INIT_GAMECONTROLLER|SDL_INIT_JOYSTICK;
     if(SDL_WasInit(flags) == 0)
     {
         //kindly ask SDL not to trash our OGL context
@@ -365,9 +365,29 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
-    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v2.xml").string();
+    std::string keybinderUser = (mCfgMgr.getUserConfigPath() / "input_v3.xml").string();
     bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
-    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, mGrab);
+    if(!keybinderUserExists)
+    {
+        std::string input2 = (mCfgMgr.getUserConfigPath() / "input_v2.xml").string();
+        if(boost::filesystem::exists(input2)) {
+            boost::filesystem::copy_file(input2, keybinderUser);
+            keybinderUserExists = boost::filesystem::exists(keybinderUser);
+        }
+    }
+
+    // find correct path to the game controller bindings
+    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/gamecontrollerdb.cfg";
+    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/gamecontrollerdb.cfg";
+    std::string gameControllerdb;
+    if (boost::filesystem::exists(localdefault))
+        gameControllerdb = localdefault;
+    else if (boost::filesystem::exists(globaldefault))
+        gameControllerdb = globaldefault;
+    else
+        gameControllerdb = ""; //if it doesn't exist, pass in an empty string
+
+    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
     mEnvironment.setInputManager (input);
 
     MWGui::WindowManager* window = new MWGui::WindowManager(
