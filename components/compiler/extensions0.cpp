@@ -303,6 +303,7 @@ namespace Compiler
             extensions.registerInstruction ("sv", "", opcodeShowVars, opcodeShowVarsExplicit);
             extensions.registerInstruction("tgm", "", opcodeToggleGodMode);
             extensions.registerInstruction("togglegodmode", "", opcodeToggleGodMode);
+            extensions.registerInstruction("togglescripts", "", opcodeToggleScripts);
             extensions.registerInstruction ("disablelevitation", "", opcodeDisableLevitation);
             extensions.registerInstruction ("enablelevitation", "", opcodeEnableLevitation);
             extensions.registerFunction ("getpcinjail", 'l', "", opcodeGetPcInJail);

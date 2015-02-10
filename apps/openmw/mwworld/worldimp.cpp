@@ -151,7 +151,8 @@ namespace MWWorld
       mFallback(fallbackMap), mTeleportEnabled(true), mLevitationEnabled(true),
       mGodMode(false), mContentFiles (contentFiles),
       mGoToJail(false), mDaysInPrison(0),
-      mStartCell (startCell), mStartupScript(startupScript)
+      mStartCell (startCell), mStartupScript(startupScript),
+      mScriptsEnabled(true)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -293,6 +294,7 @@ namespace MWWorld
         mDoorStates.clear();
 
         mGodMode = false;
+        mScriptsEnabled = true;
         mSky = true;
         mTeleportEnabled = true;
         mLevitationEnabled = true;
@@ -2587,6 +2589,17 @@ namespace MWWorld
         return mGodMode;
     }
 
+    bool World::toggleScripts()
+    {
+        mScriptsEnabled = !mScriptsEnabled;
+        return mScriptsEnabled;
+    }
+
+    bool World::getScriptsEnabled() const
+    {
+        return mScriptsEnabled;
+    }
+
     void World::loadContentFiles(const Files::Collections& fileCollections,
         const std::vector<std::string>& content, ContentLoader& contentLoader)
     {
@@ -3167,12 +3180,17 @@ namespace MWWorld
 
         breakInvisibility(actor);
 
-        if (!script.empty())
+        if (mScriptsEnabled)
         {
-            getLocalScripts().setIgnore (object);
-            MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
+            if (!script.empty())
+            {
+                getLocalScripts().setIgnore (object);
+                MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
+            }
+            if (!interpreterContext.hasActivationBeenHandled())
+                interpreterContext.executeActivation(object, actor);
         }
-        if (!interpreterContext.hasActivationBeenHandled())
+        else
             interpreterContext.executeActivation(object, actor);
     }
 

@@ -915,6 +915,19 @@ namespace MWScript
             }
         };
 
+        class OpToggleScripts : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                InterpreterContext& context = static_cast<InterpreterContext&> (runtime.getContext());
+
+                bool enabled = MWBase::Environment::get().getWorld()->toggleScripts();
+
+                context.report(enabled ? "Scripts -> On" : "Scripts -> Off");
+            }
+        };
+
         class OpToggleGodMode : public Interpreter::Opcode0
         {
             public:
@@ -1220,6 +1233,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeShowVars, new OpShowVars<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeShowVarsExplicit, new OpShowVars<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleGodMode, new OpToggleGodMode);
+            interpreter.installSegment5 (Compiler::Misc::opcodeToggleScripts, new OpToggleScripts);
             interpreter.installSegment5 (Compiler::Misc::opcodeDisableLevitation, new OpEnableLevitation<false>);
             interpreter.installSegment5 (Compiler::Misc::opcodeEnableLevitation, new OpEnableLevitation<true>);
             interpreter.installSegment5 (Compiler::Misc::opcodeCast, new OpCast<ImplicitRef>);
