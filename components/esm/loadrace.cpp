@@ -20,10 +20,34 @@ namespace ESM
 
 void Race::load(ESMReader &esm)
 {
-    mName = esm.getHNOString("FNAM");
-    esm.getHNT(mData, "RADT", 140);
-    mPowers.load(esm);
-    mDescription = esm.getHNOString("DESC");
+    mPowers.mList.clear();
+
+    bool hasData = false;
+    while (esm.hasMoreSubs())
+    {
+        esm.getSubName();
+        uint32_t name = esm.retSubName().val;
+        switch (name)
+        {
+            case ESM::FourCC<'F','N','A','M'>::value:
+                mName = esm.getHString();
+                break;
+            case ESM::FourCC<'R','A','D','T'>::value:
+                esm.getHT(mData, 140);
+                hasData = true;
+                break;
+            case ESM::FourCC<'D','E','S','C'>::value:
+                mDescription = esm.getHString();
+                break;
+            case ESM::FourCC<'N','P','C','S'>::value:
+                mPowers.add(esm);
+                break;
+            default:
+                esm.fail("Unknown subrecord " + esm.retSubName().toString());
+        }
+    }
+    if (!hasData)
+        esm.fail("Missing RADT subrecord");
 }
 void Race::save(ESMWriter &esm) const
 {

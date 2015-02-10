@@ -7,14 +7,19 @@
 namespace ESM
 {
 
+void InventoryList::add(ESMReader &esm)
+{
+    ContItem ci;
+    esm.getHT(ci, 36);
+    mList.push_back(ci);
+}
+
 void InventoryList::load(ESMReader &esm)
 {
     mList.clear();
-    ContItem ci;
     while (esm.isNextSub("NPCO"))
     {
-        esm.getHT(ci, 36);
-        mList.push_back(ci);
+        add(esm);
     }
 }
 
