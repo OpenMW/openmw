@@ -33,7 +33,7 @@ namespace MWMechanics
         MagicEffects mMagicEffects;
         Stat<int> mAiSettings[4];
         AiSequence mAiSequence;
-
+#ifdef ANDROID
         bool mDead,
         mDied,
         mMurdered,
@@ -47,8 +47,22 @@ namespace MWMechanics
         mHitRecovery,
         mBlock,
         mRecalcMagicka;
+#else
+        bool mDead;
+        bool mDied;
+        bool mMurdered;
+        bool mTalkedTo;
+        bool mAlarmed;
+        bool mAttacked;
+        bool mAttackingOrSpell;
+        bool mKnockdown;
+        bool mKnockdownOneFrame;
+        bool mKnockdownOverOneFrame;
+        bool mHitRecovery;
+        bool mBlock;
+        bool mRecalcMagicka;
+#endif
         int mFriendlyHits;
-
         unsigned int mMovementFlags;
         float mAttackStrength; // Note only some creatures attack with weapons
 
