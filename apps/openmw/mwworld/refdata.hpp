@@ -33,17 +33,12 @@ namespace MWWorld
             MWScript::Locals mLocals; // if we find the overhead of heaving a locals
                                       // object in the refdata of refs without a script,
                                       // we can make this a pointer later.
-#ifdef ANDROID
+
             bool mDeleted,mHasLocals,mEnabled,mChanged;
-#else
-            bool mHasLocals;
-            bool mEnabled;
-#endif
+            //mDeleted separate delete flag used for deletion by a content file
+
             int mCount; // 0: deleted
 
-#ifndef ANDROID
-            bool mDeleted; // separate delete flag used for deletion by a content file
-#endif
             ESM::Position mPosition;
 
             LocalRotation mLocalRotation;
@@ -53,9 +48,7 @@ namespace MWWorld
             void copy (const RefData& refData);
 
             void cleanup();
-#ifndef ANDROID
-            bool mChanged;
-#endif
+
         public:
 
             RefData();
