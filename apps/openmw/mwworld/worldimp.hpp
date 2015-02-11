@@ -82,6 +82,7 @@ namespace MWWorld
             boost::shared_ptr<ProjectileManager> mProjectileManager;
 
             bool mGodMode;
+            bool mScriptsEnabled;
             std::vector<std::string> mContentFiles;
 
             // not implemented
@@ -571,6 +572,9 @@ namespace MWWorld
             virtual bool getGodModeState();
 
             virtual bool toggleGodMode();
+
+            virtual bool toggleScripts();
+            virtual bool getScriptsEnabled() const;
 
             /**
              * @brief startSpellCast attempt to start casting a spell. Might fail immediately if conditions are not met.

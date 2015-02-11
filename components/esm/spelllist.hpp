@@ -19,6 +19,11 @@ namespace ESM
         /// Is this spell ID in mList?
         bool exists(const std::string& spell) const;
 
+        /// Load one spell, assumes the subrecord name was already read
+        void add(ESMReader &esm);
+
+        /// Load all spells
+        /// TODO: remove this method, the ESM format doesn't guarantee that all spell subrecords follow one another
         void load(ESMReader &esm);
         void save(ESMWriter &esm) const;
     };

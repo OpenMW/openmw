@@ -489,6 +489,9 @@ namespace MWBase
 
             virtual bool toggleGodMode() = 0;
 
+            virtual bool toggleScripts() = 0;
+            virtual bool getScriptsEnabled() const = 0;
+
             /**
              * @brief startSpellCast attempt to start casting a spell. Might fail immediately if conditions are not met.
              * @param actor

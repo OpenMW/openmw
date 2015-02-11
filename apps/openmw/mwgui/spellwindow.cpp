@@ -95,8 +95,9 @@ namespace MWGui
                 return;
         }
 
-        MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
         store.setSelectedEnchantItem(it);
+        // to reset WindowManager::mSelectedSpell immediately
+        MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(*it);
 
         updateSpells();
     }

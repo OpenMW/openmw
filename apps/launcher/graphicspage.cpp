@@ -67,7 +67,7 @@ bool Launcher::GraphicsPage::setupOgre()
     }
     catch(Ogre::Exception &ex)
     {
-        QString ogreError = QString::fromStdString(ex.getFullDescription().c_str());
+        QString ogreError = QString::fromUtf8(ex.getFullDescription().c_str());
         QMessageBox msgBox;
         msgBox.setWindowTitle("Error creating Ogre::Root");
         msgBox.setIcon(QMessageBox::Critical);
@@ -135,7 +135,7 @@ bool Launcher::GraphicsPage::setupSDL()
         msgBox.setWindowTitle(tr("Error receiving number of screens"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
         msgBox.exec();
         return false;
     }
@@ -237,7 +237,7 @@ QStringList Launcher::GraphicsPage::getAvailableOptions(const QString &key, Ogre
              opt_it != i->second.possibleValues.end(); ++opt_it, ++idx)
         {
             if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0) {
-                result << ((key == "FSAA") ? QString("MSAA ") : QString("")) + QString::fromStdString((*opt_it).c_str()).simplified();
+                result << ((key == "FSAA") ? QString("MSAA ") : QString("")) + QString::fromUtf8((*opt_it).c_str()).simplified();
             }
         }
     }
@@ -266,7 +266,7 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
         msgBox.setWindowTitle(tr("Error receiving resolutions"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
         msgBox.exec();
         return result;
     }
@@ -279,7 +279,7 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
             msgBox.setWindowTitle(tr("Error receiving resolutions"));
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>SDL_GetDisplayMode failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+            msgBox.setText(tr("<br><b>SDL_GetDisplayMode failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
             msgBox.exec();
             return result;
         }
