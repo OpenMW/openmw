@@ -4,8 +4,6 @@ set (OPENCS_SRC main.cpp
 
 opencs_units (. editor)
 
-set (CMAKE_BUILD_TYPE DEBUG)
-
 opencs_units (model/doc
     document operation saving documentmanager loader runner
     )
