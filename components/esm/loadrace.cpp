@@ -43,7 +43,7 @@ void Race::load(ESMReader &esm)
                 mPowers.add(esm);
                 break;
             default:
-                esm.fail("Unknown subrecord " + esm.retSubName().toString());
+                esm.fail("Unknown subrecord");
         }
     }
     if (!hasData)

@@ -53,6 +53,9 @@ public:
 
     void blank();
     ///< Set record to default state (does not touch the ID/index).
+
+private:
+    void loadSCVR(ESMReader &esm);
 };
 }
 #endif
