@@ -36,21 +36,14 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
         } else {
             // Check if reference charge is valid for it's proper referenced type
             CSMWorld::RefIdData::LocalIndex localIndex = mDataSet.searchId(cellRef.mRefID);
-            if (localIndex.second == CSMWorld::UniversalId::Type_Armor ||
-                localIndex.second == CSMWorld::UniversalId::Type_Weapon) {
-                if (cellRef.mChargeFloat < 0) {
-                    std::string str = " has negative durability ";
+            bool isLight = localIndex.second == CSMWorld::UniversalId::Type_Light;
+            if ((isLight && cellRef.mChargeFloat < -1) || (!isLight && cellRef.mChargeInt < -1)) {
+                std::string str = " has invalid charge ";
+                if (localIndex.second == CSMWorld::UniversalId::Type_Light)
                     str += boost::lexical_cast<std::string>(cellRef.mChargeFloat);
-                    messages.push_back(std::make_pair(id, id.getId() + str));
-                }
-            } else if (localIndex.second == CSMWorld::UniversalId::Type_Lockpick ||
-                localIndex.second == CSMWorld::UniversalId::Type_Probe ||
-                localIndex.second == CSMWorld::UniversalId::Type_Repair) {
-                if (cellRef.mChargeInt < -1) {
-                    std::string str = " has invalid charges ";
+                else
                     str += boost::lexical_cast<std::string>(cellRef.mChargeInt);
-                    messages.push_back(std::make_pair(id, id.getId() + str));
-                }
+                messages.push_back(std::make_pair(id, id.getId() + str));
             }
         }
     }
