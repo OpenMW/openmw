@@ -2784,18 +2784,45 @@ namespace MWWorld
     {
         if (cell->isExterior())
             return false;
-        MWWorld::CellRefList<ESM::Door>& doors = cell->get<ESM::Door>();
-        CellRefList<ESM::Door>::List& refList = doors.mList;
 
-        // Check if any door in the cell leads to an exterior directly
-        for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
-        {
-            MWWorld::LiveCellRef<ESM::Door>& ref = *it;
-            if (ref.mRef.getTeleport() && ref.mRef.getDestCell().empty())
-            {
-                ESM::Position pos = ref.mRef.getDoorDest();
-                result = Ogre::Vector3(pos.pos);
-                return true;
+        // Search for a 'nearest' exterior, counting each cell between the starting
+        // cell and the exterior as a distance of 1.  Will fail for isolated interiors.
+        std::set< std::string >checkedCells;
+        std::set< std::string >currentCells;
+        std::set< std::string >nextCells;
+        nextCells.insert( cell->getCell()->mName );
+
+        while ( !nextCells.empty() ) {
+            currentCells = nextCells;
+            nextCells.clear();
+            for( std::set< std::string >::const_iterator i = currentCells.begin(); i != currentCells.end(); ++i ) {
+                MWWorld::CellStore *next = getInterior( *i );
+                if ( !next ) continue;
+
+                MWWorld::CellRefList<ESM::Door>& doors = next->get<ESM::Door>();
+                CellRefList<ESM::Door>::List& refList = doors.mList;
+
+                // Check if any door in the cell leads to an exterior directly
+                for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
+                {
+                    MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+                    if (!ref.mRef.getTeleport()) continue;
+
+                    if (ref.mRef.getDestCell().empty())
+                    {
+                        ESM::Position pos = ref.mRef.getDoorDest();
+                        result = Ogre::Vector3(pos.pos);
+                        return true;
+                    }
+                    else
+                    {
+                        std::string dest = ref.mRef.getDestCell();
+                        if ( !checkedCells.count(dest) && !currentCells.count(dest) )
+                            nextCells.insert(dest);
+                    }
+                }
+
+                checkedCells.insert( *i );
             }
         }
 
