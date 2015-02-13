@@ -23,6 +23,7 @@
 #include "referenceablecheck.hpp"
 #include "scriptcheck.hpp"
 #include "bodypartcheck.hpp"
+#include "referencecheck.hpp"
 
 CSMDoc::Operation *CSMTools::Tools::get (int type)
 {
@@ -81,6 +82,8 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
         mVerifier->appendStage (new SpellCheckStage (mData.getSpells()));
 
         mVerifier->appendStage (new ReferenceableCheckStage (mData.getReferenceables().getDataSet(), mData.getRaces(), mData.getClasses(), mData.getFactions()));
+
+        mVerifier->appendStage (new ReferenceCheckStage(mData.getReferences(), mData.getReferenceables(), mData.getCells(), mData.getFactions()));
 
         mVerifier->appendStage (new ScriptCheckStage (mDocument));
 
