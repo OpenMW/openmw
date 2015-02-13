@@ -21,6 +21,7 @@ namespace ESM
         else
         {
             // Original engine ignores rest of the record, even if there are items following
+            mList.clear();
             esm.skipRecord();
             return;
         }
