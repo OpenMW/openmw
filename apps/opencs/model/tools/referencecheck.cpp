@@ -10,6 +10,7 @@ CSMTools::ReferenceCheckStage::ReferenceCheckStage(
     :
     mReferences(references),
     mReferencables(referencables),
+    mDataSet(referencables.getDataSet()),
     mCells(cells),
     mFactions(factions)
 {
@@ -26,12 +27,33 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
     const CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Reference, cellRef.mId);
 
     // Check for empty reference id
-    if (cellRef.mRefID.empty())
+    if (cellRef.mRefID.empty()) {
         messages.push_back(std::make_pair(id, " is an empty reference"));
-
-    // Check for non existing referenced object
-    if (mReferencables.searchId(cellRef.mRefID) == -1)
-        messages.push_back(std::make_pair(id, " is referencing non existing object " + cellRef.mRefID));
+    } else {
+        // Check for non existing referenced object
+        if (mReferencables.searchId(cellRef.mRefID) == -1) {
+            messages.push_back(std::make_pair(id, " is referencing non existing object " + cellRef.mRefID));
+        } else {
+            // Check if reference charge isn't negative if it's proper type
+            CSMWorld::RefIdData::LocalIndex localIndex = mDataSet.searchId(cellRef.mRefID);
+            if (localIndex.second == CSMWorld::UniversalId::Type_Armor ||
+                localIndex.second == CSMWorld::UniversalId::Type_Weapon) {
+                if (cellRef.mChargeFloat < 0) {
+                    std::string str = " has negative durability ";
+                    str += boost::lexical_cast<std::string>(cellRef.mChargeFloat);
+                    messages.push_back(std::make_pair(id, id.getId() + str));
+                }
+            } else if (localIndex.second == CSMWorld::UniversalId::Type_Lockpick ||
+                localIndex.second == CSMWorld::UniversalId::Type_Probe ||
+                localIndex.second == CSMWorld::UniversalId::Type_Repair) {
+                if (cellRef.mChargeInt < -1) {
+                    std::string str = " has invalid charges ";
+                    str += boost::lexical_cast<std::string>(cellRef.mChargeFloat);
+                    messages.push_back(std::make_pair(id, id.getId() + str));
+                }
+            }
+        }
+    }
 
     // Check if referenced object is in valid cell
     if (mCells.searchId(cellRef.mCell) == -1)
@@ -69,14 +91,6 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
     {
         std::string str = " has negative scale ";
         str += boost::lexical_cast<std::string>(cellRef.mScale);
-        messages.push_back(std::make_pair(id, id.getId() + str));
-    }
-
-    // Check if charge isn't negative
-    if (cellRef.mChargeFloat < 0)
-    {
-        std::string str = " has negative charges ";
-        str += boost::lexical_cast<std::string>(cellRef.mChargeFloat);
         messages.push_back(std::make_pair(id, id.getId() + str));
     }
 
