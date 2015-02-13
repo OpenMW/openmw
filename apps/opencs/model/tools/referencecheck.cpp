@@ -34,7 +34,7 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
         if (mReferencables.searchId(cellRef.mRefID) == -1) {
             messages.push_back(std::make_pair(id, " is referencing non existing object " + cellRef.mRefID));
         } else {
-            // Check if reference charge isn't negative if it's proper type
+            // Check if reference charge is valid for it's proper referenced type
             CSMWorld::RefIdData::LocalIndex localIndex = mDataSet.searchId(cellRef.mRefID);
             if (localIndex.second == CSMWorld::UniversalId::Type_Armor ||
                 localIndex.second == CSMWorld::UniversalId::Type_Weapon) {
@@ -48,7 +48,7 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
                 localIndex.second == CSMWorld::UniversalId::Type_Repair) {
                 if (cellRef.mChargeInt < -1) {
                     std::string str = " has invalid charges ";
-                    str += boost::lexical_cast<std::string>(cellRef.mChargeFloat);
+                    str += boost::lexical_cast<std::string>(cellRef.mChargeInt);
                     messages.push_back(std::make_pair(id, id.getId() + str));
                 }
             }
