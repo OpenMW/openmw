@@ -78,6 +78,7 @@ Programmers
     naclander
     Narmo
     Nathan Jeffords (blunted2night)
+    NeveHanter
     Nikolay Kasyanov (corristo)
     nobrakal
     Nolan Poe (nopoe)
