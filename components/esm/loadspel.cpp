@@ -10,6 +10,7 @@ namespace ESM
 
     void Spell::load(ESMReader &esm)
     {
+        mEffects.mList.clear();
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
