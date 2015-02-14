@@ -151,6 +151,8 @@ namespace MWWorld
 
             float feetToGameUnits(float feet);
 
+            MWWorld::Ptr getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id );
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
