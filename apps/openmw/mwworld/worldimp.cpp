@@ -3071,28 +3071,29 @@ namespace MWWorld
 
     void World::confiscateStolenItems(const Ptr &ptr)
     {
-        Ogre::Vector3 playerPos;
-        if (!findInteriorPositionInWorldSpace(ptr.getCell(), playerPos))
-            playerPos = mPlayer->getLastKnownExteriorPosition();
+        MWWorld::Ptr prisonMarker = getClosestMarker( ptr, "prisonmarker" );
+        std::string prisonName = prisonMarker.mRef->mRef.getDestCell();
+        if ( prisonName.empty() )
+        {
+            std::cerr << "Failed to confiscate items: prison marker not linked to prison interior" << std::endl;
+            return;
+        }
+        MWWorld::CellStore *prison = getInterior( prisonName );
+        if ( !prison )
+        {
+            std::cerr << "Failed to confiscate items: failed to load cell " << prisonName << std::endl;
+            return;
+        }
 
         MWWorld::Ptr closestChest;
-        float closestDistance = FLT_MAX;
 
-        //Find closest stolen_goods chest
-        std::vector<MWWorld::Ptr> chests;
-        mCells.getInteriorPtrs("stolen_goods", chests);
-
-        Ogre::Vector3 chestPos;
-        for (std::vector<MWWorld::Ptr>::iterator it = chests.begin(); it != chests.end(); ++it)
+        MWWorld::CellRefList<ESM::Container>& containers = prison->get<ESM::Container>();
+        CellRefList<ESM::Container>::List& refList = containers.mList;
+        for (CellRefList<ESM::Container>::List::iterator it = refList.begin(); it != refList.end(); ++it)
         {
-            if (!findInteriorPositionInWorldSpace(it->getCell(), chestPos))
-                continue;
-
-            float distance = playerPos.squaredDistance(chestPos);
-            if (distance < closestDistance)
-            {
-                closestDistance = distance;
-                closestChest = *it;
+            MWWorld::LiveCellRef<ESM::Container>& ref = *it;
+            if ( ref.mRef.getRefId() == "stolen_goods" ) {
+                closestChest = MWWorld::Ptr( &ref, prison );
             }
         }
 
