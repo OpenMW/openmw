@@ -113,7 +113,6 @@ void RippleSimulation::update(float dt, Ogre::Vector2 position)
             position.z = 0; // Z is set by the Scene Node
             rotSpeed = mRippleRotSpeed;
             rotation = Ogre::Radian(Ogre::Math::RangeRandom(-Ogre::Math::PI, Ogre::Math::PI));
-            created->setDimensions(50,50);
         }
     }
 
