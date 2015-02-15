@@ -53,7 +53,7 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
         messages.push_back(std::make_pair(id, " is referencing object from non existing cell " + cellRef.mCell));
 
     // If object have owner, check if that owner reference is valid
-    if (!cellRef.mOwner.empty() and mReferencables.searchId(cellRef.mOwner) == -1)
+    if (!cellRef.mOwner.empty() && mReferencables.searchId(cellRef.mOwner) == -1)
         messages.push_back(std::make_pair(id, " has non existing owner " + cellRef.mOwner));
 
     // If object have creature soul trapped, check if that creature reference is valid
