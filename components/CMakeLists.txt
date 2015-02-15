@@ -1,5 +1,4 @@
 project (Components)
-set (CMAKE_BUILD_TYPE DEBUG)
 
 # Version file
 set (VERSION_HPP_IN ${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp.cmake)
