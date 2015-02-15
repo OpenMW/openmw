@@ -1,5 +1,12 @@
 project(OpenMW)
 
+# If the user doesn't supply a CMAKE_BUILD_TYPE via command line, choose one for them.
+IF(NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
+        "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
+        FORCE)
+ENDIF()
+
 if (APPLE)
     set(APP_BUNDLE_NAME "${CMAKE_PROJECT_NAME}.app")
 
