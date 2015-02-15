@@ -849,8 +849,6 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
             Misc::StringUtils::toLower(filetype);
 
             if(filetype.compare("esm") == 0 || filetype.compare("esp") == 0) {
-                // Fixme? may need to use codecvt_type to tell filesystem::path that *entry is UTF-8 string
-                // Works on Engish Windows.  *Should* work on other languages & OS provided plug-in filename only uses ASCII characters.
                 boost::filesystem::path filepath(gameFilesDir);
                 filepath /= *entry;
                 contentFiles.push_back(std::make_pair(lastWriteTime(filepath, defaultTime), *entry));
