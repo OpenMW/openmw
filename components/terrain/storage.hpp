@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2015 scrawl <scrawl@baseoftrash.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 #ifndef COMPONENTS_TERRAIN_STORAGE_H
 #define COMPONENTS_TERRAIN_STORAGE_H
 
@@ -30,6 +51,8 @@ namespace Terrain
         /// Fill vertex buffers for a terrain chunk.
         /// @note May be called from background threads. Make sure to only call thread-safe functions from here!
         /// @note returned colors need to be in render-system specific format! Use RenderSystem::convertColourValue.
+        /// @note Vertices should be written in row-major order (a row is defined as parallel to the x-axis).
+        ///       The specified positions should be in local space, i.e. relative to the center of the terrain chunk.
         /// @param lodLevel LOD level, 0 = most detailed
         /// @param size size of the terrain chunk in cell units
         /// @param center center of the chunk in cell units

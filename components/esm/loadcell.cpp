@@ -242,6 +242,8 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
         else
         {
             id.mWorldspace = Misc::StringUtils::lowerCase (mName);
+            id.mIndex.mX = 0;
+            id.mIndex.mY = 0;
         }
 
         return id;

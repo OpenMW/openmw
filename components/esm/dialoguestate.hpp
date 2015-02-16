@@ -14,9 +14,11 @@ namespace ESM
 
     struct DialogueState
     {
+        // must be lower case topic IDs
         std::vector<std::string> mKnownTopics;
 
-        std::map<std::string, std::map<std::string, int> > mModFactionReaction;
+        // must be lower case faction IDs
+        std::map<std::string, std::map<std::string, int> > mChangedFactionReaction;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

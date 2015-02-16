@@ -54,11 +54,11 @@ namespace MWState
             /// \attention The \a slot pointer will be invalidated by this call.
 
             SlotIterator begin() const;
-            ///< First slot is the most recent. Other slots follow in descending order of save date.
-            ///
-            /// Any call to createSlot and updateSlot can invalidate the returned iterator.
+            ///<  Any call to createSlot and updateSlot can invalidate the returned iterator.
 
             SlotIterator end() const;
+
+            const boost::filesystem::path& getPath() const;
 
             ESM::SavedGame getSignature() const;
             ///< Return signature information for this character.

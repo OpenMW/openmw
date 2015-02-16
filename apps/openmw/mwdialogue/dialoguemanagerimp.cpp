@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <iterator>
+#include <list>
 
 #include <components/esm/loaddial.hpp>
 #include <components/esm/loadinfo.hpp>
@@ -47,7 +48,7 @@
 namespace MWDialogue
 {
     DialogueManager::DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose, Translation::Storage& translationDataStorage) :
-      mCompilerContext (MWScript::CompilerContext::Type_Dialgoue),
+      mCompilerContext (MWScript::CompilerContext::Type_Dialogue),
         mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
       , mTemporaryDispositionChange(0.f)
       , mPermanentDispositionChange(0.f), mScriptVerbose (scriptVerbose)
@@ -78,7 +79,7 @@ namespace MWDialogue
 
     void DialogueManager::addTopic (const std::string& topic)
     {
-        mKnownTopics[Misc::StringUtils::lowerCase(topic)] = true;
+        mKnownTopics.insert( Misc::StringUtils::lowerCase(topic) );
     }
 
     void DialogueManager::parseText (const std::string& text)
@@ -102,8 +103,8 @@ namespace MWDialogue
             if (tok->isImplicitKeyword() && mTranslationDataStorage.hasTranslation())
                 continue;
 
-            if (std::find(mActorKnownTopics.begin(), mActorKnownTopics.end(), topicId) != mActorKnownTopics.end())
-                mKnownTopics[topicId] = true;
+            if (mActorKnownTopics.count( topicId ))
+                mKnownTopics.insert( topicId );
         }
 
         updateTopics();
@@ -227,7 +228,7 @@ namespace MWDialogue
             success = false;
         }
 
-        if (!success && mScriptVerbose)
+        if (!success)
         {
             std::cerr
                 << "compiling failed (dialogue script)" << std::endl
@@ -341,10 +342,10 @@ namespace MWDialogue
                 if (filter.responseAvailable (*iter))
                 {
                     std::string lower = Misc::StringUtils::lowerCase(iter->mId);
-                    mActorKnownTopics.push_back (lower);
+                    mActorKnownTopics.insert (lower);
 
                     //does the player know the topic?
-                    if (mKnownTopics.find (lower) != mKnownTopics.end())
+                    if (mKnownTopics.count(lower))
                     {
                         keywordList.push_back (iter->mId);
                     }
@@ -635,20 +636,20 @@ namespace MWDialogue
     {
         ESM::DialogueState state;
 
-        for (std::map<std::string, bool>::const_iterator iter (mKnownTopics.begin());
+        for (std::set<std::string>::const_iterator iter (mKnownTopics.begin());
             iter!=mKnownTopics.end(); ++iter)
-            if (iter->second)
-                state.mKnownTopics.push_back (iter->first);
+        {
+            state.mKnownTopics.push_back (*iter);
+        }
 
-        state.mModFactionReaction = mModFactionReaction;
+        state.mChangedFactionReaction = mChangedFactionReaction;
 
         writer.startRecord (ESM::REC_DIAS);
         state.save (writer);
         writer.endRecord (ESM::REC_DIAS);
-        progress.increaseProgress();
     }
 
-    void DialogueManager::readRecord (ESM::ESMReader& reader, int32_t type)
+    void DialogueManager::readRecord (ESM::ESMReader& reader, uint32_t type)
     {
         if (type==ESM::REC_DIAS)
         {
@@ -660,9 +661,9 @@ namespace MWDialogue
             for (std::vector<std::string>::const_iterator iter (state.mKnownTopics.begin());
                 iter!=state.mKnownTopics.end(); ++iter)
                 if (store.get<ESM::Dialogue>().search (*iter))
-                    mKnownTopics.insert (std::make_pair (*iter, true));
+                    mKnownTopics.insert (*iter);
 
-            mModFactionReaction = state.mModFactionReaction;
+            mChangedFactionReaction = state.mChangedFactionReaction;
         }
     }
 
@@ -675,10 +676,23 @@ namespace MWDialogue
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact2);
 
-        std::map<std::string, int>& map = mModFactionReaction[fact1];
-        if (map.find(fact2) == map.end())
-            map[fact2] = 0;
-        map[fact2] += diff;
+        int newValue = getFactionReaction(faction1, faction2) + diff;
+
+        std::map<std::string, int>& map = mChangedFactionReaction[fact1];
+        map[fact2] = newValue;
+    }
+
+    void DialogueManager::setFactionReaction(const std::string &faction1, const std::string &faction2, int absolute)
+    {
+        std::string fact1 = Misc::StringUtils::lowerCase(faction1);
+        std::string fact2 = Misc::StringUtils::lowerCase(faction2);
+
+        // Make sure the factions exist
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact2);
+
+        std::map<std::string, int>& map = mChangedFactionReaction[fact1];
+        map[fact2] = absolute;
     }
 
     int DialogueManager::getFactionReaction(const std::string &faction1, const std::string &faction2) const
@@ -686,10 +700,9 @@ namespace MWDialogue
         std::string fact1 = Misc::StringUtils::lowerCase(faction1);
         std::string fact2 = Misc::StringUtils::lowerCase(faction2);
 
-        ModFactionReactionMap::const_iterator map = mModFactionReaction.find(fact1);
-        int diff = 0;
-        if (map != mModFactionReaction.end() && map->second.find(fact2) != map->second.end())
-            diff = map->second.at(fact2);
+        ModFactionReactionMap::const_iterator map = mChangedFactionReaction.find(fact1);
+        if (map != mChangedFactionReaction.end() && map->second.find(fact2) != map->second.end())
+            return map->second.at(fact2);
 
         const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
 
@@ -697,9 +710,9 @@ namespace MWDialogue
         for (; it != faction->mReactions.end(); ++it)
         {
             if (Misc::StringUtils::ciEqual(it->first, fact2))
-                    return it->second + diff;
+                    return it->second;
         }
-        return diff;
+        return 0;
     }
 
     void DialogueManager::clearInfoActor(const MWWorld::Ptr &actor) const

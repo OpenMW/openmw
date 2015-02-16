@@ -1,6 +1,6 @@
 #include "itemview.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <cmath>
 
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_Gui.h>
@@ -53,9 +53,14 @@ void ItemView::layoutWidgets()
 
     int x = 0;
     int y = 0;
-    int maxHeight = mScrollView->getSize().height - 58;
-
     MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
+    int maxHeight = mScrollView->getHeight();
+
+    int rows = maxHeight/42;
+    rows = std::max(rows, 1);
+    bool showScrollbar = int(std::ceil(dragArea->getChildCount()/float(rows))) > mScrollView->getWidth()/42;
+    if (showScrollbar)
+        maxHeight -= 18;
 
     for (unsigned int i=0; i<dragArea->getChildCount(); ++i)
     {
@@ -64,7 +69,8 @@ void ItemView::layoutWidgets()
         w->setPosition(x, y);
 
         y += 42;
-        if (y > maxHeight)
+
+        if (y > maxHeight-42 && i < dragArea->getChildCount()-1)
         {
             x += 42;
             y = 0;
@@ -149,22 +155,12 @@ void ItemView::setSize(const MyGUI::IntSize &_value)
         layoutWidgets();
 }
 
-void ItemView::setSize(int _width, int _height)
-{
-    setSize(MyGUI::IntSize(_width, _height));
-}
-
 void ItemView::setCoord(const MyGUI::IntCoord &_value)
 {
     bool changed = (_value.width != getWidth() || _value.height != getHeight());
     Base::setCoord(_value);
     if (changed)
         layoutWidgets();
-}
-
-void ItemView::setCoord(int _left, int _top, int _width, int _height)
-{
-    setCoord(MyGUI::IntCoord(_left, _top, _width, _height));
 }
 
 void ItemView::registerComponents()

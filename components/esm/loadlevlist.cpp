@@ -7,7 +7,7 @@
 namespace ESM
 {
 
-void LeveledListBase::load(ESMReader &esm)
+void LevelledListBase::load(ESMReader &esm)
 {
     esm.getHNT(mFlags, "DATA");
     esm.getHNT(mChanceNone, "NNAM");
@@ -19,13 +19,17 @@ void LeveledListBase::load(ESMReader &esm)
         mList.resize(len);
     }
     else
+    {
+        esm.skipRecord();
         return;
+    }
 
-    // TODO: Merge with an existing lists here. This can be done
-    // simply by adding the lists together, making sure that they are
-    // sorted by level. A better way might be to exclude repeated
-    // items. Also, some times we don't want to merge lists, just
-    // overwrite. Figure out a way to give the user this option.
+    // If this levelled list was already loaded by a previous content file,
+    // we overwrite the list. Merging lists should probably be left to external tools,
+    // with the limited amount of information there is in the records, all merging methods
+    // will be flawed in some way. For a proper fix the ESM format would have to be changed
+    // to actually track list changes instead of including the whole list for every file
+    // that does something with that list.
 
     for (size_t i = 0; i < mList.size(); i++)
     {
@@ -34,7 +38,7 @@ void LeveledListBase::load(ESMReader &esm)
         esm.getHNT(li.mLevel, "INTV");
     }
 }
-void LeveledListBase::save(ESMWriter &esm) const
+void LevelledListBase::save(ESMWriter &esm) const
 {
     esm.writeHNT("DATA", mFlags);
     esm.writeHNT("NNAM", mChanceNone);
@@ -47,7 +51,7 @@ void LeveledListBase::save(ESMWriter &esm) const
     }
 }
 
-    void LeveledListBase::blank()
+    void LevelledListBase::blank()
     {
         mFlags = 0;
         mChanceNone = 0;

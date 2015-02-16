@@ -4,6 +4,11 @@
 #include <OgreImage.h>
 #include <OgreTextureManager.h>
 
+#include <MyGUI_ComboBox.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_ListBox.h>
+#include <MyGUI_InputManager.h>
+
 #include <components/misc/stringops.hpp>
 
 #include <components/settings/settings.hpp>
@@ -12,6 +17,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwstate/character.hpp"
 
@@ -245,7 +251,7 @@ namespace MWGui
         else
         {
             assert (mCurrentCharacter && mCurrentSlot);
-            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot);
+            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, mCurrentSlot->mPath.string());
         }
     }
 
@@ -304,7 +310,7 @@ namespace MWGui
         mOkButton->setEnabled(pos != MyGUI::ITEM_NONE || mSaving);
         mDeleteButton->setEnabled(pos != MyGUI::ITEM_NONE);
 
-        if (pos == MyGUI::ITEM_NONE)
+        if (pos == MyGUI::ITEM_NONE || !mCurrentCharacter)
         {
             mCurrentSlot = NULL;
             mInfoText->setCaption("");

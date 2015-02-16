@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=OpenMW Content Editor
+GenericName=Content Editor
+Comment=A replacement for the Morrowind Construction Set.
+Keywords=Morrowind;Construction Set;Creation Kit Editor;Set;Kit;
+TryExec=openmw-cs
+Exec=openmw-cs
+Icon=openmw-cs
+Categories=Game;RolePlaying;

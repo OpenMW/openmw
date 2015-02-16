@@ -120,7 +120,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
 
 CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
     const std::string& id, boost::shared_ptr<CSVWorld::PhysicsSystem> physics, const Ogre::Vector3& origin)
-: mData (data), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager), mPhysics(physics),
+: mData (data), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager), mPhysics(physics), mX(0), mY(0),
     mPathgridId("")
 {
     mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
@@ -137,15 +137,14 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
     int landIndex = land.searchId(mId);
     if (landIndex != -1)
     {
-        mTerrain.reset(new Terrain::TerrainGrid(sceneManager, new TerrainStorage(mData), Element_Terrain, true,
-                                                Terrain::Align_XY));
-
         const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
-        mTerrain->loadCell(esmLand->mX,
-                           esmLand->mY);
-
         if(esmLand)
         {
+            mTerrain.reset(new Terrain::TerrainGrid(sceneManager, new TerrainStorage(mData), Element_Terrain, true,
+                                                    Terrain::Align_XY));
+            mTerrain->loadCell(esmLand->mX,
+                               esmLand->mY);
+
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
             mX = esmLand->mX;
@@ -160,6 +159,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
 
 CSVRender::Cell::~Cell()
 {
+<<<<<<< .mine
     // destroy manual objects
     for(std::map<std::pair<int, int>, std::string>::iterator iter = mPgEdges.begin();
         iter != mPgEdges.end(); ++iter)
@@ -182,6 +182,30 @@ CSVRender::Cell::~Cell()
     }
 
     mPhysics->removeHeightField(mSceneMgr, mX, mY);
+=======
+    if (mTerrain.get())
+        mPhysics->removeHeightField(mSceneMgr, mX, mY);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
 
     for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
         iter!=mObjects.end(); ++iter)

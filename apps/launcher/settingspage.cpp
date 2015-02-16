@@ -11,6 +11,7 @@
 #include <components/config/launchersettings.hpp>
 
 #include "utils/textinputdialog.hpp"
+#include "datafilespage.hpp"
 
 using namespace Process;
 
@@ -51,7 +52,7 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
     connect(mImporterInvoker->getProcess(), SIGNAL(finished(int,QProcess::ExitStatus)),
             this, SLOT(importerFinished(int,QProcess::ExitStatus)));
 
-    mProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
+    mProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
 
     connect(mProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
             this, SLOT(updateOkButton(QString)));
@@ -140,7 +141,7 @@ void Launcher::SettingsPage::on_importerButton_clicked()
 
     qDebug() << "arguments " << arguments;
 
-    if (!mImporterInvoker->startProcess(QLatin1String("mwiniimport"), arguments, false))
+    if (!mImporterInvoker->startProcess(QLatin1String("openmw-iniimporter"), arguments, false))
         return;
 }
 
@@ -198,31 +199,33 @@ void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
         return;
 
-    // Re-read the settings in their current state
+    // Importer may have changed settings, so refresh
     mMain->reloadSettings();
 
     // Import selected data files from openmw.cfg
     if (addonsCheckBox->isChecked())
     {
+        // Because we've reloaded settings, the current content list matches content in OpenMW.cfg
+        QString oldContentListName = mLauncherSettings.getCurrentContentListName();
         if (mProfileDialog->exec() == QDialog::Accepted)
         {
-            const QString profile(mProfileDialog->lineEdit()->text());
-            const QStringList files(mGameSettings.values(QLatin1String("content")));
-
-            qDebug() << "Profile " << profile << files;
-
-            // Doesn't quite work right now
-            mLauncherSettings.setValue(QLatin1String("Profiles/currentprofile"), profile);
-
-            foreach (const QString &file, files) {
-                mLauncherSettings.setMultiValue(QLatin1String("Profiles/") + profile + QLatin1String("/content"), file);
+            // remove the current content list to prevent duplication
+            //... except, not allowed to delete the Default content list
+            if (oldContentListName.compare(DataFilesPage::mDefaultContentListName) != 0)
+            {
+                mLauncherSettings.removeContentList(oldContentListName);
             }
 
-            mGameSettings.remove(QLatin1String("content"));
+            const QString newContentListName(mProfileDialog->lineEdit()->text());
+            const QStringList files(mGameSettings.getContentList());
+            mLauncherSettings.setCurrentContentListName(newContentListName);
+            mLauncherSettings.setContentList(newContentListName, files);
+
+            // Make DataFiles Page load the new content list.
+            mMain->reloadSettings();
         }
     }
 
-    mMain->reloadSettings();
     importerButton->setEnabled(true);
 }
 
@@ -234,7 +237,7 @@ void Launcher::SettingsPage::updateOkButton(const QString &text)
          return;
     }
 
-    const QStringList profiles(mLauncherSettings.subKeys(QString("Profiles/")));
+    const QStringList profiles(mLauncherSettings.getContentLists());
 
     (profiles.contains(text))
             ? mProfileDialog->setOkButtonEnabled(false)

@@ -26,6 +26,10 @@ struct InventoryList
 {
     std::vector<ContItem> mList;
 
+    /// Load one item, assumes subrecord name is already read
+    void add(ESMReader &esm);
+
+    /// TODO: remove this method, the ESM format doesn't guarantee that all ContItems follow one another
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 };

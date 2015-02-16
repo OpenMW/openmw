@@ -1,10 +1,11 @@
 #ifndef SDL4OGRE_CURSORMANAGER_H
 #define SDL4OGRE_CURSORMANAGER_H
 
-#include <SDL.h>
-
 #include "cursormanager.hpp"
 #include <map>
+
+struct SDL_Cursor;
+struct SDL_Surface;
 
 namespace SFO
 {

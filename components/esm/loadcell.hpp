@@ -18,7 +18,7 @@ namespace ESM
 {
 class ESMReader;
 class ESMWriter;
-    class CellId;
+struct CellId;
 
 /* Moved cell reference tracking object. This mainly stores the target cell
         of the reference, so we can easily know where it has been moved when another
@@ -78,7 +78,13 @@ struct Cell
     float mFogDensity;
   };
 
-  Cell() : mWater(0) {}
+  Cell() : mWater(0),
+           mName(""),
+           mRegion(""),
+           mWaterInt(false),
+           mMapColor(0),
+           mRefNumCounter(0)
+  {}
 
   // Interior cells are indexed by this (it's the 'id'), for exterior
   // cells it is optional.
@@ -131,7 +137,7 @@ struct Cell
 
   bool hasWater() const
   {
-      return (mData.mFlags&HasWater);
+      return (mData.mFlags&HasWater) != 0;
   }
 
   // Restore the given reader to the stored position. Will try to open

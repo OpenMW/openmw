@@ -1,7 +1,7 @@
 #include "esmloader.hpp"
 #include "esmstore.hpp"
 
-#include "components/to_utf8/to_utf8.hpp"
+#include <components/esm/esmreader.hpp>
 
 namespace MWWorld
 {

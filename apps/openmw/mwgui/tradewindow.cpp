@@ -1,6 +1,8 @@
 #include "tradewindow.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Button.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_ControllerManager.h>
 
 #include <components/widgets/numericeditbox.hpp>
 
@@ -14,6 +16,7 @@
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
@@ -94,12 +97,28 @@ namespace MWGui
         setCoord(400, 0, 400, 300);
     }
 
+    void TradeWindow::restock()
+    {
+        // Restock items on the actor inventory
+        mPtr.getClass().restock(mPtr);
+
+        // Also restock any containers owned by this merchant, which are also available to buy in the trade window
+        std::vector<MWWorld::Ptr> itemSources;
+        MWBase::Environment::get().getWorld()->getContainersOwnedBy(mPtr, itemSources);
+        for (std::vector<MWWorld::Ptr>::iterator it = itemSources.begin(); it != itemSources.end(); ++it)
+        {
+            it->getClass().restock(*it);
+        }
+    }
+
     void TradeWindow::startTrade(const MWWorld::Ptr& actor)
     {
         mPtr = actor;
 
         mCurrentBalance = 0;
         mCurrentMerchantOffer = 0;
+
+        restock();
 
         std::vector<MWWorld::Ptr> itemSources;
         MWBase::Environment::get().getWorld()->getContainersOwnedBy(actor, itemSources);
@@ -115,8 +134,6 @@ namespace MWGui
 
         updateLabels();
 
-        // Careful here. setTitle may cause size updates, causing itemview redraw, so make sure to do it last
-        // or we end up using a possibly invalid model.
         setTitle(actor.getClass().getName(actor));
 
         onFilterChanged(mFilterAll);
@@ -284,21 +301,23 @@ namespace MWGui
         // check if the player is attempting to sell back an item stolen from this actor
         for (std::vector<ItemStack>::iterator it = merchantBought.begin(); it != merchantBought.end(); ++it)
         {
-            if (Misc::StringUtils::ciEqual(it->mBase.getCellRef().getOwner(), mPtr.getCellRef().getRefId()))
+            if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(it->mBase.getCellRef().getRefId(),
+                                                                                   mPtr.getCellRef().getRefId()))
             {
                 std::string msg = gmst.find("sNotifyMessage49")->getString();
                 if (msg.find("%s") != std::string::npos)
                     msg.replace(msg.find("%s"), 2, it->mBase.getClass().getName(it->mBase));
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
-                MWBase::Environment::get().getDialogueManager()->say(mPtr, "Thief");
-                MWBase::Environment::get().getMechanicsManager()->reportCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
+                MWBase::Environment::get().getMechanicsManager()->commitCrime(player, mPtr, MWBase::MechanicsManager::OT_Theft,
                                                                               it->mBase.getClass().getValue(it->mBase)
-                                                                              * it->mCount);
+                                                                              * it->mCount, true);
                 onCancelButtonClicked(mCancelButton);
                 MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
                 return;
             }
         }
+
+        // TODO: move to mwmechanics
 
         // Is the player buying?
         bool buying = (mCurrentMerchantOffer < 0);
@@ -469,7 +488,7 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-        mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + boost::lexical_cast<std::string>(playerGold));
+        mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + MyGUI::utility::toString(playerGold));
 
         if (mCurrentBalance > 0)
         {
@@ -482,7 +501,7 @@ namespace MWGui
 
         mTotalBalance->setValue(std::abs(mCurrentBalance));
 
-        mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + boost::lexical_cast<std::string>(getMerchantGold()));
+        mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + MyGUI::utility::toString(getMerchantGold()));
     }
 
     void TradeWindow::updateOffer()

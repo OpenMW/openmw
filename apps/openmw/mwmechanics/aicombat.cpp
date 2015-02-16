@@ -23,6 +23,7 @@
 #include "character.hpp" // fixme: for getActiveWeapon
 
 #include "aicombataction.hpp"
+#include "combat.hpp"
 
 namespace
 {
@@ -57,7 +58,7 @@ namespace
     // magnitude of pits/obstacles is defined by PATHFIND_Z_REACH
     bool checkWayIsClear(const Ogre::Vector3& from, const Ogre::Vector3& to, float offsetXY)
     {
-        if((to - from).length() >= PATHFIND_CAUTION_DIST || abs(from.z - to.z) <= PATHFIND_Z_REACH)
+        if((to - from).length() >= PATHFIND_CAUTION_DIST || std::abs(from.z - to.z) <= PATHFIND_Z_REACH)
         {
             Ogre::Vector3 dir = to - from;
             dir.z = 0;
@@ -68,7 +69,7 @@ namespace
             // cast up-down ray and find height in world space of hit
             float h = _from.z - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(_from, -Ogre::Vector3::UNIT_Z, verticalOffset + PATHFIND_Z_REACH + 1);
 
-            if(abs(from.z - h) <= PATHFIND_Z_REACH)
+            if(std::abs(from.z - h) <= PATHFIND_Z_REACH)
                 return true;
         }
 
@@ -206,12 +207,8 @@ namespace MWMechanics
         const MWWorld::Class& actorClass = actor.getClass();
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
-        if (!actorClass.isNpc() &&
-            // 1. pure water creature and Player moved out of water
-            ((target == world->getPlayerPtr() &&
-            actorClass.canSwim(actor) && !actor.getClass().canWalk(actor) && !world->isSwimming(target))
-            // 2. creature can't swim to target
-            || (!actorClass.canSwim(actor) && world->isSwimming(target))))
+        // can't fight if attacker can't go where target is.  E.g. A fish can't attack person on land.
+        if (!actorClass.isNpc() && !MWMechanics::isEnvironmentCompatible(actor, target))
         {
             actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
             return true;
@@ -300,6 +297,14 @@ namespace MWMechanics
 
         //Update with period = tReaction
 
+        // Stop attacking if target is not seen
+        if (target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude() > 0
+                || target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude() > 75)
+        {
+            movement.mPosition[1] = movement.mPosition[0] = 0;
+            return false; // TODO: run away instead of doing nothing
+        }
+
         timerReact = 0;
         const MWWorld::CellStore*& currentCell = storage.mCell;
         bool cellChange = currentCell && (actor.getCell() != currentCell);
@@ -325,10 +330,6 @@ namespace MWMechanics
             currentAction = prepareNextAction(actor, target);
             actionCooldown = currentAction->getActionCooldown();
         }
-
-        // Stop attacking if target is not seen
-        if (!MWBase::Environment::get().getMechanicsManager()->awarenessCheck(target, actor))
-            return true;
 
         if (currentAction.get())
             currentAction->getCombatRange(rangeAttack, rangeFollow);
@@ -576,7 +577,7 @@ namespace MWMechanics
                 buildNewPath(actor, target); //may fail to build a path, check before use
 
                 //delete visited path node
-                mPathFinder.checkWaypoint(pos.pos[0],pos.pos[1],pos.pos[2]);
+                mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]);
 
                 // This works on the borders between the path grid and areas with no waypoints.
                 if(inLOS && mPathFinder.getPath().size() > 1)

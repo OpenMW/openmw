@@ -17,6 +17,7 @@
 #include "extensions.hpp"
 #include "context.hpp"
 #include "discardparser.hpp"
+#include "junkparser.hpp"
 
 namespace Compiler
 {
@@ -660,7 +661,7 @@ namespace Compiler
             else
             {
                 // no comma was used between arguments
-                scanner.putbackKeyword (code, loc);
+                scanner.putbackSpecial (code, loc);
                 return false;
             }
         }
@@ -752,7 +753,7 @@ namespace Compiler
     }
 
     int ExprParser::parseArguments (const std::string& arguments, Scanner& scanner,
-        std::vector<Interpreter::Type_Code>& code)
+        std::vector<Interpreter::Type_Code>& code, int ignoreKeyword)
     {
         bool optional = false;
         int optionalCount = 0;
@@ -760,6 +761,7 @@ namespace Compiler
         ExprParser parser (getErrorHandler(), getContext(), mLocals, mLiterals, true);
         StringParser stringParser (getErrorHandler(), getContext(), mLiterals);
         DiscardParser discardParser (getErrorHandler(), getContext());
+        JunkParser junkParser (getErrorHandler(), getContext(), ignoreKeyword);
 
         std::stack<std::vector<Interpreter::Type_Code> > stack;
 
@@ -814,6 +816,13 @@ namespace Compiler
 
                 if (discardParser.isEmpty())
                     break;
+            }
+            else if (*iter=='j')
+            {
+                /// \todo disable this when operating in strict mode
+                junkParser.reset();
+
+                scanner.scan (junkParser);
             }
             else
             {

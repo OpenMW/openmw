@@ -12,9 +12,12 @@
 
 
         <!-- Range -->
-        <Widget type="TextBox" skin="NormalText" position="8 36 400 24">
+        <Widget type="AutoSizedTextBox" skin="NormalText" position="8 36 400 24">
             <Property key="Caption" value="#{sRange}"/>
             <Property key="TextAlign" value="Left HCenter"/>
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="TextToolTip"/>
+            <UserString key="Caption_Text" value="#{sRangeDes}"/>
         </Widget>
         <Widget type="AutoSizedButton" skin="MW_Button" position="130 36 0 24" name="RangeButton">
             <Property key="Caption" value="#{sRangeTouch}"/>
@@ -22,9 +25,12 @@
 
         <!-- Magnitude -->
         <Widget type="Widget" position="8 80 400 70" name="MagnitudeBox">
-            <Widget type="TextBox" skin="NormalText" position="0 0 400 24">
+            <Widget type="AutoSizedTextBox" skin="NormalText" position="0 0 400 24">
                 <Property key="Caption" value="#{sMagnitude}"/>
                 <Property key="TextAlign" value="Left HCenter"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                <UserString key="Caption_Text" value="#{sMagnitudeDes}"/>
             </Widget>
 
             <Widget type="TextBox" skin="SandText" position="122 0 210 20" name="MagnitudeMinValue">
@@ -49,9 +55,12 @@
 
         <!-- Duration -->
         <Widget type="Widget" position="8 153 400 40" name="DurationBox">
-            <Widget type="TextBox" skin="NormalText" position="0 20 400 24">
+            <Widget type="AutoSizedTextBox" skin="NormalText" position="0 20 400 24">
                 <Property key="Caption" value="#{sDuration}"/>
                 <Property key="TextAlign" value="Left Top"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                <UserString key="Caption_Text" value="#{sDurationDes}"/>
             </Widget>
 
             <Widget type="TextBox" skin="SandText" position="122 0 210 20" name="DurationValue">
@@ -66,9 +75,12 @@
 
         <!-- Area -->
         <Widget type="Widget" position="8 197 400 40" name="AreaBox">
-            <Widget type="TextBox" skin="NormalText" position="0 20 400 24" name="AreaText">
+            <Widget type="AutoSizedTextBox" skin="NormalText" position="0 20 400 24" name="AreaText">
                 <Property key="Caption" value="#{sArea}"/>
                 <Property key="TextAlign" value="Left Top"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                <UserString key="Caption_Text" value="#{sAreaDes}"/>
             </Widget>
 
             <Widget type="TextBox" skin="SandText" position="122 0 210 20" name="AreaValue">

@@ -1,19 +1,23 @@
 #ifndef GAME_MWBASE_WINDOWMANAGER_H
 #define GAME_MWBASE_WINDOWMANAGER_H
 
+#include <stdint.h>
 #include <string>
 #include <vector>
 #include <map>
-
-#include <components/settings/settings.hpp>
-
-#include <components/translation/translation.hpp>
-
-#include <components/loadinglistener/loadinglistener.hpp>
-
-#include "../mwmechanics/stat.hpp"
+#include <set>
 
 #include "../mwgui/mode.hpp"
+
+namespace Loading
+{
+    class Listener;
+}
+
+namespace Translation
+{
+    class Storage;
+}
 
 namespace MyGUI
 {
@@ -35,6 +39,15 @@ namespace ESM
     struct Class;
     class ESMReader;
     class ESMWriter;
+    struct CellId;
+}
+
+namespace MWMechanics
+{
+    class AttributeValue;
+    template<typename T>
+    class DynamicStat;
+    class SkillValue;
 }
 
 namespace MWWorld
@@ -58,6 +71,7 @@ namespace MWGui
     class ContainerWindow;
     class DialogueWindow;
     class WindowModal;
+    class JailScreen;
 
     enum ShowInDialogueMode {
         ShowInDialogueMode_IfPossible,
@@ -108,6 +122,8 @@ namespace MWBase
 
             virtual void removeGuiMode (MWGui::GuiMode mode) = 0;
             ///< can be anywhere in the stack
+
+            virtual void goToJail(int days) = 0;
 
             virtual void updatePlayer() = 0;
 
@@ -240,9 +256,11 @@ namespace MWBase
             /** No guarentee of actually closing the window **/
             virtual void exitCurrentGuiMode() = 0;
 
-            virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
+            virtual void messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
             virtual void staticMessageBox(const std::string& message) = 0;
             virtual void removeStaticMessageBox() = 0;
+            virtual void interactiveMessageBox (const std::string& message,
+                                                const std::vector<std::string>& buttons = std::vector<std::string>(), bool block=false) = 0;
 
             /// returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
             virtual int readPressedButton() = 0;
@@ -264,7 +282,7 @@ namespace MWBase
              */
             virtual std::string getGameSettingString(const std::string &id, const std::string &default_) = 0;
 
-            virtual void processChangedSettings(const Settings::CategorySettingVector& changed) = 0;
+            virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& changed) = 0;
 
             virtual void windowResized(int x, int y) = 0;
 
@@ -308,7 +326,7 @@ namespace MWBase
             virtual void clear() = 0;
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
+            virtual void readRecord (ESM::ESMReader& reader, uint32_t type) = 0;
             virtual int countSavedGameRecords() const = 0;
 
             /// Does the current stack of GUI-windows permit saving?
@@ -342,6 +360,11 @@ namespace MWBase
             virtual void setWerewolfOverlay(bool set) = 0;
 
             virtual void toggleDebugWindow() = 0;
+
+            /// Cycle to next or previous spell
+            virtual void cycleSpell(bool next) = 0;
+            /// Cycle to next or previous weapon
+            virtual void cycleWeapon(bool next) = 0;
     };
 }
 

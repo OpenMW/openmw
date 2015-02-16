@@ -25,8 +25,7 @@ void EffectManager::addEffect(const std::string &model, std::string textureOverr
 
     NifOgre::ObjectScenePtr scene = NifOgre::Loader::createObjects(sceneNode, model);
 
-    // TODO: turn off shadow casting
-    MWRender::Animation::setRenderProperties(scene, RV_Misc,
+    MWRender::Animation::setRenderProperties(scene, RV_Effects,
                         RQG_Main, RQG_Alpha, 0.f, false, NULL);
 
     for(size_t i = 0;i < scene->mControllers.size();i++)

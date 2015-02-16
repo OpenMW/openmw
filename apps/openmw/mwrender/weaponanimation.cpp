@@ -7,12 +7,14 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/combat.hpp"
 
 #include "animation.hpp"
 
@@ -44,19 +46,37 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
 {
     MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
     MWWorld::ContainerStoreIterator weaponSlot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-    if (weaponSlot != inv.end() && weaponSlot->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
+    if (weaponSlot == inv.end())
+        return;
+    if (weaponSlot->getTypeName() != typeid(ESM::Weapon).name())
+        return;
+    int weaponType = weaponSlot->get<ESM::Weapon>()->mBase->mData.mType;
+    if (weaponType == ESM::Weapon::MarksmanThrown)
+    {
+        std::string soundid = weaponSlot->getClass().getUpSoundId(*weaponSlot);
+        if(!soundid.empty())
+        {
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            sndMgr->playSound3D(actor, soundid, 1.0f, 1.0f);
+        }
         showWeapon(true);
-    else
+    }
+    else if (weaponType == ESM::Weapon::MarksmanBow || weaponType == ESM::Weapon::MarksmanCrossbow)
     {
         NifOgre::ObjectScenePtr weapon = getWeapon();
+        if (!weapon.get())
+            return;
 
         MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
         if (ammo == inv.end())
             return;
         std::string model = ammo->getClass().getModel(*ammo);
 
-        assert(weapon->mSkelBase && "Need a skeleton to attach the arrow to");
-        mAmmunition = NifOgre::Loader::createObjects(weapon->mSkelBase, "ArrowBone", weapon->mSkelBase->getParentSceneNode(), model);
+        if (!weapon->mSkelBase)
+            throw std::runtime_error("Need a skeleton to attach the arrow to");
+
+        const std::string bonename = "ArrowBone";
+        mAmmunition = NifOgre::Loader::createObjects(weapon->mSkelBase, bonename, bonename, weapon->mSkelBase->getParentSceneNode(), model);
         configureAddedObject(mAmmunition, *ammo, MWWorld::InventoryStore::Slot_Ammunition);
     }
 }
@@ -67,6 +87,8 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
     MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     if (weapon == inv.end())
         return;
+    if (weapon->getTypeName() != typeid(ESM::Weapon).name())
+        return;
 
     // The orientation of the launched projectile. Always the same as the actor orientation, even if the ArrowBone's orientation dictates otherwise.
     Ogre::Quaternion orient = Ogre::Quaternion(Ogre::Radian(actor.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
@@ -75,19 +97,7 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-    // Reduce fatigue
-    // somewhat of a guess, but using the weapon weight makes sense
-    const float fFatigueAttackBase = gmst.find("fFatigueAttackBase")->getFloat();
-    const float fFatigueAttackMult = gmst.find("fFatigueAttackMult")->getFloat();
-    const float fWeaponFatigueMult = gmst.find("fWeaponFatigueMult")->getFloat();
-    MWMechanics::CreatureStats& attackerStats = actor.getClass().getCreatureStats(actor);
-    MWMechanics::DynamicStat<float> fatigue = attackerStats.getFatigue();
-    const float normalizedEncumbrance = actor.getClass().getNormalizedEncumbrance(actor);
-    float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
-    if (!weapon->isEmpty())
-        fatigueLoss += weapon->getClass().getWeight(*weapon) * attackerStats.getAttackStrength() * fWeaponFatigueMult;
-    fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
-    attackerStats.setFatigue(fatigue);
+    MWMechanics::applyFatigueLoss(actor, *weapon);
 
     if (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
     {
@@ -121,6 +131,9 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
         // With bows and crossbows only the used arrow/bolt gets detached
         MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
         if (ammo == inv.end())
+            return;
+
+        if (!mAmmunition.get())
             return;
 
         Ogre::Vector3 launchPos(0,0,0);

@@ -1,10 +1,6 @@
 #ifndef OPENMW_MECHANICS_OBSTACLE_H
 #define OPENMW_MECHANICS_OBSTACLE_H
 
-//#include "../mwbase/world.hpp"
-//#include "../mwworld/class.hpp"
-#include "../mwworld/cellstore.hpp"
-
 namespace MWWorld
 {
     class Ptr;

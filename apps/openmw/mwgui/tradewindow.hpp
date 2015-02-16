@@ -1,18 +1,18 @@
 #ifndef MWGUI_TRADEWINDOW_H
 #define MWGUI_TRADEWINDOW_H
 
-#include "container.hpp"
+#include "referenceinterface.hpp"
+#include "windowbase.hpp"
 
 namespace Gui
 {
     class NumericEditBox;
 }
 
-namespace MWGui
+namespace MyGUI
 {
-    class WindowManager;
+    class ControllerItem;
 }
-
 
 namespace MWGui
 {
@@ -98,6 +98,8 @@ namespace MWGui
             virtual void onReferenceUnavailable();
 
             int getMerchantGold();
+
+            void restock();
     };
 }
 

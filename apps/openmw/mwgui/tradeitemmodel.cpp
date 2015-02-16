@@ -135,11 +135,9 @@ namespace MWGui
             if (i == sourceModel->getItemCount())
                 throw std::runtime_error("The borrowed item disappeared");
 
-            // reset owner while copying, but only for items bought by the player
-            bool setNewOwner = (mMerchant.isEmpty());
             const ItemStack& item = sourceModel->getItem(i);
             // copy the borrowed items to our model
-            copyItem(item, it->mCount, setNewOwner);
+            copyItem(item, it->mCount);
             // then remove them from the source model
             sourceModel->removeItem(item, it->mCount);
         }
@@ -175,17 +173,8 @@ namespace MWGui
                 // don't show equipped items
                 if(mMerchant.getClass().hasInventoryStore(mMerchant))
                 {
-                    bool isEquipped = false;
                     MWWorld::InventoryStore& store = mMerchant.getClass().getInventoryStore(mMerchant);
-                    for (int slot=0; slot<MWWorld::InventoryStore::Slots; ++slot)
-                    {
-                        MWWorld::ContainerStoreIterator equipped = store.getSlot(slot);
-                        if (equipped == store.end())
-                            continue;
-                        if (*equipped == base)
-                            isEquipped = true;
-                    }
-                    if (isEquipped)
+                    if (store.isEquipped(base))
                         continue;
                 }
             }

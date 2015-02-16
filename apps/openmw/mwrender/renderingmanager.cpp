@@ -175,7 +175,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     mDebugging = new Debugging(mRootNode, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
 
-    mWater = new MWRender::Water(mRendering.getCamera(), this);
+    mWater = new MWRender::Water(mRendering.getCamera(), this, mFallback);
 
     setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
 }
@@ -256,10 +256,10 @@ void RenderingManager::cellAdded (MWWorld::CellStore *store)
     mDebugging->cellAdded(store);
 }
 
-void RenderingManager::addObject (const MWWorld::Ptr& ptr){
+void RenderingManager::addObject (const MWWorld::Ptr& ptr, const std::string& model){
     const MWWorld::Class& class_ =
             ptr.getClass();
-    class_.insertObjectRendering(ptr, *this);
+    class_.insertObjectRendering(ptr, model, *this);
 }
 
 void RenderingManager::removeObject (const MWWorld::Ptr& ptr)
@@ -297,6 +297,8 @@ void RenderingManager::rotateObject(const MWWorld::Ptr &ptr)
 void
 RenderingManager::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
+    if (!old.getRefData().getBaseNode())
+        return;
     Ogre::SceneNode *child =
         mRendering.getScene()->getSceneNode(old.getRefData().getHandle());
 
@@ -409,6 +411,7 @@ void RenderingManager::update (float duration, bool paused)
 
     mSkyManager->setGlare(mOcclusionQuery->getSunVisibility());
 
+    mWater->changeCell(player.getCell()->getCell());
 
     mWater->updateUnderwater(world->isUnderwater(player.getCell(), cam));
 
@@ -629,12 +632,12 @@ void RenderingManager::sunDisable(bool real)
     }
 }
 
-void RenderingManager::setSunDirection(const Ogre::Vector3& direction, bool is_moon)
+void RenderingManager::setSunDirection(const Ogre::Vector3& direction, bool is_night)
 {
     // direction * -1 (because 'direction' is camera to sun vector and not sun to camera),
     if (mSun) mSun->setDirection(Vector3(-direction.x, -direction.y, -direction.z));
 
-    mSkyManager->setSunDirection(direction, is_moon);
+    mSkyManager->setSunDirection(direction, is_night);
 }
 
 void RenderingManager::setGlare(bool glare)
@@ -677,19 +680,20 @@ void RenderingManager::writeFog(MWWorld::CellStore* cell)
 
 void RenderingManager::disableLights(bool sun)
 {
-    mObjects->disableLights();
+    mActors->disableLights();
     sunDisable(sun);
 }
 
 void RenderingManager::enableLights(bool sun)
 {
-    mObjects->enableLights();
+    mActors->enableLights();
     sunEnable(sun);
 }
 
 void RenderingManager::notifyWorldSpaceChanged()
 {
     mEffectManager->clear();
+    mWater->clearRipples();
 }
 
 Ogre::Vector4 RenderingManager::boundingBoxToScreen(Ogre::AxisAlignedBox bounds)
@@ -753,8 +757,14 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
                 || it->second == "resolution y"
                 || it->second == "fullscreen"))
             changeRes = true;
+        else if (it->first == "Video" && it->second == "window border")
+            changeRes = true;
         else if (it->second == "field of view" && it->first == "General")
             mRendering.setFov(Settings::Manager::getFloat("field of view", "General"));
+        else if (it->second == "gamma" && it->first == "General")
+        {
+            mRendering.setWindowGammaContrast(Settings::Manager::getFloat("gamma", "General"), Settings::Manager::getFloat("contrast", "General"));
+        }
         else if ((it->second == "texture filtering" && it->first == "General")
             || (it->second == "anisotropy" && it->first == "General"))
         {
@@ -810,6 +820,7 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         unsigned int x = Settings::Manager::getInt("resolution x", "Video");
         unsigned int y = Settings::Manager::getInt("resolution y", "Video");
         bool fullscreen = Settings::Manager::getBool("fullscreen", "Video");
+        bool windowBorder = Settings::Manager::getBool("window border", "Video");
 
         SDL_Window* window = mRendering.getSDLWindow();
 
@@ -828,7 +839,10 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             SDL_SetWindowFullscreen(window, fullscreen);
         }
         else
+        {
             SDL_SetWindowSize(window, x, y);
+            SDL_SetWindowBordered(window, windowBorder ? SDL_TRUE : SDL_FALSE);
+        }
     }
 
     mWater->processChangedSettings(settings);
@@ -1026,10 +1040,10 @@ void RenderingManager::enableTerrain(bool enable)
         if (!mTerrain)
         {
             if (Settings::Manager::getBool("distant land", "Terrain"))
-                mTerrain = new Terrain::DefaultWorld(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                mTerrain = new Terrain::DefaultWorld(mRendering.getScene(), new MWRender::TerrainStorage(true), RV_Terrain,
                                                 Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY, 1, 64);
             else
-                mTerrain = new Terrain::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                mTerrain = new Terrain::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(false), RV_Terrain,
                                                 Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY);
             mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
                                      Settings::Manager::getBool("split", "Shadows"));

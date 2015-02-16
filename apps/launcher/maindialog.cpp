@@ -27,25 +27,6 @@ using namespace Process;
 Launcher::MainDialog::MainDialog(QWidget *parent)
     : mGameSettings(mCfgMgr), QMainWindow (parent)
 {
-    // Install the stylesheet font
-    QFile file;
-    QFontDatabase fontDatabase;
-
-    const QStringList fonts = fontDatabase.families();
-
-    // Check if the font is installed
-    if (!fonts.contains("EB Garamond")) {
-
-        QString font = QString::fromUtf8(mCfgMgr.getGlobalDataPath().string().c_str()) + QString("resources/mygui/EBGaramond-Regular.ttf");
-        file.setFileName(font);
-
-        if (!file.exists()) {
-            font = QString::fromUtf8(mCfgMgr.getLocalPath().string().c_str()) + QString("resources/mygui/EBGaramond-Regular.ttf");
-        }
-
-        fontDatabase.addApplicationFont(font);
-    }
-
     setupUi(this);
 
     mGameInvoker = new ProcessInvoker();
@@ -209,6 +190,8 @@ bool Launcher::MainDialog::setup()
     if (!setupGameSettings())
         return false;
 
+    mLauncherSettings.setContentList(mGameSettings);
+
     if (!setupGraphicsSettings())
         return false;
 
@@ -231,6 +214,8 @@ bool Launcher::MainDialog::reloadSettings()
 
     if (!setupGameSettings())
         return false;
+
+    mLauncherSettings.setContentList(mGameSettings);
 
     if (!setupGraphicsSettings())
         return false;
@@ -280,8 +265,8 @@ bool Launcher::MainDialog::setupLauncherSettings()
     QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
 
     QStringList paths;
-    paths.append(QString("launcher.cfg"));
-    paths.append(userPath + QString("launcher.cfg"));
+    paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
+    paths.append(userPath + QString(Config::LauncherSettings::sLauncherConfigFileName));
 
     foreach (const QString &path, paths) {
         qDebug() << "Loading config file:" << qPrintable(path);
@@ -562,7 +547,7 @@ bool Launcher::MainDialog::writeSettings()
     file.close();
 
     // Launcher settings
-    file.setFileName(userPath + QString("launcher.cfg"));
+    file.setFileName(userPath + QString(Config::LauncherSettings::sLauncherConfigFileName));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created

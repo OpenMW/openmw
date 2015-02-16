@@ -38,16 +38,14 @@ shUniform(float4x4, projection) @shAutoConstant(projection, projection_matrix)
 
     SH_START_PROGRAM
     {
-        
-        float4 tex = shSample(diffuseMap, UV);
-        
-        shOutputColour(0) = float4(materialEmissive.xyz, 1) * tex;
-        
-        shOutputColour(0).a = shSample(alphaMap, UV).a * materialDiffuse.a;
-        
-        shOutputColour(0).rgb += (1.0-tex.a) * shOutputColour(0).a * atmosphereColour.rgb; //fill dark side of moon with atmosphereColour
-        shOutputColour(0).rgb += (1.0-materialDiffuse.a) * atmosphereColour.rgb; //fade bump
+        float4 phaseTex = shSample(diffuseMap, UV);
+        float4 fullCircleTex = shSample(alphaMap, UV);
 
+        shOutputColour(0).a = max(phaseTex.a, fullCircleTex.a) * materialDiffuse.a;
+
+        shOutputColour(0).xyz = fullCircleTex.xyz * atmosphereColour.xyz;
+        shOutputColour(0).xyz = shLerp(shOutputColour(0).xyz, phaseTex.xyz, phaseTex.a);
+        shOutputColour(0).xyz *= materialEmissive.xyz;
     }
 
 #endif

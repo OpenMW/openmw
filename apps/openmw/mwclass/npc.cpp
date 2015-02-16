@@ -296,21 +296,6 @@ namespace MWClass
 
             MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
-            // NPC stats
-            if (!ref->mBase->mFaction.empty())
-            {
-                std::string faction = ref->mBase->mFaction;
-                Misc::StringUtils::toLower(faction);
-                if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
-                {
-                    data->mNpcStats.setFactionRank(faction, (int)ref->mBase->mNpdt52.mRank);
-                }
-                else
-                {
-                    data->mNpcStats.setFactionRank(faction, (int)ref->mBase->mNpdt12.mRank);
-                }
-            }
-
             // creature stats
             int gold=0;
             if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
@@ -361,16 +346,19 @@ namespace MWClass
             for (std::vector<std::string>::const_iterator iter (race->mPowers.mList.begin());
                 iter!=race->mPowers.mList.end(); ++iter)
             {
-                data->mNpcStats.getSpells().add (*iter);
+                if (const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter))
+                    data->mNpcStats.getSpells().add (spell);
+                else
+                    std::cerr << "Warning: ignoring nonexistent race power '" << *iter << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
             }
 
-            if (data->mNpcStats.getFactionRanks().size())
+            if (!ref->mBase->mFaction.empty())
             {
                 static const int iAutoRepFacMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("iAutoRepFacMod")->getInt();
                 static const int iAutoRepLevMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("iAutoRepLevMod")->getInt();
-                int rank = data->mNpcStats.getFactionRanks().begin()->second;
+                int rank = ref->mBase->getFactionRank();
 
                 data->mNpcStats.setReputation(iAutoRepFacMod * (rank+1) + iAutoRepLevMod * (data->mNpcStats.getLevel()-1));
             }
@@ -385,11 +373,19 @@ namespace MWClass
             // spells
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
                 iter!=ref->mBase->mSpells.mList.end(); ++iter)
-                data->mNpcStats.getSpells().add (*iter);
+            {
+                if (const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter))
+                    data->mNpcStats.getSpells().add (spell);
+                else
+                {
+                    /// \todo add option to make this a fatal error message pop-up, but default to warning for vanilla compatibility
+                    std::cerr << "Warning: ignoring nonexistent spell '" << *iter << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
+                }
+            }
 
             // inventory
-            data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr), "",
-                                       MWBase::Environment::get().getWorld()->getStore());
+            // setting ownership is used to make the NPC auto-equip his initial equipment only, and not bartered items
+            data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr));
 
             data->mNpcStats.setGoldPool(gold);
 
@@ -413,14 +409,14 @@ namespace MWClass
         MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
     }
 
-    void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         renderingInterface.getActors().insertNPC(ptr);
     }
 
-    void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Npc::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        physics.addActor(ptr);
+        physics.addActor(ptr, model);
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
         if (getCreatureStats(ptr).isDead())
             MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
@@ -490,18 +486,7 @@ namespace MWClass
         if(!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
             weapon = MWWorld::Ptr();
 
-        // Reduce fatigue
-        // somewhat of a guess, but using the weapon weight makes sense
-        const float fFatigueAttackBase = store.find("fFatigueAttackBase")->getFloat();
-        const float fFatigueAttackMult = store.find("fFatigueAttackMult")->getFloat();
-        const float fWeaponFatigueMult = store.find("fWeaponFatigueMult")->getFloat();
-        MWMechanics::DynamicStat<float> fatigue = getCreatureStats(ptr).getFatigue();
-        const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
-        float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
-        if (!weapon.isEmpty())
-            fatigueLoss += weapon.getClass().getWeight(weapon) * getNpcStats(ptr).getAttackStrength() * fWeaponFatigueMult;
-        fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
-        getCreatureStats(ptr).setFatigue(fatigue);
+        MWMechanics::applyFatigueLoss(ptr, weapon);
 
         const float fCombatDistance = store.find("fCombatDistance")->getFloat();
         float dist = fCombatDistance * (!weapon.isEmpty() ?
@@ -562,34 +547,7 @@ namespace MWClass
         }
         else
         {
-            // Note: MCP contains an option to include Strength in hand-to-hand damage
-            // calculations. Some mods recommend using it, so we may want to include am
-            // option for it.
-            float minstrike = store.find("fMinHandToHandMult")->getFloat();
-            float maxstrike = store.find("fMaxHandToHandMult")->getFloat();
-            damage  = stats.getSkill(weapskill).getModified();
-            damage *= minstrike + ((maxstrike-minstrike)*stats.getAttackStrength());
-
-            healthdmg = (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
-                    || otherstats.getKnockedDown();
-            if(stats.isWerewolf())
-            {
-                healthdmg = true;
-                // GLOB instead of GMST because it gets updated during a quest
-                damage *= world->getGlobalFloat("werewolfclawmult");
-            }
-            if(healthdmg)
-                damage *= store.find("fHandtoHandHealthPer")->getFloat();
-
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            if(stats.isWerewolf())
-            {
-                const ESM::Sound *sound = world->getStore().get<ESM::Sound>().searchRandom("WolfHit");
-                if(sound)
-                    sndMgr->playSound3D(victim, sound->mId, 1.0f, 1.0f);
-            }
-            else
-                sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
+            MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg);
         }
         if(ptr.getRefData().getHandle() == "player")
         {
@@ -626,7 +584,7 @@ namespace MWClass
 
         MWMechanics::applyElementalShields(ptr, victim);
 
-        if (!weapon.isEmpty() && MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
+        if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
             damage = 0;
 
         if (healthdmg && damage > 0)
@@ -654,10 +612,11 @@ namespace MWClass
             setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
+        if(!object.isEmpty())
+            getCreatureStats(ptr).setLastHitAttemptObject(object.getClass().getId(object));
+
         if(!successful)
         {
-            // TODO: Handle HitAttemptOnMe script function
-
             // Missed
             sndMgr->playSound3D(ptr, "miss", 1.0f, 1.0f);
             return;
@@ -1002,37 +961,6 @@ namespace MWClass
         return x;
     }
 
-    float Npc::getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const
-    {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
-        const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
-
-        const float fallDistanceMin = store.find("fFallDamageDistanceMin")->getFloat();
-
-        if (fallHeight >= fallDistanceMin)
-        {
-            const float acrobaticsSkill = ptr.getClass().getNpcStats (ptr).getSkill(ESM::Skill::Acrobatics).getModified();
-            const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
-            const float jumpSpellBonus = npcdata->mNpcStats.getMagicEffects().get(ESM::MagicEffect::Jump).getMagnitude();
-            const float fallAcroBase = store.find("fFallAcroBase")->getFloat();
-            const float fallAcroMult = store.find("fFallAcroMult")->getFloat();
-            const float fallDistanceBase = store.find("fFallDistanceBase")->getFloat();
-            const float fallDistanceMult = store.find("fFallDistanceMult")->getFloat();
-
-            float x = fallHeight - fallDistanceMin;
-            x -= (1.5 * acrobaticsSkill) + jumpSpellBonus;
-            x = std::max(0.0f, x);
-
-            float a = fallAcroBase + fallAcroMult * (100 - acrobaticsSkill);
-            x = fallDistanceBase + fallDistanceMult * x;
-            x *= a;
-
-            return x;
-        }
-
-        return 0;
-    }
-
     MWMechanics::Movement& Npc::getMovementSettings (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
@@ -1278,6 +1206,7 @@ namespace MWClass
         // TODO: I have no idea what these are supposed to do for NPCs since they use
         // voiced dialog for various conditions like health loss and combat taunts. Maybe
         // only for biped creatures?
+
         if(name == "moan")
             return "";
         if(name == "roar")
@@ -1316,6 +1245,9 @@ namespace MWClass
     void Npc::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
         const
     {
+        if (!state.mHasCustomState)
+            return;
+
         const ESM::NpcState& state2 = dynamic_cast<const ESM::NpcState&> (state);
 
         ensureCustomData(ptr);
@@ -1342,6 +1274,12 @@ namespace MWClass
         const
     {
         ESM::NpcState& state2 = dynamic_cast<ESM::NpcState&> (state);
+
+        if (!ptr.getRefData().getCustomData())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
 
         ensureCustomData (ptr);
 
@@ -1372,7 +1310,7 @@ namespace MWClass
         {
             // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
             // This also means we cannot respawn dynamically placed references with no content file connection.
-            if (ptr.getCellRef().getRefNum().mContentFile != -1)
+            if (ptr.getCellRef().hasContentFile())
             {
                 if (ptr.getRefData().getCount() == 0)
                     ptr.getRefData().setCount(1);
@@ -1390,6 +1328,29 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().getRefId(), ptr.getCellRef().getFaction());
+        store.restock(list, ptr, ptr.getCellRef().getRefId());
+    }
+
+    int Npc::getBaseFightRating (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        return ref->mBase->mAiData.mFight;
+    }
+
+    bool Npc::isBipedal(const MWWorld::Ptr &ptr) const
+    {
+        return true;
+    }
+
+    std::string Npc::getPrimaryFaction (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        return ref->mBase->mFaction;
+    }
+
+    int Npc::getPrimaryFactionRank (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        return ref->mBase->getFactionRank();
     }
 }

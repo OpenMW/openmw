@@ -40,6 +40,7 @@
 
 #include "mwdialogue/dialoguemanagerimp.hpp"
 #include "mwdialogue/journalimp.hpp"
+#include "mwdialogue/scripttest.hpp"
 
 #include "mwmechanics/mechanicsmanagerimp.hpp"
 
@@ -108,11 +109,14 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         {
             if (!paused)
             {
-                // local scripts
-                executeLocalScripts();
+                if (MWBase::Environment::get().getWorld()->getScriptsEnabled())
+                {
+                    // local scripts
+                    executeLocalScripts();
 
-                // global scripts
-                MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
+                    // global scripts
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
+                }
 
                 MWBase::Environment::get().getWorld()->markCellAsUnchanged();
             }
@@ -169,11 +173,11 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   : mOgre (0)
-  , mFpsLevel(0)
   , mVerboseScripts (false)
   , mSkipMenu (false)
   , mUseSound (true)
   , mCompileAll (false)
+  , mCompileAllDialogue (false)
   , mWarningsMode (1)
   , mScriptContext (0)
   , mFSStrict (false)
@@ -206,6 +210,8 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
+    if (mOgre)
+        mOgre->restoreWindowGammaRamp();
     mEnvironment.cleanup();
     delete mScriptContext;
     delete mOgre;
@@ -288,16 +294,10 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
     else
         throw std::runtime_error ("No default settings file found! Make sure the file \"settings-default.cfg\" was properly installed.");
 
-    // load user settings if they exist, otherwise just load the default settings as user settings
+    // load user settings if they exist
     const std::string settingspath = mCfgMgr.getUserConfigPath().string() + "/settings.cfg";
     if (boost::filesystem::exists(settingspath))
         settings.loadUser(settingspath);
-    else if (boost::filesystem::exists(localdefault))
-        settings.loadUser(localdefault);
-    else if (boost::filesystem::exists(globaldefault))
-        settings.loadUser(globaldefault);
-
-    mFpsLevel = settings.getInt("fps", "HUD");
 
     // load nif overrides
     NifOverrides::Overrides nifOverrides;
@@ -345,9 +345,11 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
     addResourcesDirectory(mResDir / "shadows");
+    addResourcesDirectory(mResDir / "materials");
 
     OEngine::Render::WindowSettings windowSettings;
     windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
+    windowSettings.window_border = settings.getBool("window border", "Video");
     windowSettings.window_x = settings.getInt("resolution x", "Video");
     windowSettings.window_y = settings.getInt("resolution y", "Video");
     windowSettings.screen = settings.getInt("screen", "Video");
@@ -372,12 +374,14 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mEnvironment.setInputManager (input);
 
     MWGui::WindowManager* window = new MWGui::WindowManager(
-                mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
+                mExtensions, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
                 mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap);
     mEnvironment.setWindowManager (window);
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
+
+    mOgre->setWindowGammaContrast(Settings::Manager::getFloat("gamma", "General"), Settings::Manager::getFloat("contrast", "General"));
 
     if (!mSkipMenu)
     {
@@ -425,10 +429,19 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     if (mCompileAll)
     {
         std::pair<int, int> result = MWBase::Environment::get().getScriptManager()->compileAll();
-
         if (result.first)
             std::cout
                 << "compiled " << result.second << " of " << result.first << " scripts ("
+                << 100*static_cast<double> (result.second)/result.first
+                << "%)"
+                << std::endl;
+    }
+    if (mCompileAllDialogue)
+    {
+        std::pair<int, int> result = MWDialogue::ScriptTest::compileAll(&mExtensions, mWarningsMode);
+        if (result.first)
+            std::cout
+                << "compiled " << result.second << " of " << result.first << " dialogue script/actor combinations a("
                 << 100*static_cast<double> (result.second)/result.first
                 << "%)"
                 << std::endl;
@@ -456,9 +469,13 @@ void OMW::Engine::go()
     // Play some good 'ol tunes
     MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
 
-    // start in main menu
-    if (!mSkipMenu)
+    if (!mSaveGameFile.empty())
     {
+        MWBase::Environment::get().getStateManager()->loadGame(mSaveGameFile);
+    }
+    else if (!mSkipMenu)
+    {
+        // start in main menu
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         try
         {
@@ -497,6 +514,11 @@ void OMW::Engine::activate()
     if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         return;
 
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    if (player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0
+            || player.getClass().getCreatureStats(player).getKnockedDown())
+        return;
+
     MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getFacedObject();
 
     if (ptr.isEmpty())
@@ -504,6 +526,14 @@ void OMW::Engine::activate()
 
     if (ptr.getClass().getName(ptr) == "") // objects without name presented to user can never be activated
         return;
+
+    if (ptr.getClass().isActor())
+    {
+        MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
+
+        if (stats.getAiSequence().isInCombat() && !stats.isDead())
+            return;
+    }
 
     MWBase::Environment::get().getWorld()->activate(ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
 }
@@ -535,14 +565,14 @@ void OMW::Engine::setCompileAll (bool all)
     mCompileAll = all;
 }
 
+void OMW::Engine::setCompileAllDialogue (bool all)
+{
+    mCompileAllDialogue = all;
+}
+
 void OMW::Engine::setSoundUsage(bool soundUsage)
 {
     mUseSound = soundUsage;
-}
-
-void OMW::Engine::showFPS(int level)
-{
-    mFpsLevel = level;
 }
 
 void OMW::Engine::setEncoding(const ToUTF8::FromType& encoding)
@@ -588,4 +618,9 @@ void OMW::Engine::setScriptBlacklistUse (bool use)
 void OMW::Engine::enableFontExport(bool exportFonts)
 {
     mExportFonts = exportFonts;
+}
+
+void OMW::Engine::setSaveGameFile(const std::string &savegame)
+{
+    mSaveGameFile = savegame;
 }

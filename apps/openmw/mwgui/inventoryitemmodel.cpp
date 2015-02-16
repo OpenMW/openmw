@@ -65,16 +65,7 @@ MWWorld::Ptr InventoryItemModel::moveItem(const ItemStack &item, size_t count, I
     if (item.mFlags & ItemStack::Flag_Bound)
         return MWWorld::Ptr();
 
-    bool setNewOwner = false;
-
-    // Are you dead? Then you wont need that anymore
-    if (mActor.getClass().isActor() && mActor.getClass().getCreatureStats(mActor).isDead()
-            // Make sure that the item is actually owned by the dead actor
-            // Prevents a potential exploit for resetting the owner of any item, by placing the item in a corpse
-            && Misc::StringUtils::ciEqual(item.mBase.getCellRef().getOwner(), mActor.getCellRef().getRefId()))
-        setNewOwner = true;
-
-    MWWorld::Ptr ret = otherModel->copyItem(item, count, setNewOwner);
+    MWWorld::Ptr ret = otherModel->copyItem(item, count, false);
     removeItem(item, count);
     return ret;
 }
@@ -99,14 +90,8 @@ void InventoryItemModel::update()
         if (mActor.getClass().hasInventoryStore(mActor))
         {
             MWWorld::InventoryStore& store = mActor.getClass().getInventoryStore(mActor);
-            for (int slot=0; slot<MWWorld::InventoryStore::Slots; ++slot)
-            {
-                MWWorld::ContainerStoreIterator equipped = store.getSlot(slot);
-                if (equipped == store.end())
-                    continue;
-                if (*equipped == newItem.mBase)
-                    newItem.mType = ItemStack::Type_Equipped;
-            }
+            if (store.isEquipped(newItem.mBase))
+                newItem.mType = ItemStack::Type_Equipped;
         }
 
         mItems.push_back(newItem);

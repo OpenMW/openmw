@@ -201,12 +201,16 @@ namespace MWMechanics
             return 0.f;
 
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(ptr.getClass().getEnchantment(ptr));
+
         if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
         {
             return rateEffects(enchantment->mEffects, actor, target);
         }
         else
+        {
+            //if (!ptr.getClass().canBeEquipped(ptr, actor))
             return 0.f;
+        }
     }
 
     float rateEffect(const ESM::ENAMstruct &effect, const MWWorld::Ptr &actor, const MWWorld::Ptr &target)
@@ -290,7 +294,10 @@ namespace MWMechanics
                 // Effect doesn't heal more than we need, *or* we are below 1/2 health
                 if (current.getModified() - current.getCurrent() > toHeal
                         || current.getCurrent() < current.getModified()*0.5)
-                    return 10000.f * priority;
+                {
+                    return 10000.f * priority
+                            - (toHeal - (current.getModified()-current.getCurrent())); // prefer the most fitting potion
+                }
                 else
                     return -10000.f * priority; // Save for later
             }
@@ -454,6 +461,11 @@ namespace MWMechanics
         float bestActionRating = 0.f;
         // Default to hand-to-hand combat
         boost::shared_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
+        if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
+        {
+            bestAction->prepare(actor);
+            return bestAction;
+        }
 
         if (actor.getClass().hasInventoryStore(actor))
         {

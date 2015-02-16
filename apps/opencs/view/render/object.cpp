@@ -35,7 +35,8 @@ void CSVRender::Object::clear()
 {
     mObject.setNull();
 
-    clearSceneNode (mBase);
+    if (mBase)
+        clearSceneNode (mBase);
 }
 
 void CSVRender::Object::update()
@@ -156,11 +157,13 @@ CSVRender::Object::~Object()
 {
     clear();
 
-    if(mPhysics) // preview may not have physics enabled
-        mPhysics->removeObject(mBase->getName());
-
     if (mBase)
+    {
+        if(mPhysics) // preview may not have physics enabled
+            mPhysics->removeObject(mBase->getName());
+
         mBase->getCreator()->destroySceneNode (mBase);
+    }
 }
 
 bool CSVRender::Object::referenceableDataChanged (const QModelIndex& topLeft,

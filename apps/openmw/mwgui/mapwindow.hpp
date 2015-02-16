@@ -7,6 +7,8 @@
 
 #include <components/esm/cellid.hpp>
 
+#include <components/esm/custommarkerstate.hpp>
+
 namespace MWRender
 {
     class GlobalMap;
@@ -26,43 +28,25 @@ namespace Loading
 namespace MWGui
 {
 
-    struct CustomMarker
-    {
-        float mWorldX;
-        float mWorldY;
-
-        ESM::CellId mCell;
-
-        std::string mNote;
-
-        bool operator == (const CustomMarker& other)
-        {
-            return mNote == other.mNote && mCell == other.mCell && mWorldX == other.mWorldX && mWorldY == other.mWorldY;
-        }
-
-        void load (ESM::ESMReader& reader);
-        void save (ESM::ESMWriter& writer) const;
-    };
-
     class CustomMarkerCollection
     {
     public:
-        void addMarker(const CustomMarker& marker, bool triggerEvent=true);
-        void deleteMarker (const CustomMarker& marker);
-        void updateMarker(const CustomMarker& marker, const std::string& newNote);
+        void addMarker(const ESM::CustomMarker& marker, bool triggerEvent=true);
+        void deleteMarker (const ESM::CustomMarker& marker);
+        void updateMarker(const ESM::CustomMarker& marker, const std::string& newNote);
 
         void clear();
 
         size_t size() const;
 
-        std::vector<CustomMarker>::const_iterator begin() const;
-        std::vector<CustomMarker>::const_iterator end() const;
+        std::vector<ESM::CustomMarker>::const_iterator begin() const;
+        std::vector<ESM::CustomMarker>::const_iterator end() const;
 
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
         EventHandle_Void eventMarkersChanged;
 
     private:
-        std::vector<CustomMarker> mMarkers;
+        std::vector<ESM::CustomMarker> mMarkers;
     };
 
     class LocalMapBase
@@ -70,7 +54,7 @@ namespace MWGui
     public:
         LocalMapBase(CustomMarkerCollection& markers);
         virtual ~LocalMapBase();
-        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass);
+        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int mapWidgetSize);
 
         void setCellPrefix(const std::string& prefix);
         void setActiveCell(const int x, const int y, bool interior=false);
@@ -81,13 +65,15 @@ namespace MWGui
 
         bool toggleFogOfWar();
 
-        struct MarkerPosition
+        struct MarkerUserData
         {
             bool interior;
             int cellX;
             int cellY;
             float nX;
             float nY;
+            std::vector<std::string> notes;
+            std::string caption;
         };
 
     protected:
@@ -98,6 +84,8 @@ namespace MWGui
         std::string mPrefix;
         bool mChanged;
         bool mFogOfWar;
+
+        int mMapWidgetSize;
 
         // Stores markers that were placed by a player. May be shared between multiple map views.
         CustomMarkerCollection& mCustomMarkers;
@@ -114,7 +102,7 @@ namespace MWGui
 
         void applyFogOfWar();
 
-        MyGUI::IntPoint getMarkerPosition (float worldX, float worldY, MarkerPosition& markerPos);
+        MyGUI::IntPoint getMarkerPosition (float worldX, float worldY, MarkerUserData& markerPos);
 
         virtual void notifyPlayerUpdate() {}
         virtual void notifyMapChanged() {}
@@ -191,7 +179,7 @@ namespace MWGui
         void clear();
 
         void write (ESM::ESMWriter& writer, Loading::Listener& progress);
-        void readRecord (ESM::ESMReader& reader, int32_t type);
+        void readRecord (ESM::ESMReader& reader, uint32_t type);
 
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
@@ -231,7 +219,7 @@ namespace MWGui
         MWRender::GlobalMap* mGlobalMapRender;
 
         EditNoteDialog mEditNoteDialog;
-        CustomMarker mEditingMarker;
+        ESM::CustomMarker mEditingMarker;
 
         virtual void onPinToggled();
         virtual void onTitleDoubleClicked();

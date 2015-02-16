@@ -27,8 +27,9 @@ const char* const localToken = "?local?";
 const char* const userDataToken = "?userdata?";
 const char* const globalToken = "?global?";
 
-ConfigurationManager::ConfigurationManager()
+ConfigurationManager::ConfigurationManager(bool silent)
     : mFixedPath(applicationName)
+    , mSilent(silent)
 {
     setupTokensMapping();
 
@@ -129,7 +130,8 @@ void ConfigurationManager::loadConfig(const boost::filesystem::path& path,
     cfgFile /= std::string(openmwCfgFile);
     if (boost::filesystem::is_regular_file(cfgFile))
     {
-        std::cout << "Loading config file: " << cfgFile.string() << "... ";
+        if (!mSilent)
+            std::cout << "Loading config file: " << cfgFile.string() << "... ";
 
         boost::filesystem::ifstream configFileStream(cfgFile);
         if (configFileStream.is_open())
@@ -137,11 +139,13 @@ void ConfigurationManager::loadConfig(const boost::filesystem::path& path,
             boost::program_options::store(boost::program_options::parse_config_file(
                 configFileStream, description, true), variables);
 
-            std::cout << "done." << std::endl;
+            if (!mSilent)
+                std::cout << "done." << std::endl;
         }
         else
         {
-            std::cout << "failed." << std::endl;
+            if (!mSilent)
+                std::cout << "failed." << std::endl;
         }
     }
 }

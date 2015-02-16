@@ -1,10 +1,17 @@
 #ifndef CSM_WOLRD_SUBCOLLECTION_H
 #define CSM_WOLRD_SUBCOLLECTION_H
 
-#include "idcollection.hpp"
+namespace ESM
+{
+    class ESMReader;
+}
 
 namespace CSMWorld
 {
+    struct Cell;
+    template<typename T, typename AT>
+    class IdCollection;
+
     /// \brief Single type collection of top level records that are associated with cells
     template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
     class SubCellCollection : public IdCollection<ESXRecordT, IdAccessorT>

@@ -5,12 +5,14 @@
    This class owns and controls all the MW specific windows in the
    GUI. It can enable/disable Gui mode, and is responsible for sending
    and retrieving information from the Gui.
-
-   MyGUI should be initialized separately before creating instances of
-   this class.
 **/
 
+#include <stack>
+
 #include "../mwbase/windowmanager.hpp"
+
+#include <components/settings/settings.hpp>
+#include <components/to_utf8/to_utf8.hpp>
 
 #include "mapwindow.hpp"
 
@@ -89,6 +91,7 @@ namespace MWGui
   class WindowModal;
   class ScreenFader;
   class DebugWindow;
+  class JailScreen;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -96,7 +99,7 @@ namespace MWGui
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(const Compiler::Extensions& extensions, int fpsLevel,
+    WindowManager(const Compiler::Extensions& extensions,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
                   Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap);
@@ -126,6 +129,8 @@ namespace MWGui
     virtual void pushGuiMode(GuiMode mode);
     virtual void popGuiMode();
     virtual void removeGuiMode(GuiMode mode); ///< can be anywhere in the stack
+
+    virtual void goToJail(int days);
 
     virtual GuiMode getMode() const;
     virtual bool containsMode(GuiMode mode) const;
@@ -238,9 +243,12 @@ namespace MWGui
     ///Gracefully attempts to exit the topmost GUI mode
     virtual void exitCurrentGuiMode();
 
-    virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible);
+    virtual void messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible);
     virtual void staticMessageBox(const std::string& message);
     virtual void removeStaticMessageBox();
+    virtual void interactiveMessageBox (const std::string& message,
+                                        const std::vector<std::string>& buttons = std::vector<std::string>(), bool block=false);
+
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
     virtual void onFrame (float frameDuration);
@@ -303,7 +311,7 @@ namespace MWGui
     virtual void clear();
 
     virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress);
-    virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+    virtual void readRecord (ESM::ESMReader& reader, uint32_t type);
     virtual int countSavedGameRecords() const;
 
     /// Does the current stack of GUI-windows permit saving?
@@ -337,6 +345,11 @@ namespace MWGui
     virtual void setWerewolfOverlay(bool set);
 
     virtual void toggleDebugWindow();
+
+    /// Cycle to next or previous spell
+    virtual void cycleSpell(bool next);
+    /// Cycle to next or previous weapon
+    virtual void cycleWeapon(bool next);
 
   private:
     bool mConsoleOnlyScripts;
@@ -395,6 +408,7 @@ namespace MWGui
     ScreenFader* mHitFader;
     ScreenFader* mScreenFader;
     DebugWindow* mDebugWindow;
+    JailScreen* mJailScreen;
 
     Translation::Storage& mTranslationDataStorage;
 
@@ -442,7 +456,6 @@ namespace MWGui
 
     void updateVisible(); // Update visibility of all windows based on mode, shown and allowed settings
 
-    int mShowFPSLevel;
     float mFPS;
     unsigned int mTriangleCount;
     unsigned int mBatchCount;

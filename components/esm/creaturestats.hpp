@@ -32,7 +32,7 @@ namespace ESM
         bool mHasAiSettings;
         StatState<int> mAiSettings[4];
 
-        std::map<int, int> mSummonedCreatureMap;
+        std::map<std::pair<int, std::string>, int> mSummonedCreatureMap;
         std::vector<int> mSummonGraveyard;
 
         ESM::TimeStamp mTradeTime;
@@ -42,7 +42,6 @@ namespace ESM
         bool mDead;
         bool mDied;
         bool mMurdered;
-        int mFriendlyHits;
         bool mTalkedTo;
         bool mAlarmed;
         bool mAttacked;
@@ -56,6 +55,7 @@ namespace ESM
         float mAttackStrength;
         float mFallHeight;
         std::string mLastHitObject;
+        std::string mLastHitAttemptObject;
         bool mRecalcDynamicStats;
         int mDrawState;
         unsigned char mDeathAnimation;
@@ -64,6 +64,9 @@ namespace ESM
 
         SpellState mSpells;
         ActiveSpells mActiveSpells;
+
+        /// Initialize to default state
+        void blank();
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

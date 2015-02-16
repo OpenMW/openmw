@@ -225,11 +225,9 @@ namespace MWWorld
         writer.startRecord (ESM::REC_PLAY);
         player.save (writer);
         writer.endRecord (ESM::REC_PLAY);
-
-        progress.increaseProgress();
     }
 
-    bool Player::readRecord (ESM::ESMReader& reader, int32_t type)
+    bool Player::readRecord (ESM::ESMReader& reader, uint32_t type)
     {
         if (type==ESM::REC_PLAY)
         {
@@ -262,9 +260,20 @@ namespace MWWorld
                 mCellStore = world.getExterior(0,0);
             }
 
-            if (!player.mBirthsign.empty() &&
-                !world.getStore().get<ESM::BirthSign>().search (player.mBirthsign))
-                throw std::runtime_error ("invalid player state record (birthsign)");
+            if (!player.mBirthsign.empty())
+            {
+                const ESM::BirthSign* sign = world.getStore().get<ESM::BirthSign>().search (player.mBirthsign);
+                if (!sign)
+                    throw std::runtime_error ("invalid player state record (birthsign does not exist)");
+
+                // To handle the case where a birth sign was edited in between play sessions (does not yet handle removing the old spells)
+                // Also needed for ess-imported savegames which do not specify the birtsign spells in the player's spell list.
+                for (std::vector<std::string>::const_iterator iter (sign->mPowers.mList.begin());
+                    iter!=sign->mPowers.mList.end(); ++iter)
+                {
+                    getPlayer().getClass().getCreatureStats(getPlayer()).getSpells().add (*iter);
+                }
+            }
 
             mCurrentCrimeId = player.mCurrentCrimeId;
             mPaidCrimeId = player.mPaidCrimeId;

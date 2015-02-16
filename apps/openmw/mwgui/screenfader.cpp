@@ -1,5 +1,7 @@
 #include "screenfader.hpp"
 
+#include <MyGUI_RenderManager.h>
+
 namespace MWGui
 {
 

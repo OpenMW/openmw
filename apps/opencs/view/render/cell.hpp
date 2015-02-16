@@ -9,8 +9,13 @@
 
 #include <OgreVector3.h>
 
+#ifndef Q_MOC_RUN
 #include <components/terrain/terraingrid.hpp>
+<<<<<<< .mine
 #include <components/esm/loadpgrd.hpp>  // FIXME: temporaty storage until saving to document
+=======
+#endif
+>>>>>>> .theirs
 
 #include "object.hpp"
 

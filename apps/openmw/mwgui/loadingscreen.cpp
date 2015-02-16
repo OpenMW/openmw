@@ -8,6 +8,14 @@
 #include <OgreTextureManager.h>
 #include <OgreViewport.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreSceneManager.h>
+
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_ScrollBar.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_TextBox.h>
+
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -34,6 +42,7 @@ namespace MWGui
 
         getWidget(mLoadingText, "LoadingText");
         getWidget(mProgressBar, "ProgressBar");
+        getWidget(mLoadingBox, "LoadingBox");
 
         mProgressBar->setScrollViewPage(1);
 
@@ -46,6 +55,11 @@ namespace MWGui
     void LoadingScreen::setLabel(const std::string &label)
     {
         mLoadingText->setCaptionWithReplacing(label);
+        int padding = mLoadingBox->getWidth() - mLoadingText->getWidth();
+        MyGUI::IntSize size(mLoadingText->getTextSize().width+padding, mLoadingBox->getHeight());
+        size.width = std::max(300, size.width);
+        mLoadingBox->setSize(size);
+        mLoadingBox->setPosition(mMainWidget->getWidth()/2 - mLoadingBox->getWidth()/2, mLoadingBox->getTop());
     }
 
     LoadingScreen::~LoadingScreen()
@@ -137,7 +151,9 @@ namespace MWGui
             Ogre::TextureManager::getSingleton ().load (randomSplash, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
 
             // TODO: add option (filename pattern?) to use image aspect ratio instead of 4:3
-            mBackgroundImage->setBackgroundImage(randomSplash, true, true);
+            // we can't do this by default, because the Morrowind splash screens are 1024x1024, but should be displayed as 4:3
+            bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
+            mBackgroundImage->setBackgroundImage(randomSplash, true, stretch);
         }
         else
             std::cerr << "No loading screens found!" << std::endl;

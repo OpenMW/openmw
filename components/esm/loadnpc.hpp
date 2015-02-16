@@ -110,6 +110,8 @@ struct NPC
     NPDTstruct52 mNpdt52;
     NPDTstruct12 mNpdt12; //for autocalculated characters
 
+    int getFactionRank() const; /// wrapper for mNpdt*, -1 = no rank
+
     int mFlags;
 
     bool mPersistent;

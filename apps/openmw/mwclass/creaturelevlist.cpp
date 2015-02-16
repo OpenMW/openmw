@@ -52,7 +52,7 @@ namespace MWClass
         registerClass (typeid (ESM::CreatureLevList).name(), instance);
     }
 
-    void CreatureLevList::insertObjectRendering(const MWWorld::Ptr &ptr, MWRender::RenderingInterface &renderingInterface) const
+    void CreatureLevList::insertObjectRendering(const MWWorld::Ptr &ptr, const std::string& model, MWRender::RenderingInterface &renderingInterface) const
     {
         ensureCustomData(ptr);
 

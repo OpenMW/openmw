@@ -2,6 +2,7 @@
 #include "globalscripts.hpp"
 
 #include <cassert>
+#include <iostream>
 
 #include <components/misc/stringops.hpp>
 #include <components/esm/globalscript.hpp>
@@ -142,11 +143,10 @@ namespace MWScript
             writer.startRecord (ESM::REC_GSCR);
             script.save (writer);
             writer.endRecord (ESM::REC_GSCR);
-            progress.increaseProgress();
         }
     }
 
-    bool GlobalScripts::readRecord (ESM::ESMReader& reader, int32_t type)
+    bool GlobalScripts::readRecord (ESM::ESMReader& reader, uint32_t type)
     {
         if (type==ESM::REC_GSCR)
         {

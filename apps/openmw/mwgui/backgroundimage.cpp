@@ -5,14 +5,14 @@
 namespace MWGui
 {
 
-void BackgroundImage::setBackgroundImage (const std::string& image, bool fixedRatio, bool correct)
+void BackgroundImage::setBackgroundImage (const std::string& image, bool fixedRatio, bool stretch)
 {
     if (mChild)
     {
         MyGUI::Gui::getInstance().destroyWidget(mChild);
         mChild = NULL;
     }
-    if (correct)
+    if (!stretch)
     {
         setImageTexture("black.png");
 

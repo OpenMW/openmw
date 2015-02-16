@@ -10,7 +10,10 @@
 #define MAC_OS_X_VERSION_MIN_REQUIRED __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #endif // MAC_OS_X_VERSION_MIN_REQUIRED
 
-#include <SDL.h>
+#include <SDL_video.h>
+
+#include <OgreRoot.h>
+#include <OgreRenderSystem.h>
 
 #include <boost/math/common_factor.hpp>
 
@@ -64,7 +67,7 @@ bool Launcher::GraphicsPage::setupOgre()
     }
     catch(Ogre::Exception &ex)
     {
-        QString ogreError = QString::fromStdString(ex.getFullDescription().c_str());
+        QString ogreError = QString::fromUtf8(ex.getFullDescription().c_str());
         QMessageBox msgBox;
         msgBox.setWindowTitle("Error creating Ogre::Root");
         msgBox.setIcon(QMessageBox::Critical);
@@ -132,7 +135,7 @@ bool Launcher::GraphicsPage::setupSDL()
         msgBox.setWindowTitle(tr("Error receiving number of screens"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
         msgBox.exec();
         return false;
     }
@@ -158,6 +161,9 @@ bool Launcher::GraphicsPage::loadSettings()
 
     if (mGraphicsSettings.value(QString("Video/fullscreen")) == QLatin1String("true"))
         fullScreenCheckBox->setCheckState(Qt::Checked);
+
+    if (mGraphicsSettings.value(QString("Video/window border")) == QLatin1String("true"))
+        windowBorderCheckBox->setCheckState(Qt::Checked);
 
     int aaIndex = antiAliasingComboBox->findText(mGraphicsSettings.value(QString("Video/antialiasing")));
     if (aaIndex != -1)
@@ -192,6 +198,9 @@ void Launcher::GraphicsPage::saveSettings()
 
     fullScreenCheckBox->checkState() ? mGraphicsSettings.setValue(QString("Video/fullscreen"), QString("true"))
                                       : mGraphicsSettings.setValue(QString("Video/fullscreen"), QString("false"));
+
+    windowBorderCheckBox->checkState() ? mGraphicsSettings.setValue(QString("Video/window border"), QString("true"))
+                                      : mGraphicsSettings.setValue(QString("Video/window border"), QString("false"));
 
     mGraphicsSettings.setValue(QString("Video/antialiasing"), antiAliasingComboBox->currentText());
     mGraphicsSettings.setValue(QString("Video/render system"), rendererComboBox->currentText());
@@ -228,7 +237,7 @@ QStringList Launcher::GraphicsPage::getAvailableOptions(const QString &key, Ogre
              opt_it != i->second.possibleValues.end(); ++opt_it, ++idx)
         {
             if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0) {
-                result << ((key == "FSAA") ? QString("MSAA ") : QString("")) + QString::fromStdString((*opt_it).c_str()).simplified();
+                result << ((key == "FSAA") ? QString("MSAA ") : QString("")) + QString::fromUtf8((*opt_it).c_str()).simplified();
             }
         }
     }
@@ -257,7 +266,7 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
         msgBox.setWindowTitle(tr("Error receiving resolutions"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
         msgBox.exec();
         return result;
     }
@@ -270,7 +279,7 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
             msgBox.setWindowTitle(tr("Error receiving resolutions"));
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>SDL_GetDisplayMode failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+            msgBox.setText(tr("<br><b>SDL_GetDisplayMode failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
             msgBox.exec();
             return result;
         }
@@ -331,10 +340,12 @@ void Launcher::GraphicsPage::slotFullScreenChanged(int state)
         customRadioButton->setEnabled(false);
         customWidthSpinBox->setEnabled(false);
         customHeightSpinBox->setEnabled(false);
+        windowBorderCheckBox->setEnabled(false);
     } else {
         customRadioButton->setEnabled(true);
         customWidthSpinBox->setEnabled(true);
         customHeightSpinBox->setEnabled(true);
+        windowBorderCheckBox->setEnabled(true);
     }
 }
 

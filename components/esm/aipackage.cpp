@@ -11,36 +11,55 @@ namespace ESM
         mServices = 0;
     }
 
+    void AIPackageList::add(ESMReader &esm)
+    {
+        AIPackage pack;
+        if (esm.retSubName() == AI_CNDT) {
+            mList.back().mCellName = esm.getHString();
+        } else if (esm.retSubName() == AI_Wander) {
+            pack.mType = AI_Wander;
+            esm.getHExact(&pack.mWander, 14);
+            mList.push_back(pack);
+        } else if (esm.retSubName() == AI_Travel) {
+            pack.mType = AI_Travel;
+            esm.getHExact(&pack.mTravel, 16);
+            mList.push_back(pack);
+        } else if (esm.retSubName() == AI_Escort ||
+                   esm.retSubName() == AI_Follow)
+        {
+            pack.mType =
+                (esm.retSubName() == AI_Escort) ? AI_Escort : AI_Follow;
+                esm.getHExact(&pack.mTarget, 48);
+            mList.push_back(pack);
+        } else if (esm.retSubName() == AI_Activate) {
+            pack.mType = AI_Activate;
+            esm.getHExact(&pack.mActivate, 33);
+            mList.push_back(pack);
+        } else { // not AI package related data, so leave
+             return;
+        }
+
+    }
+
     void AIPackageList::load(ESMReader &esm)
     {
         mList.clear();
         while (esm.hasMoreSubs()) {
             // initialize every iteration
-            AIPackage pack;
-                esm.getSubName();
-            if (esm.retSubName() == 0x54444e43) { // CNDT
-                mList.back().mCellName = esm.getHString();
-            } else if (esm.retSubName() == AI_Wander) {
-                pack.mType = AI_Wander;
-                esm.getHExact(&pack.mWander, 14);
-                mList.push_back(pack);
-            } else if (esm.retSubName() == AI_Travel) {
-                pack.mType = AI_Travel;
-                esm.getHExact(&pack.mTravel, 16);
-                mList.push_back(pack);
-            } else if (esm.retSubName() == AI_Escort ||
-                       esm.retSubName() == AI_Follow)
+            esm.getSubName();
+            switch (esm.retSubName().val)
             {
-                pack.mType =
-                    (esm.retSubName() == AI_Escort) ? AI_Escort : AI_Follow;
-                    esm.getHExact(&pack.mTarget, 48);
-                mList.push_back(pack);
-            } else if (esm.retSubName() == AI_Activate) {
-                pack.mType = AI_Activate;
-                esm.getHExact(&pack.mActivate, 33);
-                mList.push_back(pack);
-            } else { // not AI package related data, so leave
-                 return;
+                case AI_Wander:
+                case AI_Activate:
+                case AI_Escort:
+                case AI_Follow:
+                case AI_Travel:
+                case AI_CNDT:
+
+                    add(esm);
+                    break;
+            default:
+                return;
             }
         }
     }

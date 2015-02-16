@@ -1053,13 +1053,13 @@ namespace CSMWorld
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
-            return record.get().mCharge;
+            return record.get().mChargeInt;
         }
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
         {
             ESXRecordT record2 = record.get();
-            record2.mCharge = data.toInt();
+            record2.mChargeInt = data.toInt();
             record.setModified (record2);
         }
 

@@ -4,9 +4,9 @@
     <!-- The entire screen -->
     <Widget type="Widget" layer="LoadingScreen" position="0 0 300 300" name="_Main" align="Stretch">
 
-        <Widget type="Widget" skin="MW_Dialog" position="0 245 300 48" align="Bottom HCenter">
+        <Widget type="Widget" skin="MW_Dialog" position="0 245 300 48" align="Bottom HCenter" name="LoadingBox">
 
-            <Widget type="TextBox" skin="SandText" position="20 8 260 18" name="LoadingText">
+            <Widget type="TextBox" skin="SandText" position="20 8 260 18" align="Stretch" name="LoadingText">
                 <Property key="TextAlign" value="Center"/>
             </Widget>
 

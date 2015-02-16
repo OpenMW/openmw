@@ -7,7 +7,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/refdata.hpp"
@@ -120,15 +119,6 @@ namespace MWRender
         setPosition(Ogre::Vector3(x,y,z));
     }
 
-    void Camera::updateListener()
-    {
-        Ogre::Vector3 pos = mCamera->getRealPosition();
-        Ogre::Vector3 dir = mCamera->getRealDirection();
-        Ogre::Vector3 up  = mCamera->getRealUp();
-
-        MWBase::Environment::get().getSoundManager()->setListenerPosDir(pos, dir, up);
-    }
-
     void Camera::update(float duration, bool paused)
     {
         if (mAnimation->upperBodyReady())
@@ -148,7 +138,6 @@ namespace MWRender
             }
         }
 
-        updateListener();
         if (paused)
             return;
 

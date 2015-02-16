@@ -39,11 +39,8 @@ namespace MWMechanics
             void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
                            const MWWorld::CellStore* cell, bool allowShortcuts = true);
 
-            bool checkPathCompleted(float x, float y, float z);
-            ///< \Returns true if the last point of the path has been reached.
-
-            bool checkWaypoint(float x, float y, float z);
-            ///< \Returns true if a way point was reached
+            bool checkPathCompleted(float x, float y, float z, float tolerance=32.f);
+            ///< \Returns true if we are within \a tolerance units of the last path point.
 
             float getZAngleToNext(float x, float y) const;
 

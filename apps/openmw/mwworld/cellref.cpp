@@ -5,15 +5,19 @@
 namespace MWWorld
 {
 
-    ESM::RefNum CellRef::getRefNum() const
+    const ESM::RefNum& CellRef::getRefNum() const
     {
         return mCellRef.mRefNum;
     }
 
+    bool CellRef::hasContentFile() const
+    {
+        return mCellRef.mRefNum.hasContentFile();
+    }
+
     void CellRef::unsetRefNum()
     {
-        mCellRef.mRefNum.mContentFile = -1;
-        mCellRef.mRefNum.mIndex = 0;
+        mCellRef.mRefNum.unset();
     }
 
     std::string CellRef::getRefId() const
@@ -77,15 +81,29 @@ namespace MWWorld
 
     int CellRef::getCharge() const
     {
-        return mCellRef.mCharge;
+        return mCellRef.mChargeInt;
     }
 
     void CellRef::setCharge(int charge)
     {
-        if (charge != mCellRef.mCharge)
+        if (charge != mCellRef.mChargeInt)
         {
             mChanged = true;
-            mCellRef.mCharge = charge;
+            mCellRef.mChargeInt = charge;
+        }
+    }
+
+    float CellRef::getChargeFloat() const
+    {
+        return mCellRef.mChargeFloat;
+    }
+
+    void CellRef::setChargeFloat(float charge)
+    {
+        if (charge != mCellRef.mChargeFloat)
+        {
+            mChanged = true;
+            mCellRef.mChargeFloat = charge;
         }
     }
 
@@ -97,6 +115,24 @@ namespace MWWorld
     std::string CellRef::getGlobalVariable() const
     {
         return mCellRef.mGlobalVariable;
+    }
+
+    void CellRef::resetGlobalVariable()
+    {
+        if (!mCellRef.mGlobalVariable.empty())
+        {
+            mChanged = true;
+            mCellRef.mGlobalVariable.erase();
+        }
+    }
+
+    void CellRef::setFactionRank(int factionRank)
+    {
+        if (factionRank != mCellRef.mFactionRank)
+        {
+            mChanged = true;
+            mCellRef.mFactionRank = factionRank;
+        }
     }
 
     int CellRef::getFactionRank() const

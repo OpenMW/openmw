@@ -22,6 +22,8 @@ namespace MWMechanics
 
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
 
+    bool isSummoningEffect(int effectId);
+
     /**
      * @param spell spell to cast
      * @param actor calculate spell success chance for this actor (depends on actor's skills)
@@ -58,6 +60,8 @@ namespace MWMechanics
     float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
                               const ESM::Spell* spell = NULL, const MagicEffects* effects = NULL);
 
+    int getEffectiveEnchantmentCastCost (float castCost, const MWWorld::Ptr& actor);
+
     class CastSpell
     {
     private:
@@ -93,6 +97,8 @@ namespace MWMechanics
 
         /// @note \a caster can be any type of object, or even an empty object.
         void applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const MWMechanics::EffectKey& effect, float magnitude);
+        
+        void applyDynamicStatsEffect (int attribute, const MWWorld::Ptr& target, float magnitude);
     };
 
 }

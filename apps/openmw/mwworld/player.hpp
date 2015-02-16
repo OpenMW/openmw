@@ -102,7 +102,7 @@ namespace MWWorld
 
         void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-        bool readRecord (ESM::ESMReader& reader, int32_t type);
+        bool readRecord (ESM::ESMReader& reader, uint32_t type);
 
         int getNewCrimeId();  // get new id for witnesses
         void recordCrimeId(); // record the paid crime id when bounty is 0

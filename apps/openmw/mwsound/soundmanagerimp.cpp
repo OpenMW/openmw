@@ -103,23 +103,30 @@ namespace MWSound
     std::string SoundManager::lookup(const std::string &soundId,
                        float &volume, float &min, float &max)
     {
-        const ESM::Sound *snd =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Sound>().find(soundId);
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        const ESM::Sound *snd = world->getStore().get<ESM::Sound>().find(soundId);
 
         volume *= pow(10.0, (snd->mData.mVolume/255.0*3348.0 - 3348.0) / 2000.0);
 
         if(snd->mData.mMinRange == 0 && snd->mData.mMaxRange == 0)
         {
-            min = 100.0f;
-            max = 2000.0f;
+            static const float fAudioDefaultMinDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMinDistance")->getFloat();
+            static const float fAudioDefaultMaxDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMaxDistance")->getFloat();
+            min = fAudioDefaultMinDistance;
+            max = fAudioDefaultMaxDistance;
         }
         else
         {
-            min = snd->mData.mMinRange * 20.0f;
-            max = snd->mData.mMaxRange * 50.0f;
-            min = std::max(min, 1.0f);
-            max = std::max(min, max);
+            min = snd->mData.mMinRange;
+            max = snd->mData.mMaxRange;
         }
+
+        static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->getFloat();
+        static const float fAudioMaxDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMaxDistanceMult")->getFloat();
+        min *= fAudioMinDistanceMult;
+        max *= fAudioMaxDistanceMult;
+        min = std::max(min, 1.0f);
+        max = std::max(min, max);
 
         return "Sound/"+snd->mSound;
     }
@@ -250,8 +257,19 @@ namespace MWSound
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const Ogre::Vector3 objpos(pos.pos);
 
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+            static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->getFloat();
+            static const float fAudioMaxDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMaxDistanceMult")->getFloat();
+            static const float fAudioVoiceDefaultMinDistance = world->getStore().get<ESM::GameSetting>().find("fAudioVoiceDefaultMinDistance")->getFloat();
+            static const float fAudioVoiceDefaultMaxDistance = world->getStore().get<ESM::GameSetting>().find("fAudioVoiceDefaultMaxDistance")->getFloat();
+
+            float minDistance = fAudioVoiceDefaultMinDistance * fAudioMinDistanceMult;
+            float maxDistance = fAudioVoiceDefaultMaxDistance * fAudioMaxDistanceMult;
+            minDistance = std::max(minDistance, 1.f);
+            maxDistance = std::max(minDistance, maxDistance);
+
             MWBase::SoundPtr sound = mOutput->playSound3D(filePath, objpos, 1.0f, basevol, 1.0f,
-                                                          20.0f, 1500.0f, Play_Normal|Play_TypeVoice, 0, true);
+                                                          minDistance, maxDistance, Play_Normal|Play_TypeVoice, 0, true);
             mActiveSounds[sound] = std::make_pair(ptr, std::string("_say_sound"));
         }
         catch(std::exception &e)
@@ -366,6 +384,11 @@ namespace MWSound
             std::string file = lookup(soundId, volume, min, max);
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const Ogre::Vector3 objpos(pos.pos);
+
+            if ((mode & Play_RemoveAtDistance) && mListenerPos.squaredDistance(objpos) > 2000*2000)
+            {
+                return MWBase::SoundPtr();
+            }
 
             sound = mOutput->playSound3D(file, objpos, volume, basevol, pitch, min, max, mode|type, offset);
             if((mode&Play_NoTrack))
@@ -632,6 +655,13 @@ namespace MWSound
                     const ESM::Position &pos = ptr.getRefData().getPosition();
                     const Ogre::Vector3 objpos(pos.pos);
                     snditer->first->setPosition(objpos);
+
+                    if ((snditer->first->mFlags & Play_RemoveAtDistance)
+                            && mListenerPos.squaredDistance(Ogre::Vector3(ptr.getRefData().getPosition().pos)) > 2000*2000)
+                    {
+                        mActiveSounds.erase(snditer++);
+                        continue;
+                    }
                 }
                 //update fade out
                 if(snditer->first->mFadeOutTime>0)
@@ -693,9 +723,9 @@ namespace MWSound
 
         MWWorld::Ptr player =
             MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const ESM::Cell *cell = player.getCell()->getCell();
+        const MWWorld::CellStore *cell = player.getCell();
 
-        mListenerUnderwater = ((cell->mData.mFlags&cell->HasWater) && mListenerPos.z < cell->mWater);
+        mListenerUnderwater = ((cell->getCell()->mData.mFlags&ESM::Cell::HasWater) && mListenerPos.z < cell->getWaterLevel());
     }
 
     void SoundManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)

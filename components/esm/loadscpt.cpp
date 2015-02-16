@@ -7,12 +7,6 @@
 namespace ESM
 {
 
-struct SCHD
-{
-    NAME32              mName;
-    Script::SCHDstruct  mData;
-};
-
     unsigned int Script::sRecordId = REC_SCPT;
 
 void Script::load(ESMReader &esm)
