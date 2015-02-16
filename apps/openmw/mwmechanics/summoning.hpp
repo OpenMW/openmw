@@ -14,6 +14,7 @@ namespace MWMechanics
     struct UpdateSummonedCreatures : public EffectSourceVisitor
     {
         UpdateSummonedCreatures(const MWWorld::Ptr& actor);
+        virtual ~UpdateSummonedCreatures();
 
         virtual void visit (MWMechanics::EffectKey key,
                                  const std::string& sourceName, const std::string& sourceId, int casterActorId,
