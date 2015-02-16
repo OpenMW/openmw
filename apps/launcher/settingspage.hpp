@@ -44,9 +44,14 @@ namespace Launcher
 
         void updateOkButton(const QString &text);
 
+        void onTimer();
+
     private:
-        /// Tell user how the import of the INI file went.
-        void giveImportFeedback(bool success);
+        /// Make progress bar move, to give user feedback
+        void simulateProgress();
+
+        /// after ini import runs, update settings
+        void reloadSettings();
 
         Process::ProcessInvoker *mWizardInvoker;
         Process::ProcessInvoker *mImporterInvoker;
@@ -58,7 +63,7 @@ namespace Launcher
 
         MainDialog *mMain;
         TextInputDialog *mProfileDialog;
-
+        QTimer *mTimer;
 
     };
 }

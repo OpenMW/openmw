@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QDir>
+#include <QTimer>
 
 #include <components/files/configurationmanager.hpp>
 
@@ -39,6 +40,8 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
 
     mWizardInvoker = new ProcessInvoker();
     mImporterInvoker = new ProcessInvoker();
+    mTimer = new QTimer(this);
+    progressBar->setValue(0);
 
     connect(mWizardInvoker->getProcess(), SIGNAL(started()),
             this, SLOT(wizardStarted()));
@@ -56,6 +59,8 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
 
     connect(mProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
             this, SLOT(updateOkButton(QString)));
+
+    connect(mTimer, SIGNAL(timeout()), this, SLOT(onTimer()));
 
     // Detect Morrowind configuration files
     QStringList iniPaths;
@@ -198,10 +203,21 @@ void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus
 {
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
     {
-        giveImportFeedback(false);
-        return;
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Importer finished"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText(tr("Failed to import settings from INI file."));
+        msgBox.exec();
     }
+    else
+    {
+        simulateProgress();
+    }
+}
 
+void Launcher::SettingsPage::reloadSettings()
+{
     // Importer may have changed settings, so refresh
     mMain->reloadSettings();
 
@@ -228,30 +244,31 @@ void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus
             mMain->reloadSettings();
         }
     }
-    else
-    {
-        giveImportFeedback(true);
-    }
 
     importerButton->setEnabled(true);
 }
 
-void Launcher::SettingsPage::giveImportFeedback(bool success)
+// Normally, ini import is so fast user won't notice it
+// So, we make a progress bar move so user can see something happened.
+void Launcher::SettingsPage::simulateProgress()
 {
-    QMessageBox msgBox;
-    msgBox.setWindowTitle(tr("Importer finished"));
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    if (success)
+    // update progress bar 5 times second
+    const int progressUpdateInterval = 200;
+
+    progressBar->setValue(0);
+    mTimer->start(progressUpdateInterval);
+}
+
+void Launcher::SettingsPage::onTimer()
+{
+    int val = progressBar->value();
+    ++val;
+    progressBar->setValue(val);
+    if (progressBar->maximum() <= val)
     {
-        msgBox.setIcon(QMessageBox::Information);
-        msgBox.setText(tr("Settings were successfully imported."));
+        mTimer->stop();
+        reloadSettings();
     }
-    else
-    {
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setText(tr("Failed to import settings from INI file."));
-    }
-    msgBox.exec();
 }
 
 void Launcher::SettingsPage::updateOkButton(const QString &text)
