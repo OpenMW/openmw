@@ -672,6 +672,7 @@ if (WIN32)
         4193 # #pragma warning(pop) : no matching '#pragma warning(push)'
         4251 # class 'XXXX' needs to have dll-interface to be used by clients of class 'YYYY'
         4275 # non dll-interface struct 'XXXX' used as base for dll-interface class 'YYYY'
+        4315 # undocumented, 'this' pointer for member might not be aligned (OgreMemoryStlAllocator.h)
 
         # caused by boost
         4191 # 'type cast' : unsafe conversion (1.56, thread_primitives.hpp, normally off)
@@ -679,6 +680,7 @@ if (WIN32)
         # OpenMW specific warnings
         4099 # Type mismatch, declared class or struct is defined with other type
         4100 # Unreferenced formal parameter (-Wunused-parameter)
+        4101 # Unreferenced local variable (-Wunused-variable)
         4127 # Conditional expression is constant
         4242 # Storing value in a variable of a smaller type, possible loss of data
         4244 # Storing value of one type in variable of another (size_t in int, for example)
@@ -700,14 +702,16 @@ if (WIN32)
     # boost::wave has a few issues with signed / unsigned conversions, so we suppress those here
     set(SHINY_WARNINGS "${WARNINGS} /wd4245")
     set_target_properties(shiny PROPERTIES COMPILE_FLAGS "${SHINY_WARNINGS} ${MT_BUILD}")
-    # there's an unreferenced local variable in the ogre platform, suppress it
-    set(SHINY_OGRE_WARNINGS "${WARNINGS} /wd4101")
-    set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS "${SHINY_OGRE_WARNINGS} ${MT_BUILD}")
+    set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     set_target_properties(sdl4ogre PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     # oics uses tinyxml, which has an initialized but unused variable
     set(OICS_WARNINGS "${WARNINGS} /wd4189")
     set_target_properties(oics PROPERTIES COMPILE_FLAGS "${OICS_WARNINGS} ${MT_BUILD}")
     set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    set_target_properties(ogre-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    if (BUILD_MYGUI_PLUGIN)
+        set_target_properties(Plugin_MyGUI_OpenMW_Resources PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif (BUILD_MYGUI_PLUGIN)
     if (BUILD_LAUNCHER)
         set_target_properties(openmw-launcher PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     endif (BUILD_LAUNCHER)
@@ -726,6 +730,9 @@ if (WIN32)
         set(OPENCS_WARNINGS "${WARNINGS} ${MT_BUILD} /wd4435")
         set_target_properties(openmw-cs PROPERTIES COMPILE_FLAGS ${OPENCS_WARNINGS})
     endif (BUILD_OPENCS)
+    if (BUILD_ESSIMPORTER)
+        set_target_properties(openmw-essimporter PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif (BUILD_ESSIMPORTER)
     if (BUILD_MWINIIMPORTER)
         set_target_properties(openmw-iniimporter PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     endif (BUILD_MWINIIMPORTER)
