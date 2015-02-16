@@ -51,6 +51,10 @@ namespace MWMechanics
 
     }
 
+    UpdateSummonedCreatures::~UpdateSummonedCreatures()
+    {
+    }
+
     void UpdateSummonedCreatures::visit(EffectKey key, const std::string &sourceName, const std::string &sourceId, int casterActorId, float magnitude, float remainingTime, float totalTime)
     {
         if (isSummoningEffect(key.mId) && magnitude > 0)
