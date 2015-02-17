@@ -50,8 +50,8 @@ namespace ESM
             NAME32 mPlayerName;
         };
         GMDT mGameData; // Used in .ess savegames only
-        std::vector<unsigned char> mSCRD; // Used in .ess savegames only, screenshot?
-        std::vector<unsigned char> mSCRS; // Used in .ess savegames only, screenshot?
+        std::vector<unsigned char> mSCRD; // Used in .ess savegames only, unknown
+        std::vector<unsigned char> mSCRS; // Used in .ess savegames only, screenshot
 
         Data mData;
         int mFormat;

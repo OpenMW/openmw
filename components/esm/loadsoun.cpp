@@ -8,22 +8,35 @@ namespace ESM
 {
     unsigned int Sound::sRecordId = REC_SOUN;
 
-void Sound::load(ESMReader &esm)
-{
-    mSound = esm.getHNOString("FNAM");
-    esm.getHNT(mData, "DATA", 3);
-    /*
-     cout << "vol=" << (int)data.volume
-     << " min=" << (int)data.minRange
-     << " max=" << (int)data.maxRange
-     << endl;
-     */
-}
-void Sound::save(ESMWriter &esm) const
-{
-    esm.writeHNOCString("FNAM", mSound);
-    esm.writeHNT("DATA", mData, 3);
-}
+    void Sound::load(ESMReader &esm)
+    {
+        bool hasData = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            uint32_t name = esm.retSubName().val;
+            switch (name)
+            {
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mSound = esm.getHString();
+                    break;
+                case ESM::FourCC<'D','A','T','A'>::value:
+                    esm.getHT(mData, 3);
+                    hasData = true;
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+            }
+        }
+        if (!hasData)
+            esm.fail("Missing DATA");
+    }
+
+    void Sound::save(ESMWriter &esm) const
+    {
+        esm.writeHNOCString("FNAM", mSound);
+        esm.writeHNT("DATA", mData, 3);
+    }
 
     void Sound::blank()
     {

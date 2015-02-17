@@ -41,29 +41,6 @@ namespace ESM
 
     }
 
-    void AIPackageList::load(ESMReader &esm)
-    {
-        mList.clear();
-        while (esm.hasMoreSubs()) {
-            // initialize every iteration
-            esm.getSubName();
-            switch (esm.retSubName().val)
-            {
-                case AI_Wander:
-                case AI_Activate:
-                case AI_Escort:
-                case AI_Follow:
-                case AI_Travel:
-                case AI_CNDT:
-
-                    add(esm);
-                    break;
-            default:
-                return;
-            }
-        }
-    }
-
     void AIPackageList::save(ESMWriter &esm) const
     {
         typedef std::vector<AIPackage>::const_iterator PackageIter;

@@ -5,14 +5,6 @@
 
 namespace ESM {
 
-void SpellList::load(ESMReader &esm)
-{
-    mList.clear();
-    while (esm.isNextSub("NPCS")) {
-        add(esm);
-    }
-}
-
 void SpellList::add(ESMReader &esm)
 {
     mList.push_back(esm.getHString());

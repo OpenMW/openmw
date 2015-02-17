@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <MyGUI_TextBox.h>
+#include <MyGUI_Button.h>
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
@@ -428,9 +429,22 @@ namespace
             AddNamesToList(Gui::MWList* list) : mList(list) {}
 
             Gui::MWList* mList;
-            void operator () (const std::string& name)
+            void operator () (const std::string& name, bool finished=false)
             {
                 mList->addItem(name);
+            }
+        };
+        struct SetNamesInactive
+        {
+            SetNamesInactive(Gui::MWList* list) : mList(list) {}
+
+            Gui::MWList* mList;
+            void operator () (const std::string& name, bool finished)
+            {
+                if (finished)
+                {
+                    mList->getItemWidget(name)->setStateSelected(true);
+                }
             }
         };
 
@@ -453,6 +467,12 @@ namespace
             mModel->visitQuestNames(!mAllQuests, add);
 
             list->adjustSize();
+
+            if (mAllQuests)
+            {
+                SetNamesInactive setInactive(list);
+                mModel->visitQuestNames(!mAllQuests, setInactive);
+            }
         }
 
         void notifyShowAll(MyGUI::Widget* _sender)

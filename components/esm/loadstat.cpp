@@ -8,15 +8,16 @@ namespace ESM
 {
     unsigned int Static::sRecordId = REC_STAT;
 
-void Static::load(ESMReader &esm)
-{
-    mPersistent = esm.getRecordFlags() & 0x0400;
-    mModel = esm.getHNString("MODL");
-}
-void Static::save(ESMWriter &esm) const
-{
-    esm.writeHNCString("MODL", mModel);
-}
+    void Static::load(ESMReader &esm)
+    {
+        mPersistent = esm.getRecordFlags() & 0x0400;
+
+        mModel = esm.getHNString("MODL");
+    }
+    void Static::save(ESMWriter &esm) const
+    {
+        esm.writeHNCString("MODL", mModel);
+    }
 
     void Static::blank()
     {

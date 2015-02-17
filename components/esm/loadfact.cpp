@@ -28,27 +28,46 @@ namespace ESM
 
 void Faction::load(ESMReader &esm)
 {
-    mName = esm.getHNOString("FNAM");
+    mReactions.clear();
+    for (int i=0;i<10;++i)
+        mRanks[i].clear();
 
-    // Read rank names. These are optional.
-    int i = 0;
-    while (esm.isNextSub("RNAM") && i < 10)
-        mRanks[i++] = esm.getHString();
-
-    // Main data struct
-    esm.getHNT(mData, "FADT", 240);
-
-    if (mData.mIsHidden > 1)
-        esm.fail("Unknown flag!");
-
-    // Read faction response values
+    int rankCounter=0;
+    bool hasData = false;
     while (esm.hasMoreSubs())
     {
-        std::string faction = esm.getHNString("ANAM");
-        int reaction;
-        esm.getHNT(reaction, "INTV");
-        mReactions[faction] = reaction;
+        esm.getSubName();
+        uint32_t name = esm.retSubName().val;
+        switch (name)
+        {
+            case ESM::FourCC<'F','N','A','M'>::value:
+                mName = esm.getHString();
+                break;
+            case ESM::FourCC<'R','N','A','M'>::value:
+                if (rankCounter >= 10)
+                    esm.fail("Rank out of range");
+                mRanks[rankCounter++] = esm.getHString();
+                break;
+            case ESM::FourCC<'F','A','D','T'>::value:
+                esm.getHT(mData, 240);
+                if (mData.mIsHidden > 1)
+                    esm.fail("Unknown flag!");
+                hasData = true;
+                break;
+            case ESM::FourCC<'A','N','A','M'>::value:
+            {
+                std::string faction = esm.getHString();
+                int reaction;
+                esm.getHNT(reaction, "INTV");
+                mReactions[faction] = reaction;
+                break;
+            }
+            default:
+                esm.fail("Unknown subrecord");
+        }
     }
+    if (!hasData)
+        esm.fail("Missing FADT subrecord");
 }
 void Faction::save(ESMWriter &esm) const
 {
