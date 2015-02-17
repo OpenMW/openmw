@@ -114,7 +114,6 @@ namespace MWWorld
             void performUpdateSceneQueries ();
             void getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer=true);
 
-            float getMaxActivationDistance ();
             float getNpcActivationDistance ();
             float getObjectActivationDistance ();
 
@@ -360,6 +359,8 @@ namespace MWWorld
 
             virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr, MWWorld::CellStore* cell, ESM::Position pos);
             ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr.
+
+            virtual float getMaxActivationDistance();
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const;
