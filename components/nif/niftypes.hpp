@@ -24,24 +24,35 @@
 #ifndef OPENMW_COMPONENTS_NIF_NIFTYPES_HPP
 #define OPENMW_COMPONENTS_NIF_NIFTYPES_HPP
 
-#include <OgreVector3.h>
-#include <OgreMatrix3.h>
+#include <osg/Vec3f>
 
 // Common types used in NIF files
 
 namespace Nif
 {
 
+struct Matrix3
+{
+    float mValues[3][3];
+
+    Matrix3()
+    {
+        for (int i=0;i<3;++i)
+            for (int j=0;j<3;++j)
+                mValues[i][j] = 0;
+    }
+};
+
 struct Transformation
 {
-    Ogre::Vector3 pos;
-    Ogre::Matrix3 rotation;
+    osg::Vec3f pos;
+    Matrix3 rotation;
     float scale;
 
     static const Transformation& getIdentity()
     {
         static const Transformation identity = {
-            Ogre::Vector3::ZERO, Ogre::Matrix3::IDENTITY, 1.0f
+            osg::Vec3f(), Matrix3(), 1.0f
         };
         return identity;
     }

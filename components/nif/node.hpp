@@ -1,8 +1,6 @@
 #ifndef OPENMW_COMPONENTS_NIF_NODE_HPP
 #define OPENMW_COMPONENTS_NIF_NODE_HPP
 
-#include <OgreMatrix4.h>
-
 #include "controlled.hpp"
 #include "extra.hpp"
 #include "data.hpp"
@@ -26,14 +24,14 @@ public:
     // Node flags. Interpretation depends somewhat on the type of node.
     int flags;
     Transformation trafo;
-    Ogre::Vector3 velocity; // Unused? Might be a run-time game state
+    osg::Vec3f velocity; // Unused? Might be a run-time game state
     PropertyList props;
 
     // Bounding box info
     bool hasBounds;
-    Ogre::Vector3 boundPos;
-    Ogre::Matrix3 boundRot;
-    Ogre::Vector3 boundXYZ; // Box size
+    osg::Vec3f boundPos;
+    Matrix3 boundRot;
+    osg::Vec3f boundXYZ; // Box size
 
     void read(NIFStream *nif)
     {
@@ -91,18 +89,6 @@ public:
         boneTrafo = &bi.trafo;
         boneIndex = ind;
     }
-
-    void getProperties(const Nif::NiTexturingProperty *&texprop,
-                       const Nif::NiMaterialProperty *&matprop,
-                       const Nif::NiAlphaProperty *&alphaprop,
-                       const Nif::NiVertexColorProperty *&vertprop,
-                       const Nif::NiZBufferProperty *&zprop,
-                       const Nif::NiSpecularProperty *&specprop,
-                       const Nif::NiWireframeProperty *&wireprop,
-                       const Nif::NiStencilProperty *&stencilprop) const;
-
-    Ogre::Matrix4 getLocalTransform() const;
-    Ogre::Matrix4 getWorldTransform() const;
 };
 
 struct NiNode : Node

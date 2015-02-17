@@ -31,24 +31,24 @@ add_component_dir (nifoverrides
     )
 
 add_component_dir (bsa
-    bsa_archive bsa_file resources
+    bsa_file
     )
 
 add_component_dir (nif
     controlled effect niftypes record controller extra node record_ptr data niffile property nifkey data node base nifstream
     )
 
-add_component_dir (nifcache
-    nifcache
-    )
+#add_component_dir (nifcache
+#    nifcache
+#    )
 
-add_component_dir (nifogre
-    ogrenifloader skeleton material mesh particles controller
-    )
+#add_component_dir (nifogre
+#    ogrenifloader skeleton material mesh particles controller
+#    )
 
-add_component_dir (nifbullet
-    bulletnifloader
-    )
+#add_component_dir (nifbullet
+#    bulletnifloader
+#    )
 
 add_component_dir (to_utf8
     to_utf8
@@ -160,7 +160,7 @@ include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
-target_link_libraries(components ${Boost_LIBRARIES} ${OGRE_LIBRARIES})
+target_link_libraries(components ${Boost_LIBRARIES} ${OGRE_LIBRARIES} ${OPENSCENEGRAPH_LIBRARIES})
 
 if (GIT_CHECKOUT)
     add_dependencies (components git-version)

@@ -33,7 +33,7 @@ class NiParticleSystemController : public Controller
 {
 public:
     struct Particle {
-        Ogre::Vector3 velocity;
+        osg::Vec3f velocity;
         float lifetime;
         float lifespan;
         float timestamp;
@@ -64,7 +64,7 @@ public:
     };
     int emitFlags;
 
-    Ogre::Vector3 offsetRandom;
+    osg::Vec3f offsetRandom;
 
     NodePtr emitter;
 

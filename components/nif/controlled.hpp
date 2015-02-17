@@ -129,8 +129,8 @@ public:
      * 1 - Point (fixed origin)
      */
     int mType;
-    Ogre::Vector3 mPosition;
-    Ogre::Vector3 mDirection;
+    osg::Vec3f mPosition;
+    osg::Vec3f mDirection;
 
     void read(NIFStream *nif)
     {

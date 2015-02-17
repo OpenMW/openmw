@@ -33,10 +33,10 @@ namespace Nif
 class ShapeData : public Record
 {
 public:
-    std::vector<Ogre::Vector3> vertices, normals;
-    std::vector<Ogre::Vector4> colors;
-    std::vector< std::vector<Ogre::Vector2> > uvlist;
-    Ogre::Vector3 center;
+    std::vector<osg::Vec3f> vertices, normals;
+    std::vector<osg::Vec4f> colors;
+    std::vector< std::vector<osg::Vec2f> > uvlist;
+    osg::Vec3f center;
     float radius;
 
     void read(NIFStream *nif)
@@ -131,7 +131,7 @@ public:
 class NiRotatingParticlesData : public NiAutoNormalParticlesData
 {
 public:
-    std::vector<Ogre::Quaternion> rotations;
+    std::vector<osg::Quat> rotations;
 
     void read(NIFStream *nif)
     {
@@ -272,9 +272,9 @@ class NiSkinData : public Record
 public:
     struct BoneTrafo
     {
-        Ogre::Matrix3 rotation; // Rotation offset from bone?
-        Ogre::Vector3 trans;    // Translation
-        float scale;            // Probably scale (always 1)
+        Matrix3 rotation; // Rotation offset from bone?
+        osg::Vec3f trans; // Translation
+        float scale;      // Scale
     };
 
     struct VertWeight
@@ -286,7 +286,7 @@ public:
     struct BoneInfo
     {
         BoneTrafo trafo;
-        Ogre::Vector4 unknown;
+        osg::Vec4f unknown;
         std::vector<VertWeight> weights;
     };
 
@@ -327,7 +327,7 @@ struct NiMorphData : public Record
 {
     struct MorphData {
         FloatKeyMap mData;
-        std::vector<Ogre::Vector3> mVertices;
+        std::vector<osg::Vec3f> mVertices;
     };
     std::vector<MorphData> mMorphs;
 

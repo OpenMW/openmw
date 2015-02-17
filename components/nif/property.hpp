@@ -159,7 +159,7 @@ class NiFogProperty : public Property
 {
 public:
     float mFogDepth;
-    Ogre::Vector3 mColour;
+    osg::Vec3f mColour;
 
 
     void read(NIFStream *nif)
@@ -194,7 +194,7 @@ struct StructPropT : Property
 struct S_MaterialProperty
 {
     // The vector components are R,G,B
-    Ogre::Vector3 ambient, diffuse, specular, emissive;
+    osg::Vec3f ambient, diffuse, specular, emissive;
     float glossiness, alpha;
 
     void read(NIFStream *nif)
@@ -265,14 +265,6 @@ struct S_AlphaProperty
 
         Taken from:
         http://niftools.sourceforge.net/doc/nif/NiAlphaProperty.html
-
-        Right now we only use standard alpha blending (see the Ogre code
-        that sets it up) and it appears that this is the only blending
-        used in the original game. Bloodmoon (along with several mods) do
-        however use other settings, such as discarding pixel values with
-        alpha < 1.0. This is faster because we don't have to mess with the
-        depth stuff like we did for blending. And OGRE has settings for
-        this too.
     */
 
     // Tested against when certain flags are set (see above.)

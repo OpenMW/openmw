@@ -7,6 +7,8 @@
 #include <vector>
 #include <iostream>
 
+#include <components/files/constrainedfilestream.hpp>
+
 #include "record.hpp"
 
 namespace Nif
@@ -42,6 +44,8 @@ class NIFFile
     ///\overload
     void operator = (NIFFile const &);
 
+    Files::IStreamPtr mStream;
+
 public:
     /// Used if file parsing fails
     void fail(const std::string &msg)
@@ -57,8 +61,8 @@ public:
                   << "File: " << filename <<std::endl;
     }
 
-    /// Open a NIF stream. The name is used for error messages and opening the file.
-    NIFFile(const std::string &name);
+    /// Open a NIF stream. The name is used for error messages.
+    NIFFile(Files::IStreamPtr stream, const std::string &name);
     ~NIFFile();
 
     /// Get a given record

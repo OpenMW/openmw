@@ -2,16 +2,16 @@
 #include "effect.hpp"
 
 #include <map>
-
-#include <OgreResourceGroupManager.h>
+#include <sstream>
 
 namespace Nif
 {
 
 /// Open a NIF stream. The name is used for error messages.
-NIFFile::NIFFile(const std::string &name)
+NIFFile::NIFFile(Files::IStreamPtr stream, const std::string &name)
     : ver(0)
     , filename(name)
+    , mStream(stream)
 {
     parse();
 }
@@ -121,63 +121,68 @@ std::string NIFFile::printVersion(unsigned int version)
 
     version_out.full = version;
 
-    return Ogre::StringConverter::toString(version_out.quad[3])
-    +"." + Ogre::StringConverter::toString(version_out.quad[2])
-    +"." + Ogre::StringConverter::toString(version_out.quad[1])
-    +"." + Ogre::StringConverter::toString(version_out.quad[0]);
+    std::stringstream stream;
+    stream  << version_out.quad[3] << "."
+            << version_out.quad[2] << "."
+            << version_out.quad[1] << "."
+            << version_out.quad[0];
+    return stream.str();
 }
 
 void NIFFile::parse()
 {
-    NIFStream nif (this, Ogre::ResourceGroupManager::getSingleton().openResource(filename));
+    NIFStream nif (this, mStream);
 
-  // Check the header string
-  std::string head = nif.getVersionString();
-  if(head.compare(0, 22, "NetImmerse File Format") != 0)
-    fail("Invalid NIF header:  " + head);
+    // Check the header string
+    std::string head = nif.getVersionString();
+    if(head.compare(0, 22, "NetImmerse File Format") != 0)
+        fail("Invalid NIF header:  " + head);
 
-  // Get BCD version
-  ver = nif.getUInt();
-  if(ver != VER_MW)
-    fail("Unsupported NIF version: " + printVersion(ver));
-  // Number of records
-  size_t recNum = nif.getInt();
-  records.resize(recNum);
+    // Get BCD version
+    ver = nif.getUInt();
+    if(ver != VER_MW)
+        fail("Unsupported NIF version: " + printVersion(ver));
+    // Number of records
+    size_t recNum = nif.getInt();
+    records.resize(recNum);
 
-  /* The format for 10.0.1.0 seems to be a bit different. After the
+    /* The format for 10.0.1.0 seems to be a bit different. After the
      header, it contains the number of records, r (int), just like
      4.0.0.2, but following that it contains a short x, followed by x
      strings. Then again by r shorts, one for each record, giving
      which of the above strings to use to identify the record. After
      this follows two ints (zero?) and then the record data. However
      we do not support or plan to support other versions yet.
-  */
+    */
 
-  for(size_t i = 0;i < recNum;i++)
+    for(size_t i = 0;i < recNum;i++)
     {
-      Record *r = NULL;
+        Record *r = NULL;
 
-      std::string rec = nif.getString();
-      if(rec.empty())
-        fail("Record number " + Ogre::StringConverter::toString(i) + " out of " + Ogre::StringConverter::toString(recNum) + " is blank.");
+        std::string rec = nif.getString();
+        if(rec.empty())
+        {
+            std::stringstream error;
+            error << "Record number " << i << " out of " << recNum << " is blank.";
+            fail(error.str());
+        }
 
+        std::map<std::string,RecordFactoryEntry>::const_iterator entry = factories.find(rec);
 
-      std::map<std::string,RecordFactoryEntry>::const_iterator entry = factories.find(rec);
+        if (entry != factories.end())
+        {
+            r = entry->second.mCreate ();
+            r->recType = entry->second.mType;
+        }
+        else
+            fail("Unknown record type " + rec);
 
-      if (entry != factories.end())
-      {
-          r = entry->second.mCreate ();
-          r->recType = entry->second.mType;
-      }
-      else
-          fail("Unknown record type " + rec);
-
-      assert(r != NULL);
-      assert(r->recType != RC_MISSING);
-      r->recName = rec;
-      r->recIndex = i;
-      records[i] = r;
-      r->read(&nif);
+        assert(r != NULL);
+        assert(r->recType != RC_MISSING);
+        r->recName = rec;
+        r->recIndex = i;
+        records[i] = r;
+        r->read(&nif);
     }
 
     size_t rootNum = nif.getUInt();
