@@ -63,6 +63,7 @@ set(CUSTOM_OGRE_PLUGIN_DIR "" CACHE PATH "Specify a custom directory for Ogre pl
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 
 # Apps and tools
+option(BUILD_OPENMW "build OpenMW" ON)
 option(BUILD_BSATOOL "build BSA extractor" ON)
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
@@ -417,7 +418,9 @@ IF(NOT WIN32 AND NOT APPLE)
     SET(SYSCONFDIR "${GLOBAL_CONFIG_PATH}/openmw" CACHE PATH "Set config dir")
 
     # Install binaries
-    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
+    IF(BUILD_OPENMW)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_OPENMW)
     IF(BUILD_LAUNCHER)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw-launcher" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_LAUNCHER)
@@ -586,7 +589,9 @@ if (BUILD_NIFTEST)
 endif(BUILD_NIFTEST)
 
 # Apps and tools
-add_subdirectory( apps/openmw )
+if (BUILD_OPENMW)
+    add_subdirectory( apps/openmw )
+endif()
 
 if (BUILD_BSATOOL)
   add_subdirectory( apps/bsatool )
