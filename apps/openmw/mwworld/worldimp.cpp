@@ -3108,7 +3108,7 @@ namespace MWWorld
         mRendering->spawnEffect(model, textureOverride, worldPos);
     }
 
-    void World::explodeSpell(const Vector3 &origin, const ESM::EffectList &effects, const Ptr &caster, int rangeType,
+    void World::explodeSpell(const Vector3 &origin, const ESM::EffectList &effects, const Ptr &caster, ESM::RangeType rangeType,
                              const std::string& id, const std::string& sourceName)
     {
         std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
@@ -3167,7 +3167,7 @@ namespace MWWorld
             cast.mStack = false;
             ESM::EffectList effects;
             effects.mList = apply->second;
-            cast.inflict(apply->first, caster, effects, (ESM::RangeType)rangeType, false, true);
+            cast.inflict(apply->first, caster, effects, rangeType, false, true);
         }
     }
 

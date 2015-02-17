@@ -309,9 +309,11 @@ namespace MWMechanics
         for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
             iter!=effects.mList.end(); ++iter)
         {
-            if (iter->mRange != range)
-                continue;
-            found = true;
+            if (iter->mRange == range)
+            {
+                found = true;
+                break;
+            }
         }
         if (!found)
             return;
@@ -766,8 +768,7 @@ namespace MWMechanics
 
         if (!mTarget.isEmpty())
         {
-            if (!mTarget.getClass().isActor() || !mTarget.getClass().getCreatureStats(mTarget).isDead())
-                inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Touch);
+            inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Touch);
         }
 
         std::string projectileModel;
@@ -851,10 +852,7 @@ namespace MWMechanics
 
         if (!mTarget.isEmpty())
         {
-            if (!mTarget.getClass().isActor() || !mTarget.getClass().getCreatureStats(mTarget).isDead())
-            {
-                inflict(mTarget, mCaster, spell->mEffects, ESM::RT_Touch);
-            }
+            inflict(mTarget, mCaster, spell->mEffects, ESM::RT_Touch);
         }
 
 
