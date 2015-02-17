@@ -34,15 +34,11 @@ namespace MWWorld
                                       // object in the refdata of refs without a script,
                                       // we can make this a pointer later.
 
-#ifdef ANDROID
-            bool mDeleted,mHasLocals,mEnabled,mChanged;
-#else
             bool mDeleted; // separate delete flag used for deletion by a content file
             bool mHasLocals;
             bool mEnabled;
-            bool mChanged;
-#endif            
             int mCount; // 0: deleted
+
 
             ESM::Position mPosition;
 
@@ -53,6 +49,8 @@ namespace MWWorld
             void copy (const RefData& refData);
 
             void cleanup();
+
+            bool mChanged;
 
         public:
 
