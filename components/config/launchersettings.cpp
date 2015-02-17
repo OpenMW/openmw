@@ -105,6 +105,12 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     // obtain content list from game settings (if present)
     const QStringList files(gameSettings.getContentList());
 
+    // if openmw.cfg has no content, exit so we don't create an empty content list.
+    if (files.isEmpty())
+    {
+        return;
+    }
+
     // if any existing profile in launcher matches the content list, make that profile the default
     foreach(const QString &listName, getContentLists())
     {

@@ -44,7 +44,14 @@ namespace Launcher
 
         void updateOkButton(const QString &text);
 
+        void onTimer();
+
     private:
+        /// Make progress bar move, to give user feedback
+        void simulateProgress();
+
+        /// after ini import runs, update settings
+        void reloadSettings();
 
         Process::ProcessInvoker *mWizardInvoker;
         Process::ProcessInvoker *mImporterInvoker;
@@ -56,7 +63,7 @@ namespace Launcher
 
         MainDialog *mMain;
         TextInputDialog *mProfileDialog;
-
+        QTimer *mTimer;
 
     };
 }
