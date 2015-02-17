@@ -32,6 +32,8 @@
 
 #include <OgreDataStream.h>
 
+#include <components/files/constrainedfilestream.hpp>
+
 
 namespace Bsa
 {
@@ -116,7 +118,7 @@ public:
     /** Open a file contained in the archive. Throws an exception if the
         file doesn't exist.
     */
-    Ogre::DataStreamPtr getFile(const char *file);
+    Files::IStreamPtr getFile(const char *file);
 
     /// Get a list of all files
     const FileList &getList() const
