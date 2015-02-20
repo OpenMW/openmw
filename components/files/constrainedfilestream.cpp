@@ -104,4 +104,11 @@ namespace Files
     {
         delete rdbuf();
     }
+
+
+    IStreamPtr openConstrainedFileStream(const char *filename,
+                                                       size_t start, size_t length)
+    {
+        return IStreamPtr(new ConstrainedFileStream(filename, start, length));
+    }
 }

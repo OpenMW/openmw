@@ -19,11 +19,7 @@ public:
 
 typedef boost::shared_ptr<std::istream> IStreamPtr;
 
-IStreamPtr openConstrainedFileStream(const char *filename,
-                                                   size_t start=0, size_t length=0xFFFFFFFF)
-{
-    return IStreamPtr(new ConstrainedFileStream(filename, start, length));
-}
+IStreamPtr openConstrainedFileStream(const char *filename, size_t start=0, size_t length=0xFFFFFFFF);
 
 }
 
