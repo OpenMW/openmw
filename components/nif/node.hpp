@@ -68,7 +68,7 @@ public:
     NiNode *parent;
 
     // Bone transformation. If set, node is a part of a skeleton.
-    const NiSkinData::BoneTrafo *boneTrafo;
+    const Transformation *boneTrafo;
 
     // Bone weight info, from NiSkinData
     const NiSkinData::BoneInfo *boneInfo;
@@ -77,7 +77,7 @@ public:
     // boneTrafo is set it is the root bone in the skeleton.
     short boneIndex;
 
-    void makeRootBone(const NiSkinData::BoneTrafo *tr)
+    void makeRootBone(const Transformation *tr)
     {
         boneTrafo = tr;
         boneIndex = -1;

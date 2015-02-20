@@ -26,6 +26,9 @@
 
 #include "base.hpp"
 
+#include "controlled.hpp"
+#include "data.hpp"
+
 namespace Nif
 {
 

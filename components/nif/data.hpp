@@ -26,6 +26,8 @@
 
 #include "base.hpp"
 
+#include "niftypes.hpp" // Transformation
+
 namespace Nif
 {
 
@@ -270,13 +272,6 @@ public:
 class NiSkinData : public Record
 {
 public:
-    struct BoneTrafo
-    {
-        Matrix3 rotation; // Rotation offset from bone?
-        osg::Vec3f trans; // Translation
-        float scale;      // Scale
-    };
-
     struct VertWeight
     {
         short vertex;
@@ -285,18 +280,18 @@ public:
 
     struct BoneInfo
     {
-        BoneTrafo trafo;
+        Transformation trafo;
         osg::Vec4f unknown;
         std::vector<VertWeight> weights;
     };
 
-    BoneTrafo trafo;
+    Transformation trafo;
     std::vector<BoneInfo> bones;
 
     void read(NIFStream *nif)
     {
         trafo.rotation = nif->getMatrix3();
-        trafo.trans = nif->getVector3();
+        trafo.pos = nif->getVector3();
         trafo.scale = nif->getFloat();
 
         int boneNum = nif->getInt();
@@ -308,7 +303,7 @@ public:
             BoneInfo &bi = bones[i];
 
             bi.trafo.rotation = nif->getMatrix3();
-            bi.trafo.trans = nif->getVector3();
+            bi.trafo.pos = nif->getVector3();
             bi.trafo.scale = nif->getFloat();
             bi.unknown = nif->getVector4();
 
