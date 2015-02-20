@@ -40,8 +40,7 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
 
     mWizardInvoker = new ProcessInvoker();
     mImporterInvoker = new ProcessInvoker();
-    mTimer = new QTimer(this);
-    progressBar->setValue(0);
+    resetProgressBar();
 
     connect(mWizardInvoker->getProcess(), SIGNAL(started()),
             this, SLOT(wizardStarted()));
@@ -59,8 +58,6 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
 
     connect(mProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
             this, SLOT(updateOkButton(QString)));
-
-    connect(mTimer, SIGNAL(timeout()), this, SLOT(onTimer()));
 
     // Detect Morrowind configuration files
     QStringList iniPaths;
@@ -146,8 +143,13 @@ void Launcher::SettingsPage::on_importerButton_clicked()
 
     qDebug() << "arguments " << arguments;
 
+    // start "bouncing ball" progress indicator
+    progressBar->setMaximum(0);
+    progressBar->setValue(0);
     if (!mImporterInvoker->startProcess(QLatin1String("mwiniimport"), arguments, false))
-        return;
+    {
+        resetProgressBar();
+    }
 }
 
 void Launcher::SettingsPage::on_browseButton_clicked()
@@ -203,6 +205,8 @@ void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus
 {
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
     {
+        resetProgressBar();
+
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Importer finished"));
         msgBox.setStandardButtons(QMessageBox::Ok);
@@ -212,63 +216,22 @@ void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus
     }
     else
     {
-        simulateProgress();
-    }
-}
+        // indicate progress finished
+        progressBar->setMaximum(1);
+        progressBar->setValue(1);
 
-void Launcher::SettingsPage::reloadSettings()
-{
-    // Importer may have changed settings, so refresh
-    mMain->reloadSettings();
-
-    // Import selected data files from openmw.cfg
-    if (addonsCheckBox->isChecked())
-    {
-        // Because we've reloaded settings, the current content list matches content in OpenMW.cfg
-        QString oldContentListName = mLauncherSettings.getCurrentContentListName();
-        if (mProfileDialog->exec() == QDialog::Accepted)
-        {
-            // remove the current content list to prevent duplication
-            //... except, not allowed to delete the Default content list
-            if (oldContentListName.compare(DataFilesPage::mDefaultContentListName) != 0)
-            {
-                mLauncherSettings.removeContentList(oldContentListName);
-            }
-
-            const QString newContentListName(mProfileDialog->lineEdit()->text());
-            const QStringList files(mGameSettings.getContentList());
-            mLauncherSettings.setCurrentContentListName(newContentListName);
-            mLauncherSettings.setContentList(newContentListName, files);
-
-            // Make DataFiles Page load the new content list.
-            mMain->reloadSettings();
-        }
+        // Importer may have changed settings, so refresh
+        mMain->reloadSettings();
     }
 
     importerButton->setEnabled(true);
 }
 
-// Normally, ini import is so fast user won't notice it
-// So, we make a progress bar move so user can see something happened.
-void Launcher::SettingsPage::simulateProgress()
+void Launcher::SettingsPage::resetProgressBar()
 {
-    // update progress bar 5 times second
-    const int progressUpdateInterval = 200;
-
+    // set progress bar to 0 %
+    progressBar->setMaximum(1);
     progressBar->setValue(0);
-    mTimer->start(progressUpdateInterval);
-}
-
-void Launcher::SettingsPage::onTimer()
-{
-    int val = progressBar->value();
-    ++val;
-    progressBar->setValue(val);
-    if (progressBar->maximum() <= val)
-    {
-        mTimer->stop();
-        reloadSettings();
-    }
 }
 
 void Launcher::SettingsPage::updateOkButton(const QString &text)
