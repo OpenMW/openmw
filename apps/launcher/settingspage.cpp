@@ -4,7 +4,6 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QDir>
-#include <QTimer>
 
 #include <components/files/configurationmanager.hpp>
 
