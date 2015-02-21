@@ -66,18 +66,18 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
     // If object have faction, check if that faction reference is valid
     if (hasFaction)
         if (mFactions.searchId(cellRef.mFaction) == -1)
-            messages.push_back(std::make_pair(id, " has non existing faction " + boost::lexical_cast<std::string>(cellRef.mFaction)));
+            messages.push_back(std::make_pair(id, " has non existing faction " + cellRef.mFaction));
 
     // Check item's faction rank
     if (hasFaction && cellRef.mFactionRank < -1)
-        messages.push_back(std::make_pair(id, " has faction set but has invalid faction rank " + cellRef.mFactionRank));
+        messages.push_back(std::make_pair(id, " has faction set but has invalid faction rank " + boost::lexical_cast<std::string>(cellRef.mFactionRank)));
     else if (!hasFaction && cellRef.mFactionRank != -2)
         messages.push_back(std::make_pair(id, " has invalid faction rank " + boost::lexical_cast<std::string>(cellRef.mFactionRank)));
 
     // If door have destination cell, check if that reference is valid
     if (!cellRef.mDestCell.empty())
         if (mCells.searchId(cellRef.mDestCell) == -1)
-            messages.push_back(std::make_pair(id, " has non existing destination cell " + boost::lexical_cast<std::string>(cellRef.mDestCell)));
+            messages.push_back(std::make_pair(id, " has non existing destination cell " + cellRef.mDestCell));
 
     // Check if scale isn't negative
     if (cellRef.mScale < 0)
