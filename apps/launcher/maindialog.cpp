@@ -61,6 +61,7 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     QString revision(OPENMW_VERSION_COMMITHASH);
     QString tag(OPENMW_VERSION_TAGHASH);
 
+    versionLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
     if (!revision.isEmpty() && !tag.isEmpty())
     {
         if (revision == tag) {
