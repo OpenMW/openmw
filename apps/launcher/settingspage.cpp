@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QDir>
+#include <QTimer>
 
 #include <components/files/configurationmanager.hpp>
 
@@ -39,6 +40,7 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
 
     mWizardInvoker = new ProcessInvoker();
     mImporterInvoker = new ProcessInvoker();
+    resetProgressBar();
 
     connect(mWizardInvoker->getProcess(), SIGNAL(started()),
             this, SLOT(wizardStarted()));
@@ -141,8 +143,13 @@ void Launcher::SettingsPage::on_importerButton_clicked()
 
     qDebug() << "arguments " << arguments;
 
+    // start the progress bar as a "bouncing ball"
+    progressBar->setMaximum(0);
+    progressBar->setValue(0);
     if (!mImporterInvoker->startProcess(QLatin1String("openmw-iniimporter"), arguments, false))
-        return;
+    {
+        resetProgressBar();
+    }
 }
 
 void Launcher::SettingsPage::on_browseButton_clicked()
@@ -197,36 +204,34 @@ void Launcher::SettingsPage::importerStarted()
 void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
-        return;
-
-    // Importer may have changed settings, so refresh
-    mMain->reloadSettings();
-
-    // Import selected data files from openmw.cfg
-    if (addonsCheckBox->isChecked())
     {
-        // Because we've reloaded settings, the current content list matches content in OpenMW.cfg
-        QString oldContentListName = mLauncherSettings.getCurrentContentListName();
-        if (mProfileDialog->exec() == QDialog::Accepted)
-        {
-            // remove the current content list to prevent duplication
-            //... except, not allowed to delete the Default content list
-            if (oldContentListName.compare(DataFilesPage::mDefaultContentListName) != 0)
-            {
-                mLauncherSettings.removeContentList(oldContentListName);
-            }
+        resetProgressBar();
 
-            const QString newContentListName(mProfileDialog->lineEdit()->text());
-            const QStringList files(mGameSettings.getContentList());
-            mLauncherSettings.setCurrentContentListName(newContentListName);
-            mLauncherSettings.setContentList(newContentListName, files);
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Importer finished"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText(tr("Failed to import settings from INI file."));
+        msgBox.exec();
+    }
+    else
+    {
+        // indicate progress finished
+        progressBar->setMaximum(1);
+        progressBar->setValue(1);
 
-            // Make DataFiles Page load the new content list.
-            mMain->reloadSettings();
-        }
+        // Importer may have changed settings, so refresh
+        mMain->reloadSettings();
     }
 
     importerButton->setEnabled(true);
+}
+
+void Launcher::SettingsPage::resetProgressBar()
+{
+    // set progress bar to 0 %
+    progressBar->setMaximum(1);
+    progressBar->setValue(0);
 }
 
 void Launcher::SettingsPage::updateOkButton(const QString &text)
