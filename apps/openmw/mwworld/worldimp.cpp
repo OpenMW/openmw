@@ -2799,7 +2799,7 @@ namespace MWWorld
                 MWWorld::CellStore *next = getInterior( *i );
                 if ( !next ) continue;
 
-                MWWorld::CellRefList<ESM::Door>& doors = next->get<ESM::Door>();
+                MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnly<ESM::Door>();
                 CellRefList<ESM::Door>::List& refList = doors.mList;
 
                 // Check if any door in the cell leads to an exterior directly
@@ -2838,6 +2838,8 @@ namespace MWWorld
         std::set< std::string >checkedCells;
         std::set< std::string >currentCells;
         std::set< std::string >nextCells;
+        MWWorld::Ptr closestMarker;
+
         nextCells.insert( ptr.getCell()->getCell()->mName );
         while ( !nextCells.empty() ) {
             currentCells = nextCells;
@@ -2847,27 +2849,19 @@ namespace MWWorld
                 checkedCells.insert( *i );
                 if ( !next ) continue;
 
-                MWWorld::CellRefList<ESM::Static>& statics = next->get<ESM::Static>();
-                CellRefList<ESM::Static>::List& staticList = statics.mList;
-                for (CellRefList<ESM::Static>::List::iterator it = staticList.begin(); it != staticList.end(); ++it)
+                closestMarker = next->search( id );
+                if ( !closestMarker.isEmpty() )
                 {
-                    MWWorld::LiveCellRef<ESM::Static>& ref = *it;
-                    if ( id == ref.mRef.getRefId() ) {
-                        return MWWorld::Ptr( &ref, next );
-                    }
+                    return closestMarker;
                 }
 
-                MWWorld::CellRefList<ESM::Door>& doors = next->get<ESM::Door>();
+                MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnly<ESM::Door>();
                 CellRefList<ESM::Door>::List& doorList = doors.mList;
 
                 // Check if any door in the cell leads to an exterior directly
                 for (CellRefList<ESM::Door>::List::iterator it = doorList.begin(); it != doorList.end(); ++it)
                 {
                     MWWorld::LiveCellRef<ESM::Door>& ref = *it;
-
-                    if ( id == ref.mRef.getRefId() ) {
-                        return MWWorld::Ptr( &ref, next );
-                    }
 
                     if (!ref.mRef.getTeleport()) continue;
 
@@ -3085,18 +3079,7 @@ namespace MWWorld
             return;
         }
 
-        MWWorld::Ptr closestChest;
-
-        MWWorld::CellRefList<ESM::Container>& containers = prison->get<ESM::Container>();
-        CellRefList<ESM::Container>::List& refList = containers.mList;
-        for (CellRefList<ESM::Container>::List::iterator it = refList.begin(); it != refList.end(); ++it)
-        {
-            MWWorld::LiveCellRef<ESM::Container>& ref = *it;
-            if ( ref.mRef.getRefId() == "stolen_goods" ) {
-                closestChest = MWWorld::Ptr( &ref, prison );
-            }
-        }
-
+        MWWorld::Ptr closestChest = prison->search( "stolen_goods" );
         if (!closestChest.isEmpty()) //Found a close chest
         {
             MWBase::Environment::get().getMechanicsManager()->confiscateStolenItems(ptr, closestChest);

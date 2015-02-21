@@ -184,6 +184,11 @@ namespace MWWorld
                 throw std::runtime_error ("Storage for this type not exist in cells");
             }
 
+            template <class T>
+            CellRefList<T>& getReadOnly() {
+                throw std::runtime_error ("Read Only access not available for this type");
+            }
+
             bool isPointConnected(const int start, const int end) const;
 
             std::list<ESM::Pathgrid::Point> aStarSearch(const int start, const int end) const;
@@ -355,6 +360,12 @@ namespace MWWorld
     {
         mHasState = true;
         return mWeapons;
+    }
+
+    template<>
+    inline CellRefList<ESM::Door>& CellStore::getReadOnly<ESM::Door>()
+    {
+        return mDoors;
     }
 
     bool operator== (const CellStore& left, const CellStore& right);
