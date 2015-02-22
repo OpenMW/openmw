@@ -883,15 +883,16 @@ void MwIniImporter::setInputEncoding(const ToUTF8::FromType &encoding)
 std::time_t MwIniImporter::lastWriteTime(const boost::filesystem::path& filename, std::time_t defaultTime)
 {
     std::time_t writeTime(defaultTime);
-    if (boost::filesystem::exists(filename))
+    boost::filesystem::path resolved = boost::filesystem::canonical(filename);
+    if (boost::filesystem::exists(resolved))
     {
-        writeTime = boost::filesystem::last_write_time(filename);
-        std::cout << "content file: " << filename << " timestamp = (" << writeTime  << 
+        writeTime = boost::filesystem::last_write_time(resolved);
+        std::cout << "content file: " << resolved << " timestamp = (" << writeTime <<
             ") " << asctime(localtime(&writeTime)) << std::endl;
     }
     else
     {
-        std::cout << "content file: " << filename << " not found" << std::endl;
+        std::cout << "content file: " << resolved << " not found" << std::endl;
     }
     return writeTime;
 }
