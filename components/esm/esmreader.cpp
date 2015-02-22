@@ -1,7 +1,6 @@
 #include "esmreader.hpp"
-#include <stdexcept>
 
-#include "../files/constrainedfiledatastream.hpp"
+#include <stdexcept>
 
 namespace ESM
 {
