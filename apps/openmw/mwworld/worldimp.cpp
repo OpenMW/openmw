@@ -2784,18 +2784,45 @@ namespace MWWorld
     {
         if (cell->isExterior())
             return false;
-        MWWorld::CellRefList<ESM::Door>& doors = cell->get<ESM::Door>();
-        CellRefList<ESM::Door>::List& refList = doors.mList;
 
-        // Check if any door in the cell leads to an exterior directly
-        for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
-        {
-            MWWorld::LiveCellRef<ESM::Door>& ref = *it;
-            if (ref.mRef.getTeleport() && ref.mRef.getDestCell().empty())
-            {
-                ESM::Position pos = ref.mRef.getDoorDest();
-                result = Ogre::Vector3(pos.pos);
-                return true;
+        // Search for a 'nearest' exterior, counting each cell between the starting
+        // cell and the exterior as a distance of 1.  Will fail for isolated interiors.
+        std::set< std::string >checkedCells;
+        std::set< std::string >currentCells;
+        std::set< std::string >nextCells;
+        nextCells.insert( cell->getCell()->mName );
+
+        while ( !nextCells.empty() ) {
+            currentCells = nextCells;
+            nextCells.clear();
+            for( std::set< std::string >::const_iterator i = currentCells.begin(); i != currentCells.end(); ++i ) {
+                MWWorld::CellStore *next = getInterior( *i );
+                if ( !next ) continue;
+
+                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnly<ESM::Door>();
+                const CellRefList<ESM::Door>::List& refList = doors.mList;
+
+                // Check if any door in the cell leads to an exterior directly
+                for (CellRefList<ESM::Door>::List::const_iterator it = refList.begin(); it != refList.end(); ++it)
+                {
+                    const MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+                    if (!ref.mRef.getTeleport()) continue;
+
+                    if (ref.mRef.getDestCell().empty())
+                    {
+                        ESM::Position pos = ref.mRef.getDoorDest();
+                        result = Ogre::Vector3(pos.pos);
+                        return true;
+                    }
+                    else
+                    {
+                        std::string dest = ref.mRef.getDestCell();
+                        if ( !checkedCells.count(dest) && !currentCells.count(dest) )
+                            nextCells.insert(dest);
+                    }
+                }
+
+                checkedCells.insert( *i );
             }
         }
 
@@ -2803,33 +2830,93 @@ namespace MWWorld
         return false;
     }
 
+    MWWorld::Ptr World::getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id )
+    {
+        // Search for a 'nearest' marker, counting each cell between the starting
+        // cell and the exterior as a distance of 1.  If an exterior is found, jump
+        // to the nearest exterior marker, without further interior searching.
+        std::set< std::string >checkedCells;
+        std::set< std::string >currentCells;
+        std::set< std::string >nextCells;
+        MWWorld::Ptr closestMarker;
+
+        nextCells.insert( ptr.getCell()->getCell()->mName );
+        while ( !nextCells.empty() ) {
+            currentCells = nextCells;
+            nextCells.clear();
+            for( std::set< std::string >::const_iterator i = currentCells.begin(); i != currentCells.end(); ++i ) {
+                MWWorld::CellStore *next = getInterior( *i );
+                checkedCells.insert( *i );
+                if ( !next ) continue;
+
+                closestMarker = next->search( id );
+                if ( !closestMarker.isEmpty() )
+                {
+                    return closestMarker;
+                }
+
+                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnly<ESM::Door>();
+                const CellRefList<ESM::Door>::List& doorList = doors.mList;
+
+                // Check if any door in the cell leads to an exterior directly
+                for (CellRefList<ESM::Door>::List::const_iterator it = doorList.begin(); it != doorList.end(); ++it)
+                {
+                    const MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+
+                    if (!ref.mRef.getTeleport()) continue;
+
+                    if (ref.mRef.getDestCell().empty())
+                    {
+                        Ogre::Vector3 worldPos = Ogre::Vector3(ref.mRef.getDoorDest().pos);
+                        float closestDistance = FLT_MAX;
+
+                        MWWorld::Ptr closestMarker;
+                        std::vector<MWWorld::Ptr> markers;
+                        mCells.getExteriorPtrs(id, markers);
+                        for (std::vector<MWWorld::Ptr>::iterator it2 = markers.begin(); it2 != markers.end(); ++it2)
+                        {
+                            ESM::Position pos = it2->getRefData().getPosition();
+                            Ogre::Vector3 markerPos = Ogre::Vector3(pos.pos);
+                            float distance = worldPos.squaredDistance(markerPos);
+                            if (distance < closestDistance)
+                            {
+                                closestDistance = distance;
+                                closestMarker = *it2;
+                            }
+
+                        }
+
+                        return closestMarker;
+                    }
+                    else
+                    {
+                        std::string dest = ref.mRef.getDestCell();
+                        if ( !checkedCells.count(dest) && !currentCells.count(dest) )
+                            nextCells.insert(dest);
+                    }
+                }
+            }
+        }
+
+        return MWWorld::Ptr();
+    }
+
     void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
                                           const std::string& id)
     {
-        Ogre::Vector3 worldPos;
-        if (!findInteriorPositionInWorldSpace(ptr.getCell(), worldPos))
-            worldPos = mPlayer->getLastKnownExteriorPosition();
+        MWWorld::Ptr closestMarker = getClosestMarker( ptr, id );
 
-        MWWorld::Ptr closestMarker;
-        float closestDistance = FLT_MAX;
-
-        std::vector<MWWorld::Ptr> markers;
-        mCells.getExteriorPtrs(id, markers);
-
-        for (std::vector<MWWorld::Ptr>::iterator it = markers.begin(); it != markers.end(); ++it)
+        if ( closestMarker.isEmpty() )
         {
-            ESM::Position pos = it->getRefData().getPosition();
-            Ogre::Vector3 markerPos = Ogre::Vector3(pos.pos);
-            float distance = worldPos.squaredDistance(markerPos);
-            if (distance < closestDistance)
-            {
-                closestDistance = distance;
-                closestMarker = *it;
-            }
-
+            std::cerr << "Failed to teleport: no closest marker found" << std::endl;
+            return;
         }
 
-        MWWorld::ActionTeleport action("", closestMarker.getRefData().getPosition());
+        std::string cellName;
+        if ( !closestMarker.mCell->isExterior() )
+            cellName = closestMarker.mCell->getCell()->mName;
+
+        MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition());
         action.execute(ptr);
     }
     
@@ -2978,31 +3065,21 @@ namespace MWWorld
 
     void World::confiscateStolenItems(const Ptr &ptr)
     {
-        Ogre::Vector3 playerPos;
-        if (!findInteriorPositionInWorldSpace(ptr.getCell(), playerPos))
-            playerPos = mPlayer->getLastKnownExteriorPosition();
-
-        MWWorld::Ptr closestChest;
-        float closestDistance = FLT_MAX;
-
-        //Find closest stolen_goods chest
-        std::vector<MWWorld::Ptr> chests;
-        mCells.getInteriorPtrs("stolen_goods", chests);
-
-        Ogre::Vector3 chestPos;
-        for (std::vector<MWWorld::Ptr>::iterator it = chests.begin(); it != chests.end(); ++it)
+        MWWorld::Ptr prisonMarker = getClosestMarker( ptr, "prisonmarker" );
+        std::string prisonName = prisonMarker.mRef->mRef.getDestCell();
+        if ( prisonName.empty() )
         {
-            if (!findInteriorPositionInWorldSpace(it->getCell(), chestPos))
-                continue;
-
-            float distance = playerPos.squaredDistance(chestPos);
-            if (distance < closestDistance)
-            {
-                closestDistance = distance;
-                closestChest = *it;
-            }
+            std::cerr << "Failed to confiscate items: prison marker not linked to prison interior" << std::endl;
+            return;
+        }
+        MWWorld::CellStore *prison = getInterior( prisonName );
+        if ( !prison )
+        {
+            std::cerr << "Failed to confiscate items: failed to load cell " << prisonName << std::endl;
+            return;
         }
 
+        MWWorld::Ptr closestChest = prison->search( "stolen_goods" );
         if (!closestChest.isEmpty()) //Found a close chest
         {
             MWBase::Environment::get().getMechanicsManager()->confiscateStolenItems(ptr, closestChest);
