@@ -1,6 +1,7 @@
 #include "constrainedfilestream.hpp"
 
 #include <streambuf>
+#include <iostream>
 
 #include "lowlevelfile.hpp"
 
@@ -28,6 +29,8 @@ namespace Files
             if (start != 0)
                 mFile.seek(start);
 
+            setg(0,0,0);
+
             mOrigin = start;
         }
 
@@ -35,11 +38,11 @@ namespace Files
         {
             if(gptr() == egptr())
             {
+                size_t toRead = std::min((mOrigin+mSize)-(mFile.tell()), sBufferSize);
                 // Read in the next chunk of data, and set the read pointers on success
-                size_t got = mFile.read(mBuffer, sBufferSize);
                 // Failure will throw exception in LowLevelFile
-                /*if(got != -1) */
-                setg(&mBuffer[0], &mBuffer[0], mBuffer+got);
+                size_t got = mFile.read(mBuffer, toRead);
+                setg(&mBuffer[0], &mBuffer[0], &mBuffer[0]+got);
             }
             if(gptr() == egptr())
                 return traits_type::eof();
@@ -60,7 +63,7 @@ namespace Files
                     newPos = offset;
                     break;
                 case std::ios_base::cur:
-                    newPos = (mFile.tell() - mOrigin) + offset;
+                    newPos = (mFile.tell() - mOrigin - (egptr() - gptr())) + offset;
                     break;
                 case std::ios_base::end:
                     newPos = mSize + offset;
@@ -68,9 +71,11 @@ namespace Files
                 default:
                     return traits_type::eof();
             }
-            mFile.seek(mOrigin+newPos);
 
-            // EOF handled by exception in LowLevelFile
+            if (newPos > mSize)
+                return traits_type::eof();
+
+            mFile.seek(mOrigin+newPos);
 
             // Clear read pointers so underflow() gets called on the next read attempt.
             setg(0, 0, 0);
@@ -83,8 +88,9 @@ namespace Files
             if((mode&std::ios_base::out) || !(mode&std::ios_base::in))
                 return traits_type::eof();
 
-            if(pos >= (int)mSize)
+            if ((size_t)pos > mSize)
                 return traits_type::eof();
+
             mFile.seek(mOrigin + pos);
 
             // Clear read pointers so underflow() gets called on the next read attempt.
