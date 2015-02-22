@@ -41,34 +41,7 @@ public:
     osg::Vec3f center;
     float radius;
 
-    void read(NIFStream *nif)
-    {
-        int verts = nif->getUShort();
-
-        if(nif->getInt())
-            nif->getVector3s(vertices, verts);
-
-        if(nif->getInt())
-            nif->getVector3s(normals, verts);
-
-        center = nif->getVector3();
-        radius = nif->getFloat();
-
-        if(nif->getInt())
-            nif->getVector4s(colors, verts);
-
-        // Only the first 6 bits are used as a count. I think the rest are
-        // flags of some sort.
-        int uvs = nif->getUShort();
-        uvs &= 0x3f;
-
-        if(nif->getInt())
-        {
-            uvlist.resize(uvs);
-            for(int i = 0;i < uvs;i++)
-                nif->getVector2s(uvlist[i], verts);
-        }
-    }
+    void read(NIFStream *nif);
 };
 
 class NiTriShapeData : public ShapeData
@@ -77,28 +50,7 @@ public:
     // Triangles, three vertex indices per triangle
     std::vector<short> triangles;
 
-    void read(NIFStream *nif)
-    {
-        ShapeData::read(nif);
-
-        /*int tris =*/ nif->getUShort();
-
-        // We have three times as many vertices as triangles, so this
-        // is always equal to tris*3.
-        int cnt = nif->getInt();
-        nif->getShorts(triangles, cnt);
-
-        // Read the match list, which lists the vertices that are equal to
-        // vertices. We don't actually need need this for anything, so
-        // just skip it.
-        int verts = nif->getUShort();
-        for(int i=0;i < verts;i++)
-        {
-            // Number of vertices matching vertex 'i'
-            int num = nif->getUShort();
-            nif->skip(num * sizeof(short));
-        }
-    }
+    void read(NIFStream *nif);
 };
 
 class NiAutoNormalParticlesData : public ShapeData
@@ -112,22 +64,7 @@ public:
 
     std::vector<float> sizes;
 
-    void read(NIFStream *nif)
-    {
-        ShapeData::read(nif);
-
-        // Should always match the number of vertices
-        numParticles = nif->getUShort();
-
-        particleRadius = nif->getFloat();
-        activeCount = nif->getUShort();
-
-        if(nif->getInt())
-        {
-            // Particle sizes
-            nif->getFloats(sizes, vertices.size());
-        }
-    }
+    void read(NIFStream *nif);
 };
 
 class NiRotatingParticlesData : public NiAutoNormalParticlesData
@@ -135,16 +72,7 @@ class NiRotatingParticlesData : public NiAutoNormalParticlesData
 public:
     std::vector<osg::Quat> rotations;
 
-    void read(NIFStream *nif)
-    {
-        NiAutoNormalParticlesData::read(nif);
-
-        if(nif->getInt())
-        {
-            // Rotation quaternions.
-            nif->getQuaternions(rotations, vertices.size());
-        }
-    }
+    void read(NIFStream *nif);
 };
 
 class NiPosData : public Record
@@ -152,10 +80,7 @@ class NiPosData : public Record
 public:
     Vector3KeyMap mKeyList;
 
-    void read(NIFStream *nif)
-    {
-        mKeyList.read(nif);
-    }
+    void read(NIFStream *nif);
 };
 
 class NiUVData : public Record
@@ -163,11 +88,7 @@ class NiUVData : public Record
 public:
     FloatKeyMap mKeyList[4];
 
-    void read(NIFStream *nif)
-    {
-        for(int i = 0;i < 4;i++)
-            mKeyList[i].read(nif);
-    }
+    void read(NIFStream *nif);
 };
 
 class NiFloatData : public Record
@@ -175,10 +96,7 @@ class NiFloatData : public Record
 public:
     FloatKeyMap mKeyList;
 
-    void read(NIFStream *nif)
-    {
-        mKeyList.read(nif);
-    }
+    void read(NIFStream *nif);
 };
 
 class NiPixelData : public Record
@@ -187,37 +105,7 @@ public:
     unsigned int rmask, gmask, bmask, amask;
     int bpp, mips;
 
-    void read(NIFStream *nif)
-    {
-        nif->getInt(); // always 0 or 1
-
-        rmask = nif->getInt(); // usually 0xff
-        gmask = nif->getInt(); // usually 0xff00
-        bmask = nif->getInt(); // usually 0xff0000
-        amask = nif->getInt(); // usually 0xff000000 or zero
-
-        bpp = nif->getInt();
-
-        // Unknown
-        nif->skip(12);
-
-        mips = nif->getInt();
-
-        // Bytes per pixel, should be bpp * 8
-        /*int bytes =*/ nif->getInt();
-
-        for(int i=0; i<mips; i++)
-        {
-            // Image size and offset in the following data field
-            /*int x =*/ nif->getInt();
-            /*int y =*/ nif->getInt();
-            /*int offset =*/ nif->getInt();
-        }
-
-        // Skip the data
-        unsigned int dataSize = nif->getInt();
-        nif->skip(dataSize);
-    }
+    void read(NIFStream *nif);
 };
 
 class NiColorData : public Record
@@ -225,10 +113,7 @@ class NiColorData : public Record
 public:
     Vector4KeyMap mKeyMap;
 
-    void read(NIFStream *nif)
-    {
-        mKeyMap.read(nif);
-    }
+    void read(NIFStream *nif);
 };
 
 class NiVisData : public Record
@@ -240,16 +125,7 @@ public:
     };
     std::vector<VisData> mVis;
 
-    void read(NIFStream *nif)
-    {
-        int count = nif->getInt();
-        mVis.resize(count);
-        for(size_t i = 0;i < mVis.size();i++)
-        {
-            mVis[i].time = nif->getFloat();
-            mVis[i].isSet = nif->getChar();
-        }
-    }
+    void read(NIFStream *nif);
 };
 
 class NiSkinInstance : public Record
@@ -259,13 +135,7 @@ public:
     NodePtr root;
     NodeList bones;
 
-    void read(NIFStream *nif)
-    {
-        data.read(nif);
-        root.read(nif);
-        bones.read(nif);
-    }
-
+    void read(NIFStream *nif);
     void post(NIFFile *nif);
 };
 
@@ -288,34 +158,7 @@ public:
     Transformation trafo;
     std::vector<BoneInfo> bones;
 
-    void read(NIFStream *nif)
-    {
-        trafo.rotation = nif->getMatrix3();
-        trafo.pos = nif->getVector3();
-        trafo.scale = nif->getFloat();
-
-        int boneNum = nif->getInt();
-        nif->getInt(); // -1
-
-        bones.resize(boneNum);
-        for(int i=0;i<boneNum;i++)
-        {
-            BoneInfo &bi = bones[i];
-
-            bi.trafo.rotation = nif->getMatrix3();
-            bi.trafo.pos = nif->getVector3();
-            bi.trafo.scale = nif->getFloat();
-            bi.unknown = nif->getVector4();
-
-            // Number of vertex weights
-            bi.weights.resize(nif->getUShort());
-            for(size_t j = 0;j < bi.weights.size();j++)
-            {
-                bi.weights[j].vertex = nif->getUShort();
-                bi.weights[j].weight = nif->getFloat();
-            }
-        }
-    }
+    void read(NIFStream *nif);
 };
 
 struct NiMorphData : public Record
@@ -326,19 +169,7 @@ struct NiMorphData : public Record
     };
     std::vector<MorphData> mMorphs;
 
-    void read(NIFStream *nif)
-    {
-        int morphCount = nif->getInt();
-        int vertCount  = nif->getInt();
-        /*relative targets?*/nif->getChar();
-
-        mMorphs.resize(morphCount);
-        for(int i = 0;i < morphCount;i++)
-        {
-            mMorphs[i].mData.read(nif, true);
-            nif->getVector3s(mMorphs[i].mVertices, vertCount);
-        }
-    }
+    void read(NIFStream *nif);
 };
 
 
@@ -353,20 +184,7 @@ struct NiKeyframeData : public Record
     Vector3KeyMap mTranslations;
     FloatKeyMap mScales;
 
-    void read(NIFStream *nif)
-    {
-        mRotations.read(nif);
-        if(mRotations.mInterpolationType == mRotations.sXYZInterpolation)
-        {
-            //Chomp unused float
-            nif->getFloat();
-            mXRotations.read(nif, true);
-            mYRotations.read(nif, true);
-            mZRotations.read(nif, true);
-        }
-        mTranslations.read(nif);
-        mScales.read(nif);
-    }
+    void read(NIFStream *nif);
 };
 
 } // Namespace

@@ -24,6 +24,10 @@ struct KeyT {
     float mContinuity; // Only for TBC interpolation
     */
 };
+typedef KeyT<float> FloatKey;
+typedef KeyT<osg::Vec3f> Vector3Key;
+typedef KeyT<osg::Vec4f> Vector4Key;
+typedef KeyT<osg::Quat> QuaternionKey;
 
 template<typename T, T (NIFStream::*getValue)()>
 struct KeyMapT {

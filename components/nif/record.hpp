@@ -110,12 +110,6 @@ struct Record
     virtual void post(NIFFile *nif) {}
 
     virtual ~Record() {}
-
-    /*
-       Use these later if you want custom allocation of all NIF objects
-    static void* operator new(size_t size);
-    static void operator delete(void *p);
-    */
 };
 
 } // Namespace

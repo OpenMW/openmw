@@ -26,9 +26,6 @@
 
 #include "base.hpp"
 
-#include "controlled.hpp"
-#include "data.hpp"
-
 namespace Nif
 {
 
@@ -38,11 +35,7 @@ public:
     // The meaning of these depends on the actual property type.
     int flags;
 
-    void read(NIFStream *nif)
-    {
-        Named::read(nif);
-        flags = nif->getUShort();
-    }
+    void read(NIFStream *nif);
 };
 
 class NiTexturingProperty : public Property
@@ -70,26 +63,8 @@ public:
         int clamp, uvSet, filter;
         short unknown2;
 
-        void read(NIFStream *nif)
-        {
-            inUse = !!nif->getInt();
-            if(!inUse) return;
-
-            texture.read(nif);
-            clamp = nif->getInt();
-            filter = nif->getInt();
-            uvSet = nif->getInt();
-
-            // I have no idea, but I think these are actually two
-            // PS2-specific shorts (ps2L and ps2K), followed by an unknown
-            // short.
-            nif->skip(6);
-        }
-
-        void post(NIFFile *nif)
-        {
-            texture.post(nif);
-        }
+        void read(NIFStream *nif);
+        void post(NIFFile *nif);
     };
 
     /* Apply mode:
@@ -120,42 +95,14 @@ public:
         GlossTexture = 3,
         GlowTexture = 4,
         BumpTexture = 5,
-        DecalTexture = 6
+        DecalTexture = 6,
+        NumTextures = 7 // Sentry value
     };
 
     Texture textures[7];
 
-    void read(NIFStream *nif)
-    {
-        Property::read(nif);
-        apply = nif->getInt();
-
-        // Unknown, always 7. Probably the number of textures to read
-        // below
-        nif->getInt();
-
-        textures[0].read(nif); // Base
-        textures[1].read(nif); // Dark
-        textures[2].read(nif); // Detail
-        textures[3].read(nif); // Gloss (never present)
-        textures[4].read(nif); // Glow
-        textures[5].read(nif); // Bump map
-        if(textures[5].inUse)
-        {
-            // Ignore these at the moment
-            /*float lumaScale =*/ nif->getFloat();
-            /*float lumaOffset =*/ nif->getFloat();
-            /*const Vector4 *lumaMatrix =*/ nif->getVector4();
-        }
-        textures[6].read(nif); // Decal
-    }
-
-    void post(NIFFile *nif)
-    {
-        Property::post(nif);
-        for(int i = 0;i < 7;i++)
-            textures[i].post(nif);
-    }
+    void read(NIFStream *nif);
+    void post(NIFFile *nif);
 };
 
 class NiFogProperty : public Property
@@ -164,14 +111,7 @@ public:
     float mFogDepth;
     osg::Vec3f mColour;
 
-
-    void read(NIFStream *nif)
-    {
-        Property::read(nif);
-
-        mFogDepth = nif->getFloat();
-        mColour = nif->getVector3();
-    }
+    void read(NIFStream *nif);
 };
 
 // These contain no other data than the 'flags' field in Property
@@ -200,15 +140,7 @@ struct S_MaterialProperty
     osg::Vec3f ambient, diffuse, specular, emissive;
     float glossiness, alpha;
 
-    void read(NIFStream *nif)
-    {
-        ambient = nif->getVector3();
-        diffuse = nif->getVector3();
-        specular = nif->getVector3();
-        emissive = nif->getVector3();
-        glossiness = nif->getFloat();
-        alpha = nif->getFloat();
-    }
+    void read(NIFStream *nif);
 };
 
 struct S_VertexColorProperty
@@ -224,11 +156,7 @@ struct S_VertexColorProperty
     */
     int vertmode, lightmode;
 
-    void read(NIFStream *nif)
-    {
-        vertmode = nif->getInt();
-        lightmode = nif->getInt();
-    }
+    void read(NIFStream *nif);
 };
 
 struct S_AlphaProperty
@@ -273,10 +201,7 @@ struct S_AlphaProperty
     // Tested against when certain flags are set (see above.)
     unsigned char threshold;
 
-    void read(NIFStream *nif)
-    {
-        threshold = nif->getChar();
-    }
+    void read(NIFStream *nif);
 };
 
 /*
@@ -322,17 +247,7 @@ struct S_StencilProperty
      */
     int drawMode;
 
-    void read(NIFStream *nif)
-    {
-        enabled = nif->getChar();
-        compareFunc = nif->getInt();
-        stencilRef = nif->getUInt();
-        stencilMask = nif->getUInt();
-        failAction = nif->getInt();
-        zFailAction = nif->getInt();
-        zPassAction = nif->getInt();
-        drawMode = nif->getInt();
-    }
+    void read(NIFStream *nif);
 };
 
 class NiAlphaProperty : public StructPropT<S_AlphaProperty> { };
