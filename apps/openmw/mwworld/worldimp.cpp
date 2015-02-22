@@ -2799,13 +2799,13 @@ namespace MWWorld
                 MWWorld::CellStore *next = getInterior( *i );
                 if ( !next ) continue;
 
-                MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnly<ESM::Door>();
-                CellRefList<ESM::Door>::List& refList = doors.mList;
+                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnly<ESM::Door>();
+                const CellRefList<ESM::Door>::List& refList = doors.mList;
 
                 // Check if any door in the cell leads to an exterior directly
-                for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
+                for (CellRefList<ESM::Door>::List::const_iterator it = refList.begin(); it != refList.end(); ++it)
                 {
-                    MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+                    const MWWorld::LiveCellRef<ESM::Door>& ref = *it;
                     if (!ref.mRef.getTeleport()) continue;
 
                     if (ref.mRef.getDestCell().empty())
@@ -2855,13 +2855,13 @@ namespace MWWorld
                     return closestMarker;
                 }
 
-                MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnly<ESM::Door>();
-                CellRefList<ESM::Door>::List& doorList = doors.mList;
+                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnly<ESM::Door>();
+                const CellRefList<ESM::Door>::List& doorList = doors.mList;
 
                 // Check if any door in the cell leads to an exterior directly
-                for (CellRefList<ESM::Door>::List::iterator it = doorList.begin(); it != doorList.end(); ++it)
+                for (CellRefList<ESM::Door>::List::const_iterator it = doorList.begin(); it != doorList.end(); ++it)
                 {
-                    MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+                    const MWWorld::LiveCellRef<ESM::Door>& ref = *it;
 
                     if (!ref.mRef.getTeleport()) continue;
 

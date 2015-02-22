@@ -187,7 +187,7 @@ namespace MWWorld
             }
 
             template <class T>
-            CellRefList<T>& getReadOnly() {
+            const CellRefList<T>& getReadOnly() {
                 throw std::runtime_error ("Read Only CellRefList access not available for type " + std::string(typeid(T).name()) );
             }
 
@@ -365,7 +365,7 @@ namespace MWWorld
     }
 
     template<>
-    inline CellRefList<ESM::Door>& CellStore::getReadOnly<ESM::Door>()
+    inline const CellRefList<ESM::Door>& CellStore::getReadOnly<ESM::Door>()
     {
         return mDoors;
     }
