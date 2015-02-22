@@ -4,6 +4,7 @@
 #include <list>
 #include <map>
 #include <set>
+#include <fstream>
 
 #include <boost/program_options.hpp>
 
@@ -284,7 +285,7 @@ void printRaw(ESM::ESMReader &esm)
         esm.getRecHeader();
         while(esm.hasMoreSubs())
         {
-            uint64_t offs = esm.getOffset();
+            size_t offs = esm.getFileOffset();
             esm.getSubName();
             esm.skipHSub();
             n = esm.retSubName();
