@@ -3,6 +3,8 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <string>
+#include <typeinfo>
 #include <boost/shared_ptr.hpp>
 
 #include "livecellref.hpp"
@@ -181,12 +183,12 @@ namespace MWWorld
 
             template <class T>
             CellRefList<T>& get() {
-                throw std::runtime_error ("Storage for this type not exist in cells");
+                throw std::runtime_error ("Storage for type " + std::string(typeid(T).name())+ " does not exist in cells");
             }
 
             template <class T>
             CellRefList<T>& getReadOnly() {
-                throw std::runtime_error ("Read Only access not available for this type");
+                throw std::runtime_error ("Read Only CellRefList access not available for type " + std::string(typeid(T).name()) );
             }
 
             bool isPointConnected(const int start, const int end) const;
