@@ -113,12 +113,11 @@ namespace
             collectMaterialProperties(nifNode->parent, out);
     }
 
-    void updateMaterialProperties(osg::StateSet* stateset, const std::vector<const Nif::Property*>& properties)
+    void updateMaterialProperties(osg::StateSet* stateset, const std::vector<const Nif::Property*>& properties, bool hasVertexColors)
     {
         int specFlags = 0; // Specular is disabled by default, even if there's a specular color in the NiMaterialProperty
         osg::Material* mat = new osg::Material;
-        // FIXME: color mode should be disabled if the TriShape has no vertex colors
-        mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+        mat->setColorMode(hasVertexColors ? osg::Material::AMBIENT_AND_DIFFUSE : osg::Material::OFF);
         for (std::vector<const Nif::Property*>::const_reverse_iterator it = properties.rbegin(); it != properties.rend(); ++it)
         {
             const Nif::Property* property = *it;
@@ -145,6 +144,8 @@ namespace
             case Nif::RC_NiVertexColorProperty:
             {
                 const Nif::NiVertexColorProperty* vertprop = static_cast<const Nif::NiVertexColorProperty*>(property);
+                if (!hasVertexColors)
+                    break;
                 switch (vertprop->flags)
                 {
                 case 0:
@@ -504,13 +505,20 @@ namespace NifOsg
             geometry->setTexCoordArray(textureStage, new osg::Vec2Array(data->uvlist[uvSet].size(), &data->uvlist[uvSet][0]), osg::Array::BIND_PER_VERTEX);
         }
 
-        // FIXME: material ColorMode should be disabled if the TriShape has no vertex colors
         if (!data->colors.empty())
             geometry->setColorArray(new osg::Vec4Array(data->colors.size(), &data->colors[0]), osg::Array::BIND_PER_VERTEX);
 
         geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES,
                                                               data->triangles.size(),
                                                               (unsigned short*)&data->triangles[0]));
+
+        // osg::Material properties are handled here for two reasons:
+        // - if there are no vertex colors, we need to disable colorMode.
+        // - there are 3 "overlapping" nif properties that all affect the osg::Material, handling them
+        //   above the actual renderable would be tedious.
+        std::vector<const Nif::Property*> materialProps;
+        collectMaterialProperties(triShape, materialProps);
+        updateMaterialProperties(geometry->getOrCreateStateSet(), materialProps, !data->colors.empty());
     }
 
     void Loader::handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, const std::map<int, int>& boundTextures)
@@ -653,9 +661,6 @@ namespace NifOsg
         case Nif::RC_NiSpecularProperty:
         {
             // TODO: handle these in handleTriShape so we know whether vertex colors are available
-            std::vector<const Nif::Property*> materialProps;
-            collectMaterialProperties(nifNode, materialProps);
-            updateMaterialProperties(stateset, materialProps);
             break;
         }
         case Nif::RC_NiAlphaProperty:
