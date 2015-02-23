@@ -33,6 +33,7 @@ namespace MWGui
         void onSpellSelected(const std::string& spellId);
         void onModelIndexSelected(SpellModel::ModelIndex index);
         void onDeleteSpellAccept();
+        void askDeleteSpell(const std::string& spellId);
 
         virtual void onPinToggled();
         virtual void onTitleDoubleClicked();
