@@ -467,6 +467,14 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             file->setFilePath       (info.absoluteFilePath());
             file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
 
+            // HACK
+            // Bloodmoon.esm requires Tribunal.esm, but this requirement is missing 
+            // from the file supplied by Bethesda, so we have to add it ourselves
+            if (file->fileName().compare("Bloodmoon.esm", Qt::CaseInsensitive) == 0)
+            {
+                file->addGameFile(QString::fromUtf8("Tribunal.esm"));
+            }
+
             // Put the file in the table
             addFile(file);
 
