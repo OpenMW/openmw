@@ -38,6 +38,10 @@ add_component_dir (nif
     controlled effect niftypes record controller extra node record_ptr data niffile property nifkey data node base nifstream
     )
 
+add_component_dir (nifosg
+    nifloader controller
+    )
+
 #add_component_dir (nifcache
 #    nifcache
 #    )
