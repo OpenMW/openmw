@@ -113,7 +113,7 @@ void ContentSelectorView::ContentSelector::setContentList(const QStringList &lis
         slotCurrentGameFileIndexChanged (ui.gameFileView->currentIndex());
     }
     else
-        mContentModel->setContentList(list, true);
+        mContentModel->setContentList(list);
 }
 
 ContentSelectorModel::ContentFileList

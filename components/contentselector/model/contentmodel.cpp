@@ -536,13 +536,13 @@ bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile *file) c
     return mPluginsWithLoadOrderError.contains(file->filePath());
 }
 
-void ContentSelectorModel::ContentModel::setContentList(const QStringList &fileList, bool isChecked)
+void ContentSelectorModel::ContentModel::setContentList(const QStringList &fileList)
 {
     mPluginsWithLoadOrderError.clear();
     int previousPosition = -1;
     foreach (const QString &filepath, fileList)
     {
-        if (setCheckState(filepath, isChecked))
+        if (setCheckState(filepath, true))
         {
             // as necessary, move plug-ins in visible list to match sequence of supplied filelist
             const EsmFile* file = item(filepath);
