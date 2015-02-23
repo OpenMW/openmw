@@ -33,7 +33,7 @@ class Property : public Named
 {
 public:
     // The meaning of these depends on the actual property type.
-    int flags;
+    unsigned int flags;
 
     void read(NIFStream *nif);
 };
