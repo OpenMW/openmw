@@ -229,8 +229,7 @@ void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus
 void Launcher::SettingsPage::resetProgressBar()
 {
     // set progress bar to 0 %
-    progressBar->setMaximum(1);
-    progressBar->setValue(0);
+    progressBar->reset();
 }
 
 void Launcher::SettingsPage::updateOkButton(const QString &text)
