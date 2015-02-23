@@ -92,7 +92,7 @@ float ControllerFunction::calculate(float value)
     return value;
 }
 
-osg::Quat KeyframeController::Value::interpKey(const Nif::QuaternionKeyMap::MapType &keys, float time)
+osg::Quat KeyframeControllerValue::interpKey(const Nif::QuaternionKeyMap::MapType &keys, float time)
 {
     if(time <= keys.begin()->first)
         return keys.begin()->second.mValue;
@@ -125,7 +125,7 @@ osg::Quat KeyframeController::Value::interpKey(const Nif::QuaternionKeyMap::MapT
         return keys.rbegin()->second.mValue;
 }
 
-osg::Quat KeyframeController::Value::getXYZRotation(float time) const
+osg::Quat KeyframeControllerValue::getXYZRotation(float time) const
 {
     float xrot = interpKey(mXRotations->mKeys, time);
     float yrot = interpKey(mYRotations->mKeys, time);
@@ -136,7 +136,7 @@ osg::Quat KeyframeController::Value::getXYZRotation(float time) const
     return (zr*yr*xr);
 }
 
-KeyframeController::Value::Value(osg::Node *target, const Nif::NIFFilePtr &nif, const Nif::NiKeyframeData *data,
+KeyframeControllerValue::KeyframeControllerValue(osg::Node *target, const Nif::NIFFilePtr &nif, const Nif::NiKeyframeData *data,
                                  osg::Quat initialQuat, float initialScale)
     : NodeTargetValue(target)
     , mRotations(&data->mRotations)
@@ -150,7 +150,7 @@ KeyframeController::Value::Value(osg::Node *target, const Nif::NIFFilePtr &nif, 
     , mInitialScale(initialScale)
 { }
 
-osg::Vec3f KeyframeController::Value::getTranslation(float time) const
+osg::Vec3f KeyframeControllerValue::getTranslation(float time) const
 {
     if(mTranslations->mKeys.size() > 0)
         return interpKey(mTranslations->mKeys, time);
@@ -158,7 +158,7 @@ osg::Vec3f KeyframeController::Value::getTranslation(float time) const
     return trans->getMatrix().getTrans();
 }
 
-void KeyframeController::Value::setValue(float time)
+void KeyframeControllerValue::setValue(float time)
 {
     osg::MatrixTransform* trans = static_cast<osg::MatrixTransform*>(mNode);
     osg::Matrix mat = trans->getMatrix();
@@ -200,14 +200,14 @@ void Controller::update()
     }
 }
 
-GeomMorpherController::Value::Value(osgAnimation::MorphGeometry *geom, const Nif::NiMorphData* morphData)
+GeomMorpherControllerValue::GeomMorpherControllerValue(osgAnimation::MorphGeometry *geom, const Nif::NiMorphData* morphData)
     : mGeom(geom)
     , mMorphs(morphData->mMorphs)
 {
 
 }
 
-void GeomMorpherController::Value::setValue(float time)
+void GeomMorpherControllerValue::setValue(float time)
 {
     if (mMorphs.size() <= 1)
         return;
@@ -223,7 +223,7 @@ void GeomMorpherController::Value::setValue(float time)
     }
 }
 
-UVController::Value::Value(osg::StateSet *target, const Nif::NiUVData *data, std::set<int> textureUnits)
+UVControllerValue::UVControllerValue(osg::StateSet *target, const Nif::NiUVData *data, std::set<int> textureUnits)
     : mStateSet(target)
     , mUTrans(data->mKeyList[0])
     , mVTrans(data->mKeyList[1])
@@ -233,7 +233,7 @@ UVController::Value::Value(osg::StateSet *target, const Nif::NiUVData *data, std
 {
 }
 
-void UVController::Value::setValue(float value)
+void UVControllerValue::setValue(float value)
 {
     float uTrans = interpKey(mUTrans.mKeys, value, 0.0f);
     float vTrans = interpKey(mVTrans.mKeys, value, 0.0f);
@@ -252,7 +252,7 @@ void UVController::Value::setValue(float value)
     }
 }
 
-bool VisController::Value::calculate(float time) const
+bool VisControllerValue::calculate(float time) const
 {
     if(mData.size() == 0)
         return true;
@@ -265,7 +265,7 @@ bool VisController::Value::calculate(float time) const
     return mData.back().isSet;
 }
 
-void VisController::Value::setValue(float time)
+void VisControllerValue::setValue(float time)
 {
     bool vis = calculate(time);
     mNode->setNodeMask(vis ? ~0 : 0);

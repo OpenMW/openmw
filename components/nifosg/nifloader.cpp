@@ -400,7 +400,7 @@ namespace NifOsg
                 std::set<int> texUnits;
                 for (std::map<int, int>::const_iterator it = boundTextures.begin(); it != boundTextures.end(); ++it)
                     texUnits.insert(it->first);
-                boost::shared_ptr<ControllerValue> dest(new UVController::Value(transformNode->getOrCreateStateSet()
+                boost::shared_ptr<ControllerValue> dest(new UVControllerValue(transformNode->getOrCreateStateSet()
                     , uvctrl->data.getPtr(), texUnits));
                 createController(uvctrl, dest, 0);
             }
@@ -422,7 +422,7 @@ namespace NifOsg
                         std::cerr << "Warning: multiple KeyframeControllers on the same node" << std::endl;
                         continue;
                     }
-                    boost::shared_ptr<ControllerValue> dest(new KeyframeController::Value(transformNode, mNif, key->data.getPtr(),
+                    boost::shared_ptr<ControllerValue> dest(new KeyframeControllerValue(transformNode, mNif, key->data.getPtr(),
                                                                                           transformNode->getMatrix().getRotate(), nifNode->trafo.scale));
 
                     createController(key, dest, 0);
@@ -432,7 +432,7 @@ namespace NifOsg
             else if (ctrl->recType == Nif::RC_NiVisController)
             {
                 const Nif::NiVisController* visctrl = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
-                boost::shared_ptr<ControllerValue> dest(new VisController::Value(transformNode, visctrl->data.getPtr()));
+                boost::shared_ptr<ControllerValue> dest(new VisControllerValue(transformNode, visctrl->data.getPtr()));
                 createController(visctrl, dest, 0);
             }
         }
@@ -532,7 +532,7 @@ namespace NifOsg
                 {
                     geometry = handleMorphGeometry(static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr()));
                     boost::shared_ptr<ControllerValue> value(
-                                new GeomMorpherController::Value(static_cast<osgAnimation::MorphGeometry*>(geometry.get()),
+                                new GeomMorpherControllerValue(static_cast<osgAnimation::MorphGeometry*>(geometry.get()),
                                     static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr())->data.getPtr()));
                     createController(ctrl.getPtr(), value, 0);
                     break;

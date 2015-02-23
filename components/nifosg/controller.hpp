@@ -114,99 +114,83 @@ namespace NifOsg
         { return mNode; }
     };
 
-    class GeomMorpherController
+    class GeomMorpherControllerValue : public ControllerValue, public ValueInterpolator
     {
     public:
-        class Value : public ControllerValue, public ValueInterpolator
-        {
-        public:
-            // FIXME: don't copy the morph data?
-            Value(osgAnimation::MorphGeometry* geom, const Nif::NiMorphData *data);
+        // FIXME: don't copy the morph data?
+        GeomMorpherControllerValue(osgAnimation::MorphGeometry* geom, const Nif::NiMorphData *data);
 
-            virtual void setValue(float time);
+        virtual void setValue(float time);
 
-        private:
-            osgAnimation::MorphGeometry* mGeom;
-            std::vector<Nif::NiMorphData::MorphData> mMorphs;
-        };
+    private:
+        osgAnimation::MorphGeometry* mGeom;
+        std::vector<Nif::NiMorphData::MorphData> mMorphs;
     };
 
-    class KeyframeController
+    class KeyframeControllerValue : public NodeTargetValue, public ValueInterpolator
     {
+    private:
+        const Nif::QuaternionKeyMap* mRotations;
+        const Nif::FloatKeyMap* mXRotations;
+        const Nif::FloatKeyMap* mYRotations;
+        const Nif::FloatKeyMap* mZRotations;
+        const Nif::Vector3KeyMap* mTranslations;
+        const Nif::FloatKeyMap* mScales;
+        Nif::NIFFilePtr mNif; // Hold a SharedPtr to make sure key lists stay valid
+
+        osg::Quat mInitialQuat;
+        float mInitialScale;
+
+        using ValueInterpolator::interpKey;
+
+
+        osg::Quat interpKey(const Nif::QuaternionKeyMap::MapType &keys, float time);
+
+        osg::Quat getXYZRotation(float time) const;
+
     public:
-        class Value : public NodeTargetValue, public ValueInterpolator
-        {
-        private:
-            const Nif::QuaternionKeyMap* mRotations;
-            const Nif::FloatKeyMap* mXRotations;
-            const Nif::FloatKeyMap* mYRotations;
-            const Nif::FloatKeyMap* mZRotations;
-            const Nif::Vector3KeyMap* mTranslations;
-            const Nif::FloatKeyMap* mScales;
-            Nif::NIFFilePtr mNif; // Hold a SharedPtr to make sure key lists stay valid
+        /// @note The NiKeyFrameData must be valid as long as this KeyframeController exists.
+        KeyframeControllerValue(osg::Node *target, const Nif::NIFFilePtr& nif, const Nif::NiKeyframeData *data,
+              osg::Quat initialQuat, float initialScale);
 
-            osg::Quat mInitialQuat;
-            float mInitialScale;
+        virtual osg::Vec3f getTranslation(float time) const;
 
-            using ValueInterpolator::interpKey;
-
-
-            osg::Quat interpKey(const Nif::QuaternionKeyMap::MapType &keys, float time);
-
-            osg::Quat getXYZRotation(float time) const;
-
-        public:
-            /// @note The NiKeyFrameData must be valid as long as this KeyframeController exists.
-            Value(osg::Node *target, const Nif::NIFFilePtr& nif, const Nif::NiKeyframeData *data,
-                  osg::Quat initialQuat, float initialScale);
-
-            virtual osg::Vec3f getTranslation(float time) const;
-
-            virtual void setValue(float time);
-        };
+        virtual void setValue(float time);
     };
 
-    class UVController
+    class UVControllerValue : public ControllerValue, ValueInterpolator
     {
+    private:
+        osg::StateSet* mStateSet;
+        Nif::FloatKeyMap mUTrans;
+        Nif::FloatKeyMap mVTrans;
+        Nif::FloatKeyMap mUScale;
+        Nif::FloatKeyMap mVScale;
+        std::set<int> mTextureUnits;
+
     public:
-        class Value : public ControllerValue, ValueInterpolator
-        {
-        private:
-            osg::StateSet* mStateSet;
-            Nif::FloatKeyMap mUTrans;
-            Nif::FloatKeyMap mVTrans;
-            Nif::FloatKeyMap mUScale;
-            Nif::FloatKeyMap mVScale;
-            std::set<int> mTextureUnits;
+        UVControllerValue(osg::StateSet* target, const Nif::NiUVData *data, std::set<int> textureUnits);
 
-        public:
-            Value(osg::StateSet* target, const Nif::NiUVData *data, std::set<int> textureUnits);
-
-            virtual void setValue(float value);
-        };
+        virtual void setValue(float value);
     };
 
-    class VisController
+    class VisControllerValue : public NodeTargetValue
     {
+    private:
+        std::vector<Nif::NiVisData::VisData> mData;
+
+        bool calculate(float time) const;
+
     public:
-        class Value : public NodeTargetValue
-        {
-        private:
-            std::vector<Nif::NiVisData::VisData> mData;
+        VisControllerValue(osg::Node *target, const Nif::NiVisData *data)
+          : NodeTargetValue(target)
+          , mData(data->mVis)
+        { }
 
-            bool calculate(float time) const;
+        virtual osg::Vec3f getTranslation(float time) const
+        { return osg::Vec3f(); }
 
-        public:
-            Value(osg::Node *target, const Nif::NiVisData *data)
-              : NodeTargetValue(target)
-              , mData(data->mVis)
-            { }
-
-            virtual osg::Vec3f getTranslation(float time) const
-            { return osg::Vec3f(); }
-
-            virtual void setValue(float time);
-        };
+        virtual void setValue(float time);
     };
 
 }
