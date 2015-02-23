@@ -193,6 +193,30 @@ namespace NifOsg
         virtual void setValue(float time);
     };
 
+    class AlphaControllerValue : public ControllerValue, public ValueInterpolator
+    {
+    private:
+        osg::StateSet* mTarget;
+        Nif::FloatKeyMap mData;
+
+    public:
+        AlphaControllerValue(osg::StateSet* target, const Nif::NiFloatData *data);
+
+        virtual void setValue(float time);
+    };
+
+    class MaterialColorControllerValue : public ControllerValue, public ValueInterpolator
+    {
+    private:
+        osg::StateSet* mTarget;
+        Nif::Vector3KeyMap mData;
+
+    public:
+        MaterialColorControllerValue(osg::StateSet* target, const Nif::NiPosData *data);
+
+        virtual void setValue(float time);
+    };
+
 }
 
 #endif

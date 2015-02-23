@@ -2,7 +2,10 @@
 
 #include <osg/MatrixTransform>
 #include <osg/TexMat>
+#include <osg/Material>
 #include <osgAnimation/MorphGeometry>
+
+#include <osg/io_utils>
 
 #include <components/nif/data.hpp>
 
@@ -269,6 +272,42 @@ void VisControllerValue::setValue(float time)
 {
     bool vis = calculate(time);
     mNode->setNodeMask(vis ? ~0 : 0);
+}
+
+AlphaControllerValue::AlphaControllerValue(osg::StateSet *target, const Nif::NiFloatData *data)
+    : mTarget(target)
+    , mData(data->mKeyList)
+{
+}
+
+void AlphaControllerValue::setValue(float time)
+{
+    float value = interpKey(mData.mKeys, time);
+    osg::Material* mat = dynamic_cast<osg::Material*>(mTarget->getAttribute(osg::StateAttribute::MATERIAL));
+    if (!mat)
+        return;
+
+    osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
+    diffuse.a() = value;
+    mat->setDiffuse(osg::Material::FRONT_AND_BACK, diffuse);
+}
+
+MaterialColorControllerValue::MaterialColorControllerValue(osg::StateSet *target, const Nif::NiPosData *data)
+    : mTarget(target), mData(data->mKeyList)
+{
+
+}
+
+void MaterialColorControllerValue::setValue(float time)
+{
+    osg::Vec3f value = interpKey(mData.mKeys, time);
+    osg::Material* mat = dynamic_cast<osg::Material*>(mTarget->getAttribute(osg::StateAttribute::MATERIAL));
+    if (!mat)
+        return;
+
+    osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
+    diffuse.set(value.x(), value.y(), value.z(), diffuse.a());
+    mat->setDiffuse(osg::Material::FRONT_AND_BACK, diffuse);
 }
 
 

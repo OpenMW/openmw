@@ -113,61 +113,6 @@ namespace
             collectMaterialProperties(nifNode->parent, out);
     }
 
-    void updateMaterialProperties(osg::StateSet* stateset, const std::vector<const Nif::Property*>& properties, bool hasVertexColors)
-    {
-        int specFlags = 0; // Specular is disabled by default, even if there's a specular color in the NiMaterialProperty
-        osg::Material* mat = new osg::Material;
-        mat->setColorMode(hasVertexColors ? osg::Material::AMBIENT_AND_DIFFUSE : osg::Material::OFF);
-        for (std::vector<const Nif::Property*>::const_reverse_iterator it = properties.rbegin(); it != properties.rend(); ++it)
-        {
-            const Nif::Property* property = *it;
-            switch (property->recType)
-            {
-            case Nif::RC_NiSpecularProperty:
-            {
-                specFlags = property->flags;
-                break;
-            }
-            case Nif::RC_NiMaterialProperty:
-            {
-                const Nif::NiMaterialProperty* matprop = static_cast<const Nif::NiMaterialProperty*>(property);
-
-                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.diffuse, matprop->data.alpha));
-                mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.ambient, 1.f));
-                mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.emissive, 1.f));
-
-                mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.specular, 1.f));
-                mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->data.glossiness);
-
-                break;
-            }
-            case Nif::RC_NiVertexColorProperty:
-            {
-                const Nif::NiVertexColorProperty* vertprop = static_cast<const Nif::NiVertexColorProperty*>(property);
-                if (!hasVertexColors)
-                    break;
-                switch (vertprop->flags)
-                {
-                case 0:
-                    mat->setColorMode(osg::Material::OFF);
-                    break;
-                case 1:
-                    mat->setColorMode(osg::Material::EMISSION);
-                    break;
-                case 2:
-                    mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-                    break;
-                }
-            }
-            }
-        }
-
-        if (specFlags == 0)
-            mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f,0.f,0.f,0.f));
-
-        stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
-    }
-
     // NodeCallback used to update the bone matrices in skeleton space as needed for skinning.
     class UpdateBone : public osg::NodeCallback
     {
@@ -438,6 +383,27 @@ namespace NifOsg
         }
     }
 
+    void Loader::handleMaterialControllers(const Nif::Property *materialProperty, osg::StateSet *stateset)
+    {
+        for (Nif::ControllerPtr ctrl = materialProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
+        {
+            if (ctrl->recType == Nif::RC_NiAlphaController)
+            {
+                const Nif::NiAlphaController* alphactrl = static_cast<const Nif::NiAlphaController*>(ctrl.getPtr());
+                boost::shared_ptr<ControllerValue> dest(new AlphaControllerValue(stateset, alphactrl->data.getPtr()));
+                createController(alphactrl, dest, 0);
+            }
+            else if (ctrl->recType == Nif::RC_NiMaterialColorController)
+            {
+                const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
+                boost::shared_ptr<ControllerValue> dest(new MaterialColorControllerValue(stateset, matctrl->data.getPtr()));
+                createController(matctrl, dest, 0);
+            }
+            else
+                std::cerr << "Unexpected material controller " << ctrl->recType << std::endl;
+        }
+    }
+
     void Loader::triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, const std::map<int, int>& boundTextures)
     {
         const Nif::NiTriShapeData* data = triShape->data.getPtr();
@@ -518,7 +484,7 @@ namespace NifOsg
         //   above the actual renderable would be tedious.
         std::vector<const Nif::Property*> materialProps;
         collectMaterialProperties(triShape, materialProps);
-        updateMaterialProperties(geometry->getOrCreateStateSet(), materialProps, !data->colors.empty());
+        applyMaterialProperties(geometry->getOrCreateStateSet(), materialProps, !data->colors.empty());
     }
 
     void Loader::handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, const std::map<int, int>& boundTextures)
@@ -760,5 +726,64 @@ namespace NifOsg
             std::cerr << "Unhandled " << property->recName << std::endl;
             break;
         }
+    }
+
+    void Loader::applyMaterialProperties(osg::StateSet* stateset, const std::vector<const Nif::Property*>& properties, bool hasVertexColors)
+    {
+        int specFlags = 0; // Specular is disabled by default, even if there's a specular color in the NiMaterialProperty
+        osg::Material* mat = new osg::Material;
+        mat->setColorMode(hasVertexColors ? osg::Material::AMBIENT_AND_DIFFUSE : osg::Material::OFF);
+        // TODO: check if the OpenGL default material values are actually the default NIF material values, for when there's no NiMaterialProperty
+        for (std::vector<const Nif::Property*>::const_reverse_iterator it = properties.rbegin(); it != properties.rend(); ++it)
+        {
+            const Nif::Property* property = *it;
+            switch (property->recType)
+            {
+            case Nif::RC_NiSpecularProperty:
+            {
+                specFlags = property->flags;
+                break;
+            }
+            case Nif::RC_NiMaterialProperty:
+            {
+                const Nif::NiMaterialProperty* matprop = static_cast<const Nif::NiMaterialProperty*>(property);
+
+                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.diffuse, matprop->data.alpha));
+                mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.ambient, 1.f));
+                mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.emissive, 1.f));
+
+                mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.specular, 1.f));
+                mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->data.glossiness);
+
+                if (!matprop->controller.empty())
+                    handleMaterialControllers(matprop, stateset);
+
+                break;
+            }
+            case Nif::RC_NiVertexColorProperty:
+            {
+                const Nif::NiVertexColorProperty* vertprop = static_cast<const Nif::NiVertexColorProperty*>(property);
+                if (!hasVertexColors)
+                    break;
+                switch (vertprop->flags)
+                {
+                case 0:
+                    mat->setColorMode(osg::Material::OFF);
+                    break;
+                case 1:
+                    mat->setColorMode(osg::Material::EMISSION);
+                    break;
+                case 2:
+                    mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+                    break;
+                }
+            }
+            }
+        }
+
+        if (specFlags == 0)
+            mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f,0.f,0.f,0.f));
+
+        stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
     }
 }

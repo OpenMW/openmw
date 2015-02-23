@@ -56,6 +56,8 @@ namespace NifOsg
 
         void handleNodeControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode);
 
+        void handleMaterialControllers(const Nif::Property* materialProperty, osg::StateSet* stateset);
+
         void handleProperty (const Nif::Property* property, const Nif::Node* nifNode,
                              osg::Node* node, std::map<int, int>& boundTextures);
 
@@ -70,6 +72,8 @@ namespace NifOsg
 
         // Applies the Properties of the given nifNode onto the StateSet of the given OSG node.
         void applyNodeProperties(const Nif::Node* nifNode, osg::Node* applyTo, std::map<int, int>& boundTextures);
+
+        void applyMaterialProperties(osg::StateSet* stateset, const std::vector<const Nif::Property*>& properties, bool hasVertexColors);
 
         void createController(const Nif::Controller* ctrl, boost::shared_ptr<ControllerValue> value, int animflags);
 
