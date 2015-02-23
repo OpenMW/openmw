@@ -220,7 +220,7 @@ namespace NifOsg
         }
 
         mRootNode = parentNode;
-        handleNode(nifNode, parentNode, false, std::map<int, int>());
+        handleNode(nifNode, parentNode, false, std::map<int, int>(), 0);
     }
 
     void Loader::loadAsSkeleton(Nif::NIFFilePtr nif, osg::Group *parentNode)
@@ -249,16 +249,16 @@ namespace NifOsg
         mSkeleton = skel;
         mRootNode->addChild(mSkeleton);
 
-        handleNode(nifNode, mSkeleton, true, std::map<int, int>());
+        handleNode(nifNode, mSkeleton, true, std::map<int, int>(), 0);
     }
 
-    void Loader::applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, std::map<int, int>& boundTextures)
+    void Loader::applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, std::map<int, int>& boundTextures, int animflags)
     {
         const Nif::PropertyList& props = nifNode->props;
         for (size_t i = 0; i <props.length();++i)
         {
             if (!props[i].empty())
-                handleProperty(props[i].getPtr(), nifNode, applyTo, boundTextures);
+                handleProperty(props[i].getPtr(), nifNode, applyTo, boundTextures, animflags);
         }
     }
 
@@ -276,7 +276,7 @@ namespace NifOsg
     }
 
     void Loader::handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
-                            std::map<int, int> boundTextures)
+                            std::map<int, int> boundTextures, int animflags, bool collisionNode)
     {
         osg::ref_ptr<osg::MatrixTransform> transformNode;
         if (createSkeleton)
@@ -294,11 +294,16 @@ namespace NifOsg
             transformNode->setMatrix(toMatrix(nifNode->trafo));
         }
 
+        if (nifNode->recType == Nif::RC_NiBSAnimationNode)
+            animflags |= nifNode->flags;
+
         // Hide collision shapes, but don't skip the subgraph
         // We still need to animate the hidden bones so the physics system can access them
-        // FIXME: skip creation of the TriShapes
         if (nifNode->recType == Nif::RC_RootCollisionNode)
+        {
+            collisionNode = true;
             transformNode->setNodeMask(0);
+        }
 
         // We could probably skip hidden nodes entirely if they don't have a VisController that
         // might make them visible later
@@ -308,22 +313,22 @@ namespace NifOsg
         // Insert bones at position 0 to prevent update order problems (see comment in osg Skeleton.cpp)
         parentNode->insertChild(0, transformNode);
 
-        applyNodeProperties(nifNode, transformNode, boundTextures);
+        applyNodeProperties(nifNode, transformNode, boundTextures, animflags);
 
-        if (nifNode->recType == Nif::RC_NiTriShape)
+        if (nifNode->recType == Nif::RC_NiTriShape && !collisionNode)
         {
             const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
             if (!createSkeleton || triShape->skin.empty())
-                handleTriShape(triShape, transformNode, boundTextures);
+                handleTriShape(triShape, transformNode, boundTextures, animflags);
             else
-                handleSkinnedTriShape(triShape, transformNode, boundTextures);
+                handleSkinnedTriShape(triShape, transformNode, boundTextures, animflags);
 
             if (!nifNode->controller.empty())
-                handleMeshControllers(nifNode, transformNode, boundTextures);
+                handleMeshControllers(nifNode, transformNode, boundTextures, animflags);
         }
 
         if (!nifNode->controller.empty())
-            handleNodeControllers(nifNode, transformNode);
+            handleNodeControllers(nifNode, transformNode, animflags);
 
         const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
         if(ninode)
@@ -332,12 +337,12 @@ namespace NifOsg
             for(size_t i = 0;i < children.length();++i)
             {
                 if(!children[i].empty())
-                    handleNode(children[i].getPtr(), transformNode, createSkeleton, boundTextures);
+                    handleNode(children[i].getPtr(), transformNode, createSkeleton, boundTextures, animflags, collisionNode);
             }
         }
     }
 
-    void Loader::handleMeshControllers(const Nif::Node *nifNode, osg::MatrixTransform *transformNode, const std::map<int, int> &boundTextures)
+    void Loader::handleMeshControllers(const Nif::Node *nifNode, osg::MatrixTransform *transformNode, const std::map<int, int> &boundTextures, int animflags)
     {
         for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
         {
@@ -349,12 +354,12 @@ namespace NifOsg
                     texUnits.insert(it->first);
                 boost::shared_ptr<ControllerValue> dest(new UVControllerValue(transformNode->getOrCreateStateSet()
                     , uvctrl->data.getPtr(), texUnits));
-                createController(uvctrl, dest, 0);
+                createController(uvctrl, dest, animflags);
             }
         }
     }
 
-    void Loader::handleNodeControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode)
+    void Loader::handleNodeControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode, int animflags)
     {
         bool seenKeyframeCtrl = false;
         for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
@@ -372,7 +377,7 @@ namespace NifOsg
                     boost::shared_ptr<ControllerValue> dest(new KeyframeControllerValue(transformNode, mNif, key->data.getPtr(),
                                                                                           transformNode->getMatrix().getRotate(), nifNode->trafo.scale));
 
-                    createController(key, dest, 0);
+                    createController(key, dest, animflags);
                     seenKeyframeCtrl = true;
                 }
             }
@@ -380,12 +385,12 @@ namespace NifOsg
             {
                 const Nif::NiVisController* visctrl = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
                 boost::shared_ptr<ControllerValue> dest(new VisControllerValue(transformNode, visctrl->data.getPtr()));
-                createController(visctrl, dest, 0);
+                createController(visctrl, dest, animflags);
             }
         }
     }
 
-    void Loader::handleMaterialControllers(const Nif::Property *materialProperty, osg::StateSet *stateset)
+    void Loader::handleMaterialControllers(const Nif::Property *materialProperty, osg::StateSet *stateset, int animflags)
     {
         for (Nif::ControllerPtr ctrl = materialProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
         {
@@ -393,20 +398,59 @@ namespace NifOsg
             {
                 const Nif::NiAlphaController* alphactrl = static_cast<const Nif::NiAlphaController*>(ctrl.getPtr());
                 boost::shared_ptr<ControllerValue> dest(new AlphaControllerValue(stateset, alphactrl->data.getPtr()));
-                createController(alphactrl, dest, 0);
+                createController(alphactrl, dest, animflags);
             }
             else if (ctrl->recType == Nif::RC_NiMaterialColorController)
             {
                 const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
                 boost::shared_ptr<ControllerValue> dest(new MaterialColorControllerValue(stateset, matctrl->data.getPtr()));
-                createController(matctrl, dest, 0);
+                createController(matctrl, dest, animflags);
             }
             else
                 std::cerr << "Unexpected material controller " << ctrl->recType << std::endl;
         }
     }
 
-    void Loader::triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, const std::map<int, int>& boundTextures)
+    void Loader::handleTextureControllers(const Nif::Property *texProperty, osg::StateSet *stateset, int animflags)
+    {
+        for (Nif::ControllerPtr ctrl = texProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
+        {
+            if (ctrl->recType == Nif::RC_NiFlipController)
+            {
+                const Nif::NiFlipController* flipctrl = static_cast<const Nif::NiFlipController*>(ctrl.getPtr());
+                std::vector<osg::ref_ptr<osg::Image> > textures;
+                for (unsigned int i=0; i<flipctrl->mSources.length(); ++i)
+                {
+                    Nif::NiSourceTexturePtr st = flipctrl->mSources[i];
+                    if (st.empty())
+                        continue;
+
+                    // FIXME: replace by ResourceHelpers
+                    std::string filename (st->filename);
+                    Misc::StringUtils::toLower(filename);
+                    filename = "textures\\" + filename;
+                    size_t found = filename.find(".tga");
+                    if (found == std::string::npos)
+                        found = filename.find(".bmp");
+                    if (found != std::string::npos)
+                        filename.replace(found, 4, ".dds");
+
+                    // tx_creature_werewolf.dds isn't loading in the correct format without this option
+                    osgDB::Options* opts = new osgDB::Options;
+                    opts->setOptionString("dds_dxt1_detect_rgba");
+                    osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("dds");
+                    osgDB::ReaderWriter::ReadResult result = reader->readImage(*resourceManager->getFile(filename.c_str()), opts);
+                    textures.push_back(osg::ref_ptr<osg::Image>(result.getImage()));
+                }
+                boost::shared_ptr<ControllerValue> dest(new FlipControllerValue(stateset, flipctrl, textures));
+                createController(flipctrl, dest, animflags);
+            }
+            else
+                std::cerr << "Unexpected texture controller " << ctrl->recName << std::endl;
+        }
+    }
+
+    void Loader::triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, const std::map<int, int>& boundTextures, int animflags)
     {
         const Nif::NiTriShapeData* data = triShape->data.getPtr();
 
@@ -486,10 +530,10 @@ namespace NifOsg
         //   above the actual renderable would be tedious.
         std::vector<const Nif::Property*> materialProps;
         collectMaterialProperties(triShape, materialProps);
-        applyMaterialProperties(geometry->getOrCreateStateSet(), materialProps, !data->colors.empty());
+        applyMaterialProperties(geometry->getOrCreateStateSet(), materialProps, !data->colors.empty(), animflags);
     }
 
-    void Loader::handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, const std::map<int, int>& boundTextures)
+    void Loader::handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, const std::map<int, int>& boundTextures, int animflags)
     {
         osg::ref_ptr<osg::Geometry> geometry;
         if(!triShape->controller.empty())
@@ -510,7 +554,7 @@ namespace NifOsg
 
         if (!geometry.get())
             geometry = new osg::Geometry;
-        triShapeToGeometry(triShape, geometry.get(), boundTextures);
+        triShapeToGeometry(triShape, geometry.get(), boundTextures, animflags);
 
         osg::ref_ptr<osg::Geode> geode (new osg::Geode);
         geode->addDrawable(geometry.get());
@@ -518,10 +562,10 @@ namespace NifOsg
         parentNode->addChild(geode.get());
     }
 
-    void Loader::handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, const std::map<int, int>& boundTextures)
+    void Loader::handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, const std::map<int, int>& boundTextures, int animflags)
     {
         osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
-        triShapeToGeometry(triShape, geometry.get(), boundTextures);
+        triShapeToGeometry(triShape, geometry.get(), boundTextures, animflags);
 
         osg::ref_ptr<osgAnimation::RigGeometry> rig(new osgAnimation::RigGeometry);
         rig->setSourceGeometry(geometry);
@@ -569,7 +613,7 @@ namespace NifOsg
     }
 
     void Loader::handleProperty(const Nif::Property *property, const Nif::Node* nifNode,
-                        osg::Node *node, std::map<int, int>& boundTextures)
+                        osg::Node *node, std::map<int, int>& boundTextures, int animflags)
     {
         osg::StateSet* stateset = node->getOrCreateStateSet();
 
@@ -693,6 +737,8 @@ namespace NifOsg
                         std::cerr << "Warning: unhandled internal texture " << std::endl;
                         continue;
                     }
+
+                    // FIXME: replace by ResourceHelpers
                     std::string filename (st->filename);
                     Misc::StringUtils::toLower(filename);
                     filename = "textures\\" + filename;
@@ -758,6 +804,7 @@ namespace NifOsg
                     stateset->setTextureAttributeAndModes(i, new osg::Texture2D, osg::StateAttribute::OFF);
                     boundTextures.erase(i);
                 }
+                handleTextureControllers(texprop, stateset, animflags);
             }
             break;
         }
@@ -773,7 +820,7 @@ namespace NifOsg
         }
     }
 
-    void Loader::applyMaterialProperties(osg::StateSet* stateset, const std::vector<const Nif::Property*>& properties, bool hasVertexColors)
+    void Loader::applyMaterialProperties(osg::StateSet* stateset, const std::vector<const Nif::Property*>& properties, bool hasVertexColors, int animflags)
     {
         int specFlags = 0; // Specular is disabled by default, even if there's a specular color in the NiMaterialProperty
         osg::Material* mat = new osg::Material;
@@ -801,7 +848,7 @@ namespace NifOsg
                 mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->data.glossiness);
 
                 if (!matprop->controller.empty())
-                    handleMaterialControllers(matprop, stateset);
+                    handleMaterialControllers(matprop, stateset, animflags);
 
                 break;
             }

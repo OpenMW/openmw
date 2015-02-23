@@ -3,6 +3,7 @@
 #include <osg/MatrixTransform>
 #include <osg/TexMat>
 #include <osg/Material>
+#include <osg/Texture2D>
 #include <osgAnimation/MorphGeometry>
 
 #include <osg/io_utils>
@@ -308,6 +309,26 @@ void MaterialColorControllerValue::setValue(float time)
     osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
     diffuse.set(value.x(), value.y(), value.z(), diffuse.a());
     mat->setDiffuse(osg::Material::FRONT_AND_BACK, diffuse);
+}
+
+FlipControllerValue::FlipControllerValue(osg::StateSet* target, const Nif::NiFlipController *ctrl,
+                                         std::vector<osg::ref_ptr<osg::Image> > textures)
+    : mTexSlot(ctrl->mTexSlot)
+    , mDelta(ctrl->mDelta)
+    , mTextures(textures)
+    , mTarget(target)
+{
+}
+
+void FlipControllerValue::setValue(float time)
+{
+    if (mDelta == 0)
+        return;
+    int curTexture = int(time / mDelta) % mTextures.size();
+    osg::Texture2D* tex = dynamic_cast<osg::Texture2D*>(mTarget->getAttribute(osg::StateAttribute::TEXTURE));
+    if (!tex)
+        return;
+    tex->setImage(mTextures[curTexture].get());
 }
 
 

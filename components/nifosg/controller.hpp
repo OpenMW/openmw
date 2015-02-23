@@ -12,6 +12,10 @@
 
 #include <set> //UVController
 
+// FlipController
+#include <osg/Image>
+#include <osg/ref_ptr>
+
 #include <osg/Timer>
 
 
@@ -213,6 +217,21 @@ namespace NifOsg
 
     public:
         MaterialColorControllerValue(osg::StateSet* target, const Nif::NiPosData *data);
+
+        virtual void setValue(float time);
+    };
+
+    // untested
+    class FlipControllerValue : public ControllerValue
+    {
+    private:
+        osg::StateSet* mTarget;
+        int mTexSlot;
+        float mDelta;
+        std::vector<osg::ref_ptr<osg::Image> > mTextures;
+
+    public:
+        FlipControllerValue(osg::StateSet* target, const Nif::NiFlipController* ctrl, std::vector<osg::ref_ptr<osg::Image> > textures);
 
         virtual void setValue(float time);
     };
