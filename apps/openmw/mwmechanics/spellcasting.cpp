@@ -594,6 +594,7 @@ namespace MWMechanics
                     value.restore(magnitude);
                 target.getClass().getCreatureStats(target).setAttribute(attribute, value);
             }
+            // TODO: refactor the effect tick functions in Actors so they can be reused here
             else if (effectId == ESM::MagicEffect::DamageHealth)
             {
                 applyDynamicStatsEffect(0, target, magnitude * -1);
@@ -683,7 +684,7 @@ namespace MWMechanics
     void CastSpell::applyDynamicStatsEffect(int attribute, const MWWorld::Ptr& target, float magnitude)
     {
         DynamicStat<float> value = target.getClass().getCreatureStats(target).getDynamic(attribute);
-        value.modify(magnitude);
+        value.setCurrent(value.getCurrent()+magnitude, attribute == 2);
         target.getClass().getCreatureStats(target).setDynamic(attribute, value);
     }
 
