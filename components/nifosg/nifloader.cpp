@@ -26,6 +26,8 @@
 #include <osg/Stencil>
 #include <osg/Material>
 #include <osg/Texture2D>
+#include <osg/TexEnv>
+#include <osg/TexEnvCombine>
 
 #include <components/nif/node.hpp>
 
@@ -668,10 +670,17 @@ namespace NifOsg
             const Nif::NiTexturingProperty* texprop = static_cast<const Nif::NiTexturingProperty*>(property);
             for (int i=0; i<Nif::NiTexturingProperty::NumTextures; ++i)
             {
-                if (i != Nif::NiTexturingProperty::BaseTexture)
-                    continue; // FIXME: implement other textures
                 if (texprop->textures[i].inUse)
                 {
+                    if (i != Nif::NiTexturingProperty::BaseTexture
+                            && i != Nif::NiTexturingProperty::GlowTexture
+                            && i != Nif::NiTexturingProperty::DarkTexture
+                            && i != Nif::NiTexturingProperty::DetailTexture)
+                    {
+                        std::cerr << "Warning: unhandled texture stage " << i << std::endl;
+                        continue;
+                    }
+
                     const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
                     if(tex.texture.empty())
                     {
@@ -679,6 +688,11 @@ namespace NifOsg
                         continue;
                     }
                     const Nif::NiSourceTexture *st = tex.texture.getPtr();
+                    if (!st->external)
+                    {
+                        std::cerr << "Warning: unhandled internal texture " << std::endl;
+                        continue;
+                    }
                     std::string filename (st->filename);
                     Misc::StringUtils::toLower(filename);
                     filename = "textures\\" + filename;
@@ -705,6 +719,37 @@ namespace NifOsg
                     texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
 
                     stateset->setTextureAttributeAndModes(i, texture2d, osg::StateAttribute::ON);
+
+                    if (i == Nif::NiTexturingProperty::GlowTexture)
+                    {
+                        osg::TexEnv* texEnv = new osg::TexEnv;
+                        texEnv->setMode(osg::TexEnv::ADD);
+                        stateset->setTextureAttributeAndModes(i, texEnv, osg::StateAttribute::ON);
+                    }
+                    else if (i == Nif::NiTexturingProperty::DarkTexture)
+                    {
+                        // untested
+                        osg::TexEnv* texEnv = new osg::TexEnv;
+                        texEnv->setMode(osg::TexEnv::MODULATE);
+                        stateset->setTextureAttributeAndModes(i, texEnv, osg::StateAttribute::ON);
+                    }
+                    else if (i == Nif::NiTexturingProperty::DetailTexture)
+                    {
+                        // untested
+                        osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
+                        texEnv->setScale_RGB(2.f);
+                        texEnv->setCombine_Alpha(GL_MODULATE);
+                        texEnv->setOperand0_Alpha(GL_SRC_ALPHA);
+                        texEnv->setOperand1_Alpha(GL_SRC_ALPHA);
+                        texEnv->setSource0_Alpha(GL_PREVIOUS);
+                        texEnv->setSource1_Alpha(GL_TEXTURE);
+                        texEnv->setCombine_RGB(GL_MODULATE);
+                        texEnv->setOperand0_RGB(GL_SRC_COLOR);
+                        texEnv->setOperand1_RGB(GL_SRC_COLOR);
+                        texEnv->setSource0_RGB(GL_PREVIOUS);
+                        texEnv->setSource1_RGB(GL_TEXTURE);
+                        stateset->setTextureAttributeAndModes(i, texEnv, osg::StateAttribute::ON);
+                    }
 
                     boundTextures[i] = tex.uvSet;
                 }
