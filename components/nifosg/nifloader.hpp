@@ -51,7 +51,7 @@ namespace NifOsg
 
         /// @param createSkeleton If true, use an osgAnimation::Bone for NIF nodes, otherwise an osg::MatrixTransform.
         void handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
-                        std::map<int, int> boundTextures, int animflags, bool collisionNode=false);
+                        std::map<int, int> boundTextures, int animflags, int particleflags, bool collisionNode=false);
 
         void handleMeshControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode, const std::map<int, int>& boundTextures, int animflags);
 
@@ -63,6 +63,8 @@ namespace NifOsg
 
         void handleProperty (const Nif::Property* property, const Nif::Node* nifNode,
                              osg::Node* node, std::map<int, int>& boundTextures, int animflags);
+
+        void handleParticleSystem(const Nif::Node* nifNode, osg::Group* parentNode, int particleflags, int animflags);
 
         // Creates an osg::Geometry object for the given TriShape, populates it, and attaches it to the given node.
         void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, const std::map<int, int>& boundTextures, int animflags);
@@ -76,7 +78,8 @@ namespace NifOsg
         // Applies the Properties of the given nifNode onto the StateSet of the given OSG node.
         void applyNodeProperties(const Nif::Node* nifNode, osg::Node* applyTo, std::map<int, int>& boundTextures, int animflags);
 
-        void applyMaterialProperties(osg::StateSet* stateset, const std::vector<const Nif::Property*>& properties, bool hasVertexColors, int animflags);
+        void applyMaterialProperties(osg::StateSet* stateset, const std::vector<const Nif::Property*>& properties,
+                                     bool hasVertexColors, int animflags);
 
         void createController(const Nif::Controller* ctrl, boost::shared_ptr<ControllerValue> value, int animflags);
 

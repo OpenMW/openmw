@@ -221,7 +221,7 @@ if (${OGRE_VERSION} VERSION_LESS "1.9")
     message(FATAL_ERROR "OpenMW requires Ogre 1.9 or later, please install the latest stable version from http://ogre3d.org")
 endif()
 
-find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgGA osgAnimation)
+find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgGA osgAnimation osgParticle)
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 find_package(MyGUI REQUIRED)

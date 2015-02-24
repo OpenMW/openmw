@@ -18,6 +18,10 @@
 #include <osgAnimation/RigGeometry>
 #include <osgAnimation/MorphGeometry>
 
+// particle
+#include <osgParticle/ParticleSystem>
+#include <osgParticle/ParticleSystemUpdater>
+
 #include <osg/BlendFunc>
 #include <osg/AlphaFunc>
 #include <osg/Depth>
@@ -177,6 +181,17 @@ namespace
         osg::Node* mSkelRoot;
     };
 
+    // HACK: Particle doesn't allow setting the initial age, but we need this for loading the particle system state
+    class ParticleAgeSetter : public osgParticle::Particle
+    {
+    public:
+        ParticleAgeSetter(float age)
+            : Particle()
+        {
+            _t0 = age;
+        }
+    };
+
     osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher)
     {
         osg::ref_ptr<osgAnimation::MorphGeometry> morphGeom = new osgAnimation::MorphGeometry;
@@ -220,7 +235,7 @@ namespace NifOsg
         }
 
         mRootNode = parentNode;
-        handleNode(nifNode, parentNode, false, std::map<int, int>(), 0);
+        handleNode(nifNode, parentNode, false, std::map<int, int>(), 0, 0);
     }
 
     void Loader::loadAsSkeleton(Nif::NIFFilePtr nif, osg::Group *parentNode)
@@ -249,7 +264,7 @@ namespace NifOsg
         mSkeleton = skel;
         mRootNode->addChild(mSkeleton);
 
-        handleNode(nifNode, mSkeleton, true, std::map<int, int>(), 0);
+        handleNode(nifNode, mSkeleton, true, std::map<int, int>(), 0, 0);
     }
 
     void Loader::applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, std::map<int, int>& boundTextures, int animflags)
@@ -276,7 +291,7 @@ namespace NifOsg
     }
 
     void Loader::handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
-                            std::map<int, int> boundTextures, int animflags, bool collisionNode)
+                            std::map<int, int> boundTextures, int animflags, int particleflags, bool collisionNode)
     {
         osg::ref_ptr<osg::MatrixTransform> transformNode;
         if (createSkeleton)
@@ -327,6 +342,9 @@ namespace NifOsg
                 handleMeshControllers(nifNode, transformNode, boundTextures, animflags);
         }
 
+        if(nifNode->recType == Nif::RC_NiAutoNormalParticles || nifNode->recType == Nif::RC_NiRotatingParticles)
+            handleParticleSystem(nifNode, transformNode, particleflags, animflags);
+
         if (!nifNode->controller.empty())
             handleNodeControllers(nifNode, transformNode, animflags);
 
@@ -337,7 +355,7 @@ namespace NifOsg
             for(size_t i = 0;i < children.length();++i)
             {
                 if(!children[i].empty())
-                    handleNode(children[i].getPtr(), transformNode, createSkeleton, boundTextures, animflags, collisionNode);
+                    handleNode(children[i].getPtr(), transformNode, createSkeleton, boundTextures, animflags, particleflags, collisionNode);
             }
         }
     }
@@ -346,6 +364,8 @@ namespace NifOsg
     {
         for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
         {
+            if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                continue;
             if (ctrl->recType == Nif::RC_NiUVController)
             {
                 const Nif::NiUVController *uvctrl = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
@@ -364,6 +384,8 @@ namespace NifOsg
         bool seenKeyframeCtrl = false;
         for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
         {
+            if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                continue;
             if (ctrl->recType == Nif::RC_NiKeyframeController)
             {
                 const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
@@ -394,6 +416,8 @@ namespace NifOsg
     {
         for (Nif::ControllerPtr ctrl = materialProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
         {
+            if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                continue;
             if (ctrl->recType == Nif::RC_NiAlphaController)
             {
                 const Nif::NiAlphaController* alphactrl = static_cast<const Nif::NiAlphaController*>(ctrl.getPtr());
@@ -415,6 +439,8 @@ namespace NifOsg
     {
         for (Nif::ControllerPtr ctrl = texProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
         {
+            if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                continue;
             if (ctrl->recType == Nif::RC_NiFlipController)
             {
                 const Nif::NiFlipController* flipctrl = static_cast<const Nif::NiFlipController*>(ctrl.getPtr());
@@ -448,6 +474,71 @@ namespace NifOsg
             else
                 std::cerr << "Unexpected texture controller " << ctrl->recName << std::endl;
         }
+    }
+
+    void Loader::handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, int particleflags, int animflags)
+    {
+        osg::ref_ptr<osgParticle::ParticleSystem> partsys (new osgParticle::ParticleSystem);
+
+        const Nif::NiAutoNormalParticlesData *particledata = NULL;
+        if(nifNode->recType == Nif::RC_NiAutoNormalParticles)
+            particledata = static_cast<const Nif::NiAutoNormalParticles*>(nifNode)->data.getPtr();
+        else if(nifNode->recType == Nif::RC_NiRotatingParticles)
+            particledata = static_cast<const Nif::NiRotatingParticles*>(nifNode)->data.getPtr();
+        else
+            return;
+
+        const Nif::NiParticleSystemController* partctrl = NULL;
+        for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
+        {
+            if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                continue;
+            if(ctrl->recType == Nif::RC_NiParticleSystemController || ctrl->recType == Nif::RC_NiBSPArrayController)
+                partctrl = static_cast<Nif::NiParticleSystemController*>(ctrl.getPtr());
+        }
+        if (!partctrl)
+            return;
+
+        int i=0;
+        for (std::vector<Nif::NiParticleSystemController::Particle>::const_iterator it = partctrl->particles.begin();
+             i<particledata->activeCount && it != partctrl->particles.end(); ++it, ++i)
+        {
+            const Nif::NiParticleSystemController::Particle& particle = *it;
+
+            ParticleAgeSetter particletemplate(std::max(0.f, particle.lifespan - particle.lifetime));
+
+            osgParticle::Particle* created = partsys->createParticle(&particletemplate);
+            created->setLifeTime(500);//std::max(0.f, particle.lifespan));
+            created->setVelocity(particle.velocity);
+            created->setPosition(particledata->vertices.at(particle.vertex));
+
+            osg::Vec4f partcolor (1.f,1.f,1.f,1.f);
+            if (particle.vertex < int(particledata->colors.size()))
+                partcolor = particledata->colors.at(particle.vertex);
+
+            float size = particledata->sizes.at(particle.vertex) * partctrl->size;
+
+            created->setSizeRange(osgParticle::rangef(size, size));
+        }
+
+        osg::NodeVisitor visitor;
+        partsys->update(0.f, visitor);
+        partsys->setFrozen(true);
+        partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
+
+        std::vector<const Nif::Property*> materialProps;
+        collectMaterialProperties(nifNode, materialProps);
+        applyMaterialProperties(partsys->getOrCreateStateSet(), materialProps, true, animflags);
+
+        partsys->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+        partsys->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+        geode->addDrawable(partsys);
+        parentNode->addChild(geode);
+
+        osgParticle::ParticleSystemUpdater* updater = new osgParticle::ParticleSystemUpdater;
+        updater->addParticleSystem(partsys);
+        parentNode->addChild(updater);
     }
 
     void Loader::triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, const std::map<int, int>& boundTextures, int animflags)
@@ -554,18 +645,18 @@ namespace NifOsg
 
         if (!geometry.get())
             geometry = new osg::Geometry;
-        triShapeToGeometry(triShape, geometry.get(), boundTextures, animflags);
+        triShapeToGeometry(triShape, geometry, boundTextures, animflags);
 
         osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-        geode->addDrawable(geometry.get());
+        geode->addDrawable(geometry);
 
-        parentNode->addChild(geode.get());
+        parentNode->addChild(geode);
     }
 
     void Loader::handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, const std::map<int, int>& boundTextures, int animflags)
     {
         osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
-        triShapeToGeometry(triShape, geometry.get(), boundTextures, animflags);
+        triShapeToGeometry(triShape, geometry, boundTextures, animflags);
 
         osg::ref_ptr<osgAnimation::RigGeometry> rig(new osgAnimation::RigGeometry);
         rig->setSourceGeometry(geometry);
@@ -600,16 +691,16 @@ namespace NifOsg
 
             map->insert(std::make_pair(boneName, influence));
         }
-        rig->setInfluenceMap(map.get());
+        rig->setInfluenceMap(map);
 
         osg::ref_ptr<osg::MatrixTransform> trans(new osg::MatrixTransform);
         trans->setUpdateCallback(new InvertBoneMatrix(mSkeleton));
 
         osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-        geode->addDrawable(rig.get());
+        geode->addDrawable(rig);
 
-        trans->addChild(geode.get());
-        parentNode->addChild(trans.get());
+        trans->addChild(geode);
+        parentNode->addChild(trans);
     }
 
     void Loader::handleProperty(const Nif::Property *property, const Nif::Node* nifNode,
@@ -820,7 +911,8 @@ namespace NifOsg
         }
     }
 
-    void Loader::applyMaterialProperties(osg::StateSet* stateset, const std::vector<const Nif::Property*>& properties, bool hasVertexColors, int animflags)
+    void Loader::applyMaterialProperties(osg::StateSet* stateset, const std::vector<const Nif::Property*>& properties,
+                                         bool hasVertexColors, int animflags)
     {
         int specFlags = 0; // Specular is disabled by default, even if there's a specular color in the NiMaterialProperty
         osg::Material* mat = new osg::Material;
