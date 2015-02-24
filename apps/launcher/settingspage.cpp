@@ -95,7 +95,7 @@ Launcher::SettingsPage::~SettingsPage()
 
 void Launcher::SettingsPage::on_wizardButton_clicked()
 {
-    saveSettings();
+    mMain->writeSettings();
 
     if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false))
         return;
@@ -103,7 +103,7 @@ void Launcher::SettingsPage::on_wizardButton_clicked()
 
 void Launcher::SettingsPage::on_importerButton_clicked()
 {
-    saveSettings();
+    mMain->writeSettings();
 
     // Create the file if it doesn't already exist, else the importer will fail
     QString path(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
