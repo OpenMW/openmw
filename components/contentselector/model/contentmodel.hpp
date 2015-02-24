@@ -47,6 +47,7 @@ namespace ContentSelectorModel
 
         QModelIndex indexFromItem(const EsmFile *item) const;
         const EsmFile *item(const QString &name) const;
+        QStringList gameFiles() const;
 
         bool isEnabled (QModelIndex index) const;
         bool isChecked(const QString &filepath) const;

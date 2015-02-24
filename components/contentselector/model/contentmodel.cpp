@@ -489,6 +489,19 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     sortFiles();
 }
 
+QStringList ContentSelectorModel::ContentModel::gameFiles() const
+{
+    QStringList gameFiles;
+    foreach(const ContentSelectorModel::EsmFile *file, mFiles)
+    {
+        if (file->isGameFile())
+        {
+            gameFiles.append(file->fileName());
+        }
+    }
+    return gameFiles;
+}
+
 void ContentSelectorModel::ContentModel::sortFiles()
 {
     //first, sort the model such that all dependencies are ordered upstream (gamefile) first.
@@ -589,7 +602,7 @@ void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()
 QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::checkForLoadOrderErrors(const EsmFile *file, int row) const
 {
     QList<LoadOrderError> errors = QList<LoadOrderError>();
-    foreach(QString dependentfileName, file->gameFiles())
+    foreach(const QString &dependentfileName, file->gameFiles())
     {
         const EsmFile* dependentFile = item(dependentfileName);
 
