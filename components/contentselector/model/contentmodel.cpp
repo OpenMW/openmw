@@ -110,15 +110,14 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     if (!file)
         return Qt::NoItemFlags;
 
-    //game files can always be checked
+    //game files are not shown
     if (file->isGameFile())
-        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
+        return Qt::NoItemFlags;
 
     Qt::ItemFlags returnFlags;
-    bool allDependenciesFound = true;
     bool gamefileChecked = false;
 
-    //addon can be checked if its gamefile is and all other dependencies exist
+    // addon can be checked if its gamefile is
     foreach (const QString &fileName, file->gameFiles())
     {
         bool depFound = false;
@@ -144,16 +143,11 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
             if (gamefileChecked || !(dependency->isGameFile()))
                 break;
         }
-
-        allDependenciesFound = allDependenciesFound && depFound;
     }
 
     if (gamefileChecked)
     {
-        if (allDependenciesFound)
-            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled;
-        else
-            returnFlags = Qt::ItemIsSelectable;
+        returnFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled;
     }
 
     return returnFlags;
@@ -468,7 +462,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
 
             // HACK
-            // Bloodmoon.esm requires Tribunal.esm, but this requirement is missing 
+            // Load order constraint of Bloodmoon.esm needing Tribunal.esm is missing 
             // from the file supplied by Bethesda, so we have to add it ourselves
             if (file->fileName().compare("Bloodmoon.esm", Qt::CaseInsensitive) == 0)
             {
