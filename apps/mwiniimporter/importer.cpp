@@ -883,16 +883,23 @@ void MwIniImporter::setInputEncoding(const ToUTF8::FromType &encoding)
 std::time_t MwIniImporter::lastWriteTime(const boost::filesystem::path& filename, std::time_t defaultTime)
 {
     std::time_t writeTime(defaultTime);
-    boost::filesystem::path resolved = boost::filesystem::canonical(filename);
-    if (boost::filesystem::exists(resolved))
+    if (boost::filesystem::exists(filename))
     {
+        // FixMe: remove #if when Boost on Travis Linux updated
+        // Travis seems to be using older version of boost for Linux
+        // This should allow things to build until fixed
+#if BOOST_FILESYSTEM_VERSION == 3
+        boost::filesystem::path resolved = boost::filesystem::canonical(filename);
+#else
+        boost::filesystem::path resolved = filename;
+#endif
         writeTime = boost::filesystem::last_write_time(resolved);
         std::cout << "content file: " << resolved << " timestamp = (" << writeTime <<
             ") " << asctime(localtime(&writeTime)) << std::endl;
     }
     else
     {
-        std::cout << "content file: " << resolved << " not found" << std::endl;
+        std::cout << "content file: " << filename << " not found" << std::endl;
     }
     return writeTime;
 }
