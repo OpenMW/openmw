@@ -3075,6 +3075,11 @@ namespace MWWorld
     void World::confiscateStolenItems(const Ptr &ptr)
     {
         MWWorld::Ptr prisonMarker = getClosestMarker( ptr, "prisonmarker" );
+        if ( prisonMarker.isEmpty() )
+        {
+            std::cerr << "Failed to confiscate items: no closest prison marker found." << std::endl;
+            return;
+        }
         std::string prisonName = prisonMarker.mRef->mRef.getDestCell();
         if ( prisonName.empty() )
         {
