@@ -2832,6 +2832,10 @@ namespace MWWorld
 
     MWWorld::Ptr World::getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id )
     {
+        if ( ptr.getCell()->isExterior() ) {
+            return getClosestMarkerFromExteriorPosition(mPlayer->getLastKnownExteriorPosition(), id);
+        }
+
         // Search for a 'nearest' marker, counting each cell between the starting
         // cell and the exterior as a distance of 1.  If an exterior is found, jump
         // to the nearest exterior marker, without further interior searching.
@@ -2868,25 +2872,7 @@ namespace MWWorld
                     if (ref.mRef.getDestCell().empty())
                     {
                         Ogre::Vector3 worldPos = Ogre::Vector3(ref.mRef.getDoorDest().pos);
-                        float closestDistance = FLT_MAX;
-
-                        MWWorld::Ptr closestMarker;
-                        std::vector<MWWorld::Ptr> markers;
-                        mCells.getExteriorPtrs(id, markers);
-                        for (std::vector<MWWorld::Ptr>::iterator it2 = markers.begin(); it2 != markers.end(); ++it2)
-                        {
-                            ESM::Position pos = it2->getRefData().getPosition();
-                            Ogre::Vector3 markerPos = Ogre::Vector3(pos.pos);
-                            float distance = worldPos.squaredDistance(markerPos);
-                            if (distance < closestDistance)
-                            {
-                                closestDistance = distance;
-                                closestMarker = *it2;
-                            }
-
-                        }
-
-                        return closestMarker;
+                        return getClosestMarkerFromExteriorPosition(worldPos, id);
                     }
                     else
                     {
@@ -2900,6 +2886,29 @@ namespace MWWorld
 
         return MWWorld::Ptr();
     }
+
+    MWWorld::Ptr World::getClosestMarkerFromExteriorPosition( const Ogre::Vector3 worldPos, const std::string &id ) {
+        MWWorld::Ptr closestMarker;
+        float closestDistance = FLT_MAX;
+
+        std::vector<MWWorld::Ptr> markers;
+        mCells.getExteriorPtrs(id, markers);
+        for (std::vector<MWWorld::Ptr>::iterator it2 = markers.begin(); it2 != markers.end(); ++it2)
+        {
+            ESM::Position pos = it2->getRefData().getPosition();
+            Ogre::Vector3 markerPos = Ogre::Vector3(pos.pos);
+            float distance = worldPos.squaredDistance(markerPos);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestMarker = *it2;
+            }
+
+        }
+
+        return closestMarker;
+    }
+
 
     void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
                                           const std::string& id)
