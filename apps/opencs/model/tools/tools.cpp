@@ -58,9 +58,6 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
         mandatoryIds.push_back ("GameHour");
         mandatoryIds.push_back ("Month");
         mandatoryIds.push_back ("PCRace");
-        mandatoryIds.push_back ("PCVampire");
-        mandatoryIds.push_back ("PCWerewolf");
-        mandatoryIds.push_back ("PCYear");
 
         mVerifier->appendStage (new MandatoryIdStage (mData.getGlobals(),
             CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Globals), mandatoryIds));
