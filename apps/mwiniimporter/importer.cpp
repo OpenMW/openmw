@@ -8,7 +8,8 @@
 #include <sstream>
 #include <components/misc/stringops.hpp>
 
-#include <boost/filesystem/path.hpp>
+#include <boost/version.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 namespace bfs = boost::filesystem;
@@ -660,7 +661,7 @@ std::string MwIniImporter::numberToString(int n) {
     return str.str();
 }
 
-MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::string& filename) const {
+MwIniImporter::multistrmap MwIniImporter::loadIniFile(const boost::filesystem::path&  filename) const {
     std::cout << "load ini file: " << filename << std::endl;
 
     std::string section("");
@@ -719,7 +720,7 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::string& filenam
     return map;
 }
 
-MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const std::string& filename) {
+MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const boost::filesystem::path& filename) {
     std::cout << "load cfg file: " << filename << std::endl;
 
     MwIniImporter::multistrmap map;
@@ -825,10 +826,14 @@ void MwIniImporter::importArchives(multistrmap &cfg, const multistrmap &ini) con
     }
 }
 
-void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini) const {
-    std::vector<std::string> contentFiles;
+void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, const boost::filesystem::path& iniFilename) const {
+    std::vector<std::pair<std::time_t, std::string> > contentFiles;
     std::string baseGameFile("Game Files:GameFile");
     std::string gameFile("");
+    std::time_t defaultTime = 0;
+
+    // assume the Game Files are all in a "Data Files" directory under the directory holding Morrowind.ini
+    const boost::filesystem::path gameFilesDir(iniFilename.parent_path() /= "Data Files");
 
     multistrmap::const_iterator it = ini.begin();
     for(int i=0; it != ini.end(); i++) {
@@ -845,18 +850,20 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini) co
             Misc::StringUtils::toLower(filetype);
 
             if(filetype.compare("esm") == 0 || filetype.compare("esp") == 0) {
-                contentFiles.push_back(*entry);
+                boost::filesystem::path filepath(gameFilesDir);
+                filepath /= *entry;
+                contentFiles.push_back(std::make_pair(lastWriteTime(filepath, defaultTime), *entry));
             }
         }
-
-        gameFile = "";
     }
 
     cfg.erase("content");
     cfg.insert( std::make_pair("content", std::vector<std::string>() ) );
 
-    for(std::vector<std::string>::const_iterator it=contentFiles.begin(); it!=contentFiles.end(); ++it) {
-        cfg["content"].push_back(*it);
+    // this will sort files by time order first, then alphabetical (maybe), I suspect non ASCII filenames will be stuffed.
+    sort(contentFiles.begin(), contentFiles.end());
+    for(std::vector<std::pair<std::time_t, std::string> >::const_iterator it=contentFiles.begin(); it!=contentFiles.end(); ++it) {
+        cfg["content"].push_back(it->second);
     }
 }
 
@@ -872,4 +879,28 @@ void MwIniImporter::writeToFile(std::ostream &out, const multistrmap &cfg) {
 void MwIniImporter::setInputEncoding(const ToUTF8::FromType &encoding)
 {
   mEncoding = encoding;
+}
+
+std::time_t MwIniImporter::lastWriteTime(const boost::filesystem::path& filename, std::time_t defaultTime)
+{
+    std::time_t writeTime(defaultTime);
+    if (boost::filesystem::exists(filename))
+    {
+        // FixMe: remove #if when Boost dependency for Linux builds updated
+        // This allows Linux to build until then
+#if (BOOST_VERSION >= 104800)
+        // need to resolve any symlinks so that we get time of file, not symlink
+        boost::filesystem::path resolved = boost::filesystem::canonical(filename);
+#else
+        boost::filesystem::path resolved = filename;
+#endif
+        writeTime = boost::filesystem::last_write_time(resolved);
+        std::cout << "content file: " << resolved << " timestamp = (" << writeTime <<
+            ") " << asctime(localtime(&writeTime)) << std::endl;
+    }
+    else
+    {
+        std::cout << "content file: " << filename << " not found" << std::endl;
+    }
+    return writeTime;
 }
