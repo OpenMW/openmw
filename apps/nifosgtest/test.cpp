@@ -1,4 +1,5 @@
 #include <osgViewer/Viewer>
+#include <osgViewer/ViewerEventHandlers>
 
 #include <components/bsa/bsa_file.hpp>
 #include <components/nif/niffile.hpp>
@@ -13,10 +14,10 @@
 #include <osg/PolygonMode>
 
 // EventHandler to toggle wireframe when 'w' key is pressed
-class EventHandler : public osgGA::GUIEventHandler
+class WireframeKeyHandler : public osgGA::GUIEventHandler
 {
 public:
-    EventHandler(osg::Node* node)
+    WireframeKeyHandler(osg::Node* node)
         : mWireframe(false)
         , mNode(node)
     {
@@ -70,12 +71,17 @@ int main(int argc, char** argv)
     // To prevent lighting issues with scaled meshes
     root->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
 
+
+    //osgDB::writeNodeFile(*newNode, "out.osg");
+
+    std::vector<NifOsg::Controller >  controllers;
     osg::Group* newNode = new osg::Group;
     NifOsg::Loader loader;
     loader.resourceManager = &bsa;
     loader.loadAsSkeleton(nif, newNode);
 
-    //osgDB::writeNodeFile(*newNode, "out.osg");
+    for (unsigned int i=0; i<loader.mControllers.size(); ++i)
+        controllers.push_back(loader.mControllers[i]);
 
     for (int x=0; x<1;++x)
     {
@@ -87,14 +93,16 @@ int main(int argc, char** argv)
     viewer.setUpViewInWindow(0, 0, 800, 600);
     viewer.realize();
     viewer.setCameraManipulator(new osgGA::TrackballManipulator());
-    viewer.addEventHandler(new EventHandler(root));
+    viewer.addEventHandler(new WireframeKeyHandler(root));
+    viewer.addEventHandler(new osgViewer::StatsHandler);
 
     while (!viewer.done())
     {
         viewer.frame();
 
-        for (unsigned int i=0; i<loader.mControllers.size(); ++i)
-            loader.mControllers[i].update();
+        for (unsigned int i=0; i<controllers.size(); ++i)
+            controllers[i].update();
     }
+
     return 0;
 }
