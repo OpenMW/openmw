@@ -230,7 +230,7 @@ namespace MWWorld
                         cell->getCell()->getGridX(),
                         cell->getCell()->getGridY()
                     );
-                if (land) {
+                if (land && land->mDataTypes&ESM::Land::DATA_VHGT) {
                     // Actually only VHGT is needed here, but we'll need the rest for rendering anyway.
                     // Load everything now to reduce IO overhead.
                     const int flags = ESM::Land::DATA_VCLR|ESM::Land::DATA_VHGT|ESM::Land::DATA_VNML|ESM::Land::DATA_VTEX;

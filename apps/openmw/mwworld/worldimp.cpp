@@ -423,6 +423,19 @@ namespace MWWorld
         globals["werewolfclawmult"] = ESM::Variant(25.f);
         globals["pcknownwerewolf"] = ESM::Variant(0);
 
+        // following should exist in all versions of MW, but not necessarily in TCs
+        globals["gamehour"] = ESM::Variant(0.f);
+        globals["timescale"] = ESM::Variant(30.f);
+        globals["day"] = ESM::Variant(1);
+        globals["month"] = ESM::Variant(1);
+        globals["year"] = ESM::Variant(1);
+        globals["pcrace"] = ESM::Variant(0);
+        globals["pchascrimegold"] = ESM::Variant(0);
+        globals["pchasgolddiscount"] = ESM::Variant(0);
+        globals["crimegolddiscount"] = ESM::Variant(0);
+        globals["crimegoldturnin"] = ESM::Variant(0);
+        globals["pchasturnin"] = ESM::Variant(0);
+
         for (std::map<std::string, ESM::Variant>::iterator it = gmst.begin(); it != gmst.end(); ++it)
         {
             if (!mStore.get<ESM::GameSetting>().search(it->first))
