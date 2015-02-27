@@ -5,13 +5,16 @@
 
 #include "lowlevelfile.hpp"
 
+namespace
+{
+// somewhat arbitrary though 64KB buffers didn't seem to improve performance any
+const size_t sBufferSize = 4096;
+}
+
 namespace Files
 {
-
     class ConstrainedFileStreamBuf : public std::streambuf
     {
-        // somewhat arbitrary though 64KB buffers didn't seem to improve performance any
-        static const size_t sBufferSize = 4096;
 
         size_t mOrigin;
         size_t mSize;
