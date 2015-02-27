@@ -221,6 +221,9 @@
 #if UNDERWATER
     #include "underwater.h"
 #endif
+#if NORMAL_MAP && SH_GLSLES
+        mat3 transpose(mat3 m);
+#endif
 
     SH_BEGIN_PROGRAM
     
@@ -319,7 +322,7 @@ shUniform(float4, cameraPos) @shAutoConstant(cameraPos, camera_position)
 
         // derive final matrix
         float3x3 tbn = float3x3(tangent, binormal, normal);
-        #if SH_GLSL
+        #if SH_GLSL || SH_GLSLES
         tbn = transpose(tbn);
         #endif
 #endif
@@ -492,5 +495,13 @@ albedo = shLerp(albedo, diffuseTex, blendValues@shPropertyString(blendmap_compon
         shOutputColour(0).a = 1.0-previousAlpha;
 #endif
     }
-
+#if NORMAL_MAP && SH_GLSLES
+        mat3 transpose(mat3 m){
+           return mat3(
+            m[0][0],m[1][0],m[2][0],
+            m[0][1],m[1][1],m[2][1],
+            m[0][2],m[1][2],m[2][2]
+            );
+         }
+#endif
 #endif

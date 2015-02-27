@@ -120,14 +120,12 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     // Set default texture filtering options
     TextureFilterOptions tfo;
     std::string filter = Settings::Manager::getString("texture filtering", "General");
-#ifndef ANDROID
+
     if (filter == "anisotropic") tfo = TFO_ANISOTROPIC;
     else if (filter == "trilinear") tfo = TFO_TRILINEAR;
     else if (filter == "bilinear") tfo = TFO_BILINEAR;
     else /*if (filter == "none")*/ tfo = TFO_NONE;
-#else
-    tfo = TFO_NONE;
-#endif
+
     MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
     MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
 
