@@ -67,6 +67,8 @@ namespace Launcher
         Config::GameSettings &mGameSettings;
         Config::LauncherSettings &mLauncherSettings;
 
+        QString mPreviousProfile;
+
         QString mDataLocal;
 
         void setPluginsCheckstates(Qt::CheckState state);
@@ -132,6 +134,8 @@ namespace Launcher
             }
 
         };
+
+        QStringList filesInProfile(const QString& profileName, PathIterator& pathIterator);
     };
 }
 #endif

@@ -23,6 +23,7 @@ namespace Compiler
         x - Optional, ignored string argument
         X - Optional, ignored numeric expression
         z - Optional, ignored string or numeric argument
+        j - A piece of junk (either . or a specific keyword)
     **/
     typedef std::string ScriptArgs;
 

@@ -2,6 +2,10 @@
 
 #include <OgreResourceGroupManager.h>
 
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_RenderManager.h>
+
 #include <components/version/version.hpp>
 
 #include <components/widgets/imagebutton.hpp>
@@ -176,13 +180,16 @@ namespace MWGui
             int screenHeight = viewSize.height;
             mVideoBackground->setSize(screenWidth, screenHeight);
 
-            double imageaspect = static_cast<double>(mVideo->getVideoWidth())/mVideo->getVideoHeight();
+            if (mVideo->getVideoHeight() > 0)
+            {
+                double imageaspect = static_cast<double>(mVideo->getVideoWidth())/mVideo->getVideoHeight();
 
-            int leftPadding = std::max(0.0, (screenWidth - screenHeight * imageaspect) / 2);
-            int topPadding = std::max(0.0, (screenHeight - screenWidth / imageaspect) / 2);
+                int leftPadding = std::max(0.0, (screenWidth - screenHeight * imageaspect) / 2);
+                int topPadding = std::max(0.0, (screenHeight - screenWidth / imageaspect) / 2);
 
-            mVideo->setCoord(leftPadding, topPadding,
-                                   screenWidth - leftPadding*2, screenHeight - topPadding*2);
+                mVideo->setCoord(leftPadding, topPadding,
+                                       screenWidth - leftPadding*2, screenHeight - topPadding*2);
+            }
 
             mVideo->setVisible(true);
         }

@@ -1,12 +1,17 @@
 #ifndef MWGUI_LOADINGSCREEN_H
 #define MWGUI_LOADINGSCREEN_H
 
-#include <OgreSceneManager.h>
 #include <OgreTimer.h>
+#include <OgreStringVector.h>
 
 #include "windowbase.hpp"
 
 #include <components/loadinglistener/loadinglistener.hpp>
+
+namespace Ogre
+{
+    class SceneManager;
+}
 
 namespace MWGui
 {
@@ -46,6 +51,8 @@ namespace MWGui
         Ogre::Timer mTimer;
 
         size_t mProgress;
+
+        MyGUI::Widget* mLoadingBox;
 
         MyGUI::TextBox* mLoadingText;
         MyGUI::ScrollBar* mProgressBar;

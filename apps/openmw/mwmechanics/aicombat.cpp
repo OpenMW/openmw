@@ -23,6 +23,7 @@
 #include "character.hpp" // fixme: for getActiveWeapon
 
 #include "aicombataction.hpp"
+#include "combat.hpp"
 
 namespace
 {
@@ -206,12 +207,8 @@ namespace MWMechanics
         const MWWorld::Class& actorClass = actor.getClass();
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
-        if (!actorClass.isNpc() &&
-            // 1. pure water creature and Player moved out of water
-            ((target == world->getPlayerPtr() &&
-            actorClass.canSwim(actor) && !actor.getClass().canWalk(actor) && !world->isSwimming(target))
-            // 2. creature can't swim to target
-            || (!actorClass.canSwim(actor) && world->isSwimming(target))))
+        // can't fight if attacker can't go where target is.  E.g. A fish can't attack person on land.
+        if (!actorClass.isNpc() && !MWMechanics::isEnvironmentCompatible(actor, target))
         {
             actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
             return true;
@@ -300,6 +297,14 @@ namespace MWMechanics
 
         //Update with period = tReaction
 
+        // Stop attacking if target is not seen
+        if (target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude() > 0
+                || target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude() > 75)
+        {
+            movement.mPosition[1] = movement.mPosition[0] = 0;
+            return false; // TODO: run away instead of doing nothing
+        }
+
         timerReact = 0;
         const MWWorld::CellStore*& currentCell = storage.mCell;
         bool cellChange = currentCell && (actor.getCell() != currentCell);
@@ -325,10 +330,6 @@ namespace MWMechanics
             currentAction = prepareNextAction(actor, target);
             actionCooldown = currentAction->getActionCooldown();
         }
-
-        // Stop attacking if target is not seen
-        if (!MWBase::Environment::get().getMechanicsManager()->awarenessCheck(target, actor))
-            return true;
 
         if (currentAction.get())
             currentAction->getCombatRange(rangeAttack, rangeFollow);
@@ -576,7 +577,7 @@ namespace MWMechanics
                 buildNewPath(actor, target); //may fail to build a path, check before use
 
                 //delete visited path node
-                mPathFinder.checkWaypoint(pos.pos[0],pos.pos[1],pos.pos[2]);
+                mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]);
 
                 // This works on the borders between the path grid and areas with no waypoints.
                 if(inLOS && mPathFinder.getPath().size() > 1)

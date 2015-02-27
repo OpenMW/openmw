@@ -1,6 +1,7 @@
 #include "controllers.hpp"
 
 #include <MyGUI_InputManager.h>
+#include <MyGUI_Widget.h>
 
 namespace MWGui
 {

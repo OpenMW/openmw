@@ -38,9 +38,9 @@ namespace MWWorld
             void setWaterHeight(float height);
             void disableWater();
 
-            void addObject (const MWWorld::Ptr& ptr, bool placeable=false);
+            void addObject (const MWWorld::Ptr& ptr, const std::string& mesh, bool placeable=false);
 
-            void addActor (const MWWorld::Ptr& ptr);
+            void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 
             void addHeightField (float* heights,
                 int x, int y, float yoffset,

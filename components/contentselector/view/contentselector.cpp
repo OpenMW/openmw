@@ -24,7 +24,8 @@ ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
 
 void ContentSelectorView::ContentSelector::buildContentModel()
 {
-    mContentModel = new ContentSelectorModel::ContentModel();
+    QIcon warningIcon(ui.addonView->style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(QSize(16, 15)));
+    mContentModel = new ContentSelectorModel::ContentModel(this, warningIcon);
 }
 
 void ContentSelectorView::ContentSelector::buildGameFileView()
@@ -58,36 +59,25 @@ void ContentSelectorView::ContentSelector::buildAddonView()
 
     ui.addonView->setModel(mAddonProxyModel);
 
-    connect(ui.addonView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotAddonTableItemClicked(const QModelIndex &)));
+    connect(ui.addonView, SIGNAL(activated(const QModelIndex&)), this, SLOT(slotAddonTableItemActivated(const QModelIndex&)));
+    connect(mContentModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SIGNAL(signalAddonDataChanged(QModelIndex,QModelIndex)));
 }
 
 void ContentSelectorView::ContentSelector::setProfileContent(const QStringList &fileList)
 {
     clearCheckStates();
-    bool foundGamefile = false;
 
     foreach (const QString &filepath, fileList)
     {
-        if (!foundGamefile)
+        const ContentSelectorModel::EsmFile *file = mContentModel->item(filepath);
+        if (file && file->isGameFile())
         {
-            const ContentSelectorModel::EsmFile *file = mContentModel->item(filepath);
-
-            foundGamefile = (file->isGameFile());
-
-            if (foundGamefile)
-            {
-                setGameFile (filepath);
-                break;
-            }
+            setGameFile (filepath);
+            break;
         }
     }
 
-/*        if (!foundGameFile)
-        {
-            //throw gamefile error here.
-        }*/
-
-    setCheckStates (fileList);
+    setContentList(fileList);
 }
 
 void ContentSelectorView::ContentSelector::setGameFile(const QString &filename)
@@ -115,14 +105,14 @@ void ContentSelectorView::ContentSelector::clearCheckStates()
     mContentModel->uncheckAll();
 }
 
-void ContentSelectorView::ContentSelector::setCheckStates(const QStringList &list)
+void ContentSelectorView::ContentSelector::setContentList(const QStringList &list)
 {
     if (list.isEmpty())
     {
         slotCurrentGameFileIndexChanged (ui.gameFileView->currentIndex());
     }
     else
-        mContentModel->setCheckStates (list, true);
+        mContentModel->setContentList(list, true);
 }
 
 ContentSelectorModel::ContentFileList
@@ -173,6 +163,7 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
         oldIndex = index;
 
         model->setData(model->index(index, 0), true, Qt::UserRole + 1);
+        mContentModel->checkForLoadOrderErrors();
     }
 
     if (proxy)
@@ -181,7 +172,7 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
     emit signalCurrentGamefileIndexChanged (index);
 }
 
-void ContentSelectorView::ContentSelector::slotAddonTableItemClicked(const QModelIndex &index)
+void ContentSelectorView::ContentSelector::slotAddonTableItemActivated(const QModelIndex &index)
 {
     QModelIndex sourceIndex = mAddonProxyModel->mapToSource (index);
 
@@ -194,10 +185,4 @@ void ContentSelectorView::ContentSelector::slotAddonTableItemClicked(const QMode
         checkState = Qt::Checked;
 
     mContentModel->setData(sourceIndex, checkState, Qt::CheckStateRole);
-
-    if (checkState == Qt::Checked)
-        emit signalAddonFileSelected (index.row());
-    else
-        emit signalAddonFileUnselected (index.row());
-
 }

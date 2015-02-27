@@ -16,12 +16,20 @@ namespace AiSequence
     {
         esm.getHNT (mData, "DATA");
         esm.getHNT(mStartTime, "STAR");
+        mStoredInitialActorPosition = false;
+        if (esm.isNextSub("POS_"))
+        {
+            mStoredInitialActorPosition = true;
+            esm.getHT(mInitialActorPosition);
+        }
     }
 
     void AiWander::save(ESMWriter &esm) const
     {
         esm.writeHNT ("DATA", mData);
         esm.writeHNT ("STAR", mStartTime);
+        if (mStoredInitialActorPosition)
+            esm.writeHNT ("POS_", mInitialActorPosition);
     }
 
     void AiTravel::load(ESMReader &esm)
@@ -60,6 +68,8 @@ namespace AiSequence
         esm.getHNT (mAlwaysFollow, "ALWY");
         mCommanded = false;
         esm.getHNOT (mCommanded, "CMND");
+        mActive = false;
+        esm.getHNOT (mActive, "ACTV");
     }
 
     void AiFollow::save(ESMWriter &esm) const
@@ -71,6 +81,8 @@ namespace AiSequence
             esm.writeHNString ("CELL", mCellId);
         esm.writeHNT ("ALWY", mAlwaysFollow);
         esm.writeHNT ("CMND", mCommanded);
+        if (mActive)
+            esm.writeHNT("ACTV", mActive);
     }
 
     void AiActivate::load(ESMReader &esm)

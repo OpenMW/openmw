@@ -33,7 +33,6 @@ MWMechanics::NpcStats::NpcStats()
 , mWerewolfKills (0)
 , mProfit(0)
 , mTimeToStartDrowning(20.0)
-, mLastDrowningHit(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
 }
@@ -257,18 +256,16 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     /// \todo check if character is the player, if levelling is ever implemented for NPCs
     MWBase::Environment::get().getSoundManager ()->playSound ("skillraise", 1, 1);
 
-    std::vector <std::string> noButtons;
-
     std::stringstream message;
     message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
                % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
                % static_cast<int> (base);
-    MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), noButtons, MWGui::ShowInDialogueMode_Never);
+    MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), MWGui::ShowInDialogueMode_Never);
 
     if (mLevelProgress >= gmst.find("iLevelUpTotal")->getInt())
     {
         // levelup is possible now
-        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", noButtons, MWGui::ShowInDialogueMode_Never);
+        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", MWGui::ShowInDialogueMode_Never);
     }
 
     getSkill (skillIndex).setBase (base);
@@ -336,16 +333,12 @@ bool MWMechanics::NpcStats::hasBeenUsed (const std::string& id) const
 
 int MWMechanics::NpcStats::getBounty() const
 {
-    if (mIsWerewolf)
-        return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iWereWolfBounty")->getInt();
-    else
-        return mBounty;
+    return mBounty;
 }
 
 void MWMechanics::NpcStats::setBounty (int bounty)
 {
-    if (!mIsWerewolf)
-        mBounty = bounty;
+    mBounty = bounty;
 }
 
 int MWMechanics::NpcStats::getFactionReputation (const std::string& faction) const
@@ -528,7 +521,6 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
     std::copy (mUsedIds.begin(), mUsedIds.end(), std::back_inserter (state.mUsedIds));
 
     state.mTimeToStartDrowning = mTimeToStartDrowning;
-    state.mLastDrowningHit = mLastDrowningHit;
 }
 
 void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
@@ -579,5 +571,4 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
             mUsedIds.insert (*iter);
 
     mTimeToStartDrowning = state.mTimeToStartDrowning;
-    mLastDrowningHit = state.mLastDrowningHit;
 }

@@ -1,5 +1,7 @@
 #include "console.hpp"
 
+#include <MyGUI_EditBox.h>
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -10,6 +12,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
 
@@ -101,8 +104,20 @@ namespace MWGui
                 it->second->listIdentifier (mNames);
             }
 
+            // exterior cell names aren't technically identifiers, but since the COC function accepts them,
+            // we should list them too
+            for (MWWorld::Store<ESM::Cell>::iterator it = store.get<ESM::Cell>().extBegin();
+                 it != store.get<ESM::Cell>().extEnd(); ++it)
+            {
+                if (!it->mName.empty())
+                    mNames.push_back(it->mName);
+            }
+
             // sort
             std::sort (mNames.begin(), mNames.end());
+
+            // remove duplicates
+            mNames.erase( std::unique( mNames.begin(), mNames.end() ), mNames.end() );
         }
     }
 

@@ -223,7 +223,14 @@ void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdD
 }
 
 CSMWorld::CreatureColumns::CreatureColumns (const ActorColumns& actorColumns)
-: ActorColumns (actorColumns)
+: ActorColumns (actorColumns),
+  mType(NULL),
+  mSoul(NULL),
+  mScale(NULL),
+  mOriginal(NULL),
+  mCombat(NULL),
+  mMagic(NULL),
+  mStealth(NULL)
 {}
 
 CSMWorld::CreatureRefIdAdapter::CreatureRefIdAdapter (const CreatureColumns& columns)
@@ -431,7 +438,14 @@ void CSMWorld::MiscRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
         InventoryRefIdAdapter<ESM::Miscellaneous>::setData (column, data, index, value);
 }
 
-CSMWorld::NpcColumns::NpcColumns (const ActorColumns& actorColumns) : ActorColumns (actorColumns) {}
+CSMWorld::NpcColumns::NpcColumns (const ActorColumns& actorColumns)
+: ActorColumns (actorColumns),
+  mRace(NULL),
+  mClass(NULL),
+  mFaction(NULL),
+  mHair(NULL),
+  mHead(NULL)
+{}
 
 CSMWorld::NpcRefIdAdapter::NpcRefIdAdapter (const NpcColumns& columns)
 : ActorRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, columns), mColumns (columns)

@@ -133,12 +133,12 @@
 
             <Widget type="AutoSizedTextBox" skin="NormalText" name="PriceTextLabel">
                 <Property key="Caption" value="#{sBarterDialog7}"/>
-            </Widget>
-            <Widget type="AutoSizedTextBox" skin="SandText" name="PriceLabel">
-                <Property key="Caption" value="0"/>
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="TextToolTip"/>
                 <UserString key="Caption_Text" value="#{sEnchantmentHelp6}"/>
+            </Widget>
+            <Widget type="AutoSizedTextBox" skin="SandText" name="PriceLabel">
+                <Property key="Caption" value="0"/>
             </Widget>
 
 

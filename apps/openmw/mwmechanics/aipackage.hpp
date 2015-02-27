@@ -3,7 +3,6 @@
 
 #include "pathfinding.hpp"
 #include <components/esm/defs.hpp>
-#include "../mwbase/world.hpp"
 
 #include "obstacle.hpp"
 #include "aistate.hpp"
@@ -63,6 +62,9 @@ namespace MWMechanics
             virtual unsigned int getPriority() const {return 0;}
 
             virtual void writeState (ESM::AiSequence::AiSequence& sequence) const {}
+
+            /// Simulates the passing of time
+            virtual void fastForward(const MWWorld::Ptr& actor, AiState& state) {}
 
         protected:
             /// Causes the actor to attempt to walk to the specified location

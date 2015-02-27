@@ -17,7 +17,7 @@ namespace Terrain
 
         /// @param flags first 4*4 bits are LOD deltas on each edge, respectively (4 bits each)
         ///              next 4 bits are LOD level of the index buffer (LOD 0 = don't omit any vertices)
-        Ogre::HardwareIndexBufferSharedPtr getIndexBuffer (int flags);
+        Ogre::HardwareIndexBufferSharedPtr getIndexBuffer (unsigned int flags);
 
         Ogre::HardwareVertexBufferSharedPtr getUVBuffer ();
 

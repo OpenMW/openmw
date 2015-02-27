@@ -120,6 +120,10 @@ namespace MWRender
         }
 
         void setPrototype(const ESM::NPC &proto);
+
+    private:
+
+        Ogre::Radian mPitch;
     };
 
 }

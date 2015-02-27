@@ -8,6 +8,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
@@ -15,6 +16,7 @@
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/actiondoor.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actiontrap.hpp"
@@ -22,7 +24,7 @@
 
 #include "../mwgui/tooltips.hpp"
 
-#include "../mwrender/objects.hpp"
+#include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 namespace
@@ -47,19 +49,18 @@ namespace MWClass
         return ptr.get<ESM::Door>()->mBase->mId;
     }
 
-    void Door::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Door::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        const std::string model = getModel(ptr);
         if (!model.empty()) {
-            renderingInterface.getObjects().insertModel(ptr, model);
+            MWRender::Actors& actors = renderingInterface.getActors();
+            actors.insertActivator(ptr, model);
         }
     }
 
-    void Door::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Door::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr, model);
 
         // Resume the door's opening/closing animation if it wasn't finished
         if (ptr.getRefData().getCustomData())
@@ -70,6 +71,8 @@ namespace MWClass
                 MWBase::Environment::get().getWorld()->activateDoor(ptr, customData.mDoorState);
             }
         }
+
+        MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
     std::string Door::getModel(const MWWorld::Ptr &ptr) const

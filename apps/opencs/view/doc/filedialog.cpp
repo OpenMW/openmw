@@ -18,7 +18,7 @@
 #include "adjusterwidget.hpp"
 
 CSVDoc::FileDialog::FileDialog(QWidget *parent) :
-    QDialog(parent), mSelector (0), mFileWidget (0), mAdjusterWidget (0), mDialogBuilt(false)
+    QDialog(parent), mSelector (0), mFileWidget (0), mAdjusterWidget (0), mDialogBuilt(false), mAction(ContentAction_Undefined)
 {
     ui.setupUi (this);
     resize(400, 400);
@@ -125,13 +125,17 @@ void CSVDoc::FileDialog::buildOpenFileView()
 
     if(!mDialogBuilt)
     {
-        connect (mSelector, SIGNAL (signalAddonFileSelected (int)), this, SLOT (slotUpdateAcceptButton (int)));
-        connect (mSelector, SIGNAL (signalAddonFileUnselected (int)), this, SLOT (slotUpdateAcceptButton (int)));
+        connect (mSelector, SIGNAL (signalAddonDataChanged (const QModelIndex&, const QModelIndex&)), this, SLOT (slotAddonDataChanged(const QModelIndex&, const QModelIndex&)));
     }
         connect (ui.projectButtonBox, SIGNAL (accepted()), this, SLOT (slotOpenFile()));
 }
 
-void CSVDoc::FileDialog::slotUpdateAcceptButton (int)
+void CSVDoc::FileDialog::slotAddonDataChanged(const QModelIndex &topleft, const QModelIndex &bottomright)
+{
+    slotUpdateAcceptButton(0);
+}
+
+void CSVDoc::FileDialog::slotUpdateAcceptButton(int)
 {
     QString name = "";
 

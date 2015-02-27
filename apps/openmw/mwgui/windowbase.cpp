@@ -1,9 +1,11 @@
 #include "windowbase.hpp"
 
+#include <MyGUI_InputManager.h>
+
 #include "../mwbase/windowmanager.hpp"
-#include "container.hpp"
 #include "../mwbase/environment.hpp"
-#include "../mwgui/windowmanagerimp.hpp"
+
+#include "draganddrop.hpp"
 
 using namespace MWGui;
 

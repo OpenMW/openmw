@@ -99,14 +99,8 @@ void InventoryItemModel::update()
         if (mActor.getClass().hasInventoryStore(mActor))
         {
             MWWorld::InventoryStore& store = mActor.getClass().getInventoryStore(mActor);
-            for (int slot=0; slot<MWWorld::InventoryStore::Slots; ++slot)
-            {
-                MWWorld::ContainerStoreIterator equipped = store.getSlot(slot);
-                if (equipped == store.end())
-                    continue;
-                if (*equipped == newItem.mBase)
-                    newItem.mType = ItemStack::Type_Equipped;
-            }
+            if (store.isEquipped(newItem.mBase))
+                newItem.mType = ItemStack::Type_Equipped;
         }
 
         mItems.push_back(newItem);

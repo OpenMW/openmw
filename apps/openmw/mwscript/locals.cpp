@@ -10,6 +10,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/scriptmanager.hpp"
 
+#include <iostream>
+
 namespace MWScript
 {
     void Locals::configure (const ESM::Script& script)
@@ -124,27 +126,60 @@ namespace MWScript
             const Compiler::Locals& declarations =
                 MWBase::Environment::get().getScriptManager()->getLocals(script);
 
-            for (std::vector<std::pair<std::string, ESM::Variant> >::const_iterator iter
-                = locals.mVariables.begin(); iter!=locals.mVariables.end(); ++iter)
+            int index = 0, numshorts = 0, numlongs = 0;
+            for (unsigned int v=0; v<locals.mVariables.size();++v)
             {
-                char type =  declarations.getType (iter->first);
-                char index = declarations.getIndex (iter->first);
+                ESM::VarType type = locals.mVariables[v].second.getType();
+                if (type == ESM::VT_Short)
+                    ++numshorts;
+                else if (type == ESM::VT_Int)
+                    ++numlongs;
+            }
 
-                try
+            for (std::vector<std::pair<std::string, ESM::Variant> >::const_iterator iter
+                = locals.mVariables.begin(); iter!=locals.mVariables.end(); ++iter,++index)
+            {
+                if (iter->first.empty())
                 {
-                    switch (type)
+                    // no variable names available (this will happen for legacy, i.e. ESS-imported savegames only)
+                    try
                     {
-                        case 's': mShorts.at (index) = iter->second.getInteger(); break;
-                        case 'l': mLongs.at (index) = iter->second.getInteger(); break;
-                        case 'f': mFloats.at (index) = iter->second.getFloat(); break;
-
-                        // silently ignore locals that don't exist anymore
+                        if (index >= numshorts+numlongs)
+                            mFloats.at(index - (numshorts+numlongs)) = iter->second.getFloat();
+                        else if (index >= numshorts)
+                            mLongs.at(index - numshorts) = iter->second.getInteger();
+                        else
+                            mShorts.at(index) = iter->second.getInteger();
+                    }
+                    catch (std::exception& e)
+                    {
+                        std::cerr << "Failed to read local variable state for script '"
+                                  << script << "' (legacy format): " << e.what()
+                                  << "\nNum shorts: " << numshorts << " / " << mShorts.size()
+                                  << " Num longs: " << numlongs << " / " << mLongs.size() << std::endl;
                     }
                 }
-                catch (...)
+                else
                 {
-                    // ignore type changes
-                    /// \todo write to log
+                    char type =  declarations.getType (iter->first);
+                    char index = declarations.getIndex (iter->first);
+
+                    try
+                    {
+                        switch (type)
+                        {
+                            case 's': mShorts.at (index) = iter->second.getInteger(); break;
+                            case 'l': mLongs.at (index) = iter->second.getInteger(); break;
+                            case 'f': mFloats.at (index) = iter->second.getFloat(); break;
+
+                            // silently ignore locals that don't exist anymore
+                        }
+                    }
+                    catch (...)
+                    {
+                        // ignore type changes
+                        /// \todo write to log
+                    }
                 }
             }
         }

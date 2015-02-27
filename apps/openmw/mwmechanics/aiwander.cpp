@@ -9,6 +9,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -40,16 +41,9 @@ namespace MWMechanics
         
         AiWander::GreetingState mSaidGreeting;
         int mGreetingTimer;
-        
-        // Cached current cell location
-        int mCellX;
-        int mCellY;
-        // Cell location multiplied by ESM::Land::REAL_SIZE
-        float mXCell;
-        float mYCell;
-        
+
         const MWWorld::CellStore* mCell; // for detecting cell change
-        
+
         // AiWander states
         bool mChooseAction;
         bool mIdleNow;
@@ -66,10 +60,6 @@ namespace MWMechanics
             mReaction(0),
             mSaidGreeting(AiWander::Greet_None),
             mGreetingTimer(0),
-            mCellX(std::numeric_limits<int>::max()),
-            mCellY(std::numeric_limits<int>::max()),
-            mXCell(0),
-            mYCell(0),
             mCell(NULL),
             mChooseAction(true),
             mIdleNow(false),
@@ -81,6 +71,7 @@ namespace MWMechanics
     
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
+      , mStoredInitialActorPosition(false)
     {
         mIdle.resize(8, 0);
         init();
@@ -183,7 +174,6 @@ namespace MWMechanics
             currentCell = actor.getCell();
             mStoredAvailableNodes = false; // prob. not needed since mDistance = 0
         }
-        const ESM::Cell *cell = currentCell->getCell();
 
         cStats.setDrawState(DrawState_Nothing);
         cStats.setMovementFlag(CreatureStats::Flag_Run, false);
@@ -213,7 +203,7 @@ namespace MWMechanics
         // Are we there yet?
         bool& chooseAction = storage.mChooseAction;
         if(walking &&
-           storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
+           storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2], 64.f))
         {
             stopWalking(actor, storage);
             moveNow = false;
@@ -312,26 +302,34 @@ namespace MWMechanics
                 playIdle(actor, playedIdle);
                 chooseAction = false;
                 idleNow = true;
-
-                // Play idle voiced dialogue entries randomly
-                int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
-                if (hello > 0)
-                {
-                    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
-                    // Don't bother if the player is out of hearing range
-                    static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
-                            .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
-
-                    // Only say Idle voices when player is in LOS
-                    // A bit counterintuitive, likely vanilla did this to reduce the appearance of
-                    // voices going through walls?
-                    if (roll < fVoiceIdleOdds && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos)) < 1500*1500
-                            && MWBase::Environment::get().getWorld()->getLOS(player, actor))
-                        MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
-                }
             }
+        }
+
+        // Play idle voiced dialogue entries randomly
+        int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
+        if (hello > 0 && !MWBase::Environment::get().getWorld()->isSwimming(actor)
+                && MWBase::Environment::get().getSoundManager()->sayDone(actor))
+        {
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+            static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
+                    .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
+
+            float roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 10000;
+
+            // In vanilla MW the chance was FPS dependent, and did not allow proper changing of fVoiceIdleOdds
+            // due to the roll being an integer.
+            // Our implementation does not have these issues, so needs to be recalibrated. We chose to
+            // use the chance MW would have when run at 60 FPS with the default value of the GMST for calibration.
+            float x = fVoiceIdleOdds * 0.6 * (MWBase::Environment::get().getFrameDuration() / 0.1);
+
+            // Only say Idle voices when player is in LOS
+            // A bit counterintuitive, likely vanilla did this to reduce the appearance of
+            // voices going through walls?
+            if (roll < x && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos))
+                    < 3000*3000 // maybe should be fAudioVoiceDefaultMaxDistance*fAudioMaxDistanceMult instead
+                    && MWBase::Environment::get().getWorld()->getLOS(player, actor))
+                MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
         }
 
         float& lastReaction = storage.mReaction;
@@ -371,81 +369,10 @@ namespace MWMechanics
             }
         }
 
-
-        
-        int& cachedCellX = storage.mCellX;
-        int& cachedCellY = storage.mCellY;
-        float& cachedCellXposition = storage.mXCell;
-        float& cachedCellYposition = storage.mYCell;
         // Initialization to discover & store allowed node points for this actor.
         if(!mStoredAvailableNodes)
         {
-            // infrequently used, therefore no benefit in caching it as a member
-            const ESM::Pathgrid *
-                pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell);
-
-            // cache the current cell location
-            cachedCellX = cell->mData.mX;
-            cachedCellY = cell->mData.mY;
-
-            // If there is no path this actor doesn't go anywhere. See:
-            // https://forum.openmw.org/viewtopic.php?t=1556
-            // http://www.fliggerty.com/phpBB3/viewtopic.php?f=30&t=5833
-            if(!pathgrid || pathgrid->mPoints.empty())
-                mDistance = 0;
-
-            // A distance value passed into the constructor indicates how far the
-            // actor can  wander from the spawn position.  AiWander assumes that
-            // pathgrid points are available, and uses them to randomly select wander
-            // destinations within the allowed set of pathgrid points (nodes).
-            if(mDistance)
-            {
-                cachedCellXposition = 0;
-                cachedCellYposition = 0;
-                if(cell->isExterior())
-                {
-                    cachedCellXposition = cachedCellX * ESM::Land::REAL_SIZE;
-                    cachedCellYposition = cachedCellY * ESM::Land::REAL_SIZE;
-                }
-
-                // FIXME: There might be a bug here.  The allowed node points are
-                // based on the actor's current position rather than the actor's
-                // spawn point.  As a result the allowed nodes for wander can change
-                // between saves, for example.
-                //
-                // convert npcPos to local (i.e. cell) co-ordinates
-                Ogre::Vector3 npcPos(pos.pos);
-                npcPos[0] = npcPos[0] - cachedCellXposition;
-                npcPos[1] = npcPos[1] - cachedCellYposition;
-
-                // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
-                // NOTE: mPoints and mAllowedNodes are in local co-ordinates
-                for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
-                {
-                    Ogre::Vector3 nodePos(pathgrid->mPoints[counter].mX, pathgrid->mPoints[counter].mY,
-                        pathgrid->mPoints[counter].mZ);
-                    if(npcPos.squaredDistance(nodePos) <= mDistance * mDistance)
-                        mAllowedNodes.push_back(pathgrid->mPoints[counter]);
-                }
-                if(!mAllowedNodes.empty())
-                {
-                    Ogre::Vector3 firstNodePos(mAllowedNodes[0].mX, mAllowedNodes[0].mY, mAllowedNodes[0].mZ);
-                    float closestNode = npcPos.squaredDistance(firstNodePos);
-                    unsigned int index = 0;
-                    for(unsigned int counterThree = 1; counterThree < mAllowedNodes.size(); counterThree++)
-                    {
-                        Ogre::Vector3 nodePos(mAllowedNodes[counterThree].mX, mAllowedNodes[counterThree].mY,
-                            mAllowedNodes[counterThree].mZ);
-                        float tempDist = npcPos.squaredDistance(nodePos);
-                        if(tempDist < closestNode)
-                            index = counterThree;
-                    }
-                    mCurrentNode = mAllowedNodes[index];
-                    mAllowedNodes.erase(mAllowedNodes.begin() + index);
-
-                    mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
-                }
-            }
+            getAllowedNodes(actor, currentCell->getCell());
         }
 
         // Actor becomes stationary - see above URL's for previous research
@@ -559,10 +486,8 @@ namespace MWMechanics
             
             if (greetingState == MWMechanics::AiWander::Greet_Done)
             {
-                static float fGreetDistanceReset = MWBase::Environment::get().getWorld()->getStore()
-                        .get<ESM::GameSetting>().find("fGreetDistanceReset")->getFloat();
-
-                if (playerDistSqr >= fGreetDistanceReset*fGreetDistanceReset)
+                float resetDist = 2*helloDistance;
+                if (playerDistSqr >= resetDist*resetDist)
                     greetingState = Greet_None;
             }
         }
@@ -581,9 +506,14 @@ namespace MWMechanics
 
                 // convert dest to use world co-ordinates
                 ESM::Pathgrid::Point dest;
-                dest.mX = destNodePos[0] + cachedCellXposition;
-                dest.mY = destNodePos[1] + cachedCellYposition;
+                dest.mX = destNodePos[0];
+                dest.mY = destNodePos[1];
                 dest.mZ = destNodePos[2];
+                if (currentCell->getCell()->isExterior())
+                {
+                    dest.mX += currentCell->getCell()->mData.mX * ESM::Land::REAL_SIZE;
+                    dest.mY += currentCell->getCell()->mData.mY * ESM::Land::REAL_SIZE;
+                }
 
                 // actor position is already in world co-ordinates
                 ESM::Pathgrid::Point start;
@@ -732,6 +662,103 @@ namespace MWMechanics
         }
     }
 
+    void AiWander::fastForward(const MWWorld::Ptr& actor, AiState &state)
+    {
+        if (mDistance == 0)
+            return;
+
+        if (!mStoredAvailableNodes)
+            getAllowedNodes(actor, actor.getCell()->getCell());
+
+        if (mAllowedNodes.empty())
+            return;
+
+        state.moveIn(new AiWanderStorage());
+
+        int index = std::rand() / (static_cast<double> (RAND_MAX) + 1) * mAllowedNodes.size();
+        ESM::Pathgrid::Point dest = mAllowedNodes[index];
+
+        // apply a slight offset to prevent overcrowding
+        dest.mX += Ogre::Math::RangeRandom(-64, 64);
+        dest.mY += Ogre::Math::RangeRandom(-64, 64);
+
+        if (actor.getCell()->isExterior())
+        {
+            dest.mX += actor.getCell()->getCell()->mData.mX * ESM::Land::REAL_SIZE;
+            dest.mY += actor.getCell()->getCell()->mData.mY * ESM::Land::REAL_SIZE;
+        }
+
+        MWBase::Environment::get().getWorld()->moveObject(actor, dest.mX, dest.mY, dest.mZ);
+        actor.getClass().adjustPosition(actor, false);
+    }
+
+    void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell)
+    {
+        if (!mStoredInitialActorPosition)
+        {
+            mInitialActorPosition = Ogre::Vector3(actor.getRefData().getPosition().pos);
+            mStoredInitialActorPosition = true;
+        }
+
+        // infrequently used, therefore no benefit in caching it as a member
+        const ESM::Pathgrid *
+            pathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell);
+
+        // If there is no path this actor doesn't go anywhere. See:
+        // https://forum.openmw.org/viewtopic.php?t=1556
+        // http://www.fliggerty.com/phpBB3/viewtopic.php?f=30&t=5833
+        if(!pathgrid || pathgrid->mPoints.empty())
+            mDistance = 0;
+
+        // A distance value passed into the constructor indicates how far the
+        // actor can  wander from the spawn position.  AiWander assumes that
+        // pathgrid points are available, and uses them to randomly select wander
+        // destinations within the allowed set of pathgrid points (nodes).
+        if(mDistance)
+        {
+            float cellXOffset = 0;
+            float cellYOffset = 0;
+            if(cell->isExterior())
+            {
+                cellXOffset = cell->mData.mX * ESM::Land::REAL_SIZE;
+                cellYOffset = cell->mData.mY * ESM::Land::REAL_SIZE;
+            }
+
+            // convert npcPos to local (i.e. cell) co-ordinates
+            Ogre::Vector3 npcPos(mInitialActorPosition);
+            npcPos[0] = npcPos[0] - cellXOffset;
+            npcPos[1] = npcPos[1] - cellYOffset;
+
+            // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
+            // NOTE: mPoints and mAllowedNodes are in local co-ordinates
+            for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
+            {
+                Ogre::Vector3 nodePos(pathgrid->mPoints[counter].mX, pathgrid->mPoints[counter].mY,
+                    pathgrid->mPoints[counter].mZ);
+                if(npcPos.squaredDistance(nodePos) <= mDistance * mDistance)
+                    mAllowedNodes.push_back(pathgrid->mPoints[counter]);
+            }
+            if(!mAllowedNodes.empty())
+            {
+                Ogre::Vector3 firstNodePos(mAllowedNodes[0].mX, mAllowedNodes[0].mY, mAllowedNodes[0].mZ);
+                float closestNode = npcPos.squaredDistance(firstNodePos);
+                unsigned int index = 0;
+                for(unsigned int counterThree = 1; counterThree < mAllowedNodes.size(); counterThree++)
+                {
+                    Ogre::Vector3 nodePos(mAllowedNodes[counterThree].mX, mAllowedNodes[counterThree].mY,
+                        mAllowedNodes[counterThree].mZ);
+                    float tempDist = npcPos.squaredDistance(nodePos);
+                    if(tempDist < closestNode)
+                        index = counterThree;
+                }
+                mCurrentNode = mAllowedNodes[index];
+                mAllowedNodes.erase(mAllowedNodes.begin() + index);
+
+                mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
+            }
+        }
+    }
+
     void AiWander::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
         std::auto_ptr<ESM::AiSequence::AiWander> wander(new ESM::AiSequence::AiWander());
@@ -743,6 +770,9 @@ namespace MWMechanics
         for (int i=0; i<8; ++i)
             wander->mData.mIdle[i] = mIdle[i];
         wander->mData.mShouldRepeat = mRepeat;
+        wander->mStoredInitialActorPosition = mStoredInitialActorPosition;
+        if (mStoredInitialActorPosition)
+            wander->mInitialActorPosition = mInitialActorPosition;
 
         ESM::AiSequence::AiPackageContainer package;
         package.mType = ESM::AiSequence::Ai_Wander;
@@ -756,7 +786,10 @@ namespace MWMechanics
         , mStartTime(MWWorld::TimeStamp(wander->mStartTime))
         , mTimeOfDay(wander->mData.mTimeOfDay)
         , mRepeat(wander->mData.mShouldRepeat)
+        , mStoredInitialActorPosition(wander->mStoredInitialActorPosition)
     {
+        if (mStoredInitialActorPosition)
+            mInitialActorPosition = wander->mInitialActorPosition;
         for (int i=0; i<8; ++i)
             mIdle.push_back(wander->mData.mIdle[i]);
 

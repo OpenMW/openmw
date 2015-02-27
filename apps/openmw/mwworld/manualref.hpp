@@ -24,12 +24,11 @@ namespace MWWorld
                 const T* base = list.find(name);
 
                 ESM::CellRef cellRef;
-                cellRef.mRefNum.mIndex = 0;
-                cellRef.mRefNum.mContentFile = -1;
+                cellRef.mRefNum.unset();
                 cellRef.mRefID = name;
                 cellRef.mScale = 1;
                 cellRef.mFactionRank = 0;
-                cellRef.mCharge = -1;
+                cellRef.mChargeInt = -1;
                 cellRef.mGoldValue = 1;
                 cellRef.mEnchantmentCharge = -1;
                 cellRef.mTeleport = false;

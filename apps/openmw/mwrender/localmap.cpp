@@ -24,8 +24,10 @@
 using namespace MWRender;
 using namespace Ogre;
 
-LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering) :
-    mInterior(false)
+LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering)
+    : mInterior(false)
+    , mAngle(0.f)
+    , mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
 {
     mRendering = rend;
     mRenderingManager = rendering;
@@ -49,7 +51,7 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManag
                     "localmap/rtt",
                     ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                     TEX_TYPE_2D,
-                    sMapResolution, sMapResolution,
+                    mMapResolution, mMapResolution,
                     0,
                     PF_R8G8B8,
                     TU_RENDERTARGET);
@@ -198,7 +200,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
 
     // Get the cell's NorthMarker rotation. This is used to rotate the entire map.
     const Vector2& north = MWBase::Environment::get().getWorld()->getNorthVector(cell);
-    Radian angle = Ogre::Math::ATan2 (north.x, north.y) + Ogre::Degree(2);
+    Radian angle = Ogre::Math::ATan2 (north.x, north.y);
     mAngle = angle.valueRadians();
 
     // Rotate the cell and merge the rotated corners to the bounding box
@@ -412,7 +414,7 @@ void LocalMap::render(const float x, const float y,
                         texture,
                         ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                         TEX_TYPE_2D,
-                        sMapResolution, sMapResolution,
+                        mMapResolution, mMapResolution,
                         0,
                         PF_R8G8B8);
         tex->getBuffer()->blit(mRenderTexture->getBuffer());
@@ -492,7 +494,7 @@ void LocalMap::loadResource(Ogre::Resource* resource)
 
     std::vector<uint32>& buffer = mBuffers[resourceName];
 
-    Ogre::Texture* tex = dynamic_cast<Ogre::Texture*>(resource);
+    Ogre::Texture* tex = static_cast<Ogre::Texture*>(resource);
     tex->createInternalResources();
     memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
     tex->getBuffer()->unlock();

@@ -100,9 +100,13 @@ private:
     float mAlpha;
     bool mSoundsDisabled;
 
+    Ogre::Radian mHeadYaw;
+    Ogre::Radian mHeadPitch;
+
     void updateNpcBase();
 
     NifOgre::ObjectScenePtr insertBoundedPart(const std::string &model, int group, const std::string &bonename,
+                                              const std::string &bonefilter,
                                           bool enchantedGlow, Ogre::Vector3* glowColor=NULL);
 
     void removeIndividualPart(ESM::PartReferenceType type);
@@ -142,8 +146,13 @@ public:
     /// to indicate the facing orientation of the character.
     virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
 
+    virtual void setHeadPitch(Ogre::Radian pitch);
+    virtual void setHeadYaw(Ogre::Radian yaw);
+    virtual Ogre::Radian getHeadPitch() const;
+    virtual Ogre::Radian getHeadYaw() const;
+
     virtual void showWeapons(bool showWeapon);
-    virtual void showCarriedLeft(bool showa);
+    virtual void showCarriedLeft(bool show);
 
     virtual void attachArrow();
     virtual void releaseArrow();
@@ -167,6 +176,8 @@ public:
 
     /// Make the NPC only partially visible
     virtual void setAlpha(float alpha);
+
+    virtual void setVampire(bool vampire);
 
     /// Prepare this animation for being rendered with \a camera (rotates billboard nodes)
     virtual void preRender (Ogre::Camera* camera);

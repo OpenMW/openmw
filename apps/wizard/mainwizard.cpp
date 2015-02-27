@@ -182,7 +182,7 @@ void Wizard::MainWizard::setupGameSettings()
 void Wizard::MainWizard::setupLauncherSettings()
 {
     QString path(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
-    path.append(QLatin1String("launcher.cfg"));
+    path.append(QLatin1String(Config::LauncherSettings::sLauncherConfigFileName));
 
     QString message(tr("<html><head/><body><p><b>Could not open %1 for reading</b></p> \
                     <p>Please make sure you have the right permissions \
@@ -427,7 +427,7 @@ void Wizard::MainWizard::writeSettings()
     file.close();
 
     // Launcher settings
-    file.setFileName(userPath + QLatin1String("launcher.cfg"));
+    file.setFileName(userPath + QLatin1String(Config::LauncherSettings::sLauncherConfigFileName));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created

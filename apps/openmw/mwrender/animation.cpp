@@ -86,6 +86,12 @@ Animation::~Animation()
     mAnimSources.clear();
 }
 
+std::string Animation::getObjectRootName() const
+{
+    if (mSkelBase)
+        return mSkelBase->getMesh()->getName();
+    return std::string();
+}
 
 void Animation::setObjectRoot(const std::string &model, bool baseonly)
 {
@@ -97,22 +103,8 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
     if(model.empty())
         return;
 
-    std::string mdlname = Misc::StringUtils::lowerCase(model);
-    std::string::size_type p = mdlname.rfind('\\');
-    if(p == std::string::npos)
-        p = mdlname.rfind('/');
-    if(p != std::string::npos)
-        mdlname.insert(mdlname.begin()+p+1, 'x');
-    else
-        mdlname.insert(mdlname.begin(), 'x');
-    if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(mdlname))
-    {
-        mdlname = model;
-        Misc::StringUtils::toLower(mdlname);
-    }
-
-    mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, mdlname) :
-                               NifOgre::Loader::createObjectBase(mInsert, mdlname));
+    mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, model) :
+                               NifOgre::Loader::createObjectBase(mInsert, model));
 
     if(mObjectRoot->mSkelBase)
     {
@@ -169,6 +161,9 @@ struct AddGlow
 
         instance->setProperty("env_map", sh::makeProperty(new sh::BooleanValue(true)));
         instance->setProperty("env_map_color", sh::makeProperty(new sh::Vector3(mColor->x, mColor->y, mColor->z)));
+        // Workaround for crash in Ogre (https://bitbucket.org/sinbad/ogre/pull-request/447/fix-shadows-crash-for-textureunitstates/diff)
+        // Remove when the fix is merged
+        instance->getMaterial()->setShadowCasterMaterial("openmw_shadowcaster_noalpha");
     }
 };
 
@@ -252,14 +247,8 @@ void Animation::addAnimSource(const std::string &model)
     if(!mSkelBase)
         return;
 
-    std::string kfname = Misc::StringUtils::lowerCase(model);
-    std::string::size_type p = kfname.rfind('\\');
-    if(p == std::string::npos)
-        p = kfname.rfind('/');
-    if(p != std::string::npos)
-        kfname.insert(kfname.begin()+p+1, 'x');
-    else
-        kfname.insert(kfname.begin(), 'x');
+    std::string kfname = model;
+    Misc::StringUtils::toLower(kfname);
 
     if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
         kfname.replace(kfname.size()-4, 4, ".kf");
@@ -336,7 +325,7 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScene
 {
     const MWWorld::Fallback *fallback = MWBase::Environment::get().getWorld()->getFallback();
 
-    const int clr = light->mData.mColor;
+    const unsigned int clr = light->mData.mColor;
     Ogre::ColourValue color(((clr >> 0) & 0xFF) / 255.0f,
                             ((clr >> 8) & 0xFF) / 255.0f,
                             ((clr >> 16) & 0xFF) / 255.0f);
@@ -414,13 +403,23 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScene
 }
 
 
-Ogre::Node *Animation::getNode(const std::string &name)
+Ogre::Node* Animation::getNode(const std::string &name)
 {
     if(mSkelBase)
     {
         Ogre::SkeletonInstance *skel = mSkelBase->getSkeleton();
         if(skel->hasBone(name))
             return skel->getBone(name);
+    }
+    return NULL;
+}
+
+Ogre::Node* Animation::getNode(int handle)
+{
+    if (mSkelBase)
+    {
+        Ogre::SkeletonInstance *skel = mSkelBase->getSkeleton();
+        return skel->getBone(handle);
     }
     return NULL;
 }
@@ -613,7 +612,7 @@ void Animation::updatePosition(float oldtime, float newtime, Ogre::Vector3 &posi
     mAccumRoot->setPosition(-off);
 }
 
-bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint)
+bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, bool loopfallback)
 {
     // Look for text keys in reverse. This normally wouldn't matter, but for some reason undeadwolf_2.nif has two
     // separate walkforward keys, and the last one is supposed to be used.
@@ -654,8 +653,16 @@ bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const s
         return false;
 
     state.mStartTime = startkey->first;
-    state.mLoopStartTime = startkey->first;
-    state.mLoopStopTime = stopkey->first;
+    if (loopfallback)
+    {
+        state.mLoopStartTime = startkey->first;
+        state.mLoopStopTime = stopkey->first;
+    }
+    else
+    {
+        state.mLoopStartTime = startkey->first;
+        state.mLoopStopTime = std::numeric_limits<float>::max();
+    }
     state.mStopTime = stopkey->first;
 
     state.mTime = state.mStartTime + ((state.mStopTime - state.mStartTime) * startpoint);
@@ -850,7 +857,7 @@ void Animation::stopLooping(const std::string& groupname)
     }
 }
 
-void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult, const std::string &start, const std::string &stop, float startpoint, size_t loops)
+void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult, const std::string &start, const std::string &stop, float startpoint, size_t loops, bool loopfallback)
 {
     if(!mSkelBase || mAnimSources.empty())
         return;
@@ -886,7 +893,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
     for(;iter != mAnimSources.rend();++iter)
     {
         const NifOgre::TextKeyMap &textkeys = (*iter)->mTextKeys;
-        if(reset(state, textkeys, groupname, start, stop, startpoint))
+        if(reset(state, textkeys, groupname, start, stop, startpoint, loopfallback))
         {
             state.mSource = *iter;
             state.mSpeedMult = speedmult;
@@ -980,7 +987,11 @@ void Animation::resetActiveGroups()
 
     AnimStateMap::const_iterator state = mStates.find(mAnimationTimePtr[0]->getAnimName());
     if(state == mStates.end())
+    {
+        if (mAccumRoot && mNonAccumRoot)
+            mAccumRoot->setPosition(-mNonAccumRoot->getPosition()*mAccumulate);
         return;
+    }
 
     const Ogre::SharedPtr<AnimSource> &animsrc = state->second.mSource;
     const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = animsrc->mControllers[0];
@@ -994,6 +1005,9 @@ void Animation::resetActiveGroups()
             break;
         }
     }
+
+    if (mAccumRoot && mNonAccumCtrl)
+        mAccumRoot->setPosition(-mNonAccumCtrl->getTranslation(state->second.mTime)*mAccumulate);
 }
 
 
@@ -1131,9 +1145,6 @@ Ogre::Vector3 Animation::runAnimation(float duration)
 
         if(!state.mPlaying && state.mAutoDisable)
         {
-            if(mNonAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
-                mAccumRoot->setPosition(0.f,0.f,0.f);
-
             mStates.erase(stateiter++);
 
             resetActiveGroups();
@@ -1259,7 +1270,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
     if (bonename.empty())
         params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
     else
-        params.mObjects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
+        params.mObjects = NifOgre::Loader::createObjects(mSkelBase, bonename, "", mInsert, model);
 
     // TODO: turn off shadow casting
     setRenderProperties(params.mObjects, RV_Misc,
@@ -1493,23 +1504,6 @@ ObjectAnimation::ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &mod
     {
         // No model given. Create an object root anyway, so that lights can be added to it if needed.
         mObjectRoot = NifOgre::ObjectScenePtr (new NifOgre::ObjectScene(mInsert->getCreator()));
-    }
-}
-
-void ObjectAnimation::addLight(const ESM::Light *light)
-{
-    addExtraLight(mInsert->getCreator(), mObjectRoot, light);
-}
-
-void ObjectAnimation::removeParticles()
-{
-    for (unsigned int i=0; i<mObjectRoot->mParticles.size(); ++i)
-    {
-        // Don't destroyParticleSystem, the ParticleSystemController is still holding a pointer to it.
-        // Don't setVisible, this could conflict with a VisController.
-        // The following will remove all spawned particles, then set the speed factor to zero so that no new ones will be spawned.
-        mObjectRoot->mParticles[i]->setSpeedFactor(0.f);
-        mObjectRoot->mParticles[i]->clear();
     }
 }
 

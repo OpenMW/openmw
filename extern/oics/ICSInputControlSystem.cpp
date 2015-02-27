@@ -36,6 +36,9 @@ namespace ICS
 		, mDetectingBindingControl(NULL)
 		, mLog(log)
 		, mXmouseAxisBinded(false), mYmouseAxisBinded(false)
+        , mClientHeight(1)
+        , mClientWidth(1)
+        , mDetectingBindingDirection(Control::STOP)
 	{
 		ICS_LOG(" - Creating InputControlSystem - ");
 

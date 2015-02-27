@@ -12,6 +12,7 @@ namespace ESM
     class ESMReader;
     class ESMWriter;
 
+    // NOTE: spell ids must be lower case
     struct SpellState
     {
         struct CorprusStats

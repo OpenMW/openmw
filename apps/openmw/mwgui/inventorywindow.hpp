@@ -1,14 +1,23 @@
 #ifndef MGUI_Inventory_H
 #define MGUI_Inventory_H
 
-#include "../mwrender/characterpreview.hpp"
-
 #include "windowpinnablebase.hpp"
-#include "widgets.hpp"
 #include "mode.hpp"
+
+#include "../mwworld/ptr.hpp"
+
+namespace MWRender
+{
+    class InventoryPreview;
+}
 
 namespace MWGui
 {
+    namespace Widgets
+    {
+        class MWDynamicStat;
+    }
+
     class ItemView;
     class SortFilterItemModel;
     class TradeItemModel;
@@ -33,9 +42,7 @@ namespace MWGui
 
             MWWorld::Ptr getAvatarSelectedItem(int x, int y);
 
-            void rebuildAvatar() {
-                mPreview->rebuild();
-            }
+            void rebuildAvatar();
 
             SortFilterItemModel* getSortFilterModel();
             TradeItemModel* getTradeModel();
@@ -48,6 +55,9 @@ namespace MWGui
             void useItem(const MWWorld::Ptr& ptr);
 
             void setGuiMode(GuiMode mode);
+
+            /// Cycle to previous/next weapon
+            void cycle(bool next);
 
         private:
             DragAndDrop* mDragAndDrop;

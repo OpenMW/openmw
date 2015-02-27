@@ -130,6 +130,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-all", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "compile all scripts (excluding dialogue scripts) at startup")
 
+        ("script-all-dialogue", bpo::value<bool>()->implicit_value(true)
+            ->default_value(false), "compile all dialogue scripts at startup")
+
         ("script-console", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "enable console-only script functionality")
 
@@ -148,6 +151,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
         ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
             ->default_value(true), "enable script blacklisting")
+
+        ("load-savegame", bpo::value<std::string>()->default_value(""),
+            "load a save game file on game startup")
 
         ("skip-menu", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "skip main menu on game startup")
@@ -264,12 +270,14 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     // scripts
     engine.setCompileAll(variables["script-all"].as<bool>());
+    engine.setCompileAllDialogue(variables["script-all-dialogue"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
     engine.setStartupScript (variables["script-run"].as<std::string>());
     engine.setWarningsMode (variables["script-warn"].as<int>());
     engine.setScriptBlacklist (variables["script-blacklist"].as<StringsVector>());
     engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
+    engine.setSaveGameFile (variables["load-savegame"].as<std::string>());
 
     // other settings
     engine.setSoundUsage(!variables["no-sound"].as<bool>());

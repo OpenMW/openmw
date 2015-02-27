@@ -37,7 +37,11 @@ namespace MWWorld
         getFollowers(actor, followers);
         for(std::set<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
         {
-            teleport(*it);
+            MWWorld::Ptr follower = *it;
+            if (Ogre::Vector3(follower.getRefData().getPosition().pos).squaredDistance(
+                        Ogre::Vector3( actor.getRefData().getPosition().pos))
+                    <= 800*800)
+                teleport(*it);
         }
 
         teleport(actor);

@@ -157,7 +157,6 @@ namespace MWRender
                             data[texelY * mWidth * 3 + texelX * 3+2] = b;
                         }
                     }
-                    loadingListener->increaseProgress(1);
                 }
             }
 
@@ -209,8 +208,10 @@ namespace MWRender
 
         if (!localMapTexture.isNull())
         {
+            int mapWidth = localMapTexture->getWidth();
+            int mapHeight = localMapTexture->getHeight();
             mOverlayTexture->load();
-            mOverlayTexture->getBuffer()->blit(localMapTexture->getBuffer(), Ogre::Image::Box(0,0,512,512),
+            mOverlayTexture->getBuffer()->blit(localMapTexture->getBuffer(), Ogre::Image::Box(0,0,mapWidth,mapHeight),
                          Ogre::Image::Box(originX,originY,originX+mCellSize,originY+mCellSize));
 
             Ogre::Image backup;
@@ -218,7 +219,7 @@ namespace MWRender
             data.resize(mCellSize*mCellSize*4, 0);
             backup.loadDynamicImage(&data[0], mCellSize, mCellSize, Ogre::PF_A8B8G8R8);
 
-            localMapTexture->getBuffer()->blitToMemory(Ogre::Image::Box(0,0,512,512), backup.getPixelBox());
+            localMapTexture->getBuffer()->blitToMemory(Ogre::Image::Box(0,0,mapWidth,mapHeight), backup.getPixelBox());
 
             for (int x=0; x<mCellSize; ++x)
                 for (int y=0; y<mCellSize; ++y)
@@ -244,7 +245,7 @@ namespace MWRender
 
     void GlobalMap::loadResource(Ogre::Resource *resource)
     {
-        Ogre::Texture* tex = dynamic_cast<Ogre::Texture*>(resource);
+        Ogre::Texture* tex = static_cast<Ogre::Texture*>(resource);
         Ogre::ConstImagePtrList list;
         list.push_back(&mOverlayImage);
         tex->_loadImages(list);

@@ -112,6 +112,7 @@ namespace Compiler
                 scanner.scan (mScriptParser);
 
                 mState = EndNameState;
+                scanner.allowNameStartingwithDigit();
                 return true;
             }
 

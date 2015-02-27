@@ -49,14 +49,19 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
     else
     {
         NifOgre::ObjectScenePtr weapon = getWeapon();
+        if (!weapon.get())
+            return;
 
         MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
         if (ammo == inv.end())
             return;
         std::string model = ammo->getClass().getModel(*ammo);
 
-        assert(weapon->mSkelBase && "Need a skeleton to attach the arrow to");
-        mAmmunition = NifOgre::Loader::createObjects(weapon->mSkelBase, "ArrowBone", weapon->mSkelBase->getParentSceneNode(), model);
+        if (!weapon->mSkelBase)
+            throw std::runtime_error("Need a skeleton to attach the arrow to");
+
+        const std::string bonename = "ArrowBone";
+        mAmmunition = NifOgre::Loader::createObjects(weapon->mSkelBase, bonename, bonename, weapon->mSkelBase->getParentSceneNode(), model);
         configureAddedObject(mAmmunition, *ammo, MWWorld::InventoryStore::Slot_Ammunition);
     }
 }
@@ -121,6 +126,9 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
         // With bows and crossbows only the used arrow/bolt gets detached
         MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
         if (ammo == inv.end())
+            return;
+
+        if (!mAmmunition.get())
             return;
 
         Ogre::Vector3 launchPos(0,0,0);

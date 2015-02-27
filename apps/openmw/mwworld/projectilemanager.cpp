@@ -206,7 +206,7 @@ namespace MWWorld
             if (hit)
             {
                 MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->mActorId);
-                MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, it->mSpellId, it->mSourceName);
+                MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, ESM::RT_Target, it->mSpellId, it->mSourceName);
 
                 MWBase::Environment::get().getSoundManager()->stopSound(it->mSound);
 
@@ -318,8 +318,6 @@ namespace MWWorld
             state.save(writer);
 
             writer.endRecord(ESM::REC_PROJ);
-
-            progress.increaseProgress();
         }
 
         for (std::vector<MagicBoltState>::const_iterator it = mMagicBolts.begin(); it != mMagicBolts.end(); ++it)
@@ -342,12 +340,10 @@ namespace MWWorld
             state.save(writer);
 
             writer.endRecord(ESM::REC_MPRJ);
-
-            progress.increaseProgress();
         }
     }
 
-    bool ProjectileManager::readRecord(ESM::ESMReader &reader, int32_t type)
+    bool ProjectileManager::readRecord(ESM::ESMReader &reader, uint32_t type)
     {
         if (type == ESM::REC_PROJ)
         {

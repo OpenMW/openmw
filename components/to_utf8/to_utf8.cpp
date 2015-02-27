@@ -319,7 +319,9 @@ void Utf8Encoder::copyFromArray2(const char*& chp, char* &out)
         }
     }
 
+    std::ios::fmtflags f(std::cout.flags());
     std::cout << "Could not find glyph " << std::hex << (int)ch << " " << (int)ch2 << " " << (int)ch3 << std::endl;
+    std::cout.flags(f);
 
     *(out++) = ch; // Could not find glyph, just put whatever
 }

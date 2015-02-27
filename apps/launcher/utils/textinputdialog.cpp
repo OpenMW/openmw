@@ -59,13 +59,13 @@ void Launcher::TextInputDialog::setOkButtonEnabled(bool enabled)
     QPushButton *okButton = mButtonBox->button(QDialogButtonBox::Ok);
     okButton->setEnabled(enabled);
 
-    QPalette *palette = new QPalette();
-    palette->setColor(QPalette::Text, Qt::red);
+    QPalette palette;
+    palette.setColor(QPalette::Text, Qt::red);
 
     if (enabled) {
         mLineEdit->setPalette(QApplication::palette());
     } else {
         // Existing profile name, make the text red
-        mLineEdit->setPalette(*palette);
+        mLineEdit->setPalette(palette);
     }
 }

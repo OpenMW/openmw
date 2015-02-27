@@ -22,32 +22,30 @@ namespace MWMechanics
 
     class NpcStats : public CreatureStats
     {
+            int mDisposition;
+            SkillValue mSkill[ESM::Skill::Length];
+            SkillValue mWerewolfSkill[ESM::Skill::Length];
+            int mReputation;
+            int mCrimeId;
+
+            int mProfit;
+
+            // ----- used by the player only, maybe should be moved at some point -------
+            int mBounty;
+            int mWerewolfKills;
             /// NPCs other than the player can only have one faction. But for the sake of consistency
             /// we use the same data structure for the PC and the NPCs.
             /// \note the faction key must be in lowercase
             std::map<std::string, int> mFactionRank;
-
-            int mDisposition;
-            SkillValue mSkill[ESM::Skill::Length];
-            SkillValue mWerewolfSkill[ESM::Skill::Length];
-            int mBounty;
             std::set<std::string> mExpelled;
             std::map<std::string, int> mFactionReputation;
-            int mReputation;
-            int mCrimeId;
-            int mWerewolfKills;
-            int mProfit;
-
             int mLevelProgress; // 0-10
-
             std::vector<int> mSkillIncreases; // number of skill increases for each attribute
-
             std::set<std::string> mUsedIds;
+            // ---------------------------------------------------------------------------
 
             /// Countdown to getting damage while underwater
             float mTimeToStartDrowning;
-            /// time since last hit from drowning
-            float mLastDrowningHit;
 
         public:
 
@@ -110,8 +108,10 @@ namespace MWMechanics
             ///  Called at character creation.
 
             void flagAsUsed (const std::string& id);
+            ///< @note Id must be lower-case
 
             bool hasBeenUsed (const std::string& id) const;
+            ///< @note Id must be lower-case
 
             int getBounty() const;
 

@@ -175,17 +175,8 @@ namespace MWGui
                 // don't show equipped items
                 if(mMerchant.getClass().hasInventoryStore(mMerchant))
                 {
-                    bool isEquipped = false;
                     MWWorld::InventoryStore& store = mMerchant.getClass().getInventoryStore(mMerchant);
-                    for (int slot=0; slot<MWWorld::InventoryStore::Slots; ++slot)
-                    {
-                        MWWorld::ContainerStoreIterator equipped = store.getSlot(slot);
-                        if (equipped == store.end())
-                            continue;
-                        if (*equipped == base)
-                            isEquipped = true;
-                    }
-                    if (isEquipped)
+                    if (store.isEquipped(base))
                         continue;
                 }
             }

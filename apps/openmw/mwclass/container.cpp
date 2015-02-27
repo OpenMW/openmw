@@ -15,6 +15,7 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/actionopen.hpp"
 #include "../mwworld/actiontrap.hpp"
 #include "../mwworld/physicssystem.hpp"
@@ -59,7 +60,7 @@ namespace MWClass
                 ptr.get<ESM::Container>();
 
             data->mContainerStore.fill(
-                ref->mBase->mInventory, ptr.getCellRef().getOwner(), ptr.getCellRef().getFaction(), MWBase::Environment::get().getWorld()->getStore());
+                ref->mBase->mInventory, ptr.getCellRef().getOwner(), ptr.getCellRef().getFaction(), ptr.getCellRef().getFactionRank(), MWBase::Environment::get().getWorld()->getStore());
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -81,23 +82,21 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().getOwner(), ptr.getCellRef().getFaction());
+        store.restock(list, ptr, ptr.getCellRef().getOwner(), ptr.getCellRef().getFaction(), ptr.getCellRef().getFactionRank());
     }
 
-    void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Container::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        const std::string model = getModel(ptr);
         if (!model.empty()) {
             MWRender::Actors& actors = renderingInterface.getActors();
-            actors.insertActivator(ptr);
+            actors.insertActivator(ptr, model);
         }
     }
 
-    void Container::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Container::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr, model);
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 

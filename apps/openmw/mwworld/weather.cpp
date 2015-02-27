@@ -760,24 +760,15 @@ void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
     writer.startRecord(ESM::REC_WTHR);
     state.save(writer);
     writer.endRecord(ESM::REC_WTHR);
-    progress.increaseProgress();
 }
 
-bool WeatherManager::readRecord(ESM::ESMReader& reader, int32_t type)
+bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
 {
     if(ESM::REC_WTHR == type)
     {
         // load first so that if it fails, we haven't accidentally reset the state below
         ESM::WeatherState state;
         state.load(reader);
-
-        // reset other temporary state, now that we loaded successfully
-        stopSounds(); // let's hope this never throws
-        mRegionOverrides.clear();
-        mRegionMods.clear();
-        mThunderFlash = 0.0;
-        mThunderChance = 0.0;
-        mThunderChanceNeeded = 50.0;
 
         // swap in the loaded values now that we can't fail
         mHour = state.mHour;
@@ -793,6 +784,16 @@ bool WeatherManager::readRecord(ESM::ESMReader& reader, int32_t type)
     }
 
     return false;
+}
+
+void WeatherManager::clear()
+{
+    stopSounds();
+    mRegionOverrides.clear();
+    mRegionMods.clear();
+    mThunderFlash = 0.0;
+    mThunderChance = 0.0;
+    mThunderChanceNeeded = 50.0;
 }
 
 void WeatherManager::switchToNextWeather(bool instantly)

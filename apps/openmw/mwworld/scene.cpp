@@ -3,6 +3,7 @@
 #include <OgreSceneNode.h>
 
 #include <components/nif/niffile.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -20,6 +21,18 @@
 
 namespace
 {
+
+    void addObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics,
+                   MWRender::RenderingManager& rendering)
+    {
+        std::string model = Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr));
+        std::string id = ptr.getClass().getId(ptr);
+        if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
+            model = ""; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
+        rendering.addObject(ptr, model);
+        ptr.getClass().insertObject (ptr, model, physics);
+    }
+
     void updateObjectLocalRotation (const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics,
                                     MWRender::RenderingManager& rendering)
     {
@@ -79,9 +92,7 @@ namespace
         {
             try
             {
-                mRendering.addObject (ptr);
-                ptr.getClass().insertObject (ptr, mPhysics);
-
+                addObject(ptr, mPhysics, mRendering);
                 updateObjectLocalRotation(ptr, mPhysics, mRendering);
                 if (ptr.getRefData().getBaseNode())
                 {
@@ -296,15 +307,17 @@ namespace MWWorld
         std::string loadingExteriorText = "#{sLoadingMessage3}";
         loadingListener->setLabel(loadingExteriorText);
 
+        const int halfGridSize = Settings::Manager::getInt("exterior grid size", "Cells")/2;
+
         CellStoreCollection::iterator active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
             if ((*active)->getCell()->isExterior())
             {
-                if (std::abs (X-(*active)->getCell()->getGridX())<=1 &&
-                    std::abs (Y-(*active)->getCell()->getGridY())<=1)
+                if (std::abs (X-(*active)->getCell()->getGridX())<=halfGridSize &&
+                    std::abs (Y-(*active)->getCell()->getGridY())<=halfGridSize)
                 {
-                    // keep cells within the new 3x3 grid
+                    // keep cells within the new grid
                     ++active;
                     continue;
                 }
@@ -314,9 +327,9 @@ namespace MWWorld
 
         int refsToLoad = 0;
         // get the number of refs to load
-        for (int x=X-1; x<=X+1; ++x)
+        for (int x=X-halfGridSize; x<=X+halfGridSize; ++x)
         {
-            for (int y=Y-1; y<=Y+1; ++y)
+            for (int y=Y-halfGridSize; y<=Y+halfGridSize; ++y)
             {
                 CellStoreCollection::iterator iter = mActiveCells.begin();
 
@@ -339,9 +352,9 @@ namespace MWWorld
         loadingListener->setProgressRange(refsToLoad);
 
         // Load cells
-        for (int x=X-1; x<=X+1; ++x)
+        for (int x=X-halfGridSize; x<=X+halfGridSize; ++x)
         {
-            for (int y=Y-1; y<=Y+1; ++y)
+            for (int y=Y-halfGridSize; y<=Y+halfGridSize; ++y)
             {
                 CellStoreCollection::iterator iter = mActiveCells.begin();
 
@@ -484,8 +497,7 @@ namespace MWWorld
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();
 
-        mCellChanged = true;
-        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
+        mCellChanged = true; MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
 
@@ -527,8 +539,7 @@ namespace MWWorld
 
     void Scene::addObjectToScene (const Ptr& ptr)
     {
-        mRendering.addObject(ptr);
-        ptr.getClass().insertObject(ptr, *mPhysics);
+        addObject(ptr, *mPhysics, mRendering);
         MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
         MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
     }

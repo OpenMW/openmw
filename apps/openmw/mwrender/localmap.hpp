@@ -87,7 +87,7 @@ namespace MWRender
         OEngine::Render::OgreRenderer* mRendering;
         MWRender::RenderingManager* mRenderingManager;
 
-        static const int sMapResolution = 512;
+        int mMapResolution;
 
         // the dynamic texture is a bottleneck, so don't set this too high
         static const int sFogOfWarResolution = 32;
