@@ -1,4 +1,5 @@
 #include <iostream>
+#include <csignal>
 
 #include <QApplication>
 #include <QTextCodec>
@@ -23,9 +24,11 @@ int main(int argc, char *argv[])
         SDL_SetMainReady();
         if (SDL_Init(SDL_INIT_VIDEO) != 0)
         {
-            qDebug() << "SDL_Init failed: " << QString::fromStdString(SDL_GetError());
+            qDebug() << "SDL_Init failed: " << QString::fromUtf8(SDL_GetError());
             return 0;
         }
+        signal(SIGINT, SIG_DFL); // We don't want to use the SDL event loop in the launcher,
+                                 // so reset SIGINT which SDL wants to redirect to an SDL_Quit event.
 
         QApplication app(argc, argv);
 

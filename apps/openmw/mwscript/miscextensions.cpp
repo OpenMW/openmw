@@ -17,6 +17,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -34,24 +35,24 @@
 namespace
 {
 
-    void addToLevList(ESM::LeveledListBase* list, const std::string& itemId, int level)
+    void addToLevList(ESM::LevelledListBase* list, const std::string& itemId, int level)
     {
-        for (std::vector<ESM::LeveledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
+        for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
         {
             if (it->mLevel == level && itemId == it->mId)
                 return;
         }
 
-        ESM::LeveledListBase::LevelItem item;
+        ESM::LevelledListBase::LevelItem item;
         item.mId = itemId;
         item.mLevel = level;
         list->mList.push_back(item);
     }
 
-    void removeFromLevList(ESM::LeveledListBase* list, const std::string& itemId, int level)
+    void removeFromLevList(ESM::LevelledListBase* list, const std::string& itemId, int level)
     {
         // level of -1 removes all items with that itemId
-        for (std::vector<ESM::LeveledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
+        for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
         {
             if (level != -1 && it->mLevel != level)
             {
@@ -914,6 +915,19 @@ namespace MWScript
             }
         };
 
+        class OpToggleScripts : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                InterpreterContext& context = static_cast<InterpreterContext&> (runtime.getContext());
+
+                bool enabled = MWBase::Environment::get().getWorld()->toggleScripts();
+
+                context.report(enabled ? "Scripts -> On" : "Scripts -> Off");
+            }
+        };
+
         class OpToggleGodMode : public Interpreter::Opcode0
         {
             public:
@@ -1007,8 +1021,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime &runtime)
                 {
-                    /// \todo implement jail check
-                    runtime.push (0);
+                    runtime.push (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Jail));
                 }
         };
 
@@ -1220,6 +1233,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeShowVars, new OpShowVars<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeShowVarsExplicit, new OpShowVars<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleGodMode, new OpToggleGodMode);
+            interpreter.installSegment5 (Compiler::Misc::opcodeToggleScripts, new OpToggleScripts);
             interpreter.installSegment5 (Compiler::Misc::opcodeDisableLevitation, new OpEnableLevitation<false>);
             interpreter.installSegment5 (Compiler::Misc::opcodeEnableLevitation, new OpEnableLevitation<true>);
             interpreter.installSegment5 (Compiler::Misc::opcodeCast, new OpCast<ImplicitRef>);

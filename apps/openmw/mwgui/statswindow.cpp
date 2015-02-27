@@ -108,7 +108,6 @@ namespace MWGui
     void StatsWindow::setPlayerName(const std::string& playerName)
     {
         mMainWidget->castType<MyGUI::Window>()->setCaption(playerName);
-        adjustWindowCaption();
     }
 
     void StatsWindow::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
@@ -377,17 +376,25 @@ namespace MWGui
         for (SkillList::const_iterator it = skills.begin(); it != end; ++it)
         {
             int skillId = *it;
-            if (skillId < 0 || skillId > ESM::Skill::Length) // Skip unknown skill indexes
+            if (skillId < 0 || skillId >= ESM::Skill::Length) // Skip unknown skill indexes
                 continue;
-            assert(skillId >= 0 && skillId < ESM::Skill::Length);
             const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
             const MWMechanics::SkillValue &stat = mSkillValues.find(skillId)->second;
             int base = stat.getBase();
             int modified = stat.getModified();
-            int progressPercent = stat.getProgress() * 100;
 
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             const MWWorld::ESMStore &esmStore =
                 MWBase::Environment::get().getWorld()->getStore();
+
+            float progressRequirement = player.getClass().getNpcStats(player).getSkillProgressRequirement(skillId,
+                *esmStore.get<ESM::Class>().find(player.get<ESM::NPC>()->mBase->mClass));
+
+            // This is how vanilla MW displays the progress bar (I think). Note it's slightly inaccurate,
+            // due to the int casting in the skill levelup logic. Also the progress label could in rare cases
+            // reach 100% without the skill levelling up.
+            // Leaving the original display logic for now, for consistency with ess-imported savegames.
+            int progressPercent = int(float(stat.getProgress()) / float(progressRequirement) * 100.f + 0.5f);
 
             const ESM::Skill* skill = esmStore.get<ESM::Skill>().find(skillId);
 

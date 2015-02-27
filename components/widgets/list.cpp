@@ -152,9 +152,9 @@ namespace Gui
         eventWidgetSelected(_sender);
     }
 
-    MyGUI::Widget* MWList::getItemWidget(const std::string& name)
+    MyGUI::Button *MWList::getItemWidget(const std::string& name)
     {
-        return mScrollView->findWidget (getName() + "_item_" + name);
+        return mScrollView->findWidget (getName() + "_item_" + name)->castType<MyGUI::Button>();
     }
 
 }

@@ -120,14 +120,12 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     // Set default texture filtering options
     TextureFilterOptions tfo;
     std::string filter = Settings::Manager::getString("texture filtering", "General");
-#ifndef ANDROID
+
     if (filter == "anisotropic") tfo = TFO_ANISOTROPIC;
     else if (filter == "trilinear") tfo = TFO_TRILINEAR;
     else if (filter == "bilinear") tfo = TFO_BILINEAR;
     else /*if (filter == "none")*/ tfo = TFO_NONE;
-#else
-    tfo = TFO_NONE;
-#endif
+
     MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
     MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
 
@@ -175,7 +173,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     mDebugging = new Debugging(mRootNode, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
 
-    mWater = new MWRender::Water(mRendering.getCamera(), this);
+    mWater = new MWRender::Water(mRendering.getCamera(), this, mFallback);
 
     setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
 }
@@ -297,6 +295,8 @@ void RenderingManager::rotateObject(const MWWorld::Ptr &ptr)
 void
 RenderingManager::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
+    if (!old.getRefData().getBaseNode())
+        return;
     Ogre::SceneNode *child =
         mRendering.getScene()->getSceneNode(old.getRefData().getHandle());
 
@@ -409,6 +409,7 @@ void RenderingManager::update (float duration, bool paused)
 
     mSkyManager->setGlare(mOcclusionQuery->getSunVisibility());
 
+    mWater->changeCell(player.getCell()->getCell());
 
     mWater->updateUnderwater(world->isUnderwater(player.getCell(), cam));
 
@@ -629,12 +630,12 @@ void RenderingManager::sunDisable(bool real)
     }
 }
 
-void RenderingManager::setSunDirection(const Ogre::Vector3& direction, bool is_moon)
+void RenderingManager::setSunDirection(const Ogre::Vector3& direction, bool is_night)
 {
     // direction * -1 (because 'direction' is camera to sun vector and not sun to camera),
     if (mSun) mSun->setDirection(Vector3(-direction.x, -direction.y, -direction.z));
 
-    mSkyManager->setSunDirection(direction, is_moon);
+    mSkyManager->setSunDirection(direction, is_night);
 }
 
 void RenderingManager::setGlare(bool glare)
@@ -690,6 +691,7 @@ void RenderingManager::enableLights(bool sun)
 void RenderingManager::notifyWorldSpaceChanged()
 {
     mEffectManager->clear();
+    mWater->clearRipples();
 }
 
 Ogre::Vector4 RenderingManager::boundingBoxToScreen(Ogre::AxisAlignedBox bounds)
@@ -1036,10 +1038,10 @@ void RenderingManager::enableTerrain(bool enable)
         if (!mTerrain)
         {
             if (Settings::Manager::getBool("distant land", "Terrain"))
-                mTerrain = new Terrain::DefaultWorld(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                mTerrain = new Terrain::DefaultWorld(mRendering.getScene(), new MWRender::TerrainStorage(true), RV_Terrain,
                                                 Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY, 1, 64);
             else
-                mTerrain = new Terrain::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                mTerrain = new Terrain::TerrainGrid(mRendering.getScene(), new MWRender::TerrainStorage(false), RV_Terrain,
                                                 Settings::Manager::getBool("shader", "Terrain"), Terrain::Align_XY);
             mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
                                      Settings::Manager::getBool("split", "Shadows"));

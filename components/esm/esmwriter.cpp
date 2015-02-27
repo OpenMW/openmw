@@ -4,6 +4,8 @@
 #include <fstream>
 #include <stdexcept>
 
+#include <components/to_utf8/to_utf8.hpp>
+
 namespace ESM
 {
     ESMWriter::ESMWriter()

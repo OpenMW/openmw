@@ -139,8 +139,7 @@ namespace MWClass
             // store
             ptr.getRefData().setCustomData(data.release());
 
-            getContainerStore(ptr).fill(ref->mBase->mInventory, getId(ptr), "", -1,
-                                       MWBase::Environment::get().getWorld()->getStore());
+            getContainerStore(ptr).fill(ref->mBase->mInventory, getId(ptr));
 
             if (ref->mBase->mFlags & ESM::Creature::Weapon)
                 getInventoryStore(ptr).autoEquip(ptr);   
@@ -228,18 +227,7 @@ namespace MWClass
                 weapon = *weaponslot;
         }
 
-        // Reduce fatigue
-        // somewhat of a guess, but using the weapon weight makes sense
-        const float fFatigueAttackBase = gmst.find("fFatigueAttackBase")->getFloat();
-        const float fFatigueAttackMult = gmst.find("fFatigueAttackMult")->getFloat();
-        const float fWeaponFatigueMult = gmst.find("fWeaponFatigueMult")->getFloat();
-        MWMechanics::DynamicStat<float> fatigue = stats.getFatigue();
-        const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
-        float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
-        if (!weapon.isEmpty())
-            fatigueLoss += weapon.getClass().getWeight(weapon) * stats.getAttackStrength() * fWeaponFatigueMult;
-        fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
-        stats.setFatigue(fatigue);
+        MWMechanics::applyFatigueLoss(ptr, weapon);
 
         // TODO: where is the distance defined?
         float dist = 200.f;
@@ -897,7 +885,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().getRefId(), "", -1);
+        store.restock(list, ptr, ptr.getCellRef().getRefId());
     }
 
     int Creature::getBaseFightRating(const MWWorld::Ptr &ptr) const

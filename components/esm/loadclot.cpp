@@ -10,17 +10,42 @@ namespace ESM
 
     void Clothing::load(ESMReader &esm)
     {
-        mModel = esm.getHNString("MODL");
-        mName = esm.getHNOString("FNAM");
-        esm.getHNT(mData, "CTDT", 12);
-
-        mScript = esm.getHNOString("SCRI");
-        mIcon = esm.getHNOString("ITEX");
-
-        mParts.load(esm);
-
-
-        mEnchant = esm.getHNOString("ENAM");
+        mParts.mParts.clear();
+        bool hasData = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            uint32_t name = esm.retSubName().val;
+            switch (name)
+            {
+                case ESM::FourCC<'M','O','D','L'>::value:
+                    mModel = esm.getHString();
+                    break;
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'C','T','D','T'>::value:
+                    esm.getHT(mData, 12);
+                    hasData = true;
+                    break;
+                case ESM::FourCC<'S','C','R','I'>::value:
+                    mScript = esm.getHString();
+                    break;
+                case ESM::FourCC<'I','T','E','X'>::value:
+                    mIcon = esm.getHString();
+                    break;
+                case ESM::FourCC<'E','N','A','M'>::value:
+                    mEnchant = esm.getHString();
+                    break;
+                case ESM::FourCC<'I','N','D','X'>::value:
+                    mParts.add(esm);
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+            }
+        }
+        if (!hasData)
+            esm.fail("Missing CTDT subrecord");
     }
 
     void Clothing::save(ESMWriter &esm) const

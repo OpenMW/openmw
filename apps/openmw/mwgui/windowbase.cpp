@@ -2,6 +2,8 @@
 
 #include <MyGUI_InputManager.h>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 

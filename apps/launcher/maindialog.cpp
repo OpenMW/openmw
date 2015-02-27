@@ -27,25 +27,6 @@ using namespace Process;
 Launcher::MainDialog::MainDialog(QWidget *parent)
     : mGameSettings(mCfgMgr), QMainWindow (parent)
 {
-    // Install the stylesheet font
-    QFile file;
-    QFontDatabase fontDatabase;
-
-    const QStringList fonts = fontDatabase.families();
-
-    // Check if the font is installed
-    if (!fonts.contains("EB Garamond")) {
-
-        QString font = QString::fromUtf8(mCfgMgr.getGlobalDataPath().string().c_str()) + QString("resources/mygui/EBGaramond-Regular.ttf");
-        file.setFileName(font);
-
-        if (!file.exists()) {
-            font = QString::fromUtf8(mCfgMgr.getLocalPath().string().c_str()) + QString("resources/mygui/EBGaramond-Regular.ttf");
-        }
-
-        fontDatabase.addApplicationFont(font);
-    }
-
     setupUi(this);
 
     mGameInvoker = new ProcessInvoker();
@@ -80,6 +61,7 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     QString revision(OPENMW_VERSION_COMMITHASH);
     QString tag(OPENMW_VERSION_TAGHASH);
 
+    versionLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
     if (!revision.isEmpty() && !tag.isEmpty())
     {
         if (revision == tag) {
@@ -257,24 +239,8 @@ void Launcher::MainDialog::changePage(QListWidgetItem *current, QListWidgetItem 
         current = previous;
 
     int currentIndex = iconWidget->row(current);
-//    int previousIndex = iconWidget->row(previous);
-
     pagesWidget->setCurrentIndex(currentIndex);
-
-    //    DataFilesPage *previousPage = dynamic_cast<DataFilesPage *>(pagesWidget->widget(previousIndex));
-    //    DataFilesPage *currentPage = dynamic_cast<DataFilesPage *>(pagesWidget->widget(currentIndex));
-
-    //    //special call to update/save data files page list view when it's displayed/hidden.
-    //    if (previousPage)
-    //    {
-    //        if (previousPage->objectName() == "DataFilesPage")
-    //            previousPage->saveSettings();
-    //    }
-    //    else if (currentPage)
-    //    {
-    //        if (currentPage->objectName() == "DataFilesPage")
-    //            currentPage->loadSettings();
-    //    }
+    mSettingsPage->resetProgressBar();
 }
 
 bool Launcher::MainDialog::setupLauncherSettings()

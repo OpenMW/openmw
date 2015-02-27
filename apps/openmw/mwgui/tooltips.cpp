@@ -8,10 +8,12 @@
 #include <MyGUI_ImageBox.h>
 
 #include <components/misc/resourcehelpers.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -163,15 +165,19 @@ namespace MWGui
 
                 // special handling for markers on the local map: the tooltip should only be visible
                 // if the marker is not hidden due to the fog of war.
-                if (focus->getUserString ("IsMarker") == "true")
+                if (type == "MapMarker")
                 {
-                    LocalMapBase::MarkerPosition pos = *focus->getUserData<LocalMapBase::MarkerPosition>();
+                    LocalMapBase::MarkerUserData data = *focus->getUserData<LocalMapBase::MarkerUserData>();
 
-                    if (!MWBase::Environment::get().getWorld ()->isPositionExplored (pos.nX, pos.nY, pos.cellX, pos.cellY, pos.interior))
+                    if (!MWBase::Environment::get().getWorld ()->isPositionExplored (data.nX, data.nY, data.cellX, data.cellY, data.interior))
                         return;
-                }
 
-                if (type == "ItemPtr")
+                    ToolTipInfo info;
+                    info.text = data.caption;
+                    info.notes = data.notes;
+                    tooltipSize = createToolTip(info);
+                }
+                else if (type == "ItemPtr")
                 {
                     mFocusObject = *focus->getUserData<MWWorld::Ptr>();
                     tooltipSize = getToolTipViaPtr(false);
@@ -403,16 +409,33 @@ namespace MWGui
         MyGUI::IntSize totalSize = MyGUI::IntSize( std::min(std::max(textSize.width,captionSize.width + ((image != "") ? imageCaptionHPadding : 0)),maximumWidth),
             ((text != "") ? textSize.height + imageCaptionVPadding : 0) + captionHeight );
 
+        for (std::vector<std::string>::const_iterator it = info.notes.begin(); it != info.notes.end(); ++it)
+        {
+            MyGUI::ImageBox* icon = mDynamicToolTipBox->createWidget<MyGUI::ImageBox>("MarkerButton",
+                MyGUI::IntCoord(padding.left, totalSize.height+padding.top, 8, 8), MyGUI::Align::Default);
+            icon->setColour(MyGUI::Colour(1.0,0.3,0.3));
+            MyGUI::EditBox* edit = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("SandText",
+                MyGUI::IntCoord(padding.left+8+4, totalSize.height+padding.top, 300-padding.left-8-4, 300-totalSize.height),
+                                                                                    MyGUI::Align::Default);
+            edit->setEditMultiLine(true);
+            edit->setEditWordWrap(true);
+            edit->setCaption(*it);
+            edit->setSize(edit->getWidth(), edit->getTextSize().height);
+            icon->setPosition(icon->getLeft(),(edit->getTop()+edit->getBottom())/2-icon->getHeight()/2);
+            totalSize.height += std::max(edit->getHeight(), icon->getHeight());
+            totalSize.width = std::max(totalSize.width, edit->getWidth()+8+4);
+        }
+
         if (!info.effects.empty())
         {
             MyGUI::Widget* effectArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>("",
                 MyGUI::IntCoord(padding.left, totalSize.height, 300-padding.left, 300-totalSize.height),
-                MyGUI::Align::Stretch, "ToolTipEffectArea");
+                MyGUI::Align::Stretch);
 
             MyGUI::IntCoord coord(0, 6, totalSize.width, 24);
 
             Widgets::MWEffectListPtr effectsWidget = effectArea->createWidget<Widgets::MWEffectList>
-                ("MW_StatName", coord, MyGUI::Align::Default, "ToolTipEffectsWidget");
+                ("MW_StatName", coord, MyGUI::Align::Default);
             effectsWidget->setEffectList(info.effects);
 
             std::vector<MyGUI::Widget*> effectItems;
@@ -426,12 +449,12 @@ namespace MWGui
             assert(enchant);
             MyGUI::Widget* enchantArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>("",
                 MyGUI::IntCoord(padding.left, totalSize.height, 300-padding.left, 300-totalSize.height),
-                MyGUI::Align::Stretch, "ToolTipEnchantArea");
+                MyGUI::Align::Stretch);
 
             MyGUI::IntCoord coord(0, 6, totalSize.width, 24);
 
             Widgets::MWEffectListPtr enchantWidget = enchantArea->createWidget<Widgets::MWEffectList>
-                ("MW_StatName", coord, MyGUI::Align::Default, "ToolTipEnchantWidget");
+                ("MW_StatName", coord, MyGUI::Align::Default);
             enchantWidget->setEffectList(Widgets::MWEffectList::effectListFromESM(&enchant->mEffects));
 
             std::vector<MyGUI::Widget*> enchantEffectItems;
@@ -470,7 +493,7 @@ namespace MWGui
                     chargeCoord = MyGUI::IntCoord((totalSize.width - chargeAndTextWidth)/2 + chargeTextWidth, coord.top+6, chargeWidth, 18);
                 }
                 Widgets::MWDynamicStatPtr chargeWidget = enchantArea->createWidget<Widgets::MWDynamicStat>
-                    ("MW_ChargeBar", chargeCoord, MyGUI::Align::Default, "ToolTipEnchantCharge");
+                    ("MW_ChargeBar", chargeCoord, MyGUI::Align::Default);
                 chargeWidget->setValue(charge, maxCharge);
                 totalSize.height += 24;
             }
@@ -505,7 +528,7 @@ namespace MWGui
         {
             MyGUI::ImageBox* imageWidget = mDynamicToolTipBox->createWidget<MyGUI::ImageBox>("ImageBox",
                 MyGUI::IntCoord((totalSize.width - captionSize.width - imageCaptionHPadding)/2, 0, imageSize, imageSize),
-                MyGUI::Align::Left | MyGUI::Align::Top, "ToolTipImage");
+                MyGUI::Align::Left | MyGUI::Align::Top);
             imageWidget->setImageTexture(realImage);
             imageWidget->setPosition (imageWidget->getPosition() + padding);
         }
@@ -564,6 +587,15 @@ namespace MWGui
         ret += getMiscString(cellref.getFaction(), "Faction");
         if (cellref.getFactionRank() > 0)
             ret += getValueString(cellref.getFactionRank(), "Rank");
+
+        std::vector<std::pair<std::string, int> > itemOwners =
+                MWBase::Environment::get().getMechanicsManager()->getStolenItemOwners(cellref.getRefId());
+
+        for (std::vector<std::pair<std::string, int> >::const_iterator it = itemOwners.begin(); it != itemOwners.end(); ++it)
+        {
+            ret += std::string("\nStolen from ") + it->first;
+        }
+
         ret += getMiscString(cellref.getGlobalVariable(), "Global");
         return ret;
     }

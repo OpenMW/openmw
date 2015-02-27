@@ -12,6 +12,8 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 
+#include <SDL_version.h>
+
 #include <openengine/ogre/renderer.hpp>
 
 #include "../engine.hpp"

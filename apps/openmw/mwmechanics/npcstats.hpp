@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "stat.hpp"
-
 #include "creaturestats.hpp"
 
 namespace ESM
@@ -23,19 +21,15 @@ namespace MWMechanics
     class NpcStats : public CreatureStats
     {
             int mDisposition;
-            SkillValue mSkill[ESM::Skill::Length];
+            SkillValue mSkill[ESM::Skill::Length]; // SkillValue.mProgress used by the player only
             SkillValue mWerewolfSkill[ESM::Skill::Length];
             int mReputation;
             int mCrimeId;
 
-            int mProfit;
-
             // ----- used by the player only, maybe should be moved at some point -------
             int mBounty;
             int mWerewolfKills;
-            /// NPCs other than the player can only have one faction. But for the sake of consistency
-            /// we use the same data structure for the PC and the NPCs.
-            /// \note the faction key must be in lowercase
+            /// Used for the player only; NPCs have maximum one faction defined in their NPC record
             std::map<std::string, int> mFactionRank;
             std::set<std::string> mExpelled;
             std::map<std::string, int> mFactionReputation;
@@ -50,10 +44,6 @@ namespace MWMechanics
         public:
 
             NpcStats();
-
-            /// for mercenary companions. starts out as 0, and changes when items are added or removed through the UI.
-            int getProfit() const;
-            void modifyProfit(int diff);
 
             int getBaseDisposition() const;
             void setBaseDisposition(int disposition);
@@ -74,23 +64,15 @@ namespace MWMechanics
             void lowerRank(const std::string& faction);
             /// Join this faction, setting the initial rank to 0.
             void joinFaction(const std::string& faction);
-            /// Warning: this function performs no check whether the rank exists,
-            /// and should be used in initial actor setup only.
-            void setFactionRank(const std::string& faction, int rank);
 
             const std::set<std::string>& getExpelled() const { return mExpelled; }
             bool getExpelled(const std::string& factionID) const;
             void expell(const std::string& factionID);
             void clearExpelled(const std::string& factionID);
 
-            bool isSameFaction (const NpcStats& npcStats) const;
-            ///< Do *this and \a npcStats share a faction?
+            bool isInFaction (const std::string& faction) const;
 
-            float getSkillGain (int skillIndex, const ESM::Class& class_, int usageType = -1,
-                int level = -1, float extraFactor=1.f) const;
-            ///< \param usageType: Usage specific factor, specified in the respective skill record;
-            /// -1: use a factor of 1.0 instead.
-            /// \param level Level to base calculation on; -1: use current level.
+            float getSkillProgressRequirement (int skillIndex, const ESM::Class& class_) const;
 
             void useSkill (int skillIndex, const ESM::Class& class_, int usageType = -1, float extraFactor=1.f);
             ///< Increase skill by usage.

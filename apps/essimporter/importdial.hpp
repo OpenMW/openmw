@@ -2,7 +2,7 @@
 #define OPENMW_ESSIMPORT_IMPORTDIAL_H
 namespace ESM
 {
-    struct ESMReader;
+    class ESMReader;
 }
 
 namespace ESSImport

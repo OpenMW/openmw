@@ -1,6 +1,8 @@
 #ifndef OPENMW_ESSIMPORT_CONVERTER_H
 #define OPENMW_ESSIMPORT_CONVERTER_H
 
+#include <OgreImage.h>
+
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 
@@ -13,6 +15,10 @@
 #include <components/esm/dialoguestate.hpp>
 #include <components/esm/custommarkerstate.hpp>
 #include <components/esm/loadcrea.hpp>
+#include <components/esm/weatherstate.hpp>
+#include <components/esm/globalscript.hpp>
+#include <components/esm/queststate.hpp>
+#include <components/esm/stolenitems.hpp>
 
 #include "importcrec.hpp"
 #include "importcntc.hpp"
@@ -29,6 +35,8 @@
 
 #include "convertacdt.hpp"
 #include "convertnpcc.hpp"
+#include "convertscpt.hpp"
+#include "convertplayer.hpp"
 
 namespace ESSImport
 {
@@ -98,10 +106,10 @@ public:
         npc.load(esm);
         if (id != "player")
         {
-            // TODO:
-            // this should handle changes to the NPC struct, but since there is no index here
+            // Handles changes to the NPC struct, but since there is no index here
             // it will apply to ALL instances of the class. seems to be the reason for the
             // "feature" in MW where changing AI settings of one guard will change it for all guards of that refID.
+            mContext->mNpcs[Misc::StringUtils::lowerCase(id)] = npc;
         }
         else
         {
@@ -133,6 +141,7 @@ public:
         ESM::Creature creature;
         std::string id = esm.getHNString("NAME");
         creature.load(esm);
+        mContext->mCreatures[Misc::StringUtils::lowerCase(id)] = creature;
     }
 };
 
@@ -206,7 +215,7 @@ public:
         else
         {
             int index = npcc.mNPDT.mIndex;
-            mContext->mNpcChanges.insert(std::make_pair(std::make_pair(index,id), npcc)).second;
+            mContext->mNpcChanges.insert(std::make_pair(std::make_pair(index,id), npcc));
         }
     }
 };
@@ -253,32 +262,23 @@ private:
 class ConvertPCDT : public Converter
 {
 public:
+    ConvertPCDT() : mFirstPersonCam(true) {}
+
     virtual void read(ESM::ESMReader &esm)
     {
         PCDT pcdt;
         pcdt.load(esm);
 
-        mContext->mPlayer.mBirthsign = pcdt.mBirthsign;
-        mContext->mPlayer.mObject.mNpcStats.mBounty = pcdt.mBounty;
-        for (std::vector<PCDT::FNAM>::const_iterator it = pcdt.mFactions.begin(); it != pcdt.mFactions.end(); ++it)
-        {
-            ESM::NpcStats::Faction faction;
-            faction.mExpelled = it->mFlags & 0x2;
-            faction.mRank = it->mRank;
-            faction.mReputation = it->mReputation;
-            mContext->mPlayer.mObject.mNpcStats.mFactions[it->mFactionName.toString()] = faction;
-        }
-        for (int i=0; i<8; ++i)
-            mContext->mPlayer.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];
-        mContext->mPlayer.mObject.mNpcStats.mLevelProgress = pcdt.mPNAM.mLevelProgress;
-
-        for (std::vector<std::string>::const_iterator it = pcdt.mKnownDialogueTopics.begin();
-             it != pcdt.mKnownDialogueTopics.end(); ++it)
-        {
-            mContext->mDialogueState.mKnownTopics.push_back(Misc::StringUtils::lowerCase(*it));
-        }
-
+        convertPCDT(pcdt, mContext->mPlayer, mContext->mDialogueState.mKnownTopics, mFirstPersonCam);
     }
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        esm.startRecord(ESM::REC_CAM_);
+        esm.writeHNT("FIRS", mFirstPersonCam);
+        esm.endRecord(ESM::REC_CAM_);
+    }
+private:
+    bool mFirstPersonCam;
 };
 
 class ConvertCNTC : public Converter
@@ -308,6 +308,10 @@ class ConvertFMAP : public Converter
 {
 public:
     virtual void read(ESM::ESMReader &esm);
+    virtual void write(ESM::ESMWriter &esm);
+
+private:
+    Ogre::Image mGlobalMapImage;
 };
 
 class ConvertCell : public Converter
@@ -384,29 +388,55 @@ public:
     virtual void read(ESM::ESMReader &esm)
     {
         std::string itemid = esm.getHNString("NAME");
+        Misc::StringUtils::toLower(itemid);
 
         while (esm.isNextSub("FNAM") || esm.isNextSub("ONAM"))
         {
             if (esm.retSubName().toString() == "FNAM")
             {
                 std::string factionid = esm.getHString();
-                mFactionStolenItems.insert(std::make_pair(itemid, factionid));
+                mStolenItems[itemid].insert(std::make_pair(Misc::StringUtils::lowerCase(factionid), true));
             }
             else
             {
                 std::string ownerid = esm.getHString();
-                mStolenItems.insert(std::make_pair(itemid, ownerid));
+                mStolenItems[itemid].insert(std::make_pair(Misc::StringUtils::lowerCase(ownerid), false));
             }
         }
     }
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        ESM::StolenItems items;
+        for (std::map<std::string, std::set<Owner> >::const_iterator it = mStolenItems.begin(); it != mStolenItems.end(); ++it)
+        {
+            std::map<std::pair<std::string, bool>, int> owners;
+            for (std::set<Owner>::const_iterator ownerIt = it->second.begin(); ownerIt != it->second.end(); ++ownerIt)
+            {
+                owners.insert(std::make_pair(std::make_pair(ownerIt->first, ownerIt->second)
+                                             // Since OpenMW doesn't suffer from the owner contamination bug,
+                                             // it needs a count argument. But for legacy savegames, we don't know
+                                             // this count, so must assume all items of that ID are stolen,
+                                             // like vanilla MW did.
+                                             ,std::numeric_limits<int>::max()));
+            }
+
+            items.mStolenItems.insert(std::make_pair(it->first, owners));
+        }
+
+        esm.startRecord(ESM::REC_STLN);
+        items.write(esm);
+        esm.endRecord(ESM::REC_STLN);
+    }
+
 private:
-    std::multimap<std::string, std::string> mStolenItems;
-    std::multimap<std::string, std::string> mFactionStolenItems;
+    typedef std::pair<std::string, bool> Owner; // <owner id, bool isFaction>
+
+    std::map<std::string, std::set<Owner> > mStolenItems;
 };
 
 /// Seen responses for a dialogue topic?
 /// Each DIAL record is followed by a number of INFO records, I believe, just like in ESMs
-/// Dialogue conversion problems (probably have to adjust OpenMW format) -
+/// Dialogue conversion problems:
 /// - Journal is stored in one continuous HTML markup rather than each entry separately with associated info ID.
 /// - Seen dialogue responses only store the INFO id, rather than the fulltext.
 /// - Quest stages only store the INFO id, rather than the journal entry fulltext.
@@ -428,7 +458,24 @@ public:
         std::string id = esm.getHNString("NAME");
         DIAL dial;
         dial.load(esm);
+        if (dial.mIndex > 0)
+            mDials[id] = dial;
     }
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        for (std::map<std::string, DIAL>::const_iterator it = mDials.begin(); it != mDials.end(); ++it)
+        {
+            esm.startRecord(ESM::REC_QUES);
+            ESM::QuestState state;
+            state.mFinished = 0;
+            state.mState = it->second.mIndex;
+            state.mTopic = Misc::StringUtils::lowerCase(it->first);
+            state.save(esm);
+            esm.endRecord(ESM::REC_QUES);
+        }
+    }
+private:
+    std::map<std::string, DIAL> mDials;
 };
 
 class ConvertQUES : public Converter
@@ -455,11 +502,69 @@ public:
 class ConvertGAME : public Converter
 {
 public:
+    ConvertGAME() : mHasGame(false) {}
+
+    std::string toString(int weatherId)
+    {
+        switch (weatherId)
+        {
+        case 0:
+            return "clear";
+        case 1:
+            return "cloudy";
+        case 2:
+            return "foggy";
+        case 3:
+            return "overcast";
+        case 4:
+            return "rain";
+        case 5:
+            return "thunderstorm";
+        case 6:
+            return "ashstorm";
+        case 7:
+            return "blight";
+        case 8:
+            return "snow";
+        case 9:
+            return "blizzard";
+        case -1:
+            return "";
+        default:
+            {
+                std::stringstream error;
+                error << "unknown weather id: " << weatherId;
+                throw std::runtime_error(error.str());
+            }
+        }
+    }
+
     virtual void read(ESM::ESMReader &esm)
     {
-        GAME game;
-        game.load(esm);
+        mGame.load(esm);
+        mHasGame = true;
     }
+
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        if (!mHasGame)
+            return;
+        esm.startRecord(ESM::REC_WTHR);
+        ESM::WeatherState weather;
+        weather.mCurrentWeather = toString(mGame.mGMDT.mCurrentWeather);
+        weather.mNextWeather = toString(mGame.mGMDT.mNextWeather);
+        weather.mRemainingTransitionTime = mGame.mGMDT.mWeatherTransition/100.f*(0.015*24*3600);
+        weather.mHour = mContext->mHour;
+        weather.mWindSpeed = 0.f;
+        weather.mTimePassed = 0.0;
+        weather.mFirstUpdate = false;
+        weather.save(esm);
+        esm.endRecord(ESM::REC_WTHR);
+    }
+
+private:
+    bool mHasGame;
+    GAME mGame;
 };
 
 /// Running global script
@@ -470,7 +575,21 @@ public:
     {
         SCPT script;
         script.load(esm);
+        ESM::GlobalScript out;
+        convertSCPT(script, out);
+        mScripts.push_back(out);
     }
+    virtual void write(ESM::ESMWriter &esm)
+    {
+        for (std::vector<ESM::GlobalScript>::const_iterator it = mScripts.begin(); it != mScripts.end(); ++it)
+        {
+            esm.startRecord(ESM::REC_GSCR);
+            it->save(esm);
+            esm.endRecord(ESM::REC_GSCR);
+        }
+    }
+private:
+    std::vector<ESM::GlobalScript> mScripts;
 };
 
 }

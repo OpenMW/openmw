@@ -296,25 +296,6 @@ namespace MWClass
 
             MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
-            // NPC stats
-            if (!ref->mBase->mFaction.empty())
-            {
-                std::string faction = ref->mBase->mFaction;
-                if (const ESM::Faction* fact = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().search(faction))
-                {
-                    if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
-                    {
-                        data->mNpcStats.setFactionRank(fact->mId, (int)ref->mBase->mNpdt52.mRank);
-                    }
-                    else
-                    {
-                        data->mNpcStats.setFactionRank(fact->mId, (int)ref->mBase->mNpdt12.mRank);
-                    }
-                }
-                else
-                    std::cerr << "Warning: ignoring nonexistent faction '" << faction << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
-            }
-
             // creature stats
             int gold=0;
             if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
@@ -371,13 +352,13 @@ namespace MWClass
                     std::cerr << "Warning: ignoring nonexistent race power '" << *iter << "' on NPC '" << ref->mBase->mId << "'" << std::endl;
             }
 
-            if (data->mNpcStats.getFactionRanks().size())
+            if (!ref->mBase->mFaction.empty())
             {
                 static const int iAutoRepFacMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("iAutoRepFacMod")->getInt();
                 static const int iAutoRepLevMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("iAutoRepLevMod")->getInt();
-                int rank = data->mNpcStats.getFactionRanks().begin()->second;
+                int rank = ref->mBase->getFactionRank();
 
                 data->mNpcStats.setReputation(iAutoRepFacMod * (rank+1) + iAutoRepLevMod * (data->mNpcStats.getLevel()-1));
             }
@@ -403,8 +384,8 @@ namespace MWClass
             }
 
             // inventory
-            data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr), "", -1,
-                                       MWBase::Environment::get().getWorld()->getStore());
+            // setting ownership is used to make the NPC auto-equip his initial equipment only, and not bartered items
+            data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr));
 
             data->mNpcStats.setGoldPool(gold);
 
@@ -505,18 +486,7 @@ namespace MWClass
         if(!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
             weapon = MWWorld::Ptr();
 
-        // Reduce fatigue
-        // somewhat of a guess, but using the weapon weight makes sense
-        const float fFatigueAttackBase = store.find("fFatigueAttackBase")->getFloat();
-        const float fFatigueAttackMult = store.find("fFatigueAttackMult")->getFloat();
-        const float fWeaponFatigueMult = store.find("fWeaponFatigueMult")->getFloat();
-        MWMechanics::DynamicStat<float> fatigue = getCreatureStats(ptr).getFatigue();
-        const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
-        float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
-        if (!weapon.isEmpty())
-            fatigueLoss += weapon.getClass().getWeight(weapon) * getNpcStats(ptr).getAttackStrength() * fWeaponFatigueMult;
-        fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
-        getCreatureStats(ptr).setFatigue(fatigue);
+        MWMechanics::applyFatigueLoss(ptr, weapon);
 
         const float fCombatDistance = store.find("fCombatDistance")->getFloat();
         float dist = fCombatDistance * (!weapon.isEmpty() ?
@@ -1358,7 +1328,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().getRefId(), "", -1);
+        store.restock(list, ptr, ptr.getCellRef().getRefId());
     }
 
     int Npc::getBaseFightRating (const MWWorld::Ptr& ptr) const
@@ -1370,5 +1340,17 @@ namespace MWClass
     bool Npc::isBipedal(const MWWorld::Ptr &ptr) const
     {
         return true;
+    }
+
+    std::string Npc::getPrimaryFaction (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        return ref->mBase->mFaction;
+    }
+
+    int Npc::getPrimaryFactionRank (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        return ref->mBase->getFactionRank();
     }
 }

@@ -187,6 +187,8 @@ Moon::Moon( const String& textureName,
 {
     setVisibility(1.0);
 
+    mMaterial->setProperty("alphatexture", sh::makeProperty(new sh::StringValue(textureName + "_alpha")));
+
     mPhase = Moon::Phase_Full;
 }
 
@@ -215,9 +217,15 @@ void Moon::setPhase(const Moon::Phase& phase)
     textureName += ".dds";
 
     if (mType == Moon::Type_Secunda)
+    {
         sh::Factory::getInstance ().setTextureAlias ("secunda_texture", textureName);
+        sh::Factory::getInstance ().setTextureAlias ("secunda_texture_alpha", "textures\\tx_mooncircle_full_s.dds");
+    }
     else
+    {
         sh::Factory::getInstance ().setTextureAlias ("masser_texture", textureName);
+        sh::Factory::getInstance ().setTextureAlias ("masser_texture_alpha", "textures\\tx_mooncircle_full_m.dds");
+    }
 
     mPhase = phase;
 }
@@ -759,14 +767,14 @@ void SkyManager::setStormDirection(const Vector3 &direction)
     mStormDirection = direction;
 }
 
-void SkyManager::setSunDirection(const Vector3& direction, bool is_moon)
+void SkyManager::setSunDirection(const Vector3& direction, bool is_night)
 {
     if (!mCreated) return;
     mSun->setPosition(direction);
     mSunGlare->setPosition(direction);
 
     float height = direction.z;
-    float fade = is_moon ? 0.0 : (( height > 0.5) ? 1.0 : height * 2);
+    float fade = is_night ? 0.0 : (( height > 0.5) ? 1.0 : height * 2);
     sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(fade, height)));
 }
 

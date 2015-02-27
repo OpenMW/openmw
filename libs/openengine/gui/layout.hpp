@@ -45,10 +45,6 @@ namespace GUI
   public:
     void setCoord(int x, int y, int w, int h);
 
-    // adjust the size of the window caption so that all text is visible
-    // NOTE: this assumes that mMainWidget is of type Window.
-    void adjustWindowCaption();
-
     virtual void setVisible(bool b);
 
     void setText(const std::string& name, const std::string& caption);

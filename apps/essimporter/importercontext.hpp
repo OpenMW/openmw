@@ -7,11 +7,14 @@
 #include <components/esm/player.hpp>
 #include <components/esm/dialoguestate.hpp>
 #include <components/esm/globalmap.hpp>
+#include <components/esm/loadcrea.hpp>
+#include <components/esm/loadnpc.hpp>
 
 #include "importnpcc.hpp"
 #include "importcrec.hpp"
 #include "importcntc.hpp"
 #include "importplayer.hpp"
+
 
 
 
@@ -29,6 +32,9 @@ namespace ESSImport
 
         ESM::DialogueState mDialogueState;
 
+        // cells which should show an explored overlay on the global map
+        std::set<std::pair<int, int> > mExploredCells;
+
         ESM::GlobalMap mGlobalMapState;
 
         int mDay, mMonth, mYear;
@@ -38,6 +44,9 @@ namespace ESSImport
         std::map<std::pair<int, std::string>, CREC> mCreatureChanges;
         std::map<std::pair<int, std::string>, NPCC> mNpcChanges;
         std::map<std::pair<int, std::string>, CNTC> mContainerChanges;
+
+        std::map<std::string, ESM::Creature> mCreatures;
+        std::map<std::string, ESM::NPC> mNpcs;
 
         Context()
         {

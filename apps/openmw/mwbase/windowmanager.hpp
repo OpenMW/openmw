@@ -1,19 +1,23 @@
 #ifndef GAME_MWBASE_WINDOWMANAGER_H
 #define GAME_MWBASE_WINDOWMANAGER_H
 
+#include <stdint.h>
 #include <string>
 #include <vector>
 #include <map>
-
-#include <components/settings/settings.hpp>
-
-#include <components/translation/translation.hpp>
-
-#include <components/loadinglistener/loadinglistener.hpp>
-
-#include "../mwmechanics/stat.hpp"
+#include <set>
 
 #include "../mwgui/mode.hpp"
+
+namespace Loading
+{
+    class Listener;
+}
+
+namespace Translation
+{
+    class Storage;
+}
 
 namespace MyGUI
 {
@@ -35,6 +39,15 @@ namespace ESM
     struct Class;
     class ESMReader;
     class ESMWriter;
+    struct CellId;
+}
+
+namespace MWMechanics
+{
+    class AttributeValue;
+    template<typename T>
+    class DynamicStat;
+    class SkillValue;
 }
 
 namespace MWWorld
@@ -58,6 +71,7 @@ namespace MWGui
     class ContainerWindow;
     class DialogueWindow;
     class WindowModal;
+    class JailScreen;
 
     enum ShowInDialogueMode {
         ShowInDialogueMode_IfPossible,
@@ -108,6 +122,8 @@ namespace MWBase
 
             virtual void removeGuiMode (MWGui::GuiMode mode) = 0;
             ///< can be anywhere in the stack
+
+            virtual void goToJail(int days) = 0;
 
             virtual void updatePlayer() = 0;
 
@@ -266,7 +282,7 @@ namespace MWBase
              */
             virtual std::string getGameSettingString(const std::string &id, const std::string &default_) = 0;
 
-            virtual void processChangedSettings(const Settings::CategorySettingVector& changed) = 0;
+            virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& changed) = 0;
 
             virtual void windowResized(int x, int y) = 0;
 

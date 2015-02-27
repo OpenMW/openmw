@@ -1,6 +1,8 @@
 #ifndef MWGUI_WAIT_DIALOG_H
 #define MWGUI_WAIT_DIALOG_H
 
+#include "timeadvancer.hpp"
+
 #include "windowbase.hpp"
 
 namespace MWGui
@@ -38,7 +40,7 @@ namespace MWGui
 
         void bedActivated() { setCanRest(true); }
 
-        bool getSleeping() { return mWaiting && mSleeping; }
+        bool getSleeping() { return mTimeAdvancer.isRunning() && mSleeping; }
         void wakeUp();
         void autosave();
 
@@ -51,12 +53,11 @@ namespace MWGui
         MyGUI::Button* mCancelButton;
         MWGui::Widgets::MWScrollBar* mHourSlider;
 
-        bool mWaiting;
+        TimeAdvancer mTimeAdvancer;
         bool mSleeping;
-        int mCurHour;
         int mHours;
         int mManualHours; // stores the hours to rest selected via slider
-        float mRemainingTime;
+        float mFadeTimeRemaining;
 
         int mInterruptAt;
         std::string mInterruptCreatureList;
@@ -67,6 +68,10 @@ namespace MWGui
         void onWaitButtonClicked(MyGUI::Widget* sender);
         void onCancelButtonClicked(MyGUI::Widget* sender);
         void onHourSliderChangedPosition(MyGUI::ScrollBar* sender, size_t position);
+
+        void onWaitingProgressChanged(int cur, int total);
+        void onWaitingInterrupted();
+        void onWaitingFinished();
 
         void setCanRest(bool canRest);
 

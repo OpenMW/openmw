@@ -95,10 +95,36 @@ namespace MWGui
                 return;
         }
 
-        MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
         store.setSelectedEnchantItem(it);
+        // to reset WindowManager::mSelectedSpell immediately
+        MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(*it);
 
         updateSpells();
+    }
+
+    void SpellWindow::askDeleteSpell(const std::string &spellId)
+    {
+        // delete spell, if allowed
+        const ESM::Spell* spell =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+
+        if (spell->mData.mFlags & ESM::Spell::F_Always
+            || spell->mData.mType == ESM::Spell::ST_Power)
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sDeleteSpellError}");
+        }
+        else
+        {
+            // ask for confirmation
+            mSpellToDelete = spellId;
+            ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
+            std::string question = MWBase::Environment::get().getWindowManager()->getGameSettingString("sQuestionDeleteSpell", "Delete %s?");
+            question = boost::str(boost::format(question) % spell->mName);
+            dialog->open(question);
+            dialog->eventOkClicked.clear();
+            dialog->eventOkClicked += MyGUI::newDelegate(this, &SpellWindow::onDeleteSpellAccept);
+            dialog->eventCancelClicked.clear();
+        }
     }
 
     void SpellWindow::onModelIndexSelected(SpellModel::ModelIndex index)
@@ -110,43 +136,19 @@ namespace MWGui
         }
         else
         {
-            onSpellSelected(spell.mId);
+            if (MyGUI::InputManager::getInstance().isShiftPressed())
+                askDeleteSpell(spell.mId);
+            else
+                onSpellSelected(spell.mId);
         }
     }
 
     void SpellWindow::onSpellSelected(const std::string& spellId)
     {
-        if (MyGUI::InputManager::getInstance().isShiftPressed())
-        {
-            // delete spell, if allowed
-            const ESM::Spell* spell =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-
-            if (spell->mData.mFlags & ESM::Spell::F_Always
-                || spell->mData.mType == ESM::Spell::ST_Power)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sDeleteSpellError}");
-            }
-            else
-            {
-                // ask for confirmation
-                mSpellToDelete = spellId;
-                ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-                std::string question = MWBase::Environment::get().getWindowManager()->getGameSettingString("sQuestionDeleteSpell", "Delete %s?");
-                question = boost::str(boost::format(question) % spell->mName);
-                dialog->open(question);
-                dialog->eventOkClicked.clear();
-                dialog->eventOkClicked += MyGUI::newDelegate(this, &SpellWindow::onDeleteSpellAccept);
-                dialog->eventCancelClicked.clear();
-            }
-        }
-        else
-        {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
-            store.setSelectedEnchantItem(store.end());
-            MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
-        }
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
+        store.setSelectedEnchantItem(store.end());
+        MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
 
         updateSpells();
     }
@@ -183,6 +185,10 @@ namespace MWGui
             return;
         selected = (selected + itemcount) % itemcount;
 
-        onModelIndexSelected(selected);
+        const Spell& spell = mSpellView->getModel()->getItem(selected);
+        if (spell.mType == Spell::Type_EnchantedItem)
+            onEnchantedItemSelected(spell.mItem, spell.mActive);
+        else
+            onSpellSelected(spell.mId);
     }
 }

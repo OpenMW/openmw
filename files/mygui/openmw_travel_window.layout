@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 450 300" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 450 304" name="_Main">
         <Property key="Visible" value="false"/>
-
 
         <Widget type="TextBox" skin="SandText" position="8 10 24 24" name="Select" align="Right Top">
             <Property key="TextAlign" value="Right"/>
@@ -21,11 +20,10 @@
             </Widget>
         </Widget>
 
-
         <Widget type="TextBox" skin="SandText" position="8 255 24 24" name="PlayerGold" align="Right Top">
             <Property key="TextAlign" value="Right"/>
         </Widget>
-        <Widget type="AutoSizedButton" skin="MW_Button" position="375 260 60 24" name="CancelButton" align="Right Top">
+        <Widget type="AutoSizedButton" skin="MW_Button" position="375 261 60 24" name="CancelButton" align="Right Top">
             <Property key="ExpandDirection" value="Left"/>
             <Property key="Caption" value="#{sCancel}"/>
         </Widget>

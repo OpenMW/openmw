@@ -25,14 +25,28 @@ void FFmpeg_Decoder::fail(const std::string &msg)
 
 int FFmpeg_Decoder::readPacket(void *user_data, uint8_t *buf, int buf_size)
 {
-    Ogre::DataStreamPtr stream = static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
-    return stream->read(buf, buf_size);
+    try
+    {
+        Ogre::DataStreamPtr stream = static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
+        return stream->read(buf, buf_size);
+    }
+    catch (std::exception& e)
+    {
+        return 0;
+    }
 }
 
 int FFmpeg_Decoder::writePacket(void *user_data, uint8_t *buf, int buf_size)
 {
-    Ogre::DataStreamPtr stream = static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
-    return stream->write(buf, buf_size);
+    try
+    {
+        Ogre::DataStreamPtr stream = static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
+        return stream->write(buf, buf_size);
+    }
+    catch (std::exception& e)
+    {
+        return 0;
+    }
 }
 
 int64_t FFmpeg_Decoder::seek(void *user_data, int64_t offset, int whence)

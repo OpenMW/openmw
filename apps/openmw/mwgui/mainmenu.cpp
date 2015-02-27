@@ -9,6 +9,7 @@
 #include <components/version/version.hpp>
 
 #include <components/widgets/imagebutton.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -160,6 +161,8 @@ namespace MWGui
         if (!show)
             return;
 
+        bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
+
         if (mHasAnimatedMenu)
         {
             if (!mVideo)
@@ -180,16 +183,7 @@ namespace MWGui
             int screenHeight = viewSize.height;
             mVideoBackground->setSize(screenWidth, screenHeight);
 
-            if (mVideo->getVideoHeight() > 0)
-            {
-                double imageaspect = static_cast<double>(mVideo->getVideoWidth())/mVideo->getVideoHeight();
-
-                int leftPadding = std::max(0.0, (screenWidth - screenHeight * imageaspect) / 2);
-                int topPadding = std::max(0.0, (screenHeight - screenWidth / imageaspect) / 2);
-
-                mVideo->setCoord(leftPadding, topPadding,
-                                       screenWidth - leftPadding*2, screenHeight - topPadding*2);
-            }
+            mVideo->autoResize(stretch);
 
             mVideo->setVisible(true);
         }
@@ -199,7 +193,7 @@ namespace MWGui
             {
                 mBackground = MyGUI::Gui::getInstance().createWidgetReal<BackgroundImage>("ImageBox", 0,0,1,1,
                     MyGUI::Align::Stretch, "Menu");
-                mBackground->setBackgroundImage("textures\\menu_morrowind.dds");
+                mBackground->setBackgroundImage("textures\\menu_morrowind.dds", true, stretch);
             }
             mBackground->setVisible(true);
         }

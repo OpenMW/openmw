@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>opencs.png</file>
+        <file>openmw-cs.png</file>
         <file>activator.png</file>
         <file>added.png</file>
         <file>apparatus.png</file>

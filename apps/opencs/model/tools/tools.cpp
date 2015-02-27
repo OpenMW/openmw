@@ -23,6 +23,7 @@
 #include "referenceablecheck.hpp"
 #include "scriptcheck.hpp"
 #include "bodypartcheck.hpp"
+#include "referencecheck.hpp"
 
 CSMDoc::Operation *CSMTools::Tools::get (int type)
 {
@@ -57,9 +58,6 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
         mandatoryIds.push_back ("GameHour");
         mandatoryIds.push_back ("Month");
         mandatoryIds.push_back ("PCRace");
-        mandatoryIds.push_back ("PCVampire");
-        mandatoryIds.push_back ("PCWerewolf");
-        mandatoryIds.push_back ("PCYear");
 
         mVerifier->appendStage (new MandatoryIdStage (mData.getGlobals(),
             CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Globals), mandatoryIds));
@@ -81,6 +79,8 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
         mVerifier->appendStage (new SpellCheckStage (mData.getSpells()));
 
         mVerifier->appendStage (new ReferenceableCheckStage (mData.getReferenceables().getDataSet(), mData.getRaces(), mData.getClasses(), mData.getFactions()));
+
+        mVerifier->appendStage (new ReferenceCheckStage(mData.getReferences(), mData.getReferenceables(), mData.getCells(), mData.getFactions()));
 
         mVerifier->appendStage (new ScriptCheckStage (mDocument));
 

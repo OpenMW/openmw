@@ -11,6 +11,7 @@
 #include <components/config/launchersettings.hpp>
 
 #include "utils/textinputdialog.hpp"
+#include "datafilespage.hpp"
 
 using namespace Process;
 
@@ -38,6 +39,7 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
 
     mWizardInvoker = new ProcessInvoker();
     mImporterInvoker = new ProcessInvoker();
+    resetProgressBar();
 
     connect(mWizardInvoker->getProcess(), SIGNAL(started()),
             this, SLOT(wizardStarted()));
@@ -93,7 +95,7 @@ Launcher::SettingsPage::~SettingsPage()
 
 void Launcher::SettingsPage::on_wizardButton_clicked()
 {
-    saveSettings();
+    mMain->writeSettings();
 
     if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false))
         return;
@@ -101,7 +103,7 @@ void Launcher::SettingsPage::on_wizardButton_clicked()
 
 void Launcher::SettingsPage::on_importerButton_clicked()
 {
-    saveSettings();
+    mMain->writeSettings();
 
     // Create the file if it doesn't already exist, else the importer will fail
     QString path(QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str()));
@@ -140,8 +142,13 @@ void Launcher::SettingsPage::on_importerButton_clicked()
 
     qDebug() << "arguments " << arguments;
 
-    if (!mImporterInvoker->startProcess(QLatin1String("mwiniimport"), arguments, false))
-        return;
+    // start the progress bar as a "bouncing ball"
+    progressBar->setMaximum(0);
+    progressBar->setValue(0);
+    if (!mImporterInvoker->startProcess(QLatin1String("openmw-iniimporter"), arguments, false))
+    {
+        resetProgressBar();
+    }
 }
 
 void Launcher::SettingsPage::on_browseButton_clicked()
@@ -196,25 +203,33 @@ void Launcher::SettingsPage::importerStarted()
 void Launcher::SettingsPage::importerFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     if (exitCode != 0 || exitStatus == QProcess::CrashExit)
-        return;
-
-    // Re-read the settings in their current state
-    mMain->reloadSettings();
-
-    // Import selected data files from openmw.cfg
-    if (addonsCheckBox->isChecked())
     {
-        if (mProfileDialog->exec() == QDialog::Accepted)
-        {
-            const QString profile(mProfileDialog->lineEdit()->text());
-            const QStringList files(mGameSettings.getContentList());
-            mLauncherSettings.setCurrentContentListName(profile);
-            mLauncherSettings.setContentList(profile, files);
-        }
+        resetProgressBar();
+
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Importer finished"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText(tr("Failed to import settings from INI file."));
+        msgBox.exec();
+    }
+    else
+    {
+        // indicate progress finished
+        progressBar->setMaximum(1);
+        progressBar->setValue(1);
+
+        // Importer may have changed settings, so refresh
+        mMain->reloadSettings();
     }
 
-    mMain->reloadSettings();
     importerButton->setEnabled(true);
+}
+
+void Launcher::SettingsPage::resetProgressBar()
+{
+    // set progress bar to 0 %
+    progressBar->reset();
 }
 
 void Launcher::SettingsPage::updateOkButton(const QString &text)

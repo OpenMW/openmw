@@ -15,8 +15,7 @@ ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningI
     mMimeType ("application/omwcontent"),
     mMimeTypes (QStringList() << mMimeType),
     mColumnCount (1),
-    mDragDropFlags (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled),
-    mDropActions (Qt::CopyAction | Qt::MoveAction)
+    mDropActions (Qt::MoveAction)
 {
     setEncoding ("win1252");
     uncheckAll();
@@ -104,22 +103,21 @@ QModelIndex ContentSelectorModel::ContentModel::indexFromItem(const EsmFile *ite
 Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-        return Qt::NoItemFlags;
+        return Qt::ItemIsDropEnabled;
 
     const EsmFile *file = item(index.row());
 
     if (!file)
         return Qt::NoItemFlags;
 
-    //game files can always be checked
+    //game files are not shown
     if (file->isGameFile())
-        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
+        return Qt::NoItemFlags;
 
     Qt::ItemFlags returnFlags;
-    bool allDependenciesFound = true;
     bool gamefileChecked = false;
 
-    //addon can be checked if its gamefile is and all other dependencies exist
+    // addon can be checked if its gamefile is
     foreach (const QString &fileName, file->gameFiles())
     {
         bool depFound = false;
@@ -145,16 +143,11 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
             if (gamefileChecked || !(dependency->isGameFile()))
                 break;
         }
-
-        allDependenciesFound = allDependenciesFound && depFound;
     }
 
     if (gamefileChecked)
     {
-        if (allDependenciesFound)
-            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | mDragDropFlags;
-        else
-            returnFlags = Qt::ItemIsSelectable;
+        returnFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled;
     }
 
     return returnFlags;
@@ -443,11 +436,6 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
     dir.setNameFilters(filters);
 
-    QTextCodec *codec = QTextCodec::codecForName("UTF8");
-
-    // Create a decoder for non-latin characters in esx metadata
-    QTextDecoder *decoder = codec->makeDecoder();
-
     foreach (const QString &path, dir.entryList())
     {
         QFileInfo info(dir.absoluteFilePath(path));
@@ -465,13 +453,21 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             EsmFile *file = new EsmFile(path);
 
             foreach (const ESM::Header::MasterData &item, fileReader.getGameFiles())
-                file->addGameFile(QString::fromStdString(item.name));
+                file->addGameFile(QString::fromUtf8(item.name.c_str()));
 
-            file->setAuthor     (decoder->toUnicode(fileReader.getAuthor().c_str()));
+            file->setAuthor     (QString::fromUtf8(fileReader.getAuthor().c_str()));
             file->setDate       (info.lastModified());
             file->setFormat     (fileReader.getFormat());
             file->setFilePath       (info.absoluteFilePath());
-            file->setDescription(decoder->toUnicode(fileReader.getDesc().c_str()));
+            file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
+
+            // HACK
+            // Load order constraint of Bloodmoon.esm needing Tribunal.esm is missing 
+            // from the file supplied by Bethesda, so we have to add it ourselves
+            if (file->fileName().compare("Bloodmoon.esm", Qt::CaseInsensitive) == 0)
+            {
+                file->addGameFile(QString::fromUtf8("Tribunal.esm"));
+            }
 
             // Put the file in the table
             addFile(file);
@@ -484,9 +480,20 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
 
     }
 
-    delete decoder;
-
     sortFiles();
+}
+
+QStringList ContentSelectorModel::ContentModel::gameFiles() const
+{
+    QStringList gameFiles;
+    foreach(const ContentSelectorModel::EsmFile *file, mFiles)
+    {
+        if (file->isGameFile())
+        {
+            gameFiles.append(file->fileName());
+        }
+    }
+    return gameFiles;
 }
 
 void ContentSelectorModel::ContentModel::sortFiles()
@@ -544,13 +551,13 @@ bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile *file) c
     return mPluginsWithLoadOrderError.contains(file->filePath());
 }
 
-void ContentSelectorModel::ContentModel::setContentList(const QStringList &fileList, bool isChecked)
+void ContentSelectorModel::ContentModel::setContentList(const QStringList &fileList)
 {
     mPluginsWithLoadOrderError.clear();
     int previousPosition = -1;
     foreach (const QString &filepath, fileList)
     {
-        if (setCheckState(filepath, isChecked))
+        if (setCheckState(filepath, true))
         {
             // as necessary, move plug-ins in visible list to match sequence of supplied filelist
             const EsmFile* file = item(filepath);
@@ -589,7 +596,7 @@ void ContentSelectorModel::ContentModel::checkForLoadOrderErrors()
 QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::checkForLoadOrderErrors(const EsmFile *file, int row) const
 {
     QList<LoadOrderError> errors = QList<LoadOrderError>();
-    foreach(QString dependentfileName, file->gameFiles())
+    foreach(const QString &dependentfileName, file->gameFiles())
     {
         const EsmFile* dependentFile = item(dependentfileName);
 

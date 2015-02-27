@@ -259,7 +259,12 @@ namespace MWDialogue
             record.load (reader);
 
             if (isThere (record.mTopic))
-                mQuests.insert (std::make_pair (record.mTopic, record));
+            {
+                std::pair<TQuestContainer::iterator, bool> result = mQuests.insert (std::make_pair (record.mTopic, record));
+                // reapply quest index, this is to handle users upgrading from only
+                // Morrowind.esm (no quest states) to Morrowind.esm + Tribunal.esm
+                result.first->second.setIndex(record.mState);
+            }
         }
     }
 }

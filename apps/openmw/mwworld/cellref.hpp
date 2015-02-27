@@ -23,7 +23,7 @@ namespace MWWorld
         }
 
         // Note: Currently unused for items in containers
-        ESM::RefNum getRefNum() const;
+        const ESM::RefNum& getRefNum() const;
 
         // Set RefNum to its default state.
         void unsetRefNum();
@@ -74,6 +74,8 @@ namespace MWWorld
         // even if it has an Owner field.
         // Used by bed rent scripts to allow the player to use the bed for the duration of the rent.
         std::string getGlobalVariable() const;
+
+        void resetGlobalVariable();
 
         // ID of creature trapped in this soul gem
         std::string getSoul() const;

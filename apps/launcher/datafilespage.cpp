@@ -20,6 +20,9 @@
 #include "utils/textinputdialog.hpp"
 #include "utils/profilescombobox.hpp"
 
+
+const char *Launcher::DataFilesPage::mDefaultContentListName = "Default";
+
 Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings, Config::LauncherSettings &launcherSettings, QWidget *parent)
     : mCfgMgr(cfg)
     , mGameSettings(gameSettings)
@@ -48,9 +51,9 @@ void Launcher::DataFilesPage::buildView()
     ui.deleteProfileButton->setToolTip ("Delete an existing Content List");
 
     //combo box
-    ui.profilesComboBox->addItem ("Default");
+    ui.profilesComboBox->addItem(mDefaultContentListName);
     ui.profilesComboBox->setPlaceholderText (QString("Select a Content List..."));
-    ui.profilesComboBox->setCurrentIndex(ui.profilesComboBox->findText(QLatin1String("Default")));
+    ui.profilesComboBox->setCurrentIndex(ui.profilesComboBox->findText(QLatin1String(mDefaultContentListName)));
 
     // Add the actions to the toolbuttons
     ui.newProfileButton->setDefaultAction (ui.newProfileAction);
@@ -69,19 +72,6 @@ void Launcher::DataFilesPage::buildView()
 
 bool Launcher::DataFilesPage::loadSettings()
 {
-    QStringList paths = mGameSettings.getDataDirs();
-
-    foreach (const QString &path, paths)
-        mSelector->addFiles(path);
-
-    mDataLocal = mGameSettings.getDataLocal();
-
-    if (!mDataLocal.isEmpty())
-        mSelector->addFiles(mDataLocal);
-
-    paths.insert (0, mDataLocal);
-    PathIterator pathIterator (paths);
-
     QStringList profiles = mLauncherSettings.getContentLists();
     QString currentProfile = mLauncherSettings.getCurrentContentListName();
 
@@ -94,9 +84,25 @@ bool Launcher::DataFilesPage::loadSettings()
     if (!currentProfile.isEmpty())
         addProfile(currentProfile, true);
 
-    mSelector->setProfileContent(filesInProfile(currentProfile, pathIterator));
-
     return true;
+}
+
+void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
+{
+    QStringList paths = mGameSettings.getDataDirs();
+
+    foreach(const QString &path, paths)
+        mSelector->addFiles(path);
+
+    mDataLocal = mGameSettings.getDataLocal();
+
+    if (!mDataLocal.isEmpty())
+        mSelector->addFiles(mDataLocal);
+
+    paths.insert(0, mDataLocal);
+    PathIterator pathIterator(paths);
+
+    mSelector->setProfileContent(filesInProfile(contentModelName, pathIterator));
 }
 
 QStringList Launcher::DataFilesPage::filesInProfile(const QString& profileName, PathIterator& pathIterator)
@@ -175,7 +181,7 @@ void Launcher::DataFilesPage::setProfile (const QString &previous, const QString
 
     ui.profilesComboBox->setCurrentProfile (ui.profilesComboBox->findText (current));
 
-    loadSettings();
+    populateFileViews(current);
 
     checkForDefaultProfile();
 }
@@ -229,13 +235,6 @@ void Launcher::DataFilesPage::on_newProfileAction_triggered()
     mLauncherSettings.setCurrentContentListName(profile);
 
     addProfile(profile, true);
-    mSelector->clearCheckStates();
-
-    mSelector->setGameFile();
-
-    saveSettings();
-
-    emit signalProfileChanged (ui.profilesComboBox->findText(profile));
 }
 
 void Launcher::DataFilesPage::addProfile (const QString &profile, bool setAsCurrent)
@@ -262,14 +261,12 @@ void Launcher::DataFilesPage::on_deleteProfileAction_triggered()
 
     // this should work since the Default profile can't be deleted and is always index 0
     int next = ui.profilesComboBox->currentIndex()-1;
+
+    // changing the profile forces a reload of plugin file views.
     ui.profilesComboBox->setCurrentIndex(next);
 
     removeProfile(profile);
     ui.profilesComboBox->removeItem(ui.profilesComboBox->findText(profile));
-
-    saveSettings();
-
-    loadSettings();
 
     checkForDefaultProfile();
 }
@@ -290,7 +287,7 @@ void Launcher::DataFilesPage::updateOkButton(const QString &text)
 void Launcher::DataFilesPage::checkForDefaultProfile()
 {
     //don't allow deleting "Default" profile
-    bool success = (ui.profilesComboBox->currentText() != "Default");
+    bool success = (ui.profilesComboBox->currentText() != mDefaultContentListName);
 
     ui.deleteProfileAction->setEnabled (success);
     ui.profilesComboBox->setEditEnabled (success);

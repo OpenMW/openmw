@@ -22,6 +22,15 @@ namespace MWWorld
         else
             return boost::lexical_cast<float>(fallback);
     }
+    int Fallback::getFallbackInt(const std::string& fall) const
+    {
+        std::string fallback=getFallbackString(fall);
+        if(fallback.empty())
+            return 0;
+        else
+            return boost::lexical_cast<int>(fallback);
+    }
+
     bool Fallback::getFallbackBool(const std::string& fall) const
     {
         std::string fallback=getFallbackString(fall);

@@ -10,6 +10,7 @@
 #include <MyGUI_ScrollView.h>
 
 #include <components/misc/resourcehelpers.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -182,6 +183,10 @@ namespace MWGui
 
     HUD::~HUD()
     {
+        mMainWidget->eventMouseLostFocus.clear();
+        mMainWidget->eventMouseMove.clear();
+        mMainWidget->eventMouseButtonClick.clear();
+
         delete mSpellIcons;
     }
 
@@ -664,6 +669,16 @@ namespace MWGui
     {
         mEnemyActorId = -1;
         mEnemyHealthTimer = -1;
+    }
+
+    void HUD::customMarkerCreated(MyGUI::Widget *marker)
+    {
+        marker->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
+    }
+
+    void HUD::doorMarkerCreated(MyGUI::Widget *marker)
+    {
+        marker->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
     }
 
 }

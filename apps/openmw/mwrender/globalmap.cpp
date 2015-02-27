@@ -11,6 +11,7 @@
 #include <OgreHardwarePixelBuffer.h>
 
 #include <components/loadinglistener/loadinglistener.hpp>
+#include <components/settings/settings.hpp>
 
 #include <components/esm/globalmap.hpp>
 
@@ -66,108 +67,83 @@ namespace MWRender
         loadingListener->setProgressRange((mMaxX-mMinX+1) * (mMaxY-mMinY+1));
         loadingListener->setProgress(0);
 
-        const Ogre::ColourValue waterShallowColour(0.15, 0.2, 0.19);
-        const Ogre::ColourValue waterDeepColour(0.1, 0.14, 0.13);
-        const Ogre::ColourValue groundColour(0.254, 0.19, 0.13);
-        const Ogre::ColourValue mountainColour(0.05, 0.05, 0.05);
-        const Ogre::ColourValue hillColour(0.16, 0.12, 0.08);
+        std::vector<Ogre::uchar> data (mWidth * mHeight * 3);
 
-        //if (!boost::filesystem::exists(mCacheDir + "/GlobalMap.png"))
-        if (1)
+        for (int x = mMinX; x <= mMaxX; ++x)
         {
-            std::vector<Ogre::uchar> data (mWidth * mHeight * 3);
-
-            for (int x = mMinX; x <= mMaxX; ++x)
+            for (int y = mMinY; y <= mMaxY; ++y)
             {
-                for (int y = mMinY; y <= mMaxY; ++y)
+                ESM::Land* land = esmStore.get<ESM::Land>().search (x,y);
+
+                if (land)
                 {
-                    ESM::Land* land = esmStore.get<ESM::Land>().search (x,y);
+                    int mask = ESM::Land::DATA_WNAM;
+                    if (!land->isDataLoaded(mask))
+                        land->loadData(mask);
+                }
 
-                    if (land)
+                for (int cellY=0; cellY<mCellSize; ++cellY)
+                {
+                    for (int cellX=0; cellX<mCellSize; ++cellX)
                     {
-                        int mask = ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX;
-                        if (!land->isDataLoaded(mask))
-                            land->loadData(mask);
-                    }
+                        int vertexX = float(cellX)/float(mCellSize) * 9;
+                        int vertexY = float(cellY)/float(mCellSize) * 9;
 
-                    for (int cellY=0; cellY<mCellSize; ++cellY)
-                    {
-                        for (int cellX=0; cellX<mCellSize; ++cellX)
+
+                        int texelX = (x-mMinX) * mCellSize + cellX;
+                        int texelY = (mHeight-1) - ((y-mMinY) * mCellSize + cellY);
+
+                        unsigned char r,g,b;
+
+                        float y = 0;
+                        if (land && land->mDataTypes & ESM::Land::DATA_WNAM)
+                            y = (land->mLandData->mWnam[vertexY * 9 + vertexX] << 4) / 2048.f;
+                        else
+                            y = (SCHAR_MIN << 4) / 2048.f;
+                        if (y < 0)
                         {
-                            int vertexX = float(cellX)/float(mCellSize) * ESM::Land::LAND_SIZE;
-                            int vertexY = float(cellY)/float(mCellSize) * ESM::Land::LAND_SIZE;
-
-
-                            int texelX = (x-mMinX) * mCellSize + cellX;
-                            int texelY = (mHeight-1) - ((y-mMinY) * mCellSize + cellY);
-
-                            unsigned char r,g,b;
-
-                            if (land)
-                            {
-                                const float landHeight = land->mLandData->mHeights[vertexY * ESM::Land::LAND_SIZE + vertexX];
-
-                                if (landHeight >= 0)
-                                {
-                                    const float hillHeight = 2500.f;
-                                    if (landHeight >= hillHeight)
-                                    {
-                                        const float mountainHeight = 15000.f;
-                                        float factor = std::min(1.f, float(landHeight-hillHeight)/mountainHeight);
-                                        r = (hillColour.r * (1-factor) + mountainColour.r * factor) * 255;
-                                        g = (hillColour.g * (1-factor) + mountainColour.g * factor) * 255;
-                                        b = (hillColour.b * (1-factor) + mountainColour.b * factor) * 255;
-                                    }
-                                    else
-                                    {
-                                        float factor = std::min(1.f, float(landHeight)/hillHeight);
-                                        r = (groundColour.r * (1-factor) + hillColour.r * factor) * 255;
-                                        g = (groundColour.g * (1-factor) + hillColour.g * factor) * 255;
-                                        b = (groundColour.b * (1-factor) + hillColour.b * factor) * 255;
-                                    }
-                                }
-                                else
-                                {
-                                    if (landHeight >= -100)
-                                    {
-                                        float factor = std::min(1.f, -1*landHeight/100.f);
-                                        r = (((waterShallowColour+groundColour)/2).r * (1-factor) + waterShallowColour.r * factor) * 255;
-                                        g = (((waterShallowColour+groundColour)/2).g * (1-factor) + waterShallowColour.g * factor) * 255;
-                                        b = (((waterShallowColour+groundColour)/2).b * (1-factor) + waterShallowColour.b * factor) * 255;
-                                    }
-                                    else
-                                    {
-                                        float factor = std::min(1.f, -1*(landHeight-100)/1000.f);
-                                        r = (waterShallowColour.r * (1-factor) + waterDeepColour.r * factor) * 255;
-                                        g = (waterShallowColour.g * (1-factor) + waterDeepColour.g * factor) * 255;
-                                        b = (waterShallowColour.b * (1-factor) + waterDeepColour.b * factor) * 255;
-                                    }
-                                }
-
-                            }
+                            r = (14 * y + 38);
+                            g = 20 * y + 56;
+                            b = 18 * y + 51;
+                        }
+                        else if (y < 0.3f)
+                        {
+                            if (y < 0.1f)
+                                y *= 8.f;
                             else
                             {
-                                r = waterDeepColour.r * 255;
-                                g = waterDeepColour.g * 255;
-                                b = waterDeepColour.b * 255;
+                                y -= 0.1;
+                                y += 0.8;
                             }
-
-                            data[texelY * mWidth * 3 + texelX * 3] = r;
-                            data[texelY * mWidth * 3 + texelX * 3+1] = g;
-                            data[texelY * mWidth * 3 + texelX * 3+2] = b;
+                            r = 66 - 32 * y;
+                            g = 48 - 23 * y;
+                            b = 33 - 16 * y;
                         }
+                        else
+                        {
+                            y -= 0.3f;
+                            y *= 1.428f;
+                            r = 34 - 29 * y;
+                            g = 25 - 20 * y;
+                            b = 17 - 12 * y;
+                        }
+
+                        data[texelY * mWidth * 3 + texelX * 3] = r;
+                        data[texelY * mWidth * 3 + texelX * 3+1] = g;
+                        data[texelY * mWidth * 3 + texelX * 3+2] = b;
                     }
                 }
+                loadingListener->increaseProgress();
+                if (land)
+                    land->unloadData();
             }
-
-            Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&data[0], data.size()));
-
-            tex = Ogre::TextureManager::getSingleton ().createManual ("GlobalMap.png", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                Ogre::TEX_TYPE_2D, mWidth, mHeight, 0, Ogre::PF_B8G8R8, Ogre::TU_STATIC);
-            tex->loadRawData(stream, mWidth, mHeight, Ogre::PF_B8G8R8);
         }
-        else
-            tex = Ogre::TextureManager::getSingleton ().getByName ("GlobalMap.png");
+
+        Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&data[0], data.size()));
+
+        tex = Ogre::TextureManager::getSingleton ().createManual ("GlobalMap.png", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+            Ogre::TEX_TYPE_2D, mWidth, mHeight, 0, Ogre::PF_B8G8R8, Ogre::TU_STATIC);
+        tex->loadRawData(stream, mWidth, mHeight, Ogre::PF_B8G8R8);
 
         tex->load();
 
@@ -267,9 +243,9 @@ namespace MWRender
     {
         const ESM::GlobalMap::Bounds& bounds = map.mBounds;
 
-        if (bounds.mMaxX-bounds.mMinX <= 0)
+        if (bounds.mMaxX-bounds.mMinX < 0)
             return;
-        if (bounds.mMaxY-bounds.mMinY <= 0)
+        if (bounds.mMaxY-bounds.mMinY < 0)
             return;
 
         if (bounds.mMinX > bounds.mMaxX

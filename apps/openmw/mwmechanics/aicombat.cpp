@@ -58,7 +58,7 @@ namespace
     // magnitude of pits/obstacles is defined by PATHFIND_Z_REACH
     bool checkWayIsClear(const Ogre::Vector3& from, const Ogre::Vector3& to, float offsetXY)
     {
-        if((to - from).length() >= PATHFIND_CAUTION_DIST || abs(from.z - to.z) <= PATHFIND_Z_REACH)
+        if((to - from).length() >= PATHFIND_CAUTION_DIST || std::abs(from.z - to.z) <= PATHFIND_Z_REACH)
         {
             Ogre::Vector3 dir = to - from;
             dir.z = 0;
@@ -69,7 +69,7 @@ namespace
             // cast up-down ray and find height in world space of hit
             float h = _from.z - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(_from, -Ogre::Vector3::UNIT_Z, verticalOffset + PATHFIND_Z_REACH + 1);
 
-            if(abs(from.z - h) <= PATHFIND_Z_REACH)
+            if(std::abs(from.z - h) <= PATHFIND_Z_REACH)
                 return true;
         }
 
@@ -207,16 +207,6 @@ namespace MWMechanics
         const MWWorld::Class& actorClass = actor.getClass();
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
-        // can't fight if attacker can't go where target is.  E.g. A fish can't attack person on land.
-        if (!actorClass.isNpc() && !MWMechanics::isEnvironmentCompatible(actor, target))
-        {
-            actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
-            return true;
-        }
-        
-
-      
-        
 
         //Update every frame
         bool& combatMove = storage.mCombatMove;
@@ -475,6 +465,19 @@ namespace MWMechanics
 
         // for distant combat we should know if target is in LOS even if distToTarget < rangeAttack 
         bool inLOS = distantCombat ? world->getLOS(actor, target) : true;
+
+        // can't fight if attacker can't go where target is.  E.g. A fish can't attack person on land.
+        if (distToTarget >= rangeAttack
+                && !actorClass.isNpc() && !MWMechanics::isEnvironmentCompatible(actor, target))
+        {
+            // TODO: start fleeing?
+            movement.mPosition[0] = 0;
+            movement.mPosition[1] = 0;
+            movement.mPosition[2] = 0;
+            readyToAttack = false;
+            actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
+            return false;
+        }
 
         // (within attack dist) || (not quite attack dist while following)
         if(inLOS && (distToTarget < rangeAttack || (distToTarget <= rangeFollow && followTarget && !isStuck)))

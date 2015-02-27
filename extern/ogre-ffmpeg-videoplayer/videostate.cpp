@@ -175,13 +175,27 @@ void PacketQueue::clear()
 int VideoState::OgreResource_Read(void *user_data, uint8_t *buf, int buf_size)
 {
     Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
-    return stream->read(buf, buf_size);
+    try
+    {
+        return stream->read(buf, buf_size);
+    }
+    catch (std::exception& e)
+    {
+        return 0;
+    }
 }
 
 int VideoState::OgreResource_Write(void *user_data, uint8_t *buf, int buf_size)
 {
     Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
-    return stream->write(buf, buf_size);
+    try
+    {
+        return stream->write(buf, buf_size);
+    }
+    catch (std::exception& e)
+    {
+        return 0;
+    }
 }
 
 int64_t VideoState::OgreResource_Seek(void *user_data, int64_t offset, int whence)
@@ -346,11 +360,11 @@ double VideoState::synchronize_video(AVFrame *src_frame, double pts)
  * buffer. We use this to store the global_pts in
  * a frame at the time it is allocated.
  */
-static uint64_t global_video_pkt_pts = static_cast<uint64_t>(AV_NOPTS_VALUE);
+static int64_t global_video_pkt_pts = AV_NOPTS_VALUE;
 static int our_get_buffer(struct AVCodecContext *c, AVFrame *pic)
 {
     int ret = avcodec_default_get_buffer(c, pic);
-    uint64_t *pts = (uint64_t*)av_malloc(sizeof(uint64_t));
+    int64_t *pts = (int64_t*)av_malloc(sizeof(int64_t));
     *pts = global_video_pkt_pts;
     pic->opaque = pts;
     return ret;
@@ -397,10 +411,10 @@ void VideoState::video_thread_loop(VideoState *self)
             throw std::runtime_error("Error decoding video frame");
 
         double pts = 0;
-        if((uint64_t)packet->dts != AV_NOPTS_VALUE)
+        if(packet->dts != AV_NOPTS_VALUE)
             pts = packet->dts;
-        else if(pFrame->opaque && *(uint64_t*)pFrame->opaque != AV_NOPTS_VALUE)
-            pts = *(uint64_t*)pFrame->opaque;
+        else if(pFrame->opaque && *(int64_t*)pFrame->opaque != AV_NOPTS_VALUE)
+            pts = *(int64_t*)pFrame->opaque;
         pts *= av_q2d((*self->video_st)->time_base);
 
         av_free_packet(packet);

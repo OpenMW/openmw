@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
         application.setLibraryPaths(libraryPaths);
     #endif
 
-        application.setWindowIcon (QIcon (":./opencs.png"));
+        application.setWindowIcon (QIcon (":./openmw-cs.png"));
 
         CS::Editor editor (ogreInit);
 

@@ -8,6 +8,8 @@
 
 #include <components/misc/utf8stream.hpp>
 
+#include <components/translation/translation.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
 #include "../mwbase/environment.hpp"
@@ -197,7 +199,7 @@ struct JournalViewModelImpl : JournalViewModel
 
     };
 
-    void visitQuestNames (bool active_only, boost::function <void (const std::string&)> visitor) const
+    void visitQuestNames (bool active_only, boost::function <void (const std::string&, bool)> visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get ().getJournal ();
 
@@ -229,7 +231,7 @@ struct JournalViewModelImpl : JournalViewModel
                 if (visitedQuests.find(quest.getName()) != visitedQuests.end())
                     continue;
 
-                visitor (quest.getName());
+                visitor (quest.getName(), isFinished);
 
                 visitedQuests.insert(quest.getName());
             }

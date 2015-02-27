@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2015 scrawl <scrawl@baseoftrash.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 #include "core.h"
 
 #define IS_FIRST_PASS (@shPropertyString(pass_index) == 0)
@@ -199,6 +221,9 @@
 #if UNDERWATER
     #include "underwater.h"
 #endif
+#if NORMAL_MAP && SH_GLSLES
+        mat3 transpose(mat3 m);
+#endif
 
     SH_BEGIN_PROGRAM
     
@@ -297,7 +322,7 @@ shUniform(float4, cameraPos) @shAutoConstant(cameraPos, camera_position)
 
         // derive final matrix
         float3x3 tbn = float3x3(tangent, binormal, normal);
-        #if SH_GLSL
+        #if SH_GLSL || SH_GLSLES
         tbn = transpose(tbn);
         #endif
 #endif
@@ -470,5 +495,13 @@ albedo = shLerp(albedo, diffuseTex, blendValues@shPropertyString(blendmap_compon
         shOutputColour(0).a = 1.0-previousAlpha;
 #endif
     }
-
+#if NORMAL_MAP && SH_GLSLES
+        mat3 transpose(mat3 m){
+           return mat3(
+            m[0][0],m[1][0],m[2][0],
+            m[0][1],m[1][1],m[2][1],
+            m[0][2],m[1][2],m[2][2]
+            );
+         }
+#endif
 #endif

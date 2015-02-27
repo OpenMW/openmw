@@ -7,6 +7,8 @@
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
+#include <components/esm/esmreader.hpp>
+
 namespace MWWorld
 {
 
@@ -82,7 +84,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
             } else if (n.val == ESM::REC_SKIL) {
                 mSkills.load (esm);
             }
-            else if (n.val==ESM::REC_FILT || ESM::REC_DBGP)
+            else if (n.val==ESM::REC_FILT || n.val == ESM::REC_DBGP)
             {
                 // ignore project file only records
                 esm.skipRecord();

@@ -141,7 +141,7 @@ public:
 
     void setAmbientColour(const Ogre::ColourValue& colour);
     void setSunColour(const Ogre::ColourValue& colour);
-    void setSunDirection(const Ogre::Vector3& direction, bool is_moon);
+    void setSunDirection(const Ogre::Vector3& direction, bool is_night);
     void sunEnable(bool real); ///< @param real whether or not to really disable the sunlight (otherwise just set diffuse to 0)
     void sunDisable(bool real);
 

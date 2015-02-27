@@ -35,8 +35,11 @@ namespace MWRender
         WeaponAnimation() : mPitchFactor(0) {}
         virtual ~WeaponAnimation() {}
 
-        virtual void attachArrow(MWWorld::Ptr actor);
-        virtual void releaseArrow(MWWorld::Ptr actor);
+        /// @note If no weapon (or an invalid weapon) is equipped, this function is a no-op.
+        void attachArrow(MWWorld::Ptr actor);
+
+        /// @note If no weapon (or an invalid weapon) is equipped, this function is a no-op.
+        void releaseArrow(MWWorld::Ptr actor);
 
     protected:
         NifOgre::ObjectScenePtr mAmmunition;

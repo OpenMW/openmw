@@ -1,5 +1,4 @@
 project (Components)
-set (CMAKE_BUILD_TYPE DEBUG)
 
 # Version file
 set (VERSION_HPP_IN ${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp.cmake)
@@ -58,12 +57,12 @@ add_component_dir (to_utf8
 add_component_dir (esm
     attr defs esmcommon esmreader esmwriter loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
     loadclas loadclot loadcont loadcrea loaddial loaddoor loadench loadfact loadglob loadgmst
-    loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc loadnpcc
+    loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
     savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap inventorystate containerstate npcstate creaturestate dialoguestate statstate
     npcstats creaturestats weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
-    aisequence magiceffects util custommarkerstate
+    aisequence magiceffects util custommarkerstate stolenitems
     )
 
 add_component_dir (esmterrain
@@ -113,7 +112,7 @@ add_component_dir (ogreinit
     )
 
 add_component_dir (widgets
-    box imagebutton tags list numericeditbox sharedstatebutton widgets
+    box imagebutton tags list numericeditbox sharedstatebutton windowcaption widgets
     )
 
 add_component_dir (fontloader

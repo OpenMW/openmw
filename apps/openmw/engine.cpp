@@ -109,11 +109,14 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         {
             if (!paused)
             {
-                // local scripts
-                executeLocalScripts();
+                if (MWBase::Environment::get().getWorld()->getScriptsEnabled())
+                {
+                    // local scripts
+                    executeLocalScripts();
 
-                // global scripts
-                MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
+                    // global scripts
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
+                }
 
                 MWBase::Environment::get().getWorld()->markCellAsUnchanged();
             }
@@ -170,7 +173,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   : mOgre (0)
-  , mFpsLevel(0)
   , mVerboseScripts (false)
   , mSkipMenu (false)
   , mUseSound (true)
@@ -292,16 +294,10 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
     else
         throw std::runtime_error ("No default settings file found! Make sure the file \"settings-default.cfg\" was properly installed.");
 
-    // load user settings if they exist, otherwise just load the default settings as user settings
+    // load user settings if they exist
     const std::string settingspath = mCfgMgr.getUserConfigPath().string() + "/settings.cfg";
     if (boost::filesystem::exists(settingspath))
         settings.loadUser(settingspath);
-    else if (boost::filesystem::exists(localdefault))
-        settings.loadUser(localdefault);
-    else if (boost::filesystem::exists(globaldefault))
-        settings.loadUser(globaldefault);
-
-    mFpsLevel = settings.getInt("fps", "HUD");
 
     // load nif overrides
     NifOverrides::Overrides nifOverrides;
@@ -349,6 +345,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
     addResourcesDirectory(mResDir / "shadows");
+    addResourcesDirectory(mResDir / "materials");
 
     OEngine::Render::WindowSettings windowSettings;
     windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
@@ -397,7 +394,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mEnvironment.setInputManager (input);
 
     MWGui::WindowManager* window = new MWGui::WindowManager(
-                mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
+                mExtensions, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
                 mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap);
     mEnvironment.setWindowManager (window);
 
@@ -596,11 +593,6 @@ void OMW::Engine::setCompileAllDialogue (bool all)
 void OMW::Engine::setSoundUsage(bool soundUsage)
 {
     mUseSound = soundUsage;
-}
-
-void OMW::Engine::showFPS(int level)
-{
-    mFpsLevel = level;
 }
 
 void OMW::Engine::setEncoding(const ToUTF8::FromType& encoding)

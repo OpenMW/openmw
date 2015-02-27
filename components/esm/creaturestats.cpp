@@ -24,8 +24,8 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mMurdered = false;
     esm.getHNOT (mMurdered, "MURD");
 
-    mFriendlyHits = 0;
-    esm.getHNOT (mFriendlyHits, "FRHT");
+    if (esm.isNextSub("FRHT"))
+        esm.skipHSub(); // Friendly hits, no longer used
 
     mTalkedTo = false;
     esm.getHNOT (mTalkedTo, "TALK");
@@ -140,9 +140,6 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mMurdered)
         esm.writeHNT ("MURD", mMurdered);
 
-    if (mFriendlyHits)
-        esm.writeHNT ("FRHT", mFriendlyHits);
-
     if (mTalkedTo)
         esm.writeHNT ("TALK", mTalkedTo);
 
@@ -235,7 +232,6 @@ void ESM::CreatureStats::blank()
     mDead = false;
     mDied = false;
     mMurdered = false;
-    mFriendlyHits = 0;
     mTalkedTo = false;
     mAlarmed = false;
     mAttacked = false;

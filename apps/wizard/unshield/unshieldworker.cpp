@@ -739,7 +739,8 @@ bool Wizard::UnshieldWorker::extractFile(Unshield *unshield, const QString &dest
 
     // Ensure the target path exists
     QDir dir;
-    dir.mkpath(path);
+    if (!dir.mkpath(path))
+        return false;
 
     QString fileName(path);
     fileName.append(QString::fromUtf8(unshield_file_name(unshield, index)));

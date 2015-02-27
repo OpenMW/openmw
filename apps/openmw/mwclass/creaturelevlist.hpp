@@ -20,7 +20,7 @@ namespace MWClass
 
             static void registerSelf();
 
-            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
+            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
             virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)

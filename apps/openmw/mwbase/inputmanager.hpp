@@ -2,8 +2,8 @@
 #define GAME_MWBASE_INPUTMANAGER_H
 
 #include <string>
-
-#include <components/settings/settings.hpp>
+#include <set>
+#include <vector>
 
 namespace MWBase
 {
@@ -29,7 +29,7 @@ namespace MWBase
 
             virtual void changeInputMode(bool guiMode) = 0;
 
-            virtual void processChangedSettings(const Settings::CategorySettingVector& changed) = 0;
+            virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& changed) = 0;
 
             virtual void setDragDrop(bool dragDrop) = 0;
 

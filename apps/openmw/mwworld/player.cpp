@@ -260,9 +260,20 @@ namespace MWWorld
                 mCellStore = world.getExterior(0,0);
             }
 
-            if (!player.mBirthsign.empty() &&
-                !world.getStore().get<ESM::BirthSign>().search (player.mBirthsign))
-                throw std::runtime_error ("invalid player state record (birthsign)");
+            if (!player.mBirthsign.empty())
+            {
+                const ESM::BirthSign* sign = world.getStore().get<ESM::BirthSign>().search (player.mBirthsign);
+                if (!sign)
+                    throw std::runtime_error ("invalid player state record (birthsign does not exist)");
+
+                // To handle the case where a birth sign was edited in between play sessions (does not yet handle removing the old spells)
+                // Also needed for ess-imported savegames which do not specify the birtsign spells in the player's spell list.
+                for (std::vector<std::string>::const_iterator iter (sign->mPowers.mList.begin());
+                    iter!=sign->mPowers.mList.end(); ++iter)
+                {
+                    getPlayer().getClass().getCreatureStats(getPlayer()).getSpells().add (*iter);
+                }
+            }
 
             mCurrentCrimeId = player.mCurrentCrimeId;
             mPaidCrimeId = player.mPaidCrimeId;

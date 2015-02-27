@@ -15,6 +15,8 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_TextBox.h>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -149,7 +151,9 @@ namespace MWGui
             Ogre::TextureManager::getSingleton ().load (randomSplash, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
 
             // TODO: add option (filename pattern?) to use image aspect ratio instead of 4:3
-            mBackgroundImage->setBackgroundImage(randomSplash, true, true);
+            // we can't do this by default, because the Morrowind splash screens are 1024x1024, but should be displayed as 4:3
+            bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
+            mBackgroundImage->setBackgroundImage(randomSplash, true, stretch);
         }
         else
             std::cerr << "No loading screens found!" << std::endl;

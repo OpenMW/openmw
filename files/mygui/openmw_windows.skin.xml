@@ -395,17 +395,9 @@
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Center"/>
 
-        <Child type="Widget" skin="DialogBG" offset="0 0 88 20" align="Stretch"/>
-
-        <Child type="TextBox" skin="SandText" offset="2 0 84 20" align="Stretch" name="Client"/>
-
-        <!-- Add the borders of the surrounding blocks -->
-        <Child type="Widget" skin="HB_LEFT" offset="86 2 2 16" align="Top Right"/>
-        <Child type="Widget" skin="HB_RIGHT" offset="0 2 2 16" align="Top Left"/>
-        <Child type="Widget" skin="HB_TR" offset="0 0 2 2" align="Top Left"/>
-        <Child type="Widget" skin="HB_TL" offset="86 0 2 2" align="Top Right"/>
-        <Child type="Widget" skin="HB_BR" offset="0 18 2 2" align="Bottom Left"/>
-        <Child type="Widget" skin="HB_BL" offset="86 18 2 2" align="Bottom Right"/>
+        <Child type="Widget" skin="HB_ALL" offset="0 0 30 20" align="Default" name="Left"/>
+        <Child type="TextBox" skin="SandText" offset="30 0 28 20" align="Left VStretch" name="Client"/>
+        <Child type="Widget" skin="HB_ALL" offset="0 0 30 20" align="Right" name="Right"/>
     </Resource>
 
 <!-- ----------------------------------------------------
@@ -420,7 +412,8 @@
         <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
 
-        <Child type="Widget" skin="BlackBG" offset="8 28 240 220" align="Stretch" name="Client"/>
+        <Child type="Widget" skin="BlackBG" offset="0 0 256 256" align="Stretch"/>
+        <Child type="Widget" skin="" offset="8 28 240 220" align="Stretch" name="Client"/>
 
         <!-- Outer Borders -->
         <Child type="Widget" skin="TB_T" offset="14 0 228 4" align="Top HStretch" name="Action">
@@ -538,12 +531,7 @@
             <Property key="Scale" value="0 0 1 1"/>
         </Child>
 
-        <!-- Caption -->
-        <Child type="Widget" skin="HB_ALL" offset="4 4 248 20" align="Top HStretch">
-            <Property key="Scale" value="1 1 0 0"/>
-        </Child>
-
-        <Child type="EditBox" skin="MW_Caption" offset="80 4 88 20" align="HCenter Top" name="Caption">
+        <Child type="WindowCaption" skin="MW_Caption" offset="4 4 248 20" align="HStretch Top" name="Caption">
         </Child>
 
         <!-- This invisible button makes it possible to move the
@@ -559,7 +547,8 @@
         <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
 
-        <Child type="Widget" skin="BlackBG" offset="8 28 240 220" align="Stretch" name="Client"/>
+        <Child type="Widget" skin="BlackBG" offset=" 0 0 256 256" align="Stretch"/>
+        <Child type="Widget" skin="" offset="8 28 240 220" align="Stretch" name="Client"/>
 
         <!-- Outer Borders -->
         <Child type="Widget" skin="TB_T" offset="14 0 228 4" align="Top HStretch" name="Action">
@@ -695,7 +684,8 @@
         <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
 
-        <Child type="Widget" skin="BlackBG" offset="8 28 240 220" align="Stretch" name="Client"/>
+        <Child type="Widget" skin="BlackBG" offset=" 0 0 256 256" align="Stretch"/>
+        <Child type="Widget" skin="" offset="8 28 240 220" align="Stretch" name="Client"/>
 
         <!-- Outer Borders -->
         <Child type="Widget" skin="TB_T" offset="14 0 228 4" align="Top HStretch" name="Action">
@@ -814,12 +804,7 @@
         </Child>
 
         <!-- Caption -->
-
-        <Child type="Widget" skin="HB_ALL" offset="4 4 248 20" align="Top HStretch">
-            <Property key="Scale" value="1 1 0 0"/>
-        </Child>
-
-        <Child type="EditBox" skin="MW_Caption" offset="80 4 88 20" align="HCenter Top" name="Caption">
+        <Child type="WindowCaption" skin="MW_Caption_Pin" offset="4 4 248 20" align="HStretch Top" name="Caption">
         </Child>
 
         <!-- This invisible button makes it possible to move the

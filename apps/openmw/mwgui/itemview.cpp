@@ -155,22 +155,12 @@ void ItemView::setSize(const MyGUI::IntSize &_value)
         layoutWidgets();
 }
 
-void ItemView::setSize(int _width, int _height)
-{
-    setSize(MyGUI::IntSize(_width, _height));
-}
-
 void ItemView::setCoord(const MyGUI::IntCoord &_value)
 {
     bool changed = (_value.width != getWidth() || _value.height != getHeight());
     Base::setCoord(_value);
     if (changed)
         layoutWidgets();
-}
-
-void ItemView::setCoord(int _left, int _top, int _width, int _height)
-{
-    setCoord(MyGUI::IntCoord(_left, _top, _width, _height));
 }
 
 void ItemView::registerComponents()

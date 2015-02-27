@@ -33,12 +33,13 @@ Programmers
     Douglas Diniz (Dgdiniz)
     Douglas Mencken (dougmencken)
     dreamer-dead
-    dteviot
+    David Teviotdale (dteviot)
     Edmondo Tommasina (edmondo)
     Eduard Cot (trombonecot)
     Eli2
     Emanuel Guével (potatoesmaster)
     eroen
+    Evgeniy Mineev (sandstranger)
     Fil Krynicki (filkry)
     Gašper Sedej
     gugus/gus
@@ -75,20 +76,22 @@ Programmers
     Michał Bień (Glorf)
     Miroslav Puda (pakanek)
     MiroslavR
+    naclander
     Narmo
     Nathan Jeffords (blunted2night)
+    NeveHanter
     Nikolay Kasyanov (corristo)
     nobrakal
     Nolan Poe (nopoe)
     Paul McElroy (Greendogo)
     Pieter van der Kloet (pvdk)
     Radu-Marius Popovici (rpopovici)
+    rdimesio
     riothamus
     Robert MacGregor (Ragora)
     Rohit Nirmal
     Roman Melnik (Kromgart)
     Roman Proskuryakov (humbug)
-    sandstranger
     Sandy Carter (bwrsandman)
     Scott Howard
     Sebastian Wick (swick)

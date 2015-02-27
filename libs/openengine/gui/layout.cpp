@@ -46,27 +46,6 @@ namespace GUI
         mMainWidget->setCoord(x,y,w,h);
     }
 
-    void Layout::adjustWindowCaption()
-    {
-        MyGUI::TextBox* box = mMainWidget->castType<MyGUI::Window>(mMainWidget)->getCaptionWidget();
-        box->setSize(box->getTextSize().width + 24, box->getSize().height);
-
-        // in order to trigger alignment updates, we need to update the parent
-        // mygui doesn't provide a proper way of doing this, so we are just changing size
-        box->getParent()->setCoord(MyGUI::IntCoord(
-            box->getParent()->getCoord().left,
-            box->getParent()->getCoord().top,
-            box->getParent()->getCoord().width,
-            box->getParent()->getCoord().height+1
-        ));
-        box->getParent()->setCoord(MyGUI::IntCoord(
-            box->getParent()->getCoord().left,
-            box->getParent()->getCoord().top,
-            box->getParent()->getCoord().width,
-            box->getParent()->getCoord().height-1
-        ));
-    }
-
     void Layout::setVisible(bool b)
     {
         mMainWidget->setVisible(b);
@@ -82,7 +61,6 @@ namespace GUI
     void Layout::setTitle(const std::string& title)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->setCaptionWithReplacing(title);
-        adjustWindowCaption();
     }
 
     MyGUI::Widget* Layout::getWidget(const std::string &_name)

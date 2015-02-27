@@ -1,3 +1,6 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "weather.hpp"
 
 #include <components/esm/weatherstate.hpp>
@@ -427,29 +430,35 @@ void WeatherManager::update(float duration, bool paused)
     else
         mRendering->getSkyManager()->sunEnable();
 
-    // sun angle
-    float height;
+    // Update the sun direction.  Run it east to west at a fixed angle from overhead.
+    // The sun's speed at day and night may differ, since mSunriseTime and mNightStart
+    // mark when the sun is level with the horizon.
+    {
+        // Shift times into a 24-hour window beginning at mSunriseTime...
+        float adjustedHour = mHour;
+        float adjustedNightStart = mNightStart;
+        if ( mHour < mSunriseTime )
+            adjustedHour += 24.f;
+        if ( mNightStart < mSunriseTime )
+            adjustedNightStart += 24.f;
 
-    //Day duration
-    float dayDuration = (mNightStart - 1) - mSunriseTime;
+        const bool is_night = adjustedHour >= adjustedNightStart;
+        const float dayDuration = adjustedNightStart - mSunriseTime;
+        const float nightDuration = 24.f - dayDuration;
 
-    // rise at 6, set at 20
-    if (mHour >= mSunriseTime && mHour <= mNightStart)
-        height = 1 - std::abs(((mHour - dayDuration) / 7.f));
-    else if (mHour > mNightStart)
-        height = (mHour - mNightStart) / 4.f;
-    else //if (mHour > 0 && mHour < 6)
-        height = 1 - (mHour / mSunriseTime);
+        double theta;
+        if ( !is_night ) {
+            theta = M_PI * (adjustedHour - mSunriseTime) / dayDuration;
+        } else {
+            theta = M_PI * (adjustedHour - adjustedNightStart) / nightDuration;
+        }
 
-    int facing = (mHour > 13.f) ? 1 : -1;
-
-    bool sun_is_moon = mHour >= mNightStart || mHour <= mSunriseTime;
-
-    Vector3 final(
-            (height - 1) * facing,
-            (height - 1) * facing,
-            height);
-    mRendering->setSunDirection(final, sun_is_moon);
+        Vector3 final(
+            cos( theta ),
+            -0.268f, // approx tan( -15 degrees )
+            sin( theta ) );
+        mRendering->setSunDirection( final, is_night );
+    }
 
     /*
      * TODO: import separated fadeInStart/Finish, fadeOutStart/Finish

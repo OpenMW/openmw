@@ -35,6 +35,11 @@ namespace MWMechanics
             Objects mObjects;
             Actors mActors;
 
+            typedef std::pair<std::string, bool> Owner; // < Owner id, bool isFaction >
+            typedef std::map<Owner, int> OwnerMap; // < Owner, number of stolen items with this id from this owner >
+            typedef std::map<std::string, OwnerMap> StolenItemsMap;
+            StolenItemsMap mStolenItems;
+
         public:
 
             void buildPlayer();
@@ -121,15 +126,14 @@ namespace MWMechanics
             /// @return false if the attack was considered a "friendly hit" and forgiven
             virtual bool actorAttacked (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
             /// Utility to check if taking this item is illegal and calling commitCrime if so
-            virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, int count);
+            /// @param container The container the item is in; may be empty for an item in the world
+            virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, const MWWorld::Ptr& container,
+                                    int count);
             /// Utility to check if opening (i.e. unlocking) this object is illegal and calling commitCrime if so
             virtual void objectOpened (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item);
             /// Attempt sleeping in a bed. If this is illegal, call commitCrime.
             /// @return was it illegal, and someone saw you doing it? Also returns fail when enemies are nearby
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed);
-
-            /// @return is \a ptr allowed to take/use \a item or is it a crime?
-            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, MWWorld::Ptr& victim);
 
             virtual void forceStateUpdate(const MWWorld::Ptr &ptr);
 
@@ -168,9 +172,21 @@ namespace MWMechanics
 
             virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const;
 
+            virtual void confiscateStolenItems (const MWWorld::Ptr& player, const MWWorld::Ptr& targetContainer);
+
+            /// List the owners that the player has stolen this item from (the owner can be an NPC or a faction).
+            /// <Owner, item count>
+            virtual std::vector<std::pair<std::string, int> > getStolenItemOwners(const std::string& itemid);
+
+            /// Has the player stolen this item from the given owner?
+            virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid);
+
         private:
             void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0);
+
+            /// @return is \a ptr allowed to take/use \a cellref or is it a crime?
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim);
     };
 }
 

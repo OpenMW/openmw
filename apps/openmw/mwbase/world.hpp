@@ -3,24 +3,23 @@
 
 #include <vector>
 #include <map>
+#include <set>
 
-#include <components/settings/settings.hpp>
+#include <components/esm/cellid.hpp>
 
-#include "../mwworld/globals.hpp"
 #include "../mwworld/ptr.hpp"
 
 namespace Ogre
 {
     class Vector2;
     class Vector3;
+    class Quaternion;
+    class Image;
 }
 
-namespace OEngine
+namespace Loading
 {
-    namespace Physic
-    {
-        class PhysicEngine;
-    }
+    class Listener;
 }
 
 namespace ESM
@@ -33,7 +32,6 @@ namespace ESM
     struct Potion;
     struct Spell;
     struct NPC;
-    struct CellId;
     struct Armor;
     struct Weapon;
     struct Clothing;
@@ -92,6 +90,7 @@ namespace MWBase
             {
                 std::string name;
                 float x, y; // world position
+                ESM::CellId dest;
             };
 
             World() {}
@@ -269,6 +268,8 @@ namespace MWBase
             virtual MWWorld::Ptr  getFacedObject() = 0;
             ///< Return pointer to the object the player is looking at, if it is within activation range
 
+            virtual float getMaxActivationDistance() = 0;
+
             /// Returns a pointer to the object the provided object would hit (if within the
             /// specified distance), and the point where the hit occurs. This will attempt to
             /// use the "Head" node, or alternatively the "Bip01 Head" node as a basis.
@@ -388,7 +389,7 @@ namespace MWBase
             virtual bool canPlaceObject (float cursorX, float cursorY) = 0;
             ///< @return true if it is possible to place on object at specified cursor location
 
-            virtual void processChangedSettings (const Settings::CategorySettingVector& settings) = 0;
+            virtual void processChangedSettings (const std::set< std::pair<std::string, std::string> >& settings) = 0;
 
             virtual bool isFlying(const MWWorld::Ptr &ptr) const = 0;
             virtual bool isSlowFalling(const MWWorld::Ptr &ptr) const = 0;
@@ -453,6 +454,7 @@ namespace MWBase
 
             /// \todo Probably shouldn't be here
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) = 0;
+            virtual void reattachPlayerCamera() = 0;
 
             /// \todo this does not belong here
             virtual void frameStarted (float dt, bool paused) = 0;
@@ -488,6 +490,9 @@ namespace MWBase
             virtual bool getGodModeState() = 0;
 
             virtual bool toggleGodMode() = 0;
+
+            virtual bool toggleScripts() = 0;
+            virtual bool getScriptsEnabled() const = 0;
 
             /**
              * @brief startSpellCast attempt to start casting a spell. Might fail immediately if conditions are not met.
@@ -548,7 +553,7 @@ namespace MWBase
             virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const Ogre::Vector3& worldPos) = 0;
 
             virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
-                                       const MWWorld::Ptr& caster, int rangeType, const std::string& id, const std::string& sourceName) = 0;
+                                       const MWWorld::Ptr& caster, ESM::RangeType rangeType, const std::string& id, const std::string& sourceName) = 0;
 
             virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
 

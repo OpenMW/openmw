@@ -24,6 +24,8 @@ set(ESSIMPORTER_FILES
     convertcrec.cpp
     convertcntc.cpp
     convertscri.cpp
+    convertscpt.cpp
+    convertplayer.cpp
 )
 
 add_executable(openmw-essimporter

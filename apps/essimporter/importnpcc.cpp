@@ -9,10 +9,9 @@ namespace ESSImport
     {
         esm.getHNT(mNPDT, "NPDT");
 
-        // FIXME: use AiPackageList, need to fix getSubName()
         while (esm.isNextSub("AI_W") || esm.isNextSub("AI_E") || esm.isNextSub("AI_T") || esm.isNextSub("AI_F")
                || esm.isNextSub("AI_A"))
-            esm.skipHSub();
+            mAiPackages.add(esm);
 
         mInventory.load(esm);
     }

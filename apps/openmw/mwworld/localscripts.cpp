@@ -1,5 +1,7 @@
 #include "localscripts.hpp"
 
+#include <iostream>
+
 #include "esmstore.hpp"
 #include "cellstore.hpp"
 

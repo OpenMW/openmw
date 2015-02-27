@@ -196,6 +196,8 @@ namespace MWMechanics
         if (index==0 && mDynamic[index].getCurrent()<1)
         {
             mDead = true;
+
+            mDynamic[index].setModifier(0);
             mDynamic[index].setCurrent(0);
 
             if (MWBase::Environment::get().getWorld()->getGodModeState())
@@ -495,7 +497,10 @@ namespace MWMechanics
         state.mDead = mDead;
         state.mDied = mDied;
         state.mMurdered = mMurdered;
-        state.mFriendlyHits = mFriendlyHits;
+        // The vanilla engine does not store friendly hits in the save file. Since there's no other mechanism
+        // that ever resets the friendly hits (at least not to my knowledge) this should be regarded a feature
+        // rather than a bug.
+        //state.mFriendlyHits = mFriendlyHits;
         state.mTalkedTo = mTalkedTo;
         state.mAlarmed = mAlarmed;
         state.mAttacked = mAttacked;
@@ -544,7 +549,6 @@ namespace MWMechanics
         mDead = state.mDead;
         mDied = state.mDied;
         mMurdered = state.mMurdered;
-        mFriendlyHits = state.mFriendlyHits;
         mTalkedTo = state.mTalkedTo;
         mAlarmed = state.mAlarmed;
         mAttacked = state.mAttacked;

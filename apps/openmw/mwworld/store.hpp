@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <stdexcept>
+#include <sstream>
 
 #include <components/esm/esmwriter.hpp>
 
@@ -359,6 +360,8 @@ namespace MWWorld
         std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(scpt.mId, scpt));
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
+        else
+            inserted.first->second = scpt;
     }
 
     template <>
@@ -370,6 +373,8 @@ namespace MWWorld
         std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(s.mId, s));
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
+        else
+            inserted.first->second = s;
     }
 
     template <>
@@ -436,9 +441,7 @@ namespace MWWorld
             ltexl[lt.mIndex] = lt;
         }
 
-        void load(ESM::ESMReader &esm, const std::string &id) {
-            load(esm, id, esm.getIndex());
-        }
+        void load(ESM::ESMReader &esm, const std::string &id);
 
         iterator begin(size_t plugin) const {
             assert(plugin < mStatic.size());

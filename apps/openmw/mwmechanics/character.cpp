@@ -27,6 +27,8 @@
 #include "creaturestats.hpp"
 #include "security.hpp"
 
+#include <components/settings/settings.hpp>
+
 #include "../mwrender/animation.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -1126,7 +1128,7 @@ bool CharacterController::updateWeaponState()
                 attackStrength = std::min(1.f, 0.1f + std::rand() / float(RAND_MAX));
             }
 
-            if(mAttackType != "shoot")
+            if(mWeaponType != WeapType_Crossbow && mWeaponType != WeapType_BowAndArrow)
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
 
@@ -1372,7 +1374,7 @@ void CharacterController::update(float duration)
 
         //Force Jump Logic
 
-        bool isMoving = (std::abs(cls.getMovementSettings(mPtr).mPosition[0]) > .5 || abs(cls.getMovementSettings(mPtr).mPosition[1]) > .5);
+        bool isMoving = (std::abs(cls.getMovementSettings(mPtr).mPosition[0]) > .5 || std::abs(cls.getMovementSettings(mPtr).mPosition[1]) > .5);
         if(!inwater && !flying)
         {
             //Force Jump

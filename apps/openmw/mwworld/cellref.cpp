@@ -5,19 +5,19 @@
 namespace MWWorld
 {
 
-    ESM::RefNum CellRef::getRefNum() const
+    const ESM::RefNum& CellRef::getRefNum() const
     {
         return mCellRef.mRefNum;
     }
 
     bool CellRef::hasContentFile() const
     {
-        return getRefNum().hasContentFile();
+        return mCellRef.mRefNum.hasContentFile();
     }
 
     void CellRef::unsetRefNum()
     {
-        getRefNum().unset();
+        mCellRef.mRefNum.unset();
     }
 
     std::string CellRef::getRefId() const
@@ -115,6 +115,15 @@ namespace MWWorld
     std::string CellRef::getGlobalVariable() const
     {
         return mCellRef.mGlobalVariable;
+    }
+
+    void CellRef::resetGlobalVariable()
+    {
+        if (!mCellRef.mGlobalVariable.empty())
+        {
+            mChanged = true;
+            mCellRef.mGlobalVariable.erase();
+        }
     }
 
     void CellRef::setFactionRank(int factionRank)

@@ -12,6 +12,9 @@
 #include <MyGUI_RotatingSkin.h>
 #include <MyGUI_FactoryManager.h>
 
+#include <components/esm/globalmap.hpp>
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -22,10 +25,9 @@
 
 #include "../mwrender/globalmap.hpp"
 
-#include <components/esm/globalmap.hpp>
-
 #include "widgets.hpp"
 #include "confirmationdialog.hpp"
+#include "tooltips.hpp"
 
 namespace
 {
@@ -226,7 +228,7 @@ namespace MWGui
         redraw();
     }
 
-    MyGUI::IntPoint LocalMapBase::getMarkerPosition(float worldX, float worldY, MarkerPosition& markerPos)
+    MyGUI::IntPoint LocalMapBase::getMarkerPosition(float worldX, float worldY, MarkerUserData& markerPos)
     {
         MyGUI::IntPoint widgetPos;
         // normalized cell coordinates
@@ -295,7 +297,7 @@ namespace MWGui
                     continue;
             }
 
-            MarkerPosition markerPos;
+            MarkerUserData markerPos;
             MyGUI::IntPoint widgetPos = getMarkerPosition(marker.mWorldX, marker.mWorldY, markerPos);
 
             MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
@@ -380,8 +382,17 @@ namespace MWGui
         {
             MWBase::World::DoorMarker marker = *it;
 
-            MarkerPosition markerPos;
-            MyGUI::IntPoint widgetPos = getMarkerPosition(marker.x, marker.y, markerPos);
+            std::vector<std::string> destNotes;
+            for (std::vector<ESM::CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
+            {
+                if (it->mCell == marker.dest)
+                    destNotes.push_back(it->mNote);
+            }
+
+            MarkerUserData data;
+            data.notes = destNotes;
+            data.caption = marker.name;
+            MyGUI::IntPoint widgetPos = getMarkerPosition(marker.x, marker.y, data);
             MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
                                         widgetPos.top - 4,
                                         8, 8);
@@ -392,12 +403,10 @@ namespace MWGui
             markerWidget->setHoverColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal_over}")));
             markerWidget->setDepth(Local_MarkerLayer);
             markerWidget->setNeedMouseFocus(true);
-            markerWidget->setUserString("ToolTipType", "Layout");
-            markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
-            markerWidget->setUserString("Caption_TextOneLine", marker.name);
             // Used by tooltips to not show the tooltip if marker is hidden by fog of war
-            markerWidget->setUserString("IsMarker", "true");
-            markerWidget->setUserData(markerPos);
+            markerWidget->setUserString("ToolTipType", "MapMarker");
+
+            markerWidget->setUserData(data);
             doorMarkerCreated(markerWidget);
 
             mDoorMarkerWidgets.push_back(markerWidget);
@@ -480,7 +489,7 @@ namespace MWGui
         for (std::vector<MWWorld::Ptr>::iterator it = markers.begin(); it != markers.end(); ++it)
         {
             const ESM::Position& worldPos = it->getRefData().getPosition();
-            MarkerPosition markerPos;
+            MarkerUserData markerPos;
             MyGUI::IntPoint widgetPos = getMarkerPosition(worldPos.pos[0], worldPos.pos[1], markerPos);
             MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
                                         widgetPos.top - 4,
@@ -490,9 +499,8 @@ namespace MWGui
                 widgetCoord, MyGUI::Align::Default);
             markerWidget->setDepth(Local_MarkerAboveFogLayer);
             markerWidget->setImageTexture(markerTexture);
-            markerWidget->setUserString("IsMarker", "true");
-            markerWidget->setUserData(markerPos);
             markerWidget->setColour(markerColour);
+            markerWidget->setNeedMouseFocus(false);
             mMagicMarkerWidgets.push_back(markerWidget);
         }
     }
@@ -526,7 +534,7 @@ namespace MWGui
         if (markedCell && markedCell->isExterior() == !mInterior
                 && (!mInterior || Misc::StringUtils::ciEqual(markedCell->getCell()->mName, mPrefix)))
         {
-            MarkerPosition markerPos;
+            MarkerUserData markerPos;
             MyGUI::IntPoint widgetPos = getMarkerPosition(markedPosition.pos[0], markedPosition.pos[1], markerPos);
             MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
                                         widgetPos.top - 4,
@@ -535,8 +543,7 @@ namespace MWGui
                 widgetCoord, MyGUI::Align::Default);
             markerWidget->setDepth(Local_MarkerAboveFogLayer);
             markerWidget->setImageTexture("textures\\menu_map_smark.dds");
-            markerWidget->setUserString("IsMarker", "true");
-            markerWidget->setUserData(markerPos);
+            markerWidget->setNeedMouseFocus(false);
             mMagicMarkerWidgets.push_back(markerWidget);
         }
 

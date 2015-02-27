@@ -11,6 +11,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/journal.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -196,7 +197,7 @@ namespace MWScript
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
-                    runtime.push (ptr.getClass().getNpcStats (ptr).isSameFaction (player.getClass().getNpcStats (player)));
+                    player.getClass().getNpcStats (player).isInFaction(ptr.getClass().getPrimaryFaction(ptr));
                 }
         };
 

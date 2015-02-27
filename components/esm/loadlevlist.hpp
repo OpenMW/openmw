@@ -11,14 +11,14 @@ class ESMReader;
 class ESMWriter;
 
 /*
- * Leveled lists. Since these have identical layout, I only bothered
+ * Levelled lists. Since these have identical layout, I only bothered
  * to implement it once.
  *
- * We should later implement the ability to merge leveled lists from
+ * We should later implement the ability to merge levelled lists from
  * several files.
  */
 
-struct LeveledListBase
+struct LevelledListBase
 {
     int mFlags;
     unsigned char mChanceNone; // Chance that none are selected (0-100)
@@ -43,7 +43,7 @@ struct LeveledListBase
     ///< Set record to default state (does not touch the ID).
 };
 
-struct CreatureLevList: LeveledListBase
+struct CreatureLevList: LevelledListBase
 {
     static unsigned int sRecordId;
 
@@ -61,7 +61,7 @@ struct CreatureLevList: LeveledListBase
     }
 };
 
-struct ItemLevList: LeveledListBase
+struct ItemLevList: LevelledListBase
 {
     static unsigned int sRecordId;
 
@@ -72,7 +72,7 @@ struct ItemLevList: LeveledListBase
                           // list is instantiated, instead of
                           // giving several identical items
                           // (used when a container has more
-                          // than one instance of one leveled
+                          // than one instance of one levelled
                           // list.)
         AllLevels = 0x02  // Calculate from all levels <= player
                           // level, not just the closest below

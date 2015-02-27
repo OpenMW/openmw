@@ -32,6 +32,21 @@ namespace MWScript
         return (mShorts.empty() && mLongs.empty() && mFloats.empty());
     }
 
+    bool Locals::hasVar(const std::string &script, const std::string &var)
+    {
+        try
+        {
+            const Compiler::Locals& locals =
+                MWBase::Environment::get().getScriptManager()->getLocals(script);
+            int index = locals.getIndex(var);
+            return (index != -1);
+        }
+        catch (const Compiler::SourceException&)
+        {
+            return false;
+        }
+    }
+
     int Locals::getIntVar(const std::string &script, const std::string &var)
     {
         const Compiler::Locals& locals = MWBase::Environment::get().getScriptManager()->getLocals(script);

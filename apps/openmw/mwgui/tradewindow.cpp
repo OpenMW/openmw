@@ -16,6 +16,7 @@
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
@@ -133,8 +134,6 @@ namespace MWGui
 
         updateLabels();
 
-        // Careful here. setTitle may cause size updates, causing itemview redraw, so make sure to do it last
-        // or we end up using a possibly invalid model.
         setTitle(actor.getClass().getName(actor));
 
         onFilterChanged(mFilterAll);
@@ -302,7 +301,8 @@ namespace MWGui
         // check if the player is attempting to sell back an item stolen from this actor
         for (std::vector<ItemStack>::iterator it = merchantBought.begin(); it != merchantBought.end(); ++it)
         {
-            if (Misc::StringUtils::ciEqual(it->mBase.getCellRef().getOwner(), mPtr.getCellRef().getRefId()))
+            if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(it->mBase.getCellRef().getRefId(),
+                                                                                   mPtr.getCellRef().getRefId()))
             {
                 std::string msg = gmst.find("sNotifyMessage49")->getString();
                 if (msg.find("%s") != std::string::npos)
@@ -316,6 +316,8 @@ namespace MWGui
                 return;
             }
         }
+
+        // TODO: move to mwmechanics
 
         // Is the player buying?
         bool buying = (mCurrentMerchantOffer < 0);

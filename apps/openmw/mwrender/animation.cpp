@@ -18,6 +18,7 @@
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadstat.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/settings/settings.hpp>
 
 #include <libs/openengine/ogre/lights.hpp>
 
@@ -1272,8 +1273,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
     else
         params.mObjects = NifOgre::Loader::createObjects(mSkelBase, bonename, "", mInsert, model);
 
-    // TODO: turn off shadow casting
-    setRenderProperties(params.mObjects, RV_Misc,
+    setRenderProperties(params.mObjects, RV_Effects,
                         RQG_Main, RQG_Alpha, 0.f, false, NULL);
 
     params.mLoop = loop;

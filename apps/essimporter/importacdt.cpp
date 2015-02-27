@@ -20,12 +20,22 @@ namespace ESSImport
 
         ESM::CellRef::loadData(esm);
 
-        // FIXME: not all actors have this, add flag
-        esm.getHNOT(mACDT, "ACDT");
+        mHasACDT = false;
+        if (esm.isNextSub("ACDT"))
+        {
+            mHasACDT = true;
+            esm.getHT(mACDT);
+        }
 
-        ACSC acsc;
-        esm.getHNOT(acsc, "ACSC");
-        esm.getHNOT(acsc, "ACSL");
+        mHasACSC = false;
+        if (esm.isNextSub("ACSC"))
+        {
+            mHasACSC = true;
+            esm.getHT(mACSC);
+        }
+
+        if (esm.isNextSub("ACSL"))
+            esm.skipHSubSize(112);
 
         if (esm.isNextSub("CSTN"))
             esm.skipHSub(); // "PlayerSaveGame", link to some object?
@@ -60,10 +70,6 @@ namespace ESSImport
         if (esm.isNextSub("PWPS"))
             esm.skipHSub();
 
-        // unsure at which point between LSTN and CHRD
-        if (esm.isNextSub("APUD"))
-            esm.skipHSub(); // 40 bytes, starts with string "ancestor guardian". maybe spellcasting in progress?
-
         if (esm.isNextSub("WNAM"))
         {
             std::string id = esm.getHString();
@@ -75,6 +81,20 @@ namespace ESSImport
 
             if (esm.isNextSub("YNAM"))
                 esm.skipHSub(); // 4 byte, 0
+        }
+
+        while (esm.isNextSub("APUD"))
+        {
+            // used power
+            esm.getSubHeader();
+            std::string id = esm.getString(32);
+            (void)id;
+            // timestamp can't be used: this is the total hours passed, calculated by
+            // timestamp = 24 * (365 * year + cumulativeDays[month] + day)
+            // unfortunately cumulativeDays[month] is not clearly defined,
+            // in the (non-MCP) vanilla version the first month was missing, but MCP added it.
+            double timestamp;
+            esm.getT(timestamp);
         }
 
         // FIXME: not all actors have this, add flag
