@@ -10,7 +10,7 @@
                 <Property key="TextAlign" value="Center"/>
             </Widget>
 
-            <Widget type="ScrollBar" skin="MW_ProgressScroll_Loading" position="20 30 260 6" name="ProgressBar">
+            <Widget type="ScrollBar" skin="MW_ProgressScroll_Loading" position="20 30 260 6" align="Top HCenter" name="ProgressBar">
             </Widget>
 
         </Widget>
