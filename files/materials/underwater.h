@@ -93,7 +93,7 @@ float3 getCaustics (shTexture2D causticMap, float3 worldPos, float3 waterEyePos,
     // NOTE: the original shader calculated a tangent space basis here, 
     // but using only the world normal is cheaper and i couldn't see a visual difference
     // also, if this effect gets moved to screen-space some day, it's unlikely to have tangent information
-    float3 causticNorm = worldNormal.xyz * perturb(causticMap, causticPos.xy, causticdepth, windDir_windSpeed.xy, windDir_windSpeed.z, waterTimer).xyz * 2 - 1;
+    float3 causticNorm = worldNormal.xyz * perturb(causticMap, causticPos.xy, causticdepth, windDir_windSpeed.xy, windDir_windSpeed.z, waterTimer).xyz * 2.0 - float3(1.0,1.0,1.0);
     causticNorm = float3(causticNorm.x, causticNorm.y, -causticNorm.z);
 
     //float fresnel = pow(clamp(dot(LV,causticnorm),0.0,1.0),2.0); 
@@ -111,7 +111,7 @@ float3 getCaustics (shTexture2D causticMap, float3 worldPos, float3 waterEyePos,
     //caustics = shSaturate(pow(float3(causticR,causticG,causticB)*5.5,float3(5.5*causticdepth)))*NdotL*sunFade*causticdepth;
                 caustics = shSaturate(pow(float3(causticR,causticG,causticB)*5.5,float3(5.5*causticdepth,5.5*causticdepth,5.5*causticdepth)))*NdotL*causticdepth;
 
-    caustics *= 3;
+    caustics *= 3.0;
     
     // shore transition
     caustics = shLerp (float3(1,1,1), caustics, waterDepth);
