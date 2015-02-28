@@ -115,9 +115,10 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
         return Qt::NoItemFlags;
 
     Qt::ItemFlags returnFlags;
-    bool gamefileChecked = false;
 
     // addon can be checked if its gamefile is
+    // ... special case, addon with no dependency can be used with any gamefile.
+    bool gamefileChecked = (file->gameFiles().count() == 0);
     foreach (const QString &fileName, file->gameFiles())
     {
         bool depFound = false;

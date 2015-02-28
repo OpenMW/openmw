@@ -64,7 +64,7 @@ namespace ContentSelectorModel
                                                              .arg(mGameFiles.join(", "));
                                                     }
 
-        inline bool isGameFile() const              { return (mGameFiles.size() == 0); }
+        bool isGameFile() const;
         QByteArray encodedData() const;
 
     public:
