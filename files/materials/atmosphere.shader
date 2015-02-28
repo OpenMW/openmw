@@ -11,7 +11,7 @@
     SH_START_PROGRAM
     {
         float4x4 viewFixed = view;
-#if !SH_GLSL
+#if !SH_GLSL || !SH_GLSLES
         viewFixed[0][3] = 0.0;
         viewFixed[1][3] = 0.0;
         viewFixed[2][3] = 0.0;
