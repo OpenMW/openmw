@@ -414,13 +414,17 @@ namespace Physic
             + boost::lexical_cast<std::string>(x) + "_"
             + boost::lexical_cast<std::string>(y);
 
-        HeightField hf = mHeightFieldMap [name];
+        HeightFieldContainer::iterator it = mHeightFieldMap.find(name);
+        if (it == mHeightFieldMap.end())
+            return;
+
+        const HeightField& hf = it->second;
 
         mDynamicsWorld->removeRigidBody(hf.mBody);
         delete hf.mShape;
         delete hf.mBody;
 
-        mHeightFieldMap.erase(name);
+        mHeightFieldMap.erase(it);
     }
 
     void PhysicEngine::adjustRigidBody(RigidBody* body, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,

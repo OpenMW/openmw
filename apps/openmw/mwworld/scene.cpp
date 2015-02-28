@@ -199,7 +199,7 @@ namespace MWWorld
                     (*iter)->getCell()->getGridX(),
                     (*iter)->getCell()->getGridY()
                 );
-            if (land)
+            if (land && land->mDataTypes&ESM::Land::DATA_VHGT)
                 mPhysics->removeHeightField ((*iter)->getCell()->getGridX(), (*iter)->getCell()->getGridY());
         }
 
