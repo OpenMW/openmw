@@ -56,6 +56,42 @@ namespace
         }
     }
 
+    void applyDynamicStatsEffect(int attribute, const MWWorld::Ptr& target, float magnitude)
+    {
+        MWMechanics::DynamicStat<float> value = target.getClass().getCreatureStats(target).getDynamic(attribute);
+        value.setCurrent(value.getCurrent()+magnitude, attribute == 2);
+        target.getClass().getCreatureStats(target).setDynamic(attribute, value);
+    }
+
+    // TODO: refactor the effect tick functions in Actors so they can be reused here
+    void applyInstantEffectTick(int effectId, const MWWorld::Ptr& target, float magnitude)
+    {
+        if (effectId == ESM::MagicEffect::DamageHealth)
+        {
+            applyDynamicStatsEffect(0, target, magnitude * -1);
+        }
+        else if (effectId == ESM::MagicEffect::RestoreHealth)
+        {
+            applyDynamicStatsEffect(0, target, magnitude);
+        }
+        else if (effectId == ESM::MagicEffect::DamageFatigue)
+        {
+            applyDynamicStatsEffect(2, target, magnitude * -1);
+        }
+        else if (effectId == ESM::MagicEffect::RestoreFatigue)
+        {
+            applyDynamicStatsEffect(2, target, magnitude);
+        }
+        else if (effectId == ESM::MagicEffect::DamageMagicka)
+        {
+            applyDynamicStatsEffect(1, target, magnitude * -1);
+        }
+        else if (effectId == ESM::MagicEffect::RestoreMagicka)
+        {
+            applyDynamicStatsEffect(1, target, magnitude);
+        }
+    }
+
 }
 
 namespace MWMechanics
@@ -438,8 +474,8 @@ namespace MWMechanics
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
                 magnitude *= magnitudeMult;
 
-                bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration) && effectIt->mDuration > 0;
-                if (target.getClass().isActor() && hasDuration)
+                bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
+                if (target.getClass().isActor() && hasDuration && effectIt->mDuration > 0)
                 {
                     ActiveSpells::ActiveEffect effect;
                     effect.mEffectId = effectIt->mEffectID;
@@ -471,7 +507,12 @@ namespace MWMechanics
                     }
                 }
                 else
-                    applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude);
+                {
+                    if (hasDuration && target.getClass().isActor())
+                        applyInstantEffectTick(effectIt->mEffectID, target, magnitude);
+                    else
+                        applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude);
+                }
 
                 // Re-casting a summon effect will remove the creature from previous castings of that effect.
                 if (isSummoningEffect(effectIt->mEffectID) && !target.isEmpty() && target.getClass().isActor())
@@ -594,31 +635,6 @@ namespace MWMechanics
                     value.restore(magnitude);
                 target.getClass().getCreatureStats(target).setAttribute(attribute, value);
             }
-            // TODO: refactor the effect tick functions in Actors so they can be reused here
-            else if (effectId == ESM::MagicEffect::DamageHealth)
-            {
-                applyDynamicStatsEffect(0, target, magnitude * -1);
-            }
-            else if (effectId == ESM::MagicEffect::RestoreHealth)
-            {
-                applyDynamicStatsEffect(0, target, magnitude);
-            }
-            else if (effectId == ESM::MagicEffect::DamageFatigue)
-            {
-                applyDynamicStatsEffect(2, target, magnitude * -1);
-            }
-            else if (effectId == ESM::MagicEffect::RestoreFatigue)
-            {
-                applyDynamicStatsEffect(2, target, magnitude);
-            }
-            else if (effectId == ESM::MagicEffect::DamageMagicka)
-            {
-                applyDynamicStatsEffect(1, target, magnitude * -1);
-            }
-            else if (effectId == ESM::MagicEffect::RestoreMagicka)
-            {
-                applyDynamicStatsEffect(1, target, magnitude);
-            }
             else if (effectId == ESM::MagicEffect::DamageSkill || effectId == ESM::MagicEffect::RestoreSkill)
             {
                 if (target.getTypeName() != typeid(ESM::NPC).name())
@@ -680,13 +696,7 @@ namespace MWMechanics
             }
         }
     }
-    
-    void CastSpell::applyDynamicStatsEffect(int attribute, const MWWorld::Ptr& target, float magnitude)
-    {
-        DynamicStat<float> value = target.getClass().getCreatureStats(target).getDynamic(attribute);
-        value.setCurrent(value.getCurrent()+magnitude, attribute == 2);
-        target.getClass().getCreatureStats(target).setDynamic(attribute, value);
-    }
+
 
     bool CastSpell::cast(const std::string &id)
     {
