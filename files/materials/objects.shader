@@ -139,7 +139,7 @@
 #endif
 
 #if ENV_MAP || VERTEX_LIGHTING
-        float3 viewNormal = normalize(shMatrixMult(worldView, float4(normal.xyz, 0)).xyz);
+        float3 viewNormal = normalize(shMatrixMult(worldView, float4(normal.xyz, 0.0)).xyz);
 #endif
 
 #if ENV_MAP
@@ -449,8 +449,8 @@
         shOutputColour(0) = diffuse;
 
 #if !VERTEX_LIGHTING
-        float3 viewPos = shMatrixMult(worldView, float4(objSpacePositionPassthrough.xyz,1)).xyz;
-        float3 viewNormal = normalize(shMatrixMult(worldView, float4(normal.xyz, 0)).xyz);
+        float3 viewPos = shMatrixMult(worldView, float4(objSpacePositionPassthrough.xyz,1.0)).xyz;
+        float3 viewNormal = normalize(shMatrixMult(worldView, float4(normal.xyz, 0.0)).xyz);
 
         float3 lightDir;
         float d;

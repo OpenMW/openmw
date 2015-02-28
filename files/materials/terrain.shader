@@ -376,7 +376,7 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
 #if @shIterator == 0 && IS_FIRST_PASS
         TSnormal = normalize(normalTex.xyz * 2.0 - float3(1.0,1.0,1.0));
 #else
-        TSnormal = shLerp(TSnormal, normalTex.xyz * 2.0 - 1.0, blendValues@shPropertyString(blendmap_component_@shIterator));
+        TSnormal = shLerp(TSnormal, normalTex.xyz * 2.0 - float3 (1.0,1.0,1.0), blendValues@shPropertyString(blendmap_component_@shIterator));
 #endif
 #endif
 
