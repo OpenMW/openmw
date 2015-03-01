@@ -70,9 +70,9 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
 
     // Check item's faction rank
     if (hasFaction && cellRef.mFactionRank < -1)
-        messages.push_back(std::make_pair(id, " has faction set but has invalid faction rank " + cellRef.mFactionRank));
+        messages.push_back(std::make_pair(id, " has faction set but has invalid faction rank " + boost::lexical_cast<std::string>(cellRef.mFactionRank)));
     else if (!hasFaction && cellRef.mFactionRank != -2)
-        messages.push_back(std::make_pair(id, " has invalid faction rank " + cellRef.mFactionRank));
+        messages.push_back(std::make_pair(id, " has invalid faction rank " + boost::lexical_cast<std::string>(cellRef.mFactionRank)));
 
     // If door have destination cell, check if that reference is valid
     if (!cellRef.mDestCell.empty())
