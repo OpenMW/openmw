@@ -64,8 +64,9 @@ namespace
     }
 
     // TODO: refactor the effect tick functions in Actors so they can be reused here
-    void applyInstantEffectTick(int effectId, const MWWorld::Ptr& target, float magnitude)
+    void applyInstantEffectTick(MWMechanics::EffectKey effect, const MWWorld::Ptr& target, float magnitude)
     {
+        int effectId = effect.mId;
         if (effectId == ESM::MagicEffect::DamageHealth)
         {
             applyDynamicStatsEffect(0, target, magnitude * -1);
@@ -89,6 +90,27 @@ namespace
         else if (effectId == ESM::MagicEffect::RestoreMagicka)
         {
             applyDynamicStatsEffect(1, target, magnitude);
+        }
+        else if (effectId == ESM::MagicEffect::DamageAttribute || effectId == ESM::MagicEffect::RestoreAttribute)
+        {
+            int attribute = effect.mArg;
+            MWMechanics::AttributeValue value = target.getClass().getCreatureStats(target).getAttribute(attribute);
+            if (effectId == ESM::MagicEffect::DamageAttribute)
+                value.damage(magnitude);
+            else
+                value.restore(magnitude);
+            target.getClass().getCreatureStats(target).setAttribute(attribute, value);
+        }
+        else if (effectId == ESM::MagicEffect::DamageSkill || effectId == ESM::MagicEffect::RestoreSkill)
+        {
+            if (target.getTypeName() != typeid(ESM::NPC).name())
+                return;
+            int skill = effect.mArg;
+            MWMechanics::SkillValue& value = target.getClass().getNpcStats(target).getSkill(skill);
+            if (effectId == ESM::MagicEffect::DamageSkill)
+                value.damage(magnitude);
+            else
+                value.restore(magnitude);
         }
     }
 
@@ -509,7 +531,7 @@ namespace MWMechanics
                 else
                 {
                     if (hasDuration && target.getClass().isActor())
-                        applyInstantEffectTick(effectIt->mEffectID, target, magnitude);
+                        applyInstantEffectTick(EffectKey(*effectIt), target, magnitude);
                     else
                         applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude);
                 }
@@ -525,16 +547,6 @@ namespace MWMechanics
                         targetStats.getSummonedCreatureMap().erase(found);
                     }
                 }
-
-                // HACK: Damage attribute/skill actually has a duration, even though the actual effect is instant and permanent.
-                // This was probably just done to have the effect visible in the magic menu for a while
-                // to notify the player they've been damaged?
-                if (effectIt->mEffectID == ESM::MagicEffect::DamageAttribute
-                        || effectIt->mEffectID == ESM::MagicEffect::DamageSkill
-                        || effectIt->mEffectID == ESM::MagicEffect::RestoreAttribute
-                        || effectIt->mEffectID == ESM::MagicEffect::RestoreSkill
-                        )
-                    applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude);
 
                 if (target.getClass().isActor() || magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
                 {
@@ -625,28 +637,6 @@ namespace MWMechanics
         }
         else
         {
-            if (effectId == ESM::MagicEffect::DamageAttribute || effectId == ESM::MagicEffect::RestoreAttribute)
-            {
-                int attribute = effect.mArg;
-                AttributeValue value = target.getClass().getCreatureStats(target).getAttribute(attribute);
-                if (effectId == ESM::MagicEffect::DamageAttribute)
-                    value.damage(magnitude);
-                else
-                    value.restore(magnitude);
-                target.getClass().getCreatureStats(target).setAttribute(attribute, value);
-            }
-            else if (effectId == ESM::MagicEffect::DamageSkill || effectId == ESM::MagicEffect::RestoreSkill)
-            {
-                if (target.getTypeName() != typeid(ESM::NPC).name())
-                    return;
-                int skill = effect.mArg;
-                SkillValue& value = target.getClass().getNpcStats(target).getSkill(skill);
-                if (effectId == ESM::MagicEffect::DamageSkill)
-                    value.damage(magnitude);
-                else
-                    value.restore(magnitude);
-            }
-
             if (effectId == ESM::MagicEffect::CurePoison)
                 target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(ESM::MagicEffect::Poison);
             else if (effectId == ESM::MagicEffect::CureParalyzation)
