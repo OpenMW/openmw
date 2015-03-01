@@ -43,13 +43,17 @@ namespace ESSImport
         float mMagicEffects[27]; // Effect attributes: https://wiki.openmw.org/index.php?title=Research:Magic#Effect_attributes
         unsigned char mUnknown4[4];
         unsigned int mGoldPool;
-        unsigned char mUnknown5[4];
+        unsigned char mCountDown; // seen the same value as in ACSC.mCorpseClearCountdown, maybe
+                                  // this one is for respawning?
+        unsigned char mUnknown5[3];
     };
     struct ACSC
     {
         unsigned char mUnknown1[17];
         unsigned char mFlags; // ACSCFlags
-        unsigned char mUnknown2[94];
+        unsigned char mUnknown2[22];
+        unsigned char mCorpseClearCountdown; // hours?
+        unsigned char mUnknown3[71];
     };
 #pragma pack(pop)
 

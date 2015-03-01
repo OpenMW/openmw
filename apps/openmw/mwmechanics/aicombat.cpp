@@ -207,16 +207,6 @@ namespace MWMechanics
         const MWWorld::Class& actorClass = actor.getClass();
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
-        // can't fight if attacker can't go where target is.  E.g. A fish can't attack person on land.
-        if (!actorClass.isNpc() && !MWMechanics::isEnvironmentCompatible(actor, target))
-        {
-            actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
-            return true;
-        }
-        
-
-      
-        
 
         //Update every frame
         bool& combatMove = storage.mCombatMove;
@@ -475,6 +465,19 @@ namespace MWMechanics
 
         // for distant combat we should know if target is in LOS even if distToTarget < rangeAttack 
         bool inLOS = distantCombat ? world->getLOS(actor, target) : true;
+
+        // can't fight if attacker can't go where target is.  E.g. A fish can't attack person on land.
+        if (distToTarget >= rangeAttack
+                && !actorClass.isNpc() && !MWMechanics::isEnvironmentCompatible(actor, target))
+        {
+            // TODO: start fleeing?
+            movement.mPosition[0] = 0;
+            movement.mPosition[1] = 0;
+            movement.mPosition[2] = 0;
+            readyToAttack = false;
+            actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
+            return false;
+        }
 
         // (within attack dist) || (not quite attack dist while following)
         if(inLOS && (distToTarget < rangeAttack || (distToTarget <= rangeFollow && followTarget && !isStuck)))

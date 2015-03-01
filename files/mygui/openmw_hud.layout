@@ -112,7 +112,8 @@
                         <Property key="ImageTexture" value="textures\compass.dds"/>
                     </Widget>
 
-                    <Widget type="Button" skin="" position="0 0 1536 1536" name="MiniMapButton" align="Right Bottom">
+                    <Widget type="Button" skin="" position_real="0 0 1 1" name="MiniMapButton" align="Stretch">
+                        <Property key="Depth" value="10"/>
                     </Widget>
 
                 </Widget>

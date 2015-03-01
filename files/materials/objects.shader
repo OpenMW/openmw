@@ -243,7 +243,9 @@
     }
 
 #else
-
+#if NORMAL_MAP && SH_GLSLES
+    mat3 transpose( mat3 m);
+#endif
     // ----------------------------------- FRAGMENT ------------------------------------------
 
 #if UNDERWATER
@@ -376,13 +378,13 @@
         float3 binormal = cross(tangentPassthrough.xyz, normal.xyz);
         float3x3 tbn = float3x3(tangentPassthrough.xyz, binormal, normal.xyz);
 
-        #if SH_GLSL
+        #if SH_GLSL || SH_GLSLES
             tbn = transpose(tbn);
         #endif
 
         float4 normalTex = shSample(normalMap, UV.xy);
 
-        normal = normalize (shMatrixMult( transpose(tbn), normalTex.xyz * 2 - 1 ));
+        normal = normalize (shMatrixMult( transpose(tbn), normalTex.xyz * 2.0 - float3 (1.0,1.0,1.0) ));
 #endif
 
 #if ENV_MAP || SPECULAR || PARALLAX
@@ -576,5 +578,14 @@
         // prevent negative colour output (for example with negative lights)
         shOutputColour(0).xyz = max(shOutputColour(0).xyz, float3(0.0,0.0,0.0));
     }
+#if NORMAL_MAP && SH_GLSLES
+         mat3 transpose(mat3 m){
+           return  mat3(
+            m[0][0],m[1][0],m[2][0],
+            m[0][1],m[1][1],m[2][1],
+            m[0][2],m[1][2],m[2][2]
+            );
+         }
+#endif
 
 #endif

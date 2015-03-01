@@ -17,7 +17,7 @@ namespace MWGui
 {
     JailScreen::JailScreen()
         : WindowBase("openmw_jail_screen.layout"),
-          mTimeAdvancer(0.0125),
+          mTimeAdvancer(0.01),
           mDays(1),
           mFadeTimeRemaining(0)
     {
@@ -39,7 +39,7 @@ namespace MWGui
         mFadeTimeRemaining = 0.5;
 
         setVisible(false);
-        mProgressBar->setScrollRange(days*24+1);
+        mProgressBar->setScrollRange(100+1);
         mProgressBar->setScrollPosition(0);
         mProgressBar->setTrackSize(0);
     }
@@ -59,7 +59,7 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->teleportToClosestMarker(player, "prisonmarker");
 
             setVisible(true);
-            mTimeAdvancer.run(mDays*24);
+            mTimeAdvancer.run(100);
         }
     }
 

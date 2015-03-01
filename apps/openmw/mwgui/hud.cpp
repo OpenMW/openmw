@@ -671,4 +671,14 @@ namespace MWGui
         mEnemyHealthTimer = -1;
     }
 
+    void HUD::customMarkerCreated(MyGUI::Widget *marker)
+    {
+        marker->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
+    }
+
+    void HUD::doorMarkerCreated(MyGUI::Widget *marker)
+    {
+        marker->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
+    }
+
 }

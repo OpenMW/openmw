@@ -19,7 +19,6 @@ namespace ContentSelectorView
     protected:
 
         ContentSelectorModel::ContentModel *mContentModel;
-        QSortFilterProxyModel *mGameFileProxyModel;
         QSortFilterProxyModel *mAddonProxyModel;
 
     public:
@@ -52,6 +51,7 @@ namespace ContentSelectorView
         void buildContentModel();
         void buildGameFileView();
         void buildAddonView();
+        void setGameFileSelected(int index, bool selected);
 
     signals:
         void signalCurrentGamefileIndexChanged (int);

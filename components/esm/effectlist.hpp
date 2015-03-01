@@ -29,11 +29,15 @@ namespace ESM
     };
     #pragma pack(pop)
 
+    /// EffectList, ENAM subrecord
     struct EffectList
     {
-
         std::vector<ENAMstruct> mList;
 
+        /// Load one effect, assumes subrecord name was already read
+        void add(ESMReader &esm);
+
+        /// Load all effects
         void load(ESMReader &esm);
         void save(ESMWriter &esm) const;
     };

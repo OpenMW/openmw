@@ -1,8 +1,8 @@
 particle_system openmw/Ripples
 {
     material openmw/Ripple
-    particle_width 50
-    particle_height 50
+    particle_width 30
+    particle_height 30
     // To make the particles move with the scene node when the waterlevel changes
     local_space true
     quota 300
@@ -17,7 +17,7 @@ particle_system openmw/Ripples
 
     affector Scaler
     {
-	rate 100
+        rate 120
     }
 
     affector Rotator

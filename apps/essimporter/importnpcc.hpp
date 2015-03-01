@@ -27,6 +27,7 @@ namespace ESSImport
         } mNPDT;
 
         Inventory mInventory;
+        ESM::AIPackageList mAiPackages;
 
         void load(ESM::ESMReader &esm);
     };

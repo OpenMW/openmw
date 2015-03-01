@@ -28,9 +28,9 @@
             <State name="normal" colour="#{fontcolour=journal_topic}" shift="0"/>
             <State name="highlighted" colour="#{fontcolour=journal_topic_over}" shift="0"/>
             <State name="pushed" colour="#{fontcolour=journal_topic_pressed}" shift="0"/>
-            <State name="normal_checked" colour="#{fontcolour=journal_topic_pressed}" shift="0"/>
-            <State name="highlighted_checked" colour="#{fontcolour=journal_topic_pressed}" shift="0"/>
-            <State name="pushed_checked" colour="#{fontcolour=journal_topic_pressed}" shift="0"/>
+            <State name="normal_checked" colour="0.2 0.2 0.2" shift="0"/>
+            <State name="highlighted_checked" colour="0.4 0.4 0.4" shift="0"/>
+            <State name="pushed_checked" colour="0.5 0.5 0.5" shift="0"/>
         </BasisSkin>
     </Resource>
 </MyGUI>
