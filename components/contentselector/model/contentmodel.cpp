@@ -9,14 +9,13 @@
 
 #include "components/esm/esmreader.hpp"
 
-ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon, bool showGameFiles) :
+ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon) :
     QAbstractTableModel(parent),
     mWarningIcon(warningIcon),
     mMimeType ("application/omwcontent"),
     mMimeTypes (QStringList() << mMimeType),
     mColumnCount (1),
-    mDropActions (Qt::MoveAction),
-    mShowGameFiles(showGameFiles)
+    mDropActions (Qt::MoveAction)
 {
     setEncoding ("win1252");
     uncheckAll();
@@ -111,14 +110,9 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     if (!file)
         return Qt::NoItemFlags;
 
-    //game files are not shown (unless OpenCS)
+    //game files can always be checked
     if (file->isGameFile())
-    {
-        if(mShowGameFiles)
-            return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
-        else
-            return Qt::NoItemFlags;
-    }
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
 
     Qt::ItemFlags returnFlags;
 

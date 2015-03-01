@@ -13,21 +13,21 @@
 #include <QDir>
 #include <assert.h>
 
-ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent, bool showGameFiles) :
+ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
     QObject(parent)
 {
     ui.setupUi(parent);
     ui.addonView->setDragDropMode(QAbstractItemView::InternalMove);
 
-    buildContentModel(showGameFiles);
+    buildContentModel();
     buildGameFileView();
     buildAddonView();
 }
 
-void ContentSelectorView::ContentSelector::buildContentModel(bool showGameFiles)
+void ContentSelectorView::ContentSelector::buildContentModel()
 {
     QIcon warningIcon(ui.addonView->style()->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(QSize(16, 15)));
-    mContentModel = new ContentSelectorModel::ContentModel(this, warningIcon, showGameFiles);
+    mContentModel = new ContentSelectorModel::ContentModel(this, warningIcon);
 }
 
 void ContentSelectorView::ContentSelector::buildGameFileView()

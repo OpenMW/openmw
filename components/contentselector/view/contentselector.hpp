@@ -23,7 +23,7 @@ namespace ContentSelectorView
 
     public:
 
-        explicit ContentSelector(QWidget *parent = 0, bool showGameFiles = false);
+        explicit ContentSelector(QWidget *parent = 0);
 
         QString currentFile() const;
 
@@ -48,7 +48,7 @@ namespace ContentSelectorView
 
         Ui::ContentSelector ui;
 
-        void buildContentModel(bool showGameFiles);
+        void buildContentModel();
         void buildGameFileView();
         void buildAddonView();
         void setGameFileSelected(int index, bool selected);

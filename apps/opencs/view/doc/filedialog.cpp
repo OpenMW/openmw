@@ -24,7 +24,7 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     resize(400, 400);
 
     setObjectName ("FileDialog");
-    mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget, true);
+    mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget);
     mAdjusterWidget = new AdjusterWidget (this);
 }
 
