@@ -9,13 +9,14 @@
 
 #include "components/esm/esmreader.hpp"
 
-ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon) :
+ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon, bool showGameFiles) :
     QAbstractTableModel(parent),
     mWarningIcon(warningIcon),
     mMimeType ("application/omwcontent"),
     mMimeTypes (QStringList() << mMimeType),
     mColumnCount (1),
-    mDropActions (Qt::MoveAction)
+    mDropActions (Qt::MoveAction),
+    mShowGameFiles(showGameFiles)
 {
     setEncoding ("win1252");
     uncheckAll();
@@ -110,9 +111,14 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     if (!file)
         return Qt::NoItemFlags;
 
-    //game files are not shown
+    //game files are not shown (unless OpenCS)
     if (file->isGameFile())
-        return Qt::NoItemFlags;
+    {
+        if(mShowGameFiles)
+            return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
+        else
+            return Qt::NoItemFlags;
+    }
 
     Qt::ItemFlags returnFlags;
 
@@ -463,7 +469,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
 
             // HACK
-            // Load order constraint of Bloodmoon.esm needing Tribunal.esm is missing 
+            // Load order constraint of Bloodmoon.esm needing Tribunal.esm is missing
             // from the file supplied by Bethesda, so we have to add it ourselves
             if (file->fileName().compare("Bloodmoon.esm", Qt::CaseInsensitive) == 0)
             {

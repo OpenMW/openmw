@@ -23,7 +23,7 @@ namespace ContentSelectorModel
     {
         Q_OBJECT
     public:
-        explicit ContentModel(QObject *parent, QIcon warningIcon);
+        explicit ContentModel(QObject *parent, QIcon warningIcon, bool showGameFiles = false);
         ~ContentModel();
 
         void setEncoding(const QString &encoding);
@@ -66,6 +66,7 @@ namespace ContentSelectorModel
         void addFile(EsmFile *file);
         const EsmFile *item(int row) const;
         EsmFile *item(int row);
+        bool mShowGameFiles;
 
         void sortFiles();
 

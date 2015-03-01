@@ -24,7 +24,7 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     resize(400, 400);
 
     setObjectName ("FileDialog");
-    mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget);
+    mSelector = new ContentSelectorView::ContentSelector (ui.contentSelectorWidget, true);
     mAdjusterWidget = new AdjusterWidget (this);
 }
 
@@ -147,7 +147,7 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(int)
 
 void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
 {
-    bool success = (mSelector->selectedFiles().size() > 0);
+    bool success = !mSelector->selectedFiles().empty();
 
     bool isNew = (mAction == ContentAction_New);
 
