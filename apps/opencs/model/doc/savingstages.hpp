@@ -103,8 +103,20 @@ namespace CSMDoc
         if (state==CSMWorld::RecordBase::State_Modified ||
             state==CSMWorld::RecordBase::State_ModifiedOnly)
         {
-            mState.getWriter().startRecord (mCollection.getRecord (stage).mModified.sRecordId);
-            mState.getWriter().writeHNCString ("NAME", mCollection.getId (stage));
+            // FIXME: A quick Workaround to support SKIL records which should not write NAME.
+            // If there are more idcollection records that don't use NAME then a more
+            // generic solution may be required.  The conversion code was simply
+            // copied from esmwriter. There's room for improving speed a little bit
+            // here if it turns out to be an issue.
+            uint32_t name = mCollection.getRecord (stage).mModified.sRecordId;
+            mState.getWriter().startRecord (name);
+            std::string type;
+            for (int i=0; i<4; ++i)
+                /// \todo make endianess agnostic
+                type += reinterpret_cast<const char *> (&name)[i];
+
+            if(type != "SKIL")
+                mState.getWriter().writeHNCString ("NAME", mCollection.getId (stage));
             mCollection.getRecord (stage).mModified.save (mState.getWriter());
             mState.getWriter().endRecord (mCollection.getRecord (stage).mModified.sRecordId);
         }
