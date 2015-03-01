@@ -97,7 +97,7 @@
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
 
 
-	    #if !SH_GLSL
+	    #if !SH_GLSL && !SH_GLSLES
         float4x4 scalemat = float4x4(   0.5,    0.0,      0.0,      0.5,
                                         0.0,      -0.5,   0.0,      0.5,
                                         0.0,      0.0,      0.5,    0.5,
