@@ -245,7 +245,8 @@ namespace MWClass
         else
             typeText = "#{sHeavy}";
 
-        text += "\n#{sArmorRating}: " + MWGui::ToolTips::toString(ref->mBase->mData.mArmor);
+        text += "\n#{sArmorRating}: " + MWGui::ToolTips::toString(getEffectiveArmorRating(ptr,
+            MWBase::Environment::get().getWorld()->getPlayerPtr()));
 
         int remainingHealth = getItemHealth(ptr);
         text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
@@ -288,6 +289,22 @@ namespace MWClass
         newItem.mEnchant=enchId;
         const ESM::Armor *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         return record->mId;
+    }
+
+    int Armor::getEffectiveArmorRating(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor) const
+    {
+        MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+
+        int armorSkillType = getEquipmentSkill(ptr);
+        int armorSkill = actor.getClass().getSkill(actor, armorSkillType);
+
+        const MWBase::World *world = MWBase::Environment::get().getWorld();
+        int iBaseArmorSkill = world->getStore().get<ESM::GameSetting>().find("iBaseArmorSkill")->getInt();
+
+        if(ref->mBase->mData.mWeight == 0)
+            return ref->mBase->mData.mArmor;
+        else
+            return ref->mBase->mData.mArmor * armorSkill / iBaseArmorSkill;
     }
 
     std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const

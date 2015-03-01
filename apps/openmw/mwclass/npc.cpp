@@ -1086,7 +1086,6 @@ namespace MWClass
         MWMechanics::NpcStats &stats = getNpcStats(ptr);
         MWWorld::InventoryStore &invStore = getInventoryStore(ptr);
 
-        int iBaseArmorSkill = store.find("iBaseArmorSkill")->getInt();
         float fUnarmoredBase1 = store.find("fUnarmoredBase1")->getFloat();
         float fUnarmoredBase2 = store.find("fUnarmoredBase2")->getFloat();
         int unarmoredSkill = stats.getSkill(ESM::Skill::Unarmored).getModified();
@@ -1102,15 +1101,7 @@ namespace MWClass
             }
             else
             {
-                MWWorld::LiveCellRef<ESM::Armor> *ref = it->get<ESM::Armor>();
-
-                int armorSkillType = it->getClass().getEquipmentSkill(*it);
-                int armorSkill = stats.getSkill(armorSkillType).getModified();
-
-                if(ref->mBase->mData.mWeight == 0)
-                    ratings[i] = ref->mBase->mData.mArmor;
-                else
-                    ratings[i] = ref->mBase->mData.mArmor * armorSkill / iBaseArmorSkill;
+                ratings[i] = it->getClass().getEffectiveArmorRating(*it, ptr);
             }
         }
 
