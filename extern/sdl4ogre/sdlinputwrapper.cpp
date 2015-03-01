@@ -20,7 +20,7 @@ namespace SFO
         mMouseY(0),
         mMouseX(0),
         mMouseInWindow(true),
-        mJoyListener(NULL),
+        mConListener(NULL),
         mKeyboardListener(NULL),
         mMouseListener(NULL),
         mWindowListener(NULL),
@@ -91,24 +91,32 @@ namespace SFO
                 case SDL_TEXTINPUT:
                     mKeyboardListener->textInput(evt.text);
                     break;
+                case SDL_JOYHATMOTION: //As we manage everything with GameController, don't even bother with these.
                 case SDL_JOYAXISMOTION:
-                    if (mJoyListener)
-                        mJoyListener->axisMoved(evt.jaxis, evt.jaxis.axis);
-                    break;
                 case SDL_JOYBUTTONDOWN:
-                    if (mJoyListener)
-                        mJoyListener->buttonPressed(evt.jbutton, evt.jbutton.button);
-                    break;
                 case SDL_JOYBUTTONUP:
-                    if (mJoyListener)
-                        mJoyListener->buttonReleased(evt.jbutton, evt.jbutton.button);
-                    break;
                 case SDL_JOYDEVICEADDED:
-                    //SDL_JoystickOpen(evt.jdevice.which);
-                    //std::cout << "Detected a new joystick: " << SDL_JoystickNameForIndex(evt.jdevice.which) << std::endl;
-                    break;
                 case SDL_JOYDEVICEREMOVED:
-                    //std::cout << "A joystick has been removed" << std::endl;
+                    break;
+                case SDL_CONTROLLERDEVICEADDED:
+                    if(mConListener)
+                        mConListener->controllerAdded(1, evt.cdevice); //We only support one joystick, so give everything a generic deviceID
+                    break;
+                case SDL_CONTROLLERDEVICEREMOVED:
+                    if(mConListener)
+                        mConListener->controllerRemoved(evt.cdevice);
+                    break;
+                case SDL_CONTROLLERBUTTONDOWN:
+                    if(mConListener)
+                        mConListener->buttonPressed(1, evt.cbutton);
+                    break;
+                case SDL_CONTROLLERBUTTONUP:
+                    if(mConListener)
+                        mConListener->buttonReleased(1, evt.cbutton);
+                    break;
+                case SDL_CONTROLLERAXISMOTION:
+                    if(mConListener)
+                        mConListener->axisMoved(1, evt.caxis);
                     break;
                 case SDL_WINDOWEVENT:
                     handleWindowEvent(evt);
