@@ -110,9 +110,9 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     if (!file)
         return Qt::NoItemFlags;
 
-    //game files are not shown
+    //game files can always be checked
     if (file->isGameFile())
-        return Qt::NoItemFlags;
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
 
     Qt::ItemFlags returnFlags;
 
@@ -463,7 +463,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
 
             // HACK
-            // Load order constraint of Bloodmoon.esm needing Tribunal.esm is missing 
+            // Load order constraint of Bloodmoon.esm needing Tribunal.esm is missing
             // from the file supplied by Bethesda, so we have to add it ourselves
             if (file->fileName().compare("Bloodmoon.esm", Qt::CaseInsensitive) == 0)
             {

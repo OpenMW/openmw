@@ -147,7 +147,7 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(int)
 
 void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
 {
-    bool success = (mSelector->selectedFiles().size() > 0);
+    bool success = !mSelector->selectedFiles().empty();
 
     bool isNew = (mAction == ContentAction_New);
 
