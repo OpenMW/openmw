@@ -492,8 +492,6 @@ namespace MWWorld
         loadingListener->setProgressRange(refsToLoad);
 
         // Load cell.
-        std::cout << "cellName: " << cell->getCell()->mName << std::endl;
-
         loadCell (cell, loadingListener);
 
         changePlayerCell(cell, position, true);
