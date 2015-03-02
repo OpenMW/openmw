@@ -383,7 +383,7 @@ namespace ESMTerrain
         int cellY = std::floor(worldPos.y / 8192.f);
 
         ESM::Land* land = getLand(cellX, cellY);
-        if (!land)
+        if (!land || !(land->mDataTypes&ESM::Land::DATA_VHGT))
             return -2048;
 
         // Mostly lifted from Ogre::Terrain::getHeightAtTerrainPosition
