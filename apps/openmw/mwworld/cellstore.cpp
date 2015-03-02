@@ -407,8 +407,6 @@ namespace MWWorld
             if (mState==State_Preloaded)
                 mIds.clear();
 
-            std::cout << "loading cell " << mCell->getDescription() << std::endl;
-
             loadRefs (store, esm);
 
             mState = State_Loaded;
