@@ -335,7 +335,10 @@ void NpcAnimation::updateNpcBase()
 }
 
 void NpcAnimation::updateParts()
-{    
+{
+    if (!mSkelBase)
+        return;
+
     mAlpha = 1.f;
     const MWWorld::Class &cls = mPtr.getClass();
 
@@ -621,30 +624,33 @@ NifOgre::ObjectScenePtr NpcAnimation::insertBoundedPart(const std::string &model
 }
 
 Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
-{
+{    
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
 
     mHeadAnimationTime->update(timepassed);
 
-    Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
-    if(mViewMode == VM_FirstPerson)
+    if (mSkelBase)
     {
-        float pitch = mPtr.getRefData().getPosition().rot[0];
-        Ogre::Node *node = baseinst->getBone("Bip01 Neck");
-        node->pitch(Ogre::Radian(-pitch), Ogre::Node::TS_WORLD);
+        Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
+        if(mViewMode == VM_FirstPerson)
+        {
+            float pitch = mPtr.getRefData().getPosition().rot[0];
+            Ogre::Node *node = baseinst->getBone("Bip01 Neck");
+            node->pitch(Ogre::Radian(-pitch), Ogre::Node::TS_WORLD);
 
-        // This has to be done before this function ends;
-        // updateSkeletonInstance, below, touches the hands.
-        node->translate(mFirstPersonOffset, Ogre::Node::TS_WORLD);
-    }
-    else
-    {
-        // In third person mode we may still need pitch for ranged weapon targeting
-        pitchSkeleton(mPtr.getRefData().getPosition().rot[0], baseinst);
+            // This has to be done before this function ends;
+            // updateSkeletonInstance, below, touches the hands.
+            node->translate(mFirstPersonOffset, Ogre::Node::TS_WORLD);
+        }
+        else
+        {
+            // In third person mode we may still need pitch for ranged weapon targeting
+            pitchSkeleton(mPtr.getRefData().getPosition().rot[0], baseinst);
 
-        Ogre::Node* node = baseinst->getBone("Bip01 Head");
-        if (node)
-            node->rotate(Ogre::Quaternion(mHeadYaw, Ogre::Vector3::UNIT_Z) * Ogre::Quaternion(mHeadPitch, Ogre::Vector3::UNIT_X), Ogre::Node::TS_WORLD);
+            Ogre::Node* node = baseinst->getBone("Bip01 Head");
+            if (node)
+                node->rotate(Ogre::Quaternion(mHeadYaw, Ogre::Vector3::UNIT_Z) * Ogre::Quaternion(mHeadPitch, Ogre::Vector3::UNIT_X), Ogre::Node::TS_WORLD);
+        }
     }
     mFirstPersonOffset = 0.f; // reset the X, Y, Z offset for the next frame.
 
@@ -659,7 +665,9 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
         if (!isSkinned(mObjectParts[i]))
             continue;
 
-        updateSkeletonInstance(baseinst, mObjectParts[i]->mSkelBase->getSkeleton());
+        if (mSkelBase)
+            updateSkeletonInstance(mSkelBase->getSkeleton(), mObjectParts[i]->mSkelBase->getSkeleton());
+
         mObjectParts[i]->mSkelBase->getAllAnimationStates()->_notifyDirty();
     }
 
