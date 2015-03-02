@@ -1206,6 +1206,10 @@ namespace MWWorld
                     }
                 }
                 ptr.getRefData().setCount(0);
+                // Deleted references can still be accessed by scripts,
+                // so we need this extra step to remove access to the old reference completely.
+                // This will no longer be necessary once we have a proper cell movement tracker.
+                ptr.getCellRef().unsetRefNum();
             }
         }
         if (haveToMove && ptr.getRefData().getBaseNode())
