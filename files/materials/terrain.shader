@@ -136,7 +136,7 @@
 #if NEED_DEPTH
 #if VIEWPROJ_FIX
         float4x4 vpFixed = viewProjMatrix;
-#if !SH_GLSL
+#if !SH_GLSL && !SH_GLSLES 
         vpFixed[2] = vpRow2Fix;
 #else
         vpFixed[0][2] = vpRow2Fix.x;

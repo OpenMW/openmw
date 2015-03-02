@@ -13,7 +13,7 @@
     SH_START_PROGRAM
     {
         float4x4 worldviewFixed = worldview;
-#if !SH_GLSL
+#if !SH_GLSL && !SH_GLSLES
         worldviewFixed[0][3] = 0.0;
         worldviewFixed[1][3] = 0.0;
         worldviewFixed[2][3] = 0.0;

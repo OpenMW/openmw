@@ -166,7 +166,7 @@
 
 #if VIEWPROJ_FIX
         float4x4 vpFixed = vpMatrix;
-#if !SH_GLSL
+#if !SH_GLSL && !SH_GLSLES
         vpFixed[2] = vpRow2Fix;
 #else
         vpFixed[0][2] = vpRow2Fix.x;
@@ -384,7 +384,7 @@
 
         float4 normalTex = shSample(normalMap, UV.xy);
 
-        normal = normalize (shMatrixMult( transpose(tbn), normalTex.xyz * 2.0 - float3 (1.0,1.0,1.0) ));
+        normal = normalize (shMatrixMult( transpose(tbn), normalTex.xyz * 2.0 - 1.0 ));
 #endif
 
 #if ENV_MAP || SPECULAR || PARALLAX
