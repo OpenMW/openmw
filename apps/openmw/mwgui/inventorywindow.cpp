@@ -653,15 +653,12 @@ namespace MWGui
         if (selected != -1)
             lastId = model.getItem(selected).mBase.getCellRef().getRefId();
         ItemModel::ModelIndex cycled = selected;
-        while (!found)
+        for (int i=0; i<model.getItemCount(); ++i)
         {
             cycled += incr;
             cycled = (cycled + model.getItemCount()) % model.getItemCount();
 
             MWWorld::Ptr item = model.getItem(cycled).mBase;
-
-            if (cycled == selected) // we've been through all items, nothing found
-                return;
 
             // skip different stacks of the same item, or we will get stuck as stacking/unstacking them may change their relative ordering
             if (Misc::StringUtils::ciEqual(lastId, item.getCellRef().getRefId()))
@@ -670,8 +667,14 @@ namespace MWGui
             lastId = item.getCellRef().getRefId();
 
             if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() && isRightHandWeapon(item))
+            {
                 found = true;
+                break;
+            }
         }
+
+        if (!found)
+            return;
 
         useItem(model.getItem(cycled).mBase);
     }
