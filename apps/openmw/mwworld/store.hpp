@@ -555,6 +555,9 @@ namespace MWWorld
                 if (left.first == right.first)
                     return left.second > right.second;
 
+                // Exterior cells are listed in descending, row-major order,
+                // this is a workaround for an ambiguous chargen_plank reference in the vanilla game.
+                // there is one at -22,16 and one at -2,-9, the latter should be used.
                 return left.first > right.first;
             }
         };
