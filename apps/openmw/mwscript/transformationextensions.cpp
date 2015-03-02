@@ -310,12 +310,13 @@ namespace MWScript
                     }
                     catch(std::exception&)
                     {
-                        const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
-                        if(cell)
+                        const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);                        
+                        int cx,cy;
+                        MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
+                        store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                        if(!cell)
                         {
-                            int cx,cy;
-                            MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
-                            store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                            std::cerr << "unknown cell (" << cellID << ")\n";
                         }
                     }
                     if(store)
@@ -334,10 +335,6 @@ namespace MWScript
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
 
                         ptr.getClass().adjustPosition(ptr, false);
-                    }
-                    else
-                    {
-                        throw std::runtime_error (std::string("unknown cell (") + cellID + ")");
                     }
                 }
         };
@@ -426,11 +423,12 @@ namespace MWScript
                     catch(std::exception&)
                     {
                         const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
-                        if(cell)
+                        int cx,cy;
+                        MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
+                        store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                        if(!cell)
                         {
-                            int cx,cy;
-                            MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
-                            store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                            std::cerr << "unknown cell (" << cellID << ")\n";
                         }
                     }
                     if(store)
@@ -445,10 +443,6 @@ namespace MWScript
                         ref.getPtr().getCellRef().setPosition(pos);
                         MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
                         placed.getClass().adjustPosition(placed, true);
-                    }
-                    else
-                    {
-                        throw std::runtime_error ( std::string("unknown cell (") + cellID + ")");
                     }
                 }
         };
