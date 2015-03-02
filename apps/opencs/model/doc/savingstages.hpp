@@ -7,6 +7,8 @@
 #include "../world/idcollection.hpp"
 #include "../world/scope.hpp"
 
+#include <components/esm/defs.hpp>
+
 #include "savingstate.hpp"
 
 namespace ESM
@@ -110,8 +112,7 @@ namespace CSMDoc
             uint32_t name = mCollection.getRecord (stage).mModified.sRecordId;
             mState.getWriter().startRecord (name);
 
-            if(name != ESM::RecNameInts::REC_SKIL &&
-                    name != ESM::RecNameInts::REC_MGEF && name != ESM::RecNameInts::REC_SCPT)
+            if(name != ESM::REC_SKIL && name != ESM::REC_MGEF && name != ESM::REC_SCPT)
                 mState.getWriter().writeHNCString ("NAME", mCollection.getId (stage));
             mCollection.getRecord (stage).mModified.save (mState.getWriter());
             mState.getWriter().endRecord (mCollection.getRecord (stage).mModified.sRecordId);
