@@ -383,7 +383,7 @@ namespace ESMTerrain
         int cellY = std::floor(worldPos.y / 8192.f);
 
         ESM::Land* land = getLand(cellX, cellY);
-        if (!land)
+        if (!land || !(land->mDataTypes&ESM::Land::DATA_VHGT))
             return -2048;
 
         // Mostly lifted from Ogre::Terrain::getHeightAtTerrainPosition
@@ -465,8 +465,9 @@ namespace ESMTerrain
     Terrain::LayerInfo Storage::getLayerInfo(const std::string& texture)
     {
         // Already have this cached?
-        if (mLayerInfoMap.find(texture) != mLayerInfoMap.end())
-            return mLayerInfoMap[texture];
+        std::map<std::string, Terrain::LayerInfo>::iterator found = mLayerInfoMap.find(texture);
+        if (found != mLayerInfoMap.end())
+            return found->second;
 
         Terrain::LayerInfo info;
         info.mParallax = false;

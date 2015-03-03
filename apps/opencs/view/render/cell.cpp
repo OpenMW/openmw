@@ -78,7 +78,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
     if (landIndex != -1)
     {
         const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
-        if(esmLand)
+        if(esmLand && esmLand->mDataTypes&ESM::Land::DATA_VHGT)
         {
             mTerrain.reset(new Terrain::TerrainGrid(sceneManager, new TerrainStorage(mData), Element_Terrain, true,
                                                     Terrain::Align_XY));
