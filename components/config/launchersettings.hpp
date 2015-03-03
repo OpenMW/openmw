@@ -17,7 +17,7 @@ namespace Config
         /// \return names of all Content Lists in the launcher's .cfg file. 
         QStringList getContentLists();
 
-        /// Set initally selected content list to match values from openmw.cfg, creating if necessary
+        /// Set initially selected content list to match values from openmw.cfg, creating if necessary
         void setContentList(const GameSettings& gameSettings);
 
         /// Create a Content List (or replace if it already exists)
