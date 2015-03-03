@@ -27,6 +27,8 @@ struct StartScript
     // Load a record and add it to the list
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
+
+    void blank();
 };
 
 }

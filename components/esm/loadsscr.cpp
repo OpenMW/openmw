@@ -41,4 +41,8 @@ namespace ESM
         esm.writeHNString("NAME", mId);
     }
 
+    void StartScript::blank()
+    {
+        mData.clear();
+    }
 }
