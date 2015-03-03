@@ -173,6 +173,10 @@ void CSVDoc::View::setupMechanicsMenu()
     QAction *effects = new QAction (tr ("Magic Effects"), this);
     connect (effects, SIGNAL (triggered()), this, SLOT (addMagicEffectsSubView()));
     mechanics->addAction (effects);
+
+    QAction *startScripts = new QAction (tr ("Start Scripts"), this);
+    connect (startScripts, SIGNAL (triggered()), this, SLOT (addStartScriptsSubView()));
+    mechanics->addAction (startScripts);
 }
 
 void CSVDoc::View::setupCharacterMenu()
@@ -714,6 +718,11 @@ void CSVDoc::View::addRunLogSubView()
 void CSVDoc::View::addPathgridSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Pathgrids);
+}
+
+void CSVDoc::View::addStartScriptsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_StartScripts);
 }
 
 void CSVDoc::View::abortOperation (int type)
