@@ -1253,7 +1253,7 @@ void Record<ESM::Spell>::print()
 template<>
 void Record<ESM::StartScript>::print()
 {
-    std::cout << "Start Script: " << mData.mScript << std::endl;
+    std::cout << "Start Script: " << mData.mId << std::endl;
     std::cout << "Start Data: " << mData.mData << std::endl;
 }
 
