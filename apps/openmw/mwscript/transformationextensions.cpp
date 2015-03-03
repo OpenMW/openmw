@@ -316,6 +316,9 @@ namespace MWScript
                         store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
                         if(!cell)
                         {
+                            InterpreterContext& context
+                                = static_cast<InterpreterContext&> (runtime.getContext());
+                            context.report ("unknown cell (" + cellID + ")");
                             std::cerr << "unknown cell (" << cellID << ")\n";
                         }
                     }
@@ -428,6 +431,9 @@ namespace MWScript
                         store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
                         if(!cell)
                         {
+                            InterpreterContext& context
+                                = static_cast<InterpreterContext&> (runtime.getContext());
+                            context.report ("unknown cell (" + cellID + ")");
                             std::cerr << "unknown cell (" << cellID << ")\n";
                         }
                     }
