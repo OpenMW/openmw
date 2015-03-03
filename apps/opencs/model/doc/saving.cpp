@@ -78,6 +78,9 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::MagicEffect> >
         (mDocument.getData().getMagicEffects(), mState));
 
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::StartScript> >
+        (mDocument.getData().getStartScripts(), mState));
+
     appendStage (new WriteDialogueCollectionStage (mDocument, mState, false));
 
     appendStage (new WriteDialogueCollectionStage (mDocument, mState, true));
