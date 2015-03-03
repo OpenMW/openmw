@@ -387,12 +387,12 @@ endif()
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
-    SET(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++98 -pedantic -Wno-long-long ${CMAKE_CXX_FLAGS}")
+    set_property(GLOBAL APPEND_STRING PROPERTY COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++98 -pedantic -Wno-long-long")
 
     execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
                 OUTPUT_VARIABLE GCC_VERSION)
     if ("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
-        SET(CMAKE_CXX_FLAGS "-Wno-unused-but-set-parameter ${CMAKE_CXX_FLAGS}")
+        set_property(GLOBAL APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-unused-but-set-parameter")
     endif("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
 elseif (MSVC)
     # Enable link-time code generation globally for all linking
@@ -705,60 +705,22 @@ if (WIN32)
         set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
 
+    set_property(GLOBAL APPEND_STRING PROPERTY COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+
     # boost::wave has a few issues with signed / unsigned conversions, so we suppress those here
     set(SHINY_WARNINGS "${WARNINGS} /wd4245")
     set_target_properties(shiny PROPERTIES COMPILE_FLAGS "${SHINY_WARNINGS} ${MT_BUILD}")
-    set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
-    set_target_properties(sdl4ogre PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+
     # oics uses tinyxml, which has an initialized but unused variable
     set(OICS_WARNINGS "${WARNINGS} /wd4189")
     set_target_properties(oics PROPERTIES COMPILE_FLAGS "${OICS_WARNINGS} ${MT_BUILD}")
-    set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
-    set_target_properties(ogre-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
-    if (BUILD_MYGUI_PLUGIN)
-        set_target_properties(Plugin_MyGUI_OpenMW_Resources PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
-    endif (BUILD_MYGUI_PLUGIN)
-    if (BUILD_LAUNCHER)
-        set_target_properties(openmw-launcher PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
-    endif (BUILD_LAUNCHER)
-    set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
-    if (BUILD_BSATOOL)
-        set_target_properties(bsatool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
-    endif (BUILD_BSATOOL)
-    if (BUILD_ESMTOOL)
-        set_target_properties(esmtool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
-    endif (BUILD_ESMTOOL)
-    if (BUILD_WIZARD)
-        set_target_properties(openmw-wizard PROPERTIES COMPILE_FLAGS ${WARNINGS})
-    endif (BUILD_WIZARD)
+
     if (BUILD_OPENCS)
         # QT triggers an informational warning that the object layout may differ when compiled with /vd2
         set(OPENCS_WARNINGS "${WARNINGS} ${MT_BUILD} /wd4435")
         set_target_properties(openmw-cs PROPERTIES COMPILE_FLAGS ${OPENCS_WARNINGS})
     endif (BUILD_OPENCS)
-    if (BUILD_ESSIMPORTER)
-        set_target_properties(openmw-essimporter PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
-    endif (BUILD_ESSIMPORTER)
-    if (BUILD_MWINIIMPORTER)
-        set_target_properties(openmw-iniimporter PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
-    endif (BUILD_MWINIIMPORTER)
   endif(MSVC)
-
-  # Same for MinGW
-  if (MINGW)
-    if (USE_DEBUG_CONSOLE)
-      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "-Wl,-subsystem,console")
-      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "-Wl,-subsystem,console")
-      set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
-    else(USE_DEBUG_CONSOLE)
-      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "-Wl,-subsystem,windows")
-      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "-Wl,-subsystem,windows")
-    endif(USE_DEBUG_CONSOLE)
-
-    set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "-Wl,-subsystem,console")
-    set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "-Wl,-subsystem,console")
-    set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
-  endif(MINGW)
 
   # TODO: At some point release builds should not use the console but rather write to a log file
   #set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
