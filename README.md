@@ -6,7 +6,7 @@ OpenMW
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-* Version: 0.35.0
+* Version: 0.35.1
 * License: GPL (see docs/license/GPL3.txt for more information)
 * Website: http://www.openmw.org
 * IRC: #openmw on irc.freenode.net
@@ -68,9 +68,9 @@ Command line options
                                             of the blacklist is enabled)
       --script-blacklist-use [=arg(=1)] (=1)
                                             enable script blacklisting
-      --load-savegame arg                   load a save game file on game startup 
-                                            (specify an absolute filename or a 
-                                            filename relative to the current 
+      --load-savegame arg                   load a save game file on game startup
+                                            (specify an absolute filename or a
+                                            filename relative to the current
                                             working directory)
       --skip-menu [=arg(=1)] (=0)           skip main menu on game startup
       --new-game [=arg(=1)] (=0)            run new game sequence (ignored if
