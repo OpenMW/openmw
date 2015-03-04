@@ -61,7 +61,7 @@ namespace ContentSelectorView
     private slots:
 
         void slotCurrentGameFileIndexChanged(int index);
-        void slotAddonTableItemActivated(const QModelIndex& index);
+        void slotAddonTableItemDoubleClicked(const QModelIndex& index);
     };
 }
 
