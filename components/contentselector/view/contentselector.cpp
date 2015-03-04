@@ -55,7 +55,7 @@ void ContentSelectorView::ContentSelector::buildAddonView()
 
     ui.addonView->setModel(mAddonProxyModel);
 
-    connect(ui.addonView, SIGNAL(activated(const QModelIndex&)), this, SLOT(slotAddonTableItemActivated(const QModelIndex&)));
+    connect(ui.addonView, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(slotAddonTableItemDoubleClicked(const QModelIndex&)));
     connect(mContentModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SIGNAL(signalAddonDataChanged(QModelIndex,QModelIndex)));
 }
 
@@ -181,13 +181,14 @@ void ContentSelectorView::ContentSelector::setGameFileSelected(int index, bool s
     }
 }
 
-void ContentSelectorView::ContentSelector::slotAddonTableItemActivated(const QModelIndex &index)
+void ContentSelectorView::ContentSelector::slotAddonTableItemDoubleClicked(const QModelIndex &index)
 {
     QModelIndex sourceIndex = mAddonProxyModel->mapToSource (index);
 
     if (!mContentModel->isEnabled (sourceIndex))
         return;
 
+    // toggle check state
     Qt::CheckState checkState = Qt::Unchecked;
 
     if (mContentModel->data(sourceIndex, Qt::CheckStateRole).toInt() == Qt::Unchecked)
