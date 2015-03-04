@@ -3,13 +3,15 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <string>
+#include <typeinfo>
 #include <boost/shared_ptr.hpp>
 
 #include "livecellref.hpp"
-#include "esmstore.hpp"
 #include "cellreflist.hpp"
 
 #include <components/esm/fogstate.hpp>
+#include <components/esm/records.hpp>
 
 #include "../mwmechanics/pathgrid.hpp"  // TODO: maybe belongs in mwworld
 
@@ -24,7 +26,7 @@ namespace ESM
 namespace MWWorld
 {
     class Ptr;
-
+    class ESMStore;
 
 
     /// \brief Mutable state of a cell
@@ -149,6 +151,17 @@ namespace MWWorld
                     forEachImp (functor, mCreatureLists);
             }
 
+            template<class Functor>
+            bool forEachContainer (Functor& functor)
+            {
+                mHasState = true;
+
+                return
+                    forEachImp (functor, mContainers) &&
+                    forEachImp (functor, mCreatures) &&
+                    forEachImp (functor, mNpcs);
+            }
+
             bool isExterior() const;
 
             Ptr searchInContainer (const std::string& id);
@@ -170,7 +183,12 @@ namespace MWWorld
 
             template <class T>
             CellRefList<T>& get() {
-                throw std::runtime_error ("Storage for this type not exist in cells");
+                throw std::runtime_error ("Storage for type " + std::string(typeid(T).name())+ " does not exist in cells");
+            }
+
+            template <class T>
+            const CellRefList<T>& getReadOnly() {
+                throw std::runtime_error ("Read Only CellRefList access not available for type " + std::string(typeid(T).name()) );
             }
 
             bool isPointConnected(const int start, const int end) const;
@@ -185,7 +203,7 @@ namespace MWWorld
                 for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
                     ++iter)
                 {
-                    if (!iter->mData.getCount())
+                    if (iter->mData.isDeletedByContentFile())
                         continue;
                     if (!functor (MWWorld::Ptr(&*iter, this)))
                         return false;
@@ -344,6 +362,12 @@ namespace MWWorld
     {
         mHasState = true;
         return mWeapons;
+    }
+
+    template<>
+    inline const CellRefList<ESM::Door>& CellStore::getReadOnly<ESM::Door>()
+    {
+        return mDoors;
     }
 
     bool operator== (const CellStore& left, const CellStore& right);

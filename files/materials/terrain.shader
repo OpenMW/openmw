@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2015 scrawl <scrawl@baseoftrash.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 #include "core.h"
 
 #define IS_FIRST_PASS (@shPropertyString(pass_index) == 0)
@@ -114,7 +136,7 @@
 #if NEED_DEPTH
 #if VIEWPROJ_FIX
         float4x4 vpFixed = viewProjMatrix;
-#if !SH_GLSL
+#if !SH_GLSL && !SH_GLSLES 
         vpFixed[2] = vpRow2Fix;
 #else
         vpFixed[0][2] = vpRow2Fix.x;
@@ -175,7 +197,7 @@
 
             lightResult.xyz += lightDiffuse[@shIterator].xyz
                     * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(normal.xyz, lightDir), 0);
+                    * max(dot(normal.xyz, lightDir), 0.0);
 
 #if @shIterator == 0
             directionalResult = lightResult.xyz;
@@ -198,6 +220,9 @@
 
 #if UNDERWATER
     #include "underwater.h"
+#endif
+#if NORMAL_MAP && SH_GLSLES
+        mat3 transpose(mat3 m);
 #endif
 
     SH_BEGIN_PROGRAM
@@ -297,7 +322,7 @@ shUniform(float4, cameraPos) @shAutoConstant(cameraPos, camera_position)
 
         // derive final matrix
         float3x3 tbn = float3x3(tangent, binormal, normal);
-        #if SH_GLSL
+        #if SH_GLSL || SH_GLSLES
         tbn = transpose(tbn);
         #endif
 #endif
@@ -310,7 +335,7 @@ shUniform(float4, cameraPos) @shAutoConstant(cameraPos, camera_position)
 
 #if !IS_FIRST_PASS
 // Opacity the previous passes should have, i.e. 1 - (opacity of this pass)
-float previousAlpha = 1.f;
+float previousAlpha = 1.0;
 #endif
 
 
@@ -334,7 +359,7 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
 
         float4 albedo = float4(0,0,0,1);
 
-        float2 layerUV = float2(UV.x, 1.f-UV.y) * 16; // Reverse Y, required to get proper tangents
+        float2 layerUV = float2(UV.x, 1.0-UV.y) * 16.0; // Reverse Y, required to get proper tangents
         float2 thisLayerUV;
         float4 normalTex;
         float4 diffuseTex;
@@ -349,9 +374,9 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
 #if @shPropertyBool(use_normal_map_@shIterator)
         normalTex = shSample(normalMap@shIterator, thisLayerUV);
 #if @shIterator == 0 && IS_FIRST_PASS
-        TSnormal = normalize(normalTex.xyz * 2 - 1);
+        TSnormal = normalize(normalTex.xyz * 2.0 - 1.0);
 #else
-        TSnormal = shLerp(TSnormal, normalTex.xyz * 2 - 1, blendValues@shPropertyString(blendmap_component_@shIterator));
+        TSnormal = shLerp(TSnormal, normalTex.xyz * 2.0 - 1.0, blendValues@shPropertyString(blendmap_component_@shIterator));
 #endif
 #endif
 
@@ -361,7 +386,7 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
 
         diffuseTex = shSample(diffuseMap@shIterator, layerUV);
 #if !@shPropertyBool(use_specular_@shIterator)
-        diffuseTex.a = 0;
+        diffuseTex.a = 0.0;
 #endif
 
 #if @shIterator == 0
@@ -371,7 +396,7 @@ albedo = shLerp(albedo, diffuseTex, blendValues@shPropertyString(blendmap_compon
 #endif
 
 #if !IS_FIRST_PASS
-        previousAlpha *= 1.f-blendValues@shPropertyString(blendmap_component_@shIterator);
+        previousAlpha *= 1.0-blendValues@shPropertyString(blendmap_component_@shIterator);
 #endif
 
 
@@ -404,7 +429,7 @@ albedo = shLerp(albedo, diffuseTex, blendValues@shPropertyString(blendmap_compon
 
             lightResult.xyz += lightDiffuse[@shIterator].xyz
                     * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(normal.xyz, lightDir), 0);
+                    * max(dot(normal.xyz, lightDir), 0.0);
 #if @shIterator == 0
             float3 directionalResult = lightResult.xyz;
 #endif
@@ -444,10 +469,10 @@ albedo = shLerp(albedo, diffuseTex, blendValues@shPropertyString(blendmap_compon
         // Specular
         float3 light0Dir = normalize(lightPos0.xyz);
 
-        float NdotL = max(dot(normal, light0Dir), 0);
+        float NdotL = max(dot(normal, light0Dir), 0.0);
         float3 halfVec = normalize (light0Dir + eyeDir);
 
-        float3 specular = pow(max(dot(normal, halfVec), 0), 32) * lightSpec0;
+        float3 specular = pow(max(dot(normal, halfVec), 0.0), 32.0) * lightSpec0;
         shOutputColour(0).xyz += specular * (albedo.a) * shadow;
 #endif
 
@@ -465,10 +490,18 @@ albedo = shLerp(albedo, diffuseTex, blendValues@shPropertyString(blendmap_compon
         shOutputColour(0).xyz = max(shOutputColour(0).xyz, float3(0,0,0));
 
 #if IS_FIRST_PASS
-        shOutputColour(0).a = 1;
+        shOutputColour(0).a = 1.0;
 #else
-        shOutputColour(0).a = 1.f-previousAlpha;
+        shOutputColour(0).a = 1.0-previousAlpha;
 #endif
     }
-
+#if NORMAL_MAP && SH_GLSLES
+        mat3 transpose(mat3 m){
+           return mat3(
+            m[0][0],m[1][0],m[2][0],
+            m[0][1],m[1][1],m[2][1],
+            m[0][2],m[1][2],m[2][2]
+            );
+         }
+#endif
 #endif

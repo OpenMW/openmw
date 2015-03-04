@@ -16,8 +16,10 @@ namespace ESM
 
     struct AIData
     {
-        // These are probabilities
-        char mHello, mU1, mFight, mFlee, mAlarm, mU2, mU3, mU4;
+        unsigned char mHello;
+        char mU1;
+        unsigned char mFight, mFlee, mAlarm; // These are probabilities [0, 100]
+        char mU2, mU3, mU4; // Unknown values
         int mServices; // See the Services enum
 
         void blank();
@@ -61,7 +63,8 @@ namespace ESM
         AI_Travel = 0x545f4941,
         AI_Follow = 0x465f4941,
         AI_Escort = 0x455f4941,
-        AI_Activate = 0x415f4941
+        AI_Activate = 0x415f4941,
+        AI_CNDT = 0x54444e43
     };
 
     /// \note Used for storaging packages in a single container
@@ -88,11 +91,9 @@ namespace ESM
     {
         std::vector<AIPackage> mList;
 
-        /// \note This breaks consistency of subrecords reading:
-        /// after calling it subrecord name is already read, so
-        /// it needs to use retSubName() if needed. But, hey, there
-        /// is only one field left (XSCL) and only two records uses AI
-        void load(ESMReader &esm);
+        /// Add a single AIPackage, assumes subrecord name was already read
+        void add(ESMReader &esm);
+
         void save(ESMWriter &esm) const;
     };
 }

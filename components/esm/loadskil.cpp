@@ -129,23 +129,47 @@ namespace ESM
 
     unsigned int Skill::sRecordId = REC_SKIL;
 
-void Skill::load(ESMReader &esm)
-{
-    esm.getHNT(mIndex, "INDX");
-    esm.getHNT(mData, "SKDT", 24);
-    mDescription = esm.getHNOString("DESC");
+    void Skill::load(ESMReader &esm)
+    {
+        bool hasIndex = false;
+        bool hasData = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            uint32_t name = esm.retSubName().val;
+            switch (name)
+            {
+                case ESM::FourCC<'I','N','D','X'>::value:
+                    esm.getHT(mIndex);
+                    hasIndex = true;
+                    break;
+                case ESM::FourCC<'S','K','D','T'>::value:
+                    esm.getHT(mData, 24);
+                    hasData = true;
+                    break;
+                case ESM::FourCC<'D','E','S','C'>::value:
+                    mDescription = esm.getHString();
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+            }
+        }
+        if (!hasIndex)
+            esm.fail("Missing INDX");
+        if (!hasData)
+            esm.fail("Missing SKDT");
 
-    // create an ID from the index and the name (only used in the editor and likely to change in the
-    // future)
-    mId = indexToId (mIndex);
-}
+        // create an ID from the index and the name (only used in the editor and likely to change in the
+        // future)
+        mId = indexToId (mIndex);
+    }
 
-void Skill::save(ESMWriter &esm) const
-{
-    esm.writeHNT("INDX", mIndex);
-    esm.writeHNT("SKDT", mData, 24);
-    esm.writeHNOString("DESC", mDescription);
-}
+    void Skill::save(ESMWriter &esm) const
+    {
+        esm.writeHNT("INDX", mIndex);
+        esm.writeHNT("SKDT", mData, 24);
+        esm.writeHNOString("DESC", mDescription);
+    }
 
     void Skill::blank()
     {

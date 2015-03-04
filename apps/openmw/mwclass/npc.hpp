@@ -50,12 +50,14 @@ namespace MWClass
             virtual std::string getId (const MWWorld::Ptr& ptr) const;
             ///< Return ID of \a ptr
 
-            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
+            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
-            virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
+            virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const;
 
-            virtual void adjustPosition(const MWWorld::Ptr& ptr) const;
+            virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) const;
+            ///< Adjust position to stand on ground. Must be called post model load
+            /// @param force do this even if the ptr is flying
 
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
@@ -102,9 +104,6 @@ namespace MWClass
             virtual float getJump(const MWWorld::Ptr &ptr) const;
             ///< Return jump velocity (not accounting for movement)
 
-            virtual float getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const;
-            ///< Return amount of health points lost when falling
-
             virtual MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const;
             ///< Return desired movement.
 
@@ -134,10 +133,8 @@ namespace MWClass
 
             virtual void adjustScale (const MWWorld::Ptr &ptr, float &scale) const;
 
-            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const;
+            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const;
             ///< Inform actor \a ptr that a skill use has succeeded.
-
-            virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
             virtual bool isEssential (const MWWorld::Ptr& ptr) const;
             ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)
@@ -185,9 +182,16 @@ namespace MWClass
                 return true;
             }
 
+            virtual bool isBipedal (const MWWorld::Ptr &ptr) const;
+
             virtual void respawn (const MWWorld::Ptr& ptr) const;
 
             virtual void restock (const MWWorld::Ptr& ptr) const;
+
+            virtual int getBaseFightRating (const MWWorld::Ptr& ptr) const;
+
+            virtual std::string getPrimaryFaction(const MWWorld::Ptr &ptr) const;
+            virtual int getPrimaryFactionRank(const MWWorld::Ptr &ptr) const;
     };
 }
 

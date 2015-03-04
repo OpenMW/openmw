@@ -24,7 +24,7 @@
 #ifndef OPENMW_COMPONENTS_NIF_PROPERTY_HPP
 #define OPENMW_COMPONENTS_NIF_PROPERTY_HPP
 
-#include "controlled.hpp"
+#include "base.hpp"
 
 namespace Nif
 {
@@ -152,6 +152,22 @@ public:
         Property::post(nif);
         for(int i = 0;i < 7;i++)
             textures[i].post(nif);
+    }
+};
+
+class NiFogProperty : public Property
+{
+public:
+    float mFogDepth;
+    Ogre::Vector3 mColour;
+
+
+    void read(NIFStream *nif)
+    {
+        Property::read(nif);
+
+        mFogDepth = nif->getFloat();
+        mColour = nif->getVector3();
     }
 };
 

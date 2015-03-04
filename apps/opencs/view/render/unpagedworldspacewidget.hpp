@@ -37,9 +37,11 @@ namespace CSVRender
             UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document,
                                      QWidget *parent);
 
-            virtual dropRequirments getDropRequirements(dropType type) const;
+            virtual dropRequirments getDropRequirements(DropType type) const;
 
-            virtual void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
+            /// \return Drop handled?
+            virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
+                DropType type);
 
         private:
 
@@ -55,6 +57,12 @@ namespace CSVRender
             virtual void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
             virtual void referenceAdded (const QModelIndex& index, int start, int end);
+
+            virtual std::string getStartupInstruction();
+
+        protected:
+
+            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
 
         private slots:
 

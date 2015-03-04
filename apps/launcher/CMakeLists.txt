@@ -5,21 +5,16 @@ set(LAUNCHER
     maindialog.cpp
     playpage.cpp
     textslotmsgbox.cpp
+    settingspage.cpp
 
-    settings/gamesettings.cpp
     settings/graphicssettings.cpp
-    settings/launchersettings.cpp
 
-    utils/checkablemessagebox.cpp
     utils/profilescombobox.cpp
     utils/textinputdialog.cpp
     utils/lineedit.cpp
 
-    ${CMAKE_SOURCE_DIR}/files/launcher/launcher.rc
+    ${CMAKE_SOURCE_DIR}/files/windows/launcher.rc
 )
-if(NOT WIN32)
-    LIST(APPEND LAUNCHER unshieldthread.cpp)
-endif(NOT WIN32)
 
 set(LAUNCHER_HEADER
     datafilespage.hpp
@@ -27,21 +22,14 @@ set(LAUNCHER_HEADER
     maindialog.hpp
     playpage.hpp
     textslotmsgbox.hpp
+    settingspage.hpp
 
-    settings/gamesettings.hpp
     settings/graphicssettings.hpp
-    settings/launchersettings.hpp
-    settings/settingsbase.hpp
 
-    utils/checkablemessagebox.hpp
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
     utils/lineedit.hpp
 )
-if(NOT WIN32)
-    LIST(APPEND LAUNCHER_HEADER unshieldthread.hpp)
-endif(NOT WIN32)
-
 
 # Headers that must be pre-processed
 set(LAUNCHER_HEADER_MOC
@@ -50,18 +38,13 @@ set(LAUNCHER_HEADER_MOC
     maindialog.hpp
     playpage.hpp
     textslotmsgbox.hpp
+    settingspage.hpp
 
     utils/textinputdialog.hpp
-    utils/checkablemessagebox.hpp
     utils/profilescombobox.hpp
     utils/lineedit.hpp
 
 )
-
-if(NOT WIN32)
-    LIST(APPEND LAUNCHER_HEADER_MOC unshieldthread.hpp)
-endif(NOT WIN32)
-
 
 set(LAUNCHER_UI
     ${CMAKE_SOURCE_DIR}/files/ui/datafilespage.ui
@@ -69,6 +52,7 @@ set(LAUNCHER_UI
     ${CMAKE_SOURCE_DIR}/files/ui/mainwindow.ui
     ${CMAKE_SOURCE_DIR}/files/ui/playpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/settingspage.ui
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
@@ -90,11 +74,11 @@ QT4_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
 include(${QT_USE_FILE})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 if(NOT WIN32)
-    include_directories(${LIBUNSHIELD_INCLUDE})
+    include_directories(${LIBUNSHIELD_INCLUDE_DIR})
 endif(NOT WIN32)
 
 # Main executable
-add_executable(omwlauncher
+add_executable(openmw-launcher
     ${GUI_TYPE}
     ${LAUNCHER}
     ${LAUNCHER_HEADER}
@@ -103,7 +87,7 @@ add_executable(omwlauncher
     ${UI_HDRS}
 )
 
-target_link_libraries(omwlauncher
+target_link_libraries(openmw-launcher
     ${Boost_LIBRARIES}
     ${OGRE_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
@@ -111,16 +95,10 @@ target_link_libraries(omwlauncher
     ${QT_LIBRARIES}
     components
 )
-if(NOT WIN32)
-    target_link_libraries(omwlauncher
-        ${LIBUNSHIELD_LIBRARY}
-    )
-endif(NOT WIN32)
-
 
 
 if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
-  target_link_libraries(omwlauncher gcov)
+  target_link_libraries(openmw-launcher gcov)
 endif()
 

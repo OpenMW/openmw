@@ -7,6 +7,12 @@
 
 #include "widgets.hpp"
 
+namespace ESM
+{
+    class Class;
+    struct Race;
+}
+
 namespace MWGui
 {
     // Info about tooltip that is supplied by the MWWorld::Class object
@@ -31,6 +37,9 @@ namespace MWGui
 
         // effects (for potions, ingredients)
         Widgets::SpellEffectList effects;
+
+        // local map notes
+        std::vector<std::string> notes;
 
         bool isPotion; // potions do not show target in the tooltip
         bool wordWrap;
@@ -84,8 +93,6 @@ namespace MWGui
 
         MWWorld::Ptr mFocusObject;
 
-        void findImageExtension(std::string& image);
-
         MyGUI::IntSize getToolTipViaPtr (bool image=true);
         ///< @return requested tooltip size
 
@@ -97,6 +104,8 @@ namespace MWGui
 
         /// Adjust position for a tooltip so that it doesn't leave the screen and does not obscure the mouse cursor
         void position(MyGUI::IntPoint& position, MyGUI::IntSize size, MyGUI::IntSize viewportSize);
+
+        static std::string sSchoolNames[6];
 
 	int mHorizontalScrollIndex;
 

@@ -17,56 +17,56 @@ namespace CSMTools
                 const CSMWorld::IdCollection<ESM::Class>& classes,
                 const CSMWorld::IdCollection<ESM::Faction>& factions);
 
-            virtual void perform(int stage, Messages& messages);
+            virtual void perform(int stage, CSMDoc::Messages& messages);
             virtual int setup();
 
         private:
             //CONCRETE CHECKS
-            void bookCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Book >& records, Messages& messages);
-            void activatorCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Activator >& records, Messages& messages);
-            void potionCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Potion>& records, Messages& messages);
-            void apparatusCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Apparatus>& records, Messages& messages);
-            void armorCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Armor>& records, Messages& messages);
-            void clothingCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Clothing>& records, Messages& messages);
-            void containerCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Container>& records, Messages& messages);
-            void creatureCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Creature>& records, Messages& messages);
-            void doorCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Door>& records, Messages& messages);
-            void ingredientCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Ingredient>& records, Messages& messages);
-            void creaturesLevListCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::CreatureLevList>& records, Messages& messages);
-            void itemLevelledListCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::ItemLevList>& records, Messages& messages);
-            void lightCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Light>& records, Messages& messages);
-            void lockpickCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Lockpick>& records, Messages& messages);
-            void miscCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Miscellaneous>& records, Messages& messages);
-            void npcCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::NPC>& records, Messages& messages);
-            void weaponCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Weapon>& records, Messages& messages);
-            void probeCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Probe>& records, Messages& messages);
-            void repairCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Repair>& records, Messages& messages);
-            void staticCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Static>& records, Messages& messages);
+            void bookCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Book >& records, CSMDoc::Messages& messages);
+            void activatorCheck(int stage, const CSMWorld::RefIdDataContainer< ESM::Activator >& records, CSMDoc::Messages& messages);
+            void potionCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Potion>& records, CSMDoc::Messages& messages);
+            void apparatusCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Apparatus>& records, CSMDoc::Messages& messages);
+            void armorCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Armor>& records, CSMDoc::Messages& messages);
+            void clothingCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Clothing>& records, CSMDoc::Messages& messages);
+            void containerCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Container>& records, CSMDoc::Messages& messages);
+            void creatureCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Creature>& records, CSMDoc::Messages& messages);
+            void doorCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Door>& records, CSMDoc::Messages& messages);
+            void ingredientCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Ingredient>& records, CSMDoc::Messages& messages);
+            void creaturesLevListCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::CreatureLevList>& records, CSMDoc::Messages& messages);
+            void itemLevelledListCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::ItemLevList>& records, CSMDoc::Messages& messages);
+            void lightCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Light>& records, CSMDoc::Messages& messages);
+            void lockpickCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Lockpick>& records, CSMDoc::Messages& messages);
+            void miscCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Miscellaneous>& records, CSMDoc::Messages& messages);
+            void npcCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::NPC>& records, CSMDoc::Messages& messages);
+            void weaponCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Weapon>& records, CSMDoc::Messages& messages);
+            void probeCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Probe>& records, CSMDoc::Messages& messages);
+            void repairCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Repair>& records, CSMDoc::Messages& messages);
+            void staticCheck(int stage, const CSMWorld::RefIdDataContainer<ESM::Static>& records, CSMDoc::Messages& messages);
 
             //FINAL CHECK
-            void finalCheck (Messages& messages);
+            void finalCheck (CSMDoc::Messages& messages);
 
 	    //TEMPLATE CHECKS
 	    template<typename ITEM> void inventoryItemCheck(const ITEM& someItem,
-                                                            Messages& messages,
+                                                            CSMDoc::Messages& messages,
                                                             const std::string& someID,
                                                             bool enchantable); //for all enchantable items.
 
 	    template<typename ITEM> void inventoryItemCheck(const ITEM& someItem,
-                                                            Messages& messages,
+                                                            CSMDoc::Messages& messages,
                                                             const std::string& someID); //for non-enchantable items.
 
 	    template<typename TOOL> void toolCheck(const TOOL& someTool,
-                                                   Messages& messages,
+                                                   CSMDoc::Messages& messages,
                                                    const std::string& someID,
                                                    bool canbebroken); //for tools with uses.
 
 	    template<typename TOOL> void toolCheck(const TOOL& someTool,
-                                                   Messages& messages,
+                                                   CSMDoc::Messages& messages,
                                                    const std::string& someID); //for tools without uses.
 
 	    template<typename LIST> void listCheck(const LIST& someList,
-                                                   Messages& messages,
+                                                   CSMDoc::Messages& messages,
                                                    const std::string& someID);
 
             const CSMWorld::RefIdData& mReferencables;

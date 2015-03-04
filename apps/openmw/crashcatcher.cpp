@@ -11,7 +11,6 @@
 #include <errno.h>
 #include <limits.h>
 
-
 #include <pthread.h>
 #include <stdbool.h>
 #include <sys/ptrace.h>
@@ -29,6 +28,7 @@
 #include <signal.h>
 #endif
 
+#define UNUSED(x) (void)(x)
 
 static const char crash_switch[] = "--cc-handle-crash";
 
@@ -36,6 +36,10 @@ static const char fatal_err[] = "\n\n*** Fatal Error ***\n";
 static const char pipe_err[] = "!!! Failed to create pipe\n";
 static const char fork_err[] = "!!! Failed to fork debug process\n";
 static const char exec_err[] = "!!! Failed to exec debug process\n";
+
+#ifndef PATH_MAX		/* Not all platforms (GNU Hurd) have this. */
+#	define PATH_MAX 256
+#endif
 
 static char argv0[PATH_MAX];
 
@@ -66,7 +70,7 @@ static const struct {
     int code;
     const char *name;
 } sigill_codes[] = {
-    #ifndef __FreeBSD__
+    #if !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__)
     { ILL_ILLOPC, "Illegal opcode" },
     { ILL_ILLOPN, "Illegal operand" },
     { ILL_ILLADR, "Illegal addressing mode" },
@@ -123,7 +127,6 @@ static int (*cc_user_info)(char*, char*);
 static void gdb_info(pid_t pid)
 {
     char respfile[64];
-    char cmd_buf[128];
     FILE *f;
     int fd;
 
@@ -152,11 +155,16 @@ static void gdb_info(pid_t pid)
         fclose(f);
 
         /* Run gdb and print process info. */
+        char cmd_buf[128];
         snprintf(cmd_buf, sizeof(cmd_buf), "gdb --quiet --batch --command=%s", respfile);
         printf("Executing: %s\n", cmd_buf);
         fflush(stdout);
 
-        system(cmd_buf);
+        {   /* another special exception for "ignoring return value..." */
+            int unused;
+            unused = system(cmd_buf);
+            UNUSED(unused);
+        }
         /* Clean up */
         remove(respfile);
     }
@@ -402,7 +410,13 @@ int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, co
         snprintf(argv0, sizeof(argv0), "%s", argv[0]);
     else
     {
-        getcwd(argv0, sizeof(argv0));
+        {
+            /* we don't want to disable "ignoring return value" warnings, so we make
+             * a special exception here. */
+            char * unused;
+            unused = getcwd(argv0, sizeof(argv0));
+            UNUSED(unused);
+        }
         retval = strlen(argv0);
         snprintf(argv0+retval, sizeof(argv0)-retval, "/%s", argv[0]);
     }

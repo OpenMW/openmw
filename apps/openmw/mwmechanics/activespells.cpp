@@ -17,18 +17,35 @@ namespace MWMechanics
 
         MWWorld::TimeStamp now = MWBase::Environment::get().getWorld()->getTimeStamp();
 
-        // Erase no longer active spells
+        // Erase no longer active spells and effects
         if (mLastUpdate!=now)
         {
             TContainer::iterator iter (mSpells.begin());
             while (iter!=mSpells.end())
+            {
                 if (!timeToExpire (iter))
                 {
                     mSpells.erase (iter++);
                     rebuild = true;
                 }
                 else
+                {
+                    std::vector<ActiveEffect>& effects = iter->second.mEffects;
+                    for (std::vector<ActiveEffect>::iterator effectIt = effects.begin(); effectIt != effects.end();)
+                    {
+                        MWWorld::TimeStamp start = iter->second.mTimeStamp;
+                        MWWorld::TimeStamp end = start + static_cast<double>(effectIt->mDuration)*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
+                        if (end <= now)
+                        {
+                            effectIt = effects.erase(effectIt);
+                            rebuild = true;
+                        }
+                        else
+                            ++effectIt;
+                    }
                     ++iter;
+                }
+            }
 
             mLastUpdate = now;
         }
@@ -135,12 +152,7 @@ namespace MWMechanics
     void ActiveSpells::addSpell(const std::string &id, bool stack, std::vector<ActiveEffect> effects,
                                 const std::string &displayName, int casterActorId)
     {
-        bool exists = false;
-        for (TContainer::const_iterator it = begin(); it != end(); ++it)
-        {
-            if (id == it->first)
-                exists = true;
-        }
+        TContainer::iterator it(mSpells.find(id));
 
         ActiveSpellParams params;
         params.mTimeStamp = MWBase::Environment::get().getWorld()->getTimeStamp();
@@ -148,12 +160,42 @@ namespace MWMechanics
         params.mDisplayName = displayName;
         params.mCasterActorId = casterActorId;
 
-        if (!exists || stack)
-            mSpells.insert (std::make_pair(id, params));
+        if (it == end() || stack)
+        {
+            mSpells.insert(std::make_pair(id, params));
+        }
         else
-            mSpells.find(id)->second = params;
+        {
+            // addSpell() is called with effects for a range.
+            // but a spell may have effects with different ranges (e.g. Touch & Target)
+            // so, if we see new effects for same spell assume additional 
+            // spell effects and add to existing effects of spell
+            mergeEffects(params.mEffects, it->second.mEffects);
+            it->second = params;
+        }
 
         mSpellsChanged = true;
+    }
+
+    void ActiveSpells::mergeEffects(std::vector<ActiveEffect>& addTo, const std::vector<ActiveEffect>& from)
+    {
+        for (std::vector<ActiveEffect>::const_iterator effect(from.begin()); effect != from.end(); ++effect)
+        {
+            // if effect is not in addTo, add it
+            bool missing = true;
+            for (std::vector<ActiveEffect>::const_iterator iter(addTo.begin()); iter != addTo.end(); ++iter)
+            {
+                if (effect->mEffectId == iter->mEffectId)
+                {
+                    missing = false;
+                    break;
+                }
+            }
+            if (missing)
+            {
+                addTo.push_back(*effect);
+            }
+        }
     }
 
     void ActiveSpells::removeEffects(const std::string &id)
@@ -178,7 +220,7 @@ namespace MWMechanics
                 float magnitude = effectIt->mMagnitude;
 
                 if (magnitude)
-                    visitor.visit(MWMechanics::EffectKey(effectIt->mEffectId, effectIt->mArg), name, it->second.mCasterActorId, magnitude, remainingTime);
+                    visitor.visit(MWMechanics::EffectKey(effectIt->mEffectId, effectIt->mArg), name, it->first, it->second.mCasterActorId, magnitude, remainingTime, effectIt->mDuration);
             }
         }
     }
@@ -204,6 +246,22 @@ namespace MWMechanics
                  effectIt != it->second.mEffects.end();)
             {
                 if (effectIt->mEffectId == effectId)
+                    effectIt = it->second.mEffects.erase(effectIt);
+                else
+                    ++effectIt;
+            }
+        }
+        mSpellsChanged = true;
+    }
+
+    void ActiveSpells::purgeEffect(short effectId, const std::string& sourceId)
+    {
+        for (TContainer::iterator it = mSpells.begin(); it != mSpells.end(); ++it)
+        {
+            for (std::vector<ActiveEffect>::iterator effectIt = it->second.mEffects.begin();
+                 effectIt != it->second.mEffects.end();)
+            {
+                if (effectIt->mEffectId == effectId && it->first == sourceId)
                     effectIt = it->second.mEffects.erase(effectIt);
                 else
                     ++effectIt;

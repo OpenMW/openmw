@@ -13,6 +13,7 @@ bool blockMeleeAttack (const MWWorld::Ptr& attacker, const MWWorld::Ptr& blocker
 void resistNormalWeapon (const MWWorld::Ptr& actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float& damage);
 
 /// @note for a thrown weapon, \a weapon == \a projectile, for bows/crossbows, \a projectile is the arrow/bolt
+/// @note \a victim may be empty (e.g. for a hit on terrain), a non-actor (environment objects) or an actor
 void projectileHit (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, MWWorld::Ptr weapon, const MWWorld::Ptr& projectile,
                     const Ogre::Vector3& hitPosition);
 
@@ -21,6 +22,24 @@ float getHitChance (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, in
 
 /// Applies damage to attacker based on the victim's elemental shields.
 void applyElementalShields(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim);
+
+/// @param damage Unmitigated weapon damage of the attack
+/// @param hit Was the attack successful?
+/// @param weapon The weapon used.
+/// @note if the weapon is unequipped as result of condition damage, a new Ptr will be assigned to \a weapon.
+void reduceWeaponCondition (float damage, bool hit, MWWorld::Ptr& weapon, const MWWorld::Ptr& attacker);
+
+/// Adjust weapon damage based on its condition. A used weapon will be less effective.
+void adjustWeaponDamage (float& damage, const MWWorld::Ptr& weapon);
+
+void getHandToHandDamage (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, float& damage, bool& healthdmg);
+
+/// Apply the fatigue loss incurred by attacking with the given weapon (weapon may be empty = hand-to-hand)
+void applyFatigueLoss(const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon);
+
+/// Can attacker operate in victim's environment?
+/// e.g. If attacker is a fish, is victim in water? Or, if attacker can't swim, is victim on land?
+bool isEnvironmentCompatible(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim);
 
 }
 

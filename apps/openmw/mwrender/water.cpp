@@ -20,9 +20,6 @@
 #include <extern/shiny/Main/Factory.hpp>
 #include <extern/shiny/Platforms/Ogre/OgreMaterial.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-
 using namespace Ogre;
 
 namespace MWRender
@@ -74,7 +71,8 @@ CubeReflection::~CubeReflection ()
 
 void CubeReflection::update ()
 {
-    mParentCamera->getParentSceneNode ()->needUpdate ();
+    if (mParentCamera->isAttached())
+        mParentCamera->getParentSceneNode ()->needUpdate ();
     mCamera->setPosition(mParentCamera->getDerivedPosition());
 }
 
@@ -133,7 +131,8 @@ void PlaneReflection::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::St
 
 void PlaneReflection::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
 {
-    mParentCamera->getParentSceneNode ()->needUpdate ();
+    if (mParentCamera->isAttached())
+        mParentCamera->getParentSceneNode ()->needUpdate ();
     mCamera->setOrientation(mParentCamera->getDerivedOrientation());
     mCamera->setPosition(mParentCamera->getDerivedPosition());
     mCamera->setNearClipDistance(mParentCamera->getNearClipDistance());
@@ -185,7 +184,7 @@ void PlaneReflection::setVisibilityMask (int flags)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Water::Water (Ogre::Camera *camera, RenderingManager* rend) :
+Water::Water (Ogre::Camera *camera, RenderingManager* rend, const MWWorld::Fallback* fallback) :
     mCamera (camera), mSceneMgr (camera->getSceneManager()),
     mIsUnderwater(false), mVisibilityFlags(0),
     mActive(1), mToggled(1),
@@ -196,7 +195,7 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend) :
     mSimulation(NULL),
     mPlayer(0,0)
 {
-    mSimulation = new RippleSimulation(mSceneMgr);
+    mSimulation = new RippleSimulation(mSceneMgr, fallback);
 
     mSky = rend->getSkyManager();
 
@@ -208,10 +207,10 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend) :
 
     mWaterPlane = Plane(Vector3::UNIT_Z, 0);
 
-    int waterScale = 300;
+    int waterScale = 30;
 
     MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, mWaterPlane,
-        CELL_SIZE*5*waterScale, CELL_SIZE*5*waterScale, 10, 10, true, 1, 3*waterScale,3*waterScale, Vector3::UNIT_Y);
+        CELL_SIZE*5*waterScale, CELL_SIZE*5*waterScale, 40, 40, true, 1, 3*waterScale,3*waterScale, Vector3::UNIT_Y);
 
     mWater = mSceneMgr->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);
@@ -303,17 +302,15 @@ Water::~Water()
 
 void Water::changeCell(const ESM::Cell* cell)
 {
-    mTop = cell->mWater;
-
-    setHeight(mTop);
-
-    if(!(cell->mData.mFlags & cell->Interior))
+    if(cell->isExterior())
         mWaterNode->setPosition(getSceneNodeCoordinates(cell->mData.mX, cell->mData.mY));
 }
 
 void Water::setHeight(const float height)
 {
     mTop = height;
+
+    mSimulation->setWaterHeight(height);
 
     mWaterPlane = Plane(Vector3::UNIT_Z, -height);
 
@@ -384,10 +381,15 @@ void Water::update(float dt, Ogre::Vector3 player)
 
 void Water::frameStarted(float dt)
 {
+    if (!mActive)
+        return;
+
     mSimulation->update(dt, mPlayer);
 
     if (mReflection)
+    {
         mReflection->update();
+    }
 }
 
 void Water::applyRTT()
@@ -421,6 +423,7 @@ void Water::applyVisibilityMask()
     mVisibilityFlags = RV_Terrain * Settings::Manager::getBool("reflect terrain", "Water")
                         + (RV_Statics + RV_StaticsSmall + RV_Misc) * Settings::Manager::getBool("reflect statics", "Water")
                         + RV_Actors * Settings::Manager::getBool("reflect actors", "Water")
+                        + RV_Effects
                         + RV_Sky;
 
     if (mReflection)
@@ -495,6 +498,11 @@ void Water::removeEmitter (const MWWorld::Ptr& ptr)
 void Water::updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr)
 {
     mSimulation->updateEmitterPtr(old, ptr);
+}
+
+void Water::clearRipples()
+{
+    mSimulation->clear();
 }
 
 } // namespace

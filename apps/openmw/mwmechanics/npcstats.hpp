@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "stat.hpp"
-
 #include "creaturestats.hpp"
 
 namespace ESM
@@ -19,48 +17,33 @@ namespace ESM
 namespace MWMechanics
 {
     /// \brief Additional stats for NPCs
-    ///
-    /// \note For technical reasons the spell list and the currently selected spell is also handled by
-    /// CreatureStats, even though they are actually NPC stats.
 
     class NpcStats : public CreatureStats
     {
-            /// NPCs other than the player can only have one faction. But for the sake of consistency
-            /// we use the same data structure for the PC and the NPCs.
-            /// \note the faction key must be in lowercase
-            std::map<std::string, int> mFactionRank;
-
             int mDisposition;
-            SkillValue mSkill[ESM::Skill::Length];
+            SkillValue mSkill[ESM::Skill::Length]; // SkillValue.mProgress used by the player only
             SkillValue mWerewolfSkill[ESM::Skill::Length];
-            int mBounty;
-            std::set<std::string> mExpelled;
-            std::map<std::string, int> mFactionReputation;
             int mReputation;
             int mCrimeId;
+
+            // ----- used by the player only, maybe should be moved at some point -------
+            int mBounty;
             int mWerewolfKills;
-            int mProfit;
-
+            /// Used for the player only; NPCs have maximum one faction defined in their NPC record
+            std::map<std::string, int> mFactionRank;
+            std::set<std::string> mExpelled;
+            std::map<std::string, int> mFactionReputation;
             int mLevelProgress; // 0-10
-
             std::vector<int> mSkillIncreases; // number of skill increases for each attribute
-
             std::set<std::string> mUsedIds;
+            // ---------------------------------------------------------------------------
 
             /// Countdown to getting damage while underwater
             float mTimeToStartDrowning;
-            /// time since last hit from drowning
-            float mLastDrowningHit;
-
-            float mLevelHealthBonus;
 
         public:
 
             NpcStats();
-
-            /// for mercenary companions. starts out as 0, and changes when items are added or removed through the UI.
-            int getProfit() const;
-            void modifyProfit(int diff);
 
             int getBaseDisposition() const;
             void setBaseDisposition(int disposition);
@@ -75,23 +58,23 @@ namespace MWMechanics
             SkillValue& getSkill (int index);
 
             const std::map<std::string, int>& getFactionRanks() const;
-            std::map<std::string, int>& getFactionRanks();
+            /// Increase the rank in this faction by 1, if such a rank exists.
+            void raiseRank(const std::string& faction);
+            /// Lower the rank in this faction by 1, if such a rank exists.
+            void lowerRank(const std::string& faction);
+            /// Join this faction, setting the initial rank to 0.
+            void joinFaction(const std::string& faction);
 
             const std::set<std::string>& getExpelled() const { return mExpelled; }
             bool getExpelled(const std::string& factionID) const;
             void expell(const std::string& factionID);
             void clearExpelled(const std::string& factionID);
 
-            bool isSameFaction (const NpcStats& npcStats) const;
-            ///< Do *this and \a npcStats share a faction?
+            bool isInFaction (const std::string& faction) const;
 
-            float getSkillGain (int skillIndex, const ESM::Class& class_, int usageType = -1,
-                int level = -1) const;
-            ///< \param usageType: Usage specific factor, specified in the respective skill record;
-            /// -1: use a factor of 1.0 instead.
-            /// \param level Level to base calculation on; -1: use current level.
+            float getSkillProgressRequirement (int skillIndex, const ESM::Class& class_) const;
 
-            void useSkill (int skillIndex, const ESM::Class& class_, int usageType = -1);
+            void useSkill (int skillIndex, const ESM::Class& class_, int usageType = -1, float extraFactor=1.f);
             ///< Increase skill by usage.
 
             void increaseSkill (int skillIndex, const ESM::Class& class_, bool preserveProgress);
@@ -104,11 +87,13 @@ namespace MWMechanics
 
             void updateHealth();
             ///< Calculate health based on endurance and strength.
-            ///  Called at character creation and at level up.
+            ///  Called at character creation.
 
             void flagAsUsed (const std::string& id);
+            ///< @note Id must be lower-case
 
             bool hasBeenUsed (const std::string& id) const;
+            ///< @note Id must be lower-case
 
             int getBounty() const;
 

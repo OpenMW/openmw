@@ -79,9 +79,6 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
 
     std::auto_ptr<ObjectAnimation> anim(new ObjectAnimation(ptr, mesh));
 
-    if(ptr.getTypeName() == typeid(ESM::Light).name())
-        anim->addLight(ptr.get<ESM::Light>()->mBase);
-
     if (!mesh.empty())
     {
         Ogre::AxisAlignedBox bounds = anim->getWorldBounds();
@@ -238,20 +235,6 @@ void Objects::buildStaticGeometry(MWWorld::CellStore& cell)
 Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::CellStore* cell)
 {
     return mBounds[cell];
-}
-
-void Objects::enableLights()
-{
-    PtrAnimationMap::const_iterator it = mObjects.begin();
-    for(;it != mObjects.end();++it)
-        it->second->enableLights(true);
-}
-
-void Objects::disableLights()
-{
-    PtrAnimationMap::const_iterator it = mObjects.begin();
-    for(;it != mObjects.end();++it)
-        it->second->enableLights(false);
 }
 
 void Objects::update(float dt, Ogre::Camera* camera)

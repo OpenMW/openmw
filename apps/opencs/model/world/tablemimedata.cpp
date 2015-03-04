@@ -91,7 +91,7 @@ return (  type == CSMWorld::ColumnBase::Display_Activator
        || type == CSMWorld::ColumnBase::Display_Static
        || type == CSMWorld::ColumnBase::Display_Weapon);
 }
-bool CSMWorld::TableMimeData::isReferencable(CSMWorld::UniversalId::Type type) const
+bool CSMWorld::TableMimeData::isReferencable(CSMWorld::UniversalId::Type type)
 {
      return (  type == CSMWorld::UniversalId::Type_Activator
             || type == CSMWorld::UniversalId::Type_Potion
@@ -222,7 +222,6 @@ namespace
         { CSMWorld::UniversalId::Type_Race, CSMWorld::ColumnBase::Display_Race },
         { CSMWorld::UniversalId::Type_Skill, CSMWorld::ColumnBase::Display_Skill },
         { CSMWorld::UniversalId::Type_Class, CSMWorld::ColumnBase::Display_Class },
-        { CSMWorld::UniversalId::Type_Class, CSMWorld::ColumnBase::Display_Class },
         { CSMWorld::UniversalId::Type_Faction, CSMWorld::ColumnBase::Display_Faction },
         { CSMWorld::UniversalId::Type_Sound, CSMWorld::ColumnBase::Display_Sound },
         { CSMWorld::UniversalId::Type_Region, CSMWorld::ColumnBase::Display_Region },
@@ -264,6 +263,7 @@ namespace
         { CSMWorld::UniversalId::Type_SoundRes, CSMWorld::ColumnBase::Display_SoundRes },
         { CSMWorld::UniversalId::Type_Texture, CSMWorld::ColumnBase::Display_Texture },
         { CSMWorld::UniversalId::Type_Video, CSMWorld::ColumnBase::Display_Video },
+        { CSMWorld::UniversalId::Type_Global, CSMWorld::ColumnBase::Display_GlobalVariable },
 
         { CSMWorld::UniversalId::Type_None, CSMWorld::ColumnBase::Display_None } // end marker
     };

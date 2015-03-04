@@ -119,10 +119,21 @@ namespace CSMWorld
                 Type_Textures,
                 Type_Texture,
                 Type_Videos,
-                Type_Video
+                Type_Video,
+                Type_DebugProfiles,
+                Type_DebugProfile,
+                Type_SoundGens,
+                Type_SoundGen,
+                Type_MagicEffects,
+                Type_MagicEffect,
+                Type_Pathgrids,
+                Type_Pathgrid,
+                Type_StartScripts,
+                Type_StartScript,
+                Type_RunLog
             };
 
-            enum { NumberOfTypes = Type_BodyPart+1 };
+            enum { NumberOfTypes = Type_RunLog+1 };
 
         private:
 

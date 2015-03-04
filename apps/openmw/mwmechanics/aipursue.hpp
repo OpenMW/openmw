@@ -31,7 +31,7 @@ namespace MWMechanics
             AiPursue(const ESM::AiSequence::AiPursue* pursue);
 
             virtual AiPursue *clone() const;
-            virtual bool execute (const MWWorld::Ptr& actor,float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
             virtual int getTypeId() const;
 
             MWWorld::Ptr getTarget() const;
@@ -41,8 +41,6 @@ namespace MWMechanics
         private:
 
             int mTargetActorId; // The actor to pursue
-            int mCellX;
-            int mCellY;
     };
 }
 #endif

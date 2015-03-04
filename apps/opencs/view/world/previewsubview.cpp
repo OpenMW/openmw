@@ -9,7 +9,7 @@
 #include "../widget/scenetoolmode.hpp"
 
 CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id)
+: SubView (id), mTitle (id.toString().c_str())
 {
     QHBoxLayout *layout = new QHBoxLayout;
 
@@ -52,15 +52,19 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
 
 void CSVWorld::PreviewSubView::setEditLock (bool locked) {}
 
-void CSVWorld::PreviewSubView::closeRequest()
+std::string CSVWorld::PreviewSubView::getTitle() const
 {
-    deleteLater();
+    return mTitle;
 }
 
 void CSVWorld::PreviewSubView::referenceableIdChanged (const std::string& id)
 {
     if (id.empty())
-        setWindowTitle ("Preview: Reference to <nothing>");
+        mTitle = "Preview: Reference to <nothing>";
     else
-        setWindowTitle (("Preview: Reference to " + id).c_str());
+        mTitle = "Preview: Reference to " + id;
+
+    setWindowTitle (QString::fromUtf8 (mTitle.c_str()));
+
+    emit updateTitle();
 }

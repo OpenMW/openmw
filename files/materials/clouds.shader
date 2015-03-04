@@ -13,19 +13,19 @@
     {
         float4x4 worldviewFixed = worldview;
 
-#if !SH_GLSL
-        worldviewFixed[0][3] = 0;
-        worldviewFixed[1][3] = 0;
-        worldviewFixed[2][3] = 0;
+#if !SH_GLSL && !SH_GLSLES
+        worldviewFixed[0][3] = 0.0;
+        worldviewFixed[1][3] = 0.0;
+        worldviewFixed[2][3] = 0.0;
 #else
-        worldviewFixed[3][0] = 0;
-        worldviewFixed[3][1] = 0;
-        worldviewFixed[3][2] = 0;
+        worldviewFixed[3][0] = 0.0;
+        worldviewFixed[3][1] = 0.0;
+        worldviewFixed[3][2] = 0.0;
 #endif
 
         shOutputPosition = shMatrixMult(proj, shMatrixMult(worldviewFixed, shInputPosition));
         UV = uv0;
-            alphaFade = (shInputPosition.z <= 200.f) ? ((shInputPosition.z <= 100.f) ? 0.0 : 0.25) : 1.0;
+            alphaFade = (shInputPosition.z <= 200.0) ? ((shInputPosition.z <= 100.0) ? 0.0 : 0.25) : 1.0;
     }
 
 #else
@@ -47,7 +47,7 @@
         // Scroll in y direction
         float2 scrolledUV = UV + float2(0,1) * cloudAnimationTimer * 0.003; 
         
-        float4 albedo = shSample(diffuseMap1, scrolledUV) * (1-cloudBlendFactor) + shSample(diffuseMap2, scrolledUV) * cloudBlendFactor;
+        float4 albedo = shSample(diffuseMap1, scrolledUV) * (1.0-cloudBlendFactor) + shSample(diffuseMap2, scrolledUV) * cloudBlendFactor;
         
         shOutputColour(0) = float4(cloudColour, 1) * albedo * float4(1,1,1, cloudOpacity * alphaFade);
     }

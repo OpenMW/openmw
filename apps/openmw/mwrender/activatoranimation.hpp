@@ -13,8 +13,11 @@ namespace MWRender
     class ActivatorAnimation : public Animation
     {
     public:
-        ActivatorAnimation(const MWWorld::Ptr& ptr);
+        ActivatorAnimation(const MWWorld::Ptr& ptr, const std::string &model);
         virtual ~ActivatorAnimation();
+
+        void addLight(const ESM::Light *light);
+        void removeParticles();
     };
 }
 

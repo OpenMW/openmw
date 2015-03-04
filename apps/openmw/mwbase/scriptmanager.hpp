@@ -46,17 +46,11 @@ namespace MWBase
             ///< Compile all scripts
             /// \return count, success
 
-            virtual Compiler::Locals& getLocals (const std::string& name) = 0;
+            virtual const Compiler::Locals& getLocals (const std::string& name) = 0;
             ///< Return locals for script \a name.
 
             virtual MWScript::GlobalScripts& getGlobalScripts() = 0;
-
-            virtual int getLocalIndex (const std::string& scriptId, const std::string& variable,
-                char type) = 0;
-            ///< Return index of the variable of the given name and type in the given script. Will
-            /// throw an exception, if there is no such script or variable or the type does not match.
-
-    };
+   };
 }
 
 #endif

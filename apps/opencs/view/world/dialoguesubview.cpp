@@ -170,10 +170,10 @@ void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::
 ==============================DialogueDelegateDispatcher==========================================
 */
 
-CSVWorld::DialogueDelegateDispatcher::DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table, QUndoStack& undoStack) :
+CSVWorld::DialogueDelegateDispatcher::DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table, CSMDoc::Document& document) :
 mParent(parent),
 mTable(table),
-mUndoStack(undoStack),
+mDocument (document),
 mNotEditableDelegate(table, parent)
 {
 }
@@ -185,7 +185,7 @@ CSVWorld::CommandDelegate* CSVWorld::DialogueDelegateDispatcher::makeDelegate(CS
     if (delegateIt == mDelegates.end())
     {
         delegate = CommandDelegateFactoryCollection::get().makeDelegate (
-                                    display, mUndoStack, mParent);
+                                    display, mDocument, mParent);
         mDelegates.insert(std::make_pair(display, delegate));
     } else
     {
@@ -271,7 +271,6 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
 
         DialogueDelegateDispatcherProxy* proxy = new DialogueDelegateDispatcherProxy(editor, display);
 
-        bool skip = false;
         if (qobject_cast<DropLineEdit*>(editor))
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
@@ -284,25 +283,21 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
 
             skip = true;
         }
-        if(!skip && qobject_cast<QCheckBox*>(editor))
+        else if (qobject_cast<QCheckBox*>(editor))
         {
             connect(editor, SIGNAL(stateChanged(int)), proxy, SLOT(editorDataCommited()));
-            skip = true;
         }
-        if(!skip && qobject_cast<QPlainTextEdit*>(editor))
+        else if (qobject_cast<QPlainTextEdit*>(editor))
         {
             connect(editor, SIGNAL(textChanged()), proxy, SLOT(editorDataCommited()));
-            skip = true;
         }
-        if(!skip && qobject_cast<QComboBox*>(editor))
+        else if (qobject_cast<QComboBox*>(editor))
         {
             connect(editor, SIGNAL(currentIndexChanged (int)), proxy, SLOT(editorDataCommited()));
-            skip = true;
         }
-        if(!skip && qobject_cast<QAbstractSpinBox*>(editor))
+        else if (qobject_cast<QAbstractSpinBox*>(editor))
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
-            skip = true;
         } //lisp cond pairs would be nice in the C++
 
         connect(proxy, SIGNAL(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)),
@@ -338,7 +333,7 @@ mDispatcher(this, table, undoStack),
 QScrollArea(parent),
 mWidgetMapper(NULL),
 mMainWidget(NULL),
-mUndoStack(undoStack),
+mDocument (document),
 mTable(table)
 {
     remake (row);
@@ -442,7 +437,6 @@ void CSVWorld::EditWidget::remake(int row)
 
     mWidgetMapper->setCurrentModelIndex(mTable->index(row, 0));
 
-    this->setMinimumWidth(325); /// \todo replace hardcoded value with a user setting
     this->setWidget(mMainWidget);
     this->setWidgetResizable(true);
 }

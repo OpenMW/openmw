@@ -34,6 +34,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../sdl4ogre/events.h"
 
+#include "boost/lexical_cast.hpp"
+
 #define ICS_LOG(text) if(mLog) mLog->logMessage( ("ICS: " + std::string(text)).c_str() );
 #define ICS_MAX_JOYSTICK_AXIS 16
 #define ICS_MOUSE_BINDING_MARGIN 30
@@ -43,16 +45,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace ICS
 {
-	class DllExport InputControlSystemLog 
+	class DllExport InputControlSystemLog
 	{
 	public:
 		virtual void logMessage(const char* text) = 0;
 	};
 
-	class DllExport InputControlSystem : 
+	class DllExport InputControlSystem :
 		public SFO::MouseListener,
 		public SFO::KeyListener,
-        public SFO::JoyListener
+        public SFO::ControllerListener
 	{
 
 	public:
@@ -62,6 +64,7 @@ namespace ICS
 
 		typedef NamedAxis MouseAxis; // MouseAxis is deprecated. It will be removed in future versions
 
+		typedef std::map<int, SDL_GameController*> JoystickInstanceMap;
 		typedef std::list<int> JoystickIDList;
 
 		typedef struct
@@ -72,7 +75,7 @@ namespace ICS
 
 		InputControlSystem(std::string file = "", bool active = true
 			, DetectingBindingListener* detectingBindingListener = NULL
-			, InputControlSystemLog* log = NULL, size_t channelCount = 16); 
+			, InputControlSystemLog* log = NULL, size_t channelCount = 16);
 		~InputControlSystem();
 
 		std::string getFileName(){ return mFileName; };
@@ -98,51 +101,45 @@ namespace ICS
 		inline void activate(){ this->mActive = true; };
 		inline void deactivate(){ this->mActive = false; };
 
-		void addJoystick(int deviceId);
+		void controllerAdded  (int deviceID, const SDL_ControllerDeviceEvent &args);
+		void controllerRemoved(const SDL_ControllerDeviceEvent &args);
 		JoystickIDList& getJoystickIdList(){ return mJoystickIDList; };
-		
+		JoystickInstanceMap& getJoystickInstanceMap(){ return mJoystickInstanceMap; };
+
 		// MouseListener
         void mouseMoved(const SFO::MouseMotionEvent &evt);
         void mousePressed(const SDL_MouseButtonEvent &evt, Uint8);
         void mouseReleased(const SDL_MouseButtonEvent &evt, Uint8);
-		
+
 		// KeyListener
         void keyPressed(const SDL_KeyboardEvent &evt);
         void keyReleased(const SDL_KeyboardEvent &evt);
-		
-		// JoyStickListener
-        void buttonPressed(const SDL_JoyButtonEvent &evt, int button);
-        void buttonReleased(const SDL_JoyButtonEvent &evt, int button);
-        void axisMoved(const SDL_JoyAxisEvent &evt, int axis);
-        void povMoved(const SDL_JoyHatEvent &evt, int index);
-		//TODO: does this have an SDL equivalent?
-        //bool sliderMoved(const OIS::JoyStickEvent &evt, int index);
 
-		void addKeyBinding(Control* control, SDL_Keycode key, Control::ControlChangingDirection direction);
+		// ControllerListener
+        void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &evt);
+        void buttonReleased(int deviceID, const SDL_ControllerButtonEvent &evt);
+        void axisMoved(int deviceID, const SDL_ControllerAxisEvent &evt);
+
+        void addKeyBinding(Control* control, SDL_Scancode key, Control::ControlChangingDirection direction);
+        bool isKeyBound(SDL_Scancode key) const;
 		void addMouseAxisBinding(Control* control, NamedAxis axis, Control::ControlChangingDirection direction);
 		void addMouseButtonBinding(Control* control, unsigned int button, Control::ControlChangingDirection direction);
-		void addJoystickAxisBinding(Control* control, int deviceId, int axis, Control::ControlChangingDirection direction);
-		void addJoystickButtonBinding(Control* control, int deviceId, unsigned int button, Control::ControlChangingDirection direction);
-		void addJoystickPOVBinding(Control* control, int deviceId, int index, POVAxis axis, Control::ControlChangingDirection direction);
-		void addJoystickSliderBinding(Control* control, int deviceId, int index, Control::ControlChangingDirection direction);
-		void removeKeyBinding(SDL_Keycode key);
+        bool isMouseButtonBound(unsigned int button) const;
+        void addJoystickAxisBinding(Control* control, int deviceID, int axis, Control::ControlChangingDirection direction);
+		void addJoystickButtonBinding(Control* control, int deviceID, unsigned int button, Control::ControlChangingDirection direction);
+        void removeKeyBinding(SDL_Scancode key);
 		void removeMouseAxisBinding(NamedAxis axis);
 		void removeMouseButtonBinding(unsigned int button);
-		void removeJoystickAxisBinding(int deviceId, int axis);
-		void removeJoystickButtonBinding(int deviceId, unsigned int button);
-		void removeJoystickPOVBinding(int deviceId, int index, POVAxis axis);
-		void removeJoystickSliderBinding(int deviceId, int index);
+		void removeJoystickAxisBinding(int deviceID, int axis);
+		void removeJoystickButtonBinding(int deviceID, unsigned int button);
 
-		SDL_Keycode getKeyBinding(Control* control, ICS::Control::ControlChangingDirection direction);
+        SDL_Scancode getKeyBinding(Control* control, ICS::Control::ControlChangingDirection direction);
 		NamedAxis getMouseAxisBinding(Control* control, ICS::Control::ControlChangingDirection direction);
 		unsigned int getMouseButtonBinding(Control* control, ICS::Control::ControlChangingDirection direction);
-		int getJoystickAxisBinding(Control* control, int deviceId, ICS::Control::ControlChangingDirection direction);
-		unsigned int getJoystickButtonBinding(Control* control, int deviceId, ICS::Control::ControlChangingDirection direction);
-		POVBindingPair getJoystickPOVBinding(Control* control, int deviceId, ICS::Control::ControlChangingDirection direction);
-		int getJoystickSliderBinding(Control* control, int deviceId, ICS::Control::ControlChangingDirection direction);
+		int getJoystickAxisBinding(Control* control, int deviceID, ICS::Control::ControlChangingDirection direction);
+		unsigned int getJoystickButtonBinding(Control* control, int deviceID, ICS::Control::ControlChangingDirection direction);
 
-		std::string keyCodeToString(SDL_Keycode key);
-		SDL_Keycode stringToKeyCode(std::string key);
+        std::string scancodeToString(SDL_Scancode key);
 
 		void enableDetectingBindingState(Control* control, Control::ControlChangingDirection direction);
 		void cancelDetectingBindingState();
@@ -186,23 +183,17 @@ namespace ICS
 
 		std::string mFileName;
 
-		typedef std::map<SDL_Keycode, ControlKeyBinderItem> ControlsKeyBinderMapType;	// <KeyCode, [direction, control]>
+        typedef std::map<SDL_Scancode, ControlKeyBinderItem> ControlsKeyBinderMapType;	// <Scancode, [direction, control]>
 		typedef std::map<int, ControlAxisBinderItem> ControlsAxisBinderMapType;			// <axis, [direction, control]>
 		typedef std::map<int, ControlButtonBinderItem> ControlsButtonBinderMapType;		// <button, [direction, control]>
-		typedef std::map<int, ControlPOVBinderItem> ControlsPOVBinderMapType;			// <index, [direction, control]>
-		typedef std::map<int, ControlSliderBinderItem> ControlsSliderBinderMapType;		// <index, [direction, control]>
 
 		typedef std::map<int, ControlsAxisBinderMapType> JoystickAxisBinderMapType;					// <joystick_id, <axis, [direction, control]> >
-		typedef std::map<int, ControlsButtonBinderMapType> JoystickButtonBinderMapType;				// <joystick_id, <button, [direction, control]> > 
-        typedef std::map<int, std::map<int, ControlsPOVBinderMapType> > JoystickPOVBinderMapType;	// <joystick_id, <index, <axis, [direction, control]> > >
-		typedef std::map<int, ControlsSliderBinderMapType> JoystickSliderBinderMapType;				// <joystick_id, <index, [direction, control]> > 
+		typedef std::map<int, ControlsButtonBinderMapType> JoystickButtonBinderMapType;				// <joystick_id, <button, [direction, control]> >
 
 		ControlsAxisBinderMapType mControlsMouseAxisBinderMap;			// <axis, [direction, control]>
 		ControlsButtonBinderMapType mControlsMouseButtonBinderMap;		// <int, [direction, control]>
-		JoystickAxisBinderMapType mControlsJoystickAxisBinderMap;		// <joystick_id, <axis, [direction, control]> >
-		JoystickButtonBinderMapType mControlsJoystickButtonBinderMap;	// <joystick_id, <button, [direction, control]> > 
-		JoystickPOVBinderMapType mControlsJoystickPOVBinderMap;			// <joystick_id, <index, <axis, [direction, control]> > > 
-		JoystickSliderBinderMapType mControlsJoystickSliderBinderMap;	// <joystick_id, <index, [direction, control]> > 
+		JoystickAxisBinderMapType mControlsJoystickAxisBinderMap;		// <axis, [direction, control]>
+		JoystickButtonBinderMapType mControlsJoystickButtonBinderMap;	// <button, [direction, control]>
 
 		std::vector<Control *> mControls;
 		std::vector<Channel *> mChannels;
@@ -211,7 +202,7 @@ namespace ICS
 
 		bool mActive;
 		InputControlSystemLog* mLog;
-		
+
 		DetectingBindingListener* mDetectingBindingListener;
 		Control* mDetectingBindingControl;
 		Control::ControlChangingDirection mDetectingBindingDirection;
@@ -220,6 +211,7 @@ namespace ICS
 		bool mYmouseAxisBinded;
 
 		JoystickIDList mJoystickIDList;
+		JoystickInstanceMap mJoystickInstanceMap;
 
 		int mMouseAxisBindingInitialValues[3];
 
@@ -233,7 +225,7 @@ namespace ICS
 	{
 	public:
 		virtual void keyBindingDetected(InputControlSystem* ICS, Control* control
-			, SDL_Keycode key, Control::ControlChangingDirection direction);
+            , SDL_Scancode key, Control::ControlChangingDirection direction);
 
 		virtual void mouseAxisBindingDetected(InputControlSystem* ICS, Control* control
 			, InputControlSystem::NamedAxis axis, Control::ControlChangingDirection direction);
@@ -241,17 +233,12 @@ namespace ICS
 		virtual void mouseButtonBindingDetected(InputControlSystem* ICS, Control* control
 			, unsigned int button, Control::ControlChangingDirection direction);
 
-		virtual void joystickAxisBindingDetected(InputControlSystem* ICS, Control* control
-			, int deviceId, int axis, Control::ControlChangingDirection direction);
+		virtual void joystickAxisBindingDetected(InputControlSystem* ICS, int deviceID, Control* control
+			, int axis, Control::ControlChangingDirection direction);
 
-		virtual void joystickButtonBindingDetected(InputControlSystem* ICS, Control* control
-			, int deviceId, unsigned int button, Control::ControlChangingDirection direction);
+		virtual void joystickButtonBindingDetected(InputControlSystem* ICS, int deviceID, Control* control
+			, unsigned int button, Control::ControlChangingDirection direction);
 
-		virtual void joystickPOVBindingDetected(InputControlSystem* ICS, Control* control
-			, int deviceId, int pov, InputControlSystem::POVAxis axis, Control::ControlChangingDirection direction);
-
-		virtual void joystickSliderBindingDetected(InputControlSystem* ICS, Control* control
-			, int deviceId, int slider, Control::ControlChangingDirection direction);
 	};
 
 	static const float ICS_MAX = std::numeric_limits<float>::max();

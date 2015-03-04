@@ -33,7 +33,7 @@ namespace MWMechanics
 
             virtual AiEscort *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor,float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
 
             virtual int getTypeId() const;
 
@@ -48,7 +48,6 @@ namespace MWMechanics
             float mMaxDist;
             float mRemainingDuration; // In seconds
 
-            PathFinder mPathFinder;
             int mCellX;
             int mCellY;
     };

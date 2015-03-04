@@ -1,22 +1,27 @@
 #ifndef MWGUI_CONTROLLERS_H
 #define MWGUI_CONTROLLERS_H
 
-#include <MyGUI_Widget.h>
+#include <string>
 #include <MyGUI_ControllerItem.h>
 
+namespace MyGUI
+{
+    class Widget;
+}
 
 namespace MWGui
 {
     namespace Controllers
     {
-        class ControllerRepeatClick :
+        // Should be removed when upgrading to MyGUI 3.2.2 (current git), it has ControllerRepeatClick
+        class ControllerRepeatEvent :
             public MyGUI::ControllerItem
         {
-            MYGUI_RTTI_DERIVED( ControllerRepeatClick )
+            MYGUI_RTTI_DERIVED( ControllerRepeatEvent )
 
         public:
-            ControllerRepeatClick();
-            virtual ~ControllerRepeatClick();
+            ControllerRepeatEvent();
+            virtual ~ControllerRepeatEvent();
 
             void setRepeat(float init, float step);
             void setEnabled(bool enable);
@@ -39,6 +44,17 @@ namespace MWGui
             float mStep;
             bool mEnabled;
             float mTimeLeft;
+        };
+
+        /// Automatically positions a widget below the mouse cursor.
+        class ControllerFollowMouse :
+            public MyGUI::ControllerItem
+        {
+            MYGUI_RTTI_DERIVED( ControllerFollowMouse )
+
+        private:
+            bool addTime(MyGUI::Widget* _widget, float _time);
+            void prepareItem(MyGUI::Widget* _widget);
         };
     }
 }

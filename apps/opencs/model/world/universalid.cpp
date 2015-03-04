@@ -46,10 +46,16 @@ namespace
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Filters, "Filters", 0 },
         { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_Meshes, "Meshes", 0 },
         { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_Icons, "Icons", 0 },
-        { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_Musics, "Musics", 0 },
+        { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_Musics, "Music Files", 0 },
         { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_SoundsRes, "Sound Files", 0 },
         { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_Textures, "Textures", 0 },
         { CSMWorld::UniversalId::Class_ResourceList, CSMWorld::UniversalId::Type_Videos, "Videos", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_DebugProfiles, "Debug Profiles", 0 },
+        { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_RunLog, "Run Log", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_SoundGens, "Sound Generators", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_MagicEffects, "Magic Effects", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Pathgrids, "Pathgrids", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_StartScripts, "Start Scripts", 0 },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
@@ -109,6 +115,11 @@ namespace
         { CSMWorld::UniversalId::Class_Resource, CSMWorld::UniversalId::Type_SoundRes, "Sound File", 0 },
         { CSMWorld::UniversalId::Class_Resource, CSMWorld::UniversalId::Type_Texture, "Texture", 0 },
         { CSMWorld::UniversalId::Class_Resource, CSMWorld::UniversalId::Type_Video, "Video", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_DebugProfile, "Debug Profile", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_SoundGen, "Sound Generator", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_MagicEffect, "Magic Effect", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Pathgrid, "Pathgrid", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_StartScript, "Start Script", 0 },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
@@ -122,6 +133,7 @@ namespace
 }
 
 CSMWorld::UniversalId::UniversalId (const std::string& universalId)
+: mIndex(0)
 {
     std::string::size_type index = universalId.find (':');
 
@@ -319,7 +331,7 @@ std::string CSMWorld::UniversalId::getIcon() const
 
     for (int i=0; typeData[i].mName; ++i)
         if (typeData[i].mType==mType)
-            return typeData[i].mIcon ? typeData[i].mIcon : "";
+            return typeData[i].mIcon ? typeData[i].mIcon : ":placeholder";
 
     throw std::logic_error ("failed to retrieve UniversalId type icon");
 }

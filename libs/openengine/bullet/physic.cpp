@@ -1,15 +1,20 @@
 #include "physic.hpp"
+
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include <components/nifbullet/bulletnifloader.hpp>
-#include "OgreRoot.h"
-#include "BtOgrePG.h"
-#include "BtOgreGP.h"
-#include "BtOgreExtras.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+
+#include <OgreSceneManager.h>
+
+#include <components/nifbullet/bulletnifloader.hpp>
+#include <components/misc/stringops.hpp>
+
+#include "BtOgrePG.h"
+#include "BtOgreGP.h"
+#include "BtOgreExtras.h"
 
 namespace
 {
@@ -35,7 +40,7 @@ btCollisionShape *duplicateCollisionShape(btCollisionShape *shape)
 
     if(btBvhTriangleMeshShape *trishape = dynamic_cast<btBvhTriangleMeshShape*>(shape))
     {
-        btTriangleMesh* oldMesh = dynamic_cast<btTriangleMesh*>(trishape->getMeshInterface());
+        btTriangleMesh* oldMesh = static_cast<btTriangleMesh*>(trishape->getMeshInterface());
         btTriangleMesh* newMesh = new btTriangleMesh(*oldMesh);
         NifBullet::TriangleMeshShape *newShape = new NifBullet::TriangleMeshShape(newMesh, true);
 
@@ -74,6 +79,8 @@ namespace Physic
       , mExternalCollisionMode(true)
       , mForce(0.0f)
       , mScale(scale)
+      , mWalkingOnWater(false)
+      , mCanWaterWalk(false)
     {
         if (!NifBullet::getBoundingBox(mMesh, mHalfExtents, mMeshTranslation, mMeshOrientation))
         {
@@ -97,12 +104,13 @@ namespace Physic
                 (0,0, mShape.get());
         mBody = new RigidBody(CI, name);
         mBody->mPlaceable = false;
+        mBody->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
+        mBody->setActivationState(DISABLE_DEACTIVATION);
 
         setPosition(position);
         setRotation(rotation);
 
-        mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor,
-            CollisionType_Actor|CollisionType_World|CollisionType_HeightMap);
+        updateCollisionMask();
     }
 
     PhysicActor::~PhysicActor()
@@ -111,7 +119,7 @@ namespace Physic
         {
             mEngine->mDynamicsWorld->removeRigidBody(mBody);
             delete mBody;
-        }  
+        }
     }
 
     void PhysicActor::enableCollisionMode(bool collision)
@@ -121,10 +129,22 @@ namespace Physic
 
     void PhysicActor::enableCollisionBody(bool collision)
     {
-        assert(mBody);
-        if(collision && !mExternalCollisionMode) enableCollisionBody();
-        if(!collision && mExternalCollisionMode) disableCollisionBody();
-        mExternalCollisionMode = collision;
+        if (mExternalCollisionMode != collision)
+        {
+            mExternalCollisionMode = collision;
+            updateCollisionMask();
+        }
+    }
+
+    void PhysicActor::updateCollisionMask()
+    {
+        mEngine->mDynamicsWorld->removeRigidBody(mBody);
+        int collisionMask = CollisionType_World | CollisionType_HeightMap;
+        if (mExternalCollisionMode)
+            collisionMask |= CollisionType_Actor | CollisionType_Projectile;
+        if (mCanWaterWalk)
+            collisionMask |= CollisionType_Water;
+        mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor, collisionMask);
     }
 
     const Ogre::Vector3& PhysicActor::getPosition() const
@@ -176,18 +196,23 @@ namespace Physic
         mOnGround = grounded;
     }
 
-    void PhysicActor::disableCollisionBody()
+    bool PhysicActor::isWalkingOnWater() const
     {
-        mEngine->mDynamicsWorld->removeRigidBody(mBody);
-        mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor,
-            CollisionType_World|CollisionType_HeightMap);
+        return mWalkingOnWater;
     }
 
-    void PhysicActor::enableCollisionBody()
+    void PhysicActor::setWalkingOnWater(bool walkingOnWater)
     {
-        mEngine->mDynamicsWorld->removeRigidBody(mBody);
-        mEngine->mDynamicsWorld->addRigidBody(mBody, CollisionType_Actor,
-            CollisionType_Actor|CollisionType_World|CollisionType_HeightMap);
+        mWalkingOnWater = walkingOnWater;
+    }
+
+    void PhysicActor::setCanWaterWalk(bool waterWalk)
+    {
+        if (waterWalk != mCanWaterWalk)
+        {
+            mCanWaterWalk = waterWalk;
+            updateCollisionMask();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,15 +249,15 @@ namespace Physic
         // The actual physics solver
         solver = new btSequentialImpulseConstraintSolver;
 
-        //btOverlappingPairCache* pairCache = new btSortedOverlappingPairCache();
-        pairCache = new btSortedOverlappingPairCache();
-
-        //pairCache->setInternalGhostPairCallback( new btGhostPairCallback() );
-
         broadphase = new btDbvtBroadphase();
 
         // The world.
         mDynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
+
+        // Don't update AABBs of all objects every frame. Most objects in MW are static, so we don't need this.
+        // Should a "static" object ever be moved, we have to update its AABB manually using DynamicsWorld::updateSingleAabb.
+        mDynamicsWorld->setForceUpdateAllAabbs(false);
+
         mDynamicsWorld->setGravity(btVector3(0,0,-10));
 
         if(BulletShapeManager::getSingletonPtr() == NULL)
@@ -334,10 +359,10 @@ namespace Physic
         delete collisionConfiguration;
         delete dispatcher;
         delete broadphase;
-        delete pairCache;
         delete mShapeLoader;
 
-        delete BulletShapeManager::getSingletonPtr();
+        // Moved the cleanup to mwworld/physicssystem
+        //delete BulletShapeManager::getSingletonPtr();
     }
 
     void PhysicEngine::addHeightField(float* heights,
@@ -380,7 +405,7 @@ namespace Physic
         mHeightFieldMap [name] = hf;
 
         mDynamicsWorld->addRigidBody(body,CollisionType_HeightMap,
-                                    CollisionType_World|CollisionType_Actor|CollisionType_Raycasting);
+                                    CollisionType_Actor|CollisionType_Raycasting|CollisionType_Projectile);
     }
 
     void PhysicEngine::removeHeightField(int x, int y)
@@ -389,13 +414,17 @@ namespace Physic
             + boost::lexical_cast<std::string>(x) + "_"
             + boost::lexical_cast<std::string>(y);
 
-        HeightField hf = mHeightFieldMap [name];
+        HeightFieldContainer::iterator it = mHeightFieldMap.find(name);
+        if (it == mHeightFieldMap.end())
+            return;
+
+        const HeightField& hf = it->second;
 
         mDynamicsWorld->removeRigidBody(hf.mBody);
         delete hf.mShape;
         delete hf.mBody;
 
-        mHeightFieldMap.erase(name);
+        mHeightFieldMap.erase(it);
     }
 
     void PhysicEngine::adjustRigidBody(RigidBody* body, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
@@ -436,7 +465,9 @@ namespace Physic
         BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
         BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
 
-        if (placeable && !raycasting && shape->mCollisionShape && !shape->mHasCollisionNode)
+        // TODO: add option somewhere to enable collision for placeable meshes
+
+        if (placeable && !raycasting && shape->mCollisionShape)
             return NULL;
 
         if (!shape->mCollisionShape && !raycasting)
@@ -487,13 +518,14 @@ namespace Physic
         {
             assert (mCollisionObjectMap.find(name) == mCollisionObjectMap.end());
             mCollisionObjectMap[name] = body;
-            mDynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_Actor|CollisionType_HeightMap);
+            mDynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_Actor|CollisionType_HeightMap);
         }
         else
         {
             assert (mRaycastingObjectMap.find(name) == mRaycastingObjectMap.end());
             mRaycastingObjectMap[name] = body;
-            mDynamicsWorld->addRigidBody(body,CollisionType_Raycasting,CollisionType_Raycasting);
+            mDynamicsWorld->addRigidBody(body,CollisionType_Raycasting,CollisionType_Raycasting|CollisionType_Projectile);
+            body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
         }
 
         return body;
@@ -661,12 +693,14 @@ namespace Physic
     };
 
 
-    std::vector<std::string> PhysicEngine::getCollisions(const std::string& name)
+    std::vector<std::string> PhysicEngine::getCollisions(const std::string& name, int collisionGroup, int collisionMask)
     {
         RigidBody* body = getRigidBody(name);
         if (!body) // fall back to raycasting body if there is no collision body
             body = getRigidBody(name, true);
         ContactTestResultCallback callback;
+        callback.m_collisionFilterGroup = collisionGroup;
+        callback.m_collisionFilterMask = collisionMask;
         mDynamicsWorld->contactTest(body, callback);
         return callback.mResult;
     }
@@ -733,11 +767,7 @@ namespace Physic
         }
     }
 
-    void PhysicEngine::emptyEventLists(void)
-    {
-    }
-
-    std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly,bool ignoreHeightMap, Ogre::Vector3* normal)
+    std::pair<std::string,float> PhysicEngine::rayTest(const btVector3 &from, const btVector3 &to, bool raycastingObjectOnly, bool ignoreHeightMap, Ogre::Vector3* normal)
     {
         std::string name = "";
         float d = -1;
@@ -801,10 +831,10 @@ namespace Physic
             return std::make_pair(false, 1);
     }
 
-    std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(btVector3& from, btVector3& to)
+    std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(const btVector3& from, const btVector3& to, int filterGroup)
     {
         MyRayResultCallback resultCallback1;
-        resultCallback1.m_collisionFilterGroup = 0xff;
+        resultCallback1.m_collisionFilterGroup = filterGroup;
         resultCallback1.m_collisionFilterMask = CollisionType_Raycasting|CollisionType_Actor|CollisionType_HeightMap;
         mDynamicsWorld->rayTest(from, to, resultCallback1);
         std::vector< std::pair<float, const btCollisionObject*> > results = resultCallback1.results;
@@ -846,20 +876,75 @@ namespace Physic
         }
     }
 
-    bool PhysicEngine::isAnyActorStandingOn (const std::string& objectName)
+    int PhysicEngine::toggleDebugRendering(Ogre::SceneManager *sceneMgr)
     {
-        for (PhysicActorContainer::iterator it = mActorMap.begin(); it != mActorMap.end(); ++it)
+        if(!sceneMgr)
+            return 0;
+
+        std::map<Ogre::SceneManager *, BtOgre::DebugDrawer *>::iterator iter =
+            mDebugDrawers.find(sceneMgr);
+        if(iter != mDebugDrawers.end()) // found scene manager
         {
-            if (!it->second->getOnGround())
-                continue;
-            Ogre::Vector3 pos = it->second->getPosition();
-            btVector3 from (pos.x, pos.y, pos.z);
-            btVector3 to = from - btVector3(0,0,5);
-            std::pair<std::string, float> result = rayTest(from, to);
-            if (result.first == objectName)
-                return true;
+            if((*iter).second)
+            {
+                // set a new drawer each time (maybe with a different scene manager)
+                mDynamicsWorld->setDebugDrawer(mDebugDrawers[sceneMgr]);
+                if(!mDebugDrawers[sceneMgr]->getDebugMode())
+                    mDebugDrawers[sceneMgr]->setDebugMode(1 /*mDebugDrawFlags*/);
+                else
+                    mDebugDrawers[sceneMgr]->setDebugMode(0);
+                mDynamicsWorld->debugDrawWorld();
+
+                return mDebugDrawers[sceneMgr]->getDebugMode();
+            }
         }
-        return false;
+        return 0;
+    }
+
+    void PhysicEngine::stepDebug(Ogre::SceneManager *sceneMgr)
+    {
+        if(!sceneMgr)
+            return;
+
+        std::map<Ogre::SceneManager *, BtOgre::DebugDrawer *>::iterator iter =
+            mDebugDrawers.find(sceneMgr);
+        if(iter != mDebugDrawers.end()) // found scene manager
+        {
+            if((*iter).second)
+                (*iter).second->step();
+            else
+                return;
+        }
+    }
+
+    void PhysicEngine::createDebugDraw(Ogre::SceneManager *sceneMgr)
+    {
+        if(mDebugDrawers.find(sceneMgr) == mDebugDrawers.end())
+        {
+            mDebugSceneNodes[sceneMgr] = sceneMgr->getRootSceneNode()->createChildSceneNode();
+            mDebugDrawers[sceneMgr] = new BtOgre::DebugDrawer(mDebugSceneNodes[sceneMgr], mDynamicsWorld);
+            mDebugDrawers[sceneMgr]->setDebugMode(0);
+        }
+    }
+
+    void PhysicEngine::removeDebugDraw(Ogre::SceneManager *sceneMgr)
+    {
+        std::map<Ogre::SceneManager *, BtOgre::DebugDrawer *>::iterator iter =
+            mDebugDrawers.find(sceneMgr);
+        if(iter != mDebugDrawers.end())
+        {
+            delete (*iter).second;
+            mDebugDrawers.erase(iter);
+        }
+
+        std::map<Ogre::SceneManager *, Ogre::SceneNode *>::iterator it =
+            mDebugSceneNodes.find(sceneMgr);
+        if(it != mDebugSceneNodes.end())
+        {
+            std::string sceneNodeName = (*it).second->getName();
+            if(sceneMgr->hasSceneNode(sceneNodeName))
+                sceneMgr->destroySceneNode(sceneNodeName);
+        }
     }
 
 }

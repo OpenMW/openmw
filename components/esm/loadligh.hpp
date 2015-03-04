@@ -25,7 +25,7 @@ struct Light
         Negative    = 0x004, // Negative light - i.e. darkness
         Flicker     = 0x008,
         Fire        = 0x010,
-        OffDefault  = 0x020, // Off by default
+        OffDefault  = 0x020, // Off by default - does not burn while placed in a cell, but can burn when equipped by an NPC
         FlickerSlow = 0x040,
         Pulse       = 0x080,
         PulseSlow   = 0x100
@@ -37,7 +37,7 @@ struct Light
         int mValue;
         int mTime; // Duration
         int mRadius;
-        int mColor; // 4-byte rgba value
+        unsigned int mColor; // 4-byte rgba value
         int mFlags;
     }; // Size = 24 bytes
 

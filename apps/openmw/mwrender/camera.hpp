@@ -27,6 +27,7 @@ namespace MWRender
 
         Ogre::Camera *mCamera;
         Ogre::SceneNode *mCameraNode;
+        Ogre::SceneNode *mCameraPosNode;
 
         NpcAnimation *mAnimation;
 
@@ -36,7 +37,6 @@ namespace MWRender
         float mNearest;
         float mFurthest;
         bool mIsNearest;
-        bool mIsFurthest;
 
         struct {
             bool enabled, allowed;
@@ -50,8 +50,8 @@ namespace MWRender
         bool mVanityToggleQueued;
         bool mViewModeToggleQueued;
 
-        /// Updates sound manager listener data
-        void updateListener();
+        void setPosition(const Ogre::Vector3& position);
+        void setPosition(float x, float y, float z);
 
     public:
         Camera(Ogre::Camera *camera);
@@ -73,7 +73,7 @@ namespace MWRender
         const std::string &getHandle() const;
 
         /// Attach camera to object
-        void attachTo(const MWWorld::Ptr &);
+        Ogre::SceneNode* attachTo(const MWWorld::Ptr &);
 
         /// @param Force view mode switch, even if currently not allowed by the animation.
         void toggleViewMode(bool force=false);
@@ -118,8 +118,6 @@ namespace MWRender
         bool isVanityOrPreviewModeEnabled();
 
         bool isNearest();
-
-        bool isFurthest();
     };
 }
 

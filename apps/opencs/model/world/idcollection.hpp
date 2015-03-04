@@ -11,14 +11,19 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
     class IdCollection : public Collection<ESXRecordT, IdAccessorT>
     {
+            virtual void loadRecord (ESXRecordT& record, ESM::ESMReader& reader);
+
         public:
 
-            void load (ESM::ESMReader& reader, bool base);
+            /// \return Index of loaded record (-1 if no record was loaded)
+            int load (ESM::ESMReader& reader, bool base);
 
             /// \param index Index at which the record can be found.
             /// Special values: -2 index unknown, -1 record does not exist yet and therefore
             /// does not have an index
-            void load (const ESXRecordT& record, bool base, int index = -2);
+            ///
+            /// \return index
+            int load (const ESXRecordT& record, bool base, int index = -2);
 
             bool tryDelete (const std::string& id);
             ///< Try deleting \a id. If the id does not exist or can't be deleted the call is ignored.
@@ -27,7 +32,14 @@ namespace CSMWorld
     };
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::load (ESM::ESMReader& reader, bool base)
+    void IdCollection<ESXRecordT, IdAccessorT>::loadRecord (ESXRecordT& record,
+        ESM::ESMReader& reader)
+    {
+        record.load (reader);
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    int IdCollection<ESXRecordT, IdAccessorT>::load (ESM::ESMReader& reader, bool base)
     {
         std::string id = reader.getHNOString ("NAME");
 
@@ -55,6 +67,8 @@ namespace CSMWorld
                 record.mState = RecordBase::State_Deleted;
                 this->setRecord (index, record);
             }
+
+            return -1;
         }
         else
         {
@@ -69,14 +83,22 @@ namespace CSMWorld
                 record = this->getRecord (index).get();
             }
 
-            record.load (reader);
+            loadRecord (record, reader);
 
-            load (record, base, index);
+            if (index==-1)
+            {
+                std::string newId = IdAccessorT().getId(record);
+                int newIndex = this->searchId(newId);
+                if (newIndex != -1 && id != newId)
+                    index = newIndex;
+            }
+
+            return load (record, base, index);
         }
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::load (const ESXRecordT& record, bool base,
+    int IdCollection<ESXRecordT, IdAccessorT>::load (const ESXRecordT& record, bool base,
         int index)
     {
         if (index==-2)
@@ -89,6 +111,7 @@ namespace CSMWorld
             record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
             (base ? record2.mBase : record2.mModified) = record;
 
+            index = this->getSize();
             this->appendRecord (record2);
         }
         else
@@ -103,6 +126,8 @@ namespace CSMWorld
 
             this->setRecord (index, record2);
         }
+
+        return index;
     }
 
     template<typename ESXRecordT, typename IdAccessorT>

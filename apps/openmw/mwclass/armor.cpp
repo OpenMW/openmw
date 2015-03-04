@@ -14,6 +14,7 @@
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -25,19 +26,22 @@
 
 namespace MWClass
 {
-    void Armor::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    std::string Armor::getId (const MWWorld::Ptr& ptr) const
     {
-        const std::string model = getModel(ptr);
+        return ptr.get<ESM::Armor>()->mBase->mId;
+    }
+
+    void Armor::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
+    {
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    void Armor::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Armor::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr,true);
+            physics.addObject(ptr, model, true);
     }
 
     std::string Armor::getModel(const MWWorld::Ptr &ptr) const
@@ -152,15 +156,19 @@ namespace MWClass
 
         float iWeight = gmst.find (typeGmst)->getInt();
 
-        if (iWeight * gmst.find ("fLightMaxMod")->getFloat()>=
-            ref->mBase->mData.mWeight)
+        float epsilon = 5e-4;
+
+        if (ref->mBase->mData.mWeight == 0)
+            return ESM::Skill::Unarmored;
+
+        if (ref->mBase->mData.mWeight <= iWeight * gmst.find ("fLightMaxMod")->getFloat() + epsilon)
             return ESM::Skill::LightArmor;
 
-        if (iWeight * gmst.find ("fMedMaxMod")->getFloat()>=
-            ref->mBase->mData.mWeight)
+        if (ref->mBase->mData.mWeight <= iWeight * gmst.find ("fMedMaxMod")->getFloat() + epsilon)
             return ESM::Skill::MediumArmor;
 
-        return ESM::Skill::HeavyArmor;
+        else
+            return ESM::Skill::HeavyArmor;
     }
 
     int Armor::getValue (const MWWorld::Ptr& ptr) const
@@ -237,7 +245,8 @@ namespace MWClass
         else
             typeText = "#{sHeavy}";
 
-        text += "\n#{sArmorRating}: " + MWGui::ToolTips::toString(ref->mBase->mData.mArmor);
+        text += "\n#{sArmorRating}: " + MWGui::ToolTips::toString(getEffectiveArmorRating(ptr,
+            MWBase::Environment::get().getWorld()->getPlayerPtr()));
 
         int remainingHealth = getItemHealth(ptr);
         text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
@@ -280,6 +289,22 @@ namespace MWClass
         newItem.mEnchant=enchId;
         const ESM::Armor *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         return record->mId;
+    }
+
+    int Armor::getEffectiveArmorRating(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor) const
+    {
+        MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+
+        int armorSkillType = getEquipmentSkill(ptr);
+        int armorSkill = actor.getClass().getSkill(actor, armorSkillType);
+
+        const MWBase::World *world = MWBase::Environment::get().getWorld();
+        int iBaseArmorSkill = world->getStore().get<ESM::GameSetting>().find("iBaseArmorSkill")->getInt();
+
+        if(ref->mBase->mData.mWeight == 0)
+            return ref->mBase->mData.mArmor;
+        else
+            return ref->mBase->mData.mArmor * armorSkill / iBaseArmorSkill;
     }
 
     std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
@@ -371,7 +396,8 @@ namespace MWClass
 
     bool Armor::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Armor;
+        return (npcServices & ESM::NPC::Armor)
+                || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
     float Armor::getWeight(const MWWorld::Ptr &ptr) const

@@ -15,6 +15,7 @@
 #include <OgreKeyFrame.h>
 
 #include <components/nif/node.hpp>
+#include <components/nifcache/nifcache.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "material.hpp"
@@ -319,13 +320,14 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
     const Nif::NiZBufferProperty *zprop = NULL;
     const Nif::NiSpecularProperty *specprop = NULL;
     const Nif::NiWireframeProperty *wireprop = NULL;
+    const Nif::NiStencilProperty *stencilprop = NULL;
     bool needTangents = false;
 
-    shape->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
+    shape->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop, stencilprop);
     std::string matname = NIFMaterialLoader::getMaterial(data, mesh->getName(), mGroup,
                                                          texprop, matprop, alphaprop,
                                                          vertprop, zprop, specprop,
-                                                         wireprop, needTangents);
+                                                         wireprop, stencilprop, needTangents);
     if(matname.length() > 0)
         sub->setMaterialName(matname);
 
@@ -380,10 +382,10 @@ NIFMeshLoader::NIFMeshLoader(const std::string &name, const std::string &group, 
 
 void NIFMeshLoader::loadResource(Ogre::Resource *resource)
 {
-    Ogre::Mesh *mesh = dynamic_cast<Ogre::Mesh*>(resource);
+    Ogre::Mesh *mesh = static_cast<Ogre::Mesh*>(resource);
     OgreAssert(mesh, "Attempting to load a mesh into a non-mesh resource!");
 
-    Nif::NIFFile::ptr nif = Nif::NIFFile::create(mName);
+    Nif::NIFFilePtr nif = Nif::Cache::getInstance().load(mName);
     if(mShapeIndex >= nif->numRecords())
     {
         Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
@@ -393,7 +395,7 @@ void NIFMeshLoader::loadResource(Ogre::Resource *resource)
     }
 
     const Nif::Record *record = nif->getRecord(mShapeIndex);
-    createSubMesh(mesh, dynamic_cast<const Nif::NiTriShape*>(record));
+    createSubMesh(mesh, static_cast<const Nif::NiTriShape*>(record));
 }
 
 

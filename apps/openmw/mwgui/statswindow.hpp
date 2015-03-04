@@ -1,10 +1,10 @@
 #ifndef MWGUI_STATS_WINDOW_H
 #define MWGUI_STATS_WINDOW_H
 
-#include "../mwworld/esmstore.hpp"
-
 #include "../mwmechanics/stat.hpp"
 #include "windowpinnablebase.hpp"
+
+#include <components/esm/loadskil.hpp>
 
 namespace MWGui
 {
@@ -37,7 +37,7 @@ namespace MWGui
             void setBounty (int bounty) { if (bounty != mBounty) mChanged = true; this->mBounty = bounty; }
             void updateSkillArea();
 
-            virtual void open() { onWindowResize(static_cast<MyGUI::Window*>(mMainWidget)); }
+            virtual void open() { onWindowResize(mMainWidget->castType<MyGUI::Window>()); }
 
         private:
             void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
@@ -74,6 +74,7 @@ namespace MWGui
 
         protected:
             virtual void onPinToggled();
+            virtual void onTitleDoubleClicked();
     };
 }
 #endif

@@ -18,6 +18,8 @@ namespace CSMWorld
 
 namespace CSVDoc
 {
+    class View;
+
     class SubView : public QDockWidget
     {
             Q_OBJECT
@@ -27,7 +29,9 @@ namespace CSVDoc
             // not implemented
             SubView (const SubView&);
             SubView& operator= (SubView&);
+
         protected:
+
             void setUniversalId(const CSMWorld::UniversalId& id);
 
         public:
@@ -44,13 +48,27 @@ namespace CSVDoc
             virtual void useHint (const std::string& hint);
             ///< Default implementation: ignored
 
+            virtual std::string getTitle() const;
+
+            virtual void updateUserSetting (const QString& name, const QStringList& value);
+
+        private:
+
+            void closeEvent (QCloseEvent *event);
+
         signals:
 
             void focusId (const CSMWorld::UniversalId& universalId, const std::string& hint);
 
-        public slots:
-            virtual void updateUserSetting
-                                    (const QString &, const QStringList &);
+            void closeRequest (SubView *subView);
+
+            void updateTitle();
+
+            void updateSubViewIndicies (SubView *view = 0);
+
+        protected slots:
+
+            void closeRequest();
     };
 }
 

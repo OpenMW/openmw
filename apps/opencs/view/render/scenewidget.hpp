@@ -14,6 +14,9 @@ namespace Ogre
     class Camera;
     class SceneManager;
     class RenderWindow;
+    class Viewport;
+    class OverlaySystem;
+    class RenderTargetListener;
 }
 
 namespace CSVWidget
@@ -42,10 +45,20 @@ namespace CSVRender
             ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
             /// is the responsibility of the calling function.
 
+            virtual void setVisibilityMask (unsigned int mask);
+
+            virtual void updateScene();
+
         protected:
 
             void setNavigation (Navigation *navigation);
             ///< \attention The ownership of \a navigation is not transferred to *this.
+
+            void addRenderTargetListener(Ogre::RenderTargetListener *listener);
+
+            void removeRenderTargetListener(Ogre::RenderTargetListener *listener);
+
+            Ogre::Viewport *getViewport();
 
             Ogre::SceneManager *getSceneManager();
 
@@ -56,35 +69,37 @@ namespace CSVRender
             void setDefaultAmbient (const Ogre::ColourValue& colour);
             ///< \note The actual ambient colour may differ based on lighting settings.
 
+            virtual void updateOverlay();
+
+            virtual void mouseReleaseEvent (QMouseEvent *event);
+
+            virtual void mouseMoveEvent (QMouseEvent *event);
+
+            void wheelEvent (QWheelEvent *event);
+
+            void keyPressEvent (QKeyEvent *event);
+
         private:
             void paintEvent(QPaintEvent* e);
             void resizeEvent(QResizeEvent* e);
             bool event(QEvent* e);
 
-            void keyPressEvent (QKeyEvent *event);
-
             void keyReleaseEvent (QKeyEvent *event);
 
             void focusOutEvent (QFocusEvent *event);
 
-            void wheelEvent (QWheelEvent *event);
-
             void leaveEvent (QEvent *event);
 
-            void mouseMoveEvent (QMouseEvent *event);
-
-            void mouseReleaseEvent (QMouseEvent *event);
-
             void updateOgreWindow();
-
-            int getFastFactor() const;
 
             void setLighting (Lighting *lighting);
             ///< \attention The ownership of \a lighting is not transferred to *this.
 
-            Ogre::Camera*	    mCamera;
+            Ogre::Camera*       mCamera;
             Ogre::SceneManager* mSceneMgr;
             Ogre::RenderWindow* mWindow;
+            Ogre::Viewport *mViewport;
+            Ogre::OverlaySystem *mOverlaySystem;
 
             Navigation *mNavigation;
             Lighting *mLighting;
@@ -105,6 +120,10 @@ namespace CSVRender
             LightingDay mLightingDay;
             LightingNight mLightingNight;
             LightingBright mLightingBright;
+
+        public slots:
+
+            void updateUserSetting (const QString &key, const QStringList &list);
 
         private slots:
 

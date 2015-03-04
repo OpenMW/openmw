@@ -4,6 +4,7 @@
 #include <list>
 
 #include <components/esm/loadnpc.hpp>
+//#include "aistate.hpp"
 
 namespace MWWorld
 {
@@ -18,9 +19,15 @@ namespace ESM
     }
 }
 
+
+
 namespace MWMechanics
 {
     class AiPackage;
+    
+    template< class Base > class DerivedClassStorage;
+    struct AiTemporaryBase;
+    typedef DerivedClassStorage<AiTemporaryBase> AiState;
 
     /// \brief Sequence of AI-packages for a single actor
     /** The top-most AI package is run each frame. When completed, it is removed from the stack. **/
@@ -49,6 +56,12 @@ namespace MWMechanics
             AiSequence& operator= (const AiSequence& sequence);
 
             virtual ~AiSequence();
+
+            /// Iterator may be invalidated by any function calls other than begin() or end().
+            std::list<AiPackage*>::const_iterator begin() const;
+            std::list<AiPackage*>::const_iterator end() const;
+
+            std::list<AiPackage*>::const_iterator erase (std::list<AiPackage*>::const_iterator package);
 
             /// Returns currently executing AiPackage type
             /** \see enum AiPackage::TypeId **/
@@ -82,7 +95,10 @@ namespace MWMechanics
             void stopPursuit();
 
             /// Execute current package, switching if needed.
-            void execute (const MWWorld::Ptr& actor,float duration);
+            void execute (const MWWorld::Ptr& actor, MWMechanics::AiState& state, float duration);
+
+            /// Simulate the passing of time using the currently active AI package
+            void fastForward(const MWWorld::Ptr &actor, AiState &state);
 
             /// Remove all packages.
             void clear();
@@ -91,10 +107,6 @@ namespace MWMechanics
             /** Suspends current package
                 @param actor The actor that owns this AiSequence **/
             void stack (const AiPackage& package, const MWWorld::Ptr& actor);
-
-            /// Add \a package to the end of the sequence
-            /** Executed after all other packages have been completed **/
-            void queue (const AiPackage& package);
 
             /// Return the current active package.
             /** If there is no active package, it will throw an exception **/

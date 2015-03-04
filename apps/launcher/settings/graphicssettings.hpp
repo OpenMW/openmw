@@ -1,11 +1,11 @@
 #ifndef GRAPHICSSETTINGS_HPP
 #define GRAPHICSSETTINGS_HPP
 
-#include "settingsbase.hpp"
+#include <components/config/settingsbase.hpp>
 
 namespace Launcher
 {
-    class GraphicsSettings : public SettingsBase<QMap<QString, QString> >
+    class GraphicsSettings : public Config::SettingsBase<QMap<QString, QString> >
     {
     public:
         GraphicsSettings();

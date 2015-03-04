@@ -12,14 +12,14 @@ shUniform(float4x4, projection) @shAutoConstant(projection, projection_matrix)
     SH_START_PROGRAM
     {
         float4x4 viewFixed = view;
-#if !SH_GLSL
-        viewFixed[0][3] = 0;
-        viewFixed[1][3] = 0;
-        viewFixed[2][3] = 0;
+#if !SH_GLSL && !SH_GLSLES
+        viewFixed[0][3] = 0.0;
+        viewFixed[1][3] = 0.0;
+        viewFixed[2][3] = 0.0;
 #else
-        viewFixed[3][0] = 0;
-        viewFixed[3][1] = 0;
-        viewFixed[3][2] = 0;
+        viewFixed[3][0] = 0.0;
+        viewFixed[3][1] = 0.0;
+        viewFixed[3][2] = 0.0;
 #endif
         shOutputPosition = shMatrixMult(projection, shMatrixMult(viewFixed, shMatrixMult(world, shInputPosition)));
         UV = uv0;

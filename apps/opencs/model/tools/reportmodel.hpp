@@ -14,7 +14,7 @@ namespace CSMTools
     {
             Q_OBJECT
 
-            std::vector<std::pair<CSMWorld::UniversalId, std::string> > mRows;
+            std::vector<std::pair<CSMWorld::UniversalId, std::pair<std::string, std::string> > > mRows;
 
         public:
 
@@ -28,9 +28,12 @@ namespace CSMTools
 
             virtual bool removeRows (int row, int count, const QModelIndex& parent = QModelIndex());
 
-            void add (const CSMWorld::UniversalId& id, const std::string& message);
+            void add (const CSMWorld::UniversalId& id, const std::string& message,
+                const std::string& hint = "");
 
             const CSMWorld::UniversalId& getUniversalId (int row) const;
+
+            std::string getHint (int row) const;
     };
 }
 

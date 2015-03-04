@@ -59,8 +59,8 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 }
 
 CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
-: mEncoder (encoding), mRefs (mCells), mResourcesManager (resourcesManager), mReader (0),
-  mDialogue (0)
+: mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
+  mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0)
 {
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
     mGlobals.addColumn (new RecordStateColumn<ESM::Global>);
@@ -70,7 +70,6 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
 
     mGmsts.addColumn (new StringIdColumn<ESM::GameSetting>);
     mGmsts.addColumn (new RecordStateColumn<ESM::GameSetting>);
-    mGmsts.addColumn (new FixedRecordTypeColumn<ESM::GameSetting> (UniversalId::Type_Gmst));
     mGmsts.addColumn (new FixedRecordTypeColumn<ESM::GameSetting> (UniversalId::Type_Gmst));
     mGmsts.addColumn (new VarTypeColumn<ESM::GameSetting> (ColumnBase::Display_GmstVarType));
     mGmsts.addColumn (new VarValueColumn<ESM::GameSetting>);
@@ -131,7 +130,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mScripts.addColumn (new StringIdColumn<ESM::Script>);
     mScripts.addColumn (new RecordStateColumn<ESM::Script>);
     mScripts.addColumn (new FixedRecordTypeColumn<ESM::Script> (UniversalId::Type_Script));
-    mScripts.addColumn (new ScriptColumn<ESM::Script>);
+    mScripts.addColumn (new ScriptColumn<ESM::Script> (ScriptColumn<ESM::Script>::Type_File));
 
     mRegions.addColumn (new StringIdColumn<ESM::Region>);
     mRegions.addColumn (new RecordStateColumn<ESM::Region>);
@@ -186,7 +185,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
 
     mJournalInfos.addColumn (new StringIdColumn<Info> (true));
     mJournalInfos.addColumn (new RecordStateColumn<Info>);
-    mJournalInfos.addColumn (new FixedRecordTypeColumn<Info> (UniversalId::Type_Journal));
+    mJournalInfos.addColumn (new FixedRecordTypeColumn<Info> (UniversalId::Type_JournalInfo));
     mJournalInfos.addColumn (new TopicColumn<Info> (true));
     mJournalInfos.addColumn (new QuestStatusTypeColumn<Info>);
     mJournalInfos.addColumn (new QuestIndexColumn<Info>);
@@ -200,6 +199,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorWater, ESM::Cell::HasWater));
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorSky, ESM::Cell::QuasiEx));
     mCells.addColumn (new RegionColumn<Cell>);
+    mCells.addColumn (new RefNumCounterColumn<Cell>);
 
     mEnchantments.addColumn (new StringIdColumn<ESM::Enchantment>);
     mEnchantments.addColumn (new RecordStateColumn<ESM::Enchantment>);
@@ -219,6 +219,44 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mBodyParts.addColumn (new MeshTypeColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new ModelColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new RaceColumn<ESM::BodyPart>);
+
+    mSoundGens.addColumn (new StringIdColumn<ESM::SoundGenerator>);
+    mSoundGens.addColumn (new RecordStateColumn<ESM::SoundGenerator>);
+    mSoundGens.addColumn (new FixedRecordTypeColumn<ESM::SoundGenerator> (UniversalId::Type_SoundGen));
+    mSoundGens.addColumn (new CreatureColumn<ESM::SoundGenerator>);
+    mSoundGens.addColumn (new SoundColumn<ESM::SoundGenerator>);
+    mSoundGens.addColumn (new SoundGeneratorTypeColumn<ESM::SoundGenerator>);
+
+    mMagicEffects.addColumn (new StringIdColumn<ESM::MagicEffect>);
+    mMagicEffects.addColumn (new RecordStateColumn<ESM::MagicEffect>);
+    mMagicEffects.addColumn (new FixedRecordTypeColumn<ESM::MagicEffect> (UniversalId::Type_MagicEffect));
+    mMagicEffects.addColumn (new SchoolColumn<ESM::MagicEffect>);
+    mMagicEffects.addColumn (new BaseCostColumn<ESM::MagicEffect>);
+    mMagicEffects.addColumn (new EffectTextureColumn<ESM::MagicEffect> (Columns::ColumnId_Icon));
+    mMagicEffects.addColumn (new EffectTextureColumn<ESM::MagicEffect> (Columns::ColumnId_Particle));
+    mMagicEffects.addColumn (new EffectObjectColumn<ESM::MagicEffect> (Columns::ColumnId_CastingObject));
+    mMagicEffects.addColumn (new EffectObjectColumn<ESM::MagicEffect> (Columns::ColumnId_HitObject));
+    mMagicEffects.addColumn (new EffectObjectColumn<ESM::MagicEffect> (Columns::ColumnId_AreaObject));
+    mMagicEffects.addColumn (new EffectObjectColumn<ESM::MagicEffect> (Columns::ColumnId_BoltObject));
+    mMagicEffects.addColumn (new EffectSoundColumn<ESM::MagicEffect> (Columns::ColumnId_CastingSound));
+    mMagicEffects.addColumn (new EffectSoundColumn<ESM::MagicEffect> (Columns::ColumnId_HitSound));
+    mMagicEffects.addColumn (new EffectSoundColumn<ESM::MagicEffect> (Columns::ColumnId_AreaSound));
+    mMagicEffects.addColumn (new EffectSoundColumn<ESM::MagicEffect> (Columns::ColumnId_BoltSound));
+    mMagicEffects.addColumn (new FlagColumn<ESM::MagicEffect> (
+        Columns::ColumnId_AllowSpellmaking, ESM::MagicEffect::AllowSpellmaking));
+    mMagicEffects.addColumn (new FlagColumn<ESM::MagicEffect> (
+        Columns::ColumnId_AllowEnchanting, ESM::MagicEffect::AllowEnchanting));
+    mMagicEffects.addColumn (new FlagColumn<ESM::MagicEffect> (
+        Columns::ColumnId_NegativeLight, ESM::MagicEffect::NegativeLight));
+    mMagicEffects.addColumn (new DescriptionColumn<ESM::MagicEffect>);
+
+    mPathgrids.addColumn (new StringIdColumn<Pathgrid>);
+    mPathgrids.addColumn (new RecordStateColumn<Pathgrid>);
+    mPathgrids.addColumn (new FixedRecordTypeColumn<Pathgrid> (UniversalId::Type_Pathgrid));
+
+    mStartScripts.addColumn (new StringIdColumn<ESM::StartScript>);
+    mStartScripts.addColumn (new RecordStateColumn<ESM::StartScript>);
+    mStartScripts.addColumn (new FixedRecordTypeColumn<ESM::StartScript> (UniversalId::Type_StartScript));
 
     mRefs.addColumn (new StringIdColumn<CellRef> (true));
     mRefs.addColumn (new RecordStateColumn<CellRef>);
@@ -250,13 +288,27 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRefs.addColumn (new LockLevelColumn<CellRef>);
     mRefs.addColumn (new KeyColumn<CellRef>);
     mRefs.addColumn (new TrapColumn<CellRef>);
+    mRefs.addColumn (new OwnerGlobalColumn<CellRef>);
+    mRefs.addColumn (new RefNumColumn<CellRef>);
 
-    mFilters.addColumn (new StringIdColumn<CSMFilter::Filter>);
-    mFilters.addColumn (new RecordStateColumn<CSMFilter::Filter>);
-    mFilters.addColumn (new FixedRecordTypeColumn<CSMFilter::Filter> (UniversalId::Type_Filter));
-    mFilters.addColumn (new FilterColumn<CSMFilter::Filter>);
-    mFilters.addColumn (new DescriptionColumn<CSMFilter::Filter>);
-    mFilters.addColumn (new ScopeColumn<CSMFilter::Filter>);
+    mFilters.addColumn (new StringIdColumn<ESM::Filter>);
+    mFilters.addColumn (new RecordStateColumn<ESM::Filter>);
+    mFilters.addColumn (new FixedRecordTypeColumn<ESM::Filter> (UniversalId::Type_Filter));
+    mFilters.addColumn (new FilterColumn<ESM::Filter>);
+    mFilters.addColumn (new DescriptionColumn<ESM::Filter>);
+
+    mDebugProfiles.addColumn (new StringIdColumn<ESM::DebugProfile>);
+    mDebugProfiles.addColumn (new RecordStateColumn<ESM::DebugProfile>);
+    mDebugProfiles.addColumn (new FixedRecordTypeColumn<ESM::DebugProfile> (UniversalId::Type_DebugProfile));
+    mDebugProfiles.addColumn (new FlagColumn2<ESM::DebugProfile> (
+        Columns::ColumnId_DefaultProfile, ESM::DebugProfile::Flag_Default));
+    mDebugProfiles.addColumn (new FlagColumn2<ESM::DebugProfile> (
+        Columns::ColumnId_BypassNewGame, ESM::DebugProfile::Flag_BypassNewGame));
+    mDebugProfiles.addColumn (new FlagColumn2<ESM::DebugProfile> (
+        Columns::ColumnId_GlobalProfile, ESM::DebugProfile::Flag_Global));
+    mDebugProfiles.addColumn (new DescriptionColumn<ESM::DebugProfile>);
+    mDebugProfiles.addColumn (new ScriptColumn<ESM::DebugProfile> (
+        ScriptColumn<ESM::DebugProfile>::Type_Lines));
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
@@ -276,21 +328,26 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new IdTable (&mCells, IdTable::Feature_ViewId), UniversalId::Type_Cell);
     addModel (new IdTable (&mEnchantments), UniversalId::Type_Enchantment);
     addModel (new IdTable (&mBodyParts), UniversalId::Type_BodyPart);
+    addModel (new IdTable (&mSoundGens), UniversalId::Type_SoundGen);
+    addModel (new IdTable (&mMagicEffects), UniversalId::Type_MagicEffect);
+    addModel (new IdTable (&mPathgrids), UniversalId::Type_Pathgrid);
+    addModel (new IdTable (&mStartScripts), UniversalId::Type_StartScript);
     addModel (new IdTable (&mReferenceables, IdTable::Feature_Preview),
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs, IdTable::Feature_ViewCell | IdTable::Feature_Preview), UniversalId::Type_Reference);
     addModel (new IdTable (&mFilters), UniversalId::Type_Filter);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Mesh)),
+    addModel (new IdTable (&mDebugProfiles), UniversalId::Type_DebugProfile);
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Meshes)),
         UniversalId::Type_Mesh);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Icon)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Icons)),
         UniversalId::Type_Icon);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Music)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Musics)),
         UniversalId::Type_Music);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_SoundRes)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_SoundsRes)),
         UniversalId::Type_SoundRes);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Texture)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Textures)),
         UniversalId::Type_Texture);
-    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Video)),
+    addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Videos)),
         UniversalId::Type_Video);
 }
 
@@ -483,12 +540,12 @@ CSMWorld::RefCollection& CSMWorld::Data::getReferences()
     return mRefs;
 }
 
-const CSMWorld::IdCollection<CSMFilter::Filter>& CSMWorld::Data::getFilters() const
+const CSMWorld::IdCollection<ESM::Filter>& CSMWorld::Data::getFilters() const
 {
     return mFilters;
 }
 
-CSMWorld::IdCollection<CSMFilter::Filter>& CSMWorld::Data::getFilters()
+CSMWorld::IdCollection<ESM::Filter>& CSMWorld::Data::getFilters()
 {
     return mFilters;
 }
@@ -513,9 +570,69 @@ CSMWorld::IdCollection<ESM::BodyPart>& CSMWorld::Data::getBodyParts()
     return mBodyParts;
 }
 
+const CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfiles() const
+{
+    return mDebugProfiles;
+}
+
+CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfiles()
+{
+    return mDebugProfiles;
+}
+
+const CSMWorld::IdCollection<CSMWorld::Land>& CSMWorld::Data::getLand() const
+{
+    return mLand;
+}
+
+const CSMWorld::IdCollection<CSMWorld::LandTexture>& CSMWorld::Data::getLandTextures() const
+{
+    return mLandTextures;
+}
+
+const CSMWorld::IdCollection<ESM::SoundGenerator>& CSMWorld::Data::getSoundGens() const
+{
+    return mSoundGens;
+}
+
+CSMWorld::IdCollection<ESM::SoundGenerator>& CSMWorld::Data::getSoundGens()
+{
+    return mSoundGens;
+}
+
+const CSMWorld::IdCollection<ESM::MagicEffect>& CSMWorld::Data::getMagicEffects() const
+{
+    return mMagicEffects;
+}
+
+CSMWorld::IdCollection<ESM::MagicEffect>& CSMWorld::Data::getMagicEffects()
+{
+    return mMagicEffects;
+}
+
+const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& CSMWorld::Data::getPathgrids() const
+{
+    return mPathgrids;
+}
+
+CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& CSMWorld::Data::getPathgrids()
+{
+    return mPathgrids;
+}
+
+const CSMWorld::IdCollection<ESM::StartScript>& CSMWorld::Data::getStartScripts() const
+{
+    return mStartScripts;
+}
+
+CSMWorld::IdCollection<ESM::StartScript>& CSMWorld::Data::getStartScripts()
+{
+    return mStartScripts;
+}
+
 const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) const
 {
-    return mResourcesManager.get (UniversalId::getParentType (id.getType()));
+    return mResourcesManager.get (id.getType());
 }
 
 QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& id)
@@ -547,13 +664,17 @@ void CSMWorld::Data::merge()
 
 int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base, bool project)
 {
-    delete mReader;
+    // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading
+    boost::shared_ptr<ESM::ESMReader> ptr(mReader);
+    mReaders.push_back(ptr);
     mReader = 0;
+
     mDialogue = 0;
     mRefLoadCache.clear();
 
     mReader = new ESM::ESMReader;
     mReader->setEncoder (&mEncoder);
+    mReader->setIndex(mReaderIndex++);
     mReader->open (path.string());
 
     mBase = base;
@@ -565,15 +686,26 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     return mReader->getRecordCount();
 }
 
-bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
+bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 {
     if (!mReader)
         throw std::logic_error ("can't continue loading, because no load has been started");
 
     if (!mReader->hasMoreRecs())
     {
-        delete mReader;
+        if (mBase)
+        {
+            // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading.
+            // We don't store non-base reader, because everything going into modified will be
+            // fully loaded during the initial loading process.
+            boost::shared_ptr<ESM::ESMReader> ptr(mReader);
+            mReaders.push_back(ptr);
+        }
+        else
+            delete mReader;
+
         mReader = 0;
+
         mDialogue = 0;
         mRefLoadCache.clear();
         return true;
@@ -581,6 +713,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
 
     ESM::NAME n = mReader->getRecName();
     mReader->getRecHeader();
+
+    bool unhandledRecord = false;
 
     switch (n.val)
     {
@@ -597,6 +731,24 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         case ESM::REC_SPEL: mSpells.load (*mReader, mBase); break;
         case ESM::REC_ENCH: mEnchantments.load (*mReader, mBase); break;
         case ESM::REC_BODY: mBodyParts.load (*mReader, mBase); break;
+        case ESM::REC_SNDG: mSoundGens.load (*mReader, mBase); break;
+        case ESM::REC_MGEF: mMagicEffects.load (*mReader, mBase); break;
+        case ESM::REC_PGRD: mPathgrids.load (*mReader, mBase); break;
+        case ESM::REC_SSCR: mStartScripts.load (*mReader, mBase); break;
+
+        case ESM::REC_LTEX: mLandTextures.load (*mReader, mBase); break;
+
+        case ESM::REC_LAND:
+        {
+            int index = mLand.load(*mReader, mBase);
+
+            if (index!=-1 && !mBase)
+                mLand.getRecord (index).mModified.mLand->loadData (
+                    ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR |
+                    ESM::Land::DATA_VTEX);
+
+            break;
+        }
 
         case ESM::REC_CELL:
         {
@@ -658,8 +810,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
                 }
                 else
                 {
-                    messages.push_back (std::make_pair (UniversalId::Type_None,
-                        "Trying to delete dialogue record " + id + " which does not exist"));
+                    messages.add (UniversalId::Type_None,
+                        "Trying to delete dialogue record " + id + " which does not exist");
                 }
             }
             else
@@ -675,8 +827,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
         {
             if (!mDialogue)
             {
-                messages.push_back (std::make_pair (UniversalId::Type_None,
-                    "Found info record not following a dialogue record"));
+                messages.add (UniversalId::Type_None,
+                    "Found info record not following a dialogue record");
 
                 mReader->skipRecord();
                 break;
@@ -692,23 +844,36 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Stage::Messages& messages)
 
         case ESM::REC_FILT:
 
-            if (mProject)
+            if (!mProject)
             {
-                mFilters.load (*mReader, mBase);
-                mFilters.setData (mFilters.getSize()-1,
-                    mFilters.findColumnIndex (CSMWorld::Columns::ColumnId_Scope),
-                    static_cast<int> (CSMFilter::Filter::Scope_Project));
+                unhandledRecord = true;
                 break;
             }
 
-            // fall through (filter record in a content file is an error with format 0)
+            mFilters.load (*mReader, mBase);
+            break;
+
+        case ESM::REC_DBGP:
+
+            if (!mProject)
+            {
+                unhandledRecord = true;
+                break;
+            }
+
+            mDebugProfiles.load (*mReader, mBase);
+            break;
 
         default:
 
-            messages.push_back (std::make_pair (UniversalId::Type_None,
-                "Unsupported record type: " + n.toString()));
+            unhandledRecord = true;
+    }
 
-            mReader->skipRecord();
+    if (unhandledRecord)
+    {
+        messages.add (UniversalId::Type_None, "Unsupported record type: " + n.toString());
+
+        mReader->skipRecord();
     }
 
     return false;
@@ -733,6 +898,8 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getCells().searchId (id)!=-1 ||
         getEnchantments().searchId (id)!=-1 ||
         getBodyParts().searchId (id)!=-1 ||
+        getSoundGens().searchId (id)!=-1 ||
+        getMagicEffects().searchId (id)!=-1 ||
         getReferenceables().searchId (id)!=-1;
 }
 
@@ -753,7 +920,12 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mCells) +
         count (state, mEnchantments) +
         count (state, mBodyParts) +
-        count (state, mReferenceables);
+        count (state, mLand) +
+        count (state, mLandTextures) +
+        count (state, mSoundGens) +
+        count (state, mMagicEffects) +
+        count (state, mReferenceables) +
+        count (state, mPathgrids);
 }
 
 void CSMWorld::Data::setDescription (const std::string& description)
@@ -795,6 +967,8 @@ std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
     appendIds (ids, mCells, listDeleted);
     appendIds (ids, mEnchantments, listDeleted);
     appendIds (ids, mBodyParts, listDeleted);
+    appendIds (ids, mSoundGens, listDeleted);
+    appendIds (ids, mMagicEffects, listDeleted);
     appendIds (ids, mReferenceables, listDeleted);
 
     std::sort (ids.begin(), ids.end());

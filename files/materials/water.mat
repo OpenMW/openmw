@@ -75,3 +75,27 @@ material Water
         }
     }
 }
+
+material openmw/Ripple
+{
+    // this will be overridden by Water_RippleFrameCount fallback setting
+    anim_texture2 textures\water\ripple.dds 4 0.25
+    pass
+    {
+        scene_blend alpha_blend
+        depth_write off
+        cull_hardware none
+        diffuse vertexcolour
+        emissive 1 1 1
+        ambient 0 0 0
+        texture_unit diffuseMap
+        {
+            create_in_ffp true
+            anim_texture2 $anim_texture2
+
+            // to make sure rotating doesn't cause the texture to repeat
+            tex_address_mode border
+            tex_border_colour 0 0 0 0
+        }
+    }
+}

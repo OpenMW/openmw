@@ -33,10 +33,15 @@ namespace ESM
             {
                 Format_Global,
                 Format_Gmst,
-                Format_Info // also used for local variables in saved game files
+                Format_Info,
+                Format_Local // local script variables in save game files
             };
 
             Variant();
+
+            Variant (const std::string& value);
+            Variant (int value);
+            Variant (float value);
 
             ~Variant();
 

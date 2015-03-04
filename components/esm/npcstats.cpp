@@ -4,7 +4,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-ESM::NpcStats::Faction::Faction() : mExpelled (false), mRank (0), mReputation (0) {}
+ESM::NpcStats::Faction::Faction() : mExpelled (false), mRank (-1), mReputation (0) {}
 
 void ESM::NpcStats::load (ESMReader &esm)
 {
@@ -57,12 +57,13 @@ void ESM::NpcStats::load (ESMReader &esm)
     mWerewolfKills = 0;
     esm.getHNOT (mWerewolfKills, "WKIL");
 
-    mProfit = 0;
-    esm.getHNOT (mProfit, "PROF");
+    // No longer used
+    if (esm.isNextSub("PROF"))
+        esm.skipHSub(); // int profit
 
     // No longer used. Now part of CreatureStats.
-    float attackStrength = 0;
-    esm.getHNOT (attackStrength, "ASTR");
+    if (esm.isNextSub("ASTR"))
+        esm.skipHSub(); // attackStrength
 
     mLevelProgress = 0;
     esm.getHNOT (mLevelProgress, "LPRO");
@@ -75,11 +76,13 @@ void ESM::NpcStats::load (ESMReader &esm)
     mTimeToStartDrowning = 0;
     esm.getHNOT (mTimeToStartDrowning, "DRTI");
 
-    mLastDrowningHit = 0;
-    esm.getHNOT (mLastDrowningHit, "DRLH");
+    // No longer used
+    float lastDrowningHit = 0;
+    esm.getHNOT (lastDrowningHit, "DRLH");
 
-    mLevelHealthBonus = 0;
-    esm.getHNOT (mLevelHealthBonus, "LVLH");
+    // No longer used
+    float levelHealthBonus = 0;
+    esm.getHNOT (levelHealthBonus, "LVLH");
 
     mCrimeId = -1;
     esm.getHNOT (mCrimeId, "CRID");
@@ -98,7 +101,7 @@ void ESM::NpcStats::save (ESMWriter &esm) const
             esm.writeHNT ("FAEX", expelled);
         }
 
-        if (iter->second.mRank)
+        if (iter->second.mRank >= 0)
             esm.writeHNT ("FARA", iter->second.mRank);
 
         if (iter->second.mReputation)
@@ -130,9 +133,6 @@ void ESM::NpcStats::save (ESMWriter &esm) const
     if (mWerewolfKills)
         esm.writeHNT ("WKIL", mWerewolfKills);
 
-    if (mProfit)
-        esm.writeHNT ("PROF", mProfit);
-
     if (mLevelProgress)
         esm.writeHNT ("LPRO", mLevelProgress);
 
@@ -145,12 +145,20 @@ void ESM::NpcStats::save (ESMWriter &esm) const
     if (mTimeToStartDrowning)
         esm.writeHNT ("DRTI", mTimeToStartDrowning);
 
-    if (mLastDrowningHit)
-        esm.writeHNT ("DRLH", mLastDrowningHit);
-
-    if (mLevelHealthBonus)
-        esm.writeHNT ("LVLH", mLevelHealthBonus);
-
     if (mCrimeId != -1)
         esm.writeHNT ("CRID", mCrimeId);
+}
+
+void ESM::NpcStats::blank()
+{
+    mIsWerewolf = false;
+    mDisposition = 0;
+    mBounty = 0;
+    mReputation = 0;
+    mWerewolfKills = 0;
+    mLevelProgress = 0;
+    for (int i=0; i<8; ++i)
+        mSkillIncrease[i] = 0;
+    mTimeToStartDrowning = 20;
+    mCrimeId = -1;
 }

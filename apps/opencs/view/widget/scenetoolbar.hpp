@@ -25,7 +25,11 @@ namespace CSVWidget
 
             SceneToolbar (int buttonSize, QWidget *parent = 0);
 
-            void addTool (SceneTool *tool);
+            /// If insertPoint==0, insert \a tool at the end of the scrollbar. Otherwise
+            /// insert tool after \a insertPoint.
+            void addTool (SceneTool *tool, SceneTool *insertPoint = 0);
+
+            void removeTool (SceneTool *tool);
 
             int getButtonSize() const;
 

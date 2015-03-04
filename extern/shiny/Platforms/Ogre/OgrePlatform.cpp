@@ -54,6 +54,8 @@ namespace sh
 
 	OgrePlatform::~OgrePlatform ()
 	{
+		Ogre::MaterialManager::getSingleton().removeListener(this);
+
 		delete sSerializer;
 	}
 
@@ -151,7 +153,7 @@ namespace sh
 			else if (typeid(*value) == typeid(IntValue))
 				type = Ogre::GCT_INT1;
 			else
-                throw std::runtime_error("unexpected type");
+				throw std::runtime_error("unexpected type");
 			params->addConstantDefinition(name, type);
 			mSharedParameters[name] = params;
 		}

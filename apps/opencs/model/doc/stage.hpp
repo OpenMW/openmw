@@ -6,13 +6,13 @@
 
 #include "../world/universalid.hpp"
 
+#include "messages.hpp"
+
 namespace CSMDoc
 {
     class Stage
     {
         public:
-
-            typedef std::vector<std::pair<CSMWorld::UniversalId, std::string> > Messages;
 
             virtual ~Stage();
 

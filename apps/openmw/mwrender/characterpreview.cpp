@@ -37,6 +37,7 @@ namespace MWRender
         , mViewport(NULL)
         , mCamera(NULL)
         , mNode(NULL)
+        , mRecover(false)
     {
         mCharacter.mCell = NULL;
     }
@@ -44,6 +45,16 @@ namespace MWRender
     void CharacterPreview::onSetup()
     {
 
+    }
+
+    void CharacterPreview::onFrame()
+    {
+        if (mRecover)
+        {
+            setupRenderTarget();
+            mRenderTarget->update();
+            mRecover = false;
+        }
     }
 
     void CharacterPreview::setup ()
@@ -61,41 +72,33 @@ namespace MWRender
         l->setDirection (Ogre::Vector3(0.3, -0.7, 0.3));
         l->setDiffuseColour (Ogre::ColourValue(1,1,1));
 
-        mSceneMgr->setAmbientLight (Ogre::ColourValue(0.5, 0.5, 0.5));
+        mSceneMgr->setAmbientLight (Ogre::ColourValue(0.25, 0.25, 0.25));
 
         mCamera = mSceneMgr->createCamera (mName);
+        mCamera->setFOVy(Ogre::Degree(12.3));
         mCamera->setAspectRatio (float(mSizeX) / float(mSizeY));
 
         Ogre::SceneNode* renderRoot = mSceneMgr->getRootSceneNode()->createChildSceneNode("renderRoot");
 
-        //we do this with mwRoot in renderingManager, do it here too.
+        // leftover of old coordinate system. TODO: remove this and adjust positions/orientations to match
         renderRoot->pitch(Ogre::Degree(-90));
 
         mNode = renderRoot->createChildSceneNode();
 
         mAnimation = new NpcAnimation(mCharacter, mNode,
-                                      0, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
+                                      0, true, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
         Ogre::Vector3 scale = mNode->getScale();
         mCamera->setPosition(mPosition * scale);
         mCamera->lookAt(mLookAt * scale);
 
-        mCamera->setNearClipDistance (0.01);
+        mCamera->setNearClipDistance (1);
         mCamera->setFarClipDistance (1000);
 
-        mTexture = Ogre::TextureManager::getSingleton().getByName (mName);
-        if (mTexture.isNull ())
-            mTexture = Ogre::TextureManager::getSingleton().createManual(mName,
-                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, mSizeX, mSizeY, 0, Ogre::PF_A8R8G8B8, Ogre::TU_RENDERTARGET);
+        mTexture = Ogre::TextureManager::getSingleton().createManual(mName,
+                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, mSizeX, mSizeY, 0, Ogre::PF_A8R8G8B8, Ogre::TU_RENDERTARGET, this);
 
-        mRenderTarget = mTexture->getBuffer()->getRenderTarget();
-        mRenderTarget->removeAllViewports ();
-        mViewport = mRenderTarget->addViewport(mCamera);
-        mViewport->setOverlaysEnabled(false);
-        mViewport->setBackgroundColour(Ogre::ColourValue(0, 0, 0, 0));
-        mViewport->setShadowsEnabled(false);
-        mRenderTarget->setActive(true);
-        mRenderTarget->setAutoUpdated (false);
+        setupRenderTarget();
 
         onSetup ();
     }
@@ -107,15 +110,16 @@ namespace MWRender
             mSceneMgr->destroyAllCameras();
             delete mAnimation;
             Ogre::Root::getSingleton().destroySceneManager(mSceneMgr);
+            Ogre::TextureManager::getSingleton().remove(mName);
         }
     }
 
     void CharacterPreview::rebuild()
     {
-        assert(mAnimation);
         delete mAnimation;
+        mAnimation = NULL;
         mAnimation = new NpcAnimation(mCharacter, mNode,
-                                      0, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
+                                      0, true, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
         float scale=1.f;
         mCharacter.getClass().adjustScale(mCharacter, scale);
@@ -127,12 +131,39 @@ namespace MWRender
         onSetup();
     }
 
+    void CharacterPreview::loadResource(Ogre::Resource *resource)
+    {
+        Ogre::Texture* tex = dynamic_cast<Ogre::Texture*>(resource);
+        if (!tex)
+            return;
+
+        tex->createInternalResources();
+
+        mRenderTarget = NULL;
+        mViewport = NULL;
+        mRecover = true;
+    }
+
+    void CharacterPreview::setupRenderTarget()
+    {
+        mRenderTarget = mTexture->getBuffer()->getRenderTarget();
+        mRenderTarget->removeAllViewports ();
+        mViewport = mRenderTarget->addViewport(mCamera);
+        mViewport->setOverlaysEnabled(false);
+        mViewport->setBackgroundColour(Ogre::ColourValue(0, 0, 0, 0));
+        mViewport->setShadowsEnabled(false);
+        mRenderTarget->setActive(true);
+        mRenderTarget->setAutoUpdated (false);
+    }
+
     // --------------------------------------------------------------------------------------------------
 
 
     InventoryPreview::InventoryPreview(MWWorld::Ptr character)
-        : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 65, -180), Ogre::Vector3(0,65,0))
+        : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 71, -700), Ogre::Vector3(0,71,0))
         , mSelectionBuffer(NULL)
+        , mSizeX(0)
+        , mSizeY(0)
     {
     }
 
@@ -141,13 +172,31 @@ namespace MWRender
         delete mSelectionBuffer;
     }
 
-    void InventoryPreview::update(int sizeX, int sizeY)
+    void InventoryPreview::resize(int sizeX, int sizeY)
     {
+        mSizeX = sizeX;
+        mSizeY = sizeY;
+
+        mViewport->setDimensions (0, 0, std::min(1.f, float(mSizeX) / float(512)), std::min(1.f, float(mSizeY) / float(1024)));
+        mTexture->load();
+
+        if (!mRenderTarget)
+            setupRenderTarget();
+
+        mRenderTarget->update();
+    }
+
+    void InventoryPreview::update()
+    {
+        if (!mAnimation)
+            return;
+
         mAnimation->updateParts();
 
         MWWorld::InventoryStore &inv = mCharacter.getClass().getInventoryStore(mCharacter);
         MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         std::string groupname;
+        bool showCarriedLeft = true;
         if(iter == inv.end())
             groupname = "inventoryhandtohand";
         else
@@ -177,33 +226,47 @@ namespace MWRender
                     groupname = "inventoryweapontwowide";
                 else
                     groupname = "inventoryhandtohand";
-            }
+
+                showCarriedLeft = (iter->getClass().canBeEquipped(*iter, mCharacter).first != 2);
+           }
             else
                 groupname = "inventoryhandtohand";
         }
+
+        mAnimation->showCarriedLeft(showCarriedLeft);
 
         mCurrentAnimGroup = groupname;
         mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, 1.0f, "start", "stop", 0.0f, 0);
 
         MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
+        if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name() && showCarriedLeft)
         {
             if(!mAnimation->getInfo("torch"))
                 mAnimation->play("torch", 2, MWRender::Animation::Group_LeftArm, false,
-                                 1.0f, "start", "stop", 0.0f, ~0ul);
+                                 1.0f, "start", "stop", 0.0f, ~0ul, true);
         }
         else if(mAnimation->getInfo("torch"))
             mAnimation->disable("torch");
 
         mAnimation->runAnimation(0.0f);
 
-        mViewport->setDimensions (0, 0, std::min(1.f, float(sizeX) / float(512)), std::min(1.f, float(sizeY) / float(1024)));
-
         mNode->setOrientation (Ogre::Quaternion::IDENTITY);
+
+        mViewport->setDimensions (0, 0, std::min(1.f, float(mSizeX) / float(512)), std::min(1.f, float(mSizeY) / float(1024)));
+        mTexture->load();
+
+        if (!mRenderTarget)
+            setupRenderTarget();
 
         mRenderTarget->update();
 
         mSelectionBuffer->update();
+    }
+
+    void InventoryPreview::setupRenderTarget()
+    {
+        CharacterPreview::setupRenderTarget();
+        mViewport->setDimensions (0, 0, std::min(1.f, float(mSizeX) / float(512)), std::min(1.f, float(mSizeY) / float(1024)));
     }
 
     int InventoryPreview::getSlotSelected (int posX, int posY)
@@ -226,23 +289,30 @@ namespace MWRender
 
     RaceSelectionPreview::RaceSelectionPreview()
         : CharacterPreview(MWBase::Environment::get().getWorld()->getPlayerPtr(),
-            512, 512, "CharacterHeadPreview", Ogre::Vector3(0, 6, -35), Ogre::Vector3(0,125,0))
+            512, 512, "CharacterHeadPreview", Ogre::Vector3(0, 8, -125), Ogre::Vector3(0,127,0))
+        , mBase (*mCharacter.get<ESM::NPC>()->mBase)
         , mRef(&mBase)
+        , mPitch(Ogre::Degree(6))
     {
-        mBase = *mCharacter.get<ESM::NPC>()->mBase;
         mCharacter = MWWorld::Ptr(&mRef, NULL);
     }
 
     void RaceSelectionPreview::update(float angle)
     {
         mAnimation->runAnimation(0.0f);
-        mNode->roll(Ogre::Radian(angle), Ogre::SceneNode::TS_LOCAL);
+
+        mNode->setOrientation(Ogre::Quaternion(Ogre::Radian(angle), Ogre::Vector3::UNIT_Z)
+                              * Ogre::Quaternion(mPitch, Ogre::Vector3::UNIT_X));
 
         updateCamera();
     }
 
     void RaceSelectionPreview::render()
     {
+        mTexture->load();
+
+        if (!mRenderTarget)
+            setupRenderTarget();
         mRenderTarget->update();
     }
 
@@ -251,7 +321,8 @@ namespace MWRender
         mBase = proto;
         mBase.mId = "player";
         rebuild();
-        update(0);
+        mAnimation->runAnimation(0.0f);
+        updateCamera();
     }
 
     void RaceSelectionPreview::onSetup ()
@@ -264,7 +335,10 @@ namespace MWRender
     void RaceSelectionPreview::updateCamera()
     {
         Ogre::Vector3 scale = mNode->getScale();
-        Ogre::Vector3 headOffset = mAnimation->getNode("Bip01 Head")->_getDerivedPosition();
+        Ogre::Node* headNode = mAnimation->getNode("Bip01 Head");
+        if (!headNode)
+            return;
+        Ogre::Vector3 headOffset = headNode->_getDerivedPosition();
         headOffset = mNode->convertLocalToWorldPosition(headOffset);
 
         mCamera->setPosition(headOffset + mPosition * scale);

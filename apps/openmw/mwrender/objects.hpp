@@ -45,9 +45,6 @@ public:
 
     ObjectAnimation* getAnimation(const MWWorld::Ptr &ptr);
 
-    void enableLights();
-    void disableLights();
-
     void update (float dt, Ogre::Camera* camera);
     ///< per-frame update
 

@@ -11,6 +11,7 @@
 
 #include "spellstate.hpp"
 #include "activespells.hpp"
+#include "magiceffects.hpp"
 #include "aisequence.hpp"
 
 namespace ESM
@@ -24,12 +25,14 @@ namespace ESM
         StatState<int> mAttributes[8];
         StatState<float> mDynamic[3];
 
+        MagicEffects mMagicEffects;
+
         AiSequence::AiSequence mAiSequence;
 
         bool mHasAiSettings;
         StatState<int> mAiSettings[4];
 
-        std::map<int, int> mSummonedCreatureMap;
+        std::map<std::pair<int, std::string>, int> mSummonedCreatureMap;
         std::vector<int> mSummonGraveyard;
 
         ESM::TimeStamp mTradeTime;
@@ -39,11 +42,9 @@ namespace ESM
         bool mDead;
         bool mDied;
         bool mMurdered;
-        int mFriendlyHits;
         bool mTalkedTo;
         bool mAlarmed;
         bool mAttacked;
-        bool mHostile;
         bool mAttackingOrSpell;
         bool mKnockdown;
         bool mKnockdownOneFrame;
@@ -54,6 +55,7 @@ namespace ESM
         float mAttackStrength;
         float mFallHeight;
         std::string mLastHitObject;
+        std::string mLastHitAttemptObject;
         bool mRecalcDynamicStats;
         int mDrawState;
         unsigned char mDeathAnimation;
@@ -62,6 +64,9 @@ namespace ESM
 
         SpellState mSpells;
         ActiveSpells mActiveSpells;
+
+        /// Initialize to default state
+        void blank();
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

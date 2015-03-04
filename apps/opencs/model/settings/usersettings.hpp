@@ -1,10 +1,13 @@
 #ifndef USERSETTINGS_HPP
 #define USERSETTINGS_HPP
 
+#include <map>
+
 #include <QList>
 #include <QStringList>
 #include <QString>
 #include <QMap>
+#include <QPair>
 
 #include <boost/filesystem/path.hpp>
 #include "support.hpp"
@@ -22,18 +25,20 @@ class QSettings;
 namespace CSMSettings {
 
     class Setting;
-    typedef QMap <QString, QList <Setting *> > SettingPageMap;
+    typedef QMap <QString, QPair<QString, QList <Setting *> > > SettingPageMap;
 
     class UserSettings: public QObject
     {
 
         Q_OBJECT
 
-        static UserSettings *mUserSettingsInstance;
+        static UserSettings *sUserSettingsInstance;
         const Files::ConfigurationManager& mCfgMgr;
 
         QSettings *mSettingDefinitions;
         QList <Setting *> mSettings;
+        QString mSection;
+        std::map<QString, QString> mSectionLabels;
 
     public:
 
@@ -62,7 +67,7 @@ namespace CSMSettings {
         void removeSetting
                         (const QString &pageName, const QString &settingName);
 
-        ///Retreive a map of the settings, keyed by page name
+        ///Retrieve a map of the settings, keyed by page name
         SettingPageMap settingPageMap() const;
 
         ///Returns a string list of defined vlaues for the specified setting
@@ -75,13 +80,20 @@ namespace CSMSettings {
         ///Save any unsaved changes in the QSettings object
         void saveDefinitions() const;
 
+        QString setting(const QString &viewKey, const QString &value = QString());
+
     private:
 
         void buildSettingModelDefaults();
 
         ///add a new setting to the model and return it
-        Setting *createSetting (CSMSettings::SettingType typ,
-                            const QString &page, const QString &name);
+        Setting *createSetting (CSMSettings::SettingType type, const QString &name,
+            const QString& label);
+
+        /// Set the section for createSetting calls.
+        ///
+        /// Sections can be declared multiple times.
+        void declareSection (const QString& page, const QString& label);
 
     signals:
 

@@ -235,26 +235,29 @@ namespace MWMechanics
     class AttributeValue
     {
         int mBase;
-        int mModifier;
-        int mDamage;
+        int mFortified;
+        int mModifier; // net effect of Fortified, Drain & Absorb
+        float mDamage; // needs to be float to allow continuous damage
 
     public:
-        AttributeValue() : mBase(0), mModifier(0), mDamage(0) {}
+        AttributeValue() : mBase(0), mFortified(0), mModifier(0), mDamage(0) {}
 
-        int getModified() const { return std::max(0, mBase - mDamage + mModifier); }
+        int getModified() const { return std::max(0, mBase - (int) mDamage + mModifier); }
         int getBase() const { return mBase; }
         int getModifier() const {  return mModifier; }
 
         void setBase(int base) { mBase = std::max(0, base); }
-        void setModifier(int mod) { mModifier = mod; }
+        void setModifiers(int fortify, int drain, int absorb);
 
-        void damage(int damage) { mDamage += damage; }
-        void restore(int amount) { mDamage -= std::min(mDamage, amount); }
+        void damage(float damage) { mDamage = std::min(mDamage + damage, (float)(mBase + mFortified)); }
+        void restore(float amount) { mDamage -= std::min(mDamage, amount); }
         int getDamage() const { return mDamage; }
 
         void writeState (ESM::StatState<int>& state) const;
 
         void readState (const ESM::StatState<int>& state);
+
+        friend bool operator== (const AttributeValue& left, const AttributeValue& right);
     };
 
     class SkillValue : public AttributeValue
@@ -268,13 +271,16 @@ namespace MWMechanics
         void writeState (ESM::StatState<int>& state) const;
 
         void readState (const ESM::StatState<int>& state);
+
+        friend bool operator== (const SkillValue& left, const SkillValue& right);
     };
 
     inline bool operator== (const AttributeValue& left, const AttributeValue& right)
     {
         return left.getBase() == right.getBase()
+                && left.mFortified == right.mFortified
                 && left.getModifier() == right.getModifier()
-                && left.getDamage() == right.getDamage();
+                && left.mDamage == right.mDamage;
     }
     inline bool operator!= (const AttributeValue& left, const AttributeValue& right)
     {
@@ -283,9 +289,8 @@ namespace MWMechanics
 
     inline bool operator== (const SkillValue& left, const SkillValue& right)
     {
-        return left.getBase() == right.getBase()
-                && left.getModifier() == right.getModifier()
-                && left.getDamage() == right.getDamage()
+        // delegate to base class for most of the work
+        return (static_cast<const AttributeValue&>(left) == right)
                 && left.getProgress() == right.getProgress();
     }
     inline bool operator!= (const SkillValue& left, const SkillValue& right)

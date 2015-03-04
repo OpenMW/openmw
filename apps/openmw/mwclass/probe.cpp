@@ -22,19 +22,22 @@
 
 namespace MWClass
 {
-    void Probe::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    std::string Probe::getId (const MWWorld::Ptr& ptr) const
     {
-        const std::string model = getModel(ptr);
+        return ptr.get<ESM::Probe>()->mBase->mId;
+    }
+
+    void Probe::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
+    {
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    void Probe::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Probe::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr,true);
+            physics.addObject(ptr, model, true);
     }
 
     std::string Probe::getModel(const MWWorld::Ptr &ptr) const

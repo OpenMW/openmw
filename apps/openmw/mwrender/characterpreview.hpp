@@ -22,7 +22,7 @@ namespace MWRender
 
     class NpcAnimation;
 
-    class CharacterPreview
+    class CharacterPreview : public Ogre::ManualResourceLoader
     {
     public:
         CharacterPreview(MWWorld::Ptr character, int sizeX, int sizeY, const std::string& name,
@@ -34,12 +34,21 @@ namespace MWRender
 
         virtual void rebuild();
 
+        void onFrame();
+
+        void loadResource(Ogre::Resource *resource);
+
+    private:
+        bool mRecover; // Texture content was lost and needs to be re-rendered
+
     private:
         CharacterPreview(const CharacterPreview&);
         CharacterPreview& operator=(const CharacterPreview&);
 
     protected:
         virtual bool renderHeadOnly() { return false; }
+
+        virtual void setupRenderTarget();
 
         Ogre::TexturePtr mTexture;
         Ogre::RenderTarget* mRenderTarget;
@@ -72,11 +81,17 @@ namespace MWRender
         virtual ~InventoryPreview();
         virtual void onSetup();
 
-        void update(int sizeX, int sizeY);
+        void update(); // Render preview again, e.g. after changed equipment
+        void resize(int sizeX, int sizeY);
 
         int getSlotSelected(int posX, int posY);
 
+    protected:
+        virtual void setupRenderTarget();
+
     private:
+        int mSizeX;
+        int mSizeY;
 
         OEngine::Render::SelectionBuffer* mSelectionBuffer;
     };
@@ -105,6 +120,10 @@ namespace MWRender
         }
 
         void setPrototype(const ESM::NPC &proto);
+
+    private:
+
+        Ogre::Radian mPitch;
     };
 
 }

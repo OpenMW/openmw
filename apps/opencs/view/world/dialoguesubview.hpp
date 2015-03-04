@@ -113,7 +113,7 @@ namespace CSVWorld
 
         CSMWorld::IdTable* mTable;
 
-        QUndoStack& mUndoStack;
+            CSMDoc::Document& mDocument;
 
         NotEditableSubDelegate mNotEditableDelegate;
 
@@ -169,7 +169,7 @@ namespace CSVWorld
             DialogueDelegateDispatcher mDispatcher;
             QWidget* mMainWidget;
             CSMWorld::IdTable* mTable;
-            QUndoStack& mUndoStack;
+            CSMDoc::Document& mDocument;
             std::vector<CSMWorld::NestedTableModel*> mNestedModels; //Plain, raw C pointers, deleted in the dtor
 
         public:

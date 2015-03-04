@@ -12,6 +12,7 @@
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
 
@@ -29,19 +30,17 @@ namespace MWClass
         return ref->mBase->mId;
     }
 
-    void Weapon::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Weapon::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        const std::string model = getModel(ptr);
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    void Weapon::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Weapon::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr,true);
+            physics.addObject(ptr, model, true);
     }
 
     std::string Weapon::getModel(const MWWorld::Ptr &ptr) const
@@ -190,9 +189,8 @@ namespace MWClass
         {
             return std::string("Item Weapon Longblade Up");
         }
-        // Shortblade and thrown weapons
-        // thrown weapons may not be entirely correct
-        if (type == 0 || type == 11)
+        // Shortblade
+        if (type == 0)
         {
             return std::string("Item Weapon Shortblade Up");
         }
@@ -201,8 +199,8 @@ namespace MWClass
         {
             return std::string("Item Weapon Spear Up");
         }
-        // Blunts and Axes
-        if (type == 3 || type == 4 || type == 5 || type == 7 || type == 8)
+        // Blunts, Axes and Thrown weapons
+        if (type == 3 || type == 4 || type == 5 || type == 7 || type == 8 || type == 11)
         {
             return std::string("Item Weapon Blunt Up");
         }
@@ -236,9 +234,8 @@ namespace MWClass
         {
             return std::string("Item Weapon Longblade Down");
         }
-        // Shortblade and thrown weapons
-        // thrown weapons may not be entirely correct
-        if (type == 0 || type == 11)
+        // Shortblade
+        if (type == 0)
         {
             return std::string("Item Weapon Shortblade Down");
         }
@@ -247,8 +244,8 @@ namespace MWClass
         {
             return std::string("Item Weapon Spear Down");
         }
-        // Blunts and Axes
-        if (type == 3 || type == 4 || type == 5 || type == 7 || type == 8)
+        // Blunts, Axes and Thrown weapons
+        if (type == 3 || type == 4 || type == 5 || type == 7 || type == 8 || type == 11)
         {
             return std::string("Item Weapon Blunt Down");
         }
@@ -378,13 +375,14 @@ namespace MWClass
         newItem.mName=newName;
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;
+        newItem.mData.mFlags |= ESM::Weapon::Magical;
         const ESM::Weapon *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         return record->mId;
     }
 
     std::pair<int, std::string> Weapon::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
-        if (ptr.getCellRef().getCharge() == 0)
+        if (hasItemHealth(ptr) && ptr.getCellRef().getCharge() == 0)
             return std::make_pair(0, "#{sInventoryMessage1}");
 
         std::pair<std::vector<int>, bool> slots_ = ptr.getClass().getEquipmentSlots(ptr);
@@ -434,7 +432,8 @@ namespace MWClass
 
     bool Weapon::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Weapon;
+        return (npcServices & ESM::NPC::Weapon)
+                || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
     float Weapon::getWeight(const MWWorld::Ptr &ptr) const

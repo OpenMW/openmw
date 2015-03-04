@@ -3,8 +3,6 @@
 
 #include "windowbase.hpp"
 
-#include "../mwbase/windowmanager.hpp"
-
 #undef MessageBox
 
 namespace MyGUI
@@ -34,9 +32,9 @@ namespace MWGui
             void clear();
 
             bool removeMessageBox (MessageBox *msgbox);
-            void setMessageBoxSpeed (int speed);
 
-            int readPressedButton ();
+            /// @param reset Reset the pressed button to -1 after reading it.
+            int readPressedButton (bool reset=true);
 
             typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
 

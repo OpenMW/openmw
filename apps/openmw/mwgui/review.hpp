@@ -1,6 +1,8 @@
 #ifndef MWGUI_REVIEW_H
 #define MWGUI_REVIEW_H
 
+#include <components/esm/attr.hpp>
+#include <components/esm/loadclas.hpp>
 #include "windowbase.hpp"
 #include "widgets.hpp"
 
@@ -8,11 +10,6 @@ namespace MWGui
 {
     class WindowManager;
 }
-
-/*
-This file contains the dialog for reviewing the generated character.
-Layout is defined by resources/mygui/openmw_chargen_review.layout.
-*/
 
 namespace MWGui
 {
@@ -53,6 +50,11 @@ namespace MWGui
         signature : void method()\n
         */
         EventHandle_Void eventBack;
+
+        /** Event : Dialog finished, OK button clicked.\n
+            signature : void method()\n
+        */
+        EventHandle_WindowBase eventDone;
 
         EventHandle_Int eventActivateDialog;
 

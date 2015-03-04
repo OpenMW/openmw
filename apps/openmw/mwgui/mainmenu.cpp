@@ -2,7 +2,14 @@
 
 #include <OgreResourceGroupManager.h>
 
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_RenderManager.h>
+
 #include <components/version/version.hpp>
+
+#include <components/widgets/imagebutton.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -16,7 +23,6 @@
 
 #include "savegamedialog.hpp"
 #include "confirmationdialog.hpp"
-#include "imagebutton.hpp"
 #include "backgroundimage.hpp"
 #include "videowidget.hpp"
 
@@ -28,6 +34,7 @@ namespace MWGui
         , mButtonBox(0), mWidth (w), mHeight (h)
         , mSaveGameDialog(NULL)
         , mBackground(NULL)
+        , mVideoBackground(NULL)
         , mVideo(NULL)
     {
         getWidget(mVersionText, "VersionText");
@@ -42,7 +49,7 @@ namespace MWGui
                 rev = rev.substr(0,10);
                 sstream << "\nRevision: " <<  rev;
         }
-        
+
         std::string output = sstream.str();
         mVersionText->setCaption(output);
 
@@ -92,7 +99,6 @@ namespace MWGui
         MWBase::Environment::get().getSoundManager()->playSound("Menu Click", 1.f, 1.f);
         if (name == "return")
         {
-            MWBase::Environment::get().getSoundManager ()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);
             MWBase::Environment::get().getWindowManager ()->removeGuiMode (GM_MainMenu);
         }
         else if (name == "options")
@@ -155,6 +161,8 @@ namespace MWGui
         if (!show)
             return;
 
+        bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
+
         if (mHasAnimatedMenu)
         {
             if (!mVideo)
@@ -175,13 +183,7 @@ namespace MWGui
             int screenHeight = viewSize.height;
             mVideoBackground->setSize(screenWidth, screenHeight);
 
-            double imageaspect = static_cast<double>(mVideo->getVideoWidth())/mVideo->getVideoHeight();
-
-            int leftPadding = std::max(0.0, (screenWidth - screenHeight * imageaspect) / 2);
-            int topPadding = std::max(0.0, (screenHeight - screenWidth / imageaspect) / 2);
-
-            mVideo->setCoord(leftPadding, topPadding,
-                                   screenWidth - leftPadding*2, screenHeight - topPadding*2);
+            mVideo->autoResize(stretch);
 
             mVideo->setVisible(true);
         }
@@ -191,7 +193,7 @@ namespace MWGui
             {
                 mBackground = MyGUI::Gui::getInstance().createWidgetReal<BackgroundImage>("ImageBox", 0,0,1,1,
                     MyGUI::Align::Stretch, "Menu");
-                mBackground->setBackgroundImage("textures\\menu_morrowind.dds");
+                mBackground->setBackgroundImage("textures\\menu_morrowind.dds", true, stretch);
             }
             mBackground->setVisible(true);
         }
@@ -250,7 +252,7 @@ namespace MWGui
         {
             if (mButtons.find(*it) == mButtons.end())
             {
-                MWGui::ImageButton* button = mButtonBox->createWidget<MWGui::ImageButton>
+                Gui::ImageButton* button = mButtonBox->createWidget<Gui::ImageButton>
                         ("ImageBox", MyGUI::IntCoord(0, curH, 0, 0), MyGUI::Align::Default);
                 button->setProperty("ImageHighlighted", "textures\\menu_" + *it + "_over.dds");
                 button->setProperty("ImageNormal", "textures\\menu_" + *it + ".dds");
@@ -263,7 +265,7 @@ namespace MWGui
 
         // Start by hiding all buttons
         int maxwidth = 0;
-        for (std::map<std::string, MWGui::ImageButton*>::iterator it = mButtons.begin(); it != mButtons.end(); ++it)
+        for (std::map<std::string, Gui::ImageButton*>::iterator it = mButtons.begin(); it != mButtons.end(); ++it)
         {
             it->second->setVisible(false);
             MyGUI::IntSize requested = it->second->getRequestedSize();
@@ -275,7 +277,7 @@ namespace MWGui
         for (std::vector<std::string>::iterator it = buttons.begin(); it != buttons.end(); ++it)
         {
             assert(mButtons.find(*it) != mButtons.end());
-            MWGui::ImageButton* button = mButtons[*it];
+            Gui::ImageButton* button = mButtons[*it];
             button->setVisible(true);
 
             MyGUI::IntSize requested = button->getRequestedSize();

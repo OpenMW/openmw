@@ -48,3 +48,8 @@ void CSMWorld::IdTableProxyModel::setFilter (const boost::shared_ptr<CSMFilter::
     updateColumnMap();
     invalidateFilter();
 }
+
+bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+{
+    return QSortFilterProxyModel::lessThan(left, right);
+}

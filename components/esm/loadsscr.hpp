@@ -22,11 +22,13 @@ struct StartScript
     static unsigned int sRecordId;
 
     std::string mData;
-    std::string mId, mScript;
+    std::string mId;
 
     // Load a record and add it to the list
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
+
+    void blank();
 };
 
 }

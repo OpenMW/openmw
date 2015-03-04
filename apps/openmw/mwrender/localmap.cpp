@@ -24,8 +24,10 @@
 using namespace MWRender;
 using namespace Ogre;
 
-LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering) :
-    mInterior(false), mCellX(0), mCellY(0)
+LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering)
+    : mInterior(false)
+    , mAngle(0.f)
+    , mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
 {
     mRendering = rend;
     mRenderingManager = rendering;
@@ -49,7 +51,7 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManag
                     "localmap/rtt",
                     ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                     TEX_TYPE_2D,
-                    sMapResolution, sMapResolution,
+                    mMapResolution, mMapResolution,
                     0,
                     PF_R8G8B8,
                     TU_RENDERTARGET);
@@ -98,6 +100,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
             return;
 
         Ogre::Image image;
+        tex->load();
         tex->convertToImage(image);
 
         Ogre::DataStreamPtr encoded = image.encode("tga");
@@ -137,6 +140,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
                     return;
 
                 Ogre::Image image;
+                tex->load();
                 tex->convertToImage(image);
 
                 fog->mFogTextures.push_back(ESM::FogTexture());
@@ -196,7 +200,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
 
     // Get the cell's NorthMarker rotation. This is used to rotate the entire map.
     const Vector2& north = MWBase::Environment::get().getWorld()->getNorthVector(cell);
-    Radian angle = Ogre::Math::ATan2 (north.x, north.y) + Ogre::Degree(2);
+    Radian angle = Ogre::Math::ATan2 (north.x, north.y);
     mAngle = angle.valueRadians();
 
     // Rotate the cell and merge the rotated corners to the bounding box
@@ -322,6 +326,7 @@ void LocalMap::createFogOfWar(const std::string& texturePrefix)
     buffer.resize(sFogOfWarResolution*sFogOfWarResolution, 0xFF000000);
 
     // upload to the texture
+    tex->load();
     memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
     tex->getBuffer()->unlock();
 
@@ -409,7 +414,7 @@ void LocalMap::render(const float x, const float y,
                         texture,
                         ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                         TEX_TYPE_2D,
-                        sMapResolution, sMapResolution,
+                        mMapResolution, mMapResolution,
                         0,
                         PF_R8G8B8);
         tex->getBuffer()->blit(mRenderTexture->getBuffer());
@@ -428,7 +433,7 @@ void LocalMap::render(const float x, const float y,
     mRendering->getScene()->setAmbientLight(oldAmbient);
 }
 
-void LocalMap::getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y)
+void LocalMap::worldToInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y)
 {
     pos = rotatePoint(pos, Vector2(mBounds.getCenter().x, mBounds.getCenter().y), mAngle);
 
@@ -439,6 +444,18 @@ void LocalMap::getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, 
 
     nX = (pos.x - min.x - sSize*x)/sSize;
     nY = 1.0-(pos.y - min.y - sSize*y)/sSize;
+}
+
+Ogre::Vector2 LocalMap::interiorMapToWorldPosition (float nX, float nY, int x, int y)
+{
+    Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().y);
+    Ogre::Vector2 pos;
+
+    pos.x = sSize * (nX + x) + min.x;
+    pos.y = sSize * (1.0-nY + y) + min.y;
+
+    pos = rotatePoint(pos, Vector2(mBounds.getCenter().x, mBounds.getCenter().y), -mAngle);
+    return pos;
 }
 
 bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interior)
@@ -477,7 +494,7 @@ void LocalMap::loadResource(Ogre::Resource* resource)
 
     std::vector<uint32>& buffer = mBuffers[resourceName];
 
-    Ogre::Texture* tex = dynamic_cast<Ogre::Texture*>(resource);
+    Ogre::Texture* tex = static_cast<Ogre::Texture*>(resource);
     tex->createInternalResources();
     memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
     tex->getBuffer()->unlock();
@@ -499,7 +516,7 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     Vector2 pos(position.x, position.y);
 
     if (mInterior)
-        getInteriorMapPosition(pos, u,v, x,y);
+        worldToInteriorMapPosition(pos, u,v, x,y);
 
     Vector3 playerdirection = mCameraRotNode->convertWorldToLocalOrientation(orientation).yAxis();
 
@@ -507,10 +524,9 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     {
         x = std::ceil(pos.x / sSize)-1;
         y = std::ceil(pos.y / sSize)-1;
-        mCellX = x;
-        mCellY = y;
     }
-    MWBase::Environment::get().getWindowManager()->setActiveMap(x,y,mInterior);
+    else
+        MWBase::Environment::get().getWindowManager()->setActiveMap(x,y,mInterior);
 
     // convert from world coordinates to texture UV coordinates
     std::string texBaseName;
@@ -525,7 +541,7 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
         texBaseName = mInteriorName + "_";
     }
 
-    MWBase::Environment::get().getWindowManager()->setPlayerPos(u, v);
+    MWBase::Environment::get().getWindowManager()->setPlayerPos(x, y, u, v);
     MWBase::Environment::get().getWindowManager()->setPlayerDir(playerdirection.x, playerdirection.y);
 
     // explore radius (squared)
@@ -580,6 +596,8 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
                         ++i;
                     }
                 }
+
+                tex->load();
 
                 // copy to the texture
                 // NOTE: Could be optimized later. We actually only need to update the region that changed.

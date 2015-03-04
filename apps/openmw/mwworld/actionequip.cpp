@@ -31,11 +31,7 @@ namespace MWWorld
         {
             case 0:
                 return;
-            case 2:
-                invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedLeft, actor);
-                break;
-            case 3:
-                invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, actor);
+            default:
                 break;
         }
 

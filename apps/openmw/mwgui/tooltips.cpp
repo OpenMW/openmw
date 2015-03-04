@@ -2,13 +2,22 @@
 
 #include <iomanip>
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Gui.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_ImageBox.h>
+
+#include <components/misc/resourcehelpers.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "mapwindow.hpp"
 #include "inventorywindow.hpp"
@@ -17,6 +26,7 @@
 
 namespace MWGui
 {
+    std::string ToolTips::sSchoolNames[] = {"#{sSchoolAlteration}", "#{sSchoolConjuration}", "#{sSchoolDestruction}", "#{sSchoolIllusion}", "#{sSchoolMysticism}", "#{sSchoolRestoration}"};
 
     ToolTips::ToolTips() :
         Layout("openmw_tooltips.layout")
@@ -84,8 +94,6 @@ namespace MWGui
                 || (MWBase::Environment::get().getWindowManager()->getMode() == GM_Container)
                 || (MWBase::Environment::get().getWindowManager()->getMode() == GM_Inventory)))
             {
-                mFocusObject = MWBase::Environment::get().getWorld()->getFacedObject();
-
                 if (mFocusObject.isEmpty ())
                     return;
 
@@ -97,7 +105,9 @@ namespace MWGui
                     setCoord(0, 0, 300, 300);
                     mDynamicToolTipBox->setVisible(true);
                     ToolTipInfo info;
-                    info.caption=mFocusObject.getCellRef().getRefId();
+                    info.caption = mFocusObject.getClass().getName(mFocusObject);
+                    if (info.caption.empty())
+                        info.caption=mFocusObject.getCellRef().getRefId();
                     info.icon="";
                     tooltipSize = createToolTip(info);
                 }
@@ -155,15 +165,19 @@ namespace MWGui
 
                 // special handling for markers on the local map: the tooltip should only be visible
                 // if the marker is not hidden due to the fog of war.
-                if (focus->getUserString ("IsMarker") == "true")
+                if (type == "MapMarker")
                 {
-                    LocalMapBase::MarkerPosition pos = *focus->getUserData<LocalMapBase::MarkerPosition>();
+                    LocalMapBase::MarkerUserData data = *focus->getUserData<LocalMapBase::MarkerUserData>();
 
-                    if (!MWBase::Environment::get().getWorld ()->isPositionExplored (pos.nX, pos.nY, pos.cellX, pos.cellY, pos.interior))
+                    if (!MWBase::Environment::get().getWorld ()->isPositionExplored (data.nX, data.nY, data.cellX, data.cellY, data.interior))
                         return;
-                }
 
-                if (type == "ItemPtr")
+                    ToolTipInfo info;
+                    info.text = data.caption;
+                    info.notes = data.notes;
+                    tooltipSize = createToolTip(info);
+                }
+                else if (type == "ItemPtr")
                 {
                     mFocusObject = *focus->getUserData<MWWorld::Ptr>();
                     tooltipSize = getToolTipViaPtr(false);
@@ -218,6 +232,12 @@ namespace MWGui
                         params.mNoTarget = false;
                         effects.push_back(params);
                     }
+                    if (MWMechanics::spellIncreasesSkill(spell)) // display school of spells that contribute to skill progress
+                    {
+                        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                        int school = MWMechanics::getSpellSchool(spell, player);
+                        info.text = "#{sSchool}: " + sSchoolNames[school];
+                    }
                     info.effects = effects;
                     tooltipSize = createToolTip(info);
                 }
@@ -236,12 +256,23 @@ namespace MWGui
                         size_t underscorePos = it->first.find("_");
                         if (underscorePos == std::string::npos)
                             continue;
-                        std::string propertyKey = it->first.substr(0, underscorePos);
+                        std::string key = it->first.substr(0, underscorePos);
                         std::string widgetName = it->first.substr(underscorePos+1, it->first.size()-(underscorePos+1));
+
+                        std::string type = "Property";
+                        size_t caretPos = key.find("^");
+                        if (caretPos != std::string::npos)
+                        {
+                            type = key.substr(0, caretPos);
+                            key.erase(key.begin(), key.begin() + caretPos + 1);
+                        }
 
                         MyGUI::Widget* w;
                         getWidget(w, widgetName);
-                        w->setProperty(propertyKey, it->second);
+                        if (type == "Property")
+                            w->setProperty(key, it->second);
+                        else if (type == "UserData")
+                            w->setUserString(key, it->second);
                     }
 
                     tooltipSize = tooltip->getSize();
@@ -319,20 +350,6 @@ namespace MWGui
         return tooltipSize;
     }
 
-    void ToolTips::findImageExtension(std::string& image)
-    {
-        int len = image.size();
-        if (len < 4) return;
-
-        if (!Ogre::ResourceGroupManager::getSingleton().resourceExists(Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME, image))
-        {
-            // Change texture extension to .dds
-            image[len-3] = 'd';
-            image[len-2] = 'd';
-            image[len-1] = 's';
-        }
-    }
-
     MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     {
         mDynamicToolTipBox->setVisible(true);
@@ -371,8 +388,7 @@ namespace MWGui
         const int imageCaptionHPadding = (caption != "" ? 8 : 0);
         const int imageCaptionVPadding = (caption != "" ? 4 : 0);
 
-        std::string realImage = "icons\\" + image;
-        findImageExtension(realImage);
+        std::string realImage = Misc::ResourceHelpers::correctIconPath(image);
 
         MyGUI::EditBox* captionWidget = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("NormalText", MyGUI::IntCoord(0, 0, 300, 300), MyGUI::Align::Left | MyGUI::Align::Top, "ToolTipCaption");
         captionWidget->setProperty("Static", "true");
@@ -393,16 +409,33 @@ namespace MWGui
         MyGUI::IntSize totalSize = MyGUI::IntSize( std::min(std::max(textSize.width,captionSize.width + ((image != "") ? imageCaptionHPadding : 0)),maximumWidth),
             ((text != "") ? textSize.height + imageCaptionVPadding : 0) + captionHeight );
 
+        for (std::vector<std::string>::const_iterator it = info.notes.begin(); it != info.notes.end(); ++it)
+        {
+            MyGUI::ImageBox* icon = mDynamicToolTipBox->createWidget<MyGUI::ImageBox>("MarkerButton",
+                MyGUI::IntCoord(padding.left, totalSize.height+padding.top, 8, 8), MyGUI::Align::Default);
+            icon->setColour(MyGUI::Colour(1.0,0.3,0.3));
+            MyGUI::EditBox* edit = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("SandText",
+                MyGUI::IntCoord(padding.left+8+4, totalSize.height+padding.top, 300-padding.left-8-4, 300-totalSize.height),
+                                                                                    MyGUI::Align::Default);
+            edit->setEditMultiLine(true);
+            edit->setEditWordWrap(true);
+            edit->setCaption(*it);
+            edit->setSize(edit->getWidth(), edit->getTextSize().height);
+            icon->setPosition(icon->getLeft(),(edit->getTop()+edit->getBottom())/2-icon->getHeight()/2);
+            totalSize.height += std::max(edit->getHeight(), icon->getHeight());
+            totalSize.width = std::max(totalSize.width, edit->getWidth()+8+4);
+        }
+
         if (!info.effects.empty())
         {
             MyGUI::Widget* effectArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>("",
                 MyGUI::IntCoord(padding.left, totalSize.height, 300-padding.left, 300-totalSize.height),
-                MyGUI::Align::Stretch, "ToolTipEffectArea");
+                MyGUI::Align::Stretch);
 
             MyGUI::IntCoord coord(0, 6, totalSize.width, 24);
 
             Widgets::MWEffectListPtr effectsWidget = effectArea->createWidget<Widgets::MWEffectList>
-                ("MW_StatName", coord, MyGUI::Align::Default, "ToolTipEffectsWidget");
+                ("MW_StatName", coord, MyGUI::Align::Default);
             effectsWidget->setEffectList(info.effects);
 
             std::vector<MyGUI::Widget*> effectItems;
@@ -416,12 +449,12 @@ namespace MWGui
             assert(enchant);
             MyGUI::Widget* enchantArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>("",
                 MyGUI::IntCoord(padding.left, totalSize.height, 300-padding.left, 300-totalSize.height),
-                MyGUI::Align::Stretch, "ToolTipEnchantArea");
+                MyGUI::Align::Stretch);
 
             MyGUI::IntCoord coord(0, 6, totalSize.width, 24);
 
             Widgets::MWEffectListPtr enchantWidget = enchantArea->createWidget<Widgets::MWEffectList>
-                ("MW_StatName", coord, MyGUI::Align::Default, "ToolTipEnchantWidget");
+                ("MW_StatName", coord, MyGUI::Align::Default);
             enchantWidget->setEffectList(Widgets::MWEffectList::effectListFromESM(&enchant->mEffects));
 
             std::vector<MyGUI::Widget*> enchantEffectItems;
@@ -460,7 +493,7 @@ namespace MWGui
                     chargeCoord = MyGUI::IntCoord((totalSize.width - chargeAndTextWidth)/2 + chargeTextWidth, coord.top+6, chargeWidth, 18);
                 }
                 Widgets::MWDynamicStatPtr chargeWidget = enchantArea->createWidget<Widgets::MWDynamicStat>
-                    ("MW_ChargeBar", chargeCoord, MyGUI::Align::Default, "ToolTipEnchantCharge");
+                    ("MW_ChargeBar", chargeCoord, MyGUI::Align::Default);
                 chargeWidget->setValue(charge, maxCharge);
                 totalSize.height += 24;
             }
@@ -495,7 +528,7 @@ namespace MWGui
         {
             MyGUI::ImageBox* imageWidget = mDynamicToolTipBox->createWidget<MyGUI::ImageBox>("ImageBox",
                 MyGUI::IntCoord((totalSize.width - captionSize.width - imageCaptionHPadding)/2, 0, imageSize, imageSize),
-                MyGUI::Align::Left | MyGUI::Align::Top, "ToolTipImage");
+                MyGUI::Align::Left | MyGUI::Align::Top);
             imageWidget->setImageTexture(realImage);
             imageWidget->setPosition (imageWidget->getPosition() + padding);
         }
@@ -544,7 +577,7 @@ namespace MWGui
         if (value == 1)
             return "";
         else
-            return " (" + boost::lexical_cast<std::string>(value) + ")";
+            return " (" + MyGUI::utility::toString(value) + ")";
     }
 
     std::string ToolTips::getCellRefString(const MWWorld::CellRef& cellref)
@@ -554,6 +587,15 @@ namespace MWGui
         ret += getMiscString(cellref.getFaction(), "Faction");
         if (cellref.getFactionRank() > 0)
             ret += getValueString(cellref.getFactionRank(), "Rank");
+
+        std::vector<std::pair<std::string, int> > itemOwners =
+                MWBase::Environment::get().getMechanicsManager()->getStolenItemOwners(cellref.getRefId());
+
+        for (std::vector<std::pair<std::string, int> >::const_iterator it = itemOwners.begin(); it != itemOwners.end(); ++it)
+        {
+            ret += std::string("\nStolen from ") + it->first;
+        }
+
         ret += getMiscString(cellref.getGlobalVariable(), "Global");
         return ret;
     }
@@ -627,8 +669,8 @@ namespace MWGui
         MWWorld::Store<ESM::Skill>::iterator it = skills.begin();
         for (; it != skills.end(); ++it)
         {
-            if (it->mData.mSpecialization == specId)
-                specText += std::string("\n#{") + ESM::Skill::sSkillNameIds[it->mIndex] + "}";
+            if (it->second.mData.mSpecialization == specId)
+                specText += std::string("\n#{") + ESM::Skill::sSkillNameIds[it->first] + "}";
         }
         widget->setUserString("Caption_CenteredCaptionText", specText);
         widget->setUserString("ToolTipLayout", "TextWithCenteredCaptionToolTip");
@@ -644,13 +686,11 @@ namespace MWGui
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "BirthSignToolTip");
-        std::string image = sign->mTexture;
-        image.replace(image.size()-3, 3, "dds");
-        widget->setUserString("ImageTexture_BirthSignImage", "textures\\" + image);
+        widget->setUserString("ImageTexture_BirthSignImage", Misc::ResourceHelpers::correctTexturePath(sign->mTexture));
         std::string text;
 
         text += sign->mName;
-        text += "\n#BF9959" + sign->mDescription;
+        text += "\n#{fontcolourhtml=normal}" + sign->mDescription;
 
         std::vector<std::string> abilities, powers, spells;
 
@@ -690,13 +730,13 @@ namespace MWGui
             {
                 if (it == categories[category].spells.begin())
                 {
-                    text += std::string("\n#DDC79E") + std::string("#{") + categories[category].label + "}";
+                    text += std::string("\n#{fontcolourhtml=header}") + std::string("#{") + categories[category].label + "}";
                 }
 
                 const std::string &spellId = *it;
 
                 const ESM::Spell *spell = store.get<ESM::Spell>().find(spellId);
-                text += "\n#BF9959" + spell->mName;
+                text += "\n#{fontcolourhtml=normal}" + spell->mName;
             }
         }
 
@@ -739,29 +779,15 @@ namespace MWGui
         const std::string &name = ESM::MagicEffect::effectIdToString (id);
 
         std::string icon = effect->mIcon;
-
-        int slashPos = icon.find("\\");
+        int slashPos = icon.rfind('\\');
         icon.insert(slashPos+1, "b_");
-
-        icon[icon.size()-3] = 'd';
-        icon[icon.size()-2] = 'd';
-        icon[icon.size()-1] = 's';
-
-        icon = "icons\\" + icon;
-
-        std::vector<std::string> schools;
-        schools.push_back ("#{sSchoolAlteration}");
-        schools.push_back ("#{sSchoolConjuration}");
-        schools.push_back ("#{sSchoolDestruction}");
-        schools.push_back ("#{sSchoolIllusion}");
-        schools.push_back ("#{sSchoolMysticism}");
-        schools.push_back ("#{sSchoolRestoration}");
+        icon = Misc::ResourceHelpers::correctIconPath(icon);
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");
         widget->setUserString("Caption_MagicEffectName", "#{" + name + "}");
         widget->setUserString("Caption_MagicEffectDescription", effect->mDescription);
-        widget->setUserString("Caption_MagicEffectSchool", "#{sSchool}: " + schools[effect->mData.mSchool]);
+        widget->setUserString("Caption_MagicEffectSchool", "#{sSchool}: " + sSchoolNames[effect->mData.mSchool]);
         widget->setUserString("ImageTexture_MagicEffectImage", icon);
     }
 

@@ -3,8 +3,6 @@
 
 #include "../doc/subviewfactoryimp.hpp"
 
-#include "../filter/filtercreator.hpp"
-
 #include "tablesubview.hpp"
 #include "dialoguesubview.hpp"
 #include "scriptsubview.hpp"
@@ -28,6 +26,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     manager.add (CSMWorld::UniversalId::Type_Skills,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, NullCreatorFactory>);
 
+    manager.add (CSMWorld::UniversalId::Type_MagicEffects,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, NullCreatorFactory>);
+
     static const CSMWorld::UniversalId::Type sTableTypes[] =
     {
         CSMWorld::UniversalId::Type_Globals,
@@ -35,12 +36,14 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Factions,
         CSMWorld::UniversalId::Type_Races,
         CSMWorld::UniversalId::Type_Sounds,
-        CSMWorld::UniversalId::Type_Scripts,
         CSMWorld::UniversalId::Type_Regions,
         CSMWorld::UniversalId::Type_Birthsigns,
         CSMWorld::UniversalId::Type_Spells,
         CSMWorld::UniversalId::Type_Enchantments,
         CSMWorld::UniversalId::Type_BodyParts,
+        CSMWorld::UniversalId::Type_SoundGens,
+        CSMWorld::UniversalId::Type_Pathgrids,
+        CSMWorld::UniversalId::Type_StartScripts,
 
         CSMWorld::UniversalId::Type_None // end marker
     };
@@ -91,11 +94,20 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     // Other stuff (combined record tables)
     manager.add (CSMWorld::UniversalId::Type_RegionMap, new CSVDoc::SubViewFactory<RegionMapSubView>);
 
+    manager.add (CSMWorld::UniversalId::Type_Scene, new CSVDoc::SubViewFactory<SceneSubView>);
+
+    // More other stuff
     manager.add (CSMWorld::UniversalId::Type_Filters,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView,
-        CreatorFactory<CSVFilter::FilterCreator> >);
+        CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> >);
 
-    manager.add (CSMWorld::UniversalId::Type_Scene, new CSVDoc::SubViewFactory<SceneSubView>);
+    manager.add (CSMWorld::UniversalId::Type_DebugProfiles,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView,
+        CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> >);
+
+    manager.add (CSMWorld::UniversalId::Type_Scripts,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GenericCreator,
+            CSMWorld::Scope_Project | CSMWorld::Scope_Content> >);
 
     // Dialogue subviews
     static const CSMWorld::UniversalId::Type sTableTypes2[] =
@@ -106,11 +118,13 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Global,
         CSMWorld::UniversalId::Type_Race,
         CSMWorld::UniversalId::Type_Class,
-        CSMWorld::UniversalId::Type_Filter,
         CSMWorld::UniversalId::Type_Sound,
         CSMWorld::UniversalId::Type_Faction,
         CSMWorld::UniversalId::Type_Enchantment,
         CSMWorld::UniversalId::Type_BodyPart,
+        CSMWorld::UniversalId::Type_SoundGen,
+        CSMWorld::UniversalId::Type_Pathgrid,
+        CSMWorld::UniversalId::Type_StartScript,
 
         CSMWorld::UniversalId::Type_None // end marker
     };
@@ -121,6 +135,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
             CreatorFactory<GenericCreator> > (false));
 
     manager.add (CSMWorld::UniversalId::Type_Skill,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, NullCreatorFactory > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_MagicEffect,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, NullCreatorFactory > (false));
 
     manager.add (CSMWorld::UniversalId::Type_Gmst,
@@ -146,6 +163,12 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add (CSMWorld::UniversalId::Type_Journal,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, JournalCreatorFactory> (false));
+
+    manager.add (CSMWorld::UniversalId::Type_DebugProfile,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_Filter,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<GenericCreator, CSMWorld::Scope_Project | CSMWorld::Scope_Session> > (false));
 
     //preview
     manager.add (CSMWorld::UniversalId::Type_Preview, new CSVDoc::SubViewFactory<PreviewSubView>);

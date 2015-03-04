@@ -25,6 +25,8 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                     "fDiseaseXferChance")->getFloat();
 
+        MagicEffects& actorEffects = actor.getClass().getCreatureStats(actor).getMagicEffects();
+
         Spells& spells = carrier.getClass().getCreatureStats(carrier).getSpells();
         for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
@@ -33,26 +35,16 @@ namespace MWMechanics
             if (actor.getClass().getCreatureStats(actor).getSpells().hasSpell(spell->mId))
                 continue;
 
-            bool hasCorprusEffect = false;
-            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = spell->mEffects.mList.begin(); effectIt != spell->mEffects.mList.end(); ++effectIt)
-            {
-                if (effectIt->mEffectID == ESM::MagicEffect::Corprus)
-                {
-                    hasCorprusEffect = true;
-                    break;
-                }
-            }
-
             float resist = 0.f;
-            if (hasCorprusEffect)
-                resist = 1.f - 0.01 * (actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::ResistCorprusDisease).mMagnitude
-                                        - actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::WeaknessToCorprusDisease).mMagnitude);
+            if (spells.hasCorprusEffect(spell))
+                resist = 1.f - 0.01 * (actorEffects.get(ESM::MagicEffect::ResistCorprusDisease).getMagnitude()
+                                        - actorEffects.get(ESM::MagicEffect::WeaknessToCorprusDisease).getMagnitude());
             else if (spell->mData.mType == ESM::Spell::ST_Disease)
-                resist = 1.f - 0.01 * (actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::ResistCommonDisease).mMagnitude
-                                        - actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::WeaknessToCommonDisease).mMagnitude);
+                resist = 1.f - 0.01 * (actorEffects.get(ESM::MagicEffect::ResistCommonDisease).getMagnitude()
+                                        - actorEffects.get(ESM::MagicEffect::WeaknessToCommonDisease).getMagnitude());
             else if (spell->mData.mType == ESM::Spell::ST_Blight)
-                resist = 1.f - 0.01 * (actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::ResistBlightDisease).mMagnitude
-                                        - actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::WeaknessToBlightDisease).mMagnitude);
+                resist = 1.f - 0.01 * (actorEffects.get(ESM::MagicEffect::ResistBlightDisease).getMagnitude()
+                                        - actorEffects.get(ESM::MagicEffect::WeaknessToBlightDisease).getMagnitude());
             else
                 continue;
 

@@ -1,6 +1,9 @@
 #include "scrollwindow.hpp"
 
+#include <MyGUI_ScrollView.h>
+
 #include <components/esm/loadbook.hpp>
+#include <components/widgets/imagebutton.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -13,7 +16,7 @@
 
 namespace
 {
-    void adjustButton (MWGui::ImageButton* button)
+    void adjustButton (Gui::ImageButton* button)
     {
         MyGUI::IntSize diff = button->getSize() - button->getRequestedSize();
         button->setSize(button->getRequestedSize());
@@ -54,13 +57,17 @@ namespace MWGui
 
         MWWorld::LiveCellRef<ESM::Book> *ref = mScroll.get<ESM::Book>();
 
-        BookTextParser parser;
-        MyGUI::IntSize size = parser.parseScroll(ref->mBase->mText, mTextView, 390);
+        Formatting::BookFormatter formatter;
+        formatter.markupToWidget(mTextView, ref->mBase->mText, 390, mTextView->getHeight());
+        MyGUI::IntSize size = mTextView->getChildAt(0)->getSize();
 
+        // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mTextView->setVisibleVScroll(false);
         if (size.height > mTextView->getSize().height)
             mTextView->setCanvasSize(MyGUI::IntSize(410, size.height));
         else
             mTextView->setCanvasSize(410, mTextView->getSize().height);
+        mTextView->setVisibleVScroll(true);
 
         mTextView->setViewOffset(MyGUI::IntPoint(0,0));
 

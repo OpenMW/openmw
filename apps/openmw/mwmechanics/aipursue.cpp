@@ -30,13 +30,27 @@ AiPursue *MWMechanics::AiPursue::clone() const
 {
     return new AiPursue(*this);
 }
-bool AiPursue::execute (const MWWorld::Ptr& actor, float duration)
+bool AiPursue::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
 {
+    if(actor.getClass().getCreatureStats(actor).isDead())
+        return true;
+
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
     const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId); //The target to follow
 
-    if(target == MWWorld::Ptr())
+    if(target == MWWorld::Ptr() || !target.getRefData().getCount() || !target.getRefData().isEnabled()  // Really we should be checking whether the target is currently registered
+                                                                                                        // with the MechanicsManager
+            )
         return true; //Target doesn't exist
+
+    if (target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude() > 0
+            || target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude() > 75)
+        return true;
+
+    if(target.getClass().getCreatureStats(target).isDead())
+        return true;
+
+    actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
     //Set the target desition from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;

@@ -1,72 +1,121 @@
 <RCC>
     <qresource prefix="/">
-        <file>opencs.png</file>
+        <file>openmw-cs.png</file>
         <file>activator.png</file>
-	<file>added.png</file>
-	<file>apparatus.png</file>
-	<file>armor.png</file>
-	<file>attribute.png</file>
-	<file>base.png</file>
-	<file>birthsign.png</file>
-	<file>body-part.png</file>
-	<file>book.png</file>
-	<file>cell.png</file>
-	<file>class.png</file>
-	<file>clothing.png</file>
-	<file>container.png</file>
-	<file>creature.png</file>
-	<file>dialogoue-info.png</file>
-	<file>dialogoue-journal.png</file>
-	<file>dialogoue-regular.png</file>
-	<file>dialogue-greeting.png</file>
-	<file>dialogue-persuasion.png</file>
-	<file>dialogue-speech.png</file>
-	<file>door.png</file>
-	<file>enchantment.png</file>
-	<file>faction.png</file>
-	<file>filter.png</file>
-	<file>globvar.png</file>
-	<file>GMST.png</file>
-	<file>Info.png</file>
-	<file>ingredient.png</file>
-	<file>landpaint.png</file>
-	<file>land.png</file>
-	<file>LandTexture.png</file>
-	<file>leveled-creature.png</file>
-	<file>light.png</file>
-	<file>lockpick.png</file>
-	<file>magic-effect.png</file>
-	<file>magicrabbit.png</file>
-	<file>map.png</file>
-	<file>miscellaneous.png</file>
-	<file>modified.png</file>
-	<file>npc.png</file>
-	<file>PathGrid.png</file>
-	<file>potion.png</file>
-	<file>probe.png</file>
-	<file>race.png</file>
-	<file>random-item.png</file>
-	<file>random.png</file>
-	<file>removed.png</file>
-	<file>repair.png</file>
-	<file>script.png</file>
-	<file>skill.png</file>
-	<file>soundgen.png</file>
-	<file>sound.png</file>
-	<file>spell.png</file>
-	<file>static.png</file>
-	<file>weapon.png</file>
-	<file>multitype.png</file>
-    <file>go-next.png</file>
-    <file>go-previous.png</file>
-    <file>edit-delete.png</file>
-    <file>edit-undo.png</file>
-    <file>edit-preview.png</file>
-    <file>edit-clone.png</file>
-    <file>add.png</file>
-        <file alias="startup/create-addon">raster/startup/big/create-addon.png</file>
-        <file alias="startup/create-game">raster/startup/big/new-game.png</file>
-        <file alias="startup/edit-content">raster/startup/big/edit-content.png</file>
-        <file alias="startup/configure">raster/startup/small/configure.png</file>
+        <file>added.png</file>
+        <file>apparatus.png</file>
+        <file>armor.png</file>
+        <file>attribute.png</file>
+        <file>base.png</file>
+        <file>birthsign.png</file>
+        <file>body-part.png</file>
+        <file>book.png</file>
+        <file>cell.png</file>
+        <file>class.png</file>
+        <file>clothing.png</file>
+        <file>container.png</file>
+        <file>creature.png</file>
+        <file>dialogoue-info.png</file>
+        <file>dialogoue-journal.png</file>
+        <file>dialogoue-regular.png</file>
+        <file>dialogue-greeting.png</file>
+        <file>dialogue-persuasion.png</file>
+        <file>dialogue-speech.png</file>
+        <file>door.png</file>
+        <file>enchantment.png</file>
+        <file>faction.png</file>
+        <file>filter.png</file>
+        <file>globvar.png</file>
+        <file>GMST.png</file>
+        <file>Info.png</file>
+        <file>ingredient.png</file>
+        <file>landpaint.png</file>
+        <file>land.png</file>
+        <file>LandTexture.png</file>
+        <file>leveled-creature.png</file>
+        <file>light.png</file>
+        <file>lockpick.png</file>
+        <file>magic-effect.png</file>
+        <file>magicrabbit.png</file>
+        <file>map.png</file>
+        <file>miscellaneous.png</file>
+        <file>modified.png</file>
+        <file>npc.png</file>
+        <file>PathGrid.png</file>
+        <file>potion.png</file>
+        <file>probe.png</file>
+        <file>race.png</file>
+        <file>random-item.png</file>
+        <file>random.png</file>
+        <file>removed.png</file>
+        <file>repair.png</file>
+        <file>script.png</file>
+        <file>skill.png</file>
+        <file>soundgen.png</file>
+        <file>sound.png</file>
+        <file>spell.png</file>
+        <file>static.png</file>
+        <file>weapon.png</file>
+        <file>multitype.png</file>
+        <file>go-next.png</file>
+        <file>go-previous.png</file>
+        <file>edit-delete.png</file>
+        <file>edit-undo.png</file>
+        <file>edit-preview.png</file>
+        <file>edit-clone.png</file>
+        <file>add.png</file>
+        <file alias="placeholder">placeholder.png</file>
+    </qresource>
+    <qresource prefix="/startup">
+        <file alias="create-addon">raster/startup/big/create-addon.png</file>
+        <file alias="create-game">raster/startup/big/new-game.png</file>
+        <file alias="edit-content">raster/startup/big/edit-content.png</file>
+        <file alias="configure">raster/startup/small/configure.png</file>
+    </qresource>
+    <qresource prefix="/scenetoolbar">
+        <file alias="night">Moon-48.png</file>
+        <file alias="day">Sun-48.png</file>
+        <file alias="bright">Lightbulb-48.png</file>
+        <file alias="1st-person">eyeballdude.png</file>
+        <file alias="free-camera">flying eye.png</file>
+        <file alias="orbiting-camera">orbit2.png</file>
+        <file alias="play">scene-play.png</file>
+        <file alias="scene-view-1">scene-view-references.png</file>
+        <file alias="scene-view-16">scene-view-terrain.png</file>
+        <file alias="scene-view-4">scene-view-water.png</file>
+        <file alias="scene-view-2">scene-view-pathgrid.png</file>
+        <file alias="scene-view-8">scene-view-fog.png</file>
+        <file alias="scene-view-c0">scene-view-status-0.png</file>
+        <file alias="scene-view-c1">scene-view-status-1.png</file>
+        <file alias="scene-view-c2">scene-view-status-2.png</file>
+        <file alias="scene-view-c3">scene-view-status-3.png</file>
+        <file alias="scene-view-c4">scene-view-status-4.png</file>
+        <file alias="scene-view-c5">scene-view-status-5.png</file>
+        <file alias="scene-view-c6">scene-view-status-6.png</file>
+        <file alias="scene-view-c7">scene-view-status-7.png</file>
+        <file alias="scene-view-c8">scene-view-status-8.png</file>
+        <file alias="scene-view-c9">scene-view-status-9.png</file>
+        <file alias="scene-view-c10">scene-view-status-10.png</file>
+        <file alias="scene-view-c11">scene-view-status-11.png</file>
+        <file alias="scene-view-c12">scene-view-status-12.png</file>
+        <file alias="scene-view-c13">scene-view-status-13.png</file>
+        <file alias="scene-view-c14">scene-view-status-14.png</file>
+        <file alias="scene-view-c15">scene-view-status-15.png</file>
+        <file alias="scene-view-c16">scene-view-status-16.png</file>
+        <file alias="scene-view-c17">scene-view-status-17.png</file>
+        <file alias="scene-view-c18">scene-view-status-18.png</file>
+        <file alias="scene-view-c19">scene-view-status-19.png</file>
+        <file alias="scene-view-c20">scene-view-status-20.png</file>
+        <file alias="scene-view-c21">scene-view-status-21.png</file>
+        <file alias="scene-view-c22">scene-view-status-22.png</file>
+        <file alias="scene-view-c23">scene-view-status-23.png</file>
+        <file alias="scene-view-c24">scene-view-status-24.png</file>
+        <file alias="scene-view-c25">scene-view-status-25.png</file>
+        <file alias="scene-view-c26">scene-view-status-26.png</file>
+        <file alias="scene-view-c27">scene-view-status-27.png</file>
+        <file alias="scene-view-c28">scene-view-status-28.png</file>
+        <file alias="scene-view-c29">scene-view-status-29.png</file>
+        <file alias="scene-view-c30">scene-view-status-30.png</file>
+        <file alias="scene-view-c31">scene-view-status-31.png</file>
     </qresource>
 </RCC>

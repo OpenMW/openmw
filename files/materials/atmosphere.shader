@@ -11,14 +11,14 @@
     SH_START_PROGRAM
     {
         float4x4 viewFixed = view;
-#if !SH_GLSL
-        viewFixed[0][3] = 0;
-        viewFixed[1][3] = 0;
-        viewFixed[2][3] = 0;
+#if !SH_GLSL && !SH_GLSLES
+        viewFixed[0][3] = 0.0;
+        viewFixed[1][3] = 0.0;
+        viewFixed[2][3] = 0.0;
 #else
-        viewFixed[3][0] = 0;
-        viewFixed[3][1] = 0;
-        viewFixed[3][2] = 0;
+        viewFixed[3][0] = 0.0;
+        viewFixed[3][1] = 0.0;
+        viewFixed[3][2] = 0.0;
 #endif
         shOutputPosition = shMatrixMult(projection, shMatrixMult(viewFixed, shInputPosition));
             alphaFade = shInputPosition.z < 150.0 ? 0.0 : 1.0;
@@ -33,7 +33,7 @@
 
     SH_START_PROGRAM
     {
-        shOutputColour(0) = alphaFade * atmosphereColour + (1.f - alphaFade) * horizonColour;
+        shOutputColour(0) = alphaFade * atmosphereColour + (1.0 - alphaFade) * horizonColour;
     }
 
 #endif

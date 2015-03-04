@@ -8,8 +8,7 @@
 #include <map>
 #include "BulletShapeLoader.h"
 #include "BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h"
-
-
+#include <boost/shared_ptr.hpp>
 
 class btRigidBody;
 class btBroadphaseInterface;
@@ -47,22 +46,9 @@ namespace Physic
         CollisionType_World = 1<<0, //<Collide with world objects
         CollisionType_Actor = 1<<1, //<Collide sith actors
         CollisionType_HeightMap = 1<<2, //<collide with heightmap
-        CollisionType_Raycasting = 1<<3 //Still used?
-    };
-
-    /**
-    *This is just used to be able to name objects.
-    */
-    class PairCachingGhostObject : public btPairCachingGhostObject
-    {
-    public:
-        PairCachingGhostObject(std::string name)
-            :btPairCachingGhostObject(),mName(name)
-        {
-        }
-        virtual ~PairCachingGhostObject(){}
-
-        std::string mName;
+        CollisionType_Raycasting = 1<<3,
+        CollisionType_Projectile = 1<<4,
+        CollisionType_Water = 1<<5
     };
 
     /**
@@ -146,9 +132,20 @@ namespace Physic
             return mBody;
         }
 
+
+        /// Sets whether this actor should be able to collide with the water surface
+        void setCanWaterWalk(bool waterWalk);
+
+        /// Sets whether this actor has been walking on the water surface in the last frame
+        void setWalkingOnWater(bool walkingOnWater);
+        bool isWalkingOnWater() const;
+
     private:
-        void disableCollisionBody();
-        void enableCollisionBody();
+        /// Removes then re-adds the collision body to the dynamics world
+        void updateCollisionMask();
+
+        bool mCanWaterWalk;
+        bool mWalkingOnWater;
 
         boost::shared_ptr<btCollisionShape> mShape;
 
@@ -169,6 +166,9 @@ namespace Physic
         std::string mMesh;
         std::string mName;
         PhysicEngine *mEngine;
+
+        PhysicActor(const PhysicActor&);
+        PhysicActor& operator=(const PhysicActor&);
     };
 
 
@@ -182,8 +182,8 @@ namespace Physic
     {
         btCollisionShape* mCompound;
 
-        // Maps bone name to child index in the compound shape
-        std::map<std::string, int> mAnimatedShapes;
+        // Maps node record index to child index in the compound shape
+        std::map<int, int> mAnimatedShapes;
     };
 
     /**
@@ -274,11 +274,6 @@ namespace Physic
         void stepSimulation(double deltaT);
 
         /**
-         * Empty events lists
-         */
-        void emptyEventLists(void);
-
-        /**
          * Create a debug rendering. It is called by setDebgRenderingMode if it's not created yet.
          * Important Note: this will crash if the Render is not yet initialise!
          */
@@ -296,24 +291,22 @@ namespace Physic
 
         void setSceneManager(Ogre::SceneManager* sceneMgr);
 
-        bool isAnyActorStandingOn (const std::string& objectName);
-
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
          * If \a normal is non-NULL, the hit normal will be written there (if there is a hit)
          */
-        std::pair<std::string,float> rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly = true,
+        std::pair<std::string,float> rayTest(const btVector3& from,const btVector3& to,bool raycastingObjectOnly = true,
                                              bool ignoreHeightMap = false, Ogre::Vector3* normal = NULL);
 
         /**
          * Return all objects hit by a ray.
          */
-        std::vector< std::pair<float, std::string> > rayTest2(btVector3& from, btVector3& to);
+        std::vector< std::pair<float, std::string> > rayTest2(const btVector3 &from, const btVector3 &to, int filterGroup=0xff);
 
         std::pair<bool, float> sphereCast (float radius, btVector3& from, btVector3& to);
         ///< @return (hit, relative distance)
 
-        std::vector<std::string> getCollisions(const std::string& name);
+        std::vector<std::string> getCollisions(const std::string& name, int collisionGroup, int collisionMask);
 
         // Get the nearest object that's inside the given object, filtering out objects of the
         // provided name
@@ -322,7 +315,6 @@ namespace Physic
                                                                  btCollisionObject *object);
 
         //Bullet Stuff
-        btOverlappingPairCache* pairCache;
         btBroadphaseInterface* broadphase;
         btDefaultCollisionConfiguration* collisionConfiguration;
         btSequentialImpulseConstraintSolver* solver;
@@ -355,6 +347,19 @@ namespace Physic
         BtOgre::DebugDrawer* mDebugDrawer;
         bool isDebugCreated;
         bool mDebugActive;
+
+        // for OpenCS with multiple engines per document
+        std::map<Ogre::SceneManager *, BtOgre::DebugDrawer *> mDebugDrawers;
+        std::map<Ogre::SceneManager *, Ogre::SceneNode *> mDebugSceneNodes;
+
+        int toggleDebugRendering(Ogre::SceneManager *sceneMgr);
+        void stepDebug(Ogre::SceneManager *sceneMgr);
+        void createDebugDraw(Ogre::SceneManager *sceneMgr);
+        void removeDebugDraw(Ogre::SceneManager *sceneMgr);
+
+    private:
+        PhysicEngine(const PhysicEngine&);
+        PhysicEngine& operator=(const PhysicEngine&);
     };
 
 

@@ -6,14 +6,35 @@
 #include <QRegExp>
 #include <QString>
 
+#include "../../model/doc/document.hpp"
+
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
-CSVWorld::ScriptEdit::ScriptEdit (QWidget* parent, const CSMDoc::Document& document) :
-    QTextEdit (parent),
-    mDocument (document),
-    mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive)
+
+CSVWorld::ScriptEdit::ChangeLock::ChangeLock (ScriptEdit& edit) : mEdit (edit)
 {
+    ++mEdit.mChangeLocked;
+}
+
+CSVWorld::ScriptEdit::ChangeLock::~ChangeLock()
+{
+    --mEdit.mChangeLocked;
+}
+
+
+CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, ScriptHighlighter::Mode mode,
+    QWidget* parent)
+    : QPlainTextEdit (parent),
+    mDocument (document),
+    mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive),
+    mChangeLocked (0)
+{
+//    setAcceptRichText (false);
+    setLineWrapMode (QPlainTextEdit::NoWrap);
+    setTabStopWidth (4);
+    setUndoRedoEnabled (false); // we use OpenCS-wide undo/redo instead
+
     mAllowedTypes <<CSMWorld::UniversalId::Type_Journal
                   <<CSMWorld::UniversalId::Type_Global
                   <<CSMWorld::UniversalId::Type_Topic
@@ -40,14 +61,29 @@ CSVWorld::ScriptEdit::ScriptEdit (QWidget* parent, const CSMDoc::Document& docum
                   <<CSMWorld::UniversalId::Type_Probe
                   <<CSMWorld::UniversalId::Type_Repair
                   <<CSMWorld::UniversalId::Type_Static
-                  <<CSMWorld::UniversalId::Type_Weapon;
+                  <<CSMWorld::UniversalId::Type_Weapon
+                  <<CSMWorld::UniversalId::Type_Script
+                  <<CSMWorld::UniversalId::Type_Region;
+
+    mHighlighter = new ScriptHighlighter (document.getData(), mode, ScriptEdit::document());
+
+    connect (&document.getData(), SIGNAL (idListChanged()), this, SLOT (idListChanged()));
+
+    connect (&mUpdateTimer, SIGNAL (timeout()), this, SLOT (updateHighlighting()));
+
+    mUpdateTimer.setSingleShot (true);
+}
+
+bool CSVWorld::ScriptEdit::isChangeLocked() const
+{
+    return mChangeLocked!=0;
 }
 
 void CSVWorld::ScriptEdit::dragEnterEvent (QDragEnterEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
     if (!mime)
-        QTextEdit::dragEnterEvent(event);
+        QPlainTextEdit::dragEnterEvent(event);
     else
     {
         setTextCursor (cursorForPosition (event->pos()));
@@ -59,7 +95,7 @@ void CSVWorld::ScriptEdit::dragMoveEvent (QDragMoveEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
     if (!mime)
-        QTextEdit::dragMoveEvent(event);
+        QPlainTextEdit::dragMoveEvent(event);
     else
     {
         setTextCursor (cursorForPosition (event->pos()));
@@ -72,7 +108,7 @@ void CSVWorld::ScriptEdit::dropEvent (QDropEvent* event)
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
     if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
     {
-        QTextEdit::dropEvent(event);
+        QPlainTextEdit::dropEvent(event);
         return;
     }
 
@@ -102,4 +138,22 @@ bool CSVWorld::ScriptEdit::stringNeedsQuote (const std::string& id) const
     const QString string(QString::fromUtf8(id.c_str())); //<regex> is only for c++11, so let's use qregexp for now.
     //I'm not quite sure when do we need to put quotes. To be safe we will use quotes for anything other than…
     return !(string.contains(mWhiteListQoutes));
+}
+
+void CSVWorld::ScriptEdit::idListChanged()
+{
+    mHighlighter->invalidateIds();
+
+    if (!mUpdateTimer.isActive())
+        mUpdateTimer.start (0);
+}
+
+void CSVWorld::ScriptEdit::updateHighlighting()
+{
+    if (isChangeLocked())
+        return;
+
+    ChangeLock lock (*this);
+
+    mHighlighter->rehighlight();
 }

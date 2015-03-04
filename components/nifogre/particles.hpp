@@ -38,4 +38,13 @@ class GravityAffectorFactory : public Ogre::ParticleAffectorFactory
     Ogre::ParticleAffector *createAffector(Ogre::ParticleSystem *psys);
 };
 
+struct NiNodeHolder
+{
+    std::vector<Ogre::Bone*> mBones;
+
+    // Ogre::Any needs this for some reason
+    friend std::ostream& operator<<(std::ostream& o, const NiNodeHolder& r)
+    { return o; }
+};
+
 #endif /* OENGINE_OGRE_PARTICLES_H */

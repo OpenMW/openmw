@@ -12,6 +12,7 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/nullaction.hpp"
@@ -38,19 +39,22 @@ bool isGold (const MWWorld::Ptr& ptr)
 
 namespace MWClass
 {
-    void Miscellaneous::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    std::string Miscellaneous::getId (const MWWorld::Ptr& ptr) const
     {
-        const std::string model = getModel(ptr);
+        return ptr.get<ESM::Miscellaneous>()->mBase->mId;
+    }
+
+    void Miscellaneous::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
+    {
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    void Miscellaneous::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Miscellaneous::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr,true);
+            physics.addObject(ptr, model, true);
     }
 
     std::string Miscellaneous::getModel(const MWWorld::Ptr &ptr) const
@@ -175,7 +179,7 @@ namespace MWClass
 
         std::string text;
 
-        if (!gold)
+        if (!gold && !ref->mBase->mData.mIsKey)
         {
             text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
             text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");

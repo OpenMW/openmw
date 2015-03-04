@@ -278,40 +278,17 @@ namespace MWMechanics
         const ESM::Pathgrid::Point &nextPoint = *mPath.begin();
         float directionX = nextPoint.mX - x;
         float directionY = nextPoint.mY - y;
-        float directionResult = sqrt(directionX * directionX + directionY * directionY);
 
-        return Ogre::Radian(Ogre::Math::ACos(directionY / directionResult) * sgn(Ogre::Math::ASin(directionX / directionResult))).valueDegrees();
+        return Ogre::Math::ATan2(directionX,directionY).valueDegrees();
     }
 
-    // Used by AiCombat, use Euclidean distance
-    float PathFinder::getDistToNext(float x, float y, float z)
-    {
-        ESM::Pathgrid::Point nextPoint = *mPath.begin();
-        return distance(nextPoint, x, y, z);
-    }
-
-    bool PathFinder::checkWaypoint(float x, float y, float z)
+    bool PathFinder::checkPathCompleted(float x, float y, float z, float tolerance)
     {
         if(mPath.empty())
             return true;
 
         ESM::Pathgrid::Point nextPoint = *mPath.begin();
-        if(sqrDistanceZCorrected(nextPoint, x, y, z) < 64*64)
-        {
-            mPath.pop_front();
-            if(mPath.empty()) mIsPathConstructed = false;
-            return true;
-        }
-        return false;
-    }
-
-    bool PathFinder::checkPathCompleted(float x, float y, float z)
-    {
-        if(mPath.empty())
-            return true;
-
-        ESM::Pathgrid::Point nextPoint = *mPath.begin();
-        if(sqrDistanceZCorrected(nextPoint, x, y, z) < 64*64)
+        if(sqrDistanceZCorrected(nextPoint, x, y, z) < tolerance*tolerance)
         {
             mPath.pop_front();
             if(mPath.empty())

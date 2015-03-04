@@ -1,19 +1,19 @@
 #ifndef RIPPLE_SIMULATION_H
 #define RIPPLE_SIMULATION_H
 
-#include <OgreTexture.h>
-#include <OgreMaterial.h>
-#include <OgreVector2.h>
 #include <OgreVector3.h>
 
 #include "../mwworld/ptr.hpp"
 
 namespace Ogre
 {
-    class RenderTexture;
-    class Camera;
     class SceneManager;
-    class Rectangle2D;
+    class ParticleSystem;
+}
+
+namespace MWWorld
+{
+    class Fallback;
 }
 
 namespace MWRender
@@ -30,9 +30,11 @@ struct Emitter
 class RippleSimulation
 {
 public:
-    RippleSimulation(Ogre::SceneManager* mainSceneManager);
+    RippleSimulation(Ogre::SceneManager* mainSceneManager, const MWWorld::Fallback* fallback);
     ~RippleSimulation();
 
+    /// @param dt Time since the last frame
+    /// @param position Position of the player
     void update(float dt, Ogre::Vector2 position);
 
     /// adds an emitter, position will be tracked automatically
@@ -40,44 +42,21 @@ public:
     void removeEmitter (const MWWorld::Ptr& ptr);
     void updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
 
+    /// Change the height of the water surface, thus moving all ripples with it
+    void setWaterHeight(float height);
+
+    /// Remove all active ripples
+    void clear();
+
 private:
+    Ogre::SceneManager* mSceneMgr;
+    Ogre::ParticleSystem* mParticleSystem;
+    Ogre::SceneNode* mSceneNode;
+
     std::vector<Emitter> mEmitters;
 
-    Ogre::RenderTexture* mRenderTargets[4];
-    Ogre::TexturePtr mTextures[4];
-
-    int mTextureSize;
-    float mRippleAreaLength;
-    float mImpulseSize;
-
-    bool mFirstUpdate;
-
-    Ogre::Camera* mCamera;
-
-    // own scenemanager to render our simulation
-    Ogre::SceneManager* mSceneMgr;
-    Ogre::Rectangle2D* mRectangle;
-
-    // scenemanager to create the debug overlays on
-    Ogre::SceneManager* mMainSceneMgr;
-
-    static const int TEX_NORMAL = 3;
-
-    Ogre::Rectangle2D* mImpulse;
-
-    void addImpulses();
-    void heightMapToNormalMap();
-    void waterSimulation();
-    void swapHeightMaps();
-
-    float mTime;
-
-    Ogre::Vector2 mRippleCenter;
-
-    Ogre::Vector2 mTexelOffset;
-
-    Ogre::Vector2 mCurrentFrameOffset;
-    Ogre::Vector2 mPreviousFrameOffset;
+    float mRippleLifeTime;
+    float mRippleRotSpeed;
 };
 
 }

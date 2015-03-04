@@ -113,6 +113,7 @@ namespace Interpreter
         interpreter.installSegment5 (46, new OpScriptRunning);
         interpreter.installSegment5 (47, new OpStartScript);
         interpreter.installSegment5 (48, new OpStopScript);
+        interpreter.installSegment5 (71, new OpStartScriptExplicit);
 
         // spacial
         interpreter.installSegment5 (49, new OpGetDistance);

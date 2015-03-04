@@ -19,8 +19,29 @@ class HeadAnimationTime : public Ogre::ControllerValue<Ogre::Real>
 {
 private:
     MWWorld::Ptr mReference;
+    float mTalkStart;
+    float mTalkStop;
+    float mBlinkStart;
+    float mBlinkStop;
+
+    float mBlinkTimer;
+
+    bool mEnabled;
+
+    float mValue;
+private:
+    void resetBlinkTimer();
 public:
-    HeadAnimationTime(MWWorld::Ptr reference) : mReference(reference) {}
+    HeadAnimationTime(MWWorld::Ptr reference);
+
+    void update(float dt);
+
+    void setEnabled(bool enabled);
+
+    void setTalkStart(float value);
+    void setTalkStop(float value);
+    void setBlinkStart(float value);
+    void setBlinkStop(float value);
 
     virtual Ogre::Real getValue() const;
     virtual void setValue(Ogre::Real value)
@@ -30,7 +51,7 @@ public:
 class NpcAnimation : public Animation, public WeaponAnimation, public MWWorld::InventoryStoreListener
 {
 public:
-    virtual void equipmentChanged() { updateParts(); }
+    virtual void equipmentChanged();
     virtual void permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound);
 
 public:
@@ -49,6 +70,7 @@ private:
 
     // Bounded Parts
     NifOgre::ObjectScenePtr mObjectParts[ESM::PRT_Count];
+    std::string mSoundIds[ESM::PRT_Count];
 
     const ESM::NPC *mNpc;
     std::string    mHeadModel;
@@ -76,10 +98,15 @@ private:
     Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
+    bool mSoundsDisabled;
+
+    Ogre::Radian mHeadYaw;
+    Ogre::Radian mHeadPitch;
 
     void updateNpcBase();
 
     NifOgre::ObjectScenePtr insertBoundedPart(const std::string &model, int group, const std::string &bonename,
+                                              const std::string &bonefilter,
                                           bool enchantedGlow, Ogre::Vector3* glowColor=NULL);
 
     void removeIndividualPart(ESM::PartReferenceType type);
@@ -102,11 +129,14 @@ public:
      *                         one listener at a time, so you shouldn't do this if creating several NpcAnimations
      *                         for the same Ptr, eg preview dolls for the player.
      *                         Those need to be manually rendered anyway.
+     * @param disableSounds    Same as \a disableListener but for playing items sounds
      * @param viewMode
      */
     NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, bool disableListener = false,
-                 ViewMode viewMode=VM_Normal);
+                 bool disableSounds = false, ViewMode viewMode=VM_Normal);
     virtual ~NpcAnimation();
+
+    virtual void enableHeadAnimation(bool enable);
 
     virtual void setWeaponGroup(const std::string& group) { mWeaponAnimationTime->setGroup(group); }
 
@@ -116,8 +146,13 @@ public:
     /// to indicate the facing orientation of the character.
     virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
 
+    virtual void setHeadPitch(Ogre::Radian pitch);
+    virtual void setHeadYaw(Ogre::Radian yaw);
+    virtual Ogre::Radian getHeadPitch() const;
+    virtual Ogre::Radian getHeadYaw() const;
+
     virtual void showWeapons(bool showWeapon);
-    virtual void showCarriedLeft(bool showa);
+    virtual void showCarriedLeft(bool show);
 
     virtual void attachArrow();
     virtual void releaseArrow();
@@ -141,6 +176,8 @@ public:
 
     /// Make the NPC only partially visible
     virtual void setAlpha(float alpha);
+
+    virtual void setVampire(bool vampire);
 
     /// Prepare this animation for being rendered with \a camera (rotates billboard nodes)
     virtual void preRender (Ogre::Camera* camera);

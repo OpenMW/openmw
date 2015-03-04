@@ -201,23 +201,6 @@ void CSMDoc::WriteRefIdCollectionStage::perform (int stage, Messages& messages)
 }
 
 
-CSMDoc::WriteFilterStage::WriteFilterStage (Document& document, SavingState& state,
-    CSMFilter::Filter::Scope scope)
-: WriteCollectionStage<CSMWorld::IdCollection<CSMFilter::Filter> > (document.getData().getFilters(),
-  state),
-  mDocument (document), mScope (scope)
-{}
-
-void CSMDoc::WriteFilterStage::perform (int stage, Messages& messages)
-{
-    const CSMWorld::Record<CSMFilter::Filter>& record =
-        mDocument.getData().getFilters().getRecord (stage);
-
-    if (record.get().mScope==mScope)
-        WriteCollectionStage<CSMWorld::IdCollection<CSMFilter::Filter> >::perform (stage, messages);
-}
-
-
 CSMDoc::CollectionReferencesStage::CollectionReferencesStage (Document& document,
     SavingState& state)
 : mDocument (document), mState (state)
@@ -301,20 +284,6 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
         // write references
         if (references!=mState.getSubRecords().end())
         {
-            // first pass: find highest RefNum
-            int lastRefNum = -1;
-
-            for (std::vector<int>::const_iterator iter (references->second.begin());
-                iter!=references->second.end(); ++iter)
-            {
-                const CSMWorld::Record<CSMWorld::CellRef>& ref =
-                    mDocument.getData().getReferences().getRecord (*iter);
-
-                if (ref.get().mRefNum.mContentFile==0 && ref.get().mRefNum.mIndex>lastRefNum)
-                    lastRefNum = ref.get().mRefNum.mIndex;
-            }
-
-            // second pass: write
             for (std::vector<int>::const_iterator iter (references->second.begin());
                 iter!=references->second.end(); ++iter)
             {
@@ -324,20 +293,7 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                 if (ref.mState==CSMWorld::RecordBase::State_Modified ||
                     ref.mState==CSMWorld::RecordBase::State_ModifiedOnly)
                 {
-                    if (ref.get().mRefNum.mContentFile==-2)
-                    {
-                        if (lastRefNum>=0xffffff)
-                            throw std::runtime_error (
-                                "RefNums exhausted in cell: " + cell.get().mId);
-
-                        ESM::CellRef ref2 = ref.get();
-                        ref2.mRefNum.mContentFile = 0;
-                        ref2.mRefNum.mIndex = ++lastRefNum;
-
-                        ref2.save (mState.getWriter());
-                    }
-                    else
-                        ref.get().save (mState.getWriter());
+                    ref.get().save (mState.getWriter());
                 }
                 else if (ref.mState==CSMWorld::RecordBase::State_Deleted)
                 {
@@ -349,6 +305,48 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
         mState.getWriter().endRecord (cell.mModified.sRecordId);
     }
     else if (cell.mState==CSMWorld::RecordBase::State_Deleted)
+    {
+        /// \todo write record with delete flag
+    }
+}
+
+
+CSMDoc::WritePathgridCollectionStage::WritePathgridCollectionStage (Document& document,
+    SavingState& state)
+: mDocument (document), mState (state)
+{}
+
+int CSMDoc::WritePathgridCollectionStage::setup()
+{
+    return mDocument.getData().getPathgrids().getSize();
+}
+
+void CSMDoc::WritePathgridCollectionStage::perform (int stage, Messages& messages)
+{
+    const CSMWorld::Record<CSMWorld::Pathgrid>& pathgrid =
+        mDocument.getData().getPathgrids().getRecord (stage);
+
+    if (pathgrid.mState==CSMWorld::RecordBase::State_Modified ||
+        pathgrid.mState==CSMWorld::RecordBase::State_ModifiedOnly)
+    {
+        CSMWorld::Pathgrid record = pathgrid.get();
+
+        if (record.mId.substr (0, 1)=="#")
+        {
+            std::istringstream stream (record.mId.c_str());
+            char ignore;
+            stream >> ignore >> record.mData.mX >> record.mData.mY;
+        }
+        else
+            record.mCell = record.mId;
+
+        mState.getWriter().startRecord (record.sRecordId);
+
+        record.save (mState.getWriter());
+
+        mState.getWriter().endRecord (record.sRecordId);
+    }
+    else if (pathgrid.mState==CSMWorld::RecordBase::State_Deleted)
     {
         /// \todo write record with delete flag
     }

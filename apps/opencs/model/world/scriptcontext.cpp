@@ -47,7 +47,7 @@ std::pair<char, bool> CSMWorld::ScriptContext::getMemberType (const std::string&
     int index = mData.getScripts().searchId (id2);
     bool reference = false;
 
-    if (index!=-1)
+    if (index==-1)
     {
         // ID is not a script ID. Search for a matching referenceable instead.
         index = mData.getReferenceables().searchId (id2);
@@ -55,19 +55,16 @@ std::pair<char, bool> CSMWorld::ScriptContext::getMemberType (const std::string&
         if (index!=-1)
         {
             // Referenceable found.
-            int columnIndex = mData.getReferenceables().searchColumnIndex (Columns::ColumnId_Script);
+            int columnIndex = mData.getReferenceables().findColumnIndex (Columns::ColumnId_Script);
 
-            if (columnIndex!=-1)
+            id2 = Misc::StringUtils::lowerCase (mData.getReferenceables().
+                getData (index, columnIndex).toString().toUtf8().constData());
+
+            if (!id2.empty())
             {
-                id2 = Misc::StringUtils::lowerCase (mData.getReferenceables().
-                    getData (index, columnIndex).toString().toUtf8().constData());
-
-                if (!id2.empty())
-                {
-                    // Referenceable has a script -> use it.
-                    index = mData.getScripts().searchId (id2);
-                    reference = true;
-                }
+                // Referenceable has a script -> use it.
+                index = mData.getScripts().searchId (id2);
+                reference = true;
             }
         }
     }
@@ -99,7 +96,7 @@ bool CSMWorld::ScriptContext::isId (const std::string& name) const
     {
         mIds = mData.getIds();
 
-        std::for_each (mIds.begin(), mIds.end(), &Misc::StringUtils::lowerCase);
+        std::for_each (mIds.begin(), mIds.end(), &Misc::StringUtils::toLower);
         std::sort (mIds.begin(), mIds.end());
 
         mIdsUpdated = true;

@@ -1,6 +1,11 @@
 #include "spellcreationdialog.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_Gui.h>
+
+#include <components/misc/resourcehelpers.hpp>
+#include <components/esm/records.hpp>
+#include <components/widgets/list.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -10,6 +15,7 @@
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/spells.hpp"
@@ -17,6 +23,7 @@
 
 #include "tooltips.hpp"
 #include "class.hpp"
+#include "widgets.hpp"
 
 namespace
 {
@@ -29,6 +36,18 @@ namespace
         return gmst.find(ESM::MagicEffect::effectIdToString (id1))->getString()
                 < gmst.find(ESM::MagicEffect::effectIdToString  (id2))->getString();
     }
+
+    void init(ESM::ENAMstruct& effect)
+    {
+        effect.mArea = 0;
+        effect.mDuration = 0;
+        effect.mEffectID = -1;
+        effect.mMagnMax = 0;
+        effect.mMagnMin = 0;
+        effect.mRange = 0;
+        effect.mSkill = -1;
+        effect.mAttribute = -1;
+    }
 }
 
 namespace MWGui
@@ -37,7 +56,12 @@ namespace MWGui
     EditEffectDialog::EditEffectDialog()
         : WindowModal("openmw_edit_effect.layout")
         , mEditing(false)
+        , mMagicEffect(NULL)
+        , mConstantEffect(false)
     {
+        init(mEffect);
+        init(mOldEffect);
+
         getWidget(mCancelButton, "CancelButton");
         getWidget(mOkButton, "OkButton");
         getWidget(mDeleteButton, "DeleteButton");
@@ -66,7 +90,11 @@ namespace MWGui
         mMagnitudeMaxSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onMagnitudeMaxChanged);
         mDurationSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onDurationChanged);
         mAreaSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onAreaChanged);
-        constantEffect=false;
+    }
+
+    void EditEffectDialog::setConstantEffect(bool constant)
+    {
+        mConstantEffect = constant;
     }
 
     void EditEffectDialog::open()
@@ -86,15 +114,22 @@ namespace MWGui
 
     void EditEffectDialog::newEffect (const ESM::MagicEffect *effect)
     {
+        bool allowSelf = effect->mData.mFlags & ESM::MagicEffect::CastSelf;
+        bool allowTouch = (effect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
+        bool allowTarget = (effect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
+
+        if (!allowSelf && !allowTouch && !allowTarget)
+            return; // TODO: Show an error message popup?
+
         setMagicEffect(effect);
         mEditing = false;
 
         mDeleteButton->setVisible (false);
 
         mEffect.mRange = ESM::RT_Self;
-        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf))
+        if (!allowSelf)
             mEffect.mRange = ESM::RT_Touch;
-        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch))
+        if (!allowTouch)
             mEffect.mRange = ESM::RT_Target;
         mEffect.mMagnMin = 1;
         mEffect.mMagnMax = 1;
@@ -115,6 +150,8 @@ namespace MWGui
         mMagnitudeMinValue->setCaption("1");
         mMagnitudeMaxValue->setCaption("- 1");
         mAreaValue->setCaption("0");
+
+        setVisible(true);
     }
 
     void EditEffectDialog::editEffect (ESM::ENAMstruct effect)
@@ -143,13 +180,7 @@ namespace MWGui
 
     void EditEffectDialog::setMagicEffect (const ESM::MagicEffect *effect)
     {
-        std::string icon = effect->mIcon;
-        icon[icon.size()-3] = 'd';
-        icon[icon.size()-2] = 'd';
-        icon[icon.size()-1] = 's';
-        icon = "icons\\" + icon;
-
-        mEffectImage->setImageTexture (icon);
+        mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(effect->mIcon));
 
         mEffectName->setCaptionWithReplacing("#{"+ESM::MagicEffect::effectIdToString  (effect->mIndex)+"}");
 
@@ -175,7 +206,7 @@ namespace MWGui
             mMagnitudeBox->setVisible (true);
             curY += mMagnitudeBox->getSize().height;
         }
-        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)&&constantEffect==false)
+        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)&&mConstantEffect==false)
         {
             mDurationBox->setPosition(mDurationBox->getPosition().left, curY);
             mDurationBox->setVisible (true);
@@ -185,13 +216,31 @@ namespace MWGui
         {
             mAreaBox->setPosition(mAreaBox->getPosition().left, curY);
             mAreaBox->setVisible (true);
-            curY += mAreaBox->getSize().height;
+            //curY += mAreaBox->getSize().height;
         }
     }
 
     void EditEffectDialog::onRangeButtonClicked (MyGUI::Widget* sender)
     {
         mEffect.mRange = (mEffect.mRange+1)%3;
+
+        // cycle through range types until we find something that's allowed
+        // does not handle the case where nothing is allowed (this should be prevented before opening the Add Effect dialog)
+        bool allowSelf = mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf;
+        bool allowTouch = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
+        bool allowTarget = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
+        if (mEffect.mRange == ESM::RT_Self && !allowSelf)
+            mEffect.mRange = (mEffect.mRange+1)%3;
+        if (mEffect.mRange == ESM::RT_Touch && !allowTouch)
+            mEffect.mRange = (mEffect.mRange+1)%3;
+        if (mEffect.mRange == ESM::RT_Target && !allowTarget)
+            mEffect.mRange = (mEffect.mRange+1)%3;
+
+        if(mEffect.mRange == ESM::RT_Self)
+        {
+            mAreaSlider->setScrollPosition(0);
+            onAreaChanged(mAreaSlider,0);
+        }
 
         if (mEffect.mRange == ESM::RT_Self)
             mRangeButton->setCaptionWithReplacing ("#{sRangeSelf}");
@@ -200,19 +249,6 @@ namespace MWGui
         else if (mEffect.mRange == ESM::RT_Touch)
             mRangeButton->setCaptionWithReplacing ("#{sRangeTouch}");
 
-        // cycle through range types until we find something that's allowed
-        if (mEffect.mRange == ESM::RT_Target && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget))
-            onRangeButtonClicked(sender);
-        if (mEffect.mRange == ESM::RT_Self && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf))
-            onRangeButtonClicked(sender);
-        if (mEffect.mRange == ESM::RT_Touch && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch))
-            onRangeButtonClicked(sender);
-
-        if(mEffect.mRange == ESM::RT_Self)
-        {
-            mAreaSlider->setScrollPosition(0);
-            onAreaChanged(mAreaSlider,0);
-        }
         updateBoxes();
         eventEffectModified(mEffect);
     }
@@ -248,7 +284,7 @@ namespace MWGui
 
     void EditEffectDialog::onMagnitudeMinChanged (MyGUI::ScrollBar* sender, size_t pos)
     {
-        mMagnitudeMinValue->setCaption(boost::lexical_cast<std::string>(pos+1));
+        mMagnitudeMinValue->setCaption(MyGUI::utility::toString(pos+1));
         mEffect.mMagnMin = pos+1;
 
         // trigger the check again (see below)
@@ -268,21 +304,21 @@ namespace MWGui
 
         mEffect.mMagnMax = pos+1;
 
-        mMagnitudeMaxValue->setCaption("- " + boost::lexical_cast<std::string>(pos+1));
+        mMagnitudeMaxValue->setCaption("- " + MyGUI::utility::toString(pos+1));
 
         eventEffectModified(mEffect);
     }
 
     void EditEffectDialog::onDurationChanged (MyGUI::ScrollBar* sender, size_t pos)
     {
-        mDurationValue->setCaption(boost::lexical_cast<std::string>(pos+1));
+        mDurationValue->setCaption(MyGUI::utility::toString(pos+1));
         mEffect.mDuration = pos+1;
         eventEffectModified(mEffect);
     }
 
     void EditEffectDialog::onAreaChanged (MyGUI::ScrollBar* sender, size_t pos)
     {
-        mAreaValue->setCaption(boost::lexical_cast<std::string>(pos));
+        mAreaValue->setCaption(MyGUI::utility::toString(pos));
         mEffect.mArea = pos;
         eventEffectModified(mEffect);
     }
@@ -291,7 +327,7 @@ namespace MWGui
 
     SpellCreationDialog::SpellCreationDialog()
         : WindowBase("openmw_spellcreation_dialog.layout")
-        , EffectEditorBase()
+        , EffectEditorBase(EffectEditorBase::Spellmaking)
     {
         getWidget(mNameEdit, "NameEdit");
         getWidget(mMagickaCost, "MagickaCost");
@@ -344,7 +380,7 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-        if (boost::lexical_cast<int>(mPriceLabel->getCaption()) > playerGold)
+        if (MyGUI::utility::parseInt(mPriceLabel->getCaption()) > playerGold)
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;
@@ -352,17 +388,21 @@ namespace MWGui
 
         mSpell.mName = mNameEdit->getCaption();
 
-        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, boost::lexical_cast<int>(mPriceLabel->getCaption()), player);
+        int price = MyGUI::utility::parseInt(mPriceLabel->getCaption());
 
-        MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
+        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+
+        // add gold to NPC trading gold pool
+        MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
+        npcStats.setGoldPool(npcStats.getGoldPool() + price);
+
+        MWBase::Environment::get().getSoundManager()->playSound ("Mysticism Hit", 1.0, 1.0);
 
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->createRecord(mSpell);
 
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
         spells.add (spell->mId);
-
-        MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_SpellCreation);
     }
@@ -385,6 +425,14 @@ namespace MWGui
 
     void SpellCreationDialog::notifyEffectsChanged ()
     {
+        if (mEffects.empty())
+        {
+            mMagickaCost->setCaption("0");
+            mPriceLabel->setCaption("0");
+            mSuccessChance->setCaption("0");
+            return;
+        }
+
         float y = 0;
 
         const MWWorld::ESMStore &store =
@@ -392,7 +440,7 @@ namespace MWGui
 
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
-            float x = 0.5 * it->mMagnMin + it->mMagnMax;
+            float x = 0.5 * (it->mMagnMin + it->mMagnMax);
 
             const ESM::MagicEffect* effect =
                 store.get<ESM::MagicEffect>().find(it->mEffectID);
@@ -407,37 +455,43 @@ namespace MWGui
             y += x * fEffectCostMult;
             y = std::max(1.f,y);
 
-            if (effect->mData.mFlags & ESM::MagicEffect::CastTarget)
+            if (it->mRange == ESM::RT_Target)
                 y *= 1.5;
         }
-
-        mSpell.mData.mCost = int(y);
 
         ESM::EffectList effectList;
         effectList.mList = mEffects;
         mSpell.mEffects = effectList;
+        mSpell.mData.mCost = int(y);
         mSpell.mData.mType = ESM::Spell::ST_Spell;
+        mSpell.mData.mFlags = 0;
 
-        mMagickaCost->setCaption(boost::lexical_cast<std::string>(int(y)));
+        mMagickaCost->setCaption(MyGUI::utility::toString(int(y)));
 
         float fSpellMakingValueMult =
             store.get<ESM::GameSetting>().find("fSpellMakingValueMult")->getFloat();
 
         int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,int(y) * fSpellMakingValueMult,true);
 
-        mPriceLabel->setCaption(boost::lexical_cast<std::string>(int(price)));
+        mPriceLabel->setCaption(MyGUI::utility::toString(int(price)));
 
         float chance = MWMechanics::getSpellSuccessChance(&mSpell, MWBase::Environment::get().getWorld()->getPlayerPtr());
-        mSuccessChance->setCaption(boost::lexical_cast<std::string>(int(chance)));
+        mSuccessChance->setCaption(MyGUI::utility::toString(int(chance)));
     }
 
     // ------------------------------------------------------------------------------------------------
 
 
-    EffectEditorBase::EffectEditorBase()
+    EffectEditorBase::EffectEditorBase(Type type)
         : mAddEffectDialog()
+        , mAvailableEffectsList(NULL)
+        , mUsedEffectsView(NULL)
         , mSelectAttributeDialog(NULL)
         , mSelectSkillDialog(NULL)
+        , mSelectedEffect(0)
+        , mSelectedKnownEffectId(0)
+        , mType(type)
+        , mConstantEffect(false)
     {
         mAddEffectDialog.eventEffectAdded += MyGUI::newDelegate(this, &EffectEditorBase::onEffectAdded);
         mAddEffectDialog.eventEffectModified += MyGUI::newDelegate(this, &EffectEditorBase::onEffectModified);
@@ -472,6 +526,13 @@ namespace MWGui
             const std::vector<ESM::ENAMstruct>& list = spell->mEffects.mList;
             for (std::vector<ESM::ENAMstruct>::const_iterator it2 = list.begin(); it2 != list.end(); ++it2)
             {
+                const ESM::MagicEffect * effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(it2->mEffectID);
+
+                // skip effects that do not allow spellmaking/enchanting
+                int requiredFlags = (mType == Spellmaking) ? ESM::MagicEffect::AllowSpellmaking : ESM::MagicEffect::AllowEnchanting;
+                if (!(effect->mData.mFlags & requiredFlags))
+                    continue;
+
                 if (std::find(knownEffects.begin(), knownEffects.end(), it2->mEffectID) == knownEffects.end())
                     knownEffects.push_back(it2->mEffectID);
             }
@@ -504,7 +565,7 @@ namespace MWGui
         updateEffectsView ();
     }
 
-    void EffectEditorBase::setWidgets (Widgets::MWList *availableEffectsList, MyGUI::ScrollView *usedEffectsView)
+    void EffectEditorBase::setWidgets (Gui::MWList *availableEffectsList, MyGUI::ScrollView *usedEffectsView)
     {
         mAvailableEffectsList = availableEffectsList;
         mUsedEffectsView = usedEffectsView;
@@ -514,7 +575,10 @@ namespace MWGui
 
     void EffectEditorBase::onSelectAttribute ()
     {
-        mAddEffectDialog.setVisible(true);
+        const ESM::MagicEffect* effect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
+
+        mAddEffectDialog.newEffect(effect);
         mAddEffectDialog.setAttribute (mSelectAttributeDialog->getAttributeId());
         MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectAttributeDialog);
         mSelectAttributeDialog = 0;
@@ -522,8 +586,11 @@ namespace MWGui
 
     void EffectEditorBase::onSelectSkill ()
     {
-        mAddEffectDialog.setVisible(true);
-        mAddEffectDialog.setSkill (mSelectSkillDialog->getSkillId ());
+        const ESM::MagicEffect* effect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
+
+        mAddEffectDialog.newEffect(effect);
+        mAddEffectDialog.setSkill (mSelectSkillDialog->getSkillId());
         MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectSkillDialog);
         mSelectSkillDialog = 0;
     }
@@ -548,21 +615,10 @@ namespace MWGui
         }
 
         int buttonId = *sender->getUserData<int>();
-        short effectId = mButtonMapping[buttonId];
-
-        for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
-        {
-            if (it->mEffectID == effectId)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
-                return;
-            }
-        }
+        mSelectedKnownEffectId = mButtonMapping[buttonId];
 
         const ESM::MagicEffect* effect =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
-
-        mAddEffectDialog.newEffect (effect);
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(mSelectedKnownEffectId);
 
         if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
         {
@@ -582,7 +638,16 @@ namespace MWGui
         }
         else
         {
-            mAddEffectDialog.setVisible(true);
+            for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+            {
+                if (it->mEffectID == mSelectedKnownEffectId)
+                {
+                    MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
+                    return;
+                }
+            }
+
+            mAddEffectDialog.newEffect(effect);
         }
     }
 
@@ -618,6 +683,7 @@ namespace MWGui
             params.mMagnMax = it->mMagnMax;
             params.mRange = it->mRange;
             params.mArea = it->mArea;
+            params.mIsConstant = mConstantEffect;
 
             MyGUI::Button* button = mUsedEffectsView->createWidget<MyGUI::Button>("", MyGUI::IntCoord(0, size.height, 0, 24), MyGUI::Align::Default);
             button->setUserData(i);
@@ -637,7 +703,10 @@ namespace MWGui
             ++i;
         }
 
+        // Canvas size must be expressed with HScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+        mUsedEffectsView->setVisibleHScroll(false);
         mUsedEffectsView->setCanvasSize(size);
+        mUsedEffectsView->setVisibleHScroll(true);
 
         notifyEffectsChanged();
     }
@@ -658,5 +727,11 @@ namespace MWGui
 
         mAddEffectDialog.editEffect (mEffects[id]);
         mAddEffectDialog.setVisible (true);
+    }
+
+    void EffectEditorBase::setConstantEffect(bool constant)
+    {
+        mAddEffectDialog.setConstantEffect(constant);
+        mConstantEffect = constant;
     }
 }

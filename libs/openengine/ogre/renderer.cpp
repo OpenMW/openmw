@@ -1,5 +1,4 @@
 #include "renderer.hpp"
-#include "fader.hpp"
 
 #include <SDL.h>
 
@@ -24,12 +23,14 @@
 using namespace Ogre;
 using namespace OEngine::Render;
 
+OgreRenderer::~OgreRenderer()
+{
+    cleanup();
+    restoreWindowGammaRamp();
+}
 
 void OgreRenderer::cleanup()
 {
-    delete mFader;
-    mFader = NULL;
-
     if (mWindow)
         Ogre::Root::getSingleton().destroyRenderTarget(mWindow);
     mWindow = NULL;
@@ -46,10 +47,9 @@ void OgreRenderer::cleanup()
 
 void OgreRenderer::update(float dt)
 {
-    mFader->update(dt);
 }
 
-void OgreRenderer::screenshot(const std::string &file)
+void OgreRenderer::screenshot(const std::string &file, const std::string& imageFormat)
 {
     /*  Since Ogre uses narrow character interfaces, it does not support
         Unicode paths on Windows. Therefore we had to implement screenshot
@@ -70,7 +70,7 @@ void OgreRenderer::screenshot(const std::string &file)
     );
     mWindow->copyContentsToMemory(image.getPixelBox());
 
-    Ogre::DataStreamPtr stream = image.encode("png");
+    Ogre::DataStreamPtr stream = image.encode(imageFormat);
     Ogre::MemoryDataStream *mem = dynamic_cast<Ogre::MemoryDataStream *>(stream.get());
     if (mem != 0) { // likely
         const char *ptr = reinterpret_cast<char *>(mem->getCurrentPtr());
@@ -86,11 +86,6 @@ void OgreRenderer::screenshot(const std::string &file)
             size -= chunk;
         }
     }
-}
-
-float OgreRenderer::getFPS()
-{
-    return mWindow->getLastFPS();
 }
 
 void OgreRenderer::configure(const std::string &logPath,
@@ -138,14 +133,19 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
       settings.window_x, // width, in pixels
       settings.window_y, // height, in pixels
       SDL_WINDOW_SHOWN
-        | (settings.fullscreen ? SDL_WINDOW_FULLSCREEN : 0) | SDL_WINDOW_RESIZABLE
+        | SDL_WINDOW_RESIZABLE
+        | (settings.fullscreen ? SDL_WINDOW_FULLSCREEN : 0)
+        | (settings.window_border ? 0 : SDL_WINDOW_BORDERLESS)
     );
+    if (mSDLWindow == 0)
+        throw std::runtime_error("Failed to create window: " + std::string(SDL_GetError()));
 
     SFO::SDLWindowHelper helper(mSDLWindow, settings.window_x, settings.window_y, title, settings.fullscreen, params);
     if (settings.icon != "")
         helper.setWindowIcon(settings.icon);
     mWindow = helper.getWindow();
 
+    SDL_GetWindowGammaRamp(mSDLWindow, mOldSystemGammaRamp, &mOldSystemGammaRamp[256], &mOldSystemGammaRamp[512]);
 
     // create the semi-transparent black background texture used by the GUI.
     // has to be created in code with TU_DYNAMIC_WRITE_ONLY param
@@ -161,14 +161,41 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
 
     mScene = mRoot->createSceneManager(ST_GENERIC);
 
-    mFader = new Fader(mScene);
-
     mCamera = mScene->createCamera("cam");
 
     // Create one viewport, entire window
     mView = mWindow->addViewport(mCamera);
     // Alter the camera aspect ratio to match the viewport
     mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
+}
+
+void OgreRenderer::setWindowGammaContrast(float gamma, float contrast)
+{
+    if (mSDLWindow == NULL) return;
+
+    Uint16 red[256], green[256], blue[256];
+    for (int i = 0; i < 256; i++)
+    {
+        float k = i/256.0f;
+        k = (k - 0.5f) * contrast + 0.5f;
+        k = pow(k, 1.f/gamma);
+        k *= 256;
+        float value = k*256;
+        if (value > 65535)  value = 65535;
+        else if (value < 0) value = 0;
+
+        red[i] = green[i] = blue[i] = value;
+    }
+    if (SDL_SetWindowGammaRamp(mSDLWindow, red, green, blue) < 0)
+        std::cout << "Couldn't set gamma: " << SDL_GetError() << std::endl;
+}
+
+void OgreRenderer::restoreWindowGammaRamp()
+{
+    if (mSDLWindow != NULL)
+    {
+        SDL_SetWindowGammaRamp(mSDLWindow, mOldSystemGammaRamp, &mOldSystemGammaRamp[256], &mOldSystemGammaRamp[512]);
+    }
 }
 
 void OgreRenderer::adjustCamera(float fov, float nearClip)

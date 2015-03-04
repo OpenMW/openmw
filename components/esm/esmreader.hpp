@@ -32,10 +32,11 @@ public:
 
   int getVer() const { return mHeader.mData.version; }
   int getRecordCount() const { return mHeader.mData.records; }
-  float getFVer() const { if(mHeader.mData.version == VER_12) return 1.2; else return 1.3; }
+  float getFVer() const { return (mHeader.mData.version == VER_12) ? 1.2f : 1.3f; }
   const std::string getAuthor() const { return mHeader.mData.author.toString(); }
   const std::string getDesc() const { return mHeader.mData.desc.toString(); }
   const std::vector<Header::MasterData> &getGameFiles() const { return mHeader.mMaster; }
+  const Header& getHeader() const { return mHeader; }
   int getFormat() const;
   const NAME &retSubName() const { return mCtx.subName; }
   uint32_t getSubSize() const { return mCtx.leftSub; }
@@ -83,7 +84,7 @@ public:
   //  indirectly to the load() method.
   int mIdx;
   void setIndex(const int index) {mIdx = index; mCtx.index = index;}
-  const int getIndex() {return mIdx;}
+  int getIndex() {return mIdx;}
 
   void setGlobalReaderList(std::vector<ESMReader> *list) {mGlobalReaderList = list;}
   std::vector<ESMReader> *getGlobalReaderList() {return mGlobalReaderList;}
@@ -136,7 +137,11 @@ public:
   {
       getSubHeader();
       if (mCtx.leftSub != sizeof(X))
-          fail("getHT(): subrecord size mismatch");
+      {
+          std::stringstream error;
+          error << "getHT(): subrecord size mismatch (requested " << sizeof(X) << ", got " << mCtx.leftSub << ")";
+          fail(error.str());
+      }
       getT(x);
   }
 
@@ -194,6 +199,9 @@ public:
   // Skip sub record and check its size
   void skipHSubSize(int size);
 
+  // Skip all subrecords until the given subrecord or no more subrecords remaining
+  void skipHSubUntil(const char* name);
+
   /* Sub-record header. This updates leftRec beyond the current
      sub-record as well. leftSub contains size of current sub-record.
   */
@@ -215,9 +223,6 @@ public:
   // Skip the rest of this record. Assumes the name and header have
   // already been read
   void skipRecord();
-
-  // Skip an entire record, including the header (but not the name)
-  void skipHRecord();
 
   /* Read record header. This updatesleftFile BEYOND the data that
      follows the header, ie beyond the entire record. You should use

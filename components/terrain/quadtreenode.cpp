@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2015 scrawl <scrawl@baseoftrash.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 #include "quadtreenode.hpp"
 
 #include <OgreSceneManager.h>
@@ -71,38 +92,6 @@ namespace
             return nextNode->getChild(reflect(currentNode->getDirection(), dir));
         else
             return NULL;
-    }
-
-
-    // Ogre::AxisAlignedBox::distance is broken in 1.8.
-    Ogre::Real distance(const Ogre::AxisAlignedBox& box, const Ogre::Vector3& v)
-    {
-
-      if (box.contains(v))
-        return 0;
-      else
-      {
-          Ogre::Vector3 maxDist(0,0,0);
-        const Ogre::Vector3& minimum = box.getMinimum();
-        const Ogre::Vector3& maximum = box.getMaximum();
-
-        if (v.x < minimum.x)
-          maxDist.x = minimum.x - v.x;
-        else if (v.x > maximum.x)
-          maxDist.x = v.x - maximum.x;
-
-        if (v.y < minimum.y)
-          maxDist.y = minimum.y - v.y;
-        else if (v.y > maximum.y)
-          maxDist.y = v.y - maximum.y;
-
-        if (v.z < minimum.z)
-          maxDist.z = minimum.z - v.z;
-        else if (v.z > maximum.z)
-          maxDist.z = v.z - maximum.z;
-
-        return maxDist.length();
-      }
     }
 
     // Create a 2D quad
@@ -270,7 +259,7 @@ bool QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
     if (mBounds.isNull())
         return true;
 
-    float dist = distance(mWorldBounds, cameraPos);
+    float dist = mWorldBounds.distance(cameraPos);
 
     // Make sure our scene node is attached
     if (!mSceneNode->isInSceneGraph())
@@ -447,7 +436,7 @@ void QuadTreeNode::updateIndexBuffers()
         // Fetch a suitable index buffer (which may be shared)
         size_t ourLod = getActualLodLevel();
 
-        int flags = 0;
+        unsigned int flags = 0;
 
         for (int i=0; i<4; ++i)
         {
@@ -468,7 +457,7 @@ void QuadTreeNode::updateIndexBuffers()
             if (lod > 0)
             {
                 assert (lod - ourLod < (1 << 4));
-                flags |= int(lod - ourLod) << (4*i);
+                flags |= static_cast<unsigned int>(lod - ourLod) << (4*i);
             }
         }
         flags |= 0 /*((int)mAdditionalLod)*/ << (4*4);

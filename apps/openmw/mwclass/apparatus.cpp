@@ -21,19 +21,22 @@
 
 namespace MWClass
 {
-    void Apparatus::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    std::string Apparatus::getId (const MWWorld::Ptr& ptr) const
     {
-        const std::string model = getModel(ptr);
+        return ptr.get<ESM::Apparatus>()->mBase->mId;
+    }
+
+    void Apparatus::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
+    {
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    void Apparatus::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Apparatus::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr,true);
+            physics.addObject(ptr, model, true);
     }
 
     std::string Apparatus::getModel(const MWWorld::Ptr &ptr) const

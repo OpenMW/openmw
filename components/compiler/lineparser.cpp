@@ -1,6 +1,8 @@
 
 #include "lineparser.hpp"
 
+#include <memory>
+
 #include <components/misc/stringops.hpp>
 
 #include "scanner.hpp"
@@ -11,6 +13,7 @@
 #include "generator.hpp"
 #include "extensions.hpp"
 #include "declarationparser.hpp"
+#include "exception.hpp"
 
 namespace Compiler
 {
@@ -54,7 +57,7 @@ namespace Compiler
         Literals& literals, std::vector<Interpreter::Type_Code>& code, bool allowExpression)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals), mCode (code),
        mState (BeginState), mExprParser (errorHandler, context, locals, literals),
-       mAllowExpression (allowExpression), mButtons(0), mType(0)
+       mAllowExpression (allowExpression), mButtons(0), mType(0), mReferenceMember(false)
     {}
 
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
@@ -119,7 +122,7 @@ namespace Compiler
 
         if (mState==SetMemberVarState)
         {
-            mMemberName = name;
+            mMemberName = Misc::StringUtils::lowerCase (name);
             std::pair<char, bool> type = getContext().getMemberType (mMemberName, mName);
 
             if (type.first!=' ')
@@ -262,6 +265,20 @@ namespace Compiler
                     Generator::disable (mCode, mLiterals, mExplicit);
                     mState = PotentialEndState;
                     return true;
+
+                case Scanner::K_startscript:
+
+                    mExprParser.parseArguments ("c", scanner, mCode);
+                    Generator::startScript (mCode, mLiterals, mExplicit);
+                    mState = EndState;
+                    return true;
+
+                case Scanner::K_stopscript:
+
+                    mExprParser.parseArguments ("c", scanner, mCode);
+                    Generator::stopScript (mCode);
+                    mState = EndState;
+                    return true;
             }
 
             // check for custom extensions
@@ -278,9 +295,34 @@ namespace Compiler
                         mExplicit.clear();
                     }
 
-                    int optionals = mExprParser.parseArguments (argumentType, scanner, mCode);
+                    try
+                    {
+                        // workaround for broken positioncell instructions.
+                        /// \todo add option to disable this
+                        std::auto_ptr<ErrorDowngrade> errorDowngrade (0);
+                        if (Misc::StringUtils::lowerCase (loc.mLiteral)=="positioncell")
+                            errorDowngrade.reset (new ErrorDowngrade (getErrorHandler()));
 
-                    extensions->generateInstructionCode (keyword, mCode, mLiterals, mExplicit, optionals);
+                        std::vector<Interpreter::Type_Code> code;
+                        int optionals = mExprParser.parseArguments (argumentType, scanner, code, keyword);
+                        mCode.insert (mCode.end(), code.begin(), code.end());
+                        extensions->generateInstructionCode (keyword, mCode, mLiterals,
+                            mExplicit, optionals);
+                    }
+                    catch (const SourceException&)
+                    {
+                        // Ignore argument exceptions for positioncell.
+                        /// \todo add option to disable this
+                        if (Misc::StringUtils::lowerCase (loc.mLiteral)=="positioncell")
+                        {
+                            SkipParser skip (getErrorHandler(), getContext());
+                            scanner.scan (skip);
+                            return false;
+                        }
+
+                        throw;
+                    }
+
                     mState = EndState;
                     return true;
                 }
@@ -349,7 +391,7 @@ namespace Compiler
                     if (declaration.parseKeyword (keyword, loc, scanner))
                         scanner.scan (declaration);
 
-                    return true;
+                    return false;
                 }
 
                 case Scanner::K_set: mState = SetState; return true;
@@ -358,13 +400,6 @@ namespace Compiler
                 case Scanner::K_return:
 
                     Generator::exit (mCode);
-                    mState = EndState;
-                    return true;
-
-                case Scanner::K_startscript:
-
-                    mExprParser.parseArguments ("c", scanner, mCode);
-                    Generator::startScript (mCode);
                     mState = EndState;
                     return true;
 
@@ -454,6 +489,13 @@ namespace Compiler
 
     bool LineParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
     {
+        if (mState==EndState && code==Scanner::S_open)
+        {
+            getErrorHandler().warning ("stray '[' or '(' at the end of the line (ignoring it)",
+                loc);
+            return true;
+        }
+
         if (code==Scanner::S_newline &&
             (mState==EndState || mState==BeginState || mState==PotentialEndState))
             return false;

@@ -39,7 +39,6 @@ namespace MWRender
                         Ogre::SceneNode* rootNode,
                           const std::string& material
                     );
-        BillboardObject();
 
         void requestedConfiguration (sh::MaterialInstance* m, const std::string& configuration);
         void createdConfiguration (sh::MaterialInstance* m, const std::string& configuration);
@@ -103,7 +102,6 @@ namespace MWRender
         void setPhase(const Phase& phase);
         void setType(const Type& type);
 
-        Phase getPhase() const;
         unsigned int getPhaseInt() const;
 
     private:
@@ -116,6 +114,9 @@ namespace MWRender
     public:
         SkyManager(Ogre::SceneNode* root, Ogre::Camera* pCamera);
         ~SkyManager();
+
+        /// Attach weather particle effects to this scene node (should be the Camera's parent node)
+        void attachToNode(Ogre::SceneNode* sceneNode);
 
         void update(float duration);
 
@@ -152,7 +153,7 @@ namespace MWRender
 
         void setStormDirection(const Ogre::Vector3& direction);
 
-        void setSunDirection(const Ogre::Vector3& direction, bool is_moon);
+        void setSunDirection(const Ogre::Vector3& direction, bool is_night);
 
         void setMasserDirection(const Ogre::Vector3& direction);
 
@@ -169,8 +170,6 @@ namespace MWRender
         void secundaDisable();
 
         void setLightningStrength(const float factor);
-        void setLightningDirection(const Ogre::Vector3& dir);
-        void setLightningEnabled(bool enabled); ///< disable prior to map render
 
         void setGlare(const float glare);
         void setGlareEnabled(bool enabled);

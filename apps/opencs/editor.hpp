@@ -3,6 +3,9 @@
 
 #include <memory>
 
+#include <boost/interprocess/sync/file_lock.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 #include <QObject>
 #include <QString>
 #include <QLocalServer>
@@ -16,6 +19,8 @@
 
 #include <components/files/multidircollection.hpp>
 
+#include <components/nifcache/nifcache.hpp>
+
 #include "model/settings/usersettings.hpp"
 #include "model/doc/documentmanager.hpp"
 
@@ -25,6 +30,7 @@
 #include "view/doc/newgame.hpp"
 
 #include "view/settings/dialog.hpp"
+#include "view/render/overlaysystem.hpp"
 
 namespace OgreInit
 {
@@ -37,8 +43,10 @@ namespace CS
     {
             Q_OBJECT
 
+            Nif::Cache mNifCache;
             Files::ConfigurationManager mCfgMgr;
             CSMSettings::UserSettings mUserSettings;
+            std::auto_ptr<CSVRender::OverlaySystem> mOverlaySystem;
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
@@ -47,6 +55,9 @@ namespace CS
             CSVDoc::FileDialog mFileDialog;
             boost::filesystem::path mLocal;
             boost::filesystem::path mResources;
+            boost::filesystem::path mPid;
+            boost::interprocess::file_lock mLock;
+            boost::filesystem::ofstream mPidFile;
             bool mFsStrict;
 
             void setupDataFiles (const Files::PathContainer& dataDirs);
@@ -61,6 +72,7 @@ namespace CS
         public:
 
             Editor (OgreInit::OgreInit& ogreInit);
+            ~Editor ();
 
             bool makeIPCServer();
             void connectToIPCServer();

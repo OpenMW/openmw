@@ -3,6 +3,9 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 
+#include <MyGUI_EditBox.h>
+#include <MyGUI_Button.h>
+
 namespace MWGui
 {
 
@@ -61,13 +64,18 @@ namespace MWGui
 
     void TextInputDialog::onTextAccepted(MyGUI::Edit* _sender)
     {
-        if (mTextEdit->getCaption() == "")
-        {
-            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage37}");
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget (mTextEdit);
-        }
-        else
-            eventDone(this);
+        onOkClicked(_sender);
     }
+
+    std::string TextInputDialog::getTextInput() const
+    {
+        return mTextEdit->getCaption();
+    }
+
+    void TextInputDialog::setTextInput(const std::string &text)
+    {
+        mTextEdit->setCaption(text);
+    }
+
 
 }

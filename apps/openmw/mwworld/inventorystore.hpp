@@ -102,6 +102,8 @@ namespace MWWorld
             typedef std::vector<std::pair<ContainerStoreIterator, float> > TRechargingItems;
             TRechargingItems mRechargingItems;
 
+            bool mRechargingItemsUpToDate;
+
             void copySlots (const InventoryStore& store);
 
             void initSlots (TSlots& slots_);
@@ -111,11 +113,8 @@ namespace MWWorld
 
             void fireEquipmentChangedEvent();
 
-            virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
-            ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).
-
-            virtual void setSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
-            ///< Set slot for \a iter. Ignored if \a iter is an end iterator or if slot==-1.
+            virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
+            virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
 
         public:
 
@@ -141,7 +140,10 @@ namespace MWWorld
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
             void equip (int slot, const ContainerStoreIterator& iterator, const Ptr& actor);
-            ///< \note \a iterator can be an end-iterator
+            ///< \warning \a iterator can not be an end()-iterator, use unequip function instead
+
+            bool isEquipped(const MWWorld::Ptr& item);
+            ///< Utility function, returns true if the given item is equipped in any slot
 
             void setSelectedEnchantItem(const ContainerStoreIterator& iterator);
             ///< set the selected magic item (for using enchantments of type "Cast once" or "Cast when used")
@@ -198,8 +200,15 @@ namespace MWWorld
             void purgeEffect (short effectId);
             ///< Remove a magic effect
 
+            void purgeEffect (short effectId, const std::string& sourceId);
+            ///< Remove a magic effect
+
             virtual void clear();
             ///< Empty container.
+
+            virtual void writeState (ESM::InventoryState& state);
+
+            virtual void readState (const ESM::InventoryState& state);
     };
 }
 

@@ -8,7 +8,8 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld//cellstore.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/action.hpp"
@@ -25,20 +26,23 @@
 
 namespace MWClass
 {
-    void Activator::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    std::string Activator::getId (const MWWorld::Ptr& ptr) const
     {
-        const std::string model = getModel(ptr);
+        return ptr.get<ESM::Activator>()->mBase->mId;
+    }
+
+    void Activator::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
+    {
         if (!model.empty()) {
             MWRender::Actors& actors = renderingInterface.getActors();
-            actors.insertActivator(ptr);
+            actors.insertActivator(ptr, model);
         }
     }
 
-    void Activator::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Activator::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr, model);
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 

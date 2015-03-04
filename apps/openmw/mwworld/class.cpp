@@ -10,6 +10,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "ptr.hpp"
 #include "refdata.hpp"
@@ -37,12 +38,12 @@ namespace MWWorld
         throw std::runtime_error ("class does not support ID retrieval");
     }
 
-    void Class::insertObjectRendering (const Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Class::insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const
     {
 
     }
 
-    void Class::insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Class::insertObject(const Ptr& ptr, const std::string& mesh, MWWorld::PhysicsSystem& physics) const
     {
 
     }
@@ -52,7 +53,7 @@ namespace MWWorld
         return false;
     }
 
-    void Class::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const
+    void Class::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor) const
     {
         throw std::runtime_error ("class does not represent an actor");
     }
@@ -180,11 +181,6 @@ namespace MWWorld
         throw std::runtime_error ("class does not support enchanting");
     }
 
-    float Class::getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const
-    {
-        return 0;
-    }
-
     MWMechanics::Movement& Class::getMovementSettings (const Ptr& ptr) const
     {
         throw std::runtime_error ("movement settings not supported by class");
@@ -303,10 +299,6 @@ namespace MWWorld
     {
     }
 
-    void Class::adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const
-    {
-    }
-
     std::string Class::getModel(const MWWorld::Ptr &ptr) const
     {
         return "";
@@ -322,7 +314,7 @@ namespace MWWorld
         return std::make_pair (1, "");
     }
 
-    void Class::adjustPosition(const MWWorld::Ptr& ptr) const
+    void Class::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
     {
     }
 
@@ -358,7 +350,7 @@ namespace MWWorld
     Class::copyToCell(const Ptr &ptr, CellStore &cell) const
     {
         Ptr newPtr = copyToCellImpl(ptr, cell);
-
+        newPtr.getCellRef().unsetRefNum(); // This RefNum is only valid within the original cell of the reference
         return newPtr;
     }
 
@@ -389,6 +381,16 @@ namespace MWWorld
     bool Class::canWalk(const Ptr &ptr) const
     {
         return false;
+    }
+
+    bool Class::isPureWaterCreature(const MWWorld::Ptr& ptr) const
+    {
+        return canSwim(ptr) && !canWalk(ptr);
+    }
+
+    bool Class::isMobile(const MWWorld::Ptr& ptr) const
+    {
+        return canSwim(ptr) || canWalk(ptr) || canFly(ptr);
     }
 
     int Class::getSkill(const MWWorld::Ptr& ptr, int skill) const
@@ -423,5 +425,38 @@ namespace MWWorld
     void Class::setDoorState (const MWWorld::Ptr &ptr, int state) const
     {
         throw std::runtime_error("this is not a door");
+    }
+
+    float Class::getNormalizedEncumbrance(const Ptr &ptr) const
+    {
+        float capacity = getCapacity(ptr);
+        if (capacity == 0)
+            return 1.f;
+
+        return getEncumbrance(ptr) / capacity;
+    }
+
+    std::string Class::getSound(const MWWorld::Ptr&) const
+    {
+      return std::string();
+    }
+
+    int Class::getBaseFightRating(const Ptr &ptr) const
+    {
+        throw std::runtime_error("class does not support fight rating");
+    }
+
+    std::string Class::getPrimaryFaction (const MWWorld::Ptr& ptr) const
+    {
+        return std::string();
+    }
+    int Class::getPrimaryFactionRank (const MWWorld::Ptr& ptr) const
+    {
+        return -1;
+    }
+
+    int Class::getEffectiveArmorRating(const Ptr &ptr, const Ptr &actor) const
+    {
+        throw std::runtime_error("class does not support armor ratings");
     }
 }

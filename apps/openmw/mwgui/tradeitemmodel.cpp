@@ -93,6 +93,21 @@ namespace MWGui
         unborrowImpl(item, count, mBorrowedFromUs);
     }
 
+    void TradeItemModel::adjustEncumbrance(float &encumbrance)
+    {
+        for (std::vector<ItemStack>::iterator it = mBorrowedToUs.begin(); it != mBorrowedToUs.end(); ++it)
+        {
+            MWWorld::Ptr item = it->mBase;
+            encumbrance += item.getClass().getWeight(item) * it->mCount;
+        }
+        for (std::vector<ItemStack>::iterator it = mBorrowedFromUs.begin(); it != mBorrowedFromUs.end(); ++it)
+        {
+            MWWorld::Ptr item = it->mBase;
+            encumbrance -= item.getClass().getWeight(item) * it->mCount;
+        }
+        encumbrance = std::max(0.f, encumbrance);
+    }
+
     void TradeItemModel::abort()
     {
         mBorrowedFromUs.clear();
@@ -120,11 +135,9 @@ namespace MWGui
             if (i == sourceModel->getItemCount())
                 throw std::runtime_error("The borrowed item disappeared");
 
-            // reset owner while copying, but only for items bought by the player
-            bool setNewOwner = (mMerchant.isEmpty());
             const ItemStack& item = sourceModel->getItem(i);
             // copy the borrowed items to our model
-            copyItem(item, it->mCount, setNewOwner);
+            copyItem(item, it->mCount);
             // then remove them from the source model
             sourceModel->removeItem(item, it->mCount);
         }
@@ -154,26 +167,14 @@ namespace MWGui
                     continue;
 
                 // Bound items may not be bought
-                if (item.mBase.getCellRef().getRefId().size() > 6
-                        && item.mBase.getCellRef().getRefId().substr(0,6) == "bound_")
-                {
+                if (item.mFlags & ItemStack::Flag_Bound)
                     continue;
-                }
 
                 // don't show equipped items
                 if(mMerchant.getClass().hasInventoryStore(mMerchant))
                 {
-                    bool isEquipped = false;
                     MWWorld::InventoryStore& store = mMerchant.getClass().getInventoryStore(mMerchant);
-                    for (int slot=0; slot<MWWorld::InventoryStore::Slots; ++slot)
-                    {
-                        MWWorld::ContainerStoreIterator equipped = store.getSlot(slot);
-                        if (equipped == store.end())
-                            continue;
-                        if (*equipped == base)
-                            isEquipped = true;
-                    }
-                    if (isEquipped)
+                    if (store.isEquipped(base))
                         continue;
                 }
             }

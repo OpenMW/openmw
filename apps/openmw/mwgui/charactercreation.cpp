@@ -1,18 +1,23 @@
 #include "charactercreation.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
+
+#include "../mwmechanics/npcstats.hpp"
+
+#include "../mwworld/class.hpp"
+#include "../mwworld/fallback.hpp"
+#include "../mwworld/esmstore.hpp"
+
 #include "textinput.hpp"
 #include "race.hpp"
 #include "class.hpp"
 #include "birth.hpp"
 #include "review.hpp"
 #include "inventorywindow.hpp"
-#include <boost/lexical_cast.hpp>
-#include "../mwbase/environment.hpp"
-#include "../mwbase/soundmanager.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
-#include "../mwmechanics/npcstats.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/fallback.hpp"
 
 namespace
 {
@@ -27,11 +32,11 @@ namespace
     Step sGenerateClassSteps(int number) {
         number++;
         const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
-        Step step = {fallback->getFallbackString("Question_"+boost::lexical_cast<std::string>(number)+"_Question"),
-        {fallback->getFallbackString("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerOne"),
-        fallback->getFallbackString("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerTwo"),
-        fallback->getFallbackString("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerThree")},
-        "vo\\misc\\chargen qa"+boost::lexical_cast<std::string>(number)+".wav"
+        Step step = {fallback->getFallbackString("Question_"+MyGUI::utility::toString(number)+"_Question"),
+        {fallback->getFallbackString("Question_"+MyGUI::utility::toString(number)+"_AnswerOne"),
+        fallback->getFallbackString("Question_"+MyGUI::utility::toString(number)+"_AnswerTwo"),
+        fallback->getFallbackString("Question_"+MyGUI::utility::toString(number)+"_AnswerThree")},
+        "vo\\misc\\chargen qa"+MyGUI::utility::toString(number)+".wav"
         };
         return step;
     }

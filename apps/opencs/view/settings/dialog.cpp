@@ -1,18 +1,19 @@
 #include "dialog.hpp"
 
+#include <algorithm>
+
 #include <QListWidgetItem>
 #include <QApplication>
 #include <QWidget>
 #include <QStackedWidget>
 #include <QtGui>
+#include <QSplitter>
 
 #include "../../model/settings/usersettings.hpp"
 
 #include "page.hpp"
 
 #include <QApplication>
-
-#include <QSplitter>
 
 #include <QTreeView>
 #include <QListView>
@@ -25,6 +26,10 @@ CSVSettings::Dialog::Dialog(QMainWindow *parent)
     : mStackedWidget (0), mDebugMode (false), SettingWindow (parent)
 {
     setWindowTitle(QString::fromUtf8 ("User Settings"));
+
+    setSizePolicy (QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+
+    setMinimumSize (600, 400);
 
     setupDialog();
 
@@ -39,20 +44,14 @@ void CSVSettings::Dialog::slotChangePage
 {
    mStackedWidget->changePage
                     (mPageListWidget->row (cur), mPageListWidget->row (prev));
-
-   layout()->activate();
-   setFixedSize(minimumSizeHint());
 }
 
 void CSVSettings::Dialog::setupDialog()
 {
-    //create central widget with it's layout and immediate children
-    QWidget *centralWidget = new QGroupBox (this);
+    QSplitter *centralWidget = new QSplitter (this);
+    centralWidget->setSizePolicy (QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
-    centralWidget->setLayout (new QHBoxLayout());
-    centralWidget->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Preferred);
     setCentralWidget (centralWidget);
-    setDockOptions (QMainWindow::AllowNestedDocks);
 
     buildPageListWidget (centralWidget);
     buildStackedWidget (centralWidget);
@@ -64,37 +63,39 @@ void CSVSettings::Dialog::buildPages()
 
     QFontMetrics fm (QApplication::font());
 
+    int maxWidth = 1;
+
     foreach (Page *page, SettingWindow::pages())
     {
-        QString pageName = page->objectName();
+        maxWidth = std::max (maxWidth, fm.width(page->getLabel()));
 
-        int textWidth = fm.width(pageName);
+        new QListWidgetItem (page->getLabel(), mPageListWidget);
 
-        new QListWidgetItem (pageName, mPageListWidget);
-        mPageListWidget->setFixedWidth (textWidth + 50);
-
-        mStackedWidget->addWidget (&dynamic_cast<QWidget &>(*(page)));
+        mStackedWidget->addWidget (page);
     }
+
+    mPageListWidget->setMaximumWidth (maxWidth + 10);
 
     resize (mStackedWidget->sizeHint());
 }
 
-void CSVSettings::Dialog::buildPageListWidget (QWidget *centralWidget)
+void CSVSettings::Dialog::buildPageListWidget (QSplitter *centralWidget)
 {
     mPageListWidget = new QListWidget (centralWidget);
     mPageListWidget->setMinimumWidth(50);
-    mPageListWidget->setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Expanding);
+    mPageListWidget->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     mPageListWidget->setSelectionBehavior (QAbstractItemView::SelectItems);
 
-    centralWidget->layout()->addWidget(mPageListWidget);
+    centralWidget->addWidget(mPageListWidget);
 }
 
-void CSVSettings::Dialog::buildStackedWidget (QWidget *centralWidget)
+void CSVSettings::Dialog::buildStackedWidget (QSplitter *centralWidget)
 {
     mStackedWidget = new ResizeableStackedWidget (centralWidget);
+    mStackedWidget->setSizePolicy (QSizePolicy::Preferred, QSizePolicy::Expanding);
 
-    centralWidget->layout()->addWidget (mStackedWidget);
+    centralWidget->addWidget (mStackedWidget);
 }
 
 void CSVSettings::Dialog::closeEvent (QCloseEvent *event)
@@ -114,8 +115,20 @@ void CSVSettings::Dialog::show()
         setViewValues();
     }
 
-    QPoint screenCenter = QApplication::desktop()->screenGeometry().center();
-
-    move (screenCenter - geometry().center());
+    QWidget *currView = QApplication::activeWindow();
+    if(currView)
+    {
+        // place at the center of the window with focus
+        QSize size = currView->size();
+        move(currView->geometry().x()+(size.width() - frameGeometry().width())/2,
+             currView->geometry().y()+(size.height() - frameGeometry().height())/2);
+    }
+    else
+    {
+        // something's gone wrong, place at the center of the screen
+        QPoint screenCenter = QApplication::desktop()->screenGeometry().center();
+        move(screenCenter - QPoint(frameGeometry().width()/2,
+                                   frameGeometry().height()/2));
+    }
     QWidget::show();
 }

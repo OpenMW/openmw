@@ -16,7 +16,7 @@ namespace MWWorld
     void ActionTake::executeImp (const Ptr& actor)
     {
         MWBase::Environment::get().getMechanicsManager()->itemTaken(
-                    actor, getTarget(), getTarget().getRefData().getCount());
+                    actor, getTarget(), MWWorld::Ptr(), getTarget().getRefData().getCount());
         actor.getClass().getContainerStore (actor).add (getTarget(), getTarget().getRefData().getCount(), actor);
         MWBase::Environment::get().getWorld()->deleteObject (getTarget());
     }

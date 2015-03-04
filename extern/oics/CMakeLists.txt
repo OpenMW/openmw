@@ -9,6 +9,7 @@ set(OICS_SOURCE_FILES
 	ICSInputControlSystem_keyboard.cpp
 	ICSInputControlSystem_mouse.cpp
 	ICSInputControlSystem_joystick.cpp
+	ICSPrerequisites.h
 )
 
 set(TINYXML_SOURCE_FILES

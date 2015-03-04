@@ -9,7 +9,7 @@
 #include "view.hpp"
 
 CSVSettings::SettingWindow::SettingWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), mModel(NULL)
 {}
 
 void CSVSettings::SettingWindow::createPages()
@@ -19,10 +19,10 @@ void CSVSettings::SettingWindow::createPages()
     QList <CSMSettings::Setting *> connectedSettings;
 
     foreach (const QString &pageName, pageMap.keys())
-    {        
-        QList <CSMSettings::Setting *> pageSettings = pageMap.value (pageName);
+    {
+        QList <CSMSettings::Setting *> pageSettings = pageMap.value (pageName).second;
 
-        mPages.append (new Page (pageName, pageSettings, this));
+        mPages.append (new Page (pageName, pageSettings, this, pageMap.value (pageName).first));
 
         for (int i = 0; i < pageSettings.size(); i++)
         {
@@ -84,7 +84,7 @@ void CSVSettings::SettingWindow::createConnections
 
 void CSVSettings::SettingWindow::setViewValues()
 {
-    //iterate each page and view, setting their definintions
+    //iterate each page and view, setting their definitions
     //if they exist in the model
     foreach (const Page *page, mPages)
     {
@@ -129,7 +129,3 @@ void CSVSettings::SettingWindow::saveSettings()
     mModel->saveDefinitions();
 }
 
-void CSVSettings::SettingWindow::closeEvent (QCloseEvent *event)
-{
-    QApplication::focusWidget()->clearFocus();
-}

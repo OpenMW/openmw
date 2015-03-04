@@ -4,11 +4,15 @@
 #include <QFile>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/settings/settings.hpp>
 #include <boost/version.hpp>
 
 #include "setting.hpp"
 #include "support.hpp"
+#include <QTextCodec>
 #include <QDebug>
+
+#include <extern/shiny/Main/Factory.hpp>
 
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
@@ -26,81 +30,184 @@ namespace boost
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
 
-CSMSettings::UserSettings *CSMSettings::UserSettings::mUserSettingsInstance = 0;
+CSMSettings::UserSettings *CSMSettings::UserSettings::sUserSettingsInstance = 0;
 
-CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
-: mCfgMgr (configurationManager)
+    CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
+    : mCfgMgr (configurationManager)
+    , mSettingDefinitions(NULL)
 {
-    assert(!mUserSettingsInstance);
-    mUserSettingsInstance = this;
-
-    mSettingDefinitions = 0;
+    assert(!sUserSettingsInstance);
+    sUserSettingsInstance = this;
 
     buildSettingModelDefaults();
 }
 
 void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
-    QString section = "Window Size";
+    QString section;
+
+    declareSection ("3d-render", "3D Rendering");
     {
-        Setting *width = createSetting (Type_LineEdit, section, "Width");
-        Setting *height = createSetting (Type_LineEdit, section, "Height");
+        Setting *shaders = createSetting (Type_CheckBox, "shaders", "Enable Shaders");
+        shaders->setDefaultValue ("true");
 
-        width->setWidgetWidth (5);
-        height->setWidgetWidth (8);
+        Setting *farClipDist = createSetting (Type_DoubleSpinBox, "far-clip-distance", "Far clipping distance");
+        farClipDist->setDefaultValue (300000);
+        farClipDist->setRange (0, 1000000);
+        farClipDist->setToolTip ("The maximum distance objects are still rendered at.");
 
-        width->setDefaultValues (QStringList() << "1024");
-        height->setDefaultValues (QStringList() << "768");
-
-        width->setEditorSetting (true);
-        height->setEditorSetting (true);
-
-        height->setViewLocation (2,2);
-        width->setViewLocation (2,1);
-
-        /*
-         *Create the proxy setting for predefined values
-         */
-        Setting *preDefined = createSetting (Type_ComboBox, section,
-                                             "Pre-Defined");
-
-        preDefined->setDeclaredValues (QStringList() << "640 x 480"
-                                << "800 x 600" << "1024 x 768" << "1440 x 900");
-
-        preDefined->setViewLocation (1, 1);
-        preDefined->setWidgetWidth (10);
-        preDefined->setColumnSpan (2);
-
-        preDefined->addProxy (width,
-                             QStringList() << "640" << "800" << "1024" << "1440"
-                             );
-
-        preDefined->addProxy (height,
-                             QStringList() << "480" << "600" << "768" << "900"
-                             );
+        QString defaultValue = "None";
+        Setting *antialiasing = createSetting (Type_ComboBox, "antialiasing", "Antialiasing");
+        antialiasing->setDeclaredValues (QStringList()
+            << defaultValue << "MSAA 2" << "MSAA 4" << "MSAA 8" << "MSAA 16");
+        antialiasing->setDefaultValue (defaultValue);
     }
 
-    section = "Display Format";
+    declareSection ("3d-render-adv", "3D Rendering (Advanced)");
+    {
+        Setting *numLights = createSetting (Type_SpinBox, "num_lights",
+            "Number of lights per pass");
+        numLights->setDefaultValue (8);
+        numLights->setRange (1, 100);
+    }
+
+    declareSection ("scene-input", "Scene Input");
+    {
+        Setting *timer = createSetting (Type_SpinBox, "timer", "Input responsiveness");
+        timer->setDefaultValue (20);
+        timer->setRange (1, 100);
+        timer->setToolTip ("The time between two checks for user input in milliseconds.<p>"
+            "Lower value result in higher responsiveness.");
+
+        Setting *fastFactor = createSetting (Type_SpinBox, "fast-factor",
+            "Fast movement factor");
+        fastFactor->setDefaultValue (4);
+        fastFactor->setRange (1, 100);
+        fastFactor->setToolTip (
+            "Factor by which movement is speed up while the shift key is held down.");
+    }
+
+    declareSection ("window", "Window");
+    {
+        Setting *preDefined = createSetting (Type_ComboBox, "pre-defined",
+            "Default window size");
+        preDefined->setEditorSetting (false);
+        preDefined->setDeclaredValues (
+            QStringList() << "640 x 480" << "800 x 600" << "1024 x 768" << "1440 x 900");
+        preDefined->setViewLocation (1, 1);
+        preDefined->setColumnSpan (2);
+        preDefined->setToolTip ("Newly opened top-level windows will open with this size "
+            "(picked from a list of pre-defined values)");
+
+        Setting *width = createSetting (Type_LineEdit, "default-width",
+            "Default window width");
+        width->setDefaultValues (QStringList() << "1024");
+        width->setViewLocation (2, 1);
+        width->setColumnSpan (1);
+        width->setToolTip ("Newly opened top-level windows will open with this width.");
+        preDefined->addProxy (width, QStringList() << "640" << "800" << "1024" << "1440");
+
+        Setting *height = createSetting (Type_LineEdit, "default-height",
+            "Default window height");
+        height->setDefaultValues (QStringList() << "768");
+        height->setViewLocation (2, 2);
+        height->setColumnSpan (1);
+        height->setToolTip ("Newly opened top-level windows will open with this height.");
+        preDefined->addProxy (height, QStringList() << "480" << "600" << "768" << "900");
+
+        Setting *reuse = createSetting (Type_CheckBox, "reuse", "Reuse Subviews");
+        reuse->setDefaultValue ("true");
+        reuse->setToolTip ("When a new subview is requested and a matching subview already "
+            " exist, do not open a new subview and use the existing one instead.");
+
+        Setting *statusBar = createSetting (Type_CheckBox, "show-statusbar", "Show Status Bar");
+        statusBar->setDefaultValue ("true");
+        statusBar->setToolTip ("If a newly open top level window is showing status bars or not. "
+            " Note that this does not affect existing windows.");
+
+        Setting *maxSubView = createSetting (Type_SpinBox, "max-subviews",
+            "Maximum number of subviews per top-level window");
+        maxSubView->setDefaultValue (256);
+        maxSubView->setRange (1, 256);
+        maxSubView->setToolTip ("If the maximum number is reached and a new subview is opened "
+            "it will be placed into a new top-level window.");
+
+        Setting *hide = createSetting (Type_CheckBox, "hide-subview", "Hide single subview");
+        hide->setDefaultValue ("false");
+        hide->setToolTip ("When a view contains only a single subview, hide the subview title "
+            "bar and if this subview is closed also close the view (unless it is the last "
+            "view for this document)");
+
+        Setting *minWidth = createSetting (Type_SpinBox, "minimum-width",
+            "Minimum subview width");
+        minWidth->setDefaultValue (325);
+        minWidth->setRange (50, 10000);
+        minWidth->setToolTip ("Minimum width of subviews.");
+    }
+
+    declareSection ("records", "Records");
     {
         QString defaultValue = "Icon and Text";
+        QStringList values = QStringList() << defaultValue << "Icon Only" << "Text Only";
 
-        QStringList values = QStringList()
-                            << defaultValue << "Icon Only" << "Text Only";
-
-        Setting *rsd = createSetting (Type_RadioButton,
-                                      section, "Record Status Display");
-
-        Setting *ritd = createSetting (Type_RadioButton,
-                                      section, "Referenceable ID Type Display");
-
+        Setting *rsd = createSetting (Type_RadioButton, "status-format",
+            "Modification status display format");
+        rsd->setDefaultValue (defaultValue);
         rsd->setDeclaredValues (values);
-        ritd->setDeclaredValues (values);
 
-        rsd->setEditorSetting (true);
-        ritd->setEditorSetting (true);
+        Setting *ritd = createSetting (Type_RadioButton, "type-format",
+            "ID type display format");
+        ritd->setDefaultValue (defaultValue);
+        ritd->setDeclaredValues (values);
     }
 
-    section = "Proxy Selection Test";
+    declareSection ("table-input", "Table Input");
+    {
+        QString inPlaceEdit ("Edit in Place");
+        QString editRecord ("Edit Record");
+        QString view ("View");
+        QString editRecordAndClose ("Edit Record and Close");
+
+        QStringList values;
+        values
+            << "None" << inPlaceEdit << editRecord << view << "Revert" << "Delete"
+            << editRecordAndClose << "View and Close";
+
+        QString toolTip = "<ul>"
+            "<li>None</li>"
+            "<li>Edit in Place: Edit the clicked cell</li>"
+            "<li>Edit Record: Open a dialogue subview for the clicked record</li>"
+            "<li>View: Open a scene subview for the clicked record (not available everywhere)</li>"
+            "<li>Revert: Revert record</li>"
+            "<li>Delete: Delete recordy</li>"
+            "<li>Edit Record and Close: Open a dialogue subview for the clicked record and close the table subview</li>"
+            "<li>View And Close: Open a scene subview for the clicked record and close the table subview</li>"
+            "</ul>";
+
+        Setting *doubleClick = createSetting (Type_ComboBox, "double", "Double Click");
+        doubleClick->setDeclaredValues (values);
+        doubleClick->setDefaultValue (inPlaceEdit);
+        doubleClick->setToolTip ("Action on double click in table:<p>" + toolTip);
+
+        Setting *shiftDoubleClick = createSetting (Type_ComboBox, "double-s",
+            "Shift Double Click");
+        shiftDoubleClick->setDeclaredValues (values);
+        shiftDoubleClick->setDefaultValue (editRecord);
+        shiftDoubleClick->setToolTip ("Action on shift double click in table:<p>" + toolTip);
+
+        Setting *ctrlDoubleClick = createSetting (Type_ComboBox, "double-c",
+            "Control Double Click");
+        ctrlDoubleClick->setDeclaredValues (values);
+        ctrlDoubleClick->setDefaultValue (view);
+        ctrlDoubleClick->setToolTip ("Action on control double click in table:<p>" + toolTip);
+
+        Setting *shiftCtrlDoubleClick = createSetting (Type_ComboBox, "double-sc",
+            "Shift Control Double Click");
+        shiftCtrlDoubleClick->setDeclaredValues (values);
+        shiftCtrlDoubleClick->setDefaultValue (editRecordAndClose);
+        shiftCtrlDoubleClick->setToolTip ("Action on shift control double click in table:<p>" + toolTip);
+    }
+
     {
         /******************************************************************
         * There are three types of values:
@@ -276,7 +383,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
 CSMSettings::UserSettings::~UserSettings()
 {
-    mUserSettingsInstance = 0;
+    sUserSettingsInstance = 0;
 }
 
 void CSMSettings::UserSettings::loadSettings (const QString &fileName)
@@ -307,8 +414,21 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
         (QSettings::IniFormat, QSettings::UserScope, "opencs", QString(), this);
 }
 
-bool CSMSettings::UserSettings::hasSettingDefinitions
-                                                (const QString &viewKey) const
+// if the key is not found create one with a default value
+QString CSMSettings::UserSettings::setting(const QString &viewKey, const QString &value)
+{
+    if(mSettingDefinitions->contains(viewKey))
+        return settingValue(viewKey);
+    else if(value != QString())
+    {
+        mSettingDefinitions->setValue (viewKey, QStringList() << value);
+        return value;
+    }
+
+    return QString();
+}
+
+bool CSMSettings::UserSettings::hasSettingDefinitions (const QString &viewKey) const
 {
     return (mSettingDefinitions->contains (viewKey));
 }
@@ -326,10 +446,12 @@ void CSMSettings::UserSettings::saveDefinitions() const
 
 QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
 {
+    QStringList defs;
+
     if (!mSettingDefinitions->contains (settingKey))
         return QString();
 
-    QStringList defs = mSettingDefinitions->value (settingKey).toStringList();
+    defs = mSettingDefinitions->value (settingKey).toStringList();
 
     if (defs.isEmpty())
         return QString();
@@ -339,14 +461,23 @@ QString CSMSettings::UserSettings::settingValue (const QString &settingKey)
 
 CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
 {
-    assert(mUserSettingsInstance);
-    return *mUserSettingsInstance;
+    assert(sUserSettingsInstance);
+    return *sUserSettingsInstance;
 }
 
 void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
                                                     const QStringList &list)
 {
     mSettingDefinitions->setValue (settingKey ,list);
+
+    if(settingKey == "3d-render-adv/num_lights" && !list.empty())
+    {
+        sh::Factory::getInstance ().setGlobalSetting ("num_lights", list.at(0).toStdString());
+    }
+    else if(settingKey == "3d-render/shaders" && !list.empty())
+    {
+        sh::Factory::getInstance ().setShadersEnabled (list.at(0).toStdString() == "true" ? true : false);
+    }
 
     emit userSettingUpdated (settingKey, list);
 }
@@ -387,35 +518,73 @@ void CSMSettings::UserSettings::removeSetting
     }
 }
 
-
 CSMSettings::SettingPageMap CSMSettings::UserSettings::settingPageMap() const
 {
     SettingPageMap pageMap;
 
     foreach (Setting *setting, mSettings)
-        pageMap[setting->page()].append (setting);
+    {
+        SettingPageMap::iterator iter = pageMap.find (setting->page());
+
+        if (iter==pageMap.end())
+        {
+            QPair<QString, QList <Setting *> > value;
+
+            std::map<QString, QString>::const_iterator iter2 =
+                mSectionLabels.find (setting->page());
+
+            value.first = iter2!=mSectionLabels.end() ? iter2->second : "";
+
+            iter = pageMap.insert (setting->page(), value);
+        }
+
+        iter->second.append (setting);
+    }
 
     return pageMap;
 }
 
 CSMSettings::Setting *CSMSettings::UserSettings::createSetting
-        (CSMSettings::SettingType typ, const QString &page, const QString &name)
+        (CSMSettings::SettingType type, const QString &name, const QString& label)
 {
-    //get list of all settings for the current setting name
-    if (findSetting (page, name))
-    {
-        qWarning() << "Duplicate declaration encountered: "
-                   << (name + '/' + page);
-        return 0;
-    }
+    Setting *setting = new Setting (type, name, mSection, label);
 
-    Setting *setting = new Setting (typ, name, page);
+    // set useful defaults
+    int row = 1;
 
+    if (!mSettings.empty())
+        row = mSettings.back()->viewRow()+1;
+
+    setting->setViewLocation (row, 1);
+
+    setting->setColumnSpan (3);
+
+    int width = 10;
+
+    if (type==Type_CheckBox)
+        width = 40;
+
+    setting->setWidgetWidth (width);
+
+    if (type==Type_CheckBox)
+        setting->setStyleSheet ("QGroupBox { border: 0px; }");
+
+    if (type==Type_CheckBox)
+        setting->setDeclaredValues(QStringList() << "true" << "false");
+
+    if (type==Type_CheckBox)
+        setting->setSpecialValueText (setting->getLabel());
 
     //add declaration to the model
     mSettings.append (setting);
 
     return setting;
+}
+
+void CSMSettings::UserSettings::declareSection (const QString& page, const QString& label)
+{
+    mSection = page;
+    mSectionLabels[page] = label;
 }
 
 QStringList CSMSettings::UserSettings::definitions (const QString &viewKey) const

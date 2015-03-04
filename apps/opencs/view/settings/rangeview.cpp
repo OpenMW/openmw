@@ -36,8 +36,11 @@ CSVSettings::RangeView::RangeView (CSMSettings::Setting *setting,
         break;
     }
 
-    mRangeWidget->setFixedWidth (widgetWidth (setting->widgetWidth()));
-    mRangeWidget->setObjectName (setting->name());
+    if(mRangeWidget)
+    {
+        mRangeWidget->setFixedWidth (widgetWidth (setting->widgetWidth()));
+        mRangeWidget->setObjectName (setting->name());
+    }
 
     addWidget (mRangeWidget);
 }
@@ -75,13 +78,16 @@ void CSVSettings::RangeView::buildSlider (CSMSettings::Setting *setting)
         break;
     }
 
-    mRangeWidget->setProperty ("minimum", setting->minimum());
-    mRangeWidget->setProperty ("maximum", setting->maximum());
-    mRangeWidget->setProperty ("tracking", false);
-    mRangeWidget->setProperty ("singleStep", setting->singleStep());
+    if(mRangeWidget)
+    {
+        mRangeWidget->setProperty ("minimum", setting->minimum());
+        mRangeWidget->setProperty ("maximum", setting->maximum());
+        mRangeWidget->setProperty ("tracking", false);
+        mRangeWidget->setProperty ("singleStep", setting->singleStep());
 
-    connect (mRangeWidget, SIGNAL (valueChanged (int)),
-             this, SLOT (slotUpdateView (int)));
+        connect (mRangeWidget, SIGNAL (valueChanged (int)),
+                 this, SLOT (slotUpdateView (int)));
+    }
 }
 
 void CSVSettings::RangeView::buildSpinBox (CSMSettings::Setting *setting)
@@ -111,7 +117,7 @@ void CSVSettings::RangeView::buildSpinBox (CSMSettings::Setting *setting)
     break;
 
     default:
-    break;
+        return;
     }
 
     //min / max values are set automatically in AlphaSpinBox
@@ -120,14 +126,15 @@ void CSVSettings::RangeView::buildSpinBox (CSMSettings::Setting *setting)
         mRangeWidget->setProperty ("minimum", setting->minimum());
         mRangeWidget->setProperty ("maximum", setting->maximum());
         mRangeWidget->setProperty ("singleStep", setting->singleStep());
-        mRangeWidget->setProperty ("specialValueText",
-                                  setting->specialValueText());
     }
 
     mRangeWidget->setProperty ("prefix", setting->prefix());
     mRangeWidget->setProperty ("suffix", setting->suffix());
     mRangeWidget->setProperty ("wrapping", setting->wrapping());
+    dynamic_cast<QAbstractSpinBox *> (mRangeWidget)->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
 
+    if(setting->type()  == CSMSettings::Type_SpinBox && setting->declaredValues().isEmpty())
+        dynamic_cast<QSpinBox *> (mRangeWidget)->setValue (setting->defaultValues().at(0).toInt());
 }
 
 void CSVSettings::RangeView::slotUpdateView (int value)

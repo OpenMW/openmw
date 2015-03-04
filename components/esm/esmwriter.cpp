@@ -4,9 +4,16 @@
 #include <fstream>
 #include <stdexcept>
 
+#include <components/to_utf8/to_utf8.hpp>
+
 namespace ESM
 {
-    ESMWriter::ESMWriter() : mEncoder (0), mRecordCount (0), mCounting (true) {}
+    ESMWriter::ESMWriter()
+        : mEncoder (0)
+        , mRecordCount (0)
+        , mCounting (true)
+        , mStream(NULL)
+    {}
 
     unsigned int ESMWriter::getVersion() const
     {

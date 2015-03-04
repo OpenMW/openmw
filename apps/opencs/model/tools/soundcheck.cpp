@@ -16,7 +16,7 @@ int CSMTools::SoundCheckStage::setup()
     return mSounds.getSize();
 }
 
-void CSMTools::SoundCheckStage::perform (int stage, Messages& messages)
+void CSMTools::SoundCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
     const CSMWorld::Record<ESM::Sound>& record = mSounds.getRecord (stage);
 

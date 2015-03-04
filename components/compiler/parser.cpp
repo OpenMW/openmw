@@ -21,13 +21,6 @@ namespace Compiler
         throw SourceException();
     }
 
-    // Report the error
-
-    void Parser::reportError (const std::string& message, const TokenLoc& loc)
-    {
-        mErrorHandler.error (message, loc);
-    }
-
     // Report the warning without throwing an exception.
 
     void Parser::reportWarning (const std::string& message, const TokenLoc& loc)

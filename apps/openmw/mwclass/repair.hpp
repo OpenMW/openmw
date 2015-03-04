@@ -12,10 +12,13 @@ namespace MWClass
 
         public:
 
-            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
+            /// Return ID of \a ptr
+            virtual std::string getId (const MWWorld::Ptr& ptr) const;
+
+            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
-            virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
+            virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const;
 
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
@@ -60,7 +63,7 @@ namespace MWClass
 
             virtual int getItemMaxHealth (const MWWorld::Ptr& ptr) const;
             ///< Return item max health or throw an exception, if class does not have item health
-            /// (default implementation: throw an exceoption)
+            /// (default implementation: throw an exception)
 
             virtual float getWeight (const MWWorld::Ptr& ptr) const;
 

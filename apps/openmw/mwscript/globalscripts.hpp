@@ -26,16 +26,25 @@ namespace MWWorld
 
 namespace MWScript
 {
+    struct GlobalScriptDesc
+    {
+        bool mRunning;
+        Locals mLocals;
+        std::string mId; // ID used to start targeted script (empty if not a targeted script)
+
+        GlobalScriptDesc();
+    };
+
     class GlobalScripts
     {
             const MWWorld::ESMStore& mStore;
-            std::map<std::string, std::pair<bool, Locals> > mScripts; // running, local variables
+            std::map<std::string, GlobalScriptDesc> mScripts;
 
         public:
 
             GlobalScripts (const MWWorld::ESMStore& store);
 
-            void addScript (const std::string& name);
+            void addScript (const std::string& name, const std::string& targetId = "");
 
             void removeScript (const std::string& name);
 
@@ -53,7 +62,7 @@ namespace MWScript
 
             void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            bool readRecord (ESM::ESMReader& reader, int32_t type);
+            bool readRecord (ESM::ESMReader& reader, uint32_t type);
             ///< Records for variables that do not exist are dropped silently.
             ///
             /// \return Known type?

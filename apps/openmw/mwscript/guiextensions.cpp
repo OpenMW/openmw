@@ -12,7 +12,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-
+#include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "interpretercontext.hpp"
@@ -210,6 +210,12 @@ namespace MWScript
             {
                 bool state = MWBase::Environment::get().getWindowManager()->toggleGui();
                 runtime.getContext().report(state ? "GUI -> On" : "GUI -> Off");
+
+                if (!state)
+                {
+                    while (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_None) // don't use isGuiMode, or we get an infinite loop for modal message boxes!
+                        MWBase::Environment::get().getWindowManager()->popGuiMode();
+                }
             }
         };
 
@@ -225,6 +231,8 @@ namespace MWScript
                 new OpShowDialogue (MWGui::GM_Race));
             interpreter.installSegment5 (Compiler::Gui::opcodeEnableStatsReviewMenu,
                 new OpShowDialogue (MWGui::GM_Review));
+            interpreter.installSegment5 (Compiler::Gui::opcodeEnableLevelupMenu,
+                new OpShowDialogue (MWGui::GM_Levelup));
 
             interpreter.installSegment5 (Compiler::Gui::opcodeEnableInventoryMenu,
                 new OpEnableWindow (MWGui::GW_Inventory));

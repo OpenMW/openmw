@@ -14,12 +14,12 @@ class QMenu;
 
 namespace Files { struct ConfigurationManager; }
 namespace ContentSelectorView { class ContentSelector; }
+namespace Config { class GameSettings;
+                   class LauncherSettings; }
 
 namespace Launcher
 {
     class TextInputDialog;
-    class GameSettings;
-    class LauncherSettings;
     class ProfilesComboBox;
 
     class DataFilesPage : public QWidget
@@ -30,8 +30,8 @@ namespace Launcher
         Ui::DataFilesPage ui;
 
     public:
-        explicit DataFilesPage (Files::ConfigurationManager &cfg, GameSettings &gameSettings,
-                                LauncherSettings &launcherSettings, QWidget *parent = 0);
+        explicit DataFilesPage (Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
+                                Config::LauncherSettings &launcherSettings, QWidget *parent = 0);
 
         QAbstractItemModel* profilesModel() const;
 
@@ -39,7 +39,7 @@ namespace Launcher
 
         //void writeConfig(QString profile = QString());
         void saveSettings(const QString &profile = "");
-        void loadSettings();
+        bool loadSettings();
 
     signals:
         void signalProfileChanged (int index);
@@ -53,24 +53,31 @@ namespace Launcher
         void slotProfileRenamed(const QString &previous, const QString &current);
         void slotProfileDeleted(const QString &item);
 
+        void updateOkButton(const QString &text);
+
         void on_newProfileAction_triggered();
         void on_deleteProfileAction_triggered();
 
+    public:
+        /// Content List that is always present
+        const static char *mDefaultContentListName;
+
     private:
 
-        QMenu *mContextMenu;
+        TextInputDialog *mProfileDialog;
 
         Files::ConfigurationManager &mCfgMgr;
 
-        GameSettings &mGameSettings;
-        LauncherSettings &mLauncherSettings;
+        Config::GameSettings &mGameSettings;
+        Config::LauncherSettings &mLauncherSettings;
+
+        QString mPreviousProfile;
 
         QString mDataLocal;
 
         void setPluginsCheckstates(Qt::CheckState state);
 
         void buildView();
-        void setupDataFiles();
         void setupConfig();
         void readConfig();
         void setProfile (int index, bool savePrevious);
@@ -79,6 +86,7 @@ namespace Launcher
         bool showDeleteMessageBox (const QString &text);
         void addProfile (const QString &profile, bool setAsCurrent);
         void checkForDefaultProfile();
+        void populateFileViews(const QString& contentModelName);
 
         class PathIterator
         {
@@ -131,6 +139,8 @@ namespace Launcher
             }
 
         };
+
+        QStringList filesInProfile(const QString& profileName, PathIterator& pathIterator);
     };
 }
 #endif

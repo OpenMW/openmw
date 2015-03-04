@@ -6,22 +6,17 @@
 
 #include "bookpage.hpp"
 
-#include "keywordsearch.hpp"
+#include "../mwdialogue/keywordsearch.hpp"
+
+namespace Gui
+{
+    class MWList;
+}
 
 namespace MWGui
 {
     class WindowManager;
-
-    namespace Widgets
-    {
-        class MWList;
-    }
 }
-
-/*
-  This file contains the dialouge window
-  Layout is defined by resources/mygui/openmw_dialogue_window.layout.
- */
 
 namespace MWGui
 {
@@ -76,7 +71,7 @@ namespace MWGui
         virtual void activated ();
     };
 
-    typedef KeywordSearch <std::string, intptr_t> KeywordSearchT;
+    typedef MWDialogue::KeywordSearch <std::string, intptr_t> KeywordSearchT;
 
     struct DialogueText
     {
@@ -152,6 +147,7 @@ namespace MWGui
 
     private:
         void updateOptions();
+        void restock();
 
         int mServices;
 
@@ -160,7 +156,7 @@ namespace MWGui
         bool mGoodbye;
 
         std::vector<DialogueText*> mHistoryContents;
-        std::map<std::string, int> mChoices;
+        std::vector<std::pair<std::string, int> > mChoices;
 
         std::vector<Link*> mLinks;
         std::map<std::string, Link*> mTopicLinks;
@@ -168,9 +164,9 @@ namespace MWGui
         KeywordSearchT mKeywordSearch;
 
         BookPage* mHistory;
-        Widgets::MWList*   mTopicsList;
+        Gui::MWList*   mTopicsList;
         MyGUI::ScrollBar* mScrollBar;
-        MyGUI::Progress* mDispositionBar;
+        MyGUI::ProgressBar* mDispositionBar;
         MyGUI::EditBox*     mDispositionText;
 
         PersuasionDialog mPersuasionDialog;

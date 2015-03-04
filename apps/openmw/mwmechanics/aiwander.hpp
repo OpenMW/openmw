@@ -12,8 +12,12 @@
 
 #include "../mwworld/timestamp.hpp"
 
+
+#include "aistate.hpp"
+
 namespace ESM
 {
+    class Cell;
     namespace AiSequence
     {
         struct AiWander;
@@ -21,7 +25,11 @@ namespace ESM
 }
 
 namespace MWMechanics
-{
+{    
+    
+    
+    struct AiWanderStorage;
+
     /// \brief Causes the Actor to wander within a specified range
     class AiWander : public AiPackage
     {
@@ -36,11 +44,11 @@ namespace MWMechanics
 
             AiWander (const ESM::AiSequence::AiWander* wander);
 
-            void init();
+            
 
             virtual AiPackage *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor,float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
 
             virtual int getTypeId() const;
 
@@ -50,64 +58,65 @@ namespace MWMechanics
 
             virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
+            virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
+            
+            enum GreetingState {
+                Greet_None,
+                Greet_InProgress,
+                Greet_Done
+            };
         private:
-            void stopWalking(const MWWorld::Ptr& actor);
+            // NOTE: mDistance and mDuration must be set already
+            void init();
+            
+            void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
-            void getRandomIdle();
+            void getRandomIdle(unsigned short& playedIdle);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
             int mTimeOfDay;
             std::vector<unsigned char> mIdle;
             bool mRepeat;
-
-            bool mSaidGreeting;
+            
 
             bool mHasReturnPosition; // NOTE: Could be removed if mReturnPosition was initialized to actor position,
                                     // if we had the actor in the AiWander constructor...
             Ogre::Vector3 mReturnPosition;
 
-            // Cached current cell location
-            int mCellX;
-            int mCellY;
-            // Cell location multiplied by ESM::Land::REAL_SIZE
-            float mXCell;
-            float mYCell;
+            Ogre::Vector3 mInitialActorPosition;
+            bool mStoredInitialActorPosition;
 
-            const MWWorld::CellStore* mCell; // for detecting cell change
+           
 
             // if false triggers calculating allowed nodes based on mDistance
             bool mStoredAvailableNodes;
-            // AiWander states
-            bool mChooseAction;
-            bool mIdleNow;
-            bool mMoveNow;
-            bool mWalking;
 
-            unsigned short mPlayedIdle;
+
+            
 
             MWWorld::TimeStamp mStartTime;
 
             // allowed pathgrid nodes based on mDistance from the spawn point
             std::vector<ESM::Pathgrid::Point> mAllowedNodes;
+
+            void getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell);
+
             ESM::Pathgrid::Point mCurrentNode;
             bool mTrimCurrentNode;
             void trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
                                   const PathFinder& pathfinder);
 
-            PathFinder mPathFinder;
 
-            ObstacleCheck mObstacleCheck;
+//             ObstacleCheck mObstacleCheck;
             float mDoorCheckDuration;
             int mStuckCount;
 
-            // the z rotation angle (degrees) we want to reach
-            // used every frame when mRotate is true
-            float mTargetAngle;
-            bool mRotate;
-            float mReaction; // update some actions infrequently
+
     };
+    
+    
 }
 
 #endif

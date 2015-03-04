@@ -10,19 +10,25 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
                                         const QVariant& new_, QUndoCommand* parent)
 : QUndoCommand (parent), mModel (model), mIndex (index), mNew (new_)
 {
-    mOld = mModel.data (mIndex, Qt::EditRole);
-
     setText ("Modify " + mModel.headerData (mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
 }
 
 void CSMWorld::ModifyCommand::redo()
 {
+    mOld = mModel.data (mIndex, Qt::EditRole);
     mModel.setData (mIndex, mNew);
 }
 
 void CSMWorld::ModifyCommand::undo()
 {
     mModel.setData (mIndex, mOld);
+}
+
+
+void CSMWorld::CreateCommand::applyModifications()
+{
+    for (std::map<int, QVariant>::const_iterator iter (mValues.begin()); iter!=mValues.end(); ++iter)
+        mModel.setData (mModel.getModelIndex (mId, iter->first), iter->second);
 }
 
 CSMWorld::CreateCommand::CreateCommand (IdTable& model, const std::string& id, QUndoCommand* parent)
@@ -44,9 +50,7 @@ void CSMWorld::CreateCommand::setType (UniversalId::Type type)
 void CSMWorld::CreateCommand::redo()
 {
     mModel.addRecord (mId, mType);
-
-    for (std::map<int, QVariant>::const_iterator iter (mValues.begin()); iter!=mValues.end(); ++iter)
-        mModel.setData (mModel.getModelIndex (mId, iter->first), iter->second);
+    applyModifications();
 }
 
 void CSMWorld::CreateCommand::undo()
@@ -148,29 +152,24 @@ void CSMWorld::ReorderRowsCommand::undo()
 
 CSMWorld::CloneCommand::CloneCommand (CSMWorld::IdTable& model,
                                       const std::string& idOrigin,
-                                      const std::string& IdDestination,
+                                      const std::string& idDestination,
                                       const CSMWorld::UniversalId::Type type,
-                                      QUndoCommand* parent) :
-    QUndoCommand (parent),
-    mModel (model),
-    mIdOrigin (idOrigin),
-    mIdDestination (Misc::StringUtils::lowerCase (IdDestination)),
-    mType (type)
+                                      QUndoCommand* parent)
+: CreateCommand (model, idDestination, parent), mIdOrigin (idOrigin)
 {
-    setText ( ("Clone record " + idOrigin + " to the " + IdDestination).c_str());
+    setType (type);
+    setText ( ("Clone record " + idOrigin + " to the " + idDestination).c_str());
 }
 
 void CSMWorld::CloneCommand::redo()
 {
-    mModel.cloneRecord (mIdOrigin, mIdDestination, mType);
-
-    for (std::map<int, QVariant>::const_iterator iter (mValues.begin()); iter != mValues.end(); ++iter)
-        mModel.setData (mModel.getModelIndex (mIdDestination, iter->first), iter->second);
+    mModel.cloneRecord (mIdOrigin, mId, mType);
+    applyModifications();
 }
 
 void CSMWorld::CloneCommand::undo()
 {
-    mModel.removeRow (mModel.getModelIndex (mIdDestination, 0).row());
+    mModel.removeRow (mModel.getModelIndex (mId, 0).row());
 }
 
 CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTable& model,

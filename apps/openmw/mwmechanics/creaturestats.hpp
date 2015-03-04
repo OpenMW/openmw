@@ -40,7 +40,6 @@ namespace MWMechanics
         bool mTalkedTo;
         bool mAlarmed;
         bool mAttacked;
-        bool mHostile;
         bool mAttackingOrSpell;
         bool mKnockdown;
         bool mKnockdownOneFrame;
@@ -53,9 +52,9 @@ namespace MWMechanics
         float mFallHeight;
 
         std::string mLastHitObject; // The last object to hit this actor
+        std::string mLastHitAttemptObject; // The last object to attempt to hit this actor
 
-        // Do we need to recalculate stats derived from attributes or other factors?
-        bool mRecalcDynamicStats;
+        bool mRecalcMagicka;
 
         // For merchants: the last time items were restocked and gold pool refilled.
         MWWorld::TimeStamp mLastRestock;
@@ -68,8 +67,11 @@ namespace MWMechanics
         // The index of the death animation that was played
         unsigned char mDeathAnimation;
 
-        // <ESM::MagicEffect index, ActorId>
-        std::map<int, int> mSummonedCreatures;
+    public:
+        typedef std::pair<int, std::string> SummonKey; // <ESM::MagicEffect index, spell ID>
+    private:
+        std::map<SummonKey, int> mSummonedCreatures; // <SummonKey, ActorId>
+
         // Contains ActorIds of summoned creatures with an expired lifetime that have not been deleted yet.
         // This may be necessary when the creature is in an inactive cell.
         std::vector<int> mSummonGraveyard;
@@ -92,6 +94,7 @@ namespace MWMechanics
         void setAttackStrength(float value);
 
         bool needToRecalcDynamicStats();
+        void setNeedRecalcDynamicStats(bool val);
 
         void addToFallHeight(float height);
 
@@ -137,11 +140,8 @@ namespace MWMechanics
 
         void setDynamic (int index, const DynamicStat<float> &value);
 
-        void setSpells(const Spells &spells);
-
-        void setActiveSpells(const ActiveSpells &active);
-
-        void setMagicEffects(const MagicEffects &effects);
+        /// Set Modifier for each magic effect according to \a effects. Does not touch Base values.
+        void modifyMagicEffects(const MagicEffects &effects);
 
         void setAttackingOrSpell(bool attackingOrSpell);
 
@@ -166,6 +166,8 @@ namespace MWMechanics
         ///< Return effective fatigue
 
         bool isDead() const;
+
+        void notifyDied();
 
         bool hasDied() const;
 
@@ -200,11 +202,6 @@ namespace MWMechanics
         bool getAttacked() const;
         void setAttacked (bool attacked);
 
-        bool isHostile() const;
-        void setHostile (bool hostile);
-
-        bool getCreatureTargetted() const;
-
         float getEvasion() const;
 
         void setKnockedDown(bool value);
@@ -222,15 +219,17 @@ namespace MWMechanics
         void setBlock(bool value);
         bool getBlock() const;
 
-        std::map<int, int>& getSummonedCreatureMap();
-        std::vector<int>& getSummonedCreatureGraveyard();
+        std::map<SummonKey, int>& getSummonedCreatureMap(); // <SummonKey, ActorId of summoned creature>
+        std::vector<int>& getSummonedCreatureGraveyard(); // ActorIds
 
         enum Flag
         {
             Flag_ForceRun = 1,
             Flag_ForceSneak = 2,
             Flag_Run = 4,
-            Flag_Sneak = 8
+            Flag_Sneak = 8,
+            Flag_ForceJump = 16,
+            Flag_ForceMoveJump = 32
         };
         enum Stance
         {
@@ -244,7 +243,9 @@ namespace MWMechanics
         bool getStance (Stance flag) const;
 
         void setLastHitObject(const std::string &objectid);
+        void setLastHitAttemptObject(const std::string &objectid);
         const std::string &getLastHitObject() const;
+        const std::string &getLastHitAttemptObject() const;
 
         // Note, this is just a cache to avoid checking the whole container store every frame. We don't need to store it in saves.
         // TODO: Put it somewhere else?

@@ -96,7 +96,7 @@ QWidget *CSVDoc::StartupDialogue::createTools()
 
 CSVDoc::StartupDialogue::StartupDialogue() : mWidth (0), mColumn (2)
 {
-    setWindowTitle ("Open CS");
+    setWindowTitle ("OpenMW-CS");
 
     QVBoxLayout *layout = new QVBoxLayout (this);
 

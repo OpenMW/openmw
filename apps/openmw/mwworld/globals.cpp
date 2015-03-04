@@ -85,11 +85,10 @@ namespace MWWorld
             writer.writeHNString ("NAME", iter->first);
             iter->second.write (writer, ESM::Variant::Format_Global);
             writer.endRecord (ESM::REC_GLOB);
-            progress.increaseProgress();
         }
     }
 
-    bool Globals::readRecord (ESM::ESMReader& reader,  int32_t type)
+    bool Globals::readRecord (ESM::ESMReader& reader,  uint32_t type)
     {
         if (type==ESM::REC_GLOB)
         {

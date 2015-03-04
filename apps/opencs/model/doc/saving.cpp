@@ -17,7 +17,14 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
 
     appendStage (new WriteHeaderStage (mDocument, mState, true));
 
-    appendStage (new WriteFilterStage (mDocument, mState, CSMFilter::Filter::Scope_Project));
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Filter> > (
+        mDocument.getData().getFilters(), mState, CSMWorld::Scope_Project));
+
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::DebugProfile> > (
+        mDocument.getData().getDebugProfiles(), mState, CSMWorld::Scope_Project));
+
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Script> > (
+        mDocument.getData().getScripts(), mState, CSMWorld::Scope_Project));
 
     appendStage (new CloseSaveStage (mState));
 
@@ -65,6 +72,15 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::BodyPart> >
         (mDocument.getData().getBodyParts(), mState));
 
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::SoundGenerator> >
+        (mDocument.getData().getSoundGens(), mState));
+
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::MagicEffect> >
+        (mDocument.getData().getMagicEffects(), mState));
+
+    appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::StartScript> >
+        (mDocument.getData().getStartScripts(), mState));
+
     appendStage (new WriteDialogueCollectionStage (mDocument, mState, false));
 
     appendStage (new WriteDialogueCollectionStage (mDocument, mState, true));
@@ -74,6 +90,8 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
     appendStage (new CollectionReferencesStage (mDocument, mState));
 
     appendStage (new WriteCellCollectionStage (mDocument, mState));
+
+    appendStage (new WritePathgridCollectionStage (mDocument, mState));
 
     // close file and clean up
     appendStage (new CloseSaveStage (mState));

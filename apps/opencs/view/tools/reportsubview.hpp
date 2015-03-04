@@ -11,27 +11,15 @@ namespace CSMDoc
     class Document;
 }
 
-namespace CSMTools
-{
-    class ReportModel;
-}
-
-namespace CSVWorld
-{
-    class CommandDelegate;
-}
-
 namespace CSVTools
 {
-    class Table;
+    class ReportTable;
 
     class ReportSubView : public CSVDoc::SubView
     {
             Q_OBJECT
 
-            CSMTools::ReportModel *mModel;
-            QTableView *mTable;
-            CSVWorld::CommandDelegate *mIdTypeDelegate;
+            ReportTable *mTable;
 
         public:
 
@@ -39,12 +27,7 @@ namespace CSVTools
 
             virtual void setEditLock (bool locked);
 
-            virtual void updateUserSetting
-                                        (const QString &, const QStringList &);
-
-        private slots:
-
-            void show (const QModelIndex& index);
+            virtual void updateUserSetting (const QString &, const QStringList &);
     };
 }
 

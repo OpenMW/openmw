@@ -12,6 +12,7 @@
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
 
@@ -22,19 +23,22 @@
 
 namespace MWClass
 {
-    void Clothing::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    std::string Clothing::getId (const MWWorld::Ptr& ptr) const
     {
-        const std::string model = getModel(ptr);
+        return ptr.get<ESM::Clothing>()->mBase->mId;
+    }
+
+    void Clothing::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
+    {
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    void Clothing::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Clothing::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr,true);
+            physics.addObject(ptr, model, true);
     }
 
     std::string Clothing::getModel(const MWWorld::Ptr &ptr) const
@@ -287,7 +291,8 @@ namespace MWClass
 
     bool Clothing::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Clothing;
+        return (npcServices & ESM::NPC::Clothing)
+                || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
     float Clothing::getWeight(const MWWorld::Ptr &ptr) const

@@ -1,19 +1,23 @@
 #ifndef GAME_MWBASE_WINDOWMANAGER_H
 #define GAME_MWBASE_WINDOWMANAGER_H
 
+#include <stdint.h>
 #include <string>
 #include <vector>
 #include <map>
-
-#include <components/settings/settings.hpp>
-
-#include <components/translation/translation.hpp>
-
-#include <components/loadinglistener/loadinglistener.hpp>
-
-#include "../mwmechanics/stat.hpp"
+#include <set>
 
 #include "../mwgui/mode.hpp"
+
+namespace Loading
+{
+    class Listener;
+}
+
+namespace Translation
+{
+    class Storage;
+}
 
 namespace MyGUI
 {
@@ -35,6 +39,15 @@ namespace ESM
     struct Class;
     class ESMReader;
     class ESMWriter;
+    struct CellId;
+}
+
+namespace MWMechanics
+{
+    class AttributeValue;
+    template<typename T>
+    class DynamicStat;
+    class SkillValue;
 }
 
 namespace MWWorld
@@ -58,6 +71,7 @@ namespace MWGui
     class ContainerWindow;
     class DialogueWindow;
     class WindowModal;
+    class JailScreen;
 
     enum ShowInDialogueMode {
         ShowInDialogueMode_IfPossible,
@@ -109,6 +123,8 @@ namespace MWBase
             virtual void removeGuiMode (MWGui::GuiMode mode) = 0;
             ///< can be anywhere in the stack
 
+            virtual void goToJail(int days) = 0;
+
             virtual void updatePlayer() = 0;
 
             virtual MWGui::GuiMode getMode() const = 0;
@@ -145,8 +161,6 @@ namespace MWBase
             virtual MWGui::SpellWindow* getSpellWindow() = 0;
             virtual MWGui::Console* getConsole() = 0;
 
-            virtual MyGUI::Gui* getGui() const = 0;
-
             virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount) = 0;
 
             /// Set value for the given ID.
@@ -179,7 +193,7 @@ namespace MWBase
             virtual void changeCell(MWWorld::CellStore* cell) = 0;
             ///< change the active cell
 
-            virtual void setPlayerPos(const float x, const float y) = 0;
+            virtual void setPlayerPos(int cellX, int cellY, const float x, const float y) = 0;
             ///< set player position in map space
 
             virtual void setPlayerDir(const float x, const float y) = 0;
@@ -227,7 +241,6 @@ namespace MWBase
 
             virtual void showCrosshair(bool show) = 0;
             virtual bool getSubtitlesEnabled() = 0;
-            virtual void toggleHud() = 0;
             virtual bool toggleGui() = 0;
 
             virtual void disallowMouse() = 0;
@@ -243,9 +256,11 @@ namespace MWBase
             /** No guarentee of actually closing the window **/
             virtual void exitCurrentGuiMode() = 0;
 
-            virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
+            virtual void messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible) = 0;
             virtual void staticMessageBox(const std::string& message) = 0;
             virtual void removeStaticMessageBox() = 0;
+            virtual void interactiveMessageBox (const std::string& message,
+                                                const std::vector<std::string>& buttons = std::vector<std::string>(), bool block=false) = 0;
 
             /// returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
             virtual int readPressedButton() = 0;
@@ -267,7 +282,7 @@ namespace MWBase
              */
             virtual std::string getGameSettingString(const std::string &id, const std::string &default_) = 0;
 
-            virtual void processChangedSettings(const Settings::CategorySettingVector& changed) = 0;
+            virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& changed) = 0;
 
             virtual void windowResized(int x, int y) = 0;
 
@@ -311,7 +326,7 @@ namespace MWBase
             virtual void clear() = 0;
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
+            virtual void readRecord (ESM::ESMReader& reader, uint32_t type) = 0;
             virtual int countSavedGameRecords() const = 0;
 
             /// Does the current stack of GUI-windows permit saving?
@@ -331,6 +346,25 @@ namespace MWBase
             virtual void removeCurrentModal(MWGui::WindowModal* input) = 0;
 
             virtual void pinWindow (MWGui::GuiWindow window) = 0;
+
+            /// Fade the screen in, over \a time seconds
+            virtual void fadeScreenIn(const float time, bool clearQueue=true) = 0;
+            /// Fade the screen out to black, over \a time seconds
+            virtual void fadeScreenOut(const float time, bool clearQueue=true) = 0;
+            /// Fade the screen to a specified percentage of black, over \a time seconds
+            virtual void fadeScreenTo(const int percent, const float time, bool clearQueue=true) = 0;
+            /// Darken the screen to a specified percentage
+            virtual void setBlindness(const int percent) = 0;
+
+            virtual void activateHitOverlay(bool interrupt=true) = 0;
+            virtual void setWerewolfOverlay(bool set) = 0;
+
+            virtual void toggleDebugWindow() = 0;
+
+            /// Cycle to next or previous spell
+            virtual void cycleSpell(bool next) = 0;
+            /// Cycle to next or previous weapon
+            virtual void cycleWeapon(bool next) = 0;
     };
 }
 

@@ -44,7 +44,7 @@
             </Widget>
 
             <Widget type="TextBox" skin="SandText" position="48 0 140 24" name="TotalBalanceLabel" align="Left Top "/>
-            <Widget type="EditBox" skin="MW_TextEdit" position="48 28 140 24" name="TotalBalance" align="Left Top">
+            <Widget type="NumericEditBox" skin="MW_TextEdit" position="48 28 140 24" name="TotalBalance" align="Left Top">
                 <Property key="TextAlign" value="Center"/>
             </Widget>
 

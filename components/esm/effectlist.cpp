@@ -7,11 +7,17 @@ namespace ESM {
 
 void EffectList::load(ESMReader &esm)
 {
-    ENAMstruct s;
+    mList.clear();
     while (esm.isNextSub("ENAM")) {
-        esm.getHT(s, 24);
-        mList.push_back(s);
+        add(esm);
     }
+}
+
+void EffectList::add(ESMReader &esm)
+{
+    ENAMstruct s;
+    esm.getHT(s, 24);
+    mList.push_back(s);
 }
 
 void EffectList::save(ESMWriter &esm) const

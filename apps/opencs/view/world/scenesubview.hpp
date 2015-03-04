@@ -44,6 +44,7 @@ namespace CSVWorld
             QHBoxLayout* mLayout;
             CSMDoc::Document& mDocument;
             CSVWidget::SceneToolbar* mToolbar;
+            std::string mTitle;
 
         public:
 
@@ -56,6 +57,8 @@ namespace CSVWorld
             virtual void setStatusBar (bool show);
 
             virtual void useHint (const std::string& hint);
+
+            virtual std::string getTitle() const;
 
         private:
 
@@ -75,13 +78,19 @@ namespace CSVWorld
 
         private slots:
 
-            void closeRequest();
-
             void cellSelectionChanged (const CSMWorld::CellSelection& selection);
 
             void cellSelectionChanged (const CSMWorld::UniversalId& id);
 
             void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
+
+        public slots:
+
+            void updateUserSetting (const QString &, const QStringList &);
+
+        signals:
+
+            void updateSceneUserSetting (const QString &, const QStringList &);
     };
 }
 

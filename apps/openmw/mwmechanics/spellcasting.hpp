@@ -22,18 +22,25 @@ namespace MWMechanics
 
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
 
+    bool isSummoningEffect(int effectId);
+
     /**
      * @param spell spell to cast
      * @param actor calculate spell success chance for this actor (depends on actor's skills)
      * @param effectiveSchool the spell's effective school (relevant for skill progress) will be written here
-     * @attention actor has to be an NPC and not a creature!
-     * @return success chance from 0 to 100 (in percent)
+     * @param cap cap the result to 100%?
+     * @note actor can be an NPC or a creature
+     * @return success chance from 0 to 100 (in percent), if cap=false then chance above 100 may be returned.
      */
-    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool = NULL);
-    float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool = NULL);
+    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool = NULL, bool cap=true);
+    float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool = NULL, bool cap=true);
 
     int getSpellSchool(const std::string& spellId, const MWWorld::Ptr& actor);
     int getSpellSchool(const ESM::Spell* spell, const MWWorld::Ptr& actor);
+
+    /// Get whether or not the given spell contributes to skill progress.
+    bool spellIncreasesSkill(const ESM::Spell* spell);
+    bool spellIncreasesSkill(const std::string& spellId);
 
     /// Get the resistance attribute against an effect for a given actor. This will add together
     /// ResistX and Weakness to X effects relevant against the given effect.
@@ -46,8 +53,14 @@ namespace MWMechanics
     float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
                                const ESM::Spell* spell = NULL, const MagicEffects* effects = NULL);
 
+    /// Get an effect multiplier for applying an effect cast by the given actor in the given spell (optional).
+    /// @return effect multiplier from 0 to 2.  (100% net resistance to 100% net weakness)
+    /// @param effects Override the actor's current magicEffects. Useful if there are effects currently
+    ///                being applied (but not applied yet) that should also be considered.
     float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
                               const ESM::Spell* spell = NULL, const MagicEffects* effects = NULL);
+
+    int getEffectiveEnchantmentCastCost (float castCost, const MWWorld::Ptr& actor);
 
     class CastSpell
     {
@@ -59,6 +72,7 @@ namespace MWMechanics
         std::string mId; // ID of spell, potion, item etc
         std::string mSourceName; // Display name for spell, potion, etc
         Ogre::Vector3 mHitPosition; // Used for spawning area orb
+        bool mAlwaysSucceed; // Always succeed spells casted by NPCs/creatures regardless of their chance (default: false)
 
     public:
         CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target);

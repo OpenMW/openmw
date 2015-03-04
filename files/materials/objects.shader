@@ -23,6 +23,8 @@
 #define DARK_MAP @shPropertyHasValue(darkMap)
 #define SPEC_MAP @shPropertyHasValue(specMap) && SPECULAR
 
+#define ALPHATEST_MODE @shPropertyString(alphaTestMode)
+
 #define PARALLAX @shPropertyBool(use_parallax)
 #define PARALLAX_SCALE 0.04
 #define PARALLAX_BIAS -0.02
@@ -164,7 +166,7 @@
 
 #if VIEWPROJ_FIX
         float4x4 vpFixed = vpMatrix;
-#if !SH_GLSL
+#if !SH_GLSL && !SH_GLSLES
         vpFixed[2] = vpRow2Fix;
 #else
         vpFixed[0][2] = vpRow2Fix.x;
@@ -210,11 +212,11 @@
 #if VERTEXCOLOR_MODE == 2
             lightResult.xyz += colour.xyz * lightDiffuse[@shIterator].xyz
                     * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(viewNormal.xyz, lightDir), 0);
+                    * max(dot(viewNormal.xyz, lightDir), 0.0);
 #else
             lightResult.xyz += materialDiffuse.xyz * lightDiffuse[@shIterator].xyz
                     * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(viewNormal.xyz, lightDir), 0);
+                    * max(dot(viewNormal.xyz, lightDir), 0.0);
 #endif
 
 #if @shIterator == 0
@@ -241,7 +243,9 @@
     }
 
 #else
-
+#if NORMAL_MAP && SH_GLSLES
+    mat3 transpose( mat3 m);
+#endif
     // ----------------------------------- FRAGMENT ------------------------------------------
 
 #if UNDERWATER
@@ -354,6 +358,10 @@
     #endif
 #endif
 
+#if ALPHATEST_MODE != 0
+    shUniform(float, alphaTestValue) @shUniformProperty1f(alphaTestValue, alphaTestValue)
+#endif
+
     SH_START_PROGRAM
     {
         float4 newUV = UV;
@@ -370,13 +378,13 @@
         float3 binormal = cross(tangentPassthrough.xyz, normal.xyz);
         float3x3 tbn = float3x3(tangentPassthrough.xyz, binormal, normal.xyz);
 
-        #if SH_GLSL
+        #if SH_GLSL || SH_GLSLES
             tbn = transpose(tbn);
         #endif
 
         float4 normalTex = shSample(normalMap, UV.xy);
 
-        normal = normalize (shMatrixMult( transpose(tbn), normalTex.xyz * 2 - 1 ));
+        normal = normalize (shMatrixMult( transpose(tbn), normalTex.xyz * 2.0 - 1.0 ));
 #endif
 
 #if ENV_MAP || SPECULAR || PARALLAX
@@ -398,6 +406,29 @@
 #else
         float4 diffuse = float4(1,1,1,1);
 #endif
+
+#if ALPHATEST_MODE == 1
+        if (diffuse.a >= alphaTestValue)
+            discard;
+#elif ALPHATEST_MODE == 2
+        if (diffuse.a != alphaTestValue)
+            discard;
+#elif ALPHATEST_MODE == 3
+        if (diffuse.a > alphaTestValue)
+            discard;
+#elif ALPHATEST_MODE == 4
+        if (diffuse.a <= alphaTestValue)
+            discard;
+#elif ALPHATEST_MODE == 5
+        if (diffuse.a == alphaTestValue)
+            discard;
+#elif ALPHATEST_MODE == 6
+        if (diffuse.a < alphaTestValue)
+            discard;
+#elif ALPHATEST_MODE == 7
+        discard;
+#endif
+
 
 #if DETAIL_MAP
 #if @shPropertyString(detailMapUVSet)
@@ -432,11 +463,11 @@
 #if VERTEXCOLOR_MODE == 2
             lightResult.xyz += colourPassthrough.xyz * lightDiffuse[@shIterator].xyz
                     * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(viewNormal.xyz, lightDir), 0);
+                    * max(dot(viewNormal.xyz, lightDir), 0.0);
 #else
             lightResult.xyz += materialDiffuse.xyz * lightDiffuse[@shIterator].xyz
                     * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(viewNormal.xyz, lightDir), 0);
+                    * max(dot(viewNormal.xyz, lightDir), 0.0);
 #endif
 
 #if @shIterator == 0
@@ -470,7 +501,7 @@
 
 #if SHADOWS || SHADOWS_PSSM
             float fadeRange = shadowFar_fadeStart.x - shadowFar_fadeStart.y;
-            float fade = 1-((depthPassthrough - shadowFar_fadeStart.y) / fadeRange);
+            float fade = 1.0-((depthPassthrough - shadowFar_fadeStart.y) / fadeRange);
             shadow = (depthPassthrough > shadowFar_fadeStart.x) ? 1.0 : ((depthPassthrough > shadowFar_fadeStart.y) ? 1.0-((1.0-shadow)*fade) : shadow);
 #endif
 
@@ -485,11 +516,11 @@
 #endif
 
 #if UNDERWATER
-    float3 waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,0,1), waterLevel);
+    float3 waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0.0,0.0,1.0), waterLevel);
 #endif
 
 #if SHADOWS || SHADOWS_PSSM
-        shOutputColour(0) *= (lightResult - float4(directionalResult * (1.0-shadow),0));
+        shOutputColour(0) *= (lightResult - float4(directionalResult * (1.0-shadow),0.0));
 #else
         shOutputColour(0) *= lightResult;
 #endif
@@ -504,8 +535,8 @@
 
 #if ENV_MAP
         // Everything looks better with fresnel
-        float facing = 1.0 - max(abs(dot(-eyeDir, normal)), 0);
-        float envFactor = shSaturate(0.25 + 0.75 * pow(facing, 1));
+        float facing = 1.0 - max(abs(dot(-eyeDir, normal)), 0.0);
+        float envFactor = shSaturate(0.25 + 0.75 * pow(facing, 1.0));
 
         shOutputColour(0).xyz += shSample(envMap, UV.zw).xyz * envFactor * env_map_color;
 #endif
@@ -513,7 +544,7 @@
 #if SPECULAR
         float3 light0Dir = normalize(lightPosObjSpace0.xyz);
 
-        float NdotL = max(dot(normal, light0Dir), 0);
+        float NdotL = max(dot(normal, light0Dir), 0.0);
         float3 halfVec = normalize (light0Dir + eyeDir);
 
         float shininess = matShininess;
@@ -522,7 +553,7 @@
         shininess *= (specTex.a);
 #endif
 
-        float3 specular = pow(max(dot(normal, halfVec), 0), shininess) * lightSpec0 * matSpec;
+        float3 specular = pow(max(dot(normal, halfVec), 0.0), shininess) * lightSpec0 * matSpec;
 #if SPEC_MAP
         specular *= specTex.xyz;
 #else
@@ -545,7 +576,16 @@
 #endif
 
         // prevent negative colour output (for example with negative lights)
-        shOutputColour(0).xyz = max(shOutputColour(0).xyz, float3(0,0,0));
+        shOutputColour(0).xyz = max(shOutputColour(0).xyz, float3(0.0,0.0,0.0));
     }
+#if NORMAL_MAP && SH_GLSLES
+         mat3 transpose(mat3 m){
+           return  mat3(
+            m[0][0],m[1][0],m[2][0],
+            m[0][1],m[1][1],m[2][1],
+            m[0][2],m[1][2],m[2][2]
+            );
+         }
+#endif
 
 #endif

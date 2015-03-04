@@ -23,6 +23,7 @@ namespace MyGUI
  *  As of MyGUI 3.2.0, MyGUI::OgreDataManager::isDataExist is unnecessarily complex
  *  this override fixes the resulting performance issue.
  */
+// Remove for MyGUI 3.2.2
 class FixedOgreDataManager : public MyGUI::OgreDataManager
 {
 public:
@@ -102,6 +103,9 @@ public:
         mVertexProgramOneTexture(NULL),
         mFragmentProgramOneTexture(NULL)
     {
+        mTextureAddressMode.u = Ogre::TextureUnitState::TAM_CLAMP;
+        mTextureAddressMode.v = Ogre::TextureUnitState::TAM_CLAMP;
+        mTextureAddressMode.w = Ogre::TextureUnitState::TAM_CLAMP;
     }
 
     void initialise(Ogre::RenderWindow* _window, Ogre::SceneManager* _scene)
@@ -637,23 +641,11 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
     mGui->initialise("");
 }
 
-void MyGUIManager::updateWindow (Ogre::RenderWindow *wnd)
-{
-    if (mShaderRenderManager)
-    {
-        mShaderRenderManager->setRenderWindow (wnd);
-        mShaderRenderManager->setActiveViewport(0);
-    }
-    else
-    {
-        mRenderManager->setRenderWindow (wnd);
-        mRenderManager->setActiveViewport(0);
-    }
-}
-
 void MyGUIManager::windowResized()
 {
+#ifndef ANDROID
     mRenderManager->setActiveViewport(0);
+#endif
 }
 
 void MyGUIManager::shutdown()

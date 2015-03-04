@@ -12,22 +12,25 @@
 
 namespace MWClass
 {
-    void Static::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    std::string Static::getId (const MWWorld::Ptr& ptr) const
+    {
+        return ptr.get<ESM::Static>()->mBase->mId;
+    }
+
+    void Static::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         MWWorld::LiveCellRef<ESM::Static> *ref =
             ptr.get<ESM::Static>();
 
-        const std::string model = getModel(ptr);
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model, !ref->mBase->mPersistent);
         }
     }
 
-    void Static::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Static::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr, model);
     }
 
     std::string Static::getModel(const MWWorld::Ptr &ptr) const

@@ -18,7 +18,7 @@ namespace ESM
 {
 class ESMReader;
 class ESMWriter;
-    class CellId;
+struct CellId;
 
 /* Moved cell reference tracking object. This mainly stores the target cell
         of the reference, so we can easily know where it has been moved when another
@@ -78,7 +78,13 @@ struct Cell
     float mFogDensity;
   };
 
-  Cell() : mWater(0) {}
+  Cell() : mWater(0),
+           mName(""),
+           mRegion(""),
+           mWaterInt(false),
+           mMapColor(0),
+           mRefNumCounter(0)
+  {}
 
   // Interior cells are indexed by this (it's the 'id'), for exterior
   // cells it is optional.
@@ -94,17 +100,16 @@ struct Cell
   float mWater; // Water level
   bool mWaterInt;
   int mMapColor;
-  // Counter for RefIds. This is only used during content file editing and has no impact on gameplay.
-  // It prevents overwriting previous refIDs, even if they were deleted.
+  // Counter for RefNums. This is only used during content file editing and has no impact on gameplay.
+  // It prevents overwriting previous refNums, even if they were deleted.
   // as that would collide with refs when a content file is upgraded.
-  int mRefIdCounter;
+  int mRefNumCounter;
 
   // References "leased" from another cell (i.e. a different cell
   //  introduced this ref, and it has been moved here by a plugin)
   CellRefTracker mLeasedRefs;
   MovedCellRefTracker mMovedRefs;
 
-  void preLoad(ESMReader &esm);
   void postLoad(ESMReader &esm);
 
   // This method is left in for compatibility with esmtool. Parsing moved references currently requires
@@ -132,7 +137,7 @@ struct Cell
 
   bool hasWater() const
   {
-      return (mData.mFlags&HasWater);
+      return (mData.mFlags&HasWater) != 0;
   }
 
   // Restore the given reader to the stored position. Will try to open

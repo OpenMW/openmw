@@ -39,6 +39,20 @@ namespace ESM
             int index; // Position of the parent file in the global list of loaded files
         };
 
+        struct GMDT
+        {
+            float mCurrentHealth;
+            float mMaximumHealth;
+            float mHour;
+            unsigned char unknown1[12];
+            NAME64 mCurrentCell;
+            unsigned char unknown2[4];
+            NAME32 mPlayerName;
+        };
+        GMDT mGameData; // Used in .ess savegames only
+        std::vector<unsigned char> mSCRD; // Used in .ess savegames only, unknown
+        std::vector<unsigned char> mSCRS; // Used in .ess savegames only, screenshot
+
         Data mData;
         int mFormat;
         std::vector<MasterData> mMaster;

@@ -1,419 +1,487 @@
 #include "formatting.hpp"
 
-#include <components/interpreter/defines.hpp>
+#include <OgreUTFString.h>
+#include <OgreResourceGroupManager.h>
 
-#include "../mwscript/interpretercontext.hpp"
+#include <MyGUI_EditText.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_FontManager.h>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/range/adaptor/filtered.hpp>
-#include <boost/range/algorithm/copy.hpp>
-#include <OgreUTFString.h>
 
-#include <OgreResourceGroupManager.h>
+#include <components/interpreter/defines.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/misc/stringops.hpp>
 
-namespace
-{
-    int convertFromHex(std::string hex)
-    {
-        int value = 0;
-
-        int a = 0;
-        int b = hex.length() - 1;
-        for (; b >= 0; a++, b--)
-        {
-            if (hex[b] >= '0' && hex[b] <= '9')
-            {
-                value += (hex[b] - '0') * (1 << (a * 4));
-            }
-            else
-            {
-                switch (hex[b])
-                {
-                    case 'A':
-                    case 'a':
-                        value += 10 * (1 << (a * 4));
-                        break;
-
-                    case 'B':
-                    case 'b':
-                        value += 11 * (1 << (a * 4));
-                        break;
-
-                    case 'C':
-                    case 'c':
-                        value += 12 * (1 << (a * 4));
-                        break;
-
-                    case 'D':
-                    case 'd':
-                        value += 13 * (1 << (a * 4));
-                        break;
-
-                    case 'E':
-                    case 'e':
-                        value += 14 * (1 << (a * 4));
-                        break;
-
-                    case 'F':
-                    case 'f':
-                        value += 15 * (1 << (a * 4));
-                        break;
-
-                    default:
-                        throw std::runtime_error("invalid character in hex number");
-                        break;
-                }
-            }
-        }
-
-        return value;
-    }
-
-    Ogre::UTFString::unicode_char unicodeCharFromChar(char ch)
-    {
-        std::string s;
-        s += ch;
-        Ogre::UTFString string(s);
-        return string.getChar(0);
-    }
-    
-    bool is_not_empty(const std::string& s) {
-        std::string temp = s;
-        boost::algorithm::trim(temp);
-        return !temp.empty();
-    }
-}
+#include "../mwscript/interpretercontext.hpp"
 
 namespace MWGui
 {
-
-    std::vector<std::string> BookTextParser::split(std::string utf8Text, const int width, const int height)
+    namespace Formatting
     {
-        using Ogre::UTFString;
-        std::vector<std::string> result;
-
-        MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
-        utf8Text = Interpreter::fixDefinesBook(utf8Text, interpreterContext);
-
-        boost::algorithm::replace_all(utf8Text, "\n", "");
-        boost::algorithm::replace_all(utf8Text, "\r", "");
-        boost::algorithm::replace_all(utf8Text, "<BR>", "\n");
-        boost::algorithm::replace_all(utf8Text, "<P>", "\n\n");
-
-        UTFString text(utf8Text);
-        const int spacing = 48;
-
-        const UTFString::unicode_char LEFT_ANGLE = unicodeCharFromChar('<');
-        const UTFString::unicode_char NEWLINE = unicodeCharFromChar('\n');
-        const UTFString::unicode_char SPACE = unicodeCharFromChar(' ');
-
-        while (!text.empty())
+        /* BookTextParser */
+        BookTextParser::BookTextParser(const std::string & text)
+            : mIndex(0), mText(text), mIgnoreNewlineTags(true), mIgnoreLineEndings(true), mClosingTag(false)
         {
-            // read in characters until we have exceeded the size, or run out of text
-            int currentWidth = 0;
-            int currentHeight = 0;
+            MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
+            mText = Interpreter::fixDefinesBook(mText, interpreterContext);
 
-            size_t currentWordStart = 0;
-            size_t index = 0;
-            
+            boost::algorithm::replace_all(mText, "\r", "");
+
+            registerTag("br", Event_BrTag);
+            registerTag("p", Event_PTag);
+            registerTag("img", Event_ImgTag);
+            registerTag("div", Event_DivTag);
+            registerTag("font", Event_FontTag);
+        }
+
+        void BookTextParser::registerTag(const std::string & tag, BookTextParser::Events type)
+        {
+            mTagTypes[tag] = type;
+        }
+
+        std::string BookTextParser::getReadyText() const
+        {
+            return mReadyText;
+        }
+
+        BookTextParser::Events BookTextParser::next()
+        {
+            while (mIndex < mText.size())
             {
-                std::string texToTrim = text.asUTF8();
-                boost::algorithm::trim( texToTrim );
-                text = UTFString(texToTrim);
-            }
-            
-            
-            while (currentHeight <= height - spacing && index < text.size())
-            {
-                const UTFString::unicode_char ch = text.getChar(index);
-                if (ch == LEFT_ANGLE)
+                char ch = mText[mIndex];
+                if (ch == '<')
                 {
-                    const size_t tagStart = index + 1;
-                    const size_t tagEnd = text.find('>', tagStart);
-                    if (tagEnd == UTFString::npos)
+                    const size_t tagStart = mIndex + 1;
+                    const size_t tagEnd = mText.find('>', tagStart);
+                    if (tagEnd == std::string::npos)
                         throw std::runtime_error("BookTextParser Error: Tag is not terminated");
-                    const std::string tag = text.substr(tagStart, tagEnd - tagStart).asUTF8();
+                    parseTag(mText.substr(tagStart, tagEnd - tagStart));
+                    mIndex = tagEnd;
 
-                    if (boost::algorithm::starts_with(tag, "IMG"))
+                    if (mTagTypes.find(mTag) != mTagTypes.end())
                     {
-                        const int h = mHeight;
-                        parseImage(tag, false);
-                        currentHeight += (mHeight - h);
-                        currentWidth = 0;
-                    }
-                    else if (boost::algorithm::starts_with(tag, "FONT"))
-                    {
-                        parseFont(tag);
-                        if (currentWidth != 0) {
-                            currentHeight += currentFontHeight();
-                            currentWidth = 0;
+                        Events type = mTagTypes.at(mTag);
+
+                        if (type == Event_BrTag || type == Event_PTag)
+                        {
+                            if (!mIgnoreNewlineTags)
+                            {
+                                if (type == Event_BrTag)
+                                    mBuffer.push_back('\n');
+                                else
+                                {
+                                    mBuffer.append("\n\n");
+                                }
+                            }
+                            mIgnoreLineEndings = true;
                         }
-                        currentWidth = 0;
-                    }
-                    else if (boost::algorithm::starts_with(tag, "DIV"))
-                    {
-                        parseDiv(tag);
-                        if (currentWidth != 0) {
-                            currentHeight += currentFontHeight();
-                            currentWidth = 0;
+                        else
+                            flushBuffer();
+
+                        if (type == Event_ImgTag)
+                        {
+                            mIgnoreNewlineTags = false;
                         }
+
+                        ++mIndex;
+                        return type;
                     }
-                    index = tagEnd;
-                }
-                else if (ch == NEWLINE)
-                {
-                    currentHeight += currentFontHeight();
-                    currentWidth = 0;
-                    currentWordStart = index;
-                }
-                else if (ch == SPACE)
-                {
-                    currentWidth += 3; // keep this in sync with the font's SpaceWidth property
-                    currentWordStart = index;
                 }
                 else
                 {
-                    currentWidth += widthForCharGlyph(ch);
-                }
-
-                if (currentWidth > width)
-                {
-                    currentHeight += currentFontHeight();
-                    currentWidth = 0;
-                    // add size of the current word
-                    UTFString word = text.substr(currentWordStart, index - currentWordStart);
-                    for (UTFString::const_iterator it = word.begin(), end = word.end(); it != end; ++it)
-                        currentWidth += widthForCharGlyph(it.getCharacter());
-                }
-                index += UTFString::_utf16_char_length(ch);
-            }
-            const size_t pageEnd = (currentHeight > height - spacing && currentWordStart != 0)
-                    ? currentWordStart : index;
-
-            result.push_back(text.substr(0, pageEnd).asUTF8());
-            text.erase(0, pageEnd);
-        }
-        
-        std::vector<std::string> nonEmptyPages;
-        boost::copy(result | boost::adaptors::filtered(is_not_empty), std::back_inserter(nonEmptyPages));
-        return nonEmptyPages;
-    }
-
-    float BookTextParser::widthForCharGlyph(unsigned unicodeChar) const
-    {
-        std::string fontName(mTextStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mTextStyle.mFont);
-        return MyGUI::FontManager::getInstance().getByName(fontName)
-                ->getGlyphInfo(unicodeChar)->width;
-    }
-
-    float BookTextParser::currentFontHeight() const
-    {
-        std::string fontName(mTextStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mTextStyle.mFont);
-        return MyGUI::FontManager::getInstance().getByName(fontName)->getDefaultHeight();
-    }
-
-    MyGUI::IntSize BookTextParser::parsePage(std::string text, MyGUI::Widget* parent, const int width)
-    {
-        MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
-        text = Interpreter::fixDefinesBook(text, interpreterContext);
-
-        mParent = parent;
-        mWidth = width;
-        mHeight = 0;
-
-        assert(mParent);
-        while (mParent->getChildCount())
-        {
-            MyGUI::Gui::getInstance().destroyWidget(mParent->getChildAt(0));
-        }
-
-        // remove trailing "
-        if (text[text.size()-1] == '\"')
-            text.erase(text.size()-1);
-
-        parseSubText(text);
-        return MyGUI::IntSize(mWidth, mHeight);
-    }
-    
-    MyGUI::IntSize BookTextParser::parseScroll(std::string text, MyGUI::Widget* parent, const int width)
-    {
-        MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
-        text = Interpreter::fixDefinesBook(text, interpreterContext);
-
-        mParent = parent;
-        mWidth = width;
-        mHeight = 0;
-
-        assert(mParent);
-        while (mParent->getChildCount())
-        {
-            MyGUI::Gui::getInstance().destroyWidget(mParent->getChildAt(0));
-        }
-
-        boost::algorithm::replace_all(text, "<BR>", "\n");
-        boost::algorithm::replace_all(text, "<P>", "\n\n");
-        boost::algorithm::trim_left(text);
-
-        // remove trailing "
-        if (text[text.size()-1] == '\"')
-            text.erase(text.size()-1);
-
-        parseSubText(text);
-        return MyGUI::IntSize(mWidth, mHeight);
-    }
-    
-
-    void BookTextParser::parseImage(std::string tag, bool createWidget)
-    {
-        int src_start = tag.find("SRC=")+5;
-        std::string image = tag.substr(src_start, tag.find('"', src_start)-src_start);
-
-        // fix texture extension to .dds
-        if (image.size() > 4)
-        {
-            image[image.size()-3] = 'd';
-            image[image.size()-2] = 'd';
-            image[image.size()-1] = 's';
-        }
-
-        int width_start = tag.find("WIDTH=")+7;
-        int width = boost::lexical_cast<int>(tag.substr(width_start, tag.find('"', width_start)-width_start));
-
-        int height_start = tag.find("HEIGHT=")+8;
-        int height = boost::lexical_cast<int>(tag.substr(height_start, tag.find('"', height_start)-height_start));
-
-        if (createWidget)
-        {
-            MyGUI::ImageBox* box = mParent->createWidget<MyGUI::ImageBox> ("ImageBox",
-                MyGUI::IntCoord(0, mHeight, width, height), MyGUI::Align::Left | MyGUI::Align::Top,
-                mParent->getName() + boost::lexical_cast<std::string>(mParent->getChildCount()));
-
-            // Apparently a bug with some morrowind versions, they reference the image without the size suffix.
-            // So if the image isn't found, try appending the size.
-            if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("bookart\\"+image))
-            {
-                std::stringstream str;
-                str << image.substr(0, image.rfind(".")) << "_" << width << "_" << height << image.substr(image.rfind("."));
-                image = str.str();
-            }
-
-            box->setImageTexture("bookart\\" + image);
-            box->setProperty("NeedMouse", "false");
-        }
-
-        mWidth = std::max(mWidth, width);
-        mHeight += height;
-    }
-
-    void BookTextParser::parseDiv(std::string tag)
-    {
-        if (tag.find("ALIGN=") == std::string::npos)
-            return;
-
-        int align_start = tag.find("ALIGN=")+7;
-        std::string align = tag.substr(align_start, tag.find('"', align_start)-align_start);
-        if (align == "CENTER")
-            mTextStyle.mTextAlign = MyGUI::Align::HCenter;
-        else if (align == "LEFT")
-            mTextStyle.mTextAlign = MyGUI::Align::Left;
-    }
-
-    void BookTextParser::parseFont(std::string tag)
-    {
-        if (tag.find("COLOR=") != std::string::npos)
-        {
-            int color_start = tag.find("COLOR=")+7;
-            std::string color = tag.substr(color_start, tag.find('"', color_start)-color_start);
-
-            mTextStyle.mColour = MyGUI::Colour(
-                convertFromHex(color.substr(0, 2))/255.0,
-                convertFromHex(color.substr(2, 2))/255.0,
-                convertFromHex(color.substr(4, 2))/255.0);
-        }
-        if (tag.find("FACE=") != std::string::npos)
-        {
-            int face_start = tag.find("FACE=")+6;
-            std::string face = tag.substr(face_start, tag.find('"', face_start)-face_start);
-
-            if (face != "Magic Cards")
-                mTextStyle.mFont = face;
-        }
-        if (tag.find("SIZE=") != std::string::npos)
-        {
-            /// \todo
-        }
-    }
-
-    void BookTextParser::parseSubText(std::string text)
-    {
-        if (text[0] == '<')
-        {
-            const size_t tagStart = 1;
-            const size_t tagEnd = text.find('>', tagStart);
-            if (tagEnd == std::string::npos)
-                throw std::runtime_error("BookTextParser Error: Tag is not terminated");
-            const std::string tag = text.substr(tagStart, tagEnd - tagStart);
-
-            if (boost::algorithm::starts_with(tag, "IMG"))
-                parseImage(tag);
-            if (boost::algorithm::starts_with(tag, "FONT"))
-                parseFont(tag);
-            if (boost::algorithm::starts_with(tag, "DIV"))
-                parseDiv(tag);
-
-            text.erase(0, tagEnd + 1);
-        }
-
-        size_t tagStart = std::string::npos;
-        std::string realText; // real text, without tags
-        for (size_t i = 0; i<text.size(); ++i)
-        {
-            char c = text[i];
-            if (c == '<')
-            {
-                if ((i + 1 < text.size()) && text[i+1] == '/') // ignore closing tags
-                {
-                    while (c != '>')
+                    if (!mIgnoreLineEndings || ch != '\n')
                     {
-                        if (i >= text.size())
-                            throw std::runtime_error("BookTextParser Error: Tag is not terminated");
-                        ++i;
-                        c = text[i];
+                        mBuffer.push_back(ch);
+                        mIgnoreLineEndings = false;
+                        mIgnoreNewlineTags = false;
                     }
+                }
+
+                ++mIndex;
+            }
+
+            flushBuffer();
+            return Event_EOF;
+        }
+
+        void BookTextParser::flushBuffer()
+        {
+            mReadyText = mBuffer;
+            mBuffer.clear();
+        }
+
+        const BookTextParser::Attributes & BookTextParser::getAttributes() const
+        {
+            return mAttributes;
+        }
+
+        bool BookTextParser::isClosingTag() const
+        {
+            return mClosingTag;
+        }
+
+        void BookTextParser::parseTag(std::string tag)
+        {
+            size_t tagNameEndPos = tag.find(' ');
+            mAttributes.clear();
+            mTag = tag.substr(0, tagNameEndPos);
+            Misc::StringUtils::toLower(mTag);
+            if (mTag.empty())
+                return;
+
+            mClosingTag = (mTag[0] == '/');
+            if (mClosingTag)
+            {
+                mTag.erase(mTag.begin());
+                return;
+            }
+
+            if (tagNameEndPos == std::string::npos)
+                return;
+            tag.erase(0, tagNameEndPos+1);
+
+            while (!tag.empty())
+            {
+                size_t sepPos = tag.find('=');
+                if (sepPos == std::string::npos)
+                    return;
+
+                std::string key = tag.substr(0, sepPos);
+                Misc::StringUtils::toLower(key);
+                tag.erase(0, sepPos+1);
+
+                std::string value;
+
+                if (tag.empty())
+                    return;
+
+                if (tag[0] == '"')
+                {
+                    size_t quoteEndPos = tag.find('"', 1);
+                    if (quoteEndPos == std::string::npos)
+                        throw std::runtime_error("BookTextParser Error: Missing end quote in tag");
+                    value = tag.substr(1, quoteEndPos-1);
+                    tag.erase(0, quoteEndPos+2);
+                }
+                else
+                {
+                    size_t valEndPos = tag.find(' ');
+                    if (valEndPos == std::string::npos)
+                    {
+                        value = tag;
+                        tag.erase();
+                    }
+                    else
+                    {
+                        value = tag.substr(0, valEndPos);
+                        tag.erase(0, valEndPos+1);
+                    }
+                }
+
+                mAttributes[key] = value;
+            }
+        }
+
+        /* BookFormatter */
+        Paginator::Pages BookFormatter::markupToWidget(MyGUI::Widget * parent, const std::string & markup, const int pageWidth, const int pageHeight)
+        {
+            Paginator pag(pageWidth, pageHeight);
+
+            while (parent->getChildCount())
+            {
+                MyGUI::Gui::getInstance().destroyWidget(parent->getChildAt(0));
+            }
+
+            mTextStyle = TextStyle();
+            mBlockStyle = BlockStyle();
+
+            MyGUI::Widget * paper = parent->createWidget<MyGUI::Widget>("Widget", MyGUI::IntCoord(0, 0, pag.getPageWidth(), pag.getPageHeight()), MyGUI::Align::Left | MyGUI::Align::Top);
+            paper->setNeedMouseFocus(false);
+
+            BookTextParser parser(markup);
+
+            bool brBeforeLastTag = false;
+            bool isPrevImg = false;
+            for (;;)
+            {
+                BookTextParser::Events event = parser.next();
+                if (event == BookTextParser::Event_BrTag || event == BookTextParser::Event_PTag)
                     continue;
+
+                std::string plainText = parser.getReadyText();
+
+                // for cases when linebreaks are used to cause a shift to the next page
+                // if the split text block ends in an empty line, proceeding text block(s) should have leading empty lines removed
+                if (pag.getIgnoreLeadingEmptyLines())
+                {
+                    while (!plainText.empty())
+                    {
+                        if (plainText[0] == '\n')
+                            plainText.erase(plainText.begin());
+                        else
+                        {
+                            pag.setIgnoreLeadingEmptyLines(false);
+                            break;
+                        }
+                    }
                 }
+
+                if (plainText.empty())
+                    brBeforeLastTag = true;
                 else
                 {
-                    tagStart = i;
+                    // Each block of text (between two tags / boundary and tag) will be displayed in a separate editbox widget,
+                    // which means an additional linebreak will be created between them.
+                    // ^ This is not what vanilla MW assumes, so we must deal with line breaks around tags appropriately.
+                    bool brAtStart = (plainText[0] == '\n');
+                    bool brAtEnd = (plainText[plainText.size()-1] == '\n');
+
+                    if (brAtStart && !brBeforeLastTag && !isPrevImg)
+                        plainText.erase(plainText.begin());
+
+                    if (plainText.size() && brAtEnd)
+                        plainText.erase(plainText.end()-1);
+
+#if (MYGUI_VERSION < MYGUI_DEFINE_VERSION(3, 2, 2))
+                    // splitting won't be fully functional until 3.2.2 (see TextElement::pageSplit())
+                    // hack: prevent newlines at the end of the book possibly creating unnecessary pages
+                    if (event == BookTextParser::Event_EOF)
+                    {
+                        while (plainText.size() && plainText[plainText.size()-1] == '\n')
+                            plainText.erase(plainText.end()-1);
+                    }
+#endif
+
+                    if (!plainText.empty() || brBeforeLastTag || isPrevImg)
+                    {
+                        TextElement elem(paper, pag, mBlockStyle,
+                                         mTextStyle, plainText);
+                        elem.paginate();
+                    }
+
+                    brBeforeLastTag = brAtEnd;
+                }
+
+                if (event == BookTextParser::Event_EOF)
+                    break;
+
+                isPrevImg = (event == BookTextParser::Event_ImgTag);
+
+                switch (event)
+                {
+                    case BookTextParser::Event_ImgTag:
+                    {
+                        pag.setIgnoreLeadingEmptyLines(false);
+
+                        const BookTextParser::Attributes & attr = parser.getAttributes();
+
+                        if (attr.find("src") == attr.end() || attr.find("width") == attr.end() || attr.find("height") == attr.end())
+                            continue;
+
+                        std::string src = attr.at("src");
+                        int width = MyGUI::utility::parseInt(attr.at("width"));
+                        int height = MyGUI::utility::parseInt(attr.at("height"));
+
+                        ImageElement elem(paper, pag, mBlockStyle,
+                                          src, width, height);
+                        elem.paginate();
+                        break;
+                    }
+                    case BookTextParser::Event_FontTag:
+                        if (parser.isClosingTag())
+                            resetFontProperties();
+                        else
+                            handleFont(parser.getAttributes());
+                        break;
+                    case BookTextParser::Event_DivTag:
+                        handleDiv(parser.getAttributes());
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // insert last page
+            if (pag.getStartTop() != pag.getCurrentTop())
+                pag << Paginator::Page(pag.getStartTop(), pag.getStartTop() + pag.getPageHeight());
+
+            paper->setSize(paper->getWidth(), pag.getCurrentTop());
+
+            return pag.getPages();
+        }
+
+        Paginator::Pages BookFormatter::markupToWidget(MyGUI::Widget * parent, const std::string & markup)
+        {
+            return markupToWidget(parent, markup, parent->getWidth(), parent->getHeight());
+        }
+
+        void BookFormatter::resetFontProperties()
+        {
+            mTextStyle = TextStyle();
+        }
+
+        void BookFormatter::handleDiv(const BookTextParser::Attributes & attr)
+        {
+            if (attr.find("align") == attr.end())
+                return;
+
+            std::string align = attr.at("align");
+
+            if (Misc::StringUtils::ciEqual(align, "center"))
+                mBlockStyle.mAlign = MyGUI::Align::HCenter;
+            else if (Misc::StringUtils::ciEqual(align, "left"))
+                mBlockStyle.mAlign = MyGUI::Align::Left;
+            else if (Misc::StringUtils::ciEqual(align, "right"))
+                mBlockStyle.mAlign = MyGUI::Align::Right;
+        }
+
+        void BookFormatter::handleFont(const BookTextParser::Attributes & attr)
+        {
+            if (attr.find("color") != attr.end())
+            {
+                unsigned int color;
+                std::stringstream ss;
+                ss << attr.at("color");
+                ss >> std::hex >> color;
+
+                mTextStyle.mColour = MyGUI::Colour(
+                    (color>>16 & 0xFF) / 255.f,
+                    (color>>8 & 0xFF) / 255.f,
+                    (color & 0xFF) / 255.f);
+            }
+            if (attr.find("face") != attr.end())
+            {
+                std::string face = attr.at("face");
+                mTextStyle.mFont = face;
+            }
+            if (attr.find("size") != attr.end())
+            {
+                /// \todo
+            }
+        }
+
+        /* GraphicElement */
+        GraphicElement::GraphicElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle)
+            : mParent(parent), mPaginator(pag), mBlockStyle(blockStyle)
+        {
+        }
+
+        void GraphicElement::paginate()
+        {
+            int newTop = mPaginator.getCurrentTop() + getHeight();
+            while (newTop-mPaginator.getStartTop() > mPaginator.getPageHeight())
+            {
+                int newStartTop = pageSplit();
+                mPaginator << Paginator::Page(mPaginator.getStartTop(), newStartTop);
+                mPaginator.setStartTop(newStartTop);
+            }
+
+            mPaginator.setCurrentTop(newTop);
+        }
+
+        int GraphicElement::pageSplit()
+        {
+            return mPaginator.getStartTop() + mPaginator.getPageHeight();
+        }
+
+        /* TextElement */
+        TextElement::TextElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle,
+                                 const TextStyle & textStyle, const std::string & text)
+            : GraphicElement(parent, pag, blockStyle),
+              mTextStyle(textStyle)
+        {
+            MyGUI::EditBox* box = parent->createWidget<MyGUI::EditBox>("NormalText",
+                MyGUI::IntCoord(0, pag.getCurrentTop(), pag.getPageWidth(), 0), MyGUI::Align::Left | MyGUI::Align::Top,
+                parent->getName() + MyGUI::utility::toString(parent->getChildCount()));
+            box->setProperty("Static", "true");
+            box->setProperty("MultiLine", "true");
+            box->setProperty("WordWrap", "true");
+            box->setProperty("NeedMouse", "false");
+            box->setMaxTextLength(text.size());
+            box->setTextAlign(mBlockStyle.mAlign);
+            box->setTextColour(mTextStyle.mColour);
+            box->setFontName(mTextStyle.mFont);
+            box->setCaption(MyGUI::TextIterator::toTagsString(text));
+            box->setSize(box->getSize().width, box->getTextSize().height);
+            mEditBox = box;
+        }
+
+        int TextElement::currentFontHeight() const
+        {
+            std::string fontName(mTextStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mTextStyle.mFont);
+            return MyGUI::FontManager::getInstance().getByName(fontName)->getDefaultHeight();
+        }
+
+        int TextElement::getHeight()
+        {
+            return mEditBox->getTextSize().height;
+        }
+
+        int TextElement::pageSplit()
+        {
+            // split lines
+            const int lineHeight = currentFontHeight();
+            unsigned int lastLine = (mPaginator.getStartTop() + mPaginator.getPageHeight() - mPaginator.getCurrentTop()) / lineHeight;
+            int ret = mPaginator.getCurrentTop() + lastLine * lineHeight;
+
+            // first empty lines that would go to the next page should be ignored
+            // unfortunately, getLineInfo method won't be available until 3.2.2
+#if (MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3, 2, 2))
+            mPaginator.setIgnoreLeadingEmptyLines(true);
+
+            const MyGUI::VectorLineInfo & lines = mEditBox->getSubWidgetText()->castType<MyGUI::EditText>()->getLineInfo();
+            for (unsigned int i = lastLine; i < lines.size(); ++i)
+            {
+                if (lines[i].width == 0)
+                    ret += lineHeight;
+                else
+                {
+                    mPaginator.setIgnoreLeadingEmptyLines(false);
                     break;
                 }
             }
-            else
-                realText += c;
+#endif
+            return ret;
         }
 
-        MyGUI::EditBox* box = mParent->createWidget<MyGUI::EditBox>("NormalText",
-            MyGUI::IntCoord(0, mHeight, mWidth, 24), MyGUI::Align::Left | MyGUI::Align::Top,
-            mParent->getName() + boost::lexical_cast<std::string>(mParent->getChildCount()));
-        box->setProperty("Static", "true");
-        box->setProperty("MultiLine", "true");
-        box->setProperty("WordWrap", "true");
-        box->setProperty("NeedMouse", "false");
-        box->setMaxTextLength(realText.size());
-        box->setTextAlign(mTextStyle.mTextAlign);
-        box->setTextColour(mTextStyle.mColour);
-        box->setFontName(mTextStyle.mFont);
-        box->setCaption(realText);
-        box->setSize(box->getSize().width, box->getTextSize().height);
-        mHeight += box->getTextSize().height;
-
-        if (tagStart != std::string::npos)
+        /* ImageElement */
+        ImageElement::ImageElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle,
+                                   const std::string & src, int width, int height)
+            : GraphicElement(parent, pag, blockStyle),
+              mImageHeight(height)
         {
-            parseSubText(text.substr(tagStart, text.size()));
+            int left = 0;
+            if (mBlockStyle.mAlign.isHCenter())
+                left += (pag.getPageWidth() - width) / 2;
+            else if (mBlockStyle.mAlign.isLeft())
+                left = 0;
+            else if (mBlockStyle.mAlign.isRight())
+                left += pag.getPageWidth() - width;
+
+            mImageBox = parent->createWidget<MyGUI::ImageBox> ("ImageBox",
+                MyGUI::IntCoord(left, pag.getCurrentTop(), width, mImageHeight), MyGUI::Align::Left | MyGUI::Align::Top,
+                parent->getName() + MyGUI::utility::toString(parent->getChildCount()));
+
+            std::string image = Misc::ResourceHelpers::correctBookartPath(src, width, mImageHeight);
+            mImageBox->setImageTexture(image);
+            mImageBox->setProperty("NeedMouse", "false");
+        }
+
+        int ImageElement::getHeight()
+        {
+            return mImageHeight;
+        }
+
+        int ImageElement::pageSplit()
+        {
+            // if the image is larger than the page, fall back to the default pageSplit implementation
+            if (mImageHeight > mPaginator.getPageHeight())
+                return GraphicElement::pageSplit();
+            return mPaginator.getCurrentTop();
         }
     }
-
 }

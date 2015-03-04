@@ -1,11 +1,14 @@
 
 #include "filter.hpp"
 
+#include <components/compiler/locals.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -64,14 +67,11 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
         if (isCreature)
             return false;
 
-        MWMechanics::NpcStats& stats = mActor.getClass().getNpcStats (mActor);
-        std::map<std::string, int>::iterator iter = stats.getFactionRanks().find ( Misc::StringUtils::lowerCase (info.mFaction));
-
-        if (iter==stats.getFactionRanks().end())
+        if (!Misc::StringUtils::ciEqual(mActor.getClass().getPrimaryFaction(mActor), info.mFaction))
             return false;
 
         // check rank
-        if (iter->second < info.mData.mRank)
+        if (mActor.getClass().getPrimaryFactionRank(mActor) < info.mData.mRank)
             return false;
     }
     else if (info.mData.mRank != -1)
@@ -80,13 +80,8 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
             return false;
 
         // Rank requirement, but no faction given. Use the actor's faction, if there is one.
-        MWMechanics::NpcStats& stats = mActor.getClass().getNpcStats (mActor);
-
-        if (!stats.getFactionRanks().size())
-            return false;
-
         // check rank
-        if (stats.getFactionRanks().begin()->second < info.mData.mRank)
+        if (mActor.getClass().getPrimaryFactionRank(mActor) < info.mData.mRank)
             return false;
     }
 
@@ -109,7 +104,7 @@ bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
     if (!info.mPcFaction.empty())
     {
         MWMechanics::NpcStats& stats = player.getClass().getNpcStats (player);
-        std::map<std::string,int>::iterator iter = stats.getFactionRanks().find (Misc::StringUtils::lowerCase (info.mPcFaction));
+        std::map<std::string,int>::const_iterator iter = stats.getFactionRanks().find (Misc::StringUtils::lowerCase (info.mPcFaction));
 
         if(iter==stats.getFactionRanks().end())
             return false;
@@ -123,7 +118,7 @@ bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
     if (!info.mCell.empty())
     {
         // supports partial matches, just like getPcCell
-        const std::string& playerCell = player.getCell()->getCell()->mName;
+        const std::string& playerCell = MWBase::Environment::get().getWorld()->getCellName(player.getCell());
         bool match = playerCell.length()>=info.mCell.length() &&
             Misc::StringUtils::ciEqual(playerCell.substr (0, info.mCell.length()), info.mCell);
         if (!match)
@@ -197,33 +192,28 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             if (scriptName.empty())
                 return false; // no script
 
-            const ESM::Script *script =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptName);
+            std::string name = Misc::StringUtils::lowerCase (select.getName());
 
-            std::string name = select.getName();
+            const Compiler::Locals& localDefs =
+                MWBase::Environment::get().getScriptManager()->getLocals (scriptName);
 
-            int i = 0;
+            char type = localDefs.getType (name);
 
-            for (; i<static_cast<int> (script->mVarNames.size()); ++i)
-                if (Misc::StringUtils::ciEqual(script->mVarNames[i], name))
-                    break;
+            if (type==' ')
+                return false; // script does not have a variable of this name.
 
-            if (i>=static_cast<int> (script->mVarNames.size()))
-                return false; // script does not have a variable of this name
+            int index = localDefs.getIndex (name);
 
             const MWScript::Locals& locals = mActor.getRefData().getLocals();
 
-            if (i<script->mData.mNumShorts)
-                return select.selectCompare (static_cast<int> (locals.mShorts[i]));
+            switch (type)
+            {
+                case 's': return select.selectCompare (static_cast<int> (locals.mShorts[index]));
+                case 'l': return select.selectCompare (locals.mLongs[index]);
+                case 'f': return select.selectCompare (locals.mFloats[index]);
+            }
 
-            i -= script->mData.mNumShorts;
-
-            if (i<script->mData.mNumLongs)
-                return select.selectCompare (locals.mLongs[i]);
-
-            i -= script->mData.mNumLongs;
-
-            return select.selectCompare (locals.mFloats.at (i));
+            throw std::logic_error ("unknown local variable type in dialogue filter");
         }
 
         case SelectWrapper::Function_PcHealthPercent:
@@ -251,7 +241,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             float ratio = mActor.getClass().getCreatureStats (mActor).getHealth().getCurrent() /
                 mActor.getClass().getCreatureStats (mActor).getHealth().getModified();
 
-            return select.selectCompare (ratio);
+            return select.selectCompare (static_cast<int>(ratio*100));
         }
 
         default:
@@ -338,11 +328,9 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
         case SelectWrapper::Function_RankRequirement:
         {
-            if (mActor.getClass().getNpcStats (mActor).getFactionRanks().empty())
+            std::string faction = mActor.getClass().getPrimaryFaction(mActor);
+            if (faction.empty())
                 return 0;
-
-            std::string faction =
-                mActor.getClass().getNpcStats (mActor).getFactionRanks().begin()->first;
 
             int rank = getFactionRank (player, faction);
 
@@ -378,15 +366,14 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
         case SelectWrapper::Function_FactionRankDiff:
         {
-            if (mActor.getClass().getNpcStats (mActor).getFactionRanks().empty())
+            std::string faction = mActor.getClass().getPrimaryFaction(mActor);
+
+            if (faction.empty())
                 return 0;
 
-            std::pair<std::string, int> faction =
-                *mActor.getClass().getNpcStats (mActor).getFactionRanks().begin();
-
-            int rank = getFactionRank (player, faction.first);
-
-            return rank-faction.second;
+            int rank = getFactionRank (player, faction);
+            int npcRank = mActor.getClass().getPrimaryFactionRank(mActor);
+            return rank-npcRank;
         }
 
         case SelectWrapper::Function_WerewolfKills:
@@ -398,11 +385,10 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
         {
             bool low = select.getFunction()==SelectWrapper::Function_RankLow;
 
-            if (mActor.getClass().getNpcStats (mActor).getFactionRanks().empty())
-                return 0;
+            std::string factionId = mActor.getClass().getPrimaryFaction(mActor);
 
-            std::string factionId =
-                mActor.getClass().getNpcStats (mActor).getFactionRanks().begin()->first;
+            if (factionId.empty())
+                return 0;
 
             int value = 0;
 
@@ -418,6 +404,21 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
             return value;
         }
+
+        case SelectWrapper::Function_CreatureTargetted:
+
+            {
+                MWWorld::Ptr target;
+                mActor.getClass().getCreatureStats(mActor).getAiSequence().getCombatTarget(target);
+                if (target)
+                {
+                    if (target.getClass().isNpc() && target.getClass().getNpcStats(target).isWerewolf())
+                        return 2;
+                    if (target.getTypeName() == typeid(ESM::Creature).name())
+                        return 1;
+                }
+            }
+            return 0;
 
         default:
 
@@ -441,7 +442,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_NotFaction:
 
-            return !Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mFaction, select.getName());
+            return !Misc::StringUtils::ciEqual(mActor.getClass().getPrimaryFaction(mActor), select.getName());
 
         case SelectWrapper::Function_NotClass:
 
@@ -453,7 +454,8 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_NotCell:
 
-            return !Misc::StringUtils::ciEqual(mActor.getCell()->getCell()->mName, select.getName());
+            return !Misc::StringUtils::ciEqual(MWBase::Environment::get().getWorld()->getCellName(mActor.getCell())
+                                               , select.getName());
 
         case SelectWrapper::Function_NotLocal:
         {
@@ -463,20 +465,10 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
                 // This actor has no attached script, so there is no local variable
                 return true;
 
-            const ESM::Script *script =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptName);
+            const Compiler::Locals& localDefs =
+                MWBase::Environment::get().getScriptManager()->getLocals (scriptName);
 
-            std::string name = select.getName();
-
-            int i = 0;
-            for (; i < static_cast<int> (script->mVarNames.size()); ++i)
-                if (Misc::StringUtils::ciEqual(script->mVarNames[i], name))
-                    break;
-
-            if (i >= static_cast<int> (script->mVarNames.size()))
-                return true; // script does not have a variable of this name
-
-            return false;
+            return localDefs.getIndex (Misc::StringUtils::lowerCase (select.getName()))==-1;
         }
 
         case SelectWrapper::Function_SameGender:
@@ -490,8 +482,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_SameFaction:
 
-            return mActor.getClass().getNpcStats (mActor).isSameFaction (
-                player.getClass().getNpcStats (player));
+            return player.getClass().getNpcStats (player).isInFaction(mActor.getClass().getPrimaryFaction(mActor));
 
         case SelectWrapper::Function_PcCommonDisease:
 
@@ -504,15 +495,14 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
         case SelectWrapper::Function_PcCorprus:
 
             return player.getClass().getCreatureStats (player).
-                getMagicEffects().get (ESM::MagicEffect::Corprus).mMagnitude!=0;
+                getMagicEffects().get (ESM::MagicEffect::Corprus).getMagnitude()!=0;
 
         case SelectWrapper::Function_PcExpelled:
         {
-            if (mActor.getClass().getNpcStats (mActor).getFactionRanks().empty())
-                return false;
+            std::string faction = mActor.getClass().getPrimaryFaction(mActor);
 
-            std::string faction =
-                mActor.getClass().getNpcStats (mActor).getFactionRanks().begin()->first;
+            if (faction.empty())
+                return false;
 
             return player.getClass().getNpcStats(player).getExpelled(faction);
         }
@@ -520,7 +510,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
         case SelectWrapper::Function_PcVampire:
 
             return player.getClass().getCreatureStats(player).getMagicEffects().
-                    get(ESM::MagicEffect::Vampirism).mMagnitude > 0;
+                    get(ESM::MagicEffect::Vampirism).getMagnitude() > 0;
 
         case SelectWrapper::Function_TalkedToPc:
 
@@ -543,10 +533,6 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
             return MWBase::Environment::get().getMechanicsManager()->isAggressive(mActor,
                     MWBase::Environment::get().getWorld()->getPlayerPtr());
 
-        case SelectWrapper::Function_CreatureTargetted:
-
-            return mActor.getClass().getCreatureStats (mActor).getCreatureTargetted();
-
         case SelectWrapper::Function_Werewolf:
 
             return mActor.getClass().getNpcStats (mActor).isWerewolf();
@@ -561,7 +547,7 @@ int MWDialogue::Filter::getFactionRank (const MWWorld::Ptr& actor, const std::st
 {
     MWMechanics::NpcStats& stats = actor.getClass().getNpcStats (actor);
 
-    std::map<std::string, int>::const_iterator iter = stats.getFactionRanks().find (factionId);
+    std::map<std::string, int>::const_iterator iter = stats.getFactionRanks().find (Misc::StringUtils::lowerCase(factionId));
 
     if (iter==stats.getFactionRanks().end())
         return -1;
@@ -613,6 +599,17 @@ const ESM::DialInfo* MWDialogue::Filter::search (const ESM::Dialogue& dialogue, 
         return NULL;
     else
         return suitableInfos[0];
+}
+
+std::vector<const ESM::DialInfo *> MWDialogue::Filter::listAll (const ESM::Dialogue& dialogue) const
+{
+    std::vector<const ESM::DialInfo *> infos;
+    for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin(); iter!=dialogue.mInfo.end(); ++iter)
+    {
+        if (testActor (*iter))
+            infos.push_back(&*iter);
+    }
+    return infos;
 }
 
 std::vector<const ESM::DialInfo *> MWDialogue::Filter::list (const ESM::Dialogue& dialogue,

@@ -1,9 +1,13 @@
 #include "windowbase.hpp"
 
+#include <MyGUI_InputManager.h>
+
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/windowmanager.hpp"
-#include "container.hpp"
 #include "../mwbase/environment.hpp"
-#include "../mwgui/windowmanagerimp.hpp"
+
+#include "draganddrop.hpp"
 
 using namespace MWGui;
 
@@ -23,6 +27,7 @@ void WindowBase::setVisible(bool visible)
         close();
 
     // This is needed as invisible widgets can retain key focus.
+    // Remove for MyGUI 3.2.2
     if (!visible)
     {
         MyGUI::Widget* keyFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
@@ -75,6 +80,8 @@ void WindowModal::close()
 NoDrop::NoDrop(DragAndDrop *drag, MyGUI::Widget *widget)
     : mDrag(drag), mWidget(widget), mTransparent(false)
 {
+    if (!mWidget)
+        throw std::runtime_error("NoDrop needs a non-NULL widget!");
 }
 
 void NoDrop::onFrame(float dt)
@@ -96,11 +103,16 @@ void NoDrop::onFrame(float dt)
     if (mTransparent)
     {
         mWidget->setNeedMouseFocus(false); // Allow click-through
-        mWidget->setAlpha(std::max(0.13f, mWidget->getAlpha() - dt*5));
+        setAlpha(std::max(0.13f, mWidget->getAlpha() - dt*5));
     }
     else
     {
         mWidget->setNeedMouseFocus(true);
-        mWidget->setAlpha(std::min(1.0f, mWidget->getAlpha() + dt*5));
+        setAlpha(std::min(1.0f, mWidget->getAlpha() + dt*5));
     }
+}
+
+void NoDrop::setAlpha(float alpha)
+{
+    mWidget->setAlpha(alpha);
 }

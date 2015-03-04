@@ -1,7 +1,6 @@
 #ifndef MWGUI_JOURNAL_H
 #define MWGUI_JOURNAL_H
 
-#include <memory>
 #include <boost/shared_ptr.hpp>
 
 namespace MWBase { class WindowManager; }

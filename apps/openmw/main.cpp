@@ -62,7 +62,6 @@ void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap
 
     FallbackMap *map = boost::any_cast<FallbackMap>(&v);
 
-    std::map<std::string,std::string>::iterator mapIt;
     for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); ++it)
     {
         int sep = it->find(",");
@@ -76,7 +75,7 @@ void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap
         std::string key(it->substr(0,sep));
         std::string value(it->substr(sep+1));
 
-        if((mapIt = map->mMap.find(key)) == map->mMap.end())
+        if(map->mMap.find(key) == map->mMap.end())
         {
             map->mMap.insert(std::make_pair (key,value));
         }
@@ -105,7 +104,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("help", "print help message")
         ("version", "print version information and quit")
         ("data", bpo::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")
-            ->multitoken(), "set data directories (later directories have higher priority)")
+            ->multitoken()->composing(), "set data directories (later directories have higher priority)")
 
         ("data-local", bpo::value<std::string>()->default_value(""),
             "set local data directory (highest priority)")
@@ -131,6 +130,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-all", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "compile all scripts (excluding dialogue scripts) at startup")
 
+        ("script-all-dialogue", bpo::value<bool>()->implicit_value(true)
+            ->default_value(false), "compile all dialogue scripts at startup")
+
         ("script-console", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "enable console-only script functionality")
 
@@ -144,8 +146,20 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             "\t1 - show warning but consider script as correctly compiled anyway\n"
             "\t2 - treat warnings as errors")
 
+        ("script-blacklist", bpo::value<StringsVector>()->default_value(StringsVector(), "")
+            ->multitoken(), "ignore the specified script (if the use of the blacklist is enabled)")
+
+        ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
+            ->default_value(true), "enable script blacklisting")
+
+        ("load-savegame", bpo::value<std::string>()->default_value(""),
+            "load a save game file on game startup (specify an absolute filename or a filename relative to the current working directory)")
+
         ("skip-menu", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "skip main menu on game startup")
+
+        ("new-game", bpo::value<bool>()->implicit_value(true)
+            ->default_value(false), "run new game sequence (ignored if skip-menu=0)")
 
         ("fs-strict", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "strict file system handling (no case folding)")
@@ -162,6 +176,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
         ("no-grab", "Don't grab mouse cursor")
 
+        ("export-fonts", bpo::value<bool>()->implicit_value(true)
+            ->default_value(false), "Export Morrowind .fnt fonts to PNG image and XML file in current directory")
+
         ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
@@ -173,21 +190,23 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
 
-    bool run = true;
-
     if (variables.count ("help"))
     {
         std::cout << desc << std::endl;
-        run = false;
+        return false;
     }
+
+    std::cout << "OpenMW version " << OPENMW_VERSION;
+    std::string rev = OPENMW_VERSION_COMMITHASH;
+    std::string tag = OPENMW_VERSION_TAGHASH;
+    if (!rev.empty() && !tag.empty())
+    {
+        rev = rev.substr(0, 10);
+        std::cout << " (revision " << rev << ")";
+    }
+    std::cout << std::endl;
 
     if (variables.count ("version"))
-    {
-        std::cout << "OpenMW version " << OPENMW_VERSION << std::endl;
-        run = false;
-    }
-
-    if (!run)
         return false;
 
     cfgMgr.readConfiguration(variables, desc);
@@ -239,17 +258,26 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     // startup-settings
     engine.setCell(variables["start"].as<std::string>());
-    engine.setSkipMenu (variables["skip-menu"].as<bool>());
+    engine.setSkipMenu (variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
+    if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
+        std::cerr << "new-game used without skip-menu -> ignoring it" << std::endl;
+
+    // scripts
+    engine.setCompileAll(variables["script-all"].as<bool>());
+    engine.setCompileAllDialogue(variables["script-all-dialogue"].as<bool>());
+    engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
+    engine.setScriptConsoleMode (variables["script-console"].as<bool>());
+    engine.setStartupScript (variables["script-run"].as<std::string>());
+    engine.setWarningsMode (variables["script-warn"].as<int>());
+    engine.setScriptBlacklist (variables["script-blacklist"].as<StringsVector>());
+    engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
+    engine.setSaveGameFile (variables["load-savegame"].as<std::string>());
 
     // other settings
     engine.setSoundUsage(!variables["no-sound"].as<bool>());
-    engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
-    engine.setCompileAll(variables["script-all"].as<bool>());
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
-    engine.setScriptConsoleMode (variables["script-console"].as<bool>());
-    engine.setStartupScript (variables["script-run"].as<std::string>());
     engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
-    engine.setWarningsMode (variables["script-warn"].as<int>());
+    engine.enableFontExport(variables["export-fonts"].as<bool>());
 
     return true;
 }
@@ -309,6 +337,8 @@ int main(int argc, char**argv)
 
     boost::filesystem::ofstream logfile;
 
+    std::auto_ptr<OMW::Engine> engine;
+
     int ret = 0;
     try
     {
@@ -350,21 +380,21 @@ int main(int argc, char**argv)
         boost::filesystem::current_path(bundlePath);
 #endif
 
-        OMW::Engine engine(cfgMgr);
+        engine.reset(new OMW::Engine(cfgMgr));
 
-        if (parseOptions(argc, argv, engine, cfgMgr))
+        if (parseOptions(argc, argv, *engine, cfgMgr))
         {
-            engine.go();
+            engine->go();
         }
     }
     catch (std::exception &e)
     {
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        if (isatty(fileno(stdin)))
-            std::cerr << "\nERROR: " << e.what() << std::endl;
-        else
+        if (!isatty(fileno(stdin)))
 #endif
             SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);
+
+        std::cerr << "\nERROR: " << e.what() << std::endl;
 
         ret = 1;
     }

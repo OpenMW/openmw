@@ -10,7 +10,7 @@
 CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
     const std::string& id, bool referenceable, QWidget *parent)
 : SceneWidget (parent), mData (data),
-  mObject (data, getSceneManager()->getRootSceneNode(), id, referenceable, true)
+  mObject (data, getSceneManager()->getRootSceneNode(), id, referenceable, boost::shared_ptr<CSVWorld::PhysicsSystem>(), true)
 {
     setNavigation (&mOrbit);
 

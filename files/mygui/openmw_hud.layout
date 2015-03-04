@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Widget" layer="HUD" position="0 0 300 200" name="_Main">
+    <Widget type="Widget" layer="HUD" position="0 0 300 200" name="_Main" align="Stretch">
         <!-- Energy bars -->
         <Widget type="ProgressBar" skin="MW_EnergyBar_Yellow" position="13 131 65 12" align="Left Bottom" name="EnemyHealth">
             <Property key="Visible" value="false"/>
@@ -63,7 +63,7 @@
                     <Property key="NeedMouse" value="false"/>
                 </Widget>
             </Widget>
-            <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="0 36 36 6" align="Left Bottom" name="WeapStatus">
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Weapon" position="0 36 36 6" align="Left Bottom" name="WeapStatus">
                 <Property key="NeedMouse" value="false"/>
             </Widget>
         </Widget>
@@ -74,7 +74,7 @@
                 <Widget type="ItemWidget" skin="MW_ItemIcon" position="-3 -3 42 42" align="Left Top" name="SpellImage"/>
                 <Property key="NeedMouse" value="false"/>
             </Widget>
-            <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="0 36 36 6" align="Left Bottom" name="SpellStatus">
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Magic" position="0 36 36 6" align="Left Bottom" name="SpellStatus">
                 <Property key="NeedMouse" value="false"/>
             </Widget>
         </Widget>
@@ -108,13 +108,12 @@
             <Widget type="Widget" skin="HUD_Box" position="0 0 65 65" align="Center">
 
                 <Widget type="ScrollView" skin="MW_MapView" position="2 2 61 61" align="Left Bottom" name="MiniMap">
-                    <Property key="CanvasSize" value="1536 1536"/>
-
                     <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="Bottom Left" name="Compass">
                         <Property key="ImageTexture" value="textures\compass.dds"/>
                     </Widget>
 
-                    <Widget type="Button" skin="" position="0 0 1536 1536" name="MiniMapButton" align="Right Bottom">
+                    <Widget type="Button" skin="" position_real="0 0 1 1" name="MiniMapButton" align="Stretch">
+                        <Property key="Depth" value="10"/>
                     </Widget>
 
                 </Widget>
@@ -128,35 +127,35 @@
         </Widget>
 
         <!-- Basic FPSCounter box -->
-        <Widget type="Widget" skin="HUD_Box" position="12 12 32 26" align="Left Top" name="FPSBox">
+        <Widget type="Widget" skin="" position="12 12 32 26" align="Left Top" name="FPSBox">
             <Property key="Visible" value="false"/>
             <Widget type="TextBox" skin="NumFPS" position="3 3 25 17" align="Center" name="FPSCounter"/>
         </Widget>
 
         <!-- Advanced FPSCounter box -->
-        <Widget type="Widget" skin="HUD_Box" position="12 12 165 64" align="Left Top" name="FPSBoxAdv">
+        <Widget type="Widget" skin="" position="12 12 135 64" align="Left Top" name="FPSBoxAdv">
             <Property key="Visible" value="false"/>
 
-            <Widget type="Widget" skin="" position="0 0 110 60" align="Left Top">
+            <Widget type="Widget" skin="" position="0 0 80 60" align="Left Top">
 
-                <Widget type="TextBox" skin="NumFPS" position="0 0 110 32" align="Left Top">
+                <Widget type="TextBox" skin="NumFPS" position="0 0 80 32" align="Left Top">
                     <Property key="Caption" value="FPS: "/>
                     <Property key="TextAlign" value="Right"/>
                 </Widget>
 
-                <Widget type="TextBox" skin="NumFPS" position="0 16 110 32" align="Left Top">
-                    <Property key="Caption" value="Tri Count: "/>
+                <Widget type="TextBox" skin="NumFPS" position="0 16 80 32" align="Left Top">
+                    <Property key="Caption" value="Triangles: "/>
                     <Property key="TextAlign" value="Right"/>
                 </Widget>
 
-                <Widget type="TextBox" skin="NumFPS" position="0 32 110 32" align="Left Top">
-                    <Property key="Caption" value="Batch Count: "/>
+                <Widget type="TextBox" skin="NumFPS" position="0 32 80 32" align="Left Top">
+                    <Property key="Caption" value="Batches: "/>
                     <Property key="TextAlign" value="Right"/>
                 </Widget>
 
             </Widget>
 
-            <Widget type="Widget" skin="" position="110 0 55 60" align="Left Top">
+            <Widget type="Widget" skin="" position="80 0 55 60" align="Left Top">
 
                 <Widget type="TextBox" skin="NumFPS" position="0 0 55 32" align="Left Top" name="FPSCounterAdv">
                     <Property key="TextAlign" value="Left"/>

@@ -4,7 +4,11 @@
 #include "mapwindow.hpp"
 
 #include "../mwmechanics/stat.hpp"
-#include "../mwworld/ptr.hpp"
+
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MWGui
 {
@@ -15,7 +19,7 @@ namespace MWGui
     class HUD : public OEngine::GUI::Layout, public LocalMapBase
     {
     public:
-        HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop);
+        HUD(CustomMarkerCollection& customMarkers, int fpsLevel, DragAndDrop* dragAndDrop);
         virtual ~HUD();
         void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
         void setFPS(float fps);
@@ -47,7 +51,6 @@ namespace MWGui
         void setCrosshairVisible(bool visible);
 
         void onFrame(float dt);
-        void onResChange(int width, int height);
 
         void setCellName(const std::string& cellName);
 
@@ -74,8 +77,6 @@ namespace MWGui
         MyGUI::TextBox* mCellNameBox;
         MyGUI::TextBox* mWeaponSpellBox;
         MyGUI::Widget *mDrowningFrame, *mDrowningFlash;
-
-        MyGUI::Widget* mDummy;
 
         MyGUI::Widget* mFpsBox;
         MyGUI::TextBox* mFpsCounter;
@@ -117,6 +118,10 @@ namespace MWGui
         void onWeaponClicked(MyGUI::Widget* _sender);
         void onMagicClicked(MyGUI::Widget* _sender);
         void onMapClicked(MyGUI::Widget* _sender);
+
+        // LocalMapBase
+        virtual void customMarkerCreated(MyGUI::Widget* marker);
+        virtual void doorMarkerCreated(MyGUI::Widget* marker);
 
         void updateEnemyHealthBar();
 

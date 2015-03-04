@@ -13,8 +13,12 @@ namespace ESM
 
     struct RefNum
     {
-        int mIndex;
-        int mContentFile; // -1 no content file
+        unsigned int mIndex;
+        int mContentFile;
+
+        enum { RefNum_NoContentFile = -1 };
+        inline bool hasContentFile() const { return mContentFile != RefNum_NoContentFile; }
+        inline void unset() { mIndex = 0; mContentFile = RefNum_NoContentFile; }
     };
 
     /* Cell reference. This represents ONE object (of many) inside the
@@ -55,7 +59,13 @@ namespace ESM
 
             // For weapon or armor, this is the remaining item health.
             // For tools (lockpicks, probes, repair hammer) it is the remaining uses.
-            int mCharge;
+            // For lights it is remaining time.
+            // This could be -1 if the charge was not touched yet (i.e. full).
+            union
+            {
+                int mChargeInt;     // Used by everything except lights
+                float mChargeFloat; // Used only by lights
+            };
 
             // Remaining enchantment charge. This could be -1 if the charge was not touched yet (i.e. full).
             float mEnchantmentCharge;
@@ -85,7 +95,13 @@ namespace ESM
             // Position and rotation of this object within the cell
             Position mPos;
 
+            /// Calls loadId and loadData
             void load (ESMReader& esm, bool wideRefNum = false);
+
+            void loadId (ESMReader& esm, bool wideRefNum = false);
+
+            /// Implicitly called by load
+            void loadData (ESMReader& esm);
 
             void save (ESMWriter &esm, bool wideRefNum = false, bool inInventory = false) const;
 

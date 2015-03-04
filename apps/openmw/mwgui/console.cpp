@@ -1,5 +1,7 @@
 #include "console.hpp"
 
+#include <MyGUI_EditBox.h>
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -10,6 +12,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
 
@@ -101,8 +104,20 @@ namespace MWGui
                 it->second->listIdentifier (mNames);
             }
 
+            // exterior cell names aren't technically identifiers, but since the COC function accepts them,
+            // we should list them too
+            for (MWWorld::Store<ESM::Cell>::iterator it = store.get<ESM::Cell>().extBegin();
+                 it != store.get<ESM::Cell>().extEnd(); ++it)
+            {
+                if (!it->mName.empty())
+                    mNames.push_back(it->mName);
+            }
+
             // sort
             std::sort (mNames.begin(), mNames.end());
+
+            // remove duplicates
+            mNames.erase( std::unique( mNames.begin(), mNames.end() ), mNames.end() );
         }
     }
 
@@ -140,6 +155,7 @@ namespace MWGui
     void Console::close()
     {
         // Apparently, hidden widgets can retain key focus
+        // Remove for MyGUI 3.2.2
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
     }
 
@@ -152,11 +168,6 @@ namespace MWGui
     {
         mHistory->setFontName(fntName);
         mCommandLine->setFontName(fntName);
-    }
-
-    void Console::clearHistory()
-    {
-        mHistory->setCaption("");
     }
 
     void Console::print(const std::string &msg)
@@ -279,7 +290,8 @@ namespace MWGui
 
         // Add the command to the history, and set the current pointer to
         // the end of the list
-        mCommandHistory.push_back(cm);
+        if (mCommandHistory.empty() || mCommandHistory.back() != cm)
+            mCommandHistory.push_back(cm);
         mCurrent = mCommandHistory.end();
         mEditString.clear();
 

@@ -23,19 +23,26 @@
 #include <components/esm/loaddial.hpp>
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadbody.hpp>
+#include <components/esm/loadsndg.hpp>
+#include <components/esm/loadmgef.hpp>
+#include <components/esm/loadsscr.hpp>
+#include <components/esm/debugprofile.hpp>
+#include <components/esm/filter.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
-
-#include "../filter/filter.hpp"
 
 #include "../doc/stage.hpp"
 
 #include "idcollection.hpp"
 #include "universalid.hpp"
 #include "cell.hpp"
+#include "land.hpp"
+#include "landtexture.hpp"
 #include "refidcollection.hpp"
 #include "refcollection.hpp"
 #include "infocollection.hpp"
+#include "pathgrid.hpp"
+#include "subcellcollection.hpp"
 
 class QAbstractItemModel;
 
@@ -70,12 +77,19 @@ namespace CSMWorld
             IdCollection<ESM::Dialogue> mJournals;
             IdCollection<ESM::Enchantment> mEnchantments;
             IdCollection<ESM::BodyPart> mBodyParts;
+            IdCollection<ESM::MagicEffect> mMagicEffects;
+            SubCellCollection<Pathgrid> mPathgrids;
+            IdCollection<ESM::DebugProfile> mDebugProfiles;
+            IdCollection<ESM::SoundGenerator> mSoundGens;
+            IdCollection<ESM::StartScript> mStartScripts;
             InfoCollection mTopicInfos;
             InfoCollection mJournalInfos;
             IdCollection<Cell> mCells;
+            IdCollection<LandTexture> mLandTextures;
+            IdCollection<Land> mLand;
             RefIdCollection mReferenceables;
             RefCollection mRefs;
-            IdCollection<CSMFilter::Filter> mFilters;
+            IdCollection<ESM::Filter> mFilters;
             const ResourcesManager& mResourcesManager;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
@@ -86,6 +100,9 @@ namespace CSMWorld
             bool mBase;
             bool mProject;
             std::map<std::string, std::map<ESM::RefNum, std::string> > mRefLoadCache;
+            int mReaderIndex;
+
+            std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
             // not implemented
             Data (const Data&);
@@ -178,9 +195,9 @@ namespace CSMWorld
 
             RefCollection& getReferences();
 
-            const IdCollection<CSMFilter::Filter>& getFilters() const;
+            const IdCollection<ESM::Filter>& getFilters() const;
 
-            IdCollection<CSMFilter::Filter>& getFilters();
+            IdCollection<ESM::Filter>& getFilters();
 
             const IdCollection<ESM::Enchantment>& getEnchantments() const;
 
@@ -189,6 +206,30 @@ namespace CSMWorld
             const IdCollection<ESM::BodyPart>& getBodyParts() const;
 
             IdCollection<ESM::BodyPart>& getBodyParts();
+
+            const IdCollection<ESM::DebugProfile>& getDebugProfiles() const;
+
+            IdCollection<ESM::DebugProfile>& getDebugProfiles();
+
+            const IdCollection<CSMWorld::Land>& getLand() const;
+
+            const IdCollection<CSMWorld::LandTexture>& getLandTextures() const;
+
+            const IdCollection<ESM::SoundGenerator>& getSoundGens() const;
+
+            IdCollection<ESM::SoundGenerator>& getSoundGens();
+
+            const IdCollection<ESM::MagicEffect>& getMagicEffects() const;
+
+            IdCollection<ESM::MagicEffect>& getMagicEffects();
+
+            const SubCellCollection<Pathgrid>& getPathgrids() const;
+
+            SubCellCollection<Pathgrid>& getPathgrids();
+
+            const IdCollection<ESM::StartScript>& getStartScripts() const;
+
+            IdCollection<ESM::StartScript>& getStartScripts();
 
             /// Throws an exception, if \a id does not match a resources list.
             const Resources& getResources (const UniversalId& id) const;
@@ -209,7 +250,7 @@ namespace CSMWorld
             ///
             ///< \return estimated number of records
 
-            bool continueLoading (CSMDoc::Stage::Messages& messages);
+            bool continueLoading (CSMDoc::Messages& messages);
             ///< \return Finished?
 
             bool hasId (const std::string& id) const;

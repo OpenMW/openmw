@@ -3,9 +3,9 @@
 
 #include "pathfinding.hpp"
 #include <components/esm/defs.hpp>
-#include "../mwbase/world.hpp"
 
 #include "obstacle.hpp"
+#include "aistate.hpp"
 
 namespace MWWorld
 {
@@ -20,8 +20,10 @@ namespace ESM
     }
 }
 
+
 namespace MWMechanics
 {
+
     /// \brief Base class for AI packages
     class AiPackage
     {
@@ -50,7 +52,7 @@ namespace MWMechanics
 
             /// Updates and runs the package (Should run every frame)
             /// \return Package completed?
-            virtual bool execute (const MWWorld::Ptr& actor,float duration) = 0;
+            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration) = 0;
 
             /// Returns the TypeID of the AiPackage
             /// \see enum TypeId
@@ -61,19 +63,20 @@ namespace MWMechanics
 
             virtual void writeState (ESM::AiSequence::AiSequence& sequence) const {}
 
+            /// Simulates the passing of time
+            virtual void fastForward(const MWWorld::Ptr& actor, AiState& state) {}
+
         protected:
             /// Causes the actor to attempt to walk to the specified location
             /** \return If the actor has arrived at his destination **/
             bool pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Point dest, float duration);
 
+            // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;
             ObstacleCheck mObstacleCheck;
 
-            float mDoorCheckDuration;
             float mTimer;
             float mStuckTimer;
-
-            MWWorld::Ptr mLastDoorChecked; //Used to ensure we don't try to CONSTANTLY open a door
 
             ESM::Position mStuckPos;
             ESM::Pathgrid::Point mPrevDest;

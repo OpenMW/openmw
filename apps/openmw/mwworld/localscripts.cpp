@@ -1,5 +1,7 @@
 #include "localscripts.hpp"
 
+#include <iostream>
+
 #include "esmstore.hpp"
 #include "cellstore.hpp"
 
@@ -17,7 +19,7 @@ namespace
             cellRefList.mList.begin());
             iter!=cellRefList.mList.end(); ++iter)
         {
-            if (!iter->mBase->mScript.empty() && iter->mData.getCount())
+            if (!iter->mBase->mScript.empty() && !iter->mData.isDeleted())
             {
                 localScripts.add (iter->mBase->mScript, MWWorld::Ptr (&*iter, cell));
             }
@@ -93,9 +95,18 @@ void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
 {
     if (const ESM::Script *script = mStore.get<ESM::Script>().find (scriptName))
     {
-        ptr.getRefData().setLocals (*script);
+        try
+        {
+            ptr.getRefData().setLocals (*script);
 
-        mScripts.push_back (std::make_pair (scriptName, ptr));
+            mScripts.push_back (std::make_pair (scriptName, ptr));
+        }
+        catch (const std::exception& exception)
+        {
+            std::cerr
+                << "failed to add local script " << scriptName
+                << " because an exception has been thrown: " << exception.what() << std::endl;
+        }
     }
 }
 

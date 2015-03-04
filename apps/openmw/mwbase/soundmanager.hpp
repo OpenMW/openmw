@@ -2,10 +2,8 @@
 #define GAME_MWBASE_SOUNDMANAGER_H
 
 #include <string>
-
+#include <set>
 #include <boost/shared_ptr.hpp>
-
-#include <components/settings/settings.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -42,15 +40,21 @@ namespace MWBase
                 Play_NoTrack = 1<<2, /* (3D only) Play the sound at the given object's position
                                       * but do not keep it updated (the sound will not move with
                                       * the object and will not stop when the object is deleted. */
-
-                Play_LoopNoEnv = Play_Loop | Play_NoEnv
+                Play_RemoveAtDistance = 1<<3, /* (3D only) If the listener gets further than 2000 units away
+                                                from the sound source, the sound is removed.
+                                                This is weird stuff but apparently how vanilla works for sounds
+                                                played by the PlayLoopSound family of script functions. Perhaps we
+                                                can make this cut off a more subtle fade later, but have to
+                                                be careful to not change the overall volume of areas by too much. */
+                Play_LoopNoEnv = Play_Loop | Play_NoEnv,
+                Play_LoopRemoveAtDistance = Play_Loop | Play_RemoveAtDistance
             };
             enum PlayType {
-                Play_TypeSfx   = 1<<3, /* Normal SFX sound */
-                Play_TypeVoice = 1<<4, /* Voice sound */
-                Play_TypeFoot  = 1<<5, /* Footstep sound */
-                Play_TypeMusic = 1<<6, /* Music track */
-                Play_TypeMovie = 1<<7, /* Movie audio track */
+                Play_TypeSfx   = 1<<4, /* Normal SFX sound */
+                Play_TypeVoice = 1<<5, /* Voice sound */
+                Play_TypeFoot  = 1<<6, /* Footstep sound */
+                Play_TypeMusic = 1<<7, /* Music track */
+                Play_TypeMovie = 1<<8, /* Movie audio track */
                 Play_TypeMask  = Play_TypeSfx|Play_TypeVoice|Play_TypeFoot|Play_TypeMusic|Play_TypeMovie
             };
 
@@ -68,7 +72,7 @@ namespace MWBase
 
             virtual ~SoundManager() {}
 
-            virtual void processChangedSettings(const Settings::CategorySettingVector& settings) = 0;
+            virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& settings) = 0;
 
             virtual void stopMusic() = 0;
             ///< Stops music if it's playing
@@ -100,6 +104,11 @@ namespace MWBase
 
             virtual void stopSay(const MWWorld::Ptr &reference=MWWorld::Ptr()) = 0;
             ///< Stop an actor speaking
+
+            virtual float getSaySoundLoudness(const MWWorld::Ptr& reference) const = 0;
+            ///< Check the currently playing say sound for this actor
+            /// and get an average loudness value (scale [0,1]) at the current time position.
+            /// If the actor is not saying anything, returns 0.
 
             virtual SoundPtr playTrack(const MWSound::DecoderPtr& decoder, PlayType type) = 0;
             ///< Play a 2D audio track, using a custom decoder

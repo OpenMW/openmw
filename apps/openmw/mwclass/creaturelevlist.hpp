@@ -11,13 +11,16 @@ namespace MWClass
 
         public:
 
+            /// Return ID of \a ptr
+            virtual std::string getId (const MWWorld::Ptr& ptr) const;
+
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
             static void registerSelf();
 
-            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
+            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
             virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)

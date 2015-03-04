@@ -11,6 +11,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/journal.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -41,7 +42,8 @@ namespace MWScript
                     }
                     catch (...)
                     {
-                        MWBase::Environment::get().getJournal()->setJournalIndex(quest, index);
+                        if (MWBase::Environment::get().getJournal()->getJournalIndex(quest) < index)
+                            MWBase::Environment::get().getJournal()->setJournalIndex(quest, index);
                     }
                 }
         };
@@ -124,6 +126,9 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
+                    if (!ptr.getRefData().isEnabled())
+                        return;
+
                     MWBase::Environment::get().getDialogueManager()->startDialogue (ptr);
                 }
         };
@@ -192,7 +197,7 @@ namespace MWScript
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
-                    runtime.push (ptr.getClass().getNpcStats (ptr).isSameFaction (player.getClass().getNpcStats (player)));
+                    player.getClass().getNpcStats (player).isInFaction(ptr.getClass().getPrimaryFaction(ptr));
                 }
         };
 
@@ -232,6 +237,25 @@ namespace MWScript
             }
         };
 
+        class OpSetFactionReaction : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                std::string faction1 = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                std::string faction2 = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                int newValue = runtime[0].mInteger;
+                runtime.pop();
+
+                MWBase::Environment::get().getDialogueManager()->setFactionReaction(faction1, faction2, newValue);
+            }
+        };
+
         template <class R>
         class OpClearInfoActor : public Interpreter::Opcode0
         {
@@ -264,6 +288,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFaction, new OpSameFaction<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFactionExplicit, new OpSameFaction<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeModFactionReaction, new OpModFactionReaction);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeSetFactionReaction, new OpSetFactionReaction);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeGetFactionReaction, new OpGetFactionReaction);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeClearInfoActor, new OpClearInfoActor<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeClearInfoActorExplicit, new OpClearInfoActor<ExplicitRef>);

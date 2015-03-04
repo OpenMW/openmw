@@ -11,6 +11,7 @@
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/actionapply.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
@@ -24,19 +25,22 @@
 
 namespace MWClass
 {
-    void Potion::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    std::string Potion::getId (const MWWorld::Ptr& ptr) const
     {
-        const std::string model = getModel(ptr);
+        return ptr.get<ESM::Potion>()->mBase->mId;
+    }
+
+    void Potion::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
+    {
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    void Potion::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Potion::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr,true);
+            physics.addObject(ptr, model, true);
     }
 
     std::string Potion::getModel(const MWWorld::Ptr &ptr) const
@@ -140,11 +144,8 @@ namespace MWClass
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->getFloat();
         for (MWGui::Widgets::SpellEffectList::iterator it = info.effects.begin(); it != info.effects.end(); ++it)
         {
-            it->mKnown = ( (i == 0 && alchemySkill >= fWortChanceValue)
-                 || (i == 1 && alchemySkill >= fWortChanceValue*2)
-                 || (i == 2 && alchemySkill >= fWortChanceValue*3)
-                 || (i == 3 && alchemySkill >= fWortChanceValue*4));
-
+            it->mKnown = (i <= 1 && alchemySkill >= fWortChanceValue)
+                 || (i <= 3 && alchemySkill >= fWortChanceValue*2);
             ++i;
         }
 

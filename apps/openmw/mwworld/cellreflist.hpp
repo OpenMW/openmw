@@ -27,7 +27,9 @@ namespace MWWorld
         LiveRef *find (const std::string& name)
         {
             for (typename List::iterator iter (mList.begin()); iter!=mList.end(); ++iter)
-                if (iter->mData.getCount() > 0 && iter->mRef.getRefId() == name)
+                if (!iter->mData.isDeletedByContentFile()
+                        && (iter->mRef.hasContentFile() || iter->mData.getCount() > 0)
+                        && iter->mRef.getRefId() == name)
                     return &*iter;
 
             return 0;
@@ -42,7 +44,7 @@ namespace MWWorld
         LiveCellRef<X> *searchViaHandle (const std::string& handle)
         {
             for (typename List::iterator iter (mList.begin()); iter!=mList.end(); ++iter)
-                if (iter->mData.getCount()>0 && iter->mData.getBaseNode() &&
+                if (iter->mData.getBaseNode() &&
                     iter->mData.getHandle()==handle)
                     return &*iter;
 

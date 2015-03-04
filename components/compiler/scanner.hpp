@@ -37,6 +37,7 @@ namespace Compiler
             float mPutbackFloat;
             std::string mPutbackName;
             TokenLoc mPutbackLoc;
+            bool mNameStartingWithDigit;
 
         public:
 
@@ -88,9 +89,12 @@ namespace Compiler
 
             bool scanName (char c, Parser& parser, bool& cont);
 
-            bool scanName (char c, std::string& name);
+            /// \param name May contain the start of the name (one or more characters)
+            bool scanName (std::string& name);
 
             bool scanSpecial (char c, Parser& parser, bool& cont);
+
+            bool isStringCharacter (char c, bool lookAhead = true);
 
             static bool isWhitespace (char c);
 
@@ -120,6 +124,9 @@ namespace Compiler
 
             void listKeywords (std::vector<std::string>& keywords);
             ///< Append all known keywords to \a kaywords.
+
+            /// For the next token allow names to start with a digit.
+            void allowNameStartingwithDigit();
     };
 }
 

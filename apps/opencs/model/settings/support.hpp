@@ -35,12 +35,15 @@ namespace CSMSettings
         Property_TickInterval = 19,
         Property_TicksAbove = 20,
         Property_TicksBelow = 21,
+        Property_StyleSheet = 22,
+        Property_Label = 23,
+        Property_ToolTip = 24,
 
         //Stringlists should always be the last items
-        Property_DefaultValues = 22,
-        Property_DeclaredValues = 23,
-        Property_DefinedValues = 24,
-        Property_Proxies = 25
+        Property_DefaultValues = 25,
+        Property_DeclaredValues = 26,
+        Property_DefinedValues = 27,
+        Property_Proxies = 28
     };
 
     ///Basic setting widget types.
@@ -106,7 +109,7 @@ namespace CSMSettings
         "is_multi_line", "widget_width", "view_row", "view_column", "delimiter",
         "is_serializable","column_span", "row_span", "minimum", "maximum",
         "special_value_text", "prefix", "suffix", "single_step", "wrapping",
-        "tick_interval", "ticks_above", "ticks_below",
+        "tick_interval", "ticks_above", "ticks_below", "stylesheet",
         "defaults", "declarations", "definitions", "proxies"
     };
 
@@ -135,6 +138,7 @@ namespace CSMSettings
         "1",        //tick interval
         "false",    //ticks above
         "true",     //ticks below
+        "",         //StyleSheet
         "",         //default values
         "",         //declared values
         "",         //defined values

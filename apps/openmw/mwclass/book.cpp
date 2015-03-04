@@ -11,6 +11,7 @@
 #include "../mwworld/actionread.hpp"
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 
 #include "../mwrender/objects.hpp"
@@ -22,19 +23,22 @@
 
 namespace MWClass
 {
-    void Book::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    std::string Book::getId (const MWWorld::Ptr& ptr) const
     {
-        const std::string model = getModel(ptr);
+        return ptr.get<ESM::Book>()->mBase->mId;
+    }
+
+    void Book::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
+    {
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    void Book::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Book::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr,true);
+            physics.addObject(ptr, model, true);
     }
 
     std::string Book::getModel(const MWWorld::Ptr &ptr) const
@@ -197,7 +201,8 @@ namespace MWClass
 
     bool Book::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Books;
+        return (npcServices & ESM::NPC::Books)
+                || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
     float Book::getWeight(const MWWorld::Ptr &ptr) const

@@ -1,5 +1,7 @@
 #include "effectmanager.hpp"
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include <OgreSceneManager.h>
 #include <OgreParticleSystem.h>
 #include <OgreSceneNode.h>
@@ -21,19 +23,9 @@ void EffectManager::addEffect(const std::string &model, std::string textureOverr
     Ogre::SceneNode* sceneNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(worldPosition);
     sceneNode->setScale(scale,scale,scale);
 
-    // fix texture extension to .dds
-    if (textureOverride.size() > 4)
-    {
-        textureOverride[textureOverride.size()-3] = 'd';
-        textureOverride[textureOverride.size()-2] = 'd';
-        textureOverride[textureOverride.size()-1] = 's';
-    }
-
-
     NifOgre::ObjectScenePtr scene = NifOgre::Loader::createObjects(sceneNode, model);
 
-    // TODO: turn off shadow casting
-    MWRender::Animation::setRenderProperties(scene, RV_Misc,
+    MWRender::Animation::setRenderProperties(scene, RV_Effects,
                         RQG_Main, RQG_Alpha, 0.f, false, NULL);
 
     for(size_t i = 0;i < scene->mControllers.size();i++)
@@ -44,6 +36,7 @@ void EffectManager::addEffect(const std::string &model, std::string textureOverr
 
     if (!textureOverride.empty())
     {
+        std::string correctedTexture = Misc::ResourceHelpers::correctTexturePath(textureOverride);
         for(size_t i = 0;i < scene->mParticles.size(); ++i)
         {
             Ogre::ParticleSystem* partSys = scene->mParticles[i];
@@ -59,7 +52,7 @@ void EffectManager::addEffect(const std::string &model, std::string textureOverr
                     for (int tex=0; tex<pass->getNumTextureUnitStates(); ++tex)
                     {
                         Ogre::TextureUnitState* tus = pass->getTextureUnitState(tex);
-                        tus->setTextureName("textures\\" + textureOverride);
+                        tus->setTextureName(correctedTexture);
                     }
                 }
             }

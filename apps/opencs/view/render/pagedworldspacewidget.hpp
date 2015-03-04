@@ -8,8 +8,16 @@
 #include "worldspacewidget.hpp"
 #include "cell.hpp"
 
+namespace CSVWidget
+{
+   class SceneToolToggle;
+}
+
 namespace CSVRender
 {
+    class TextOverlay;
+    class OverlayMask;
+
     class PagedWorldspaceWidget : public WorldspaceWidget
     {
             Q_OBJECT
@@ -18,6 +26,10 @@ namespace CSVRender
             CSMWorld::CellSelection mSelection;
             std::map<CSMWorld::CellCoordinates, Cell *> mCells;
             std::string mWorldspace;
+            CSVWidget::SceneToolToggle *mControlElements;
+            bool mDisplayCellCoord;
+            std::map<CSMWorld::CellCoordinates, TextOverlay *> mTextOverlays;
+            OverlayMask *mOverlayMask;
 
         private:
 
@@ -41,6 +53,8 @@ namespace CSVRender
 
             virtual void referenceAdded (const QModelIndex& index, int start, int end);
 
+            virtual std::string getStartupInstruction();
+
         public:
 
             PagedWorldspaceWidget (QWidget *parent, CSMDoc::Document& document);
@@ -52,11 +66,34 @@ namespace CSVRender
 
             void useViewHint (const std::string& hint);
 
-            void setCellSelection (const CSMWorld::CellSelection& selection);
+            void setCellSelection(const CSMWorld::CellSelection& selection);
 
-            virtual void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
+            /// \return Drop handled?
+            virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
+                DropType type);
 
-            virtual dropRequirments getDropRequirements(dropType type) const;
+            virtual dropRequirments getDropRequirements(DropType type) const;
+
+            /// \attention The created tool is not added to the toolbar (via addTool). Doing
+            /// that is the responsibility of the calling function.
+            virtual CSVWidget::SceneToolToggle *makeControlVisibilitySelector (
+                CSVWidget::SceneToolbar *parent);
+
+            virtual unsigned int getVisibilityMask() const;
+
+        protected:
+
+            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
+
+            virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
+
+            virtual void updateOverlay();
+
+            virtual void mousePressEvent (QMouseEvent *event);
+
+            virtual void mouseReleaseEvent (QMouseEvent *event);
+
+            virtual void mouseDoubleClickEvent (QMouseEvent *event);
 
         signals:
 

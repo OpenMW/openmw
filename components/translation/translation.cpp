@@ -6,6 +6,11 @@
 
 namespace Translation
 {
+    Storage::Storage()
+        : mEncoder(NULL)
+    {
+    }
+
     void Storage::loadTranslationData(const Files::Collections& dataFileCollections,
                                       const std::string& esmFileName)
     {

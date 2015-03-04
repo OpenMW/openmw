@@ -8,9 +8,12 @@
 #include <QMdiArea>
 #include <QDockWidget>
 #include <QtGui/QApplication>
+#include <QDesktopWidget>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/settings/usersettings.hpp"
+
+#include "../../model/world/idtable.hpp"
 
 #include "../world/subviews.hpp"
 
@@ -19,11 +22,19 @@
 #include "viewmanager.hpp"
 #include "operations.hpp"
 #include "subview.hpp"
+#include "globaldebugprofilemenu.hpp"
+#include "runlogsubview.hpp"
+#include "subviewfactoryimp.hpp"
 
 void CSVDoc::View::closeEvent (QCloseEvent *event)
 {
     if (!mViewManager.closeRequest (this))
         event->ignore();
+    else
+    {
+        // closeRequest() returns true if last document
+        mViewManager.removeDocAndView(mDocument);
+    }
 }
 
 void CSVDoc::View::setupFileMenu()
@@ -93,6 +104,10 @@ void CSVDoc::View::setupViewMenu()
     mShowStatusBar = new QAction (tr ("Show Status Bar"), this);
     mShowStatusBar->setCheckable (true);
     connect (mShowStatusBar, SIGNAL (toggled (bool)), this, SLOT (toggleShowStatusBar (bool)));
+    std::string showStatusBar =
+        CSMSettings::UserSettings::instance().settingValue("window/show-statusbar").toStdString();
+    if(showStatusBar == "true")
+        mShowStatusBar->setChecked(true);
     view->addAction (mShowStatusBar);
 
     QAction *filters = new QAction (tr ("Filters"), this);
@@ -119,6 +134,10 @@ void CSVDoc::View::setupWorldMenu()
     QAction *references = new QAction (tr ("References"), this);
     connect (references, SIGNAL (triggered()), this, SLOT (addReferencesSubView()));
     world->addAction (references);
+
+    QAction *grid = new QAction (tr ("Pathgrid"), this);
+    connect (grid, SIGNAL (triggered()), this, SLOT (addPathgridSubView()));
+    world->addAction (grid);
 
     world->addSeparator(); // items that don't represent single record lists follow here
 
@@ -150,6 +169,14 @@ void CSVDoc::View::setupMechanicsMenu()
     QAction *enchantments = new QAction (tr ("Enchantments"), this);
     connect (enchantments, SIGNAL (triggered()), this, SLOT (addEnchantmentsSubView()));
     mechanics->addAction (enchantments);
+
+    QAction *effects = new QAction (tr ("Magic Effects"), this);
+    connect (effects, SIGNAL (triggered()), this, SLOT (addMagicEffectsSubView()));
+    mechanics->addAction (effects);
+
+    QAction *startScripts = new QAction (tr ("Start Scripts"), this);
+    connect (startScripts, SIGNAL (triggered()), this, SLOT (addStartScriptsSubView()));
+    mechanics->addAction (startScripts);
 }
 
 void CSVDoc::View::setupCharacterMenu()
@@ -205,6 +232,10 @@ void CSVDoc::View::setupAssetsMenu()
     connect (sounds, SIGNAL (triggered()), this, SLOT (addSoundsSubView()));
     assets->addAction (sounds);
 
+    QAction *soundGens = new QAction (tr ("Sound Generators"), this);
+    connect (soundGens, SIGNAL (triggered()), this, SLOT (addSoundGensSubView()));
+    assets->addAction (soundGens);
+
     assets->addSeparator(); // resources follow here
 
     QAction *meshes = new QAction (tr ("Meshes"), this);
@@ -232,6 +263,35 @@ void CSVDoc::View::setupAssetsMenu()
     assets->addAction (videos);
 }
 
+void CSVDoc::View::setupDebugMenu()
+{
+    QMenu *debug = menuBar()->addMenu (tr ("Debug"));
+
+    QAction *profiles = new QAction (tr ("Debug Profiles"), this);
+    connect (profiles, SIGNAL (triggered()), this, SLOT (addDebugProfilesSubView()));
+    debug->addAction (profiles);
+
+    debug->addSeparator();
+
+    mGlobalDebugProfileMenu = new GlobalDebugProfileMenu (
+        &dynamic_cast<CSMWorld::IdTable&> (*mDocument->getData().getTableModel (
+        CSMWorld::UniversalId::Type_DebugProfiles)), this);
+
+    connect (mGlobalDebugProfileMenu, SIGNAL (triggered (const std::string&)),
+        this, SLOT (run (const std::string&)));
+
+    QAction *runDebug = debug->addMenu (mGlobalDebugProfileMenu);
+    runDebug->setText (tr ("Run OpenMW"));
+
+    mStopDebug = new QAction (tr ("Shutdown OpenMW"), this);
+    connect (mStopDebug, SIGNAL (triggered()), this, SLOT (stop()));
+    debug->addAction (mStopDebug);
+
+    QAction *runLog = new QAction (tr ("Run Log"), this);
+    connect (runLog, SIGNAL (triggered()), this, SLOT (addRunLogSubView()));
+    debug->addAction (runLog);
+}
+
 void CSVDoc::View::setupUi()
 {
     setupFileMenu();
@@ -241,6 +301,7 @@ void CSVDoc::View::setupUi()
     setupMechanicsMenu();
     setupCharacterMenu();
     setupAssetsMenu();
+    setupDebugMenu();
 }
 
 void CSVDoc::View::updateTitle()
@@ -255,12 +316,51 @@ void CSVDoc::View::updateTitle()
     if (mViewTotal>1)
         stream << " [" << (mViewIndex+1) << "/" << mViewTotal << "]";
 
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+
+    bool hideTitle = userSettings.setting ("window/hide-subview", QString ("false"))=="true" &&
+        mSubViews.size()==1 && !mSubViews.at (0)->isFloating();
+
+    if (hideTitle)
+        stream << " - " << mSubViews.at (0)->getTitle();
+
     setWindowTitle (stream.str().c_str());
+}
+
+void CSVDoc::View::updateSubViewIndicies(SubView *view)
+{
+    if(view && mSubViews.contains(view))
+        mSubViews.removeOne(view);
+
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+
+    bool hideTitle = userSettings.setting ("window/hide-subview", QString ("false"))=="true" &&
+        mSubViews.size()==1 && !mSubViews.at (0)->isFloating();
+
+    updateTitle();
+
+    foreach (SubView *subView, mSubViews)
+    {
+        if (!subView->isFloating())
+        {
+            if (hideTitle)
+            {
+                subView->setTitleBarWidget (new QWidget (this));
+                subView->setWindowTitle (QString::fromUtf8 (subView->getTitle().c_str()));
+            }
+            else
+            {
+                delete subView->titleBarWidget();
+                subView->setTitleBarWidget (0);
+            }
+        }
+    }
 }
 
 void CSVDoc::View::updateActions()
 {
     bool editing = !(mDocument->getState() & CSMDoc::State_Locked);
+    bool running = mDocument->getState() & CSMDoc::State_Running;
 
     for (std::vector<QAction *>::iterator iter (mEditingActions.begin()); iter!=mEditingActions.end(); ++iter)
         (*iter)->setEnabled (editing);
@@ -268,21 +368,31 @@ void CSVDoc::View::updateActions()
     mUndo->setEnabled (editing & mDocument->getUndoStack().canUndo());
     mRedo->setEnabled (editing & mDocument->getUndoStack().canRedo());
 
-    mSave->setEnabled (!(mDocument->getState() & CSMDoc::State_Saving));
+    mSave->setEnabled (!(mDocument->getState() & CSMDoc::State_Saving) && !running);
     mVerify->setEnabled (!(mDocument->getState() & CSMDoc::State_Verifying));
+
+    mGlobalDebugProfileMenu->updateActions (running);
+    mStopDebug->setEnabled (running);
 }
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
       mViewTotal (totalViews)
 {
-    QString width = CSMSettings::UserSettings::instance().settingValue
-                                    ("Window Size/Width");
+    int width = CSMSettings::UserSettings::instance().settingValue
+                                    ("window/default-width").toInt();
 
-    QString height = CSMSettings::UserSettings::instance().settingValue
-                                    ("Window Size/Height");
+    int height = CSMSettings::UserSettings::instance().settingValue
+                                    ("window/default-height").toInt();
 
-    resize (width.toInt(), height.toInt());
+    width = std::max(width, 300);
+    height = std::max(height, 300);
+
+    // trick to get the window decorations and their sizes
+    show();
+    hide();
+    resize (width - (frameGeometry().width() - geometry().width()),
+            height - (frameGeometry().height() - geometry().height()));
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
@@ -295,8 +405,12 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
 
     setupUi();
 
+    updateActions();
+
     CSVWorld::addSubViewFactories (mSubViewFactory);
     CSVTools::addSubViewFactories (mSubViewFactory);
+
+    mSubViewFactory.add (CSMWorld::UniversalId::Type_RunLog, new SubViewFactory<RunLogSubView>);
 
     connect (mOperations, SIGNAL (abortOperation (int)), this, SLOT (abortOperation (int)));
 }
@@ -352,38 +466,76 @@ void CSVDoc::View::updateProgress (int current, int max, int type, int threads)
 
 void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::string& hint)
 {
-    /// \todo add an user setting for limiting the number of sub views per top level view. Automatically open a new top level view if this
-    /// number is exceeded
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
 
-    /// \todo if the sub view limit setting is one, the sub view title bar should be hidden and the text in the main title bar adjusted
-    /// accordingly
+    bool isReferenceable = id.getClass() == CSMWorld::UniversalId::Class_RefRecord;
 
-    /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
+    // User setting to reuse sub views (on a per top level view basis)
+    bool reuse =
+        userSettings.setting ("window/reuse", QString("true")) == "true" ? true : false;
+    if(reuse)
+    {
+        foreach(SubView *sb, mSubViews)
+        {
+            bool isSubViewReferenceable =
+                sb->getUniversalId().getType() == CSMWorld::UniversalId::Type_Referenceable;
 
-    const std::vector<CSMWorld::UniversalId::Type> referenceables(CSMWorld::UniversalId::listReferenceableTypes());
+            if((isReferenceable && isSubViewReferenceable && id.getId() == sb->getUniversalId().getId())
+               ||
+               (!isReferenceable && id == sb->getUniversalId()))
+            {
+                sb->setFocus();
+                return;
+            }
+        }
+    }
+
+    // User setting for limiting the number of sub views per top level view.
+    // Automatically open a new top level view if this number is exceeded
+    //
+    // If the sub view limit setting is one, the sub view title bar is hidden and the
+    // text in the main title bar is adjusted accordingly
+    int maxSubView = userSettings.setting("window/max-subviews", QString("256")).toInt();
+    if(mSubViews.size() >= maxSubView) // create a new top level view
+    {
+        mViewManager.addView(mDocument, id, hint);
+
+        return;
+    }
+
     SubView *view = NULL;
-    if(std::find(referenceables.begin(), referenceables.end(), id.getType()) != referenceables.end())
+    if(isReferenceable)
     {
         view = mSubViewFactory.makeSubView (CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Referenceable, id.getId()), *mDocument);
-    } else
+    }
+    else
     {
         view = mSubViewFactory.makeSubView (id, *mDocument);
     }
     assert(view);
+    view->setParent(this);
+    mSubViews.append(view); // only after assert
     if (!hint.empty())
         view->useHint (hint);
+
+    int minWidth = userSettings.setting ("window/minimum-width", QString("325")).toInt();
+    view->setMinimumWidth(minWidth);
 
     view->setStatusBar (mShowStatusBar->isChecked());
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
+    updateSubViewIndicies();
+
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&, const std::string&)));
 
-    connect (&CSMSettings::UserSettings::instance(),
-             SIGNAL (userSettingUpdated (const QString &, const QStringList &)),
-             view,
-             SLOT (updateUserSetting (const QString &, const QStringList &)));
+    connect (view, SIGNAL (closeRequest (SubView *)), this, SLOT (closeRequest (SubView *)));
+
+    connect (view, SIGNAL (updateTitle()), this, SLOT (updateTitle()));
+
+    connect (view, SIGNAL (updateSubViewIndicies (SubView *)),
+        this, SLOT (updateSubViewIndicies (SubView *)));
 
     view->show();
 }
@@ -513,6 +665,11 @@ void CSVDoc::View::addBodyPartsSubView()
     addSubView (CSMWorld::UniversalId::Type_BodyParts);
 }
 
+void CSVDoc::View::addSoundGensSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_SoundGens);
+}
+
 void CSVDoc::View::addMeshesSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Meshes);
@@ -533,6 +690,11 @@ void CSVDoc::View::addSoundsResSubView()
     addSubView (CSMWorld::UniversalId::Type_SoundsRes);
 }
 
+void CSVDoc::View::addMagicEffectsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_MagicEffects);
+}
+
 void CSVDoc::View::addTexturesSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Textures);
@@ -541,6 +703,26 @@ void CSVDoc::View::addTexturesSubView()
 void CSVDoc::View::addVideosSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Videos);
+}
+
+void CSVDoc::View::addDebugProfilesSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_DebugProfiles);
+}
+
+void CSVDoc::View::addRunLogSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_RunLog);
+}
+
+void CSVDoc::View::addPathgridSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Pathgrids);
+}
+
+void CSVDoc::View::addStartScriptsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_StartScripts);
 }
 
 void CSVDoc::View::abortOperation (int type)
@@ -571,9 +753,16 @@ void CSVDoc::View::resizeViewHeight (int height)
         resize (geometry().width(), height);
 }
 
-void CSVDoc::View::updateUserSetting
-                                (const QString &name, const QStringList &list)
-{}
+void CSVDoc::View::updateUserSetting (const QString &name, const QStringList &list)
+{
+    if (name=="window/hide-subview")
+        updateSubViewIndicies (0);
+
+    foreach (SubView *subView, mSubViews)
+    {
+        subView->updateUserSetting (name, list);
+    }
+}
 
 void CSVDoc::View::toggleShowStatusBar (bool show)
 {
@@ -584,7 +773,33 @@ void CSVDoc::View::toggleShowStatusBar (bool show)
     }
 }
 
+void CSVDoc::View::toggleStatusBar(bool checked)
+{
+    mShowStatusBar->setChecked(checked);
+}
+
 void CSVDoc::View::loadErrorLog()
 {
     addSubView (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_LoadErrorLog, 0));
+}
+
+void CSVDoc::View::run (const std::string& profile, const std::string& startupInstruction)
+{
+    mDocument->startRunning (profile, startupInstruction);
+}
+
+void CSVDoc::View::stop()
+{
+    mDocument->stopRunning();
+}
+
+void CSVDoc::View::closeRequest (SubView *subView)
+{
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+
+    if (mSubViews.size()>1 || mViewTotal<=1 ||
+        userSettings.setting ("window/hide-subview", QString ("false"))!="true")
+        subView->deleteLater();
+    else if (mViewManager.closeRequest (this))
+        mViewManager.removeDocAndView (mDocument);
 }

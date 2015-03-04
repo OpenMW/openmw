@@ -32,7 +32,6 @@ struct Land
     ESMReader* mEsm;
     ESM_Context mContext;
 
-    bool mHasData;
     int mDataTypes;
     int mDataLoaded;
 
@@ -81,11 +80,12 @@ struct Land
         VNML mNormals[LAND_NUM_VERTS * 3];
         uint16_t mTextures[LAND_NUM_TEXTURES];
 
-        bool mUsingColours;
         char mColours[3 * LAND_NUM_VERTS];
         int mDataTypes;
 
-        uint8_t mWnam[81];
+        // low-LOD heightmap (used for rendering the global map)
+        signed char mWnam[81];
+
         short mUnk1;
         uint8_t mUnk2;
 
@@ -98,6 +98,8 @@ struct Land
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 
+    void blank() {}
+
     /**
      * Actually loads data
      */
@@ -109,10 +111,8 @@ struct Land
     void unloadData();
 
     /// Check if given data type is loaded
-    /// \todo reimplement this
-    bool isDataLoaded(int flags) {
-        return (mDataLoaded & flags) == flags;
-    }
+    /// @note We only check data types that *can* be loaded (present in mDataTypes)
+    bool isDataLoaded(int flags) const;
 
     private:
         Land(const Land& land);

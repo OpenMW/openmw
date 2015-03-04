@@ -3,12 +3,29 @@
 
 #include <sstream>
 
-#include <OgreCamera.h>
+#include <QMouseEvent>
 
-#include <QtGui/qevent.h>
+#include <OgreCamera.h>
+#include <OgreSceneManager.h>
+#include <OgreManualObject.h>
+#include <OgreOverlayContainer.h>
+#include <OgreOverlayManager.h>
+#include <OgreRoot.h>
+#include <OgreSceneQuery.h>
+
+#include <components/esm/loadland.hpp>
+#include "textoverlay.hpp"
+#include "overlaymask.hpp"
 
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
+
+#include "../widget/scenetooltoggle.hpp"
+#include "../widget/scenetoolmode.hpp"
+#include "../widget/scenetooltoggle2.hpp"
+
+#include "editmode.hpp"
+#include "elements.hpp"
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
@@ -18,7 +35,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     const CSMWorld::IdCollection<CSMWorld::Cell>& cells = mDocument.getData().getCells();
 
     {
-        // remove
+        // remove (or name/region modified)
         std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
 
         while (iter!=mCells.end())
@@ -28,12 +45,57 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             if (!mSelection.has (iter->first) || index==-1 ||
                 cells.getRecord (index).mState==CSMWorld::RecordBase::State_Deleted)
             {
+                // delete overlays
+                std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator itOverlay = mTextOverlays.find(iter->first);
+                if(itOverlay != mTextOverlays.end())
+                {
+                    delete itOverlay->second;
+                    mTextOverlays.erase(itOverlay);
+                }
+
+                // destroy manual objects
+                getSceneManager()->destroyManualObject("manual"+iter->first.getId(mWorldspace));
+
                 delete iter->second;
                 mCells.erase (iter++);
+
                 modified = true;
             }
             else
+            {
+                // check if name or region field has changed
+                // FIXME: config setting
+                std::string name = cells.getRecord(index).get().mName;
+                std::string region = cells.getRecord(index).get().mRegion;
+
+                std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator it = mTextOverlays.find(iter->first);
+                if(it != mTextOverlays.end())
+                {
+                    if(it->second->getDesc() != "") // previously had name
+                    {
+                        if(name != it->second->getDesc()) // new name
+                        {
+                            if(name != "")
+                                it->second->setDesc(name);
+                            else // name deleted, use region
+                                it->second->setDesc(region);
+                            it->second->update();
+                        }
+                    }
+                    else if(name != "") // name added
+                    {
+                        it->second->setDesc(name);
+                        it->second->update();
+                    }
+                    else if(region != it->second->getDesc()) // new region
+                    {
+                        it->second->setDesc(region);
+                        it->second->update();
+                    }
+                    modified = true;
+                }
                 ++iter;
+            }
         }
     }
 
@@ -46,24 +108,159 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     {
         int index = cells.searchId (iter->getId (mWorldspace));
 
-        if (index!=0 && cells.getRecord (index).mState!=CSMWorld::RecordBase::State_Deleted &&
+        if (index > 0 && cells.getRecord (index).mState!=CSMWorld::RecordBase::State_Deleted &&
             mCells.find (*iter)==mCells.end())
         {
+            Cell *cell = new Cell (mDocument.getData(), getSceneManager(),
+                    iter->getId (mWorldspace), mDocument.getPhysics());
+            mCells.insert (std::make_pair (*iter, cell));
+
+            float height = cell->getTerrainHeightAt(Ogre::Vector3(
+                              ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
+                              0));
             if (setCamera)
             {
                 setCamera = false;
-                getCamera()->setPosition (8192*iter->getX()+4096, 8192*iter->getY()+4096, 0);
+                getCamera()->setPosition (
+                              ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
+                              height);
+                // better camera position at the start
+                getCamera()->move(getCamera()->getDirection() * -6000); // FIXME: config setting
             }
 
-            mCells.insert (std::make_pair (*iter,
-                new Cell (mDocument.getData(), getSceneManager(),
-                iter->getId (mWorldspace))));
+            Ogre::ManualObject* manual =
+                    getSceneManager()->createManualObject("manual" + iter->getId(mWorldspace));
+            manual->begin("BaseWhite", Ogre::RenderOperation::OT_LINE_LIST);
+            // define start and end point (x, y, z)
+            manual-> position(ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
+                              height);
+            manual-> position(ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
+                              height+200); // FIXME: config setting
+            manual->end();
+            manual->setBoundingBox(Ogre::AxisAlignedBox(
+                              ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
+                              height,
+                              ESM::Land::REAL_SIZE * iter->getX() + ESM::Land::REAL_SIZE/2,
+                              ESM::Land::REAL_SIZE * iter->getY() + ESM::Land::REAL_SIZE/2,
+                              height+200));
+            getSceneManager()->getRootSceneNode()->createChildSceneNode()->attachObject(manual);
+            manual->setVisible(false);
+
+            CSVRender::TextOverlay *textDisp =
+                    new CSVRender::TextOverlay(manual, getCamera(), iter->getId(mWorldspace));
+            textDisp->enable(true);
+            textDisp->setCaption(iter->getId(mWorldspace));
+            std::string desc = cells.getRecord(index).get().mName;
+            if(desc == "") desc = cells.getRecord(index).get().mRegion;
+            textDisp->setDesc(desc); // FIXME: config setting
+            textDisp->update();
+            mTextOverlays.insert(std::make_pair(*iter, textDisp));
+            if(!mOverlayMask)
+            {
+                mOverlayMask = new OverlayMask(mTextOverlays, getViewport());
+                addRenderTargetListener(mOverlayMask);
+            }
 
             modified = true;
         }
     }
 
     return modified;
+}
+
+void CSVRender::PagedWorldspaceWidget::mousePressEvent (QMouseEvent *event)
+{
+    if(event->button() == Qt::RightButton)
+    {
+        std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator iter = mTextOverlays.begin();
+        for(; iter != mTextOverlays.end(); ++iter)
+        {
+            if(mDisplayCellCoord &&
+               iter->second->isEnabled() && iter->second->container().contains(event->x(), event->y()))
+            {
+                return;
+            }
+        }
+    }
+    WorldspaceWidget::mousePressEvent(event);
+}
+
+void CSVRender::PagedWorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
+{
+    if(event->button() == Qt::RightButton)
+    {
+        std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator iter = mTextOverlays.begin();
+        for(; iter != mTextOverlays.end(); ++iter)
+        {
+            if(mDisplayCellCoord &&
+               iter->second->isEnabled() && iter->second->container().contains(event->x(), event->y()))
+            {
+                std::cout << "clicked: " << iter->second->getCaption() << std::endl;
+                return;
+            }
+        }
+    }
+    WorldspaceWidget::mouseReleaseEvent(event);
+}
+
+void CSVRender::PagedWorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
+{
+    WorldspaceWidget::mouseDoubleClickEvent(event);
+}
+
+void CSVRender::PagedWorldspaceWidget::addVisibilitySelectorButtons (
+    CSVWidget::SceneToolToggle2 *tool)
+{
+    WorldspaceWidget::addVisibilitySelectorButtons (tool);
+    tool->addButton (Element_Terrain, "Terrain");
+    tool->addButton (Element_Fog, "Fog", "", true);
+}
+
+void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
+    CSVWidget::SceneToolMode *tool)
+{
+    WorldspaceWidget::addEditModeSelectorButtons (tool);
+
+    /// \todo replace EditMode with suitable subclasses
+    tool->addButton (
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain shape editing"),
+        "terrain-shape");
+    tool->addButton (
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain texture editing"),
+        "terrain-texture");
+    tool->addButton (
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain vertex paint editing"),
+        "terrain-vertex");
+    tool->addButton (
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain movement"),
+        "terrain-move");
+}
+
+void CSVRender::PagedWorldspaceWidget::updateOverlay()
+{
+    if(getCamera()->getViewport())
+    {
+        if((uint32_t)getCamera()->getViewport()->getVisibilityMask()
+                                & (uint32_t)CSVRender::Element_CellMarker)
+            mDisplayCellCoord = true;
+        else
+            mDisplayCellCoord = false;
+    }
+
+    if(!mTextOverlays.empty())
+    {
+        std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator it = mTextOverlays.begin();
+        for(; it != mTextOverlays.end(); ++it)
+        {
+            it->second->enable(mDisplayCellCoord);
+            it->second->update();
+        }
+    }
 }
 
 void CSVRender::PagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
@@ -129,8 +326,23 @@ void CSVRender::PagedWorldspaceWidget::referenceAdded (const QModelIndex& parent
             flagAsModified();
 }
 
+std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
+{
+    Ogre::Vector3 position = getCamera()->getPosition();
+
+    std::ostringstream stream;
+
+    stream
+        << "player->position "
+        << position.x << ", " << position.y << ", " << position.z
+        << ", 0";
+
+    return stream.str();
+}
+
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
-: WorldspaceWidget (document, parent), mDocument (document), mWorldspace ("std::default")
+: WorldspaceWidget (document, parent), mDocument (document), mWorldspace ("std::default"),
+  mControlElements(NULL), mDisplayCellCoord(true), mOverlayMask(NULL)
 {
     QAbstractItemModel *cells =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells);
@@ -147,7 +359,23 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
 {
     for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
         iter!=mCells.end(); ++iter)
+    {
         delete iter->second;
+
+        getSceneManager()->destroyManualObject("manual"+iter->first.getId(mWorldspace));
+    }
+
+    for (std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator iter (mTextOverlays.begin());
+        iter != mTextOverlays.end(); ++iter)
+    {
+        delete iter->second;
+    }
+
+    if(mOverlayMask)
+    {
+        removeRenderTargetListener(mOverlayMask);
+        delete mOverlayMask;
+    }
 }
 
 void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
@@ -202,8 +430,15 @@ std::pair< int, int > CSVRender::PagedWorldspaceWidget::getCoordinatesFromId (co
     return std::make_pair(x, y);
 }
 
-void CSVRender::PagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::UniversalId >& data)
+bool CSVRender::PagedWorldspaceWidget::handleDrop (
+    const std::vector< CSMWorld::UniversalId >& data, DropType type)
 {
+    if (WorldspaceWidget::handleDrop (data, type))
+        return true;
+
+    if (type!=Type_CellsExterior)
+        return false;
+
     bool selectionChanged = false;
     for (unsigned i = 0; i < data.size(); ++i)
     {
@@ -220,21 +455,52 @@ void CSVRender::PagedWorldspaceWidget::handleDrop (const std::vector< CSMWorld::
 
         emit cellSelectionChanged(mSelection);
     }
+
+    return true;
 }
 
-CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::dropType type) const
+CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::DropType type) const
 {
+    dropRequirments requirements = WorldspaceWidget::getDropRequirements (type);
+
+    if (requirements!=ignored)
+        return requirements;
+
     switch (type)
     {
-        case cellsExterior:
+        case Type_CellsExterior:
             return canHandle;
 
-        case cellsInterior:
+        case Type_CellsInterior:
             return needUnpaged;
 
         default:
             return ignored;
     }
+}
+
+unsigned int CSVRender::PagedWorldspaceWidget::getVisibilityMask() const
+{
+    return WorldspaceWidget::getVisibilityMask() | mControlElements->getSelection();
+}
+
+CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (
+    CSVWidget::SceneToolbar *parent)
+{
+    mControlElements = new CSVWidget::SceneToolToggle (parent,
+        "Controls & Guides Visibility", ":placeholder");
+
+    mControlElements->addButton (":placeholder", Element_CellMarker, ":placeholder",
+        "Cell marker");
+    mControlElements->addButton (":placeholder", Element_CellArrow, ":placeholder", "Cell arrows");
+    mControlElements->addButton (":placeholder", Element_CellBorder, ":placeholder", "Cell border");
+
+    mControlElements->setSelection (0xffffffff);
+
+    connect (mControlElements, SIGNAL (selectionChanged()),
+        this, SLOT (elementSelectionChanged()));
+
+    return mControlElements;
 }
 
 void CSVRender::PagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,

@@ -1,7 +1,11 @@
 #include "recharge.hpp"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_Gui.h>
+
+#include <components/esm/records.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -9,6 +13,7 @@
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -60,7 +65,7 @@ void Recharge::updateView()
     std::string soul = gem.getCellRef().getSoul();
     const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(soul);
 
-    mChargeLabel->setCaptionWithReplacing("#{sCharges} " + boost::lexical_cast<std::string>(creature->mData.mSoul));
+    mChargeLabel->setCaptionWithReplacing("#{sCharges} " + MyGUI::utility::toString(creature->mData.mSoul));
 
     bool toolBoxVisible = (gem.getRefData().getCount() != 0);
     mGemBox->setVisible(toolBoxVisible);
@@ -119,7 +124,11 @@ void Recharge::updateView()
 
         currentY += 32 + 4;
     }
+
+    // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
+    mView->setVisibleVScroll(false);
     mView->setCanvasSize (MyGUI::IntSize(mView->getWidth(), std::max(mView->getHeight(), currentY)));
+    mView->setVisibleVScroll(true);
 }
 
 void Recharge::onCancel(MyGUI::Widget *sender)
@@ -177,6 +186,10 @@ void Recharge::onItemClicked(MyGUI::Widget *sender)
         std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage51")->getString();
         message = boost::str(boost::format(message) % gem.getClass().getName(gem));
         MWBase::Environment::get().getWindowManager()->messageBox(message);
+
+        // special case: readd Azura's Star
+        if (Misc::StringUtils::ciEqual(gem.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
+            player.getClass().getContainerStore(player).add("Misc_SoulGem_Azura", 1, player);
     }
 
     updateView();

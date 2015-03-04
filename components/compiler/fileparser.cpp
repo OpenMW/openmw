@@ -51,6 +51,12 @@ namespace Compiler
                           /// \todo allow this workaround to be disabled for newer scripts
         }
 
+        if (mState==BeginCompleteState)
+        {
+            reportWarning ("Stray string (" + name + ") after begin statement", loc);
+            return true;
+        }
+
         return Parser::parseName (name, loc, scanner);
     }
 
@@ -59,6 +65,7 @@ namespace Compiler
         if (mState==BeginState && keyword==Scanner::K_begin)
         {
             mState = NameState;
+            scanner.allowNameStartingwithDigit();
             return true;
         }
 
@@ -105,6 +112,7 @@ namespace Compiler
                 scanner.scan (mScriptParser);
 
                 mState = EndNameState;
+                scanner.allowNameStartingwithDigit();
                 return true;
             }
 

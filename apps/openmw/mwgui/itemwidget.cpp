@@ -2,14 +2,32 @@
 
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_TextBox.h>
+
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwworld/class.hpp"
+
+namespace
+{
+    std::string getCountString(int count)
+    {
+        if (count == 1)
+            return "";
+        if (count > 9999)
+            return MyGUI::utility::toString(int(count/1000.f)) + "k";
+        else
+            return MyGUI::utility::toString(count);
+    }
+}
 
 namespace MWGui
 {
 
     ItemWidget::ItemWidget()
         : mItem(NULL)
+        , mFrame(NULL)
+        , mText(NULL)
     {
 
     }
@@ -27,32 +45,28 @@ namespace MWGui
         assignWidget(mFrame, "Frame");
         if (mFrame)
             mFrame->setNeedMouseFocus(false);
+        assignWidget(mText, "Text");
+        if (mText)
+            mText->setNeedMouseFocus(false);
 
         Base::initialiseOverride();
     }
 
+    void ItemWidget::setCount(int count)
+    {
+        if (!mText)
+            return;
+        mText->setCaption(getCountString(count));
+    }
+
     void ItemWidget::setIcon(const std::string &icon)
     {
-        // HACK HACK HACK: Don't setImageTexture if it hasn't changed.
-        // There is a leak in MyGUI for each setImageTexture on the same widget.
-        // http://www.ogre3d.org/addonforums/viewtopic.php?f=17&t=30251
-        if (mCurrentItemTexture == icon)
-            return;
-
-        mCurrentItemTexture = icon;
         if (mItem)
             mItem->setImageTexture(icon);
     }
 
     void ItemWidget::setFrame(const std::string &frame, const MyGUI::IntCoord &coord)
     {
-        // HACK HACK HACK: Don't setImageTexture if it hasn't changed.
-        // There is a leak in MyGUI for each setImageTexture on the same widget.
-        // http://www.ogre3d.org/addonforums/viewtopic.php?f=17&t=30251
-        if (mCurrentFrameTexture == frame)
-            return;
-
-        mCurrentFrameTexture = frame;
         if (mFrame)
         {
             mFrame->setImageTexture(frame);
@@ -63,15 +77,7 @@ namespace MWGui
 
     void ItemWidget::setIcon(const MWWorld::Ptr &ptr)
     {
-        // image
-        std::string path = std::string("icons\\");
-        path += ptr.getClass().getInventoryIcon(ptr);
-
-        std::string::size_type pos = path.rfind(".");
-        if(pos != std::string::npos)
-            path.erase(pos);
-        path.append(".dds");
-        setIcon(path);
+        setIcon(Misc::ResourceHelpers::correctIconPath(ptr.getClass().getInventoryIcon(ptr)));
     }
 
 
@@ -83,21 +89,9 @@ namespace MWGui
         if (ptr.isEmpty())
         {
             if (mFrame)
-            {
-                // HACK HACK HACK: Don't setImageTexture if it hasn't changed.
-                // There is a leak in MyGUI for each setImageTexture on the same widget.
-                // http://www.ogre3d.org/addonforums/viewtopic.php?f=17&t=30251
-                if (!mCurrentFrameTexture.empty())
-                {
-                    mFrame->setImageTexture("");
-                    mCurrentFrameTexture = "";
-                }
-            }
-            if (!mCurrentItemTexture.empty())
-            {
-                mCurrentItemTexture = "";
-                mItem->setImageTexture("");
-            }
+                mFrame->setImageTexture("");
+            mItem->setImageTexture("");
+            mText->setCaption("");
             return;
         }
 

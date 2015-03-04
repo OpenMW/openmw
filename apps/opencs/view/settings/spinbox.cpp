@@ -24,7 +24,7 @@ QString CSVSettings::SpinBox::textFromValue(int val) const
 int CSVSettings::SpinBox::valueFromText(const QString &text) const
 {
     if (mValueList.isEmpty())
-        return -1;
+        return text.toInt(); // TODO: assumed integer, untested error handling for alpha types
 
     if (mValueList.contains (text))
         return mValueList.indexOf(text);

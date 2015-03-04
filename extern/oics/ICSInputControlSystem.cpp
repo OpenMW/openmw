@@ -36,6 +36,9 @@ namespace ICS
 		, mDetectingBindingControl(NULL)
 		, mLog(log)
 		, mXmouseAxisBinded(false), mYmouseAxisBinded(false)
+        , mClientHeight(1)
+        , mClientWidth(1)
+        , mDetectingBindingDirection(Control::STOP)
 	{
 		ICS_LOG(" - Creating InputControlSystem - ");
 
@@ -57,10 +60,10 @@ namespace ICS
 			xmlDoc = new TiXmlDocument(file.c_str());
 			xmlDoc->LoadFile();
 
-			if(xmlDoc->Error()) 
+			if(xmlDoc->Error())
 			{
-				std::ostringstream message;  
-				message << "TinyXml reported an error reading \""+ file + "\". Row " << 
+				std::ostringstream message;
+				message << "TinyXml reported an error reading \""+ file + "\". Row " <<
 					(int)xmlDoc->ErrorRow() << ", Col " << (int)xmlDoc->ErrorCol() << ": " <<
 					xmlDoc->ErrorDesc() ;
 				ICS_LOG(message.str());
@@ -78,13 +81,13 @@ namespace ICS
 
 			TiXmlElement* xmlControl = xmlRoot->FirstChildElement("Control");
 
-	        size_t controlChannelCount = 0;  
-			while(xmlControl) 
+	        size_t controlChannelCount = 0;
+			while(xmlControl)
 	        {
-	            TiXmlElement* xmlChannel = xmlControl->FirstChildElement("Channel");    
+	            TiXmlElement* xmlChannel = xmlControl->FirstChildElement("Channel");
 				while(xmlChannel)
 				{
-	                controlChannelCount = std::max(channelCount, FromString<size_t>(xmlChannel->Attribute("number")));
+					controlChannelCount = std::max(channelCount, FromString<size_t>(xmlChannel->Attribute("number"))+1);
 
 					xmlChannel = xmlChannel->NextSiblingElement("Channel");
 				}
@@ -108,7 +111,7 @@ namespace ICS
 			//	<interval type="bezier" startX="0.5" startY="0.5" midX="0.75" midY="0.5" endX="1.0" endY="1.0" step="0.1" />
 			//</ChannelFilter>
 
-			TiXmlElement* xmlChannelFilter = xmlRoot->FirstChildElement("ChannelFilter"); 
+			TiXmlElement* xmlChannelFilter = xmlRoot->FirstChildElement("ChannelFilter");
 			while(xmlChannelFilter)
 			{
 				int ch = FromString<int>(xmlChannelFilter->Attribute("number"));
@@ -120,8 +123,6 @@ namespace ICS
 
 					if(type == "bezier")
 					{
-						float step = 0.1;
-
 						float startX = FromString<float>(xmlInterval->Attribute("startX"));
 						float startY = FromString<float>(xmlInterval->Attribute("startY"));
 						float midX = FromString<float>(xmlInterval->Attribute("midX"));
@@ -129,15 +130,15 @@ namespace ICS
 						float endX = FromString<float>(xmlInterval->Attribute("endX"));
 						float endY = FromString<float>(xmlInterval->Attribute("endY"));
 
-						step = FromString<float>(xmlInterval->Attribute("step"));
+                        float step = FromString<float>(xmlInterval->Attribute("step"));
 
 						ICS_LOG("Applying Bezier filter to channel [number="
-							+ ToString<int>(ch) + ", startX=" 
-							+ ToString<float>(startX) + ", startY=" 
-							+ ToString<float>(startY) + ", midX=" 
-							+ ToString<float>(midX) + ", midY=" 
-							+ ToString<float>(midY) + ", endX=" 
-							+ ToString<float>(endX) + ", endY=" 
+							+ ToString<int>(ch) + ", startX="
+							+ ToString<float>(startX) + ", startY="
+							+ ToString<float>(startY) + ", midX="
+							+ ToString<float>(midX) + ", midY="
+							+ ToString<float>(midY) + ", endX="
+							+ ToString<float>(endX) + ", endY="
 							+ ToString<float>(endY) + ", step="
 							+ ToString<float>(step) + "]");
 
@@ -151,8 +152,8 @@ namespace ICS
 				xmlChannelFilter = xmlChannelFilter->NextSiblingElement("ChannelFilter");
 			}
 
-			xmlControl = xmlRoot->FirstChildElement("Control");    
-			while(xmlControl) 
+			xmlControl = xmlRoot->FirstChildElement("Control");
+			while(xmlControl)
 			{
 				bool axisBindable = true;
 				if(xmlControl->Attribute("axisBindable"))
@@ -175,11 +176,11 @@ namespace ICS
 					std::string value(xmlControl->Attribute("stepSize"));
 					if(value == "MAX")
 					{
-						_stepSize = ICS_MAX;					
+						_stepSize = ICS_MAX;
 					}
 					else
 					{
-						_stepSize = FromString<float>(value.c_str());					
+						_stepSize = FromString<float>(value.c_str());
 					}
 				}
 				else
@@ -193,7 +194,7 @@ namespace ICS
 					std::string value(xmlControl->Attribute("stepsPerSeconds"));
 					if(value == "MAX")
 					{
-						_stepsPerSeconds = ICS_MAX;					
+						_stepsPerSeconds = ICS_MAX;
 					}
 					else
 					{
@@ -223,12 +224,8 @@ namespace ICS
 
 				loadJoystickButtonBinders(xmlControl);
 
-				loadJoystickPOVBinders(xmlControl);
-
-				loadJoystickSliderBinders(xmlControl);
-
 				// Attach controls to channels
-				TiXmlElement* xmlChannel = xmlControl->FirstChildElement("Channel");    
+				TiXmlElement* xmlChannel = xmlControl->FirstChildElement("Channel");
 				while(xmlChannel)
 				{
 					ICS_LOG("\tAttaching control to channel [number="
@@ -249,7 +246,7 @@ namespace ICS
 							{
 								percentage = val;
 							}
-						}			
+						}
 						else
 						{
 							ICS_LOG("ERROR: attaching percentage value range is [0,1]");
@@ -334,10 +331,10 @@ namespace ICS
 
 		TiXmlElement Controller( "Controller" );
 
-		for(std::vector<Channel*>::const_iterator o = mChannels.begin() ; o != mChannels.end(); o++)
+        for(std::vector<Channel*>::const_iterator o = mChannels.begin() ; o != mChannels.end(); ++o)
 		{
 			ICS::IntervalList intervals = (*o)->getIntervals();
-			
+
 			if(intervals.size() > 1) // all channels have a default linear filter
 			{
 				TiXmlElement ChannelFilter( "ChannelFilter" );
@@ -370,15 +367,15 @@ namespace ICS
 
 						ChannelFilter.InsertEndChild(XMLInterval);
 					}
-					
-					interval++;
+
+                    ++interval;
 				}
 
 				Controller.InsertEndChild(ChannelFilter);
 			}
 		}
 
-		for(std::vector<Control*>::const_iterator o = mControls.begin() ; o != mControls.end(); o++)
+        for(std::vector<Control*>::const_iterator o = mControls.begin() ; o != mControls.end(); ++o)
 		{
 			TiXmlElement control( "Control" );
 
@@ -400,7 +397,7 @@ namespace ICS
 				control.SetAttribute( "autoReverseToInitialValue", "false" );
 			}
 			control.SetAttribute( "initialValue", ToString<float>((*o)->getInitialValue()).c_str() );
-			
+
 			if((*o)->getStepSize() == ICS_MAX)
 			{
 				control.SetAttribute( "stepSize", "MAX" );
@@ -424,7 +421,7 @@ namespace ICS
 				control.SetAttribute( "axisBindable", "false" );
 			}
 
-			if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::INCREASE) != SDLK_UNKNOWN)
+            if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::INCREASE) != SDL_SCANCODE_UNKNOWN)
 			{
 				TiXmlElement keyBinder( "KeyBinder" );
 
@@ -434,7 +431,7 @@ namespace ICS
 				control.InsertEndChild(keyBinder);
 			}
 
-			if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::DECREASE) != SDLK_UNKNOWN)
+            if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::DECREASE) != SDL_SCANCODE_UNKNOWN)
 			{
 				TiXmlElement keyBinder( "KeyBinder" );
 
@@ -444,12 +441,12 @@ namespace ICS
 				control.InsertEndChild(keyBinder);
 			}
 
-			if(getMouseAxisBinding(*o, Control/*::ControlChangingDirection*/::INCREASE) 
+			if(getMouseAxisBinding(*o, Control/*::ControlChangingDirection*/::INCREASE)
 				!= InputControlSystem/*::NamedAxis*/::UNASSIGNED)
 			{
 				TiXmlElement binder( "MouseBinder" );
 
-				InputControlSystem::NamedAxis axis = 
+				InputControlSystem::NamedAxis axis =
 					getMouseAxisBinding(*o, Control/*::ControlChangingDirection*/::INCREASE);
 				if(axis == InputControlSystem/*::NamedAxis*/::X)
 				{
@@ -468,12 +465,12 @@ namespace ICS
 				control.InsertEndChild(binder);
 			}
 
-			if(getMouseAxisBinding(*o, Control/*::ControlChangingDirection*/::DECREASE) 
+			if(getMouseAxisBinding(*o, Control/*::ControlChangingDirection*/::DECREASE)
 				!= InputControlSystem/*::NamedAxis*/::UNASSIGNED)
 			{
 				TiXmlElement binder( "MouseBinder" );
 
-				InputControlSystem::NamedAxis axis = 
+				InputControlSystem::NamedAxis axis =
 					getMouseAxisBinding(*o, Control/*::ControlChangingDirection*/::DECREASE);
 				if(axis == InputControlSystem/*::NamedAxis*/::X)
 				{
@@ -492,7 +489,7 @@ namespace ICS
 				control.InsertEndChild(binder);
 			}
 
-			if(getMouseButtonBinding(*o, Control/*::ControlChangingDirection*/::INCREASE) 
+			if(getMouseButtonBinding(*o, Control/*::ControlChangingDirection*/::INCREASE)
 				!= ICS_MAX_DEVICE_BUTTONS)
 			{
 				TiXmlElement binder( "MouseButtonBinder" );
@@ -518,7 +515,7 @@ namespace ICS
 				control.InsertEndChild(binder);
 			}
 
-			if(getMouseButtonBinding(*o, Control/*::ControlChangingDirection*/::DECREASE) 
+			if(getMouseButtonBinding(*o, Control/*::ControlChangingDirection*/::DECREASE)
 				!= ICS_MAX_DEVICE_BUTTONS)
 			{
 				TiXmlElement binder( "MouseButtonBinder" );
@@ -543,175 +540,94 @@ namespace ICS
 				binder.SetAttribute( "direction", "DECREASE" );
 				control.InsertEndChild(binder);
 			}
-
 			JoystickIDList::const_iterator it = mJoystickIDList.begin();
-			while(it != mJoystickIDList.end())
+			while(it!=mJoystickIDList.end())
 			{
-				int deviceId = *it;
+                int deviceID = *it;
+                if(getJoystickAxisBinding(*o, deviceID, Control/*::ControlChangingDirection*/::INCREASE)
+                    != /*NamedAxis::*/UNASSIGNED)
+                {
+                    TiXmlElement binder( "JoystickAxisBinder" );
 
-				if(getJoystickAxisBinding(*o, deviceId, Control/*::ControlChangingDirection*/::INCREASE) 
-					!= /*NamedAxis::*/UNASSIGNED)
-				{
-					TiXmlElement binder( "JoystickAxisBinder" );
+                    binder.SetAttribute( "axis", ToString<int>(
+                        getJoystickAxisBinding(*o, deviceID, Control/*::ControlChangingDirection*/::INCREASE)).c_str() );
 
-					binder.SetAttribute( "axis", ToString<int>(
-						getJoystickAxisBinding(*o, deviceId, Control/*::ControlChangingDirection*/::INCREASE)).c_str() );				
+                    binder.SetAttribute( "direction", "INCREASE" );
 
-					binder.SetAttribute( "direction", "INCREASE" );
+                    binder.SetAttribute( "deviceId", deviceID ); //completely useless, but required for backwards compatability
 
-					binder.SetAttribute( "deviceId", ToString<int>(deviceId).c_str() );
-					
-					control.InsertEndChild(binder);
-				}
+                    control.InsertEndChild(binder);
+                }
 
-				if(getJoystickAxisBinding(*o, deviceId, Control/*::ControlChangingDirection*/::DECREASE) 
-					!= /*NamedAxis::*/UNASSIGNED)
-				{
-					TiXmlElement binder( "JoystickAxisBinder" );
+                if(getJoystickAxisBinding(*o, deviceID, Control/*::ControlChangingDirection*/::DECREASE)
+                    != /*NamedAxis::*/UNASSIGNED)
+                {
+                    TiXmlElement binder( "JoystickAxisBinder" );
 
-					binder.SetAttribute( "axis", ToString<int>(
-						getJoystickAxisBinding(*o, deviceId, Control/*::ControlChangingDirection*/::DECREASE)).c_str() );				
+                    binder.SetAttribute( "axis", ToString<int>(
+                        getJoystickAxisBinding(*o, deviceID, Control/*::ControlChangingDirection*/::DECREASE)).c_str() );
 
-					binder.SetAttribute( "direction", "DECREASE" );
+                    binder.SetAttribute( "direction", "DECREASE" );
 
-					binder.SetAttribute( "deviceId", ToString<int>(deviceId).c_str() );
-					
-					control.InsertEndChild(binder);
-				}
+                    binder.SetAttribute( "deviceId", deviceID ); //completely useless, but required for backwards compatability
 
-				if(getJoystickButtonBinding(*o, deviceId, Control/*::ControlChangingDirection*/::INCREASE) 
-					!= ICS_MAX_DEVICE_BUTTONS)
-				{
-					TiXmlElement binder( "JoystickButtonBinder" );
+                    control.InsertEndChild(binder);
+                }
 
-					binder.SetAttribute( "button", ToString<unsigned int>(
-						getJoystickButtonBinding(*o, deviceId, Control/*::ControlChangingDirection*/::INCREASE)).c_str() );				
+                if(getJoystickButtonBinding(*o, deviceID, Control/*::ControlChangingDirection*/::INCREASE)
+                    != ICS_MAX_DEVICE_BUTTONS)
+                {
+                    TiXmlElement binder( "JoystickButtonBinder" );
 
-					binder.SetAttribute( "direction", "INCREASE" );
+                    binder.SetAttribute( "button", ToString<unsigned int>(
+                        getJoystickButtonBinding(*o, deviceID, Control/*::ControlChangingDirection*/::INCREASE)).c_str() );
 
-					binder.SetAttribute( "deviceId", ToString<int>(deviceId).c_str() );
-					
-					control.InsertEndChild(binder);
-				}
+                    binder.SetAttribute( "direction", "INCREASE" );
 
-				if(getJoystickButtonBinding(*o, deviceId, Control/*::ControlChangingDirection*/::DECREASE) 
-					!= ICS_MAX_DEVICE_BUTTONS)
-				{
-					TiXmlElement binder( "JoystickButtonBinder" );
+                    binder.SetAttribute( "deviceId", deviceID ); //completely useless, but required for backwards compatability
 
-					binder.SetAttribute( "button", ToString<unsigned int>(
-						getJoystickButtonBinding(*o, *it, Control/*::ControlChangingDirection*/::DECREASE)).c_str() );				
+                    control.InsertEndChild(binder);
+                }
 
-					binder.SetAttribute( "direction", "DECREASE" );
+                if(getJoystickButtonBinding(*o, deviceID, Control/*::ControlChangingDirection*/::DECREASE)
+                    != ICS_MAX_DEVICE_BUTTONS)
+                {
+                    TiXmlElement binder( "JoystickButtonBinder" );
 
-					binder.SetAttribute( "deviceId", ToString<int>(deviceId).c_str() );
-					
-					control.InsertEndChild(binder);
-				}
+                    binder.SetAttribute( "button", ToString<unsigned int>(
+                        getJoystickButtonBinding(*o, deviceID, Control/*::ControlChangingDirection*/::DECREASE)).c_str() );
 
-				if(getJoystickPOVBinding(*o, deviceId, Control/*::ControlChangingDirection*/::INCREASE).index >= 0)
-				{
-					TiXmlElement binder( "JoystickPOVBinder" );
+                    binder.SetAttribute( "direction", "DECREASE" );
 
-					POVBindingPair POVPair = getJoystickPOVBinding(*o, deviceId, Control/*::ControlChangingDirection*/::INCREASE);
-					
-					binder.SetAttribute( "pov", ToString<int>(POVPair.index).c_str() );
+                    binder.SetAttribute( "deviceId", deviceID ); //completely useless, but required for backwards compatability
 
-					binder.SetAttribute( "direction", "INCREASE" );
-
-					binder.SetAttribute( "deviceId", ToString<int>(deviceId).c_str() );
-
-					if(POVPair.axis == ICS::InputControlSystem::EastWest)
-					{
-						binder.SetAttribute( "axis", "EastWest" );
-					}
-					else
-					{
-						binder.SetAttribute( "axis", "NorthSouth" );
-					}
-					
-					control.InsertEndChild(binder);
-				}
-
-				if(getJoystickPOVBinding(*o, deviceId, Control/*::ControlChangingDirection*/::DECREASE).index >= 0)
-				{
-					TiXmlElement binder( "JoystickPOVBinder" );
-
-					POVBindingPair POVPair = getJoystickPOVBinding(*o, deviceId, Control/*::ControlChangingDirection*/::DECREASE);
-					
-					binder.SetAttribute( "pov", ToString<int>(POVPair.index).c_str() );
-
-					binder.SetAttribute( "direction", "DECREASE" );
-
-					binder.SetAttribute( "deviceId", ToString<int>(deviceId).c_str() );
-
-					if(POVPair.axis == ICS::InputControlSystem::EastWest)
-					{
-						binder.SetAttribute( "axis", "EastWest" );
-					}
-					else
-					{
-						binder.SetAttribute( "axis", "NorthSouth" );
-					}
-					
-					control.InsertEndChild(binder);
-				}
-
-				if(getJoystickSliderBinding(*o, deviceId, Control/*::ControlChangingDirection*/::INCREASE) 
-					!= /*NamedAxis::*/UNASSIGNED)
-				{
-					TiXmlElement binder( "JoystickSliderBinder" );
-
-					binder.SetAttribute( "slider", ToString<int>(
-						getJoystickSliderBinding(*o, deviceId, Control/*::ControlChangingDirection*/::INCREASE)).c_str() );				
-
-					binder.SetAttribute( "direction", "INCREASE" );
-
-					binder.SetAttribute( "deviceId", ToString<int>(deviceId).c_str() );
-					
-					control.InsertEndChild(binder);
-				}
-
-				if(getJoystickSliderBinding(*o, deviceId, Control/*::ControlChangingDirection*/::DECREASE) 
-					!= /*NamedAxis::*/UNASSIGNED)
-				{
-					TiXmlElement binder( "JoystickSliderBinder" );
-
-					binder.SetAttribute( "slider", ToString<int>(
-						getJoystickSliderBinding(*o, deviceId, Control/*::ControlChangingDirection*/::DECREASE)).c_str() );				
-
-					binder.SetAttribute( "direction", "DECREASE" );
-
-					binder.SetAttribute( "deviceId", ToString<int>(deviceId).c_str() );
-					
-					control.InsertEndChild(binder);
-				}
-
-				it++;
-			}
+                    control.InsertEndChild(binder);
+                }
+                it++;
+            }
 
 
 			std::list<Channel*> channels = (*o)->getAttachedChannels();
 			for(std::list<Channel*>::iterator it = channels.begin() ;
-				it != channels.end() ; it++)
+                it != channels.end() ; ++it)
 			{
 				TiXmlElement binder( "Channel" );
 
 				binder.SetAttribute( "number", ToString<int>((*it)->getNumber()).c_str() );
 
-				Channel::ChannelDirection direction = (*it)->getAttachedControlBinding(*o).direction;				
+				Channel::ChannelDirection direction = (*it)->getAttachedControlBinding(*o).direction;
 				if(direction == Channel/*::ChannelDirection*/::DIRECT)
 				{
 					binder.SetAttribute( "direction", "DIRECT" );
-				} 
+				}
 				else
 				{
 					binder.SetAttribute( "direction", "INVERSE" );
 				}
-				
+
 				float percentage = (*it)->getAttachedControlBinding(*o).percentage;
 				binder.SetAttribute( "percentage", ToString<float>(percentage).c_str() );
-				
+
 				control.InsertEndChild(binder);
 			}
 
@@ -733,7 +649,7 @@ namespace ICS
 			}
 		}
 
-		//! @todo Future versions should consider channel exponentials and mixtures, so 
+		//! @todo Future versions should consider channel exponentials and mixtures, so
 		// after updating Controls, Channels should be updated according to their values
 	}
 
@@ -745,24 +661,6 @@ namespace ICS
 	float InputControlSystem::getControlValue(int i)
 	{
 		return mControls[i]->getValue();
-	}
-
-	void InputControlSystem::addJoystick(int deviceId)
-	{
-		ICS_LOG("Adding joystick (device id: " + ToString<int>(deviceId) + ")");
-
-		for(int j = 0 ; j < ICS_MAX_JOYSTICK_AXIS ; j++)
-		{
-			if(mControlsJoystickAxisBinderMap[deviceId].find(j) == mControlsJoystickAxisBinderMap[deviceId].end())
-			{
-				ControlAxisBinderItem controlJoystickBinderItem;
-				controlJoystickBinderItem.direction = Control::STOP;
-				controlJoystickBinderItem.control = NULL;
-				mControlsJoystickAxisBinderMap[deviceId][j] = controlJoystickBinderItem;
-			}
-		}
-
-		mJoystickIDList.push_back(deviceId);
 	}
 
 	Control* InputControlSystem::findControl(std::string name)
@@ -801,14 +699,13 @@ namespace ICS
 		mDetectingBindingControl = NULL;
 	}
 
-	std::string InputControlSystem::keyCodeToString(SDL_Keycode key)
+    std::string InputControlSystem::scancodeToString(SDL_Scancode key)
 	{
-        return std::string(SDL_GetKeyName(key));
-	}
-
-	SDL_Keycode InputControlSystem::stringToKeyCode(std::string key)
-	{
-        return SDL_GetKeyFromName(key.c_str());
+        SDL_Keycode code = SDL_GetKeyFromScancode(key);
+        if (code == SDLK_UNKNOWN)
+            return std::string(SDL_GetScancodeName(key));
+        else
+            return std::string(SDL_GetKeyName(code));
 	}
 
     void InputControlSystem::adjustMouseRegion(Uint16 width, Uint16 height)

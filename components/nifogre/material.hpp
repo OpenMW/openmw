@@ -18,6 +18,7 @@ namespace Nif
     class NiZBufferProperty;
     class NiSpecularProperty;
     class NiWireframeProperty;
+    class NiStencilProperty;
 }
 
 namespace NifOgre
@@ -29,17 +30,9 @@ class NIFMaterialLoader {
         std::cerr << "NIFMaterialLoader: Warn: " << msg << std::endl;
     }
 
-    static void fail(const std::string &msg)
-    {
-        std::cerr << "NIFMaterialLoader: Fail: "<< msg << std::endl;
-        abort();
-    }
-
     static std::map<size_t,std::string> sMaterialMap;
 
 public:
-    static std::string findTextureName(const std::string &filename);
-
     static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
                                     const Ogre::String &name, const Ogre::String &group,
                                     const Nif::NiTexturingProperty *texprop,
@@ -49,6 +42,7 @@ public:
                                     const Nif::NiZBufferProperty *zprop,
                                     const Nif::NiSpecularProperty *specprop,
                                     const Nif::NiWireframeProperty *wireprop,
+                                    const Nif::NiStencilProperty *stencilprop,
                                     bool &needTangents, bool particleMaterial=false);
 };
 

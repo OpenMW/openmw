@@ -12,6 +12,8 @@ void ESM::GlobalScript::load (ESMReader &esm)
 
     mRunning = 0;
     esm.getHNOT (mRunning, "RUN_");
+
+    mTargetId = esm.getHNOString ("TARG");
 }
 
 void ESM::GlobalScript::save (ESMWriter &esm) const
@@ -22,4 +24,6 @@ void ESM::GlobalScript::save (ESMWriter &esm) const
 
     if (mRunning)
         esm.writeHNT ("RUN_", mRunning);
+
+    esm.writeHNOString ("TARG", mTargetId);
 }

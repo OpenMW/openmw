@@ -6,6 +6,7 @@
 
 void ESM::Player::load (ESMReader &esm)
 {
+    mObject.mRef.loadId(esm, true);
     mObject.load (esm);
 
     mCellId.load (esm);

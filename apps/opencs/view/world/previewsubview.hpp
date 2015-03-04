@@ -20,6 +20,7 @@ namespace CSVWorld
             Q_OBJECT
 
             CSVRender::PreviewWidget *mScene;
+            std::string mTitle;
 
         public:
 
@@ -27,9 +28,9 @@ namespace CSVWorld
 
             virtual void setEditLock (bool locked);
 
-        private slots:
+            virtual std::string getTitle() const;
 
-            void closeRequest();
+        private slots:
 
             void referenceableIdChanged (const std::string& id);
     };

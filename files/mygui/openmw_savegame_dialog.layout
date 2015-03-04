@@ -2,18 +2,19 @@
 
 <MyGUI type="Layout">
     <Widget type="VBox" skin="MW_Dialog" layer="Windows" position="0 0 600 400" name="_Main">
-        <Property key="Padding" value="8"/>
-        <Property key="Spacing" value="6"/>
+        <Property key="Padding" value="12"/>
+        <Property key="Spacing" value="8"/>
 
         <Widget type="HBox" skin="">
-        <UserString key="HStretch" value="true"/>
-        <UserString key="VStretch" value="true"/>
-
+            <UserString key="HStretch" value="true"/>
+            <UserString key="VStretch" value="true"/>
+            <Property key="Spacing" value="8"/>
 
             <Widget type="VBox" skin="">
 
                 <UserString key="HStretch" value="true"/>
                 <UserString key="VStretch" value="true"/>
+                <Property key="Spacing" value="8"/>
 
                 <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 200 24" name="SelectCharacter">
                     <Property key="Caption" value="Select Character"/>
@@ -31,9 +32,9 @@
             <Widget type="VBox" skin="">
                 <UserString key="HStretch" value="false"/>
                 <UserString key="VStretch" value="true"/>
-                <Property key="Spacing" value="4"/>
+                <Property key="Spacing" value="8"/>
 
-                <Widget type="AutoSizedButton" skin="" name="Spacer">
+                <Widget type="Widget" skin="" position="0 0 200 24" name="Spacer">
                     <Property key="Visible" value="false"/>
                 </Widget>
 
@@ -52,6 +53,8 @@
         </Widget>
 
         <Widget type="HBox" skin="">
+            <Property key="Spacing" value="4"/>
+
             <UserString key="HStretch" value="true"/>
             <Widget type="AutoSizedButton" skin="MW_Button" name="DeleteButton">
                 <Property key="Caption" value="#{sDeleteGame}"/>
@@ -62,13 +65,12 @@
                 <UserString key="VStretch" value="true"/>
             </Widget>
 
-            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
-                <Property key="Caption" value="#{sCancel}"/>
-            </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton">
                 <Property key="Caption" value="#{sOk}"/>
             </Widget>
-
+            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
+                <Property key="Caption" value="#{sCancel}"/>
+            </Widget>
         </Widget>
 
 

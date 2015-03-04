@@ -5,10 +5,15 @@
 #include <OgreSceneNode.h>
 
 #include <components/misc/stringops.hpp>
+#include <components/esm/loadland.hpp>
 
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
+#include "../world/physicssystem.hpp"
+
+#include "elements.hpp"
+#include "terrainstorage.hpp"
 
 bool CSVRender::Cell::removeObject (const std::string& id)
 {
@@ -46,7 +51,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
             std::string id = Misc::StringUtils::lowerCase (references.data (
                 references.index (i, idColumn)).toString().toUtf8().constData());
 
-            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false)));
+            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false, mPhysics)));
             modified = true;
         }
     }
@@ -55,8 +60,8 @@ bool CSVRender::Cell::addObjects (int start, int end)
 }
 
 CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
-    const std::string& id, const Ogre::Vector3& origin)
-: mData (data), mId (Misc::StringUtils::lowerCase (id))
+    const std::string& id, boost::shared_ptr<CSVWorld::PhysicsSystem> physics, const Ogre::Vector3& origin)
+: mData (data), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager), mPhysics(physics), mX(0), mY(0)
 {
     mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
     mCellNode->setPosition (origin);
@@ -67,10 +72,34 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
     int rows = references.rowCount();
 
     addObjects (0, rows-1);
+
+    const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
+    int landIndex = land.searchId(mId);
+    if (landIndex != -1)
+    {
+        const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
+        if(esmLand && esmLand->mDataTypes&ESM::Land::DATA_VHGT)
+        {
+            mTerrain.reset(new Terrain::TerrainGrid(sceneManager, new TerrainStorage(mData), Element_Terrain, true,
+                                                    Terrain::Align_XY));
+            mTerrain->loadCell(esmLand->mX,
+                               esmLand->mY);
+
+            float verts = ESM::Land::LAND_SIZE;
+            float worldsize = ESM::Land::REAL_SIZE;
+            mX = esmLand->mX;
+            mY = esmLand->mY;
+            mPhysics->addHeightField(sceneManager,
+                    esmLand->mLandData->mHeights, mX, mY, 0, worldsize / (verts-1), verts);
+        }
+    }
 }
 
 CSVRender::Cell::~Cell()
 {
+    if (mTerrain.get())
+        mPhysics->removeHeightField(mSceneMgr, mX, mY);
+
     for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
         iter!=mObjects.end(); ++iter)
         delete iter->second;
@@ -163,7 +192,7 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     for (std::map<std::string, bool>::iterator iter (ids.begin()); iter!=ids.end(); ++iter)
     {
         mObjects.insert (std::make_pair (
-            iter->first, new Object (mData, mCellNode, iter->first, false)));
+            iter->first, new Object (mData, mCellNode, iter->first, false, mPhysics)));
 
         modified = true;
     }
@@ -198,4 +227,12 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
         return false;
 
     return addObjects (start, end);
+}
+
+float CSVRender::Cell::getTerrainHeightAt(const Ogre::Vector3 &pos) const
+{
+    if(mTerrain.get() != NULL)
+        return mTerrain->getHeightAt(pos);
+    else
+        return -std::numeric_limits<float>::max();
 }

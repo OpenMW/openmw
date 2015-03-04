@@ -1,7 +1,7 @@
 #include "material.hpp"
 
 #include <components/nif/node.hpp>
-#include <components/misc/stringops.hpp>
+#include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
@@ -54,47 +54,26 @@ static const char *getTestMode(int mode)
     return "less_equal";
 }
 
-
-std::string NIFMaterialLoader::findTextureName(const std::string &filename)
+static void setTextureProperties(sh::MaterialInstance* material, const std::string& textureSlotName, const Nif::NiTexturingProperty::Texture& tex)
 {
-    /* Bethesda at some point converted all their BSA
-     * textures from tga to dds for increased load speed, but all
-     * texture file name references were kept as .tga.
-     */
-    static const char path[] = "textures\\";
-    static const char path2[] = "textures/";
-
-    std::string texname = filename;
-    Misc::StringUtils::toLower(texname);
-
-    // Apparently, leading separators are allowed
-    while (texname.size() && (texname[0] == '/' || texname[0] == '\\'))
-        texname.erase(0, 1);
-
-    if(texname.compare(0, sizeof(path)-1, path) != 0 &&
-       texname.compare(0, sizeof(path2)-1, path2) != 0)
-        texname = path + texname;
-
-    Ogre::String::size_type pos = texname.rfind('.');
-    if(pos != Ogre::String::npos && texname.compare(pos, texname.length() - pos, ".dds") != 0)
+    material->setProperty(textureSlotName + "UVSet", sh::makeProperty(new sh::IntValue(tex.uvSet)));
+    const std::string clampMode = textureSlotName + "ClampMode";
+    switch (tex.clamp)
     {
-        // since we know all (GOTY edition or less) textures end
-        // in .dds, we change the extension
-        texname.replace(pos, texname.length(), ".dds");
-
-        // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
-        // verify, and revert if false (this call succeeds quickly, but fails slowly)
-        if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texname))
-        {
-            texname = filename;
-            Misc::StringUtils::toLower(texname);
-            if(texname.compare(0, sizeof(path)-1, path) != 0 &&
-               texname.compare(0, sizeof(path2)-1, path2) != 0)
-                texname = path + texname;
-        }
+    case 0:
+        material->setProperty(clampMode, sh::makeProperty(new sh::StringValue("clamp clamp")));
+        break;
+    case 1:
+        material->setProperty(clampMode, sh::makeProperty(new sh::StringValue("clamp wrap")));
+        break;
+    case 2:
+        material->setProperty(clampMode, sh::makeProperty(new sh::StringValue("wrap clamp")));
+        break;
+    case 3:
+    default:
+        material->setProperty(clampMode, sh::makeProperty(new sh::StringValue("wrap wrap")));
+        break;
     }
-
-    return texname;
 }
 
 Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
@@ -106,6 +85,7 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
                                             const Nif::NiZBufferProperty *zprop,
                                             const Nif::NiSpecularProperty *specprop,
                                             const Nif::NiWireframeProperty *wireprop,
+                                            const Nif::NiStencilProperty *stencilprop,
                                             bool &needTangents, bool particleMaterial)
 {
     Ogre::MaterialManager &matMgr = Ogre::MaterialManager::getSingleton();
@@ -127,6 +107,7 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
     // Default should be 1, but Bloodmoon's models are broken
     int specFlags = 0;
     int wireFlags = 0;
+    int drawMode = 1;
     Ogre::String texName[7];
 
     bool vertexColour = (shapedata->colors.size() != 0);
@@ -146,7 +127,7 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
 
             const Nif::NiSourceTexture *st = texprop->textures[i].texture.getPtr();
             if(st->external)
-                texName[i] = findTextureName(st->filename);
+                texName[i] = Misc::ResourceHelpers::correctTexturePath(st->filename);
             else
                 warn("Found internal texture, ignoring.");
         }
@@ -226,6 +207,20 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         }
     }
 
+    if(stencilprop)
+    {
+        drawMode = stencilprop->data.drawMode;
+        if (stencilprop->data.enabled)
+            warn("Unhandled stencil test in "+name);
+
+        Nif::ControllerPtr ctrls = stencilprop->controller;
+        while(!ctrls.empty())
+        {
+            warn("Unhandled stencil controller "+ctrls->recName+" in "+name);
+            ctrls = ctrls->next;
+        }
+    }
+
     // Material
     if(matprop)
     {
@@ -270,8 +265,13 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         for(int i = 0;i < 7;i++)
         {
             if(!texName[i].empty())
+            {
                 boost::hash_combine(h, texName[i]);
+                boost::hash_combine(h, texprop->textures[i].clamp);
+                boost::hash_combine(h, texprop->textures[i].uvSet);
+            }
         }
+        boost::hash_combine(h, drawMode);
         boost::hash_combine(h, vertexColour);
         boost::hash_combine(h, alphaFlags);
         boost::hash_combine(h, alphaTest);
@@ -329,6 +329,13 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         instance->setProperty("polygon_mode", sh::makeProperty(new sh::StringValue("wireframe")));
     }
 
+    if (drawMode == 1)
+        instance->setProperty("cullmode", sh::makeProperty(new sh::StringValue("clockwise")));
+    else if (drawMode == 2)
+        instance->setProperty("cullmode", sh::makeProperty(new sh::StringValue("anticlockwise")));
+    else if (drawMode == 3)
+        instance->setProperty("cullmode", sh::makeProperty(new sh::StringValue("none")));
+
     instance->setProperty("diffuseMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BaseTexture]));
     instance->setProperty("normalMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BumpTexture]));
     instance->setProperty("detailMap", sh::makeProperty(texName[Nif::NiTexturingProperty::DetailTexture]));
@@ -337,22 +344,22 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
     if (!texName[Nif::NiTexturingProperty::BaseTexture].empty())
     {
         instance->setProperty("use_diffuse_map", sh::makeProperty(new sh::BooleanValue(true)));
-        instance->setProperty("diffuseMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::BaseTexture].uvSet)));
+        setTextureProperties(instance, "diffuseMap", texprop->textures[Nif::NiTexturingProperty::BaseTexture]);
     }
     if (!texName[Nif::NiTexturingProperty::GlowTexture].empty())
     {
         instance->setProperty("use_emissive_map", sh::makeProperty(new sh::BooleanValue(true)));
-        instance->setProperty("emissiveMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::GlowTexture].uvSet)));
+        setTextureProperties(instance, "emissiveMap", texprop->textures[Nif::NiTexturingProperty::GlowTexture]);
     }
     if (!texName[Nif::NiTexturingProperty::DetailTexture].empty())
     {
         instance->setProperty("use_detail_map", sh::makeProperty(new sh::BooleanValue(true)));
-        instance->setProperty("detailMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::DetailTexture].uvSet)));
+        setTextureProperties(instance, "detailMap", texprop->textures[Nif::NiTexturingProperty::DetailTexture]);
     }
     if (!texName[Nif::NiTexturingProperty::DarkTexture].empty())
     {
         instance->setProperty("use_dark_map", sh::makeProperty(new sh::BooleanValue(true)));
-        instance->setProperty("darkMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::DarkTexture].uvSet)));
+        setTextureProperties(instance, "darkMap", texprop->textures[Nif::NiTexturingProperty::DarkTexture]);
     }
 
     bool useParallax = !texName[Nif::NiTexturingProperty::BumpTexture].empty()
@@ -375,7 +382,7 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         instance->setProperty("has_vertex_colour", sh::makeProperty(new sh::BooleanValue(true)));
 
     // Override alpha flags based on our override list (transparency-overrides.cfg)
-    if (!texName[0].empty())
+    if ((alphaFlags&1) && !texName[0].empty())
     {
         NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName[0]);
         if (result.first)
@@ -398,11 +405,17 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
 
     if((alphaFlags>>9)&1)
     {
+#ifndef ANDROID
         std::string reject;
         reject += getTestMode((alphaFlags>>10)&0x7);
         reject += " ";
         reject += Ogre::StringConverter::toString(alphaTest);
         instance->setProperty("alpha_rejection", sh::makeProperty(new sh::StringValue(reject)));
+#else
+        // alpha test not supported in OpenGL ES 2, use manual implementation in shader
+        instance->setProperty("alphaTestMode", sh::makeProperty(new sh::IntValue((alphaFlags>>10)&0x7)));
+        instance->setProperty("alphaTestValue", sh::makeProperty(new sh::FloatValue(alphaTest/255.f)));
+#endif
     }
     else
         instance->getMaterial()->setShadowCasterMaterial("openmw_shadowcaster_noalpha");

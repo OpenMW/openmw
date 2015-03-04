@@ -27,8 +27,8 @@ struct Arguments
 
 void replaceAll(std::string& str, const std::string& needle, const std::string& substitute)
 {
-    int pos = str.find(needle);
-    while(pos != -1)
+    size_t pos = str.find(needle);
+    while(pos != std::string::npos)
     {
         str.replace(pos, needle.size(), substitute);
         pos = str.find(needle);
@@ -51,7 +51,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
         ("help,h", "print help message.")
         ("version,v", "print version information and quit.")
         ("long,l", "Include extra information in archive listing.")
-        ("full-path,f", "Create diretory hierarchy on file extraction "
+        ("full-path,f", "Create directory hierarchy on file extraction "
          "(always true for extractall).")
         ;
 
@@ -138,8 +138,8 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     else if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
         info.outdir = variables["input-file"].as< std::vector<std::string> >()[1];
 
-    info.longformat = variables.count("long");
-    info.fullpath = variables.count("full-path");
+    info.longformat = variables.count("long") != 0;
+    info.fullpath = variables.count("full-path") != 0;
 
     return true;
 }
@@ -150,33 +150,32 @@ int extractAll(Bsa::BSAFile& bsa, Arguments& info);
 
 int main(int argc, char** argv)
 {
-    Arguments info;
-    if(!parseOptions (argc, argv, info))
-        return 1;
-
-    // Open file
-    Bsa::BSAFile bsa;
     try
     {
-        bsa.open(info.filename);
-    }
-    catch(std::exception &e)
-    {
-        std::cout << "ERROR reading BSA archive '" << info.filename
-            << "'\nDetails:\n" << e.what() << std::endl;
-        return 2;
-    }
+        Arguments info;
+        if(!parseOptions (argc, argv, info))
+            return 1;
 
-    if (info.mode == "list")
-        return list(bsa, info);
-    else if (info.mode == "extract")
-        return extract(bsa, info);
-    else if (info.mode == "extractall")
-        return extractAll(bsa, info);
-    else
+        // Open file
+        Bsa::BSAFile bsa;
+        bsa.open(info.filename);
+
+        if (info.mode == "list")
+            return list(bsa, info);
+        else if (info.mode == "extract")
+            return extract(bsa, info);
+        else if (info.mode == "extractall")
+            return extractAll(bsa, info);
+        else
+        {
+            std::cout << "Unsupported mode. That is not supposed to happen." << std::endl;
+            return 1;
+        }
+    }
+    catch (std::exception& e)
     {
-        std::cout << "Unsupported mode. That is not supposed to happen." << std::endl;
-        return 1;
+        std::cerr << "ERROR reading BSA archive\nDetails:\n" << e.what() << std::endl;
+        return 2;
     }
 }
 
@@ -189,9 +188,11 @@ int list(Bsa::BSAFile& bsa, Arguments& info)
         if(info.longformat)
         {
             // Long format
+            std::ios::fmtflags f(std::cout.flags());
             std::cout << std::setw(50) << std::left << files[i].name;
             std::cout << std::setw(8) << std::left << std::dec << files[i].fileSize;
             std::cout << "@ 0x" << std::hex << files[i].offset << std::endl;
+            std::cout.flags(f);
         }
         else
             std::cout << files[i].name << std::endl;

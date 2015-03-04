@@ -14,10 +14,13 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include <components/misc/stringops.hpp>
+
 #include <components/esm/loadskil.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -71,8 +74,7 @@ namespace MWScript
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage61}");
                             msgBox = boost::str(boost::format(msgBox) % count % itemName);
                         }
-                        std::vector <std::string> noButtons;
-                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, MWGui::ShowInDialogueMode_Only);
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, MWGui::ShowInDialogueMode_Only);
                     }
                 }
         };
@@ -143,8 +145,7 @@ namespace MWScript
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage62}");
                             msgBox = boost::str (boost::format(msgBox) % itemName);
                         }
-                        std::vector <std::string> noButtons;
-                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, MWGui::ShowInDialogueMode_Only);
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, MWGui::ShowInDialogueMode_Only);
                     }
                 }
         };
@@ -290,18 +291,15 @@ namespace MWScript
                     const std::string &name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    int count = 0;
                     MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     for (MWWorld::ContainerStoreIterator it = invStore.begin(MWWorld::ContainerStore::Type_Miscellaneous);
                          it != invStore.end(); ++it)
                     {
-
                         if (::Misc::StringUtils::ciEqual(it->getCellRef().getSoul(), name))
-                        {
-                            runtime.push(1);
-                            return;
-                        }
+                            ++count;
                     }
-                    runtime.push(0);
+                    runtime.push(count);
                 }
         };
 

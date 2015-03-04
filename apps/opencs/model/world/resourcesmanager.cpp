@@ -6,6 +6,8 @@
 void CSMWorld::ResourcesManager::addResources (const Resources& resources)
 {
     mResources.insert (std::make_pair (resources.getType(), resources));
+    mResources.insert (std::make_pair (UniversalId::getParentType (resources.getType()),
+        resources));
 }
 
 void CSMWorld::ResourcesManager::listResources()

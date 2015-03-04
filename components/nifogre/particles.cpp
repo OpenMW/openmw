@@ -16,7 +16,7 @@
 class NifEmitter : public Ogre::ParticleEmitter
 {
 public:
-    Ogre::Bone* mEmitterBone;
+    std::vector<Ogre::Bone*> mEmitterBones;
     Ogre::Bone* mParticleBone;
 
     Ogre::ParticleSystem* getPartSys() { return mParent; }
@@ -130,8 +130,9 @@ public:
 
     NifEmitter(Ogre::ParticleSystem *psys)
       : Ogre::ParticleEmitter(psys)
+      , mEmitterBones(Ogre::any_cast<NiNodeHolder>(psys->getUserObjectBindings().getUserAny()).mBones)
     {
-        mEmitterBone = Ogre::any_cast<Ogre::Bone*>(psys->getUserObjectBindings().getUserAny());
+        assert (!mEmitterBones.empty());
         Ogre::TagPoint* tag = static_cast<Ogre::TagPoint*>(mParent->getParentNode());
         mParticleBone = static_cast<Ogre::Bone*>(tag->getParent());
         initDefaults("Nif");
@@ -170,8 +171,10 @@ public:
         Ogre::Real& timeToLive = particle->timeToLive;
 #endif
 
+        Ogre::Node* emitterBone = mEmitterBones.at((int)(::rand()/(RAND_MAX+1.0)*mEmitterBones.size()));
+
         position = xOff + yOff + zOff +
-                 mParticleBone->_getDerivedOrientation().Inverse() * (mEmitterBone->_getDerivedPosition()
+                 mParticleBone->_getDerivedOrientation().Inverse() * (emitterBone->_getDerivedPosition()
                 - mParticleBone->_getDerivedPosition());
 
         // Generate complex data by reference
@@ -181,7 +184,7 @@ public:
         Ogre::Radian hdir = mHorizontalDir + mHorizontalAngle*Ogre::Math::SymmetricRandom();
         Ogre::Radian vdir = mVerticalDir + mVerticalAngle*Ogre::Math::SymmetricRandom();
         direction = (mParticleBone->_getDerivedOrientation().Inverse()
-                     * mEmitterBone->_getDerivedOrientation() *
+                     * emitterBone->_getDerivedOrientation() *
                                 Ogre::Quaternion(hdir, Ogre::Vector3::UNIT_Z) *
                                Ogre::Quaternion(vdir, Ogre::Vector3::UNIT_X)) *
                               Ogre::Vector3::UNIT_Z;
@@ -449,6 +452,8 @@ public:
         {
             Ogre::Real scale = (life_time-particle_time) / mGrowTime;
             assert (scale >= 0);
+            // HACK: don't allow zero-sized particles which can rarely cause an AABB assertion in Ogre to fail
+            scale = std::max(scale, 0.00001f);
             width *= scale;
             height *= scale;
         }
@@ -456,6 +461,8 @@ public:
         {
             Ogre::Real scale = particle_time / mFadeTime;
             assert (scale >= 0);
+            // HACK: don't allow zero-sized particles which can rarely cause an AABB assertion in Ogre to fail
+            scale = std::max(scale, 0.00001f);
             width *= scale;
             height *= scale;
         }
@@ -482,6 +489,8 @@ public:
             {
                 Ogre::Real scale = (life_time-particle_time) / mGrowTime;
                 assert (scale >= 0);
+                // HACK: don't allow zero-sized particles which can rarely cause an AABB assertion in Ogre to fail
+                scale = std::max(scale, 0.00001f);
                 width *= scale;
                 height *= scale;
             }
@@ -489,6 +498,8 @@ public:
             {
                 Ogre::Real scale = particle_time / mFadeTime;
                 assert (scale >= 0);
+                // HACK: don't allow zero-sized particles which can rarely cause an AABB assertion in Ogre to fail
+                scale = std::max(scale, 0.00001f);
                 width *= scale;
                 height *= scale;
             }
@@ -635,7 +646,9 @@ public:
       , mPosition(0.0f)
       , mDirection(0.0f)
     {
-        mEmitterBone = Ogre::any_cast<Ogre::Bone*>(psys->getUserObjectBindings().getUserAny());
+        std::vector<Ogre::Bone*> bones = Ogre::any_cast<NiNodeHolder>(psys->getUserObjectBindings().getUserAny()).mBones;
+        assert (!bones.empty());
+        mEmitterBone = bones[0];
         Ogre::TagPoint* tag = static_cast<Ogre::TagPoint*>(mParent->getParentNode());
         mParticleBone = static_cast<Ogre::Bone*>(tag->getParent());
 

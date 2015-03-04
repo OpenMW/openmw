@@ -17,11 +17,17 @@ CSVSettings::View::View(CSMSettings::Setting *setting,
       mIsMultiValue (setting->isMultiValue()),
       mViewKey (setting->page() + '/' + setting->name()),
       mSerializable (setting->serializable()),
-      Frame(true, setting->name(), parent)
+      Frame(true, setting->getLabel(), parent)
 {
+    if (!setting->getToolTip().isEmpty())
+        setToolTip (setting->getToolTip());
+
     setObjectName (setting->name());
     buildView();
     buildModel (setting);
+    // apply stylesheet to view's frame if exists
+    if(setting->styleSheet() != "")
+        Frame::setStyleSheet (setting->styleSheet());
 }
 
 void CSVSettings::View::buildModel (const CSMSettings::Setting *setting)
