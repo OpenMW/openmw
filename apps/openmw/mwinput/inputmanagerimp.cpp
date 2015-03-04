@@ -666,11 +666,9 @@ namespace MWInput
             SDL_StopTextInput();
 
         bool consumed = SDL_IsTextInputActive();
-        if (kc != OIS::KC_UNASSIGNED)
-        {
-            bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
-            setPlayerControlsEnabled(!guiFocus);
-        }
+        bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+        setPlayerControlsEnabled(!guiFocus);
+
         if (!mControlsDisabled && !consumed)
             mInputBinder->keyPressed (arg);
         mJoystickLastUsed = false;
