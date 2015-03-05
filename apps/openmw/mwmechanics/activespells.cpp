@@ -185,7 +185,7 @@ namespace MWMechanics
             bool missing = true;
             for (std::vector<ActiveEffect>::const_iterator iter(addTo.begin()); iter != addTo.end(); ++iter)
             {
-                if (effect->mEffectId == iter->mEffectId)
+                if ((effect->mEffectId == iter->mEffectId) && (effect->mArg == iter->mArg))
                 {
                     missing = false;
                     break;

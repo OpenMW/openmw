@@ -183,6 +183,7 @@ void ContentSelectorView::ContentSelector::setGameFileSelected(int index, bool s
 
 void ContentSelectorView::ContentSelector::slotAddonTableItemActivated(const QModelIndex &index)
 {
+    // toggles check state when an AddOn file is double clicked or activated by keyboard
     QModelIndex sourceIndex = mAddonProxyModel->mapToSource (index);
 
     if (!mContentModel->isEnabled (sourceIndex))
