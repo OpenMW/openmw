@@ -24,6 +24,7 @@
 #include "scriptcheck.hpp"
 #include "bodypartcheck.hpp"
 #include "referencecheck.hpp"
+#include "startscriptcheck.hpp"
 
 CSMDoc::Operation *CSMTools::Tools::get (int type)
 {
@@ -83,6 +84,8 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
         mVerifier->appendStage (new ReferenceCheckStage(mData.getReferences(), mData.getReferenceables(), mData.getCells(), mData.getFactions()));
 
         mVerifier->appendStage (new ScriptCheckStage (mDocument));
+
+        mVerifier->appendStage (new StartScriptCheckStage (mData.getStartScripts(), mData.getScripts()));
 
         mVerifier->appendStage(
             new BodyPartCheckStage(

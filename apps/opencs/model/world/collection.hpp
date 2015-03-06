@@ -2,13 +2,11 @@
 #define CSM_WOLRD_COLLECTION_H
 
 #include <vector>
-#include <iostream>
 #include <map>
 #include <algorithm>
 #include <cctype>
 #include <stdexcept>
 #include <functional>
-#include <cassert>
 
 #include <QVariant>
 
@@ -94,7 +92,7 @@ namespace CSMWorld
             virtual void purge();
             ///< Remove records that are flagged as erased.
 
-            virtual void removeRows (int index, int count);
+            virtual void removeRows (int index, int count) ;
 
             virtual void appendBlankRecord (const std::string& id,
                 UniversalId::Type type = UniversalId::Type_None);

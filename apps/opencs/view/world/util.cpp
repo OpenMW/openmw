@@ -186,7 +186,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         }
 
         case CSMWorld::ColumnBase::Display_Boolean:
-            
+
             return new QCheckBox(parent);
 
         case CSMWorld::ColumnBase::Display_String:

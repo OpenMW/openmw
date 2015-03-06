@@ -19,7 +19,7 @@ opencs_hdrs_noqt (model/doc
 
 opencs_units (model/world
     idtable idtableproxymodel regionmap data commanddispatcher
-    idtablebase resourcetable nestedtablemodel 
+    idtablebase resourcetable nestedtablemodel
     )
 
 
@@ -41,6 +41,7 @@ opencs_units (model/tools
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
+    startscriptcheck
     )
 
 
@@ -64,7 +65,7 @@ opencs_units (view/world
     cellcreator referenceablecreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
     )
-    
+
 opencs_units_noqt (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
     scripthighlighter idvalidator dialoguecreator physicssystem

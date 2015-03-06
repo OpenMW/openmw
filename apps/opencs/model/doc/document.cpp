@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <fstream>
-#include <iostream>
 
 #include <boost/filesystem.hpp>
 
@@ -2243,7 +2242,7 @@ void CSMDoc::Document::createBase()
         record.blank();
 
         getData().getMagicEffects().add (record);
-}
+    }
 }
 
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
@@ -2265,7 +2264,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     {
         boost::filesystem::path customFiltersPath (configuration.getUserDataPath());
         customFiltersPath /= "defaultfilters";
-        
+
         std::ofstream destination (mProjectPath.string().c_str(), std::ios::binary);
 
         if (boost::filesystem::exists (customFiltersPath))
