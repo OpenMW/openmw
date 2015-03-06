@@ -31,7 +31,7 @@ int CSMWorld::IdTable::columnCount (const QModelIndex & parent) const
     {
         return dynamic_cast<NestedCollection*>(mIdCollection)->getNestedColumnsCount(parent.row(), parent.column());
     }
-    
+
     return mIdCollection->getColumns();
 }
 
@@ -72,7 +72,7 @@ QVariant CSMWorld::IdTable::headerData (int section,
     {
         return mIdCollection->getColumn (section).mDisplayType;
     }
-    
+
     return QVariant();
 }
 
@@ -104,7 +104,7 @@ bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value
             const std::pair<int, int>& parentAdress(unfoldIndexAdress(index.internalId()));
 
             dynamic_cast<NestedCollection*>(mIdCollection)->setNestedData(parentAdress.first, parentAdress.second, value, index.row(), index.column());
-           
+
             emit dataChanged (CSMWorld::IdTable::index (parentAdress.first, 0),
                               CSMWorld::IdTable::index (parentAdress.second, mIdCollection->getColumns()-1));
 
@@ -114,17 +114,17 @@ bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value
             return false;
         }
     }
-    
+
     if (mIdCollection->getColumn (index.column()).isEditable() && role==Qt::EditRole)
     {
         mIdCollection->setData (index.row(), index.column(), value);
-        
+
         emit dataChanged (CSMWorld::IdTable::index (index.row(), 0),
                           CSMWorld::IdTable::index (index.row(), mIdCollection->getColumns()-1));
-        
+
         return true;
-    } 
-    
+    }
+
     return false;
 }
 
@@ -177,7 +177,7 @@ void CSMWorld::IdTable::addNestedRow(const QModelIndex& parent, int position)
     dynamic_cast<NestedCollection*>(mIdCollection)->addNestedRow(row, parent.column(), position);
 
     endInsertRows();
-   
+
     emit dataChanged (CSMWorld::IdTable::index (row, 0),
                       CSMWorld::IdTable::index (row, mIdCollection->getColumns()-1));
 }
@@ -353,7 +353,7 @@ std::pair< int, int > CSMWorld::IdTable::unfoldIndexAdress (unsigned int id) con
     --id;
     int row = id / this->columnCount();
     int column = id - row * this->columnCount();
-    return std::make_pair<int, int>(row, column);
+    return std::make_pair (row, column);
 }
 
 bool CSMWorld::IdTable::hasChildren(const QModelIndex& index) const
@@ -370,14 +370,14 @@ void CSMWorld::IdTable::setNestedTable(const QModelIndex& index, const CSMWorld:
     {
         throw std::logic_error("Tried to set nested table, but index has no children");
     }
-    
+
     bool removeRowsMode = false;
     if (nestedTable.size() != this->nestedTable(index)->size())
     {
         emit resetStart(this->index(index.row(), 0).data().toString());
         removeRowsMode = true;
     }
-    
+
     dynamic_cast<NestedCollection*>(mIdCollection)->setNestedTable(index.row(), index.column(), nestedTable);
 
     emit dataChanged (CSMWorld::IdTable::index (index.row(), 0),
@@ -395,6 +395,6 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::IdTable::nestedTable(const QModelInd
     {
         throw std::logic_error("Tried to retrive nested table, but index has no children");
     }
-    
+
     return dynamic_cast<NestedCollection*>(mIdCollection)->nestedTable(index.row(), index.column());
 }

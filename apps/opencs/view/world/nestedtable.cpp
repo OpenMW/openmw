@@ -9,11 +9,11 @@
 #include <QMenu>
 #include <QDebug>
 
-CSVWorld::NestedTable::NestedTable(QUndoStack& undoStack,
+CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
                                    CSMWorld::NestedTableModel* model,
                                    QWidget* parent)
     : QTableView(parent),
-      mUndoStack(undoStack),
+      mUndoStack(document.getUndoStack()),
       mModel(model)
 {
 
@@ -31,9 +31,9 @@ CSVWorld::NestedTable::NestedTable(QUndoStack& undoStack,
             model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
         CommandDelegate *delegate = CommandDelegateFactoryCollection::get().makeDelegate(display,
-                                                                                         undoStack,
+                                                                                         document,
                                                                                          this);
-        
+
         setItemDelegateForColumn(i, delegate);
     }
 

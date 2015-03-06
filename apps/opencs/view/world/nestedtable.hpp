@@ -29,23 +29,23 @@ namespace CSVWorld
         QAction *mRemoveRowAction;
         QUndoStack& mUndoStack;
         CSMWorld::NestedTableModel* mModel;
-        
+
     public:
-        NestedTable(QUndoStack& undoStack,
+        NestedTable(CSMDoc::Document& document,
                     CSMWorld::NestedTableModel* model,
                     QWidget* parent = NULL);
-        
+
     protected:
         void dragEnterEvent(QDragEnterEvent *event);
-        
+
         void dragMoveEvent(QDragMoveEvent *event);
-        
+
     private:
         void contextMenuEvent (QContextMenuEvent *event);
-        
+
     private slots:
         void removeRowActionTriggered();
-        
+
         void addNewRowActionTriggered();
     };
 }
