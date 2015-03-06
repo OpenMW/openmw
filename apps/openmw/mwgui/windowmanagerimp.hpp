@@ -65,7 +65,7 @@ namespace MWGui
   class MainMenu;
   class StatsWindow;
   class InventoryWindow;
-  class JournalWindow;
+  struct JournalWindow;
   class CharacterCreation;
   class DragAndDrop;
   class ToolTips;

@@ -17,7 +17,7 @@ namespace ESM
 
 namespace MWMechanics
 {
-    class EffectKey;
+    struct EffectKey;
     class MagicEffects;
 
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);

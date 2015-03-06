@@ -39,7 +39,7 @@ namespace ICS
 
 namespace MyGUI
 {
-    class MouseButton;
+    struct MouseButton;
 }
 
 namespace Files

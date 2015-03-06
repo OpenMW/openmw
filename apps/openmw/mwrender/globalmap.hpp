@@ -12,7 +12,7 @@ namespace Loading
 
 namespace ESM
 {
-    class GlobalMap;
+    struct GlobalMap;
 }
 
 namespace MWRender
