@@ -65,12 +65,9 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context
-                        = static_cast<InterpreterContext&> (runtime.getContext());
-
                     bool enabled = MWBase::Environment::get().getWorld()->toggleCollisionMode();
 
-                    context.report (enabled ? "Collision -> On" : "Collision -> Off");
+                    runtime.getContext().report (enabled ? "Collision -> On" : "Collision -> Off");
                 }
         };
 

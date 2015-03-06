@@ -97,43 +97,6 @@ endif()
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
 
-# source directory: libs
-
-set(LIBS_DIR ${CMAKE_SOURCE_DIR}/libs)
-
-set(OENGINE_OGRE
-  ${LIBS_DIR}/openengine/ogre/renderer.cpp
-  ${LIBS_DIR}/openengine/ogre/lights.cpp
-  ${LIBS_DIR}/openengine/ogre/selectionbuffer.cpp
-  ${LIBS_DIR}/openengine/ogre/imagerotate.cpp
-)
-
-set(OENGINE_GUI
-  ${LIBS_DIR}/openengine/gui/loglistener.cpp
-  ${LIBS_DIR}/openengine/gui/manager.cpp
-  ${LIBS_DIR}/openengine/gui/layout.cpp
-)
-
-set(OENGINE_BULLET
-    ${LIBS_DIR}/openengine/bullet/BtOgre.cpp
-    ${LIBS_DIR}/openengine/bullet/BtOgreExtras.h
-    ${LIBS_DIR}/openengine/bullet/BtOgreGP.h
-    ${LIBS_DIR}/openengine/bullet/BtOgrePG.h
-    ${LIBS_DIR}/openengine/bullet/physic.cpp
-    ${LIBS_DIR}/openengine/bullet/physic.hpp
-    ${LIBS_DIR}/openengine/bullet/BulletShapeLoader.cpp
-    ${LIBS_DIR}/openengine/bullet/BulletShapeLoader.h
-    ${LIBS_DIR}/openengine/bullet/trace.cpp
-    ${LIBS_DIR}/openengine/bullet/trace.h
-
-)
-
-set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_BULLET})
-source_group(libs\\openengine FILES ${OENGINE_ALL})
-
-set(OPENMW_LIBS ${OENGINE_ALL})
-set(OPENMW_LIBS_HEADER)
-
 # Sound setup
 set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE AVRESAMPLE)
 unset(FFMPEG_LIBRARIES CACHE)
@@ -275,6 +238,7 @@ include_directories("."
     ${MYGUI_INCLUDE_DIRS}
     ${MYGUI_PLATFORM_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
+    ${BULLET_INCLUDE_DIRS}
     ${LIBS_DIR}
 )
 
@@ -571,6 +535,10 @@ if(WIN32)
 
     include(CPack)
 endif(WIN32)
+
+# Libs
+include_directories(libs)
+add_subdirectory(libs/openengine)
 
 # Extern
 add_subdirectory (extern/shiny)

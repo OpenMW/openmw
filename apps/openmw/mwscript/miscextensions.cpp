@@ -212,13 +212,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
                     bool enabled =
                         MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_CollisionDebug);
 
-                    context.report (enabled ?
+                    runtime.getContext().report (enabled ?
                         "Collision Mesh Rendering -> On" : "Collision Mesh Rendering -> Off");
                 }
         };
@@ -230,13 +227,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
                     bool enabled =
                         MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_BoundingBoxes);
 
-                    context.report (enabled ?
+                    runtime.getContext().report (enabled ?
                         "Bounding Box Rendering -> On" : "Bounding Box Rendering -> Off");
                 }
         };
@@ -247,13 +241,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
                     bool enabled =
                         MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_Wireframe);
 
-                    context.report (enabled ?
+                    runtime.getContext().report (enabled ?
                         "Wireframe Rendering -> On" : "Wireframe Rendering -> Off");
                 }
         };
@@ -263,13 +254,10 @@ namespace MWScript
         public:
             virtual void execute (Interpreter::Runtime& runtime)
             {
-                InterpreterContext& context =
-                    static_cast<InterpreterContext&> (runtime.getContext());
-
                 bool enabled =
                     MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_Pathgrid);
 
-                context.report (enabled ?
+                runtime.getContext().report (enabled ?
                     "Path Grid rendering -> On" : "Path Grid Rendering -> Off");
             }
         };
@@ -386,17 +374,14 @@ namespace MWScript
 
             virtual void execute(Interpreter::Runtime &runtime)
             {
-                InterpreterContext& context =
-                    static_cast<InterpreterContext&> (runtime.getContext());
-
                 MWBase::World *world =
                     MWBase::Environment::get().getWorld();
 
                 if (world->toggleVanityMode(sActivate)) {
-                    context.report(sActivate ? "Vanity Mode -> On" : "Vanity Mode -> Off");
+                    runtime.getContext().report(sActivate ? "Vanity Mode -> On" : "Vanity Mode -> Off");
                     sActivate = !sActivate;
                 } else {
-                    context.report("Vanity Mode -> No");
+                    runtime.getContext().report("Vanity Mode -> No");
                 }
             }
         };
@@ -862,14 +847,11 @@ namespace MWScript
 
             void printGlobalVars(Interpreter::Runtime &runtime)
             {
-                InterpreterContext& context =
-                    static_cast<InterpreterContext&> (runtime.getContext());
-
                 std::stringstream str;
                 str<< "Global variables:";
 
                 MWBase::World *world = MWBase::Environment::get().getWorld();
-                std::vector<std::string> names = context.getGlobals();
+                std::vector<std::string> names = runtime.getContext().getGlobals();
                 for(size_t i = 0;i < names.size();++i)
                 {
                     char type = world->getGlobalVariableType (names[i]);
@@ -879,17 +861,17 @@ namespace MWScript
                     {
                         case 's':
 
-                            str << context.getGlobalShort (names[i]) << " (short)";
+                            str << runtime.getContext().getGlobalShort (names[i]) << " (short)";
                             break;
 
                         case 'l':
 
-                            str << context.getGlobalLong (names[i]) << " (long)";
+                            str << runtime.getContext().getGlobalLong (names[i]) << " (long)";
                             break;
 
                         case 'f':
 
-                            str << context.getGlobalFloat (names[i]) << " (float)";
+                            str << runtime.getContext().getGlobalFloat (names[i]) << " (float)";
                             break;
 
                         default:
@@ -898,7 +880,7 @@ namespace MWScript
                     }
                 }
 
-                context.report (str.str());
+                runtime.getContext().report (str.str());
             }
 
         public:
@@ -920,11 +902,9 @@ namespace MWScript
         public:
             virtual void execute (Interpreter::Runtime& runtime)
             {
-                InterpreterContext& context = static_cast<InterpreterContext&> (runtime.getContext());
-
                 bool enabled = MWBase::Environment::get().getWorld()->toggleScripts();
 
-                context.report(enabled ? "Scripts -> On" : "Scripts -> Off");
+                runtime.getContext().report(enabled ? "Scripts -> On" : "Scripts -> Off");
             }
         };
 
@@ -933,11 +913,9 @@ namespace MWScript
             public:
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context = static_cast<InterpreterContext&> (runtime.getContext());
-
                     bool enabled = MWBase::Environment::get().getWorld()->toggleGodMode();
 
-                    context.report (enabled ? "God Mode -> On" : "God Mode -> Off");
+                    runtime.getContext().report (enabled ? "God Mode -> On" : "God Mode -> Off");
                 }
         };
 

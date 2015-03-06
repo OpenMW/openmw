@@ -222,7 +222,7 @@ int MovieAudioDecoder::audio_decode_frame(AVFrame *frame, int &sample_skip)
         }
 
         /* if update, update the audio clock w/pts */
-        if((uint64_t)pkt->pts != AV_NOPTS_VALUE)
+        if(pkt->pts != AV_NOPTS_VALUE)
             mAudioClock = av_q2d(mAVStream->time_base)*pkt->pts;
     }
 }

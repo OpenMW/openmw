@@ -7,7 +7,7 @@
 #include <SDL_mouse.h>
 #include <SDL_endian.h>
 
-#include <openengine/ogre/imagerotate.hpp>
+#include "imagerotate.hpp"
 
 namespace SFO
 {
@@ -91,7 +91,7 @@ namespace SFO
 
         // we use a render target to uncompress the DDS texture
         // just blitting doesn't seem to work on D3D9
-        OEngine::Render::ImageRotate::rotate(tex->getName(), tempName, -rotDegrees);
+        ImageRotate::rotate(tex->getName(), tempName, -rotDegrees);
 
         Ogre::TexturePtr resultTexture = Ogre::TextureManager::getSingleton().getByName(tempName);
 
