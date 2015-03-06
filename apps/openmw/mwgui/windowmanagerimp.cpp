@@ -565,7 +565,7 @@ namespace MWGui
                     int eff = mShown & mAllowed & ~mForceHidden;
 
                     // Show the windows we want
-                    mMap            ->setVisible(eff & GW_Map);
+                    mMap            ->setVisible((eff & GW_Map) != 0);
                     mStatsWindow    ->setVisible((eff & GW_Stats) != 0);
                     mInventoryWindow->setVisible((eff & GW_Inventory) != 0);
                     mInventoryWindow->setGuiMode(mode);
