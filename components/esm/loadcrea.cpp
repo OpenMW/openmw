@@ -10,7 +10,7 @@ namespace ESM {
 
     void Creature::load(ESMReader &esm)
     {
-        mPersistent = esm.getRecordFlags() & 0x0400;
+        mPersistent = (esm.getRecordFlags() & 0x0400) != 0;
 
         mAiPackage.mList.clear();
         mInventory.mList.clear();

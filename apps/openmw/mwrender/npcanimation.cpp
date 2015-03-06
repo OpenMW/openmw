@@ -377,7 +377,7 @@ void NpcAnimation::updateParts()
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
-    bool wasArrowAttached = (mAmmunition.get());
+    bool wasArrowAttached = (mAmmunition.get() != NULL);
 
     MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
@@ -941,7 +941,7 @@ void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, boo
     if (!magicEffect->mHit.empty())
     {
         const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
-        bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
+        bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
         // Don't play particle VFX unless the effect is new or it should be looping.
         if (isNew || loop)
             addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");

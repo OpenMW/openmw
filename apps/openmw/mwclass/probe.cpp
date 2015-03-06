@@ -172,7 +172,7 @@ namespace MWClass
 
     bool Probe::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Probes;
+        return (npcServices & ESM::NPC::Probes) != 0;
     }
 
     int Probe::getItemMaxHealth (const MWWorld::Ptr& ptr) const

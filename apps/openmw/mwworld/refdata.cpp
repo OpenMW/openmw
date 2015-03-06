@@ -59,7 +59,7 @@ namespace MWWorld
     }
 
     RefData::RefData (const ESM::ObjectState& objectState)
-    : mBaseNode (0), mHasLocals (false), mEnabled (objectState.mEnabled),
+    : mBaseNode (0), mHasLocals (false), mEnabled (objectState.mEnabled != 0),
       mCount (objectState.mCount), mPosition (objectState.mPosition), mCustomData (0),
       mChanged(true), // Loading from a savegame -> assume changed
       mDeleted(false)

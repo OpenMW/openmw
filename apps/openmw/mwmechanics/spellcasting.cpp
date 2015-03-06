@@ -573,7 +573,7 @@ namespace MWMechanics
                         castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_DefaultHit");
 
                     // TODO: VFX are no longer active after saving/reloading the game
-                    bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
+                    bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
                     // Note: in case of non actor, a free effect should be fine as well
                     MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(target);
                     if (anim)

@@ -43,7 +43,7 @@ namespace ESSImport
         {
             unsigned int deleted;
             esm.getHT(deleted);
-            mDeleted = (deleted >> 24) & 0x2; // the other 3 bytes seem to be uninitialized garbage
+            mDeleted = ((deleted >> 24) & 0x2) != 0; // the other 3 bytes seem to be uninitialized garbage
         }
 
         if (esm.isNextSub("MVRF"))

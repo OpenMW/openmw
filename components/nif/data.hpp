@@ -234,7 +234,7 @@ class NiVisData : public Record
 public:
     struct VisData {
         float time;
-        char isSet;
+        bool isSet;
     };
     std::vector<VisData> mVis;
 
@@ -245,7 +245,7 @@ public:
         for(size_t i = 0;i < mVis.size();i++)
         {
             mVis[i].time = nif->getFloat();
-            mVis[i].isSet = nif->getChar();
+            mVis[i].isSet = nif->getChar() != 0;
         }
     }
 };

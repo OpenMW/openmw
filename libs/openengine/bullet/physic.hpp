@@ -283,7 +283,7 @@ namespace Physic
          * Set the debug rendering mode. 0 to turn it off.
          * Important Note: this will crash if the Render is not yet initialise!
          */
-        void setDebugRenderingMode(int mode);
+        void setDebugRenderingMode(bool isDebug);
 
         bool toggleDebugRendering();
 

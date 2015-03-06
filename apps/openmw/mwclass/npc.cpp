@@ -993,7 +993,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
-        return ref->mBase->mFlags & ESM::NPC::Essential;
+        return (ref->mBase->mFlags & ESM::NPC::Essential) != 0;
     }
 
     void Npc::registerSelf()

@@ -439,7 +439,7 @@ namespace MWMechanics
 
     bool CreatureStats::getMovementFlag (Flag flag) const
     {
-        return mMovementFlags & flag;
+        return (mMovementFlags & flag) != 0;
     }
 
     void CreatureStats::setMovementFlag (Flag flag, bool state)

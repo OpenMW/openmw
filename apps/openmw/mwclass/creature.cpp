@@ -164,7 +164,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         MWRender::Actors& actors = renderingInterface.getActors();
-        actors.insertCreature(ptr, model, ref->mBase->mFlags & ESM::Creature::Weapon);
+        actors.insertCreature(ptr, model, (ref->mBase->mFlags & ESM::Creature::Weapon) != 0);
     }
 
     void Creature::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
@@ -493,7 +493,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
-        return (ref->mBase->mFlags & ESM::Creature::Weapon);
+        return (ref->mBase->mFlags & ESM::Creature::Weapon) != 0;
     }
 
     std::string Creature::getScript (const MWWorld::Ptr& ptr) const
@@ -508,7 +508,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
-        return ref->mBase->mFlags & ESM::Creature::Essential;
+        return (ref->mBase->mFlags & ESM::Creature::Essential) != 0;
     }
 
     void Creature::registerSelf()
@@ -713,7 +713,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
-        return ref->mBase->mFlags & ESM::Creature::Flies;
+        return (ref->mBase->mFlags & ESM::Creature::Flies) != 0;
     }
 
     bool Creature::canSwim(const MWWorld::Ptr &ptr) const

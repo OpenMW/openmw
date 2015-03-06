@@ -283,14 +283,14 @@ namespace Physic
         }
     }
 
-    void PhysicEngine::setDebugRenderingMode(int mode)
+    void PhysicEngine::setDebugRenderingMode(bool isDebug)
     {
         if(!isDebugCreated)
         {
             createDebugRendering();
         }
-        mDebugDrawer->setDebugMode(mode);
-        mDebugActive = mode;
+        mDebugDrawer->setDebugMode(isDebug);
+        mDebugActive = isDebug;
     }
 
     bool  PhysicEngine::toggleDebugRendering()

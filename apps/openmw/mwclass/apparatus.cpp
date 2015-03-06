@@ -155,7 +155,7 @@ namespace MWClass
 
     bool Apparatus::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Apparatus;
+        return (npcServices & ESM::NPC::Apparatus) != 0;
     }
 
     float Apparatus::getWeight(const MWWorld::Ptr &ptr) const

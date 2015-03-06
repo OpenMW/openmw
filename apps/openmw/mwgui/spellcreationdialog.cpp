@@ -114,7 +114,7 @@ namespace MWGui
 
     void EditEffectDialog::newEffect (const ESM::MagicEffect *effect)
     {
-        bool allowSelf = effect->mData.mFlags & ESM::MagicEffect::CastSelf;
+        bool allowSelf = (effect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0;
         bool allowTouch = (effect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
         bool allowTarget = (effect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
 
@@ -226,7 +226,7 @@ namespace MWGui
 
         // cycle through range types until we find something that's allowed
         // does not handle the case where nothing is allowed (this should be prevented before opening the Add Effect dialog)
-        bool allowSelf = mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf;
+        bool allowSelf = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0;
         bool allowTouch = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
         bool allowTarget = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
         if (mEffect.mRange == ESM::RT_Self && !allowSelf)
