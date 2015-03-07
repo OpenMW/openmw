@@ -197,9 +197,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
     Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE|SDL_INIT_GAMECONTROLLER|SDL_INIT_JOYSTICK;
     if(SDL_WasInit(flags) == 0)
     {
-        //kindly ask SDL not to trash our OGL context
-        //might this be related to http://bugzilla.libsdl.org/show_bug.cgi?id=748 ?
-        SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
         SDL_SetMainReady();
         if(SDL_Init(flags) != 0)
         {
