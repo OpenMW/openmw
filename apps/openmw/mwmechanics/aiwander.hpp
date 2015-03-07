@@ -17,7 +17,7 @@
 
 namespace ESM
 {
-    class Cell;
+    struct Cell;
     namespace AiSequence
     {
         struct AiWander;

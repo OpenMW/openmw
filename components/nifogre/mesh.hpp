@@ -10,7 +10,7 @@
 
 namespace Nif
 {
-    class NiTriShape;
+    struct NiTriShape;
 }
 
 namespace NifOgre

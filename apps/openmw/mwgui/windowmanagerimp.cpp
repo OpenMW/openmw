@@ -565,11 +565,11 @@ namespace MWGui
                     int eff = mShown & mAllowed & ~mForceHidden;
 
                     // Show the windows we want
-                    mMap            ->setVisible(eff & GW_Map);
-                    mStatsWindow    ->setVisible(eff & GW_Stats);
-                    mInventoryWindow->setVisible(eff & GW_Inventory);
+                    mMap            ->setVisible((eff & GW_Map) != 0);
+                    mStatsWindow    ->setVisible((eff & GW_Stats) != 0);
+                    mInventoryWindow->setVisible((eff & GW_Inventory) != 0);
                     mInventoryWindow->setGuiMode(mode);
-                    mSpellWindow    ->setVisible(eff & GW_Magic);
+                    mSpellWindow    ->setVisible((eff & GW_Magic) != 0);
                     break;
                 }
                 case GM_Container:
@@ -1301,7 +1301,7 @@ namespace MWGui
 
     bool WindowManager::isAllowed (GuiWindow wnd) const
     {
-        return mAllowed & wnd;
+        return (mAllowed & wnd) != 0;
     }
 
     void WindowManager::allow (GuiWindow wnd)

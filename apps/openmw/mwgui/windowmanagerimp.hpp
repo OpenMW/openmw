@@ -65,7 +65,7 @@ namespace MWGui
   class MainMenu;
   class StatsWindow;
   class InventoryWindow;
-  class JournalWindow;
+  struct JournalWindow;
   class CharacterCreation;
   class DragAndDrop;
   class ToolTips;
@@ -277,7 +277,7 @@ namespace MWGui
     virtual void enableRest() { mRestAllowed = true; }
     virtual bool getRestEnabled();
 
-    virtual bool getJournalAllowed() { return (mAllowed & GW_Magic); }
+    virtual bool getJournalAllowed() { return (mAllowed & GW_Magic) != 0; }
 
     virtual bool getPlayerSleeping();
     virtual void wakeUpPlayer();

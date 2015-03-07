@@ -173,7 +173,7 @@ namespace MWClass
 
     bool Lockpick::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Picks;
+        return (npcServices & ESM::NPC::Picks) != 0;
     }
 
     int Lockpick::getItemMaxHealth (const MWWorld::Ptr& ptr) const

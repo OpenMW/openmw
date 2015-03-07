@@ -16,8 +16,8 @@
 namespace MWGui
 {
 struct TypesetBookImpl;
-struct PageDisplay;
-struct BookPageImpl;
+class PageDisplay;
+class BookPageImpl;
 
 static bool ucsSpace (int codePoint);
 static bool ucsLineBreak (int codePoint);

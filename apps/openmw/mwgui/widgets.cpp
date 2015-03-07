@@ -239,7 +239,7 @@ namespace MWGui
                 params.mMagnMin = it->mMagnMin;
                 params.mMagnMax = it->mMagnMax;
                 params.mRange = it->mRange;
-                params.mIsConstant = (flags & MWEffectList::EF_Constant);
+                params.mIsConstant = (flags & MWEffectList::EF_Constant) != 0;
                 params.mNoTarget = (flags & MWEffectList::EF_NoTarget);
                 effect->setSpellEffect(params);
                 effects.push_back(effect);

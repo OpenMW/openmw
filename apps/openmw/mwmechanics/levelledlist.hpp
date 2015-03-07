@@ -35,7 +35,7 @@ namespace MWMechanics
         }
 
         // For levelled creatures, the flags are swapped. This file format just makes so much sense.
-        bool allLevels = levItem->mFlags & ESM::ItemLevList::AllLevels;
+        bool allLevels = (levItem->mFlags & ESM::ItemLevList::AllLevels) != 0;
         if (creature)
             allLevels = levItem->mFlags & ESM::CreatureLevList::AllLevels;
 

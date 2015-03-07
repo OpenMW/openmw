@@ -785,7 +785,7 @@ namespace MWMechanics
         , mDuration(wander->mData.mDuration)
         , mStartTime(MWWorld::TimeStamp(wander->mStartTime))
         , mTimeOfDay(wander->mData.mTimeOfDay)
-        , mRepeat(wander->mData.mShouldRepeat)
+        , mRepeat(wander->mData.mShouldRepeat != 0)
         , mStoredInitialActorPosition(wander->mStoredInitialActorPosition)
     {
         if (mStoredInitialActorPosition)

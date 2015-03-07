@@ -10,7 +10,7 @@ namespace ESM
 
     void Static::load(ESMReader &esm)
     {
-        mPersistent = esm.getRecordFlags() & 0x0400;
+        mPersistent = (esm.getRecordFlags() & 0x0400) != 0;
 
         mModel = esm.getHNString("MODL");
     }

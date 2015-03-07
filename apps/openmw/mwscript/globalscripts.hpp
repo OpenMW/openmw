@@ -21,7 +21,7 @@ namespace Loading
 
 namespace MWWorld
 {
-    struct ESMStore;
+    class ESMStore;
 }
 
 namespace MWScript

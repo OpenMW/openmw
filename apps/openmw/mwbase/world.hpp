@@ -49,7 +49,7 @@ namespace MWRender
 
 namespace MWMechanics
 {
-    class Movement;
+    struct Movement;
 }
 
 namespace MWWorld

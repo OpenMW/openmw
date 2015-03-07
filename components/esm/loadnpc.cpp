@@ -10,7 +10,7 @@ namespace ESM
 
     void NPC::load(ESMReader &esm)
     {
-        mPersistent = esm.getRecordFlags() & 0x0400;
+        mPersistent = (esm.getRecordFlags() & 0x0400) != 0;
 
         mSpells.mList.clear();
         mInventory.mList.clear();

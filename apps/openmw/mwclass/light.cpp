@@ -50,7 +50,7 @@ namespace MWClass
         assert (ref->mBase != NULL);
 
         if(!model.empty())
-            physics.addObject(ptr, model, ref->mBase->mData.mFlags & ESM::Light::Carry);
+            physics.addObject(ptr, model, (ref->mBase->mData.mFlags & ESM::Light::Carry) != 0);
 
         if (!ref->mBase->mSound.empty() && !(ref->mBase->mData.mFlags & ESM::Light::OffDefault))
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0,
@@ -221,7 +221,7 @@ namespace MWClass
 
     bool Light::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Lights;
+        return (npcServices & ESM::NPC::Lights) != 0;
     }
 
     float Light::getWeight(const MWWorld::Ptr &ptr) const

@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    class GameSetting;
+    struct GameSetting;
 }
 
 namespace MWClass

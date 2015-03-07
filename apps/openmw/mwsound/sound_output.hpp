@@ -13,7 +13,7 @@
 namespace MWSound
 {
     class SoundManager;
-    class Sound_Decoder;
+    struct Sound_Decoder;
     class Sound;
 
     class Sound_Output

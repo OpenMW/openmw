@@ -81,7 +81,7 @@ namespace MWScript
                 std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
 
-                bool allowSkipping = runtime[0].mInteger;
+                bool allowSkipping = runtime[0].mInteger != 0;
                 runtime.pop();
 
                 MWBase::Environment::get().getWindowManager()->playVideo (name, allowSkipping);
