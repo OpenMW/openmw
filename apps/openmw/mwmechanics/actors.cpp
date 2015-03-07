@@ -547,7 +547,9 @@ namespace MWMechanics
         {
             DynamicStat<float> stat = creatureStats.getDynamic(i);
             stat.setModifier(effects.get(ESM::MagicEffect::FortifyHealth+i).getMagnitude() -
-                             effects.get(ESM::MagicEffect::DrainHealth+i).getMagnitude());
+                             effects.get(ESM::MagicEffect::DrainHealth+i).getMagnitude(),
+                             // Fatigue can be decreased below zero meaning the actor will be knocked out
+                             i == 2);
 
 
             float currentDiff = creatureStats.getMagicEffects().get(ESM::MagicEffect::RestoreHealth+i).getMagnitude()

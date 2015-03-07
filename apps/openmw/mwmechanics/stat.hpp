@@ -170,10 +170,10 @@ namespace MWMechanics
             }
 
             /// Change modified relatively.
-            void modify (const T& diff)
+            void modify (const T& diff, bool allowCurrentDecreaseBelowZero=false)
             {
                 mStatic.modify (diff);
-                setCurrent (getCurrent()+diff);
+                setCurrent (getCurrent()+diff, allowCurrentDecreaseBelowZero);
             }
 
             void setCurrent (const T& value, bool allowDecreaseBelowZero = false)
@@ -198,11 +198,11 @@ namespace MWMechanics
                 }
             }
 
-            void setModifier (const T& modifier)
+            void setModifier (const T& modifier, bool allowCurrentDecreaseBelowZero=false)
             {
                 T diff =  modifier - mStatic.getModifier();
                 mStatic.setModifier (modifier);
-                setCurrent (getCurrent()+diff);
+                setCurrent (getCurrent()+diff, allowCurrentDecreaseBelowZero);
             }
 
             void writeState (ESM::StatState<T>& state) const
