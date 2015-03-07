@@ -145,9 +145,9 @@ namespace CSMWorld
         void addNestedColumn(int columnId, Display displayType);
 
         bool canHaveNestedColumns() const;
-        
+
         const ColumnBase& nestedColumn(int subColumn) const;
-        
+
         int nestedColumnCount() const;
     };
 
@@ -157,15 +157,15 @@ namespace CSMWorld
 
     public:
         NestedColumn(int columnId, Display displayType, int flag, const NestColumn* parent);
-        
+
         virtual bool isEditable() const;
     };
-    
+
     template<typename ESXRecordT>
     struct Column : public NestColumn
     {
         Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue, bool canNest = false)
-            : NestColumn (columnId, displayType, canNest, flags) {}
+            : NestColumn (columnId, displayType, flags, canNest) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
 
