@@ -74,9 +74,9 @@ namespace MWMechanics
 
             for (std::vector<ActiveEffect>::const_iterator effectIt = effects.begin(); effectIt != effects.end(); ++effectIt)
             {
-                int duration = effectIt->mDuration;
+                double duration = effectIt->mDuration;
                 MWWorld::TimeStamp end = start;
-                end += static_cast<double> (duration)*
+                end += duration * 
                     MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
 
                 if (end>now)
@@ -110,7 +110,7 @@ namespace MWMechanics
     {
         const std::vector<ActiveEffect>& effects = iterator->second.mEffects;
 
-        int duration = 0;
+        float duration = 0;
 
         for (std::vector<ActiveEffect>::const_iterator iter (effects.begin());
             iter!=effects.end(); ++iter)
@@ -216,7 +216,7 @@ namespace MWMechanics
                 std::string name = it->second.mDisplayName;
 
                 float remainingTime = effectIt->mDuration +
-                        (it->second.mTimeStamp - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
+                        static_cast<float>(it->second.mTimeStamp - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
                 float magnitude = effectIt->mMagnitude;
 
                 if (magnitude)
@@ -229,7 +229,7 @@ namespace MWMechanics
     {
         for (TContainer::iterator it = mSpells.begin(); it != mSpells.end(); )
         {
-            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 100); // [0, 99]
             if (roll < chance)
                 mSpells.erase(it++);
             else

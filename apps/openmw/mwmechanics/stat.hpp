@@ -247,7 +247,7 @@ namespace MWMechanics
         int getModifier() const {  return mModifier; }
 
         void setBase(int base) { mBase = std::max(0, base); }
-        void setModifiers(int fortify, int drain, int absorb);
+        void setModifiers(float fortify, float drain, float absorb);
 
         void damage(float damage) { mDamage = std::min(mDamage + damage, (float)(mBase + mFortified)); }
         void restore(float amount) { mDamage -= std::min(mDamage, amount); }

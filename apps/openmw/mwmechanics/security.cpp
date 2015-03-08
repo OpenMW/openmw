@@ -20,9 +20,9 @@ namespace MWMechanics
     {
         CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
         NpcStats& npcStats = actor.getClass().getNpcStats(actor);
-        mAgility = creatureStats.getAttribute(ESM::Attribute::Agility).getModified();
-        mLuck = creatureStats.getAttribute(ESM::Attribute::Luck).getModified();
-        mSecuritySkill = npcStats.getSkill(ESM::Skill::Security).getModified();
+        mAgility = static_cast<float>(creatureStats.getAttribute(ESM::Attribute::Agility).getModified());
+        mLuck = static_cast<float>(creatureStats.getAttribute(ESM::Attribute::Luck).getModified());
+        mSecuritySkill = static_cast<float>(npcStats.getSkill(ESM::Skill::Security).getModified());
         mFatigueTerm = creatureStats.getFatigueTerm();
     }
 
@@ -38,7 +38,7 @@ namespace MWMechanics
 
         float fPickLockMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fPickLockMult")->getFloat();
 
-        float x = 0.2 * mAgility + 0.1 * mLuck + mSecuritySkill;
+        float x = 0.2f * mAgility + 0.1f * mLuck + mSecuritySkill;
         x *= pickQuality * mFatigueTerm;
         x += fPickLockMult * lockStrength;
 
@@ -48,7 +48,7 @@ namespace MWMechanics
         else
         {
             MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, lock);
-            int roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
+            int roll = static_cast<int>(static_cast<float> (std::rand()) / RAND_MAX * 100);
             if (roll <= x)
             {
                 lock.getClass().unlock(lock);
@@ -76,11 +76,11 @@ namespace MWMechanics
         float probeQuality = probe.get<ESM::Probe>()->mBase->mData.mQuality;
 
         const ESM::Spell* trapSpell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(trap.getCellRef().getTrap());
-        float trapSpellPoints = trapSpell->mData.mCost;
+        int trapSpellPoints = trapSpell->mData.mCost;
 
         float fTrapCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTrapCostMult")->getFloat();
 
-        float x = 0.2 * mAgility + 0.1 * mLuck + mSecuritySkill;
+        float x = 0.2f * mAgility + 0.1f * mLuck + mSecuritySkill;
         x += fTrapCostMult * trapSpellPoints;
         x *= probeQuality * mFatigueTerm;
 
@@ -90,7 +90,7 @@ namespace MWMechanics
         else
         {
             MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, trap);
-            int roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
+            int roll = static_cast<int>(static_cast<float> (std::rand()) / RAND_MAX * 100);
             if (roll <= x)
             {
                 trap.getCellRef().setTrap("");

@@ -42,10 +42,10 @@ namespace MWMechanics
 
     float CreatureStats::getFatigueTerm() const
     {
-        int max = getFatigue().getModified();
-        int current = getFatigue().getCurrent();
+        float max = getFatigue().getModified();
+        float current = getFatigue().getCurrent();
 
-        float normalised = max==0 ? 1 : std::max (0.0f, static_cast<float> (current)/max);
+        float normalised = floor(max) == 0 ? 1 : std::max (0.0f, current / max);
 
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();

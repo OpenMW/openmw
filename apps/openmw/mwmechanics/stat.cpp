@@ -15,10 +15,10 @@ void MWMechanics::AttributeValue::readState (const ESM::StatState<int>& state)
     mDamage = state.mDamage;
 }
 
-void MWMechanics::AttributeValue::setModifiers(int fortify, int drain, int absorb)
+void MWMechanics::AttributeValue::setModifiers(float fortify, float drain, float absorb)
 {
-    mFortified = fortify;
-    mModifier = (fortify - drain) - absorb; 
+    mFortified = static_cast<int>(fortify);
+    mModifier = mFortified - static_cast<int>(drain + absorb);
 }
 
 void MWMechanics::SkillValue::writeState (ESM::StatState<int>& state) const

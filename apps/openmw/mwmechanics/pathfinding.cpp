@@ -17,7 +17,7 @@ namespace
     //
     float distanceSquared(ESM::Pathgrid::Point point, Ogre::Vector3 pos)
     {
-        return Ogre::Vector3(point.mX, point.mY, point.mZ).squaredDistance(pos);
+        return MWMechanics::PathFinder::MakeOgreVector3(point).squaredDistance(pos);
     }
 
     // Return the closest pathgrid point index from the specified position co
@@ -95,7 +95,7 @@ namespace MWMechanics
         x -= point.mX;
         y -= point.mY;
         z -= point.mZ;
-        return (x * x + y * y + 0.1 * z * z);
+        return (x * x + y * y + 0.1f * z * z);
     }
 
     float distance(ESM::Pathgrid::Point point, float x, float y, float z)
@@ -108,9 +108,9 @@ namespace MWMechanics
 
     float distance(ESM::Pathgrid::Point a, ESM::Pathgrid::Point b)
     {
-        float x = a.mX - b.mX;
-        float y = a.mY - b.mY;
-        float z = a.mZ - b.mZ;
+        float x = static_cast<float>(a.mX - b.mX);
+        float y = static_cast<float>(a.mY - b.mY);
+        float z = static_cast<float>(a.mZ - b.mZ);
         return sqrt(x * x + y * y + z * z);
     }
 
@@ -176,8 +176,9 @@ namespace MWMechanics
         if(allowShortcuts)
         {
             // if there's a ray cast hit, can't take a direct path
-            if(!MWBase::Environment::get().getWorld()->castRay(startPoint.mX, startPoint.mY, startPoint.mZ,
-                                                               endPoint.mX, endPoint.mY, endPoint.mZ))
+            if (!MWBase::Environment::get().getWorld()->castRay(
+                static_cast<float>(startPoint.mX), static_cast<float>(startPoint.mY), static_cast<float>(startPoint.mZ),
+                static_cast<float>(endPoint.mX), static_cast<float>(endPoint.mY), static_cast<float>(endPoint.mZ)))
             {
                 mPath.push_back(endPoint);
                 mIsPathConstructed = true;
@@ -206,8 +207,8 @@ namespace MWMechanics
         float yCell = 0;
         if (mCell->isExterior())
         {
-            xCell = mCell->getCell()->mData.mX * ESM::Land::REAL_SIZE;
-            yCell = mCell->getCell()->mData.mY * ESM::Land::REAL_SIZE;
+            xCell = static_cast<float>(mCell->getCell()->mData.mX * ESM::Land::REAL_SIZE);
+            yCell = static_cast<float>(mCell->getCell()->mData.mY * ESM::Land::REAL_SIZE);
         }
 
         // NOTE: It is possible that getClosestPoint returns a pathgrind point index
@@ -216,12 +217,12 @@ namespace MWMechanics
         //       point right behind the wall that is closer than any pathgrid
         //       point outside the wall
         int startNode = getClosestPoint(mPathgrid,
-                Ogre::Vector3(startPoint.mX - xCell, startPoint.mY - yCell, startPoint.mZ));
+                Ogre::Vector3(startPoint.mX - xCell, startPoint.mY - yCell, static_cast<float>(startPoint.mZ)));
         // Some cells don't have any pathgrids at all
         if(startNode != -1)
         {
             std::pair<int, bool> endNode = getClosestReachablePoint(mPathgrid, cell,
-                    Ogre::Vector3(endPoint.mX - xCell, endPoint.mY - yCell, endPoint.mZ),
+                Ogre::Vector3(endPoint.mX - xCell, endPoint.mY - yCell, static_cast<float>(endPoint.mZ)),
                     startNode);
 
             // this shouldn't really happen, but just in case

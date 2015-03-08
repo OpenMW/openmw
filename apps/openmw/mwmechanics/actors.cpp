@@ -84,8 +84,8 @@ bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
             // FIXME: charge should be a float, not int so that damage < 1 per frame can be applied.
             // This was also a bug in the original engine.
             charge -=
-                    std::min(disintegrate,
-                             static_cast<float>(charge));
+                    std::min(static_cast<int>(disintegrate),
+                             charge);
             item->getCellRef().setCharge(charge);
 
             if (charge == 0)
@@ -163,7 +163,7 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
     bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).getMagnitude() > 0;
     int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
 
-    health = 0.1 * endurance;
+    health = 0.1f * endurance;
 
     magicka = 0;
     if (!stunted)
@@ -203,7 +203,7 @@ namespace MWMechanics
 
             static const float fSoulgemMult = world->getStore().get<ESM::GameSetting>().find("fSoulgemMult")->getFloat();
 
-            float creatureSoulValue = mCreature.get<ESM::Creature>()->mBase->mData.mSoul;
+            int creatureSoulValue = mCreature.get<ESM::Creature>()->mBase->mData.mSoul;
             if (creatureSoulValue == 0)
                 return;
 
@@ -519,8 +519,8 @@ namespace MWMechanics
                              effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).getMagnitude(),
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).getMagnitude());
 
-            stat.damage(effects.get(EffectKey(ESM::MagicEffect::DamageAttribute, i)).getMagnitude() * duration * 1.5);
-            stat.restore(effects.get(EffectKey(ESM::MagicEffect::RestoreAttribute, i)).getMagnitude() * duration * 1.5);
+            stat.damage(effects.get(EffectKey(ESM::MagicEffect::DamageAttribute, i)).getMagnitude() * duration * 1.5f);
+            stat.restore(effects.get(EffectKey(ESM::MagicEffect::RestoreAttribute, i)).getMagnitude() * duration * 1.5f);
 
             creatureStats.setAttribute(i, stat);
         }
@@ -566,19 +566,19 @@ namespace MWMechanics
         if (!creature || ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Creatures)
         {
             Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Fight);
-            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::FrenzyHumanoid+creature).getMagnitude()
-                - creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid+creature).getMagnitude());
+            stat.setModifier(static_cast<int>(creatureStats.getMagicEffects().get(ESM::MagicEffect::FrenzyHumanoid + creature).getMagnitude()
+                - creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid+creature).getMagnitude()));
             creatureStats.setAiSetting(CreatureStats::AI_Fight, stat);
 
             stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
-            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::DemoralizeHumanoid+creature).getMagnitude()
-                - creatureStats.getMagicEffects().get(ESM::MagicEffect::RallyHumanoid+creature).getMagnitude());
+            stat.setModifier(static_cast<int>(creatureStats.getMagicEffects().get(ESM::MagicEffect::DemoralizeHumanoid + creature).getMagnitude()
+                - creatureStats.getMagicEffects().get(ESM::MagicEffect::RallyHumanoid+creature).getMagnitude()));
             creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
         }
         if (creature && ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Undead)
         {
             Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
-            stat.setModifier(creatureStats.getMagicEffects().get(ESM::MagicEffect::TurnUndead).getMagnitude());
+            stat.setModifier(static_cast<int>(creatureStats.getMagicEffects().get(ESM::MagicEffect::TurnUndead).getMagnitude()));
             creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
         }
 
@@ -741,7 +741,7 @@ namespace MWMechanics
         for (std::map<int, std::string>::iterator it = boundItemsMap.begin(); it != boundItemsMap.end(); ++it)
         {
             bool found = creatureStats.mBoundItems.find(it->first) != creatureStats.mBoundItems.end();
-            int magnitude = creatureStats.getMagicEffects().get(it->first).getMagnitude();
+            float magnitude = creatureStats.getMagicEffects().get(it->first).getMagnitude();
             if (found != (magnitude > 0))
             {
                 std::string itemGmst = it->second;
@@ -786,8 +786,8 @@ namespace MWMechanics
                              effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).getMagnitude(),
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).getMagnitude());
 
-            skill.damage(effects.get(EffectKey(ESM::MagicEffect::DamageSkill, i)).getMagnitude() * duration * 1.5);
-            skill.restore(effects.get(EffectKey(ESM::MagicEffect::RestoreSkill, i)).getMagnitude() * duration * 1.5);
+            skill.damage(effects.get(EffectKey(ESM::MagicEffect::DamageSkill, i)).getMagnitude() * duration * 1.5f);
+            skill.restore(effects.get(EffectKey(ESM::MagicEffect::RestoreSkill, i)).getMagnitude() * duration * 1.5f);
         }
     }
 
@@ -1331,7 +1331,7 @@ namespace MWMechanics
                               ? (stats.getMagicka().getModified() - stats.getMagicka().getCurrent()) / magickaPerHour
                               : 1.0f;
 
-        int autoHours = std::ceil(std::max(1.f, std::max(healthHours, magickaHours)));
+        int autoHours = static_cast<int>(std::ceil(std::max(1.f, std::max(healthHours, magickaHours))));
         return autoHours;
     }
 

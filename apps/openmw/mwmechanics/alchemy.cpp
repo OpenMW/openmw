@@ -94,17 +94,17 @@ void MWMechanics::Alchemy::applyTools (int flags, float& value) const
 
             quality = negative ? 2 * toolQuality + 3 * calcinatorQuality :
                 (magnitude && duration ?
-                2 * toolQuality + calcinatorQuality : 2/3.0 * (toolQuality + calcinatorQuality) + 0.5);
+                2 * toolQuality + calcinatorQuality : 2/3.0f * (toolQuality + calcinatorQuality) + 0.5f);
             break;
 
         case 2:
 
-            quality = negative ? 1+toolQuality : (magnitude && duration ? toolQuality : toolQuality + 0.5);
+            quality = negative ? 1+toolQuality : (magnitude && duration ? toolQuality : toolQuality + 0.5f);
             break;
 
         case 3:
 
-            quality = magnitude && duration ? calcinatorQuality : calcinatorQuality + 0.5;
+            quality = magnitude && duration ? calcinatorQuality : calcinatorQuality + 0.5f;
             break;
     }
 
@@ -178,8 +178,8 @@ void MWMechanics::Alchemy::updateEffects()
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
             applyTools (magicEffect->mData.mFlags, duration);
 
-        duration = static_cast<int> (duration+0.5);
-        magnitude = static_cast<int> (magnitude+0.5);
+        duration = roundf(duration);
+        magnitude = roundf(magnitude);
 
         if (magnitude>0 && duration>0)
         {
@@ -197,8 +197,8 @@ void MWMechanics::Alchemy::updateEffects()
             effect.mRange = 0;
             effect.mArea = 0;
 
-            effect.mDuration = duration;
-            effect.mMagnMin = effect.mMagnMax = magnitude;
+            effect.mDuration = static_cast<int>(duration);
+            effect.mMagnMin = effect.mMagnMax = static_cast<int>(magnitude);
 
             mEffects.push_back (effect);
         }
@@ -323,8 +323,8 @@ float MWMechanics::Alchemy::getAlchemyFactor() const
 
     return
         (npcStats.getSkill (ESM::Skill::Alchemy).getModified() +
-        0.1 * creatureStats.getAttribute (ESM::Attribute::Intelligence).getModified()
-        + 0.1 * creatureStats.getAttribute (ESM::Attribute::Luck).getModified());
+        0.1f * creatureStats.getAttribute (ESM::Attribute::Intelligence).getModified()
+        + 0.1f * creatureStats.getAttribute (ESM::Attribute::Luck).getModified());
 }
 
 int MWMechanics::Alchemy::countIngredients() const

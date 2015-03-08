@@ -630,7 +630,7 @@ void MWWorld::InventoryStore::updateRechargingItems()
                         it->getClass().getEnchantment(*it));
             if (enchantment->mData.mType == ESM::Enchantment::WhenUsed
                     || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
-                mRechargingItems.push_back(std::make_pair(it, enchantment->mData.mCharge));
+                mRechargingItems.push_back(std::make_pair(it, static_cast<float>(enchantment->mData.mCharge)));
         }
     }
 }

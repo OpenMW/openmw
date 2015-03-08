@@ -192,7 +192,7 @@ namespace MWMechanics
             if(mDistance &&            // actor is not intended to be stationary
                 idleNow &&             // but is in idle
                !walking &&            // FIXME: some actors are idle while walking
-               proximityToDoor(actor, MIN_DIST_TO_DOOR_SQUARED*1.6*1.6)) // NOTE: checks interior cells only
+               proximityToDoor(actor, MIN_DIST_TO_DOOR_SQUARED*1.6f*1.6f)) // NOTE: checks interior cells only
             {
                 idleNow = false;
                 moveNow = true;
@@ -315,13 +315,13 @@ namespace MWMechanics
             static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
                     .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
 
-            float roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 10000;
+            float roll = std::rand()/ (static_cast<float> (RAND_MAX) + 1) * 10000;
 
             // In vanilla MW the chance was FPS dependent, and did not allow proper changing of fVoiceIdleOdds
             // due to the roll being an integer.
             // Our implementation does not have these issues, so needs to be recalibrated. We chose to
             // use the chance MW would have when run at 60 FPS with the default value of the GMST for calibration.
-            float x = fVoiceIdleOdds * 0.6 * (MWBase::Environment::get().getFrameDuration() / 0.1);
+            float x = fVoiceIdleOdds * 0.6f * (MWBase::Environment::get().getFrameDuration() / 0.1f);
 
             // Only say Idle voices when player is in LOS
             // A bit counterintuitive, likely vanilla did this to reduce the appearance of
@@ -393,18 +393,10 @@ namespace MWMechanics
 
             if (!storage.mPathFinder.isPathConstructed())
             {
-                Ogre::Vector3 destNodePos = mReturnPosition;
-
-                ESM::Pathgrid::Point dest;
-                dest.mX = destNodePos[0];
-                dest.mY = destNodePos[1];
-                dest.mZ = destNodePos[2];
+                ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(mReturnPosition));
 
                 // actor position is already in world co-ordinates
-                ESM::Pathgrid::Point start;
-                start.mX = pos.pos[0];
-                start.mY = pos.pos[1];
-                start.mZ = pos.pos[2];
+                ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
                 // don't take shortcuts for wandering
                 storage.mPathFinder.buildPath(start, dest, actor.getCell(), false);
@@ -422,7 +414,7 @@ namespace MWMechanics
         {
             // Play a random voice greeting if the player gets too close
             int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
-            float helloDistance = hello;
+            float helloDistance = static_cast<float>(hello);
             static int iGreetDistanceMultiplier =MWBase::Environment::get().getWorld()->getStore()
                 .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
 
@@ -500,15 +492,10 @@ namespace MWMechanics
                 assert(mAllowedNodes.size());
                 unsigned int randNode = (int)(rand() / ((double)RAND_MAX + 1) * mAllowedNodes.size());
                 // NOTE: initially constructed with local (i.e. cell) co-ordinates
-                Ogre::Vector3 destNodePos(mAllowedNodes[randNode].mX,
-                                          mAllowedNodes[randNode].mY,
-                                          mAllowedNodes[randNode].mZ);
+                Ogre::Vector3 destNodePos(PathFinder::MakeOgreVector3(mAllowedNodes[randNode]));
 
                 // convert dest to use world co-ordinates
-                ESM::Pathgrid::Point dest;
-                dest.mX = destNodePos[0];
-                dest.mY = destNodePos[1];
-                dest.mZ = destNodePos[2];
+                ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(destNodePos));
                 if (currentCell->getCell()->isExterior())
                 {
                     dest.mX += currentCell->getCell()->mData.mX * ESM::Land::REAL_SIZE;
@@ -516,10 +503,7 @@ namespace MWMechanics
                 }
 
                 // actor position is already in world co-ordinates
-                ESM::Pathgrid::Point start;
-                start.mX = pos.pos[0];
-                start.mY = pos.pos[1];
-                start.mZ = pos.pos[2];
+                ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
                 // don't take shortcuts for wandering
                 storage.mPathFinder.buildPath(start, dest, actor.getCell(), false);
@@ -652,7 +636,7 @@ namespace MWMechanics
             static float fIdleChanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
                 .get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
 
-            unsigned short idleChance = fIdleChanceMultiplier * mIdle[counter];
+            unsigned short idleChance = static_cast<unsigned short>(fIdleChanceMultiplier * mIdle[counter]);
             unsigned short randSelect = (int)(rand() / ((double)RAND_MAX + 1) * int(100 / fIdleChanceMultiplier));
             if(randSelect < idleChance && randSelect > idleRoll)
             {
@@ -675,12 +659,12 @@ namespace MWMechanics
 
         state.moveIn(new AiWanderStorage());
 
-        int index = std::rand() / (static_cast<double> (RAND_MAX) + 1) * mAllowedNodes.size();
+        int index = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * mAllowedNodes.size());
         ESM::Pathgrid::Point dest = mAllowedNodes[index];
 
         // apply a slight offset to prevent overcrowding
-        dest.mX += Ogre::Math::RangeRandom(-64, 64);
-        dest.mY += Ogre::Math::RangeRandom(-64, 64);
+        dest.mX += static_cast<int>(Ogre::Math::RangeRandom(-64, 64));
+        dest.mY += static_cast<int>(Ogre::Math::RangeRandom(-64, 64));
 
         if (actor.getCell()->isExterior())
         {
@@ -688,7 +672,8 @@ namespace MWMechanics
             dest.mY += actor.getCell()->getCell()->mData.mY * ESM::Land::REAL_SIZE;
         }
 
-        MWBase::Environment::get().getWorld()->moveObject(actor, dest.mX, dest.mY, dest.mZ);
+        MWBase::Environment::get().getWorld()->moveObject(actor, static_cast<float>(dest.mX), 
+            static_cast<float>(dest.mY), static_cast<float>(dest.mZ));
         actor.getClass().adjustPosition(actor, false);
     }
 
@@ -720,8 +705,8 @@ namespace MWMechanics
             float cellYOffset = 0;
             if(cell->isExterior())
             {
-                cellXOffset = cell->mData.mX * ESM::Land::REAL_SIZE;
-                cellYOffset = cell->mData.mY * ESM::Land::REAL_SIZE;
+                cellXOffset = static_cast<float>(cell->mData.mX * ESM::Land::REAL_SIZE);
+                cellYOffset = static_cast<float>(cell->mData.mY * ESM::Land::REAL_SIZE);
             }
 
             // convert npcPos to local (i.e. cell) co-ordinates
@@ -733,20 +718,18 @@ namespace MWMechanics
             // NOTE: mPoints and mAllowedNodes are in local co-ordinates
             for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
             {
-                Ogre::Vector3 nodePos(pathgrid->mPoints[counter].mX, pathgrid->mPoints[counter].mY,
-                    pathgrid->mPoints[counter].mZ);
+                Ogre::Vector3 nodePos(PathFinder::MakeOgreVector3(pathgrid->mPoints[counter]));
                 if(npcPos.squaredDistance(nodePos) <= mDistance * mDistance)
                     mAllowedNodes.push_back(pathgrid->mPoints[counter]);
             }
             if(!mAllowedNodes.empty())
             {
-                Ogre::Vector3 firstNodePos(mAllowedNodes[0].mX, mAllowedNodes[0].mY, mAllowedNodes[0].mZ);
+                Ogre::Vector3 firstNodePos(PathFinder::MakeOgreVector3(mAllowedNodes[0]));
                 float closestNode = npcPos.squaredDistance(firstNodePos);
                 unsigned int index = 0;
                 for(unsigned int counterThree = 1; counterThree < mAllowedNodes.size(); counterThree++)
                 {
-                    Ogre::Vector3 nodePos(mAllowedNodes[counterThree].mX, mAllowedNodes[counterThree].mY,
-                        mAllowedNodes[counterThree].mZ);
+                    Ogre::Vector3 nodePos(PathFinder::MakeOgreVector3(mAllowedNodes[counterThree]));
                     float tempDist = npcPos.squaredDistance(nodePos);
                     if(tempDist < closestNode)
                         index = counterThree;

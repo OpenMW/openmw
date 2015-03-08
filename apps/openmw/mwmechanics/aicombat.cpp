@@ -404,7 +404,7 @@ namespace MWMechanics
                 {
                     const MWWorld::ESMStore &store = world->getStore();
                     int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->getInt();
-                    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                    int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 100); // [0, 99]
                     if (roll < chance)
                     {
                         MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
@@ -521,7 +521,7 @@ namespace MWMechanics
                     //apply sideway movement (kind of dodging) with some probability
                     if(static_cast<float>(rand())/RAND_MAX < 0.25)
                     {
-                        movement.mPosition[0] = static_cast<float>(rand())/RAND_MAX < 0.5? 1: -1;
+                        movement.mPosition[0] = static_cast<float>(rand())/RAND_MAX < 0.5? 1.0f : -1.0f;
                         timerCombatMove = 0.05f + 0.15f * static_cast<float>(rand())/RAND_MAX;
                         combatMove = true;
                     }
@@ -588,7 +588,7 @@ namespace MWMechanics
                     // get point just before target
                     std::list<ESM::Pathgrid::Point>::const_iterator pntIter = --mPathFinder.getPath().end();
                     --pntIter;
-                    Ogre::Vector3 vBeforeTarget = Ogre::Vector3(pntIter->mX, pntIter->mY, pntIter->mZ);
+                    Ogre::Vector3 vBeforeTarget(PathFinder::MakeOgreVector3(*pntIter));
 
                     // if current actor pos is closer to target then last point of path (excluding target itself) then go straight on target
                     if(distToTarget <= (vTargetPos - vBeforeTarget).length())
@@ -685,27 +685,21 @@ namespace MWMechanics
         if(!mPathFinder.getPath().empty())
         {
             ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
-            Ogre::Vector3 currPathTarget(lastPt.mX, lastPt.mY, lastPt.mZ);
+            Ogre::Vector3 currPathTarget(PathFinder::MakeOgreVector3(lastPt));
             dist = (newPathTarget - currPathTarget).length();
         }
         else dist = 1e+38F; // necessarily construct a new path
 
-        float targetPosThreshold = (actor.getCell()->getCell()->isExterior())? 300 : 100;
+        float targetPosThreshold = (actor.getCell()->getCell()->isExterior())? 300.0f : 100.0f;
 
         //construct new path only if target has moved away more than on [targetPosThreshold]
         if(dist > targetPosThreshold)
         {
             ESM::Position pos = actor.getRefData().getPosition();
 
-            ESM::Pathgrid::Point start;
-            start.mX = pos.pos[0];
-            start.mY = pos.pos[1];
-            start.mZ = pos.pos[2];
+            ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
-            ESM::Pathgrid::Point dest;
-            dest.mX = newPathTarget.x;
-            dest.mY = newPathTarget.y;
-            dest.mZ = newPathTarget.z;
+            ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(newPathTarget));
 
             if(!mPathFinder.isPathConstructed())
                 mPathFinder.buildPath(start, dest, actor.getCell(), false);
@@ -770,7 +764,7 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
         float roll = static_cast<float>(rand())/RAND_MAX;
         if(roll <= 0.333f)  //side punch
         {
-            movement.mPosition[0] = (static_cast<float>(rand())/RAND_MAX < 0.5f)? 1: -1;
+            movement.mPosition[0] = (static_cast<float>(rand())/RAND_MAX < 0.5f)? 1.0f : -1.0f;
             movement.mPosition[1] = 0;
             attackType = ESM::Weapon::AT_Slash;
         }
@@ -792,16 +786,16 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
         int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
         int thrust = (weapon->mData.mThrust[0] + weapon->mData.mThrust[1])/2;
 
-        float total = slash + chop + thrust;
+        float total = static_cast<float>(slash + chop + thrust);
 
         float roll = static_cast<float>(rand())/RAND_MAX;
-        if(roll <= static_cast<float>(slash)/total)
+        if(roll <= (slash/total))
         {
-            movement.mPosition[0] = (static_cast<float>(rand())/RAND_MAX < 0.5f)? 1: -1;
+            movement.mPosition[0] = (static_cast<float>(rand())/RAND_MAX < 0.5f)? 1.0f : -1.0f;
             movement.mPosition[1] = 0;
             attackType = ESM::Weapon::AT_Slash;
         }
-        else if(roll <= (static_cast<float>(slash) + static_cast<float>(thrust))/total)
+        else if(roll <= (slash + (thrust/total)))
         {
             movement.mPosition[1] = 1;
             attackType = ESM::Weapon::AT_Thrust;

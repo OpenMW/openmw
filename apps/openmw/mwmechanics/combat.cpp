@@ -83,8 +83,8 @@ namespace MWMechanics
 
         MWMechanics::CreatureStats& attackerStats = attacker.getClass().getCreatureStats(attacker);
 
-        float blockTerm = blocker.getClass().getSkill(blocker, ESM::Skill::Block) + 0.2 * blockerStats.getAttribute(ESM::Attribute::Agility).getModified()
-            + 0.1 * blockerStats.getAttribute(ESM::Attribute::Luck).getModified();
+        float blockTerm = blocker.getClass().getSkill(blocker, ESM::Skill::Block) + 0.2f * blockerStats.getAttribute(ESM::Attribute::Agility).getModified()
+            + 0.1f * blockerStats.getAttribute(ESM::Attribute::Luck).getModified();
         float enemySwing = attackerStats.getAttackStrength();
         float swingTerm = enemySwing * gmst.find("fSwingBlockMult")->getFloat() + gmst.find("fSwingBlockBase")->getFloat();
 
@@ -93,13 +93,13 @@ namespace MWMechanics
             blockerTerm *= gmst.find("fBlockStillBonus")->getFloat();
         blockerTerm *= blockerStats.getFatigueTerm();
 
-        float attackerSkill = 0.f;
+        int attackerSkill = 0;
         if (weapon.isEmpty())
             attackerSkill = attacker.getClass().getSkill(attacker, ESM::Skill::HandToHand);
         else
             attackerSkill = attacker.getClass().getSkill(attacker, weapon.getClass().getEquipmentSkill(weapon));
-        float attackerTerm = attackerSkill + 0.2 * attackerStats.getAttribute(ESM::Attribute::Agility).getModified()
-                + 0.1 * attackerStats.getAttribute(ESM::Attribute::Luck).getModified();
+        float attackerTerm = attackerSkill + 0.2f * attackerStats.getAttribute(ESM::Attribute::Agility).getModified()
+                + 0.1f * attackerStats.getAttribute(ESM::Attribute::Luck).getModified();
         attackerTerm *= attackerStats.getFatigueTerm();
 
         int x = int(blockerTerm - attackerTerm);
@@ -107,7 +107,7 @@ namespace MWMechanics
         int iBlockMinChance = gmst.find("iBlockMinChance")->getInt();
         x = std::min(iBlockMaxChance, std::max(iBlockMinChance, x));
 
-        int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+        int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 100); // [0, 99]
         if (roll < x)
         {
             // Reduce shield durability by incoming damage
@@ -183,7 +183,7 @@ namespace MWMechanics
         if(!weapon.isEmpty())
             weapskill = weapon.getClass().getEquipmentSkill(weapon);
 
-        float skillValue = attacker.getClass().getSkill(attacker,
+        int skillValue = attacker.getClass().getSkill(attacker,
                                            weapon.getClass().getEquipmentSkill(weapon));
 
         if((::rand()/(RAND_MAX+1.0)) > getHitChance(attacker, victim, skillValue)/100.0f)
@@ -206,7 +206,7 @@ namespace MWMechanics
         }
 
         damage *= fDamageStrengthBase +
-                (attackerStats.getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult * 0.1);
+                (attackerStats.getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult * 0.1f);
 
         adjustWeaponDamage(damage, weapon);
         reduceWeaponCondition(damage, true, weapon, attacker);
@@ -265,14 +265,14 @@ namespace MWMechanics
                     + 0.2f * attackerStats.getAttribute(ESM::Attribute::Willpower).getModified()
                     + 0.1f * attackerStats.getAttribute(ESM::Attribute::Luck).getModified();
 
-            int fatigueMax = attackerStats.getFatigue().getModified();
-            int fatigueCurrent = attackerStats.getFatigue().getCurrent();
+            float fatigueMax = attackerStats.getFatigue().getModified();
+            float fatigueCurrent = attackerStats.getFatigue().getCurrent();
 
-            float normalisedFatigue = fatigueMax==0 ? 1 : std::max (0.0f, static_cast<float> (fatigueCurrent)/fatigueMax);
+            float normalisedFatigue = floor(fatigueMax)==0 ? 1 : std::max (0.0f, (fatigueCurrent/fatigueMax));
 
             saveTerm *= 1.25f * normalisedFatigue;
 
-            float roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            float roll = std::rand()/ (static_cast<float> (RAND_MAX) + 1) * 100; // [0, 99]
             float x = std::max(0.f, saveTerm - roll);
 
             int element = ESM::MagicEffect::FireDamage;
@@ -344,7 +344,7 @@ namespace MWMechanics
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         float minstrike = store.get<ESM::GameSetting>().find("fMinHandToHandMult")->getFloat();
         float maxstrike = store.get<ESM::GameSetting>().find("fMaxHandToHandMult")->getFloat();
-        damage  = attacker.getClass().getSkill(attacker, ESM::Skill::HandToHand);
+        damage  = static_cast<float>(attacker.getClass().getSkill(attacker, ESM::Skill::HandToHand));
         damage *= minstrike + ((maxstrike-minstrike)*attacker.getClass().getCreatureStats(attacker).getAttackStrength());
 
         MWMechanics::CreatureStats& otherstats = victim.getClass().getCreatureStats(victim);

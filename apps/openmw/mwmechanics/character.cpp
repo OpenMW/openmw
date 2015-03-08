@@ -112,7 +112,7 @@ float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
 
     if (fallHeight >= fallDistanceMin)
     {
-        const float acrobaticsSkill = ptr.getClass().getSkill(ptr, ESM::Skill::Acrobatics);
+        const float acrobaticsSkill = static_cast<float>(ptr.getClass().getSkill(ptr, ESM::Skill::Acrobatics));
         const float jumpSpellBonus = ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Jump).getMagnitude();
         const float fallAcroBase = store.find("fFallAcroBase")->getFloat();
         const float fallAcroMult = store.find("fFallAcroMult")->getFloat();
@@ -120,7 +120,7 @@ float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
         const float fallDistanceMult = store.find("fFallDistanceMult")->getFloat();
 
         float x = fallHeight - fallDistanceMin;
-        x -= (1.5 * acrobaticsSkill) + jumpSpellBonus;
+        x -= (1.5f * acrobaticsSkill) + jumpSpellBonus;
         x = std::max(0.0f, x);
 
         float a = fallAcroBase + fallAcroMult * (100 - acrobaticsSkill);
@@ -220,7 +220,7 @@ std::string CharacterController::chooseRandomGroup (const std::string& prefix, i
     while (mAnimation->hasAnimation(prefix + Ogre::StringConverter::toString(numAnims+1)))
         ++numAnims;
 
-    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * numAnims + 1; // [1, numAnims]
+    int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * numAnims) + 1; // [1, numAnims]
     if (num)
         *num = roll;
     return prefix + Ogre::StringConverter::toString(roll);
@@ -829,7 +829,7 @@ bool CharacterController::updateCreatureState()
             }
             if (weapType != WeapType_Spell || !mAnimation->hasAnimation("spellcast")) // Not all creatures have a dedicated spellcast animation
             {
-                int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 3; // [0, 2]
+                int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 3); // [0, 2]
                 if (roll == 0)
                     mCurrentWeapon = "attack1";
                 else if (roll == 1)
@@ -1531,7 +1531,7 @@ void CharacterController::update(float duration)
                 float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
                 if (normalizedEncumbrance > 1)
                     normalizedEncumbrance = 1;
-                const int fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
+                const float fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
                 DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
                 fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
                 cls.getCreatureStats(mPtr).setFatigue(fatigue);
@@ -1551,12 +1551,12 @@ void CharacterController::update(float duration)
 
                 // inflict fall damages
                 DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
-                int realHealthLost = healthLost * (1.0f - 0.25 * fatigueTerm);
+                float realHealthLost = static_cast<float>(healthLost * (1.0f - 0.25f * fatigueTerm));
                 health.setCurrent(health.getCurrent() - realHealthLost);
                 cls.getCreatureStats(mPtr).setHealth(health);
                 cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), true);
 
-                const float acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
+                const int acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
                 if (healthLost > (acrobaticsSkill * fatigueTerm))
                 {
                     cls.getCreatureStats(mPtr).setKnockedDown(true);
@@ -1612,7 +1612,7 @@ void CharacterController::update(float duration)
 
         mTurnAnimationThreshold -= duration;
         if (movestate == CharState_TurnRight || movestate == CharState_TurnLeft)
-            mTurnAnimationThreshold = 0.05;
+            mTurnAnimationThreshold = 0.05f;
         else if (movestate == CharState_None && (mMovementState == CharState_TurnRight || mMovementState == CharState_TurnLeft)
                  && mTurnAnimationThreshold > 0)
         {

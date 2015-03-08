@@ -16,7 +16,7 @@
 
 MWMechanics::AiPackage::~AiPackage() {}
 
-MWMechanics::AiPackage::AiPackage() : mTimer(.26), mStuckTimer(0) { //mTimer starts at .26 to force initial pathbuild
+MWMechanics::AiPackage::AiPackage() : mTimer(0.26f), mStuckTimer(0) { //mTimer starts at .26 to force initial pathbuild
 
 }
 

@@ -142,7 +142,7 @@ void MWMechanics::NpcStats::setFactionReputation (const std::string& faction, in
 
 float MWMechanics::NpcStats::getSkillProgressRequirement (int skillIndex, const ESM::Class& class_) const
 {
-    float progressRequirement = 1 + getSkill (skillIndex).getBase();
+    float progressRequirement = static_cast<float>(1 + getSkill(skillIndex).getBase());
 
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -303,7 +303,7 @@ void MWMechanics::NpcStats::updateHealth()
     const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
     const int strength = getAttribute(ESM::Attribute::Strength).getBase();
 
-    setHealth(static_cast<int> (0.5 * (strength + endurance)));
+    setHealth(floor(0.5f * (strength + endurance)));
 }
 
 int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const

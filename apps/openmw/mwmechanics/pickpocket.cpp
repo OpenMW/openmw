@@ -20,10 +20,10 @@ namespace MWMechanics
     float Pickpocket::getChanceModifier(const MWWorld::Ptr &ptr, float add)
     {
         NpcStats& stats = ptr.getClass().getNpcStats(ptr);
-        float agility = stats.getAttribute(ESM::Attribute::Agility).getModified();
-        float luck = stats.getAttribute(ESM::Attribute::Luck).getModified();
-        float sneak = ptr.getClass().getSkill(ptr, ESM::Skill::Sneak);
-        return (add + 0.2 * agility + 0.1 * luck + sneak) * stats.getFatigueTerm();
+        float agility = static_cast<float>(stats.getAttribute(ESM::Attribute::Agility).getModified());
+        float luck = static_cast<float>(stats.getAttribute(ESM::Attribute::Luck).getModified());
+        float sneak = static_cast<float>(ptr.getClass().getSkill(ptr, ESM::Skill::Sneak));
+        return (add + 0.2f * agility + 0.1f * luck + sneak) * stats.getFatigueTerm();
     }
 
     bool Pickpocket::getDetected(float valueTerm)
@@ -33,13 +33,13 @@ namespace MWMechanics
 
         float t = 2*x - y;
 
-        float pcSneak = mThief.getClass().getSkill(mThief, ESM::Skill::Sneak);
+        float pcSneak = static_cast<float>(mThief.getClass().getSkill(mThief, ESM::Skill::Sneak));
         int iPickMinChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                 .find("iPickMinChance")->getInt();
         int iPickMaxChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                 .find("iPickMaxChance")->getInt();
 
-        int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+        int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 100); // [0, 99]
         if (t < pcSneak / iPickMinChance)
         {
             return (roll > int(pcSneak / iPickMinChance));
@@ -53,7 +53,7 @@ namespace MWMechanics
 
     bool Pickpocket::pick(MWWorld::Ptr item, int count)
     {
-        float stackValue = item.getClass().getValue(item) * count;
+        float stackValue = static_cast<float>(item.getClass().getValue(item) * count);
         float fPickPocketMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                 .find("fPickPocketMod")->getFloat();
         float valueTerm = 10 * fPickPocketMod * stackValue;
