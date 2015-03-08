@@ -103,9 +103,9 @@ namespace MWClass
             data->mCreatureStats.setAttribute(ESM::Attribute::Endurance, ref->mBase->mData.mEndurance);
             data->mCreatureStats.setAttribute(ESM::Attribute::Personality, ref->mBase->mData.mPersonality);
             data->mCreatureStats.setAttribute(ESM::Attribute::Luck, ref->mBase->mData.mLuck);
-            data->mCreatureStats.setHealth (ref->mBase->mData.mHealth);
-            data->mCreatureStats.setMagicka (ref->mBase->mData.mMana);
-            data->mCreatureStats.setFatigue (ref->mBase->mData.mFatigue);
+            data->mCreatureStats.setHealth(static_cast<float>(ref->mBase->mData.mHealth));
+            data->mCreatureStats.setMagicka(static_cast<float>(ref->mBase->mData.mMana));
+            data->mCreatureStats.setFatigue(static_cast<float>(ref->mBase->mData.mFatigue));
 
             data->mCreatureStats.setLevel(ref->mBase->mData.mLevel);
 
@@ -289,7 +289,7 @@ namespace MWClass
             {
                 damage = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
                 damage *= gmst.find("fDamageStrengthBase")->getFloat() +
-                        (stats.getAttribute(ESM::Attribute::Strength).getModified() * gmst.find("fDamageStrengthMult")->getFloat() * 0.1);
+                        (stats.getAttribute(ESM::Attribute::Strength).getModified() * gmst.find("fDamageStrengthMult")->getFloat() * 0.1f);
                 MWMechanics::adjustWeaponDamage(damage, weapon);
                 MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
             }
@@ -376,8 +376,8 @@ namespace MWClass
                 // Check for knockdown
                 float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
                 float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
-                        * getGmst().iKnockDownOddsMult->getInt() * 0.01 + getGmst().iKnockDownOddsBase->getInt();
-                int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                        * getGmst().iKnockDownOddsMult->getInt() * 0.01f + getGmst().iKnockDownOddsBase->getInt();
+                int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 100); // [0, 99]
                 if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
                 {
                     getCreatureStats(ptr).setKnockedDown(true);
@@ -528,7 +528,7 @@ namespace MWClass
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
         const GMST& gmst = getGmst();
 
-        float walkSpeed = gmst.fMinWalkSpeedCreature->getFloat() + 0.01 * stats.getAttribute(ESM::Attribute::Speed).getModified()
+        float walkSpeed = gmst.fMinWalkSpeedCreature->getFloat() + 0.01f * stats.getAttribute(ESM::Attribute::Speed).getModified()
                 * (gmst.fMaxWalkSpeedCreature->getFloat() - gmst.fMinWalkSpeedCreature->getFloat());
 
         const MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -626,7 +626,7 @@ namespace MWClass
     float Creature::getCapacity (const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-        return stats.getAttribute(0).getModified()*5;
+        return static_cast<float>(stats.getAttribute(0).getModified() * 5);
     }
 
     float Creature::getEncumbrance (const MWWorld::Ptr& ptr) const

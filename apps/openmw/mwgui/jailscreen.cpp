@@ -17,7 +17,7 @@ namespace MWGui
 {
     JailScreen::JailScreen()
         : WindowBase("openmw_jail_screen.layout"),
-          mTimeAdvancer(0.01),
+          mTimeAdvancer(0.01f),
           mDays(1),
           mFadeTimeRemaining(0)
     {
@@ -66,7 +66,7 @@ namespace MWGui
     void JailScreen::onJailProgressChanged(int cur, int /*total*/)
     {
         mProgressBar->setScrollPosition(0);
-        mProgressBar->setTrackSize(cur / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize());
+        mProgressBar->setTrackSize(static_cast<int>(cur / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
     }
 
     void JailScreen::onJailFinished()
@@ -83,7 +83,7 @@ namespace MWGui
         std::set<int> skills;
         for (int day=0; day<mDays; ++day)
         {
-            int skill = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * ESM::Skill::Length;
+            int skill = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * ESM::Skill::Length);
             skills.insert(skill);
 
             MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill);

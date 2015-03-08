@@ -101,7 +101,7 @@ void HeadAnimationTime::setEnabled(bool enabled)
 
 void HeadAnimationTime::resetBlinkTimer()
 {
-    mBlinkTimer = -(2 + (std::rand() / double(RAND_MAX*1.0)) * 6);
+    mBlinkTimer = -(2 + (std::rand() / static_cast<float>(RAND_MAX)) * 6);
 }
 
 void HeadAnimationTime::update(float dt)

@@ -332,7 +332,7 @@ namespace MWScript
                         // except for when you position the player, then degrees must be used.
                         // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
                         if(ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                            zRot = zRot/60.;
+                            zRot = zRot/60.0f;
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
 
                         ptr.getClass().adjustPosition(ptr, false);
@@ -389,7 +389,7 @@ namespace MWScript
                     // except for when you position the player, then degrees must be used.
                     // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
                     if(ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                        zRot = zRot/60.;
+                        zRot = zRot/60.0f;
                     MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
                     ptr.getClass().adjustPosition(ptr, false);
                 }

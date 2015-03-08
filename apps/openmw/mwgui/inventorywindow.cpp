@@ -101,7 +101,7 @@ namespace MWGui
     void InventoryWindow::adjustPanes()
     {
         const float aspect = 0.5; // fixed aspect ratio for the avatar image
-        float leftPaneWidth = (mMainWidget->getSize().height-44-mArmorRating->getHeight()) * aspect;
+        int leftPaneWidth = static_cast<int>(mMainWidget->getSize().height - 44 - mArmorRating->getHeight()) * aspect);
         mLeftPane->setSize( leftPaneWidth, mMainWidget->getSize().height-44 );
         mRightPane->setCoord( mLeftPane->getPosition().left + leftPaneWidth + 4,
                               mRightPane->getPosition().top,
@@ -153,10 +153,10 @@ namespace MWGui
         }
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        MyGUI::IntPoint pos (Settings::Manager::getFloat(setting + " x", "Windows") * viewSize.width,
-                             Settings::Manager::getFloat(setting + " y", "Windows") * viewSize.height);
-        MyGUI::IntSize size (Settings::Manager::getFloat(setting + " w", "Windows") * viewSize.width,
-                             Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height);
+        MyGUI::IntPoint pos(static_cast<int>(Settings::Manager::getFloat(setting + " x", "Windows") * viewSize.width),
+                            static_cast<int>(Settings::Manager::getFloat(setting + " y", "Windows") * viewSize.height));
+        MyGUI::IntSize size(static_cast<int>(Settings::Manager::getFloat(setting + " w", "Windows") * viewSize.width),
+                            static_cast<int>(Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height));
 
         if (size.width != mMainWidget->getWidth() || size.height != mMainWidget->getHeight())
             mPreviewResize = true;
@@ -519,7 +519,7 @@ namespace MWGui
         float capacity = player.getClass().getCapacity(player);
         float encumbrance = player.getClass().getEncumbrance(player);
         mTradeModel->adjustEncumbrance(encumbrance);
-        mEncumbranceBar->setValue(encumbrance, capacity);
+        mEncumbranceBar->setValue(static_cast<int>(encumbrance), static_cast<int>(capacity));
     }
 
     void InventoryWindow::onFrame()

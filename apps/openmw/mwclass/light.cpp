@@ -205,7 +205,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
         if (ptr.getCellRef().getCharge() == -1)
-            return ref->mBase->mData.mTime;
+            return static_cast<float>(ref->mBase->mData.mTime);
         else
             return ptr.getCellRef().getChargeFloat();
     }

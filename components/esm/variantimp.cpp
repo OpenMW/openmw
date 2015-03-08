@@ -128,7 +128,7 @@ int ESM::VariantIntegerData::getInteger (bool default_) const
 
 float ESM::VariantIntegerData::getFloat (bool default_) const
 {
-    return mValue;
+    return static_cast<float>(mValue);
 }
 
 void ESM::VariantIntegerData::setInteger (int value)
@@ -202,7 +202,7 @@ void ESM::VariantIntegerData::write (ESMWriter& esm, Variant::Format format, Var
     {
         if (type==VT_Short || type==VT_Long)
         {
-            float value = mValue;
+            float value = static_cast<float>(mValue);
             esm.writeHNString ("FNAM", type==VT_Short ? "s" : "l");
             esm.writeHNT ("FLTV", value);
         }
@@ -262,7 +262,7 @@ float ESM::VariantFloatData::getFloat (bool default_) const
 
 void ESM::VariantFloatData::setInteger (int value)
 {
-    mValue = value;
+    mValue = static_cast<float>(value);
 }
 
 void ESM::VariantFloatData::setFloat (float value)

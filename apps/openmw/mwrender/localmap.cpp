@@ -43,9 +43,9 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManag
 
     mLight = mRendering->getScene()->createLight();
     mLight->setType (Ogre::Light::LT_DIRECTIONAL);
-    mLight->setDirection (Ogre::Vector3(0.3, 0.3, -0.7));
+    mLight->setDirection (Ogre::Vector3(0.3f, 0.3f, -0.7f));
     mLight->setVisible (false);
-    mLight->setDiffuseColour (ColourValue(0.7,0.7,0.7));
+    mLight->setDiffuseColour (ColourValue(0.7f,0.7f,0.7f));
 
     mRenderTexture = TextureManager::getSingleton().createManual(
                     "localmap/rtt",
@@ -114,8 +114,8 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
         Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().y);
         Vector2 max(mBounds.getMaximum().x, mBounds.getMaximum().y);
         Vector2 length = max-min;
-        const int segsX = std::ceil( length.x / sSize );
-        const int segsY = std::ceil( length.y / sSize );
+        const int segsX = static_cast<int>(std::ceil(length.x / sSize));
+        const int segsY = static_cast<int>(std::ceil(length.y / sSize));
 
         mInteriorName = cell->getCell()->mName;
 
@@ -175,7 +175,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell, float zMin, float zMax)
     // Note: using force=true for exterior cell maps.
     // They must be updated even if they were visited before, because the set of surrounding active cells might be different
     // (and objects in a different cell can "bleed" into another cell's map if they cross the border)
-    render((x+0.5)*sSize, (y+0.5)*sSize, zMin, zMax, sSize, sSize, name, true);
+    render((x+0.5f)*sSize, (y+0.5f)*sSize, zMin, zMax, static_cast<float>(sSize), static_cast<float>(sSize), name, true);
 
     if (mBuffers.find(name) == mBuffers.end())
     {
@@ -226,7 +226,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
     // Do NOT change padding! This will break older savegames.
     // If the padding really needs to be changed, then it must be saved in the ESM::FogState and
     // assume the old (500) value as default for older savegames.
-    const int padding = 500;
+    const Ogre::Real padding = 500.0f;
 
     // Apply a little padding
     mBounds.setMinimum (mBounds.getMinimum() - Vector3(padding,padding,0));
@@ -279,8 +279,8 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
     mCameraPosNode->setPosition(Vector3(center.x, center.y, 0));
 
     // divide into segments
-    const int segsX = std::ceil( length.x / sSize );
-    const int segsY = std::ceil( length.y / sSize );
+    const int segsX = static_cast<int>(std::ceil(length.x / sSize));
+    const int segsY = static_cast<int>(std::ceil(length.y / sSize));
 
     mInteriorName = cell->getCell()->mName;
 
@@ -289,12 +289,12 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
     {
         for (int y=0; y<segsY; ++y)
         {
-            Vector2 start = min + Vector2(sSize*x,sSize*y);
+            Vector2 start = min + Vector2(static_cast<Ogre::Real>(sSize*x), static_cast<Ogre::Real>(sSize*y));
             Vector2 newcenter = start + sSize/2;
 
             std::string texturePrefix = cell->getCell()->mName + "_" + coordStr(x,y);
 
-            render(newcenter.x - center.x, newcenter.y - center.y, zMin, zMax, sSize, sSize, texturePrefix);
+            render(newcenter.x - center.x, newcenter.y - center.y, zMin, zMax, static_cast<float>(sSize), static_cast<float>(sSize), texturePrefix);
 
             if (!cell->getFog())
                 createFogOfWar(texturePrefix);
@@ -397,7 +397,7 @@ void LocalMap::render(const float x, const float y,
 
     // set up lighting
     Ogre::ColourValue oldAmbient = mRendering->getScene()->getAmbientLight();
-    mRendering->getScene()->setAmbientLight(Ogre::ColourValue(0.3, 0.3, 0.3));
+    mRendering->getScene()->setAmbientLight(Ogre::ColourValue(0.3f, 0.3f, 0.3f));
     mRenderingManager->disableLights(true);
     mLight->setVisible(true);
 
@@ -439,11 +439,11 @@ void LocalMap::worldToInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& 
 
     Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().y);
 
-    x = std::ceil((pos.x - min.x)/sSize)-1;
-    y = std::ceil((pos.y - min.y)/sSize)-1;
+    x = static_cast<int>(std::ceil((pos.x - min.x) / sSize) - 1);
+    y = static_cast<int>(std::ceil((pos.y - min.y) / sSize) - 1);
 
     nX = (pos.x - min.x - sSize*x)/sSize;
-    nY = 1.0-(pos.y - min.y - sSize*y)/sSize;
+    nY = 1.0f-(pos.y - min.y - sSize*y)/sSize;
 }
 
 Ogre::Vector2 LocalMap::interiorMapToWorldPosition (float nX, float nY, int x, int y)
@@ -452,7 +452,7 @@ Ogre::Vector2 LocalMap::interiorMapToWorldPosition (float nX, float nY, int x, i
     Ogre::Vector2 pos;
 
     pos.x = sSize * (nX + x) + min.x;
-    pos.y = sSize * (1.0-nY + y) + min.y;
+    pos.y = sSize * (1.0f-nY + y) + min.y;
 
     pos = rotatePoint(pos, Vector2(mBounds.getCenter().x, mBounds.getCenter().y), -mAngle);
     return pos;
@@ -468,8 +468,8 @@ bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interi
     nX = std::max(0.f, std::min(1.f, nX));
     nY = std::max(0.f, std::min(1.f, nY));
 
-    int texU = (sFogOfWarResolution-1) * nX;
-    int texV = (sFogOfWarResolution-1) * nY;
+    int texU = static_cast<int>((sFogOfWarResolution - 1) * nX);
+    int texV = static_cast<int>((sFogOfWarResolution - 1) * nY);
 
     Ogre::uint32 clr = mBuffers[texName][texV * sFogOfWarResolution + texU];
     uint8 alpha = (clr >> 24);
@@ -522,8 +522,8 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
 
     if (!mInterior)
     {
-        x = std::ceil(pos.x / sSize)-1;
-        y = std::ceil(pos.y / sSize)-1;
+        x = static_cast<int>(std::ceil(pos.x / sSize) - 1);
+        y = static_cast<int>(std::ceil(pos.y / sSize) - 1);
     }
     else
         MWBase::Environment::get().getWindowManager()->setActiveMap(x,y,mInterior);
@@ -533,7 +533,7 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     if (!mInterior)
     {
         u = std::abs((pos.x - (sSize*x))/sSize);
-        v = 1.0-std::abs((pos.y - (sSize*y))/sSize);
+        v = 1.0f-std::abs((pos.y - (sSize*y))/sSize);
         texBaseName = "Cell_";
     }
     else
@@ -545,7 +545,7 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     MWBase::Environment::get().getWindowManager()->setPlayerDir(playerdirection.x, playerdirection.y);
 
     // explore radius (squared)
-    const float exploreRadius = (mInterior ? 0.1 : 0.3) * (sFogOfWarResolution-1); // explore radius from 0 to sFogOfWarResolution-1
+    const float exploreRadius = (mInterior ? 0.1f : 0.3f) * (sFogOfWarResolution-1); // explore radius from 0 to sFogOfWarResolution-1
     const float sqrExploreRadius = Math::Sqr(exploreRadius);
     const float exploreRadiusUV = exploreRadius / sFogOfWarResolution; // explore radius from 0 to 1 (UV space)
 

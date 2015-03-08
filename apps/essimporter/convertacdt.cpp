@@ -23,9 +23,9 @@ namespace ESSImport
         }
         for (int i=0; i<8; ++i)
         {
-            cStats.mAttributes[i].mBase = acdt.mAttributes[i][1];
-            cStats.mAttributes[i].mMod = acdt.mAttributes[i][0];
-            cStats.mAttributes[i].mCurrent = acdt.mAttributes[i][0];
+            cStats.mAttributes[i].mBase = static_cast<int>(acdt.mAttributes[i][1]);
+            cStats.mAttributes[i].mMod = static_cast<int>(acdt.mAttributes[i][0]);
+            cStats.mAttributes[i].mCurrent = static_cast<int>(acdt.mAttributes[i][0]);
         }
         cStats.mGoldPool = acdt.mGoldPool;
         cStats.mTalkedTo = (acdt.mFlags & TalkedToPlayer) != 0;

@@ -26,7 +26,7 @@ namespace Render
 
         setupRenderTarget();
 
-        mCurrentColour = Ogre::ColourValue(0.3, 0.3, 0.3);
+        mCurrentColour = Ogre::ColourValue(0.3f, 0.3f, 0.3f);
     }
 
     void SelectionBuffer::setupRenderTarget()
@@ -145,7 +145,7 @@ namespace Render
 
     void SelectionBuffer::getNextColour ()
     {
-        Ogre::ARGB color = (float(rand()) / float(RAND_MAX)) * std::numeric_limits<Ogre::uint32>::max();
+        Ogre::ARGB color = static_cast<Ogre::ARGB>((float(rand()) / float(RAND_MAX)) * std::numeric_limits<Ogre::uint32>::max());
 
         if (mCurrentColour.getAsARGB () == color)
         {

@@ -152,7 +152,7 @@ namespace MWGui
                 }
                 else
                 {
-                    int value = Settings::Manager::getFloat(getSettingName(current), getSettingCategory(current));
+                    int value = Settings::Manager::getInt(getSettingName(current), getSettingCategory(current));
                     scroll->setScrollPosition(value);
                 }
                 scroll->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
@@ -557,10 +557,10 @@ namespace MWGui
 
     void SettingsWindow::onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel)
     {
-        if (mControlsBox->getViewOffset().top + _rel*0.3 > 0)
+        if (mControlsBox->getViewOffset().top + _rel*0.3f > 0)
             mControlsBox->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mControlsBox->setViewOffset(MyGUI::IntPoint(0, mControlsBox->getViewOffset().top + _rel*0.3));
+            mControlsBox->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mControlsBox->getViewOffset().top + _rel*0.3f)));
     }
 
     void SettingsWindow::onResetDefaultBindings(MyGUI::Widget* _sender)

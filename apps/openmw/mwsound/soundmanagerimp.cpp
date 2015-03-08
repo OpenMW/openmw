@@ -106,7 +106,7 @@ namespace MWSound
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const ESM::Sound *snd = world->getStore().get<ESM::Sound>().find(soundId);
 
-        volume *= pow(10.0, (snd->mData.mVolume/255.0*3348.0 - 3348.0) / 2000.0);
+        volume *= static_cast<float>(pow(10.0, (snd->mData.mVolume / 255.0*3348.0 - 3348.0) / 2000.0));
 
         if(snd->mData.mMinRange == 0 && snd->mData.mMaxRange == 0)
         {
@@ -559,7 +559,7 @@ namespace MWSound
         if(!cell->isExterior() || sTimePassed < sTimeToNextEnvSound)
             return;
 
-        float a = std::rand() / (double)RAND_MAX;
+        float a = std::rand() / static_cast<float>(RAND_MAX);
         // NOTE: We should use the "Minimum Time Between Environmental Sounds" and
         // "Maximum Time Between Environmental Sounds" fallback settings here.
         sTimeToNextEnvSound = 5.0f*a + 15.0f*(1.0f-a);

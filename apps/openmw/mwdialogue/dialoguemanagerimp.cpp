@@ -444,7 +444,7 @@ namespace MWDialogue
         if (mActor.getClass().isNpc())
         {
             MWMechanics::NpcStats& npcStats = mActor.getClass().getNpcStats(mActor);
-            npcStats.setBaseDisposition(npcStats.getBaseDisposition() + mPermanentDispositionChange);
+            npcStats.setBaseDisposition(static_cast<int>(npcStats.getBaseDisposition() + mPermanentDispositionChange));
         }
         mPermanentDispositionChange = 0;
         mTemporaryDispositionChange = 0;
@@ -521,7 +521,7 @@ namespace MWDialogue
         mPermanentDispositionChange += perm;
 
         // change temp disposition so that final disposition is between 0...100
-        int curDisp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor);
+        float curDisp = static_cast<float>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor));
         if (curDisp + mTemporaryDispositionChange < 0)
             mTemporaryDispositionChange = -curDisp;
         else if (curDisp + mTemporaryDispositionChange > 100)
@@ -564,7 +564,7 @@ namespace MWDialogue
 
     int DialogueManager::getTemporaryDispositionChange() const
     {
-        return mTemporaryDispositionChange;
+        return static_cast<int>(mTemporaryDispositionChange);
     }
 
     void DialogueManager::applyDispositionChange(int delta)

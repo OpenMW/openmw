@@ -33,8 +33,8 @@ namespace MWGui
         : mSceneMgr(sceneMgr)
         , mWindow(rw)
         , WindowBase("openmw_loading_screen.layout")
-        , mLastRenderTime(0.f)
-        , mLastWallpaperChangeTime(0.f)
+        , mLastRenderTime(0)
+        , mLastWallpaperChangeTime(0)
         , mProgress(0)
         , mVSyncWasEnabled(false)
     {
@@ -173,7 +173,7 @@ namespace MWGui
             return;
         mProgress = value;
         mProgressBar->setScrollPosition(0);
-        mProgressBar->setTrackSize(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize());
+        mProgressBar->setTrackSize(static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
         draw();
     }
 
@@ -182,7 +182,7 @@ namespace MWGui
         mProgressBar->setScrollPosition(0);
         size_t value = mProgress + increase;
         mProgress = value;
-        mProgressBar->setTrackSize(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize());
+        mProgressBar->setTrackSize(static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
         draw();
     }
 
@@ -193,7 +193,7 @@ namespace MWGui
             time = (time-2)*-1;
 
         mProgressBar->setTrackSize(50);
-        mProgressBar->setScrollPosition(time * (mProgressBar->getScrollRange()-1));
+        mProgressBar->setScrollPosition(static_cast<size_t>(time * (mProgressBar->getScrollRange() - 1)));
         draw();
     }
 

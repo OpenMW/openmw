@@ -570,9 +570,9 @@ namespace MWWorld
         if (name=="gamehour")
             setHour (value);
         else if (name=="day")
-            setDay (value);
+            setDay(static_cast<int>(value));
         else if (name=="month")
-            setMonth (value);
+            setMonth(static_cast<int>(value));
         else
             mGlobalVariables[name].setFloat (value);
     }
@@ -800,7 +800,7 @@ namespace MWWorld
 
     void World::advanceTime (double hours)
     {
-        MWBase::Environment::get().getMechanicsManager()->advanceTime(hours*3600);
+        MWBase::Environment::get().getMechanicsManager()->advanceTime(static_cast<float>(hours * 3600));
 
         mWeatherManager->advanceTime (hours);
 
@@ -808,7 +808,7 @@ namespace MWWorld
 
         setHour (hours);
 
-        int days = hours / 24;
+        int days = static_cast<int>(hours / 24);
 
         if (days>0)
             mGlobalVariables["dayspassed"].setInteger (
@@ -820,15 +820,15 @@ namespace MWWorld
         if (hour<0)
             hour = 0;
 
-        int days = hour / 24;
+        int days = static_cast<int>(hour / 24);
 
         hour = std::fmod (hour, 24);
 
-        mGlobalVariables["gamehour"].setFloat (hour);
+        mGlobalVariables["gamehour"].setFloat(static_cast<float>(hour));
 
         mRendering->skySetHour (hour);
 
-        mWeatherManager->setHour (hour);
+        mWeatherManager->setHour(static_cast<float>(hour));
 
         if (days>0)
             setDay (days + mGlobalVariables["day"].getInteger());
@@ -1015,25 +1015,9 @@ namespace MWWorld
     float World::getMaxActivationDistance ()
     {
         if (mActivationDistanceOverride >= 0)
-            return mActivationDistanceOverride;
+            return static_cast<float>(mActivationDistanceOverride);
 
-        return (std::max) (getNpcActivationDistance (), getObjectActivationDistance ());
-    }
-
-    float World::getNpcActivationDistance ()
-    {
-        if (mActivationDistanceOverride >= 0)
-            return mActivationDistanceOverride;
-
-        return getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt()*5/4;
-    }
-
-    float World::getObjectActivationDistance ()
-    {
-        if (mActivationDistanceOverride >= 0)
-            return mActivationDistanceOverride;
-
-        return getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt();
+        return getStore().get<ESM::GameSetting>().find("iMaxActivateDist")->getFloat() * 5 / 4;
     }
 
     MWWorld::Ptr World::getFacedObject()
@@ -1387,8 +1371,8 @@ namespace MWWorld
     {
         const int cellSize = 8192;
 
-        x = cellSize * cellX;
-        y = cellSize * cellY;
+        x = static_cast<float>(cellSize * cellX);
+        y = static_cast<float>(cellSize * cellY);
 
         if (centre)
         {
@@ -1401,8 +1385,8 @@ namespace MWWorld
     {
         const int cellSize = 8192;
 
-        cellX = std::floor(x/cellSize);
-        cellY = std::floor(y/cellSize);
+        cellX = static_cast<int>(std::floor(x / cellSize));
+        cellY = static_cast<int>(std::floor(y / cellSize));
     }
 
     void World::queueMovement(const Ptr &ptr, const Vector3 &velocity)
@@ -1621,7 +1605,7 @@ namespace MWWorld
     {
         Ogre::Vector3 playerPos = mPlayer->getPlayer().getRefData().getBaseNode()->getPosition();
         const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(getPlayerPtr().getRefData().getHandle());
-        if(actor) playerPos.z += 1.85*actor->getHalfExtents().z;
+        if(actor) playerPos.z += 1.85f * actor->getHalfExtents().z;
         Ogre::Quaternion playerOrient = Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
                     Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X) *
                     Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[1]), Ogre::Vector3::NEGATIVE_UNIT_Y);
@@ -2013,7 +1997,7 @@ namespace MWWorld
 
     bool World::isSubmerged(const MWWorld::Ptr &object) const
     {
-        return isUnderwater(object, 1.0/mSwimHeightScale);
+        return isUnderwater(object, 1.0f/mSwimHeightScale);
     }
 
     bool World::isSwimming(const MWWorld::Ptr &object) const
@@ -2371,8 +2355,8 @@ namespace MWWorld
         Ogre::Vector3 halfExt2 = actor2->getHalfExtents();
         const float* pos2 = targetActor.getRefData().getPosition().pos;
 
-        btVector3 from(pos1[0],pos1[1],pos1[2]+halfExt1.z*2*0.9); // eye level
-        btVector3 to(pos2[0],pos2[1],pos2[2]+halfExt2.z*2*0.9);
+        btVector3 from(pos1[0],pos1[1],pos1[2]+halfExt1.z*2*0.9f); // eye level
+        btVector3 to(pos2[0],pos2[1],pos2[2]+halfExt2.z*2*0.9f);
 
         std::pair<std::string, float> result = mPhysEngine->rayTest(from, to,false);
         if(result.first == "") return true;
@@ -2591,7 +2575,7 @@ namespace MWWorld
         const Store<ESM::GameSetting> &gmst = getStore().get<ESM::GameSetting>();
         MWMechanics::NpcStats &stats = actor.getClass().getNpcStats(actor);
 
-        stats.getSkill(ESM::Skill::Acrobatics).setBase(gmst.find("fWerewolfAcrobatics")->getFloat());
+        stats.getSkill(ESM::Skill::Acrobatics).setBase(gmst.find("fWerewolfAcrobatics")->getInt());
     }
 
     bool World::getGodModeState()
@@ -3071,8 +3055,8 @@ namespace MWWorld
         float fCrimeGoldDiscountMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->getFloat();
         float fCrimeGoldTurnInMult = getStore().get<ESM::GameSetting>().find("fCrimeGoldTurnInMult")->getFloat();
 
-        int discount = bounty * fCrimeGoldDiscountMult;
-        int turnIn = bounty * fCrimeGoldTurnInMult;
+        int discount = static_cast<int>(bounty * fCrimeGoldDiscountMult);
+        int turnIn = static_cast<int>(bounty * fCrimeGoldTurnInMult);
 
         if (bounty > 0)
         {
@@ -3153,7 +3137,7 @@ namespace MWWorld
         const ESM::CreatureLevList* list = getStore().get<ESM::CreatureLevList>().find(creatureList);
 
         int iNumberCreatures = getStore().get<ESM::GameSetting>().find("iNumberCreatures")->getInt();
-        int numCreatures = 1 + std::rand()/ (static_cast<double> (RAND_MAX) + 1) * iNumberCreatures; // [1, iNumberCreatures]
+        int numCreatures = static_cast<int>(1 + std::rand() / (static_cast<double> (RAND_MAX)+1) * iNumberCreatures); // [1, iNumberCreatures]
 
         for (int i=0; i<numCreatures; ++i)
         {
@@ -3204,7 +3188,7 @@ namespace MWWorld
 
         std::stringstream modelName;
         modelName << "Blood_Model_";
-        int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 3; // [0, 2]
+        int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 3); // [0, 2]
         modelName << roll;
         std::string model = "meshes\\" + getFallback()->getFallbackString(modelName.str());
 
@@ -3235,7 +3219,7 @@ namespace MWWorld
             else
                 areaStatic = getStore().get<ESM::Static>().find ("VFX_DefaultArea");
 
-            mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, effectIt->mArea);
+            mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, static_cast<float>(effectIt->mArea));
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             static const std::string schools[] = {
@@ -3251,7 +3235,7 @@ namespace MWWorld
             // Get the actors in range of the effect
             std::vector<MWWorld::Ptr> objects;
             MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
-                        origin, feetToGameUnits(effectIt->mArea), objects);
+                        origin, feetToGameUnits(static_cast<float>(effectIt->mArea)), objects);
             for (std::vector<MWWorld::Ptr>::iterator affected = objects.begin(); affected != objects.end(); ++affected)
                 toApply[*affected].push_back(*effectIt);
         }

@@ -185,7 +185,7 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
     {
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
                     ptr1.getClass().getEnchantment(ptr1));
-        float maxCharge = enchantment->mData.mCharge;
+        float maxCharge = static_cast<float>(enchantment->mData.mCharge);
         float enchantCharge1 = ptr1.getCellRef().getEnchantmentCharge() == -1 ? maxCharge : ptr1.getCellRef().getEnchantmentCharge();
         float enchantCharge2 = ptr2.getCellRef().getEnchantmentCharge() == -1 ? maxCharge : ptr2.getCellRef().getEnchantmentCharge();
         if (enchantCharge1 != maxCharge || enchantCharge2 != maxCharge)

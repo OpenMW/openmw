@@ -549,7 +549,7 @@ namespace MWGui
             size_t range = book->getSize().second - viewHeight;
             mScrollBar->setScrollRange(range);
             mScrollBar->setScrollPosition(range-1);
-            mScrollBar->setTrackSize(viewHeight / static_cast<float>(book->getSize().second) * mScrollBar->getLineSize());
+            mScrollBar->setTrackSize(static_cast<int>(viewHeight / static_cast<float>(book->getSize().second) * mScrollBar->getLineSize()));
             onScrollbarMoved(mScrollBar, range-1);
         }
         else
@@ -637,14 +637,14 @@ namespace MWGui
         if (dispositionVisible && !dispositionWasVisible)
         {
             mDispositionBar->setVisible(true);
-            float offset = mDispositionBar->getHeight()+5;
+            int offset = mDispositionBar->getHeight()+5;
             mTopicsList->setCoord(mTopicsList->getCoord() + MyGUI::IntCoord(0,offset,0,-offset));
             mTopicsList->adjustSize();
         }
         else if (!dispositionVisible && dispositionWasVisible)
         {
             mDispositionBar->setVisible(false);
-            float offset = mDispositionBar->getHeight()+5;
+            int offset = mDispositionBar->getHeight()+5;
             mTopicsList->setCoord(mTopicsList->getCoord() - MyGUI::IntCoord(0,offset,0,-offset));
             mTopicsList->adjustSize();
         }

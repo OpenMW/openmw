@@ -385,7 +385,7 @@ namespace Physic
         }
 
         btHeightfieldTerrainShape* hfShape = new btHeightfieldTerrainShape(
-            sqrtVerts, sqrtVerts, heights, 1,
+            static_cast<int>(sqrtVerts), static_cast<int>(sqrtVerts), heights, 1,
             minh, maxh, 2,
             PHY_FLOAT,true);
 
@@ -396,7 +396,7 @@ namespace Physic
 
         btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,0,hfShape);
         RigidBody* body = new RigidBody(CI,name);
-        body->getWorldTransform().setOrigin(btVector3( (x+0.5)*triSize*(sqrtVerts-1), (y+0.5)*triSize*(sqrtVerts-1), (maxh+minh)/2.f));
+        body->getWorldTransform().setOrigin(btVector3( (x+0.5f)*triSize*(sqrtVerts-1), (y+0.5f)*triSize*(sqrtVerts-1), (maxh+minh)/2.f));
 
         HeightField hf;
         hf.mBody = body;
@@ -720,7 +720,7 @@ namespace Physic
     void PhysicEngine::stepSimulation(double deltaT)
     {
         // This seems to be needed for character controller objects
-        mDynamicsWorld->stepSimulation(deltaT,10, 1/60.0);
+        mDynamicsWorld->stepSimulation(static_cast<btScalar>(deltaT), 10, 1 / 60.0f);
         if(isDebugCreated)
         {
             mDebugDrawer->step();

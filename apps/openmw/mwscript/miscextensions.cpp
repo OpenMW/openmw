@@ -312,7 +312,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWindowManager()->fadeScreenTo(alpha, time, false);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenTo(static_cast<int>(alpha), time, false);
                 }
         };
 

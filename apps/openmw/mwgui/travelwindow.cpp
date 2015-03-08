@@ -66,13 +66,13 @@ namespace MWGui
 
         if(interior)
         {
-            price = gmst.find("fMagesGuildTravel")->getFloat();
+            price = gmst.find("fMagesGuildTravel")->getInt();
         }
         else
         {
             ESM::Position PlayerPos = player.getRefData().getPosition();
             float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
-            price = d/gmst.find("fTravelMult")->getFloat();
+            price = static_cast<int>(d / gmst.find("fTravelMult")->getFloat());
         }
 
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
@@ -209,10 +209,10 @@ namespace MWGui
 
     void TravelWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
     {
-        if (mDestinationsView->getViewOffset().top + _rel*0.3 > 0)
+        if (mDestinationsView->getViewOffset().top + _rel*0.3f > 0)
             mDestinationsView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mDestinationsView->setViewOffset(MyGUI::IntPoint(0, mDestinationsView->getViewOffset().top + _rel*0.3));
+            mDestinationsView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mDestinationsView->getViewOffset().top + _rel*0.3f)));
     }
 }
 

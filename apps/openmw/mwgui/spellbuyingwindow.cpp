@@ -46,7 +46,7 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore();
 
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-        int price = spell->mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->getFloat();
+        int price = static_cast<int>(spell->mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->getFloat());
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -187,7 +187,7 @@ namespace MWGui
         if (mSpellsView->getViewOffset().top + _rel*0.3 > 0)
             mSpellsView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mSpellsView->setViewOffset(MyGUI::IntPoint(0, mSpellsView->getViewOffset().top + _rel*0.3));
+            mSpellsView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mSpellsView->getViewOffset().top + _rel*0.3f)));
     }
 }
 

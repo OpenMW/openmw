@@ -540,8 +540,8 @@ namespace MWGui
 
         MWScrollBar::MWScrollBar()
             : mEnableRepeat(true)
-            , mRepeatTriggerTime(0.5)
-            , mRepeatStepTime(0.1)
+            , mRepeatTriggerTime(0.5f)
+            , mRepeatStepTime(0.1f)
             , mIsIncreasing(true)
         {
         }

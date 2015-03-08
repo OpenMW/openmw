@@ -251,7 +251,6 @@ namespace MWMechanics
 
         void damage(float damage) { mDamage = std::min(mDamage + damage, (float)(mBase + mFortified)); }
         void restore(float amount) { mDamage -= std::min(mDamage, amount); }
-        int getDamage() const { return mDamage; }
 
         void writeState (ESM::StatState<int>& state) const;
 

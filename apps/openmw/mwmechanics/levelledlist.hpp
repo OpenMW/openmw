@@ -22,7 +22,7 @@ namespace MWMechanics
 
         failChance += levItem->mChanceNone;
 
-        int random = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+        int random = static_cast<int>(static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 100)); // [0, 99]
         if (random < failChance)
             return std::string();
 

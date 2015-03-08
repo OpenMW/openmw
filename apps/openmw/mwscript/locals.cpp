@@ -63,7 +63,7 @@ namespace MWScript
                     return mLongs.at (index);
 
                 case 'f':
-                    return mFloats.at (index);
+                    return static_cast<int>(mFloats.at(index));
                 default:
                     return 0;
             }
@@ -87,7 +87,7 @@ namespace MWScript
                     mLongs.at (index) = val; break;
 
                 case 'f':
-                    mFloats.at (index) = val; break;
+                    mFloats.at(index) = static_cast<float>(val); break;
             }
             return true;
         }

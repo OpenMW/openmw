@@ -7,7 +7,7 @@ namespace MWSound
     {
         if (mLoudnessVector.empty())
             return 0.f;
-        int index = getTimeOffset() * mLoudnessFPS;
+        int index = static_cast<int>(getTimeOffset() * mLoudnessFPS);
 
         index = std::max(0, std::min(index, int(mLoudnessVector.size()-1)));
 

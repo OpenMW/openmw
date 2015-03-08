@@ -191,7 +191,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mExportFonts(false)
   , mNewGame (false)
 {
-    std::srand ( std::time(NULL) );
+    std::srand ( static_cast<unsigned int>(std::time(NULL)) );
     MWClass::registerClasses();
 
     Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE|SDL_INIT_GAMECONTROLLER|SDL_INIT_JOYSTICK;

@@ -326,7 +326,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         mLine = NULL;
     }
     
-    void sectionBreak (float margin)
+    void sectionBreak (int margin)
     {
         add_partial_text();
 
@@ -465,7 +465,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             {
                 MyGUI::GlyphInfo* gi = style->mFont->getGlyphInfo (stream.peek ());
                 if (gi)
-                    space_width += gi->advance + gi->bearingX;
+                    space_width += static_cast<int>(gi->advance + gi->bearingX);
                 stream.consume ();
             }
 
@@ -475,7 +475,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             {
                 MyGUI::GlyphInfo* gi = style->mFont->getGlyphInfo (stream.peek ());
                 if (gi)
-                    word_width += gi->advance + gi->bearingX;
+                    word_width += static_cast<int>(gi->advance + gi->bearingX);
                 stream.consume ();
             }
 
@@ -623,15 +623,15 @@ namespace
 
         RenderXform (MyGUI::ICroppedRectangle* croppedParent, MyGUI::RenderTargetInfo const & renderTargetInfo)
         {
-            clipTop    = croppedParent->_getMarginTop ();
-            clipLeft   = croppedParent->_getMarginLeft ();
-            clipRight  = croppedParent->getWidth () - croppedParent->_getMarginRight ();
-            clipBottom = croppedParent->getHeight () - croppedParent->_getMarginBottom ();
+            clipTop    = static_cast<float>(croppedParent->_getMarginTop());
+            clipLeft   = static_cast<int>(croppedParent->_getMarginLeft ());
+            clipRight  = static_cast<int>(croppedParent->getWidth () - croppedParent->_getMarginRight ());
+            clipBottom = static_cast<int>(croppedParent->getHeight() - croppedParent->_getMarginBottom());
 
-            absoluteLeft = croppedParent->getAbsoluteLeft();
-            absoluteTop  = croppedParent->getAbsoluteTop();
-            leftOffset   = renderTargetInfo.leftOffset;
-            topOffset    = renderTargetInfo.topOffset;
+            absoluteLeft = static_cast<int>(croppedParent->getAbsoluteLeft());
+            absoluteTop  = static_cast<int>(croppedParent->getAbsoluteTop());
+            leftOffset   = static_cast<int>(renderTargetInfo.leftOffset);
+            topOffset    = static_cast<int>(renderTargetInfo.topOffset);
 
             pixScaleX   = renderTargetInfo.pixScaleX;
             pixScaleY   = renderTargetInfo.pixScaleY;
@@ -1136,7 +1136,7 @@ public:
 
             MyGUI::Colour colour = isActive ? (this_->mItemActive ? run.mStyle->mActiveColour: run.mStyle->mHotColour) : run.mStyle->mNormalColour;
 
-            glyphStream.reset (section.mRect.left + line.mRect.left + run.mLeft, line.mRect.top, colour);
+            glyphStream.reset(static_cast<float>(section.mRect.left + line.mRect.left + run.mLeft), static_cast<float>(line.mRect.top), colour);
 
             Utf8Stream stream (run.mRange);
 
@@ -1164,7 +1164,7 @@ public:
 
         RenderXform renderXform (mCroppedParent, textFormat.mRenderItem->getRenderTarget()->getInfo());
 
-        GlyphStream glyphStream (textFormat.mFont, mCoord.left, mCoord.top-mViewTop,
+        GlyphStream glyphStream(textFormat.mFont, static_cast<float>(mCoord.left), static_cast<float>(mCoord.top - mViewTop),
                                   -1 /*mNode->getNodeDepth()*/, vertices, renderXform);
 
         int visit_top    = (std::max) (mViewTop,    mViewTop + int (renderXform.clipTop   ));

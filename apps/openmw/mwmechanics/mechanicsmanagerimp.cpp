@@ -556,7 +556,7 @@ namespace MWMechanics
     int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr)
     {
         const MWMechanics::NpcStats& npcSkill = ptr.getClass().getNpcStats(ptr);
-        float x = npcSkill.getBaseDisposition();
+        float x = static_cast<float>(npcSkill.getBaseDisposition());
 
         MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
         MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -583,7 +583,7 @@ namespace MWMechanics
             if (!playerStats.getExpelled(npcFaction))
             {
                 // faction reaction towards itself. yes, that exists
-                reaction = MWBase::Environment::get().getDialogueManager()->getFactionReaction(npcFaction, npcFaction);
+                reaction = static_cast<float>(MWBase::Environment::get().getDialogueManager()->getFactionReaction(npcFaction, npcFaction));
 
                 rank = playerStats.getFactionRanks().find(npcFaction)->second;
             }
@@ -597,7 +597,7 @@ namespace MWMechanics
 
                 int itReaction = MWBase::Environment::get().getDialogueManager()->getFactionReaction(npcFaction, itFaction);
                 if (playerFactionIt == playerStats.getFactionRanks().begin() || itReaction < reaction)
-                    reaction = itReaction;
+                    reaction = static_cast<float>(itReaction);
             }
         }
         else
@@ -643,17 +643,17 @@ namespace MWMechanics
         // otherwise one would get different prices when exiting and re-entering the dialogue window...
         int clampedDisposition = std::max(0, std::min(getDerivedDisposition(ptr)
             + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange(),100));
-        float a = std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
+        float a = static_cast<float>(std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100));
         float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-        float d = std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100);
+        float d = static_cast<float>(std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100));
         float e = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
 
         float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
         float npcTerm = (d + e + f) * sellerStats.getFatigueTerm();
-        float buyTerm = 0.01 * (100 - 0.5 * (pcTerm - npcTerm));
-        float sellTerm = 0.01 * (50 - 0.5 * (npcTerm - pcTerm));
+        float buyTerm = 0.01f * (100 - 0.5f * (pcTerm - npcTerm));
+        float sellTerm = 0.01f * (50 - 0.5f * (npcTerm - pcTerm));
 
         float x;
         if(buying) x = buyTerm;
@@ -704,7 +704,7 @@ namespace MWMechanics
 
         int currentDisposition = std::min(100, std::max(0, int(getDerivedDisposition(npc) + currentTemporaryDispositionDelta)));
 
-        float d = 1 - 0.02 * abs(currentDisposition - 50);
+        float d = 1 - 0.02f * abs(currentDisposition - 50);
         float target1 = d * (playerRating1 - npcRating1 + 50);
         float target2 = d * (playerRating2 - npcRating2 + 50);
 
@@ -715,8 +715,8 @@ namespace MWMechanics
 
         float target3 = d * (playerRating3 - npcRating3 + 50) + bribeMod;
 
-        float iPerMinChance = gmst.find("iPerMinChance")->getInt();
-        float iPerMinChange = gmst.find("iPerMinChange")->getInt();
+        float iPerMinChance = floor(gmst.find("iPerMinChance")->getFloat());
+        float iPerMinChange = floor(gmst.find("iPerMinChange")->getFloat());
         float fPerDieRollMult = gmst.find("fPerDieRollMult")->getFloat();
         float fPerTempMult = gmst.find("fPerTempMult")->getFloat();
 
@@ -729,7 +729,7 @@ namespace MWMechanics
         {
             target1 = std::max(iPerMinChance, target1);
             success = (roll <= target1);
-            float c = int(fPerDieRollMult * (target1 - roll));
+            float c = floor(fPerDieRollMult * (target1 - roll));
             x = success ? std::max(iPerMinChange, c) : c;
         }
         else if (type == PT_Intimidate)
@@ -740,13 +740,13 @@ namespace MWMechanics
 
             float r;
             if (roll != target2)
-                r = int(target2 - roll);
+                r = floor(target2 - roll);
             else
                 r = 1;
 
             if (roll <= target2)
             {
-                float s = int(r * fPerDieRollMult * fPerTempMult);
+                float s = floor(r * fPerDieRollMult * fPerTempMult);
 
                 int flee = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Flee).getBase();
                 int fight = npcStats.getAiSetting(MWMechanics::CreatureStats::AI_Fight).getBase();
@@ -756,7 +756,7 @@ namespace MWMechanics
                                        std::max(0, std::min(100, fight + int(std::min(-iPerMinChange, -s)))));
             }
 
-            float c = -std::abs(int(r * fPerDieRollMult));
+            float c = -std::abs(floor(r * fPerDieRollMult));
             if (success)
             {
                 if (std::abs(c) < iPerMinChange)
@@ -766,13 +766,13 @@ namespace MWMechanics
                 }
                 else
                 {
-                    x = -int(c * fPerTempMult);
+                    x = -floor(c * fPerTempMult);
                     y = c;
                 }
             }
             else
             {
-                x = int(c * fPerTempMult);
+                x = floor(c * fPerTempMult);
                 y = c;
             }
         }
@@ -781,7 +781,7 @@ namespace MWMechanics
             target1 = std::max(iPerMinChance, target1);
             success = (roll <= target1);
 
-            float c = std::abs(int(target1 - roll));
+            float c = std::abs(floor(target1 - roll));
 
             if (success)
             {
@@ -793,7 +793,7 @@ namespace MWMechanics
                 npcStats.setAiSetting (CreatureStats::AI_Fight,
                                        std::max(0, std::min(100, fight + std::max(int(iPerMinChange), int(s)))));
             }
-            x = int(-c * fPerDieRollMult);
+            x = floor(-c * fPerDieRollMult);
 
             if (success && std::abs(x) < iPerMinChange)
                 x = -iPerMinChange;
@@ -802,7 +802,7 @@ namespace MWMechanics
         {
             target3 = std::max(iPerMinChance, target3);
             success = (roll <= target3);
-            float c = int((target3 - roll) * fPerDieRollMult);
+            float c = floor((target3 - roll) * fPerDieRollMult);
 
             x = success ? std::max(iPerMinChange, c) : c;
         }
@@ -812,11 +812,11 @@ namespace MWMechanics
 
         float cappedDispositionChange = tempChange;
         if (currentDisposition + tempChange > 100.f)
-            cappedDispositionChange = 100 - currentDisposition;
+            cappedDispositionChange = static_cast<float>(100 - currentDisposition);
         if (currentDisposition + tempChange < 0.f)
-            cappedDispositionChange = -currentDisposition;
+            cappedDispositionChange = static_cast<float>(-currentDisposition);
 
-        permChange = int(cappedDispositionChange / fPerTempMult);
+        permChange = floor(cappedDispositionChange / fPerTempMult);
         if (type == PT_Intimidate)
         {
             permChange = success ? -int(cappedDispositionChange/ fPerTempMult) : y;
@@ -1104,7 +1104,7 @@ namespace MWMechanics
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
         {
             arg = store.find("iCrimeTresspass")->getInt();
-            disp = dispVictim = store.find("iDispTresspass")->getInt();
+            disp = dispVictim = store.find("iDispTresspass")->getFloat();
         }
         else if (type == OT_Pickpocket)
         {
@@ -1114,18 +1114,18 @@ namespace MWMechanics
         else if (type == OT_Assault)
         {
             arg = store.find("iCrimeAttack")->getInt();
-            disp = store.find("iDispAttackMod")->getInt();
+            disp = store.find("iDispAttackMod")->getFloat();
             dispVictim = store.find("fDispAttacking")->getFloat();
         }
         else if (type == OT_Murder)
         {
             arg = store.find("iCrimeKilling")->getInt();
-            disp = dispVictim = store.find("iDispKilling")->getInt();
+            disp = dispVictim = store.find("iDispKilling")->getFloat();
         }
         else if (type == OT_Theft)
         {
             disp = dispVictim = store.find("fDispStealing")->getFloat() * arg;
-            arg *= store.find("fCrimeStealing")->getFloat();
+            arg = static_cast<int>(arg * store.find("fCrimeStealing")->getFloat());
             arg = std::max(1, arg); // Minimum bounty of 1, in case items with zero value are stolen
         }
 
@@ -1163,7 +1163,7 @@ namespace MWMechanics
         else if (type == OT_Murder)
             fight = fightVictim = esmStore.get<ESM::GameSetting>().find("iFightKilling")->getInt();
         else if (type == OT_Theft)
-            fight = fightVictim = esmStore.get<ESM::GameSetting>().find("fFightStealing")->getFloat();
+            fight = fightVictim = esmStore.get<ESM::GameSetting>().find("fFightStealing")->getInt();
 
         bool reported = false;
 
@@ -1197,21 +1197,21 @@ namespace MWMechanics
             {
                 float dispTerm = (*it == victim) ? dispVictim : disp;
 
-                float alarmTerm = 0.01 * it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase();
+                float alarmTerm = 0.01f * it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Alarm).getBase();
                 if (type == OT_Pickpocket && alarmTerm <= 0)
                     alarmTerm = 1.0;
 
                 if (*it != victim)
                     dispTerm *= alarmTerm;
 
-                float fightTerm = (*it == victim) ? fightVictim : fight;
+                float fightTerm = static_cast<float>((*it == victim) ? fightVictim : fight);
                 fightTerm += getFightDispositionBias(dispTerm);
                 fightTerm += getFightDistanceBias(*it, player);
                 fightTerm *= alarmTerm;
 
                 int observerFightRating = it->getClass().getCreatureStats(*it).getAiSetting(CreatureStats::AI_Fight).getBase();
                 if (observerFightRating + fightTerm > 100)
-                    fightTerm = 100 - observerFightRating;
+                    fightTerm = static_cast<float>(100 - observerFightRating);
                 fightTerm = std::max(0.f, fightTerm);
 
                 if (observerFightRating + fightTerm >= 100)
@@ -1221,9 +1221,9 @@ namespace MWMechanics
                     NpcStats& observerStats = it->getClass().getNpcStats(*it);
                     // Apply aggression value to the base Fight rating, so that the actor can continue fighting
                     // after a Calm spell wears off
-                    observerStats.setAiSetting(CreatureStats::AI_Fight, observerFightRating + fightTerm);
+                    observerStats.setAiSetting(CreatureStats::AI_Fight, observerFightRating + static_cast<int>(fightTerm));
 
-                    observerStats.setBaseDisposition(observerStats.getBaseDisposition()+dispTerm);
+                    observerStats.setBaseDisposition(observerStats.getBaseDisposition() + static_cast<int>(dispTerm));
 
                     // Set the crime ID, which we will use to calm down participants
                     // once the bounty has been paid.
@@ -1334,7 +1334,7 @@ namespace MWMechanics
         {
             static float fSneakSkillMult = store.find("fSneakSkillMult")->getFloat();
             static float fSneakBootMult = store.find("fSneakBootMult")->getFloat();
-            float sneak = ptr.getClass().getSkill(ptr, ESM::Skill::Sneak);
+            float sneak = static_cast<float>(ptr.getClass().getSkill(ptr, ESM::Skill::Sneak));
             int agility = stats.getAttribute(ESM::Attribute::Agility).getModified();
             int luck = stats.getAttribute(ESM::Attribute::Luck).getModified();
             float bootWeight = 0;
@@ -1345,7 +1345,7 @@ namespace MWMechanics
                 if (it != inv.end())
                     bootWeight = it->getClass().getWeight(*it);
             }
-            sneakTerm = fSneakSkillMult * sneak + 0.2 * agility + 0.1 * luck + bootWeight * fSneakBootMult;
+            sneakTerm = fSneakSkillMult * sneak + 0.2f * agility + 0.1f * luck + bootWeight * fSneakBootMult;
         }
 
         static float fSneakDistBase = store.find("fSneakDistanceBase")->getFloat();
@@ -1364,7 +1364,7 @@ namespace MWMechanics
         float obsBlind = observerStats.getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude();
         int obsSneak = observer.getClass().getSkill(observer, ESM::Skill::Sneak);
 
-        float obsTerm = obsSneak + 0.2 * obsAgility + 0.1 * obsLuck - obsBlind;
+        float obsTerm = obsSneak + 0.2f * obsAgility + 0.1f * obsLuck - obsBlind;
 
         // is ptr behind the observer?
         static float fSneakNoViewMult = store.find("fSneakNoViewMult")->getFloat();
@@ -1378,7 +1378,7 @@ namespace MWMechanics
             y = obsTerm * observerStats.getFatigueTerm() * fSneakViewMult;
 
         float target = x - y;
-        int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+        int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 100); // [0, 99]
 
         return (roll >= target);
     }
@@ -1479,9 +1479,8 @@ namespace MWMechanics
         if (ptr.getClass().isNpc())
             disposition = getDerivedDisposition(ptr);
 
-        int fight = std::max(0.f, ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified()
-                + getFightDistanceBias(ptr, target)
-                + getFightDispositionBias(disposition));
+        int fight = std::max(0, ptr.getClass().getCreatureStats(ptr).getAiSetting(CreatureStats::AI_Fight).getModified()
+                + static_cast<int>(getFightDistanceBias(ptr, target) + getFightDispositionBias(disposition)));
 
         if (ptr.getClass().isNpc() && target.getClass().isNpc())
         {

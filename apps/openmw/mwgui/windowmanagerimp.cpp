@@ -1103,10 +1103,10 @@ namespace MWGui
 
         for (std::map<MyGUI::Window*, std::string>::iterator it = mTrackedWindows.begin(); it != mTrackedWindows.end(); ++it)
         {
-            MyGUI::IntPoint pos (Settings::Manager::getFloat(it->second + " x", "Windows") * x,
-                                 Settings::Manager::getFloat(it->second+ " y", "Windows") * y);
-            MyGUI::IntSize size (Settings::Manager::getFloat(it->second + " w", "Windows") * x,
-                                 Settings::Manager::getFloat(it->second + " h", "Windows") * y);
+            MyGUI::IntPoint pos(static_cast<int>(Settings::Manager::getFloat(it->second + " x", "Windows") * x),
+                                static_cast<int>( Settings::Manager::getFloat(it->second+ " y", "Windows") * y));
+            MyGUI::IntSize size(static_cast<int>(Settings::Manager::getFloat(it->second + " w", "Windows") * x),
+                                 static_cast<int>(Settings::Manager::getFloat(it->second + " h", "Windows") * y));
             it->first->setPosition(pos);
             it->first->setSize(size);
         }
@@ -1221,7 +1221,7 @@ namespace MWGui
                 .find(item.getClass().getEnchantment(item));
 
         int chargePercent = (item.getCellRef().getEnchantmentCharge() == -1) ? 100
-                : (item.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
+                : static_cast<int>(item.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
         mHud->setSelectedEnchantItem(item, chargePercent);
         mSpellWindow->setTitle(item.getClass().getName(item));
     }
@@ -1229,7 +1229,7 @@ namespace MWGui
     void WindowManager::setSelectedWeapon(const MWWorld::Ptr& item)
     {
         int durabilityPercent =
-             (item.getClass().getItemHealth(item) / static_cast<float>(item.getClass().getItemMaxHealth(item)) * 100);
+             static_cast<int>(item.getClass().getItemHealth(item) / static_cast<float>(item.getClass().getItemMaxHealth(item)) * 100);
         mHud->setSelectedWeapon(item, durabilityPercent);
         mInventoryWindow->setTitle(item.getClass().getName(item));
     }
@@ -1262,8 +1262,8 @@ namespace MWGui
     void WindowManager::getMousePosition(float &x, float &y)
     {
         const MyGUI::IntPoint& pos = MyGUI::InputManager::getInstance().getMousePosition();
-        x = pos.left;
-        y = pos.top;
+        x = static_cast<float>(pos.left);
+        y = static_cast<float>(pos.top);
         const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
         x /= viewSize.width;
         y /= viewSize.height;
@@ -1569,10 +1569,10 @@ namespace MWGui
     void WindowManager::trackWindow(OEngine::GUI::Layout *layout, const std::string &name)
     {
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        MyGUI::IntPoint pos (Settings::Manager::getFloat(name + " x", "Windows") * viewSize.width,
-                             Settings::Manager::getFloat(name + " y", "Windows") * viewSize.height);
-        MyGUI::IntSize size (Settings::Manager::getFloat(name + " w", "Windows") * viewSize.width,
-                             Settings::Manager::getFloat(name + " h", "Windows") * viewSize.height);
+        MyGUI::IntPoint pos(static_cast<int>(Settings::Manager::getFloat(name + " x", "Windows") * viewSize.width),
+                            static_cast<int>(Settings::Manager::getFloat(name + " y", "Windows") * viewSize.height));
+        MyGUI::IntSize size (static_cast<int>(Settings::Manager::getFloat(name + " w", "Windows") * viewSize.width),
+                             static_cast<int>(Settings::Manager::getFloat(name + " h", "Windows") * viewSize.height));
         layout->mMainWidget->setPosition(pos);
         layout->mMainWidget->setSize(size);
 

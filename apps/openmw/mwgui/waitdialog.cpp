@@ -49,7 +49,7 @@ namespace MWGui
     WaitDialog::WaitDialog()
         : WindowBase("openmw_wait_dialog.layout")
         , mProgressBar()
-        , mTimeAdvancer(0.05)
+        , mTimeAdvancer(0.05f)
         , mSleeping(false)
         , mHours(1)
         , mManualHours(1)
@@ -104,7 +104,7 @@ namespace MWGui
         mHourSlider->setScrollPosition (0);
 
         std::string month = MWBase::Environment::get().getWorld ()->getMonthName();
-        int hour = MWBase::Environment::get().getWorld ()->getTimeStamp ().getHour ();
+        int hour = static_cast<int>(MWBase::Environment::get().getWorld()->getTimeStamp().getHour());
         bool pm = hour >= 12;
         if (hour >= 13) hour -= 12;
         if (hour == 0) hour = 12;
@@ -135,8 +135,8 @@ namespace MWGui
             MWBase::Environment::get().getStateManager()->quickSave("Autosave");
 
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.2);
-        mFadeTimeRemaining = 0.4;
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.2f);
+        mFadeTimeRemaining = 0.4f;
         setVisible(false);
 
         mHours = hoursToWait;
@@ -153,7 +153,7 @@ namespace MWGui
                 if (!region->mSleepList.empty())
                 {
                     float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->getFloat();
-                    int x = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * hoursToWait; // [0, hoursRested]
+                    int x = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * hoursToWait); // [0, hoursRested]
                     float y = fSleepRandMod * hoursToWait;
                     if (x > y)
                     {
@@ -251,7 +251,7 @@ namespace MWGui
 
     void WaitDialog::stopWaiting ()
     {
-        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.2);
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.2f);
         mProgressBar.setVisible (false);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Rest);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_RestBed);

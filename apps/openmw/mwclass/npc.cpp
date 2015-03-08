@@ -66,12 +66,12 @@ namespace
         double i = floor(d);
         d -= i;
         if(d < 0.5)
-            return i;
+            return static_cast<int>(i);
         if(d > 0.5)
-            return i + 1.0;
+            return static_cast<int>(i) + 1;
         if(is_even(i))
-            return i;
-        return i + 1.0;
+            return static_cast<int>(i);
+        return static_cast<int>(i) + 1;
     }
 
     void autoCalculateAttributes (const ESM::NPC* npc, MWMechanics::CreatureStats& creatureStats)
@@ -116,7 +116,7 @@ namespace
                     continue;
 
                 // is this a minor or major skill?
-                float add=0.2;
+                float add=0.2f;
                 for (int k=0; k<5; ++k)
                 {
                     if (class_->mData.mSkills[k][0] == j)
@@ -149,7 +149,7 @@ namespace
             || class_->mData.mAttribute[1] == ESM::Attribute::Endurance)
             multiplier += 1;
 
-        creatureStats.setHealth(static_cast<int> (0.5 * (strength + endurance)) + multiplier * (creatureStats.getLevel() - 1));
+        creatureStats.setHealth(floor(0.5f * (strength + endurance)) + multiplier * (creatureStats.getLevel() - 1));
     }
 
     /**
@@ -539,7 +539,7 @@ namespace MWClass
             {
                 damage  = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
                 damage *= gmst.fDamageStrengthBase->getFloat() +
-                        (stats.getAttribute(ESM::Attribute::Strength).getModified() * gmst.fDamageStrengthMult->getFloat() * 0.1);
+                        (stats.getAttribute(ESM::Attribute::Strength).getModified() * gmst.fDamageStrengthMult->getFloat() * 0.1f);
             }
             MWMechanics::adjustWeaponDamage(damage, weapon);
             MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
@@ -648,7 +648,7 @@ namespace MWClass
             const GMST& gmst = getGmst();
 
             int chance = store.get<ESM::GameSetting>().find("iVoiceHitOdds")->getInt();
-            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 100); // [0, 99]
             if (roll < chance)
             {
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
@@ -657,8 +657,8 @@ namespace MWClass
             // Check for knockdown
             float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * gmst.fKnockDownMult->getFloat();
             float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
-                    * gmst.iKnockDownOddsMult->getInt() * 0.01 + gmst.iKnockDownOddsBase->getInt();
-            roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                    * gmst.iKnockDownOddsMult->getInt() * 0.01f + gmst.iKnockDownOddsBase->getInt();
+            roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 100); // [0, 99]
             if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
             {
                 getCreatureStats(ptr).setKnockedDown(true);
@@ -690,7 +690,7 @@ namespace MWClass
                 float unmitigatedDamage = damage;
                 float x = damage / (damage + getArmorRating(ptr));
                 damage *= std::max(gmst.fCombatArmorMinMult->getFloat(), x);
-                int damageDiff = unmitigatedDamage - damage;
+                int damageDiff = static_cast<int>(unmitigatedDamage - damage);
                 if (damage < 1)
                     damage = 1;
 
@@ -938,7 +938,7 @@ namespace MWClass
                                           gmst.fJumpEncumbranceMultiplier->getFloat() *
                                           (1.0f - Npc::getEncumbrance(ptr)/Npc::getCapacity(ptr));
 
-        float a = npcdata->mNpcStats.getSkill(ESM::Skill::Acrobatics).getModified();
+        float a = static_cast<float>(npcdata->mNpcStats.getSkill(ESM::Skill::Acrobatics).getModified());
         float b = 0.0f;
         if(a > 50.0f)
         {
@@ -1097,7 +1097,7 @@ namespace MWClass
             if (it == invStore.end() || it->getTypeName() != typeid(ESM::Armor).name())
             {
                 // unarmored
-                ratings[i] = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
+                ratings[i] = static_cast<int>((fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill));
             }
             else
             {

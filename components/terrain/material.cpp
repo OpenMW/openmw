@@ -36,7 +36,7 @@ namespace
 
 int getBlendmapIndexForLayer (int layerIndex)
 {
-    return std::floor((layerIndex-1)/4.f);
+    return static_cast<int>(std::floor((layerIndex - 1) / 4.f));
 }
 
 std::string getBlendmapComponentForLayer (int layerIndex)

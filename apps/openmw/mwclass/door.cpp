@@ -167,19 +167,19 @@ namespace MWClass
                 if (opening)
                 {
                     MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr,
-                            closeSound, 0.5);
-                    float offset = ptr.getRefData().getLocalRotation().rot[2]/ 3.14159265 * 2.0;
+                            closeSound, 0.5f);
+                    float offset = ptr.getRefData().getLocalRotation().rot[2]/ 3.14159265f * 2.0f;
                     action->setSoundOffset(offset);
                     action->setSound(openSound);
                 }
                 else
                 {
                     MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr,
-                                                openSound, 0.5);
-                    float offset = 1.0 - ptr.getRefData().getLocalRotation().rot[2]/ 3.14159265 * 2.0;
+                                                openSound, 0.5f);
+                    float offset = 1.0 - ptr.getRefData().getLocalRotation().rot[2]/ 3.14159265f * 2.0f;
                     //most if not all door have closing bang somewhere in the middle of the sound,
                     //so we divide offset by two
-                    action->setSoundOffset(offset * 0.5);
+                    action->setSoundOffset(offset * 0.5f);
                     action->setSound(closeSound);
                 }
 

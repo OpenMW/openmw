@@ -86,8 +86,8 @@ namespace MWRender
                 {
                     for (int cellX=0; cellX<mCellSize; ++cellX)
                     {
-                        int vertexX = float(cellX)/float(mCellSize) * 9;
-                        int vertexY = float(cellY)/float(mCellSize) * 9;
+                        int vertexX = static_cast<int>(float(cellX)/float(mCellSize) * 9);
+                        int vertexY = static_cast<int>(float(cellY) / float(mCellSize) * 9);
 
 
                         int texelX = (x-mMinX) * mCellSize + cellX;
@@ -102,9 +102,9 @@ namespace MWRender
                             y = (SCHAR_MIN << 4) / 2048.f;
                         if (y < 0)
                         {
-                            r = (14 * y + 38);
-                            g = 20 * y + 56;
-                            b = 18 * y + 51;
+                            r = static_cast<unsigned char>(14 * y + 38);
+                            g = static_cast<unsigned char>(20 * y + 56);
+                            b = static_cast<unsigned char>(18 * y + 51);
                         }
                         else if (y < 0.3f)
                         {
@@ -112,20 +112,20 @@ namespace MWRender
                                 y *= 8.f;
                             else
                             {
-                                y -= 0.1;
-                                y += 0.8;
+                                y -= 0.1f;
+                                y += 0.8f;
                             }
-                            r = 66 - 32 * y;
-                            g = 48 - 23 * y;
-                            b = 33 - 16 * y;
+                            r = static_cast<unsigned char>(66 - 32 * y);
+                            g = static_cast<unsigned char>(48 - 23 * y);
+                            b = static_cast<unsigned char>(33 - 16 * y);
                         }
                         else
                         {
                             y -= 0.3f;
                             y *= 1.428f;
-                            r = 34 - 29 * y;
-                            g = 25 - 20 * y;
-                            b = 17 - 12 * y;
+                            r = static_cast<unsigned char>(34 - 29 * y);
+                            g = static_cast<unsigned char>(25 - 20 * y);
+                            b = static_cast<unsigned char>(17 - 12 * y);
                         }
 
                         data[texelY * mWidth * 3 + texelX * 3] = r;
@@ -172,9 +172,9 @@ namespace MWRender
 
     void GlobalMap::exploreCell(int cellX, int cellY)
     {
-        float originX = (cellX - mMinX) * mCellSize;
+        float originX = static_cast<float>((cellX - mMinX) * mCellSize);
         // NB y + 1, because we want the top left corner, not bottom left where the origin of the cell is
-        float originY = mHeight - (cellY+1 - mMinY) * mCellSize;
+        float originY = static_cast<float>(mHeight - (cellY + 1 - mMinY) * mCellSize);
 
         if (cellX > mMaxX || cellX < mMinX || cellY > mMaxY || cellY < mMinY)
             return;
@@ -188,7 +188,8 @@ namespace MWRender
             int mapHeight = localMapTexture->getHeight();
             mOverlayTexture->load();
             mOverlayTexture->getBuffer()->blit(localMapTexture->getBuffer(), Ogre::Image::Box(0,0,mapWidth,mapHeight),
-                         Ogre::Image::Box(originX,originY,originX+mCellSize,originY+mCellSize));
+                         Ogre::Image::Box(static_cast<Ogre::uint32>(originX), static_cast<Ogre::uint32>(originY),
+                         static_cast<Ogre::uint32>(originX + mCellSize), static_cast<Ogre::uint32>(originY + mCellSize)));
 
             Ogre::Image backup;
             std::vector<Ogre::uchar> data;
@@ -204,7 +205,7 @@ namespace MWRender
                     assert (originY+y < mOverlayImage.getHeight());
                     assert (x < int(backup.getWidth()));
                     assert (y < int(backup.getHeight()));
-                    mOverlayImage.setColourAt(backup.getColourAt(x, y, 0), originX+x, originY+y, 0);
+                    mOverlayImage.setColourAt(backup.getColourAt(x, y, 0), static_cast<size_t>(originX + x), static_cast<size_t>(originY + y), 0);
                 }
         }
     }
