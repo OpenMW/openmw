@@ -196,20 +196,10 @@
                         <Property key="Caption" value="#{sMouseFlip}"/>
                     </Widget>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 254 300 24" align="Left Bottom">
-                    <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Bottom" name="ToggleSneak">
-                        <UserString key="SettingCategory" value="Input"/>
-                        <UserString key="SettingName" value="toggle sneak"/>
-                        <UserString key="SettingType" value="CheckButton"/>
-                    </Widget>
-                    <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 78 16" align="Left Bottom">
-                        <Property key="Caption" value="Toggle Sneak"/>
-                    </Widget>
-                </Widget>
-                <Widget type="TextBox" skin="NormalText" position="4 278 336 18" align="Left Bottom">
+                <Widget type="TextBox" skin="NormalText" position="4 254 336 18" align="Left Bottom">
                     <Property key="Caption" value="Camera sensitivity"/>
                 </Widget>
-                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 302 336 18" align="HStretch Bottom" name="CameraSensitivitySlider">
+                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 278 336 18" align="HStretch Bottom" name="CameraSensitivitySlider">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
@@ -219,11 +209,11 @@
                     <UserString key="SettingMin" value="0.2"/>
                     <UserString key="SettingMax" value="5.0"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 326 336 18" align="Left Bottom">
+                <Widget type="TextBox" skin="SandText" position="4 302 336 18" align="Left Bottom">
                     <Property key="Caption" value="#{sLow}"/>
                     <Property key="TextAlign" value="Left"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 326 336 18" align="Right Bottom">
+                <Widget type="TextBox" skin="SandText" position="4 302 336 18" align="Right Bottom">
                     <Property key="Caption" value="#{sHigh}"/>
                     <Property key="TextAlign" value="Right"/>
                 </Widget>
