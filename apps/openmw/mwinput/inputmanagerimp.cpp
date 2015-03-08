@@ -817,7 +817,7 @@ namespace MWInput
 
         setPlayerControlsEnabled(!guiMode);
 
-        //esc, to leave inital movie screen
+        //esc, to leave initial movie screen
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
         bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
         setPlayerControlsEnabled(!guiFocus);
@@ -844,7 +844,7 @@ namespace MWInput
         else
             mInputBinder->buttonReleased(deviceID, arg);
 
-        //to escape inital movie
+        //to escape initial movie
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
         setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
     }
@@ -1237,8 +1237,11 @@ namespace MWInput
             bool controlExists = mInputBinder->getChannel(i)->getControlsCount () != 0;
             if (!controlExists)
             {
-                float inital = (defaultButtonBindings.find(i) != defaultButtonBindings.end()) ? 0.0f : 0.5f;
-                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, inital, ICS::ICS_MAX, ICS::ICS_MAX);
+                float initial;
+                if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
+                    initial = 0.0f;
+                else initial = 0.5f;
+                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, initial, ICS::ICS_MAX, ICS::ICS_MAX);
                 mInputBinder->addControl(control);
                 control->attachChannel(mInputBinder->getChannel(i), ICS::Channel::DIRECT);
             }

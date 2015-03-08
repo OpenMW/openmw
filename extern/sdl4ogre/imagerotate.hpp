@@ -3,9 +3,8 @@
 
 #include <string>
 
-namespace OEngine
-{
-namespace Render
+
+namespace SFO
 {
 
     /// Rotate an image by certain degrees and save as file, uses the GPU
@@ -21,7 +20,6 @@ namespace Render
         static void rotate(const std::string& sourceImage, const std::string& destImage, const float angle);
     };
 
-}
 }
 
 #endif

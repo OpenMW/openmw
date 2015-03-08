@@ -519,8 +519,8 @@ namespace MWMechanics
                              effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).getMagnitude(),
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).getMagnitude());
 
-            stat.damage(effects.get(EffectKey(ESM::MagicEffect::DamageAttribute, i)).getMagnitude() * duration * 1.5f);
-            stat.restore(effects.get(EffectKey(ESM::MagicEffect::RestoreAttribute, i)).getMagnitude() * duration * 1.5f);
+            stat.damage(effects.get(EffectKey(ESM::MagicEffect::DamageAttribute, i)).getMagnitude() * duration);
+            stat.restore(effects.get(EffectKey(ESM::MagicEffect::RestoreAttribute, i)).getMagnitude() * duration);
 
             creatureStats.setAttribute(i, stat);
         }
@@ -786,8 +786,8 @@ namespace MWMechanics
                              effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).getMagnitude(),
                              effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).getMagnitude());
 
-            skill.damage(effects.get(EffectKey(ESM::MagicEffect::DamageSkill, i)).getMagnitude() * duration * 1.5f);
-            skill.restore(effects.get(EffectKey(ESM::MagicEffect::RestoreSkill, i)).getMagnitude() * duration * 1.5f);
+            skill.damage(effects.get(EffectKey(ESM::MagicEffect::DamageSkill, i)).getMagnitude() * duration);
+            skill.restore(effects.get(EffectKey(ESM::MagicEffect::RestoreSkill, i)).getMagnitude() * duration);
         }
     }
 

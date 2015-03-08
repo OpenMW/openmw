@@ -466,12 +466,9 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context
-                        = static_cast<InterpreterContext&> (runtime.getContext());
-
                     bool enabled = MWBase::Environment::get().getMechanicsManager()->toggleAI();
 
-                    context.report (enabled ? "AI -> On" : "AI -> Off");
+                    runtime.getContext().report (enabled ? "AI -> On" : "AI -> Off");
                 }
         };
 
