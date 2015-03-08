@@ -624,14 +624,14 @@ namespace
         RenderXform (MyGUI::ICroppedRectangle* croppedParent, MyGUI::RenderTargetInfo const & renderTargetInfo)
         {
             clipTop    = static_cast<float>(croppedParent->_getMarginTop());
-            clipLeft   = static_cast<int>(croppedParent->_getMarginLeft ());
-            clipRight  = static_cast<int>(croppedParent->getWidth () - croppedParent->_getMarginRight ());
-            clipBottom = static_cast<int>(croppedParent->getHeight() - croppedParent->_getMarginBottom());
+            clipLeft   = static_cast<float>(croppedParent->_getMarginLeft ());
+            clipRight  = static_cast<float>(croppedParent->getWidth () - croppedParent->_getMarginRight ());
+            clipBottom = static_cast<float>(croppedParent->getHeight() - croppedParent->_getMarginBottom());
 
-            absoluteLeft = static_cast<int>(croppedParent->getAbsoluteLeft());
-            absoluteTop  = static_cast<int>(croppedParent->getAbsoluteTop());
-            leftOffset   = static_cast<int>(renderTargetInfo.leftOffset);
-            topOffset    = static_cast<int>(renderTargetInfo.topOffset);
+            absoluteLeft = static_cast<float>(croppedParent->getAbsoluteLeft());
+            absoluteTop  = static_cast<float>(croppedParent->getAbsoluteTop());
+            leftOffset   = static_cast<float>(renderTargetInfo.leftOffset);
+            topOffset    = static_cast<float>(renderTargetInfo.topOffset);
 
             pixScaleX   = renderTargetInfo.pixScaleX;
             pixScaleY   = renderTargetInfo.pixScaleY;

@@ -34,7 +34,7 @@ namespace
 
     int getEffectiveValue (MWWorld::Ptr item, int count)
     {
-        float price = item.getClass().getValue(item);
+        float price = static_cast<float>(item.getClass().getValue(item));
         if (item.getClass().hasItemHealth(item))
         {
             price *= item.getClass().getItemHealth(item);

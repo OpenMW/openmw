@@ -101,7 +101,7 @@ namespace MWGui
     void InventoryWindow::adjustPanes()
     {
         const float aspect = 0.5; // fixed aspect ratio for the avatar image
-        int leftPaneWidth = static_cast<int>(mMainWidget->getSize().height - 44 - mArmorRating->getHeight()) * aspect);
+        int leftPaneWidth = static_cast<int>((mMainWidget->getSize().height - 44 - mArmorRating->getHeight()) * aspect);
         mLeftPane->setSize( leftPaneWidth, mMainWidget->getSize().height-44 );
         mRightPane->setCoord( mLeftPane->getPosition().left + leftPaneWidth + 4,
                               mRightPane->getPosition().top,

@@ -264,7 +264,7 @@ namespace MWGui
 
             // Image space is -Y up, cells are Y up
             widgetPos = MyGUI::IntPoint(static_cast<int>(nX * mMapWidgetSize + (1 + (cellX - mCurX)) * mMapWidgetSize),
-                                        static_cast<float>(nY * mMapWidgetSize + (1-(cellY-mCurY)) * mMapWidgetSize));
+                                        static_cast<int>(nY * mMapWidgetSize + (1-(cellY-mCurY)) * mMapWidgetSize));
         }
 
         markerPos.nX = nX;
@@ -827,18 +827,7 @@ namespace MWGui
         if (MWBase::Environment::get().getWorld ()->isCellExterior ())
         {
             Ogre::Vector3 pos = MWBase::Environment::get().getWorld ()->getPlayerPtr().getRefData ().getBaseNode ()->_getDerivedPosition ();
-
-            float worldX, worldY;
-            mGlobalMapRender->worldPosToImageSpace (pos.x, pos.y, worldX, worldY);
-            worldX *= mGlobalMapRender->getWidth();
-            worldY *= mGlobalMapRender->getHeight();
-
-            mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(static_cast<int>(worldX - 16), static_cast<int>(worldY - 16)));
-
-            // set the view offset so that player is in the center
-            MyGUI::IntSize viewsize = mGlobalMap->getSize();
-            MyGUI::IntPoint viewoffs((viewsize.width / 2) - worldX, (viewsize.height / 2) - worldY);
-            mGlobalMap->setViewOffset(viewoffs);
+            setGlobalMapPlayerPosition(pos.x, pos.y);
         }
     }
 
@@ -858,7 +847,7 @@ namespace MWGui
 
         // set the view offset so that player is in the center
         MyGUI::IntSize viewsize = mGlobalMap->getSize();
-        MyGUI::IntPoint viewoffs((viewsize.width / 2) - x, (viewsize.height / 2) - y);
+        MyGUI::IntPoint viewoffs(static_cast<int>(viewsize.width * 0.5f - x), static_cast<int>(viewsize.height *0.5 - y));
         mGlobalMap->setViewOffset(viewoffs);
     }
 

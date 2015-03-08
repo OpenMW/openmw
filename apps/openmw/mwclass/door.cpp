@@ -176,7 +176,7 @@ namespace MWClass
                 {
                     MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr,
                                                 openSound, 0.5f);
-                    float offset = 1.0 - ptr.getRefData().getLocalRotation().rot[2]/ 3.14159265f * 2.0f;
+                    float offset = 1.0f - ptr.getRefData().getLocalRotation().rot[2]/ 3.14159265f * 2.0f;
                     //most if not all door have closing bang somewhere in the middle of the sound,
                     //so we divide offset by two
                     action->setSoundOffset(offset * 0.5f);

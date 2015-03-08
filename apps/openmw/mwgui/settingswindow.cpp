@@ -148,7 +148,7 @@ namespace MWGui
                     value = std::max(min, std::min(value, max));
                     value = (value-min)/(max-min);
 
-                    scroll->setScrollPosition( value * (scroll->getScrollRange()-1));
+                    scroll->setScrollPosition(static_cast<size_t>(value * (scroll->getScrollRange() - 1)));
                 }
                 else
                 {

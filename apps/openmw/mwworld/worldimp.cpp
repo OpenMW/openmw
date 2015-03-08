@@ -1350,7 +1350,7 @@ namespace MWWorld
         pos.pos[2] += dist;
         actor.getRefData().setPosition(pos);
 
-        Ogre::Vector3 traced = mPhysics->traceDown(actor, dist*1.1);
+        Ogre::Vector3 traced = mPhysics->traceDown(actor, dist*1.1f);
         moveObject(actor, actor.getCell(), traced.x, traced.y, traced.z);
     }
 
