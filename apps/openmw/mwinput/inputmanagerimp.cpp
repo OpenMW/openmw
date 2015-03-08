@@ -356,6 +356,12 @@ namespace MWInput
             case A_CycleWeaponRight:
                 MWBase::Environment::get().getWindowManager()->cycleWeapon(true);
                 break;
+            case A_Sneak:
+                if (mSneakToggles)
+                {
+                    toggleSneaking();
+                }
+                break;
             }
         }
     }
@@ -524,16 +530,10 @@ namespace MWInput
                     }
                 }
 
-                if (mSneakToggles)
+                if (!mSneakToggles)
                 {
-                    if (actionIsActive(A_Sneak))
-                    {
-                        toggleSneaking();
-                        mPlayer->setSneak(mSneaking);
-                    }
-                }
-                else 
                     mPlayer->setSneak(actionIsActive(A_Sneak));
+                }
 
                 if (mAttemptJump && mControlSwitch["playerjumping"])
                 {
@@ -1104,6 +1104,7 @@ namespace MWInput
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
         mSneaking = !mSneaking;
+        mPlayer->setSneak(mSneaking);
     }
 
     void InputManager::resetIdleTime()
