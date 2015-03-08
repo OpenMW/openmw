@@ -61,7 +61,9 @@ namespace CSMWorld
     template <typename ESXRecordT>
     RecordBase *Record<ESXRecordT>::clone() const
     {
-        return new Record<ESXRecordT> (*this);
+        Record<ESXRecordT> *copy = new Record<ESXRecordT> (*this);
+        copy->mModified = (*this).get();
+        return copy;
     }
 
     template <typename ESXRecordT>
