@@ -124,6 +124,8 @@ namespace MWInput
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
+        , mSneakToggles(Settings::Manager::getBool("toggle sneak", "Input"))
+        , mSneaking(false)
         , mAttemptJump(false)
         , mControlsDisabled(false)
         , mJoystickLastUsed(false)
@@ -522,7 +524,16 @@ namespace MWInput
                     }
                 }
 
-                mPlayer->setSneak(actionIsActive(A_Sneak));
+                if (mSneakToggles)
+                {
+                    if (actionIsActive(A_Sneak))
+                    {
+                        toggleSneaking();
+                        mPlayer->setSneak(mSneaking);
+                    }
+                }
+                else 
+                    mPlayer->setSneak(actionIsActive(A_Sneak));
 
                 if (mAttemptJump && mControlSwitch["playerjumping"])
                 {
@@ -1087,6 +1098,12 @@ namespace MWInput
         mAlwaysRunActive = !mAlwaysRunActive;
 
         Settings::Manager::setBool("always run", "Input", mAlwaysRunActive);
+    }
+
+    void InputManager::toggleSneaking()
+    {
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
+        mSneaking = !mSneaking;
     }
 
     void InputManager::resetIdleTime()
