@@ -349,22 +349,22 @@ if (NOT WIN32 AND NOT APPLE)
         "${OpenMW_BINARY_DIR}/openmw-cs.desktop")
 endif()
 
-# Compiler settings
-if (CMAKE_COMPILER_IS_GNUCC)
-    set_property(GLOBAL APPEND_STRING PROPERTY COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++98 -pedantic -Wno-long-long")
+# CXX Compiler settings
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++98 -pedantic -Wno-long-long")
 
     execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
                 OUTPUT_VARIABLE GCC_VERSION)
-    if ("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
-        set_property(GLOBAL APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-unused-but-set-parameter")
-    endif("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL GNU AND "${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-parameter")
+    endif(CMAKE_CXX_COMPILER_ID STREQUAL GNU AND "${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
 elseif (MSVC)
     # Enable link-time code generation globally for all linking
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
     set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
     set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
-endif (CMAKE_COMPILER_IS_GNUCC)
+endif (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
 
 IF(NOT WIN32 AND NOT APPLE)
     # Linux building
@@ -673,7 +673,7 @@ if (WIN32)
         set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
 
-    set_property(GLOBAL APPEND_STRING PROPERTY COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNINGS} ${MT_BUILD}")
 
     # boost::wave has a few issues with signed / unsigned conversions, so we suppress those here
     set(SHINY_WARNINGS "${WARNINGS} /wd4245")
