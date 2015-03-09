@@ -18,6 +18,15 @@ struct KeyT {
     float mTension;    // Only for TBC interpolation
     float mBias;       // Only for TBC interpolation
     float mContinuity; // Only for TBC interpolation
+    KeyT() :
+        mValue(T()),
+        mForwardValue(T()),
+        mBackwardValue(T()),
+        mTension(0.0f),
+        mBias(0.0f),
+        mContinuity(0.0f)
+        { }
+
 };
 typedef KeyT<float> FloatKey;
 typedef KeyT<Ogre::Vector3> Vector3Key;
