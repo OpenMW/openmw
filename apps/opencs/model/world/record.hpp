@@ -38,7 +38,8 @@ namespace CSMWorld
         ESXRecordT mBase;
         ESXRecordT mModified;
 
-        Record() {}
+        Record() = default;
+        Record(const Record&) = default;
         Record(State state,
                 const ESXRecordT *base = 0, const ESXRecordT *modified = 0);
 
