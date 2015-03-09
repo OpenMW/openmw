@@ -471,7 +471,6 @@ void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin,
                                      const CSMWorld::UniversalId::Type type)
 {
         std::auto_ptr<RecordBase> newRecord(mData.getRecord(mData.searchId(origin)).clone());
-        newRecord->mState = RecordBase::State_ModifiedOnly;
         mAdapters.find(type)->second->setId(*newRecord, destination);
         mData.insertRecord(*newRecord, type, destination);
 }

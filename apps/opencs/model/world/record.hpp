@@ -38,6 +38,10 @@ namespace CSMWorld
         ESXRecordT mBase;
         ESXRecordT mModified;
 
+        Record() {}
+        Record(State state,
+                const ESXRecordT *base = 0, const ESXRecordT *modified = 0);
+
         virtual RecordBase *clone() const;
 
         virtual void assign (const RecordBase& record);
@@ -59,11 +63,21 @@ namespace CSMWorld
     };
 
     template <typename ESXRecordT>
+    Record<ESXRecordT>::Record(State state, const ESXRecordT *base = 0, const ESXRecordT *modified = 0)
+    {
+        if(base)
+            mBase = *base;
+
+        if(modified)
+            mModified = *modified;
+
+        this->mState = state;
+    }
+
+    template <typename ESXRecordT>
     RecordBase *Record<ESXRecordT>::clone() const
     {
-        Record<ESXRecordT> *copy = new Record<ESXRecordT> (*this);
-        copy->mModified = (*this).get();
-        return copy;
+        return new Record<ESXRecordT> (State_ModifiedOnly, 0, &(this->get()));
     }
 
     template <typename ESXRecordT>
