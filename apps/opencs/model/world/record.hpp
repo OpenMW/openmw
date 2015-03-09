@@ -63,7 +63,7 @@ namespace CSMWorld
     };
 
     template <typename ESXRecordT>
-    Record<ESXRecordT>::Record(State state, const ESXRecordT *base = 0, const ESXRecordT *modified = 0)
+    Record<ESXRecordT>::Record(State state, const ESXRecordT *base, const ESXRecordT *modified)
     {
         if(base)
             mBase = *base;
