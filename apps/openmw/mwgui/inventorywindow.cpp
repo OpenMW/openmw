@@ -25,7 +25,6 @@
 
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
-#include "spellwindow.hpp"
 #include "itemview.hpp"
 #include "inventoryitemmodel.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -317,8 +316,7 @@ namespace MWGui
 
     void InventoryWindow::updateItemView()
     {
-        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
-            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
 
         mItemView->update();
         mPreviewDirty = true;
@@ -568,8 +566,7 @@ namespace MWGui
     void InventoryWindow::notifyContentChanged()
     {
         // update the spell window just in case new enchanted items were added to inventory
-        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
-            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
 
         MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(
                     MWBase::Environment::get().getWorld()->getPlayerPtr());
@@ -626,8 +623,7 @@ namespace MWGui
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, newObject, MWWorld::Ptr(), count);
 
-        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
-            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
     }
 
     void InventoryWindow::cycle(bool next)

@@ -33,8 +33,6 @@
 
 #include "../mwdialogue/dialoguemanagerimp.hpp"
 
-#include "../mwgui/windowbase.hpp"
-
 #include <iostream>
 
 using namespace ICS;
@@ -887,7 +885,7 @@ namespace MWInput
     void InputManager::toggleMainMenu()
     {
         if (MyGUI::InputManager::getInstance().isModalAny()) {
-            MWBase::Environment::get().getWindowManager()->getCurrentModal()->exit();
+            MWBase::Environment::get().getWindowManager()->exitCurrentModal();
             return;
         }
 
@@ -1061,7 +1059,7 @@ namespace MWInput
         }
         else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu) {
             while(MyGUI::InputManager::getInstance().isModalAny()) { //Handle any open Modal windows
-                MWBase::Environment::get().getWindowManager()->getCurrentModal()->exit();
+                MWBase::Environment::get().getWindowManager()->exitCurrentModal();
             }
             MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode(); //And handle the actual main window
         }

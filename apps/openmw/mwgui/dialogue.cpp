@@ -7,12 +7,14 @@
 #include <MyGUI_ProgressBar.h>
 
 #include <components/widgets/list.hpp>
+#include <components/translation/translation.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -20,12 +22,7 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include "../mwdialogue/dialoguemanagerimp.hpp"
-
 #include "widgets.hpp"
-#include "tradewindow.hpp"
-#include "spellbuyingwindow.hpp"
-#include "travelwindow.hpp"
 #include "bookpage.hpp"
 
 #include "journalbooks.hpp" // to_utf8_span
@@ -337,51 +334,25 @@ namespace MWGui
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
             if (topic == gmst.find("sPersuasion")->getString())
-            {
                 mPersuasionDialog.setVisible(true);
-            }
             else if (topic == gmst.find("sCompanionShare")->getString())
-            {
-                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Companion);
                 MWBase::Environment::get().getWindowManager()->showCompanionWindow(mPtr);
-            }
             else if (!MWBase::Environment::get().getDialogueManager()->checkServiceRefused())
             {
                 if (topic == gmst.find("sBarter")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Barter);
-                    MWBase::Environment::get().getWindowManager()->getTradeWindow()->startTrade(mPtr);
-                }
+                    MWBase::Environment::get().getWindowManager()->startTrade(mPtr);
                 else if (topic == gmst.find("sSpells")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellBuying);
-                    MWBase::Environment::get().getWindowManager()->getSpellBuyingWindow()->startSpellBuying(mPtr);
-                }
+                    MWBase::Environment::get().getWindowManager()->startSpellBuying(mPtr);
                 else if (topic == gmst.find("sTravel")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Travel);
-                    MWBase::Environment::get().getWindowManager()->getTravelWindow()->startTravel(mPtr);
-                }
+                    MWBase::Environment::get().getWindowManager()->startTravel(mPtr);
                 else if (topic == gmst.find("sSpellMakingMenuTitle")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellCreation);
                     MWBase::Environment::get().getWindowManager()->startSpellMaking (mPtr);
-                }
                 else if (topic == gmst.find("sEnchanting")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Enchanting);
                     MWBase::Environment::get().getWindowManager()->startEnchanting (mPtr);
-                }
                 else if (topic == gmst.find("sServiceTrainingTitle")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Training);
                     MWBase::Environment::get().getWindowManager()->startTraining (mPtr);
-                }
                 else if (topic == gmst.find("sRepair")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_MerchantRepair);
                     MWBase::Environment::get().getWindowManager()->startRepair (mPtr);
-                }
             }
         }
     }
@@ -440,8 +411,6 @@ namespace MWGui
         bool isCompanion = !mPtr.getClass().getScript(mPtr).empty()
                 && mPtr.getRefData().getLocals().getIntVar(mPtr.getClass().getScript(mPtr), "companion");
 
-        bool anyService = mServices > 0 || isCompanion || mPtr.getTypeName() == typeid(ESM::NPC).name();
-
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
@@ -472,7 +441,7 @@ namespace MWGui
         if (isCompanion)
             mTopicsList->addItem(gmst.find("sCompanionShare")->getString());
 
-        if (anyService)
+        if (mTopicsList->getItemCount() > 0)
             mTopicsList->addSeparator();
 
 
