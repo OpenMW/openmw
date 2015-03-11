@@ -54,9 +54,17 @@ void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& a
     {
         if (actor.getClass().getContainerStore(actor).count(item) == 0)
         {
-            MWWorld::Ptr newPtr = *actor.getClass().getContainerStore(actor).add(item, 1, actor);
+            MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
+            MWWorld::Ptr newPtr = *store.MWWorld::ContainerStore::add(item, 1, actor);
             MWWorld::ActionEquip action(newPtr);
             action.execute(actor);
+            MWWorld::ContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            // change draw state only if the item is in player's right hand
+            if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr()
+                    && rightHand != store.end() && newPtr == *rightHand)
+            {
+                MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
+            }
         }
     }
     else
