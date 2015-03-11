@@ -451,7 +451,6 @@ public:
         mRenderSystem->_setSceneBlending(Ogre::SBF_SOURCE_ALPHA, Ogre::SBF_ONE_MINUS_SOURCE_ALPHA);
 
         // always use wireframe
-        // TODO: add option to enable wireframe mode in platform
         mRenderSystem->_setPolygonMode(Ogre::PM_SOLID);
     }
 
