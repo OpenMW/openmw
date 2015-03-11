@@ -150,8 +150,6 @@ namespace MWBase
             /// \todo investigate, if we really need to expose every single lousy UI element to the outside world
             virtual MWGui::DialogueWindow* getDialogueWindow() = 0;
             virtual MWGui::InventoryWindow* getInventoryWindow() = 0;
-            virtual MWGui::BookWindow* getBookWindow() = 0;
-            virtual MWGui::ScrollWindow* getScrollWindow() = 0;
             virtual MWGui::CountDialog* getCountDialog() = 0;
             virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
             virtual MWGui::TradeWindow* getTradeWindow() = 0;
@@ -300,6 +298,8 @@ namespace MWBase
             virtual void startSpellBuying(const MWWorld::Ptr& actor) = 0;
             virtual void startTrade(const MWWorld::Ptr& actor) = 0;
             virtual void openContainer(const MWWorld::Ptr& container, bool loot) = 0;
+            virtual void showBook(const MWWorld::Ptr& item, bool showTakeButton) = 0;
+            virtual void showScroll(const MWWorld::Ptr& item, bool showTakeButton) = 0;
 
             virtual void showSoulgemDialog (MWWorld::Ptr item) = 0;
 

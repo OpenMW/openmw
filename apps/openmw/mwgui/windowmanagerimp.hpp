@@ -155,8 +155,6 @@ namespace MWGui
     /// \todo investigate, if we really need to expose every single lousy UI element to the outside world
     virtual MWGui::DialogueWindow* getDialogueWindow();
     virtual MWGui::InventoryWindow* getInventoryWindow();
-    virtual MWGui::BookWindow* getBookWindow();
-    virtual MWGui::ScrollWindow* getScrollWindow();
     virtual MWGui::CountDialog* getCountDialog();
     virtual MWGui::ConfirmationDialog* getConfirmationDialog();
     virtual MWGui::TradeWindow* getTradeWindow();
@@ -293,6 +291,8 @@ namespace MWGui
     virtual void startSpellBuying(const MWWorld::Ptr &actor);
     virtual void startTrade(const MWWorld::Ptr &actor);
     virtual void openContainer(const MWWorld::Ptr &container, bool loot);
+    virtual void showBook(const MWWorld::Ptr& item, bool showTakeButton);
+    virtual void showScroll(const MWWorld::Ptr& item, bool showTakeButton);
 
     virtual void frameStarted(float dt);
 

@@ -1278,8 +1278,6 @@ namespace MWGui
 
     MWGui::DialogueWindow* WindowManager::getDialogueWindow() { return mDialogueWindow;  }
     MWGui::InventoryWindow* WindowManager::getInventoryWindow() { return mInventoryWindow; }
-    MWGui::BookWindow* WindowManager::getBookWindow() { return mBookWindow; }
-    MWGui::ScrollWindow* WindowManager::getScrollWindow() { return mScrollWindow; }
     MWGui::CountDialog* WindowManager::getCountDialog() { return mCountDialog; }
     MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog() { return mConfirmationDialog; }
     MWGui::TradeWindow* WindowManager::getTradeWindow() { return mTradeWindow; }
@@ -1896,6 +1894,18 @@ namespace MWGui
     {
         pushGuiMode(GM_Container);
         mContainerWindow->open(container, loot);
+    }
+
+    void WindowManager::showBook(const MWWorld::Ptr &item, bool showTakeButton)
+    {
+        pushGuiMode(GM_Book);
+        mBookWindow->open(item, showTakeButton);
+    }
+
+    void WindowManager::showScroll(const MWWorld::Ptr &item, bool showTakeButton)
+    {
+        pushGuiMode(GM_Scroll);
+        mScrollWindow->open(item, showTakeButton);
     }
 
 }
