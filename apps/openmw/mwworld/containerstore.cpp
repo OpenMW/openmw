@@ -210,7 +210,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &
 {
     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
     // a bit pointless to set owner for the player
-    if (actorPtr.getRefData().getHandle() != "player")
+    if (actorPtr != MWBase::Environment::get().getWorld()->getPlayerPtr())
         return add(ref.getPtr(), count, actorPtr, true);
     else
         return add(ref.getPtr(), count, actorPtr, false);

@@ -133,7 +133,7 @@ namespace MWMechanics
 
             blockerStats.setBlock(true);
 
-            if (blocker.getCellRef().getRefId() == "player")
+            if (blocker == MWBase::Environment::get().getWorld()->getPlayerPtr())
                 blocker.getClass().skillUsageSucceeded(blocker, ESM::Skill::Block, 0);
 
             return true;
@@ -157,7 +157,7 @@ namespace MWMechanics
                 && actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
             damage *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWereWolfSilverWeaponDamageMult")->getFloat();
 
-        if (damage == 0 && attacker.getRefData().getHandle() == "player")
+        if (damage == 0 && attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResistsWeapons}");
     }
 
@@ -176,7 +176,7 @@ namespace MWMechanics
             return;
         }
 
-        if(attacker.getRefData().getHandle() == "player")
+        if(attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
         int weapskill = ESM::Skill::Marksman;
@@ -211,7 +211,7 @@ namespace MWMechanics
         adjustWeaponDamage(damage, weapon);
         reduceWeaponCondition(damage, true, weapon, attacker);
 
-        if(attacker.getRefData().getHandle() == "player")
+        if(attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
             attacker.getClass().skillUsageSucceeded(attacker, weapskill, 0);
 
         if (victim.getClass().getCreatureStats(victim).getKnockedDown())

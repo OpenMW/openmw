@@ -99,7 +99,7 @@ bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)
             if (charge == 0)
             {
                 // Will unequip the broken item and try to find a replacement
-                if (ptr.getRefData().getHandle() != "player")
+                if (ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
                     inv.autoEquip(ptr);
                 else
                     inv.unequipItem(*item, ptr);
@@ -154,6 +154,7 @@ void adjustCommandedActor (const MWWorld::Ptr& actor)
 
     if (check.mCommanded && !hasCommandPackage)
     {
+        // FIXME: don't use refid string
         MWMechanics::AiFollow package("player", true);
         stats.getAiSequence().stack(package, actor);
     }
@@ -244,7 +245,7 @@ namespace MWMechanics
             gem->getContainerStore()->unstack(*gem, caster);
             gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
 
-            if (caster.getRefData().getHandle() == "player")
+            if (caster == MWBase::Environment::get().getWorld()->getPlayerPtr())
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
 
             const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
@@ -433,7 +434,7 @@ namespace MWMechanics
         int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
 
         float base = 1.f;
-        if (ptr.getCellRef().getRefId() == "player")
+        if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
             base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fPCbaseMagickaMult")->getFloat();
         else
             base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCbaseMagickaMult")->getFloat();
@@ -543,7 +544,7 @@ namespace MWMechanics
                     {
                         spells.worsenCorprus(it->first);
 
-                        if (ptr.getRefData().getHandle() == "player")
+                        if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
                     }
                 }
@@ -665,7 +666,7 @@ namespace MWMechanics
             }
         }
 
-        if (receivedMagicDamage && ptr.getRefData().getHandle() == "player")
+        if (receivedMagicDamage && ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
             MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
 
         creatureStats.setHealth(health);
@@ -848,7 +849,7 @@ namespace MWMechanics
 
     void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
     {
-        bool isPlayer = ptr.getRefData().getHandle()=="player";
+        bool isPlayer = (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr());
 
         MWWorld::InventoryStore &inventoryStore = ptr.getClass().getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator heldIter =
@@ -1157,7 +1158,7 @@ namespace MWMechanics
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
                 // (would invalidate the iterator)
-                if (iter->first.getCellRef().getRefId() == "player")
+                if (iter->first == MWBase::Environment::get().getWorld()->getPlayerPtr())
                 {
                     playerCharacter = iter->second->getCharacterController();
                     continue;
