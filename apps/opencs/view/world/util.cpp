@@ -152,6 +152,8 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         }
     }
 
+    // NOTE: for each editor type (e.g. QLineEdit) there needs to be a corresponding
+    // entry in CSVWorld::DialogueDelegateDispatcher::makeEditor()
     switch (display)
     {
         case CSMWorld::ColumnBase::Display_Colour:
