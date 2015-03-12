@@ -241,14 +241,39 @@ namespace MWMechanics
     {
         MWMechanics::CreatureStats &stats = attacker.getClass().getCreatureStats(attacker);
         const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
-        float hitchance = skillValue +
+
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+
+        float defenseTerm = 0;
+        if (victim.getClass().getCreatureStats(victim).getFatigue().getCurrent() >= 0)
+        {
+            MWMechanics::CreatureStats& victimStats = victim.getClass().getCreatureStats(victim);
+            // Maybe we should keep an aware state for actors updated every so often instead of testing every time
+            bool unaware = (!victimStats.getAiSequence().isInCombat())
+                    && (attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    && (!MWBase::Environment::get().getMechanicsManager()->awarenessCheck(attacker, victim));
+            if (!(victimStats.getKnockedDown() ||
+                    victimStats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0
+                    || unaware ))
+            {
+                defenseTerm = victimStats.getEvasion();
+            }
+            defenseTerm += std::min(100.f,
+                                    gmst.find("fCombatInvisoMult")->getFloat() *
+                                    victimStats.getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude());
+            defenseTerm += std::min(100.f,
+                                    gmst.find("fCombatInvisoMult")->getFloat() *
+                                    victimStats.getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude());
+        }
+        float attackTerm = skillValue +
                           (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                           (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
-        hitchance *= stats.getFatigueTerm();
-        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).getMagnitude() -
+        attackTerm *= stats.getFatigueTerm();
+        attackTerm += mageffects.get(ESM::MagicEffect::FortifyAttack).getMagnitude() -
                      mageffects.get(ESM::MagicEffect::Blind).getMagnitude();
-        hitchance -= victim.getClass().getCreatureStats(victim).getEvasion();
-        return hitchance;
+
+        return static_cast<int>((attackTerm - defenseTerm) + 0.5f);
     }
 
     void applyElementalShields(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim)
