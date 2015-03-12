@@ -23,9 +23,6 @@
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwrender/characterpreview.hpp"
 
-#include "bookwindow.hpp"
-#include "scrollwindow.hpp"
-#include "spellwindow.hpp"
 #include "itemview.hpp"
 #include "inventoryitemmodel.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -317,8 +314,7 @@ namespace MWGui
 
     void InventoryWindow::updateItemView()
     {
-        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
-            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
 
         mItemView->update();
         mPreviewDirty = true;
@@ -431,13 +427,6 @@ namespace MWGui
             boost::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
 
             action->execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
-
-            // this is necessary for books/scrolls: if they are already in the player's inventory,
-            // the "Take" button should not be visible.
-            // NOTE: the take button is "reset" when the window opens, so we can safely do the following
-            // without screwing up future book windows
-            MWBase::Environment::get().getWindowManager()->getBookWindow()->setTakeButtonShow(false);
-            MWBase::Environment::get().getWindowManager()->getScrollWindow()->setTakeButtonShow(false);
 
             mSkippedToEquip = MWWorld::Ptr();
         }
@@ -568,8 +557,7 @@ namespace MWGui
     void InventoryWindow::notifyContentChanged()
     {
         // update the spell window just in case new enchanted items were added to inventory
-        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
-            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
 
         MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(
                     MWBase::Environment::get().getWorld()->getPlayerPtr());
@@ -626,8 +614,7 @@ namespace MWGui
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, newObject, MWWorld::Ptr(), count);
 
-        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
-            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
     }
 
     void InventoryWindow::cycle(bool next)

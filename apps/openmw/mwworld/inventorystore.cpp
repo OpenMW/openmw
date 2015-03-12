@@ -133,7 +133,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
     const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr, setOwner);
 
     // Auto-equip items if an armor/clothing or weapon item is added, but not for the player nor werewolves
-    if (actorPtr.getRefData().getHandle() != "player"
+    if (actorPtr != MWBase::Environment::get().getWorld()->getPlayerPtr()
             && !(actorPtr.getClass().isNpc() && actorPtr.getClass().getNpcStats(actorPtr).isWerewolf()))
     {
         std::string type = itemPtr.getTypeName();
@@ -503,7 +503,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
 
     // If an armor/clothing item is removed, try to find a replacement,
     // but not for the player nor werewolves.
-    if ((actor.getRefData().getHandle() != "player")
+    if ((actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
             && !(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf()))
     {
         std::string type = item.getTypeName();
@@ -535,7 +535,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
         {
             retval = restack(*it);
 
-            if (actor.getRefData().getHandle() == "player")
+            if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
             {
                 // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
                 const std::string& script = it->getClass().getScript(*it);

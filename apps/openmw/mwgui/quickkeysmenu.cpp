@@ -94,12 +94,24 @@ namespace MWGui
         while (key->getChildCount()) // Destroy number label
             MyGUI::Gui::getInstance().destroyWidget(key->getChildAt(0));
 
-        mAssigned[index] = Type_Unassigned;
+        if (index == 9)
+        {
+            mAssigned[index] = Type_HandToHand;
 
-        MyGUI::TextBox* textBox = key->createWidgetReal<MyGUI::TextBox>("SandText", MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Default);
-        textBox->setTextAlign (MyGUI::Align::Center);
-        textBox->setCaption (MyGUI::utility::toString(index+1));
-        textBox->setNeedMouseFocus (false);
+            MyGUI::ImageBox* image = key->createWidget<MyGUI::ImageBox>("ImageBox",
+                MyGUI::IntCoord(14, 13, 32, 32), MyGUI::Align::Default);
+            image->setImageTexture("icons\\k\\stealth_handtohand.dds");
+            image->setNeedMouseFocus(false);
+        }
+        else
+        {
+            mAssigned[index] = Type_Unassigned;
+
+            MyGUI::TextBox* textBox = key->createWidgetReal<MyGUI::TextBox>("SandText", MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Default);
+            textBox->setTextAlign (MyGUI::Align::Center);
+            textBox->setCaption (MyGUI::utility::toString(index+1));
+            textBox->setNeedMouseFocus (false);
+        }
     }
 
     void QuickKeysMenu::onQuickKeyButtonClicked(MyGUI::Widget* sender)
@@ -338,6 +350,11 @@ namespace MWGui
             store.setSelectedEnchantItem(it);
             MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Spell);
         }
+        else if (type == Type_HandToHand)
+        {
+            store.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, player);
+            MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
+        }
     }
 
     // ---------------------------------------------------------------------------------------------------------
@@ -409,6 +426,7 @@ namespace MWGui
             switch (type)
             {
                 case Type_Unassigned:
+                case Type_HandToHand:
                     break;
                 case Type_Item:
                 case Type_MagicItem:
@@ -489,6 +507,7 @@ namespace MWGui
                 break;
             }
             case Type_Unassigned:
+            case Type_HandToHand:
                 unassign(button, i);
                 break;
             }

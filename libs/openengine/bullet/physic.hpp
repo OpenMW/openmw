@@ -258,13 +258,12 @@ namespace Physic
         const Ogre::Vector3 &position, float scale, const Ogre::Quaternion &rotation);
 
         /**
-         * Remove a character from the scene. TODO:delete it! for now, a small memory leak^^ done?
+         * Remove a character from the scene.
          */
         void removeCharacter(const std::string &name);
 
         /**
          * Return a pointer to a character
-         * TODO:check if the actor exist...
          */
         PhysicActor* getCharacter(const std::string &name);
 

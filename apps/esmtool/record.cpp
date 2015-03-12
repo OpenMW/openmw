@@ -6,6 +6,9 @@
 
 #include <boost/format.hpp>
 
+namespace
+{
+
 void printAIPackage(ESM::AIPackage p)
 {
     std::cout << "  AI Type: " << aiTypeLabel(p.mType)
@@ -147,6 +150,26 @@ void printEffectList(ESM::EffectList effects)
         std::cout << "    Magnitude: " << eit->mMagnMin << "-" << eit->mMagnMax << std::endl;
         i++;
     }
+}
+
+void printTransport(const std::vector<ESM::Transport::Dest>& transport)
+{
+    std::vector<ESM::Transport::Dest>::const_iterator dit;
+    for (dit = transport.begin(); dit != transport.end(); ++dit)
+    {
+        std::cout << "  Destination Position: "
+                  << boost::format("%12.3f") % dit->mPos.pos[0] << ","
+                  << boost::format("%12.3f") % dit->mPos.pos[1] << ","
+                  << boost::format("%12.3f") % dit->mPos.pos[2] << ")" << std::endl;
+        std::cout << "  Destination Rotation: "
+                  << boost::format("%9.6f") % dit->mPos.rot[0] << ","
+                  << boost::format("%9.6f") % dit->mPos.rot[1] << ","
+                  << boost::format("%9.6f") % dit->mPos.rot[2] << ")" << std::endl;
+        if (dit->mCellName != "")
+            std::cout << "  Destination Cell: " << dit->mCellName << std::endl;
+    }
+}
+
 }
 
 namespace EsmTool {
@@ -631,6 +654,8 @@ void Record<ESM::Creature>::print()
     for (sit = mData.mSpells.mList.begin(); sit != mData.mSpells.mList.end(); ++sit)
         std::cout << "  Spell: " << *sit << std::endl;
 
+    printTransport(mData.getTransport());
+
     std::cout << "  Artifical Intelligence: " << mData.mHasAI << std::endl;
     std::cout << "    AI Hello:" << (int)mData.mAiData.mHello << std::endl;
     std::cout << "    AI Fight:" << (int)mData.mAiData.mFight << std::endl;
@@ -1042,20 +1067,7 @@ void Record<ESM::NPC>::print()
     for (sit = mData.mSpells.mList.begin(); sit != mData.mSpells.mList.end(); ++sit)
         std::cout << "  Spell: " << *sit << std::endl;
 
-    std::vector<ESM::NPC::Dest>::iterator dit;
-    for (dit = mData.mTransport.begin(); dit != mData.mTransport.end(); ++dit)
-    {
-        std::cout << "  Destination Position: "
-                  << boost::format("%12.3f") % dit->mPos.pos[0] << ","
-                  << boost::format("%12.3f") % dit->mPos.pos[1] << ","
-                  << boost::format("%12.3f") % dit->mPos.pos[2] << ")" << std::endl;
-        std::cout << "  Destination Rotation: "
-                  << boost::format("%9.6f") % dit->mPos.rot[0] << ","
-                  << boost::format("%9.6f") % dit->mPos.rot[1] << ","
-                  << boost::format("%9.6f") % dit->mPos.rot[2] << ")" << std::endl;
-        if (dit->mCellName != "")
-            std::cout << "  Destination Cell: " << dit->mCellName << std::endl;
-    }
+    printTransport(mData.getTransport());
 
     std::cout << "  Artifical Intelligence: " << mData.mHasAI << std::endl;
     std::cout << "    AI Hello:" << (int)mData.mAiData.mHello << std::endl;

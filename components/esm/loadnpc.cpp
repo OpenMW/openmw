@@ -14,7 +14,7 @@ namespace ESM
 
         mSpells.mList.clear();
         mInventory.mList.clear();
-        mTransport.clear();
+        mTransport.mList.clear();
         mAiPackage.mList.clear();
 
         bool hasNpdt = false;
@@ -81,14 +81,8 @@ namespace ESM
                     mHasAI= true;
                     break;
                 case ESM::FourCC<'D','O','D','T'>::value:
-                {
-                    Dest dodt;
-                    esm.getHExact(&dodt.mPos, 24);
-                    mTransport.push_back(dodt);
-                    break;
-                }
                 case ESM::FourCC<'D','N','A','M'>::value:
-                    mTransport.back().mCellName = esm.getHString();
+                    mTransport.add(esm);
                     break;
                 case AI_Wander:
                 case AI_Activate:
@@ -131,11 +125,8 @@ namespace ESM
             esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
         }
 
-        typedef std::vector<Dest>::const_iterator DestIter;
-        for (DestIter it = mTransport.begin(); it != mTransport.end(); ++it) {
-            esm.writeHNT("DODT", it->mPos, sizeof(it->mPos));
-            esm.writeHNOCString("DNAM", it->mCellName);
-        }
+        mTransport.save(esm);
+
         mAiPackage.save(esm);
     }
 
@@ -177,7 +168,7 @@ namespace ESM
         mSpells.mList.clear();
         mAiData.blank();
         mHasAI = false;
-        mTransport.clear();
+        mTransport.mList.clear();
         mAiPackage.mList.clear();
         mName.clear();
         mModel.clear();
@@ -197,5 +188,10 @@ namespace ESM
             return mNpdt12.mRank;
         else // NPC_DEFAULT
             return mNpdt52.mRank;
+    }
+
+    const std::vector<Transport::Dest>& NPC::getTransport() const
+    {
+        return mTransport.mList;
     }
 }

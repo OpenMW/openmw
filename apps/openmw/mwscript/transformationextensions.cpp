@@ -212,7 +212,7 @@ namespace MWScript
                     if (!ptr.isInCell())
                         return;
 
-                    if (ptr.getRefData().getHandle() == "player")
+                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                     {
                         MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
                     }
@@ -287,7 +287,7 @@ namespace MWScript
                     if (ptr.getContainerStore())
                         return;
 
-                    if (ptr.getRefData().getHandle() == "player")
+                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                     {
                         MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
                     }
@@ -352,7 +352,7 @@ namespace MWScript
                     if (!ptr.isInCell())
                         return;
 
-                    if (ptr.getRefData().getHandle() == "player")
+                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                     {
                         MWBase::Environment::get().getWorld()->getPlayer().setTeleported(true);
                     }
@@ -371,7 +371,7 @@ namespace MWScript
                     // another morrowind oddity: player will be moved to the exterior cell at this location,
                     // non-player actors will move within the cell they are in.
                     MWWorld::Ptr updated;
-                    if (ptr.getRefData().getHandle() == "player")
+                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                     {
                         MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
                         MWBase::Environment::get().getWorld()->moveObject(ptr,cell,x,y,z);

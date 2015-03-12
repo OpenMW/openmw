@@ -133,7 +133,7 @@ namespace MWMechanics
 
             blockerStats.setBlock(true);
 
-            if (blocker.getCellRef().getRefId() == "player")
+            if (blocker == MWBase::Environment::get().getWorld()->getPlayerPtr())
                 blocker.getClass().skillUsageSucceeded(blocker, ESM::Skill::Block, 0);
 
             return true;
@@ -157,7 +157,7 @@ namespace MWMechanics
                 && actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
             damage *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWereWolfSilverWeaponDamageMult")->getFloat();
 
-        if (damage == 0 && attacker.getRefData().getHandle() == "player")
+        if (damage == 0 && attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResistsWeapons}");
     }
 
@@ -176,7 +176,7 @@ namespace MWMechanics
             return;
         }
 
-        if(attacker.getRefData().getHandle() == "player")
+        if(attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
         int weapskill = ESM::Skill::Marksman;
@@ -186,32 +186,26 @@ namespace MWMechanics
         int skillValue = attacker.getClass().getSkill(attacker,
                                            weapon.getClass().getEquipmentSkill(weapon));
 
-        if((::rand()/(RAND_MAX+1.0)) > getHitChance(attacker, victim, skillValue)/100.0f)
+        if((::rand()/(RAND_MAX+1.0)) >= getHitChance(attacker, victim, skillValue)/100.0f)
         {
             victim.getClass().onHit(victim, 0.0f, false, projectile, attacker, false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, attacker);
             return;
         }
 
-        float fDamageStrengthBase = gmst.find("fDamageStrengthBase")->getFloat();
-        float fDamageStrengthMult = gmst.find("fDamageStrengthMult")->getFloat();
 
         const unsigned char* attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
         float damage = attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength()); // Bow/crossbow damage
-        if (weapon != projectile)
-        {
-            // Arrow/bolt damage
-            attack = projectile.get<ESM::Weapon>()->mBase->mData.mChop;
-            damage += attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength());
-        }
 
-        damage *= fDamageStrengthBase +
-                (attackerStats.getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult * 0.1f);
+        // Arrow/bolt damage
+        // NB in case of thrown weapons, we are applying the damage twice since projectile == weapon
+        attack = projectile.get<ESM::Weapon>()->mBase->mData.mChop;
+        damage += attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength());
 
-        adjustWeaponDamage(damage, weapon);
+        adjustWeaponDamage(damage, weapon, attacker);
         reduceWeaponCondition(damage, true, weapon, attacker);
 
-        if(attacker.getRefData().getHandle() == "player")
+        if(attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
             attacker.getClass().skillUsageSucceeded(attacker, weapskill, 0);
 
         if (victim.getClass().getCreatureStats(victim).getKnockedDown())
@@ -241,14 +235,39 @@ namespace MWMechanics
     {
         MWMechanics::CreatureStats &stats = attacker.getClass().getCreatureStats(attacker);
         const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
-        float hitchance = skillValue +
+
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+
+        float defenseTerm = 0;
+        if (victim.getClass().getCreatureStats(victim).getFatigue().getCurrent() >= 0)
+        {
+            MWMechanics::CreatureStats& victimStats = victim.getClass().getCreatureStats(victim);
+            // Maybe we should keep an aware state for actors updated every so often instead of testing every time
+            bool unaware = (!victimStats.getAiSequence().isInCombat())
+                    && (attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    && (!MWBase::Environment::get().getMechanicsManager()->awarenessCheck(attacker, victim));
+            if (!(victimStats.getKnockedDown() ||
+                    victimStats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0
+                    || unaware ))
+            {
+                defenseTerm = victimStats.getEvasion();
+            }
+            defenseTerm += std::min(100.f,
+                                    gmst.find("fCombatInvisoMult")->getFloat() *
+                                    victimStats.getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude());
+            defenseTerm += std::min(100.f,
+                                    gmst.find("fCombatInvisoMult")->getFloat() *
+                                    victimStats.getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude());
+        }
+        float attackTerm = skillValue +
                           (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                           (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
-        hitchance *= stats.getFatigueTerm();
-        hitchance += mageffects.get(ESM::MagicEffect::FortifyAttack).getMagnitude() -
+        attackTerm *= stats.getFatigueTerm();
+        attackTerm += mageffects.get(ESM::MagicEffect::FortifyAttack).getMagnitude() -
                      mageffects.get(ESM::MagicEffect::Blind).getMagnitude();
-        hitchance -= victim.getClass().getCreatureStats(victim).getEvasion();
-        return hitchance;
+
+        return static_cast<int>((attackTerm - defenseTerm) + 0.5f);
     }
 
     void applyElementalShields(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim)
@@ -322,7 +341,7 @@ namespace MWMechanics
         }
     }
 
-    void adjustWeaponDamage(float &damage, const MWWorld::Ptr &weapon)
+    void adjustWeaponDamage(float &damage, const MWWorld::Ptr &weapon, const MWWorld::Ptr& attacker)
     {
         if (weapon.isEmpty())
             return;
@@ -334,6 +353,13 @@ namespace MWMechanics
             int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
             damage *= (float(weaphealth) / weapmaxhealth);
         }
+
+        static const float fDamageStrengthBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                .find("fDamageStrengthBase")->getFloat();
+        static const float fDamageStrengthMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                .find("fDamageStrengthMult")->getFloat();
+        damage *= fDamageStrengthBase +
+                (attacker.getClass().getCreatureStats(attacker).getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult * 0.1f);
     }
 
     void getHandToHandDamage(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, float &damage, bool &healthdmg)

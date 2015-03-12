@@ -154,17 +154,14 @@ namespace MWGui
 
     /// \todo investigate, if we really need to expose every single lousy UI element to the outside world
     virtual MWGui::DialogueWindow* getDialogueWindow();
-    virtual MWGui::ContainerWindow* getContainerWindow();
     virtual MWGui::InventoryWindow* getInventoryWindow();
-    virtual MWGui::BookWindow* getBookWindow();
-    virtual MWGui::ScrollWindow* getScrollWindow();
     virtual MWGui::CountDialog* getCountDialog();
     virtual MWGui::ConfirmationDialog* getConfirmationDialog();
     virtual MWGui::TradeWindow* getTradeWindow();
-    virtual MWGui::SpellBuyingWindow* getSpellBuyingWindow();
-    virtual MWGui::TravelWindow* getTravelWindow();
-    virtual MWGui::SpellWindow* getSpellWindow();
-    virtual MWGui::Console* getConsole();
+
+    virtual void updateSpellWindow();
+
+    virtual void setConsoleSelectedObject(const MWWorld::Ptr& object);
 
     virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount);
 
@@ -182,8 +179,6 @@ namespace MWGui
 
     virtual void setPlayerClass (const ESM::Class &class_);                        ///< set current class of player
     virtual void configureSkills (const SkillList& major, const SkillList& minor); ///< configure skill groups, each set contains the skill ID for that group.
-    virtual void setReputation (int reputation);                                   ///< set the current reputation value
-    virtual void setBounty (int bounty);                                           ///< set the current bounty value
     virtual void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
     virtual void changeCell(MWWorld::CellStore* cell); ///< change the active cell
@@ -292,6 +287,12 @@ namespace MWGui
     virtual void startRepair(MWWorld::Ptr actor);
     virtual void startRepairItem(MWWorld::Ptr item);
     virtual void startRecharge(MWWorld::Ptr soulgem);
+    virtual void startTravel(const MWWorld::Ptr& actor);
+    virtual void startSpellBuying(const MWWorld::Ptr &actor);
+    virtual void startTrade(const MWWorld::Ptr &actor);
+    virtual void openContainer(const MWWorld::Ptr &container, bool loot);
+    virtual void showBook(const MWWorld::Ptr& item, bool showTakeButton);
+    virtual void showScroll(const MWWorld::Ptr& item, bool showTakeButton);
 
     virtual void frameStarted(float dt);
 
@@ -317,9 +318,8 @@ namespace MWGui
     /// Does the current stack of GUI-windows permit saving?
     virtual bool isSavingAllowed() const;
 
-    /// Returns the current Modal
-    /** Used to send exit command to active Modal when Esc is pressed **/
-    virtual WindowModal* getCurrentModal() const;
+    /// Send exit command to active Modal window **/
+    virtual void exitCurrentModal();
 
     /// Sets the current Modal
     /** Used to send exit command to active Modal when Esc is pressed **/
