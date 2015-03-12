@@ -16,6 +16,7 @@
     Bug #2334: Drag-and-drop on a content file in the launcher creates duplicate items
     Bug #2338: Arrows reclaimed from corpses do not stack sometimes
     Bug #2344: Launcher - Settings importer running correctly?
+    Bug #2346: Launcher - Importing plugins into content list screws up the load order
     Bug #2348: Mod: H.E.L.L.U.V.A. Handy Holdables does not appear in the content list
     Bug #2353: Detect Animal detects dead creatures
     Bug #2354: Cmake does not respect LIB_SUFFIX
