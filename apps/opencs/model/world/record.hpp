@@ -41,8 +41,6 @@ namespace CSMWorld
         ESXRecordT mModified;
 
         Record();
-        Record(const Record& record);
-        Record& operator= (const Record& record);
 
         Record(State state,
                 const ESXRecordT *base = 0, const ESXRecordT *modified = 0);
@@ -73,26 +71,6 @@ namespace CSMWorld
     Record<ESXRecordT>::Record()
     : mBase(), mModified()
     { }
-
-    template <typename ESXRecordT>
-    Record<ESXRecordT>::Record(const Record& record)
-    : mBase(record.mBase), mModified(record.mModified)
-    {
-        mState = record.mState;
-    }
-
-    template <typename ESXRecordT>
-    Record<ESXRecordT>& Record<ESXRecordT>::operator= (const Record& record)
-    {
-        if(this != &record)
-        {
-            mBase = record.mBase;
-            mModified = record.mModified;
-            mState = record.mState;
-        }
-
-        return *this;
-    }
 
     template <typename ESXRecordT>
     Record<ESXRecordT>::Record(State state, const ESXRecordT *base, const ESXRecordT *modified)
