@@ -22,6 +22,8 @@ namespace CSMWorld
 
         virtual RecordBase *clone() const = 0;
 
+        virtual RecordBase *modifiedCopy() const = 0;
+
         virtual void assign (const RecordBase& record) = 0;
         ///< Will throw an exception if the types don't match.
 
@@ -38,7 +40,16 @@ namespace CSMWorld
         ESXRecordT mBase;
         ESXRecordT mModified;
 
+        Record();
+        Record(const Record& record);
+        Record& operator= (const Record& record);
+
+        Record(State state,
+                const ESXRecordT *base = 0, const ESXRecordT *modified = 0);
+
         virtual RecordBase *clone() const;
+
+        virtual RecordBase *modifiedCopy() const;
 
         virtual void assign (const RecordBase& record);
 
@@ -57,6 +68,49 @@ namespace CSMWorld
         void merge();
         ///< Merge modified into base.
     };
+
+    template <typename ESXRecordT>
+    Record<ESXRecordT>::Record()
+    : mBase(), mModified()
+    { }
+
+    template <typename ESXRecordT>
+    Record<ESXRecordT>::Record(const Record& record)
+    : mBase(record.mBase), mModified(record.mModified)
+    {
+        mState = record.mState;
+    }
+
+    template <typename ESXRecordT>
+    Record<ESXRecordT>& Record<ESXRecordT>::operator= (const Record& record)
+    {
+        if(this != &record)
+        {
+            mBase = record.mBase;
+            mModified = record.mModified;
+            mState = record.mState;
+        }
+
+        return *this;
+    }
+
+    template <typename ESXRecordT>
+    Record<ESXRecordT>::Record(State state, const ESXRecordT *base, const ESXRecordT *modified)
+    {
+        if(base)
+            mBase = *base;
+
+        if(modified)
+            mModified = *modified;
+
+        this->mState = state;
+    }
+
+    template <typename ESXRecordT>
+    RecordBase *Record<ESXRecordT>::modifiedCopy() const
+    {
+        return new Record<ESXRecordT> (State_ModifiedOnly, 0, &(this->get()));
+    }
 
     template <typename ESXRecordT>
     RecordBase *Record<ESXRecordT>::clone() const
