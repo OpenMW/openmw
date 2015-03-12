@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <memory>
+#include <stdexcept>
 
 #include <QGridLayout>
 #include <QLabel>
@@ -266,6 +267,8 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         editor = delegateIt->second->createEditor(qobject_cast<QWidget*>(mParent), QStyleOptionViewItem(), index, display);
         DialogueDelegateDispatcherProxy* proxy = new DialogueDelegateDispatcherProxy(editor, display);
 
+        // NOTE: For each entry in CSVWorld::CommandDelegate::createEditor() a corresponding entry
+        // is required here
         if (qobject_cast<DropLineEdit*>(editor))
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
@@ -286,10 +289,12 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         {
             connect(editor, SIGNAL(currentIndexChanged (int)), proxy, SLOT(editorDataCommited()));
         }
-        else if (qobject_cast<QAbstractSpinBox*>(editor))
+        else if (qobject_cast<QAbstractSpinBox*>(editor) || qobject_cast<QLineEdit*>(editor))
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
         }
+        else // throw an exception because this is a coding error
+            throw std::logic_error ("Dialogue editor type missing");
 
         connect(proxy, SIGNAL(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)), this, SLOT(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)));
         mProxys.push_back(proxy); //deleted in the destructor
