@@ -93,6 +93,10 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
 
     appendStage (new WritePathgridCollectionStage (mDocument, mState));
 
+    appendStage (new WriteLandCollectionStage (mDocument, mState));
+
+    appendStage (new WriteLandTextureCollectionStage (mDocument, mState));
+
     // close file and clean up
     appendStage (new CloseSaveStage (mState));
 
