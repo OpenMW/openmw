@@ -279,8 +279,6 @@ namespace MWClass
             gmst.fKnockDownMult = store.find("fKnockDownMult");
             gmst.iKnockDownOddsMult = store.find("iKnockDownOddsMult");
             gmst.iKnockDownOddsBase = store.find("iKnockDownOddsBase");
-            gmst.fDamageStrengthBase = store.find("fDamageStrengthBase");
-            gmst.fDamageStrengthMult = store.find("fDamageStrengthMult");
             gmst.fCombatArmorMinMult = store.find("fCombatArmorMinMult");
 
             inited = true;
@@ -516,7 +514,7 @@ namespace MWClass
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ptr.getClass().getSkill(ptr, weapskill));
 
-        if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
+        if((::rand()/(RAND_MAX+1.0)) >= hitchance/100.0f)
         {
             othercls.onHit(victim, 0.0f, false, weapon, ptr, false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
@@ -538,10 +536,8 @@ namespace MWClass
             if(attack)
             {
                 damage  = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
-                damage *= gmst.fDamageStrengthBase->getFloat() +
-                        (stats.getAttribute(ESM::Attribute::Strength).getModified() * gmst.fDamageStrengthMult->getFloat() * 0.1f);
             }
-            MWMechanics::adjustWeaponDamage(damage, weapon);
+            MWMechanics::adjustWeaponDamage(damage, weapon, ptr);
             MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
             healthdmg = true;
         }

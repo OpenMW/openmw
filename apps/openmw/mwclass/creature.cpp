@@ -249,7 +249,7 @@ namespace MWClass
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ref->mBase->mData.mCombat);
 
-        if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
+        if((::rand()/(RAND_MAX+1.0)) >= hitchance/100.0f)
         {
             victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
@@ -288,9 +288,7 @@ namespace MWClass
             if(attack)
             {
                 damage = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
-                damage *= gmst.find("fDamageStrengthBase")->getFloat() +
-                        (stats.getAttribute(ESM::Attribute::Strength).getModified() * gmst.find("fDamageStrengthMult")->getFloat() * 0.1f);
-                MWMechanics::adjustWeaponDamage(damage, weapon);
+                MWMechanics::adjustWeaponDamage(damage, weapon, ptr);
                 MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
             }
 

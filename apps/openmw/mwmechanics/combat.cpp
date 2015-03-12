@@ -186,29 +186,23 @@ namespace MWMechanics
         int skillValue = attacker.getClass().getSkill(attacker,
                                            weapon.getClass().getEquipmentSkill(weapon));
 
-        if((::rand()/(RAND_MAX+1.0)) > getHitChance(attacker, victim, skillValue)/100.0f)
+        if((::rand()/(RAND_MAX+1.0)) >= getHitChance(attacker, victim, skillValue)/100.0f)
         {
             victim.getClass().onHit(victim, 0.0f, false, projectile, attacker, false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, attacker);
             return;
         }
 
-        float fDamageStrengthBase = gmst.find("fDamageStrengthBase")->getFloat();
-        float fDamageStrengthMult = gmst.find("fDamageStrengthMult")->getFloat();
 
         const unsigned char* attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
         float damage = attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength()); // Bow/crossbow damage
-        if (weapon != projectile)
-        {
-            // Arrow/bolt damage
-            attack = projectile.get<ESM::Weapon>()->mBase->mData.mChop;
-            damage += attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength());
-        }
 
-        damage *= fDamageStrengthBase +
-                (attackerStats.getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult * 0.1f);
+        // Arrow/bolt damage
+        // NB in case of thrown weapons, we are applying the damage twice since projectile == weapon
+        attack = projectile.get<ESM::Weapon>()->mBase->mData.mChop;
+        damage += attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength());
 
-        adjustWeaponDamage(damage, weapon);
+        adjustWeaponDamage(damage, weapon, attacker);
         reduceWeaponCondition(damage, true, weapon, attacker);
 
         if(attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
@@ -347,7 +341,7 @@ namespace MWMechanics
         }
     }
 
-    void adjustWeaponDamage(float &damage, const MWWorld::Ptr &weapon)
+    void adjustWeaponDamage(float &damage, const MWWorld::Ptr &weapon, const MWWorld::Ptr& attacker)
     {
         if (weapon.isEmpty())
             return;
@@ -359,6 +353,13 @@ namespace MWMechanics
             int weapmaxhealth = weapon.getClass().getItemMaxHealth(weapon);
             damage *= (float(weaphealth) / weapmaxhealth);
         }
+
+        static const float fDamageStrengthBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                .find("fDamageStrengthBase")->getFloat();
+        static const float fDamageStrengthMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                .find("fDamageStrengthMult")->getFloat();
+        damage *= fDamageStrengthBase +
+                (attacker.getClass().getCreatureStats(attacker).getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult * 0.1f);
     }
 
     void getHandToHandDamage(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, float &damage, bool &healthdmg)
