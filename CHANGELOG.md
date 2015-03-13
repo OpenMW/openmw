@@ -1,3 +1,42 @@
+0.35.1
+------
+
+    Bug #781: incorrect trajectory of the sun
+    Bug #1079: Wrong starting position in "Character Stuff Wonderland"
+    Bug #1443: Repetitive taking of a stolen object is repetitively considered as a crime
+    Bug #1533: Divine Intervention goes to the wrong place.
+    Bug #1714: No visual indicator for time passed during training
+    Bug #1916: Telekinesis does not allow safe opening of traps
+    Bug #2227: Editor: addon file name inconsistency
+    Bug #2271: Player can melee enemies from water with impunity
+    Bug #2275: Objects with bigger scale move further using Move script
+    Bug #2285: Aryon's Dominator enchantment does not work properly
+    Bug #2290: No punishment for stealing gold from owned containers
+    Bug #2328: Launcher does not respond to Ctrl+C
+    Bug #2334: Drag-and-drop on a content file in the launcher creates duplicate items
+    Bug #2338: Arrows reclaimed from corpses do not stack sometimes
+    Bug #2344: Launcher - Settings importer running correctly?
+    Bug #2346: Launcher - Importing plugins into content list screws up the load order
+    Bug #2348: Mod: H.E.L.L.U.V.A. Handy Holdables does not appear in the content list
+    Bug #2353: Detect Animal detects dead creatures
+    Bug #2354: Cmake does not respect LIB_SUFFIX
+    Bug #2356: Active magic set inactive when switching magic items
+    Bug #2361: ERROR: ESM Error: Previous record contains unread bytes
+    Bug #2382: Switching spells with "next spell" or "previous spell" while holding shift promps delete spell dialog
+    Bug #2388: Regression: Can't toggle map on/off
+    Bug #2392: MOD Shrines - Restore Health and Cancel Options adds 100 health points
+    Bug #2394: List of Data Files tab in openmw-laucher needs to show all content files.
+    Bug #2402: Editor: skills saved incorrectly
+    Bug #2408: Equipping a constant effect Restore Health/Magicka/Fatigue item will permanently boost the stat it's restoring
+    Bug #2415: It is now possible to fall off the prison ship into the water when starting a new game
+    Bug #2419: MOD MCA crash to desktop
+    Bug #2420: Game crashes when character enters a certain area
+    Bug #2421: infinite loop when using cycle weapon without having a weapon
+    Feature #2221: Cannot dress dead NPCs
+    Feature #2349: Check CMake sets correct MSVC compiler settings for release build.
+    Feature #2397: Set default values for global mandatory records.
+    Feature #2412: Basic joystick support
+
 0.35.0
 ------
 

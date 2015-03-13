@@ -12,7 +12,7 @@
 namespace CSMWorld
 {
     struct Cell;
-    struct UniversalId;
+    class UniversalId;
 
     /// \brief References in cells
     class RefCollection : public Collection<CellRef>
