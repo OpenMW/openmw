@@ -150,7 +150,7 @@ namespace BtOgre {
                 if (i == mBoneIndex->end())
                 {
                     l = new Vector3Array;
-                    mBoneIndex->insert(BoneKeyIndex(currBone, l));
+                    mBoneIndex->insert(std::make_pair(currBone, l));
                 }
                 else
                 {

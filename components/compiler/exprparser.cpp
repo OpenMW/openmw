@@ -324,7 +324,7 @@ namespace Compiler
                     mNextOperand = false;
                     mOperands.push_back ('l');
 
-                    return 2;
+                    return true;
                 }
             }
 
