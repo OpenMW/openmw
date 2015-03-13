@@ -205,10 +205,8 @@ namespace MWBase
             ///< Return a pointer to a liveCellRef which contains \a ptr.
             /// \note Search is limited to the active cells.
 
-            /// \todo enable reference in the OGRE scene
             virtual void enable (const MWWorld::Ptr& ptr) = 0;
 
-            /// \todo disable reference in the OGRE scene
             virtual void disable (const MWWorld::Ptr& ptr) = 0;
 
             virtual void advanceTime (double hours) = 0;

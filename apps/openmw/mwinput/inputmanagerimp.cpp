@@ -33,8 +33,6 @@
 
 #include "../mwdialogue/dialoguemanagerimp.hpp"
 
-#include "../mwgui/windowbase.hpp"
-
 #include <iostream>
 
 using namespace ICS;
@@ -124,6 +122,8 @@ namespace MWInput
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
+        , mSneakToggles(Settings::Manager::getBool("toggle sneak", "Input"))
+        , mSneaking(false)
         , mAttemptJump(false)
         , mControlsDisabled(false)
         , mJoystickLastUsed(false)
@@ -354,6 +354,12 @@ namespace MWInput
             case A_CycleWeaponRight:
                 MWBase::Environment::get().getWindowManager()->cycleWeapon(true);
                 break;
+            case A_Sneak:
+                if (mSneakToggles)
+                {
+                    toggleSneaking();
+                }
+                break;
             }
         }
     }
@@ -522,7 +528,10 @@ namespace MWInput
                     }
                 }
 
-                mPlayer->setSneak(actionIsActive(A_Sneak));
+                if (!mSneakToggles)
+                {
+                    mPlayer->setSneak(actionIsActive(A_Sneak));
+                }
 
                 if (mAttemptJump && mControlSwitch["playerjumping"])
                 {
@@ -887,7 +896,7 @@ namespace MWInput
     void InputManager::toggleMainMenu()
     {
         if (MyGUI::InputManager::getInstance().isModalAny()) {
-            MWBase::Environment::get().getWindowManager()->getCurrentModal()->exit();
+            MWBase::Environment::get().getWindowManager()->exitCurrentModal();
             return;
         }
 
@@ -1061,7 +1070,7 @@ namespace MWInput
         }
         else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu) {
             while(MyGUI::InputManager::getInstance().isModalAny()) { //Handle any open Modal windows
-                MWBase::Environment::get().getWindowManager()->getCurrentModal()->exit();
+                MWBase::Environment::get().getWindowManager()->exitCurrentModal();
             }
             MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode(); //And handle the actual main window
         }
@@ -1087,6 +1096,13 @@ namespace MWInput
         mAlwaysRunActive = !mAlwaysRunActive;
 
         Settings::Manager::setBool("always run", "Input", mAlwaysRunActive);
+    }
+
+    void InputManager::toggleSneaking()
+    {
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
+        mSneaking = !mSneaking;
+        mPlayer->setSneak(mSneaking);
     }
 
     void InputManager::resetIdleTime()

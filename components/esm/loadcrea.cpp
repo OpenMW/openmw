@@ -15,6 +15,7 @@ namespace ESM {
         mAiPackage.mList.clear();
         mInventory.mList.clear();
         mSpells.mList.clear();
+        mTransport.mList.clear();
 
         mScale = 1.f;
         mHasAI = false;
@@ -59,6 +60,10 @@ namespace ESM {
                     esm.getHExact(&mAiData, sizeof(mAiData));
                     mHasAI = true;
                     break;
+                case ESM::FourCC<'D','O','D','T'>::value:
+                case ESM::FourCC<'D','N','A','M'>::value:
+                    mTransport.add(esm);
+                    break;
                 case AI_Wander:
                 case AI_Activate:
                 case AI_Escort:
@@ -94,6 +99,7 @@ namespace ESM {
         if (mHasAI) {
             esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
         }
+        mTransport.save(esm);
         mAiPackage.save(esm);
     }
 
@@ -120,5 +126,11 @@ namespace ESM {
         mAiData.blank();
         mAiData.mServices = 0;
         mAiPackage.mList.clear();
+        mTransport.mList.clear();
+    }
+
+    const std::vector<Transport::Dest>& Creature::getTransport() const
+    {
+        return mTransport.mList;
     }
 }

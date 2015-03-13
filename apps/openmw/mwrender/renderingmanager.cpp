@@ -321,7 +321,7 @@ void RenderingManager::updatePlayerPtr(const MWWorld::Ptr &ptr)
 void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
 {
     NpcAnimation *anim = NULL;
-    if(ptr.getRefData().getHandle() == "player")
+    if(ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
         anim = mPlayerAnimation;
     else if(ptr.getClass().isActor())
         anim = dynamic_cast<NpcAnimation*>(mActors->getAnimation(ptr));
@@ -955,7 +955,7 @@ Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
 {
     Animation *anim = mActors->getAnimation(ptr);
 
-    if(!anim && ptr.getRefData().getHandle() == "player")
+    if(!anim && ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
         anim = mPlayerAnimation;
 
     if (!anim)

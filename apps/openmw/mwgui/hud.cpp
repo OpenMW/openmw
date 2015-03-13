@@ -24,7 +24,6 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "inventorywindow.hpp"
-#include "console.hpp"
 #include "spellicons.hpp"
 #include "itemmodel.hpp"
 #include "draganddrop.hpp"
@@ -309,7 +308,7 @@ namespace MWGui
             MWWorld::Ptr object = MWBase::Environment::get().getWorld()->getFacedObject();
 
             if (mode == GM_Console)
-                MWBase::Environment::get().getWindowManager()->getConsole()->setSelectedObject(object);
+                MWBase::Environment::get().getWindowManager()->setConsoleSelectedObject(object);
             else if ((mode == GM_Container) || (mode == GM_Inventory))
             {
                 // pick up object

@@ -1406,7 +1406,7 @@ namespace MWWorld
         PtrVelocityList::const_iterator player(results.end());
         for(PtrVelocityList::const_iterator iter(results.begin());iter != results.end();++iter)
         {
-            if(iter->first.getRefData().getHandle() == "player")
+            if(iter->first == getPlayerPtr())
             {
                 /* Handle player last, in case a cell transition occurs */
                 player = iter;
@@ -2228,7 +2228,7 @@ namespace MWWorld
 
             if (healthPerSecond > 0.0f)
             {
-                if (actor.getRefData().getHandle() == "player")
+                if (actor == getPlayerPtr())
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
 
                 if (!MWBase::Environment::get().getSoundManager()->getSoundPlaying(actor, "Health Damage"))
@@ -2259,7 +2259,7 @@ namespace MWWorld
 
             if (healthPerSecond > 0.0f)
             {
-                if (actor.getRefData().getHandle() == "player")
+                if (actor == getPlayerPtr())
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
 
                 if (!MWBase::Environment::get().getSoundManager()->getSoundPlaying(actor, "Health Damage"))
@@ -2516,7 +2516,7 @@ namespace MWWorld
         // the following is just for reattaching the camera properly.
         mRendering->rebuildPtr(actor);
 
-        if(actor.getRefData().getHandle() == "player")
+        if(actor == getPlayerPtr())
         {
             // Update the GUI only when called on the player
             MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
@@ -3167,7 +3167,7 @@ namespace MWWorld
 
     void World::spawnBloodEffect(const Ptr &ptr, const Vector3 &worldPosition)
     {
-        if (ptr.getRefData().getHandle() == "player" && Settings::Manager::getBool("hit fader", "GUI"))
+        if (ptr == getPlayerPtr() && Settings::Manager::getBool("hit fader", "GUI"))
             return;
 
         int type = ptr.getClass().getBloodTexture(ptr);

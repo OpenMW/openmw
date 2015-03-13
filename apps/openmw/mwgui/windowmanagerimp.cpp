@@ -715,16 +715,6 @@ namespace MWGui
         mPlayerMinorSkills = minor;
     }
 
-    void WindowManager::setReputation (int reputation)
-    {
-        mStatsWindow->setReputation (reputation);
-    }
-
-    void WindowManager::setBounty (int bounty)
-    {
-        mStatsWindow->setBounty (bounty);
-    }
-
     void WindowManager::updateSkillArea()
     {
         mStatsWindow->updateSkillArea();
@@ -1287,17 +1277,10 @@ namespace MWGui
     }
 
     MWGui::DialogueWindow* WindowManager::getDialogueWindow() { return mDialogueWindow;  }
-    MWGui::ContainerWindow* WindowManager::getContainerWindow() { return mContainerWindow; }
     MWGui::InventoryWindow* WindowManager::getInventoryWindow() { return mInventoryWindow; }
-    MWGui::BookWindow* WindowManager::getBookWindow() { return mBookWindow; }
-    MWGui::ScrollWindow* WindowManager::getScrollWindow() { return mScrollWindow; }
     MWGui::CountDialog* WindowManager::getCountDialog() { return mCountDialog; }
     MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog() { return mConfirmationDialog; }
     MWGui::TradeWindow* WindowManager::getTradeWindow() { return mTradeWindow; }
-    MWGui::SpellBuyingWindow* WindowManager::getSpellBuyingWindow() { return mSpellBuyingWindow; }
-    MWGui::TravelWindow* WindowManager::getTravelWindow() { return mTravelWindow; }
-    MWGui::SpellWindow* WindowManager::getSpellWindow() { return mSpellWindow; }
-    MWGui::Console* WindowManager::getConsole() { return mConsole; }
 
     bool WindowManager::isAllowed (GuiWindow wnd) const
     {
@@ -1459,11 +1442,13 @@ namespace MWGui
 
     void WindowManager::startSpellMaking(MWWorld::Ptr actor)
     {
+        pushGuiMode(GM_SpellCreation);
         mSpellCreationDialog->startSpellMaking (actor);
     }
 
     void WindowManager::startEnchanting (MWWorld::Ptr actor)
     {
+        pushGuiMode(GM_Enchanting);
         mEnchantingDialog->startEnchanting (actor);
     }
 
@@ -1474,16 +1459,19 @@ namespace MWGui
 
     void WindowManager::startTraining(MWWorld::Ptr actor)
     {
+        pushGuiMode(GM_Training);
         mTrainingWindow->startTraining(actor);
     }
 
     void WindowManager::startRepair(MWWorld::Ptr actor)
     {
+        pushGuiMode(GM_MerchantRepair);
         mMerchantRepair->startRepair(actor);
     }
 
     void WindowManager::startRepairItem(MWWorld::Ptr item)
     {
+        pushGuiMode(MWGui::GM_Repair);
         mRepair->startRepairItem(item);
     }
 
@@ -1494,6 +1482,7 @@ namespace MWGui
 
     void WindowManager::showCompanionWindow(MWWorld::Ptr actor)
     {
+        pushGuiMode(MWGui::GM_Companion);
         mCompanionWindow->open(actor);
     }
 
@@ -1744,12 +1733,10 @@ namespace MWGui
         mVideoWidget->autoResize(stretch);
     }
 
-    WindowModal* WindowManager::getCurrentModal() const
+    void WindowManager::exitCurrentModal()
     {
-        if(!mCurrentModals.empty())
-            return mCurrentModals.top();
-        else
-            return NULL;
+        if (!mCurrentModals.empty())
+            mCurrentModals.top()->exit();
     }
 
     void WindowManager::removeCurrentModal(WindowModal* input)
@@ -1872,6 +1859,53 @@ namespace MWGui
     void WindowManager::cycleWeapon(bool next)
     {
         mInventoryWindow->cycle(next);
+    }
+
+    void WindowManager::setConsoleSelectedObject(const MWWorld::Ptr &object)
+    {
+        mConsole->setSelectedObject(object);
+    }
+
+    void WindowManager::updateSpellWindow()
+    {
+        if (mSpellWindow)
+            mSpellWindow->updateSpells();
+    }
+
+    void WindowManager::startTravel(const MWWorld::Ptr &actor)
+    {
+        pushGuiMode(GM_Travel);
+        mTravelWindow->startTravel(actor);
+    }
+
+    void WindowManager::startSpellBuying(const MWWorld::Ptr &actor)
+    {
+        pushGuiMode(GM_SpellBuying);
+        mSpellBuyingWindow->startSpellBuying(actor);
+    }
+
+    void WindowManager::startTrade(const MWWorld::Ptr &actor)
+    {
+        pushGuiMode(GM_Barter);
+        mTradeWindow->startTrade(actor);
+    }
+
+    void WindowManager::openContainer(const MWWorld::Ptr &container, bool loot)
+    {
+        pushGuiMode(GM_Container);
+        mContainerWindow->open(container, loot);
+    }
+
+    void WindowManager::showBook(const MWWorld::Ptr &item, bool showTakeButton)
+    {
+        pushGuiMode(GM_Book);
+        mBookWindow->open(item, showTakeButton);
+    }
+
+    void WindowManager::showScroll(const MWWorld::Ptr &item, bool showTakeButton)
+    {
+        pushGuiMode(GM_Scroll);
+        mScrollWindow->open(item, showTakeButton);
     }
 
 }

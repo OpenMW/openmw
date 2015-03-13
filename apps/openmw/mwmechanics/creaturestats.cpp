@@ -336,7 +336,7 @@ namespace MWMechanics
         float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                         (getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         evasion *= getFatigueTerm();
-        evasion += mMagicEffects.get(ESM::MagicEffect::Sanctuary).getMagnitude();
+        evasion += std::min(100.f, mMagicEffects.get(ESM::MagicEffect::Sanctuary).getMagnitude());
 
         return evasion;
     }
