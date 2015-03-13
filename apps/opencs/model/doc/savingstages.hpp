@@ -126,7 +126,6 @@ namespace CSMDoc
 
     class WriteDialogueCollectionStage : public Stage
     {
-            Document& mDocument;
             SavingState& mState;
             const CSMWorld::IdCollection<ESM::Dialogue>& mTopics;
             CSMWorld::InfoCollection& mInfos;
