@@ -473,7 +473,6 @@ namespace MWClass
     void Npc::hit(const MWWorld::Ptr& ptr, int type) const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        const GMST& gmst = getGmst();
 
         const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
 
