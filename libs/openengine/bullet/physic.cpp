@@ -828,7 +828,7 @@ namespace Physic
         if (callback.hasHit())
             return std::make_pair(true, callback.m_closestHitFraction);
         else
-            return std::make_pair(false, 1);
+            return std::make_pair(false, 1.0f);
     }
 
     std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(const btVector3& from, const btVector3& to, int filterGroup)

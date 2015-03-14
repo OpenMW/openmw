@@ -117,6 +117,13 @@ BulletShapePtr BulletShapeManager::create (const Ogre::String& name, const Ogre:
     return createResource(name,group,isManual,loader,createParams).staticCast<BulletShape>();
 }
 
+Ogre::ResourcePtr BulletShapeManager::load(const Ogre::String &name, const Ogre::String &group,
+        bool isManual, Ogre::ManualResourceLoader *loader, const Ogre::NameValuePairList *loadParams,
+        bool backgroundThread)
+{
+    return this->load(name, group);
+}
+
 BulletShapePtr BulletShapeManager::load(const Ogre::String &name, const Ogre::String &group)
 {
     BulletShapePtr textf = getByName(name);

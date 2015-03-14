@@ -90,7 +90,7 @@ void CSMDoc::WriteHeaderStage::perform (int stage, Messages& messages)
 
 CSMDoc::WriteDialogueCollectionStage::WriteDialogueCollectionStage (Document& document,
     SavingState& state, bool journal)
-: mDocument (document), mState (state),
+: mState (state),
   mTopics (journal ? document.getData().getJournals() : document.getData().getTopics()),
   mInfos (journal ? document.getData().getJournalInfos() : document.getData().getTopicInfos())
 {}

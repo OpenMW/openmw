@@ -29,7 +29,7 @@ namespace MWWorld
         virtual bool eraseStatic(const std::string &id) {return false;}
         virtual void clearDynamic() {}
 
-        virtual void write (ESM::ESMWriter& writer) const {}
+        virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const {}
 
         virtual void read (ESM::ESMReader& reader, const std::string& id) {}
         ///< Read into dynamic storage
@@ -234,7 +234,7 @@ namespace MWWorld
 
         int getDynamicSize() const
         {
-            return mDynamic.size();
+            return static_cast<int> (mDynamic.size()); // truncated from unsigned __int64 if _MSC_VER && _WIN64
         }
 
         void listIdentifier(std::vector<std::string> &list) const {

@@ -17,7 +17,7 @@
 
 namespace Files
 {
-    class ConfigurationManager;
+    struct ConfigurationManager;
 }
 
 namespace CSMDoc
@@ -50,7 +50,7 @@ namespace CSMDoc
             ///< \param new_ Do not load the last content file in \a files and instead create in an
             /// appropriate way.
 
-	    void setResourceDir (const boost::filesystem::path& parResDir);
+            void setResourceDir (const boost::filesystem::path& parResDir);
 
             void setEncoding (ToUTF8::FromType encoding);
 
@@ -61,7 +61,7 @@ namespace CSMDoc
 
         private:
 
-	    boost::filesystem::path mResDir;
+            boost::filesystem::path mResDir;
 
         private slots:
 
