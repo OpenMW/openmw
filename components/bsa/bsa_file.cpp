@@ -79,7 +79,7 @@ void BSAFile::readHeader()
     bfs::ifstream input(bfs::path(filename), std::ios_base::binary);
 
     // Total archive size
-    size_t fsize = 0;
+    std::streamoff fsize = 0;
     if(input.seekg(0, std::ios_base::end))
     {
         fsize = input.tellg();

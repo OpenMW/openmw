@@ -343,7 +343,7 @@ namespace MWGui
             else
                 d = int(100 * (b - a) / a);
 
-            float clampedDisposition = std::max<float>(0,std::min<float>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
+            int clampedDisposition = std::max(0, std::min(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
                 + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange(),100));
 
             const MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
