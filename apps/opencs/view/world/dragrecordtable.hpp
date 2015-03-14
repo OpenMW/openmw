@@ -33,7 +33,7 @@ namespace CSVWorld
             void setEditLock(bool locked);
 
         protected:
-            void startDragToTable(const DragRecordTable& table);
+            void startDragFromTable(const DragRecordTable& table);
 
             void dragEnterEvent(QDragEnterEvent *event);
 
