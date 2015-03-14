@@ -5,7 +5,7 @@ set (OPENCS_SRC main.cpp
 opencs_units (. editor)
 
 opencs_units (model/doc
-    document operation saving documentmanager loader runner
+    document operation saving documentmanager loader runner operationholder
     )
 
 opencs_units_noqt (model/doc
