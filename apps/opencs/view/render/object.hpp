@@ -17,7 +17,7 @@ namespace Ogre
 namespace CSMWorld
 {
     class Data;
-    class CellRef;
+    struct CellRef;
 }
 
 namespace CSVWorld

@@ -140,6 +140,12 @@ void CSVWorld::CommandDelegate::setModelData (QWidget *editor, QAbstractItemMode
 }
 
 QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleOptionViewItem& option,
+    const QModelIndex& index) const
+{
+    return createEditor (parent, option, index, CSMWorld::ColumnBase::Display_None);
+}
+
+QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleOptionViewItem& option,
     const QModelIndex& index, CSMWorld::ColumnBase::Display display) const
 {
     QVariant variant = index.data();
@@ -228,6 +234,11 @@ void CSVWorld::CommandDelegate::setEditLock (bool locked)
 bool CSVWorld::CommandDelegate::isEditLocked() const
 {
     return mEditLock;
+}
+
+void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index) const
+{
+    setEditorData (editor, index, false);
 }
 
 void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const
