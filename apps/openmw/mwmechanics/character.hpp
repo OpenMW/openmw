@@ -21,7 +21,7 @@ namespace MWRender
 namespace MWMechanics
 {
 
-class Movement;
+struct Movement;
 class CreatureStats;
 
 enum Priority {

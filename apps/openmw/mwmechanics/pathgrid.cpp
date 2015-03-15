@@ -27,7 +27,7 @@ namespace
     //
     float manhattan(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b)
     {
-        return 300 * (abs(a.mX - b.mX) + abs(a.mY - b.mY) + abs(a.mZ - b.mZ));
+        return 300.0f * (abs(a.mX - b.mX) + abs(a.mY - b.mY) + abs(a.mZ - b.mZ));
     }
 
     // Choose a heuristics - Note that these may not be the best for directed
@@ -317,23 +317,23 @@ namespace MWMechanics
         float yCell = 0;
         if (mIsExterior)
         {
-            xCell = mPathgrid->mData.mX * ESM::Land::REAL_SIZE;
-            yCell = mPathgrid->mData.mY * ESM::Land::REAL_SIZE;
+            xCell = static_cast<float>(mPathgrid->mData.mX * ESM::Land::REAL_SIZE);
+            yCell = static_cast<float>(mPathgrid->mData.mY * ESM::Land::REAL_SIZE);
         }
 
         while(graphParent[current] != -1)
         {
             ESM::Pathgrid::Point pt = mPathgrid->mPoints[current];
-            pt.mX += xCell;
-            pt.mY += yCell;
+            pt.mX += static_cast<int>(xCell);
+            pt.mY += static_cast<int>(yCell);
             path.push_front(pt);
             current = graphParent[current];
         }
 
         // add first node to path explicitly
         ESM::Pathgrid::Point pt = mPathgrid->mPoints[start];
-        pt.mX += xCell;
-        pt.mY += yCell;
+        pt.mX += static_cast<int>(xCell);
+        pt.mY += static_cast<int>(yCell);
         path.push_front(pt);
         return path;
     }

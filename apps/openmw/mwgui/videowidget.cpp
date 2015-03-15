@@ -58,8 +58,8 @@ void VideoWidget::autoResize(bool stretch)
     {
         double imageaspect = static_cast<double>(getVideoWidth())/getVideoHeight();
 
-        int leftPadding = std::max(0.0, (screenSize.width - screenSize.height * imageaspect) / 2);
-        int topPadding = std::max(0.0, (screenSize.height - screenSize.width / imageaspect) / 2);
+        int leftPadding = std::max(0, static_cast<int>(screenSize.width - screenSize.height * imageaspect) / 2);
+        int topPadding = std::max(0, static_cast<int>(screenSize.height - screenSize.width / imageaspect) / 2);
 
         setCoord(leftPadding, topPadding,
                                screenSize.width - leftPadding*2, screenSize.height - topPadding*2);

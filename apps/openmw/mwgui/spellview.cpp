@@ -236,10 +236,10 @@ namespace MWGui
 
     void SpellView::onMouseWheel(MyGUI::Widget* _sender, int _rel)
     {
-        if (mScrollView->getViewOffset().top + _rel*0.3 > 0)
+        if (mScrollView->getViewOffset().top + _rel*0.3f > 0)
             mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mScrollView->setViewOffset(MyGUI::IntPoint(0, mScrollView->getViewOffset().top + _rel*0.3));
+            mScrollView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mScrollView->getViewOffset().top + _rel*0.3f)));
     }
 
 }

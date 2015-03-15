@@ -29,9 +29,9 @@ void CSMDoc::Operation::prepareStages()
 CSMDoc::Operation::Operation (int type, bool ordered, bool finalAlways)
 : mType (type), mStages(std::vector<std::pair<Stage *, int> >()), mCurrentStage(mStages.begin()),
   mCurrentStep(0), mCurrentStepTotal(0), mTotalSteps(0), mOrdered (ordered),
-  mFinalAlways (finalAlways), mError(false)
+  mFinalAlways (finalAlways), mError(false), mConnected (false)
 {
-    connect (this, SIGNAL (finished()), this, SLOT (operationDone()));
+    mTimer = new QTimer (this);
 }
 
 CSMDoc::Operation::~Operation()
@@ -42,15 +42,17 @@ CSMDoc::Operation::~Operation()
 
 void CSMDoc::Operation::run()
 {
+    mTimer->stop();
+    
+    if (!mConnected)
+    {
+        connect (mTimer, SIGNAL (timeout()), this, SLOT (executeStage()));
+        mConnected = true;
+    }
+    
     prepareStages();
 
-    QTimer timer;
-
-    timer.connect (&timer, SIGNAL (timeout()), this, SLOT (executeStage()));
-
-    timer.start (0);
-
-    exec();
+    mTimer->start (0);
 }
 
 void CSMDoc::Operation::appendStage (Stage *stage)
@@ -65,7 +67,7 @@ bool CSMDoc::Operation::hasError() const
 
 void CSMDoc::Operation::abort()
 {
-    if (!isRunning())
+    if (!mTimer->isActive())
         return;
 
     mError = true;
@@ -116,10 +118,11 @@ void CSMDoc::Operation::executeStage()
         emit reportMessage (iter->mId, iter->mMessage, iter->mHint, mType);
 
     if (mCurrentStage==mStages.end())
-        exit();
+        operationDone();
 }
 
 void CSMDoc::Operation::operationDone()
 {
+    mTimer->stop();
     emit done (mType, mError);
 }

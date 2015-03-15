@@ -69,13 +69,13 @@ namespace MWRender
         /// \todo Read the fallback values from INIImporter (Inventory:Directional*)
         l = mSceneMgr->createLight();
         l->setType (Ogre::Light::LT_DIRECTIONAL);
-        l->setDirection (Ogre::Vector3(0.3, -0.7, 0.3));
+        l->setDirection (Ogre::Vector3(0.3f, -0.7f, 0.3f));
         l->setDiffuseColour (Ogre::ColourValue(1,1,1));
 
         mSceneMgr->setAmbientLight (Ogre::ColourValue(0.25, 0.25, 0.25));
 
         mCamera = mSceneMgr->createCamera (mName);
-        mCamera->setFOVy(Ogre::Degree(12.3));
+        mCamera->setFOVy(Ogre::Degree(12.3f));
         mCamera->setAspectRatio (float(mSizeX) / float(mSizeY));
 
         Ogre::SceneNode* renderRoot = mSceneMgr->getRootSceneNode()->createChildSceneNode("renderRoot");

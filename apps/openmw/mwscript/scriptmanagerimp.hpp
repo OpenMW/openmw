@@ -16,7 +16,7 @@
 
 namespace MWWorld
 {
-    struct ESMStore;
+    class ESMStore;
 }
 
 namespace Compiler

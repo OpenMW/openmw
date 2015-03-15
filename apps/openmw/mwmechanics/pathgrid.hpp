@@ -6,7 +6,7 @@
 
 namespace ESM
 {
-    class Cell;
+    struct Cell;
 }
 
 namespace MWWorld

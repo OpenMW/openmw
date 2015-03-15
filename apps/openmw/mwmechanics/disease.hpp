@@ -1,6 +1,8 @@
 #ifndef OPENMW_MECHANICS_DISEASE_H
 #define OPENMW_MECHANICS_DISEASE_H
 
+#include <openengine/misc/rng.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -37,21 +39,19 @@ namespace MWMechanics
 
             float resist = 0.f;
             if (spells.hasCorprusEffect(spell))
-                resist = 1.f - 0.01 * (actorEffects.get(ESM::MagicEffect::ResistCorprusDisease).getMagnitude()
+                resist = 1.f - 0.01f * (actorEffects.get(ESM::MagicEffect::ResistCorprusDisease).getMagnitude()
                                         - actorEffects.get(ESM::MagicEffect::WeaknessToCorprusDisease).getMagnitude());
             else if (spell->mData.mType == ESM::Spell::ST_Disease)
-                resist = 1.f - 0.01 * (actorEffects.get(ESM::MagicEffect::ResistCommonDisease).getMagnitude()
+                resist = 1.f - 0.01f * (actorEffects.get(ESM::MagicEffect::ResistCommonDisease).getMagnitude()
                                         - actorEffects.get(ESM::MagicEffect::WeaknessToCommonDisease).getMagnitude());
             else if (spell->mData.mType == ESM::Spell::ST_Blight)
-                resist = 1.f - 0.01 * (actorEffects.get(ESM::MagicEffect::ResistBlightDisease).getMagnitude()
+                resist = 1.f - 0.01f * (actorEffects.get(ESM::MagicEffect::ResistBlightDisease).getMagnitude()
                                         - actorEffects.get(ESM::MagicEffect::WeaknessToBlightDisease).getMagnitude());
             else
                 continue;
 
-            int x = fDiseaseXferChance * 100 * resist;
-            float roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 10000; // [0, 9999]
-
-            if (roll < x)
+            int x = static_cast<int>(fDiseaseXferChance * 100 * resist);
+            if (OEngine::Misc::Rng::rollDice(10000) < x)
             {
                 // Contracted disease!
                 actor.getClass().getCreatureStats(actor).getSpells().add(it->first);

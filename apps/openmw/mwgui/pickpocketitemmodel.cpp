@@ -1,5 +1,7 @@
 #include "pickpocketitemmodel.hpp"
 
+#include <openengine/misc/rng.hpp>
+
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwworld/class.hpp"
 
@@ -12,11 +14,13 @@ namespace MWGui
         int chance = thief.getClass().getSkill(thief, ESM::Skill::Sneak);
 
         mSourceModel->update();
+
+        // build list of items that player is unable to find when attempts to pickpocket.
         if (hideItems)
         {
             for (size_t i = 0; i<mSourceModel->getItemCount(); ++i)
             {
-                if (std::rand() / static_cast<float>(RAND_MAX) * 100 > chance)
+                if (chance <= OEngine::Misc::Rng::roll0to99())
                     mHiddenItems.push_back(mSourceModel->getItem(i));
             }
         }

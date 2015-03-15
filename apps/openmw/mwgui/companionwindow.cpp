@@ -129,7 +129,7 @@ void CompanionWindow::updateEncumbranceBar()
         return;
     float capacity = mPtr.getClass().getCapacity(mPtr);
     float encumbrance = mPtr.getClass().getEncumbrance(mPtr);
-    mEncumbranceBar->setValue(encumbrance, capacity);
+    mEncumbranceBar->setValue(static_cast<int>(encumbrance), static_cast<int>(capacity));
 
     if (mModel && mModel->hasProfit(mPtr))
     {

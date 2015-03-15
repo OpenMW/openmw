@@ -84,7 +84,7 @@ namespace Terrain
         /// adding or removing passes. This can only be achieved by a full rebuild.)
         virtual void applyMaterials(bool shadows, bool splitShadows);
 
-        int getMaxBatchSize() { return mMaxBatchSize; }
+        int getMaxBatchSize() { return static_cast<int>(mMaxBatchSize); }
 
         /// Wait until all background loading is complete.
         void syncLoad();

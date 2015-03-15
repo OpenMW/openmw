@@ -1,10 +1,12 @@
 #ifndef GAME_MWMECHANICS_PATHFINDING_H
 #define GAME_MWMECHANICS_PATHFINDING_H
 
+#include <components/esm/defs.hpp>
 #include <components/esm/loadpgrd.hpp>
 #include <list>
 
 #include <OgreMath.h>
+#include <OgreVector3.h>
 
 namespace MWWorld
 {
@@ -27,11 +29,11 @@ namespace MWMechanics
                 return -1.0;
             }
 
-            static float sgn(float a)
+            static int sgn(int a)
             {
                 if(a > 0)
-                    return 1.0;
-                return -1.0;
+                    return 1;
+                return -1;
             }
 
             void clearPath();
@@ -72,6 +74,24 @@ namespace MWMechanics
             void addPointToPath(ESM::Pathgrid::Point &point)
             {
                 mPath.push_back(point);
+            }
+
+            /// utility function to convert a Ogre::Vector3 to a Pathgrid::Point
+            static ESM::Pathgrid::Point MakePathgridPoint(const Ogre::Vector3& v)
+            {
+                return ESM::Pathgrid::Point(static_cast<int>(v[0]), static_cast<int>(v[1]), static_cast<int>(v[2]));
+            }
+
+            /// utility function to convert an ESM::Position to a Pathgrid::Point
+            static ESM::Pathgrid::Point MakePathgridPoint(const ESM::Position& p)
+            {
+                return ESM::Pathgrid::Point(static_cast<int>(p.pos[0]), static_cast<int>(p.pos[1]), static_cast<int>(p.pos[2]));
+            }
+
+            /// utility function to convert a Pathgrid::Point to a Ogre::Vector3
+            static Ogre::Vector3 MakeOgreVector3(const ESM::Pathgrid::Point& p)
+            {
+                return Ogre::Vector3(static_cast<Ogre::Real>(p.mX), static_cast<Ogre::Real>(p.mY), static_cast<Ogre::Real>(p.mZ));
             }
 
         private:

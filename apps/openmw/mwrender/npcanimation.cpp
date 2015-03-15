@@ -12,6 +12,8 @@
 
 #include <extern/shiny/Main/Factory.hpp>
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -101,7 +103,7 @@ void HeadAnimationTime::setEnabled(bool enabled)
 
 void HeadAnimationTime::resetBlinkTimer()
 {
-    mBlinkTimer = -(2 + (std::rand() / double(RAND_MAX*1.0)) * 6);
+    mBlinkTimer = -(2.0f + OEngine::Misc::Rng::rollDice(6));
 }
 
 void HeadAnimationTime::update(float dt)
@@ -377,7 +379,7 @@ void NpcAnimation::updateParts()
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
-    bool wasArrowAttached = (mAmmunition.get());
+    bool wasArrowAttached = (mAmmunition.get() != NULL);
 
     MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
@@ -941,7 +943,7 @@ void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, boo
     if (!magicEffect->mHit.empty())
     {
         const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
-        bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
+        bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
         // Don't play particle VFX unless the effect is new or it should be looping.
         if (isNew || loop)
             addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");

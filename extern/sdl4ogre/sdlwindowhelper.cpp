@@ -93,7 +93,8 @@ void SDLWindowHelper::setWindowIcon(const std::string &name)
 			int bpp = surface->format->BytesPerPixel;
 			/* Here p is the address to the pixel we want to set */
 			Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
-			Uint32 pixel = SDL_MapRGBA(surface->format, clr.r*255, clr.g*255, clr.b*255, clr.a*255);
+            Uint32 pixel = SDL_MapRGBA(surface->format, static_cast<Uint8>(clr.r * 255), 
+                static_cast<Uint8>(clr.g * 255), static_cast<Uint8>(clr.b * 255), static_cast<Uint8>(clr.a * 255));
 			switch(bpp) {
 			case 1:
 				*p = pixel;

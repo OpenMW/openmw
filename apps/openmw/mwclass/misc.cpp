@@ -259,7 +259,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
             ptr.get<ESM::Miscellaneous>();
-        return ref->mBase->mData.mIsKey;
+        return ref->mBase->mData.mIsKey != 0;
     }
 
 }

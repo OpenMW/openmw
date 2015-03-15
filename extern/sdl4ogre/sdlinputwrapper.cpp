@@ -201,12 +201,12 @@ namespace SFO
 
     bool InputWrapper::isModifierHeld(SDL_Keymod mod)
     {
-        return SDL_GetModState() & mod;
+        return (SDL_GetModState() & mod) != 0;
     }
 
     bool InputWrapper::isKeyDown(SDL_Scancode key)
     {
-        return SDL_GetKeyboardState(NULL)[key];
+        return (SDL_GetKeyboardState(NULL)[key]) != 0;
     }
 
     /// \brief Moves the mouse to the specified point within the viewport

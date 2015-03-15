@@ -18,7 +18,7 @@ namespace CSMWorld
 {
     class RefIdColumn;
     class RefIdData;
-    class RecordBase;
+    struct RecordBase;
     class NestedTableWrapperBase;
     class HelperBase;
 

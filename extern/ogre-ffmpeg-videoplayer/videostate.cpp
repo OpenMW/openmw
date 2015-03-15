@@ -179,7 +179,7 @@ int VideoState::OgreResource_Read(void *user_data, uint8_t *buf, int buf_size)
     {
         return stream->read(buf, buf_size);
     }
-    catch (std::exception& e)
+    catch (std::exception& )
     {
         return 0;
     }
@@ -192,7 +192,7 @@ int VideoState::OgreResource_Write(void *user_data, uint8_t *buf, int buf_size)
     {
         return stream->write(buf, buf_size);
     }
-    catch (std::exception& e)
+    catch (std::exception& )
     {
         return 0;
     }
@@ -206,11 +206,11 @@ int64_t VideoState::OgreResource_Seek(void *user_data, int64_t offset, int whenc
     if(whence == AVSEEK_SIZE)
         return stream->size();
     if(whence == SEEK_SET)
-        stream->seek(offset);
+        stream->seek(static_cast<size_t>(offset));
     else if(whence == SEEK_CUR)
-        stream->seek(stream->tell()+offset);
+        stream->seek(static_cast<size_t>(stream->tell()+offset));
     else if(whence == SEEK_END)
-        stream->seek(stream->size()+offset);
+        stream->seek(static_cast<size_t>(stream->size() + offset));
     else
         return -1;
 
@@ -400,7 +400,7 @@ void VideoState::video_thread_loop(VideoState *self)
             self->pictq_mutex.unlock();
 
             self->frame_last_pts = packet->pts * av_q2d((*self->video_st)->time_base);
-            global_video_pkt_pts = self->frame_last_pts;
+            global_video_pkt_pts = static_cast<int64_t>(self->frame_last_pts);
             continue;
         }
 
@@ -412,9 +412,9 @@ void VideoState::video_thread_loop(VideoState *self)
 
         double pts = 0;
         if(packet->dts != AV_NOPTS_VALUE)
-            pts = packet->dts;
+            pts = static_cast<double>(packet->dts);
         else if(pFrame->opaque && *(int64_t*)pFrame->opaque != AV_NOPTS_VALUE)
-            pts = *(int64_t*)pFrame->opaque;
+            pts = static_cast<double>(*(int64_t*)pFrame->opaque);
         pts *= av_q2d((*self->video_st)->time_base);
 
         av_free_packet(packet);

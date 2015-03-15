@@ -23,9 +23,6 @@
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwrender/characterpreview.hpp"
 
-#include "bookwindow.hpp"
-#include "scrollwindow.hpp"
-#include "spellwindow.hpp"
 #include "itemview.hpp"
 #include "inventoryitemmodel.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -101,7 +98,7 @@ namespace MWGui
     void InventoryWindow::adjustPanes()
     {
         const float aspect = 0.5; // fixed aspect ratio for the avatar image
-        float leftPaneWidth = (mMainWidget->getSize().height-44-mArmorRating->getHeight()) * aspect;
+        int leftPaneWidth = static_cast<int>((mMainWidget->getSize().height - 44 - mArmorRating->getHeight()) * aspect);
         mLeftPane->setSize( leftPaneWidth, mMainWidget->getSize().height-44 );
         mRightPane->setCoord( mLeftPane->getPosition().left + leftPaneWidth + 4,
                               mRightPane->getPosition().top,
@@ -153,10 +150,10 @@ namespace MWGui
         }
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        MyGUI::IntPoint pos (Settings::Manager::getFloat(setting + " x", "Windows") * viewSize.width,
-                             Settings::Manager::getFloat(setting + " y", "Windows") * viewSize.height);
-        MyGUI::IntSize size (Settings::Manager::getFloat(setting + " w", "Windows") * viewSize.width,
-                             Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height);
+        MyGUI::IntPoint pos(static_cast<int>(Settings::Manager::getFloat(setting + " x", "Windows") * viewSize.width),
+                            static_cast<int>(Settings::Manager::getFloat(setting + " y", "Windows") * viewSize.height));
+        MyGUI::IntSize size(static_cast<int>(Settings::Manager::getFloat(setting + " w", "Windows") * viewSize.width),
+                            static_cast<int>(Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height));
 
         if (size.width != mMainWidget->getWidth() || size.height != mMainWidget->getHeight())
             mPreviewResize = true;
@@ -317,8 +314,7 @@ namespace MWGui
 
     void InventoryWindow::updateItemView()
     {
-        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
-            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
 
         mItemView->update();
         mPreviewDirty = true;
@@ -432,13 +428,6 @@ namespace MWGui
 
             action->execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
 
-            // this is necessary for books/scrolls: if they are already in the player's inventory,
-            // the "Take" button should not be visible.
-            // NOTE: the take button is "reset" when the window opens, so we can safely do the following
-            // without screwing up future book windows
-            MWBase::Environment::get().getWindowManager()->getBookWindow()->setTakeButtonShow(false);
-            MWBase::Environment::get().getWindowManager()->getScrollWindow()->setTakeButtonShow(false);
-
             mSkippedToEquip = MWWorld::Ptr();
         }
         else
@@ -519,7 +508,7 @@ namespace MWGui
         float capacity = player.getClass().getCapacity(player);
         float encumbrance = player.getClass().getEncumbrance(player);
         mTradeModel->adjustEncumbrance(encumbrance);
-        mEncumbranceBar->setValue(encumbrance, capacity);
+        mEncumbranceBar->setValue(static_cast<int>(encumbrance), static_cast<int>(capacity));
     }
 
     void InventoryWindow::onFrame()
@@ -568,8 +557,7 @@ namespace MWGui
     void InventoryWindow::notifyContentChanged()
     {
         // update the spell window just in case new enchanted items were added to inventory
-        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
-            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
 
         MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(
                     MWBase::Environment::get().getWorld()->getPlayerPtr());
@@ -626,8 +614,7 @@ namespace MWGui
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, newObject, MWWorld::Ptr(), count);
 
-        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
-            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
     }
 
     void InventoryWindow::cycle(bool next)

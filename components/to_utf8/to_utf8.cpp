@@ -84,11 +84,11 @@ std::string Utf8Encoder::getUtf8(const char* input, size_t size)
     // is also ok.)
     assert(input[size] == 0);
 
-    // TODO: The rest of this function is designed for single-character
+    // Note: The rest of this function is designed for single-character
     // input encodings only. It also assumes that the input the input
-    // encoding shares its first 128 values (0-127) with ASCII. These
-    // conditions must be checked again if you add more input encodings
-    // later.
+    // encoding shares its first 128 values (0-127) with ASCII. There are
+    // no plans to add more encodings to this module (we are using utf8
+    // for new content files), so that shouldn't be an issue.
 
     // Compute output length, and check for pure ascii input at the same
     // time.

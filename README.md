@@ -6,7 +6,7 @@ OpenMW
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-* Version: 0.35.0
+* Version: 0.35.1
 * License: GPL (see docs/license/GPL3.txt for more information)
 * Website: http://www.openmw.org
 * IRC: #openmw on irc.freenode.net
@@ -23,7 +23,7 @@ Getting Started
 * [Testing the game](https://wiki.openmw.org/index.php?title=Testing)
 * [How to contribute](https://wiki.openmw.org/index.php?title=Contribution_Wanted)
 * [Report a bug](http://bugs.openmw.org/projects/openmw) - read the [guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) before submitting your first bug!
-* [Known issues] (http://bugs.openmw.org/projects/openmw/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=7&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=1&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&group_by=tracker)
+* [Known issues](http://bugs.openmw.org/projects/openmw/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=%3D&v%5Bstatus_id%5D%5B%5D=7&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=1&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&group_by=tracker)
 
 The data path
 -------------
@@ -68,9 +68,9 @@ Command line options
                                             of the blacklist is enabled)
       --script-blacklist-use [=arg(=1)] (=1)
                                             enable script blacklisting
-      --load-savegame arg                   load a save game file on game startup 
-                                            (specify an absolute filename or a 
-                                            filename relative to the current 
+      --load-savegame arg                   load a save game file on game startup
+                                            (specify an absolute filename or a
+                                            filename relative to the current
                                             working directory)
       --skip-menu [=arg(=1)] (=0)           skip main menu on game startup
       --new-game [=arg(=1)] (=0)            run new game sequence (ignored if

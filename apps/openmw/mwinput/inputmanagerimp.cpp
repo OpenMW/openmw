@@ -33,8 +33,6 @@
 
 #include "../mwdialogue/dialoguemanagerimp.hpp"
 
-#include "../mwgui/windowbase.hpp"
-
 #include <iostream>
 
 using namespace ICS;
@@ -124,6 +122,8 @@ namespace MWInput
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
+        , mSneakToggles(Settings::Manager::getBool("toggle sneak", "Input"))
+        , mSneaking(false)
         , mAttemptJump(false)
         , mControlsDisabled(false)
         , mJoystickLastUsed(false)
@@ -250,7 +250,7 @@ namespace MWInput
         if (mControlSwitch["playercontrols"])
         {
             if (action == A_Use)
-                mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue);
+                mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue != 0);
             else if (action == A_Jump)
                 mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
         }
@@ -354,6 +354,12 @@ namespace MWInput
             case A_CycleWeaponRight:
                 MWBase::Environment::get().getWindowManager()->cycleWeapon(true);
                 break;
+            case A_Sneak:
+                if (mSneakToggles)
+                {
+                    toggleSneaking();
+                }
+                break;
             }
         }
     }
@@ -377,7 +383,7 @@ namespace MWInput
         //cursor is
         if( !is_relative && was_relative != is_relative )
         {
-            mInputManager->warpMouse(mMouseX, mMouseY);
+            mInputManager->warpMouse(static_cast<int>(mMouseX), static_cast<int>(mMouseY));
         }
     }
 
@@ -415,13 +421,13 @@ namespace MWInput
                 // game mode does not move the position of the GUI cursor
                 mMouseX += xAxis * dt * 1500.0f;
                 mMouseY += yAxis * dt * 1500.0f;
-                mMouseWheel -= zAxis * dt * 1500.0f;
+                mMouseWheel -= static_cast<int>(zAxis * dt * 1500.0f);
 
                 mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
                 mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
 
-                MyGUI::InputManager::getInstance().injectMouseMove( mMouseX, mMouseY, mMouseWheel);
-                mInputManager->warpMouse(mMouseX, mMouseY);
+                MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mMouseX), static_cast<int>(mMouseY), mMouseWheel);
+                mInputManager->warpMouse(static_cast<int>(mMouseX), static_cast<int>(mMouseY));
             }
             if (mMouseLookEnabled)
             {
@@ -522,7 +528,10 @@ namespace MWInput
                     }
                 }
 
-                mPlayer->setSneak(actionIsActive(A_Sneak));
+                if (!mSneakToggles)
+                {
+                    mPlayer->setSneak(actionIsActive(A_Sneak));
+                }
 
                 if (mAttemptJump && mControlSwitch["playerjumping"])
                 {
@@ -703,7 +712,7 @@ namespace MWInput
         if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI only uses these mouse events
         {
             guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id)) && guiMode;
+            guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mMouseX), static_cast<int>(mMouseY), sdlButtonToMyGUI(id)) && guiMode;
             if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
             {
                 MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
@@ -730,7 +739,7 @@ namespace MWInput
             mInputBinder->mouseReleased (arg, id);
         } else {
             bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id)) && guiMode;
+            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mMouseX), static_cast<int>(mMouseY), sdlButtonToMyGUI(id)) && guiMode;
 
             if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
 
@@ -752,8 +761,8 @@ namespace MWInput
 
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-            mMouseX = arg.x;
-            mMouseY = arg.y;
+            mMouseX = static_cast<float>(arg.x);
+            mMouseY = static_cast<float>(arg.y);
 
             mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
             mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
@@ -767,8 +776,8 @@ namespace MWInput
         {
             resetIdleTime();
 
-            double x = arg.xrel * mCameraSensitivity * (1.0f/256.f);
-            double y = arg.yrel * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
+            float x = arg.xrel * mCameraSensitivity * (1.0f/256.f);
+            float y = arg.yrel * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
 
             float rot[3];
             rot[0] = -y;
@@ -784,10 +793,10 @@ namespace MWInput
 
             if (arg.zrel && mControlSwitch["playerviewswitch"] && mControlSwitch["playercontrols"]) //Check to make sure you are allowed to zoomout and there is a change
             {
-                MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.zrel);
+                MWBase::Environment::get().getWorld()->changeVanityModeScale(static_cast<float>(arg.zrel));
 
                 if (Settings::Manager::getBool("allow third person zoom", "Input"))
-                    MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
+                    MWBase::Environment::get().getWorld()->setCameraDistance(static_cast<float>(arg.zrel), true, true);
             }
         }
     }
@@ -802,7 +811,8 @@ namespace MWInput
             guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
             if(!mInputBinder->detectingBindingState())
             {
-                guiMode = MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
+                guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mMouseX), static_cast<int>(mMouseY), 
+                    sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
                 if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
                 {
                     MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
@@ -816,7 +826,7 @@ namespace MWInput
 
         setPlayerControlsEnabled(!guiMode);
 
-        //esc, to leave inital movie screen
+        //esc, to leave initial movie screen
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
         bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
         setPlayerControlsEnabled(!guiFocus);
@@ -833,7 +843,7 @@ namespace MWInput
         else if(arg.button == SDL_CONTROLLER_BUTTON_A || arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
+            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mMouseX), static_cast<int>(mMouseY), sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
 
             if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
 
@@ -843,7 +853,7 @@ namespace MWInput
         else
             mInputBinder->buttonReleased(deviceID, arg);
 
-        //to escape inital movie
+        //to escape initial movie
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
         setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
     }
@@ -886,7 +896,7 @@ namespace MWInput
     void InputManager::toggleMainMenu()
     {
         if (MyGUI::InputManager::getInstance().isModalAny()) {
-            MWBase::Environment::get().getWindowManager()->getCurrentModal()->exit();
+            MWBase::Environment::get().getWindowManager()->exitCurrentModal();
             return;
         }
 
@@ -1060,7 +1070,7 @@ namespace MWInput
         }
         else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu) {
             while(MyGUI::InputManager::getInstance().isModalAny()) { //Handle any open Modal windows
-                MWBase::Environment::get().getWindowManager()->getCurrentModal()->exit();
+                MWBase::Environment::get().getWindowManager()->exitCurrentModal();
             }
             MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode(); //And handle the actual main window
         }
@@ -1086,6 +1096,13 @@ namespace MWInput
         mAlwaysRunActive = !mAlwaysRunActive;
 
         Settings::Manager::setBool("always run", "Input", mAlwaysRunActive);
+    }
+
+    void InputManager::toggleSneaking()
+    {
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
+        mSneaking = !mSneaking;
+        mPlayer->setSneak(mSneaking);
     }
 
     void InputManager::resetIdleTime()
@@ -1236,11 +1253,11 @@ namespace MWInput
             bool controlExists = mInputBinder->getChannel(i)->getControlsCount () != 0;
             if (!controlExists)
             {
-                int inital;
+                float initial;
                 if (defaultButtonBindings.find(i) != defaultButtonBindings.end())
-                    inital = 0.0f;
-                else inital = 0.5f;
-                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, inital, ICS::ICS_MAX, ICS::ICS_MAX);
+                    initial = 0.0f;
+                else initial = 0.5f;
+                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, initial, ICS::ICS_MAX, ICS::ICS_MAX);
                 mInputBinder->addControl(control);
                 control->attachChannel(mInputBinder->getChannel(i), ICS::Channel::DIRECT);
             }

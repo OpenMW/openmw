@@ -20,7 +20,7 @@ message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
 set(OPENMW_VERSION_MINOR 35)
-set(OPENMW_VERSION_RELEASE 0)
+set(OPENMW_VERSION_RELEASE 1)
 
 set(OPENMW_VERSION_COMMITHASH "")
 set(OPENMW_VERSION_TAGHASH "")
@@ -96,43 +96,6 @@ endif()
 
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
-
-# source directory: libs
-
-set(LIBS_DIR ${CMAKE_SOURCE_DIR}/libs)
-
-set(OENGINE_OGRE
-  ${LIBS_DIR}/openengine/ogre/renderer.cpp
-  ${LIBS_DIR}/openengine/ogre/lights.cpp
-  ${LIBS_DIR}/openengine/ogre/selectionbuffer.cpp
-  ${LIBS_DIR}/openengine/ogre/imagerotate.cpp
-)
-
-set(OENGINE_GUI
-  ${LIBS_DIR}/openengine/gui/loglistener.cpp
-  ${LIBS_DIR}/openengine/gui/manager.cpp
-  ${LIBS_DIR}/openengine/gui/layout.cpp
-)
-
-set(OENGINE_BULLET
-    ${LIBS_DIR}/openengine/bullet/BtOgre.cpp
-    ${LIBS_DIR}/openengine/bullet/BtOgreExtras.h
-    ${LIBS_DIR}/openengine/bullet/BtOgreGP.h
-    ${LIBS_DIR}/openengine/bullet/BtOgrePG.h
-    ${LIBS_DIR}/openengine/bullet/physic.cpp
-    ${LIBS_DIR}/openengine/bullet/physic.hpp
-    ${LIBS_DIR}/openengine/bullet/BulletShapeLoader.cpp
-    ${LIBS_DIR}/openengine/bullet/BulletShapeLoader.h
-    ${LIBS_DIR}/openengine/bullet/trace.cpp
-    ${LIBS_DIR}/openengine/bullet/trace.h
-
-)
-
-set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_BULLET})
-source_group(libs\\openengine FILES ${OENGINE_ALL})
-
-set(OPENMW_LIBS ${OENGINE_ALL})
-set(OPENMW_LIBS_HEADER)
 
 # Sound setup
 set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE AVRESAMPLE)
@@ -266,7 +229,8 @@ endif ()
     endif(WIN32)
 endif(OGRE_STATIC)
 
-include_directories("."
+include_directories("." ${LIBS_DIR}
+    SYSTEM
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_INCLUDE_DIRS} ${OGRE_PLUGIN_INCLUDE_DIRS}
     ${OGRE_INCLUDE_DIR}/Overlay ${OGRE_Overlay_INCLUDE_DIR}
     ${SDL2_INCLUDE_DIR}
@@ -275,7 +239,7 @@ include_directories("."
     ${MYGUI_INCLUDE_DIRS}
     ${MYGUI_PLATFORM_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
-    ${LIBS_DIR}
+    ${BULLET_INCLUDE_DIRS}
 )
 
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
@@ -385,22 +349,22 @@ if (NOT WIN32 AND NOT APPLE)
         "${OpenMW_BINARY_DIR}/openmw-cs.desktop")
 endif()
 
-# Compiler settings
-if (CMAKE_COMPILER_IS_GNUCC)
-    set_property(GLOBAL APPEND_STRING PROPERTY COMPILE_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++98 -pedantic -Wno-long-long")
+# CXX Compiler settings
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++98 -pedantic -Wno-long-long")
 
     execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
                 OUTPUT_VARIABLE GCC_VERSION)
-    if ("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
-        set_property(GLOBAL APPEND_STRING PROPERTY COMPILE_FLAGS "-Wno-unused-but-set-parameter")
-    endif("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL GNU AND "${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-parameter")
+    endif(CMAKE_CXX_COMPILER_ID STREQUAL GNU AND "${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
 elseif (MSVC)
     # Enable link-time code generation globally for all linking
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
     set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
     set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
-endif (CMAKE_COMPILER_IS_GNUCC)
+endif (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
 
 IF(NOT WIN32 AND NOT APPLE)
     # Linux building
@@ -572,6 +536,10 @@ if(WIN32)
     include(CPack)
 endif(WIN32)
 
+# Libs
+include_directories(libs)
+add_subdirectory(libs/openengine)
+
 # Extern
 add_subdirectory (extern/shiny)
 add_subdirectory (extern/ogre-ffmpeg-videoplayer)
@@ -705,7 +673,7 @@ if (WIN32)
         set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
 
-    set_property(GLOBAL APPEND_STRING PROPERTY COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNINGS} ${MT_BUILD}")
 
     # boost::wave has a few issues with signed / unsigned conversions, so we suppress those here
     set(SHINY_WARNINGS "${WARNINGS} /wd4245")

@@ -70,7 +70,7 @@ namespace MWGui
         it = mMessageBoxes.begin();
         while(it != mMessageBoxes.end())
         {
-                (*it)->update(height);
+                (*it)->update(static_cast<int>(height));
                 height += (*it)->getHeight();
                 ++it;
         }

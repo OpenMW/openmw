@@ -39,7 +39,7 @@ namespace ICS
 
 namespace MyGUI
 {
-    class MouseButton;
+    struct MouseButton;
 }
 
 namespace Files
@@ -180,6 +180,8 @@ namespace MWInput
         int mMouseWheel;
         bool mUserFileExists;
         bool mAlwaysRunActive;
+        bool mSneakToggles;
+        bool mSneaking;
         bool mAttemptJump;
 
         std::map<std::string, bool> mControlSwitch;
@@ -208,6 +210,7 @@ namespace MWInput
         void toggleJournal();
         void activate();
         void toggleWalking();
+        void toggleSneaking();
         void toggleAutoMove();
         void rest();
         void quickLoad();

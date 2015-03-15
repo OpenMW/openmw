@@ -20,12 +20,12 @@ namespace
     {
         size_t i = 0;
         unsigned long unicode;
-        size_t todo;
+        size_t numbytes;
         unsigned char ch = utf8[i++];
         if (ch <= 0x7F)
         {
             unicode = ch;
-            todo = 0;
+            numbytes = 0;
         }
         else if (ch <= 0xBF)
         {
@@ -34,23 +34,23 @@ namespace
         else if (ch <= 0xDF)
         {
             unicode = ch&0x1F;
-            todo = 1;
+            numbytes = 1;
         }
         else if (ch <= 0xEF)
         {
             unicode = ch&0x0F;
-            todo = 2;
+            numbytes = 2;
         }
         else if (ch <= 0xF7)
         {
             unicode = ch&0x07;
-            todo = 3;
+            numbytes = 3;
         }
         else
         {
             throw std::logic_error("not a UTF-8 string");
         }
-        for (size_t j = 0; j < todo; ++j)
+        for (size_t j = 0; j < numbytes; ++j)
         {
             unsigned char ch = utf8[i++];
             if (ch < 0x80 || ch > 0xBF)
@@ -288,7 +288,7 @@ namespace Gui
             code->addAttribute("advance", data[i].width);
             code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                + MyGUI::utility::toString((fontSize-data[i].ascent)));
-            code->addAttribute("size", MyGUI::IntSize(data[i].width, data[i].height));
+            code->addAttribute("size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
 
             // More hacks! The french game uses several win1252 characters that are not included
             // in the cp437 encoding of the font. Fall back to similar available characters.
@@ -334,7 +334,7 @@ namespace Gui
                     code->addAttribute("advance", data[i].width);
                     code->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                        + MyGUI::utility::toString((fontSize-data[i].ascent)));
-                    code->addAttribute("size", MyGUI::IntSize(data[i].width, data[i].height));
+                    code->addAttribute("size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
                 }
             }
 
@@ -350,7 +350,7 @@ namespace Gui
                 cursorCode->addAttribute("advance", data[i].width);
                 cursorCode->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                    + MyGUI::utility::toString((fontSize-data[i].ascent)));
-                cursorCode->addAttribute("size", MyGUI::IntSize(data[i].width, data[i].height));
+                cursorCode->addAttribute("size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
             }
 
             // Question mark, use for NotDefined marker (used for glyphs not existing in the font)
@@ -365,7 +365,7 @@ namespace Gui
                 cursorCode->addAttribute("advance", data[i].width);
                 cursorCode->addAttribute("bearing", MyGUI::utility::toString(data[i].kerning) + " "
                                    + MyGUI::utility::toString((fontSize-data[i].ascent)));
-                cursorCode->addAttribute("size", MyGUI::IntSize(data[i].width, data[i].height));
+                cursorCode->addAttribute("size", MyGUI::IntSize(static_cast<int>(data[i].width), static_cast<int>(data[i].height)));
             }
         }
 

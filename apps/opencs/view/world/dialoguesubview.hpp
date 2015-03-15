@@ -42,12 +42,9 @@ namespace CSVWorld
         NotEditableSubDelegate(const CSMWorld::IdTable* table,
                                QObject * parent = 0);
 
-        virtual void setEditorData (QLabel* editor,
-                                    const QModelIndex& index) const;
+        virtual void setEditorData (QWidget* editor, const QModelIndex& index) const;
 
-        virtual void setModelData (QWidget* editor, QAbstractItemModel* model,
-                                   const QModelIndex& index,
-                                   CSMWorld::ColumnBase::Display display) const;
+        virtual void setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
 
         virtual void paint (QPainter* painter,
                             const QStyleOptionViewItem& option,
@@ -60,8 +57,7 @@ namespace CSVWorld
 
         virtual QWidget *createEditor (QWidget *parent,
                                 const QStyleOptionViewItem& option,
-                                const QModelIndex& index,
-                                CSMWorld::ColumnBase::Display display = CSMWorld::ColumnBase::Display_None) const;
+                                const QModelIndex& index) const;
     };
 
     //this can't be nested into the DialogueDelegateDispatcher, because it needs to emit signals
@@ -136,10 +132,9 @@ namespace CSVWorld
         virtual void setEditorData (QWidget* editor,
                                     const QModelIndex& index) const;
 
-        virtual void setModelData (QWidget* editor,
-                                   QAbstractItemModel* model,
-                                   const QModelIndex& index,
-                                   CSMWorld::ColumnBase::Display display) const;
+        virtual void setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
+
+        virtual void setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index, CSMWorld::ColumnBase::Display display) const;
 
         virtual void paint (QPainter* painter,
                             const QStyleOptionViewItem& option,

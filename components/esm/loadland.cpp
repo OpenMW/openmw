@@ -11,7 +11,7 @@ namespace ESM
 void Land::LandData::save(ESMWriter &esm)
 {
     if (mDataTypes & Land::DATA_VNML) {
-        esm.writeHNT("VNML", mNormals, sizeof(VNML));
+        esm.writeHNT("VNML", mNormals, sizeof(mNormals));
     }
     if (mDataTypes & Land::DATA_VHGT) {
         VHGT offsets;

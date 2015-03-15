@@ -801,7 +801,7 @@ const CachedSound& OpenAL_Output::getBuffer(const std::string &fname)
     decoder->close();
 
     CachedSound cached;
-    analyzeLoudness(data, srate, chans, type, cached.mLoudnessVector, loudnessFPS);
+    analyzeLoudness(data, srate, chans, type, cached.mLoudnessVector, static_cast<float>(loudnessFPS));
 
     alGenBuffers(1, &buf);
     throwALerror();
@@ -885,7 +885,7 @@ MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, f
         offset=1;
 
     alSourcei(src, AL_BUFFER, buf);
-    alSourcef(src, AL_SEC_OFFSET, sound->getLength()*offset/pitch);
+    alSourcef(src, AL_SEC_OFFSET, static_cast<ALfloat>(sound->getLength()*offset / pitch));
     alSourcePlay(src);
     throwALerror();
 
@@ -910,7 +910,7 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre
 
         sound.reset(new OpenAL_Sound3D(*this, src, buf, pos, vol, basevol, pitch, min, max, flags));
         if (extractLoudness)
-            sound->setLoudnessVector(cached.mLoudnessVector, loudnessFPS);
+            sound->setLoudnessVector(cached.mLoudnessVector, static_cast<float>(loudnessFPS));
     }
     catch(std::exception&)
     {
@@ -929,7 +929,7 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre
         offset=1;
 
     alSourcei(src, AL_BUFFER, buf);
-    alSourcef(src, AL_SEC_OFFSET, sound->getLength()*offset/pitch);
+    alSourcef(src, AL_SEC_OFFSET, static_cast<ALfloat>(sound->getLength()*offset / pitch));
 
     alSourcePlay(src);
     throwALerror();

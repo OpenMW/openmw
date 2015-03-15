@@ -27,8 +27,8 @@ namespace ESMTerrain
         assert(origin.x == (int) origin.x);
         assert(origin.y == (int) origin.y);
 
-        int cellX = origin.x;
-        int cellY = origin.y;
+        int cellX = static_cast<int>(origin.x);
+        int cellY = static_cast<int>(origin.y);
 
         const ESM::Land* land = getLand(cellX, cellY);
         if (!land || !(land->mDataTypes&ESM::Land::DATA_VHGT))
@@ -135,10 +135,10 @@ namespace ESMTerrain
         assert(origin.x == (int) origin.x);
         assert(origin.y == (int) origin.y);
 
-        int startX = origin.x;
-        int startY = origin.y;
+        int startX = static_cast<int>(origin.x);
+        int startY = static_cast<int>(origin.y);
 
-        size_t numVerts = size*(ESM::Land::LAND_SIZE-1)/increment + 1;
+        size_t numVerts = static_cast<size_t>(size*(ESM::Land::LAND_SIZE - 1) / increment + 1);
 
         colours.resize(numVerts*numVerts*4);
         positions.resize(numVerts*numVerts*3);
@@ -175,12 +175,12 @@ namespace ESMTerrain
                     vertX = vertX_;
                     for (int row=rowStart; row<ESM::Land::LAND_SIZE; row += increment)
                     {
-                        positions[vertX*numVerts*3 + vertY*3] = ((vertX/float(numVerts-1)-0.5) * size * 8192);
-                        positions[vertX*numVerts*3 + vertY*3 + 1] = ((vertY/float(numVerts-1)-0.5) * size * 8192);
+                        positions[static_cast<unsigned int>(vertX*numVerts * 3 + vertY * 3)] = ((vertX / float(numVerts - 1) - 0.5f) * size * 8192);
+                        positions[static_cast<unsigned int>(vertX*numVerts * 3 + vertY * 3 + 1)] = ((vertY / float(numVerts - 1) - 0.5f) * size * 8192);
                         if (land)
-                            positions[vertX*numVerts*3 + vertY*3 + 2] = land->mLandData->mHeights[col*ESM::Land::LAND_SIZE+row];
+                            positions[static_cast<unsigned int>(vertX*numVerts * 3 + vertY * 3 + 2)] = land->mLandData->mHeights[col*ESM::Land::LAND_SIZE + row];
                         else
-                            positions[vertX*numVerts*3 + vertY*3 + 2] = -2048;
+                            positions[static_cast<unsigned int>(vertX*numVerts * 3 + vertY * 3 + 2)] = -2048;
 
                         if (land && land->mDataTypes&ESM::Land::DATA_VNML)
                         {
@@ -202,9 +202,9 @@ namespace ESMTerrain
 
                         assert(normal.z > 0);
 
-                        normals[vertX*numVerts*3 + vertY*3] = normal.x;
-                        normals[vertX*numVerts*3 + vertY*3 + 1] = normal.y;
-                        normals[vertX*numVerts*3 + vertY*3 + 2] = normal.z;
+                        normals[static_cast<unsigned int>(vertX*numVerts * 3 + vertY * 3)] = normal.x;
+                        normals[static_cast<unsigned int>(vertX*numVerts * 3 + vertY * 3 + 1)] = normal.y;
+                        normals[static_cast<unsigned int>(vertX*numVerts * 3 + vertY * 3 + 2)] = normal.z;
 
                         if (land && land->mDataTypes&ESM::Land::DATA_VCLR)
                         {
@@ -226,7 +226,7 @@ namespace ESMTerrain
                         color.a = 1;
                         Ogre::uint32 rsColor;
                         Ogre::Root::getSingleton().getRenderSystem()->convertColourValue(color, &rsColor);
-                        memcpy(&colours[vertX*numVerts*4 + vertY*4], &rsColor, sizeof(Ogre::uint32));
+                        memcpy(&colours[static_cast<unsigned int>(vertX*numVerts * 4 + vertY * 4)], &rsColor, sizeof(Ogre::uint32));
 
                         ++vertX;
                     }
@@ -293,7 +293,7 @@ namespace ESMTerrain
         {
             out.push_back(Terrain::LayerCollection());
             out.back().mTarget = *it;
-            getBlendmapsImpl((*it)->getSize(), (*it)->getCenter(), pack, out.back().mBlendmaps, out.back().mLayers);
+            getBlendmapsImpl(static_cast<float>((*it)->getSize()), (*it)->getCenter(), pack, out.back().mBlendmaps, out.back().mLayers);
         }
     }
 
@@ -311,8 +311,8 @@ namespace ESMTerrain
         // and interpolate the rest of the cell by hand? :/
 
         Ogre::Vector2 origin = chunkCenter - Ogre::Vector2(chunkSize/2.f, chunkSize/2.f);
-        int cellX = origin.x;
-        int cellY = origin.y;
+        int cellX = static_cast<int>(origin.x);
+        int cellY = static_cast<int>(origin.y);
 
         // Save the used texture indices so we know the total number of textures
         // and number of required blend maps
@@ -343,7 +343,7 @@ namespace ESMTerrain
 
         int numTextures = textureIndices.size();
         // numTextures-1 since the base layer doesn't need blending
-        int numBlendmaps = pack ? std::ceil((numTextures-1) / 4.f) : (numTextures-1);
+        int numBlendmaps = pack ? static_cast<int>(std::ceil((numTextures - 1) / 4.f)) : (numTextures - 1);
 
         int channels = pack ? 4 : 1;
 
@@ -364,7 +364,7 @@ namespace ESMTerrain
                 {
                     UniqueTextureId id = getVtexIndexAt(cellX, cellY, x, y);
                     int layerIndex = textureIndicesMap.find(id)->second;
-                    int blendIndex = (pack ? std::floor((layerIndex-1)/4.f) : layerIndex-1);
+                    int blendIndex = (pack ? static_cast<int>(std::floor((layerIndex - 1) / 4.f)) : layerIndex - 1);
                     int channel = pack ? std::max(0, (layerIndex-1) % 4) : 0;
 
                     if (blendIndex == i)
@@ -379,8 +379,8 @@ namespace ESMTerrain
 
     float Storage::getHeightAt(const Ogre::Vector3 &worldPos)
     {
-        int cellX = std::floor(worldPos.x / 8192.f);
-        int cellY = std::floor(worldPos.y / 8192.f);
+        int cellX = static_cast<int>(std::floor(worldPos.x / 8192.f));
+        int cellY = static_cast<int>(std::floor(worldPos.y / 8192.f));
 
         ESM::Land* land = getLand(cellX, cellY);
         if (!land || !(land->mDataTypes&ESM::Land::DATA_VHGT))
@@ -519,7 +519,7 @@ namespace ESMTerrain
 
     float Storage::getCellWorldSize()
     {
-        return ESM::Land::REAL_SIZE;
+        return static_cast<float>(ESM::Land::REAL_SIZE);
     }
 
     int Storage::getCellVertices()

@@ -149,17 +149,14 @@ namespace MWBase
 
             /// \todo investigate, if we really need to expose every single lousy UI element to the outside world
             virtual MWGui::DialogueWindow* getDialogueWindow() = 0;
-            virtual MWGui::ContainerWindow* getContainerWindow() = 0;
             virtual MWGui::InventoryWindow* getInventoryWindow() = 0;
-            virtual MWGui::BookWindow* getBookWindow() = 0;
-            virtual MWGui::ScrollWindow* getScrollWindow() = 0;
             virtual MWGui::CountDialog* getCountDialog() = 0;
             virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
             virtual MWGui::TradeWindow* getTradeWindow() = 0;
-            virtual MWGui::SpellBuyingWindow* getSpellBuyingWindow() = 0;
-            virtual MWGui::TravelWindow* getTravelWindow() = 0;
-            virtual MWGui::SpellWindow* getSpellWindow() = 0;
-            virtual MWGui::Console* getConsole() = 0;
+
+            virtual void updateSpellWindow() = 0;
+
+            virtual void setConsoleSelectedObject(const MWWorld::Ptr& object) = 0;
 
             virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount) = 0;
 
@@ -180,12 +177,6 @@ namespace MWBase
 
             virtual void configureSkills (const SkillList& major, const SkillList& minor) = 0;
             ///< configure skill groups, each set contains the skill ID for that group.
-
-            virtual void setReputation (int reputation) = 0;
-            ///< set the current reputation value
-
-            virtual void setBounty (int bounty) = 0;
-            ///< set the current bounty value
 
             virtual void updateSkillArea() = 0;
             ///< update display of skills, factions, birth sign, reputation and bounty
@@ -303,6 +294,12 @@ namespace MWBase
             virtual void startTraining(MWWorld::Ptr actor) = 0;
             virtual void startRepair(MWWorld::Ptr actor) = 0;
             virtual void startRepairItem(MWWorld::Ptr item) = 0;
+            virtual void startTravel(const MWWorld::Ptr& actor) = 0;
+            virtual void startSpellBuying(const MWWorld::Ptr& actor) = 0;
+            virtual void startTrade(const MWWorld::Ptr& actor) = 0;
+            virtual void openContainer(const MWWorld::Ptr& container, bool loot) = 0;
+            virtual void showBook(const MWWorld::Ptr& item, bool showTakeButton) = 0;
+            virtual void showScroll(const MWWorld::Ptr& item, bool showTakeButton) = 0;
 
             virtual void showSoulgemDialog (MWWorld::Ptr item) = 0;
 
@@ -332,9 +329,8 @@ namespace MWBase
             /// Does the current stack of GUI-windows permit saving?
             virtual bool isSavingAllowed() const = 0;
 
-            /// Returns the current Modal
-            /** Used to send exit command to active Modal when Esc is pressed **/
-            virtual MWGui::WindowModal* getCurrentModal() const = 0;
+            /// Send exit command to active Modal window
+            virtual void exitCurrentModal() = 0;
 
             /// Sets the current Modal
             /** Used to send exit command to active Modal when Esc is pressed **/

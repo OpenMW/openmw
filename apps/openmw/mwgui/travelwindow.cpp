@@ -66,13 +66,13 @@ namespace MWGui
 
         if(interior)
         {
-            price = gmst.find("fMagesGuildTravel")->getFloat();
+            price = gmst.find("fMagesGuildTravel")->getInt();
         }
         else
         {
             ESM::Position PlayerPos = player.getRefData().getPosition();
             float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
-            price = d/gmst.find("fTravelMult")->getFloat();
+            price = static_cast<int>(d / gmst.find("fTravelMult")->getFloat());
         }
 
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
@@ -111,20 +111,26 @@ namespace MWGui
         mPtr = actor;
         clearDestinations();
 
-        for(unsigned int i = 0;i<mPtr.get<ESM::NPC>()->mBase->mTransport.size();i++)
+        std::vector<ESM::Transport::Dest> transport;
+        if (mPtr.getClass().isNpc())
+            transport = mPtr.get<ESM::NPC>()->mBase->getTransport();
+        else if (mPtr.getTypeName() == typeid(ESM::Creature).name())
+            transport = mPtr.get<ESM::Creature>()->mBase->getTransport();
+
+        for(unsigned int i = 0;i<transport.size();i++)
         {
-            std::string cellname = mPtr.get<ESM::NPC>()->mBase->mTransport[i].mCellName;
+            std::string cellname = transport[i].mCellName;
             bool interior = true;
             int x,y;
-            MWBase::Environment::get().getWorld()->positionToIndex(mPtr.get<ESM::NPC>()->mBase->mTransport[i].mPos.pos[0],
-                                                                   mPtr.get<ESM::NPC>()->mBase->mTransport[i].mPos.pos[1],x,y);
+            MWBase::Environment::get().getWorld()->positionToIndex(transport[i].mPos.pos[0],
+                                                                   transport[i].mPos.pos[1],x,y);
             if (cellname == "")
             {
                 MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(x,y);
                 cellname = MWBase::Environment::get().getWorld()->getCellName(cell);
                 interior = false;
             }
-            addDestination(cellname,mPtr.get<ESM::NPC>()->mBase->mTransport[i].mPos,interior);
+            addDestination(cellname,transport[i].mPos,interior);
         }
 
         updateLabels();
@@ -209,10 +215,10 @@ namespace MWGui
 
     void TravelWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
     {
-        if (mDestinationsView->getViewOffset().top + _rel*0.3 > 0)
+        if (mDestinationsView->getViewOffset().top + _rel*0.3f > 0)
             mDestinationsView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mDestinationsView->setViewOffset(MyGUI::IntPoint(0, mDestinationsView->getViewOffset().top + _rel*0.3));
+            mDestinationsView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mDestinationsView->getViewOffset().top + _rel*0.3f)));
     }
 }
 

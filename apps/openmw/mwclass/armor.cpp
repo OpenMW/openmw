@@ -154,9 +154,9 @@ namespace MWClass
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        float iWeight = gmst.find (typeGmst)->getInt();
+        float iWeight = floor(gmst.find(typeGmst)->getFloat());
 
-        float epsilon = 5e-4;
+        float epsilon = 0.0005f;
 
         if (ref->mBase->mData.mWeight == 0)
             return ESM::Skill::Unarmored;
@@ -262,7 +262,7 @@ namespace MWClass
 
         info.enchant = ref->mBase->mEnchant;
         if (!info.enchant.empty())
-            info.remainingEnchantCharge = ptr.getCellRef().getEnchantmentCharge();
+            info.remainingEnchantCharge = static_cast<int>(ptr.getCellRef().getEnchantmentCharge());
 
         info.text = text;
 

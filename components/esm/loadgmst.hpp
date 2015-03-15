@@ -12,7 +12,7 @@ class ESMReader;
 class ESMWriter;
 
 /*
- *  Game setting, with automatic cleaning of "dirty" entries.
+ *  Game setting
  *
  */
 

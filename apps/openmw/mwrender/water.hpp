@@ -122,7 +122,7 @@ namespace MWRender {
         bool mIsUnderwater;
         bool mActive;
         bool mToggled;
-        int mTop;
+        float mTop;
 
         float mWaterTimer;
 

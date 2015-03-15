@@ -156,9 +156,13 @@ bool Wizard::ComponentSelectionPage::validatePage()
 
 int Wizard::ComponentSelectionPage::nextId() const
 {
+#ifdef OPENMW_USE_UNSHIELD
     if (isCommitPage()) {
         return MainWizard::Page_Installation;
     } else {
         return MainWizard::Page_Import;
     }
+#else
+    return MainWizard::Page_Import;
+#endif
 }

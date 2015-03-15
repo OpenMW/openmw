@@ -141,10 +141,10 @@ void ItemView::onSelectedBackground(MyGUI::Widget *sender)
 
 void ItemView::onMouseWheel(MyGUI::Widget *_sender, int _rel)
 {
-    if (mScrollView->getViewOffset().left + _rel*0.3 > 0)
+    if (mScrollView->getViewOffset().left + _rel*0.3f > 0)
         mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
     else
-        mScrollView->setViewOffset(MyGUI::IntPoint(mScrollView->getViewOffset().left + _rel*0.3, 0));
+        mScrollView->setViewOffset(MyGUI::IntPoint(static_cast<int>(mScrollView->getViewOffset().left + _rel*0.3f), 0));
 }
 
 void ItemView::setSize(const MyGUI::IntSize &_value)

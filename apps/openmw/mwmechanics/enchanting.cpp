@@ -1,4 +1,7 @@
 #include "enchanting.hpp"
+
+#include <openengine/misc/rng.hpp>
+
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -67,7 +70,7 @@ namespace MWMechanics
 
         if(mSelfEnchanting)
         {
-            if(getEnchantChance()<std::rand()/static_cast<double> (RAND_MAX)*100)
+            if(getEnchantChance() <= (OEngine::Misc::Rng::roll0to99()))
                 return false;
 
             mEnchanter.getClass().skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 2);
@@ -176,7 +179,7 @@ namespace MWMechanics
             int magMax = (it->mMagnMax == 0) ? 1 : it->mMagnMax;
             int area = (it->mArea == 0) ? 1 : it->mArea;
 
-            float magnitudeCost = (magMin + magMax) * baseCost * 0.05;
+            float magnitudeCost = (magMin + magMax) * baseCost * 0.05f;
             if (mCastStyle == ESM::Enchantment::ConstantEffect)
             {
                 magnitudeCost *= store.get<ESM::GameSetting>().find("fEnchantmentConstantDurationMult")->getFloat();
@@ -186,7 +189,7 @@ namespace MWMechanics
                 magnitudeCost *= it->mDuration;
             }
 
-            float areaCost = area * 0.05 * baseCost;
+            float areaCost = area * 0.05f * baseCost;
 
             const float fEffectCostMult = store.get<ESM::GameSetting>().find("fEffectCostMult")->getFloat();
 
@@ -215,7 +218,7 @@ namespace MWMechanics
     {
         int baseCost = getBaseCastCost();
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        return getEffectiveEnchantmentCastCost(baseCost, player);
+        return getEffectiveEnchantmentCastCost(static_cast<float>(baseCost), player);
     }
 
 
@@ -225,7 +228,7 @@ namespace MWMechanics
             return 0;
 
         float priceMultipler = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentValueMult")->getFloat();
-        int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mEnchanter, (getEnchantPoints() * priceMultipler), true);
+        int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mEnchanter, static_cast<int>(getEnchantPoints() * priceMultipler), true);
         return price;
     }
 
@@ -247,7 +250,7 @@ namespace MWMechanics
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-        return mOldItemPtr.getClass().getEnchantmentPoints(mOldItemPtr) * store.get<ESM::GameSetting>().find("fEnchantmentMult")->getFloat();
+        return static_cast<int>(mOldItemPtr.getClass().getEnchantmentPoints(mOldItemPtr) * store.get<ESM::GameSetting>().find("fEnchantmentMult")->getFloat());
     }
     bool Enchanting::soulEmpty() const
     {
@@ -274,13 +277,13 @@ namespace MWMechanics
         const NpcStats& npcStats = mEnchanter.getClass().getNpcStats (mEnchanter);
 
         float chance1 = (npcStats.getSkill (ESM::Skill::Enchant).getModified() + 
-        (0.25 * npcStats.getAttribute (ESM::Attribute::Intelligence).getModified())
-        + (0.125 * npcStats.getAttribute (ESM::Attribute::Luck).getModified()));
+        (0.25f * npcStats.getAttribute (ESM::Attribute::Intelligence).getModified())
+        + (0.125f * npcStats.getAttribute (ESM::Attribute::Luck).getModified()));
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        float chance2 = 7.5 / (gmst.find("fEnchantmentChanceMult")->getFloat() * ((mCastStyle == ESM::Enchantment::ConstantEffect) ?
-                                                                          gmst.find("fEnchantmentConstantChanceMult")->getFloat() : 1 ))
+        float chance2 = 7.5f / (gmst.find("fEnchantmentChanceMult")->getFloat() * ((mCastStyle == ESM::Enchantment::ConstantEffect) ?
+                                                                          gmst.find("fEnchantmentConstantChanceMult")->getFloat() : 1.0f ))
                 * getEnchantPoints();
 
         return (chance1-chance2);

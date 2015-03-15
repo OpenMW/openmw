@@ -2254,7 +2254,8 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
   mTools (*this), mResDir(resDir),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
-  mSaving (*this, mProjectPath, encoding),
+  mSavingOperation (*this, mProjectPath, encoding),
+  mSaving (&mSavingOperation),
   mRunner (mProjectPath), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>())
 {
     if (mContentFiles.empty())

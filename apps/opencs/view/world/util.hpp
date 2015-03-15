@@ -132,8 +132,12 @@ namespace CSVWorld
 
             virtual QWidget *createEditor (QWidget *parent,
                                            const QStyleOptionViewItem& option,
+                                           const QModelIndex& index) const;
+
+            virtual QWidget *createEditor (QWidget *parent,
+                                           const QStyleOptionViewItem& option,
                                            const QModelIndex& index,
-                                           CSMWorld::ColumnBase::Display display = CSMWorld::ColumnBase::Display_None) const;
+                                           CSMWorld::ColumnBase::Display display) const;
 
             void setEditLock (bool locked);
 
@@ -141,8 +145,9 @@ namespace CSVWorld
 
             ///< \return Does column require update?
 
-            virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay = false) const;
+            virtual void setEditorData (QWidget *editor, const QModelIndex& index) const;
 
+            virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const;
 
         public slots:
 

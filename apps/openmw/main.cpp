@@ -290,7 +290,7 @@ public:
     std::streamsize write(const char *str, std::streamsize size)
     {
         // Make a copy for null termination
-        std::string tmp (str, size);
+        std::string tmp (str, static_cast<unsigned int>(size));
         // Write string to Visual Studio Debug output
         OutputDebugString (tmp.c_str ());
         return size;

@@ -475,7 +475,7 @@ namespace MWScript
         for (int i=0; i<3; ++i)
             diff[i] = pos1[i] - pos2[i];
 
-        return std::sqrt (diff[0]*diff[0] + diff[1]*diff[1] + diff[2]*diff[2]);
+        return static_cast<float>(std::sqrt(diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2]));
     }
 
     bool InterpreterContext::hasBeenActivated (const MWWorld::Ptr& ptr)

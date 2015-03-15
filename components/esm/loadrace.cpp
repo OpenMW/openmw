@@ -15,7 +15,7 @@ namespace ESM
 
     int Race::MaleFemaleF::getValue (bool male) const
     {
-        return male ? mMale : mFemale;
+        return static_cast<int>(male ? mMale : mFemale);
     }
 
 void Race::load(ESMReader &esm)
