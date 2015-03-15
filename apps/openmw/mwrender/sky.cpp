@@ -19,6 +19,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/nifogre/ogrenifloader.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
@@ -464,8 +466,8 @@ void SkyManager::updateRain(float dt)
 
             // TODO: handle rain settings from Morrowind.ini
             const float rangeRandom = 100;
-            float xOffs = (std::rand()/(RAND_MAX+1.0f)) * rangeRandom - (rangeRandom/2);
-            float yOffs = (std::rand()/(RAND_MAX+1.0f)) * rangeRandom - (rangeRandom/2);
+            float xOffs = OEngine::Misc::Rng::rollProbability() * rangeRandom - (rangeRandom / 2);
+            float yOffs = OEngine::Misc::Rng::rollProbability() * rangeRandom - (rangeRandom / 2);
 
             // Create a separate node to control the offset, since a node with setInheritOrientation(false) will still
             // consider the orientation of the parent node for its position, just not for its orientation

@@ -10,6 +10,8 @@
 
 #include <stdexcept>
 
+#include <openengine/misc/rng.hpp>
+
 #include <extern/shiny/Main/Factory.hpp>
 
 namespace OEngine
@@ -145,7 +147,7 @@ namespace Render
 
     void SelectionBuffer::getNextColour ()
     {
-        Ogre::ARGB color = static_cast<Ogre::ARGB>((float(rand()) / float(RAND_MAX)) * std::numeric_limits<Ogre::uint32>::max());
+        Ogre::ARGB color = static_cast<Ogre::ARGB>(OEngine::Misc::Rng::rollClosedProbability() * std::numeric_limits<Ogre::uint32>::max());
 
         if (mCurrentColour.getAsARGB () == color)
         {

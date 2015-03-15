@@ -12,6 +12,8 @@
 
 #include <extern/shiny/Main/Factory.hpp>
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -101,7 +103,7 @@ void HeadAnimationTime::setEnabled(bool enabled)
 
 void HeadAnimationTime::resetBlinkTimer()
 {
-    mBlinkTimer = -(2 + (std::rand() / static_cast<float>(RAND_MAX)) * 6);
+    mBlinkTimer = -(2.0f + OEngine::Misc::Rng::rollDice(6));
 }
 
 void HeadAnimationTime::update(float dt)

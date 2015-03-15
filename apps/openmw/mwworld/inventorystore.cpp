@@ -364,7 +364,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                 // Roll some dice, one for each effect
                 params.resize(enchantment.mEffects.mList.size());
                 for (unsigned int i=0; i<params.size();++i)
-                    params[i].mRandom = static_cast<float> (std::rand()) / RAND_MAX;
+                    params[i].mRandom = OEngine::Misc::Rng::rollClosedProbability();
 
                 // Try resisting each effect
                 int i=0;

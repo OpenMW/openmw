@@ -1,6 +1,8 @@
 #ifndef OPENMW_MECHANICS_LEVELLEDLIST_H
 #define OPENMW_MECHANICS_LEVELLEDLIST_H
 
+#include <openengine/misc/rng.hpp>
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/manualref.hpp"
@@ -22,8 +24,7 @@ namespace MWMechanics
 
         failChance += levItem->mChanceNone;
 
-        int random = static_cast<int>(static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 100)); // [0, 99]
-        if (random < failChance)
+        if (OEngine::Misc::Rng::roll0to99() < failChance)
             return std::string();
 
         std::vector<std::string> candidates;
@@ -52,7 +53,7 @@ namespace MWMechanics
         }
         if (candidates.empty())
             return std::string();
-        std::string item = candidates[std::rand()%candidates.size()];
+        std::string item = candidates[OEngine::Misc::Rng::rollDice(candidates.size())];
 
         // Vanilla doesn't fail on nonexistent items in levelled lists
         if (!MWBase::Environment::get().getWorld()->getStore().find(Misc::StringUtils::lowerCase(item)))

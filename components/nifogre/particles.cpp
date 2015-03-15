@@ -12,6 +12,8 @@
 #include <OgreSceneNode.h>
 #include <OgreSceneManager.h>
 
+#include <openengine/misc/rng.hpp>
+
 /* FIXME: "Nif" isn't really an appropriate emitter name. */
 class NifEmitter : public Ogre::ParticleEmitter
 {
@@ -171,7 +173,7 @@ public:
         Ogre::Real& timeToLive = particle->timeToLive;
 #endif
 
-        Ogre::Node* emitterBone = mEmitterBones.at((int)(::rand()/(RAND_MAX+1.0)*mEmitterBones.size()));
+        Ogre::Node* emitterBone = mEmitterBones.at(OEngine::Misc::Rng::rollDice(mEmitterBones.size()));
 
         position = xOff + yOff + zOff +
                  mParticleBone->_getDerivedOrientation().Inverse() * (emitterBone->_getDerivedPosition()

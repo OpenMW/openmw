@@ -1,5 +1,7 @@
 #include "activespells.hpp"
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/misc/stringops.hpp>
 
 #include <components/esm/loadmgef.hpp>
@@ -229,8 +231,7 @@ namespace MWMechanics
     {
         for (TContainer::iterator it = mSpells.begin(); it != mSpells.end(); )
         {
-            int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 100); // [0, 99]
-            if (roll < chance)
+            if (OEngine::Misc::Rng::roll0to99() < chance)
                 mSpells.erase(it++);
             else
                 ++it;

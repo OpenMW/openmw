@@ -2,6 +2,8 @@
 
 #include <MyGUI_ProgressBar.h>
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/widgets/box.hpp>
 #include <components/settings/settings.hpp>
 
@@ -152,10 +154,9 @@ namespace MWGui
                 const ESM::Region *region = world->getStore().get<ESM::Region>().find (regionstr);
                 if (!region->mSleepList.empty())
                 {
+                    // figure out if player will be woken while sleeping
                     float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->getFloat();
-                    int x = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * hoursToWait); // [0, hoursRested]
-                    float y = fSleepRandMod * hoursToWait;
-                    if (x > y)
+                    if (OEngine::Misc::Rng::rollProbability() > fSleepRandMod)
                     {
                         float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->getFloat();
                         mInterruptAt = hoursToWait - int(fSleepRestMod * hoursToWait);

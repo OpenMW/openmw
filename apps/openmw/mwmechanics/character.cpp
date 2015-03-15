@@ -27,6 +27,8 @@
 #include "creaturestats.hpp"
 #include "security.hpp"
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/settings/settings.hpp>
 
 #include "../mwrender/animation.hpp"
@@ -220,7 +222,7 @@ std::string CharacterController::chooseRandomGroup (const std::string& prefix, i
     while (mAnimation->hasAnimation(prefix + Ogre::StringConverter::toString(numAnims+1)))
         ++numAnims;
 
-    int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * numAnims) + 1; // [1, numAnims]
+    int roll = OEngine::Misc::Rng::rollDice(numAnims) + 1; // [1, numAnims]
     if (num)
         *num = roll;
     return prefix + Ogre::StringConverter::toString(roll);
@@ -829,7 +831,7 @@ bool CharacterController::updateCreatureState()
             }
             if (weapType != WeapType_Spell || !mAnimation->hasAnimation("spellcast")) // Not all creatures have a dedicated spellcast animation
             {
-                int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 3); // [0, 2]
+                int roll = OEngine::Misc::Rng::rollDice(3); // [0, 2]
                 if (roll == 0)
                     mCurrentWeapon = "attack1";
                 else if (roll == 1)
@@ -1125,7 +1127,7 @@ bool CharacterController::updateWeaponState()
                 // most creatures don't actually have an attack wind-up animation, so use a uniform random value
                 // (even some creatures that can use weapons don't have a wind-up animation either, e.g. Rieklings)
                 // Note: vanilla MW uses a random value for *all* non-player actors, but we probably don't need to go that far.
-                attackStrength = std::min(1.f, 0.1f + std::rand() / float(RAND_MAX));
+                attackStrength = std::min(1.f, 0.1f + OEngine::Misc::Rng::rollClosedProbability());
             }
 
             if(mWeaponType != WeapType_Crossbow && mWeaponType != WeapType_BowAndArrow)
