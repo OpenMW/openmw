@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <map>
 
+#include <openengine/misc/rng.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -224,7 +226,7 @@ namespace MWSound
         if(!filelist.size())
             return;
 
-        int i = rand()%filelist.size();
+        int i = OEngine::Misc::Rng::rollDice(filelist.size());
 
         // Don't play the same music track twice in a row
         if (filelist[i] == mLastPlayedMusic)
@@ -559,7 +561,7 @@ namespace MWSound
         if(!cell->isExterior() || sTimePassed < sTimeToNextEnvSound)
             return;
 
-        float a = std::rand() / static_cast<float>(RAND_MAX);
+        float a = OEngine::Misc::Rng::rollClosedProbability();
         // NOTE: We should use the "Minimum Time Between Environmental Sounds" and
         // "Maximum Time Between Environmental Sounds" fallback settings here.
         sTimeToNextEnvSound = 5.0f*a + 15.0f*(1.0f-a);
@@ -588,7 +590,7 @@ namespace MWSound
                 return;
         }
 
-        int r = (int)(rand()/((double)RAND_MAX+1) * total);
+        int r = OEngine::Misc::Rng::rollDice(total);
         int pos = 0;
 
         soundIter = regn->mSoundList.begin();

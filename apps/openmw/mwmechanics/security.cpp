@@ -1,5 +1,7 @@
 #include "security.hpp"
 
+#include <openengine/misc/rng.hpp>
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -48,8 +50,7 @@ namespace MWMechanics
         else
         {
             MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, lock);
-            int roll = static_cast<int>(static_cast<float> (std::rand()) / RAND_MAX * 100);
-            if (roll <= x)
+            if (OEngine::Misc::Rng::roll0to99() <= x)
             {
                 lock.getClass().unlock(lock);
                 resultMessage = "#{sLockSuccess}";
@@ -90,8 +91,7 @@ namespace MWMechanics
         else
         {
             MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, trap);
-            int roll = static_cast<int>(static_cast<float> (std::rand()) / RAND_MAX * 100);
-            if (roll <= x)
+            if (OEngine::Misc::Rng::roll0to99() <= x)
             {
                 trap.getCellRef().setTrap("");
 

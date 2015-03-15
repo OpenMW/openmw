@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <map>
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/esm/loadskil.hpp>
 #include <components/esm/loadappa.hpp>
 #include <components/esm/loadgmst.hpp>
@@ -294,7 +296,7 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
 
     newRecord.mName = name;
 
-    int index = static_cast<int> (std::rand()/(static_cast<double> (RAND_MAX)+1)*6);
+    int index = OEngine::Misc::Rng::rollDice(6);
     assert (index>=0 && index<6);
 
     static const char *meshes[] = { "standard", "bargain", "cheap", "fresh", "exclusive", "quality" };
@@ -467,7 +469,7 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
         return Result_RandomFailure;
     }
 
-    if (getAlchemyFactor()<std::rand()/static_cast<double> (RAND_MAX)*100)
+    if (getAlchemyFactor() < OEngine::Misc::Rng::roll0to99())
     {
         removeIngredients();
         return Result_RandomFailure;

@@ -2,6 +2,8 @@
 #include "mechanicsmanagerimp.hpp"
 #include "npcstats.hpp"
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/esm/stolenitems.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -723,7 +725,7 @@ namespace MWMechanics
         float x = 0;
         float y = 0;
 
-        float roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
+        float roll = OEngine::Misc::Rng::rollClosedProbability() * 100;
 
         if (type == PT_Admire)
         {
@@ -1378,9 +1380,8 @@ namespace MWMechanics
             y = obsTerm * observerStats.getFatigueTerm() * fSneakViewMult;
 
         float target = x - y;
-        int roll = static_cast<int>(std::rand() / (static_cast<double> (RAND_MAX)+1) * 100); // [0, 99]
 
-        return (roll >= target);
+        return (OEngine::Misc::Rng::roll0to99() >= target);
     }
 
     void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)

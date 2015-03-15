@@ -160,7 +160,11 @@ include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
-target_link_libraries(components ${Boost_LIBRARIES} ${OGRE_LIBRARIES})
+target_link_libraries(components 
+    ${Boost_LIBRARIES} 
+    ${OGRE_LIBRARIES}
+    ${OENGINE_LIBRARY}    
+)
 
 if (GIT_CHECKOUT)
     add_dependencies (components git-version)
