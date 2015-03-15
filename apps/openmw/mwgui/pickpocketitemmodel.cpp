@@ -20,7 +20,7 @@ namespace MWGui
         {
             for (size_t i = 0; i<mSourceModel->getItemCount(); ++i)
             {
-                if (OEngine::Misc::Rng::roll0to99() > chance)
+                if (chance <= OEngine::Misc::Rng::roll0to99())
                     mHiddenItems.push_back(mSourceModel->getItem(i));
             }
         }

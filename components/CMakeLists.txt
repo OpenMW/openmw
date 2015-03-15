@@ -166,14 +166,9 @@ include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 target_link_libraries(components 
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_WAVE_LIBRARY}
+    ${Boost_LIBRARIES} 
     ${OGRE_LIBRARIES}
     ${OENGINE_LIBRARY}    
-    ${BULLET_LIBRARIES}
 )
 
 if (WIN32)

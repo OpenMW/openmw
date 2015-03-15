@@ -155,9 +155,8 @@ namespace MWGui
                 if (!region->mSleepList.empty())
                 {
                     // figure out if player will be woken while sleeping
-                    int x = OEngine::Misc::Rng::rollDice(hoursToWait);
                     float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->getFloat();
-                    if (x < fSleepRandMod * hoursToWait)
+                    if (OEngine::Misc::Rng::rollProbability() > fSleepRandMod)
                     {
                         float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->getFloat();
                         mInterruptAt = hoursToWait - int(fSleepRestMod * hoursToWait);

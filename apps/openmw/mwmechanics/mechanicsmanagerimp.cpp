@@ -741,7 +741,7 @@ namespace MWMechanics
         float x = 0;
         float y = 0;
 
-        int roll = OEngine::Misc::Rng::roll0to99();
+        float roll = OEngine::Misc::Rng::rollClosedProbability() * 100;
 
         if (type == PT_Admire)
         {
