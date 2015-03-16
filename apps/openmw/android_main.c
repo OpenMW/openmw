@@ -12,7 +12,7 @@
 
 extern void SDL_Android_Init(JNIEnv* env, jclass cls);
 extern int argcData;
-extern const char *argvData[15];
+extern const char **argvData;
 
 int Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls,
 		jobject obj) {
@@ -26,6 +26,7 @@ int Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls,
 	int status;
 
 	status = main(argcData+1, argvData);
+	free (argvData);
 
 	/* Do not issue an exit or the whole application will terminate instead of just the SDL thread */
 	/* exit(status); */
