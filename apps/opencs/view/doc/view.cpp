@@ -485,6 +485,8 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
                (!isReferenceable && id == sb->getUniversalId()))
             {
                 sb->setFocus();
+                if (!hint.empty())
+                    sb->useHint (hint);
                 return;
             }
         }
@@ -515,8 +517,6 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     assert(view);
     view->setParent(this);
     mSubViews.append(view); // only after assert
-    if (!hint.empty())
-        view->useHint (hint);
 
     int minWidth = userSettings.setting ("window/minimum-width", QString("325")).toInt();
     view->setMinimumWidth(minWidth);
@@ -538,6 +538,9 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
         this, SLOT (updateSubViewIndicies (SubView *)));
 
     view->show();
+
+    if (!hint.empty())
+        view->useHint (hint);
 }
 
 void CSVDoc::View::newView()
