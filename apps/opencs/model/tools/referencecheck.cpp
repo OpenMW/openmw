@@ -48,10 +48,6 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
         }
     }
 
-    // Check if referenced object is in valid cell
-    if (mCells.searchId(cellRef.mCell) == -1)
-        messages.push_back(std::make_pair(id, " is referencing object from non existing cell " + cellRef.mCell));
-
     // If object have owner, check if that owner reference is valid
     if (!cellRef.mOwner.empty() && mReferencables.searchId(cellRef.mOwner) == -1)
         messages.push_back(std::make_pair(id, " has non existing owner " + cellRef.mOwner));
