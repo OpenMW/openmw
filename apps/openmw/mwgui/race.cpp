@@ -142,13 +142,13 @@ namespace MWGui
 
         for (unsigned int i=0; i<mAvailableHeads.size(); ++i)
         {
-            if (mAvailableHeads[i] == proto.mHead)
+            if (Misc::StringUtils::ciEqual(mAvailableHeads[i], proto.mHead))
                 mFaceIndex = i;
         }
 
         for (unsigned int i=0; i<mAvailableHairs.size(); ++i)
         {
-            if (mAvailableHairs[i] == proto.mHair)
+            if (Misc::StringUtils::ciEqual(mAvailableHairs[i], proto.mHair))
                 mHairIndex = i;
         }
 
