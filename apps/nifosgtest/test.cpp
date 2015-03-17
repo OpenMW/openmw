@@ -6,6 +6,9 @@
 
 #include <components/nifosg/nifloader.hpp>
 
+#include <components/vfs/manager.hpp>
+#include <components/vfs/bsaarchive.hpp>
+
 #include <osgGA/TrackballManipulator>
 
 #include <osgDB/Registry>
@@ -57,10 +60,11 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    Bsa::BSAFile bsa;
-    bsa.open(argv[1]);
+    VFS::Manager resourceMgr (false);
+    resourceMgr.addArchive(new VFS::BsaArchive(argv[1]));
+    resourceMgr.buildIndex();
 
-    Nif::NIFFilePtr nif(new Nif::NIFFile(bsa.getFile(argv[2]), std::string(argv[2])));
+    Nif::NIFFilePtr nif(new Nif::NIFFile(resourceMgr.get(argv[2]), std::string(argv[2])));
 
     osgViewer::Viewer viewer;
 
@@ -75,7 +79,7 @@ int main(int argc, char** argv)
     std::vector<NifOsg::Controller >  controllers;
     osg::Group* newNode = new osg::Group;
     NifOsg::Loader loader;
-    loader.resourceManager = &bsa;
+    loader.resourceManager = &resourceMgr;
     loader.loadAsSkeleton(nif, newNode);
 
     for (unsigned int i=0; i<loader.mControllers.size(); ++i)

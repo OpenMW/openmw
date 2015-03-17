@@ -5,6 +5,8 @@
 
 #include <components/nifcache/nifcache.hpp> // NIFFilePtr
 
+#include <components/vfs/manager.hpp>
+
 #include <osg/Group>
 
 #include "controller.hpp"
@@ -24,10 +26,6 @@ namespace Nif
     class NiTriShape;
     class Property;
 }
-namespace Bsa
-{
-    class BSAFile;
-}
 
 namespace NifOsg
 {
@@ -41,8 +39,7 @@ namespace NifOsg
 
         void loadAsSkeleton(Nif::NIFFilePtr file, osg::Group* parentNode);
 
-        // FIXME replace with resource system
-        Bsa::BSAFile* resourceManager;
+        VFS::Manager* resourceManager;
 
         // FIXME move
         std::vector<Controller> mControllers;

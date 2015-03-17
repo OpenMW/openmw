@@ -465,7 +465,7 @@ namespace NifOsg
                     osgDB::Options* opts = new osgDB::Options;
                     opts->setOptionString("dds_dxt1_detect_rgba");
                     osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("dds");
-                    osgDB::ReaderWriter::ReadResult result = reader->readImage(*resourceManager->getFile(filename.c_str()), opts);
+                    osgDB::ReaderWriter::ReadResult result = reader->readImage(*resourceManager->get(filename.c_str()), opts);
                     textures.push_back(osg::ref_ptr<osg::Image>(result.getImage()));
                 }
                 boost::shared_ptr<ControllerValue> dest(new FlipControllerValue(stateset, flipctrl, textures));
@@ -843,7 +843,7 @@ namespace NifOsg
                     osgDB::Options* opts = new osgDB::Options;
                     opts->setOptionString("dds_dxt1_detect_rgba");
                     osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("dds");
-                    osgDB::ReaderWriter::ReadResult result = reader->readImage(*resourceManager->getFile(filename.c_str()), opts);
+                    osgDB::ReaderWriter::ReadResult result = reader->readImage(*resourceManager->get(filename.c_str()), opts);
                     osg::Image* image = result.getImage();
                     osg::Texture2D* texture2d = new osg::Texture2D;
                     texture2d->setImage(image);

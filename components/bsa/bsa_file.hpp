@@ -120,6 +120,8 @@ public:
     */
     Files::IStreamPtr getFile(const char *file);
 
+    Files::IStreamPtr getFile(const FileStruct* file);
+
     /// Get a list of all files
     const FileList &getList() const
     { return files; }
