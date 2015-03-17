@@ -130,6 +130,7 @@ namespace CSMWorld
                 Type_Pathgrid,
                 Type_StartScripts,
                 Type_StartScript,
+                Type_Search,
                 Type_RunLog
             };
 

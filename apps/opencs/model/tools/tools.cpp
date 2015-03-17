@@ -31,6 +31,7 @@ CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
     switch (type)
     {
         case CSMDoc::State_Verifying: return &mVerifier;
+        case CSMDoc::State_Searching: return &mSearch;
     }
 
     return 0;
@@ -101,7 +102,8 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
 }
 
 CSMTools::Tools::Tools (CSMDoc::Document& document)
-: mDocument (document), mData (document.getData()), mVerifierOperation (0), mNextReportNumber (0)
+: mDocument (document), mData (document.getData()), mVerifierOperation (0), mNextReportNumber (0),
+  mSearchOperation (0)
 {
     // index 0: load error log
     mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
@@ -116,6 +118,12 @@ CSMTools::Tools::~Tools()
         delete mVerifierOperation;
     }
 
+    if (mSearchOperation)
+    {
+        mSearch.abortAndWait();
+        delete mSearchOperation;
+    }
+    
     for (std::map<int, ReportModel *>::iterator iter (mReports.begin()); iter!=mReports.end(); ++iter)
         delete iter->second;
 }
@@ -130,6 +138,13 @@ CSMWorld::UniversalId CSMTools::Tools::runVerifier()
     return CSMWorld::UniversalId (CSMWorld::UniversalId::Type_VerificationResults, mNextReportNumber-1);
 }
 
+CSMWorld::UniversalId CSMTools::Tools::newSearch()
+{
+    mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
+
+    return CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Search, mNextReportNumber-1);    
+}
+
 void CSMTools::Tools::abortOperation (int type)
 {
     if (CSMDoc::OperationHolder *operation = get (type))
@@ -141,6 +156,7 @@ int CSMTools::Tools::getRunningOperations() const
     static const int sOperations[] =
     {
        CSMDoc::State_Verifying,
+       CSMDoc::State_Searching,
         -1
     };
 
@@ -157,9 +173,10 @@ int CSMTools::Tools::getRunningOperations() const
 CSMTools::ReportModel *CSMTools::Tools::getReport (const CSMWorld::UniversalId& id)
 {
     if (id.getType()!=CSMWorld::UniversalId::Type_VerificationResults &&
-        id.getType()!=CSMWorld::UniversalId::Type_LoadErrorLog)
+        id.getType()!=CSMWorld::UniversalId::Type_LoadErrorLog &&
+        id.getType()!=CSMWorld::UniversalId::Type_Search)
         throw std::logic_error ("invalid request for report model: " + id.toString());
-
+        
     return mReports.at (id.getIndex());
 }
 

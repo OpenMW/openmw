@@ -91,7 +91,7 @@ opencs_hdrs_noqt (view/render
 
 
 opencs_units (view/tools
-    reportsubview reporttable
+    reportsubview reporttable searchsubview
     )
 
 opencs_units_noqt (view/tools

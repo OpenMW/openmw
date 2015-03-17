@@ -2374,6 +2374,12 @@ CSMWorld::UniversalId CSMDoc::Document::verify()
     return id;
 }
 
+
+CSMWorld::UniversalId CSMDoc::Document::newSearch()
+{
+    return mTools.newSearch();
+}
+
 void CSMDoc::Document::abortOperation (int type)
 {
     if (type==State_Saving)

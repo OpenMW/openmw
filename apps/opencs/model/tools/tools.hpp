@@ -31,6 +31,8 @@ namespace CSMTools
             CSMWorld::Data& mData;
             CSMDoc::Operation *mVerifierOperation;
             CSMDoc::OperationHolder mVerifier;
+            CSMDoc::Operation *mSearchOperation;
+            CSMDoc::OperationHolder mSearch;
             std::map<int, ReportModel *> mReports;
             int mNextReportNumber;
             std::map<int, int> mActiveReports; // type, report number
@@ -56,6 +58,9 @@ namespace CSMTools
             CSMWorld::UniversalId runVerifier();
             ///< \return ID of the report for this verification run
 
+            /// Return ID of the report for this search.
+            CSMWorld::UniversalId newSearch();
+            
             void abortOperation (int type);
             ///< \attention The operation is not aborted immediately.
 

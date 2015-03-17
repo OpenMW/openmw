@@ -120,6 +120,8 @@ namespace CSMDoc
 
             CSMWorld::UniversalId verify();
 
+            CSMWorld::UniversalId newSearch();
+            
             void abortOperation (int type);
 
             const CSMWorld::Data& getData() const;

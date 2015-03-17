@@ -113,6 +113,10 @@ void CSVDoc::View::setupViewMenu()
     QAction *filters = new QAction (tr ("Filters"), this);
     connect (filters, SIGNAL (triggered()), this, SLOT (addFiltersSubView()));
     view->addAction (filters);
+
+    QAction *search = new QAction (tr ("Search"), this);
+    connect (search, SIGNAL (triggered()), this, SLOT (addSearchSubView()));
+    view->addAction (search);    
 }
 
 void CSVDoc::View::setupWorldMenu()
@@ -723,6 +727,11 @@ void CSVDoc::View::addPathgridSubView()
 void CSVDoc::View::addStartScriptsSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_StartScripts);
+}
+
+void CSVDoc::View::addSearchSubView()
+{
+    addSubView (mDocument->newSearch());
 }
 
 void CSVDoc::View::abortOperation (int type)
