@@ -11,7 +11,6 @@
 
 #include <osgGA/TrackballManipulator>
 
-#include <osgDB/Registry>
 #include <osgDB/WriteFile>
 
 #include <osg/PolygonMode>

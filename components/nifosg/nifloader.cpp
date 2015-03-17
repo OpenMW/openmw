@@ -192,11 +192,37 @@ namespace
         }
     };
 
+    // Node callback used to set the inverse of the parent's world matrix on the MatrixTransform
+    // that the callback is attached to. Used for certain particle systems,
+    // so that the particles do not move with the node they are attached to.
+    class InverseWorldMatrix : public osg::NodeCallback
+    {
+    public:
+        InverseWorldMatrix()
+        {
+        }
+
+        void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            if (nv && nv->getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR)
+            {
+                osg::NodePath path = nv->getNodePath();
+                path.pop_back();
+
+                osg::MatrixTransform* trans = dynamic_cast<osg::MatrixTransform*>(node);
+
+                osg::Matrix worldMat = osg::computeLocalToWorld( path );
+                trans->setMatrix(osg::Matrix::inverse(worldMat));
+            }
+            traverse(node,nv);
+        }
+    };
+
     osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher)
     {
         osg::ref_ptr<osgAnimation::MorphGeometry> morphGeom = new osgAnimation::MorphGeometry;
         morphGeom->setMethod(osgAnimation::MorphGeometry::RELATIVE);
-        // NIF format doesn't specify morphed normals
+        // No normals available in the MorphData
         morphGeom->setMorphNormals(false);
 
         const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
@@ -499,6 +525,10 @@ namespace NifOsg
         if (!partctrl)
             return;
 
+        osg::Matrix particletransform;
+        if (!(particleflags & Nif::NiNode::ParticleFlag_LocalSpace))
+            particletransform = getWorldTransform(nifNode);
+
         int i=0;
         for (std::vector<Nif::NiParticleSystemController::Particle>::const_iterator it = partctrl->particles.begin();
              i<particledata->activeCount && it != partctrl->particles.end(); ++it, ++i)
@@ -509,8 +539,8 @@ namespace NifOsg
 
             osgParticle::Particle* created = partsys->createParticle(&particletemplate);
             created->setLifeTime(500);//std::max(0.f, particle.lifespan));
-            created->setVelocity(particle.velocity);
-            created->setPosition(particledata->vertices.at(particle.vertex));
+            created->setVelocity(particle.velocity * particletransform);
+            created->setPosition(particledata->vertices.at(particle.vertex) * particletransform);
 
             osg::Vec4f partcolor (1.f,1.f,1.f,1.f);
             if (particle.vertex < int(particledata->colors.size()))
@@ -534,7 +564,16 @@ namespace NifOsg
         partsys->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
         osg::ref_ptr<osg::Geode> geode (new osg::Geode);
         geode->addDrawable(partsys);
-        parentNode->addChild(geode);
+
+        if (particleflags & Nif::NiNode::ParticleFlag_LocalSpace)
+            parentNode->addChild(geode);
+        else
+        {
+            osg::MatrixTransform* trans = new osg::MatrixTransform;
+            trans->setUpdateCallback(new InverseWorldMatrix);
+            trans->addChild(geode);
+            parentNode->addChild(trans);
+        }
 
         osgParticle::ParticleSystemUpdater* updater = new osgParticle::ParticleSystemUpdater;
         updater->addParticleSystem(partsys);
