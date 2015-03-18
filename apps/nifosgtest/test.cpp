@@ -131,6 +131,11 @@ int main(int argc, char** argv)
     viewer.realize();
     viewer.setCameraManipulator(new osgGA::TrackballManipulator());
     viewer.addEventHandler(new WireframeKeyHandler(root));
+
+    // We're going to change this from the event callback, set the variance to DYNAMIC so that
+    // we don't interfere with the draw thread.
+    root->getOrCreateStateSet()->setDataVariance(osg::Node::DYNAMIC);
+
     viewer.addEventHandler(new osgViewer::StatsHandler);
 
     while (!viewer.done())
