@@ -324,7 +324,7 @@ void CSVDoc::View::updateTitle()
     if (hideTitle)
         stream << " - " << mSubViews.at (0)->getTitle();
 
-    setWindowTitle (stream.str().c_str());
+    setWindowTitle (QString::fromUtf8(stream.str().c_str()));
 }
 
 void CSVDoc::View::updateSubViewIndicies(SubView *view)
