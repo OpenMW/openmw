@@ -7,10 +7,6 @@
 #include <unistd.h>
 #include <boost/filesystem/fstream.hpp>
 
-/**
- * FIXME: Someone with MacOS system should check this and correct if necessary
- */
-
 namespace
 {
     boost::filesystem::path getUserHome()
@@ -49,9 +45,8 @@ boost::filesystem::path MacOsPath::getUserConfigPath() const
 
 boost::filesystem::path MacOsPath::getUserDataPath() const
 {
-    // TODO: probably wrong?
     boost::filesystem::path userPath (getUserHome());
-    userPath /= "Library/Preferences/";
+    userPath /= "Library/Application Support/";
 
     return userPath / mName;
 }
