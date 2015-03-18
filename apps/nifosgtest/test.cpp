@@ -8,6 +8,9 @@
 
 #include <components/vfs/manager.hpp>
 #include <components/vfs/bsaarchive.hpp>
+#include <components/vfs/filesystemarchive.hpp>
+
+#include <components/files/configurationmanager.hpp>
 
 #include <osgGA/TrackballManipulator>
 
@@ -53,17 +56,48 @@ private:
 
 int main(int argc, char** argv)
 {
-    if (argc < 3)
+    if (argc < 2)
     {
-        std::cout << "Usage: " << argv[0] << " <BSA file> <NIF file>" << std::endl;
+        std::cout << "Usage: " << argv[0] << " <NIF file>" << std::endl;
         return 1;
     }
 
-    VFS::Manager resourceMgr (false);
-    resourceMgr.addArchive(new VFS::BsaArchive(argv[1]));
+    Files::ConfigurationManager cfgMgr;
+    boost::program_options::options_description desc("");
+    desc.add_options()
+            ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken()->composing())
+            ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
+            ("fallback-archive", boost::program_options::value<std::vector<std::string> >()->
+                default_value(std::vector<std::string>(), "fallback-archive")->multitoken());
+
+    boost::program_options::variables_map variables;
+    cfgMgr.readConfiguration(variables, desc);
+
+    std::vector<std::string> archives = variables["fallback-archive"].as<std::vector<std::string> >();
+    bool fsStrict = variables["fs-strict"].as<bool>();
+    Files::PathContainer dataDirs;
+    if (!variables["data"].empty()) {
+        dataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
+    }
+
+    cfgMgr.processPaths(dataDirs);
+
+    VFS::Manager resourceMgr (fsStrict);
+    Files::Collections collections (dataDirs, !fsStrict);
+
+    for (std::vector<std::string>::const_iterator it = archives.begin(); it != archives.end(); ++it)
+    {
+        std::string filepath = collections.getPath(*it).string();
+        resourceMgr.addArchive(new VFS::BsaArchive(filepath));
+    }
+    for (Files::PathContainer::const_iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
+    {
+        resourceMgr.addArchive(new VFS::FileSystemArchive(it->string()));
+    }
+
     resourceMgr.buildIndex();
 
-    Nif::NIFFilePtr nif(new Nif::NIFFile(resourceMgr.get(argv[2]), std::string(argv[2])));
+    Nif::NIFFilePtr nif(new Nif::NIFFile(resourceMgr.get(argv[1]), std::string(argv[1])));
 
     osgViewer::Viewer viewer;
 
