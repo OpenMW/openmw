@@ -22,8 +22,9 @@
 class WireframeKeyHandler : public osgGA::GUIEventHandler
 {
 public:
-    WireframeKeyHandler()
+    WireframeKeyHandler(osg::Node* node)
         : mWireframe(false)
+        , mNode(node)
     {
 
     }
@@ -36,7 +37,12 @@ public:
             if (adapter.getKey() == osgGA::GUIEventAdapter::KEY_W)
             {
                 mWireframe = !mWireframe;
-                // applying state from an event handler doesn't appear to be safe, so do it in the frame update
+                osg::PolygonMode* mode = new osg::PolygonMode;
+                mode->setMode(osg::PolygonMode::FRONT_AND_BACK,
+                              mWireframe ? osg::PolygonMode::LINE : osg::PolygonMode::FILL);
+                mNode->getOrCreateStateSet()->setAttributeAndModes(mode, osg::StateAttribute::ON);
+                mNode->getOrCreateStateSet()->setMode(GL_CULL_FACE, mWireframe ? osg::StateAttribute::OFF
+                                                                               : osg::StateAttribute::ON);
                 return true;
             }
         default:
@@ -45,13 +51,9 @@ public:
         return false;
     }
 
-    bool getWireframe() const
-    {
-        return mWireframe;
-    }
-
 private:
     bool mWireframe;
+    osg::Node* mNode;
 };
 
 int main(int argc, char** argv)
@@ -128,28 +130,11 @@ int main(int argc, char** argv)
     viewer.setUpViewInWindow(0, 0, 800, 600);
     viewer.realize();
     viewer.setCameraManipulator(new osgGA::TrackballManipulator());
-
-    WireframeKeyHandler* keyHandler = new WireframeKeyHandler;
-
-    viewer.addEventHandler(keyHandler);
+    viewer.addEventHandler(new WireframeKeyHandler(root));
     viewer.addEventHandler(new osgViewer::StatsHandler);
-
-    bool wireframe = false;
 
     while (!viewer.done())
     {
-
-        if (wireframe != keyHandler->getWireframe())
-        {
-            wireframe = keyHandler->getWireframe();
-            osg::PolygonMode* mode = new osg::PolygonMode;
-            mode->setMode(osg::PolygonMode::FRONT_AND_BACK,
-                          wireframe ? osg::PolygonMode::LINE : osg::PolygonMode::FILL);
-            root->getOrCreateStateSet()->setAttributeAndModes(mode, osg::StateAttribute::ON);
-            root->getOrCreateStateSet()->setMode(GL_CULL_FACE, wireframe ? osg::StateAttribute::OFF
-                                                                           : osg::StateAttribute::ON);
-        }
-
         viewer.frame();
 
         for (unsigned int i=0; i<controllers.size(); ++i)
