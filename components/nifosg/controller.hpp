@@ -111,6 +111,8 @@ namespace NifOsg
     class NodeTargetValue : public ControllerValue
     {
     protected:
+        // TODO: get rid of target pointers, which are incompatible with a copy constructor we will need later
+        // instead, controllers can be a Node added as child of their target
         osg::Node *mNode;
 
     public:

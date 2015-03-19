@@ -168,11 +168,12 @@ namespace
     class InvertBoneMatrix : public osg::NodeCallback
     {
     public:
-        InvertBoneMatrix(osg::Node* skelRootNode)
-            : mSkelRoot(skelRootNode)
-        {
-        }
-        // TODO: add copy constructor
+        InvertBoneMatrix() {}
+
+        InvertBoneMatrix(const InvertBoneMatrix& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
+            : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop) {}
+
+        META_Object(NifOsg, InvertBoneMatrix)
 
         void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
@@ -183,21 +184,20 @@ namespace
 
                 osg::MatrixTransform* trans = dynamic_cast<osg::MatrixTransform*>(node);
 
-                osg::NodePath::iterator found = std::find(path.begin(), path.end(), mSkelRoot);
-                if (found != path.end())
+                for (osg::NodePath::iterator it = path.begin(); it != path.end(); ++it)
                 {
-                    path.erase(path.begin(),found+1);
-
-                    osg::Matrix worldMat = osg::computeLocalToWorld( path );
-                    trans->setMatrix(osg::Matrix::inverse(worldMat));
+                    if (dynamic_cast<osgAnimation::Skeleton*>(*it))
+                    {
+                        path.erase(path.begin(), it+1);
+                        // the bone's transform in skeleton space
+                        osg::Matrix boneMat = osg::computeLocalToWorld( path );
+                        trans->setMatrix(osg::Matrix::inverse(boneMat));
+                        break;
+                    }
                 }
             }
             traverse(node,nv);
         }
-    private:
-
-        // TODO: keeping this pointer will break when copying the scene graph; maybe retrieve it while visiting if it's NULL?
-        osg::Node* mSkelRoot;
     };
 
     osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher)
@@ -793,7 +793,7 @@ namespace NifOsg
         rig->setInfluenceMap(map);
 
         osg::ref_ptr<osg::MatrixTransform> trans(new osg::MatrixTransform);
-        trans->setUpdateCallback(new InvertBoneMatrix(mSkeleton));
+        trans->setUpdateCallback(new InvertBoneMatrix());
 
         osg::ref_ptr<osg::Geode> geode (new osg::Geode);
         geode->addDrawable(rig);
