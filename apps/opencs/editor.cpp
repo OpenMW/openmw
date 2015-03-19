@@ -1,21 +1,13 @@
 
 #include "editor.hpp"
 
-#include <openengine/bullet/BulletShapeLoader.h>
-
 #include <QApplication>
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QMessageBox>
 
-#include <OgreRoot.h>
-#include <OgreRenderWindow.h>
-
-#include <extern/shiny/Main/Factory.hpp>
-#include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
-
-#include <components/ogreinit/ogreinit.hpp>
-#include <components/nifogre/ogrenifloader.hpp>
+#include <components/vfs/manager.hpp>
+#include <components/vfs/registerarchives.hpp>
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
@@ -34,10 +26,11 @@ CS::Editor::Editor ()
 
     //NifOgre::Loader::setShowMarkers(true);
 
-    //Bsa::registerResources (Files::Collections (config.first, !mFsStrict), config.second, true,
-    //    mFsStrict);
+    mVFS.reset(new VFS::Manager(mFsStrict));
 
-    mDocumentManager.listResources();
+    VFS::registerArchives(mVFS.get(), Files::Collections(config.first, !mFsStrict), config.second, true);
+
+    mDocumentManager.setVFS(mVFS.get());
 
     mNewGame.setLocalData (mLocal);
     mFileDialog.setLocalData (mLocal);
@@ -74,9 +67,6 @@ CS::Editor::~Editor ()
     if(mServer && boost::filesystem::exists(mPid))
         static_cast<void> ( // silence coverity warning
         remove(mPid.string().c_str())); // ignore any error
-
-    // cleanup global resources used by OEngine
-    delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
 }
 
 void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)

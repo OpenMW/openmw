@@ -73,4 +73,9 @@ namespace VFS
         return mIndex.find(normalized) != mIndex.end();
     }
 
+    const std::map<std::string, File*>& Manager::getIndex() const
+    {
+        return mIndex;
+    }
+
 }

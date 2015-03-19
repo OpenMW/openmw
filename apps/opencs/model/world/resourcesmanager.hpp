@@ -6,6 +6,11 @@
 #include "universalid.hpp"
 #include "resources.hpp"
 
+namespace VFS
+{
+    class Manager;
+}
+
 namespace CSMWorld
 {
     class ResourcesManager
@@ -18,8 +23,7 @@ namespace CSMWorld
 
         public:
 
-            /// Ask OGRE for a list of available resources.
-            void listResources();
+            void setVFS(const VFS::Manager* vfs);
 
             const Resources& get (UniversalId::Type type) const;
     };

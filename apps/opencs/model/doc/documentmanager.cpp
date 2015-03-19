@@ -90,11 +90,6 @@ void CSMDoc::DocumentManager::setBlacklistedScripts (const std::vector<std::stri
     mBlacklistedScripts = scriptIds;
 }
 
-void CSMDoc::DocumentManager::listResources()
-{
-    mResourcesManager.listResources();
-}
-
 void CSMDoc::DocumentManager::documentLoaded (Document *document)
 {
     emit documentAdded (document);
@@ -107,4 +102,9 @@ void CSMDoc::DocumentManager::documentNotLoaded (Document *document, const std::
 
     if (error.empty()) // do not remove the document yet, if we have an error
         removeDocument (document);
+}
+
+void CSMDoc::DocumentManager::setVFS(const VFS::Manager *vfs)
+{
+    mResourcesManager.setVFS(vfs);
 }

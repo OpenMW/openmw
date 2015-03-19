@@ -35,6 +35,9 @@ namespace VFS
         /// Does a file with this name exist?
         bool exists(const std::string& name) const;
 
+        /// Get a complete list of files from all archives
+        const std::map<std::string, File*>& getIndex() const;
+
         /// Retrieve a file by name.
         /// @note Throws an exception if the file can not be found.
         Files::IStreamPtr get(const std::string& name) const;

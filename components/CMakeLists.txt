@@ -35,7 +35,7 @@ add_component_dir (bsa
     )
 
 add_component_dir (vfs
-    manager archive bsaarchive filesystemarchive
+    manager archive bsaarchive filesystemarchive registerarchives
     )
 
 add_component_dir (nif
