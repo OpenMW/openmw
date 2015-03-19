@@ -91,6 +91,10 @@ void CSVDoc::View::setupEditMenu()
     QAction *userSettings = new QAction (tr ("&Preferences"), this);
     connect (userSettings, SIGNAL (triggered()), this, SIGNAL (editSettingsRequest()));
     edit->addAction (userSettings);
+
+    QAction *search = new QAction (tr ("Search"), this);
+    connect (search, SIGNAL (triggered()), this, SLOT (addSearchSubView()));
+    edit->addAction (search);    
 }
 
 void CSVDoc::View::setupViewMenu()
@@ -113,10 +117,6 @@ void CSVDoc::View::setupViewMenu()
     QAction *filters = new QAction (tr ("Filters"), this);
     connect (filters, SIGNAL (triggered()), this, SLOT (addFiltersSubView()));
     view->addAction (filters);
-
-    QAction *search = new QAction (tr ("Search"), this);
-    connect (search, SIGNAL (triggered()), this, SLOT (addSearchSubView()));
-    view->addAction (search);    
 }
 
 void CSVDoc::View::setupWorldMenu()
