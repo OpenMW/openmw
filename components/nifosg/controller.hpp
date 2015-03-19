@@ -42,9 +42,33 @@ namespace NifOsg
     class ValueInterpolator
     {
     protected:
-        float interpKey(const Nif::FloatKeyMap::MapType &keys, float time, float def=0.f) const;
+        template <typename T>
+        T interpKey (const std::map< float, Nif::KeyT<T> >& keys, float time, T defaultValue = T()) const
+        {
+            if (keys.size() == 0)
+                return defaultValue;
 
-        osg::Vec3f interpKey(const Nif::Vector3KeyMap::MapType &keys, float time) const;
+            if(time <= keys.begin()->first)
+                return keys.begin()->second.mValue;
+
+            typename std::map< float, Nif::KeyT<T> >::const_iterator it = keys.lower_bound(time);
+            if (it != keys.end())
+            {
+                float aTime = it->first;
+                const Nif::KeyT<T>* aKey = &it->second;
+
+                assert (it != keys.begin()); // Shouldn't happen, was checked at beginning of this function
+
+                typename std::map< float, Nif::KeyT<T> >::const_iterator last = --it;
+                float aLastTime = last->first;
+                const Nif::KeyT<T>* aLastKey = &last->second;
+
+                float a = (time - aLastTime) / (aTime - aLastTime);
+                return aLastKey->mValue + ((aKey->mValue - aLastKey->mValue) * a);
+            }
+            else
+                return keys.rbegin()->second.mValue;
+        }
     };
 
     // FIXME: Should not be here. We might also want to use this for non-NIF model formats

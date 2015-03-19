@@ -16,57 +16,6 @@
 namespace NifOsg
 {
 
-float ValueInterpolator::interpKey(const Nif::FloatKeyMap::MapType &keys, float time, float def) const
-{
-    if (keys.size() == 0)
-        return def;
-
-    if(time <= keys.begin()->first)
-        return keys.begin()->second.mValue;
-
-    Nif::FloatKeyMap::MapType::const_iterator it = keys.lower_bound(time);
-    if (it != keys.end())
-    {
-        float aTime = it->first;
-        const Nif::FloatKey* aKey = &it->second;
-
-        assert (it != keys.begin()); // Shouldn't happen, was checked at beginning of this function
-
-        Nif::FloatKeyMap::MapType::const_iterator last = --it;
-        float aLastTime = last->first;
-        const Nif::FloatKey* aLastKey = &last->second;
-
-        float a = (time - aLastTime) / (aTime - aLastTime);
-        return aLastKey->mValue + ((aKey->mValue - aLastKey->mValue) * a);
-    }
-    else
-        return keys.rbegin()->second.mValue;
-}
-
-osg::Vec3f ValueInterpolator::interpKey(const Nif::Vector3KeyMap::MapType &keys, float time) const
-{
-    if(time <= keys.begin()->first)
-        return keys.begin()->second.mValue;
-
-    Nif::Vector3KeyMap::MapType::const_iterator it = keys.lower_bound(time);
-    if (it != keys.end())
-    {
-        float aTime = it->first;
-        const Nif::KeyT<osg::Vec3f>* aKey = &it->second;
-
-        assert (it != keys.begin()); // Shouldn't happen, was checked at beginning of this function
-
-        Nif::Vector3KeyMap::MapType::const_iterator last = --it;
-        float aLastTime = last->first;
-        const Nif::KeyT<osg::Vec3f>* aLastKey = &last->second;
-
-        float a = (time - aLastTime) / (aTime - aLastTime);
-        return aLastKey->mValue + ((aKey->mValue - aLastKey->mValue) * a);
-    }
-    else
-        return keys.rbegin()->second.mValue;
-}
-
 ControllerFunction::ControllerFunction(const Nif::Controller *ctrl, bool deltaInput)
     : mDeltaInput(deltaInput)
     , mFrequency(ctrl->frequency)

@@ -10,6 +10,8 @@
 #include <components/nif/nifkey.hpp>
 #include <components/nif/data.hpp>
 
+#include "controller.hpp" // ValueInterpolator
+
 namespace Nif
 {
     class NiGravity;
@@ -90,7 +92,7 @@ namespace NifOsg
         float mCachedDefaultSize;
     };
 
-    class ParticleColorAffector : public osgParticle::Operator
+    class ParticleColorAffector : public osgParticle::Operator, public ValueInterpolator
     {
     public:
         ParticleColorAffector(const Nif::NiColorData* clrdata);

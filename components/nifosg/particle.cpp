@@ -45,11 +45,10 @@ ParticleShooter::ParticleShooter(const osgParticle::Shooter &copy, const osg::Co
 
 void ParticleShooter::shoot(osgParticle::Particle *particle) const
 {
-    // NOTE: We do not use mDirection/mAngle for the initial direction.
     float hdir = mHorizontalDir + mHorizontalAngle * (2.f * (std::rand() / static_cast<double>(RAND_MAX)) - 1.f);
     float vdir = mVerticalDir + mVerticalAngle * (2.f * (std::rand() / static_cast<double>(RAND_MAX)) - 1.f);
-    osg::Vec3f dir = osg::Quat(hdir, osg::Vec3f(0,0,1)) * osg::Quat(vdir, osg::Vec3f(1,0,0))
-                                                                        // ^ Vec3f(0,1,0) according to nifskope, TODO: test in mw
+    float vdir2 = mVerticalDir + mVerticalAngle * (2.f * (std::rand() / static_cast<double>(RAND_MAX)) - 1.f);
+    osg::Vec3f dir = osg::Quat(hdir, osg::Vec3f(0,0,1)) * osg::Quat(vdir, osg::Vec3f(0,1,0)) * osg::Quat(vdir2, osg::Vec3f(1,0,0))
              * osg::Vec3f(0,0,1);
 
     float vel = mMinSpeed + (mMaxSpeed - mMinSpeed) * std::rand() / static_cast<float>(RAND_MAX);
@@ -111,34 +110,10 @@ ParticleColorAffector::ParticleColorAffector(const ParticleColorAffector &copy, 
     *this = copy;
 }
 
-osg::Vec4f ParticleColorAffector::interpolate(const float time, const Nif::Vector4KeyMap::MapType &keys)
-{
-    if(time <= keys.begin()->first)
-        return keys.begin()->second.mValue;
-
-    Nif::Vector4KeyMap::MapType::const_iterator it = keys.lower_bound(time);
-    if (it != keys.end())
-    {
-        float aTime = it->first;
-        const Nif::KeyT<osg::Vec4f>* aKey = &it->second;
-
-        assert (it != keys.begin()); // Shouldn't happen, was checked at beginning of this function
-
-        Nif::Vector4KeyMap::MapType::const_iterator last = --it;
-        float aLastTime = last->first;
-        const Nif::KeyT<osg::Vec4f>* aLastKey = &last->second;
-
-        float a = (time - aLastTime) / (aTime - aLastTime);
-        return aLastKey->mValue + ((aKey->mValue - aLastKey->mValue) * a);
-    }
-    else
-        return keys.rbegin()->second.mValue;
-}
-
 void ParticleColorAffector::operate(osgParticle::Particle* particle, double /* dt */)
 {
     float time = static_cast<float>(particle->getAge()/particle->getLifeTime());
-    osg::Vec4f color = interpolate(time, mData.mKeyMap.mKeys);
+    osg::Vec4f color = interpKey(mData.mKeyMap.mKeys, time, osg::Vec4f(1,1,1,1));
 
     particle->setColorRange(osgParticle::rangev4(color, color));
 }
