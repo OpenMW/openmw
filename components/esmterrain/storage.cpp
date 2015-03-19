@@ -282,7 +282,8 @@ namespace ESMTerrain
         const ESM::LandTexture* ltex = getLandTexture(id.first-1, id.second);
 
         //TODO this is needed due to MWs messed up texture handling
-        std::string texture = Misc::ResourceHelpers::correctTexturePath(ltex->mTexture);
+        assert(0 && "no vfs here yet");
+        std::string texture = ltex->mTexture; //Misc::ResourceHelpers::correctTexturePath(ltex->mTexture);
 
         return texture;
     }

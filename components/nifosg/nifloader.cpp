@@ -11,6 +11,7 @@
 #include <osgDB/Registry>
 #include <osg/io_utils>
 #include <components/misc/stringops.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 // skel
 #include <osgAnimation/Skeleton>
@@ -477,15 +478,7 @@ namespace NifOsg
                     if (st.empty())
                         continue;
 
-                    // FIXME: replace by ResourceHelpers
-                    std::string filename (st->filename);
-                    Misc::StringUtils::toLower(filename);
-                    filename = "textures\\" + filename;
-                    size_t found = filename.find(".tga");
-                    if (found == std::string::npos)
-                        found = filename.find(".bmp");
-                    if (found != std::string::npos)
-                        filename.replace(found, 4, ".dds");
+                    std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, resourceManager);
 
                     // tx_creature_werewolf.dds isn't loading in the correct format without this option
                     osgDB::Options* opts = new osgDB::Options;
@@ -868,15 +861,7 @@ namespace NifOsg
                         continue;
                     }
 
-                    // FIXME: replace by ResourceHelpers
-                    std::string filename (st->filename);
-                    Misc::StringUtils::toLower(filename);
-                    filename = "textures\\" + filename;
-                    size_t found = filename.find(".tga");
-                    if (found == std::string::npos)
-                        found = filename.find(".bmp");
-                    if (found != std::string::npos)
-                        filename.replace(found, 4, ".dds");
+                    std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, resourceManager);
 
                     // tx_creature_werewolf.dds isn't loading in the correct format without this option
                     osgDB::Options* opts = new osgDB::Options;
