@@ -22,6 +22,11 @@
 // particle
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
+#include <osgParticle/ConstantRateCounter>
+#include <osgParticle/ModularEmitter>
+#include <osgParticle/Shooter>
+#include <osgParticle/BoxPlacer>
+#include <osgParticle/ModularProgram>
 
 #include <osg/BlendFunc>
 #include <osg/AlphaFunc>
@@ -35,6 +40,8 @@
 #include <osg/TexEnvCombine>
 
 #include <components/nif/node.hpp>
+
+#include "particle.hpp"
 
 namespace
 {
@@ -124,6 +131,14 @@ namespace
     class UpdateBone : public osg::NodeCallback
     {
     public:
+        UpdateBone() {}
+        UpdateBone(const UpdateBone& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
+            : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop)
+        {
+        }
+
+        META_Object(NifOsg, UpdateBone)
+
         // Callback method called by the NodeVisitor when visiting a node.
         void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
@@ -157,6 +172,7 @@ namespace
             : mSkelRoot(skelRootNode)
         {
         }
+        // TODO: add copy constructor
 
         void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
@@ -179,44 +195,9 @@ namespace
             traverse(node,nv);
         }
     private:
+
+        // TODO: keeping this pointer will break when copying the scene graph; maybe retrieve it while visiting if it's NULL?
         osg::Node* mSkelRoot;
-    };
-
-    // HACK: Particle doesn't allow setting the initial age, but we need this for loading the particle system state
-    class ParticleAgeSetter : public osgParticle::Particle
-    {
-    public:
-        ParticleAgeSetter(float age)
-            : Particle()
-        {
-            _t0 = age;
-        }
-    };
-
-    // Node callback used to set the inverse of the parent's world matrix on the MatrixTransform
-    // that the callback is attached to. Used for certain particle systems,
-    // so that the particles do not move with the node they are attached to.
-    class InverseWorldMatrix : public osg::NodeCallback
-    {
-    public:
-        InverseWorldMatrix()
-        {
-        }
-
-        void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-            if (nv && nv->getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR)
-            {
-                osg::NodePath path = nv->getNodePath();
-                path.pop_back();
-
-                osg::MatrixTransform* trans = dynamic_cast<osg::MatrixTransform*>(node);
-
-                osg::Matrix worldMat = osg::computeLocalToWorld( path );
-                trans->setMatrix(osg::Matrix::inverse(worldMat));
-            }
-            traverse(node,nv);
-        }
     };
 
     osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher)
@@ -338,6 +319,8 @@ namespace NifOsg
 
         if (nifNode->recType == Nif::RC_NiBSAnimationNode)
             animflags |= nifNode->flags;
+        if (nifNode->recType == Nif::RC_NiBSParticleNode)
+            particleflags |= nifNode->flags;
 
         // Hide collision shapes, but don't skip the subgraph
         // We still need to animate the hidden bones so the physics system can access them
@@ -370,7 +353,7 @@ namespace NifOsg
         }
 
         if(nifNode->recType == Nif::RC_NiAutoNormalParticles || nifNode->recType == Nif::RC_NiRotatingParticles)
-            handleParticleSystem(nifNode, transformNode, particleflags, animflags);
+            handleParticleSystem(nifNode, transformNode, animflags, particleflags);
 
         if (!nifNode->controller.empty())
             handleNodeControllers(nifNode, transformNode, animflags);
@@ -495,9 +478,10 @@ namespace NifOsg
         }
     }
 
-    void Loader::handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, int particleflags, int animflags)
+    void Loader::handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, int animflags, int particleflags)
     {
         osg::ref_ptr<osgParticle::ParticleSystem> partsys (new osgParticle::ParticleSystem);
+        partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
 
         const Nif::NiAutoNormalParticlesData *particledata = NULL;
         if(nifNode->recType == Nif::RC_NiAutoNormalParticles)
@@ -506,6 +490,8 @@ namespace NifOsg
             particledata = static_cast<const Nif::NiRotatingParticles*>(nifNode)->data.getPtr();
         else
             return;
+
+        // TODO: add special handling for NiBSPArrayController
 
         const Nif::NiParticleSystemController* partctrl = NULL;
         for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
@@ -516,10 +502,18 @@ namespace NifOsg
                 partctrl = static_cast<Nif::NiParticleSystemController*>(ctrl.getPtr());
         }
         if (!partctrl)
+        {
+            std::cerr << "No particle controller found " << std::endl;
             return;
+        }
 
+        osgParticle::ParticleProcessor::ReferenceFrame rf = (particleflags & Nif::NiNode::ParticleFlag_LocalSpace)
+                ? osgParticle::ParticleProcessor::RELATIVE_RF
+                : osgParticle::ParticleProcessor::ABSOLUTE_RF;
+
+        // TODO: also take into account the transform by placement in the scene
         osg::Matrix particletransform;
-        if (!(particleflags & Nif::NiNode::ParticleFlag_LocalSpace))
+        if (rf == osgParticle::ParticleProcessor::ABSOLUTE_RF)
             particletransform = getWorldTransform(nifNode);
 
         int i=0;
@@ -528,11 +522,12 @@ namespace NifOsg
         {
             const Nif::NiParticleSystemController::Particle& particle = *it;
 
-            ParticleAgeSetter particletemplate(std::max(0.f, particle.lifespan - particle.lifetime));
+            ParticleAgeSetter particletemplate(std::max(0.f, particle.lifetime));
 
             osgParticle::Particle* created = partsys->createParticle(&particletemplate);
-            created->setLifeTime(500);//std::max(0.f, particle.lifespan));
-            created->setVelocity(particle.velocity * particletransform);
+            created->setLifeTime(std::max(0.f, particle.lifespan));
+            osg::Vec4f adjustedVelocity = osg::Vec4f(particle.velocity, 0.f) * particletransform;
+            created->setVelocity(osg::Vec3f(adjustedVelocity.x(), adjustedVelocity.y(), adjustedVelocity.z()));
             created->setPosition(particledata->vertices.at(particle.vertex) * particletransform);
 
             osg::Vec4f partcolor (1.f,1.f,1.f,1.f);
@@ -544,10 +539,81 @@ namespace NifOsg
             created->setSizeRange(osgParticle::rangef(size, size));
         }
 
-        osg::NodeVisitor visitor;
-        partsys->update(0.f, visitor);
-        partsys->setFrozen(true);
-        partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
+        partsys->getDefaultParticleTemplate().setSizeRange(osgParticle::rangef(partctrl->size, partctrl->size));
+        partsys->getDefaultParticleTemplate().setColorRange(osgParticle::rangev4(osg::Vec4f(1.f,1.f,1.f,1.f), osg::Vec4f(1.f,1.f,1.f,1.f)));
+        partsys->getDefaultParticleTemplate().setAlphaRange(osgParticle::rangef(1.f, 1.f));
+
+        // ---- emitter
+
+        osgParticle::ModularEmitter* emitter = new osgParticle::ModularEmitter;
+        emitter->setParticleSystem(partsys);
+        emitter->setReferenceFrame(osgParticle::ParticleProcessor::RELATIVE_RF);
+
+        osgParticle::ConstantRateCounter* counter = new osgParticle::ConstantRateCounter;
+        if (partctrl->emitFlags & Nif::NiParticleSystemController::NoAutoAdjust)
+            counter->setNumberOfParticlesPerSecondToCreate(partctrl->emitRate);
+        else
+            counter->setNumberOfParticlesPerSecondToCreate(partctrl->numParticles / (partctrl->lifetime + partctrl->lifetimeRandom/2));
+
+        emitter->setCounter(counter);
+
+        ParticleShooter* shooter = new ParticleShooter(partctrl->velocity - partctrl->velocityRandom*0.5f,
+                                                       partctrl->velocity + partctrl->velocityRandom*0.5f,
+                                                       partctrl->horizontalDir, partctrl->horizontalAngle,
+                                                       partctrl->verticalDir, partctrl->verticalAngle,
+                                                       partctrl->lifetime, partctrl->lifetimeRandom);
+        emitter->setShooter(shooter);
+
+        osgParticle::BoxPlacer* placer = new osgParticle::BoxPlacer;
+        placer->setXRange(-partctrl->offsetRandom.x(), partctrl->offsetRandom.x());
+        placer->setYRange(-partctrl->offsetRandom.y(), partctrl->offsetRandom.y());
+        placer->setZRange(-partctrl->offsetRandom.z(), partctrl->offsetRandom.z());
+
+        emitter->setPlacer(placer);
+
+        // TODO: attach to the emitter node
+        // Note: we also assume that the Emitter node is placed *before* the Particle node in the scene graph.
+        // This seems to be true for all NIF files in the game that I've checked, suggesting that NIFs work similar to OSG with regards to update order.
+        // If something ever violates this assumption, the worst that could happen is the culling being one frame late, which wouldn't be a disaster.
+        parentNode->addChild(emitter);
+
+        createController(partctrl, boost::shared_ptr<ControllerValue>(new ParticleSystemControllerValue(emitter, partctrl)), animflags);
+
+        // ----------- affector (must be after emitters in the scene graph)
+        osgParticle::ModularProgram* program = new osgParticle::ModularProgram;
+        program->setParticleSystem(partsys);
+        program->setReferenceFrame(rf);
+        parentNode->addChild(program);
+        for (Nif::ExtraPtr e = partctrl->extra; !e.empty(); e = e->extra)
+        {
+            if (e->recType == Nif::RC_NiParticleGrowFade)
+            {
+                const Nif::NiParticleGrowFade *gf = static_cast<const Nif::NiParticleGrowFade*>(e.getPtr());
+                GrowFadeAffector* affector = new GrowFadeAffector(gf->growTime, gf->fadeTime);
+                program->addOperator(affector);
+            }
+            else if (e->recType == Nif::RC_NiGravity)
+            {
+                const Nif::NiGravity* gr = static_cast<const Nif::NiGravity*>(e.getPtr());
+                GravityAffector* affector = new GravityAffector(gr);
+                program->addOperator(affector);
+            }
+            else if (e->recType == Nif::RC_NiParticleColorModifier)
+            {
+                const Nif::NiParticleColorModifier *cl = static_cast<const Nif::NiParticleColorModifier*>(e.getPtr());
+                const Nif::NiColorData *clrdata = cl->data.getPtr();
+                ParticleColorAffector* affector = new ParticleColorAffector(clrdata);
+                program->addOperator(affector);
+            }
+            else if (e->recType == Nif::RC_NiParticleRotation)
+            {
+                // TODO: Implement?
+            }
+            else
+                std::cerr << "Unhandled particle modifier " << e->recName << std::endl;
+        }
+
+        // -----------
 
         std::vector<const Nif::Property*> materialProps;
         collectMaterialProperties(nifNode, materialProps);
@@ -558,7 +624,7 @@ namespace NifOsg
         osg::ref_ptr<osg::Geode> geode (new osg::Geode);
         geode->addDrawable(partsys);
 
-        if (particleflags & Nif::NiNode::ParticleFlag_LocalSpace)
+        if (rf == osgParticle::ParticleProcessor::RELATIVE_RF)
             parentNode->addChild(geode);
         else
         {
@@ -568,6 +634,7 @@ namespace NifOsg
             parentNode->addChild(trans);
         }
 
+        // particle system updater (after the emitters and affectors in the scene graph)
         osgParticle::ParticleSystemUpdater* updater = new osgParticle::ParticleSystemUpdater;
         updater->addParticleSystem(partsys);
         parentNode->addChild(updater);
@@ -870,6 +937,7 @@ namespace NifOsg
                     osgDB::ReaderWriter::ReadResult result = reader->readImage(*resourceManager->get(filename.c_str()), opts);
                     osg::Image* image = result.getImage();
                     osg::Texture2D* texture2d = new osg::Texture2D;
+                    texture2d->setUnRefImageDataAfterApply(true);
                     texture2d->setImage(image);
 
                     unsigned int clamp = static_cast<unsigned int>(tex.clamp);

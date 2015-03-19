@@ -43,7 +43,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifosg
-    nifloader controller
+    nifloader controller particle
     )
 
 #add_component_dir (nifcache

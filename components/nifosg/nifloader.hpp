@@ -61,7 +61,7 @@ namespace NifOsg
         void handleProperty (const Nif::Property* property, const Nif::Node* nifNode,
                              osg::Node* node, std::map<int, int>& boundTextures, int animflags);
 
-        void handleParticleSystem(const Nif::Node* nifNode, osg::Group* parentNode, int particleflags, int animflags);
+        void handleParticleSystem(const Nif::Node* nifNode, osg::Group* parentNode, int animflags, int particleflags);
 
         // Creates an osg::Geometry object for the given TriShape, populates it, and attaches it to the given node.
         void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, const std::map<int, int>& boundTextures, int animflags);

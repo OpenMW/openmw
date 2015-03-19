@@ -13,6 +13,7 @@
 #include <components/files/configurationmanager.hpp>
 
 #include <osgGA/TrackballManipulator>
+#include <osg/PositionAttitudeTransform>
 
 #include <osgDB/WriteFile>
 
@@ -120,9 +121,13 @@ int main(int argc, char** argv)
     for (unsigned int i=0; i<loader.mControllers.size(); ++i)
         controllers.push_back(loader.mControllers[i]);
 
+    osg::PositionAttitudeTransform* trans = new osg::PositionAttitudeTransform;
+    root->addChild(trans);
+
     for (int x=0; x<1;++x)
     {
-        root->addChild(newNode);
+        //root->addChild(newNode);
+        trans->addChild(newNode);
     }
 
     viewer.setSceneData(root);
@@ -140,6 +145,8 @@ int main(int argc, char** argv)
 
     while (!viewer.done())
     {
+        //trans->setAttitude(osg::Quat(viewer.getFrameStamp()->getSimulationTime()*5, osg::Vec3f(0,0,1)));
+
         viewer.frame();
 
         for (unsigned int i=0; i<controllers.size(); ++i)

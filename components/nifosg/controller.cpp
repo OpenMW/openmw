@@ -4,7 +4,10 @@
 #include <osg/TexMat>
 #include <osg/Material>
 #include <osg/Texture2D>
+
 #include <osgAnimation/MorphGeometry>
+
+#include <osgParticle/Emitter>
 
 #include <osg/io_utils>
 
@@ -329,6 +332,16 @@ void FlipControllerValue::setValue(float time)
     if (!tex)
         return;
     tex->setImage(mTextures[curTexture].get());
+}
+
+ParticleSystemControllerValue::ParticleSystemControllerValue(osgParticle::Emitter *emitter, const Nif::NiParticleSystemController *ctrl)
+    : mEmitter(emitter), mEmitStart(ctrl->startTime), mEmitStop(ctrl->stopTime)
+{
+}
+
+void ParticleSystemControllerValue::setValue(float time)
+{
+    mEmitter->setEnabled(time >= mEmitStart && time < mEmitStop);
 }
 
 

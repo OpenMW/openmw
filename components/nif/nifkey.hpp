@@ -8,6 +8,8 @@
 #include <sstream>
 #include <map>
 
+#include "niffile.hpp"
+
 namespace Nif
 {
 

@@ -25,6 +25,11 @@ namespace osg
     class StateSet;
 }
 
+namespace osgParticle
+{
+    class Emitter;
+}
+
 namespace osgAnimation
 {
     class MorphGeometry;
@@ -234,6 +239,19 @@ namespace NifOsg
         FlipControllerValue(osg::StateSet* target, const Nif::NiFlipController* ctrl, std::vector<osg::ref_ptr<osg::Image> > textures);
 
         virtual void setValue(float time);
+    };
+
+    class ParticleSystemControllerValue : public ControllerValue
+    {
+    public:
+        ParticleSystemControllerValue(osgParticle::Emitter* emitter, const Nif::NiParticleSystemController* ctrl);
+
+        virtual void setValue(float time);
+
+    private:
+        osgParticle::Emitter* mEmitter;
+        float mEmitStart;
+        float mEmitStop;
     };
 
 }
