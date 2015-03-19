@@ -7,9 +7,9 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
 
-CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
+CSVRender::PreviewWidget::PreviewWidget (const VFS::Manager* vfs, CSMWorld::Data& data,
     const std::string& id, bool referenceable, QWidget *parent)
-: SceneWidget (parent), mData (data)
+: SceneWidget (parent), mData (data), mObject(vfs, data, mRootNode, id, referenceable)
 {
     //setNavigation (&mOrbit);
 
@@ -36,7 +36,6 @@ CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
 void CSVRender::PreviewWidget::referenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
-#if 0
     if (mObject.referenceableDataChanged (topLeft, bottomRight))
         flagAsModified();
 
@@ -51,13 +50,11 @@ void CSVRender::PreviewWidget::referenceableDataChanged (const QModelIndex& topL
         if (referenceables.data (index).toInt()==CSMWorld::RecordBase::State_Deleted)
             emit closeRequest();
     }
-#endif
 }
 
 void CSVRender::PreviewWidget::referenceableAboutToBeRemoved (const QModelIndex& parent, int start,
     int end)
 {
-#if 0
     if (mObject.referenceableAboutToBeRemoved (parent, start, end))
         flagAsModified();
 
@@ -77,13 +74,11 @@ void CSVRender::PreviewWidget::referenceableAboutToBeRemoved (const QModelIndex&
             emit closeRequest();
         }
     }
-#endif
 }
 
 void CSVRender::PreviewWidget::referenceDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
-#if 0
     if (mObject.referenceDataChanged (topLeft, bottomRight))
         flagAsModified();
 
@@ -112,13 +107,11 @@ void CSVRender::PreviewWidget::referenceDataChanged (const QModelIndex& topLeft,
     if (index.row()>=topLeft.row() && index.row()<=bottomRight.row())
         if (index.column()>=topLeft.column() && index.column()<=bottomRight.row())
             emit referenceableIdChanged (mObject.getReferenceableId());
-#endif
 }
 
 void CSVRender::PreviewWidget::referenceAboutToBeRemoved (const QModelIndex& parent, int start,
     int end)
 {
-#if 0
     if (mObject.getReferenceId().empty())
         return;
 
@@ -129,5 +122,4 @@ void CSVRender::PreviewWidget::referenceAboutToBeRemoved (const QModelIndex& par
 
     if (index.row()>=start && index.row()<=end)
         emit closeRequest();
-#endif
 }

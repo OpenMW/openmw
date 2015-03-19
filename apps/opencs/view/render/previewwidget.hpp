@@ -8,6 +8,11 @@
 
 class QModelIndex;
 
+namespace VFS
+{
+    class Manager;
+}
+
 namespace CSMWorld
 {
     class Data;
@@ -21,11 +26,11 @@ namespace CSVRender
 
             CSMWorld::Data& mData;
             CSVRender::NavigationOrbit mOrbit;
-            //Object mObject;
+            CSVRender::Object mObject;
 
         public:
 
-            PreviewWidget (CSMWorld::Data& data, const std::string& id, bool referenceable,
+            PreviewWidget (const VFS::Manager* vfs, CSMWorld::Data& data, const std::string& id, bool referenceable,
                 QWidget *parent = 0);
 
         signals:

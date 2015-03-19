@@ -16,12 +16,14 @@
 #include <osg/GraphicsContext>
 
 #include <osgGA/TrackballManipulator>
+#include <osgViewer/ViewerEventHandlers>
 
 namespace CSVRender
 {
 
 SceneWidget::SceneWidget(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
+    , mRootNode(0)
 {
 
 #if QT_VERSION >= 0x050000
@@ -37,6 +39,7 @@ SceneWidget::SceneWidget(QWidget *parent, Qt::WindowFlags f)
     setKeyEventSetsDone(0);
 
     osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
+    //ds->setNumMultiSamples(8);
     osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
     traits->windowName = "";
     traits->windowDecoration = true;
@@ -49,6 +52,8 @@ SceneWidget::SceneWidget(QWidget *parent, Qt::WindowFlags f)
     traits->stencil = ds->getMinimumNumStencilBits();
     traits->sampleBuffers = ds->getMultiSamples();
     traits->samples = ds->getNumMultiSamples();
+    // Doesn't make much sense as we're running on demand updates, and there seems to be a bug with the refresh rate when running multiple QGLWidgets
+    traits->vsync = false;
 
     osgQt::GraphicsWindowQt* window = new osgQt::GraphicsWindowQt(traits.get());
     QLayout* layout = new QHBoxLayout(this);
@@ -59,15 +64,19 @@ SceneWidget::SceneWidget(QWidget *parent, Qt::WindowFlags f)
 
     getCamera()->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
     getCamera()->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
-    //getCamera()->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
+    getCamera()->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
 
-    osg::Node* root = new osg::Node;
-    setSceneData(root);
+    mRootNode = new osg::Group;
+    setSceneData(mRootNode);
+
+    // Press S to reveal profiling stats
+    addEventHandler(new osgViewer::StatsHandler);
 
     setCameraManipulator(new osgGA::TrackballManipulator);
 
     // Only render when the camera position changed, or content flagged dirty
     //setRunFrameScheme(osgViewer::ViewerBase::ON_DEMAND);
+    setRunFrameScheme(osgViewer::ViewerBase::CONTINUOUS);
 
     connect( &mTimer, SIGNAL(timeout()), this, SLOT(update()) );
     mTimer.start( 10 );

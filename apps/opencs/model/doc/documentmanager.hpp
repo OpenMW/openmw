@@ -40,7 +40,7 @@ namespace CSMDoc
             ToUTF8::FromType mEncoding;
             CSMWorld::ResourcesManager mResourcesManager;
             std::vector<std::string> mBlacklistedScripts;
-            VFS::Manager* mVFS;
+            const VFS::Manager* mVFS;
 
             DocumentManager (const DocumentManager&);
             DocumentManager& operator= (const DocumentManager&);

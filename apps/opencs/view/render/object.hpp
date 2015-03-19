@@ -3,15 +3,19 @@
 
 #include <boost/shared_ptr.hpp>
 
-#ifndef Q_MOC_RUN
-#include <components/nifogre/ogrenifloader.hpp>
-#endif
+#include <osg/ref_ptr>
 
 class QModelIndex;
 
-namespace Ogre
+
+namespace osg
 {
-    class SceneNode;
+    class Group;
+}
+
+namespace VFS
+{
+    class Manager;
 }
 
 namespace CSMWorld
@@ -32,8 +36,9 @@ namespace CSVRender
             const CSMWorld::Data& mData;
             std::string mReferenceId;
             std::string mReferenceableId;
-            Ogre::SceneNode *mBase;
-            NifOgre::ObjectScenePtr mObject;
+            osg::ref_ptr<osg::Group> mBaseNode;
+            osg::Group* mParentNode;
+            const VFS::Manager* mVFS;
             bool mForceBaseToZero;
             boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
 
@@ -42,9 +47,6 @@ namespace CSVRender
 
             /// Not implemented
             Object& operator= (const Object&);
-
-            /// Destroy all scene nodes and movable objects attached to node.
-            static void clearSceneNode (Ogre::SceneNode *node);
 
             /// Remove object from node (includes deleting)
             void clear();
@@ -60,7 +62,7 @@ namespace CSVRender
 
         public:
 
-            Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode,
+            Object (const VFS::Manager* vfs, const CSMWorld::Data& data, osg::Group *cellNode,
                 const std::string& id, bool referenceable,
                 boost::shared_ptr<CSVWorld::PhysicsSystem> physics = boost::shared_ptr<CSVWorld::PhysicsSystem> (),
                 bool forceBaseToZero = false);

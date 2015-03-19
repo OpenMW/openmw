@@ -2245,12 +2245,12 @@ void CSMDoc::Document::createBase()
     }
 }
 
-CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
+CSMDoc::Document::Document (const VFS::Manager* vfs, const Files::ConfigurationManager& configuration,
     const std::vector< boost::filesystem::path >& files, bool new_,
     const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
     ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
     const std::vector<std::string>& blacklistedScripts)
-: mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
+: mVFS(vfs), mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
   mTools (*this), mResDir(resDir),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
@@ -2309,6 +2309,11 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
 CSMDoc::Document::~Document()
 {
+}
+
+const VFS::Manager *CSMDoc::Document::getVFS() const
+{
+    return mVFS;
 }
 
 QUndoStack& CSMDoc::Document::getUndoStack()

@@ -51,7 +51,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
             std::string id = Misc::StringUtils::lowerCase (references.data (
                 references.index (i, idColumn)).toString().toUtf8().constData());
 
-            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false, mPhysics)));
+            //mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false, mPhysics)));
             modified = true;
         }
     }
@@ -191,8 +191,8 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     // add new objects
     for (std::map<std::string, bool>::iterator iter (ids.begin()); iter!=ids.end(); ++iter)
     {
-        mObjects.insert (std::make_pair (
-            iter->first, new Object (mData, mCellNode, iter->first, false, mPhysics)));
+        //mObjects.insert (std::make_pair (
+        //    iter->first, new Object (mData, mCellNode, iter->first, false, mPhysics)));
 
         modified = true;
     }

@@ -1,9 +1,6 @@
-
 #include "object.hpp"
 
-#include <OgreSceneManager.h>
-#include <OgreSceneNode.h>
-#include <OgreEntity.h>
+#include <osg/Group>
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/ref.hpp"
@@ -11,43 +8,20 @@
 
 #include "../world/physicssystem.hpp"
 
+#include <components/nifosg/nifloader.hpp>
+
 #include "elements.hpp"
-
-void CSVRender::Object::clearSceneNode (Ogre::SceneNode *node)
-{
-    for (Ogre::SceneNode::ObjectIterator iter = node->getAttachedObjectIterator();
-        iter.hasMoreElements(); )
-    {
-        Ogre::MovableObject* object = dynamic_cast<Ogre::MovableObject*> (iter.getNext());
-        node->getCreator()->destroyMovableObject (object);
-    }
-
-    for (Ogre::SceneNode::ChildNodeIterator iter = node->getChildIterator();
-        iter.hasMoreElements(); )
-    {
-        Ogre::SceneNode* childNode = dynamic_cast<Ogre::SceneNode*> (iter.getNext());
-        clearSceneNode (childNode);
-        node->getCreator()->destroySceneNode (childNode);
-   }
-}
 
 void CSVRender::Object::clear()
 {
-    mObject.setNull();
-
-    if (mBase)
-        clearSceneNode (mBase);
 }
 
 void CSVRender::Object::update()
 {
-    if(!mObject.isNull())
-        mPhysics->removePhysicsObject(mBase->getName());
-
     clear();
 
     std::string model;
-    int error = 0; // 1 referemceanöe does not exist, 2 referenceable does not specify a mesh
+    int error = 0; // 1 referenceable does not exist, 2 referenceable does not specify a mesh
 
     const CSMWorld::RefIdCollection& referenceables = mData.getReferenceables();
 
@@ -69,17 +43,28 @@ void CSVRender::Object::update()
 
     if (error)
     {
+        /*
         Ogre::Entity* entity = mBase->getCreator()->createEntity (Ogre::SceneManager::PT_CUBE);
         entity->setMaterialName("BaseWhite"); /// \todo adjust material according to error
         entity->setVisibilityFlags (Element_Reference);
 
         mBase->attachObject (entity);
+        */
     }
     else
     {
-        //mObject = NifOgre::Loader::createObjects (mBase, "Meshes\\" + model);
+        NifOsg::Loader loader;
+        loader.resourceManager = mVFS;
+
+        std::string path = "meshes\\" + model;
+
+        Nif::NIFFilePtr file(new Nif::NIFFile(mVFS->get(path), path));
+
+        loader.load(file, mBaseNode);
+
         //mObject->setVisibilityFlags (Element_Reference);
 
+        /*
         if (mPhysics && !mReferenceId.empty())
         {
             const CSMWorld::CellRef& reference = getReference();
@@ -96,11 +81,13 @@ void CSVRender::Object::update()
 
             mPhysics->addObject("meshes\\" + model, mBase->getName(), mReferenceId, reference.mScale, position, xr*yr*zr);
         }
+        */
     }
 }
 
 void CSVRender::Object::adjust()
 {
+    /*
     if (mReferenceId.empty())
         return;
 
@@ -122,6 +109,7 @@ void CSVRender::Object::adjust()
 
     // scale
     mBase->setScale (reference.mScale, reference.mScale, reference.mScale);
+    */
 }
 
 const CSMWorld::CellRef& CSVRender::Object::getReference() const
@@ -132,12 +120,13 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
     return mData.getReferences().getRecord (mReferenceId).get();
 }
 
-CSVRender::Object::Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode,
+CSVRender::Object::Object (const VFS::Manager* vfs, const CSMWorld::Data& data, osg::Group* parentNode,
     const std::string& id, bool referenceable, boost::shared_ptr<CSVWorld::PhysicsSystem> physics,
     bool forceBaseToZero)
-: mData (data), mBase (0), mForceBaseToZero (forceBaseToZero), mPhysics(physics)
+: mVFS(vfs), mData (data), mBaseNode(0), mParentNode(parentNode), mForceBaseToZero (forceBaseToZero), mPhysics(physics)
 {
-    mBase = cellNode->createChildSceneNode();
+    mBaseNode = new osg::Group;
+    parentNode->addChild(mBaseNode);
 
     if (referenceable)
     {
@@ -157,13 +146,7 @@ CSVRender::Object::~Object()
 {
     clear();
 
-    if (mBase)
-    {
-        if(mPhysics) // preview may not have physics enabled
-            mPhysics->removeObject(mBase->getName());
-
-        mBase->getCreator()->destroySceneNode (mBase);
-    }
+    mParentNode->removeChild(mBaseNode);
 }
 
 bool CSVRender::Object::referenceableDataChanged (const QModelIndex& topLeft,

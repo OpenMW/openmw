@@ -10,6 +10,11 @@
 
 #include <osgViewer/Viewer>
 
+namespace osg
+{
+    class Group;
+}
+
 namespace CSVWidget
 {
     class SceneToolMode;
@@ -33,6 +38,8 @@ namespace CSVRender
         void flagAsModified();
 
     protected:
+
+        osg::Group* mRootNode;
 
         QTimer mTimer;
     };

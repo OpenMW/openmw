@@ -23,6 +23,12 @@
 
 class QAbstractItemModel;
 
+namespace VFS
+{
+
+    class Manager;
+}
+
 namespace ESM
 {
     struct GameSetting;
@@ -53,6 +59,7 @@ namespace CSMDoc
 
         private:
 
+            const VFS::Manager* mVFS;
             boost::filesystem::path mSavePath;
             std::vector<boost::filesystem::path> mContentFiles;
             bool mNew;
@@ -91,13 +98,15 @@ namespace CSMDoc
 
         public:
 
-            Document (const Files::ConfigurationManager& configuration,
+            Document (const VFS::Manager* vfs, const Files::ConfigurationManager& configuration,
                 const std::vector< boost::filesystem::path >& files, bool new_,
                 const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
                 ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
                 const std::vector<std::string>& blacklistedScripts);
 
             ~Document();
+
+            const VFS::Manager* getVFS() const;
 
             QUndoStack& getUndoStack();
 

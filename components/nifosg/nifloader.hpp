@@ -39,7 +39,7 @@ namespace NifOsg
 
         void loadAsSkeleton(Nif::NIFFilePtr file, osg::Group* parentNode);
 
-        VFS::Manager* resourceManager;
+        const VFS::Manager* resourceManager;
 
         // FIXME move
         std::vector<Controller> mControllers;
