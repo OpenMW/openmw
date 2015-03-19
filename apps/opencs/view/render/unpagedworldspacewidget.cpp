@@ -26,11 +26,11 @@ void CSVRender::UnpagedWorldspaceWidget::update()
 
     Ogre::ColourValue colour;
     colour.setAsABGR (record.get().mAmbi.mAmbient);
-    setDefaultAmbient (colour);
+    //setDefaultAmbient (colour);
 
     /// \todo deal with mSunlight and mFog/mForDensity
 
-    flagAsModified();
+    //flagAsModified();
 }
 
 CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document, QWidget* parent)
@@ -49,7 +49,7 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
 
     update();
 
-    mCell.reset (new Cell (document.getData(), getSceneManager(), mCellId, document.getPhysics()));
+    //mCell.reset (new Cell (document.getData(), getSceneManager(), mCellId, document.getPhysics()));
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,
@@ -91,7 +91,7 @@ bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld:
         return false;
 
     mCellId = data.begin()->getId();
-    mCell.reset (new Cell (getDocument().getData(), getSceneManager(), mCellId, getDocument().getPhysics()));
+    //mCell.reset (new Cell (getDocument().getData(), getSceneManager(), mCellId, getDocument().getPhysics()));
 
     update();
     emit cellChanged(*data.begin());
@@ -163,6 +163,7 @@ void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
 
 std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()
 {
+    /*
     Ogre::Vector3 position = getCamera()->getPosition();
 
     std::ostringstream stream;
@@ -173,6 +174,8 @@ std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()
         << ", 0, \"" << mCellId << "\"";
 
     return stream.str();
+    */
+    return "";
 }
 
 CSVRender::WorldspaceWidget::dropRequirments CSVRender::UnpagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::DropType type) const

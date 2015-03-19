@@ -56,31 +56,33 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
         this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
 
     mPhysics = document.getPhysics(); // create physics if one doesn't exist
-    mPhysics->addSceneManager(getSceneManager(), this);
+    //mPhysics->addSceneManager(getSceneManager(), this);
     mMouse = new MouseState(this);
 }
 
 CSVRender::WorldspaceWidget::~WorldspaceWidget ()
 {
     delete mMouse;
-    mPhysics->removeSceneManager(getSceneManager());
+    //mPhysics->removeSceneManager(getSceneManager());
 }
 
 void CSVRender::WorldspaceWidget::selectNavigationMode (const std::string& mode)
 {
+    /*
     if (mode=="1st")
         setNavigation (&m1st);
     else if (mode=="free")
         setNavigation (&mFree);
     else if (mode=="orbit")
         setNavigation (&mOrbit);
+        */
 }
 
 void CSVRender::WorldspaceWidget::useViewHint (const std::string& hint) {}
 
 void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
 {
-    setNavigation (&m1st);
+    //setNavigation (&m1st);
 }
 
 CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
@@ -355,7 +357,7 @@ void CSVRender::WorldspaceWidget::debugProfileAboutToBeRemoved (const QModelInde
 
 void CSVRender::WorldspaceWidget::elementSelectionChanged()
 {
-    setVisibilityMask (getVisibilityMask());
+    //setVisibilityMask (getVisibilityMask());
     flagAsModified();
     updateOverlay();
 }
@@ -386,11 +388,13 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 {
     if(event->button() == Qt::RightButton)
     {
+        /*
         if(!getViewport())
         {
             SceneWidget::mouseReleaseEvent(event);
             return;
         }
+        */
         mMouse->mouseReleaseEvent(event);
     }
     SceneWidget::mouseReleaseEvent(event);

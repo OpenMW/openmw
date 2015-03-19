@@ -107,8 +107,8 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
     CSVWidget::SceneToolMode *navigationTool = widget->makeNavigationSelector (toolbar);
     toolbar->addTool (navigationTool);
 
-    CSVWidget::SceneToolMode *lightingTool = widget->makeLightingSelector (toolbar);
-    toolbar->addTool (lightingTool);
+    //CSVWidget::SceneToolMode *lightingTool = widget->makeLightingSelector (toolbar);
+    //toolbar->addTool (lightingTool);
 
     CSVWidget::SceneToolToggle2 *sceneVisibilityTool =
         widget->makeSceneVisibilitySelector (toolbar);

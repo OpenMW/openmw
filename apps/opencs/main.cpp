@@ -44,6 +44,9 @@ int main(int argc, char *argv[])
 {
     try
     {
+        // To allow background thread drawing in OSG
+        QApplication::setAttribute(Qt::AA_X11InitThreads, true);
+
         Q_INIT_RESOURCE (resources);
 
         qRegisterMetaType<std::string> ("std::string");

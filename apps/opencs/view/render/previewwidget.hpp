@@ -21,7 +21,7 @@ namespace CSVRender
 
             CSMWorld::Data& mData;
             CSVRender::NavigationOrbit mOrbit;
-            Object mObject;
+            //Object mObject;
 
         public:
 

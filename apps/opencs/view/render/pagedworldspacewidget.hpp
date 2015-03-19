@@ -86,8 +86,6 @@ namespace CSVRender
 
             virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
 
-            virtual void updateOverlay();
-
             virtual void mousePressEvent (QMouseEvent *event);
 
             virtual void mouseReleaseEvent (QMouseEvent *event);

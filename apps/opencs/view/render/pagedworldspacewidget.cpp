@@ -29,7 +29,7 @@
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
     bool modified = false;
-    bool setCamera = false;
+    //bool setCamera = false;
 
     const CSMWorld::IdCollection<CSMWorld::Cell>& cells = mDocument.getData().getCells();
 
@@ -53,7 +53,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                 }
 
                 // destroy manual objects
-                getSceneManager()->destroyManualObject("manual"+iter->first.getId(mWorldspace));
+                //getSceneManager()->destroyManualObject("manual"+iter->first.getId(mWorldspace));
 
                 delete iter->second;
                 mCells.erase (iter++);
@@ -98,8 +98,8 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
         }
     }
 
-    if (mCells.begin()==mCells.end())
-        setCamera = true;
+    //if (mCells.begin()==mCells.end())
+        //setCamera = true;
 
     // add
     for (CSMWorld::CellSelection::Iterator iter (mSelection.begin()); iter!=mSelection.end();
@@ -110,6 +110,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
         if (index > 0 && cells.getRecord (index).mState!=CSMWorld::RecordBase::State_Deleted &&
             mCells.find (*iter)==mCells.end())
         {
+#if 0
             Cell *cell = new Cell (mDocument.getData(), getSceneManager(),
                     iter->getId (mWorldspace), mDocument.getPhysics());
             mCells.insert (std::make_pair (*iter, cell));
@@ -166,6 +167,8 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                 addRenderTargetListener(mOverlayMask);
             }
             */
+
+#endif
 
             modified = true;
         }
@@ -242,28 +245,6 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
         "terrain-move");
 }
 
-void CSVRender::PagedWorldspaceWidget::updateOverlay()
-{
-    if(getCamera()->getViewport())
-    {
-        if((uint32_t)getCamera()->getViewport()->getVisibilityMask()
-                                & (uint32_t)CSVRender::Element_CellMarker)
-            mDisplayCellCoord = true;
-        else
-            mDisplayCellCoord = false;
-    }
-
-    if(!mTextOverlays.empty())
-    {
-        std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator it = mTextOverlays.begin();
-        for(; it != mTextOverlays.end(); ++it)
-        {
-            it->second->enable(mDisplayCellCoord);
-            it->second->update();
-        }
-    }
-}
-
 void CSVRender::PagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
@@ -329,6 +310,7 @@ void CSVRender::PagedWorldspaceWidget::referenceAdded (const QModelIndex& parent
 
 std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
 {
+    /*
     Ogre::Vector3 position = getCamera()->getPosition();
 
     std::ostringstream stream;
@@ -339,6 +321,8 @@ std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
         << ", 0";
 
     return stream.str();
+    */
+    return "";
 }
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
@@ -363,7 +347,7 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
     {
         delete iter->second;
 
-        getSceneManager()->destroyManualObject("manual"+iter->first.getId(mWorldspace));
+        //getSceneManager()->destroyManualObject("manual"+iter->first.getId(mWorldspace));
     }
 
     for (std::map<CSMWorld::CellCoordinates, TextOverlay *>::iterator iter (mTextOverlays.begin());

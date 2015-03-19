@@ -56,7 +56,7 @@ namespace CSVRender
     //
 
     MouseState::MouseState(WorldspaceWidget *parent)
-        : mParent(parent), mPhysics(parent->mDocument.getPhysics()), mSceneManager(parent->getSceneManager())
+        : mParent(parent), mPhysics(parent->mDocument.getPhysics()), mSceneManager(0/*parent->getSceneManager()*/)
         , mCurrentObj(""), mMouseState(Mouse_Default), mOldPos(0,0), mMouseEventTimer(0), mPlane(0)
         , mGrabbedSceneNode(""), mOrigObjPos(Ogre::Vector3()), mOrigMousePos(Ogre::Vector3())
         , mCurrentMousePos(Ogre::Vector3()), mOffset(0.0f)
@@ -447,17 +447,17 @@ namespace CSVRender
         std::map<Ogre::SceneManager*, CSVRender::SceneWidget *>::iterator iter = sceneWidgets.begin();
         for(; iter != sceneWidgets.end(); ++iter)
         {
-            (*iter).second->updateScene();
+            //(*iter).second->updateScene();
         }
     }
 
     Ogre::Camera *MouseState::getCamera()
     {
-        return mParent->getCamera();
+        return 0;//mParent->getCamera();
     }
 
     Ogre::Viewport *MouseState::getViewport()
     {
-        return mParent->getCamera()->getViewport();
+        return 0;//mParent->getCamera()->getViewport();
     }
 }
