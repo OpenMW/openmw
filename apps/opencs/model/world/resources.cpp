@@ -15,6 +15,7 @@ CSMWorld::Resources::Resources (const std::string& baseDirectory, UniversalId::T
 {
     int baseSize = mBaseDirectory.size();
 
+    /*
     Ogre::StringVector resourcesGroups =
         Ogre::ResourceGroupManager::getSingleton().getResourceGroups();
 
@@ -61,6 +62,7 @@ CSMWorld::Resources::Resources (const std::string& baseDirectory, UniversalId::T
                 Misc::StringUtils::lowerCase (file), static_cast<int> (mFiles.size())-1));
         }
     }
+    */
 }
 
 int CSMWorld::Resources::getSize() const

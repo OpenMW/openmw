@@ -15,7 +15,6 @@
 
 #include <components/esm/loadland.hpp>
 #include "textoverlay.hpp"
-#include "overlaymask.hpp"
 
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
@@ -160,11 +159,13 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             textDisp->setDesc(desc); // FIXME: config setting
             textDisp->update();
             mTextOverlays.insert(std::make_pair(*iter, textDisp));
+            /*
             if(!mOverlayMask)
             {
                 mOverlayMask = new OverlayMask(mTextOverlays, getViewport());
                 addRenderTargetListener(mOverlayMask);
             }
+            */
 
             modified = true;
         }
@@ -342,7 +343,7 @@ std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)
 : WorldspaceWidget (document, parent), mDocument (document), mWorldspace ("std::default"),
-  mControlElements(NULL), mDisplayCellCoord(true), mOverlayMask(NULL)
+  mControlElements(NULL), mDisplayCellCoord(true)
 {
     QAbstractItemModel *cells =
         document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells);
@@ -371,11 +372,13 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
         delete iter->second;
     }
 
+    /*
     if(mOverlayMask)
     {
         removeRenderTargetListener(mOverlayMask);
         delete mOverlayMask;
     }
+    */
 }
 
 void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)

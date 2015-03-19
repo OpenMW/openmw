@@ -15,7 +15,6 @@ namespace Ogre
     class SceneManager;
     class RenderWindow;
     class Viewport;
-    class OverlaySystem;
     class RenderTargetListener;
 }
 
@@ -99,7 +98,6 @@ namespace CSVRender
             Ogre::SceneManager* mSceneMgr;
             Ogre::RenderWindow* mWindow;
             Ogre::Viewport *mViewport;
-            Ogre::OverlaySystem *mOverlaySystem;
 
             Navigation *mNavigation;
             Lighting *mLighting;

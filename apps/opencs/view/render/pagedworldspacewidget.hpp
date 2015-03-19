@@ -29,7 +29,6 @@ namespace CSVRender
             CSVWidget::SceneToolToggle *mControlElements;
             bool mDisplayCellCoord;
             std::map<CSMWorld::CellCoordinates, TextOverlay *> mTextOverlays;
-            OverlayMask *mOverlayMask;
 
         private:
 

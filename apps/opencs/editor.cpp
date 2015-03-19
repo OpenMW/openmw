@@ -16,13 +16,12 @@
 
 #include <components/ogreinit/ogreinit.hpp>
 #include <components/nifogre/ogrenifloader.hpp>
-#include <components/bsa/resources.hpp>
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
-CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
-: mUserSettings (mCfgMgr), mOverlaySystem (0), mDocumentManager (mCfgMgr),
+CS::Editor::Editor ()
+: mUserSettings (mCfgMgr), mDocumentManager (mCfgMgr),
   mViewManager (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL), mPid(""), mLock()
 {
@@ -33,14 +32,10 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     CSMSettings::UserSettings::instance().loadSettings ("opencs.ini");
     mSettings.setModel (CSMSettings::UserSettings::instance());
 
-    ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
+    //NifOgre::Loader::setShowMarkers(true);
 
-    NifOgre::Loader::setShowMarkers(true);
-
-    mOverlaySystem.reset (new CSVRender::OverlaySystem);
-
-    Bsa::registerResources (Files::Collections (config.first, !mFsStrict), config.second, true,
-        mFsStrict);
+    //Bsa::registerResources (Files::Collections (config.first, !mFsStrict), config.second, true,
+    //    mFsStrict);
 
     mDocumentManager.listResources();
 
@@ -324,113 +319,10 @@ int CS::Editor::run()
     return QApplication::exec();
 }
 
-std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
-{
-    std::string renderer =
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-        "Direct3D9 Rendering Subsystem";
-#else
-        "OpenGL Rendering Subsystem";
-#endif
-    std::string renderSystem = mUserSettings.setting("Video/render system", renderer.c_str()).toStdString();
-
-    Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName(renderSystem));
-
-    // Initialise Ogre::OverlaySystem after Ogre::Root but before initialisation
-    mOverlaySystem.get();
-
-    Ogre::Root::getSingleton().initialise(false);
-
-    // Create a hidden background window to keep resources
-    Ogre::NameValuePairList params;
-    params.insert(std::make_pair("title", ""));
-
-    std::string antialiasing = mUserSettings.settingValue("Video/antialiasing").toStdString();
-    if(antialiasing == "MSAA 16")     antialiasing = "16";
-    else if(antialiasing == "MSAA 8") antialiasing = "8";
-    else if(antialiasing == "MSAA 4") antialiasing = "4";
-    else if(antialiasing == "MSAA 2") antialiasing = "2";
-    else                              antialiasing = "0";
-    params.insert(std::make_pair("FSAA", antialiasing));
-
-    params.insert(std::make_pair("vsync", "false"));
-    params.insert(std::make_pair("hidden", "true"));
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-    params.insert(std::make_pair("macAPI", "cocoa"));
-#endif
-    // NOTE: fullscreen mode not supported (doesn't really make sense for opencs)
-    Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, false, &params);
-    hiddenWindow->setActive(false);
-
-    sh::OgrePlatform* platform =
-        new sh::OgrePlatform ("General", (mResources / "materials").string());
-
     // for font used in overlays
-    Ogre::Root::getSingleton().addResourceLocation ((mResources / "mygui").string(),
-            "FileSystem", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
+    //Ogre::Root::getSingleton().addResourceLocation ((mResources / "mygui").string(),
+    //        "FileSystem", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 
-    if (!boost::filesystem::exists (mCfgMgr.getCachePath()))
-        boost::filesystem::create_directories (mCfgMgr.getCachePath());
-
-    platform->setCacheFolder (mCfgMgr.getCachePath().string());
-
-    std::auto_ptr<sh::Factory> factory (new sh::Factory (platform));
-
-    QString shLang = mUserSettings.settingValue("General/shader mode");
-    QString rend = renderSystem.c_str();
-    bool openGL = rend.contains(QRegExp("^OpenGL", Qt::CaseInsensitive));
-    bool glES = rend.contains(QRegExp("^OpenGL ES", Qt::CaseInsensitive));
-
-    // force shader language based on render system
-    if(shLang == ""
-            || (openGL && shLang == "hlsl")
-            || (!openGL && shLang == "glsl")
-            || (glES && shLang != "glsles"))
-    {
-        shLang = openGL ? (glES ? "glsles" : "glsl") : "hlsl";
-        //no group means "General" group in the "ini" file standard
-        mUserSettings.setDefinitions("shader mode", (QStringList() << shLang));
-    }
-    enum sh::Language lang;
-    if(shLang == "glsl")        lang = sh::Language_GLSL;
-    else if(shLang == "glsles") lang = sh::Language_GLSLES;
-    else if(shLang == "hlsl")   lang = sh::Language_HLSL;
-    else                        lang = sh::Language_CG;
-
-    factory->setCurrentLanguage (lang);
-    factory->setWriteSourceCache (true);
-    factory->setReadSourceCache (true);
-    factory->setReadMicrocodeCache (true);
-    factory->setWriteMicrocodeCache (true);
-
-    factory->loadAllFiles();
-
-    bool shaders = mUserSettings.setting("3d-render/shaders", QString("true")) == "true" ? true : false;
-    sh::Factory::getInstance ().setShadersEnabled (shaders);
-
-    std::string fog = mUserSettings.setting("Shader/fog", QString("true")).toStdString();
-    sh::Factory::getInstance().setGlobalSetting ("fog", fog);
-
-
-    std::string shadows = mUserSettings.setting("Shader/shadows", QString("false")).toStdString();
-    sh::Factory::getInstance().setGlobalSetting ("shadows", shadows);
-
-    std::string shadows_pssm = mUserSettings.setting("Shader/shadows_pssm", QString("false")).toStdString();
-    sh::Factory::getInstance().setGlobalSetting ("shadows_pssm", shadows_pssm);
-
-    std::string render_refraction = mUserSettings.setting("Shader/render_refraction", QString("false")).toStdString();
-    sh::Factory::getInstance ().setGlobalSetting ("render_refraction", render_refraction);
-
-    // internal setting - may be switched on or off by the use of shader configurations
-    sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
-
-    std::string num_lights = mUserSettings.setting("3d-render-adv/num_lights", QString("8")).toStdString();
-    sh::Factory::getInstance ().setGlobalSetting ("num_lights", num_lights);
-
-    /// \todo add more configurable shiny settings
-
-    return factory;
-}
 
 void CS::Editor::documentAdded (CSMDoc::Document *document)
 {

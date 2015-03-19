@@ -82,12 +82,14 @@ namespace Physic
       , mWalkingOnWater(false)
       , mCanWaterWalk(false)
     {
+        /*
         if (!NifBullet::getBoundingBox(mMesh, mHalfExtents, mMeshTranslation, mMeshOrientation))
         {
             mHalfExtents = Ogre::Vector3(0.f);
             mMeshTranslation = Ogre::Vector3(0.f);
             mMeshOrientation = Ogre::Quaternion::IDENTITY;
         }
+        */
 
         // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
         if (std::abs(mHalfExtents.x-mHalfExtents.y)<mHalfExtents.x*0.05 && mHalfExtents.z >= mHalfExtents.x)

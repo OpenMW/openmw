@@ -472,11 +472,11 @@ void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
 
     if(settingKey == "3d-render-adv/num_lights" && !list.empty())
     {
-        sh::Factory::getInstance ().setGlobalSetting ("num_lights", list.at(0).toStdString());
+        //sh::Factory::getInstance ().setGlobalSetting ("num_lights", list.at(0).toStdString());
     }
     else if(settingKey == "3d-render/shaders" && !list.empty())
     {
-        sh::Factory::getInstance ().setShadersEnabled (list.at(0).toStdString() == "true" ? true : false);
+        //sh::Factory::getInstance ().setShadersEnabled (list.at(0).toStdString() == "true" ? true : false);
     }
 
     emit userSettingUpdated (settingKey, list);

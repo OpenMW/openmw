@@ -77,8 +77,8 @@ void CSVRender::Object::update()
     }
     else
     {
-        mObject = NifOgre::Loader::createObjects (mBase, "Meshes\\" + model);
-        mObject->setVisibilityFlags (Element_Reference);
+        //mObject = NifOgre::Loader::createObjects (mBase, "Meshes\\" + model);
+        //mObject->setVisibilityFlags (Element_Reference);
 
         if (mPhysics && !mReferenceId.empty())
         {
