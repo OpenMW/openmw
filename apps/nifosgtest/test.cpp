@@ -112,14 +112,10 @@ int main(int argc, char** argv)
 
     //osgDB::writeNodeFile(*newNode, "out.osg");
 
-    std::vector<NifOsg::Controller >  controllers;
     osg::Group* newNode = new osg::Group;
     NifOsg::Loader loader;
     loader.resourceManager = &resourceMgr;
     loader.loadAsSkeleton(nif, newNode);
-
-    for (unsigned int i=0; i<loader.mControllers.size(); ++i)
-        controllers.push_back(loader.mControllers[i]);
 
     osg::PositionAttitudeTransform* trans = new osg::PositionAttitudeTransform;
     root->addChild(trans);
@@ -137,6 +133,8 @@ int main(int argc, char** argv)
     viewer.setCameraManipulator(new osgGA::TrackballManipulator());
     viewer.addEventHandler(new WireframeKeyHandler(root));
 
+    //viewer.getCamera()->setCullMask()
+
     // We're going to change this from the event callback, set the variance to DYNAMIC so that
     // we don't interfere with the draw thread.
     root->getOrCreateStateSet()->setDataVariance(osg::Node::DYNAMIC);
@@ -148,9 +146,6 @@ int main(int argc, char** argv)
         //trans->setAttitude(osg::Quat(viewer.getFrameStamp()->getSimulationTime()*5, osg::Vec3f(0,0,1)));
 
         viewer.frame();
-
-        for (unsigned int i=0; i<controllers.size(); ++i)
-            controllers[i].update();
     }
 
     return 0;

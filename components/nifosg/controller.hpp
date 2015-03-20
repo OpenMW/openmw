@@ -17,6 +17,9 @@
 #include <osg/ref_ptr>
 
 #include <osg/Timer>
+#include <osg/StateSet>
+#include <osg/NodeCallback>
+#include <osg/Drawable>
 
 
 namespace osg
@@ -93,76 +96,49 @@ namespace NifOsg
     class ControllerSource
     {
     public:
-        virtual float getValue() const = 0;
+        virtual float getValue(osg::NodeVisitor* nv) = 0;
     };
 
-    // FIXME: Should return a dt instead of time
     class FrameTimeSource : public ControllerSource
     {
     public:
-
-        virtual float getValue() const
-        {
-            return mTimer.time_s();
-        }
-
+        FrameTimeSource();
+        virtual float getValue(osg::NodeVisitor* nv);
     private:
-        osg::Timer mTimer;
-    };
-
-    class ControllerValue
-    {
-    public:
-        virtual void setValue(float value) = 0;
+        double mLastTime;
     };
 
     class Controller
     {
     public:
-        Controller (boost::shared_ptr<ControllerSource> src, boost::shared_ptr<ControllerValue> dest,
-                    boost::shared_ptr<ControllerFunction> function);
+        Controller();
 
-        virtual void update();
+        bool hasInput() const;
+
+        float getInputValue(osg::NodeVisitor* nv);
 
         boost::shared_ptr<ControllerSource> mSource;
-        boost::shared_ptr<ControllerValue> mDestValue;
 
         // The source value gets passed through this function before it's passed on to the DestValue.
         boost::shared_ptr<ControllerFunction> mFunction;
     };
 
-    // FIXME: Should be with other general extensions.
-    class NodeTargetValue : public ControllerValue
-    {
-    protected:
-        // TODO: get rid of target pointers, which are incompatible with a copy constructor we will need later
-        // instead, controllers can be a Node added as child of their target
-        osg::Node *mNode;
-
-    public:
-        NodeTargetValue(osg::Node *target) : mNode(target)
-        { }
-
-        virtual osg::Vec3f getTranslation(float value) const = 0;
-
-        osg::Node *getNode() const
-        { return mNode; }
-    };
-
-    class GeomMorpherControllerValue : public ControllerValue, public ValueInterpolator
+    class GeomMorpherController : public osg::Drawable::UpdateCallback, public Controller, public ValueInterpolator
     {
     public:
-        // FIXME: don't copy the morph data?
-        GeomMorpherControllerValue(osgAnimation::MorphGeometry* geom, const Nif::NiMorphData *data);
+        GeomMorpherController(const Nif::NiMorphData* data);
+        GeomMorpherController();
+        GeomMorpherController(const GeomMorpherController& copy, const osg::CopyOp& copyop);
 
-        virtual void setValue(float time);
+        META_Object(NifOsg, GeomMorpherController)
+
+        virtual void update(osg::NodeVisitor* nv, osg::Drawable* drawable);
 
     private:
-        osgAnimation::MorphGeometry* mGeom;
         std::vector<Nif::NiMorphData::MorphData> mMorphs;
     };
 
-    class KeyframeControllerValue : public NodeTargetValue, public ValueInterpolator
+    class KeyframeController : public osg::NodeCallback, public Controller, public ValueInterpolator
     {
     private:
         const Nif::QuaternionKeyMap* mRotations;
@@ -185,31 +161,39 @@ namespace NifOsg
 
     public:
         /// @note The NiKeyFrameData must be valid as long as this KeyframeController exists.
-        KeyframeControllerValue(osg::Node *target, const Nif::NIFFilePtr& nif, const Nif::NiKeyframeData *data,
+        KeyframeController(const Nif::NIFFilePtr& nif, const Nif::NiKeyframeData *data,
               osg::Quat initialQuat, float initialScale);
+        KeyframeController();
+        KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop);
+
+        META_Object(NifOsg, KeyframeController)
 
         virtual osg::Vec3f getTranslation(float time) const;
 
-        virtual void setValue(float time);
+        virtual void operator() (osg::Node*, osg::NodeVisitor*);
     };
 
-    class UVControllerValue : public ControllerValue, ValueInterpolator
+    // Note we're using NodeCallback instead of StateSet::Callback because the StateSet callback doesn't support nesting
+    struct UVController : public osg::NodeCallback, public Controller, public ValueInterpolator
     {
+    public:
+        UVController();
+        UVController(const UVController&,const osg::CopyOp& = osg::CopyOp::SHALLOW_COPY);
+        UVController(const Nif::NiUVData *data, std::set<int> textureUnits);
+
+        META_Object(NifOsg,UVController)
+
+        virtual void operator() (osg::Node*, osg::NodeVisitor*);
+
     private:
-        osg::StateSet* mStateSet;
         Nif::FloatKeyMap mUTrans;
         Nif::FloatKeyMap mVTrans;
         Nif::FloatKeyMap mUScale;
         Nif::FloatKeyMap mVScale;
         std::set<int> mTextureUnits;
-
-    public:
-        UVControllerValue(osg::StateSet* target, const Nif::NiUVData *data, std::set<int> textureUnits);
-
-        virtual void setValue(float value);
     };
 
-    class VisControllerValue : public NodeTargetValue
+    class VisController : public osg::NodeCallback, public Controller
     {
     private:
         std::vector<Nif::NiVisData::VisData> mData;
@@ -217,65 +201,75 @@ namespace NifOsg
         bool calculate(float time) const;
 
     public:
-        VisControllerValue(osg::Node *target, const Nif::NiVisData *data)
-          : NodeTargetValue(target)
-          , mData(data->mVis)
-        { }
+        VisController(const Nif::NiVisData *data);
+        VisController();
+        VisController(const VisController& copy, const osg::CopyOp& copyop);
 
-        virtual osg::Vec3f getTranslation(float time) const
-        { return osg::Vec3f(); }
+        META_Object(NifOsg, VisController)
 
-        virtual void setValue(float time);
+        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
     };
 
-    class AlphaControllerValue : public ControllerValue, public ValueInterpolator
+    class AlphaController : public osg::NodeCallback, public Controller, public ValueInterpolator
     {
     private:
-        osg::StateSet* mTarget;
         Nif::FloatKeyMap mData;
 
     public:
-        AlphaControllerValue(osg::StateSet* target, const Nif::NiFloatData *data);
+        AlphaController(const Nif::NiFloatData *data);
+        AlphaController();
+        AlphaController(const AlphaController& copy, const osg::CopyOp& copyop);
 
-        virtual void setValue(float time);
+        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
+
+        META_Object(NifOsg, AlphaController)
     };
 
-    class MaterialColorControllerValue : public ControllerValue, public ValueInterpolator
+    class MaterialColorController : public osg::NodeCallback, public Controller, public ValueInterpolator
     {
     private:
-        osg::StateSet* mTarget;
         Nif::Vector3KeyMap mData;
 
     public:
-        MaterialColorControllerValue(osg::StateSet* target, const Nif::NiPosData *data);
+        MaterialColorController(const Nif::NiPosData *data);
+        MaterialColorController();
+        MaterialColorController(const MaterialColorController& copy, const osg::CopyOp& copyop);
 
-        virtual void setValue(float time);
+        META_Object(NifOsg, MaterialColorController)
+
+        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
     };
 
     // untested
-    class FlipControllerValue : public ControllerValue
+    class FlipController : public osg::NodeCallback, public Controller
     {
     private:
-        osg::StateSet* mTarget;
         int mTexSlot;
         float mDelta;
         std::vector<osg::ref_ptr<osg::Image> > mTextures;
 
     public:
-        FlipControllerValue(osg::StateSet* target, const Nif::NiFlipController* ctrl, std::vector<osg::ref_ptr<osg::Image> > textures);
+        FlipController(const Nif::NiFlipController* ctrl, std::vector<osg::ref_ptr<osg::Image> > textures);
+        FlipController();
+        FlipController(const FlipController& copy, const osg::CopyOp& copyop);
 
-        virtual void setValue(float time);
+        META_Object(NifOsg, FlipController)
+
+        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
     };
 
-    class ParticleSystemControllerValue : public ControllerValue
+    class ParticleSystemController : public osg::NodeCallback, public Controller
     {
     public:
-        ParticleSystemControllerValue(osgParticle::Emitter* emitter, const Nif::NiParticleSystemController* ctrl);
+        ParticleSystemController(const Nif::NiParticleSystemController* ctrl);
+        ParticleSystemController();
+        ParticleSystemController(const ParticleSystemController& copy, const osg::CopyOp& copyop);
 
-        virtual void setValue(float time);
+        META_Object(NifOsg, ParticleSystemController)
+
+        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
 
     private:
-        osgParticle::Emitter* mEmitter;
         float mEmitStart;
         float mEmitStop;
     };

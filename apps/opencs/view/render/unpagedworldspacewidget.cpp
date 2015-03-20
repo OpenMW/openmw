@@ -30,7 +30,7 @@ void CSVRender::UnpagedWorldspaceWidget::update()
 
     /// \todo deal with mSunlight and mFog/mForDensity
 
-    //flagAsModified();
+    flagAsModified();
 }
 
 CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& cellId, CSMDoc::Document& document, QWidget* parent)

@@ -285,17 +285,13 @@ namespace NifOsg
         }
     }
 
-    void Loader::createController(const Nif::Controller *ctrl, boost::shared_ptr<ControllerValue> value, int animflags)
+    void Loader::setupController(const Nif::Controller* ctrl, Controller* toSetup, int animflags)
     {
-        // FIXME animflags currently not passed to this function
         //bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
-        boost::shared_ptr<ControllerSource> src(new FrameTimeSource); // if autoPlay
+        //if (autoPlay)
+            toSetup->mSource = boost::shared_ptr<ControllerSource>(new FrameTimeSource);
 
-        boost::shared_ptr<ControllerFunction> function (new ControllerFunction(ctrl
-            , 0/*autoPlay*/));
-        //scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
-
-        mControllers.push_back(Controller(src, value, function));
+        toSetup->mFunction = boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl, 1 /*autoPlay*/));
     }
 
     void Loader::handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
@@ -308,7 +304,6 @@ namespace NifOsg
             transformNode = bone;
             bone->setMatrix(toMatrix(nifNode->trafo));
             bone->setName(nifNode->name);
-            bone->setUpdateCallback(new UpdateBone);
             bone->setInvBindMatrixInSkeletonSpace(osg::Matrixf::inverse(getWorldTransform(nifNode)));
         }
         else
@@ -332,6 +327,7 @@ namespace NifOsg
 
         // We could probably skip hidden nodes entirely if they don't have a VisController that
         // might make them visible later
+        // FIXME: this disables update callbacks, so VisController no longer works
         if (nifNode->flags & Nif::NiNode::Flag_Hidden)
             transformNode->setNodeMask(0);
 
@@ -358,6 +354,10 @@ namespace NifOsg
         if (!nifNode->controller.empty())
             handleNodeControllers(nifNode, transformNode, animflags);
 
+        // Added last so the changes from KeyframeControllers are taken into account
+        if (osgAnimation::Bone* bone = dynamic_cast<osgAnimation::Bone*>(transformNode.get()))
+            bone->addUpdateCallback(new UpdateBone);
+
         const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
         if(ninode)
         {
@@ -382,9 +382,12 @@ namespace NifOsg
                 std::set<int> texUnits;
                 for (std::map<int, int>::const_iterator it = boundTextures.begin(); it != boundTextures.end(); ++it)
                     texUnits.insert(it->first);
-                boost::shared_ptr<ControllerValue> dest(new UVControllerValue(transformNode->getOrCreateStateSet()
-                    , uvctrl->data.getPtr(), texUnits));
-                createController(uvctrl, dest, animflags);
+
+                osg::ref_ptr<UVController> ctrl = new UVController(uvctrl->data.getPtr(), texUnits);
+                setupController(uvctrl, ctrl, animflags);
+                transformNode->getOrCreateStateSet()->setDataVariance(osg::StateSet::DYNAMIC);
+
+                transformNode->addUpdateCallback(ctrl);
             }
         }
     }
@@ -406,23 +409,27 @@ namespace NifOsg
                         std::cerr << "Warning: multiple KeyframeControllers on the same node" << std::endl;
                         continue;
                     }
-                    boost::shared_ptr<ControllerValue> dest(new KeyframeControllerValue(transformNode, mNif, key->data.getPtr(),
-                                                                                          transformNode->getMatrix().getRotate(), nifNode->trafo.scale));
+                    osg::ref_ptr<KeyframeController> callback(new KeyframeController(mNif, key->data.getPtr(),
+                                                                                         transformNode->getMatrix().getRotate(), nifNode->trafo.scale));
 
-                    createController(key, dest, animflags);
+                    setupController(key, callback, animflags);
+                    transformNode->addUpdateCallback(callback);
+
                     seenKeyframeCtrl = true;
                 }
             }
             else if (ctrl->recType == Nif::RC_NiVisController)
             {
                 const Nif::NiVisController* visctrl = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
-                boost::shared_ptr<ControllerValue> dest(new VisControllerValue(transformNode, visctrl->data.getPtr()));
-                createController(visctrl, dest, animflags);
+
+                osg::ref_ptr<VisController> callback(new VisController(visctrl->data.getPtr()));
+                setupController(visctrl, callback, animflags);
+                transformNode->addUpdateCallback(callback);
             }
         }
     }
 
-    void Loader::handleMaterialControllers(const Nif::Property *materialProperty, osg::StateSet *stateset, int animflags)
+    void Loader::handleMaterialControllers(const Nif::Property *materialProperty, osg::Node* node, osg::StateSet *stateset, int animflags)
     {
         for (Nif::ControllerPtr ctrl = materialProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
         {
@@ -431,21 +438,25 @@ namespace NifOsg
             if (ctrl->recType == Nif::RC_NiAlphaController)
             {
                 const Nif::NiAlphaController* alphactrl = static_cast<const Nif::NiAlphaController*>(ctrl.getPtr());
-                boost::shared_ptr<ControllerValue> dest(new AlphaControllerValue(stateset, alphactrl->data.getPtr()));
-                createController(alphactrl, dest, animflags);
+                osg::ref_ptr<AlphaController> ctrl(new AlphaController(alphactrl->data.getPtr()));
+                setupController(alphactrl, ctrl, animflags);
+                stateset->setDataVariance(osg::StateSet::DYNAMIC);
+                node->addUpdateCallback(ctrl);
             }
             else if (ctrl->recType == Nif::RC_NiMaterialColorController)
             {
                 const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
-                boost::shared_ptr<ControllerValue> dest(new MaterialColorControllerValue(stateset, matctrl->data.getPtr()));
-                createController(matctrl, dest, animflags);
+                osg::ref_ptr<MaterialColorController> ctrl(new MaterialColorController(matctrl->data.getPtr()));
+                setupController(matctrl, ctrl, animflags);
+                stateset->setDataVariance(osg::StateSet::DYNAMIC);
+                node->addUpdateCallback(ctrl);
             }
             else
                 std::cerr << "Unexpected material controller " << ctrl->recType << std::endl;
         }
     }
 
-    void Loader::handleTextureControllers(const Nif::Property *texProperty, osg::StateSet *stateset, int animflags)
+    void Loader::handleTextureControllers(const Nif::Property *texProperty, osg::Node* node, osg::StateSet *stateset, int animflags)
     {
         for (Nif::ControllerPtr ctrl = texProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
         {
@@ -470,8 +481,10 @@ namespace NifOsg
                     osgDB::ReaderWriter::ReadResult result = reader->readImage(*resourceManager->get(filename.c_str()), opts);
                     textures.push_back(osg::ref_ptr<osg::Image>(result.getImage()));
                 }
-                boost::shared_ptr<ControllerValue> dest(new FlipControllerValue(stateset, flipctrl, textures));
-                createController(flipctrl, dest, animflags);
+                osg::ref_ptr<FlipController> callback(new FlipController(flipctrl, textures));
+                setupController(ctrl.getPtr(), callback, animflags);
+                stateset->setDataVariance(osg::StateSet::DYNAMIC);
+                node->addUpdateCallback(callback);
             }
             else
                 std::cerr << "Unexpected texture controller " << ctrl->recName << std::endl;
@@ -577,7 +590,9 @@ namespace NifOsg
         // If something ever violates this assumption, the worst that could happen is the culling being one frame late, which wouldn't be a disaster.
         parentNode->addChild(emitter);
 
-        createController(partctrl, boost::shared_ptr<ControllerValue>(new ParticleSystemControllerValue(emitter, partctrl)), animflags);
+        osg::ref_ptr<ParticleSystemController> callback(new ParticleSystemController(partctrl));
+        setupController(partctrl, callback, animflags);
+        emitter->setUpdateCallback(callback);
 
         // ----------- affector (must be after emitters in the scene graph)
         osgParticle::ModularProgram* program = new osgParticle::ModularProgram;
@@ -615,14 +630,16 @@ namespace NifOsg
 
         // -----------
 
+        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+        geode->addDrawable(partsys);
+
         std::vector<const Nif::Property*> materialProps;
         collectMaterialProperties(nifNode, materialProps);
-        applyMaterialProperties(partsys->getOrCreateStateSet(), materialProps, true, animflags);
+        applyMaterialProperties(geode, materialProps, true, animflags);
 
         partsys->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         partsys->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-        geode->addDrawable(partsys);
+
 
         if (rf == osgParticle::ParticleProcessor::RELATIVE_RF)
             parentNode->addChild(geode);
@@ -640,7 +657,7 @@ namespace NifOsg
         parentNode->addChild(updater);
     }
 
-    void Loader::triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, const std::map<int, int>& boundTextures, int animflags)
+    void Loader::triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, osg::Geode* parentGeode, const std::map<int, int>& boundTextures, int animflags)
     {
         const Nif::NiTriShapeData* data = triShape->data.getPtr();
 
@@ -720,7 +737,7 @@ namespace NifOsg
         //   above the actual renderable would be tedious.
         std::vector<const Nif::Property*> materialProps;
         collectMaterialProperties(triShape, materialProps);
-        applyMaterialProperties(geometry->getOrCreateStateSet(), materialProps, !data->colors.empty(), animflags);
+        applyMaterialProperties(parentGeode, materialProps, !data->colors.empty(), animflags);
     }
 
     void Loader::handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, const std::map<int, int>& boundTextures, int animflags)
@@ -733,10 +750,11 @@ namespace NifOsg
                 if(ctrl->recType == Nif::RC_NiGeomMorpherController && ctrl->flags & Nif::NiNode::ControllerFlag_Active)
                 {
                     geometry = handleMorphGeometry(static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr()));
-                    boost::shared_ptr<ControllerValue> value(
-                                new GeomMorpherControllerValue(static_cast<osgAnimation::MorphGeometry*>(geometry.get()),
-                                    static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr())->data.getPtr()));
-                    createController(ctrl.getPtr(), value, 0);
+
+                    osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(
+                                static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr())->data.getPtr());
+                    setupController(ctrl.getPtr(), morphctrl, animflags);
+                    geometry->setUpdateCallback(morphctrl);
                     break;
                 }
             } while(!(ctrl=ctrl->next).empty());
@@ -744,9 +762,10 @@ namespace NifOsg
 
         if (!geometry.get())
             geometry = new osg::Geometry;
-        triShapeToGeometry(triShape, geometry, boundTextures, animflags);
 
         osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+        triShapeToGeometry(triShape, geometry, geode, boundTextures, animflags);
+
         geode->addDrawable(geometry);
 
         parentNode->addChild(geode);
@@ -754,8 +773,9 @@ namespace NifOsg
 
     void Loader::handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, const std::map<int, int>& boundTextures, int animflags)
     {
+        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
         osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
-        triShapeToGeometry(triShape, geometry, boundTextures, animflags);
+        triShapeToGeometry(triShape, geometry, geode, boundTextures, animflags);
 
         osg::ref_ptr<osgAnimation::RigGeometry> rig(new osgAnimation::RigGeometry);
         rig->setSourceGeometry(geometry);
@@ -795,7 +815,6 @@ namespace NifOsg
         osg::ref_ptr<osg::MatrixTransform> trans(new osg::MatrixTransform);
         trans->setUpdateCallback(new InvertBoneMatrix());
 
-        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
         geode->addDrawable(rig);
 
         trans->addChild(geode);
@@ -987,7 +1006,7 @@ namespace NifOsg
                     stateset->setTextureAttributeAndModes(i, new osg::Texture2D, osg::StateAttribute::OFF);
                     boundTextures.erase(i);
                 }
-                handleTextureControllers(texprop, stateset, animflags);
+                handleTextureControllers(texprop, node, stateset, animflags);
             }
             break;
         }
@@ -1003,9 +1022,11 @@ namespace NifOsg
         }
     }
 
-    void Loader::applyMaterialProperties(osg::StateSet* stateset, const std::vector<const Nif::Property*>& properties,
+    void Loader::applyMaterialProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties,
                                          bool hasVertexColors, int animflags)
     {
+        osg::StateSet* stateset = node->getOrCreateStateSet();
+
         int specFlags = 0; // Specular is disabled by default, even if there's a specular color in the NiMaterialProperty
         osg::Material* mat = new osg::Material;
         mat->setColorMode(hasVertexColors ? osg::Material::AMBIENT_AND_DIFFUSE : osg::Material::OFF);
@@ -1032,7 +1053,7 @@ namespace NifOsg
                 mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->data.glossiness);
 
                 if (!matprop->controller.empty())
-                    handleMaterialControllers(matprop, stateset, animflags);
+                    handleMaterialControllers(matprop, node, stateset, animflags);
 
                 break;
             }

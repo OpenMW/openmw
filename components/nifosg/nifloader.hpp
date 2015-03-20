@@ -9,8 +9,6 @@
 
 #include <osg/Group>
 
-#include "controller.hpp"
-
 namespace osg
 {
     class Geometry;
@@ -25,10 +23,12 @@ namespace Nif
     class Node;
     class NiTriShape;
     class Property;
+    class Controller;
 }
 
 namespace NifOsg
 {
+    class Controller;
 
     /// The main class responsible for loading NIF files into an OSG-Scenegraph.
     class Loader
@@ -41,9 +41,6 @@ namespace NifOsg
 
         const VFS::Manager* resourceManager;
 
-        // FIXME move
-        std::vector<Controller> mControllers;
-
     private:
 
         /// @param createSkeleton If true, use an osgAnimation::Bone for NIF nodes, otherwise an osg::MatrixTransform.
@@ -54,9 +51,9 @@ namespace NifOsg
 
         void handleNodeControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode, int animflags);
 
-        void handleMaterialControllers(const Nif::Property* materialProperty, osg::StateSet* stateset, int animflags);
+        void handleMaterialControllers(const Nif::Property* materialProperty, osg::Node* node, osg::StateSet* stateset, int animflags);
 
-        void handleTextureControllers(const Nif::Property* texProperty, osg::StateSet* stateset, int animflags);
+        void handleTextureControllers(const Nif::Property* texProperty, osg::Node* node, osg::StateSet* stateset, int animflags);
 
         void handleProperty (const Nif::Property* property, const Nif::Node* nifNode,
                              osg::Node* node, std::map<int, int>& boundTextures, int animflags);
@@ -67,7 +64,7 @@ namespace NifOsg
         void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, const std::map<int, int>& boundTextures, int animflags);
 
         // Fills the vertex data for the given TriShape into the given Geometry.
-        void triShapeToGeometry(const Nif::NiTriShape* triShape, osg::Geometry* geom, const std::map<int, int>& boundTextures, int animflags);
+        void triShapeToGeometry(const Nif::NiTriShape* triShape, osg::Geometry* geom, osg::Geode* parentGeode, const std::map<int, int>& boundTextures, int animflags);
 
         // Creates a skinned osg::Geometry object for the given TriShape, populates it, and attaches it to the given node.
         void handleSkinnedTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, const std::map<int, int>& boundTextures, int animflags);
@@ -75,10 +72,11 @@ namespace NifOsg
         // Applies the Properties of the given nifNode onto the StateSet of the given OSG node.
         void applyNodeProperties(const Nif::Node* nifNode, osg::Node* applyTo, std::map<int, int>& boundTextures, int animflags);
 
-        void applyMaterialProperties(osg::StateSet* stateset, const std::vector<const Nif::Property*>& properties,
+        void applyMaterialProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties,
                                      bool hasVertexColors, int animflags);
 
-        void createController(const Nif::Controller* ctrl, boost::shared_ptr<ControllerValue> value, int animflags);
+        // Set up the default input and controller function for the given controller.
+        void setupController(const Nif::Controller* ctrl, Controller* toSetup, int animflags);
 
         Nif::NIFFilePtr mNif;
 
