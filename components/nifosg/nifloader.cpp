@@ -128,6 +128,7 @@ namespace
     }
 
     // NodeCallback used to update the bone matrices in skeleton space as needed for skinning.
+    // Must be set on a Bone.
     class UpdateBone : public osg::NodeCallback
     {
     public:
@@ -161,10 +162,39 @@ namespace
         }
     };
 
+    // Custom node used to have a transform always oriented towards the camera. Can have translation and scale
+    // set just like a regular MatrixTransform, but the rotation set will be overridden in order to face the camera.
+    class BillboardNode : public osg::MatrixTransform
+    {
+    public:
+        BillboardNode() : osg::MatrixTransform() {}
+        BillboardNode(const BillboardNode& copy, const osg::CopyOp& copyop)
+            : osg::MatrixTransform(copy, copyop) {}
+        BillboardNode(const osg::Matrix& matrix)
+            : osg::MatrixTransform(matrix) {}
+
+        META_Node(NifOsg, BillboardNode)
+
+        virtual bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor*) const
+        {
+            if (_referenceFrame==RELATIVE_RF)
+            {
+                matrix.preMult(_matrix);
+                matrix.setRotate(osg::Quat());
+            }
+            else // absolute
+            {
+                matrix = _matrix;
+            }
+            return true;
+        }
+    };
+
     // NodeCallback used to set the inverse of the parent bone's matrix in skeleton space
     // on the MatrixTransform that the NodeCallback is attached to. This is used so we can
     // attach skinned meshes to their actual parent node, while still having the skinning
     // work in skeleton space as expected.
+    // Must be set on a MatrixTransform.
     class InvertBoneMatrix : public osg::NodeCallback
     {
     public:
@@ -298,7 +328,11 @@ namespace NifOsg
                             std::map<int, int> boundTextures, int animflags, int particleflags, bool collisionNode)
     {
         osg::ref_ptr<osg::MatrixTransform> transformNode;
-        if (createSkeleton)
+        if (nifNode->recType == Nif::RC_NiBillboardNode)
+        {
+            transformNode = new BillboardNode(toMatrix(nifNode->trafo));
+        }
+        else if (createSkeleton)
         {
             osgAnimation::Bone* bone = new osgAnimation::Bone;
             transformNode = bone;
@@ -308,8 +342,7 @@ namespace NifOsg
         }
         else
         {
-            transformNode = new osg::MatrixTransform;
-            transformNode->setMatrix(toMatrix(nifNode->trafo));
+            transformNode = new osg::MatrixTransform(toMatrix(nifNode->trafo));
         }
 
         if (nifNode->recType == Nif::RC_NiBSAnimationNode)
