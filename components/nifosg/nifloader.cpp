@@ -322,14 +322,14 @@ namespace NifOsg
         if (nifNode->recType == Nif::RC_RootCollisionNode)
         {
             collisionNode = true;
-            transformNode->setNodeMask(0);
+            // Leave mask for UpdateVisitor enabled
+            transformNode->setNodeMask(0x1);
         }
 
         // We could probably skip hidden nodes entirely if they don't have a VisController that
         // might make them visible later
-        // FIXME: this disables update callbacks, so VisController no longer works
         if (nifNode->flags & Nif::NiNode::Flag_Hidden)
-            transformNode->setNodeMask(0);
+            transformNode->setNodeMask(0x1); // Leave mask for UpdateVisitor enabled
 
         // Insert bones at position 0 to prevent update order problems (see comment in osg Skeleton.cpp)
         parentNode->insertChild(0, transformNode);

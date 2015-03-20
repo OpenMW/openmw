@@ -316,7 +316,8 @@ void VisController::operator() (osg::Node* node, osg::NodeVisitor* nv)
     if (hasInput())
     {
         bool vis = calculate(getInputValue(nv));
-        node->setNodeMask(vis ? ~0 : 0);
+        // Leave 0x1 enabled for UpdateVisitor, so we can make ourselves visible again in the future from this update callback
+        node->setNodeMask(vis ? ~0 : 0x1);
     }
     traverse(node, nv);
 }

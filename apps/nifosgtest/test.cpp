@@ -133,7 +133,8 @@ int main(int argc, char** argv)
     viewer.setCameraManipulator(new osgGA::TrackballManipulator());
     viewer.addEventHandler(new WireframeKeyHandler(root));
 
-    //viewer.getCamera()->setCullMask()
+    // Mask to separate cull visitors from update visitors
+    viewer.getCamera()->setCullMask(~(0x1));
 
     // We're going to change this from the event callback, set the variance to DYNAMIC so that
     // we don't interfere with the draw thread.
