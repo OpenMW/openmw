@@ -20,6 +20,23 @@ namespace Nif
 namespace NifOsg
 {
 
+    // Subclass ParticleSystem to support a limit on the number of active particles.
+    class ParticleSystem : public osgParticle::ParticleSystem
+    {
+    public:
+        ParticleSystem();
+        ParticleSystem(const ParticleSystem& copy, const osg::CopyOp& copyop);
+
+        META_Object(NifOsg, NifOsg::ParticleSystem)
+
+        virtual osgParticle::Particle* createParticle(const osgParticle::Particle *ptemplate);
+
+        void setQuota(int quota);
+
+    private:
+        int mQuota;
+    };
+
     // HACK: Particle doesn't allow setting the initial age, but we need this for loading the particle system state
     class ParticleAgeSetter : public osgParticle::Particle
     {

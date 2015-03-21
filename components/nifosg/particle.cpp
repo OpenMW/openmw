@@ -1,5 +1,7 @@
 #include "particle.hpp"
 
+#include <limits>
+
 #include <osg/MatrixTransform>
 
 #include <components/nif/controlled.hpp>
@@ -8,6 +10,30 @@
 
 namespace NifOsg
 {
+
+ParticleSystem::ParticleSystem()
+    : osgParticle::ParticleSystem()
+    , mQuota(std::numeric_limits<int>::max())
+{
+}
+
+ParticleSystem::ParticleSystem(const ParticleSystem &copy, const osg::CopyOp &copyop)
+    : osgParticle::ParticleSystem(copy, copyop)
+    , mQuota(copy.mQuota)
+{
+}
+
+void ParticleSystem::setQuota(int quota)
+{
+    mQuota = quota;
+}
+
+osgParticle::Particle* ParticleSystem::createParticle(const osgParticle::Particle *ptemplate)
+{
+    if (numParticles()-numDeadParticles() < mQuota)
+        return osgParticle::ParticleSystem::createParticle(ptemplate);
+    return NULL;
+}
 
 void InverseWorldMatrix::operator()(osg::Node *node, osg::NodeVisitor *nv)
 {

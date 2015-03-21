@@ -571,7 +571,7 @@ namespace NifOsg
 
     void Loader::handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, int animflags, int particleflags)
     {
-        osg::ref_ptr<osgParticle::ParticleSystem> partsys (new osgParticle::ParticleSystem);
+        osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
         partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
 
         const Nif::NiAutoNormalParticlesData *particledata = NULL;
@@ -629,6 +629,8 @@ namespace NifOsg
 
             created->setSizeRange(osgParticle::rangef(size, size));
         }
+
+        partsys->setQuota(partctrl->numParticles);
 
         partsys->getDefaultParticleTemplate().setSizeRange(osgParticle::rangef(partctrl->size, partctrl->size));
         partsys->getDefaultParticleTemplate().setColorRange(osgParticle::rangev4(osg::Vec4f(1.f,1.f,1.f,1.f), osg::Vec4f(1.f,1.f,1.f,1.f)));
