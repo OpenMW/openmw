@@ -324,6 +324,13 @@ namespace NifOsg
         toSetup->mFunction = boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl, 1 /*autoPlay*/));
     }
 
+    class RecIndexHolder : public osg::Referenced
+    {
+    public:
+        RecIndexHolder(int index) : mIndex(index) {}
+        int mIndex;
+    };
+
     void Loader::handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
                             std::map<int, int> boundTextures, int animflags, int particleflags, bool collisionNode)
     {
@@ -344,6 +351,8 @@ namespace NifOsg
         {
             transformNode = new osg::MatrixTransform(toMatrix(nifNode->trafo));
         }
+
+        transformNode->setUserData(new RecIndexHolder(nifNode->recIndex));
 
         if (nifNode->recType == Nif::RC_NiBSAnimationNode)
             animflags |= nifNode->flags;
@@ -442,8 +451,14 @@ namespace NifOsg
                         std::cerr << "Warning: multiple KeyframeControllers on the same node" << std::endl;
                         continue;
                     }
-                    osg::ref_ptr<KeyframeController> callback(new KeyframeController(mNif, key->data.getPtr(),
-                                                                                         transformNode->getMatrix().getRotate(), nifNode->trafo.scale));
+
+                    // build the rotation part manually to avoid issues caused by scaling
+                    osg::Matrixf mat;
+                    for (int i=0;i<3;++i)
+                        for (int j=0;j<3;++j)
+                            mat(j,i) = nifNode->trafo.rotation.mValues[i][j];
+
+                    osg::ref_ptr<KeyframeController> callback(new KeyframeController(mNif, key->data.getPtr(), mat.getRotate(), nifNode->trafo.scale));
 
                     setupController(key, callback, animflags);
                     transformNode->addUpdateCallback(callback);
@@ -524,6 +539,32 @@ namespace NifOsg
         }
     }
 
+    class FindEmitterNode : public osg::NodeVisitor
+    {
+    public:
+        FindEmitterNode(int recIndex)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mFound(NULL)
+            , mRecIndex(recIndex)
+        {
+        }
+
+        virtual void apply(osg::Node &searchNode)
+        {
+            if (searchNode.getUserData())
+            {
+                RecIndexHolder* holder = static_cast<RecIndexHolder*>(searchNode.getUserData());
+                if (holder->mIndex == mRecIndex)
+                    mFound = static_cast<osg::Group*>(&searchNode);
+            }
+            traverse(searchNode);
+        }
+
+        osg::Group* mFound;
+    private:
+        int mRecIndex;
+    };
+
     void Loader::handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, int animflags, int particleflags)
     {
         osg::ref_ptr<osgParticle::ParticleSystem> partsys (new osgParticle::ParticleSystem);
@@ -591,7 +632,7 @@ namespace NifOsg
 
         // ---- emitter
 
-        osgParticle::ModularEmitter* emitter = new osgParticle::ModularEmitter;
+        osg::ref_ptr<osgParticle::ModularEmitter> emitter = new osgParticle::ModularEmitter;
         emitter->setParticleSystem(partsys);
         emitter->setReferenceFrame(osgParticle::ParticleProcessor::RELATIVE_RF);
 
@@ -617,11 +658,19 @@ namespace NifOsg
 
         emitter->setPlacer(placer);
 
-        // TODO: attach to the emitter node
-        // Note: we also assume that the Emitter node is placed *before* the Particle node in the scene graph.
+        // Note: we assume that the Emitter node is placed *before* the Particle node in the scene graph.
         // This seems to be true for all NIF files in the game that I've checked, suggesting that NIFs work similar to OSG with regards to update order.
         // If something ever violates this assumption, the worst that could happen is the culling being one frame late, which wouldn't be a disaster.
-        parentNode->addChild(emitter);
+
+        FindEmitterNode find (partctrl->emitter->recIndex);
+        mRootNode->accept(find);
+        if (!find.mFound)
+        {
+            std::cerr << "can't find emitter node, wrong node order?" << std::endl;
+            return;
+        }
+        osg::Group* emitterNode = find.mFound;
+        emitterNode->addChild(emitter);
 
         osg::ref_ptr<ParticleSystemController> callback(new ParticleSystemController(partctrl));
         setupController(partctrl, callback, animflags);
@@ -631,7 +680,7 @@ namespace NifOsg
         osgParticle::ModularProgram* program = new osgParticle::ModularProgram;
         program->setParticleSystem(partsys);
         program->setReferenceFrame(rf);
-        parentNode->addChild(program);
+        emitterNode->addChild(program);
         for (Nif::ExtraPtr e = partctrl->extra; !e.empty(); e = e->extra)
         {
             if (e->recType == Nif::RC_NiParticleGrowFade)
