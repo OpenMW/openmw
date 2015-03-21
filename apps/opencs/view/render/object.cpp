@@ -60,7 +60,7 @@ void CSVRender::Object::update()
 
         Nif::NIFFilePtr file(new Nif::NIFFile(mVFS->get(path), path));
 
-        loader.load(file, mBaseNode);
+        loader.loadAsSkeleton(file, mBaseNode);
 
         //mObject->setVisibilityFlags (Element_Reference);
 

@@ -64,6 +64,18 @@ namespace
         return toMatrix(node->trafo);
     }
 
+    void getAllNiNodes(const Nif::Node* node, std::vector<int>& outIndices)
+    {
+        const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(node);
+        if (ninode)
+        {
+            outIndices.push_back(ninode->recIndex);
+            for (unsigned int i=0; i<ninode->children.length(); ++i)
+                if (!ninode->children[i].empty())
+                    getAllNiNodes(ninode->children[i].getPtr(), outIndices);
+        }
+    }
+
     osg::BlendFunc::BlendFuncMode getBlendMode(int mode)
     {
         switch(mode)
@@ -328,13 +340,6 @@ namespace NifOsg
         toSetup->mFunction = boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl, 1 /*autoPlay*/));
     }
 
-    class RecIndexHolder : public osg::Referenced
-    {
-    public:
-        RecIndexHolder(int index) : mIndex(index) {}
-        int mIndex;
-    };
-
     void Loader::handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
                             std::map<int, int> boundTextures, int animflags, int particleflags, bool collisionNode)
     {
@@ -356,6 +361,10 @@ namespace NifOsg
             transformNode = new osg::MatrixTransform(toMatrix(nifNode->trafo));
         }
 
+        // UserData used for a variety of features:
+        // - finding the correct emitter node for a particle system
+        // - establishing connections to the animated collision shapes, which are handled in a separate loader
+        // - finding a random child NiNode in NiBspArrayController
         transformNode->setUserData(new RecIndexHolder(nifNode->recIndex));
 
         if (nifNode->recType == Nif::RC_NiBSAnimationNode)
@@ -543,32 +552,6 @@ namespace NifOsg
         }
     }
 
-    class FindEmitterNode : public osg::NodeVisitor
-    {
-    public:
-        FindEmitterNode(int recIndex)
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mFound(NULL)
-            , mRecIndex(recIndex)
-        {
-        }
-
-        virtual void apply(osg::Node &searchNode)
-        {
-            if (searchNode.getUserData())
-            {
-                RecIndexHolder* holder = static_cast<RecIndexHolder*>(searchNode.getUserData());
-                if (holder->mIndex == mRecIndex)
-                    mFound = static_cast<osg::Group*>(&searchNode);
-            }
-            traverse(searchNode);
-        }
-
-        osg::Group* mFound;
-    private:
-        int mRecIndex;
-    };
-
     void Loader::handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, int animflags, int particleflags)
     {
         osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
@@ -582,8 +565,6 @@ namespace NifOsg
         else
             return;
 
-        // TODO: add special handling for NiBSPArrayController
-
         const Nif::NiParticleSystemController* partctrl = NULL;
         for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
         {
@@ -596,6 +577,12 @@ namespace NifOsg
         {
             std::cerr << "No particle controller found " << std::endl;
             return;
+        }
+
+        std::vector<int> targets;
+        if (partctrl->recType == Nif::RC_NiBSPArrayController)
+        {
+            getAllNiNodes(partctrl->emitter.getPtr(), targets);
         }
 
         osgParticle::ParticleProcessor::ReferenceFrame rf = (particleflags & Nif::NiNode::ParticleFlag_LocalSpace)
@@ -638,7 +625,7 @@ namespace NifOsg
 
         // ---- emitter
 
-        osg::ref_ptr<osgParticle::ModularEmitter> emitter = new osgParticle::ModularEmitter;
+        osg::ref_ptr<Emitter> emitter = new Emitter(targets);
         emitter->setParticleSystem(partsys);
         emitter->setReferenceFrame(osgParticle::ParticleProcessor::RELATIVE_RF);
 
@@ -668,7 +655,7 @@ namespace NifOsg
         // This seems to be true for all NIF files in the game that I've checked, suggesting that NIFs work similar to OSG with regards to update order.
         // If something ever violates this assumption, the worst that could happen is the culling being one frame late, which wouldn't be a disaster.
 
-        FindEmitterNode find (partctrl->emitter->recIndex);
+        FindRecIndexVisitor find (partctrl->emitter->recIndex);
         mRootNode->accept(find);
         if (!find.mFound)
         {
@@ -676,6 +663,9 @@ namespace NifOsg
             return;
         }
         osg::Group* emitterNode = find.mFound;
+
+        // Emitter attached to the emitter node. Note one side effect of the emitter using the CullVisitor is that hiding its node
+        // actually causes the emitter to stop firing. Convenient, because MW behaves this way too!
         emitterNode->addChild(emitter);
 
         osg::ref_ptr<ParticleSystemController> callback(new ParticleSystemController(partctrl));
@@ -852,6 +842,7 @@ namespace NifOsg
             geometry = new osg::Geometry;
 
         osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+        geode->setName(triShape->name); // name will be used for part filtering
         triShapeToGeometry(triShape, geometry, geode, boundTextures, animflags);
 
         geode->addDrawable(geometry);
@@ -862,6 +853,7 @@ namespace NifOsg
     void Loader::handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, const std::map<int, int>& boundTextures, int animflags)
     {
         osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+        geode->setName(triShape->name); // name will be used for part filtering
         osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
         triShapeToGeometry(triShape, geometry, geode, boundTextures, animflags);
 
@@ -969,7 +961,7 @@ namespace NifOsg
         case Nif::RC_NiVertexColorProperty:
         case Nif::RC_NiSpecularProperty:
         {
-            // TODO: handle these in handleTriShape so we know whether vertex colors are available
+            // Handled in handleTriShape so we know whether vertex colors are available
             break;
         }
         case Nif::RC_NiAlphaProperty:

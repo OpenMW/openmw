@@ -4,6 +4,7 @@
 #include <osgParticle/Particle>
 #include <osgParticle/Shooter>
 #include <osgParticle/Operator>
+#include <osgParticle/ModularEmitter>
 
 #include <osg/NodeCallback>
 
@@ -149,6 +150,71 @@ namespace NifOsg
         osg::Vec3f mPosition;
         osg::Vec3f mDirection;
         osg::Vec3f mCachedWorldPositionDirection;
+    };
+
+
+    class RecIndexHolder : public osg::Referenced
+    {
+    public:
+        RecIndexHolder(int index) : mIndex(index) {}
+        int mIndex;
+    };
+
+    // NodeVisitor to find a child node with the given record index, stored in the node's user data.
+    class FindRecIndexVisitor : public osg::NodeVisitor
+    {
+    public:
+        FindRecIndexVisitor(int recIndex)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mFound(NULL)
+            , mRecIndex(recIndex)
+        {
+        }
+
+        virtual void apply(osg::Node &searchNode)
+        {
+            if (searchNode.getUserData())
+            {
+                RecIndexHolder* holder = static_cast<RecIndexHolder*>(searchNode.getUserData());
+                if (holder->mIndex == mRecIndex)
+                {
+                    mFound = static_cast<osg::Group*>(&searchNode);
+                    mFoundPath = getNodePath();
+                    return;
+                }
+            }
+            traverse(searchNode);
+        }
+
+        osg::Group* mFound;
+        osg::NodePath mFoundPath;
+    private:
+        int mRecIndex;
+    };
+
+    // Subclass emitter to support randomly choosing one of the child node's transforms for the emit position of new particles.
+    class Emitter : public osgParticle::Emitter
+    {
+    public:
+        Emitter(const std::vector<int>& targets);
+        Emitter();
+        Emitter(const Emitter& copy, const osg::CopyOp& copyop);
+
+        META_Object(NifOsg, NifOsg::Emitter)
+
+        virtual void emitParticles(double dt);
+
+        void setShooter(osgParticle::Shooter* shooter);
+        void setPlacer(osgParticle::Placer* placer);
+        void setCounter(osgParticle::Counter* counter);
+
+    private:
+        // NIF Record indices
+        std::vector<int> mTargets;
+
+        osg::ref_ptr<osgParticle::Placer> mPlacer;
+        osg::ref_ptr<osgParticle::Shooter> mShooter;
+        osg::ref_ptr<osgParticle::Counter> mCounter;
     };
 
 }

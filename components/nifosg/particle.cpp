@@ -191,4 +191,92 @@ void GravityAffector::operate(osgParticle::Particle *particle, double dt)
     }
 }
 
+Emitter::Emitter()
+    : osgParticle::Emitter()
+{
+}
+
+Emitter::Emitter(const Emitter &copy, const osg::CopyOp &copyop)
+    : osgParticle::Emitter(copy, copyop)
+    , mTargets(copy.mTargets)
+{
+}
+
+Emitter::Emitter(const std::vector<int> &targets)
+    : mTargets(targets)
+{
+}
+
+void Emitter::setShooter(osgParticle::Shooter *shooter)
+{
+    mShooter = shooter;
+}
+
+void Emitter::setPlacer(osgParticle::Placer *placer)
+{
+    mPlacer = placer;
+}
+
+void Emitter::setCounter(osgParticle::Counter *counter)
+{
+    mCounter = counter;
+}
+
+void Emitter::emitParticles(double dt)
+{
+    osg::Matrix worldToPs;
+    osg::MatrixList worldMats = getParticleSystem()->getWorldMatrices();
+    if (!worldMats.empty())
+    {
+        const osg::Matrix psToWorld = worldMats[0];
+        worldToPs = osg::Matrix::inverse(psToWorld);
+    }
+
+    const osg::Matrix& ltw = getLocalToWorldMatrix();
+    const osg::Matrix& previous_ltw = getPreviousLocalToWorldMatrix();
+    const osg::Matrix emitterToPs = ltw * worldToPs;
+    const osg::Matrix prevEmitterToPs = previous_ltw * worldToPs;
+
+    int n = mCounter->numParticlesToCreate(dt);
+
+    osg::Matrix transform;
+    if (!mTargets.empty())
+    {
+        int randomRecIndex = mTargets[(std::rand() / (static_cast<double>(RAND_MAX)+1.0)) * mTargets.size()];
+
+        // we could use a map here for faster lookup
+        FindRecIndexVisitor visitor(randomRecIndex);
+        getParent(0)->accept(visitor);
+
+        if (!visitor.mFound)
+        {
+            std::cerr << "Emitter: Can't find emitter node" << randomRecIndex << std::endl;
+            return;
+        }
+
+        osg::NodePath path = visitor.mFoundPath;
+        path.erase(path.begin());
+        transform = osg::computeLocalToWorld(path);
+    }
+
+    for (int i=0; i<n; ++i)
+    {
+        osgParticle::Particle* P = getParticleSystem()->createParticle(0);
+        if (P)
+        {
+            mPlacer->place(P);
+
+            P->transformPositionVelocity(transform);
+
+            mShooter->shoot(P);
+
+            // Now need to transform the position and velocity because we having a moving model.
+            // (is this actually how MW works?)
+            float r = ((float)rand()/(float)RAND_MAX);
+            P->transformPositionVelocity(emitterToPs, prevEmitterToPs, r);
+            //P->transformPositionVelocity(ltw);
+        }
+    }
+}
+
 }

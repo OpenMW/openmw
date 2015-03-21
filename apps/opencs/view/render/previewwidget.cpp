@@ -4,6 +4,8 @@
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 
+#include <osgGA/TrackballManipulator>
+
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
 
@@ -12,6 +14,8 @@ CSVRender::PreviewWidget::PreviewWidget (const VFS::Manager* vfs, CSMWorld::Data
 : SceneWidget (parent), mData (data), mObject(vfs, data, mRootNode, id, referenceable)
 {
     //setNavigation (&mOrbit);
+
+    setCameraManipulator(new osgGA::TrackballManipulator);
 
     QAbstractItemModel *referenceables =
         mData.getTableModel (CSMWorld::UniversalId::Type_Referenceables);

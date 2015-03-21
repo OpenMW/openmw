@@ -15,7 +15,6 @@
 #include <osgQt/GraphicsWindowQt>
 #include <osg/GraphicsContext>
 
-#include <osgGA/TrackballManipulator>
 #include <osgViewer/ViewerEventHandlers>
 
 namespace CSVRender
@@ -72,14 +71,16 @@ SceneWidget::SceneWidget(QWidget *parent, Qt::WindowFlags f)
     // Press S to reveal profiling stats
     addEventHandler(new osgViewer::StatsHandler);
 
-    setCameraManipulator(new osgGA::TrackballManipulator);
-
     // Only render when the camera position changed, or content flagged dirty
     //setRunFrameScheme(osgViewer::ViewerBase::ON_DEMAND);
     setRunFrameScheme(osgViewer::ViewerBase::CONTINUOUS);
 
+    getCamera()->setCullMask(~(0x1));
+
     connect( &mTimer, SIGNAL(timeout()), this, SLOT(update()) );
     mTimer.start( 10 );
+
+    realize();
 }
 
 void SceneWidget::paintEvent(QPaintEvent *event)
