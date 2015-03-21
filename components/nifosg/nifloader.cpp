@@ -180,7 +180,11 @@ namespace
             if (_referenceFrame==RELATIVE_RF)
             {
                 matrix.preMult(_matrix);
+                osg::Vec3 scale = matrix.getScale();
                 matrix.setRotate(osg::Quat());
+                matrix(0,0) = scale.x();
+                matrix(1,1) = scale.y();
+                matrix(2,2) = scale.z();
             }
             else // absolute
             {
