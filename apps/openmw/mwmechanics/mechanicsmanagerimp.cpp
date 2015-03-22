@@ -1030,7 +1030,9 @@ namespace MWMechanics
             owner.second = true;
         }
         Misc::StringUtils::toLower(owner.first);
-        mStolenItems[Misc::StringUtils::lowerCase(item.getClass().getId(item))][owner] += count;
+
+        if (!Misc::StringUtils::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
+            mStolenItems[Misc::StringUtils::lowerCase(item.getClass().getId(item))][owner] += count;
 
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
