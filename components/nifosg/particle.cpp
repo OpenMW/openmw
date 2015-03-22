@@ -142,7 +142,7 @@ ParticleColorAffector::ParticleColorAffector(const ParticleColorAffector &copy, 
 void ParticleColorAffector::operate(osgParticle::Particle* particle, double /* dt */)
 {
     float time = static_cast<float>(particle->getAge()/particle->getLifeTime());
-    osg::Vec4f color = interpKey(mData.mKeyMap.mKeys, time, osg::Vec4f(1,1,1,1));
+    osg::Vec4f color = interpKey(mData.mKeyMap->mKeys, time, osg::Vec4f(1,1,1,1));
 
     particle->setColorRange(osgParticle::rangev4(color, color));
 }

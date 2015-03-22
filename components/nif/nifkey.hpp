@@ -8,6 +8,8 @@
 #include <sstream>
 #include <map>
 
+#include <boost/shared_ptr.hpp>
+
 #include "niffile.hpp"
 
 namespace Nif
@@ -145,6 +147,11 @@ typedef KeyMapT<float,&NIFStream::getFloat> FloatKeyMap;
 typedef KeyMapT<osg::Vec3f,&NIFStream::getVector3> Vector3KeyMap;
 typedef KeyMapT<osg::Vec4f,&NIFStream::getVector4> Vector4KeyMap;
 typedef KeyMapT<osg::Quat,&NIFStream::getQuaternion> QuaternionKeyMap;
+
+typedef boost::shared_ptr<FloatKeyMap> FloatKeyMapPtr;
+typedef boost::shared_ptr<Vector3KeyMap> Vector3KeyMapPtr;
+typedef boost::shared_ptr<Vector4KeyMap> Vector4KeyMapPtr;
+typedef boost::shared_ptr<QuaternionKeyMap> QuaternionKeyMapPtr;
 
 } // Namespace
 #endif //#ifndef OPENMW_COMPONENTS_NIF_NIFKEY_HPP

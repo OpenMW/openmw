@@ -135,20 +135,20 @@ namespace NifOsg
         virtual void update(osg::NodeVisitor* nv, osg::Drawable* drawable);
 
     private:
-        std::vector<Nif::NiMorphData::MorphData> mMorphs;
+        std::vector<Nif::FloatKeyMapPtr> mKeyFrames;
     };
 
     class KeyframeController : public osg::NodeCallback, public Controller, public ValueInterpolator
     {
     private:
-        const Nif::QuaternionKeyMap* mRotations;
-        const Nif::FloatKeyMap* mXRotations;
-        const Nif::FloatKeyMap* mYRotations;
-        const Nif::FloatKeyMap* mZRotations;
-        const Nif::Vector3KeyMap* mTranslations;
-        const Nif::FloatKeyMap* mScales;
-        // TODO: we don't need to keep the whole NIF around, just change the key maps to Referenced
-        Nif::NIFFilePtr mNif; // Hold a SharedPtr to make sure key lists stay valid
+        Nif::QuaternionKeyMapPtr mRotations;
+
+        Nif::FloatKeyMapPtr mXRotations;
+        Nif::FloatKeyMapPtr mYRotations;
+        Nif::FloatKeyMapPtr mZRotations;
+
+        Nif::Vector3KeyMapPtr mTranslations;
+        Nif::FloatKeyMapPtr mScales;
 
         using ValueInterpolator::interpKey;
 
@@ -158,8 +158,7 @@ namespace NifOsg
         osg::Quat getXYZRotation(float time) const;
 
     public:
-        /// @note The NiKeyFrameData must be valid as long as this KeyframeController exists.
-        KeyframeController(const Nif::NIFFilePtr& nif, const Nif::NiKeyframeData *data);
+        KeyframeController(const Nif::NiKeyframeData *data);
         KeyframeController();
         KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop);
 
@@ -183,10 +182,10 @@ namespace NifOsg
         virtual void operator() (osg::Node*, osg::NodeVisitor*);
 
     private:
-        Nif::FloatKeyMap mUTrans;
-        Nif::FloatKeyMap mVTrans;
-        Nif::FloatKeyMap mUScale;
-        Nif::FloatKeyMap mVScale;
+        Nif::FloatKeyMapPtr mUTrans;
+        Nif::FloatKeyMapPtr mVTrans;
+        Nif::FloatKeyMapPtr mUScale;
+        Nif::FloatKeyMapPtr mVScale;
         std::set<int> mTextureUnits;
     };
 
@@ -210,7 +209,7 @@ namespace NifOsg
     class AlphaController : public osg::NodeCallback, public Controller, public ValueInterpolator
     {
     private:
-        Nif::FloatKeyMap mData;
+        Nif::FloatKeyMapPtr mData;
 
     public:
         AlphaController(const Nif::NiFloatData *data);
@@ -225,7 +224,7 @@ namespace NifOsg
     class MaterialColorController : public osg::NodeCallback, public Controller, public ValueInterpolator
     {
     private:
-        Nif::Vector3KeyMap mData;
+        Nif::Vector3KeyMapPtr mData;
 
     public:
         MaterialColorController(const Nif::NiPosData *data);

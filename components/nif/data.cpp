@@ -115,18 +115,23 @@ void NiRotatingParticlesData::read(NIFStream *nif)
 
 void NiPosData::read(NIFStream *nif)
 {
-    mKeyList.read(nif);
+    mKeyList.reset(new Vector3KeyMap);
+    mKeyList->read(nif);
 }
 
 void NiUVData::read(NIFStream *nif)
 {
     for(int i = 0;i < 4;i++)
-        mKeyList[i].read(nif);
+    {
+        mKeyList[i].reset(new FloatKeyMap);
+        mKeyList[i]->read(nif);
+    }
 }
 
 void NiFloatData::read(NIFStream *nif)
 {
-    mKeyList.read(nif);
+    mKeyList.reset(new FloatKeyMap);
+    mKeyList->read(nif);
 }
 
 void NiPixelData::read(NIFStream *nif)
@@ -163,7 +168,8 @@ void NiPixelData::read(NIFStream *nif)
 
 void NiColorData::read(NIFStream *nif)
 {
-    mKeyMap.read(nif);
+    mKeyMap.reset(new Vector4KeyMap);
+    mKeyMap->read(nif);
 }
 
 void NiVisData::read(NIFStream *nif)
@@ -215,24 +221,31 @@ void NiMorphData::read(NIFStream *nif)
     mMorphs.resize(morphCount);
     for(int i = 0;i < morphCount;i++)
     {
-        mMorphs[i].mData.read(nif, true);
+        mMorphs[i].mKeyFrames.reset(new FloatKeyMap);
+        mMorphs[i].mKeyFrames->read(nif, true);
         nif->getVector3s(mMorphs[i].mVertices, vertCount);
     }
 }
 
 void NiKeyframeData::read(NIFStream *nif)
 {
-    mRotations.read(nif);
-    if(mRotations.mInterpolationType == mRotations.sXYZInterpolation)
+    mRotations.reset(new QuaternionKeyMap);
+    mRotations->read(nif);
+    if(mRotations->mInterpolationType == Vector3KeyMap::sXYZInterpolation)
     {
         //Chomp unused float
         nif->getFloat();
-        mXRotations.read(nif, true);
-        mYRotations.read(nif, true);
-        mZRotations.read(nif, true);
+        mXRotations.reset(new FloatKeyMap);
+        mYRotations.reset(new FloatKeyMap);
+        mZRotations.reset(new FloatKeyMap);
+        mXRotations->read(nif, true);
+        mYRotations->read(nif, true);
+        mZRotations->read(nif, true);
     }
-    mTranslations.read(nif);
-    mScales.read(nif);
+    mTranslations.reset(new Vector3KeyMap);
+    mTranslations->read(nif);
+    mScales.reset(new FloatKeyMap);
+    mScales->read(nif);
 }
 
 } // Namespace

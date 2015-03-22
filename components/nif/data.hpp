@@ -78,7 +78,7 @@ public:
 class NiPosData : public Record
 {
 public:
-    Vector3KeyMap mKeyList;
+    Vector3KeyMapPtr mKeyList;
 
     void read(NIFStream *nif);
 };
@@ -86,7 +86,7 @@ public:
 class NiUVData : public Record
 {
 public:
-    FloatKeyMap mKeyList[4];
+    FloatKeyMapPtr mKeyList[4];
 
     void read(NIFStream *nif);
 };
@@ -94,7 +94,7 @@ public:
 class NiFloatData : public Record
 {
 public:
-    FloatKeyMap mKeyList;
+    FloatKeyMapPtr mKeyList;
 
     void read(NIFStream *nif);
 };
@@ -111,7 +111,7 @@ public:
 class NiColorData : public Record
 {
 public:
-    Vector4KeyMap mKeyMap;
+    Vector4KeyMapPtr mKeyMap;
 
     void read(NIFStream *nif);
 };
@@ -164,7 +164,7 @@ public:
 struct NiMorphData : public Record
 {
     struct MorphData {
-        FloatKeyMap mData;
+        FloatKeyMapPtr mKeyFrames;
         std::vector<osg::Vec3f> mVertices;
     };
     std::vector<MorphData> mMorphs;
@@ -175,14 +175,15 @@ struct NiMorphData : public Record
 
 struct NiKeyframeData : public Record
 {
-    QuaternionKeyMap mRotations;
+    QuaternionKeyMapPtr mRotations;
 
-    FloatKeyMap mXRotations;
-    FloatKeyMap mYRotations;
-    FloatKeyMap mZRotations;
+    // may be NULL
+    FloatKeyMapPtr mXRotations;
+    FloatKeyMapPtr mYRotations;
+    FloatKeyMapPtr mZRotations;
 
-    Vector3KeyMap mTranslations;
-    FloatKeyMap mScales;
+    Vector3KeyMapPtr mTranslations;
+    FloatKeyMapPtr mScales;
 
     void read(NIFStream *nif);
 };

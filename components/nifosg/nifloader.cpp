@@ -454,7 +454,6 @@ namespace NifOsg
 
     void Loader::handleNodeControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode, int animflags)
     {
-        bool seenKeyframeCtrl = false;
         for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
         {
             if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
@@ -464,24 +463,10 @@ namespace NifOsg
                 const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
                 if(!key->data.empty())
                 {
-                    if (seenKeyframeCtrl)
-                    {
-                        std::cerr << "Warning: multiple KeyframeControllers on the same node" << std::endl;
-                        continue;
-                    }
-
-                    // build the rotation part manually to avoid issues caused by scaling
-                    osg::Matrixf mat;
-                    for (int i=0;i<3;++i)
-                        for (int j=0;j<3;++j)
-                            mat(j,i) = nifNode->trafo.rotation.mValues[i][j];
-
-                    osg::ref_ptr<KeyframeController> callback(new KeyframeController(mNif, key->data.getPtr()));
+                    osg::ref_ptr<KeyframeController> callback(new KeyframeController(key->data.getPtr()));
 
                     setupController(key, callback, animflags);
                     transformNode->addUpdateCallback(callback);
-
-                    seenKeyframeCtrl = true;
                 }
             }
             else if (ctrl->recType == Nif::RC_NiVisController)
