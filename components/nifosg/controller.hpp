@@ -147,10 +147,8 @@ namespace NifOsg
         const Nif::FloatKeyMap* mZRotations;
         const Nif::Vector3KeyMap* mTranslations;
         const Nif::FloatKeyMap* mScales;
+        // TODO: we don't need to keep the whole NIF around, just change the key maps to Referenced
         Nif::NIFFilePtr mNif; // Hold a SharedPtr to make sure key lists stay valid
-
-        osg::Quat mInitialQuat;
-        float mInitialScale;
 
         using ValueInterpolator::interpKey;
 
@@ -161,8 +159,7 @@ namespace NifOsg
 
     public:
         /// @note The NiKeyFrameData must be valid as long as this KeyframeController exists.
-        KeyframeController(const Nif::NIFFilePtr& nif, const Nif::NiKeyframeData *data,
-              osg::Quat initialQuat, float initialScale);
+        KeyframeController(const Nif::NIFFilePtr& nif, const Nif::NiKeyframeData *data);
         KeyframeController();
         KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop);
 

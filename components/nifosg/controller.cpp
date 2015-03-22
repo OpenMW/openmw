@@ -4,14 +4,16 @@
 #include <osg/TexMat>
 #include <osg/Material>
 #include <osg/Texture2D>
+#include <osg/io_utils>
+#include <osg/UserDataContainer>
 
 #include <osgAnimation/MorphGeometry>
 
 #include <osgParticle/Emitter>
 
-#include <osg/io_utils>
-
 #include <components/nif/data.hpp>
+
+#include "userdata.hpp"
 
 namespace NifOsg
 {
@@ -76,13 +78,10 @@ KeyframeController::KeyframeController(const KeyframeController &copy, const osg
     , mTranslations(copy.mTranslations)
     , mScales(copy.mScales)
     , mNif(copy.mNif)
-    , mInitialQuat(copy.mInitialQuat)
-    , mInitialScale(copy.mInitialScale)
 {
 }
 
-KeyframeController::KeyframeController(const Nif::NIFFilePtr &nif, const Nif::NiKeyframeData *data,
-                                 osg::Quat initialQuat, float initialScale)
+KeyframeController::KeyframeController(const Nif::NIFFilePtr &nif, const Nif::NiKeyframeData *data)
     : mRotations(&data->mRotations)
     , mXRotations(&data->mXRotations)
     , mYRotations(&data->mYRotations)
@@ -90,9 +89,8 @@ KeyframeController::KeyframeController(const Nif::NIFFilePtr &nif, const Nif::Ni
     , mTranslations(&data->mTranslations)
     , mScales(&data->mScales)
     , mNif(nif)
-    , mInitialQuat(initialQuat)
-    , mInitialScale(initialScale)
-{ }
+{
+}
 
 osg::Quat KeyframeController::interpKey(const Nif::QuaternionKeyMap::MapType &keys, float time)
 {
@@ -154,15 +152,35 @@ void KeyframeController::operator() (osg::Node* node, osg::NodeVisitor* nv)
 
         float time = getInputValue(nv);
 
+        NodeUserData* userdata = static_cast<NodeUserData*>(trans->getUserDataContainer()->getUserObject(0));
+        Nif::Matrix3& rot = userdata->mRotationScale;
+
+        bool setRot = false;
         if(mRotations->mKeys.size() > 0)
+        {
             mat.setRotate(interpKey(mRotations->mKeys, time));
+            setRot = true;
+        }
         else if (!mXRotations->mKeys.empty() || !mYRotations->mKeys.empty() || !mZRotations->mKeys.empty())
+        {
             mat.setRotate(getXYZRotation(time));
+            setRot = true;
+        }
         else
-            mat.setRotate(mInitialQuat);
+        {
+            // no rotation specified, use the previous value from the UserData
+            for (int i=0;i<3;++i)
+                for (int j=0;j<3;++j)
+                    mat(j,i) = rot.mValues[i][j]; // NB column/row major difference
+        }
+
+        if (setRot) // copy the new values back to the UserData
+            for (int i=0;i<3;++i)
+                for (int j=0;j<3;++j)
+                    rot.mValues[i][j] = mat(j,i); // NB column/row major difference
 
         // let's hope no one's using multiple KeyframeControllers on the same node (not that would make any sense...)
-        float scale = mInitialScale;
+        float& scale = userdata->mScale;
         if(mScales->mKeys.size() > 0)
             scale = interpKey(mScales->mKeys, time);
 

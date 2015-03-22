@@ -8,6 +8,8 @@
 
 #include <osg/io_utils>
 
+#include "userdata.hpp"
+
 namespace NifOsg
 {
 
@@ -277,6 +279,28 @@ void Emitter::emitParticles(double dt)
             //P->transformPositionVelocity(ltw);
         }
     }
+}
+
+FindRecIndexVisitor::FindRecIndexVisitor(int recIndex)
+    : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+    , mFound(NULL)
+    , mRecIndex(recIndex)
+{
+}
+
+void FindRecIndexVisitor::apply(osg::Node &searchNode)
+{
+    if (searchNode.getUserDataContainer() && searchNode.getUserDataContainer()->getNumUserObjects())
+    {
+        NodeUserData* holder = dynamic_cast<NodeUserData*>(searchNode.getUserDataContainer()->getUserObject(0));
+        if (holder && holder->mIndex == mRecIndex)
+        {
+            mFound = static_cast<osg::Group*>(&searchNode);
+            mFoundPath = getNodePath();
+            return;
+        }
+    }
+    traverse(searchNode);
 }
 
 }

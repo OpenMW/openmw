@@ -42,6 +42,7 @@
 #include <components/nif/node.hpp>
 
 #include "particle.hpp"
+#include "userdata.hpp"
 
 namespace
 {
@@ -191,12 +192,13 @@ namespace
         {
             if (_referenceFrame==RELATIVE_RF)
             {
+                const NifOsg::NodeUserData* userdata = static_cast<const NifOsg::NodeUserData*>(getUserDataContainer()->getUserObject(0));
+
                 matrix.preMult(_matrix);
-                osg::Vec3 scale = matrix.getScale();
                 matrix.setRotate(osg::Quat());
-                matrix(0,0) = scale.x();
-                matrix(1,1) = scale.y();
-                matrix(2,2) = scale.z();
+                matrix(0,0) = userdata->mScale;
+                matrix(1,1) = userdata->mScale;
+                matrix(2,2) = userdata->mScale;
             }
             else // absolute
             {
@@ -365,7 +367,10 @@ namespace NifOsg
         // - finding the correct emitter node for a particle system
         // - establishing connections to the animated collision shapes, which are handled in a separate loader
         // - finding a random child NiNode in NiBspArrayController
-        transformNode->setUserData(new RecIndexHolder(nifNode->recIndex));
+        // - storing the previous 3x3 rotation and scale values for when a KeyframeController wants to
+        //   change only certain elements of the 4x4 transform
+        transformNode->getOrCreateUserDataContainer()->addUserObject(
+            new NodeUserData(nifNode->recIndex, nifNode->trafo.scale, nifNode->trafo.rotation));
 
         if (nifNode->recType == Nif::RC_NiBSAnimationNode)
             animflags |= nifNode->flags;
@@ -471,7 +476,7 @@ namespace NifOsg
                         for (int j=0;j<3;++j)
                             mat(j,i) = nifNode->trafo.rotation.mValues[i][j];
 
-                    osg::ref_ptr<KeyframeController> callback(new KeyframeController(mNif, key->data.getPtr(), mat.getRotate(), nifNode->trafo.scale));
+                    osg::ref_ptr<KeyframeController> callback(new KeyframeController(mNif, key->data.getPtr()));
 
                     setupController(key, callback, animflags);
                     transformNode->addUpdateCallback(callback);

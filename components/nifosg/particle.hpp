@@ -7,6 +7,7 @@
 #include <osgParticle/ModularEmitter>
 
 #include <osg/NodeCallback>
+#include <osg/UserDataContainer>
 
 #include <components/nif/nifkey.hpp>
 #include <components/nif/data.hpp>
@@ -152,39 +153,13 @@ namespace NifOsg
         osg::Vec3f mCachedWorldPositionDirection;
     };
 
-
-    class RecIndexHolder : public osg::Referenced
-    {
-    public:
-        RecIndexHolder(int index) : mIndex(index) {}
-        int mIndex;
-    };
-
-    // NodeVisitor to find a child node with the given record index, stored in the node's user data.
+    // NodeVisitor to find a child node with the given record index, stored in the node's user data container.
     class FindRecIndexVisitor : public osg::NodeVisitor
     {
     public:
-        FindRecIndexVisitor(int recIndex)
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mFound(NULL)
-            , mRecIndex(recIndex)
-        {
-        }
+        FindRecIndexVisitor(int recIndex);
 
-        virtual void apply(osg::Node &searchNode)
-        {
-            if (searchNode.getUserData())
-            {
-                RecIndexHolder* holder = static_cast<RecIndexHolder*>(searchNode.getUserData());
-                if (holder->mIndex == mRecIndex)
-                {
-                    mFound = static_cast<osg::Group*>(&searchNode);
-                    mFoundPath = getNodePath();
-                    return;
-                }
-            }
-            traverse(searchNode);
-        }
+        virtual void apply(osg::Node &searchNode);
 
         osg::Group* mFound;
         osg::NodePath mFoundPath;

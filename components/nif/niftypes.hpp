@@ -46,7 +46,7 @@ struct Matrix3
 struct Transformation
 {
     osg::Vec3f pos;
-    Matrix3 rotation;
+    Matrix3 rotation; // this can contain scale components too, including negative and nonuniform scales
     float scale;
 
     static const Transformation& getIdentity()
