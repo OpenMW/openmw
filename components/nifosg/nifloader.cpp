@@ -442,19 +442,19 @@ namespace NifOsg
             for (size_t i = 0; i <props.length();++i)
             {
                 if (!props[i].empty())
-                    handleProperty(props[i].getPtr(), nifNode, applyTo, boundTextures, animflags);
+                    handleProperty(props[i].getPtr(), applyTo, boundTextures, animflags);
             }
         }
 
         void setupController(const Nif::Controller* ctrl, Controller* toSetup, int animflags)
         {
+            // TODO: uncomment this, currently commented for easier testing
             //bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
             //if (autoPlay)
                 toSetup->mSource = boost::shared_ptr<ControllerSource>(new FrameTimeSource);
 
             toSetup->mFunction = boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl, 1 /*autoPlay*/));
         }
-
 
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, bool createSkeleton,
                                 std::map<int, int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
@@ -623,7 +623,6 @@ namespace NifOsg
             }
         }
 
-
         void handleMaterialControllers(const Nif::Property *materialProperty, osg::Node* node, osg::StateSet *stateset, int animflags)
         {
             for (Nif::ControllerPtr ctrl = materialProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
@@ -650,7 +649,6 @@ namespace NifOsg
                     std::cerr << "Unexpected material controller " << ctrl->recType << std::endl;
             }
         }
-
 
         void handleTextureControllers(const Nif::Property *texProperty, osg::Node* node, osg::StateSet *stateset, int animflags)
         {
@@ -724,11 +722,14 @@ namespace NifOsg
             }
         }
 
-
-        void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, int animflags, int particleflags, osg::Node* rootNode)
+        // Load the initial state of the particle system, i.e. the initial particles and their positions, velocity and colors.
+        void handleParticleInitialState(const Nif::Node* nifNode, osgParticle::ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl,
+                                        osgParticle::ParticleProcessor::ReferenceFrame rf)
         {
-            osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
-            partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
+            // TODO: also take into account the transform by placement in the scene (should be done post-load)
+            osg::Matrix particletransform;
+            if (rf == osgParticle::ParticleProcessor::ABSOLUTE_RF)
+                particletransform = getWorldTransform(nifNode);
 
             const Nif::NiAutoNormalParticlesData *particledata = NULL;
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles)
@@ -737,35 +738,6 @@ namespace NifOsg
                 particledata = static_cast<const Nif::NiRotatingParticles*>(nifNode)->data.getPtr();
             else
                 return;
-
-            const Nif::NiParticleSystemController* partctrl = NULL;
-            for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
-            {
-                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
-                    continue;
-                if(ctrl->recType == Nif::RC_NiParticleSystemController || ctrl->recType == Nif::RC_NiBSPArrayController)
-                    partctrl = static_cast<Nif::NiParticleSystemController*>(ctrl.getPtr());
-            }
-            if (!partctrl)
-            {
-                std::cerr << "No particle controller found " << std::endl;
-                return;
-            }
-
-            std::vector<int> targets;
-            if (partctrl->recType == Nif::RC_NiBSPArrayController)
-            {
-                getAllNiNodes(partctrl->emitter.getPtr(), targets);
-            }
-
-            osgParticle::ParticleProcessor::ReferenceFrame rf = (particleflags & Nif::NiNode::ParticleFlag_LocalSpace)
-                    ? osgParticle::ParticleProcessor::RELATIVE_RF
-                    : osgParticle::ParticleProcessor::ABSOLUTE_RF;
-
-            // TODO: also take into account the transform by placement in the scene
-            osg::Matrix particletransform;
-            if (rf == osgParticle::ParticleProcessor::ABSOLUTE_RF)
-                particletransform = getWorldTransform(nifNode);
 
             int i=0;
             for (std::vector<Nif::NiParticleSystemController::Particle>::const_iterator it = partctrl->particles.begin();
@@ -789,18 +761,17 @@ namespace NifOsg
 
                 created->setSizeRange(osgParticle::rangef(size, size));
             }
+        }
 
-            partsys->setQuota(partctrl->numParticles);
-
-            partsys->getDefaultParticleTemplate().setSizeRange(osgParticle::rangef(partctrl->size, partctrl->size));
-            partsys->getDefaultParticleTemplate().setColorRange(osgParticle::rangev4(osg::Vec4f(1.f,1.f,1.f,1.f), osg::Vec4f(1.f,1.f,1.f,1.f)));
-            partsys->getDefaultParticleTemplate().setAlphaRange(osgParticle::rangef(1.f, 1.f));
-
-            // ---- emitter
+        osg::ref_ptr<Emitter> handleParticleEmitter(const Nif::NiParticleSystemController* partctrl)
+        {
+            std::vector<int> targets;
+            if (partctrl->recType == Nif::RC_NiBSPArrayController)
+            {
+                getAllNiNodes(partctrl->emitter.getPtr(), targets);
+            }
 
             osg::ref_ptr<Emitter> emitter = new Emitter(targets);
-            emitter->setParticleSystem(partsys);
-            emitter->setReferenceFrame(osgParticle::ParticleProcessor::RELATIVE_RF);
 
             osgParticle::ConstantRateCounter* counter = new osgParticle::ConstantRateCounter;
             if (partctrl->emitFlags & Nif::NiParticleSystemController::NoAutoAdjust)
@@ -823,6 +794,43 @@ namespace NifOsg
             placer->setZRange(-partctrl->offsetRandom.z(), partctrl->offsetRandom.z());
 
             emitter->setPlacer(placer);
+            return emitter;
+        }
+
+        void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, int animflags, int particleflags, osg::Node* rootNode)
+        {
+            osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
+            partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
+
+            const Nif::NiParticleSystemController* partctrl = NULL;
+            for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
+            {
+                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                    continue;
+                if(ctrl->recType == Nif::RC_NiParticleSystemController || ctrl->recType == Nif::RC_NiBSPArrayController)
+                    partctrl = static_cast<Nif::NiParticleSystemController*>(ctrl.getPtr());
+            }
+            if (!partctrl)
+            {
+                std::cerr << "No particle controller found " << std::endl;
+                return;
+            }
+
+            osgParticle::ParticleProcessor::ReferenceFrame rf = (particleflags & Nif::NiNode::ParticleFlag_LocalSpace)
+                    ? osgParticle::ParticleProcessor::RELATIVE_RF
+                    : osgParticle::ParticleProcessor::ABSOLUTE_RF;
+
+            handleParticleInitialState(nifNode, partsys, partctrl, rf);
+
+            partsys->setQuota(partctrl->numParticles);
+
+            partsys->getDefaultParticleTemplate().setSizeRange(osgParticle::rangef(partctrl->size, partctrl->size));
+            partsys->getDefaultParticleTemplate().setColorRange(osgParticle::rangev4(osg::Vec4f(1.f,1.f,1.f,1.f), osg::Vec4f(1.f,1.f,1.f,1.f)));
+            partsys->getDefaultParticleTemplate().setAlphaRange(osgParticle::rangef(1.f, 1.f));
+
+            osg::ref_ptr<Emitter> emitter = handleParticleEmitter(partctrl);
+            emitter->setParticleSystem(partsys);
+            emitter->setReferenceFrame(osgParticle::ParticleProcessor::RELATIVE_RF);
 
             // Note: we assume that the Emitter node is placed *before* the Particle node in the scene graph.
             // This seems to be true for all NIF files in the game that I've checked, suggesting that NIFs work similar to OSG with regards to update order.
@@ -859,6 +867,11 @@ namespace NifOsg
             partsys->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
             partsys->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
+            // particle system updater (after the emitters and affectors in the scene graph)
+            // I think for correct culling needs to be *before* the ParticleSystem, though osg examples do it the other way
+            osg::ref_ptr<osgParticle::ParticleSystemUpdater> updater = new osgParticle::ParticleSystemUpdater;
+            updater->addParticleSystem(partsys);
+            parentNode->addChild(updater);
 
             if (rf == osgParticle::ParticleProcessor::RELATIVE_RF)
                 parentNode->addChild(geode);
@@ -869,11 +882,6 @@ namespace NifOsg
                 trans->addChild(geode);
                 parentNode->addChild(trans);
             }
-
-            // particle system updater (after the emitters and affectors in the scene graph)
-            osgParticle::ParticleSystemUpdater* updater = new osgParticle::ParticleSystemUpdater;
-            updater->addParticleSystem(partsys);
-            parentNode->addChild(updater);
         }
 
         void triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, osg::Geode* parentGeode, const std::map<int, int>& boundTextures, int animflags)
@@ -1061,7 +1069,7 @@ namespace NifOsg
         }
 
 
-        void handleProperty(const Nif::Property *property, const Nif::Node* nifNode,
+        void handleProperty(const Nif::Property *property,
                             osg::Node *node, std::map<int, int>& boundTextures, int animflags)
         {
             osg::StateSet* stateset = node->getOrCreateStateSet();
@@ -1088,6 +1096,7 @@ namespace NifOsg
                 stateset->setMode(GL_CULL_FACE, stencilprop->data.drawMode == 3 ? osg::StateAttribute::OFF
                                                                                 : osg::StateAttribute::ON);
 
+                // TODO:
                 // Stencil settings not enabled yet, not sure if the original engine is actually using them,
                 // since they might conflict with Morrowind's stencil shadows.
                 /*
