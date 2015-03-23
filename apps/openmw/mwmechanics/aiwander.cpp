@@ -31,6 +31,18 @@ namespace MWMechanics
     static const int GREETING_SHOULD_START = 4; //how many reaction intervals should pass before NPC can greet player
     static const int GREETING_SHOULD_END = 10;
 
+    const std::string AiWander::sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1] =
+    {
+        std::string("idle2"),
+        std::string("idle3"),
+        std::string("idle4"),
+        std::string("idle5"),
+        std::string("idle6"),
+        std::string("idle7"),
+        std::string("idle8"),
+        std::string("idle9"),
+    };
+
     /// \brief This class holds the variables AiWander needs which are deleted if the package becomes inactive.
     struct AiWanderStorage : AiTemporaryBase
     {
@@ -580,44 +592,24 @@ namespace MWMechanics
 
     void AiWander::playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)
     {
-        if(idleSelect == 2)
-            MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle2", 0, 1);
-        else if(idleSelect == 3)
-            MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle3", 0, 1);
-        else if(idleSelect == 4)
-            MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle4", 0, 1);
-        else if(idleSelect == 5)
-            MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle5", 0, 1);
-        else if(idleSelect == 6)
-            MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle6", 0, 1);
-        else if(idleSelect == 7)
-            MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle7", 0, 1);
-        else if(idleSelect == 8)
-            MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle8", 0, 1);
-        else if(idleSelect == 9)
-            MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle9", 0, 1);
+        if ((GroupIndex_MinIdle <= idleSelect) && (idleSelect <= GroupIndex_MaxIdle))
+        {
+            const std::string& groupName = sIdleSelectToGroupName[idleSelect - GroupIndex_MinIdle];
+            MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, groupName, 0, 1);
+        }
     }
 
     bool AiWander::checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)
     {
-        if(idleSelect == 2)
-            return MWBase::Environment::get().getMechanicsManager()->checkAnimationPlaying(actor, "idle2");
-        else if(idleSelect == 3)
-            return MWBase::Environment::get().getMechanicsManager()->checkAnimationPlaying(actor, "idle3");
-        else if(idleSelect == 4)
-            return MWBase::Environment::get().getMechanicsManager()->checkAnimationPlaying(actor, "idle4");
-        else if(idleSelect == 5)
-            return MWBase::Environment::get().getMechanicsManager()->checkAnimationPlaying(actor, "idle5");
-        else if(idleSelect == 6)
-            return MWBase::Environment::get().getMechanicsManager()->checkAnimationPlaying(actor, "idle6");
-        else if(idleSelect == 7)
-            return MWBase::Environment::get().getMechanicsManager()->checkAnimationPlaying(actor, "idle7");
-        else if(idleSelect == 8)
-            return MWBase::Environment::get().getMechanicsManager()->checkAnimationPlaying(actor, "idle8");
-        else if(idleSelect == 9)
-            return MWBase::Environment::get().getMechanicsManager()->checkAnimationPlaying(actor, "idle9");
+        if ((GroupIndex_MinIdle <= idleSelect) && (idleSelect <= GroupIndex_MaxIdle))
+        {
+            const std::string& groupName = sIdleSelectToGroupName[idleSelect - GroupIndex_MinIdle];
+            return MWBase::Environment::get().getMechanicsManager()->checkAnimationPlaying(actor, groupName);
+        }
         else
+        {
             return false;
+        }
     }
 
     void AiWander::setReturnPosition(const Ogre::Vector3& position)
