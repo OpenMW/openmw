@@ -30,21 +30,32 @@ namespace NifOsg
 {
     class Controller;
 
+    typedef std::multimap<float,std::string> TextKeyMap;
+
     /// The main class responsible for loading NIF files into an OSG-Scenegraph.
     class Loader
     {
     public:
-        /// @param node The parent of the root node for the created NIF file.
-        void load(Nif::NIFFilePtr file, osg::Group* parentNode);
+        // TODO: add auto-detection for skinning. We will still need a "force skeleton" parameter
+        // though, when assembling from several files, i.e. equipment parts
+        /// Create a scene graph for the given NIF. Assumes no skinning is used.
+        /// @param node The parent of the new root node for the created scene graph.
+        osg::Node* load(Nif::NIFFilePtr file, osg::Group* parentNode);
 
-        void loadAsSkeleton(Nif::NIFFilePtr file, osg::Group* parentNode);
+        /// Create a scene graph for the given NIF. Assumes skinning will be used.
+        osg::Node* loadAsSkeleton(Nif::NIFFilePtr file, osg::Group* parentNode);
+
+        /// Load keyframe controllers from the given kf file onto the given scene graph.
+        /// @param sourceIndex The source index for this animation source, used for identifying
+        ///        which animation source a keyframe controller came from.
+        void loadKf(Nif::NIFFilePtr kf, osg::Node* rootNode, int sourceIndex);
 
         const VFS::Manager* resourceManager;
 
     private:
 
         /// @param createSkeleton If true, use an osgAnimation::Bone for NIF nodes, otherwise an osg::MatrixTransform.
-        void handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
+        osg::Node* handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
                         std::map<int, int> boundTextures, int animflags, int particleflags, bool collisionNode=false);
 
         void handleMeshControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode, const std::map<int, int>& boundTextures, int animflags);
@@ -81,7 +92,6 @@ namespace NifOsg
         Nif::NIFFilePtr mNif;
 
         osg::Group* mRootNode;
-        osg::Group* mSkeleton;
     };
 
 }

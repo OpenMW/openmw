@@ -140,6 +140,17 @@ namespace NifOsg
 
     class KeyframeController : public osg::NodeCallback, public Controller, public ValueInterpolator
     {
+    public:
+        KeyframeController(const Nif::NiKeyframeData *data);
+        KeyframeController();
+        KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop);
+
+        META_Object(NifOsg, KeyframeController)
+
+        virtual osg::Vec3f getTranslation(float time) const;
+
+        virtual void operator() (osg::Node*, osg::NodeVisitor*);
+
     private:
         Nif::QuaternionKeyMapPtr mRotations;
 
@@ -152,21 +163,33 @@ namespace NifOsg
 
         using ValueInterpolator::interpKey;
 
-
         osg::Quat interpKey(const Nif::QuaternionKeyMap::MapType &keys, float time);
 
         osg::Quat getXYZRotation(float time) const;
+    };
 
+    // Specialization of KeyframeController that remembers a "source index" for the animation source
+    // it came from, and can be enabled/disabled. Used for multiple animation sources support, i.e. .kf files.
+    // A SourcedKeyframeController is disabled by default and should be manually enabled when playing an animation from
+    // the relevant animation source.
+    class SourcedKeyframeController : public KeyframeController
+    {
     public:
-        KeyframeController(const Nif::NiKeyframeData *data);
-        KeyframeController();
-        KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop);
+        SourcedKeyframeController(const Nif::NiKeyframeData* data, int sourceIndex);
+        SourcedKeyframeController();
+        SourcedKeyframeController(const SourcedKeyframeController& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, KeyframeController)
-
-        virtual osg::Vec3f getTranslation(float time) const;
+        META_Object(NifOsg, SourcedKeyframeController)
 
         virtual void operator() (osg::Node*, osg::NodeVisitor*);
+
+        int getSourceIndex() const;
+
+        void setEnabled(bool enabled);
+
+    private:
+        int mSourceIndex;
+        bool mEnabled;
     };
 
     // Note we're using NodeCallback instead of StateSet::Callback because the StateSet callback doesn't support nesting

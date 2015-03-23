@@ -469,4 +469,37 @@ void ParticleSystemController::operator() (osg::Node* node, osg::NodeVisitor* nv
     traverse(node, nv);
 }
 
+SourcedKeyframeController::SourcedKeyframeController(const Nif::NiKeyframeData *data, int sourceIndex)
+    : KeyframeController(data)
+    , mSourceIndex(sourceIndex)
+    , mEnabled(false)
+{
+}
+
+SourcedKeyframeController::SourcedKeyframeController()
+    : mSourceIndex(0)
+    , mEnabled(false)
+{
+}
+
+SourcedKeyframeController::SourcedKeyframeController(const SourcedKeyframeController &copy, const osg::CopyOp &copyop)
+    : KeyframeController(copy, copyop)
+    , mSourceIndex(copy.mSourceIndex)
+    , mEnabled(copy.mEnabled)
+{
+}
+
+void SourcedKeyframeController::setEnabled(bool enabled)
+{
+    mEnabled = enabled;
+}
+
+void SourcedKeyframeController::operator ()(osg::Node* node, osg::NodeVisitor* nv)
+{
+    if (mEnabled)
+        KeyframeController::operator()(node, nv); // calls traverse
+    else
+        traverse(node, nv);
+}
+
 }

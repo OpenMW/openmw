@@ -248,6 +248,43 @@ namespace
         }
     };
 
+
+    // NodeVisitor that adds keyframe controllers to an existing scene graph, used when loading .kf files
+    class LoadKfVisitor : public osg::NodeVisitor
+    {
+    public:
+        LoadKfVisitor(std::map<std::string, const Nif::NiKeyframeController*> map, int sourceIndex)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mMap(map)
+            , mSourceIndex(sourceIndex)
+        {
+        }
+
+        void apply(osg::Node &node)
+        {
+            std::map<std::string, const Nif::NiKeyframeController*>::const_iterator found = mMap.find(node.getName());
+            if (found != mMap.end())
+            {
+                const Nif::NiKeyframeController* keyframectrl = found->second;
+
+                osg::ref_ptr<NifOsg::SourcedKeyframeController> callback(new NifOsg::SourcedKeyframeController(keyframectrl->data.getPtr(), mSourceIndex));
+                callback->mFunction = boost::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(keyframectrl, false));
+
+                // Insert in front of the callback list, to make sure UpdateBone is last.
+                // The order of SourcedKeyframeControllers doesn't matter since only one of them should be enabled at a time.
+                osg::ref_ptr<osg::NodeCallback> old = node.getUpdateCallback();
+                node.setUpdateCallback(callback);
+                callback->setNestedCallback(old);
+            }
+
+            traverse(node);
+        }
+
+    private:
+        std::map<std::string, const Nif::NiKeyframeController*> mMap;
+        int mSourceIndex;
+    };
+
     osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher)
     {
         osg::ref_ptr<osgAnimation::MorphGeometry> morphGeom = new osgAnimation::MorphGeometry;
@@ -270,38 +307,94 @@ namespace
 namespace NifOsg
 {
 
-    void Loader::load(Nif::NIFFilePtr nif, osg::Group *parentNode)
+    void Loader::loadKf(Nif::NIFFilePtr nif, osg::Node *rootNode, int sourceIndex)
     {
-        mNif = nif;
-
-        if (nif->numRoots() < 1)
+        if(nif->numRoots() < 1)
         {
             nif->warn("Found no root nodes");
             return;
         }
 
-        const Nif::Record* r = nif->getRoot(0);
+        const Nif::Record *r = nif->getRoot(0);
         assert(r != NULL);
 
-        const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
-        if (nifNode == NULL)
+        if(r->recType != Nif::RC_NiSequenceStreamHelper)
         {
-            nif->warn("First root was not a node, but a " + r->recName);
+            nif->warn("First root was not a NiSequenceStreamHelper, but a "+
+                      r->recName+".");
+            return;
+        }
+        const Nif::NiSequenceStreamHelper *seq = static_cast<const Nif::NiSequenceStreamHelper*>(r);
+
+        Nif::ExtraPtr extra = seq->extra;
+        if(extra.empty() || extra->recType != Nif::RC_NiTextKeyExtraData)
+        {
+            nif->warn("First extra data was not a NiTextKeyExtraData, but a "+
+                      (extra.empty() ? std::string("nil") : extra->recName)+".");
             return;
         }
 
-        mRootNode = parentNode;
-        handleNode(nifNode, parentNode, false, std::map<int, int>(), 0, 0);
+        //extractTextKeys(static_cast<const Nif::NiTextKeyExtraData*>(extra.getPtr()), textKeys);
+
+        std::map<std::string, const Nif::NiKeyframeController*> controllerMap;
+
+        extra = extra->extra;
+        Nif::ControllerPtr ctrl = seq->controller;
+        for(;!extra.empty() && !ctrl.empty();(extra=extra->extra),(ctrl=ctrl->next))
+        {
+            if(extra->recType != Nif::RC_NiStringExtraData || ctrl->recType != Nif::RC_NiKeyframeController)
+            {
+                nif->warn("Unexpected extra data "+extra->recName+" with controller "+ctrl->recName);
+                continue;
+            }
+
+            if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                continue;
+
+            const Nif::NiStringExtraData *strdata = static_cast<const Nif::NiStringExtraData*>(extra.getPtr());
+            const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
+
+            if(key->data.empty())
+                continue;
+
+            controllerMap[strdata->string] = key;
+        }
+
+        LoadKfVisitor visitor(controllerMap, sourceIndex);
+        rootNode->accept(visitor);
     }
 
-    void Loader::loadAsSkeleton(Nif::NIFFilePtr nif, osg::Group *parentNode)
+    osg::Node* Loader::load(Nif::NIFFilePtr nif, osg::Group *parentNode)
     {
         mNif = nif;
 
         if (nif->numRoots() < 1)
         {
-            nif->warn("Found no root nodes");
-            return;
+            nif->fail("Found no root nodes");
+        }
+
+        const Nif::Record* r = nif->getRoot(0);
+
+        const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
+        if (nifNode == NULL)
+        {
+            nif->fail("First root was not a node, but a " + r->recName);
+        }
+
+        mRootNode = parentNode;
+
+        osg::Node* created = handleNode(nifNode, parentNode, false, std::map<int, int>(), 0, 0);
+        return created;
+    }
+
+    osg::Node* Loader::loadAsSkeleton(Nif::NIFFilePtr nif, osg::Group *parentNode)
+    {
+        mNif = nif;
+
+        if (nif->numRoots() < 1)
+        {
+            //nif->warn("Found no root nodes");
+            nif->fail("Found no root nodes");
         }
 
         const Nif::Record* r = nif->getRoot(0);
@@ -310,17 +403,18 @@ namespace NifOsg
         const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
         if (nifNode == NULL)
         {
-            nif->warn("First root was not a node, but a " + r->recName);
-            return;
+            //nif->warn("First root was not a node, but a " + r->recName);
+            nif->fail("First root was not a node, but a " + r->recName);
         }
+
+        osg::ref_ptr<osgAnimation::Skeleton> skel = new osgAnimation::Skeleton;
+        parentNode->addChild(skel);
 
         mRootNode = parentNode;
 
-        osgAnimation::Skeleton* skel = new osgAnimation::Skeleton;
-        mSkeleton = skel;
-        mRootNode->addChild(mSkeleton);
+        handleNode(nifNode, skel, true, std::map<int, int>(), 0, 0);
 
-        handleNode(nifNode, mSkeleton, true, std::map<int, int>(), 0, 0);
+        return skel;
     }
 
     void Loader::applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, std::map<int, int>& boundTextures, int animflags)
@@ -342,7 +436,7 @@ namespace NifOsg
         toSetup->mFunction = boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl, 1 /*autoPlay*/));
     }
 
-    void Loader::handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
+    osg::Node* Loader::handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
                             std::map<int, int> boundTextures, int animflags, int particleflags, bool collisionNode)
     {
         osg::ref_ptr<osg::MatrixTransform> transformNode;
@@ -362,6 +456,7 @@ namespace NifOsg
         {
             transformNode = new osg::MatrixTransform(toMatrix(nifNode->trafo));
         }
+        // Ignoring name for non-bone nodes for now. We might need it later in isolated cases, e.g. AttachLight.
 
         // UserData used for a variety of features:
         // - finding the correct emitter node for a particle system
@@ -428,6 +523,8 @@ namespace NifOsg
                     handleNode(children[i].getPtr(), transformNode, createSkeleton, boundTextures, animflags, particleflags, collisionNode);
             }
         }
+
+        return transformNode;
     }
 
     void Loader::handleMeshControllers(const Nif::Node *nifNode, osg::MatrixTransform *transformNode, const std::map<int, int> &boundTextures, int animflags)
@@ -645,6 +742,7 @@ namespace NifOsg
         // This seems to be true for all NIF files in the game that I've checked, suggesting that NIFs work similar to OSG with regards to update order.
         // If something ever violates this assumption, the worst that could happen is the culling being one frame late, which wouldn't be a disaster.
 
+        // Creating emitters will need to be changed when cloning a scenegraph is implemented, the particleSystem pointer would become invalid
         FindRecIndexVisitor find (partctrl->emitter->recIndex);
         mRootNode->accept(find);
         if (!find.mFound)
