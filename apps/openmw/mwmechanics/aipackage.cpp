@@ -86,7 +86,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     //************************
     /// Checks if you aren't moving; attempts to unstick you
     //************************
-    if(mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2])) //Path finished?
+    if(mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1])) //Path finished?
         return true;
     else if(mStuckTimer>0.5) //Every half second see if we need to take action to avoid something
     {

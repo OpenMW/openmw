@@ -100,7 +100,7 @@ namespace MWMechanics
             mPathFinder.buildPath(start, dest, actor.getCell(), true);
         }
 
-        if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
+        if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1]))
         {
             movement.mPosition[1] = 0;
             return true;
