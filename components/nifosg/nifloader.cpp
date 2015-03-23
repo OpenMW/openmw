@@ -302,12 +302,50 @@ namespace
         }
         return morphGeom;
     }
+
+    void extractTextKeys(const Nif::NiTextKeyExtraData *tk, NifOsg::TextKeyMap &textkeys)
+    {
+        for(size_t i = 0;i < tk->list.size();i++)
+        {
+            const std::string &str = tk->list[i].text;
+            std::string::size_type pos = 0;
+            while(pos < str.length())
+            {
+                if(::isspace(str[pos]))
+                {
+                    pos++;
+                    continue;
+                }
+
+                std::string::size_type nextpos = std::min(str.find('\r', pos), str.find('\n', pos));
+                if(nextpos != std::string::npos)
+                {
+                    do {
+                        nextpos--;
+                    } while(nextpos > pos && ::isspace(str[nextpos]));
+                    nextpos++;
+                }
+                else if(::isspace(*str.rbegin()))
+                {
+                    std::string::const_iterator last = str.end();
+                    do {
+                        --last;
+                    } while(last != str.begin() && ::isspace(*last));
+                    nextpos = std::distance(str.begin(), ++last);
+                }
+                std::string result = str.substr(pos, nextpos-pos);
+                textkeys.insert(std::make_pair(tk->list[i].time, Misc::StringUtils::toLower(result)));
+
+                pos = nextpos;
+            }
+        }
+    }
 }
 
 namespace NifOsg
 {
 
-    void Loader::loadKf(Nif::NIFFilePtr nif, osg::Node *rootNode, int sourceIndex)
+    void Loader::loadKf(Nif::NIFFilePtr nif, osg::Node *rootNode, int sourceIndex, TextKeyMap& textKeys)
     {
         if(nif->numRoots() < 1)
         {
@@ -334,7 +372,7 @@ namespace NifOsg
             return;
         }
 
-        //extractTextKeys(static_cast<const Nif::NiTextKeyExtraData*>(extra.getPtr()), textKeys);
+        extractTextKeys(static_cast<const Nif::NiTextKeyExtraData*>(extra.getPtr()), textKeys);
 
         std::map<std::string, const Nif::NiKeyframeController*> controllerMap;
 
@@ -364,55 +402,45 @@ namespace NifOsg
         rootNode->accept(visitor);
     }
 
-    osg::Node* Loader::load(Nif::NIFFilePtr nif, osg::Group *parentNode)
+    osg::Node* Loader::load(Nif::NIFFilePtr nif, osg::Group *parentNode, TextKeyMap* textKeys)
     {
         mNif = nif;
 
         if (nif->numRoots() < 1)
-        {
             nif->fail("Found no root nodes");
-        }
 
         const Nif::Record* r = nif->getRoot(0);
 
         const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
         if (nifNode == NULL)
-        {
             nif->fail("First root was not a node, but a " + r->recName);
-        }
 
         mRootNode = parentNode;
 
-        osg::Node* created = handleNode(nifNode, parentNode, false, std::map<int, int>(), 0, 0);
+        osg::Node* created = handleNode(nifNode, parentNode, false, std::map<int, int>(), 0, 0, false, textKeys);
         return created;
     }
 
-    osg::Node* Loader::loadAsSkeleton(Nif::NIFFilePtr nif, osg::Group *parentNode)
+    osg::Node* Loader::loadAsSkeleton(Nif::NIFFilePtr nif, osg::Group *parentNode, TextKeyMap* textKeys)
     {
         mNif = nif;
 
         if (nif->numRoots() < 1)
-        {
-            //nif->warn("Found no root nodes");
             nif->fail("Found no root nodes");
-        }
 
         const Nif::Record* r = nif->getRoot(0);
         assert(r != NULL);
 
         const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
         if (nifNode == NULL)
-        {
-            //nif->warn("First root was not a node, but a " + r->recName);
             nif->fail("First root was not a node, but a " + r->recName);
-        }
 
         osg::ref_ptr<osgAnimation::Skeleton> skel = new osgAnimation::Skeleton;
         parentNode->addChild(skel);
 
         mRootNode = parentNode;
 
-        handleNode(nifNode, skel, true, std::map<int, int>(), 0, 0);
+        handleNode(nifNode, skel, true, std::map<int, int>(), 0, 0, false, textKeys);
 
         return skel;
     }
@@ -437,7 +465,7 @@ namespace NifOsg
     }
 
     osg::Node* Loader::handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
-                            std::map<int, int> boundTextures, int animflags, int particleflags, bool collisionNode)
+                            std::map<int, int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys)
     {
         osg::ref_ptr<osg::MatrixTransform> transformNode;
         if (nifNode->recType == Nif::RC_NiBillboardNode)
@@ -458,6 +486,9 @@ namespace NifOsg
         }
         // Ignoring name for non-bone nodes for now. We might need it later in isolated cases, e.g. AttachLight.
 
+        // Insert bones at position 0 to prevent update order problems (see comment in osg Skeleton.cpp)
+        parentNode->insertChild(0, transformNode);
+
         // UserData used for a variety of features:
         // - finding the correct emitter node for a particle system
         // - establishing connections to the animated collision shapes, which are handled in a separate loader
@@ -466,6 +497,27 @@ namespace NifOsg
         //   change only certain elements of the 4x4 transform
         transformNode->getOrCreateUserDataContainer()->addUserObject(
             new NodeUserData(nifNode->recIndex, nifNode->trafo.scale, nifNode->trafo.rotation));
+
+        for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->extra)
+        {
+            if(e->recType == Nif::RC_NiTextKeyExtraData && textKeys)
+            {
+                const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
+                extractTextKeys(tk, *textKeys);
+            }
+            else if(e->recType == Nif::RC_NiStringExtraData)
+            {
+                const Nif::NiStringExtraData *sd = static_cast<const Nif::NiStringExtraData*>(e.getPtr());
+                // String markers may contain important information
+                // affecting the entire subtree of this obj
+                // TODO: implement show markers flag
+                if(sd->string == "MRK" /*&& !sShowMarkers*/)
+                {
+                    // Marker objects. These meshes are only visible in the editor.
+                    skipMeshes = true;
+                }
+            }
+        }
 
         if (nifNode->recType == Nif::RC_NiBSAnimationNode)
             animflags |= nifNode->flags;
@@ -476,7 +528,7 @@ namespace NifOsg
         // We still need to animate the hidden bones so the physics system can access them
         if (nifNode->recType == Nif::RC_RootCollisionNode)
         {
-            collisionNode = true;
+            skipMeshes = true;
             // Leave mask for UpdateVisitor enabled
             transformNode->setNodeMask(0x1);
         }
@@ -486,12 +538,9 @@ namespace NifOsg
         if (nifNode->flags & Nif::NiNode::Flag_Hidden)
             transformNode->setNodeMask(0x1); // Leave mask for UpdateVisitor enabled
 
-        // Insert bones at position 0 to prevent update order problems (see comment in osg Skeleton.cpp)
-        parentNode->insertChild(0, transformNode);
-
         applyNodeProperties(nifNode, transformNode, boundTextures, animflags);
 
-        if (nifNode->recType == Nif::RC_NiTriShape && !collisionNode)
+        if (nifNode->recType == Nif::RC_NiTriShape && !skipMeshes)
         {
             const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
             if (!createSkeleton || triShape->skin.empty())
@@ -520,7 +569,7 @@ namespace NifOsg
             for(size_t i = 0;i < children.length();++i)
             {
                 if(!children[i].empty())
-                    handleNode(children[i].getPtr(), transformNode, createSkeleton, boundTextures, animflags, particleflags, collisionNode);
+                    handleNode(children[i].getPtr(), transformNode, createSkeleton, boundTextures, animflags, particleflags, skipMeshes, textKeys);
             }
         }
 

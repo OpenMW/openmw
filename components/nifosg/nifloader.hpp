@@ -40,15 +40,15 @@ namespace NifOsg
         // though, when assembling from several files, i.e. equipment parts
         /// Create a scene graph for the given NIF. Assumes no skinning is used.
         /// @param node The parent of the new root node for the created scene graph.
-        osg::Node* load(Nif::NIFFilePtr file, osg::Group* parentNode);
+        osg::Node* load(Nif::NIFFilePtr file, osg::Group* parentNode, TextKeyMap* textKeys = NULL);
 
         /// Create a scene graph for the given NIF. Assumes skinning will be used.
-        osg::Node* loadAsSkeleton(Nif::NIFFilePtr file, osg::Group* parentNode);
+        osg::Node* loadAsSkeleton(Nif::NIFFilePtr file, osg::Group* parentNode, TextKeyMap* textKeys = NULL);
 
         /// Load keyframe controllers from the given kf file onto the given scene graph.
         /// @param sourceIndex The source index for this animation source, used for identifying
         ///        which animation source a keyframe controller came from.
-        void loadKf(Nif::NIFFilePtr kf, osg::Node* rootNode, int sourceIndex);
+        void loadKf(Nif::NIFFilePtr kf, osg::Node* rootNode, int sourceIndex, TextKeyMap &textKeys);
 
         const VFS::Manager* resourceManager;
 
@@ -56,7 +56,7 @@ namespace NifOsg
 
         /// @param createSkeleton If true, use an osgAnimation::Bone for NIF nodes, otherwise an osg::MatrixTransform.
         osg::Node* handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
-                        std::map<int, int> boundTextures, int animflags, int particleflags, bool collisionNode=false);
+                        std::map<int, int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys);
 
         void handleMeshControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode, const std::map<int, int>& boundTextures, int animflags);
 

@@ -111,7 +111,6 @@ int main(int argc, char** argv)
 
 
     //osgDB::writeNodeFile(*newNode, "out.osg");
-
     osg::Group* newNode = new osg::Group;
     NifOsg::Loader loader;
     loader.resourceManager = &resourceMgr;
