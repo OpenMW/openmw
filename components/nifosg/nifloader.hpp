@@ -19,6 +19,8 @@ namespace NifOsg
     typedef std::multimap<float,std::string> TextKeyMap;
 
     /// The main class responsible for loading NIF files into an OSG-Scenegraph.
+    /// @par This scene graph is self-contained and can be cloned using osg::clone if desired. Particle emitters
+    ///      and programs hold a pointer to their ParticleSystem, which would need to be manually updated when cloning.
     class Loader
     {
     public:

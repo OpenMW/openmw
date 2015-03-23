@@ -503,7 +503,6 @@ namespace NifOsg
                     const Nif::NiStringExtraData *sd = static_cast<const Nif::NiStringExtraData*>(e.getPtr());
                     // String markers may contain important information
                     // affecting the entire subtree of this obj
-                    // TODO: implement show markers flag
                     if(sd->string == "MRK" && !mShowMarkers)
                     {
                         // Marker objects. These meshes are only visible in the editor.
