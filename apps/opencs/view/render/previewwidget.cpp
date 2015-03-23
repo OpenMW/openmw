@@ -15,7 +15,7 @@ CSVRender::PreviewWidget::PreviewWidget (const VFS::Manager* vfs, CSMWorld::Data
 {
     //setNavigation (&mOrbit);
 
-    setCameraManipulator(new osgGA::TrackballManipulator);
+    mView->setCameraManipulator(new osgGA::TrackballManipulator);
 
     QAbstractItemModel *referenceables =
         mData.getTableModel (CSMWorld::UniversalId::Type_Referenceables);

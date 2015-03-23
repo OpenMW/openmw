@@ -8,7 +8,8 @@
 #include "lightingnight.hpp"
 #include "lightingbright.hpp"
 
-#include <osgViewer/Viewer>
+#include <osgViewer/View>
+#include <osgViewer/CompositeViewer>
 
 namespace osg
 {
@@ -26,22 +27,40 @@ namespace CSVRender
     class Navigation;
     class Lighting;
 
-    class SceneWidget : public QWidget, public osgViewer::Viewer
+    class SceneWidget : public QWidget
     {
         Q_OBJECT
 
     public:
         SceneWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
-
-        virtual void paintEvent( QPaintEvent* event );
+        ~SceneWidget();
 
         void flagAsModified();
 
     protected:
 
+        osg::ref_ptr<osgViewer::View> mView;
+
         osg::Group* mRootNode;
 
         QTimer mTimer;
+    };
+
+
+
+    // There are rendering glitches when using multiple Viewer instances, work around using CompositeViewer with multiple views
+    class CompositeViewer : public QObject, public osgViewer::CompositeViewer
+    {
+        Q_OBJECT
+    public:
+        CompositeViewer();
+
+        static CompositeViewer& get();
+
+        QTimer mTimer;
+
+    public slots:
+        void update();
     };
 
 }
