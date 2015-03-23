@@ -345,6 +345,13 @@ namespace
 namespace NifOsg
 {
 
+    bool Loader::sShowMarkers = false;
+
+    void Loader::setShowMarkers(bool show)
+    {
+        sShowMarkers = show;
+    }
+
     void Loader::loadKf(Nif::NIFFilePtr nif, osg::Node *rootNode, int sourceIndex, TextKeyMap& textKeys)
     {
         if(nif->numRoots() < 1)
@@ -511,7 +518,7 @@ namespace NifOsg
                 // String markers may contain important information
                 // affecting the entire subtree of this obj
                 // TODO: implement show markers flag
-                if(sd->string == "MRK" /*&& !sShowMarkers*/)
+                if(sd->string == "MRK" && !sShowMarkers)
                 {
                     // Marker objects. These meshes are only visible in the editor.
                     skipMeshes = true;

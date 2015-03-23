@@ -9,6 +9,8 @@
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
 
+#include <components/nifosg/nifloader.hpp>
+
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
@@ -24,7 +26,7 @@ CS::Editor::Editor ()
     CSMSettings::UserSettings::instance().loadSettings ("opencs.ini");
     mSettings.setModel (CSMSettings::UserSettings::instance());
 
-    //NifOgre::Loader::setShowMarkers(true);
+    NifOsg::Loader::setShowMarkers(true);
 
     mVFS.reset(new VFS::Manager(mFsStrict));
 

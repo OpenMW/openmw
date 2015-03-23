@@ -7,11 +7,14 @@
 
 #include <components/vfs/manager.hpp>
 
-#include <osg/Group>
-
 namespace osg
 {
     class Geometry;
+    class Group;
+    class Node;
+    class MatrixTransform;
+    class StateSet;
+    class Geode;
 }
 namespace osgAnimation
 {
@@ -49,6 +52,11 @@ namespace NifOsg
         /// @param sourceIndex The source index for this animation source, used for identifying
         ///        which animation source a keyframe controller came from.
         void loadKf(Nif::NIFFilePtr kf, osg::Node* rootNode, int sourceIndex, TextKeyMap &textKeys);
+
+        /// Set whether or not nodes marked as "MRK" should be shown.
+        /// These should be hidden ingame, but visible in the editior.
+        /// Default: false.
+        static void setShowMarkers(bool show);
 
         const VFS::Manager* resourceManager;
 
@@ -92,6 +100,8 @@ namespace NifOsg
         Nif::NIFFilePtr mNif;
 
         osg::Group* mRootNode;
+
+        static bool sShowMarkers;
     };
 
 }
