@@ -15,8 +15,6 @@
 #include <OSX/macUtils.h>
 #endif
 
-#include <components/nifogre/particles.hpp>
-
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -118,8 +116,6 @@ namespace OgreInit
         loadPlugins();
         #endif
 
-        loadParticleFactories();
-
         return mRoot;
     }
 
@@ -127,16 +123,6 @@ namespace OgreInit
     {
         delete mRoot;
         delete Ogre::LogManager::getSingletonPtr();
-
-        std::vector<Ogre::ParticleEmitterFactory*>::iterator ei;
-        for(ei = mEmitterFactories.begin();ei != mEmitterFactories.end();++ei)
-            OGRE_DELETE (*ei);
-        mEmitterFactories.clear();
-
-        std::vector<Ogre::ParticleAffectorFactory*>::iterator ai;
-        for(ai = mAffectorFactories.begin();ai != mAffectorFactories.end();++ai)
-            OGRE_DELETE (*ai);
-        mAffectorFactories.clear();
 
         #ifdef ENABLE_PLUGIN_GL
         delete mGLPlugin;
@@ -221,22 +207,4 @@ namespace OgreInit
         if (!Files::loadOgrePlugin(pluginDir, "Plugin_ParticleFX", *mRoot))
             throw std::runtime_error("Required Plugin_ParticleFX for Ogre not found!");
     }
-
-    void OgreInit::loadParticleFactories()
-    {
-        Ogre::ParticleEmitterFactory *emitter;
-        emitter = OGRE_NEW NifEmitterFactory();
-        Ogre::ParticleSystemManager::getSingleton().addEmitterFactory(emitter);
-        mEmitterFactories.push_back(emitter);
-
-        Ogre::ParticleAffectorFactory *affector;
-        affector = OGRE_NEW GrowFadeAffectorFactory();
-        Ogre::ParticleSystemManager::getSingleton().addAffectorFactory(affector);
-        mAffectorFactories.push_back(affector);
-
-        affector = OGRE_NEW GravityAffectorFactory();
-        Ogre::ParticleSystemManager::getSingleton().addAffectorFactory(affector);
-        mAffectorFactories.push_back(affector);
-    }
-
 }

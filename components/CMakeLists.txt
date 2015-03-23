@@ -50,10 +50,6 @@ add_component_dir (nifosg
 #    nifcache
 #    )
 
-#add_component_dir (nifogre
-#    ogrenifloader skeleton material mesh particles controller
-#    )
-
 #add_component_dir (nifbullet
 #    bulletnifloader
 #    )

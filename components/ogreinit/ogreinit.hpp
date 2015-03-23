@@ -48,13 +48,10 @@ namespace OgreInit
         ~OgreInit();
 
     private:
-        std::vector<Ogre::ParticleEmitterFactory*> mEmitterFactories;
-        std::vector<Ogre::ParticleAffectorFactory*> mAffectorFactories;
         Ogre::Root* mRoot;
 
         void loadStaticPlugins();
         void loadPlugins();
-        void loadParticleFactories();
 
         #ifdef ENABLE_PLUGIN_CgProgramManager
         Ogre::CgPlugin* mCgPlugin;
