@@ -7,16 +7,15 @@
 
 #include <components/vfs/manager.hpp>
 
+#include <osg/ref_ptr>
+
 namespace osg
 {
-    class Group;
     class Node;
 }
 
 namespace NifOsg
 {
-    class Controller;
-
     typedef std::multimap<float,std::string> TextKeyMap;
 
     /// The main class responsible for loading NIF files into an OSG-Scenegraph.
@@ -27,10 +26,10 @@ namespace NifOsg
         // though, when assembling from several files, i.e. equipment parts
         /// Create a scene graph for the given NIF. Assumes no skinning is used.
         /// @param node The parent of the new root node for the created scene graph.
-        osg::Node* load(Nif::NIFFilePtr file, osg::Group* parentNode, TextKeyMap* textKeys = NULL);
+        osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr file, TextKeyMap* textKeys = NULL);
 
         /// Create a scene graph for the given NIF. Assumes skinning will be used.
-        osg::Node* loadAsSkeleton(Nif::NIFFilePtr file, osg::Group* parentNode, TextKeyMap* textKeys = NULL);
+        osg::ref_ptr<osg::Node> loadAsSkeleton(Nif::NIFFilePtr file, TextKeyMap* textKeys = NULL);
 
         /// Load keyframe controllers from the given kf file onto the given scene graph.
         /// @param sourceIndex The source index for this animation source, used for identifying

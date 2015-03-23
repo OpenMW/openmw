@@ -403,7 +403,7 @@ namespace NifOsg
             rootNode->accept(visitor);
         }
 
-        osg::Node* load(Nif::NIFFilePtr nif, osg::Group *parentNode, TextKeyMap* textKeys)
+        osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, TextKeyMap* textKeys)
         {
             if (nif->numRoots() < 1)
                 nif->fail("Found no root nodes");
@@ -414,11 +414,11 @@ namespace NifOsg
             if (nifNode == NULL)
                 nif->fail("First root was not a node, but a " + r->recName);
 
-            osg::Node* created = handleNode(nifNode, parentNode, false, std::map<int, int>(), 0, 0, false, textKeys);
+            osg::Node* created = handleNode(nifNode, false, std::map<int, int>(), 0, 0, false, textKeys);
             return created;
         }
 
-        osg::Node* loadAsSkeleton(Nif::NIFFilePtr nif, osg::Group *parentNode, TextKeyMap* textKeys)
+        osg::ref_ptr<osg::Node> loadAsSkeleton(Nif::NIFFilePtr nif, TextKeyMap* textKeys)
         {
             if (nif->numRoots() < 1)
                 nif->fail("Found no root nodes");
@@ -431,9 +431,7 @@ namespace NifOsg
                 nif->fail("First root was not a node, but a " + r->recName);
 
             osg::ref_ptr<osgAnimation::Skeleton> skel = new osgAnimation::Skeleton;
-            parentNode->addChild(skel);
-
-            handleNode(nifNode, skel, true, std::map<int, int>(), 0, 0, false, textKeys);
+            skel->addChild(handleNode(nifNode, true, std::map<int, int>(), 0, 0, false, textKeys));
 
             return skel;
         }
@@ -458,7 +456,7 @@ namespace NifOsg
         }
 
 
-        osg::Node* handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
+        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, bool createSkeleton,
                                 std::map<int, int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
             osg::ref_ptr<osg::MatrixTransform> transformNode;
@@ -483,9 +481,6 @@ namespace NifOsg
                 rootNode = transformNode;
 
             // Ignoring name for non-bone nodes for now. We might need it later in isolated cases, e.g. AttachLight.
-
-            // Insert bones at position 0 to prevent update order problems (see comment in osg Skeleton.cpp)
-            parentNode->insertChild(0, transformNode);
 
             // UserData used for a variety of features:
             // - finding the correct emitter node for a particle system
@@ -567,7 +562,11 @@ namespace NifOsg
                 for(size_t i = 0;i < children.length();++i)
                 {
                     if(!children[i].empty())
-                        handleNode(children[i].getPtr(), transformNode, createSkeleton, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode);
+                    {
+                        // Insert bones at position 0 to prevent update order problems (see comment in osg Skeleton.cpp)
+                        transformNode->insertChild(0,
+                            handleNode(children[i].getPtr(), createSkeleton, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode));
+                    }
                 }
             }
 
@@ -1328,16 +1327,16 @@ namespace NifOsg
 
     };
 
-    osg::Node* Loader::load(Nif::NIFFilePtr file, osg::Group *parentNode, TextKeyMap *textKeys)
+    osg::ref_ptr<osg::Node> Loader::load(Nif::NIFFilePtr file, TextKeyMap *textKeys)
     {
         LoaderImpl loader(resourceManager, sShowMarkers);
-        return loader.load(file, parentNode, textKeys);
+        return loader.load(file, textKeys);
     }
 
-    osg::Node* Loader::loadAsSkeleton(Nif::NIFFilePtr file, osg::Group *parentNode, TextKeyMap *textKeys)
+    osg::ref_ptr<osg::Node> Loader::loadAsSkeleton(Nif::NIFFilePtr file, TextKeyMap *textKeys)
     {
         LoaderImpl loader(resourceManager, sShowMarkers);
-        return loader.loadAsSkeleton(file, parentNode, textKeys);
+        return loader.loadAsSkeleton(file, textKeys);
     }
 
     void Loader::loadKf(Nif::NIFFilePtr kf, osg::Node *rootNode, int sourceIndex, TextKeyMap &textKeys)
