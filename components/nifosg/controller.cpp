@@ -433,9 +433,12 @@ void FlipController::operator() (osg::Node* node, osg::NodeVisitor* nv)
     {
         osg::StateSet* stateset = node->getStateSet();
         int curTexture = int(getInputValue(nv) / mDelta) % mTextures.size();
-        osg::Texture2D* tex = dynamic_cast<osg::Texture2D*>(stateset->getAttribute(osg::StateAttribute::TEXTURE));
+        osg::Texture2D* tex = dynamic_cast<osg::Texture2D*>(stateset->getTextureAttribute(mTexSlot, osg::StateAttribute::TEXTURE));
         if (tex)
             tex->setImage(mTextures[curTexture].get());
+        else
+            std::cout << "FlipController: can't find target slot" << std::endl;
+
     }
     traverse(node, nv);
 }

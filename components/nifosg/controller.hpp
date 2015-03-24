@@ -259,7 +259,6 @@ namespace NifOsg
         virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
     };
 
-    // untested
     class FlipController : public osg::NodeCallback, public Controller
     {
     private:

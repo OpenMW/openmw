@@ -1260,14 +1260,12 @@ namespace NifOsg
                         }
                         else if (i == Nif::NiTexturingProperty::DarkTexture)
                         {
-                            // untested
                             osg::TexEnv* texEnv = new osg::TexEnv;
                             texEnv->setMode(osg::TexEnv::MODULATE);
                             stateset->setTextureAttributeAndModes(i, texEnv, osg::StateAttribute::ON);
                         }
                         else if (i == Nif::NiTexturingProperty::DetailTexture)
                         {
-                            // untested
                             osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
                             texEnv->setScale_RGB(2.f);
                             texEnv->setCombine_Alpha(GL_MODULATE);
