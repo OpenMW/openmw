@@ -1314,7 +1314,11 @@ namespace NifOsg
             int specFlags = 0; // Specular is disabled by default, even if there's a specular color in the NiMaterialProperty
             osg::Material* mat = new osg::Material;
             mat->setColorMode(hasVertexColors ? osg::Material::AMBIENT_AND_DIFFUSE : osg::Material::OFF);
-            // TODO: check if the OpenGL default material values are actually the default NIF material values, for when there's no NiMaterialProperty
+
+            // NIF material defaults don't match OpenGL defaults
+            mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+            mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+
             for (std::vector<const Nif::Property*>::const_reverse_iterator it = properties.rbegin(); it != properties.rend(); ++it)
             {
                 const Nif::Property* property = *it;
