@@ -102,6 +102,9 @@ int main(int argc, char** argv)
 
     Nif::NIFFilePtr nif(new Nif::NIFFile(resourceMgr.get(argv[1]), std::string(argv[1])));
 
+    // For NiStencilProperty
+    osg::DisplaySettings::instance()->setMinimumNumStencilBits(8);
+
     osgViewer::Viewer viewer;
 
     osg::ref_ptr<osg::Group> root(new osg::Group());

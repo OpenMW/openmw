@@ -221,7 +221,7 @@ struct S_StencilProperty
         4   TEST_GREATER
         5   TEST_NOT_EQUAL
         6   TEST_GREATER_EQUAL
-        7   TEST_ALWAYS
+        7   TEST_NEVER (though nifskope comment says TEST_ALWAYS, but ingame it is TEST_NEVER)
      */
     int compareFunc;
     unsigned stencilRef;

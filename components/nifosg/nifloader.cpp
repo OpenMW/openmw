@@ -116,6 +116,40 @@ namespace
         }
     }
 
+    osg::Stencil::Function getStencilFunction(int func)
+    {
+        switch (func)
+        {
+        case 0: return osg::Stencil::NEVER;
+        case 1: return osg::Stencil::LESS;
+        case 2: return osg::Stencil::EQUAL;
+        case 3: return osg::Stencil::LEQUAL;
+        case 4: return osg::Stencil::GREATER;
+        case 5: return osg::Stencil::NOTEQUAL;
+        case 6: return osg::Stencil::GEQUAL;
+        case 7: return osg::Stencil::NEVER; // NifSkope says this is GL_ALWAYS, but in MW it's GL_NEVER
+        default:
+            std::cerr << "Unexpected stencil function: " << func << std::endl;
+            return osg::Stencil::NEVER;
+        }
+    }
+
+    osg::Stencil::Operation getStencilOperation(int op)
+    {
+        switch (op)
+        {
+        case 0: return osg::Stencil::KEEP;
+        case 1: return osg::Stencil::ZERO;
+        case 2: return osg::Stencil::REPLACE;
+        case 3: return osg::Stencil::INCR;
+        case 4: return osg::Stencil::DECR;
+        case 5: return osg::Stencil::INVERT;
+        default:
+            std::cerr << "Unexpected stencil operation: " << op << std::endl;
+            return osg::Stencil::KEEP;
+        }
+    }
+
     // Collect all properties affecting the given node that should be applied to an osg::Material.
     void collectMaterialProperties(const Nif::Node* nifNode, std::vector<const Nif::Property*>& out)
     {
@@ -1095,16 +1129,17 @@ namespace NifOsg
                 stateset->setMode(GL_CULL_FACE, stencilprop->data.drawMode == 3 ? osg::StateAttribute::OFF
                                                                                 : osg::StateAttribute::ON);
 
-                // TODO:
-                // Stencil settings not enabled yet, not sure if the original engine is actually using them,
-                // since they might conflict with Morrowind's stencil shadows.
-                /*
-                osg::Stencil* stencil = new osg::Stencil;
-                stencil->setFunction(func, stencilprop->data.stencilRef, stencilprop->data.stencilMask);
+                if (stencilprop->data.enabled != 0)
+                {
+                    osg::Stencil* stencil = new osg::Stencil;
+                    stencil->setFunction(getStencilFunction(stencilprop->data.compareFunc), stencilprop->data.stencilRef, stencilprop->data.stencilMask);
+                    stencil->setStencilFailOperation(getStencilOperation(stencilprop->data.failAction));
+                    stencil->setStencilPassAndDepthFailOperation(getStencilOperation(stencilprop->data.zFailAction));
+                    stencil->setStencilPassAndDepthPassOperation(getStencilOperation(stencilprop->data.zPassAction));
 
-                stateset->setMode(GL_STENCIL_TEST, stencilprop->data.enabled != 0 ? osg::StateAttribute::ON
-                                                                                  : osg::StateAttribute::OFF);
-                */
+                    stateset->setAttributeAndModes(stencil, osg::StateAttribute::ON);
+                }
+                break;
             }
             case Nif::RC_NiWireframeProperty:
             {
