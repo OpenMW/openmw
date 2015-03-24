@@ -1294,10 +1294,10 @@ namespace NifOsg
                 }
                 break;
             }
+            // unused by mw
+            case Nif::RC_NiShadeProperty:
             case Nif::RC_NiDitherProperty:
             {
-                stateset->setMode(GL_DITHER, property->flags != 0 ? osg::StateAttribute::ON
-                                                                  : osg::StateAttribute::OFF);
                 break;
             }
             default:
