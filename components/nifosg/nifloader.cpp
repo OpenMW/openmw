@@ -414,7 +414,7 @@ namespace NifOsg
             if (nifNode == NULL)
                 nif->fail("First root was not a node, but a " + r->recName);
 
-            osg::Node* created = handleNode(nifNode, false, std::map<int, int>(), 0, 0, false, textKeys);
+            osg::ref_ptr<osg::Node> created = handleNode(nifNode, false, std::map<int, int>(), 0, 0, false, textKeys);
             return created;
         }
 
