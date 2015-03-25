@@ -18,50 +18,59 @@
 namespace NifOsg
 {
 
-ControllerFunction::ControllerFunction(const Nif::Controller *ctrl, bool deltaInput)
-    : mDeltaInput(deltaInput)
-    , mFrequency(ctrl->frequency)
+ControllerFunction::ControllerFunction(const Nif::Controller *ctrl)
+    : mFrequency(ctrl->frequency)
     , mPhase(ctrl->phase)
     , mStartTime(ctrl->timeStart)
     , mStopTime(ctrl->timeStop)
-    , mDeltaCount(0.f)
+    , mExtrapolationMode(static_cast<ExtrapolationMode>((ctrl->flags&0x6) >> 1))
 {
-    if(mDeltaInput)
-        mDeltaCount = mPhase;
 }
 
 float ControllerFunction::calculate(float value)
 {
-    if(mDeltaInput)
+    float time = mFrequency * value + mPhase;
+    if (time >= mStartTime && time <= mStopTime)
+        return time;
+    switch (mExtrapolationMode)
     {
-        if (mStopTime - mStartTime == 0.f)
-            return 0.f;
-
-        mDeltaCount += value*mFrequency;
-        if(mDeltaCount < mStartTime)
-            mDeltaCount = mStopTime - std::fmod(mStartTime - mDeltaCount,
-                                                mStopTime - mStartTime);
-        mDeltaCount = std::fmod(mDeltaCount - mStartTime,
-                                mStopTime - mStartTime) + mStartTime;
-        return mDeltaCount;
+    case Cycle:
+    {
+        float delta = mStopTime - mStartTime;
+        if ( delta <= 0 )
+            return mStartTime;
+        float cycles = ( time - mStartTime ) / delta;
+        float remainder = ( cycles - std::floor( cycles ) ) * delta;
+        return mStartTime + remainder;
     }
+    case Reverse:
+    {
+        float delta = mStopTime - mStartTime;
+        if ( delta <= 0 )
+            return mStartTime;
 
-    value = std::min(mStopTime, std::max(mStartTime, value+mPhase));
-    return value;
+        float cycles = ( time - mStartTime ) / delta;
+        float remainder = ( cycles - std::floor( cycles ) ) * delta;
+
+        // Even number of cycles?
+        if ( ( static_cast<int>(std::fabs( std::floor( cycles ) )) % 2 ) == 0 )
+            return mStartTime + remainder;
+
+        return mStopTime - remainder;
+    }
+    case Constant:
+    default:
+        return std::min(mStopTime, std::max(mStartTime, time));
+    }
 }
 
 FrameTimeSource::FrameTimeSource()
-    : mLastTime(0.0)
 {
 }
 
 float FrameTimeSource::getValue(osg::NodeVisitor *nv)
 {
-    // TODO: dt could be computed globally instead of once per instance
-    double time = nv->getFrameStamp()->getReferenceTime();
-    float dt = static_cast<float>(time - mLastTime);
-    mLastTime = time;
-    return dt;
+    return nv->getFrameStamp()->getReferenceTime();
 }
 
 KeyframeController::KeyframeController()

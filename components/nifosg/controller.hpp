@@ -81,17 +81,20 @@ namespace NifOsg
         float mFrequency;
         float mPhase;
         float mStartTime;
-        bool mDeltaInput;
-        float mDeltaCount;
-    public:
         float mStopTime;
+        enum ExtrapolationMode
+        {
+            Cycle = 0,
+            Reverse = 1,
+            Constant = 2
+        };
+        ExtrapolationMode mExtrapolationMode;
 
     public:
-        ControllerFunction(const Nif::Controller *ctrl, bool deltaInput);
+        ControllerFunction(const Nif::Controller *ctrl);
 
         float calculate(float value);
     };
-    typedef ControllerFunction DefaultFunction;
 
     class ControllerSource
     {
@@ -104,8 +107,6 @@ namespace NifOsg
     public:
         FrameTimeSource();
         virtual float getValue(osg::NodeVisitor* nv);
-    private:
-        double mLastTime;
     };
 
     class Controller

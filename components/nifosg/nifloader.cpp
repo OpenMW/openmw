@@ -302,7 +302,7 @@ namespace
                 const Nif::NiKeyframeController* keyframectrl = found->second;
 
                 osg::ref_ptr<NifOsg::SourcedKeyframeController> callback(new NifOsg::SourcedKeyframeController(keyframectrl->data.getPtr(), mSourceIndex));
-                callback->mFunction = boost::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(keyframectrl, false));
+                callback->mFunction = boost::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(keyframectrl));
 
                 // Insert in front of the callback list, to make sure UpdateBone is last.
                 // The order of SourcedKeyframeControllers doesn't matter since only one of them should be enabled at a time.
@@ -490,7 +490,7 @@ namespace NifOsg
             //if (autoPlay)
                 toSetup->mSource = boost::shared_ptr<ControllerSource>(new FrameTimeSource);
 
-            toSetup->mFunction = boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl, 1 /*autoPlay*/));
+            toSetup->mFunction = boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl));
         }
 
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, bool createSkeleton,
