@@ -3,6 +3,8 @@
 
 #include "../doc/subview.hpp"
 
+#include "searchbox.hpp"
+
 class QTableView;
 class QModelIndex;
 
@@ -20,6 +22,7 @@ namespace CSVTools
             Q_OBJECT
 
             ReportTable *mTable;
+            SearchBox mSearchBox;
 
         public:
 
@@ -28,6 +31,10 @@ namespace CSVTools
             virtual void setEditLock (bool locked);
 
             virtual void updateUserSetting (const QString &, const QStringList &);
+
+        private slots:
+
+            void stateChanged (int state, CSMDoc::Document *document);
     };
 }
 

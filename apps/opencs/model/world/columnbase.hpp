@@ -122,6 +122,12 @@ namespace CSMWorld
         virtual std::string getTitle() const;
 
         virtual int getId() const;
+
+        static bool isId (Display display);
+
+        static bool isText (Display display);
+
+        static bool isScript (Display display);
     };
 
     template<typename ESXRecordT>
