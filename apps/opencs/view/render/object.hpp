@@ -10,6 +10,7 @@ class QModelIndex;
 
 namespace osg
 {
+    class PositionAttitudeTransform;
     class Group;
 }
 
@@ -36,7 +37,7 @@ namespace CSVRender
             const CSMWorld::Data& mData;
             std::string mReferenceId;
             std::string mReferenceableId;
-            osg::ref_ptr<osg::Group> mBaseNode;
+            osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
             osg::Group* mParentNode;
             const VFS::Manager* mVFS;
             bool mForceBaseToZero;
@@ -61,7 +62,7 @@ namespace CSVRender
 
         public:
 
-            Object (const VFS::Manager* vfs, const CSMWorld::Data& data, osg::Group *cellNode,
+            Object (const CSMWorld::Data& data, osg::Group *cellNode,
                 const std::string& id, bool referenceable,
                 bool forceBaseToZero = false);
             /// \param forceBaseToZero If this is a reference ignore the coordinates and place

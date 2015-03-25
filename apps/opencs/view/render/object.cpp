@@ -1,6 +1,9 @@
 #include "object.hpp"
 
+#include <stdexcept>
+
 #include <osg/Group>
+#include <osg/PositionAttitudeTransform>
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/ref.hpp"
@@ -51,14 +54,23 @@ void CSVRender::Object::update()
     }
     else
     {
-        NifOsg::Loader loader;
-        loader.resourceManager = mVFS;
+        try
+        {
+            NifOsg::Loader loader;
+            loader.resourceManager = mVFS;
 
-        std::string path = "meshes\\" + model;
+            std::string path = "meshes\\" + model;
 
-        Nif::NIFFilePtr file(new Nif::NIFFile(mVFS->get(path), path));
+            Nif::NIFFilePtr file(new Nif::NIFFile(mVFS->get(path), path));
 
-        mBaseNode->addChild(loader.load(file));
+            mBaseNode->removeChildren(0, mBaseNode->getNumChildren());
+            mBaseNode->addChild(loader.load(file));
+        }
+        catch (std::exception& e)
+        {
+            // TODO: use error marker mesh
+            std::cerr << e.what() << std::endl;
+        }
 
         //mObject->setVisibilityFlags (Element_Reference);
     }
@@ -66,29 +78,21 @@ void CSVRender::Object::update()
 
 void CSVRender::Object::adjust()
 {
-    /*
     if (mReferenceId.empty())
         return;
 
     const CSMWorld::CellRef& reference = getReference();
 
     // position
-    if (!mForceBaseToZero)
-        mBase->setPosition (Ogre::Vector3 (
-            reference.mPos.pos[0], reference.mPos.pos[1], reference.mPos.pos[2]));
+    mBaseNode->setPosition(mForceBaseToZero ? osg::Vec3() : osg::Vec3f(reference.mPos.pos[0], reference.mPos.pos[1], reference.mPos.pos[2]));
 
     // orientation
-    Ogre::Quaternion xr (Ogre::Radian (-reference.mPos.rot[0]), Ogre::Vector3::UNIT_X);
+    osg::Quat xr (-reference.mPos.rot[0], osg::Vec3f(1,0,0));
+    osg::Quat yr (-reference.mPos.rot[1], osg::Vec3f(0,1,0));
+    osg::Quat zr (-reference.mPos.rot[2], osg::Vec3f(0,0,1));
+    mBaseNode->setAttitude(zr*yr*xr);
 
-    Ogre::Quaternion yr (Ogre::Radian (-reference.mPos.rot[1]), Ogre::Vector3::UNIT_Y);
-
-    Ogre::Quaternion zr (Ogre::Radian (-reference.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
-
-    mBase->setOrientation (xr*yr*zr);
-
-    // scale
-    mBase->setScale (reference.mScale, reference.mScale, reference.mScale);
-    */
+    mBaseNode->setScale(osg::Vec3(reference.mScale, reference.mScale, reference.mScale));
 }
 
 const CSMWorld::CellRef& CSVRender::Object::getReference() const
@@ -99,11 +103,11 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
     return mData.getReferences().getRecord (mReferenceId).get();
 }
 
-CSVRender::Object::Object (const VFS::Manager* vfs, const CSMWorld::Data& data, osg::Group* parentNode,
+CSVRender::Object::Object (const CSMWorld::Data& data, osg::Group* parentNode,
     const std::string& id, bool referenceable, bool forceBaseToZero)
-: mVFS(vfs), mData (data), mBaseNode(0), mParentNode(parentNode), mForceBaseToZero (forceBaseToZero)
+: mVFS(data.getVFS()), mData (data), mBaseNode(0), mParentNode(parentNode), mForceBaseToZero (forceBaseToZero)
 {
-    mBaseNode = new osg::Group;
+    mBaseNode = new osg::PositionAttitudeTransform;
     parentNode->addChild(mBaseNode);
 
     if (referenceable)

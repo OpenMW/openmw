@@ -7,7 +7,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <OgreVector3.h>
+#include <osg/ref_ptr>
 
 #ifndef Q_MOC_RUN
 #include <components/terrain/terraingrid.hpp>
@@ -17,10 +17,9 @@
 
 class QModelIndex;
 
-namespace Ogre
+namespace osg
 {
-    class SceneManager;
-    class SceneNode;
+    class Group;
 }
 
 namespace CSMWorld
@@ -34,10 +33,9 @@ namespace CSVRender
     {
             CSMWorld::Data& mData;
             std::string mId;
-            Ogre::SceneNode *mCellNode;
+            osg::ref_ptr<osg::Group> mCellNode;
             std::map<std::string, Object *> mObjects;
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
-            Ogre::SceneManager *mSceneMgr;
             int mX;
             int mY;
 
@@ -53,7 +51,7 @@ namespace CSVRender
 
         public:
 
-            Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager, const std::string& id, const Ogre::Vector3& origin = Ogre::Vector3 (0, 0, 0));
+            Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id);
 
             ~Cell();
 

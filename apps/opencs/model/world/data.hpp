@@ -45,6 +45,11 @@
 
 class QAbstractItemModel;
 
+namespace VFS
+{
+    class Manager;
+}
+
 namespace ESM
 {
     class ESMReader;
@@ -120,6 +125,8 @@ namespace CSMWorld
             Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager);
 
             virtual ~Data();
+
+            const VFS::Manager* getVFS() const;
 
             const IdCollection<ESM::Global>& getGlobals() const;
 

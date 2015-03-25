@@ -1,9 +1,6 @@
 
 #include "previewwidget.hpp"
 
-#include <OgreSceneManager.h>
-#include <OgreSceneNode.h>
-
 #include <osgGA/TrackballManipulator>
 
 #include "../../model/world/data.hpp"
@@ -11,7 +8,7 @@
 
 CSVRender::PreviewWidget::PreviewWidget (const VFS::Manager* vfs, CSMWorld::Data& data,
     const std::string& id, bool referenceable, QWidget *parent)
-: SceneWidget (parent), mData (data), mObject(vfs, data, mRootNode, id, referenceable)
+: SceneWidget (parent), mData (data), mObject(data, mRootNode, id, referenceable)
 {
     //setNavigation (&mOrbit);
 

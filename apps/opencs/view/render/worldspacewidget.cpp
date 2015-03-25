@@ -3,10 +3,6 @@
 
 #include <algorithm>
 
-#include <OgreSceneNode.h>
-#include <OgreSceneManager.h>
-#include <OgreEntity.h>
-
 #include <QtGui/qevent.h>
 
 #include "../../model/world/universalid.hpp"

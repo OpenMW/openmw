@@ -3,8 +3,7 @@
 
 #include <sstream>
 
-#include <OgreColourValue.h>
-#include <OgreCamera.h>
+#include <osgGA/TrackballManipulator>
 
 #include <QtGui/qevent.h>
 
@@ -49,7 +48,10 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
 
     update();
 
-    //mCell.reset (new Cell (document.getData(), getSceneManager(), mCellId));
+    mCell.reset (new Cell (document.getData(), mRootNode, mCellId));
+
+    mView->setCameraManipulator(new osgGA::TrackballManipulator);
+    //mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,
@@ -91,7 +93,8 @@ bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld:
         return false;
 
     mCellId = data.begin()->getId();
-    //mCell.reset (new Cell (getDocument().getData(), getSceneManager(), mCellId));
+    // FIXME: we shouldn't need to rebuild the whole cell
+    mCell.reset (new Cell (getDocument().getData(), mRootNode, mCellId));
 
     update();
     emit cellChanged(*data.begin());

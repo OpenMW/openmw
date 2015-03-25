@@ -5,8 +5,6 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include <OgreResourceGroupManager.h>
-
 #include <components/vfs/manager.hpp>
 
 #include <components/misc/stringops.hpp>

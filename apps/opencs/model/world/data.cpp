@@ -970,3 +970,8 @@ void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 {
     emit idListChanged();
 }
+
+const VFS::Manager* CSMWorld::Data::getVFS() const
+{
+    return mResourcesManager.getVFS();
+}

@@ -58,6 +58,10 @@ SceneWidget::SceneWidget(QWidget *parent, Qt::WindowFlags f)
     mView->getCamera()->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
 
     mRootNode = new osg::Group;
+    // TODO: move to utility file
+    mRootNode->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+    mRootNode->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+
     mView->setSceneData(mRootNode);
 
     // Press S to reveal profiling stats

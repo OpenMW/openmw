@@ -1,8 +1,7 @@
 
 #include "cell.hpp"
 
-#include <OgreSceneManager.h>
-#include <OgreSceneNode.h>
+#include <osg/Group>
 
 #include <components/misc/stringops.hpp>
 #include <components/esm/loadland.hpp>
@@ -50,7 +49,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
             std::string id = Misc::StringUtils::lowerCase (references.data (
                 references.index (i, idColumn)).toString().toUtf8().constData());
 
-            //mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false, mPhysics)));
+            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false)));
             modified = true;
         }
     }
@@ -58,12 +57,11 @@ bool CSVRender::Cell::addObjects (int start, int end)
     return modified;
 }
 
-CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
-    const std::string& id, const Ogre::Vector3& origin)
-: mData (data), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager), mX(0), mY(0)
+CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id)
+: mData (data), mId (Misc::StringUtils::lowerCase (id)), mX(0), mY(0)
 {
-    mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
-    mCellNode->setPosition (origin);
+    mCellNode = new osg::Group;
+    rootNode->addChild(mCellNode);
 
     CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
         *mData.getTableModel (CSMWorld::UniversalId::Type_References));
@@ -72,6 +70,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
 
     addObjects (0, rows-1);
 
+    /*
     const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
     int landIndex = land.searchId(mId);
     if (landIndex != -1)
@@ -84,14 +83,15 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
             mTerrain->loadCell(esmLand->mX,
                                esmLand->mY);
 
-            float verts = ESM::Land::LAND_SIZE;
-            float worldsize = ESM::Land::REAL_SIZE;
+            //float verts = ESM::Land::LAND_SIZE;
+            //float worldsize = ESM::Land::REAL_SIZE;
             mX = esmLand->mX;
             mY = esmLand->mY;
             //mPhysics->addHeightField(sceneManager,
             //        esmLand->mLandData->mHeights, mX, mY, 0, worldsize / (verts-1), verts);
         }
     }
+    */
 }
 
 CSVRender::Cell::~Cell()
@@ -103,7 +103,7 @@ CSVRender::Cell::~Cell()
         iter!=mObjects.end(); ++iter)
         delete iter->second;
 
-    mCellNode->getCreator()->destroySceneNode (mCellNode);
+    mCellNode->getParent(0)->removeChild(mCellNode);
 }
 
 bool CSVRender::Cell::referenceableDataChanged (const QModelIndex& topLeft,
@@ -190,8 +190,8 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     // add new objects
     for (std::map<std::string, bool>::iterator iter (ids.begin()); iter!=ids.end(); ++iter)
     {
-        //mObjects.insert (std::make_pair (
-        //    iter->first, new Object (mData, mCellNode, iter->first, false, mPhysics)));
+        mObjects.insert (std::make_pair (
+            iter->first, new Object (mData, mCellNode, iter->first, false)));
 
         modified = true;
     }
