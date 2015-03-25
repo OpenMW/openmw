@@ -1302,6 +1302,7 @@ namespace NifOsg
             // unused by mw
             case Nif::RC_NiShadeProperty:
             case Nif::RC_NiDitherProperty:
+            case Nif::RC_NiFogProperty:
             {
                 break;
             }
