@@ -748,7 +748,7 @@ namespace NifOsg
                 }
                 else if (affectors->recType == Nif::RC_NiParticleRotation)
                 {
-                    // TODO: Implement?
+                    // unused?
                 }
                 else
                     std::cerr << "Unhandled particle modifier " << affectors->recName << std::endl;
