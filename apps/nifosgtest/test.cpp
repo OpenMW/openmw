@@ -41,9 +41,17 @@ public:
                 osg::PolygonMode* mode = new osg::PolygonMode;
                 mode->setMode(osg::PolygonMode::FRONT_AND_BACK,
                               mWireframe ? osg::PolygonMode::LINE : osg::PolygonMode::FILL);
-                mNode->getOrCreateStateSet()->setAttributeAndModes(mode, osg::StateAttribute::ON);
-                mNode->getOrCreateStateSet()->setMode(GL_CULL_FACE, mWireframe ? osg::StateAttribute::OFF
-                                                                               : osg::StateAttribute::ON);
+
+                // Create a new stateset instead of changing the old one, this alleviates the need to set
+                // the StateSet to DYNAMIC DataVariance, which would have a performance impact.
+
+                osg::StateSet* stateset = new osg::StateSet;
+                stateset->setAttributeAndModes(mode, osg::StateAttribute::ON);
+                stateset->setMode(GL_CULL_FACE, mWireframe ? osg::StateAttribute::OFF
+                                                 : osg::StateAttribute::ON);
+
+                mNode->setStateSet(stateset);
+
                 return true;
             }
         default:
@@ -137,10 +145,6 @@ int main(int argc, char** argv)
 
     // Mask to separate cull visitors from update visitors
     viewer.getCamera()->setCullMask(~(0x1));
-
-    // We're going to change this from the event callback, set the variance to DYNAMIC so that
-    // we don't interfere with the draw thread.
-    root->getOrCreateStateSet()->setDataVariance(osg::Node::DYNAMIC);
 
     viewer.addEventHandler(new osgViewer::StatsHandler);
 
