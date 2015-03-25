@@ -16,13 +16,11 @@
 #include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolrun.hpp"
 
-#include "../world/physicssystem.hpp"
-
 #include "elements.hpp"
 #include "editmode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-: SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>()), mMouse(0),
+: SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0), mMouse(0),
   mInteractionMask (0)
 {
     setAcceptDrops(true);
@@ -55,15 +53,12 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     connect (debugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
 
-    mPhysics = document.getPhysics(); // create physics if one doesn't exist
-    //mPhysics->addSceneManager(getSceneManager(), this);
-    mMouse = new MouseState(this);
+    //mMouse = new MouseState(this);
 }
 
 CSVRender::WorldspaceWidget::~WorldspaceWidget ()
 {
-    delete mMouse;
-    //mPhysics->removeSceneManager(getSceneManager());
+    //delete mMouse;
 }
 
 void CSVRender::WorldspaceWidget::selectNavigationMode (const std::string& mode)
@@ -370,7 +365,7 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 {
     if(event->buttons() & Qt::RightButton)
     {
-        mMouse->mouseMoveEvent(event);
+        //mMouse->mouseMoveEvent(event);
     }
     SceneWidget::mouseMoveEvent(event);
 }
@@ -379,7 +374,7 @@ void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
 {
     if(event->buttons() & Qt::RightButton)
     {
-        mMouse->mousePressEvent(event);
+        //mMouse->mousePressEvent(event);
     }
     //SceneWidget::mousePressEvent(event);
 }
@@ -395,7 +390,7 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
             return;
         }
         */
-        mMouse->mouseReleaseEvent(event);
+        //mMouse->mouseReleaseEvent(event);
     }
     SceneWidget::mouseReleaseEvent(event);
 }
@@ -404,14 +399,14 @@ void CSVRender::WorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
 {
     if(event->button() == Qt::RightButton)
     {
-        mMouse->mouseDoubleClickEvent(event);
+        //mMouse->mouseDoubleClickEvent(event);
     }
     //SceneWidget::mouseDoubleClickEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
 {
-    if(!mMouse->wheelEvent(event))
+    //if(!mMouse->wheelEvent(event))
         SceneWidget::wheelEvent(event);
 }
 
@@ -419,7 +414,7 @@ void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Escape)
     {
-        mMouse->cancelDrag();
+        //mMouse->cancelDrag();
     }
     else
         SceneWidget::keyPressEvent(event);

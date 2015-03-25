@@ -40,7 +40,6 @@ namespace CSVRender
             osg::Group* mParentNode;
             const VFS::Manager* mVFS;
             bool mForceBaseToZero;
-            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
 
             /// Not implemented
             Object (const Object&);
@@ -64,7 +63,6 @@ namespace CSVRender
 
             Object (const VFS::Manager* vfs, const CSMWorld::Data& data, osg::Group *cellNode,
                 const std::string& id, bool referenceable,
-                boost::shared_ptr<CSVWorld::PhysicsSystem> physics = boost::shared_ptr<CSVWorld::PhysicsSystem> (),
                 bool forceBaseToZero = false);
             /// \param forceBaseToZero If this is a reference ignore the coordinates and place
             /// it at 0, 0, 0 instead.

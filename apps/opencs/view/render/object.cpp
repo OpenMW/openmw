@@ -6,8 +6,6 @@
 #include "../../model/world/ref.hpp"
 #include "../../model/world/refidcollection.hpp"
 
-#include "../world/physicssystem.hpp"
-
 #include <components/nifosg/nifloader.hpp>
 
 #include "elements.hpp"
@@ -63,25 +61,6 @@ void CSVRender::Object::update()
         mBaseNode->addChild(loader.load(file));
 
         //mObject->setVisibilityFlags (Element_Reference);
-
-        /*
-        if (mPhysics && !mReferenceId.empty())
-        {
-            const CSMWorld::CellRef& reference = getReference();
-
-            // position
-            Ogre::Vector3 position;
-            if (!mForceBaseToZero)
-                position = Ogre::Vector3(reference.mPos.pos[0], reference.mPos.pos[1], reference.mPos.pos[2]);
-
-            // orientation
-            Ogre::Quaternion xr (Ogre::Radian (-reference.mPos.rot[0]), Ogre::Vector3::UNIT_X);
-            Ogre::Quaternion yr (Ogre::Radian (-reference.mPos.rot[1]), Ogre::Vector3::UNIT_Y);
-            Ogre::Quaternion zr (Ogre::Radian (-reference.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
-
-            mPhysics->addObject("meshes\\" + model, mBase->getName(), mReferenceId, reference.mScale, position, xr*yr*zr);
-        }
-        */
     }
 }
 
@@ -121,9 +100,8 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
 }
 
 CSVRender::Object::Object (const VFS::Manager* vfs, const CSMWorld::Data& data, osg::Group* parentNode,
-    const std::string& id, bool referenceable, boost::shared_ptr<CSVWorld::PhysicsSystem> physics,
-    bool forceBaseToZero)
-: mVFS(vfs), mData (data), mBaseNode(0), mParentNode(parentNode), mForceBaseToZero (forceBaseToZero), mPhysics(physics)
+    const std::string& id, bool referenceable, bool forceBaseToZero)
+: mVFS(vfs), mData (data), mBaseNode(0), mParentNode(parentNode), mForceBaseToZero (forceBaseToZero)
 {
     mBaseNode = new osg::Group;
     parentNode->addChild(mBaseNode);

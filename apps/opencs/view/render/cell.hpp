@@ -28,11 +28,6 @@ namespace CSMWorld
     class Data;
 }
 
-namespace CSVWorld
-{
-    class PhysicsSystem;
-}
-
 namespace CSVRender
 {
     class Cell
@@ -42,7 +37,6 @@ namespace CSVRender
             Ogre::SceneNode *mCellNode;
             std::map<std::string, Object *> mObjects;
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
-            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
             Ogre::SceneManager *mSceneMgr;
             int mX;
             int mY;
@@ -59,8 +53,7 @@ namespace CSVRender
 
         public:
 
-            Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager, const std::string& id,
-                boost::shared_ptr<CSVWorld::PhysicsSystem> physics, const Ogre::Vector3& origin = Ogre::Vector3 (0, 0, 0));
+            Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager, const std::string& id, const Ogre::Vector3& origin = Ogre::Vector3 (0, 0, 0));
 
             ~Cell();
 

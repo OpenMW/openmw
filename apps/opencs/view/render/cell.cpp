@@ -10,7 +10,6 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
-#include "../world/physicssystem.hpp"
 
 #include "elements.hpp"
 #include "terrainstorage.hpp"
@@ -60,8 +59,8 @@ bool CSVRender::Cell::addObjects (int start, int end)
 }
 
 CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
-    const std::string& id, boost::shared_ptr<CSVWorld::PhysicsSystem> physics, const Ogre::Vector3& origin)
-: mData (data), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager), mPhysics(physics), mX(0), mY(0)
+    const std::string& id, const Ogre::Vector3& origin)
+: mData (data), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager), mX(0), mY(0)
 {
     mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
     mCellNode->setPosition (origin);
@@ -89,16 +88,16 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
             float worldsize = ESM::Land::REAL_SIZE;
             mX = esmLand->mX;
             mY = esmLand->mY;
-            mPhysics->addHeightField(sceneManager,
-                    esmLand->mLandData->mHeights, mX, mY, 0, worldsize / (verts-1), verts);
+            //mPhysics->addHeightField(sceneManager,
+            //        esmLand->mLandData->mHeights, mX, mY, 0, worldsize / (verts-1), verts);
         }
     }
 }
 
 CSVRender::Cell::~Cell()
 {
-    if (mTerrain.get())
-        mPhysics->removeHeightField(mSceneMgr, mX, mY);
+    //if (mTerrain.get())
+    //    mPhysics->removeHeightField(mSceneMgr, mX, mY);
 
     for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
         iter!=mObjects.end(); ++iter)

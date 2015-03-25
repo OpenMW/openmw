@@ -4,7 +4,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "scenewidget.hpp"
-#include "mousestate.hpp"
 
 #include "navigation1st.hpp"
 #include "navigationfree.hpp"
@@ -25,13 +24,10 @@ namespace CSVWidget
     class SceneToolRun;
 }
 
-namespace CSVWorld
-{
-    class PhysicsSystem;
-}
-
 namespace CSVRender
 {
+    class MouseState;
+
     class WorldspaceWidget : public SceneWidget
     {
             Q_OBJECT
@@ -42,7 +38,6 @@ namespace CSVRender
             CSVWidget::SceneToolToggle2 *mSceneElements;
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
-            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
             MouseState *mMouse;
             unsigned int mInteractionMask;
 

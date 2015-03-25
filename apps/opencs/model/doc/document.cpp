@@ -9,8 +9,6 @@
 #include <components/files/configurationmanager.hpp>
 #endif
 
-#include "../../view/world/physicssystem.hpp"
-
 void CSMDoc::Document::addGmsts()
 {
     static const char *gmstFloats[] =
@@ -2255,7 +2253,7 @@ CSMDoc::Document::Document (const VFS::Manager* vfs, const Files::ConfigurationM
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
   mSaving (*this, mProjectPath, encoding),
-  mRunner (mProjectPath), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>())
+  mRunner (mProjectPath)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2470,12 +2468,4 @@ void CSMDoc::Document::runStateChanged()
 void CSMDoc::Document::progress (int current, int max, int type)
 {
     emit progress (current, max, type, 1, this);
-}
-
-boost::shared_ptr<CSVWorld::PhysicsSystem> CSMDoc::Document::getPhysics ()
-{
-    if(!mPhysics)
-        mPhysics = boost::shared_ptr<CSVWorld::PhysicsSystem> (new CSVWorld::PhysicsSystem());
-
-    return mPhysics;
 }

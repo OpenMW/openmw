@@ -66,7 +66,7 @@ opencs_units (view/world
 
 opencs_units_noqt (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
-    scripthighlighter idvalidator dialoguecreator physicssystem
+    scripthighlighter idvalidator dialoguecreator
     )
 
 opencs_units (view/widget
@@ -81,7 +81,7 @@ opencs_units (view/render
 
 opencs_units_noqt (view/render
     navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
-    lightingbright object cell terrainstorage textoverlay mousestate
+    lightingbright object cell terrainstorage textoverlay
     )
 
 opencs_hdrs_noqt (view/render
