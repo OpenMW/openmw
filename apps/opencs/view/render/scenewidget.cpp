@@ -84,6 +84,12 @@ void SceneWidget::flagAsModified()
     mView->requestRedraw();
 }
 
+void SceneWidget::setVisibilityMask(int mask)
+{
+    // 0x1 reserved for separating cull and update visitors
+    mView->getCamera()->setCullMask(mask<<1);
+}
+
 CompositeViewer::CompositeViewer()
 {
 #if QT_VERSION >= 0x050000

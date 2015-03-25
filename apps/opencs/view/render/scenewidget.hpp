@@ -37,6 +37,8 @@ namespace CSVRender
 
         void flagAsModified();
 
+        void setVisibilityMask(int mask);
+
     protected:
 
         osg::ref_ptr<osgViewer::View> mView;

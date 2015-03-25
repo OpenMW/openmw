@@ -71,8 +71,6 @@ void CSVRender::Object::update()
             // TODO: use error marker mesh
             std::cerr << e.what() << std::endl;
         }
-
-        //mObject->setVisibilityFlags (Element_Reference);
     }
 }
 
@@ -109,6 +107,9 @@ CSVRender::Object::Object (const CSMWorld::Data& data, osg::Group* parentNode,
 {
     mBaseNode = new osg::PositionAttitudeTransform;
     parentNode->addChild(mBaseNode);
+
+    // 0x1 reserved for separating cull and update visitors
+    mBaseNode->setNodeMask(Element_Reference<<1);
 
     if (referenceable)
     {

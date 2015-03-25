@@ -348,7 +348,7 @@ void CSVRender::WorldspaceWidget::debugProfileAboutToBeRemoved (const QModelInde
 
 void CSVRender::WorldspaceWidget::elementSelectionChanged()
 {
-    //setVisibilityMask (getVisibilityMask());
+    setVisibilityMask (getVisibilityMask());
     flagAsModified();
     updateOverlay();
 }
