@@ -171,19 +171,15 @@ void CSVRender::PagedWorldspaceWidget::referenceAdded (const QModelIndex& parent
 
 std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
 {
-    /*
-    Ogre::Vector3 position = getCamera()->getPosition();
-
+    osg::Vec3d position = mView->getCamera()->getViewMatrix().getTrans();
     std::ostringstream stream;
 
     stream
         << "player->position "
-        << position.x << ", " << position.y << ", " << position.z
+        << position.x() << ", " << position.y() << ", " << position.z()
         << ", 0";
 
     return stream.str();
-    */
-    return "";
 }
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)

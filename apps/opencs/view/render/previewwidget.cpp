@@ -6,12 +6,10 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
 
-CSVRender::PreviewWidget::PreviewWidget (const VFS::Manager* vfs, CSMWorld::Data& data,
+CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
     const std::string& id, bool referenceable, QWidget *parent)
 : SceneWidget (parent), mData (data), mObject(data, mRootNode, id, referenceable)
 {
-    //setNavigation (&mOrbit);
-
     mView->setCameraManipulator(new osgGA::TrackballManipulator);
 
     QAbstractItemModel *referenceables =

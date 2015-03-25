@@ -5,6 +5,9 @@
 
 #include <QtGui/qevent.h>
 
+#include <osgGA/TrackballManipulator>
+#include <osgGA/FirstPersonManipulator>
+
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/idtable.hpp"
 
@@ -16,7 +19,7 @@
 #include "editmode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-: SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0), mMouse(0),
+: SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0),
   mInteractionMask (0)
 {
     setAcceptDrops(true);
@@ -48,32 +51,27 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
         this, SLOT (debugProfileDataChanged (const QModelIndex&, const QModelIndex&)));
     connect (debugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
-
-    //mMouse = new MouseState(this);
 }
 
 CSVRender::WorldspaceWidget::~WorldspaceWidget ()
 {
-    //delete mMouse;
 }
 
 void CSVRender::WorldspaceWidget::selectNavigationMode (const std::string& mode)
 {
-    /*
     if (mode=="1st")
-        setNavigation (&m1st);
+        mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
     else if (mode=="free")
-        setNavigation (&mFree);
+        mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
     else if (mode=="orbit")
-        setNavigation (&mOrbit);
-        */
+        mView->setCameraManipulator(new osgGA::OrbitManipulator);
 }
 
 void CSVRender::WorldspaceWidget::useViewHint (const std::string& hint) {}
 
 void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
 {
-    //setNavigation (&m1st);
+    mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
 }
 
 CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (

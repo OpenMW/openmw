@@ -166,19 +166,16 @@ void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
 
 std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()
 {
-    /*
-    Ogre::Vector3 position = getCamera()->getPosition();
+    osg::Vec3d position = mView->getCamera()->getViewMatrix().getTrans();
 
     std::ostringstream stream;
 
     stream
         << "player->positionCell "
-        << position.x << ", " << position.y << ", " << position.z
+        << position.x() << ", " << position.y() << ", " << position.z()
         << ", 0, \"" << mCellId << "\"";
 
     return stream.str();
-    */
-    return "";
 }
 
 CSVRender::WorldspaceWidget::dropRequirments CSVRender::UnpagedWorldspaceWidget::getDropRequirements (CSVRender::WorldspaceWidget::DropType type) const

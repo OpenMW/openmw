@@ -30,7 +30,7 @@ namespace CSVRender
 
         public:
 
-            PreviewWidget (const VFS::Manager* vfs, CSMWorld::Data& data, const std::string& id, bool referenceable,
+            PreviewWidget (CSMWorld::Data& data, const std::string& id, bool referenceable,
                 QWidget *parent = 0);
 
         signals:

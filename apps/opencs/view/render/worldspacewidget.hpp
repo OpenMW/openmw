@@ -26,8 +26,6 @@ namespace CSVWidget
 
 namespace CSVRender
 {
-    class MouseState;
-
     class WorldspaceWidget : public SceneWidget
     {
             Q_OBJECT
@@ -38,7 +36,6 @@ namespace CSVRender
             CSVWidget::SceneToolToggle2 *mSceneElements;
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
-            MouseState *mMouse;
             unsigned int mInteractionMask;
 
         public:
