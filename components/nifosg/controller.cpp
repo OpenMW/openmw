@@ -135,7 +135,7 @@ osg::Quat KeyframeController::getXYZRotation(float time) const
     osg::Quat xr(xrot, osg::Vec3f(1,0,0));
     osg::Quat yr(yrot, osg::Vec3f(0,1,0));
     osg::Quat zr(zrot, osg::Vec3f(0,0,1));
-    return (zr*yr*xr);
+    return (xr*yr*zr);
 }
 
 osg::Vec3f KeyframeController::getTranslation(float time) const

@@ -77,7 +77,7 @@ void ParticleShooter::shoot(osgParticle::Particle *particle) const
     float hdir = mHorizontalDir + mHorizontalAngle * (2.f * (std::rand() / static_cast<double>(RAND_MAX)) - 1.f);
     float vdir = mVerticalDir + mVerticalAngle * (2.f * (std::rand() / static_cast<double>(RAND_MAX)) - 1.f);
     float vdir2 = mVerticalDir + mVerticalAngle * (2.f * (std::rand() / static_cast<double>(RAND_MAX)) - 1.f);
-    osg::Vec3f dir = osg::Quat(hdir, osg::Vec3f(0,0,1)) * osg::Quat(vdir, osg::Vec3f(0,1,0)) * osg::Quat(vdir2, osg::Vec3f(1,0,0))
+    osg::Vec3f dir = (osg::Quat(vdir2, osg::Vec3f(1,0,0)) * osg::Quat(vdir, osg::Vec3f(0,1,0)) * osg::Quat(hdir, osg::Vec3f(0,0,1)))
              * osg::Vec3f(0,0,1);
 
     float vel = mMinSpeed + (mMaxSpeed - mMinSpeed) * std::rand() / static_cast<float>(RAND_MAX);
