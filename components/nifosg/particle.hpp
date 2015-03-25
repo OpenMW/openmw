@@ -17,6 +17,7 @@
 namespace Nif
 {
     class NiGravity;
+    class NiPlanarCollider;
 }
 
 namespace NifOsg
@@ -90,6 +91,24 @@ namespace NifOsg
         float mVerticalAngle;
         float mLifetime;
         float mLifetimeRandom;
+    };
+
+    class PlanarCollider : public osgParticle::Operator
+    {
+    public:
+        PlanarCollider(const Nif::NiPlanarCollider* collider);
+        PlanarCollider();
+        PlanarCollider(const PlanarCollider& copy, const osg::CopyOp& copyop);
+
+        META_Object(NifOsg, PlanarCollider)
+
+        virtual void beginOperate(osgParticle::Program* program);
+        virtual void operate(osgParticle::Particle* particle, double dt);
+
+    private:
+        float mBounceFactor;
+        osg::Plane mPlane;
+        osg::Plane mPlaneInParticleSpace;
     };
 
     class GrowFadeAffector : public osgParticle::Operator

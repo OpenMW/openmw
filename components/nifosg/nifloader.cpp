@@ -719,39 +719,44 @@ namespace NifOsg
             }
         }
 
-        void handleParticleAffectors(Nif::ExtraPtr e, osg::Group *attachTo, osgParticle::ParticleSystem* partsys, osgParticle::ParticleProcessor::ReferenceFrame rf)
+        void handleParticlePrograms(Nif::ExtraPtr affectors, Nif::ExtraPtr colliders, osg::Group *attachTo, osgParticle::ParticleSystem* partsys, osgParticle::ParticleProcessor::ReferenceFrame rf)
         {
             osgParticle::ModularProgram* program = new osgParticle::ModularProgram;
             attachTo->addChild(program);
             program->setParticleSystem(partsys);
             program->setReferenceFrame(rf);
-            for (; !e.empty(); e = e->extra)
+            for (; !affectors.empty(); affectors = affectors->extra)
             {
-                if (e->recType == Nif::RC_NiParticleGrowFade)
+                if (affectors->recType == Nif::RC_NiParticleGrowFade)
                 {
-                    const Nif::NiParticleGrowFade *gf = static_cast<const Nif::NiParticleGrowFade*>(e.getPtr());
-                    GrowFadeAffector* affector = new GrowFadeAffector(gf->growTime, gf->fadeTime);
-                    program->addOperator(affector);
+                    const Nif::NiParticleGrowFade *gf = static_cast<const Nif::NiParticleGrowFade*>(affectors.getPtr());
+                    program->addOperator(new GrowFadeAffector(gf->growTime, gf->fadeTime));
                 }
-                else if (e->recType == Nif::RC_NiGravity)
+                else if (affectors->recType == Nif::RC_NiGravity)
                 {
-                    const Nif::NiGravity* gr = static_cast<const Nif::NiGravity*>(e.getPtr());
-                    GravityAffector* affector = new GravityAffector(gr);
-                    program->addOperator(affector);
+                    const Nif::NiGravity* gr = static_cast<const Nif::NiGravity*>(affectors.getPtr());
+                    program->addOperator(new GravityAffector(gr));
                 }
-                else if (e->recType == Nif::RC_NiParticleColorModifier)
+                else if (affectors->recType == Nif::RC_NiParticleColorModifier)
                 {
-                    const Nif::NiParticleColorModifier *cl = static_cast<const Nif::NiParticleColorModifier*>(e.getPtr());
+                    const Nif::NiParticleColorModifier *cl = static_cast<const Nif::NiParticleColorModifier*>(affectors.getPtr());
                     const Nif::NiColorData *clrdata = cl->data.getPtr();
-                    ParticleColorAffector* affector = new ParticleColorAffector(clrdata);
-                    program->addOperator(affector);
+                    program->addOperator(new ParticleColorAffector(clrdata));
                 }
-                else if (e->recType == Nif::RC_NiParticleRotation)
+                else if (affectors->recType == Nif::RC_NiParticleRotation)
                 {
                     // TODO: Implement?
                 }
                 else
-                    std::cerr << "Unhandled particle modifier " << e->recName << std::endl;
+                    std::cerr << "Unhandled particle modifier " << affectors->recName << std::endl;
+            }
+            for (; !colliders.empty(); colliders = colliders->extra)
+            {
+                if (colliders->recType == Nif::RC_NiPlanarCollider)
+                {
+                    const Nif::NiPlanarCollider* planarcollider = static_cast<const Nif::NiPlanarCollider*>(colliders.getPtr());
+                    program->addOperator(new PlanarCollider(planarcollider));
+                }
             }
         }
 
@@ -888,7 +893,9 @@ namespace NifOsg
             emitter->setUpdateCallback(callback);
 
             // affectors must be attached *after* the emitter in the scene graph for correct update order
-            handleParticleAffectors(partctrl->extra, emitterNode, partsys.get(), rf);
+            // attach to same node as the ParticleSystem, we need osgParticle Operators to get the correct
+            // localToWorldMatrix for transforming to particle space
+            handleParticlePrograms(partctrl->affectors, partctrl->colliders, parentNode, partsys.get(), rf);
 
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
             geode->addDrawable(partsys);

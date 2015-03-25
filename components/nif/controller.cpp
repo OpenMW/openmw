@@ -76,8 +76,8 @@ namespace Nif
         }
 
         nif->getUInt(); /* -1? */
-        extra.read(nif);
-        nif->getUInt(); /* -1? */
+        affectors.read(nif);
+        colliders.read(nif);
         nif->getChar();
     }
 
@@ -85,7 +85,8 @@ namespace Nif
     {
         Controller::post(nif);
         emitter.post(nif);
-        extra.post(nif);
+        affectors.post(nif);
+        colliders.post(nif);
     }
 
     void NiMaterialColorController::read(NIFStream *nif)

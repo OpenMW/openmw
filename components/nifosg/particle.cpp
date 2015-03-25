@@ -303,4 +303,46 @@ void FindRecIndexVisitor::apply(osg::Node &searchNode)
     traverse(searchNode);
 }
 
+PlanarCollider::PlanarCollider(const Nif::NiPlanarCollider *collider)
+    : mBounceFactor(collider->mBounceFactor)
+    , mPlane(-collider->mPlaneNormal, collider->mPlaneDistance)
+{
+}
+
+PlanarCollider::PlanarCollider()
+    : mBounceFactor(0.f)
+{
+}
+
+PlanarCollider::PlanarCollider(const PlanarCollider &copy, const osg::CopyOp &copyop)
+    : osgParticle::Operator(copy, copyop)
+    , mBounceFactor(copy.mBounceFactor)
+    , mPlane(copy.mPlane)
+    , mPlaneInParticleSpace(copy.mPlaneInParticleSpace)
+{
+}
+
+void PlanarCollider::beginOperate(osgParticle::Program *program)
+{
+    mPlaneInParticleSpace = mPlane;
+    if (program->getReferenceFrame() == osgParticle::ParticleProcessor::ABSOLUTE_RF)
+        mPlaneInParticleSpace.transform(program->getLocalToWorldMatrix());
+}
+
+void PlanarCollider::operate(osgParticle::Particle *particle, double dt)
+{
+    float dotproduct = particle->getVelocity() * mPlaneInParticleSpace.getNormal();
+
+    if (dotproduct > 0)
+    {
+        osg::BoundingSphere bs(particle->getPosition(), 0.f);
+        if (mPlaneInParticleSpace.intersect(bs) == 1)
+        {
+            osg::Vec3 reflectedVelocity = particle->getVelocity() - mPlaneInParticleSpace.getNormal() * (2 * dotproduct);
+            reflectedVelocity *= mBounceFactor;
+            particle->setVelocity(reflectedVelocity);
+        }
+    }
+}
+
 }

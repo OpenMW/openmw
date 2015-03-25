@@ -65,8 +65,14 @@ namespace Nif
     {
         Controlled::read(nif);
 
-        // (I think) 4 floats + 4 vectors
-        nif->skip(4*16);
+        mBounceFactor = nif->getFloat();
+        /*unknown*/nif->getFloat();
+
+        for (int i=0;i<10;++i)
+            /*unknown*/nif->getFloat();
+
+        mPlaneNormal = nif->getVector3();
+        mPlaneDistance = nif->getFloat();
     }
 
     void NiParticleRotation::read(NIFStream *nif)

@@ -103,6 +103,11 @@ class NiPlanarCollider : public Controlled
 {
 public:
     void read(NIFStream *nif);
+
+    float mBounceFactor;
+
+    osg::Vec3f mPlaneNormal;
+    float mPlaneDistance;
 };
 
 class NiParticleRotation : public Controlled
