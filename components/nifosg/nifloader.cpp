@@ -562,10 +562,20 @@ namespace NifOsg
                 transformNode->setNodeMask(0x1);
             }
 
-            // We could probably skip hidden nodes entirely if they don't have a VisController that
+            // We can skip creating meshes for hidden nodes if they don't have a VisController that
             // might make them visible later
             if (nifNode->flags & Nif::NiNode::Flag_Hidden)
-                transformNode->setNodeMask(0x1); // Leave mask for UpdateVisitor enabled
+            {
+                bool hasVisController = false;
+                for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
+                    hasVisController = (ctrl->recType == Nif::RC_NiVisController);
+
+                if (!hasVisController)
+                    skipMeshes = true; // skip child meshes, but still create the child node hierarchy for animating collision shapes
+
+                // now hide this node, but leave the mask for UpdateVisitor enabled so that KeyframeController works
+                transformNode->setNodeMask(0x1);
+            }
 
             applyNodeProperties(nifNode, transformNode, boundTextures, animflags);
 
