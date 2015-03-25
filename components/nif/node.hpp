@@ -166,6 +166,8 @@ struct NiTriShape : Node
         Node::post(nif);
         data.post(nif);
         skin.post(nif);
+        if (!skin.empty())
+            nif->setUseSkinning(true);
     }
 };
 

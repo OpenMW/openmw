@@ -297,7 +297,7 @@ namespace
         void apply(osg::Node &node)
         {
             std::map<std::string, const Nif::NiKeyframeController*>::const_iterator found = mMap.find(node.getName());
-            if (found != mMap.end())
+            if (node.asTransform() && found != mMap.end())
             {
                 const Nif::NiKeyframeController* keyframectrl = found->second;
 
@@ -439,6 +439,9 @@ namespace NifOsg
 
         osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, TextKeyMap* textKeys)
         {
+            if (nif->getUseSkinning())
+                return loadAsSkeleton(nif, textKeys);
+
             if (nif->numRoots() < 1)
                 nif->fail("Found no root nodes");
 

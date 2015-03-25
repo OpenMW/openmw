@@ -24,13 +24,11 @@ namespace NifOsg
     class Loader
     {
     public:
-        // TODO: add auto-detection for skinning. We will still need a "force skeleton" parameter
-        // though, when assembling from several files, i.e. equipment parts
-        /// Create a scene graph for the given NIF. Assumes no skinning is used.
+        /// Create a scene graph for the given NIF. Auto-detects when skinning is used and calls loadAsSkeleton instead.
         /// @param node The parent of the new root node for the created scene graph.
         osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr file, TextKeyMap* textKeys = NULL);
 
-        /// Create a scene graph for the given NIF. Assumes skinning will be used.
+        /// Create a scene graph for the given NIF. Always creates a skeleton so that rigs can be attached on the created scene.
         osg::ref_ptr<osg::Node> loadAsSkeleton(Nif::NIFFilePtr file, TextKeyMap* textKeys = NULL);
 
         /// Load keyframe controllers from the given kf file onto the given scene graph.

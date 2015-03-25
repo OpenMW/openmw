@@ -117,7 +117,7 @@ int main(int argc, char** argv)
     osg::Group* newNode = new osg::Group;
     NifOsg::Loader loader;
     loader.resourceManager = &resourceMgr;
-    newNode->addChild(loader.loadAsSkeleton(nif));
+    newNode->addChild(loader.load(nif));
 
     osg::PositionAttitudeTransform* trans = new osg::PositionAttitudeTransform;
     root->addChild(trans);

@@ -12,6 +12,7 @@ NIFFile::NIFFile(Files::IStreamPtr stream, const std::string &name)
     : ver(0)
     , filename(name)
     , mStream(stream)
+    , mUseSkinning(false)
 {
     parse();
 }
@@ -206,6 +207,16 @@ void NIFFile::parse()
     // Once parsing is done, do post-processing.
     for(size_t i=0; i<recNum; i++)
         records[i]->post(this);
+}
+
+void NIFFile::setUseSkinning(bool skinning)
+{
+    mUseSkinning = skinning;
+}
+
+bool NIFFile::getUseSkinning() const
+{
+    return mUseSkinning;
 }
 
 }

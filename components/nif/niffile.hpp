@@ -32,6 +32,8 @@ class NIFFile
     /// Root list.  This is a select portion of the pointers from records
     std::vector<Record*> roots;
 
+    bool mUseSkinning;
+
     /// Parse the file
     void parse();
 
@@ -82,6 +84,12 @@ public:
     }
     /// Number of roots
     size_t numRoots() const { return roots.size(); }
+
+    /// Set whether there is skinning contained in this NIF file.
+    /// @note This is just a hint for users of the NIF file and has no effect on the loading procedure.
+    void setUseSkinning(bool skinning);
+
+    bool getUseSkinning() const;
 
     /// Get the name of the file
     std::string getFilename(){ return filename; }
