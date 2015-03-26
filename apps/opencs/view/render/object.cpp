@@ -9,9 +9,11 @@
 #include "../../model/world/ref.hpp"
 #include "../../model/world/refidcollection.hpp"
 
-#include <components/nifosg/nifloader.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/clone.hpp>
 
 #include "elements.hpp"
+
 
 void CSVRender::Object::clear()
 {
@@ -56,15 +58,12 @@ void CSVRender::Object::update()
     {
         try
         {
-            NifOsg::Loader loader;
-            loader.resourceManager = mVFS;
-
             std::string path = "meshes\\" + model;
 
-            Nif::NIFFilePtr file(new Nif::NIFFile(mVFS->get(path), path));
+            osg::ref_ptr<osg::Node> loaded = mResourceSystem->getSceneManager()->getInstance(path);
 
             mBaseNode->removeChildren(0, mBaseNode->getNumChildren());
-            mBaseNode->addChild(loader.load(file));
+            mBaseNode->addChild(loaded);
         }
         catch (std::exception& e)
         {
@@ -101,9 +100,9 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
     return mData.getReferences().getRecord (mReferenceId).get();
 }
 
-CSVRender::Object::Object (const CSMWorld::Data& data, osg::Group* parentNode,
+CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
     const std::string& id, bool referenceable, bool forceBaseToZero)
-: mVFS(data.getVFS()), mData (data), mBaseNode(0), mParentNode(parentNode), mForceBaseToZero (forceBaseToZero)
+: mResourceSystem(data.getResourceSystem()), mData (data), mBaseNode(0), mParentNode(parentNode), mForceBaseToZero (forceBaseToZero)
 {
     mBaseNode = new osg::PositionAttitudeTransform;
     parentNode->addChild(mBaseNode);

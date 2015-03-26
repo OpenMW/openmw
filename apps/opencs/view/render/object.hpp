@@ -14,9 +14,9 @@ namespace osg
     class Group;
 }
 
-namespace VFS
+namespace Resource
 {
-    class Manager;
+    class ResourceSystem;
 }
 
 namespace CSMWorld
@@ -39,7 +39,7 @@ namespace CSVRender
             std::string mReferenceableId;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
             osg::Group* mParentNode;
-            const VFS::Manager* mVFS;
+            Resource::ResourceSystem* mResourceSystem;
             bool mForceBaseToZero;
 
             /// Not implemented
@@ -62,7 +62,7 @@ namespace CSVRender
 
         public:
 
-            Object (const CSMWorld::Data& data, osg::Group *cellNode,
+            Object (CSMWorld::Data& data, osg::Group *cellNode,
                 const std::string& id, bool referenceable,
                 bool forceBaseToZero = false);
             /// \param forceBaseToZero If this is a reference ignore the coordinates and place

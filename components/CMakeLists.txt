@@ -38,6 +38,14 @@ add_component_dir (vfs
     manager archive bsaarchive filesystemarchive registerarchives
     )
 
+add_component_dir (resource
+    scenemanager resourcesystem
+    )
+
+add_component_dir (sceneutil
+    clone
+    )
+
 add_component_dir (nif
     controlled effect niftypes record controller extra node record_ptr data niffile property nifkey data node base nifstream
     )

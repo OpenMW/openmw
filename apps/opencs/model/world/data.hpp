@@ -28,6 +28,8 @@
 #include <components/esm/debugprofile.hpp>
 #include <components/esm/filter.hpp>
 
+#include <components/resource/resourcesystem.hpp>
+
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "../doc/stage.hpp"
@@ -105,6 +107,8 @@ namespace CSMWorld
             std::map<std::string, std::map<ESM::RefNum, std::string> > mRefLoadCache;
             int mReaderIndex;
 
+            Resource::ResourceSystem mResourceSystem;
+
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
             // not implemented
@@ -127,6 +131,8 @@ namespace CSMWorld
             virtual ~Data();
 
             const VFS::Manager* getVFS() const;
+
+            Resource::ResourceSystem* getResourceSystem();
 
             const IdCollection<ESM::Global>& getGlobals() const;
 

@@ -59,9 +59,14 @@ namespace VFS
         std::string normalized = name;
         normalize_path(normalized, mStrict);
 
-        std::map<std::string, File*>::const_iterator found = mIndex.find(normalized);
+        return getNormalized(normalized);
+    }
+
+    Files::IStreamPtr Manager::getNormalized(const std::string &normalizedName) const
+    {
+        std::map<std::string, File*>::const_iterator found = mIndex.find(normalizedName);
         if (found == mIndex.end())
-            throw std::runtime_error("Resource '" + name + "' not found");
+            throw std::runtime_error("Resource '" + normalizedName + "' not found");
         return found->second->open();
     }
 
@@ -76,6 +81,11 @@ namespace VFS
     const std::map<std::string, File*>& Manager::getIndex() const
     {
         return mIndex;
+    }
+
+    void Manager::normalizeFilename(std::string &name) const
+    {
+        normalize_path(name, mStrict);
     }
 
 }
