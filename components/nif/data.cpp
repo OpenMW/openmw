@@ -200,7 +200,8 @@ void NiSkinData::read(NIFStream *nif)
         bi.trafo.rotation = nif->getMatrix3();
         bi.trafo.pos = nif->getVector3();
         bi.trafo.scale = nif->getFloat();
-        bi.unknown = nif->getVector4();
+        bi.boundSphereCenter = nif->getVector3();
+        bi.boundSphereRadius = nif->getFloat();
 
         // Number of vertex weights
         bi.weights.resize(nif->getUShort());

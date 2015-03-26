@@ -18,6 +18,7 @@
 #include <osgAnimation/Bone>
 #include <osgAnimation/RigGeometry>
 #include <osgAnimation/MorphGeometry>
+#include <osgAnimation/BoneMapVisitor>
 
 // particle
 #include <osgParticle/ParticleSystem>
@@ -319,6 +320,144 @@ namespace
         int mSourceIndex;
     };
 
+    // Node callback used to dirty a RigGeometry's bounding box every frame, so that RigBoundingBoxCallback updates.
+    // This has to be attached to the geode, because the RigGeometry's Drawable::UpdateCallback is already used internally and not extensible.
+    // Kind of awful, not sure of a better way to do this.
+    class DirtyBoundCallback : public osg::NodeCallback
+    {
+    public:
+        DirtyBoundCallback()
+        {
+        }
+        DirtyBoundCallback(const DirtyBoundCallback& copy, const osg::CopyOp& copyop)
+            : osg::NodeCallback(copy, copyop)
+        {
+        }
+
+        void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            osg::Geode* geode = node->asGeode();
+            if (geode && geode->getNumDrawables())
+            {
+                geode->getDrawable(0)->dirtyBound();
+            }
+            traverse(node, nv);
+        }
+    };
+
+    class RigBoundingBoxCallback : public osg::Drawable::ComputeBoundingBoxCallback
+    {
+    public:
+        RigBoundingBoxCallback()
+            : mBoneMapInit(false)
+        {
+        }
+        RigBoundingBoxCallback(const RigBoundingBoxCallback& copy, const osg::CopyOp& copyop)
+            : osg::Drawable::ComputeBoundingBoxCallback(copy, copyop)
+            , mBoneMapInit(false)
+            , mBoundSpheres(copy.mBoundSpheres)
+        {
+        }
+
+        META_Object(NifOsg, RigBoundingBoxCallback)
+
+        void addBoundSphere(const std::string& bonename, const osg::BoundingSphere& sphere)
+        {
+            mBoundSpheres[bonename] = sphere;
+        }
+
+        // based off code in osg::Transform
+        void transformBoundingSphere (const osg::Matrix& matrix, osg::BoundingSphere& bsphere) const
+        {
+            osg::BoundingSphere::vec_type xdash = bsphere._center;
+            xdash.x() += bsphere._radius;
+            xdash = xdash*matrix;
+
+            osg::BoundingSphere::vec_type ydash = bsphere._center;
+            ydash.y() += bsphere._radius;
+            ydash = ydash*matrix;
+
+            osg::BoundingSphere::vec_type zdash = bsphere._center;
+            zdash.z() += bsphere._radius;
+            zdash = zdash*matrix;
+
+            bsphere._center = bsphere._center*matrix;
+
+            xdash -= bsphere._center;
+            osg::BoundingSphere::value_type len_xdash = xdash.length();
+
+            ydash -= bsphere._center;
+            osg::BoundingSphere::value_type len_ydash = ydash.length();
+
+            zdash -= bsphere._center;
+            osg::BoundingSphere::value_type len_zdash = zdash.length();
+
+            bsphere._radius = len_xdash;
+            if (bsphere._radius<len_ydash) bsphere._radius = len_ydash;
+            if (bsphere._radius<len_zdash) bsphere._radius = len_zdash;
+        }
+
+        virtual osg::BoundingBox computeBound(const osg::Drawable& drawable) const
+        {
+            osg::BoundingBox box;
+
+            const osgAnimation::RigGeometry* rig = dynamic_cast<const osgAnimation::RigGeometry*>(&drawable);
+            if (!rig)
+            {
+                std::cerr << "Warning: RigBoundingBoxCallback set on non-rig" << std::endl;
+                return box;
+            }
+
+            if (!mBoneMapInit)
+            {
+                initBoneMap(rig);
+            }
+
+            for (std::map<osgAnimation::Bone*, osg::BoundingSphere>::const_iterator it = mBoneMap.begin();
+                 it != mBoneMap.end(); ++it)
+            {
+                osgAnimation::Bone* bone = it->first;
+                osg::BoundingSphere bs = it->second;
+                transformBoundingSphere(bone->getMatrixInSkeletonSpace(), bs);
+                box.expandBy(bs);
+            }
+
+            return box;
+        }
+
+        void initBoneMap(const osgAnimation::RigGeometry* rig) const
+        {
+            if (!rig->getSkeleton())
+            {
+                // may happen before the first frame update, but we're not animating yet, so no need for a bounding box
+                return;
+            }
+
+            osgAnimation::BoneMapVisitor mapVisitor;
+            {
+                // const_cast necessary because there does not seem to be a const variant of NodeVisitor.
+                // Don't worry, we're not actually changing the skeleton.
+                osgAnimation::Skeleton* skel = const_cast<osgAnimation::Skeleton*>(rig->getSkeleton());
+                skel->accept(mapVisitor);
+            }
+
+            for (osgAnimation::BoneMap::const_iterator it = mapVisitor.getBoneMap().begin(); it != mapVisitor.getBoneMap().end(); ++it)
+            {
+                std::map<std::string, osg::BoundingSphere>::const_iterator found = mBoundSpheres.find(it->first);
+                if (found != mBoundSpheres.end()) // not all bones have to be used for skinning
+                    mBoneMap[it->second.get()] = found->second;
+            }
+
+            mBoneMapInit = true;
+        }
+
+    private:
+        mutable bool mBoneMapInit;
+        mutable std::map<osgAnimation::Bone*, osg::BoundingSphere> mBoneMap;
+
+        std::map<std::string, osg::BoundingSphere> mBoundSpheres;
+    };
+
     void extractTextKeys(const Nif::NiTextKeyExtraData *tk, NifOsg::TextKeyMap &textkeys)
     {
         for(size_t i = 0;i < tk->list.size();i++)
@@ -451,7 +590,7 @@ namespace NifOsg
             if (nifNode == NULL)
                 nif->fail("First root was not a node, but a " + r->recName);
 
-            osg::ref_ptr<osg::Node> created = handleNode(nifNode, false, std::map<int, int>(), 0, 0, false, textKeys);
+            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, false, std::map<int, int>(), 0, 0, false, textKeys);
             return created;
         }
 
@@ -469,7 +608,7 @@ namespace NifOsg
 
             osg::ref_ptr<osgAnimation::Skeleton> skel = new osgAnimation::Skeleton;
             skel->setDefaultUpdateCallback(); // validates the skeleton hierarchy
-            skel->addChild(handleNode(nifNode, true, std::map<int, int>(), 0, 0, false, textKeys));
+            handleNode(nifNode, skel, true, std::map<int, int>(), 0, 0, false, textKeys);
 
             return skel;
         }
@@ -494,7 +633,7 @@ namespace NifOsg
             toSetup->mFunction = boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl));
         }
 
-        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, bool createSkeleton,
+        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
                                 std::map<int, int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
             osg::ref_ptr<osg::MatrixTransform> transformNode;
@@ -514,6 +653,9 @@ namespace NifOsg
             {
                 transformNode = new osg::MatrixTransform(toMatrix(nifNode->trafo));
             }
+
+            if (parentNode)
+                parentNode->addChild(transformNode);
 
             if (!rootNode)
                 rootNode = transformNode;
@@ -610,8 +752,7 @@ namespace NifOsg
                 {
                     if(!children[i].empty())
                     {
-                        transformNode->addChild(
-                            handleNode(children[i].getPtr(), createSkeleton, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode));
+                        handleNode(children[i].getPtr(), transformNode, createSkeleton, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode);
                     }
                 }
             }
@@ -1085,16 +1226,10 @@ namespace NifOsg
             osg::ref_ptr<osgAnimation::RigGeometry> rig(new osgAnimation::RigGeometry);
             rig->setSourceGeometry(geometry);
 
-            // Slightly expand the bounding box to account for movement of the bones
-            // For more accuracy the skinning should be relative to the parent of the first skinned bone,
-            // rather than the root bone.
-            // TODO: calculate a correct bounding box based on the bone positions every frame in a ComputeBoundingBoxCallback
-            osg::BoundingBox box = geometry->getBound();
-            box.expandBy(box._min-(box._max-box._min)/2);
-            box.expandBy(box._max+(box._max-box._min)/2);
-            rig->setInitialBound(box);
-
             const Nif::NiSkinInstance *skin = triShape->skin.getPtr();
+
+            RigBoundingBoxCallback* callback = new RigBoundingBoxCallback;
+            rig->setComputeBoundingBoxCallback(callback);
 
             // Assign bone weights
             osg::ref_ptr<osgAnimation::VertexInfluenceMap> map (new osgAnimation::VertexInfluenceMap);
@@ -1104,6 +1239,8 @@ namespace NifOsg
             for(size_t i = 0;i < bones.length();i++)
             {
                 std::string boneName = bones[i].getPtr()->name;
+
+                callback->addBoundSphere(boneName, osg::BoundingSphere(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius));
 
                 osgAnimation::VertexInfluence influence;
                 influence.setName(boneName);
@@ -1123,6 +1260,7 @@ namespace NifOsg
             trans->setUpdateCallback(new InvertBoneMatrix());
 
             geode->addDrawable(rig);
+            geode->addUpdateCallback(new DirtyBoundCallback);
 
             trans->addChild(geode);
             parentNode->addChild(trans);

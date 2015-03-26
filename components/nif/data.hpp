@@ -151,7 +151,8 @@ public:
     struct BoneInfo
     {
         Transformation trafo;
-        osg::Vec4f unknown;
+        osg::Vec3f boundSphereCenter;
+        float boundSphereRadius;
         std::vector<VertWeight> weights;
     };
 
