@@ -23,6 +23,9 @@ ParticleSystem::ParticleSystem(const ParticleSystem &copy, const osg::CopyOp &co
     : osgParticle::ParticleSystem(copy, copyop)
     , mQuota(copy.mQuota)
 {
+    // For some reason the osgParticle constructor doesn't copy the particles
+    for (int i=0;i<copy.numParticles()-copy.numDeadParticles();++i)
+        _particles.push_back(*copy.getParticle(i));
 }
 
 void ParticleSystem::setQuota(int quota)
@@ -201,6 +204,10 @@ Emitter::Emitter()
 Emitter::Emitter(const Emitter &copy, const osg::CopyOp &copyop)
     : osgParticle::Emitter(copy, copyop)
     , mTargets(copy.mTargets)
+    , mPlacer(copy.mPlacer)
+    , mShooter(copy.mShooter)
+    // need a deep copy because the remainder is stored in the object
+    , mCounter(osg::clone(copy.mCounter.get(), osg::CopyOp::DEEP_COPY_ALL))
 {
 }
 
