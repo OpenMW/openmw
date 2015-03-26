@@ -468,6 +468,7 @@ namespace NifOsg
                 nif->fail("First root was not a node, but a " + r->recName);
 
             osg::ref_ptr<osgAnimation::Skeleton> skel = new osgAnimation::Skeleton;
+            skel->setDefaultUpdateCallback(); // validates the skeleton hierarchy
             skel->addChild(handleNode(nifNode, true, std::map<int, int>(), 0, 0, false, textKeys));
 
             return skel;
@@ -609,8 +610,7 @@ namespace NifOsg
                 {
                     if(!children[i].empty())
                     {
-                        // Insert bones at position 0 to prevent update order problems (see comment in osg Skeleton.cpp)
-                        transformNode->insertChild(0,
+                        transformNode->addChild(
                             handleNode(children[i].getPtr(), createSkeleton, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode));
                     }
                 }
@@ -1077,11 +1077,18 @@ namespace NifOsg
             osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
             triShapeToGeometry(triShape, geometry, geode, boundTextures, animflags);
 
+            // Note the RigGeometry's UpdateCallback uses the skeleton space bone matrix, so the bone UpdateCallback has to be fired first.
+            // For this to work properly, all bones used for skinning a RigGeometry need to be created before that RigGeometry.
+            // All NIFs I've checked seem to conform to this restriction, perhaps Gamebryo update method works similarly.
+            // If a file violates this assumption, the worst that could happen is the bone position being a frame late.
+            // If this happens, we should get a warning from the Skeleton's validation update callback on the error log.
             osg::ref_ptr<osgAnimation::RigGeometry> rig(new osgAnimation::RigGeometry);
             rig->setSourceGeometry(geometry);
+
             // Slightly expand the bounding box to account for movement of the bones
             // For more accuracy the skinning should be relative to the parent of the first skinned bone,
             // rather than the root bone.
+            // TODO: calculate a correct bounding box based on the bone positions every frame in a ComputeBoundingBoxCallback
             osg::BoundingBox box = geometry->getBound();
             box.expandBy(box._min-(box._max-box._min)/2);
             box.expandBy(box._max+(box._max-box._min)/2);
