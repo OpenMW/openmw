@@ -107,13 +107,13 @@ void RippleSimulation::update(float dt, Ogre::Vector2 position)
             Ogre::Radian& rotation = created->rotation;
 #endif
             timeToLive = totalTimeToLive = mRippleLifeTime;
-            colour = Ogre::ColourValue(0.f, 0.f, 0.f, 0.7); // Water_RippleAlphas.x?
+            colour = Ogre::ColourValue(0.f, 0.f, 0.f, 0.7f); // Water_RippleAlphas.x?
             direction = Ogre::Vector3(0,0,0);
             position = currentPos;
             position.z = 0; // Z is set by the Scene Node
             rotSpeed = mRippleRotSpeed;
             rotation = Ogre::Radian(Ogre::Math::RangeRandom(-Ogre::Math::PI, Ogre::Math::PI));
-            created->setDimensions(50,50);
+            created->setDimensions(mParticleSystem->getDefaultWidth(), mParticleSystem->getDefaultHeight());
         }
     }
 

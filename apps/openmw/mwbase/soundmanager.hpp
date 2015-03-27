@@ -20,7 +20,7 @@ namespace MWWorld
 namespace MWSound
 {
     class Sound;
-    class Sound_Decoder;
+    struct Sound_Decoder;
     typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
 }
 

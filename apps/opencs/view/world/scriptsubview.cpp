@@ -68,6 +68,7 @@ void CSVWorld::ScriptSubView::useHint (const std::string& hint)
             if (cursor.movePosition (QTextCursor::Down, QTextCursor::MoveAnchor, line))
                 cursor.movePosition (QTextCursor::Right, QTextCursor::MoveAnchor, column);
 
+            mEditor->setFocus();
             mEditor->setTextCursor (cursor);
         }
     }

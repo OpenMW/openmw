@@ -94,18 +94,8 @@ boost::filesystem::path WindowsPath::getInstallPath() const
 
     HKEY hKey;
 
-    BOOL f64 = FALSE;
-    LPCTSTR regkey;
-    if ((IsWow64Process(GetCurrentProcess(), &f64) && f64) || sizeof(void*) == 8)
-    {
-        regkey = "SOFTWARE\\Wow6432Node\\Bethesda Softworks\\Morrowind";
-    }
-    else
-    {
-        regkey = "SOFTWARE\\Bethesda Softworks\\Morrowind";
-    }
-
-    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, TEXT(regkey), 0, KEY_ALL_ACCESS, &hKey) == ERROR_SUCCESS)
+    LPCTSTR regkey = TEXT("SOFTWARE\\Bethesda Softworks\\Morrowind");
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, regkey, 0, KEY_READ | KEY_WOW64_32KEY, &hKey) == ERROR_SUCCESS)
     {
         //Key existed, let's try to read the install dir
         std::vector<char> buf(512);
@@ -115,6 +105,7 @@ boost::filesystem::path WindowsPath::getInstallPath() const
         {
             installPath = &buf[0];
         }
+        RegCloseKey(hKey);
     }
 
     return installPath;

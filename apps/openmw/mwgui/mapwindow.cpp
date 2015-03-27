@@ -244,14 +244,14 @@ namespace MWGui
             // Image space is -Y up, cells are Y up
             nY = 1 - (worldY - cellSize * cellY) / cellSize;
 
-            float cellDx = cellX - mCurX;
-            float cellDy = cellY - mCurY;
+            float cellDx = static_cast<float>(cellX - mCurX);
+            float cellDy = static_cast<float>(cellY - mCurY);
 
             markerPos.cellX = cellX;
             markerPos.cellY = cellY;
 
-            widgetPos = MyGUI::IntPoint(nX * mMapWidgetSize + (1+cellDx) * mMapWidgetSize,
-                                        nY * mMapWidgetSize - (cellDy-1) * mMapWidgetSize);
+            widgetPos = MyGUI::IntPoint(static_cast<int>(nX * mMapWidgetSize + (1 + cellDx) * mMapWidgetSize),
+                                        static_cast<int>(nY * mMapWidgetSize - (cellDy-1) * mMapWidgetSize));
         }
         else
         {
@@ -263,8 +263,8 @@ namespace MWGui
             markerPos.cellY = cellY;
 
             // Image space is -Y up, cells are Y up
-            widgetPos = MyGUI::IntPoint(nX * mMapWidgetSize + (1+(cellX-mCurX)) * mMapWidgetSize,
-                                        nY * mMapWidgetSize + (1-(cellY-mCurY)) * mMapWidgetSize);
+            widgetPos = MyGUI::IntPoint(static_cast<int>(nX * mMapWidgetSize + (1 + (cellX - mCurX)) * mMapWidgetSize),
+                                        static_cast<int>(nY * mMapWidgetSize + (1-(cellY-mCurY)) * mMapWidgetSize));
         }
 
         markerPos.nX = nX;
@@ -309,8 +309,8 @@ namespace MWGui
             markerWidget->setUserString("ToolTipType", "Layout");
             markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
             markerWidget->setUserString("Caption_TextOneLine", MyGUI::TextIterator::toTagsString(marker.mNote));
-            markerWidget->setNormalColour(MyGUI::Colour(1.0,0.3,0.3));
-            markerWidget->setHoverColour(MyGUI::Colour(1.0,0.5,0.5));
+            markerWidget->setNormalColour(MyGUI::Colour(1.0f, 0.3f, 0.3f));
+            markerWidget->setHoverColour(MyGUI::Colour(1.0f, 0.5f, 0.5f));
             markerWidget->setUserData(marker);
             markerWidget->setNeedMouseFocus(true);
             customMarkerCreated(markerWidget);
@@ -424,7 +424,7 @@ namespace MWGui
 
     void LocalMapBase::setPlayerPos(int cellX, int cellY, const float nx, const float ny)
     {
-        MyGUI::IntPoint pos(mMapWidgetSize+nx*mMapWidgetSize-16, mMapWidgetSize+ny*mMapWidgetSize-16);
+        MyGUI::IntPoint pos(static_cast<int>(mMapWidgetSize + nx*mMapWidgetSize - 16), static_cast<int>(mMapWidgetSize + ny*mMapWidgetSize - 16));
         pos.left += (cellX - mCurX) * mMapWidgetSize;
         pos.top -= (cellY - mCurY) * mMapWidgetSize;
 
@@ -435,7 +435,7 @@ namespace MWGui
             mCompass->setPosition(pos);
             MyGUI::IntPoint middle (pos.left+16, pos.top+16);
                     MyGUI::IntCoord viewsize = mLocalMap->getCoord();
-            MyGUI::IntPoint viewOffset(0.5*viewsize.width - middle.left, 0.5*viewsize.height - middle.top);
+            MyGUI::IntPoint viewOffset((viewsize.width / 2) - middle.left, (viewsize.height / 2) - middle.top);
             mLocalMap->setViewOffset(viewOffset);
         }
     }
@@ -668,7 +668,7 @@ namespace MWGui
         else
         {
             worldPos.x = (x + nX) * cellSize;
-            worldPos.y = (y + (1.0-nY)) * cellSize;
+            worldPos.y = (y + (1.0f-nY)) * cellSize;
         }
 
         mEditingMarker.mWorldX = worldPos.x;
@@ -737,8 +737,8 @@ namespace MWGui
             int markerSize = 12;
             int offset = mGlobalMapRender->getCellSize()/2 - markerSize/2;
             MyGUI::IntCoord widgetCoord(
-                        worldX * mGlobalMapRender->getWidth()+offset,
-                        worldY * mGlobalMapRender->getHeight()+offset,
+                        static_cast<int>(worldX * mGlobalMapRender->getWidth()+offset),
+                        static_cast<int>(worldY * mGlobalMapRender->getHeight() + offset),
                         markerSize, markerSize);
 
             MyGUI::Widget* markerWidget = mGlobalMap->createWidget<MyGUI::Widget>("MarkerButton",
@@ -827,18 +827,7 @@ namespace MWGui
         if (MWBase::Environment::get().getWorld ()->isCellExterior ())
         {
             Ogre::Vector3 pos = MWBase::Environment::get().getWorld ()->getPlayerPtr().getRefData ().getBaseNode ()->_getDerivedPosition ();
-
-            float worldX, worldY;
-            mGlobalMapRender->worldPosToImageSpace (pos.x, pos.y, worldX, worldY);
-            worldX *= mGlobalMapRender->getWidth();
-            worldY *= mGlobalMapRender->getHeight();
-
-            mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(worldX - 16, worldY - 16));
-
-            // set the view offset so that player is in the center
-            MyGUI::IntSize viewsize = mGlobalMap->getSize();
-            MyGUI::IntPoint viewoffs(0.5*viewsize.width - worldX, 0.5*viewsize.height - worldY);
-            mGlobalMap->setViewOffset(viewoffs);
+            setGlobalMapPlayerPosition(pos.x, pos.y);
         }
     }
 
@@ -854,11 +843,11 @@ namespace MWGui
         x *= mGlobalMapRender->getWidth();
         y *= mGlobalMapRender->getHeight();
 
-        mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(x - 16, y - 16));
+        mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(static_cast<int>(x - 16), static_cast<int>(y - 16)));
 
         // set the view offset so that player is in the center
         MyGUI::IntSize viewsize = mGlobalMap->getSize();
-        MyGUI::IntPoint viewoffs(0.5*viewsize.width - x, 0.5*viewsize.height - y);
+        MyGUI::IntPoint viewoffs(static_cast<int>(viewsize.width * 0.5f - x), static_cast<int>(viewsize.height *0.5 - y));
         mGlobalMap->setViewOffset(viewoffs);
     }
 

@@ -57,9 +57,9 @@ struct MagicEffect
         // Glow color for enchanted items with this effect
         int mRed, mGreen, mBlue;
 
-        float mUnknown1;
+        float mUnknown1; // Called "Size X" in CS
         float mSpeed; // Speed of fired projectile
-        float mUnknown2;
+        float mUnknown2; // Called "Size Cap" in CS
     }; // 36 bytes
 
     static const std::map<short,std::string> sNames;

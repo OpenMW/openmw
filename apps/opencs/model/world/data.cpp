@@ -254,6 +254,10 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mPathgrids.addColumn (new RecordStateColumn<Pathgrid>);
     mPathgrids.addColumn (new FixedRecordTypeColumn<Pathgrid> (UniversalId::Type_Pathgrid));
 
+    mStartScripts.addColumn (new StringIdColumn<ESM::StartScript>);
+    mStartScripts.addColumn (new RecordStateColumn<ESM::StartScript>);
+    mStartScripts.addColumn (new FixedRecordTypeColumn<ESM::StartScript> (UniversalId::Type_StartScript));
+
     mRefs.addColumn (new StringIdColumn<CellRef> (true));
     mRefs.addColumn (new RecordStateColumn<CellRef>);
     mRefs.addColumn (new FixedRecordTypeColumn<CellRef> (UniversalId::Type_Reference));
@@ -327,6 +331,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new IdTable (&mSoundGens), UniversalId::Type_SoundGen);
     addModel (new IdTable (&mMagicEffects), UniversalId::Type_MagicEffect);
     addModel (new IdTable (&mPathgrids), UniversalId::Type_Pathgrid);
+    addModel (new IdTable (&mStartScripts), UniversalId::Type_StartScript);
     addModel (new IdTable (&mReferenceables, IdTable::Feature_Preview),
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs, IdTable::Feature_ViewCell | IdTable::Feature_Preview), UniversalId::Type_Reference);
@@ -620,6 +625,16 @@ CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& CSMWorld::Data::getPathgrids()
     return mPathgrids;
 }
 
+const CSMWorld::IdCollection<ESM::StartScript>& CSMWorld::Data::getStartScripts() const
+{
+    return mStartScripts;
+}
+
+CSMWorld::IdCollection<ESM::StartScript>& CSMWorld::Data::getStartScripts()
+{
+    return mStartScripts;
+}
+
 const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) const
 {
     return mResourcesManager.get (id.getType());
@@ -724,6 +739,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
         case ESM::REC_SNDG: mSoundGens.load (*mReader, mBase); break;
         case ESM::REC_MGEF: mMagicEffects.load (*mReader, mBase); break;
         case ESM::REC_PGRD: mPathgrids.load (*mReader, mBase); break;
+        case ESM::REC_SSCR: mStartScripts.load (*mReader, mBase); break;
 
         case ESM::REC_LTEX: mLandTextures.load (*mReader, mBase); break;
 
@@ -734,7 +750,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             if (index!=-1 && !mBase)
                 mLand.getRecord (index).mModified.mLand->loadData (
                     ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR |
-                    ESM::Land::DATA_VTEX);
+                    ESM::Land::DATA_VTEX | ESM::Land::DATA_WNAM);
 
             break;
         }

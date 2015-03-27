@@ -17,7 +17,7 @@
 
 namespace ESM
 {
-    class Cell;
+    struct Cell;
     namespace AiSequence
     {
         struct AiWander;
@@ -113,7 +113,15 @@ namespace MWMechanics
             float mDoorCheckDuration;
             int mStuckCount;
 
+            // constants for converting idleSelect values into groupNames
+            enum GroupIndex
+            {
+                GroupIndex_MinIdle = 2,
+                GroupIndex_MaxIdle = 9
+            };
 
+            /// lookup table for converting idleSelect value to groupName
+            static const std::string sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1];
     };
     
     

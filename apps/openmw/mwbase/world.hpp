@@ -49,7 +49,7 @@ namespace MWRender
 
 namespace MWMechanics
 {
-    class Movement;
+    struct Movement;
 }
 
 namespace MWWorld
@@ -205,10 +205,8 @@ namespace MWBase
             ///< Return a pointer to a liveCellRef which contains \a ptr.
             /// \note Search is limited to the active cells.
 
-            /// \todo enable reference in the OGRE scene
             virtual void enable (const MWWorld::Ptr& ptr) = 0;
 
-            /// \todo disable reference in the OGRE scene
             virtual void disable (const MWWorld::Ptr& ptr) = 0;
 
             virtual void advanceTime (double hours) = 0;
@@ -267,6 +265,8 @@ namespace MWBase
 
             virtual MWWorld::Ptr  getFacedObject() = 0;
             ///< Return pointer to the object the player is looking at, if it is within activation range
+
+            virtual float getMaxActivationDistance() = 0;
 
             /// Returns a pointer to the object the provided object would hit (if within the
             /// specified distance), and the point where the hit occurs. This will attempt to
@@ -551,7 +551,7 @@ namespace MWBase
             virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const Ogre::Vector3& worldPos) = 0;
 
             virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
-                                       const MWWorld::Ptr& caster, int rangeType, const std::string& id, const std::string& sourceName) = 0;
+                                       const MWWorld::Ptr& caster, ESM::RangeType rangeType, const std::string& id, const std::string& sourceName) = 0;
 
             virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
 

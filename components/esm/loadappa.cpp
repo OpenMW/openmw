@@ -10,25 +10,35 @@ namespace ESM
 
 void Apparatus::load(ESMReader &esm)
 {
-    // we will not treat duplicated subrecords as errors here
+    bool hasData = false;
     while (esm.hasMoreSubs())
     {
         esm.getSubName();
-        NAME subName = esm.retSubName();
-
-        if (subName == "MODL")
-            mModel = esm.getHString();
-        else if (subName == "FNAM")
-            mName = esm.getHString();
-        else if (subName == "AADT")
-            esm.getHT(mData);
-        else if (subName == "SCRI")
-            mScript = esm.getHString();
-        else if (subName == "ITEX")
-            mIcon = esm.getHString();
-        else
-            esm.fail("wrong subrecord type " + subName.toString() + " for APPA record");
+        uint32_t name = esm.retSubName().val;
+        switch (name)
+        {
+            case ESM::FourCC<'M','O','D','L'>::value:
+                mModel = esm.getHString();
+                break;
+            case ESM::FourCC<'F','N','A','M'>::value:
+                mName = esm.getHString();
+                break;
+            case ESM::FourCC<'A','A','D','T'>::value:
+                esm.getHT(mData);
+                hasData = true;
+                break;
+            case ESM::FourCC<'S','C','R','I'>::value:
+                mScript = esm.getHString();
+                break;
+            case ESM::FourCC<'I','T','E','X'>::value:
+                mIcon = esm.getHString();
+                break;
+            default:
+                esm.fail("Unknown subrecord");
+        }
     }
+    if (!hasData)
+        esm.fail("Missing AADT");
 }
 
 void Apparatus::save(ESMWriter &esm) const

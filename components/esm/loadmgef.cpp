@@ -246,7 +246,7 @@ void MagicEffect::load(ESMReader &esm)
                 mDescription = esm.getHString();
                 break;
             default:
-                esm.fail("Unknown subrecord " + esm.retSubName().toString());
+                esm.fail("Unknown subrecord");
         }
     }
 }

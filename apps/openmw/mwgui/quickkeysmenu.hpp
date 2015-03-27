@@ -37,14 +37,15 @@ namespace MWGui
 
         void activateQuickKey(int index);
 
+        /// @note This enum is serialized, so don't move the items around!
         enum QuickKeyType
         {
             Type_Item,
             Type_Magic,
             Type_MagicItem,
-            Type_Unassigned
+            Type_Unassigned,
+            Type_HandToHand
         };
-
 
         void write (ESM::ESMWriter& writer);
         void readRecord (ESM::ESMReader& reader, uint32_t type);

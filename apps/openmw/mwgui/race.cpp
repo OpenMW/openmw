@@ -142,13 +142,13 @@ namespace MWGui
 
         for (unsigned int i=0; i<mAvailableHeads.size(); ++i)
         {
-            if (mAvailableHeads[i] == proto.mHead)
+            if (Misc::StringUtils::ciEqual(mAvailableHeads[i], proto.mHead))
                 mFaceIndex = i;
         }
 
         for (unsigned int i=0; i<mAvailableHairs.size(); ++i)
         {
-            if (mAvailableHairs[i] == proto.mHair)
+            if (Misc::StringUtils::ciEqual(mAvailableHairs[i], proto.mHair))
                 mHairIndex = i;
         }
 
@@ -203,7 +203,7 @@ namespace MWGui
 
     void RaceDialog::onHeadRotate(MyGUI::ScrollBar* scroll, size_t _position)
     {
-        float angle = (float(_position) / (scroll->getScrollRange()-1) - 0.5) * 3.14 * 2;
+        float angle = (float(_position) / (scroll->getScrollRange()-1) - 0.5f) * 3.14f * 2;
         mPreview->update (angle);
         mPreviewDirty = true;
         mCurrentAngle = angle;
@@ -404,7 +404,7 @@ namespace MWGui
             skillWidget = mSkillList->createWidget<Widgets::MWSkill>("MW_StatNameValue", coord1, MyGUI::Align::Default,
                                                            std::string("Skill") + MyGUI::utility::toString(i));
             skillWidget->setSkillNumber(skillId);
-            skillWidget->setSkillValue(Widgets::MWSkill::SkillValue(race->mData.mBonus[i].mBonus));
+            skillWidget->setSkillValue(Widgets::MWSkill::SkillValue(static_cast<float>(race->mData.mBonus[i].mBonus)));
             ToolTips::createSkillToolTip(skillWidget, skillId);
 
 

@@ -22,7 +22,7 @@ namespace Resource
 namespace CSMWorld
 {
     class Data;
-    class CellRef;
+    struct CellRef;
 }
 
 namespace CSVWorld

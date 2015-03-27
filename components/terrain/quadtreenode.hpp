@@ -95,7 +95,7 @@ namespace Terrain
 
         Ogre::SceneNode* getSceneNode() { return mSceneNode; }
 
-        int getSize() { return mSize; }
+        int getSize() { return static_cast<int>(mSize); }
         Ogre::Vector2 getCenter() { return mCenter; }
 
         bool hasChildren() { return mChildren[0] != 0; }

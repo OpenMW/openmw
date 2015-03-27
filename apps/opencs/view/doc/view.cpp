@@ -173,6 +173,10 @@ void CSVDoc::View::setupMechanicsMenu()
     QAction *effects = new QAction (tr ("Magic Effects"), this);
     connect (effects, SIGNAL (triggered()), this, SLOT (addMagicEffectsSubView()));
     mechanics->addAction (effects);
+
+    QAction *startScripts = new QAction (tr ("Start Scripts"), this);
+    connect (startScripts, SIGNAL (triggered()), this, SLOT (addStartScriptsSubView()));
+    mechanics->addAction (startScripts);
 }
 
 void CSVDoc::View::setupCharacterMenu()
@@ -320,7 +324,7 @@ void CSVDoc::View::updateTitle()
     if (hideTitle)
         stream << " - " << mSubViews.at (0)->getTitle();
 
-    setWindowTitle (stream.str().c_str());
+    setWindowTitle (QString::fromUtf8(stream.str().c_str()));
 }
 
 void CSVDoc::View::updateSubViewIndicies(SubView *view)
@@ -481,6 +485,8 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
                (!isReferenceable && id == sb->getUniversalId()))
             {
                 sb->setFocus();
+                if (!hint.empty())
+                    sb->useHint (hint);
                 return;
             }
         }
@@ -511,8 +517,6 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     assert(view);
     view->setParent(this);
     mSubViews.append(view); // only after assert
-    if (!hint.empty())
-        view->useHint (hint);
 
     int minWidth = userSettings.setting ("window/minimum-width", QString("325")).toInt();
     view->setMinimumWidth(minWidth);
@@ -534,6 +538,9 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
         this, SLOT (updateSubViewIndicies (SubView *)));
 
     view->show();
+
+    if (!hint.empty())
+        view->useHint (hint);
 }
 
 void CSVDoc::View::newView()
@@ -714,6 +721,11 @@ void CSVDoc::View::addRunLogSubView()
 void CSVDoc::View::addPathgridSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Pathgrids);
+}
+
+void CSVDoc::View::addStartScriptsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_StartScripts);
 }
 
 void CSVDoc::View::abortOperation (int type)

@@ -24,7 +24,6 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "inventorywindow.hpp"
-#include "console.hpp"
 #include "spellicons.hpp"
 #include "itemmodel.hpp"
 #include "draganddrop.hpp"
@@ -262,7 +261,7 @@ namespace MWGui
 
     void HUD::setDrowningTimeLeft(float time, float maxTime)
     {
-        size_t progress = time/maxTime*200.0;
+        size_t progress = static_cast<size_t>(time / maxTime * 200);
         mDrowning->setProgressPosition(progress);
 
         bool isDrowning = (progress == 0);
@@ -309,7 +308,7 @@ namespace MWGui
             MWWorld::Ptr object = MWBase::Environment::get().getWorld()->getFacedObject();
 
             if (mode == GM_Console)
-                MWBase::Environment::get().getWindowManager()->getConsole()->setSelectedObject(object);
+                MWBase::Environment::get().getWindowManager()->setConsoleSelectedObject(object);
             else if ((mode == GM_Container) || (mode == GM_Inventory))
             {
                 // pick up object
@@ -631,7 +630,7 @@ namespace MWGui
         mEnemyHealth->setProgressRange(100);
         // Health is usually cast to int before displaying. Actors die whenever they are < 1 health.
         // Therefore any value < 1 should show as an empty health bar. We do the same in statswindow :)
-        mEnemyHealth->setProgressPosition(int(stats.getHealth().getCurrent()) / stats.getHealth().getModified() * 100);
+        mEnemyHealth->setProgressPosition(static_cast<size_t>(stats.getHealth().getCurrent() / stats.getHealth().getModified() * 100));
 
         static const float fNPCHealthBarFade = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCHealthBarFade")->getFloat();
         if (fNPCHealthBarFade > 0.f)
@@ -669,6 +668,16 @@ namespace MWGui
     {
         mEnemyActorId = -1;
         mEnemyHealthTimer = -1;
+    }
+
+    void HUD::customMarkerCreated(MyGUI::Widget *marker)
+    {
+        marker->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
+    }
+
+    void HUD::doorMarkerCreated(MyGUI::Widget *marker)
+    {
+        marker->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
     }
 
 }

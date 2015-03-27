@@ -461,7 +461,7 @@ int clone(Arguments& info)
     for (Stats::iterator it = stats.begin(); it != stats.end(); ++it)
     {
         name.val = it->first;
-        float amount = it->second;
+        int amount = it->second;
         std::cout << std::setw(digitCount) << amount << " " << name.toString() << "  ";
 
         if (++i % 3 == 0)

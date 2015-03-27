@@ -135,7 +135,7 @@ QuadTreeNode::QuadTreeNode(DefaultWorld* terrain, ChildDirection dir, float size
     : mMaterialGenerator(NULL)
     , mIsDummy(false)
     , mSize(size)
-    , mLodLevel(Log2(mSize))
+    , mLodLevel(Log2(static_cast<int>(mSize)))
     , mBounds(Ogre::AxisAlignedBox::BOX_NULL)
     , mWorldBounds(Ogre::AxisAlignedBox::BOX_NULL)
     , mDirection(dir)

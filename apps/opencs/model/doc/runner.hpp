@@ -16,6 +16,8 @@ class QTemporaryFile;
 
 namespace CSMDoc
 {
+    class OperationHolder;
+    
     class Runner : public QObject
     {
             Q_OBJECT
@@ -74,7 +76,7 @@ namespace CSMDoc
         public:
 
             /// *this attaches itself to runner
-            SaveWatcher (Runner *runner, Operation *operation);
+            SaveWatcher (Runner *runner, OperationHolder *operation);
 
         private slots:
 

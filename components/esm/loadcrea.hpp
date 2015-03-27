@@ -6,6 +6,7 @@
 #include "loadcont.hpp"
 #include "spelllist.hpp"
 #include "aipackage.hpp"
+#include "transport.hpp"
 
 namespace ESM
 {
@@ -92,6 +93,9 @@ struct Creature
     bool mHasAI;
     AIData mAiData;
     AIPackageList mAiPackage;
+    Transport mTransport;
+
+    const std::vector<Transport::Dest>& getTransport() const;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;

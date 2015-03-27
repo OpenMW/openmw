@@ -5,7 +5,7 @@ set (OPENCS_SRC main.cpp
 opencs_units (. editor)
 
 opencs_units (model/doc
-    document operation saving documentmanager loader runner
+    document operation saving documentmanager loader runner operationholder
     )
 
 opencs_units_noqt (model/doc
@@ -40,6 +40,7 @@ opencs_units (model/tools
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
+    startscriptcheck
     )
 
 
@@ -164,7 +165,8 @@ qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
 qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
 qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${BULLET_INCLUDE_DIRS})
+# for compiled .ui files
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if(APPLE)
     set (OPENCS_MAC_ICON ${CMAKE_SOURCE_DIR}/files/mac/openmw-cs.icns)
@@ -174,7 +176,6 @@ endif(APPLE)
 
 add_executable(openmw-cs
     MACOSX_BUNDLE
-    ${OENGINE_BULLET}
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
     ${OPENCS_MOC_SRC}
@@ -198,6 +199,7 @@ if(APPLE)
 endif(APPLE)
 
 target_link_libraries(openmw-cs
+    ${OENGINE_LIBRARY}
     ${OGRE_LIBRARIES}
     ${OGRE_Overlay_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}

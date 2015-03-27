@@ -270,15 +270,21 @@ namespace MWScript
 
     std::string InterpreterContext::getActionBinding(const std::string& action) const
     {
-        std::vector<int> actions = MWBase::Environment::get().getInputManager()->getActionSorting ();
+        MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
+        std::vector<int> actions = input->getActionKeySorting ();
         for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
         {
-            std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
+            std::string desc = input->getActionDescription (*it);
             if(desc == "")
                 continue;
 
             if(desc == action)
-                return MWBase::Environment::get().getInputManager()->getActionBindingName (*it);
+            {
+                if(input->joystickLastUsed())
+                    return input->getActionControllerBindingName(*it);
+                else
+                    return input->getActionKeyBindingName (*it);
+            }
         }
 
         return "None";
@@ -469,7 +475,7 @@ namespace MWScript
         for (int i=0; i<3; ++i)
             diff[i] = pos1[i] - pos2[i];
 
-        return std::sqrt (diff[0]*diff[0] + diff[1]*diff[1] + diff[2]*diff[2]);
+        return static_cast<float>(std::sqrt(diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2]));
     }
 
     bool InterpreterContext::hasBeenActivated (const MWWorld::Ptr& ptr)

@@ -103,7 +103,7 @@ namespace MWGui
                         && item.getClass().canBeEquipped(item, mActor).first == 0)
                     continue;
 
-                int castCost = MWMechanics::getEffectiveEnchantmentCastCost(enchant->mData.mCost, mActor);
+                int castCost = MWMechanics::getEffectiveEnchantmentCastCost(static_cast<float>(enchant->mData.mCost), mActor);
 
                 std::string cost = boost::lexical_cast<std::string>(castCost);
                 int currentCharge = int(item.getCellRef().getEnchantmentCharge());

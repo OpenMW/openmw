@@ -187,7 +187,7 @@ namespace MWMechanics
         for (std::vector<ESM::ENAMstruct>::const_iterator it = effects.mList.begin(); it != effects.mList.end(); ++it)
         {
             const ESM::ENAMstruct& effect = *it;
-            float x = effect.mDuration;
+            float x = static_cast<float>(effect.mDuration);
 
             const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
             if (!(magicEffect->mData.mFlags & ESM::MagicEffect::UncappedDamage))

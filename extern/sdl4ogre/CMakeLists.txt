@@ -6,6 +6,7 @@ set(SDL4OGRE_SOURCE_FILES
 	sdlinputwrapper.cpp
 	sdlcursormanager.cpp
 	sdlwindowhelper.cpp
+	imagerotate.cpp
 )
 
 if (APPLE)

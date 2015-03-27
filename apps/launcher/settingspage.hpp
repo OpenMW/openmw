@@ -29,6 +29,9 @@ namespace Launcher
 
         void saveSettings();
         bool loadSettings();
+        
+        /// set progress bar on page to 0%
+        void resetProgressBar();
 
     private slots:
 
@@ -56,7 +59,6 @@ namespace Launcher
 
         MainDialog *mMain;
         TextInputDialog *mProfileDialog;
-
 
     };
 }

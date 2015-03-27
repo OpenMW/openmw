@@ -365,7 +365,7 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScene
 
     // with the standard 1 / (c + d*l + d*d*q) equation the attenuation factor never becomes zero,
     // so we ignore lights if their attenuation falls below this factor.
-    const float threshold = 0.03;
+    const float threshold = 0.03f;
 
     float quadraticAttenuation = 0;
     float linearAttenuation = 0;
@@ -1271,7 +1271,11 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
     if (bonename.empty())
         params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
     else
+    {
+        if (!mSkelBase)
+            return;
         params.mObjects = NifOgre::Loader::createObjects(mSkelBase, bonename, "", mInsert, model);
+    }
 
     setRenderProperties(params.mObjects, RV_Effects,
                         RQG_Main, RQG_Alpha, 0.f, false, NULL);
@@ -1473,7 +1477,7 @@ void Animation::setLightEffect(float effect)
         }
         mGlowLight->setType(Ogre::Light::LT_POINT);
         effect += 3;
-        mGlowLight->setAttenuation(1.0f / (0.03 * (0.5/effect)), 0, 0.5/effect, 0);
+        mGlowLight->setAttenuation(1.0f / (0.03f * (0.5f/effect)), 0, 0.5f/effect, 0);
     }
 }
 

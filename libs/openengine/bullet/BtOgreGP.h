@@ -27,7 +27,6 @@
 namespace BtOgre {
 
 typedef std::map<unsigned char, Vector3Array*> BoneIndex;
-typedef std::pair<unsigned short, Vector3Array*> BoneKeyIndex;
 
 class VertexIndexToShape
 {

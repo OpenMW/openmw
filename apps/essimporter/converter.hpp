@@ -553,7 +553,7 @@ public:
         ESM::WeatherState weather;
         weather.mCurrentWeather = toString(mGame.mGMDT.mCurrentWeather);
         weather.mNextWeather = toString(mGame.mGMDT.mNextWeather);
-        weather.mRemainingTransitionTime = mGame.mGMDT.mWeatherTransition/100.f*(0.015*24*3600);
+        weather.mRemainingTransitionTime = mGame.mGMDT.mWeatherTransition/100.f*(0.015f*24*3600);
         weather.mHour = mContext->mHour;
         weather.mWindSpeed = 0.f;
         weather.mTimePassed = 0.0;

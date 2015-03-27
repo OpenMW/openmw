@@ -148,11 +148,11 @@ namespace MWGui
                     value = std::max(min, std::min(value, max));
                     value = (value-min)/(max-min);
 
-                    scroll->setScrollPosition( value * (scroll->getScrollRange()-1));
+                    scroll->setScrollPosition(static_cast<size_t>(value * (scroll->getScrollRange() - 1)));
                 }
                 else
                 {
-                    int value = Settings::Manager::getFloat(getSettingName(current), getSettingCategory(current));
+                    int value = Settings::Manager::getInt(getSettingName(current), getSettingCategory(current));
                     scroll->setScrollPosition(value);
                 }
                 scroll->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
@@ -163,7 +163,8 @@ namespace MWGui
     }
 
     SettingsWindow::SettingsWindow() :
-        WindowBase("openmw_settings_window.layout")
+        WindowBase("openmw_settings_window.layout"),
+        mKeyboardMode(true)
     {
         configureWidgets(mMainWidget);
 
@@ -188,6 +189,8 @@ namespace MWGui
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mRefractionButton, "RefractionButton");
         getWidget(mDifficultySlider, "DifficultySlider");
+        getWidget(mKeyboardSwitch, "KeyboardButton");
+        getWidget(mControllerSwitch, "ControllerButton");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -212,6 +215,9 @@ namespace MWGui
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
 
         mShadowsTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onShadowTextureSizeChanged);
+
+        mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
+        mControllerSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onControllerSwitchClicked);
 
         center();
 
@@ -260,9 +266,13 @@ namespace MWGui
 
         MyGUI::TextBox* diffText;
         getWidget(diffText, "DifficultyText");
+
         diffText->setCaptionWithReplacing("#{sDifficulty} (" + MyGUI::utility::toString(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
 
         mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
+
+        mKeyboardSwitch->setStateSelected(true);
+        mControllerSwitch->setStateSelected(false);
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
@@ -462,14 +472,37 @@ namespace MWGui
         MWBase::Environment::get().getInputManager()->processChangedSettings(changed);
     }
 
+    void SettingsWindow::onKeyboardSwitchClicked(MyGUI::Widget* _sender)
+    {
+        if(mKeyboardMode)
+            return;
+        mKeyboardMode = true;
+        mKeyboardSwitch->setStateSelected(true);
+        mControllerSwitch->setStateSelected(false);
+        updateControlsBox();
+    }
+
+    void SettingsWindow::onControllerSwitchClicked(MyGUI::Widget* _sender)
+    {
+        if(!mKeyboardMode)
+            return;
+        mKeyboardMode = false;
+        mKeyboardSwitch->setStateSelected(false);
+        mControllerSwitch->setStateSelected(true);
+        updateControlsBox();
+    }
+
     void SettingsWindow::updateControlsBox()
     {
         while (mControlsBox->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mControlsBox->getChildAt(0));
 
-        MWBase::Environment::get().getWindowManager ()->removeStaticMessageBox();
-
-        std::vector<int> actions = MWBase::Environment::get().getInputManager()->getActionSorting ();
+        MWBase::Environment::get().getWindowManager()->removeStaticMessageBox();
+        std::vector<int> actions;
+        if(mKeyboardMode)
+            actions = MWBase::Environment::get().getInputManager()->getActionKeySorting();
+        else
+            actions = MWBase::Environment::get().getInputManager()->getActionControllerSorting();
 
         const int h = 18;
         const int w = mControlsBox->getWidth() - 28;
@@ -480,7 +513,11 @@ namespace MWGui
             if (desc == "")
                 continue;
 
-            std::string binding = MWBase::Environment::get().getInputManager()->getActionBindingName (*it);
+            std::string binding;
+            if(mKeyboardMode)
+                binding = MWBase::Environment::get().getInputManager()->getActionKeyBindingName(*it);
+            else
+                binding = MWBase::Environment::get().getInputManager()->getActionControllerBindingName(*it);
 
             Gui::SharedStateButton* leftText = mControlsBox->createWidget<Gui::SharedStateButton>("SandTextButton", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
             leftText->setCaptionWithReplacing(desc);
@@ -514,16 +551,16 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager ()->staticMessageBox ("#{sControlsMenu3}");
         MWBase::Environment::get().getWindowManager ()->disallowMouse();
 
-        MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId);
+        MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId, mKeyboardMode);
 
     }
 
     void SettingsWindow::onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel)
     {
-        if (mControlsBox->getViewOffset().top + _rel*0.3 > 0)
+        if (mControlsBox->getViewOffset().top + _rel*0.3f > 0)
             mControlsBox->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mControlsBox->setViewOffset(MyGUI::IntPoint(0, mControlsBox->getViewOffset().top + _rel*0.3));
+            mControlsBox->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mControlsBox->getViewOffset().top + _rel*0.3f)));
     }
 
     void SettingsWindow::onResetDefaultBindings(MyGUI::Widget* _sender)
@@ -537,7 +574,10 @@ namespace MWGui
 
     void SettingsWindow::onResetDefaultBindingsAccept()
     {
-        MWBase::Environment::get().getInputManager ()->resetToDefaultBindings ();
+        if(mKeyboardMode)
+            MWBase::Environment::get().getInputManager ()->resetToDefaultKeyBindings ();
+        else
+            MWBase::Environment::get().getInputManager()->resetToDefaultControllerBindings();
         updateControlsBox ();
     }
 

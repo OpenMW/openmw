@@ -114,7 +114,7 @@ namespace MWGui
 
     void EditEffectDialog::newEffect (const ESM::MagicEffect *effect)
     {
-        bool allowSelf = effect->mData.mFlags & ESM::MagicEffect::CastSelf;
+        bool allowSelf = (effect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0;
         bool allowTouch = (effect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
         bool allowTarget = (effect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
 
@@ -226,7 +226,7 @@ namespace MWGui
 
         // cycle through range types until we find something that's allowed
         // does not handle the case where nothing is allowed (this should be prevented before opening the Add Effect dialog)
-        bool allowSelf = mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf;
+        bool allowSelf = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf) != 0;
         bool allowTouch = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch) && !mConstantEffect;
         bool allowTarget = (mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget) && !mConstantEffect;
         if (mEffect.mRange == ESM::RT_Self && !allowSelf)
@@ -440,14 +440,14 @@ namespace MWGui
 
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
-            float x = 0.5 * (it->mMagnMin + it->mMagnMax);
+            float x = 0.5f * (it->mMagnMin + it->mMagnMax);
 
             const ESM::MagicEffect* effect =
                 store.get<ESM::MagicEffect>().find(it->mEffectID);
 
-            x *= 0.1 * effect->mData.mBaseCost;
+            x *= 0.1f * effect->mData.mBaseCost;
             x *= 1 + it->mDuration;
-            x += 0.05 * std::max(1, it->mArea) * effect->mData.mBaseCost;
+            x += 0.05f * std::max(1, it->mArea) * effect->mData.mBaseCost;
 
             float fEffectCostMult =
                 store.get<ESM::GameSetting>().find("fEffectCostMult")->getFloat();
@@ -471,7 +471,7 @@ namespace MWGui
         float fSpellMakingValueMult =
             store.get<ESM::GameSetting>().find("fSpellMakingValueMult")->getFloat();
 
-        int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,int(y) * fSpellMakingValueMult,true);
+        int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, static_cast<int>(y * fSpellMakingValueMult),true);
 
         mPriceLabel->setCaption(MyGUI::utility::toString(int(price)));
 

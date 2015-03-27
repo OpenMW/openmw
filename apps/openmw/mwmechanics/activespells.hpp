@@ -55,6 +55,9 @@ namespace MWMechanics
             
             void rebuildEffects() const;
 
+            /// Add any effects that are in "from" and not in "addTo" to "addTo"
+            void mergeEffects(std::vector<ActiveEffect>& addTo, const std::vector<ActiveEffect>& from);
+
             double timeToExpire (const TIterator& iterator) const;
             ///< Returns time (in in-game hours) until the spell pointed to by \a iterator
             /// expires.

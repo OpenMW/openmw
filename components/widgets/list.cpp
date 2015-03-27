@@ -138,10 +138,10 @@ namespace Gui
     void MWList::onMouseWheel(MyGUI::Widget* _sender, int _rel)
     {
         //NB view offset is negative
-        if (mScrollView->getViewOffset().top + _rel*0.3 > 0)
+        if (mScrollView->getViewOffset().top + _rel*0.3f > 0)
             mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mScrollView->setViewOffset(MyGUI::IntPoint(0, mScrollView->getViewOffset().top + _rel*0.3));
+            mScrollView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mScrollView->getViewOffset().top + _rel*0.3)));
     }
 
     void MWList::onItemSelected(MyGUI::Widget* _sender)
@@ -152,9 +152,9 @@ namespace Gui
         eventWidgetSelected(_sender);
     }
 
-    MyGUI::Widget* MWList::getItemWidget(const std::string& name)
+    MyGUI::Button *MWList::getItemWidget(const std::string& name)
     {
-        return mScrollView->findWidget (getName() + "_item_" + name);
+        return mScrollView->findWidget (getName() + "_item_" + name)->castType<MyGUI::Button>();
     }
 
 }

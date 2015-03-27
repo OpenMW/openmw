@@ -40,7 +40,7 @@ namespace ESM
         // mDamage was changed to a float; ensure backwards compatibility
         T oldDamage = 0;
         esm.getHNOT(oldDamage, "STDA");
-        mDamage = oldDamage;
+        mDamage = static_cast<float>(oldDamage);
 
         esm.getHNOT (mDamage, "STDF");
 

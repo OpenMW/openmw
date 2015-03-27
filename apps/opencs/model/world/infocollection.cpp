@@ -26,7 +26,7 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
 
         if (!record2.get().mPrev.empty())
         {
-            index = getIndex (record2.get().mPrev, topic);
+            index = getInfoIndex (record2.get().mPrev, topic);
 
             if (index!=-1)
                 ++index;
@@ -34,7 +34,7 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
 
         if (index==-1 && !record2.get().mNext.empty())
         {
-            index = getIndex (record2.get().mNext, topic);
+            index = getInfoIndex (record2.get().mNext, topic);
         }
 
         if (index==-1)
@@ -60,7 +60,7 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
     }
 }
 
-int CSMWorld::InfoCollection::getIndex (const std::string& id, const std::string& topic) const
+int CSMWorld::InfoCollection::getInfoIndex (const std::string& id, const std::string& topic) const
 {
     std::string fullId = Misc::StringUtils::lowerCase (topic) + "#" +  id;
 

@@ -33,11 +33,11 @@ namespace MWWorld
             MWScript::Locals mLocals; // if we find the overhead of heaving a locals
                                       // object in the refdata of refs without a script,
                                       // we can make this a pointer later.
+            bool mDeleted; // separate delete flag used for deletion by a content file
             bool mHasLocals;
             bool mEnabled;
             int mCount; // 0: deleted
 
-            bool mDeleted; // separate delete flag used for deletion by a content file
 
             ESM::Position mPosition;
 

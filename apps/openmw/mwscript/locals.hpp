@@ -7,7 +7,7 @@
 
 namespace ESM
 {
-    struct Script;
+    class Script;
     struct Locals;
 }
 

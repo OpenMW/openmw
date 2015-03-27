@@ -179,7 +179,7 @@ void NiVisData::read(NIFStream *nif)
     for(size_t i = 0;i < mVis.size();i++)
     {
         mVis[i].time = nif->getFloat();
-        mVis[i].isSet = nif->getChar();
+        mVis[i].isSet = (nif->getChar() != 0);
     }
 }
 

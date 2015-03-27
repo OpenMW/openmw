@@ -6,7 +6,7 @@
 namespace MWState
 {
     class Character;
-    class Slot;
+    struct Slot;
 }
 
 namespace MWGui

@@ -192,7 +192,7 @@ namespace MWClass
 
     bool Ingredient::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Ingredients;
+        return (npcServices & ESM::NPC::Ingredients) != 0;
     }
 
 

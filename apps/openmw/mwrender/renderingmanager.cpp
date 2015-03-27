@@ -120,14 +120,12 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     // Set default texture filtering options
     TextureFilterOptions tfo;
     std::string filter = Settings::Manager::getString("texture filtering", "General");
-#ifndef ANDROID
+
     if (filter == "anisotropic") tfo = TFO_ANISOTROPIC;
     else if (filter == "trilinear") tfo = TFO_TRILINEAR;
     else if (filter == "bilinear") tfo = TFO_BILINEAR;
     else /*if (filter == "none")*/ tfo = TFO_NONE;
-#else
-    tfo = TFO_NONE;
-#endif
+
     MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
     MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
 
@@ -150,8 +148,8 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     sh::Factory::getInstance ().setSharedParameter ("waterEnabled", sh::makeProperty<sh::FloatValue> (new sh::FloatValue(0.0)));
     sh::Factory::getInstance ().setSharedParameter ("waterLevel", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
     sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
-    sh::Factory::getInstance ().setSharedParameter ("windDir_windSpeed", sh::makeProperty<sh::Vector3>(new sh::Vector3(0.5, -0.8, 0.2)));
-    sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(1, 0.6)));
+    sh::Factory::getInstance ().setSharedParameter ("windDir_windSpeed", sh::makeProperty<sh::Vector3>(new sh::Vector3(0.5f, -0.8f, 0.2f)));
+    sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(1, 0.6f)));
     sh::Factory::getInstance ().setGlobalSetting ("refraction", Settings::Manager::getBool("refraction", "Water") ? "true" : "false");
     sh::Factory::getInstance ().setGlobalSetting ("viewproj_fix", "false");
     sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh::Vector4> (new sh::Vector4(0,0,0,0)));
@@ -323,7 +321,7 @@ void RenderingManager::updatePlayerPtr(const MWWorld::Ptr &ptr)
 void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
 {
     NpcAnimation *anim = NULL;
-    if(ptr.getRefData().getHandle() == "player")
+    if(ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
         anim = mPlayerAnimation;
     else if(ptr.getClass().isActor())
         anim = dynamic_cast<NpcAnimation*>(mActors->getAnimation(ptr));
@@ -348,7 +346,7 @@ void RenderingManager::update (float duration, bool paused)
 
     MWWorld::Ptr player = world->getPlayerPtr();
 
-    int blind = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude();
+    int blind = static_cast<int>(player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude());
     MWBase::Environment::get().getWindowManager()->setBlindness(std::max(0, std::min(100, blind)));
     setAmbientMode();
 
@@ -367,7 +365,7 @@ void RenderingManager::update (float duration, bool paused)
 
         btVector3 btOrig(orig.x, orig.y, orig.z);
         btVector3 btDest(dest.x, dest.y, dest.z);
-        std::pair<bool,float> test = mPhysicsEngine->sphereCast(mRendering.getCamera()->getNearClipDistance()*2.5, btOrig, btDest);
+        std::pair<bool,float> test = mPhysicsEngine->sphereCast(mRendering.getCamera()->getNearClipDistance()*2.5f, btOrig, btDest);
         if(test.first)
             mCamera->setCameraDistance(test.second * orig.distance(dest), false, false);
     }
@@ -377,8 +375,8 @@ void RenderingManager::update (float duration, bool paused)
     bool isInAir = !world->isOnGround(player);
     bool isSwimming = world->isSwimming(player);
 
-    static const int i1stPersonSneakDelta = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-            .find("i1stPersonSneakDelta")->getInt();
+    static const float i1stPersonSneakDelta = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+            .find("i1stPersonSneakDelta")->getFloat();
     if(!paused && isSneaking && !(isSwimming || isInAir))
         mCamera->setSneakOffset(i1stPersonSneakDelta);
 
@@ -540,7 +538,7 @@ void RenderingManager::applyFog (bool underwater)
     }
     else
     {
-        Ogre::ColourValue clv(0.090195, 0.115685, 0.12745);
+        Ogre::ColourValue clv(0.090195f, 0.115685f, 0.12745f);
         mRendering.getScene()->setFog (FOG_LINEAR, Ogre::ColourValue(clv), 0, 0, 1000);
         mRendering.getViewport()->setBackgroundColour (Ogre::ColourValue(clv));
         mWater->setViewportBackground (Ogre::ColourValue(clv));
@@ -600,9 +598,9 @@ void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
     mAmbientColor = colour;
 
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    int nightEye = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).getMagnitude();
+    int nightEye = static_cast<int>(player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).getMagnitude());
     Ogre::ColourValue final = colour;
-    final += Ogre::ColourValue(0.7,0.7,0.7,0) * std::min(1.f, (nightEye/100.f));
+    final += Ogre::ColourValue(0.7f,0.7f,0.7f,0) * std::min(1.f, (nightEye/100.f));
 
     mRendering.getScene()->setAmbientLight(final);
 }
@@ -664,7 +662,7 @@ void RenderingManager::requestMap(MWWorld::CellStore* cell)
         assert(mTerrain);
 
         Ogre::AxisAlignedBox dims = mObjects->getDimensions(cell);
-        Ogre::Vector2 center (cell->getCell()->getGridX() + 0.5, cell->getCell()->getGridY() + 0.5);
+        Ogre::Vector2 center (cell->getCell()->getGridX() + 0.5f, cell->getCell()->getGridY() + 0.5f);
         dims.merge(mTerrain->getWorldBoundingBox(center));
 
         mLocalMap->requestMap(cell, dims.getMinimum().z, dims.getMaximum().z);
@@ -716,8 +714,8 @@ Ogre::Vector4 RenderingManager::boundingBoxToScreen(Ogre::AxisAlignedBox bounds)
 
         // make 2D relative/normalized coords from the view-space vertex
         // by dividing out the Z (depth) factor -- this is an approximation
-        float x = corner.x / corner.z + 0.5;
-        float y = corner.y / corner.z + 0.5;
+        float x = corner.x / corner.z + 0.5f;
+        float y = corner.y / corner.z + 0.5f;
 
         if (x < min_x)
         min_x = x;
@@ -957,7 +955,7 @@ Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
 {
     Animation *anim = mActors->getAnimation(ptr);
 
-    if(!anim && ptr.getRefData().getHandle() == "player")
+    if(!anim && ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
         anim = mPlayerAnimation;
 
     if (!anim)

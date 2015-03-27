@@ -2252,7 +2252,8 @@ CSMDoc::Document::Document (const VFS::Manager* vfs, const Files::ConfigurationM
   mTools (*this), mResDir(resDir),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
-  mSaving (*this, mProjectPath, encoding),
+  mSavingOperation (*this, mProjectPath, encoding),
+  mSaving (&mSavingOperation),
   mRunner (mProjectPath)
 {
     if (mContentFiles.empty())

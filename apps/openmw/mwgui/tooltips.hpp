@@ -9,7 +9,7 @@
 
 namespace ESM
 {
-    class Class;
+    struct Class;
     struct Race;
 }
 

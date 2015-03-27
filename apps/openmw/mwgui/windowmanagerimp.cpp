@@ -565,11 +565,11 @@ namespace MWGui
                     int eff = mShown & mAllowed & ~mForceHidden;
 
                     // Show the windows we want
-                    mMap            ->setVisible(eff & GW_Map);
-                    mStatsWindow    ->setVisible(eff & GW_Stats);
-                    mInventoryWindow->setVisible(eff & GW_Inventory);
+                    mMap            ->setVisible((eff & GW_Map) != 0);
+                    mStatsWindow    ->setVisible((eff & GW_Stats) != 0);
+                    mInventoryWindow->setVisible((eff & GW_Inventory) != 0);
                     mInventoryWindow->setGuiMode(mode);
-                    mSpellWindow    ->setVisible(eff & GW_Magic);
+                    mSpellWindow    ->setVisible((eff & GW_Magic) != 0);
                     break;
                 }
                 case GM_Container:
@@ -713,16 +713,6 @@ namespace MWGui
         mCharGen->configureSkills(major, minor);
         mPlayerMajorSkills = major;
         mPlayerMinorSkills = minor;
-    }
-
-    void WindowManager::setReputation (int reputation)
-    {
-        mStatsWindow->setReputation (reputation);
-    }
-
-    void WindowManager::setBounty (int bounty)
-    {
-        mStatsWindow->setBounty (bounty);
     }
 
     void WindowManager::updateSkillArea()
@@ -1103,10 +1093,10 @@ namespace MWGui
 
         for (std::map<MyGUI::Window*, std::string>::iterator it = mTrackedWindows.begin(); it != mTrackedWindows.end(); ++it)
         {
-            MyGUI::IntPoint pos (Settings::Manager::getFloat(it->second + " x", "Windows") * x,
-                                 Settings::Manager::getFloat(it->second+ " y", "Windows") * y);
-            MyGUI::IntSize size (Settings::Manager::getFloat(it->second + " w", "Windows") * x,
-                                 Settings::Manager::getFloat(it->second + " h", "Windows") * y);
+            MyGUI::IntPoint pos(static_cast<int>(Settings::Manager::getFloat(it->second + " x", "Windows") * x),
+                                static_cast<int>( Settings::Manager::getFloat(it->second+ " y", "Windows") * y));
+            MyGUI::IntSize size(static_cast<int>(Settings::Manager::getFloat(it->second + " w", "Windows") * x),
+                                 static_cast<int>(Settings::Manager::getFloat(it->second + " h", "Windows") * y));
             it->first->setPosition(pos);
             it->first->setSize(size);
         }
@@ -1221,7 +1211,7 @@ namespace MWGui
                 .find(item.getClass().getEnchantment(item));
 
         int chargePercent = (item.getCellRef().getEnchantmentCharge() == -1) ? 100
-                : (item.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
+                : static_cast<int>(item.getCellRef().getEnchantmentCharge() / static_cast<float>(ench->mData.mCharge) * 100);
         mHud->setSelectedEnchantItem(item, chargePercent);
         mSpellWindow->setTitle(item.getClass().getName(item));
     }
@@ -1229,7 +1219,7 @@ namespace MWGui
     void WindowManager::setSelectedWeapon(const MWWorld::Ptr& item)
     {
         int durabilityPercent =
-             (item.getClass().getItemHealth(item) / static_cast<float>(item.getClass().getItemMaxHealth(item)) * 100);
+             static_cast<int>(item.getClass().getItemHealth(item) / static_cast<float>(item.getClass().getItemMaxHealth(item)) * 100);
         mHud->setSelectedWeapon(item, durabilityPercent);
         mInventoryWindow->setTitle(item.getClass().getName(item));
     }
@@ -1262,8 +1252,8 @@ namespace MWGui
     void WindowManager::getMousePosition(float &x, float &y)
     {
         const MyGUI::IntPoint& pos = MyGUI::InputManager::getInstance().getMousePosition();
-        x = pos.left;
-        y = pos.top;
+        x = static_cast<float>(pos.left);
+        y = static_cast<float>(pos.top);
         const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
         x /= viewSize.width;
         y /= viewSize.height;
@@ -1287,21 +1277,14 @@ namespace MWGui
     }
 
     MWGui::DialogueWindow* WindowManager::getDialogueWindow() { return mDialogueWindow;  }
-    MWGui::ContainerWindow* WindowManager::getContainerWindow() { return mContainerWindow; }
     MWGui::InventoryWindow* WindowManager::getInventoryWindow() { return mInventoryWindow; }
-    MWGui::BookWindow* WindowManager::getBookWindow() { return mBookWindow; }
-    MWGui::ScrollWindow* WindowManager::getScrollWindow() { return mScrollWindow; }
     MWGui::CountDialog* WindowManager::getCountDialog() { return mCountDialog; }
     MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog() { return mConfirmationDialog; }
     MWGui::TradeWindow* WindowManager::getTradeWindow() { return mTradeWindow; }
-    MWGui::SpellBuyingWindow* WindowManager::getSpellBuyingWindow() { return mSpellBuyingWindow; }
-    MWGui::TravelWindow* WindowManager::getTravelWindow() { return mTravelWindow; }
-    MWGui::SpellWindow* WindowManager::getSpellWindow() { return mSpellWindow; }
-    MWGui::Console* WindowManager::getConsole() { return mConsole; }
 
     bool WindowManager::isAllowed (GuiWindow wnd) const
     {
-        return mAllowed & wnd;
+        return (mAllowed & wnd) != 0;
     }
 
     void WindowManager::allow (GuiWindow wnd)
@@ -1459,11 +1442,13 @@ namespace MWGui
 
     void WindowManager::startSpellMaking(MWWorld::Ptr actor)
     {
+        pushGuiMode(GM_SpellCreation);
         mSpellCreationDialog->startSpellMaking (actor);
     }
 
     void WindowManager::startEnchanting (MWWorld::Ptr actor)
     {
+        pushGuiMode(GM_Enchanting);
         mEnchantingDialog->startEnchanting (actor);
     }
 
@@ -1474,16 +1459,19 @@ namespace MWGui
 
     void WindowManager::startTraining(MWWorld::Ptr actor)
     {
+        pushGuiMode(GM_Training);
         mTrainingWindow->startTraining(actor);
     }
 
     void WindowManager::startRepair(MWWorld::Ptr actor)
     {
+        pushGuiMode(GM_MerchantRepair);
         mMerchantRepair->startRepair(actor);
     }
 
     void WindowManager::startRepairItem(MWWorld::Ptr item)
     {
+        pushGuiMode(MWGui::GM_Repair);
         mRepair->startRepairItem(item);
     }
 
@@ -1494,6 +1482,7 @@ namespace MWGui
 
     void WindowManager::showCompanionWindow(MWWorld::Ptr actor)
     {
+        pushGuiMode(MWGui::GM_Companion);
         mCompanionWindow->open(actor);
     }
 
@@ -1569,10 +1558,10 @@ namespace MWGui
     void WindowManager::trackWindow(OEngine::GUI::Layout *layout, const std::string &name)
     {
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        MyGUI::IntPoint pos (Settings::Manager::getFloat(name + " x", "Windows") * viewSize.width,
-                             Settings::Manager::getFloat(name + " y", "Windows") * viewSize.height);
-        MyGUI::IntSize size (Settings::Manager::getFloat(name + " w", "Windows") * viewSize.width,
-                             Settings::Manager::getFloat(name + " h", "Windows") * viewSize.height);
+        MyGUI::IntPoint pos(static_cast<int>(Settings::Manager::getFloat(name + " x", "Windows") * viewSize.width),
+                            static_cast<int>(Settings::Manager::getFloat(name + " y", "Windows") * viewSize.height));
+        MyGUI::IntSize size (static_cast<int>(Settings::Manager::getFloat(name + " w", "Windows") * viewSize.width),
+                             static_cast<int>(Settings::Manager::getFloat(name + " h", "Windows") * viewSize.height));
         layout->mMainWidget->setPosition(pos);
         layout->mMainWidget->setSize(size);
 
@@ -1744,12 +1733,10 @@ namespace MWGui
         mVideoWidget->autoResize(stretch);
     }
 
-    WindowModal* WindowManager::getCurrentModal() const
+    void WindowManager::exitCurrentModal()
     {
-        if(!mCurrentModals.empty())
-            return mCurrentModals.top();
-        else
-            return NULL;
+        if (!mCurrentModals.empty())
+            mCurrentModals.top()->exit();
     }
 
     void WindowManager::removeCurrentModal(WindowModal* input)
@@ -1872,6 +1859,53 @@ namespace MWGui
     void WindowManager::cycleWeapon(bool next)
     {
         mInventoryWindow->cycle(next);
+    }
+
+    void WindowManager::setConsoleSelectedObject(const MWWorld::Ptr &object)
+    {
+        mConsole->setSelectedObject(object);
+    }
+
+    void WindowManager::updateSpellWindow()
+    {
+        if (mSpellWindow)
+            mSpellWindow->updateSpells();
+    }
+
+    void WindowManager::startTravel(const MWWorld::Ptr &actor)
+    {
+        pushGuiMode(GM_Travel);
+        mTravelWindow->startTravel(actor);
+    }
+
+    void WindowManager::startSpellBuying(const MWWorld::Ptr &actor)
+    {
+        pushGuiMode(GM_SpellBuying);
+        mSpellBuyingWindow->startSpellBuying(actor);
+    }
+
+    void WindowManager::startTrade(const MWWorld::Ptr &actor)
+    {
+        pushGuiMode(GM_Barter);
+        mTradeWindow->startTrade(actor);
+    }
+
+    void WindowManager::openContainer(const MWWorld::Ptr &container, bool loot)
+    {
+        pushGuiMode(GM_Container);
+        mContainerWindow->open(container, loot);
+    }
+
+    void WindowManager::showBook(const MWWorld::Ptr &item, bool showTakeButton)
+    {
+        pushGuiMode(GM_Book);
+        mBookWindow->open(item, showTakeButton);
+    }
+
+    void WindowManager::showScroll(const MWWorld::Ptr &item, bool showTakeButton)
+    {
+        pushGuiMode(GM_Scroll);
+        mScrollWindow->open(item, showTakeButton);
     }
 
 }

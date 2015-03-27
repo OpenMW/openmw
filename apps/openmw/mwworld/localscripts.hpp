@@ -8,7 +8,7 @@
 
 namespace MWWorld
 {
-    struct ESMStore;
+    class ESMStore;
     class CellStore;
     class RefData;
 

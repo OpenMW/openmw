@@ -19,7 +19,6 @@ namespace MWWorld
             return;
         }
 
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Repair);
         MWBase::Environment::get().getWindowManager()->startRepairItem(getTarget());
     }
 }

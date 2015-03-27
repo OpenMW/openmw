@@ -74,7 +74,7 @@ add_component_dir (esm
     loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
     savedgame journalentry queststate locals globalscript player objectstate cellid cellstate globalmap inventorystate containerstate npcstate creaturestate dialoguestate statstate
     npcstats creaturestats weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
-    aisequence magiceffects util custommarkerstate stolenitems
+    aisequence magiceffects util custommarkerstate stolenitems transport
     )
 
 add_component_dir (esmterrain
@@ -173,7 +173,12 @@ include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
-target_link_libraries(components ${Boost_LIBRARIES} ${OGRE_LIBRARIES} ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(components 
+    ${Boost_LIBRARIES} 
+    ${OGRE_LIBRARIES}
+    ${OENGINE_LIBRARY}
+    ${OPENSCENEGRAPH_LIBRARIES}
+)
 
 if (GIT_CHECKOUT)
     add_dependencies (components git-version)

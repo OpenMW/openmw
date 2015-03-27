@@ -88,6 +88,9 @@ void CreatureWeaponAnimation::updateParts()
 
 void CreatureWeaponAnimation::updatePart(NifOgre::ObjectScenePtr& scene, int slot)
 {
+    if (!mSkelBase)
+        return;
+
     MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     MWWorld::ContainerStoreIterator it = inv.getSlot(slot);
 
@@ -181,7 +184,9 @@ void CreatureWeaponAnimation::releaseArrow()
 Ogre::Vector3 CreatureWeaponAnimation::runAnimation(float duration)
 {
     Ogre::Vector3 ret = Animation::runAnimation(duration);
-    pitchSkeleton(mPtr.getRefData().getPosition().rot[0], mSkelBase->getSkeleton());
+
+    if (mSkelBase)
+        pitchSkeleton(mPtr.getRefData().getPosition().rot[0], mSkelBase->getSkeleton());
 
     if (!mWeapon.isNull())
     {

@@ -17,7 +17,9 @@
 #include <OgreViewport.h>
 
 using namespace Ogre;
-using namespace OEngine::Render;
+
+namespace SFO
+{
 
 void ImageRotate::rotate(const std::string& sourceImage, const std::string& destImage, const float angle)
 {
@@ -92,4 +94,6 @@ void ImageRotate::rotate(const std::string& sourceImage, const std::string& dest
     MaterialManager::getSingleton().remove("ImageRotateMaterial");
     root->destroySceneManager(sceneMgr);
     delete rect;
+}
+
 }

@@ -121,7 +121,7 @@ class NiVisData : public Record
 public:
     struct VisData {
         float time;
-        char isSet;
+        bool isSet;
     };
     std::vector<VisData> mVis;
 

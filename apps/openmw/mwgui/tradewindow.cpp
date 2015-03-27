@@ -4,6 +4,8 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_ControllerManager.h>
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/widgets/numericeditbox.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -34,18 +36,21 @@ namespace
 
     int getEffectiveValue (MWWorld::Ptr item, int count)
     {
-        int price = item.getClass().getValue(item) * count;
+        float price = static_cast<float>(item.getClass().getValue(item));
         if (item.getClass().hasItemHealth(item))
-            price *= (static_cast<float>(item.getClass().getItemHealth(item)) / item.getClass().getItemMaxHealth(item));
-        return price;
+        {
+            price *= item.getClass().getItemHealth(item);
+            price /= item.getClass().getItemMaxHealth(item);
+        }
+        return static_cast<int>(price * count);
     }
 
 }
 
 namespace MWGui
 {
-    const float TradeWindow::sBalanceChangeInitialPause = 0.5;
-    const float TradeWindow::sBalanceChangeInterval = 0.1;
+    const float TradeWindow::sBalanceChangeInitialPause = 0.5f;
+    const float TradeWindow::sBalanceChangeInterval = 0.1f;
 
     TradeWindow::TradeWindow()
         : WindowBase("openmw_trade_window.layout")
@@ -340,16 +345,16 @@ namespace MWGui
             else
                 d = int(100 * (b - a) / a);
 
-            float clampedDisposition = std::max<int>(0,std::min<int>(int(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
-                + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()),100));
+            int clampedDisposition = std::max(0, std::min(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
+                + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange(),100));
 
             const MWMechanics::CreatureStats &sellerStats = mPtr.getClass().getCreatureStats(mPtr);
             const MWMechanics::CreatureStats &playerStats = player.getClass().getCreatureStats(player);
 
-            float a1 = player.getClass().getSkill(player, ESM::Skill::Mercantile);
+            float a1 = static_cast<float>(player.getClass().getSkill(player, ESM::Skill::Mercantile));
             float b1 = 0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified();
             float c1 = 0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified();
-            float d1 = mPtr.getClass().getSkill(mPtr, ESM::Skill::Mercantile);
+            float d1 = static_cast<float>(mPtr.getClass().getSkill(mPtr, ESM::Skill::Mercantile));
             float e1 = 0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified();
             float f1 = 0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified();
 
@@ -362,7 +367,7 @@ namespace MWGui
             else
                 x += abs(int(npcTerm - pcTerm));
 
-            int roll = std::rand()%100 + 1;
+            int roll = OEngine::Misc::Rng::rollDice(100) + 1;
             if(roll > x || (mCurrentMerchantOffer < 0) != (mCurrentBalance < 0)) //trade refused
             {
                 MWBase::Environment::get().getWindowManager()->
@@ -379,9 +384,9 @@ namespace MWGui
             int finalPrice = std::abs(mCurrentBalance);
             int initialMerchantOffer = std::abs(mCurrentMerchantOffer);
             if (!buying && (finalPrice > initialMerchantOffer) && finalPrice > 0)
-                skillGain = int(100 * (finalPrice - initialMerchantOffer) / float(finalPrice));
+                skillGain = floor(100 * (finalPrice - initialMerchantOffer) / float(finalPrice));
             else if (buying && (finalPrice < initialMerchantOffer) && initialMerchantOffer > 0)
-                skillGain = int(100 * (initialMerchantOffer - finalPrice) / float(initialMerchantOffer));
+                skillGain = floor(100 * (initialMerchantOffer - finalPrice) / float(initialMerchantOffer));
 
             player.getClass().skillUsageSucceeded(player, ESM::Skill::Mercantile, 0, skillGain);
         }

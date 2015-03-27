@@ -210,7 +210,8 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const MWWorld::Fallb
     int waterScale = 30;
 
     MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, mWaterPlane,
-        CELL_SIZE*5*waterScale, CELL_SIZE*5*waterScale, 40, 40, true, 1, 3*waterScale,3*waterScale, Vector3::UNIT_Y);
+        static_cast<Ogre::Real>(CELL_SIZE*5*waterScale), static_cast<Ogre::Real>(CELL_SIZE*5*waterScale), 
+        40, 40, true, 1, static_cast<Ogre::Real>(3 * waterScale), static_cast<Ogre::Real>(3 * waterScale), Vector3::UNIT_Y);
 
     mWater = mSceneMgr->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);
@@ -284,7 +285,7 @@ void Water::setActive(bool active)
     mActive = active;
     updateVisible();
 
-    sh::Factory::getInstance ().setSharedParameter ("waterEnabled", sh::makeProperty<sh::FloatValue> (new sh::FloatValue(active ? 1.0 : 0.0)));
+    sh::Factory::getInstance ().setSharedParameter ("waterEnabled", sh::makeProperty<sh::FloatValue> (new sh::FloatValue(active ? 1.0f : 0.0f)));
 }
 
 Water::~Water()
@@ -351,7 +352,7 @@ Water::updateUnderwater(bool underwater)
 
 Vector3 Water::getSceneNodeCoordinates(int gridX, int gridY)
 {
-    return Vector3(gridX * CELL_SIZE + (CELL_SIZE / 2), gridY * CELL_SIZE + (CELL_SIZE / 2), mTop);
+    return Vector3(static_cast<Ogre::Real>(gridX * CELL_SIZE + (CELL_SIZE / 2)), static_cast<Ogre::Real>(gridY * CELL_SIZE + (CELL_SIZE / 2)), mTop);
 }
 
 void Water::setViewportBackground(const ColourValue& bg)

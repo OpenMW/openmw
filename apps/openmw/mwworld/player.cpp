@@ -97,13 +97,13 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        ptr.getClass().getMovementSettings (ptr).mPosition[1] = value;
+        ptr.getClass().getMovementSettings(ptr).mPosition[1] = static_cast<float>(value);
     }
 
     void Player::setLeftRight (int value)
     {
         MWWorld::Ptr ptr = getPlayer();
-        ptr.getClass().getMovementSettings (ptr).mPosition[0] = value;
+        ptr.getClass().getMovementSettings(ptr).mPosition[0] = static_cast<float>(value);
     }
 
     void Player::setForwardBackward (int value)
@@ -115,13 +115,13 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        ptr.getClass().getMovementSettings (ptr).mPosition[1] = value;
+        ptr.getClass().getMovementSettings(ptr).mPosition[1] = static_cast<float>(value);
     }
 
     void Player::setUpDown(int value)
     {
         MWWorld::Ptr ptr = getPlayer();
-        ptr.getClass().getMovementSettings (ptr).mPosition[2] = value;
+        ptr.getClass().getMovementSettings(ptr).mPosition[2] = static_cast<float>(value);
     }
 
     void Player::setRunState(bool run)

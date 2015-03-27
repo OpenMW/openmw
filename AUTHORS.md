@@ -39,6 +39,8 @@ Programmers
     Eli2
     Emanuel Guével (potatoesmaster)
     eroen
+    escondida
+    Evgeniy Mineev (sandstranger)
     Fil Krynicki (filkry)
     Gašper Sedej
     gugus/gus
@@ -91,7 +93,6 @@ Programmers
     Rohit Nirmal
     Roman Melnik (Kromgart)
     Roman Proskuryakov (humbug)
-    sandstranger
     Sandy Carter (bwrsandman)
     Scott Howard
     Sebastian Wick (swick)

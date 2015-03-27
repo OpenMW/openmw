@@ -169,7 +169,7 @@ namespace MWScript
                     if (mIndex==0 && ptr.getClass().hasItemHealth (ptr))
                     {
                         // health is a special case
-                        value = ptr.getClass().getItemMaxHealth (ptr);
+                        value = static_cast<Interpreter::Type_Float>(ptr.getClass().getItemMaxHealth(ptr));
                     } else {
                         value =
                             ptr.getClass()
@@ -402,7 +402,7 @@ namespace MWScript
                     MWBase::World *world = MWBase::Environment::get().getWorld();
                     MWWorld::Ptr player = world->getPlayerPtr();
 
-                    int bounty = runtime[0].mFloat;
+                    int bounty = static_cast<int>(runtime[0].mFloat);
                     runtime.pop();
                     player.getClass().getNpcStats (player).setBounty(bounty);
 
@@ -420,7 +420,7 @@ namespace MWScript
                     MWBase::World *world = MWBase::Environment::get().getWorld();
                     MWWorld::Ptr player = world->getPlayerPtr();
 
-                    player.getClass().getNpcStats (player).setBounty(runtime[0].mFloat + player.getClass().getNpcStats (player).getBounty());
+                    player.getClass().getNpcStats(player).setBounty(static_cast<int>(runtime[0].mFloat) + player.getClass().getNpcStats(player).getBounty());
                     runtime.pop();
                 }
         };
@@ -1195,11 +1195,10 @@ namespace MWScript
                 float currentValue = stats.getMagicEffects().get(mPositiveEffect).getMagnitude();
                 if (mNegativeEffect != -1)
                     currentValue -= stats.getMagicEffects().get(mNegativeEffect).getMagnitude();
-                currentValue = int(currentValue);
 
                 int arg = runtime[0].mInteger;
                 runtime.pop();
-                stats.getMagicEffects().modifyBase(mPositiveEffect, (arg - currentValue));
+                stats.getMagicEffects().modifyBase(mPositiveEffect, (arg - static_cast<int>(currentValue)));
             }
         };
 

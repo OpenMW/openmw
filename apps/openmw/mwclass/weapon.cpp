@@ -345,7 +345,7 @@ namespace MWClass
         info.enchant = ref->mBase->mEnchant;
 
         if (!info.enchant.empty())
-            info.remainingEnchantCharge = ptr.getCellRef().getEnchantmentCharge();
+            info.remainingEnchantCharge = static_cast<int>(ptr.getCellRef().getEnchantmentCharge());
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());

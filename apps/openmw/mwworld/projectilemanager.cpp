@@ -68,7 +68,7 @@ namespace MWWorld
     {
         float height = 0;
         if (OEngine::Physic::PhysicActor* actor = mPhysEngine.getCharacter(caster.getRefData().getHandle()))
-            height = actor->getHalfExtents().z * 2 * 0.75;         // Spawn at 0.75 * ActorHeight
+            height = actor->getHalfExtents().z * 2 * 0.75f;         // Spawn at 0.75 * ActorHeight
 
         Ogre::Vector3 pos(caster.getRefData().getPosition().pos);
         pos.z += height;

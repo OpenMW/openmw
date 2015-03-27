@@ -25,6 +25,7 @@
 #include <components/esm/loadbody.hpp>
 #include <components/esm/loadsndg.hpp>
 #include <components/esm/loadmgef.hpp>
+#include <components/esm/loadsscr.hpp>
 #include <components/esm/debugprofile.hpp>
 #include <components/esm/filter.hpp>
 
@@ -87,6 +88,7 @@ namespace CSMWorld
             SubCellCollection<Pathgrid> mPathgrids;
             IdCollection<ESM::DebugProfile> mDebugProfiles;
             IdCollection<ESM::SoundGenerator> mSoundGens;
+            IdCollection<ESM::StartScript> mStartScripts;
             InfoCollection mTopicInfos;
             InfoCollection mJournalInfos;
             IdCollection<Cell> mCells;
@@ -237,6 +239,10 @@ namespace CSMWorld
             const SubCellCollection<Pathgrid>& getPathgrids() const;
 
             SubCellCollection<Pathgrid>& getPathgrids();
+
+            const IdCollection<ESM::StartScript>& getStartScripts() const;
+
+            IdCollection<ESM::StartScript>& getStartScripts();
 
             /// Throws an exception, if \a id does not match a resources list.
             const Resources& getResources (const UniversalId& id) const;

@@ -43,7 +43,7 @@ namespace Gui
         std::string getItemNameAt(unsigned int at); ///< \attention if there are separators, this method will return "" at the place where the separator is
         void clear();
 
-        MyGUI::Widget* getItemWidget(const std::string& name);
+        MyGUI::Button* getItemWidget(const std::string& name);
         ///< get widget for an item name, useful to set up tooltip
 
         virtual void setPropertyOverride(const std::string& _key, const std::string& _value);

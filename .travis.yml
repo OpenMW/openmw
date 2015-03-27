@@ -21,6 +21,14 @@ addons:
     build_command_prepend: "cmake ."
     build_command:   "make -j3"
     branch_pattern: coverity_scan
+matrix:
+  include:
+    - os: linux
+      env:
+        ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
+      compiler: clang
+  allow_failures:
+    - env: ANALYZE="scan-build-3.6 --use-cc clang-3.6 --use-c++ clang++-3.6 "
 
 before_install:
  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./CI/before_install.linux.sh; fi
@@ -30,8 +38,8 @@ before_script:
  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then ./CI/before_script.osx.sh; fi
 script:
  - cd ./build
- - if [ "$COVERITY_SCAN_BRANCH" != 1 ]; then make -j4; fi
- - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && ["${TRAVIS_OS_NAME}" = "osx"]; then make package; fi
+ - if [ "$COVERITY_SCAN_BRANCH" != 1 ]; then ${ANALYZE}make -j4; fi
+ - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then make package; fi
 after_script:
  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./openmw_test_suite; fi
 notifications:

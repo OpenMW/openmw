@@ -15,7 +15,6 @@ void MWMechanics::AttributeValue::readState (const ESM::StatState<int>& state)
     mDamage = state.mDamage;
 }
 
-
 void MWMechanics::SkillValue::writeState (ESM::StatState<int>& state) const
 {
     AttributeValue::writeState (state);

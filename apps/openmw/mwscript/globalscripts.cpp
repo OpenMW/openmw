@@ -100,7 +100,7 @@ namespace MWScript
             mStore.get<ESM::StartScript>().begin();
             iter != mStore.get<ESM::StartScript>().end(); ++iter)
         {
-            scripts.push_back (iter->mScript);
+            scripts.push_back (iter->mId);
         }
 
         // add scripts

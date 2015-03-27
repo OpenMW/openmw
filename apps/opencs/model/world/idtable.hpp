@@ -10,7 +10,7 @@
 namespace CSMWorld
 {
     class CollectionBase;
-    class RecordBase;
+    struct RecordBase;
 
     class IdTable : public IdTableBase
     {

@@ -2,7 +2,7 @@
 #define OPENMW_ESM_READER_H
 
 #include <stdint.h>
-#include <libs/platform/string.h>
+#include <string.h>
 #include <cassert>
 #include <vector>
 #include <sstream>
