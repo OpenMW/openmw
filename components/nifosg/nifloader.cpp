@@ -1407,7 +1407,8 @@ namespace NifOsg
                         osgDB::ReaderWriter::ReadResult result = reader->readImage(*mResourceManager->get(filename.c_str()), opts);
                         osg::Image* image = result.getImage();
                         osg::Texture2D* texture2d = new osg::Texture2D;
-                        texture2d->setUnRefImageDataAfterApply(true);
+                        // Can be enabled for single-context, i.e. in openmw
+                        //texture2d->setUnRefImageDataAfterApply(true);
                         texture2d->setImage(image);
 
                         unsigned int clamp = static_cast<unsigned int>(tex.clamp);
