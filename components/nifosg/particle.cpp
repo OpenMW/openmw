@@ -176,7 +176,7 @@ void GravityAffector::beginOperate(osgParticle::Program* program)
 {
     bool absolute = (program->getReferenceFrame() == osgParticle::ParticleProcessor::ABSOLUTE_RF);
     if (mType == Type_Wind)
-        mCachedWorldPositionDirection = absolute ? osg::Matrix::transform3x3(program->getLocalToWorldMatrix(), mDirection) : mDirection;
+        mCachedWorldPositionDirection = absolute ? program->rotateLocalToWorld(mDirection) : mDirection;
     else // Type_Point
         mCachedWorldPositionDirection = absolute ? program->transformLocalToWorld(mPosition) : mPosition;
 }
