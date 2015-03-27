@@ -25,6 +25,7 @@
 #include "bodypartcheck.hpp"
 #include "referencecheck.hpp"
 #include "startscriptcheck.hpp"
+#include "searchoperation.hpp"
 
 CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
 {
@@ -108,6 +109,12 @@ CSMTools::Tools::Tools (CSMDoc::Document& document)
     // index 0: load error log
     mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
     mActiveReports.insert (std::make_pair (CSMDoc::State_Loading, 0));
+
+    connect (&mSearch, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
+    connect (&mSearch, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
+    connect (&mSearch,
+        SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
+        this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));   
 }
 
 CSMTools::Tools::~Tools()
@@ -143,6 +150,21 @@ CSMWorld::UniversalId CSMTools::Tools::newSearch()
     mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
 
     return CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Search, mNextReportNumber-1);    
+}
+
+void CSMTools::Tools::runSearch (const CSMWorld::UniversalId& searchId, const Search& search)
+{
+    mActiveReports[CSMDoc::State_Searching] = searchId.getIndex();
+
+    if (!mSearchOperation)
+    {
+        mSearchOperation = new SearchOperation (mDocument);
+        mSearch.setOperation (mSearchOperation);        
+    }
+
+    mSearchOperation->configure (search);
+    
+    mSearch.start();
 }
 
 void CSMTools::Tools::abortOperation (int type)

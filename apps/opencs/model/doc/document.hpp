@@ -121,6 +121,8 @@ namespace CSMDoc
             CSMWorld::UniversalId verify();
 
             CSMWorld::UniversalId newSearch();
+
+            void runSearch (const CSMWorld::UniversalId& searchId, const CSMTools::Search& search);
             
             void abortOperation (int type);
 

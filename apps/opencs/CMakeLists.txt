@@ -40,7 +40,7 @@ opencs_units (model/tools
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
-    startscriptcheck search
+    startscriptcheck search searchoperation searchstage
     )
 
 

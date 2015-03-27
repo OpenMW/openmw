@@ -9,7 +9,7 @@
 #include "searchbox.hpp"
 
 CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: CSVDoc::SubView (id)
+: CSVDoc::SubView (id), mDocument (document)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
@@ -32,6 +32,9 @@ CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     connect (&document, SIGNAL (stateChanged (int, CSMDoc::Document *)),
         this, SLOT (stateChanged (int, CSMDoc::Document *)));
+
+    connect (&mSearchBox, SIGNAL (startSearch (const CSMTools::Search&)),
+        this, SLOT (startSearch (const CSMTools::Search&)));
 }
 
 void CSVTools::SearchSubView::setEditLock (bool locked)
@@ -47,4 +50,9 @@ void CSVTools::SearchSubView::updateUserSetting (const QString &name, const QStr
 void CSVTools::SearchSubView::stateChanged (int state, CSMDoc::Document *document)
 {
     mSearchBox.setSearchMode (!(state & CSMDoc::State_Searching));
+}
+
+void CSVTools::SearchSubView::startSearch (const CSMTools::Search& search)
+{
+    mDocument.runSearch (getUniversalId(), search);
 }

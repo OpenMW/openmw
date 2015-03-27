@@ -23,6 +23,7 @@ namespace CSVTools
 
             ReportTable *mTable;
             SearchBox mSearchBox;
+            CSMDoc::Document& mDocument;
 
         public:
 
@@ -35,6 +36,8 @@ namespace CSVTools
         private slots:
 
             void stateChanged (int state, CSMDoc::Document *document);
+
+            void startSearch (const CSMTools::Search& search);
     };
 }
 
