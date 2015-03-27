@@ -24,7 +24,7 @@ void CSMTools::Search::searchTextCell (const CSMWorld::IdTableBase *model,
     while ((pos = text.indexOf (search, pos, Qt::CaseInsensitive))!=-1)
     {
         std::ostringstream message;
-        message << text.mid (pos).toUtf8().data();
+        message << getLocation (model, index, id) << text.mid (pos).toUtf8().data();
 
         std::ostringstream hint;
         hint << "r: " << index.column() << " " << pos << " " << search.length();
@@ -49,7 +49,7 @@ void CSMTools::Search::searchRegExCell (const CSMWorld::IdTableBase *model,
     while ((pos = mRegExp.indexIn (text, pos))!=-1)
     {
         std::ostringstream message;
-        message << text.mid (pos).toUtf8().data();
+        message << getLocation (model, index, id) << text.mid (pos).toUtf8().data();
 
         int length = mRegExp.matchedLength();
         
@@ -76,13 +76,26 @@ void CSMTools::Search::searchRecordStateCell (const CSMWorld::IdTableBase *model
             CSMWorld::Columns::getEnums (CSMWorld::Columns::ColumnId_Modification);
     
         std::ostringstream message;
-        message << id.getId() << " " << states.at (data);
+        message << getLocation (model, index, id) << states.at (data);
 
         std::ostringstream hint;
         hint << "r: " << index.column();
         
         messages.add (id, message.str(), hint.str());
     }
+}
+
+std::string CSMTools::Search::getLocation (const CSMWorld::IdTableBase *model, const QModelIndex& index, const CSMWorld::UniversalId& id) const
+{
+    std::ostringstream stream;
+    
+    stream
+        << id.getId()
+        << ", "
+        << model->headerData (index.column(), Qt::Horizontal).toString().toUtf8().data()
+        << ": ";
+
+    return stream.str();
 }
 
 CSMTools::Search::Search() : mType (Type_None) {}

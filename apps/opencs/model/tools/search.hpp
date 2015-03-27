@@ -55,6 +55,8 @@ namespace CSMTools
             void searchRecordStateCell (const CSMWorld::IdTableBase *model,
                 const QModelIndex& index, const CSMWorld::UniversalId& id,
                 CSMDoc::Messages& messages) const;
+
+            std::string getLocation (const CSMWorld::IdTableBase *model, const QModelIndex& index, const CSMWorld::UniversalId& id) const;
                 
         public:
 
