@@ -27,7 +27,7 @@ void CSMTools::Search::searchTextCell (const CSMWorld::IdTableBase *model,
         message << text.mid (pos).toUtf8().data();
 
         std::ostringstream hint;
-        message << "r: " << index.column() << " " << pos << " " << search.length();
+        hint << "r: " << index.column() << " " << pos << " " << search.length();
         
         messages.add (id, message.str(), hint.str());
 
@@ -54,7 +54,7 @@ void CSMTools::Search::searchRegExCell (const CSMWorld::IdTableBase *model,
         int length = mRegExp.matchedLength();
         
         std::ostringstream hint;
-        message << "r: " << index.column() << " " << pos << " " << length;
+        hint << "r: " << index.column() << " " << pos << " " << length;
         
         messages.add (id, message.str(), hint.str());
 
@@ -79,7 +79,7 @@ void CSMTools::Search::searchRecordStateCell (const CSMWorld::IdTableBase *model
         message << id.getId() << " " << states.at (data);
 
         std::ostringstream hint;
-        message << "r: " << index.column();
+        hint << "r: " << index.column();
         
         messages.add (id, message.str(), hint.str());
     }
