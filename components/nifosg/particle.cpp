@@ -49,8 +49,10 @@ void InverseWorldMatrix::operator()(osg::Node *node, osg::NodeVisitor *nv)
 
         osg::MatrixTransform* trans = dynamic_cast<osg::MatrixTransform*>(node);
 
-        osg::Matrix worldMat = osg::computeLocalToWorld( path );
-        trans->setMatrix(osg::Matrix::inverse(worldMat));
+        osg::Matrix mat = osg::computeLocalToWorld( path );
+        mat = osg::Matrix::inverse(mat);
+        mat.orthoNormalize(mat); // don't undo the scale
+        trans->setMatrix(mat);
     }
     traverse(node,nv);
 }
@@ -174,7 +176,7 @@ void GravityAffector::beginOperate(osgParticle::Program* program)
 {
     bool absolute = (program->getReferenceFrame() == osgParticle::ParticleProcessor::ABSOLUTE_RF);
     if (mType == Type_Wind)
-        mCachedWorldPositionDirection = absolute ? program->rotateLocalToWorld(mDirection) : mDirection;
+        mCachedWorldPositionDirection = absolute ? osg::Matrix::transform3x3(program->getLocalToWorldMatrix(), mDirection) : mDirection;
     else // Type_Point
         mCachedWorldPositionDirection = absolute ? program->transformLocalToWorld(mPosition) : mPosition;
 }
@@ -241,10 +243,10 @@ void Emitter::emitParticles(double dt)
         worldToPs = osg::Matrix::inverse(psToWorld);
     }
 
+    worldToPs.orthoNormalize(worldToPs);
+
     const osg::Matrix& ltw = getLocalToWorldMatrix();
-    const osg::Matrix& previous_ltw = getPreviousLocalToWorldMatrix();
     const osg::Matrix emitterToPs = ltw * worldToPs;
-    const osg::Matrix prevEmitterToPs = previous_ltw * worldToPs;
 
     int n = mCounter->numParticlesToCreate(dt);
 
@@ -275,15 +277,11 @@ void Emitter::emitParticles(double dt)
         {
             mPlacer->place(P);
 
-            P->transformPositionVelocity(transform);
-
             mShooter->shoot(P);
 
-            // Now need to transform the position and velocity because we having a moving model.
-            // (is this actually how MW works?)
-            float r = ((float)rand()/(float)RAND_MAX);
-            P->transformPositionVelocity(emitterToPs, prevEmitterToPs, r);
-            //P->transformPositionVelocity(ltw);
+            P->transformPositionVelocity(transform);
+
+            P->transformPositionVelocity(emitterToPs);
         }
     }
 }
