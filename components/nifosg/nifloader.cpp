@@ -915,14 +915,8 @@ namespace NifOsg
         }
 
         // Load the initial state of the particle system, i.e. the initial particles and their positions, velocity and colors.
-        void handleParticleInitialState(const Nif::Node* nifNode, osgParticle::ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl,
-                                        osgParticle::ParticleProcessor::ReferenceFrame rf)
+        void handleParticleInitialState(const Nif::Node* nifNode, osgParticle::ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
         {
-            // TODO: also take into account the transform by placement in the scene (should be done post-load)
-            osg::Matrix particletransform;
-            if (rf == osgParticle::ParticleProcessor::ABSOLUTE_RF)
-                particletransform = getWorldTransform(nifNode);
-
             const Nif::NiAutoNormalParticlesData *particledata = NULL;
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles)
                 particledata = static_cast<const Nif::NiAutoNormalParticles*>(nifNode)->data.getPtr();
@@ -941,9 +935,11 @@ namespace NifOsg
 
                 osgParticle::Particle* created = partsys->createParticle(&particletemplate);
                 created->setLifeTime(std::max(0.f, particle.lifespan));
-                osg::Vec4f adjustedVelocity = osg::Vec4f(particle.velocity, 0.f) * particletransform;
-                created->setVelocity(osg::Vec3f(adjustedVelocity.x(), adjustedVelocity.y(), adjustedVelocity.z()));
-                created->setPosition(particledata->vertices.at(particle.vertex) * particletransform);
+
+                // Note this position and velocity is not correct for a particle system with absolute reference frame,
+                // which can not be done in this loader since we are not attached to the scene yet. Will be fixed up post-load in the SceneManager.
+                created->setVelocity(particle.velocity);
+                created->setPosition(particledata->vertices.at(particle.vertex));
 
                 osg::Vec4f partcolor (1.f,1.f,1.f,1.f);
                 if (particle.vertex < int(particledata->colors.size()))
@@ -1014,7 +1010,13 @@ namespace NifOsg
                     ? osgParticle::ParticleProcessor::RELATIVE_RF
                     : osgParticle::ParticleProcessor::ABSOLUTE_RF;
 
-            handleParticleInitialState(nifNode, partsys, partctrl, rf);
+            // HACK: ParticleSystem has no setReferenceFrame method
+            if (rf == osgParticle::ParticleProcessor::ABSOLUTE_RF)
+            {
+                partsys->getOrCreateUserDataContainer()->addDescription("worldspace");
+            }
+
+            handleParticleInitialState(nifNode, partsys, partctrl);
 
             partsys->setQuota(partctrl->numParticles);
 
@@ -1030,7 +1032,6 @@ namespace NifOsg
             // This seems to be true for all NIF files in the game that I've checked, suggesting that NIFs work similar to OSG with regards to update order.
             // If something ever violates this assumption, the worst that could happen is the culling being one frame late, which wouldn't be a disaster.
 
-            // Creating emitters will need to be changed when cloning a scenegraph is implemented, the particleSystem pointer would become invalid
             FindRecIndexVisitor find (partctrl->emitter->recIndex);
             rootNode->accept(find);
             if (!find.mFound)

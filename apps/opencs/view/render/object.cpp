@@ -5,6 +5,10 @@
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
 
+#include <osg/ShapeDrawable>
+#include <osg/Shape>
+#include <osg/Geode>
+
 #include "../../model/world/data.hpp"
 #include "../../model/world/ref.hpp"
 #include "../../model/world/refidcollection.hpp"
@@ -13,6 +17,22 @@
 #include <components/sceneutil/clone.hpp>
 
 #include "elements.hpp"
+
+namespace
+{
+
+    osg::ref_ptr<osg::Geode> createErrorCube()
+    {
+        osg::ref_ptr<osg::Box> shape(new osg::Box(osg::Vec3f(0,0,0), 50.f));
+        osg::ref_ptr<osg::ShapeDrawable> shapedrawable(new osg::ShapeDrawable);
+        shapedrawable->setShape(shape);
+
+        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+        geode->addDrawable(shapedrawable);
+        return geode;
+    }
+
+}
 
 
 void CSVRender::Object::clear()
@@ -44,15 +64,11 @@ void CSVRender::Object::update()
             error = 2;
     }
 
+    mBaseNode->removeChildren(0, mBaseNode->getNumChildren());
+
     if (error)
     {
-        /*
-        Ogre::Entity* entity = mBase->getCreator()->createEntity (Ogre::SceneManager::PT_CUBE);
-        entity->setMaterialName("BaseWhite"); /// \todo adjust material according to error
-        entity->setVisibilityFlags (Element_Reference);
-
-        mBase->attachObject (entity);
-        */
+        mBaseNode->addChild(createErrorCube());
     }
     else
     {
@@ -60,10 +76,7 @@ void CSVRender::Object::update()
         {
             std::string path = "meshes\\" + model;
 
-            osg::ref_ptr<osg::Node> loaded = mResourceSystem->getSceneManager()->getInstance(path);
-
-            mBaseNode->removeChildren(0, mBaseNode->getNumChildren());
-            mBaseNode->addChild(loaded);
+            mResourceSystem->getSceneManager()->createInstance(path, mBaseNode);
         }
         catch (std::exception& e)
         {
@@ -73,7 +86,7 @@ void CSVRender::Object::update()
     }
 }
 
-void CSVRender::Object::adjust()
+void CSVRender::Object::adjustTransform()
 {
     if (mReferenceId.empty())
         return;
@@ -120,8 +133,8 @@ CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
         mReferenceableId = getReference().mRefID;
     }
 
+    adjustTransform();
     update();
-    adjust();
 }
 
 CSVRender::Object::~Object()
@@ -140,8 +153,8 @@ bool CSVRender::Object::referenceableDataChanged (const QModelIndex& topLeft,
 
     if (index!=-1 && index>=topLeft.row() && index<=bottomRight.row())
     {
+        adjustTransform();
         update();
-        adjust();
         return true;
     }
 
@@ -160,8 +173,8 @@ bool CSVRender::Object::referenceableAboutToBeRemoved (const QModelIndex& parent
         // Deletion of referenceable-type objects is handled outside of Object.
         if (!mReferenceId.empty())
         {
+            adjustTransform();
             update();
-            adjust();
             return true;
         }
     }
@@ -184,6 +197,8 @@ bool CSVRender::Object::referenceDataChanged (const QModelIndex& topLeft,
         int columnIndex =
             references.findColumnIndex (CSMWorld::Columns::ColumnId_ReferenceableId);
 
+        adjustTransform();
+
         if (columnIndex>=topLeft.column() && columnIndex<=bottomRight.row())
         {
             mReferenceableId =
@@ -191,8 +206,6 @@ bool CSVRender::Object::referenceDataChanged (const QModelIndex& topLeft,
 
             update();
         }
-
-        adjust();
 
         return true;
     }

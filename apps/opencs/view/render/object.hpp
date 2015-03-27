@@ -52,10 +52,11 @@ namespace CSVRender
             void clear();
 
             /// Update model
+            /// @note Make sure adjustTransform() was called first so world space particles get positioned correctly
             void update();
 
             /// Adjust position, orientation and scale
-            void adjust();
+            void adjustTransform();
 
             /// Throws an exception if *this was constructed with referenceable
             const CSMWorld::CellRef& getReference() const;
