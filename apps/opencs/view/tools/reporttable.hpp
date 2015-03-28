@@ -43,6 +43,8 @@ namespace CSVTools
 
             void updateUserSetting (const QString& name, const QStringList& list);
 
+            void clear();
+
         private slots:
 
             void showSelection();

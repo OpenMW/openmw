@@ -54,5 +54,6 @@ void CSVTools::SearchSubView::stateChanged (int state, CSMDoc::Document *documen
 
 void CSVTools::SearchSubView::startSearch (const CSMTools::Search& search)
 {
+    mTable->clear();
     mDocument.runSearch (getUniversalId(), search);
 }

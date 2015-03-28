@@ -79,3 +79,13 @@ std::string CSMTools::ReportModel::getHint (int row) const
 {
     return mRows.at (row).second.second;
 }
+
+void CSMTools::ReportModel::clear()
+{
+    if (!mRows.empty())
+    {
+        beginRemoveRows (QModelIndex(), 0, mRows.size()-1);
+        mRows.clear();
+        endRemoveRows();
+    }
+}

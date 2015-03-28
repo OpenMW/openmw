@@ -34,6 +34,8 @@ namespace CSMTools
             const CSMWorld::UniversalId& getUniversalId (int row) const;
 
             std::string getHint (int row) const;
+
+            void clear();
     };
 }
 

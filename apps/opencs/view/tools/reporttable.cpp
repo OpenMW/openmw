@@ -134,3 +134,8 @@ void CSVTools::ReportTable::removeSelection()
 
     selectionModel()->clear();
 }
+
+void CSVTools::ReportTable::clear()
+{
+    mModel->clear();
+}
