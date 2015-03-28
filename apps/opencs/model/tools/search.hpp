@@ -30,8 +30,8 @@ namespace CSMTools
             {
                 Type_Text = 0,
                 Type_TextRegEx = 1,
-                Type_Reference = 2,
-                Type_ReferenceRegEx = 3,
+                Type_Id = 2,
+                Type_IdRegEx = 3,
                 Type_RecordState = 4,
                 Type_None
             };

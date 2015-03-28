@@ -103,14 +103,14 @@ CSMTools::Search::Search() : mType (Type_None) {}
 CSMTools::Search::Search (Type type, const std::string& value)
 : mType (type), mText (value)
 {
-    if (type!=Type_Text && type!=Type_Reference)
+    if (type!=Type_Text && type!=Type_Id)
         throw std::logic_error ("Invalid search parameter (string)");
 }
 
 CSMTools::Search::Search (Type type, const QRegExp& value)
 : mType (type), mRegExp (value)
 {
-    if (type!=Type_TextRegEx && type!=Type_ReferenceRegEx)
+    if (type!=Type_TextRegEx && type!=Type_IdRegEx)
         throw std::logic_error ("Invalid search parameter (RegExp)");
 }
 
@@ -150,8 +150,8 @@ void CSMTools::Search::configure (const CSMWorld::IdTableBase *model)
 
                 break;
                 
-            case Type_Reference:
-            case Type_ReferenceRegEx:
+            case Type_Id:
+            case Type_IdRegEx:
 
                 if (CSMWorld::ColumnBase::isId (display))
                 {
@@ -202,13 +202,13 @@ void CSMTools::Search::searchRow (const CSMWorld::IdTableBase *model, int row,
         switch (mType)
         {
             case Type_Text:
-            case Type_Reference:
+            case Type_Id:
 
                 searchTextCell (model, index, id, iter->second, messages);
                 break;
             
             case Type_TextRegEx:
-            case Type_ReferenceRegEx:
+            case Type_IdRegEx:
 
                 searchRegExCell (model, index, id, iter->second, messages);
                 break;

@@ -50,8 +50,8 @@ CSVTools::SearchBox::SearchBox (QWidget *parent)
 
     mMode.addItem ("Text");
     mMode.addItem ("Text (RegEx)");
-    mMode.addItem ("Reference");
-    mMode.addItem ("Reference (RegEx)");
+    mMode.addItem ("ID");
+    mMode.addItem ("ID (RegEx)");
     mMode.addItem ("Record State");
 
     mLayout->addWidget (&mMode, 0, 0);
@@ -93,12 +93,12 @@ CSMTools::Search CSVTools::SearchBox::getSearch() const
     switch (type)
     {
         case CSMTools::Search::Type_Text:
-        case CSMTools::Search::Type_Reference:
+        case CSMTools::Search::Type_Id:
 
             return CSMTools::Search (type, std::string (mText.text().toUtf8().data()));
         
         case CSMTools::Search::Type_TextRegEx:
-        case CSMTools::Search::Type_ReferenceRegEx:
+        case CSMTools::Search::Type_IdRegEx:
 
             return CSMTools::Search (type, QRegExp (mText.text().toUtf8().data(), Qt::CaseInsensitive));
         
@@ -120,8 +120,8 @@ void CSVTools::SearchBox::modeSelected (int index)
     {
         case CSMTools::Search::Type_Text:
         case CSMTools::Search::Type_TextRegEx:
-        case CSMTools::Search::Type_Reference:
-        case CSMTools::Search::Type_ReferenceRegEx:
+        case CSMTools::Search::Type_Id:
+        case CSMTools::Search::Type_IdRegEx:
 
             mInput.setCurrentIndex (0);
             break;
