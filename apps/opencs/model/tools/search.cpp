@@ -11,7 +11,7 @@
 #include "../../model/world/universalid.hpp"
 
 void CSMTools::Search::searchTextCell (const CSMWorld::IdTableBase *model,
-    const QModelIndex& index, const CSMWorld::UniversalId& id, bool multiple,
+    const QModelIndex& index, const CSMWorld::UniversalId& id,
     CSMDoc::Messages& messages) const
 {
     // using QString here for easier handling of case folding.
@@ -31,15 +31,12 @@ void CSMTools::Search::searchTextCell (const CSMWorld::IdTableBase *model,
         
         messages.add (id, message.str(), hint.str());
 
-        if (!multiple)
-            break;
-
         pos += search.length();
     }
 }
 
 void CSMTools::Search::searchRegExCell (const CSMWorld::IdTableBase *model,
-    const QModelIndex& index, const CSMWorld::UniversalId& id, bool multiple,
+    const QModelIndex& index, const CSMWorld::UniversalId& id,
     CSMDoc::Messages& messages) const
 {
     QString text = model->data (index).toString();
@@ -57,9 +54,6 @@ void CSMTools::Search::searchRegExCell (const CSMWorld::IdTableBase *model,
         hint << "r: " << index.column() << " " << pos << " " << length;
         
         messages.add (id, message.str(), hint.str());
-
-        if (!multiple)
-            break;
 
         pos += length;
     }
@@ -134,7 +128,6 @@ void CSMTools::Search::configure (const CSMWorld::IdTableBase *model)
             i,  Qt::Horizontal, static_cast<int> (CSMWorld::ColumnBase::Role_Display)).toInt());
 
         bool consider = false;
-        bool multiple = false;
 
         switch (mType)
         {
@@ -145,7 +138,6 @@ void CSMTools::Search::configure (const CSMWorld::IdTableBase *model)
                     CSMWorld::ColumnBase::isScript (display))
                 {
                     consider = true;
-                    multiple = true;
                 }
 
                 break;
@@ -153,14 +145,10 @@ void CSMTools::Search::configure (const CSMWorld::IdTableBase *model)
             case Type_Id:
             case Type_IdRegEx:
 
-                if (CSMWorld::ColumnBase::isId (display))
+                if (CSMWorld::ColumnBase::isId (display) ||
+                    CSMWorld::ColumnBase::isScript (display))
                 {
                     consider = true;
-                }
-                else if (CSMWorld::ColumnBase::isScript (display))
-                {
-                    consider = true;
-                    multiple = true;
                 }
 
                 break;
@@ -178,7 +166,7 @@ void CSMTools::Search::configure (const CSMWorld::IdTableBase *model)
         }
 
         if (consider)
-            mColumns.insert (std::make_pair (i, multiple));
+            mColumns.insert (i);
     }
 
     mIdColumn = model->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
@@ -188,10 +176,9 @@ void CSMTools::Search::configure (const CSMWorld::IdTableBase *model)
 void CSMTools::Search::searchRow (const CSMWorld::IdTableBase *model, int row,
     CSMDoc::Messages& messages) const
 {
-    for (std::map<int, bool>::const_iterator iter (mColumns.begin()); iter!=mColumns.end();
-        ++iter)
+    for (std::set<int>::const_iterator iter (mColumns.begin()); iter!=mColumns.end(); ++iter)
     {
-        QModelIndex index = model->index (row, iter->first);
+        QModelIndex index = model->index (row, *iter);
 
         CSMWorld::UniversalId::Type type = static_cast<CSMWorld::UniversalId::Type> (
             model->data (model->index (row, mTypeColumn)).toInt());
@@ -204,13 +191,13 @@ void CSMTools::Search::searchRow (const CSMWorld::IdTableBase *model, int row,
             case Type_Text:
             case Type_Id:
 
-                searchTextCell (model, index, id, iter->second, messages);
+                searchTextCell (model, index, id, messages);
                 break;
             
             case Type_TextRegEx:
             case Type_IdRegEx:
 
-                searchRegExCell (model, index, id, iter->second, messages);
+                searchRegExCell (model, index, id, messages);
                 break;
             
             case Type_RecordState:

@@ -2,7 +2,7 @@
 #define CSM_TOOLS_SEARCH_H
 
 #include <string>
-#include <map>
+#include <set>
 
 #include <QRegExp>
 #include <QMetaType>
@@ -42,15 +42,15 @@ namespace CSMTools
             std::string mText;
             QRegExp mRegExp;
             int mValue;
-            std::map<int, bool> mColumns; // column, multiple finds per cell
+            std::set<int> mColumns;
             int mIdColumn;
             int mTypeColumn;
 
             void searchTextCell (const CSMWorld::IdTableBase *model, const QModelIndex& index,
-                const CSMWorld::UniversalId& id, bool multiple, CSMDoc::Messages& messages) const;
+                const CSMWorld::UniversalId& id, CSMDoc::Messages& messages) const;
 
             void searchRegExCell (const CSMWorld::IdTableBase *model, const QModelIndex& index,
-                const CSMWorld::UniversalId& id, bool multiple, CSMDoc::Messages& messages) const;
+                const CSMWorld::UniversalId& id, CSMDoc::Messages& messages) const;
 
             void searchRecordStateCell (const CSMWorld::IdTableBase *model,
                 const QModelIndex& index, const CSMWorld::UniversalId& id,
