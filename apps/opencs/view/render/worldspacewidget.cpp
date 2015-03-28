@@ -19,7 +19,7 @@
 #include "editmode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-: SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0),
+: SceneWidget (document.getData().getResourceSystem()->getSceneManager(), parent), mDocument(document), mSceneElements(0), mRun(0),
   mInteractionMask (0)
 {
     setAcceptDrops(true);
@@ -361,7 +361,7 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
     {
         //mMouse->mouseMoveEvent(event);
     }
-    SceneWidget::mouseMoveEvent(event);
+    RenderWidget::mouseMoveEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
@@ -386,7 +386,7 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
         */
         //mMouse->mouseReleaseEvent(event);
     }
-    SceneWidget::mouseReleaseEvent(event);
+    RenderWidget::mouseReleaseEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
@@ -401,7 +401,7 @@ void CSVRender::WorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
 void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
 {
     //if(!mMouse->wheelEvent(event))
-        SceneWidget::wheelEvent(event);
+        RenderWidget::wheelEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
@@ -411,5 +411,5 @@ void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
         //mMouse->cancelDrag();
     }
     else
-        SceneWidget::keyPressEvent(event);
+        RenderWidget::keyPressEvent(event);
 }

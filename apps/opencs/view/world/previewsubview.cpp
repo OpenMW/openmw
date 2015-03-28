@@ -30,8 +30,8 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
 
     CSVWidget::SceneToolbar *toolbar = new CSVWidget::SceneToolbar (48+6, this);
 
-    //CSVWidget::SceneToolMode *lightingTool = mScene->makeLightingSelector (toolbar);
-    //toolbar->addTool (lightingTool);
+    CSVWidget::SceneToolMode *lightingTool = mScene->makeLightingSelector (toolbar);
+    toolbar->addTool (lightingTool);
 
     layout->addWidget (toolbar, 0);
 

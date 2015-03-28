@@ -3,28 +3,28 @@
 
 #include <OgreSceneManager.h>
 
-CSVRender::LightingBright::LightingBright() : mSceneManager (0), mLight (0) {}
+#include <osgViewer/View>
 
-void CSVRender::LightingBright::activate (Ogre::SceneManager *sceneManager,
-    const Ogre::ColourValue *defaultAmbient)
+CSVRender::LightingBright::LightingBright() : mView(NULL) {}
+
+void CSVRender::LightingBright::activate (osgViewer::View* view,
+ const osg::Vec4f* /*defaultAmbient*/)
 {
-    mSceneManager = sceneManager;
+    mView = view;
 
-    mSceneManager->setAmbientLight (Ogre::ColourValue (1.0, 1.0, 1.0, 1));
+    // FIXME: ambient should be applied to LightModel instead of the light
 
-    mLight = mSceneManager->createLight();
-    mLight->setType (Ogre::Light::LT_DIRECTIONAL);
-    mLight->setDirection (Ogre::Vector3 (0, 0, -1));
-    mLight->setDiffuseColour (Ogre::ColourValue (1.0, 1.0, 1.0));
+    osg::ref_ptr<osg::Light> light (new osg::Light);
+    light->setConstantAttenuation(1.f);
+    light->setDirection(osg::Vec3f(0.f, 0.f, -1.f));
+    light->setDiffuse(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+    light->setAmbient(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+
+    mView->setLight(light);
 }
 
 void CSVRender::LightingBright::deactivate()
 {
-    if (mLight)
-    {
-        mSceneManager->destroyLight (mLight);
-        mLight = 0;
-    }
 }
 
-void CSVRender::LightingBright::setDefaultAmbient (const Ogre::ColourValue& colour) {}
+void CSVRender::LightingBright::setDefaultAmbient (const osg::Vec4f& colour) {}

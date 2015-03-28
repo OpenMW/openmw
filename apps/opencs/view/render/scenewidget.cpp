@@ -6,21 +6,23 @@
 #include <QShortcut>
 #include <QLayout>
 
+#include <osgQt/GraphicsWindowQt>
+#include <osg/GraphicsContext>
+#include <osgViewer/CompositeViewer>
+#include <osgViewer/ViewerEventHandlers>
+
+#include <components/resource/scenemanager.hpp>
+
 #include "../widget/scenetoolmode.hpp"
 #include "../../model/settings/usersettings.hpp"
 
 #include "navigation.hpp"
 #include "lighting.hpp"
 
-#include <osgQt/GraphicsWindowQt>
-#include <osg/GraphicsContext>
-#include <osgViewer/CompositeViewer>
-#include <osgViewer/ViewerEventHandlers>
-
 namespace CSVRender
 {
 
-SceneWidget::SceneWidget(QWidget *parent, Qt::WindowFlags f)
+RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
     , mRootNode(0)
 {
@@ -58,9 +60,8 @@ SceneWidget::SceneWidget(QWidget *parent, Qt::WindowFlags f)
     mView->getCamera()->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
 
     mRootNode = new osg::Group;
-    // TODO: move to utility file
-    mRootNode->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
-    mRootNode->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+
+    addDefaultRootState(mRootNode->getOrCreateStateSet());
 
     mView->setSceneData(mRootNode);
 
@@ -74,21 +75,29 @@ SceneWidget::SceneWidget(QWidget *parent, Qt::WindowFlags f)
     viewer.realize();
 }
 
-SceneWidget::~SceneWidget()
+void RenderWidget::addDefaultRootState(osg::StateSet* stateset)
+{
+    stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+    stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+}
+
+RenderWidget::~RenderWidget()
 {
     CompositeViewer::get().removeView(mView);
 }
 
-void SceneWidget::flagAsModified()
+void RenderWidget::flagAsModified()
 {
     mView->requestRedraw();
 }
 
-void SceneWidget::setVisibilityMask(int mask)
+void RenderWidget::setVisibilityMask(int mask)
 {
     // 0x1 reserved for separating cull and update visitors
     mView->getCamera()->setCullMask(mask<<1);
 }
+
+// --------------------------------------------------
 
 CompositeViewer::CompositeViewer()
 {
@@ -109,7 +118,7 @@ CompositeViewer::CompositeViewer()
     setRunFrameScheme(osgViewer::ViewerBase::CONTINUOUS);
 
     connect( &mTimer, SIGNAL(timeout()), this, SLOT(update()) );
-    mTimer.start( 0 );
+    mTimer.start( 10 );
 }
 
 CompositeViewer &CompositeViewer::get()
@@ -121,6 +130,82 @@ CompositeViewer &CompositeViewer::get()
 void CompositeViewer::update()
 {
     frame();
+}
+
+// ---------------------------------------------------
+
+SceneWidget::SceneWidget(Resource::SceneManager* sceneManager, QWidget *parent, Qt::WindowFlags f)
+    : RenderWidget(parent, f)
+    , mSceneManager(sceneManager)
+    , mLighting(NULL)
+{
+    //mView->setLightingMode(osgViewer::View::NO_LIGHT);
+
+    setLighting(&mLightingDay);
+}
+
+SceneWidget::~SceneWidget()
+{
+    // Since we're holding on to the scene templates past the existance of this graphics context, we'll need to manually release the created objects
+    mSceneManager->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
+}
+
+void SceneWidget::setLighting(Lighting *lighting)
+{
+    if (mLighting)
+        mLighting->deactivate();
+
+    mLighting = lighting;
+    mLighting->activate (mView.get(), mHasDefaultAmbient ? &mDefaultAmbient : 0);
+
+    flagAsModified();
+}
+
+void SceneWidget::selectLightingMode (const std::string& mode)
+{
+    if (mode=="day")
+        setLighting (&mLightingDay);
+    else if (mode=="night")
+        setLighting (&mLightingNight);
+    else if (mode=="bright")
+        setLighting (&mLightingBright);
+}
+
+CSVWidget::SceneToolMode *SceneWidget::makeLightingSelector (CSVWidget::SceneToolbar *parent)
+{
+    CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent, "Lighting Mode");
+
+    /// \todo replace icons
+    tool->addButton (":scenetoolbar/day", "day",
+        "Day"
+        "<ul><li>Cell specific ambient in interiors</li>"
+        "<li>Low ambient in exteriors</li>"
+        "<li>Strong directional light source</li>"
+        "<li>This mode closely resembles day time in-game</li></ul>");
+    tool->addButton (":scenetoolbar/night", "night",
+        "Night"
+        "<ul><li>Cell specific ambient in interiors</li>"
+        "<li>Low ambient in exteriors</li>"
+        "<li>Weak directional light source</li>"
+        "<li>This mode closely resembles night time in-game</li></ul>");
+    tool->addButton (":scenetoolbar/bright", "bright",
+        "Bright"
+        "<ul><li>Maximum ambient</li>"
+        "<li>Strong directional light source</li></ul>");
+
+    connect (tool, SIGNAL (modeChanged (const std::string&)),
+        this, SLOT (selectLightingMode (const std::string&)));
+
+    return tool;
+}
+
+void SceneWidget::setDefaultAmbient (const osg::Vec4f& colour)
+{
+    mDefaultAmbient = colour;
+    mHasDefaultAmbient = true;
+
+    if (mLighting)
+        mLighting->setDefaultAmbient (colour);
 }
 
 }

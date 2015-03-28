@@ -115,4 +115,12 @@ namespace Resource
         instance->accept(visitor);
     }
 
+    void SceneManager::releaseGLObjects(osg::State *state)
+    {
+        for (Index::iterator it = mIndex.begin(); it != mIndex.end(); ++it)
+        {
+            it->second->releaseGLObjects(state);
+        }
+    }
+
 }

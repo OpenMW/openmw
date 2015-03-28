@@ -1,36 +1,33 @@
-
 #include "lightingnight.hpp"
 
-#include <OgreSceneManager.h>
+#include <osgViewer/View>
 
-CSVRender::LightingNight::LightingNight() : mSceneManager (0), mLight (0) {}
+CSVRender::LightingNight::LightingNight() : mView(NULL) {}
 
-void CSVRender::LightingNight::activate (Ogre::SceneManager *sceneManager,
-    const Ogre::ColourValue *defaultAmbient)
+void CSVRender::LightingNight::activate (osgViewer::View* view,
+                                         const osg::Vec4f *defaultAmbient)
 {
-    mSceneManager = sceneManager;
+    mView = view;
+
+    osg::ref_ptr<osg::Light> light (new osg::Light);
+    light->setDirection(osg::Vec3f(0.f, 0.f, -1.f));
+    light->setDiffuse(osg::Vec4f(0.2f, 0.2f, 0.2f, 1.f));
+    light->setConstantAttenuation(1.f);
 
     if (defaultAmbient)
-        mSceneManager->setAmbientLight (*defaultAmbient);
+        light->setAmbient(*defaultAmbient);
     else
-        mSceneManager->setAmbientLight (Ogre::ColourValue (0.2, 0.2, 0.2, 1));
+        light->setAmbient(osg::Vec4f(0.2f, 0.2f, 0.2f, 1.f));
 
-    mLight = mSceneManager->createLight();
-    mLight->setType (Ogre::Light::LT_DIRECTIONAL);
-    mLight->setDirection (Ogre::Vector3 (0, 0, -1));
-    mLight->setDiffuseColour (Ogre::ColourValue (0.2, 0.2, 0.2));
+    mView->setLight(light);
 }
 
 void CSVRender::LightingNight::deactivate()
 {
-    if (mLight)
-    {
-        mSceneManager->destroyLight (mLight);
-        mLight = 0;
-    }
 }
 
-void CSVRender::LightingNight::setDefaultAmbient (const Ogre::ColourValue& colour)
+void CSVRender::LightingNight::setDefaultAmbient (const osg::Vec4f& colour)
 {
-    mSceneManager->setAmbientLight (colour);
+    if (mView)
+        mView->getLight()->setAmbient(colour);
 }

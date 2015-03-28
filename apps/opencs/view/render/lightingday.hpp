@@ -12,19 +12,18 @@ namespace CSVRender
 {
     class LightingDay : public Lighting
     {
-            Ogre::SceneManager *mSceneManager;
-            Ogre::Light *mLight;
+            osgViewer::View* mView;
 
         public:
 
             LightingDay();
 
-            virtual void activate (Ogre::SceneManager *sceneManager,
-                const Ogre::ColourValue *defaultAmbient = 0);
+            virtual void activate (osgViewer::View* view,
+                const osg::Vec4f *defaultAmbient = 0);
 
             virtual void deactivate();
 
-            virtual void setDefaultAmbient (const Ogre::ColourValue& colour);
+            virtual void setDefaultAmbient (const osg::Vec4f& colour);
     };
 }
 

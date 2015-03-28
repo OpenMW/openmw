@@ -11,6 +11,11 @@
 #include <osgViewer/View>
 #include <osgViewer/CompositeViewer>
 
+namespace Resource
+{
+    class SceneManager;
+}
+
 namespace osg
 {
     class Group;
@@ -27,19 +32,21 @@ namespace CSVRender
     class Navigation;
     class Lighting;
 
-    class SceneWidget : public QWidget
+    class RenderWidget : public QWidget
     {
         Q_OBJECT
 
     public:
-        SceneWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
-        ~SceneWidget();
+        RenderWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
+        virtual ~RenderWidget();
 
         void flagAsModified();
 
         void setVisibilityMask(int mask);
 
     protected:
+
+        void addDefaultRootState(osg::StateSet* stateset);
 
         osg::ref_ptr<osgViewer::View> mView;
 
@@ -48,6 +55,39 @@ namespace CSVRender
         QTimer mTimer;
     };
 
+    // Extension of RenderWidget to support lighting mode selection & toolbar
+    class SceneWidget : public RenderWidget
+    {
+        Q_OBJECT
+    public:
+        SceneWidget(Resource::SceneManager* sceneManager, QWidget* parent = 0, Qt::WindowFlags f = 0);
+        virtual ~SceneWidget();
+
+        CSVWidget::SceneToolMode *makeLightingSelector (CSVWidget::SceneToolbar *parent);
+        ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
+        /// is the responsibility of the calling function.
+
+        void setDefaultAmbient (const osg::Vec4f& colour);
+        ///< \note The actual ambient colour may differ based on lighting settings.
+
+    protected:
+        void setLighting (Lighting *lighting);
+        ///< \attention The ownership of \a lighting is not transferred to *this.
+
+        Resource::SceneManager* mSceneManager;
+
+        Lighting* mLighting;
+
+        osg::Vec4f mDefaultAmbient;
+        bool mHasDefaultAmbient;
+        LightingDay mLightingDay;
+        LightingNight mLightingNight;
+        LightingBright mLightingBright;
+
+    private slots:
+
+        void selectLightingMode (const std::string& mode);
+    };
 
 
     // There are rendering glitches when using multiple Viewer instances, work around using CompositeViewer with multiple views

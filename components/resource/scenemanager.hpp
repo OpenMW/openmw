@@ -41,6 +41,8 @@ namespace Resource
         /// @note Assumes the given instance was not attached to any parents before.
         void attachTo(osg::Node* instance, osg::Group* parentNode) const;
 
+        void releaseGLObjects(osg::State* state);
+
     private:
         const VFS::Manager* mVFS;
         Resource::TextureManager* mTextureManager;

@@ -23,9 +23,12 @@ void CSVRender::UnpagedWorldspaceWidget::update()
     const CSMWorld::Record<CSMWorld::Cell>& record =
         dynamic_cast<const CSMWorld::Record<CSMWorld::Cell>&> (mCellsModel->getRecord (mCellId));
 
-    Ogre::ColourValue colour;
-    colour.setAsABGR (record.get().mAmbi.mAmbient);
-    //setDefaultAmbient (colour);
+    ESM::Color clr = record.get().mAmbi.mAmbient;
+    osg::Vec4f colour(((clr >> 0) & 0xFF) / 255.0f,
+                      ((clr >> 8) & 0xFF) / 255.0f,
+                      ((clr >> 16) & 0xFF) / 255.0f, 1.f);
+
+    setDefaultAmbient (colour);
 
     /// \todo deal with mSunlight and mFog/mForDensity
 
@@ -51,7 +54,6 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
     mCell.reset (new Cell (document.getData(), mRootNode, mCellId));
 
     mView->setCameraManipulator(new osgGA::TrackballManipulator);
-    //mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,
@@ -93,7 +95,7 @@ bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld:
         return false;
 
     mCellId = data.begin()->getId();
-    // FIXME: we shouldn't need to rebuild the whole cell
+
     mCell.reset (new Cell (getDocument().getData(), mRootNode, mCellId));
 
     update();

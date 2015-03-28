@@ -1,10 +1,13 @@
 #ifndef OPENCS_VIEW_LIGHTING_H
 #define OPENCS_VIEW_LIGHTING_H
 
-namespace Ogre
+namespace osgViewer
 {
-    class SceneManager;
-    class ColourValue;
+    class View;
+}
+namespace osg
+{
+    class Vec4f;
 }
 
 namespace CSVRender
@@ -15,12 +18,12 @@ namespace CSVRender
 
             virtual ~Lighting();
 
-            virtual void activate (Ogre::SceneManager *sceneManager,
-                const Ogre::ColourValue *defaultAmbient = 0) = 0;
+            virtual void activate (osgViewer::View* view,
+                const osg::Vec4f *defaultAmbient = 0) = 0;
 
             virtual void deactivate() = 0;
 
-            virtual void setDefaultAmbient (const Ogre::ColourValue& colour) = 0;
+            virtual void setDefaultAmbient (const osg::Vec4f& colour) = 0;
     };
 }
 

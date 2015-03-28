@@ -13,7 +13,7 @@ struct TimeStamp
 };
 
 // Pixel color value. Standard four-byte rr,gg,bb,aa format.
-typedef int32_t Color;
+typedef uint32_t Color;
 
 enum Specialization
 {
