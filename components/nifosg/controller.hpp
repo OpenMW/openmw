@@ -13,7 +13,7 @@
 #include <set> //UVController
 
 // FlipController
-#include <osg/Image>
+#include <osg/Texture2D>
 #include <osg/ref_ptr>
 
 #include <osg/Timer>
@@ -265,10 +265,10 @@ namespace NifOsg
     private:
         int mTexSlot;
         float mDelta;
-        std::vector<osg::ref_ptr<osg::Image> > mTextures;
+        std::vector<osg::ref_ptr<osg::Texture2D> > mTextures;
 
     public:
-        FlipController(const Nif::NiFlipController* ctrl, std::vector<osg::ref_ptr<osg::Image> > textures);
+        FlipController(const Nif::NiFlipController* ctrl, std::vector<osg::ref_ptr<osg::Texture2D> > textures);
         FlipController();
         FlipController(const FlipController& copy, const osg::CopyOp& copyop);
 

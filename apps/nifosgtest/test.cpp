@@ -10,6 +10,8 @@
 #include <components/vfs/bsaarchive.hpp>
 #include <components/vfs/filesystemarchive.hpp>
 
+#include <components/resource/texturemanager.hpp>
+
 #include <components/files/configurationmanager.hpp>
 
 #include <osgGA/TrackballManipulator>
@@ -124,7 +126,8 @@ int main(int argc, char** argv)
     //osgDB::writeNodeFile(*newNode, "out.osg");
     osg::Group* newNode = new osg::Group;
     NifOsg::Loader loader;
-    loader.resourceManager = &resourceMgr;
+    Resource::TextureManager texMgr(&resourceMgr);
+    loader.mTextureManager = &texMgr;
     newNode->addChild(loader.load(nif));
 
     osg::PositionAttitudeTransform* trans = new osg::PositionAttitudeTransform;

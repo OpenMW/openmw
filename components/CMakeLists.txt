@@ -39,7 +39,7 @@ add_component_dir (vfs
     )
 
 add_component_dir (resource
-    scenemanager resourcesystem
+    scenemanager texturemanager resourcesystem
     )
 
 add_component_dir (sceneutil

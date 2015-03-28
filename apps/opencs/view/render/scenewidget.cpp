@@ -109,7 +109,7 @@ CompositeViewer::CompositeViewer()
     setRunFrameScheme(osgViewer::ViewerBase::CONTINUOUS);
 
     connect( &mTimer, SIGNAL(timeout()), this, SLOT(update()) );
-    mTimer.start( 10 );
+    mTimer.start( 0 );
 }
 
 CompositeViewer &CompositeViewer::get()

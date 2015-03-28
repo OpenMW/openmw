@@ -5,13 +5,16 @@
 
 #include <components/nifcache/nifcache.hpp> // NIFFilePtr
 
-#include <components/vfs/manager.hpp>
-
 #include <osg/ref_ptr>
 
 namespace osg
 {
     class Node;
+}
+
+namespace Resource
+{
+    class TextureManager;
 }
 
 namespace NifOsg
@@ -41,7 +44,7 @@ namespace NifOsg
         /// Default: false.
         static void setShowMarkers(bool show);
 
-        const VFS::Manager* resourceManager;
+        Resource::TextureManager* mTextureManager;
 
     private:
 

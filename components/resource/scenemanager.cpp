@@ -9,6 +9,8 @@
 #include <components/nifosg/nifloader.hpp>
 #include <components/nif/niffile.hpp>
 
+#include <components/vfs/manager.hpp>
+
 #include <components/sceneutil/clone.hpp>
 
 namespace
@@ -61,8 +63,9 @@ namespace
 namespace Resource
 {
 
-    SceneManager::SceneManager(const VFS::Manager *vfs)
+    SceneManager::SceneManager(const VFS::Manager *vfs, Resource::TextureManager* textureManager)
         : mVFS(vfs)
+        , mTextureManager(textureManager)
     {
     }
 
@@ -79,7 +82,7 @@ namespace Resource
             // TODO: add support for non-NIF formats
 
             NifOsg::Loader loader;
-            loader.resourceManager = mVFS;
+            loader.mTextureManager = mTextureManager;
             osg::ref_ptr<const osg::Node> loaded = loader.load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)));
 
             // TODO: provide way for the user to get textKeys (attach to the node?)

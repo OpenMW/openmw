@@ -6,12 +6,12 @@
 #include <osg/Geometry>
 #include <osg/Array>
 
-// resource
-#include <components/bsa/bsa_file.hpp>
-#include <osgDB/Registry>
 #include <osg/io_utils>
+
+// resource
 #include <components/misc/stringops.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/resource/texturemanager.hpp>
 
 // skel
 #include <osgAnimation/Skeleton>
@@ -510,11 +510,11 @@ namespace NifOsg
     class LoaderImpl
     {
     public:
-        const VFS::Manager* mResourceManager;
+        Resource::TextureManager* mTextureManager;
         bool mShowMarkers;
 
-        LoaderImpl(const VFS::Manager* resourceManager, bool showMarkers)
-            : mResourceManager(resourceManager)
+        LoaderImpl(Resource::TextureManager* textureManager, bool showMarkers)
+            : mTextureManager(textureManager)
             , mShowMarkers(showMarkers)
         {
         }
@@ -846,22 +846,26 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiFlipController)
                 {
                     const Nif::NiFlipController* flipctrl = static_cast<const Nif::NiFlipController*>(ctrl.getPtr());
-                    std::vector<osg::ref_ptr<osg::Image> > textures;
+                    std::vector<osg::ref_ptr<osg::Texture2D> > textures;
                     for (unsigned int i=0; i<flipctrl->mSources.length(); ++i)
                     {
                         Nif::NiSourceTexturePtr st = flipctrl->mSources[i];
                         if (st.empty())
                             continue;
 
-                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, mResourceManager);
+                        // inherit wrap settings from the target slot
+                        osg::Texture2D* inherit = dynamic_cast<osg::Texture2D*>(stateset->getTextureAttribute(flipctrl->mTexSlot, osg::StateAttribute::TEXTURE));
+                        osg::Texture2D::WrapMode wrapS = osg::Texture2D::CLAMP;
+                        osg::Texture2D::WrapMode wrapT = osg::Texture2D::CLAMP;
+                        if (inherit)
+                        {
+                            wrapS = inherit->getWrap(osg::Texture2D::WRAP_S);
+                            wrapT = inherit->getWrap(osg::Texture2D::WRAP_T);
+                        }
 
-                        // TODO: replace with texture manager
-                        // tx_creature_werewolf.dds isn't loading in the correct format without this option
-                        osgDB::Options* opts = new osgDB::Options;
-                        opts->setOptionString("dds_dxt1_detect_rgba");
-                        osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("dds");
-                        osgDB::ReaderWriter::ReadResult result = reader->readImage(*mResourceManager->get(filename.c_str()), opts);
-                        textures.push_back(osg::ref_ptr<osg::Image>(result.getImage()));
+                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, mTextureManager->getVFS());
+                        osg::ref_ptr<osg::Texture2D> texture = mTextureManager->getTexture2D(filename, wrapS, wrapT);
+                        textures.push_back(texture);
                     }
                     osg::ref_ptr<FlipController> callback(new FlipController(flipctrl, textures));
                     setupController(ctrl.getPtr(), callback, animflags);
@@ -1398,26 +1402,15 @@ namespace NifOsg
                             continue;
                         }
 
-                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, mResourceManager);
-
-                        // TODO: replace with texture manager
-                        // tx_creature_werewolf.dds isn't loading in the correct format without this option
-                        osgDB::Options* opts = new osgDB::Options;
-                        opts->setOptionString("dds_dxt1_detect_rgba");
-                        osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("dds");
-                        osgDB::ReaderWriter::ReadResult result = reader->readImage(*mResourceManager->get(filename.c_str()), opts);
-                        osg::Image* image = result.getImage();
-                        osg::Texture2D* texture2d = new osg::Texture2D;
-                        // Can be enabled for single-context, i.e. in openmw
-                        //texture2d->setUnRefImageDataAfterApply(true);
-                        texture2d->setImage(image);
+                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, mTextureManager->getVFS());
 
                         unsigned int clamp = static_cast<unsigned int>(tex.clamp);
                         int wrapT = (clamp) & 0x1;
                         int wrapS = (clamp >> 1) & 0x1;
 
-                        texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP);
-                        texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
+                        osg::Texture2D* texture2d = mTextureManager->getTexture2D(filename,
+                              wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP,
+                              wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
 
                         stateset->setTextureAttributeAndModes(i, texture2d, osg::StateAttribute::ON);
 
@@ -1544,19 +1537,19 @@ namespace NifOsg
 
     osg::ref_ptr<osg::Node> Loader::load(Nif::NIFFilePtr file, TextKeyMap *textKeys)
     {
-        LoaderImpl loader(resourceManager, sShowMarkers);
+        LoaderImpl loader(mTextureManager, sShowMarkers);
         return loader.load(file, textKeys);
     }
 
     osg::ref_ptr<osg::Node> Loader::loadAsSkeleton(Nif::NIFFilePtr file, TextKeyMap *textKeys)
     {
-        LoaderImpl loader(resourceManager, sShowMarkers);
+        LoaderImpl loader(mTextureManager, sShowMarkers);
         return loader.loadAsSkeleton(file, textKeys);
     }
 
     void Loader::loadKf(Nif::NIFFilePtr kf, osg::Node *rootNode, int sourceIndex, TextKeyMap &textKeys)
     {
-        LoaderImpl loader(resourceManager, sShowMarkers);
+        LoaderImpl loader(mTextureManager, sShowMarkers);
         loader.loadKf(kf, rootNode, sourceIndex, textKeys);
     }
 

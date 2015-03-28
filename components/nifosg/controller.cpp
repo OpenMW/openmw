@@ -416,7 +416,7 @@ void MaterialColorController::operator() (osg::Node* node, osg::NodeVisitor* nv)
     traverse(node, nv);
 }
 
-FlipController::FlipController(const Nif::NiFlipController *ctrl, std::vector<osg::ref_ptr<osg::Image> > textures)
+FlipController::FlipController(const Nif::NiFlipController *ctrl, std::vector<osg::ref_ptr<osg::Texture2D> > textures)
     : mTexSlot(ctrl->mTexSlot)
     , mDelta(ctrl->mDelta)
     , mTextures(textures)
@@ -442,12 +442,7 @@ void FlipController::operator() (osg::Node* node, osg::NodeVisitor* nv)
     {
         osg::StateSet* stateset = node->getStateSet();
         int curTexture = int(getInputValue(nv) / mDelta) % mTextures.size();
-        osg::Texture2D* tex = dynamic_cast<osg::Texture2D*>(stateset->getTextureAttribute(mTexSlot, osg::StateAttribute::TEXTURE));
-        if (tex)
-            tex->setImage(mTextures[curTexture].get());
-        else
-            std::cout << "FlipController: can't find target slot" << std::endl;
-
+        stateset->setTextureAttribute(mTexSlot, mTextures[curTexture]);
     }
     traverse(node, nv);
 }

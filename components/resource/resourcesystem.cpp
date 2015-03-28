@@ -1,6 +1,7 @@
 #include "resourcesystem.hpp"
 
 #include "scenemanager.hpp"
+#include "texturemanager.hpp"
 
 namespace Resource
 {
@@ -8,7 +9,8 @@ namespace Resource
     ResourceSystem::ResourceSystem(const VFS::Manager *vfs)
         : mVFS(vfs)
     {
-        mSceneManager.reset(new SceneManager(vfs));
+        mTextureManager.reset(new TextureManager(vfs));
+        mSceneManager.reset(new SceneManager(vfs, mTextureManager.get()));
     }
 
     SceneManager* ResourceSystem::getSceneManager()

@@ -7,6 +7,11 @@
 #include <osg/ref_ptr>
 #include <osg/Node>
 
+namespace Resource
+{
+    class TextureManager;
+}
+
 namespace VFS
 {
     class Manager;
@@ -19,7 +24,7 @@ namespace Resource
     class SceneManager
     {
     public:
-        SceneManager(const VFS::Manager* vfs);
+        SceneManager(const VFS::Manager* vfs, Resource::TextureManager* textureManager);
 
         /// Get a read-only copy of this scene "template"
         osg::ref_ptr<const osg::Node> getTemplate(const std::string& name);
@@ -38,6 +43,7 @@ namespace Resource
 
     private:
         const VFS::Manager* mVFS;
+        Resource::TextureManager* mTextureManager;
 
         // observer_ptr?
         typedef std::map<std::string, osg::ref_ptr<const osg::Node> > Index;
