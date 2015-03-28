@@ -74,7 +74,9 @@ CSVTools::SearchBox::SearchBox (QWidget *parent)
         this, SLOT (textChanged (const QString&)));
 
     connect (&mSearch, SIGNAL (clicked (bool)), this, SLOT (startSearch (bool)));
-        
+
+    connect (&mText, SIGNAL (returnPressed()), this, SLOT (startSearch()));
+    
     modeSelected (0);
 
     updateSearchButton();
@@ -141,5 +143,6 @@ void CSVTools::SearchBox::textChanged (const QString& text)
 
 void CSVTools::SearchBox::startSearch (bool checked)
 {
-    emit startSearch (getSearch());
+    if (mSearch.isEnabled())
+        emit startSearch (getSearch());
 }

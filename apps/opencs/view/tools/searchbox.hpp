@@ -46,7 +46,7 @@ namespace CSVTools
 
             void textChanged (const QString& text);
 
-            void startSearch (bool checked);
+            void startSearch (bool checked = true);
 
         signals:
 
