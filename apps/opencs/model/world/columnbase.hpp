@@ -103,7 +103,8 @@ namespace CSMWorld
             Display_Colour,
             Display_ScriptLines, // console context
             Display_SoundGeneratorType,
-            Display_School
+            Display_School,
+            Display_Id
         };
 
         int mColumnId;

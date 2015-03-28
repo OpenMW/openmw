@@ -43,7 +43,7 @@ namespace CSMWorld
     struct StringIdColumn : public Column<ESXRecordT>
     {
         StringIdColumn (bool hidden = false)
-        : Column<ESXRecordT> (Columns::ColumnId_Id, ColumnBase::Display_String,
+        : Column<ESXRecordT> (Columns::ColumnId_Id, ColumnBase::Display_Id,
             hidden ? 0 : ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue)
         {}
 

@@ -73,6 +73,8 @@ bool CSMWorld::ColumnBase::isId (Display display)
         Display_SoundRes,
         Display_Texture,
         Display_Video,
+
+        Display_Id,
         
         Display_None
     };
