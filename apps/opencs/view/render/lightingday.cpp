@@ -1,33 +1,36 @@
 #include "lightingday.hpp"
 
-#include <osgViewer/View>
+#include <osg/LightSource>
 
-CSVRender::LightingDay::LightingDay() : mView(NULL) {}
+CSVRender::LightingDay::LightingDay(){}
 
-void CSVRender::LightingDay::activate (osgViewer::View* view,
-                                       const osg::Vec4f *defaultAmbient)
+void CSVRender::LightingDay::activate (osg::Group* rootNode)
 {
-    mView = view;
+    mRootNode = rootNode;
+
+    mLightSource = new osg::LightSource;
 
     osg::ref_ptr<osg::Light> light (new osg::Light);
     light->setDirection(osg::Vec3f(0.f, 0.f, -1.f));
+    light->setAmbient(osg::Vec4f(0.f, 0.f, 0.f, 1.f));
     light->setDiffuse(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+    light->setSpecular(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
     light->setConstantAttenuation(1.f);
 
-    if (defaultAmbient)
-        light->setAmbient(*defaultAmbient);
-    else
-        light->setAmbient(osg::Vec4f(0.7f, 0.7f, 0.7f, 1.f));
-
-    mView->setLight(light);
+    mLightSource->setLight(light);
+    mRootNode->addChild(mLightSource);
 }
 
 void CSVRender::LightingDay::deactivate()
 {
+    if (mRootNode && mLightSource.get())
+        mRootNode->removeChild(mLightSource);
 }
 
-void CSVRender::LightingDay::setDefaultAmbient (const osg::Vec4f& colour)
+osg::Vec4f CSVRender::LightingDay::getAmbientColour(osg::Vec4f *defaultAmbient)
 {
-    if (mView)
-        mView->getLight()->setAmbient(colour);
+    if (defaultAmbient)
+        return *defaultAmbient;
+    else
+        return osg::Vec4f(0.7f, 0.7f, 0.7f, 1.f);
 }

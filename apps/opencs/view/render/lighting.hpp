@@ -1,13 +1,13 @@
 #ifndef OPENCS_VIEW_LIGHTING_H
 #define OPENCS_VIEW_LIGHTING_H
 
-namespace osgViewer
-{
-    class View;
-}
+#include <osg/ref_ptr>
+
 namespace osg
 {
     class Vec4f;
+    class LightSource;
+    class Group;
 }
 
 namespace CSVRender
@@ -16,14 +16,19 @@ namespace CSVRender
     {
         public:
 
+            Lighting() : mRootNode(0) {}
             virtual ~Lighting();
 
-            virtual void activate (osgViewer::View* view,
-                const osg::Vec4f *defaultAmbient = 0) = 0;
+            virtual void activate (osg::Group* rootNode) = 0;
 
             virtual void deactivate() = 0;
 
-            virtual void setDefaultAmbient (const osg::Vec4f& colour) = 0;
+            virtual osg::Vec4f getAmbientColour(osg::Vec4f* defaultAmbient) = 0;
+
+        protected:
+
+            osg::ref_ptr<osg::LightSource> mLightSource;
+            osg::Group* mRootNode;
     };
 }
 

@@ -1,30 +1,35 @@
 
 #include "lightingbright.hpp"
 
-#include <OgreSceneManager.h>
+#include <osg/LightSource>
 
-#include <osgViewer/View>
+CSVRender::LightingBright::LightingBright() {}
 
-CSVRender::LightingBright::LightingBright() : mView(NULL) {}
-
-void CSVRender::LightingBright::activate (osgViewer::View* view,
- const osg::Vec4f* /*defaultAmbient*/)
+void CSVRender::LightingBright::activate (osg::Group* rootNode)
 {
-    mView = view;
+    mRootNode = rootNode;
 
-    // FIXME: ambient should be applied to LightModel instead of the light
+    mLightSource = (new osg::LightSource);
 
     osg::ref_ptr<osg::Light> light (new osg::Light);
-    light->setConstantAttenuation(1.f);
+    light->setAmbient(osg::Vec4f(0.f, 0.f, 0.f, 1.f));
     light->setDirection(osg::Vec3f(0.f, 0.f, -1.f));
     light->setDiffuse(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-    light->setAmbient(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+    light->setSpecular(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+    light->setConstantAttenuation(1.f);
 
-    mView->setLight(light);
+    mLightSource->setLight(light);
+
+    mRootNode->addChild(mLightSource);
 }
 
 void CSVRender::LightingBright::deactivate()
 {
+    if (mRootNode && mLightSource.get())
+        mRootNode->removeChild(mLightSource);
 }
 
-void CSVRender::LightingBright::setDefaultAmbient (const osg::Vec4f& colour) {}
+osg::Vec4f CSVRender::LightingBright::getAmbientColour(osg::Vec4f* /*defaultAmbient*/)
+{
+    return osg::Vec4f(1.f, 1.f, 1.f, 1.f);
+}

@@ -1,33 +1,37 @@
 #include "lightingnight.hpp"
 
-#include <osgViewer/View>
+#include <osg/LightSource>
 
-CSVRender::LightingNight::LightingNight() : mView(NULL) {}
+CSVRender::LightingNight::LightingNight() {}
 
-void CSVRender::LightingNight::activate (osgViewer::View* view,
-                                         const osg::Vec4f *defaultAmbient)
+void CSVRender::LightingNight::activate (osg::Group* rootNode)
 {
-    mView = view;
+    mRootNode = rootNode;
+
+    mLightSource = new osg::LightSource;
 
     osg::ref_ptr<osg::Light> light (new osg::Light);
     light->setDirection(osg::Vec3f(0.f, 0.f, -1.f));
+    light->setAmbient(osg::Vec4f(0.f, 0.f, 0.f, 1.f));
     light->setDiffuse(osg::Vec4f(0.2f, 0.2f, 0.2f, 1.f));
+    light->setSpecular(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
     light->setConstantAttenuation(1.f);
 
-    if (defaultAmbient)
-        light->setAmbient(*defaultAmbient);
-    else
-        light->setAmbient(osg::Vec4f(0.2f, 0.2f, 0.2f, 1.f));
+    mLightSource->setLight(light);
 
-    mView->setLight(light);
+    mRootNode->addChild(mLightSource);
 }
 
 void CSVRender::LightingNight::deactivate()
 {
+    if (mRootNode && mLightSource.get())
+        mRootNode->removeChild(mLightSource);
 }
 
-void CSVRender::LightingNight::setDefaultAmbient (const osg::Vec4f& colour)
+osg::Vec4f CSVRender::LightingNight::getAmbientColour(osg::Vec4f *defaultAmbient)
 {
-    if (mView)
-        mView->getLight()->setAmbient(colour);
+    if (defaultAmbient)
+        return *defaultAmbient;
+    else
+        return osg::Vec4f(0.2f, 0.2f, 0.2f, 1.f);
 }

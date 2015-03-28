@@ -10,6 +10,8 @@
 #include <osg/GraphicsContext>
 #include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
+#include <osg/LightModel>
+#include <osg/io_utils>
 
 #include <components/resource/scenemanager.hpp>
 
@@ -61,7 +63,8 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
 
     mRootNode = new osg::Group;
 
-    addDefaultRootState(mRootNode->getOrCreateStateSet());
+    mView->getCamera()->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+    mView->getCamera()->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
 
     mView->setSceneData(mRootNode);
 
@@ -73,12 +76,6 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     viewer.addView(mView);
     viewer.setDone(false);
     viewer.realize();
-}
-
-void RenderWidget::addDefaultRootState(osg::StateSet* stateset)
-{
-    stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
-    stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
 }
 
 RenderWidget::~RenderWidget()
@@ -138,8 +135,10 @@ SceneWidget::SceneWidget(Resource::SceneManager* sceneManager, QWidget *parent, 
     : RenderWidget(parent, f)
     , mSceneManager(sceneManager)
     , mLighting(NULL)
+    , mHasDefaultAmbient(false)
 {
-    //mView->setLightingMode(osgViewer::View::NO_LIGHT);
+    // we handle lighting manually
+    mView->setLightingMode(osgViewer::View::NO_LIGHT);
 
     setLighting(&mLightingDay);
 }
@@ -156,9 +155,23 @@ void SceneWidget::setLighting(Lighting *lighting)
         mLighting->deactivate();
 
     mLighting = lighting;
-    mLighting->activate (mView.get(), mHasDefaultAmbient ? &mDefaultAmbient : 0);
+    mLighting->activate (mRootNode);
+
+    osg::Vec4f ambient = mLighting->getAmbientColour(mHasDefaultAmbient ? &mDefaultAmbient : 0);
+    setAmbient(ambient);
 
     flagAsModified();
+}
+
+void SceneWidget::setAmbient(const osg::Vec4f& ambient)
+{
+    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+    osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
+    lightmodel->setAmbientIntensity(ambient);
+    stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
+    stateset->setMode(GL_LIGHT0, osg::StateAttribute::ON);
+    stateset->setAttributeAndModes(lightmodel, osg::StateAttribute::ON);
+    mRootNode->setStateSet(stateset);
 }
 
 void SceneWidget::selectLightingMode (const std::string& mode)
@@ -204,8 +217,7 @@ void SceneWidget::setDefaultAmbient (const osg::Vec4f& colour)
     mDefaultAmbient = colour;
     mHasDefaultAmbient = true;
 
-    if (mLighting)
-        mLighting->setDefaultAmbient (colour);
+    setAmbient(mLighting->getAmbientColour(&mDefaultAmbient));
 }
 
 }

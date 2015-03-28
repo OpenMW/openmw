@@ -3,27 +3,25 @@
 
 #include "lighting.hpp"
 
-namespace Ogre
+namespace osg
 {
     class Light;
+    class Group;
 }
 
 namespace CSVRender
 {
     class LightingBright : public Lighting
     {
-            osgViewer::View* mView;
-
         public:
 
             LightingBright();
 
-            virtual void activate (osgViewer::View* view,
-                const osg::Vec4f *defaultAmbient = 0);
+            virtual void activate (osg::Group* rootNode);
 
             virtual void deactivate();
 
-            virtual void setDefaultAmbient (const osg::Vec4f& colour);
+            virtual osg::Vec4f getAmbientColour(osg::Vec4f* defaultAmbient);
     };
 }
 

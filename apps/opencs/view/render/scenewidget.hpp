@@ -46,8 +46,6 @@ namespace CSVRender
 
     protected:
 
-        void addDefaultRootState(osg::StateSet* stateset);
-
         osg::ref_ptr<osgViewer::View> mView;
 
         osg::Group* mRootNode;
@@ -73,6 +71,8 @@ namespace CSVRender
     protected:
         void setLighting (Lighting *lighting);
         ///< \attention The ownership of \a lighting is not transferred to *this.
+
+        void setAmbient(const osg::Vec4f& ambient);
 
         Resource::SceneManager* mSceneManager;
 

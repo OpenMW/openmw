@@ -12,18 +12,15 @@ namespace CSVRender
 {
     class LightingDay : public Lighting
     {
-            osgViewer::View* mView;
-
         public:
 
             LightingDay();
 
-            virtual void activate (osgViewer::View* view,
-                const osg::Vec4f *defaultAmbient = 0);
+            virtual void activate (osg::Group* rootNode);
 
             virtual void deactivate();
 
-            virtual void setDefaultAmbient (const osg::Vec4f& colour);
+            virtual osg::Vec4f getAmbientColour(osg::Vec4f *defaultAmbient);
     };
 }
 
