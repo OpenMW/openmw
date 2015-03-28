@@ -12,8 +12,15 @@
 CSMTools::SearchOperation::SearchOperation (CSMDoc::Document& document)
 : CSMDoc::Operation (CSMDoc::State_Searching, false)
 {
-appendStage (new SearchStage (&dynamic_cast<CSMWorld::IdTableBase&> (*document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells))));
+    std::vector<CSMWorld::UniversalId::Type> types = CSMWorld::UniversalId::listTypes (
+        CSMWorld::UniversalId::Class_RecordList |
+        CSMWorld::UniversalId::Class_ResourceList
+        );
 
+    for (std::vector<CSMWorld::UniversalId::Type>::const_iterator iter (types.begin());
+        iter!=types.end(); ++iter)
+        appendStage (new SearchStage (&dynamic_cast<CSMWorld::IdTableBase&> (
+            *document.getData().getTableModel (*iter))));
 }
 
 void CSMTools::SearchOperation::configure (const Search& search)

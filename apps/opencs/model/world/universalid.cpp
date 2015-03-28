@@ -348,6 +348,25 @@ std::vector<CSMWorld::UniversalId::Type> CSMWorld::UniversalId::listReferenceabl
     return list;
 }
 
+std::vector<CSMWorld::UniversalId::Type> CSMWorld::UniversalId::listTypes (int classes)
+{
+    std::vector<CSMWorld::UniversalId::Type> list;
+
+    for (int i=0; sNoArg[i].mName; ++i)
+        if (sNoArg[i].mClass & classes)
+            list.push_back (sNoArg[i].mType);
+
+    for (int i=0; sIdArg[i].mName; ++i)
+        if (sIdArg[i].mClass & classes)
+            list.push_back (sIdArg[i].mType);
+
+    for (int i=0; sIndexArg[i].mName; ++i)
+        if (sIndexArg[i].mClass & classes)
+            list.push_back (sIndexArg[i].mType);
+            
+    return list;    
+}
+
 CSMWorld::UniversalId::Type CSMWorld::UniversalId::getParentType (Type type)
 {
     for (int i=0; sIdArg[i].mType; ++i)
