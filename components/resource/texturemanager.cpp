@@ -6,11 +6,36 @@
 
 #include <components/vfs/manager.hpp>
 
+namespace
+{
+
+    osg::ref_ptr<osg::Texture2D> createWarningTexture()
+    {
+        osg::ref_ptr<osg::Image> warningImage = new osg::Image;
+
+        int width=8, height=8;
+        unsigned char* bytes = (unsigned char*)calloc(width*height*3, sizeof(unsigned char));
+        for (int i=0;i<width*height;++i)
+        {
+            bytes[3*i] = (255);
+            bytes[3*i+1] = (0);
+            bytes[3*i+2] = (255);
+        }
+        warningImage->setImage(width, height, 1, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, bytes, osg::Image::USE_MALLOC_FREE);
+
+        osg::ref_ptr<osg::Texture2D> warningTexture = new osg::Texture2D;
+        warningTexture->setImage(warningImage);
+        return warningTexture;
+    }
+
+}
+
 namespace Resource
 {
 
     TextureManager::TextureManager(const VFS::Manager *vfs)
         : mVFS(vfs)
+        , mWarningTexture(createWarningTexture())
     {
 
     }
@@ -34,6 +59,17 @@ namespace Resource
         }
         else
         {
+            Files::IStreamPtr stream;
+            try
+            {
+                stream = mVFS->get(normalized.c_str());
+            }
+            catch (std::exception& e)
+            {
+                std::cerr << "Failed to open texture: " << e.what() << std::endl;
+                return mWarningTexture;
+            }
+
             osg::ref_ptr<osgDB::Options> opts (new osgDB::Options);
             opts->setOptionString("dds_dxt1_detect_rgba"); // tx_creature_werewolf.dds isn't loading in the correct format without this option
             size_t extPos = normalized.find_last_of('.');
@@ -41,12 +77,11 @@ namespace Resource
             if (extPos != std::string::npos && extPos+1 < normalized.size())
                 ext = normalized.substr(extPos+1);
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
-            osgDB::ReaderWriter::ReadResult result = reader->readImage(*mVFS->get(normalized.c_str()), opts);
+            osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, opts);
             if (!result.success())
             {
-                // TODO: use "notfound" default texture
-                throw std::runtime_error("Error loading");
-                //std::cerr << "Error loading " << filename << ": " << result.message() << std::endl;
+                std::cerr << "Error loading " << filename << ": " << result.message() << std::endl;
+                return mWarningTexture;
             }
 
             osg::Image* image = result.getImage();

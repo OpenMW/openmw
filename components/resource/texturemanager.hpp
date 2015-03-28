@@ -41,6 +41,8 @@ namespace Resource
 
         std::map<MapKey, osg::ref_ptr<osg::Texture2D> > mTextures;
 
+        osg::ref_ptr<osg::Texture2D> mWarningTexture;
+
     };
 
 }
