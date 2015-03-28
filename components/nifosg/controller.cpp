@@ -364,6 +364,7 @@ AlphaController::AlphaController()
 
 AlphaController::AlphaController(const AlphaController &copy, const osg::CopyOp &copyop)
     : osg::NodeCallback(copy, copyop), ValueInterpolator(), Controller(copy)
+    , mData(copy.mData)
 {
 }
 
