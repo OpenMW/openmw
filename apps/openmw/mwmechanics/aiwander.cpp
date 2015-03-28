@@ -686,7 +686,8 @@ namespace MWMechanics
         // If there is no path this actor doesn't go anywhere. See:
         // https://forum.openmw.org/viewtopic.php?t=1556
         // http://www.fliggerty.com/phpBB3/viewtopic.php?f=30&t=5833
-        if(!pathgrid || pathgrid->mPoints.empty())
+        // Note: In order to wander, need at least two points.
+        if(!pathgrid || (pathgrid->mPoints.size() < 2))
             mDistance = 0;
 
         // A distance value passed into the constructor indicates how far the
@@ -730,10 +731,35 @@ namespace MWMechanics
                 }
                 mCurrentNode = mAllowedNodes[index];
                 mAllowedNodes.erase(mAllowedNodes.begin() + index);
-
-                mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
             }
+            
+            // In vanilla Morrowind, sometimes distance is too small to include at least two points,
+            // in which case, we will take the two closest points regardless of the wander distance
+            // This is a backup option, as std::sort is potentially O(n^2) in time.
+            if (mAllowedNodes.empty())
+            {
+                // Start with list of PathGrid nodes, sorted by distance from actor
+                std::vector<PathDistance> nodeDistances;
+                for (unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
+                {
+                    float distance = npcPos.squaredDistance(PathFinder::MakeOgreVector3(pathgrid->mPoints[counter]));
+                    nodeDistances.push_back(std::make_pair(distance, &pathgrid->mPoints.at(counter)));
+                }
+                std::sort(nodeDistances.begin(), nodeDistances.end(), sortByDistance);
+
+                // make closest node the current node
+                mCurrentNode = *nodeDistances[0].second;
+
+                // give Actor a 2nd node to walk to
+                mAllowedNodes.push_back(*nodeDistances[1].second);
+            }
+            mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
         }
+    }
+
+    bool AiWander::sortByDistance(const PathDistance& left, const PathDistance& right)
+    {
+        return left.first < right.first;
     }
 
     void AiWander::writeState(ESM::AiSequence::AiSequence &sequence) const
