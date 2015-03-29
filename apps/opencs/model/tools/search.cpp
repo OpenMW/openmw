@@ -27,7 +27,11 @@ void CSMTools::Search::searchTextCell (const CSMWorld::IdTableBase *model,
         message << getLocation (model, index, id) << text.mid (pos).toUtf8().data();
 
         std::ostringstream hint;
-        hint << "r: " << index.column() << " " << pos << " " << search.length();
+        hint
+            << "r: "
+            << model->getColumnId (index.column())
+            << " " << pos
+            << " " << search.length();
         
         messages.add (id, message.str(), hint.str());
 

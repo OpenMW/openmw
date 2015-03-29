@@ -26,13 +26,20 @@ namespace CSMTools
 
             std::vector<Line> mRows;
 
+            // Fixed columns
             enum Columns
             {
-                Column_Type = 0, Column_Id = 1, Column_Hint = 2, Column_Description = 3
+                Column_Type = 0, Column_Id = 1, Column_Hint = 2
             };
+
+            // Configurable columns
+            int mColumnDescription;
+            int mColumnField;
 
         public:
 
+            ReportModel (bool fieldColumn = false);
+        
             virtual int rowCount (const QModelIndex & parent = QModelIndex()) const;
 
             virtual int columnCount (const QModelIndex & parent = QModelIndex()) const;
