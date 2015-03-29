@@ -71,6 +71,7 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
 : CSVWorld::DragRecordTable (document, parent), mModel (document.getReport (id))
 {
     horizontalHeader()->setResizeMode (QHeaderView::Interactive);
+    horizontalHeader()->setStretchLastSection (true);
     verticalHeader()->hide();
     setSortingEnabled (true);
     setSelectionBehavior (QAbstractItemView::SelectRows);
