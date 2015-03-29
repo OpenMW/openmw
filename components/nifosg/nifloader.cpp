@@ -334,6 +334,8 @@ namespace
         {
         }
 
+        META_Object(NifOsg, DirtyBoundCallback)
+
         void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
             osg::Geode* geode = node->asGeode();
