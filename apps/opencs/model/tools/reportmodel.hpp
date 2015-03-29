@@ -14,7 +14,17 @@ namespace CSMTools
     {
             Q_OBJECT
 
-            std::vector<std::pair<CSMWorld::UniversalId, std::pair<std::string, std::string> > > mRows;
+            struct Line
+            {
+                Line (const CSMWorld::UniversalId& id, const std::string& message,
+                    const std::string& hint);
+                
+                CSMWorld::UniversalId mId;
+                std::string mMessage;
+                std::string mHint;
+            };
+
+            std::vector<Line> mRows;
 
         public:
 

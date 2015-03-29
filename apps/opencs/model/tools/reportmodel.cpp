@@ -3,6 +3,12 @@
 
 #include <stdexcept>
 
+CSMTools::ReportModel::Line::Line (const CSMWorld::UniversalId& id, const std::string& message,
+    const std::string& hint)
+: mId (id), mMessage (message), mHint (hint)
+{}
+
+
 int CSMTools::ReportModel::rowCount (const QModelIndex & parent) const
 {
     if (parent.isValid())
@@ -25,12 +31,12 @@ QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
         return QVariant();
 
     if (index.column()==0)
-        return static_cast<int> (mRows.at (index.row()).first.getType());
+        return static_cast<int> (mRows.at (index.row()).mId.getType());
 
     if (index.column()==1)
-        return QString::fromUtf8 (mRows.at (index.row()).second.first.c_str());
+        return QString::fromUtf8 (mRows.at (index.row()).mMessage.c_str());
 
-    return QString::fromUtf8 (mRows.at (index.row()).second.second.c_str());
+    return QString::fromUtf8 (mRows.at (index.row()).mHint.c_str());
 }
 
 QVariant CSMTools::ReportModel::headerData (int section, Qt::Orientation orientation, int role) const
@@ -64,20 +70,20 @@ void CSMTools::ReportModel::add (const CSMWorld::UniversalId& id, const std::str
     const std::string& hint)
 {
     beginInsertRows (QModelIndex(), mRows.size(), mRows.size());
-
-    mRows.push_back (std::make_pair (id, std::make_pair (message, hint)));
+    
+    mRows.push_back (Line (id, message, hint));
 
     endInsertRows();
 }
 
 const CSMWorld::UniversalId& CSMTools::ReportModel::getUniversalId (int row) const
 {
-    return mRows.at (row).first;
+    return mRows.at (row).mId;
 }
 
 std::string CSMTools::ReportModel::getHint (int row) const
 {
-    return mRows.at (row).second.second;
+    return mRows.at (row).mHint;
 }
 
 void CSMTools::ReportModel::clear()
