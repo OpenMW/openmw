@@ -22,7 +22,7 @@ int CSMTools::ReportModel::columnCount (const QModelIndex & parent) const
     if (parent.isValid())
         return 0;
 
-    return 3;
+    return 4;
 }
 
 QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
@@ -30,13 +30,32 @@ QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
     if (role!=Qt::DisplayRole)
         return QVariant();
 
-    if (index.column()==0)
-        return static_cast<int> (mRows.at (index.row()).mId.getType());
+    switch (index.column())
+    {
+        case Column_Type:
 
-    if (index.column()==1)
-        return QString::fromUtf8 (mRows.at (index.row()).mMessage.c_str());
+            return static_cast<int> (mRows.at (index.row()).mId.getType());
+        
+        case Column_Id:
+        {
+            CSMWorld::UniversalId id = mRows.at (index.row()).mId;
 
-    return QString::fromUtf8 (mRows.at (index.row()).mHint.c_str());
+            if (id.getArgumentType()==CSMWorld::UniversalId::ArgumentType_Id)
+                return QString::fromUtf8 (id.getId().c_str());
+
+            return QString ("-");
+        }
+        
+        case Column_Description:
+
+            return QString::fromUtf8 (mRows.at (index.row()).mMessage.c_str());
+            
+        case Column_Hint:
+
+            return QString::fromUtf8 (mRows.at (index.row()).mHint.c_str());
+    }
+
+    return QVariant();
 }
 
 QVariant CSMTools::ReportModel::headerData (int section, Qt::Orientation orientation, int role) const
@@ -47,13 +66,14 @@ QVariant CSMTools::ReportModel::headerData (int section, Qt::Orientation orienta
     if (orientation==Qt::Vertical)
         return QVariant();
 
-    if (section==0)
-        return "Type";
+    switch (section)
+    {
+        case Column_Type: return "Type";
+        case Column_Id: return "ID";
+        case Column_Description: return "Description";
+    }
 
-    if (section==1)
-        return "Description";
-
-    return "Hint";
+    return "-";
 }
 
 bool CSMTools::ReportModel::removeRows (int row, int count, const QModelIndex& parent)

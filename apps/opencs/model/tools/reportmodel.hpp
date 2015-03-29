@@ -26,6 +26,11 @@ namespace CSMTools
 
             std::vector<Line> mRows;
 
+            enum Columns
+            {
+                Column_Type = 0, Column_Id = 1, Column_Hint = 2, Column_Description = 3
+            };
+
         public:
 
             virtual int rowCount (const QModelIndex & parent = QModelIndex()) const;
