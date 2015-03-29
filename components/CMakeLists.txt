@@ -43,7 +43,7 @@ add_component_dir (resource
     )
 
 add_component_dir (sceneutil
-    clone
+    clone attach
     )
 
 add_component_dir (nif
