@@ -144,3 +144,14 @@ bool CSMWorld::ResourceTable::isDeleted (const std::string& id) const
 {
     return false;
 }
+
+int CSMWorld::ResourceTable::getColumnId (int column) const
+{
+    switch (column)
+    {
+        case 0: return Columns::ColumnId_Id;
+        case 1: return Columns::ColumnId_RecordType;
+    }
+
+    return -1;
+}
