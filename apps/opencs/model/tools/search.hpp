@@ -56,7 +56,7 @@ namespace CSMTools
                 const QModelIndex& index, const CSMWorld::UniversalId& id,
                 CSMDoc::Messages& messages) const;
 
-            std::string getLocation (const CSMWorld::IdTableBase *model, const QModelIndex& index, const CSMWorld::UniversalId& id) const;
+            QString formatDescription (const QString& description, int pos, int length) const;
                 
         public:
 
