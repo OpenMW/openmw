@@ -141,6 +141,8 @@ namespace SceneUtil
             osgAnimation::BoneMapVisitor boneMapVisitor;
             masterSkel->accept(boneMapVisitor);
 
+            // would be more efficient if we could attach the RigGeometry directly to the master skeleton, but currently not possible
+            // due to a difference in binding pose of the two skeletons
             AddCopyControllerVisitor visitor(boneMapVisitor.getBoneMap());
             toAttach->accept(visitor);
 
