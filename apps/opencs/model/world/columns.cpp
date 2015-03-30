@@ -24,7 +24,6 @@ namespace CSMWorld
             { ColumnId_ValueType, "Value Type" },
             { ColumnId_Description, "Description" },
             { ColumnId_Specialisation, "Specialisation" },
-            { ColumnId_Skill, "Skill" },
             { ColumnId_Attribute, "Attribute" },
             { ColumnId_Name, "Name" },
             { ColumnId_Playable, "Playable" },
@@ -174,10 +173,11 @@ namespace CSMWorld
             { ColumnId_Gender, "Gender" },
             { ColumnId_PcRank, "PC Rank" },
             { ColumnId_ReferenceableId, "Referenceable ID" },
-            { ColumnId_NpcDestinations, "Destinations" },
+
+            { ColumnId_ContainerContent, "Content" },
+            { ColumnId_ItemCount, "Count" },
             { ColumnId_InventoryItemId, "ID"},
-            { ColumnId_SpellId, "ID"},
-            { ColumnId_ItemCount, "Count"},
+
             { ColumnId_CombatState, "Combat" },
             { ColumnId_MagicState, "Magic" },
             { ColumnId_StealthState, "Stealth" },
@@ -185,6 +185,22 @@ namespace CSMWorld
             { ColumnId_Vampire, "Vampire" },
             { ColumnId_BodyPartType, "Bodypart Type" },
             { ColumnId_MeshType, "Mesh Type" },
+
+            { ColumnId_ActorInventory, "Inventory" },
+            { ColumnId_ActorSpells, "Spells" },
+            { ColumnId_SpellId, "ID"},
+
+            { ColumnId_NpcDestinations, "Destinations" },
+            { ColumnId_DestinationCell, "Cell"},
+            { ColumnId_PosX, "X"},
+            { ColumnId_PosY, "Y"},
+            { ColumnId_PosZ, "Z"},
+            { ColumnId_RotX, "Rotation X"},
+            { ColumnId_RotY, "Rotation Y"},
+            { ColumnId_RotZ, "Rotation Z"},
+
+            { ColumnId_Skill, "Skill" },
+
             { ColumnId_OwnerGlobal, "Owner Global" },
             { ColumnId_DefaultProfile, "Default Profile" },
             { ColumnId_BypassNewGame, "Bypass New Game" },
@@ -206,14 +222,6 @@ namespace CSMWorld
             { ColumnId_HitSound, "Hit Sound" },
             { ColumnId_AreaSound, "Area Sound" },
             { ColumnId_BoltSound, "Bolt Sound" },
-            
-            { ColumnId_NpcDestinations, "Cell"},
-            { ColumnId_PosX, "X"},
-            { ColumnId_PosY, "Y"},
-            { ColumnId_PosZ, "Z"},
-            { ColumnId_RotX, "Rotation X"},
-            { ColumnId_RotY, "Rotation Y"},
-            { ColumnId_RotZ, "Rotation Z"},
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },

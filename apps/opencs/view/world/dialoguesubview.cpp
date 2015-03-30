@@ -20,6 +20,7 @@
 #include <QScrollArea>
 #include <QPushButton>
 #include <QToolButton>
+#include <QHeaderView>
 #include <QDebug>
 
 #include "../../model/world/nestedtablemodel.hpp"
@@ -139,26 +140,26 @@ void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::
         CSMWorld::UniversalId::Type type = data[i].getType();
         if (mDisplay == CSMWorld::ColumnBase::Display_Referenceable)
         {
-            if (  type == CSMWorld::UniversalId::Type_Activator
-                  || type == CSMWorld::UniversalId::Type_Potion
-                  || type == CSMWorld::UniversalId::Type_Apparatus
-                  || type == CSMWorld::UniversalId::Type_Armor
-                  || type == CSMWorld::UniversalId::Type_Book
-                  || type == CSMWorld::UniversalId::Type_Clothing
-                  || type == CSMWorld::UniversalId::Type_Container
-                  || type == CSMWorld::UniversalId::Type_Creature
-                  || type == CSMWorld::UniversalId::Type_Door
-                  || type == CSMWorld::UniversalId::Type_Ingredient
-                  || type == CSMWorld::UniversalId::Type_CreatureLevelledList
-                  || type == CSMWorld::UniversalId::Type_ItemLevelledList
-                  || type == CSMWorld::UniversalId::Type_Light
-                  || type == CSMWorld::UniversalId::Type_Lockpick
-                  || type == CSMWorld::UniversalId::Type_Miscellaneous
-                  || type == CSMWorld::UniversalId::Type_Npc
-                  || type == CSMWorld::UniversalId::Type_Probe
-                  || type == CSMWorld::UniversalId::Type_Repair
-                  || type == CSMWorld::UniversalId::Type_Static
-                  || type == CSMWorld::UniversalId::Type_Weapon)
+            if (type == CSMWorld::UniversalId::Type_Activator
+                || type == CSMWorld::UniversalId::Type_Potion
+                || type == CSMWorld::UniversalId::Type_Apparatus
+                || type == CSMWorld::UniversalId::Type_Armor
+                || type == CSMWorld::UniversalId::Type_Book
+                || type == CSMWorld::UniversalId::Type_Clothing
+                || type == CSMWorld::UniversalId::Type_Container
+                || type == CSMWorld::UniversalId::Type_Creature
+                || type == CSMWorld::UniversalId::Type_Door
+                || type == CSMWorld::UniversalId::Type_Ingredient
+                || type == CSMWorld::UniversalId::Type_CreatureLevelledList
+                || type == CSMWorld::UniversalId::Type_ItemLevelledList
+                || type == CSMWorld::UniversalId::Type_Light
+                || type == CSMWorld::UniversalId::Type_Lockpick
+                || type == CSMWorld::UniversalId::Type_Miscellaneous
+                || type == CSMWorld::UniversalId::Type_Npc
+                || type == CSMWorld::UniversalId::Type_Probe
+                || type == CSMWorld::UniversalId::Type_Repair
+                || type == CSMWorld::UniversalId::Type_Static
+                || type == CSMWorld::UniversalId::Type_Weapon)
             {
                 type = CSMWorld::UniversalId::Type_Referenceable;
             }
@@ -388,6 +389,12 @@ void CSVWorld::EditWidget::remake(int row)
     line->setFrameShape(QFrame::HLine);
     line->setFrameShadow(QFrame::Sunken);
 
+    QFrame* line2 = new QFrame(mMainWidget);
+    line2->setObjectName(QString::fromUtf8("line2"));
+    line2->setGeometry(QRect(320, 150, 118, 3));
+    line2->setFrameShape(QFrame::HLine);
+    line2->setFrameShadow(QFrame::Sunken);
+
     QVBoxLayout *mainLayout = new QVBoxLayout(mMainWidget);
     QGridLayout *unlockedLayout = new QGridLayout();
     QGridLayout *lockedLayout = new QGridLayout();
@@ -396,7 +403,8 @@ void CSVWorld::EditWidget::remake(int row)
     mainLayout->addLayout(lockedLayout, 0);
     mainLayout->addWidget(line, 1);
     mainLayout->addLayout(unlockedLayout, 2);
-    mainLayout->addLayout(tablesLayout, 3);
+    mainLayout->addWidget(line2, 1);
+    mainLayout->addLayout(tablesLayout, 0);
     mainLayout->addStretch(1);
 
     int unlocked = 0;
@@ -416,10 +424,28 @@ void CSVWorld::EditWidget::remake(int row)
             {
                 mNestedModels.push_back(new CSMWorld::NestedTableModel (mTable->index(row, i), display, mTable));
 
-                NestedTable* table = new NestedTable(mDocument, *(mNestedModels.rbegin()), this);
+                NestedTable* table = new NestedTable(mDocument, mNestedModels.back(), this);
 
+                int rows = mNestedModels.back()->rowCount(mTable->index(row, i));
+                if (rows == 0) rows = 1; // FIXME: quick hack
+                int rowHeight = table->rowHeight(0);
+                int tableHeight = (rows * rowHeight)
+                    + table->horizontalHeader()->height() + 2 * table->frameWidth();
+                int tableMaxHeight = (5 * rowHeight)
+                    + table->horizontalHeader()->height() + 2 * table->frameWidth();
+                if (rows > 1 && rows < 5)
+                    table->setMinimumHeight(tableHeight);
+                else if (rows > 1)
+                    table->setMinimumHeight(tableMaxHeight);
+
+                QLabel* label = new QLabel (mTable->headerData (i, Qt::Horizontal, Qt::DisplayRole).toString(), mMainWidget);
+
+                label->setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+                tablesLayout->addWidget(label);
                 tablesLayout->addWidget(table);
-            } else
+            }
+            else
             {
                 mDispatcher.makeDelegate (display);
                 QWidget* editor = mDispatcher.makeEditor (display, (mTable->index (row, i)));
@@ -438,7 +464,8 @@ void CSVWorld::EditWidget::remake(int row)
                         lockedLayout->addWidget (label, locked, 0);
                         lockedLayout->addWidget (editor, locked, 1);
                         ++locked;
-                    } else
+                    }
+                    else
                     {
                         unlockedLayout->addWidget (label, unlocked, 0);
                         unlockedLayout->addWidget (editor, unlocked, 1);
