@@ -11,13 +11,6 @@ namespace VFS
     {
         const Files::PathContainer& dataDirs = collections.getPaths();
 
-        if (useLooseFiles)
-            for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
-            {
-                // Last data dir has the highest priority
-                vfs->addArchive(new FileSystemArchive(iter->string()));
-            }
-
         for (std::vector<std::string>::const_iterator archive = archives.begin(); archive != archives.end(); ++archive)
         {
             if (collections.doesExist(*archive))
@@ -35,6 +28,13 @@ namespace VFS
                 throw std::runtime_error(message.str());
             }
         }
+
+        if (useLooseFiles)
+            for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
+            {
+                // Last data dir has the highest priority
+                vfs->addArchive(new FileSystemArchive(iter->string()));
+            }
 
         vfs->buildIndex();
     }
