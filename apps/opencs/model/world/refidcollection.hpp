@@ -7,6 +7,7 @@
 
 #include "columnbase.hpp"
 #include "collectionbase.hpp"
+#include "nestedcollection.hpp"
 #include "refiddata.hpp"
 
 namespace ESM
@@ -45,7 +46,7 @@ namespace CSMWorld
 
         private:
 
-            RefIdAdapter& findAdaptor (UniversalId::Type) const;
+            RefIdAdapter& findAdapter (UniversalId::Type) const;
             ///< Throws an exception if no adaptor for \a Type can be found.
 
         public:
@@ -71,7 +72,7 @@ namespace CSMWorld
             virtual QVariant getData (int index, int column) const;
 
             virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const;
-        
+
             virtual NestedTableWrapperBase* nestedTable(int row, int column) const;
 
             virtual void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable);

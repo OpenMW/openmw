@@ -1,4 +1,4 @@
-#include "nestedadaptors.hpp"
+#include "nestedadapters.hpp"
 
 CSMWorld::HelperBase::HelperBase(CSMWorld::UniversalId::Type type)
     : mType(type)

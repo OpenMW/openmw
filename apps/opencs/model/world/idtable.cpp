@@ -6,6 +6,7 @@
 #include "nestedtablewrapper.hpp"
 
 #include "collectionbase.hpp"
+#include "nestedcollection.hpp"
 #include "columnbase.hpp"
 
 CSMWorld::IdTable::IdTable (CollectionBase *idCollection, unsigned int features)

@@ -13,7 +13,6 @@ namespace CSMWorld
 {
     struct ColumnBase;
     struct RecordBase;
-    class NestedTableWrapperBase;
 
     /// \brief Base class for record collections
     ///
@@ -104,28 +103,6 @@ namespace CSMWorld
             int findColumnIndex (Columns::ColumnId id) const;
             ///< Return index of column with the given \a id. If no such column exists, an exception is
             /// thrown.
-    };
-
-    class NestedCollection : public CollectionBase
-    {
-    public:
-        virtual void addNestedRow(int row, int col, int position) = 0;
-
-        virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const = 0;
-
-        virtual NestedTableWrapperBase* nestedTable(int row, int column) const = 0;
-
-        virtual void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable) = 0;
-
-        virtual void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn) = 0;
-
-        virtual int getNestedRowsCount(int row, int column) const = 0;
-
-        virtual int getNestedColumnsCount(int row, int column) const = 0;
-
-        virtual void removeNestedRows(int row, int column, int subRow) = 0;
-
-
     };
 }
 

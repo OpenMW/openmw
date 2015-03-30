@@ -1,5 +1,5 @@
-#ifndef CSM_WORLD_NESTEDADAPTORS_H
-#define CSM_WORLD_NESTEDADAPTORS_H
+#ifndef CSM_WORLD_NESTEDADAPTERS_H
+#define CSM_WORLD_NESTEDADAPTERS_H
 
 #include <vector>
 #include <string>

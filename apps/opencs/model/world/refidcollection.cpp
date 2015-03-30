@@ -27,7 +27,7 @@ bool CSMWorld::RefIdColumn::isUserEditable() const
 }
 
 
-CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdaptor (UniversalId::Type type) const
+CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdapter (UniversalId::Type type) const
 {
     std::map<UniversalId::Type, RefIdAdapter *>::const_iterator iter = mAdapters.find (type);
 
@@ -452,7 +452,7 @@ QVariant CSMWorld::RefIdCollection::getData (int index, int column) const
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (index);
 
-    const RefIdAdapter& adaptor = findAdaptor (localIndex.second);
+    const RefIdAdapter& adaptor = findAdapter (localIndex.second);
 
     return adaptor.getData (&mColumns.at (column), mData, localIndex.first);
 }
@@ -461,7 +461,7 @@ QVariant CSMWorld::RefIdCollection::getNestedData (int row, int column, int subR
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex(row);
 
-    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
+    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
     return adaptor.getNestedData (&mColumns.at (column), mData, localIndex.first, subRow, subColumn);
 }
@@ -470,7 +470,7 @@ void CSMWorld::RefIdCollection::setData (int index, int column, const QVariant& 
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (index);
 
-    const RefIdAdapter& adaptor = findAdaptor (localIndex.second);
+    const RefIdAdapter& adaptor = findAdapter (localIndex.second);
 
     adaptor.setData (&mColumns.at (column), mData, localIndex.first, data);
 }
@@ -479,7 +479,7 @@ void CSMWorld::RefIdCollection::setNestedData(int row, int column, const QVarian
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
-    const RefIdAdapter& adaptor = findAdaptor (localIndex.second);
+    const RefIdAdapter& adaptor = findAdapter (localIndex.second);
 
     dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(adaptor).setNestedData (&mColumns.at (column), mData, localIndex.first, data, subRow, subColumn);
 }
@@ -493,7 +493,7 @@ void CSMWorld::RefIdCollection::removeNestedRows(int row, int column, int subRow
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
-    const RefIdAdapter& adaptor = findAdaptor (localIndex.second);
+    const RefIdAdapter& adaptor = findAdapter (localIndex.second);
 
     dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(adaptor).removeNestedRow(&mColumns.at (column), mData, localIndex.first, subRow);
 }
@@ -530,7 +530,7 @@ void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin,
 void CSMWorld::RefIdCollection::appendRecord (const RecordBase& record,
     UniversalId::Type type)
 {
-    std::string id = findAdaptor (type).getId (record);
+    std::string id = findAdapter (type).getId (record);
 
     int index = mData.getAppendIndex (type);
 
@@ -637,7 +637,7 @@ int CSMWorld::RefIdCollection::getNestedRowsCount(int row, int column) const
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
-    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
+    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
     return adaptor.getNestedRowsCount(&mColumns.at(column), mData, localIndex.first);
 }
@@ -646,7 +646,7 @@ int CSMWorld::RefIdCollection::getNestedColumnsCount(int row, int column) const
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
-    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
+    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
     return adaptor.getNestedColumnsCount(&mColumns.at(column), mData);
 }
@@ -655,7 +655,7 @@ void CSMWorld::RefIdCollection::addNestedRow(int row, int col, int position)
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
-    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
+    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
     adaptor.addNestedRow(&mColumns.at(col), mData, localIndex.first, position);
 }
@@ -664,7 +664,7 @@ void CSMWorld::RefIdCollection::setNestedTable(int row, int column, const CSMWor
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
-    CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
+    CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
     adaptor.setNestedTable(&mColumns.at(column), mData, localIndex.first, nestedTable);
 }
@@ -673,7 +673,7 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::RefIdCollection::nestedTable(int row
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
-    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdaptor (localIndex.second));
+    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
     return adaptor.nestedTable(&mColumns.at(column), mData, localIndex.first);
 }
