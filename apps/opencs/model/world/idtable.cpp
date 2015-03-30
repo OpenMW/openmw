@@ -14,7 +14,9 @@ CSMWorld::IdTable::IdTable (CollectionBase *idCollection, unsigned int features)
 {}
 
 CSMWorld::IdTable::~IdTable()
-{}
+{
+    mIdCollection = 0; // FIXME: workaround only, should stop QHideEvent calling after destruction
+}
 
 int CSMWorld::IdTable::rowCount (const QModelIndex & parent) const
 {
@@ -81,6 +83,10 @@ QVariant CSMWorld::IdTable::headerData (int section,
 
 QVariant CSMWorld::IdTable::nestedHeaderData(int section, int subSection, Qt::Orientation orientation, int role) const
 {
+    // FIXME: workaround only, should stop QHideEvent calling after destruction
+    if (section < 0 || !mIdCollection || section >= mIdCollection->getColumns())
+        return QVariant();
+
     const NestColumn& parentColumn = dynamic_cast<const NestColumn&>(mIdCollection->getColumn(section));
 
     if (orientation==Qt::Vertical)
