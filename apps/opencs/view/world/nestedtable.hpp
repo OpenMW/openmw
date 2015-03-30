@@ -10,7 +10,7 @@ class QContextMenuEvent;
 
 namespace CSMWorld
 {
-    class NestedTableModel;
+    class NestedTableProxyModel;
     class UniversalId;
 }
 
@@ -28,11 +28,11 @@ namespace CSVWorld
         QAction *mAddNewRowAction;
         QAction *mRemoveRowAction;
         QUndoStack& mUndoStack;
-        CSMWorld::NestedTableModel* mModel;
+        CSMWorld::NestedTableProxyModel* mModel;
 
     public:
         NestedTable(CSMDoc::Document& document,
-                    CSMWorld::NestedTableModel* model,
+                    CSMWorld::NestedTableProxyModel* model,
                     QWidget* parent = NULL);
 
     protected:

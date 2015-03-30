@@ -1,5 +1,5 @@
-#ifndef CSM_WOLRD_NESTEDTABLEMODEL_H
-#define CSM_WOLRD_NESTEDTABLEMODEL_H
+#ifndef CSM_WOLRD_NESTEDTABLEPROXYMODEL_H
+#define CSM_WOLRD_NESTEDTABLEPROXYMODEL_H
 
 #include <vector>
 
@@ -19,7 +19,7 @@ namespace CSMWorld
     class RecordBase;
     class IdTable;
 
-    class NestedTableModel : public QAbstractProxyModel
+    class NestedTableProxyModel : public QAbstractProxyModel
     {
         Q_OBJECT
 
@@ -28,15 +28,15 @@ namespace CSMWorld
         std::string mId;
 
         public:
-        NestedTableModel(const QModelIndex& parent,
+        NestedTableProxyModel(const QModelIndex& parent,
                          ColumnBase::Display displayType,
                          IdTable* parentModel);
         //parent is the parent of columns to work with. Columnid provides information about the column
 
         std::string getParentId() const;
-        
+
         int getParentColumn() const;
-        
+
         CSMWorld::IdTable* model() const;
 
         virtual QModelIndex mapFromSource(const QModelIndex& sourceIndex) const;
@@ -52,27 +52,27 @@ namespace CSMWorld
         virtual QModelIndex parent(const QModelIndex& index) const;
 
         virtual QVariant headerData ( int section, Qt::Orientation orientation, int role ) const;
-        
+
         virtual bool setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
-        
+
         virtual Qt::ItemFlags flags(const QModelIndex& index) const;
-        
+
     private:
         void setupHeaderVectors(ColumnBase::Display columnId);
 
         bool indexIsParent(const QModelIndex& index);
-        
+
     private slots:
         void forwardRowsAboutToInserted(const QModelIndex & parent, int first, int last);
-        
+
         void forwardRowsInserted(const QModelIndex & parent, int first, int last);
 
         void forwardRowsAboutToRemoved(const QModelIndex & parent, int first, int last);
 
         void forwardRowsRemoved(const QModelIndex & parent, int first, int last);
-        
+
         void forwardResetStart(const QString& id);
-        
+
         void forwardResetEnd(const QString& id);
     };
 }

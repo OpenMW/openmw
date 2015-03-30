@@ -23,7 +23,7 @@
 #include <QHeaderView>
 #include <QDebug>
 
-#include "../../model/world/nestedtablemodel.hpp"
+#include "../../model/world/nestedtableproxymodel.hpp"
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/columns.hpp"
@@ -422,7 +422,7 @@ void CSVWorld::EditWidget::remake(int row)
 
             if (mTable->hasChildren(mTable->index(row, i)))
             {
-                mNestedModels.push_back(new CSMWorld::NestedTableModel (mTable->index(row, i), display, mTable));
+                mNestedModels.push_back(new CSMWorld::NestedTableProxyModel (mTable->index(row, i), display, mTable));
 
                 NestedTable* table = new NestedTable(mDocument, mNestedModels.back(), this);
 

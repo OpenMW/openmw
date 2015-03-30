@@ -51,7 +51,9 @@ QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
                                                                              parentAdress.second,
                                                                              index.row(),
                                                                              index.column());
-    } else {
+    }
+    else
+    {
         return mIdCollection->getData (index.row(), index.column());
     }
 }
@@ -110,7 +112,8 @@ bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value
                               CSMWorld::IdTable::index (parentAdress.second, mIdCollection->getColumns()-1));
 
             return true;
-        } else
+        }
+        else
         {
             return false;
         }
@@ -149,7 +152,8 @@ bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& paren
         {
             dynamic_cast<NestedCollection*>(mIdCollection)->removeNestedRows(parent.row(), parent.column(), row+i);
         }
-    } else
+    }
+    else
     {
 
         beginRemoveRows (parent, row, row+count-1);

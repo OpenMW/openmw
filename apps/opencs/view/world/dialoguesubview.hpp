@@ -21,7 +21,7 @@ class QVBoxLayout;
 namespace CSMWorld
 {
     class IdTable;
-    class NestedTableModel;
+    class NestedTableProxyModel;
 }
 
 namespace CSMDoc
@@ -165,7 +165,7 @@ namespace CSVWorld
             QWidget* mMainWidget;
             CSMWorld::IdTable* mTable;
             CSMDoc::Document& mDocument;
-            std::vector<CSMWorld::NestedTableModel*> mNestedModels; //Plain, raw C pointers, deleted in the dtor
+            std::vector<CSMWorld::NestedTableProxyModel*> mNestedModels; //Plain, raw C pointers, deleted in the dtor
 
         public:
 

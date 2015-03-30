@@ -1,5 +1,5 @@
 #include "nestedtable.hpp"
-#include "../../model/world/nestedtablemodel.hpp"
+#include "../../model/world/nestedtableproxymodel.hpp"
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/commands.hpp"
 #include "util.hpp"
@@ -10,7 +10,7 @@
 #include <QDebug>
 
 CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
-                                   CSMWorld::NestedTableModel* model,
+                                   CSMWorld::NestedTableProxyModel* model,
                                    QWidget* parent)
     : QTableView(parent),
       mUndoStack(document.getUndoStack()),
