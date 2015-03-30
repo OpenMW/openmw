@@ -210,36 +210,49 @@ namespace
         }
     };
 
-    // Custom node used to have a transform always oriented towards the camera. Can have translation and scale
+    // NodeCallback used to have a transform always oriented towards the camera. Can have translation and scale
     // set just like a regular MatrixTransform, but the rotation set will be overridden in order to face the camera.
-    class BillboardNode : public osg::MatrixTransform
+    class BillboardCallback : public osg::NodeCallback
     {
     public:
-        BillboardNode() : osg::MatrixTransform() {}
-        BillboardNode(const BillboardNode& copy, const osg::CopyOp& copyop)
-            : osg::MatrixTransform(copy, copyop) {}
-        BillboardNode(const osg::Matrix& matrix)
-            : osg::MatrixTransform(matrix) {}
-
-        META_Node(NifOsg, BillboardNode)
-
-        virtual bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor*) const
+        BillboardCallback()
         {
-            if (_referenceFrame==RELATIVE_RF)
-            {
-                const NifOsg::NodeUserData* userdata = static_cast<const NifOsg::NodeUserData*>(getUserDataContainer()->getUserObject(0));
+        }
+        BillboardCallback(const BillboardCallback& copy, const osg::CopyOp& copyop)
+            : osg::NodeCallback(copy, copyop)
+        {
+        }
 
-                matrix.preMult(_matrix);
-                matrix.setRotate(osg::Quat());
-                matrix(0,0) = userdata->mScale;
-                matrix(1,1) = userdata->mScale;
-                matrix(2,2) = userdata->mScale;
-            }
-            else // absolute
+        META_Object(NifOsg, BillboardCallback)
+
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            osgUtil::CullVisitor* cv = dynamic_cast<osgUtil::CullVisitor*>(nv);
+            osg::MatrixTransform* billboardNode = dynamic_cast<osg::MatrixTransform*>(node);
+            if (billboardNode && cv)
             {
-                matrix = _matrix;
+                osg::Matrix modelView = *cv->getModelViewMatrix();
+
+                // attempt to preserve scale
+                float mag[3];
+                for (int i=0;i<3;++i)
+                {
+                    mag[i] = std::sqrt(modelView(0,i) * modelView(0,i) + modelView(1,i) * modelView(1,i) + modelView(2,i) * modelView(2,i));
+                }
+
+                modelView.setRotate(osg::Quat());
+                modelView(0,0) = mag[0];
+                modelView(1,1) = mag[1];
+                modelView(2,2) = mag[2];
+
+                cv->pushModelViewMatrix(new osg::RefMatrix(modelView), osg::Transform::RELATIVE_RF);
+
+                traverse(node, nv);
+
+                cv->popModelViewMatrix();
             }
-            return true;
+            else
+                traverse(node, nv);
         }
     };
 
@@ -639,11 +652,7 @@ namespace NifOsg
                                 std::map<int, int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
             osg::ref_ptr<osg::MatrixTransform> transformNode;
-            if (nifNode->recType == Nif::RC_NiBillboardNode)
-            {
-                transformNode = new BillboardNode(toMatrix(nifNode->trafo));
-            }
-            else if (createSkeleton)
+            if (createSkeleton)
             {
                 osgAnimation::Bone* bone = new osgAnimation::Bone;
                 transformNode = bone;
@@ -654,6 +663,10 @@ namespace NifOsg
             else
             {
                 transformNode = new osg::MatrixTransform(toMatrix(nifNode->trafo));
+            }
+            if (nifNode->recType == Nif::RC_NiBillboardNode)
+            {
+                transformNode->addCullCallback(new BillboardCallback);
             }
 
             if (parentNode)
