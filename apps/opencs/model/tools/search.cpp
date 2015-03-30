@@ -79,31 +79,36 @@ void CSMTools::Search::searchRecordStateCell (const CSMWorld::IdTableBase *model
 
 QString CSMTools::Search::formatDescription (const QString& description, int pos, int length) const
 {
-    int padding = 10; ///< \todo make this configurable
-
-    if (pos<padding)
-    {
-        length += pos;
-        pos = 0;
-    }
-    else
-    {
-        pos -= padding;
-        length += padding;
-    }
-
-    length += padding;
-    
-    QString text = description.mid (pos, length);
+    QString text (description);
 
     // compensate for Windows nonsense
     text.remove ('\r');
 
+    // split
+    int padding = 10; ///< \todo make this configurable
+
+    QString highlight = flatten (text.mid (pos, length));
+    QString before = flatten (padding<=pos ? text.mid (0, pos) : text.mid (pos-padding, padding));
+    QString after = flatten (text.mid (pos+length, padding));
+
+    // join
+    text = before + "<b>" + highlight + "</b>" + after;
+
     // improve layout for single line display
-    text.replace ("\n", "<CR>");
+    text.replace ("\n", "&lt;CR>");
     text.replace ('\t', ' ');
     
-    return text;    
+    return text; 
+}
+
+QString CSMTools::Search::flatten (const QString& text) const
+{
+    QString flat (text);
+
+    flat.replace ("&", "&amp;");
+    flat.replace ("<", "&lt;");
+
+    return flat;
 }
 
 CSMTools::Search::Search() : mType (Type_None) {}

@@ -6,10 +6,44 @@
 #include <QHeaderView>
 #include <QAction>
 #include <QMenu>
+#include <QStyledItemDelegate>
+#include <QTextDocument>
+#include <QPainter>
 
 #include "../../model/tools/reportmodel.hpp"
 
 #include "../../view/world/idtypedelegate.hpp"
+
+namespace CSVTools
+{
+    class RichTextDelegate : public QStyledItemDelegate
+    {
+        public:
+
+            RichTextDelegate (QObject *parent = 0);
+            
+            virtual void paint(QPainter *painter, const QStyleOptionViewItem& option,
+                const QModelIndex& index) const;
+    };
+}
+
+CSVTools::RichTextDelegate::RichTextDelegate (QObject *parent) : QStyledItemDelegate (parent)
+{}
+
+void CSVTools::RichTextDelegate::paint(QPainter *painter, const QStyleOptionViewItem& option,
+    const QModelIndex& index) const
+{
+    QTextDocument document;
+    QVariant value = index.data (Qt::DisplayRole);
+    if (value.isValid() && !value.isNull())
+    {
+        document.setHtml (value.toString());
+        painter->translate (option.rect.topLeft());
+        document.drawContents (painter);
+        painter->translate (-option.rect.topLeft());
+    }
+}
+
 
 void CSVTools::ReportTable::contextMenuEvent (QContextMenuEvent *event)
 {
@@ -67,7 +101,7 @@ void CSVTools::ReportTable::mouseDoubleClickEvent (QMouseEvent *event)
 }
 
 CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
-    const CSMWorld::UniversalId& id, QWidget *parent)
+    const CSMWorld::UniversalId& id, bool richTextDescription, QWidget *parent)
 : CSVWorld::DragRecordTable (document, parent), mModel (document.getReport (id))
 {
     horizontalHeader()->setResizeMode (QHeaderView::Interactive);
@@ -85,6 +119,9 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
 
     setItemDelegateForColumn (0, mIdTypeDelegate);
 
+    if (richTextDescription)
+        setItemDelegateForColumn (mModel->columnCount()-1, new RichTextDelegate (this));
+    
     mShowAction = new QAction (tr ("Show"), this);
     connect (mShowAction, SIGNAL (triggered()), this, SLOT (showSelection()));
     addAction (mShowAction);

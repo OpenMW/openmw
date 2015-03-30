@@ -36,8 +36,9 @@ namespace CSVTools
 
         public:
 
+            /// \param richTextDescription Use rich text in the description column.
             ReportTable (CSMDoc::Document& document, const CSMWorld::UniversalId& id,
-                QWidget *parent = 0);
+                bool richTextDescription, QWidget *parent = 0);
 
             virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
 

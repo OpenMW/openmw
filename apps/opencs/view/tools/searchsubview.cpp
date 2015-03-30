@@ -17,7 +17,7 @@ CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     layout->addWidget (&mSearchBox);
     
-    layout->addWidget (mTable = new ReportTable (document, id), 2);
+    layout->addWidget (mTable = new ReportTable (document, id, true), 2);
 
     QWidget *widget = new QWidget;
     

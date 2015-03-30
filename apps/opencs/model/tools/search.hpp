@@ -57,7 +57,9 @@ namespace CSMTools
                 CSMDoc::Messages& messages) const;
 
             QString formatDescription (const QString& description, int pos, int length) const;
-                
+
+            QString flatten (const QString& text) const;
+            
         public:
 
             Search();
