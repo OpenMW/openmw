@@ -85,11 +85,10 @@ QString CSMTools::Search::formatDescription (const QString& description, int pos
     text.remove ('\r');
 
     // split
-    int padding = 10; ///< \todo make this configurable
-
     QString highlight = flatten (text.mid (pos, length));
-    QString before = flatten (padding<=pos ? text.mid (0, pos) : text.mid (pos-padding, padding));
-    QString after = flatten (text.mid (pos+length, padding));
+    QString before = flatten (mPaddingBefore<=pos ?
+        text.mid (0, pos) : text.mid (pos-mPaddingBefore, mPaddingBefore));
+    QString after = flatten (text.mid (pos+length, mPaddingAfter));
 
     // join
     text = before + "<b>" + highlight + "</b>" + after;
@@ -111,24 +110,24 @@ QString CSMTools::Search::flatten (const QString& text) const
     return flat;
 }
 
-CSMTools::Search::Search() : mType (Type_None) {}
+CSMTools::Search::Search() : mType (Type_None), mPaddingBefore (10), mPaddingAfter (10) {}
 
 CSMTools::Search::Search (Type type, const std::string& value)
-: mType (type), mText (value)
+: mType (type), mText (value), mPaddingBefore (10), mPaddingAfter (10)
 {
     if (type!=Type_Text && type!=Type_Id)
         throw std::logic_error ("Invalid search parameter (string)");
 }
 
 CSMTools::Search::Search (Type type, const QRegExp& value)
-: mType (type), mRegExp (value)
+: mType (type), mRegExp (value), mPaddingBefore (10), mPaddingAfter (10)
 {
     if (type!=Type_TextRegEx && type!=Type_IdRegEx)
         throw std::logic_error ("Invalid search parameter (RegExp)");
 }
 
 CSMTools::Search::Search (Type type, int value)
-: mType (type), mValue (value)
+: mType (type), mValue (value), mPaddingBefore (10), mPaddingAfter (10)
 {
     if (type!=Type_RecordState)
         throw std::logic_error ("invalid search parameter (int)");
@@ -229,4 +228,10 @@ void CSMTools::Search::searchRow (const CSMWorld::IdTableBase *model, int row,
                 break;
         }
     }
+}
+
+void CSMTools::Search::setPadding (int before, int after)
+{
+    mPaddingBefore = before;
+    mPaddingAfter = after;
 }

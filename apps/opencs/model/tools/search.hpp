@@ -45,6 +45,8 @@ namespace CSMTools
             std::set<int> mColumns;
             int mIdColumn;
             int mTypeColumn;
+            int mPaddingBefore;
+            int mPaddingAfter;
 
             void searchTextCell (const CSMWorld::IdTableBase *model, const QModelIndex& index,
                 const CSMWorld::UniversalId& id, CSMDoc::Messages& messages) const;
@@ -78,6 +80,8 @@ namespace CSMTools
             // \attention *this needs to be configured for \a model.
             void searchRow (const CSMWorld::IdTableBase *model, int row,
                 CSMDoc::Messages& messages) const;
+
+            void setPadding (int before, int after);
     };
 }
 

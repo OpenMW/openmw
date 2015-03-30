@@ -24,6 +24,8 @@ namespace CSVTools
             ReportTable *mTable;
             SearchBox mSearchBox;
             CSMDoc::Document& mDocument;
+            int mPaddingBefore;
+            int mPaddingAfter;
 
         public:
 

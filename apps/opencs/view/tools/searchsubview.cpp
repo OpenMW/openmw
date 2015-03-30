@@ -4,12 +4,13 @@
 #include <QVBoxLayout>
 
 #include "../../model/doc/document.hpp"
+#include "../../model/tools/search.hpp"
 
 #include "reporttable.hpp"
 #include "searchbox.hpp"
 
 CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: CSVDoc::SubView (id), mDocument (document)
+: CSVDoc::SubView (id), mDocument (document), mPaddingBefore (10), mPaddingAfter (10)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
@@ -45,6 +46,14 @@ void CSVTools::SearchSubView::setEditLock (bool locked)
 void CSVTools::SearchSubView::updateUserSetting (const QString &name, const QStringList &list)
 {
     mTable->updateUserSetting (name, list);
+
+    if (!list.empty())
+    {
+        if (name=="search/char-before")
+            mPaddingBefore = list.at (0).toInt();
+        else if (name=="search/char-after")
+            mPaddingAfter = list.at (0).toInt();
+    }
 }
 
 void CSVTools::SearchSubView::stateChanged (int state, CSMDoc::Document *document)
@@ -54,6 +63,9 @@ void CSVTools::SearchSubView::stateChanged (int state, CSMDoc::Document *documen
 
 void CSVTools::SearchSubView::startSearch (const CSMTools::Search& search)
 {
+    CSMTools::Search search2 (search);
+    search2.setPadding (mPaddingBefore, mPaddingAfter);
+    
     mTable->clear();
-    mDocument.runSearch (getUniversalId(), search);
+    mDocument.runSearch (getUniversalId(), search2);
 }
