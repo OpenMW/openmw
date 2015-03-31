@@ -81,14 +81,14 @@ QString CSMTools::Search::formatDescription (const QString& description, int pos
 {
     QString text (description);
 
-    // compensate for Windows nonsense
-    text.remove ('\r');
-
     // split
     QString highlight = flatten (text.mid (pos, length));
-    QString before = flatten (mPaddingBefore<=pos ?
+    QString before = flatten (mPaddingBefore>=pos ?
         text.mid (0, pos) : text.mid (pos-mPaddingBefore, mPaddingBefore));
     QString after = flatten (text.mid (pos+length, mPaddingAfter));
+
+    // compensate for Windows nonsense
+    text.remove ('\r');
 
     // join
     text = before + "<b>" + highlight + "</b>" + after;
