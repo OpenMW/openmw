@@ -211,6 +211,7 @@ namespace MWSound
         Ogre::StringVector filelist;
         if (mMusicFiles.find(mCurrentPlaylist) == mMusicFiles.end())
         {
+#if 0
             Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
             for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
             {
@@ -219,6 +220,8 @@ namespace MWSound
                 filelist.insert(filelist.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
             }
             mMusicFiles[mCurrentPlaylist] = filelist;
+
+#endif
         }
         else
             filelist = mMusicFiles[mCurrentPlaylist];

@@ -180,7 +180,7 @@ namespace MWGui
 
     void EditEffectDialog::setMagicEffect (const ESM::MagicEffect *effect)
     {
-        mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(effect->mIcon));
+        //mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(effect->mIcon));
 
         mEffectName->setCaptionWithReplacing("#{"+ESM::MagicEffect::effectIdToString  (effect->mIndex)+"}");
 

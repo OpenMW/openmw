@@ -125,18 +125,19 @@ namespace MWGui
         updateSkills();
         updateSpellPowers();
 
-        mPreview.reset(NULL);
+        //mPreview.reset(NULL);
 
         mPreviewImage->setImageTexture("");
 
         const std::string textureName = "CharacterHeadPreview";
         MyGUI::RenderManager::getInstance().destroyTexture(MyGUI::RenderManager::getInstance().getTexture(textureName));
 
-        mPreview.reset(new MWRender::RaceSelectionPreview());
-        mPreview->setup();
-        mPreview->update (mCurrentAngle);
+        //mPreview.reset(new MWRender::RaceSelectionPreview());
+        //mPreview->setup();
+        //mPreview->update (mCurrentAngle);
 
-        const ESM::NPC proto = mPreview->getPrototype();
+        //const ESM::NPC& proto = mPreview->getPrototype();
+        ESM::NPC proto;
         setRaceId(proto.mRace);
         recountParts();
 
@@ -184,7 +185,7 @@ namespace MWGui
         mPreviewImage->setImageTexture("");
         const std::string textureName = "CharacterHeadPreview";
         MyGUI::RenderManager::getInstance().destroyTexture(MyGUI::RenderManager::getInstance().getTexture(textureName));
-        mPreview.reset(NULL);
+        //mPreview.reset(NULL);
     }
 
     // widget controls
@@ -204,7 +205,7 @@ namespace MWGui
     void RaceDialog::onHeadRotate(MyGUI::ScrollBar* scroll, size_t _position)
     {
         float angle = (float(_position) / (scroll->getScrollRange()-1) - 0.5f) * 3.14f * 2;
-        mPreview->update (angle);
+        //mPreview->update (angle);
         mPreviewDirty = true;
         mCurrentAngle = angle;
     }
@@ -316,7 +317,7 @@ namespace MWGui
 
     void RaceDialog::updatePreview()
     {
-        ESM::NPC record = mPreview->getPrototype();
+        ESM::NPC record;// = mPreview->getPrototype();
         record.mRace = mCurrentRaceId;
         record.setIsMale(mGenderIndex == 0);
 
@@ -325,7 +326,7 @@ namespace MWGui
 
         try
         {
-            mPreview->setPrototype(record);
+            //mPreview->setPrototype(record);
         }
         catch (std::exception& e)
         {
@@ -337,13 +338,13 @@ namespace MWGui
 
     void RaceDialog::doRenderUpdate()
     {
-        if (!mPreview.get())
+        //if (!mPreview.get())
             return;
 
-        mPreview->onFrame();
+        //mPreview->onFrame();
         if (mPreviewDirty)
         {
-            mPreview->render();
+            //mPreview->render();
             mPreviewDirty = false;
         }
     }
@@ -450,6 +451,8 @@ namespace MWGui
 
     const ESM::NPC& RaceDialog::getResult() const
     {
-        return mPreview->getPrototype();
+        static ESM::NPC result;
+        return result;
+        //return mPreview->getPrototype();
     }
 }

@@ -212,6 +212,7 @@ namespace MWGui
 
     void LocalMapBase::applyFogOfWar()
     {
+#if 0
         for (int mx=0; mx<3; ++mx)
         {
             for (int my=0; my<3; ++my)
@@ -225,6 +226,7 @@ namespace MWGui
                    : "");
             }
         }
+#endif
         redraw();
     }
 
@@ -338,6 +340,7 @@ namespace MWGui
         mDoorMarkerWidgets.clear();
 
         // Update the map textures
+#if 0
         for (int mx=0; mx<3; ++mx)
         {
             for (int my=0; my<3; ++my)
@@ -354,7 +357,7 @@ namespace MWGui
                     box->setImageTexture("black.png");
             }
         }
-
+#endif
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
         // Retrieve the door markers we want to show
@@ -558,7 +561,7 @@ namespace MWGui
         , LocalMapBase(customMarkers)
         , mGlobal(false)
         , mGlobalMap(0)
-        , mGlobalMapRender(0)
+        //, mGlobalMapRender(0)
         , mEditNoteDialog()
         , mEventBoxGlobal(NULL)
         , mEventBoxLocal(NULL)
@@ -705,18 +708,19 @@ namespace MWGui
 
     void MapWindow::renderGlobalMap(Loading::Listener* loadingListener)
     {
+#if 0
         mGlobalMapRender = new MWRender::GlobalMap("");
         mGlobalMapRender->render(loadingListener);
         mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
         mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
-
         mGlobalMapImage->setImageTexture("GlobalMap.png");
         mGlobalMapOverlay->setImageTexture("GlobalMapOverlay");
+#endif
     }
 
     MapWindow::~MapWindow()
     {
-        delete mGlobalMapRender;
+        //delete mGlobalMapRender;
     }
 
     void MapWindow::setCellName(const std::string& cellName)
@@ -726,6 +730,7 @@ namespace MWGui
 
     void MapWindow::addVisitedLocation(const std::string& name, int x, int y)
     {
+#if 0
         CellId cell;
         cell.first = x;
         cell.second = y;
@@ -752,6 +757,7 @@ namespace MWGui
             markerWidget->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
             markerWidget->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
         }
+#endif
     }
 
     void MapWindow::cellExplored(int x, int y)
@@ -763,10 +769,12 @@ namespace MWGui
     {
         LocalMapBase::onFrame(dt);
 
+#if 0
         for (std::vector<CellId>::iterator it = mQueuedToExplore.begin(); it != mQueuedToExplore.end(); ++it)
         {
             mGlobalMapRender->exploreCell(it->first, it->second);
         }
+#endif
         mQueuedToExplore.clear();
 
         NoDrop::onFrame(dt);
@@ -823,12 +831,14 @@ namespace MWGui
 
     void MapWindow::globalMapUpdatePlayer ()
     {
+#if 0
         // For interiors, position is set by WindowManager via setGlobalMapPlayerPosition
         if (MWBase::Environment::get().getWorld ()->isCellExterior ())
         {
             Ogre::Vector3 pos = MWBase::Environment::get().getWorld ()->getPlayerPtr().getRefData ().getBaseNode ()->_getDerivedPosition ();
             setGlobalMapPlayerPosition(pos.x, pos.y);
         }
+#endif
     }
 
     void MapWindow::notifyPlayerUpdate ()
@@ -838,6 +848,7 @@ namespace MWGui
 
     void MapWindow::setGlobalMapPlayerPosition(float worldX, float worldY)
     {
+#if 0
         float x, y;
         mGlobalMapRender->worldPosToImageSpace (worldX, worldY, x, y);
         x *= mGlobalMapRender->getWidth();
@@ -849,6 +860,7 @@ namespace MWGui
         MyGUI::IntSize viewsize = mGlobalMap->getSize();
         MyGUI::IntPoint viewoffs(static_cast<int>(viewsize.width * 0.5f - x), static_cast<int>(viewsize.height *0.5 - y));
         mGlobalMap->setViewOffset(viewoffs);
+#endif
     }
 
     void MapWindow::setGlobalMapPlayerDir(const float x, const float y)
@@ -863,7 +875,8 @@ namespace MWGui
     void MapWindow::clear()
     {
         mMarkers.clear();
-        mGlobalMapRender->clear();
+
+        //mGlobalMapRender->clear();
         mChanged = true;
 
         while (mEventBoxGlobal->getChildCount())
@@ -872,6 +885,7 @@ namespace MWGui
 
     void MapWindow::write(ESM::ESMWriter &writer, Loading::Listener& progress)
     {
+#if 0
         ESM::GlobalMap map;
         mGlobalMapRender->write(map);
 
@@ -880,10 +894,12 @@ namespace MWGui
         writer.startRecord(ESM::REC_GMAP);
         map.save(writer);
         writer.endRecord(ESM::REC_GMAP);
+#endif
     }
 
     void MapWindow::readRecord(ESM::ESMReader &reader, uint32_t type)
     {
+#if 0
         if (type == ESM::REC_GMAP)
         {
             ESM::GlobalMap map;
@@ -898,6 +914,7 @@ namespace MWGui
                     addVisitedLocation(cell->mName, it->first, it->second);
             }
         }
+#endif
     }
 
     void MapWindow::setAlpha(float alpha)

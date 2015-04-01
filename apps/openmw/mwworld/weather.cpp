@@ -13,7 +13,7 @@
 
 #include "../mwsound/sound.hpp"
 
-#include "../mwrender/renderingmanager.hpp"
+//#include "../mwrender/renderingmanager.hpp"
 
 #include "player.hpp"
 #include "esmstore.hpp"

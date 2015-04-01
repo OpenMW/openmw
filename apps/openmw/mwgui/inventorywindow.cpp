@@ -53,7 +53,9 @@ namespace MWGui
         , mTrading(false)
         , mLastXSize(0)
         , mLastYSize(0)
+    #if 0
         , mPreview(new MWRender::InventoryPreview(MWBase::Environment::get().getWorld ()->getPlayerPtr()))
+    #endif
         , mPreviewDirty(true)
         , mPreviewResize(true)
         , mDragAndDrop(dragAndDrop)
@@ -118,10 +120,10 @@ namespace MWGui
         MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().getTexture("CharacterPreview");
         if (tex)
             MyGUI::RenderManager::getInstance().destroyTexture(tex);
-
+#if 0
         mPreview.reset(new MWRender::InventoryPreview(mPtr));
         mPreview->setup();
-
+#endif
         mPreviewDirty = true;
         mPreviewResize = true;
     }
@@ -481,6 +483,8 @@ namespace MWGui
 
     MWWorld::Ptr InventoryWindow::getAvatarSelectedItem(int x, int y)
     {
+        return MWWorld::Ptr();
+#if 0
         int slot = mPreview->getSlotSelected (x, y);
 
         if (slot == -1)
@@ -499,6 +503,7 @@ namespace MWGui
         }
 
         return MWWorld::Ptr();
+#endif
     }
 
     void InventoryWindow::updateEncumbranceBar()
@@ -526,6 +531,7 @@ namespace MWGui
 
     void InventoryWindow::doRenderUpdate ()
     {
+#if 0
         mPreview->onFrame();
 
         if (mPreviewResize || mPreviewDirty)
@@ -552,6 +558,7 @@ namespace MWGui
 
             mAvatarImage->setImageTexture("CharacterPreview");
         }
+#endif
     }
 
     void InventoryWindow::notifyContentChanged()
@@ -668,6 +675,8 @@ namespace MWGui
 
     void InventoryWindow::rebuildAvatar()
     {
+#if 0
         mPreview->rebuild();
+#endif
     }
 }

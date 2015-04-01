@@ -1,12 +1,12 @@
 set(OENGINE_OGRE
-    ogre/renderer.cpp
+    #ogre/renderer.cpp
     ogre/lights.cpp
     ogre/selectionbuffer.cpp
 )
 
 set(OENGINE_GUI
     gui/loglistener.cpp
-    gui/manager.cpp
+    #gui/manager.cpp
     gui/layout.cpp
 )
 

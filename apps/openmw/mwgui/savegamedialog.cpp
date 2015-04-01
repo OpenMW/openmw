@@ -358,7 +358,7 @@ namespace MWGui
             <<  " " << hour << " " << (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
         mInfoText->setCaptionWithReplacing(text.str());
-
+#if 0
         // Decode screenshot
         std::vector<char> data = mCurrentSlot->mProfile.mScreenshot; // MemoryDataStream doesn't work with const data :(
         Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&data[0], data.size()));
@@ -382,5 +382,6 @@ namespace MWGui
         texture->loadImage(image);
 
         mScreenshot->setImageTexture(textureName);
+#endif
     }
 }

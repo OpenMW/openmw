@@ -108,7 +108,7 @@ namespace MWGui
 
         float mCurrentAngle;
 
-        std::auto_ptr<MWRender::RaceSelectionPreview> mPreview;
+        //std::auto_ptr<MWRender::RaceSelectionPreview> mPreview;
 
         bool mPreviewDirty;
     };

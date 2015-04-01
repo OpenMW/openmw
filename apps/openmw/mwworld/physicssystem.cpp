@@ -14,10 +14,9 @@
 #include <openengine/bullet/physic.hpp>
 #include <openengine/bullet/BtOgreExtras.h>
 #include <openengine/ogre/renderer.hpp>
-#include <openengine/bullet/BulletShapeLoader.h>
+//#include <openengine/bullet/BulletShapeLoader.h>
 
 #include <components/nifbullet/bulletnifloader.hpp>
-#include <components/nifogre/skeleton.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include <components/esm/loadgmst.hpp>
@@ -31,7 +30,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 
-#include "../apps/openmw/mwrender/animation.hpp"
+//#include "../apps/openmw/mwrender/animation.hpp"
 #include "../apps/openmw/mwbase/world.hpp"
 #include "../apps/openmw/mwbase/environment.hpp"
 
@@ -45,6 +44,7 @@ namespace
 
 void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>& map, btDynamicsWorld* dynamicsWorld)
 {
+    /*
     for (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>::iterator it = map.begin();
          it != map.end(); ++it)
     {
@@ -85,6 +85,7 @@ void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Phys
         // needed because we used btDynamicsWorld::setForceUpdateAllAabbs(false)
         dynamicsWorld->updateSingleAabb(it->first);
     }
+    */
 }
 
 }
@@ -502,8 +503,8 @@ namespace MWWorld
         mRender(_rend), mEngine(0), mTimeAccum(0.0f), mWaterEnabled(false), mWaterHeight(0)
     {
         // Create physics. shapeLoader is deleted by the physic engine
-        NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
-        mEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
+        //NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
+        mEngine = new OEngine::Physic::PhysicEngine(0);//shapeLoader);
     }
 
     PhysicsSystem::~PhysicsSystem()
@@ -521,7 +522,7 @@ namespace MWWorld
 
     std::pair<float, std::string> PhysicsSystem::getFacedHandle(float queryDistance)
     {
-        Ray ray = mRender.getCamera()->getCameraToViewportRay(0.5, 0.5);
+        Ray ray;// = mRender.getCamera()->getCameraToViewportRay(0.5, 0.5);
 
         Ogre::Vector3 origin_ = ray.getOrigin();
         btVector3 origin(origin_.x, origin_.y, origin_.z);
@@ -537,7 +538,7 @@ namespace MWWorld
 
     std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedHandles (float queryDistance)
     {
-        Ray ray = mRender.getCamera()->getCameraToViewportRay(0.5, 0.5);
+        Ray ray;// = mRender.getCamera()->getCameraToViewportRay(0.5, 0.5);
 
         Ogre::Vector3 origin_ = ray.getOrigin();
         btVector3 origin(origin_.x, origin_.y, origin_.z);
@@ -555,7 +556,7 @@ namespace MWWorld
 
     std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedHandles (float mouseX, float mouseY, float queryDistance)
     {
-        Ray ray = mRender.getCamera()->getCameraToViewportRay(mouseX, mouseY);
+        Ray ray;// = mRender.getCamera()->getCameraToViewportRay(mouseX, mouseY);
         Ogre::Vector3 from = ray.getOrigin();
         Ogre::Vector3 to = ray.getPoint(queryDistance);
 
@@ -628,9 +629,9 @@ namespace MWWorld
 
     std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY, Ogre::Vector3* normal, std::string* hit)
     {
-        Ogre::Ray ray = mRender.getCamera()->getCameraToViewportRay(
-            mouseX,
-            mouseY);
+        Ogre::Ray ray;// = mRender.getCamera()->getCameraToViewportRay(
+            //mouseX,
+            //mouseY);
         Ogre::Vector3 from = ray.getOrigin();
         Ogre::Vector3 to = ray.getPoint(200); /// \todo make this distance (ray length) configurable
 
@@ -755,7 +756,7 @@ namespace MWWorld
         if(handleToMesh.find(handle) != handleToMesh.end())
         {
             std::string model = ptr.getClass().getModel(ptr);
-            model = Misc::ResourceHelpers::correctActorModelPath(model); // FIXME: scaling shouldn't require model
+            //model = Misc::ResourceHelpers::correctActorModelPath(model); // FIXME: scaling shouldn't require model
 
             bool placeable = false;
             if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle,true))
@@ -803,8 +804,9 @@ namespace MWWorld
 
     bool PhysicsSystem::getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max)
     {
+        // FIXME: since raycasting shapes are going away, this should use the osg ComputeBoundingBoxVisitor
         std::string model = ptr.getClass().getModel(ptr);
-        model = Misc::ResourceHelpers::correctActorModelPath(model);
+        //model = Misc::ResourceHelpers::correctActorModelPath(model);
         if (model.empty()) {
             return false;
         }

@@ -31,7 +31,6 @@
 
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwbase/environment.hpp"
-#include "../mwbase/inputmanager.hpp" // FIXME
 #include "../mwbase/windowmanager.hpp" // FIXME
 #include "../mwbase/statemanager.hpp"
 
@@ -40,7 +39,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include "shadows.hpp"
 #include "localmap.hpp"
 #include "water.hpp"
 #include "npcanimation.hpp"
@@ -59,7 +57,6 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     : mRendering(_rend)
     , mFallback(fallback)
     , mPlayerAnimation(NULL)
-    , mAmbientMode(0)
     , mSunEnabled(0)
     , mPhysicsEngine(engine)
     , mTerrain(NULL)
@@ -162,15 +159,12 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 
     mCamera = new MWRender::Camera(mRendering.getCamera());
 
-    mShadows = new Shadows(&mRendering);
-
     mSkyManager = new SkyManager(mRootNode, mRendering.getCamera());
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
     mSun = 0;
 
-    mDebugging = new Debugging(mRootNode, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
 
     mWater = new MWRender::Water(mRendering.getCamera(), this, mFallback);
@@ -185,8 +179,6 @@ RenderingManager::~RenderingManager ()
     delete mPlayerAnimation;
     delete mCamera;
     delete mSkyManager;
-    delete mDebugging;
-    delete mShadows;
     delete mTerrain;
     delete mLocalMap;
     delete mOcclusionQuery;
@@ -222,7 +214,6 @@ void RenderingManager::removeCell (MWWorld::CellStore *store)
     mLocalMap->saveFogOfWar(store);
     mObjects->removeCell(store);
     mActors->removeCell(store);
-    mDebugging->cellRemoved(store);
 }
 
 void RenderingManager::removeWater ()
@@ -251,7 +242,6 @@ void RenderingManager::cellAdded (MWWorld::CellStore *store)
 
     mObjects->buildStaticGeometry (*store);
     sh::Factory::getInstance().unloadUnreferencedMaterials();
-    mDebugging->cellAdded(store);
 }
 
 void RenderingManager::addObject (const MWWorld::Ptr& ptr, const std::string& model){
@@ -477,9 +467,10 @@ void RenderingManager::skySetMoonColour (bool red){
 
 bool RenderingManager::toggleRenderMode(int mode)
 {
+#if 0
     if (mode == MWBase::World::Render_CollisionDebug || mode == MWBase::World::Render_Pathgrid)
         return mDebugging->toggleRenderMode(mode);
-    else if (mode == MWBase::World::Render_Wireframe)
+    if (mode == MWBase::World::Render_Wireframe)
     {
         if (mRendering.getCamera()->getPolygonMode() == PM_SOLID)
         {
@@ -498,6 +489,8 @@ bool RenderingManager::toggleRenderMode(int mode)
         mRendering.getScene()->showBoundingBoxes(show);
         return show;
     }
+#endif
+    return 0;
 }
 
 void RenderingManager::configureFog(const MWWorld::CellStore &mCell)
@@ -547,20 +540,7 @@ void RenderingManager::applyFog (bool underwater)
 
 void RenderingManager::setAmbientMode()
 {
-    switch (mAmbientMode)
-    {
-    case 0:
-        setAmbientColour(mAmbientColor);
-        break;
-
-    case 1:
-        setAmbientColour(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
-        break;
-
-    case 2:
-        setAmbientColour(ColourValue(1,1,1));
-        break;
-    }
+    setAmbientColour(mAmbientColor);
 }
 
 void RenderingManager::configureAmbient(MWWorld::CellStore &mCell)
@@ -803,12 +783,6 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             else
                 lang = sh::Language_CG;
             sh::Factory::getInstance ().setCurrentLanguage (lang);
-            rebuild = true;
-        }
-        else if (it->first == "Shadows")
-        {
-            mShadows->recreate ();
-
             rebuild = true;
         }
     }

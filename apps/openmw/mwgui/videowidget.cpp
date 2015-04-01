@@ -1,51 +1,51 @@
 #include "videowidget.hpp"
 
-#include <extern/ogre-ffmpeg-videoplayer/videoplayer.hpp>
+//#include <extern/ogre-ffmpeg-videoplayer/videoplayer.hpp>
 
 #include <MyGUI_RenderManager.h>
 
-#include "../mwsound/movieaudiofactory.hpp"
+//#include "../mwsound/movieaudiofactory.hpp"
 
 namespace MWGui
 {
 
 VideoWidget::VideoWidget()
 {
-    mPlayer.reset(new Video::VideoPlayer());
+    //mPlayer.reset(new Video::VideoPlayer());
     setNeedKeyFocus(true);
 }
 
 void VideoWidget::playVideo(const std::string &video)
 {
-    mPlayer->setAudioFactory(new MWSound::MovieAudioFactory());
-    mPlayer->playVideo(video);
+    //mPlayer->setAudioFactory(new MWSound::MovieAudioFactory());
+    //mPlayer->playVideo(video);
 
-    setImageTexture(mPlayer->getTextureName());
+    //setImageTexture(mPlayer->getTextureName());
 }
 
 int VideoWidget::getVideoWidth()
 {
-    return mPlayer->getVideoWidth();
+    return 0;//mPlayer->getVideoWidth();
 }
 
 int VideoWidget::getVideoHeight()
 {
-    return mPlayer->getVideoHeight();
+    return 0;//mPlayer->getVideoHeight();
 }
 
 bool VideoWidget::update()
 {
-    return mPlayer->update();
+    return 0;//mPlayer->update();
 }
 
 void VideoWidget::stop()
 {
-    mPlayer->close();
+    //mPlayer->close();
 }
 
 bool VideoWidget::hasAudioStream()
 {
-    return mPlayer->hasAudioStream();
+    return 0;//mPlayer->hasAudioStream();
 }
 
 void VideoWidget::autoResize(bool stretch)

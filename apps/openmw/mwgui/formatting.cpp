@@ -1,8 +1,5 @@
 #include "formatting.hpp"
 
-#include <OgreUTFString.h>
-#include <OgreResourceGroupManager.h>
-
 #include <MyGUI_EditText.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_EditBox.h>
@@ -466,7 +463,7 @@ namespace MWGui
                 MyGUI::IntCoord(left, pag.getCurrentTop(), width, mImageHeight), MyGUI::Align::Left | MyGUI::Align::Top,
                 parent->getName() + MyGUI::utility::toString(parent->getChildCount()));
 
-            std::string image = Misc::ResourceHelpers::correctBookartPath(src, width, mImageHeight);
+            std::string image;// = Misc::ResourceHelpers::correctBookartPath(src, width, mImageHeight);
             mImageBox->setImageTexture(image);
             mImageBox->setProperty("NeedMouse", "false");
         }

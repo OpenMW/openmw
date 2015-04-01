@@ -26,10 +26,6 @@ add_component_dir (settings
     settings
     )
 
-add_component_dir (nifoverrides
-    nifoverrides
-    )
-
 add_component_dir (bsa
     bsa_file
     )

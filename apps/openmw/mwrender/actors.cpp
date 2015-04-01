@@ -6,13 +6,14 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 
-#include "../mwrender/renderingmanager.hpp"
+//#include "../mwrender/renderingmanager.hpp"
 
+/*
 #include "animation.hpp"
 #include "activatoranimation.hpp"
 #include "creatureanimation.hpp"
 #include "npcanimation.hpp"
-
+*/
 #include "renderconst.hpp"
 
 
@@ -22,19 +23,22 @@ using namespace Ogre;
 
 Actors::~Actors()
 {
+    /*
     PtrAnimationMap::iterator it = mAllActors.begin();
     for(;it != mAllActors.end();++it)
     {
         delete it->second;
         it->second = NULL;
     }
+    */
 }
 
-void Actors::setRootNode(Ogre::SceneNode* root)
-{ mRootNode = root; }
+//void Actors::setRootNode(Ogre::SceneNode* root)
+//{ mRootNode = root; }
 
 void Actors::insertBegin(const MWWorld::Ptr &ptr)
 {
+    /*
     Ogre::SceneNode* cellnode;
     CellSceneNodeMap::const_iterator celliter = mCellSceneNodes.find(ptr.getCell());
     if(celliter != mCellSceneNodes.end())
@@ -61,18 +65,22 @@ void Actors::insertBegin(const MWWorld::Ptr &ptr)
 
     insert->setOrientation(zr);
     ptr.getRefData().setBaseNode(insert);
+    */
 }
 
 void Actors::insertNPC(const MWWorld::Ptr& ptr)
 {
+    /*
     insertBegin(ptr);
     NpcAnimation* anim = new NpcAnimation(ptr, ptr.getRefData().getBaseNode(), RV_Actors);
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
     mRendering->addWaterRippleEmitter (ptr);
+    */
 }
 void Actors::insertCreature (const MWWorld::Ptr& ptr, const std::string &model, bool weaponsShields)
 {
+    /*
     insertBegin(ptr);
     Animation* anim = NULL;
     if (weaponsShields)
@@ -82,9 +90,11 @@ void Actors::insertCreature (const MWWorld::Ptr& ptr, const std::string &model, 
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
     mRendering->addWaterRippleEmitter (ptr);
+    */
 }
 void Actors::insertActivator (const MWWorld::Ptr& ptr, const std::string &model, bool addLight)
 {
+    /*
     insertBegin(ptr);
     ActivatorAnimation* anim = new ActivatorAnimation(ptr, model);
 
@@ -98,10 +108,12 @@ void Actors::insertActivator (const MWWorld::Ptr& ptr, const std::string &model,
 
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
+    */
 }
 
 bool Actors::deleteObject (const MWWorld::Ptr& ptr)
 {
+    /*
     if (mAllActors.find(ptr) == mAllActors.end())
         return false;
 
@@ -127,12 +139,13 @@ bool Actors::deleteObject (const MWWorld::Ptr& ptr)
 
         return false;
     }
-
+*/
     return true;
 }
 
 void Actors::removeCell(MWWorld::CellStore* store)
 {
+    /*
     for(PtrAnimationMap::iterator iter = mAllActors.begin();iter != mAllActors.end();)
     {
         if(iter->first.getCell() == store)
@@ -153,26 +166,22 @@ void Actors::removeCell(MWWorld::CellStore* store)
 
         mCellSceneNodes.erase(celliter);
     }
-}
-
-void Actors::update (Ogre::Camera* camera)
-{
-    for(PtrAnimationMap::iterator iter = mAllActors.begin();iter != mAllActors.end(); ++iter)
-    {
-        iter->second->preRender(camera);
-    }
+    */
 }
 
 Animation* Actors::getAnimation(const MWWorld::Ptr &ptr)
 {
+    /*
     PtrAnimationMap::const_iterator iter = mAllActors.find(ptr);
     if(iter != mAllActors.end())
         return iter->second;
+    */
     return NULL;
 }
 
 void Actors::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
+    /*
     Ogre::SceneNode *node;
     MWWorld::CellStore *newCell = cur.getCell();
 
@@ -196,20 +205,7 @@ void Actors::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     }
 
     mRendering->updateWaterRippleEmitterPtr (old, cur);
-}
-
-void Actors::enableLights()
-{
-    PtrAnimationMap::const_iterator it = mAllActors.begin();
-    for(;it != mAllActors.end();++it)
-        it->second->enableLights(true);
-}
-
-void Actors::disableLights()
-{
-    PtrAnimationMap::const_iterator it = mAllActors.begin();
-    for(;it != mAllActors.end();++it)
-        it->second->enableLights(false);
+    */
 }
 
 }

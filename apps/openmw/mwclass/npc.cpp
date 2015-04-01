@@ -3,8 +3,6 @@
 
 #include <memory>
 
-#include <OgreSceneNode.h>
-
 #include <openengine/misc/rng.hpp>
 
 #include <components/esm/loadmgef.hpp>
@@ -1151,9 +1149,9 @@ namespace MWClass
                 if (ptr.getClass().getNpcStats(ptr).isWerewolf()
                         && ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
                 {
-                    MWMechanics::WeaponType weaponType = MWMechanics::WeapType_None;
-                    MWMechanics::getActiveWeapon(ptr.getClass().getCreatureStats(ptr), ptr.getClass().getInventoryStore(ptr), &weaponType);
-                    if (weaponType == MWMechanics::WeapType_None)
+                    //MWMechanics::WeaponType weaponType = MWMechanics::WeapType_None;
+                    //MWMechanics::getActiveWeapon(ptr.getClass().getCreatureStats(ptr), ptr.getClass().getInventoryStore(ptr), &weaponType);
+                    //if (weaponType == MWMechanics::WeapType_None)
                         return "";
                 }
 

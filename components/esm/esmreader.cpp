@@ -25,6 +25,7 @@ ESMReader::ESMReader()
     , mIdx(0)
     , mGlobalReaderList(NULL)
     , mEncoder(NULL)
+    , mFileSize(0)
 {
 }
 
@@ -64,7 +65,7 @@ void ESMReader::openRaw(Files::IStreamPtr _esm, const std::string& name)
     mEsm = _esm;
     mCtx.filename = name;
     mEsm->seekg(0, mEsm->end);
-    mCtx.leftFile = mEsm->tellg();
+    mCtx.leftFile = mFileSize = mEsm->tellg();
     mEsm->seekg(0, mEsm->beg);
 }
 

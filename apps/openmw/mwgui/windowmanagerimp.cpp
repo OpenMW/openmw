@@ -19,11 +19,12 @@
 #include <MyGUI_ClipboardManager.h>
 #include <MyGUI_RenderManager.h>
 
+#include <MyGUI_DummyPlatform.h>
+
 #include <SDL_keyboard.h>
 #include <SDL_clipboard.h>
 
 #include <openengine/ogre/renderer.hpp>
-#include <openengine/gui/manager.hpp>
 
 #include <extern/sdl4ogre/sdlcursormanager.hpp>
 
@@ -102,7 +103,7 @@ namespace MWGui
             const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
             Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap)
       : mConsoleOnlyScripts(consoleOnlyScripts)
-      , mGuiManager(NULL)
+      //, mGuiManager(NULL)
       , mRendering(ogre)
       , mHud(NULL)
       , mMap(NULL)
@@ -177,7 +178,13 @@ namespace MWGui
       , mFallbackMap(fallbackMap)
     {
         // Set up the GUI system
-        mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
+        //mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
+
+        MyGUI::DummyPlatform* platform = new MyGUI::DummyPlatform;
+        platform->initialise(logpath);
+
+        MyGUI::Gui* gui = new MyGUI::Gui;
+        gui->initialise("");
 
         MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
@@ -207,11 +214,11 @@ namespace MWGui
 
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::ResourceManager::getInstance().load("core.xml");
-
+#if 0
         mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow ());
-
+#endif
         //set up the hardware cursor manager
-        mCursorManager = new SFO::SDLCursorManager();
+        //mCursorManager = new SFO::SDLCursorManager();
 
         MyGUI::PointerManager::getInstance().eventChangeMousePointer += MyGUI::newDelegate(this, &WindowManager::onCursorChange);
 
@@ -219,7 +226,7 @@ namespace MWGui
 
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
 
-        mCursorManager->setEnabled(true);
+        //mCursorManager->setEnabled(true);
 
         // hide mygui's pointer
         MyGUI::PointerManager::getInstance().setVisible(false);
@@ -245,6 +252,7 @@ namespace MWGui
 
     void WindowManager::initUI()
     {
+        /*
         // Get size info from the Gui object
         int w = MyGUI::RenderManager::getInstance().getViewSize().width;
         int h = MyGUI::RenderManager::getInstance().getViewSize().height;
@@ -328,6 +336,7 @@ namespace MWGui
         updateVisible();
 
         MWBase::Environment::get().getInputManager()->changeInputMode(false);
+        */
     }
 
     void WindowManager::renderWorldMap()
@@ -408,11 +417,11 @@ namespace MWGui
         delete mDebugWindow;
         delete mJailScreen;
 
-        delete mCursorManager;
+        //delete mCursorManager;
 
         cleanupGarbage();
 
-        delete mGuiManager;
+        //delete mGuiManager;
     }
 
     void WindowManager::cleanupGarbage()
@@ -923,6 +932,7 @@ namespace MWGui
 
     void WindowManager::changeCell(MWWorld::CellStore* cell)
     {
+        /*
         std::string name = MWBase::Environment::get().getWorld()->getCellName (cell);
 
         mMap->setCellName( name );
@@ -947,10 +957,12 @@ namespace MWGui
                 MWBase::Environment::get().getWorld()->getPlayer().setLastKnownExteriorPosition(worldPos);
             mMap->setGlobalMapPlayerPosition(worldPos.x, worldPos.y);
         }
+        */
     }
 
     void WindowManager::setActiveMap(int x, int y, bool interior)
     {
+        /*
         if (!interior)
         {
             mMap->setCellPrefix("Cell");
@@ -959,19 +971,22 @@ namespace MWGui
 
         mMap->setActiveCell(x,y, interior);
         mHud->setActiveCell(x,y, interior);
+        */
     }
 
     void WindowManager::setPlayerPos(int cellX, int cellY, const float x, const float y)
     {
-        mMap->setPlayerPos(cellX, cellY, x, y);
-        mHud->setPlayerPos(cellX, cellY, x, y);
+        //mMap->setPlayerPos(cellX, cellY, x, y);
+        //mHud->setPlayerPos(cellX, cellY, x, y);
     }
 
     void WindowManager::setPlayerDir(const float x, const float y)
     {
+        /*
         mMap->setPlayerDir(x,y);
         mMap->setGlobalMapPlayerDir(x, y);
         mHud->setPlayerDir(x,y);
+        */
     }
 
     void WindowManager::setDrowningBarVisibility(bool visible)
@@ -1087,7 +1102,7 @@ namespace MWGui
     void WindowManager::windowResized(int x, int y)
     {
         sizeVideo(x, y);
-        mGuiManager->windowResized();
+        //mGuiManager->windowResized();
         if (!mHud)
             return; // UI not initialized yet
 
@@ -1133,6 +1148,7 @@ namespace MWGui
 
     void WindowManager::onCursorChange(const std::string &name)
     {
+        /*
         if(!mCursorManager->cursorChanged(name))
             return; //the cursor manager doesn't want any more info about this cursor
         //See if we can get the information we need out of the cursor resource
@@ -1157,6 +1173,7 @@ namespace MWGui
                 mCursorManager->receiveCursorInfo(name, rotation, tex, size_x, size_y, hotspot_x, hotspot_y);
             }
         }
+        */
     }
 
     void WindowManager::popGuiMode()
@@ -1266,7 +1283,7 @@ namespace MWGui
 
     void WindowManager::executeInConsole (const std::string& path)
     {
-        mConsole->executeFile (path);
+        //mConsole->executeFile (path);
     }
 
     void WindowManager::wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount)
@@ -1507,7 +1524,7 @@ namespace MWGui
 
     void WindowManager::updatePlayer()
     {
-        mInventoryWindow->updatePlayer();
+        //mInventoryWindow->updatePlayer();
 
         const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (player.getClass().getNpcStats(player).isWerewolf())
@@ -1540,9 +1557,22 @@ namespace MWGui
         mHud->setEnemy(enemy);
     }
 
+    class DummyListener : public Loading::Listener
+    {
+    public:
+        virtual void setLabel (const std::string& label){}
+        virtual void loadingOn(){}
+        virtual void loadingOff(){}
+        virtual void indicateProgress (){}
+        virtual void setProgressRange (size_t range){}
+        virtual void setProgress (size_t value){}
+        virtual void increaseProgress (size_t increase = 1){}
+    };
+
     Loading::Listener* WindowManager::getLoadingScreen()
     {
-        return mLoadingScreen;
+        static DummyListener listener;
+        return &listener;
     }
 
     void WindowManager::startRecharge(MWWorld::Ptr soulgem)
@@ -1779,23 +1809,29 @@ namespace MWGui
 
     void WindowManager::fadeScreenIn(const float time, bool clearQueue)
     {
+        /*
         if (clearQueue)
             mScreenFader->clearQueue();
         mScreenFader->fadeOut(time);
+        */
     }
 
     void WindowManager::fadeScreenOut(const float time, bool clearQueue)
     {
+        /*
         if (clearQueue)
             mScreenFader->clearQueue();
         mScreenFader->fadeIn(time);
+        */
     }
 
     void WindowManager::fadeScreenTo(const int percent, const float time, bool clearQueue)
     {
+        /*
         if (clearQueue)
             mScreenFader->clearQueue();
         mScreenFader->fadeTo(percent, time);
+        */
     }
 
     void WindowManager::setBlindness(const int percent)

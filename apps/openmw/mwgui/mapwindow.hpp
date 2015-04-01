@@ -216,7 +216,7 @@ namespace MWGui
         MyGUI::Button* mEventBoxGlobal;
         MyGUI::Button* mEventBoxLocal;
 
-        MWRender::GlobalMap* mGlobalMapRender;
+        //MWRender::GlobalMap* mGlobalMapRender;
 
         EditNoteDialog mEditNoteDialog;
         ESM::CustomMarker mEditingMarker;

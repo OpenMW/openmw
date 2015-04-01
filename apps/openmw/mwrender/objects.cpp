@@ -14,7 +14,7 @@
 #include <components/esm/loadligh.hpp>
 #include <components/esm/loadstat.hpp>
 
-#include <components/nifogre/ogrenifloader.hpp>
+//#include <components/nifogre/ogrenifloader.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -22,7 +22,7 @@
 #include "../mwworld/cellstore.hpp"
 
 #include "renderconst.hpp"
-#include "animation.hpp"
+//#include "animation.hpp"
 
 using namespace MWRender;
 
@@ -76,7 +76,7 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
 void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool batch)
 {
     insertBegin(ptr);
-
+/*
     std::auto_ptr<ObjectAnimation> anim(new ObjectAnimation(ptr, mesh));
 
     if (!mesh.empty())
@@ -96,70 +96,16 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
             mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
         mBounds[ptr.getCell()].merge(bounds);
 
-        if(batch &&
-           Settings::Manager::getBool("use static geometry", "Objects") &&
-           anim->canBatch())
-        {
-            Ogre::StaticGeometry* sg = 0;
-
-            if (small)
-            {
-                if(mStaticGeometrySmall.find(ptr.getCell()) == mStaticGeometrySmall.end())
-                {
-                    uniqueID = uniqueID+1;
-                    sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
-                    sg->setOrigin(ptr.getRefData().getBaseNode()->getPosition());
-                    mStaticGeometrySmall[ptr.getCell()] = sg;
-
-                    sg->setRenderingDistance(static_cast<Ogre::Real>(Settings::Manager::getInt("small object distance", "Viewing distance")));
-                }
-                else
-                    sg = mStaticGeometrySmall[ptr.getCell()];
-            }
-            else
-            {
-                if(mStaticGeometry.find(ptr.getCell()) == mStaticGeometry.end())
-                {
-                    uniqueID = uniqueID+1;
-                    sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
-                    sg->setOrigin(ptr.getRefData().getBaseNode()->getPosition());
-                    mStaticGeometry[ptr.getCell()] = sg;
-                }
-                else
-                    sg = mStaticGeometry[ptr.getCell()];
-            }
-
-            // This specifies the size of a single batch region.
-            // If it is set too high:
-            //  - there will be problems choosing the correct lights
-            //  - the culling will be more inefficient
-            // If it is set too low:
-            //  - there will be too many batches.
-            if(ptr.getCell()->isExterior())
-                sg->setRegionDimensions(Ogre::Vector3(2048,2048,2048));
-            else
-                sg->setRegionDimensions(Ogre::Vector3(1024,1024,1024));
-
-            sg->setVisibilityFlags(small ? RV_StaticsSmall : RV_Statics);
-
-            sg->setCastShadows(true);
-
-            sg->setRenderQueueGroup(RQG_Main);
-
-            anim->fillBatch(sg);
-            /* TODO: We could hold on to this and just detach it from the scene graph, so if the Ptr
-             * ever needs to modify we can reattach it and rebuild the StaticGeometry object without
-             * it. Would require associating the Ptr with the StaticGeometry. */
-            anim.reset();
-        }
     }
 
     if(anim.get() != NULL)
         mObjects.insert(std::make_pair(ptr, anim.release()));
+        */
 }
 
 bool Objects::deleteObject (const MWWorld::Ptr& ptr)
 {
+    /*
     if(!ptr.getRefData().getBaseNode())
         return true;
 
@@ -173,13 +119,14 @@ bool Objects::deleteObject (const MWWorld::Ptr& ptr)
         ptr.getRefData().setBaseNode(0);
         return true;
     }
-
+*/
     return false;
 }
 
 
 void Objects::removeCell(MWWorld::CellStore* store)
 {
+    /*
     for(PtrAnimationMap::iterator iter = mObjects.begin();iter != mObjects.end();)
     {
         if(iter->first.getCell() == store)
@@ -216,20 +163,7 @@ void Objects::removeCell(MWWorld::CellStore* store)
         mRenderer.getScene()->destroySceneNode(cell->second);
         mCellSceneNodes.erase(cell);
     }
-}
-
-void Objects::buildStaticGeometry(MWWorld::CellStore& cell)
-{
-    if(mStaticGeometry.find(&cell) != mStaticGeometry.end())
-    {
-        Ogre::StaticGeometry* sg = mStaticGeometry[&cell];
-        sg->build();
-    }
-    if(mStaticGeometrySmall.find(&cell) != mStaticGeometrySmall.end())
-    {
-        Ogre::StaticGeometry* sg = mStaticGeometrySmall[&cell];
-        sg->build();
-    }
+    */
 }
 
 Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::CellStore* cell)
@@ -239,33 +173,16 @@ Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::CellStore* cell)
 
 void Objects::update(float dt, Ogre::Camera* camera)
 {
+    /*
     PtrAnimationMap::const_iterator it = mObjects.begin();
     for(;it != mObjects.end();++it)
         it->second->runAnimation(dt);
-
-    it = mObjects.begin();
-    for(;it != mObjects.end();++it)
-        it->second->preRender(camera);
-
-}
-
-void Objects::rebuildStaticGeometry()
-{
-    for (std::map<MWWorld::CellStore *, Ogre::StaticGeometry*>::iterator it = mStaticGeometry.begin(); it != mStaticGeometry.end(); ++it)
-    {
-        it->second->destroy();
-        it->second->build();
-    }
-
-    for (std::map<MWWorld::CellStore *, Ogre::StaticGeometry*>::iterator it = mStaticGeometrySmall.begin(); it != mStaticGeometrySmall.end(); ++it)
-    {
-        it->second->destroy();
-        it->second->build();
-    }
+    */
 }
 
 void Objects::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
+    /*
     Ogre::SceneNode *node;
     MWWorld::CellStore *newCell = cur.getCell();
 
@@ -286,13 +203,16 @@ void Objects::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
         anim->updatePtr(cur);
         mObjects[cur] = anim;
     }
+    */
 }
 
 ObjectAnimation* Objects::getAnimation(const MWWorld::Ptr &ptr)
 {
+    /*
     PtrAnimationMap::const_iterator iter = mObjects.find(ptr);
     if(iter != mObjects.end())
         return iter->second;
+        */
     return NULL;
 }
 

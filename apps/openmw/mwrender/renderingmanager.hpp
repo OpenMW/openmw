@@ -248,9 +248,6 @@ private:
 
     MWRender::NpcAnimation *mPlayerAnimation;
 
-    // 0 normal, 1 more bright, 2 max
-    int mAmbientMode;
-
     Ogre::ColourValue mAmbientColor;
     Ogre::Light* mSun;
 
@@ -264,11 +261,7 @@ private:
 
     MWRender::Camera *mCamera;
 
-    MWRender::Debugging *mDebugging;
-
     MWRender::LocalMap* mLocalMap;
-
-    MWRender::Shadows* mShadows;
 
     bool mRenderWorld;
 };

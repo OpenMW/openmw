@@ -20,15 +20,16 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
-    actors objects renderinginterface localmap occlusionquery water shadows
-    characterpreview globalmap ripplesimulation refraction
-    terrainstorage renderconst effectmanager weaponanimation
+actors objects
+#    renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
+#    renderinginterface localmap occlusionquery water shadows
+#    characterpreview globalmap ripplesimulation refraction
+#    terrainstorage renderconst effectmanager weaponanimation
     )
 
-add_openmw_dir (mwinput
-    inputmanagerimp
-    )
+#add_openmw_dir (mwinput
+#    inputmanagerimp
+#    )
 
 add_openmw_dir (mwgui
     textinput widgets race class birth review windowmanagerimp console dialogue
@@ -57,16 +58,18 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanagerimp openal_output ffmpeg_decoder sound sound_decoder sound_output loudness libavwrapper movieaudiofactory
+    soundmanagerimp openal_output ffmpeg_decoder sound sound_decoder sound_output loudness libavwrapper
+# movieaudiofactory
     )
 
 add_openmw_dir (mwworld
-    refdata worldimp physicssystem scene globals class action nullaction actionteleport
+    refdata worldimp scene globals class action nullaction actionteleport
     containerstore actiontalk actiontake manualref player cellfunctors failedaction
-    cells localscripts customdata weather inventorystore ptr actionopen actionread
+    cells localscripts customdata inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader actiontrap cellreflist projectilemanager cellref
+    contentloader esmloader actiontrap cellreflist cellref physicssystem
+# weather projectilemanager
     )
 
 add_openmw_dir (mwclass
@@ -75,10 +78,11 @@ add_openmw_dir (mwclass
     )
 
 add_openmw_dir (mwmechanics
-    mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
+    mechanicsmanagerimp stat creaturestats magiceffects movement
     drawstate spells activespells npcstats aipackage aisequence aipursue alchemy aiwander aitravel aifollow aiavoiddoor
     aiescort aiactivate aicombat repair enchanting pathfinding pathgrid security spellsuccess spellcasting
     disease pickpocket levelledlist combat steering obstacle autocalcspell difficultyscaling aicombataction actor summoning
+# character actors objects
     )
 
 add_openmw_dir (mwstate
@@ -133,9 +137,7 @@ target_link_libraries(openmw
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
-    "ogre-ffmpeg-videoplayer"
     "oics"
-    "sdl4ogre"
     components
 )
 

@@ -98,7 +98,7 @@ namespace OMW
             bool mScriptBlacklistUse;
             bool mNewGame;
 
-            Nif::Cache mNifCache;
+            //Nif::Cache mNifCache;
 
             // not implemented
             Engine (const Engine&);

@@ -42,7 +42,7 @@ namespace MWGui
         void autoResize (bool stretch);
 
     private:
-        std::auto_ptr<Video::VideoPlayer> mPlayer;
+        //std::auto_ptr<Video::VideoPlayer> mPlayer;
     };
 
 }

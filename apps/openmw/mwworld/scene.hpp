@@ -1,10 +1,12 @@
 #ifndef GAME_MWWORLD_SCENE_H
 #define GAME_MWWORLD_SCENE_H
 
-#include "../mwrender/renderingmanager.hpp"
+//#include "../mwrender/renderingmanager.hpp"
 
 #include "ptr.hpp"
 #include "globals.hpp"
+
+#include <set>
 
 namespace Ogre
 {
@@ -35,6 +37,7 @@ namespace MWRender
 {
     class SkyManager;
     class CellRender;
+    class RenderingManager;
 }
 
 namespace MWWorld
@@ -55,8 +58,8 @@ namespace MWWorld
             CellStore* mCurrentCell; // the cell the player is in
             CellStoreCollection mActiveCells;
             bool mCellChanged;
-            PhysicsSystem *mPhysics;
-            MWRender::RenderingManager& mRendering;
+            //PhysicsSystem *mPhysics;
+            //MWRender::RenderingManager& mRendering;
 
             bool mNeedMapUpdate;
 

@@ -55,7 +55,6 @@ public:
     ///< \return found?
 
     void removeCell(MWWorld::CellStore* store);
-    void buildStaticGeometry(MWWorld::CellStore &cell);
     void setRootNode(Ogre::SceneNode* root);
 
     void rebuildStaticGeometry();

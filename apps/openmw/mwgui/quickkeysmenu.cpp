@@ -245,7 +245,7 @@ namespace MWGui
         std::string path = effect->mIcon;
         int slashPos = path.rfind('\\');
         path.insert(slashPos+1, "b_");
-        path = Misc::ResourceHelpers::correctIconPath(path);
+        //path = Misc::ResourceHelpers::correctIconPath(path);
 
         button->setFrame("textures\\menu_icon_select_magic.dds", MyGUI::IntCoord(2, 2, 40, 40));
         button->setIcon(path);

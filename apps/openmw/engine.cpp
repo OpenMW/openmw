@@ -14,17 +14,14 @@
 
 #include <components/compiler/extensions0.hpp>
 
-#include <components/bsa/resources.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
-#include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bulletnifloader.hpp>
-#include <components/nifogre/ogrenifloader.hpp>
 
 #include <components/esm/loadcell.hpp>
 
-#include "mwinput/inputmanagerimp.hpp"
+//#include "mwinput/inputmanagerimp.hpp"
 
 #include "mwgui/windowmanagerimp.hpp"
 
@@ -86,12 +83,12 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         mEnvironment.setFrameDuration (frametime);
 
         // update input
-        MWBase::Environment::get().getInputManager()->update(frametime, false);
+        //MWBase::Environment::get().getInputManager()->update(frametime, false);
 
         // When the window is minimized, pause everything. Currently this *has* to be here to work around a MyGUI bug.
         // If we are not currently rendering, then RenderItems will not be reused resulting in a memory leak upon changing widget textures.
-        if (!mOgre->getWindow()->isActive() || !mOgre->getWindow()->isVisible())
-            return true;
+        //if (!mOgre->getWindow()->isActive() || !mOgre->getWindow()->isVisible())
+        //    return true;
 
         // sound
         if (mUseSound)
@@ -157,11 +154,12 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         if (MWBase::Environment::get().getStateManager()->getState()!=
             MWBase::StateManager::State_NoGame)
         {
+#if 0
             Ogre::RenderWindow* window = mOgre->getWindow();
             unsigned int tri, batch;
             MWBase::Environment::get().getWorld()->getTriangleBatchCount(tri, batch);
             MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
-
+#endif
             MWBase::Environment::get().getWindowManager()->update();
         }
     }
@@ -210,11 +208,8 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
-    if (mOgre)
-        mOgre->restoreWindowGammaRamp();
     mEnvironment.cleanup();
     delete mScriptContext;
-    delete mOgre;
     SDL_Quit();
 }
 
@@ -223,14 +218,10 @@ OMW::Engine::~Engine()
 
 void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
 {
-    mOgre->getRoot()->addResourceLocation (path.string(), "FileSystem",
-        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 }
 
 void OMW::Engine::addZipResource (const boost::filesystem::path& path)
 {
-    mOgre->getRoot()->addResourceLocation (path.string(), "Zip",
-        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, false);
 }
 
 void OMW::Engine::enableFSStrict(bool fsStrict)
@@ -299,19 +290,6 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
     if (boost::filesystem::exists(settingspath))
         settings.loadUser(settingspath);
 
-    // load nif overrides
-    NifOverrides::Overrides nifOverrides;
-    std::string transparencyOverrides = "/transparency-overrides.cfg";
-    std::string materialOverrides = "/material-overrides.cfg";
-    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + transparencyOverrides))
-        nifOverrides.loadTransparencyOverrides(mCfgMgr.getLocalPath().string() + transparencyOverrides);
-    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + transparencyOverrides))
-        nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + transparencyOverrides);
-    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + materialOverrides))
-        nifOverrides.loadMaterialOverrides(mCfgMgr.getLocalPath().string() + materialOverrides);
-    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + materialOverrides))
-        nifOverrides.loadMaterialOverrides(mCfgMgr.getGlobalPath().string() + materialOverrides);
-
     return settingspath;
 }
 
@@ -329,13 +307,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         renderSystem = "OpenGL Rendering Subsystem";
 #endif
     }
-
-    mOgre = new OEngine::Render::OgreRenderer;
-
-    mOgre->configure(
-        mCfgMgr.getLogPath().string(),
-        renderSystem,
-        Settings::Manager::getString("opengl rtt mode", "Video"));
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
@@ -361,9 +332,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS,
                 settings.getBool("minimize on focus loss", "Video") ? "1" : "0");
 
-    mOgre->createWindow("OpenMW", windowSettings);
-
-    Bsa::registerResources (mFileCollections, mArchives, true, mFSStrict);
+    //Bsa::registerResources (mFileCollections, mArchives, true, mFSStrict);
 
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
@@ -390,18 +359,16 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     else
         gameControllerdb = ""; //if it doesn't exist, pass in an empty string
 
-    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
-    mEnvironment.setInputManager (input);
+    //MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
+    //mEnvironment.setInputManager (input);
 
     MWGui::WindowManager* window = new MWGui::WindowManager(
-                mExtensions, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
+                mExtensions, NULL, mCfgMgr.getLogPath().string() + std::string("/"),
                 mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap);
     mEnvironment.setWindowManager (window);
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
-
-    mOgre->setWindowGammaContrast(Settings::Manager::getFloat("gamma", "General"), Settings::Manager::getFloat("contrast", "General"));
 
     if (!mSkipMenu)
     {
@@ -411,11 +378,11 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     }
 
     // Create the world
-    mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mContentFiles,
+    mEnvironment.setWorld( new MWWorld::World (mFileCollections, mContentFiles,
         mResDir, mCfgMgr.getCachePath(), mEncoder, mFallbackMap,
         mActivationDistanceOverride, mCellName, mStartupScript));
     MWBase::Environment::get().getWorld()->setupPlayer();
-    input->setPlayer(&mEnvironment.getWorld()->getPlayer());
+    //input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
     window->initUI();
     window->renderWorldMap();
@@ -443,7 +410,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mEnvironment.setJournal (new MWDialogue::Journal);
     mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts, mTranslationDataStorage));
 
-    mOgre->getRoot()->addFrameListener (this);
+    //mOgre->getRoot()->addFrameListener (this);
 
     // scripts
     if (mCompileAll)
@@ -473,7 +440,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 void OMW::Engine::go()
 {
     assert (!mContentFiles.empty());
-    assert (!mOgre);
+    //assert (!mOgre);
 
     Settings::Manager settings;
     std::string settingspath;
@@ -514,6 +481,7 @@ void OMW::Engine::go()
     }
 
     // Start the main rendering loop
+    /*
     Ogre::Timer timer;
     while (!MWBase::Environment::get().getStateManager()->hasQuitRequest())
     {
@@ -523,6 +491,8 @@ void OMW::Engine::go()
         timer.reset();
         Ogre::Root::getSingleton().renderOneFrame(dt);
     }
+    */
+
     // Save user settings
     settings.saveUser(settingspath);
 
@@ -577,7 +547,7 @@ void OMW::Engine::screenshot()
 
     } while (boost::filesystem::exists(stream.str()));
 
-    mOgre->screenshot(stream.str(), format);
+    //mOgre->screenshot(stream.str(), format);
 }
 
 void OMW::Engine::setCompileAll (bool all)

@@ -261,6 +261,8 @@ public:
   /// Get record flags of last record
   unsigned int getRecordFlags() { return mRecordFlags; }
 
+  size_t getFileSize() const { return mFileSize; }
+
 private:
   Files::IStreamPtr mEsm;
 
@@ -277,6 +279,9 @@ private:
 
   std::vector<ESMReader> *mGlobalReaderList;
   ToUTF8::Utf8Encoder* mEncoder;
+
+  size_t mFileSize;
+
 };
 }
 #endif

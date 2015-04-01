@@ -147,6 +147,7 @@ namespace Gui
 
     void FontLoader::loadAllFonts(bool exportToFile)
     {
+        /*
         Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
         for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
         {
@@ -156,6 +157,7 @@ namespace Gui
                 loadFont(*resource, exportToFile);
             }
         }
+        */
     }
 
 

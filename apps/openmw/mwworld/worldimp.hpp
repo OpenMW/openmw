@@ -8,7 +8,7 @@
 #include "ptr.hpp"
 #include "scene.hpp"
 #include "esmstore.hpp"
-#include "physicssystem.hpp"
+//#include "physicssystem.hpp"
 #include "cells.hpp"
 #include "localscripts.hpp"
 #include "timestamp.hpp"
@@ -18,6 +18,8 @@
 #include "../mwbase/world.hpp"
 
 #include "contentloader.hpp"
+
+#include <components/settings/settings.hpp>
 
 namespace Ogre
 {
@@ -62,7 +64,7 @@ namespace MWWorld
             MWWorld::Fallback mFallback;
             MWRender::RenderingManager* mRendering;
 
-            MWWorld::WeatherManager* mWeatherManager;
+            //MWWorld::WeatherManager* mWeatherManager;
 
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
@@ -152,7 +154,7 @@ namespace MWWorld
 
         public:
 
-            World (OEngine::Render::OgreRenderer& renderer,
+            World (
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& contentFiles,
                 const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
@@ -465,31 +467,31 @@ namespace MWWorld
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
 
             virtual void togglePOV() {
-                mRendering->togglePOV();
+                //mRendering->togglePOV();
             }
 
             virtual bool isFirstPerson() const {
-                return mRendering->getCamera()->isFirstPerson();
+                return 0;//mRendering->getCamera()->isFirstPerson();
             }
 
             virtual void togglePreviewMode(bool enable) {
-                mRendering->togglePreviewMode(enable);
+                //mRendering->togglePreviewMode(enable);
             }
 
             virtual bool toggleVanityMode(bool enable) {
-                return mRendering->toggleVanityMode(enable);
+                return 0;//mRendering->toggleVanityMode(enable);
             }
 
             virtual void allowVanityMode(bool allow) {
-                mRendering->allowVanityMode(allow);
+                //mRendering->allowVanityMode(allow);
             }
 
             virtual void togglePlayerLooking(bool enable) {
-                mRendering->togglePlayerLooking(enable);
+                //mRendering->togglePlayerLooking(enable);
             }
 
             virtual void changeVanityModeScale(float factor) {
-                mRendering->changeVanityModeScale(factor);
+                //mRendering->changeVanityModeScale(factor);
             }
 
             virtual bool vanityRotateCamera(float * rot);

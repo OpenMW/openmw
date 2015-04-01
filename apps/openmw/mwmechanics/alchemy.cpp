@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <cmath>
 
 #include <algorithm>
 #include <stdexcept>
