@@ -418,7 +418,6 @@ IF(NOT WIN32 AND NOT APPLE)
 
     # Install licenses
     INSTALL(FILES "docs/license/DejaVu Font License.txt" DESTINATION "${LICDIR}" )
-    INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
 
     # Install icon and desktop file
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "openmw")
@@ -542,7 +541,6 @@ include_directories(libs)
 add_subdirectory(libs/openengine)
 
 # Extern
-#add_subdirectory (extern/shiny)
 #add_subdirectory (extern/ogre-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
 #add_subdirectory (extern/sdl4ogre)
@@ -679,10 +677,6 @@ if (WIN32)
     endforeach(d)
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNINGS} ${MT_BUILD}")
-
-    # boost::wave has a few issues with signed / unsigned conversions, so we suppress those here
-    set(SHINY_WARNINGS "${WARNINGS} /wd4245")
-    set_target_properties(shiny PROPERTIES COMPILE_FLAGS "${SHINY_WARNINGS} ${MT_BUILD}")
 
     # oics uses tinyxml, which has an initialized but unused variable
     set(OICS_WARNINGS "${WARNINGS} /wd4189")

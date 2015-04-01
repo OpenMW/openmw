@@ -129,7 +129,6 @@ target_link_libraries(openmw
     ${OENGINE_LIBRARY}
     ${OGRE_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
-    ${SHINY_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}

@@ -27,8 +27,6 @@
 #include <OgreMaterialManager.h>
 #include <OgreStringConverter.h>
 
-#include <extern/shiny/Main/Factory.hpp>
-
 namespace Terrain
 {
 

@@ -204,7 +204,6 @@ target_link_libraries(openmw-cs
     ${OGRE_Overlay_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
     ${OPENSCENEGRAPH_LIBRARIES}
-    ${SHINY_LIBRARIES}
     ${Boost_LIBRARIES}
     ${BULLET_LIBRARIES}
     ${QT_LIBRARIES}

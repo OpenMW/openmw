@@ -1,7 +1,6 @@
 set(OENGINE_OGRE
     #ogre/renderer.cpp
     ogre/lights.cpp
-    ogre/selectionbuffer.cpp
 )
 
 set(OENGINE_GUI
