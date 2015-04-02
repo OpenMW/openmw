@@ -12,6 +12,8 @@
 #include "runtime.hpp"
 #include "defines.hpp"
 
+#include <openengine/misc/rng.hpp>
+
 namespace Interpreter
 {
     inline std::string formatMessage (const std::string& message, Runtime& runtime)
@@ -140,15 +142,13 @@ namespace Interpreter
 
             virtual void execute (Runtime& runtime)
             {
-                double r = static_cast<double> (std::rand()) / RAND_MAX; // [0, 1)
-
                 Type_Integer limit = runtime[0].mInteger;
 
                 if (limit<0)
                     throw std::runtime_error (
                         "random: argument out of range (Don't be so negative!)");
 
-                Type_Integer value = static_cast<Type_Integer> (r*limit); // [o, limit)
+                Type_Integer value = OEngine::Misc::Rng::rollDice(limit); // [o, limit)
 
                 runtime[0].mInteger = value;
             }

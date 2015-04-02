@@ -31,6 +31,7 @@ JNIEXPORT void JNICALL Java_ui_activity_GameActivity_getPathToJni(JNIEnv *env, j
 {
     jboolean iscopy;
     Buffer::setData((env)->GetStringUTFChars(prompt, &iscopy));
+    (env)->DeleteLocalRef(prompt);
 }
 
 namespace

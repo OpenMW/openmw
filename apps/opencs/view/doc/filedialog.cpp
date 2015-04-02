@@ -153,11 +153,13 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
 
     if (isNew)
         success = success && !(name.isEmpty());
-    else
+    else if (success)
     {
         ContentSelectorModel::EsmFile *file = mSelector->selectedFiles().back();
         mAdjusterWidget->setName (file->filePath(), !file->isGameFile());
     }
+    else
+        mAdjusterWidget->setName ("", true);
 
     ui.projectButtonBox->button (QDialogButtonBox::Ok)->setEnabled (success);
 }

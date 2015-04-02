@@ -90,12 +90,11 @@ namespace
 
 namespace MWMechanics
 {
-    float sqrDistanceZCorrected(ESM::Pathgrid::Point point, float x, float y, float z)
+    float sqrDistanceIgnoreZ(ESM::Pathgrid::Point point, float x, float y)
     {
         x -= point.mX;
         y -= point.mY;
-        z -= point.mZ;
-        return (x * x + y * y + 0.1f * z * z);
+        return (x * x + y * y);
     }
 
     float distance(ESM::Pathgrid::Point point, float x, float y, float z)
@@ -283,13 +282,13 @@ namespace MWMechanics
         return Ogre::Math::ATan2(directionX,directionY).valueDegrees();
     }
 
-    bool PathFinder::checkPathCompleted(float x, float y, float z, float tolerance)
+    bool PathFinder::checkPathCompleted(float x, float y, float tolerance)
     {
         if(mPath.empty())
             return true;
 
         ESM::Pathgrid::Point nextPoint = *mPath.begin();
-        if(sqrDistanceZCorrected(nextPoint, x, y, z) < tolerance*tolerance)
+        if (sqrDistanceIgnoreZ(nextPoint, x, y) < tolerance*tolerance)
         {
             mPath.pop_front();
             if(mPath.empty())
