@@ -298,6 +298,7 @@ namespace
 
 
     // NodeVisitor that adds keyframe controllers to an existing scene graph, used when loading .kf files
+    /*
     class LoadKfVisitor : public osg::NodeVisitor
     {
     public:
@@ -332,6 +333,7 @@ namespace
         std::map<std::string, const Nif::NiKeyframeController*> mMap;
         int mSourceIndex;
     };
+    */
 
     // Node callback used to dirty a RigGeometry's bounding box every frame, so that RigBoundingBoxCallback updates.
     // This has to be attached to the geode, because the RigGeometry's Drawable::UpdateCallback is already used internally and not extensible.
@@ -522,19 +524,15 @@ namespace NifOsg
         sShowMarkers = show;
     }
 
+    bool Loader::getShowMarkers()
+    {
+        return sShowMarkers;
+    }
+
     class LoaderImpl
     {
     public:
-        Resource::TextureManager* mTextureManager;
-        bool mShowMarkers;
-
-        LoaderImpl(Resource::TextureManager* textureManager, bool showMarkers)
-            : mTextureManager(textureManager)
-            , mShowMarkers(showMarkers)
-        {
-        }
-
-        void loadKf(Nif::NIFFilePtr nif, osg::Node *rootNode, int sourceIndex, TextKeyMap& textKeys)
+        static void loadKf(Nif::NIFFilePtr nif, KeyframeHolder& target)
         {
             if(nif->numRoots() < 1)
             {
@@ -561,9 +559,7 @@ namespace NifOsg
                 return;
             }
 
-            extractTextKeys(static_cast<const Nif::NiTextKeyExtraData*>(extra.getPtr()), textKeys);
-
-            std::map<std::string, const Nif::NiKeyframeController*> controllerMap;
+            extractTextKeys(static_cast<const Nif::NiTextKeyExtraData*>(extra.getPtr()), target.mTextKeys);
 
             extra = extra->extra;
             Nif::ControllerPtr ctrl = seq->controller;
@@ -584,17 +580,17 @@ namespace NifOsg
                 if(key->data.empty())
                     continue;
 
-                controllerMap[strdata->string] = key;
-            }
+                osg::ref_ptr<NifOsg::SourcedKeyframeController> callback(new NifOsg::SourcedKeyframeController(key->data.getPtr()));
+                callback->mFunction = boost::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key));
 
-            LoadKfVisitor visitor(controllerMap, sourceIndex);
-            rootNode->accept(visitor);
+                target.mKeyframeControllers[strdata->string] = callback;
+            }
         }
 
-        osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, TextKeyMap* textKeys)
+        static osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::TextureManager* textureManager)
         {
             if (nif->getUseSkinning())
-                return loadAsSkeleton(nif, textKeys);
+                return loadAsSkeleton(nif, textureManager);
 
             if (nif->numRoots() < 1)
                 nif->fail("Found no root nodes");
@@ -605,11 +601,16 @@ namespace NifOsg
             if (nifNode == NULL)
                 nif->fail("First root was not a node, but a " + r->recName);
 
-            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, false, std::map<int, int>(), 0, 0, false, textKeys);
+            osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
+
+            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, textureManager, false, std::map<int, int>(), 0, 0, false, &textkeys->mTextKeys);
+
+            created->getOrCreateUserDataContainer()->addUserObject(textkeys);
+
             return created;
         }
 
-        osg::ref_ptr<osg::Node> loadAsSkeleton(Nif::NIFFilePtr nif, TextKeyMap* textKeys)
+        static osg::ref_ptr<osg::Node> loadAsSkeleton(Nif::NIFFilePtr nif, Resource::TextureManager* textureManager)
         {
             if (nif->numRoots() < 1)
                 nif->fail("Found no root nodes");
@@ -621,24 +622,28 @@ namespace NifOsg
             if (nifNode == NULL)
                 nif->fail("First root was not a node, but a " + r->recName);
 
+            osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
+
             osg::ref_ptr<osgAnimation::Skeleton> skel = new osgAnimation::Skeleton;
             skel->setDefaultUpdateCallback(); // validates the skeleton hierarchy
-            handleNode(nifNode, skel, true, std::map<int, int>(), 0, 0, false, textKeys);
+            handleNode(nifNode, skel, textureManager, true, std::map<int, int>(), 0, 0, false, &textkeys->mTextKeys);
+
+            skel->getOrCreateUserDataContainer()->addUserObject(textkeys);
 
             return skel;
         }
 
-        void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, std::map<int, int>& boundTextures, int animflags)
+        static void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
         {
             const Nif::PropertyList& props = nifNode->props;
             for (size_t i = 0; i <props.length();++i)
             {
                 if (!props[i].empty())
-                    handleProperty(props[i].getPtr(), applyTo, boundTextures, animflags);
+                    handleProperty(props[i].getPtr(), applyTo, textureManager, boundTextures, animflags);
             }
         }
 
-        void setupController(const Nif::Controller* ctrl, Controller* toSetup, int animflags)
+        static void setupController(const Nif::Controller* ctrl, Controller* toSetup, int animflags)
         {
             // TODO: uncomment this, currently commented for easier testing
             //bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
@@ -648,7 +653,7 @@ namespace NifOsg
             toSetup->mFunction = boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl));
         }
 
-        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, bool createSkeleton,
+        static osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::TextureManager* textureManager, bool createSkeleton,
                                 std::map<int, int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
             osg::ref_ptr<osg::MatrixTransform> transformNode;
@@ -698,7 +703,7 @@ namespace NifOsg
                     const Nif::NiStringExtraData *sd = static_cast<const Nif::NiStringExtraData*>(e.getPtr());
                     // String markers may contain important information
                     // affecting the entire subtree of this obj
-                    if(sd->string == "MRK" && !mShowMarkers)
+                    if(sd->string == "MRK" && !Loader::getShowMarkers())
                     {
                         // Marker objects. These meshes are only visible in the editor.
                         skipMeshes = true;
@@ -735,7 +740,7 @@ namespace NifOsg
                 transformNode->setNodeMask(0x1);
             }
 
-            applyNodeProperties(nifNode, transformNode, boundTextures, animflags);
+            applyNodeProperties(nifNode, transformNode, textureManager, boundTextures, animflags);
 
             if (nifNode->recType == Nif::RC_NiTriShape && !skipMeshes)
             {
@@ -767,7 +772,8 @@ namespace NifOsg
                 {
                     if(!children[i].empty())
                     {
-                        handleNode(children[i].getPtr(), transformNode, createSkeleton, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode);
+                        handleNode(children[i].getPtr(), transformNode, textureManager,
+                                   createSkeleton, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode);
                     }
                 }
             }
@@ -775,7 +781,7 @@ namespace NifOsg
             return transformNode;
         }
 
-        void handleMeshControllers(const Nif::Node *nifNode, osg::MatrixTransform *transformNode, const std::map<int, int> &boundTextures, int animflags)
+        static void handleMeshControllers(const Nif::Node *nifNode, osg::MatrixTransform *transformNode, const std::map<int, int> &boundTextures, int animflags)
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -797,7 +803,7 @@ namespace NifOsg
             }
         }
 
-        void handleNodeControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode, int animflags)
+        static void handleNodeControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode, int animflags)
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -825,7 +831,7 @@ namespace NifOsg
             }
         }
 
-        void handleMaterialControllers(const Nif::Property *materialProperty, osg::Node* node, osg::StateSet *stateset, int animflags)
+        static void handleMaterialControllers(const Nif::Property *materialProperty, osg::Node* node, osg::StateSet *stateset, int animflags)
         {
             for (Nif::ControllerPtr ctrl = materialProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -852,7 +858,7 @@ namespace NifOsg
             }
         }
 
-        void handleTextureControllers(const Nif::Property *texProperty, osg::Node* node, osg::StateSet *stateset, int animflags)
+        static void handleTextureControllers(const Nif::Property *texProperty, osg::Node* node, Resource::TextureManager* textureManager, osg::StateSet *stateset, int animflags)
         {
             for (Nif::ControllerPtr ctrl = texProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -878,8 +884,8 @@ namespace NifOsg
                             wrapT = inherit->getWrap(osg::Texture2D::WRAP_T);
                         }
 
-                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, mTextureManager->getVFS());
-                        osg::ref_ptr<osg::Texture2D> texture = mTextureManager->getTexture2D(filename, wrapS, wrapT);
+                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, textureManager->getVFS());
+                        osg::ref_ptr<osg::Texture2D> texture = textureManager->getTexture2D(filename, wrapS, wrapT);
                         textures.push_back(texture);
                     }
                     osg::ref_ptr<FlipController> callback(new FlipController(flipctrl, textures));
@@ -892,7 +898,7 @@ namespace NifOsg
             }
         }
 
-        void handleParticlePrograms(Nif::ExtraPtr affectors, Nif::ExtraPtr colliders, osg::Group *attachTo, osgParticle::ParticleSystem* partsys, osgParticle::ParticleProcessor::ReferenceFrame rf)
+        static void handleParticlePrograms(Nif::ExtraPtr affectors, Nif::ExtraPtr colliders, osg::Group *attachTo, osgParticle::ParticleSystem* partsys, osgParticle::ParticleProcessor::ReferenceFrame rf)
         {
             osgParticle::ModularProgram* program = new osgParticle::ModularProgram;
             attachTo->addChild(program);
@@ -934,7 +940,7 @@ namespace NifOsg
         }
 
         // Load the initial state of the particle system, i.e. the initial particles and their positions, velocity and colors.
-        void handleParticleInitialState(const Nif::Node* nifNode, osgParticle::ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
+        static void handleParticleInitialState(const Nif::Node* nifNode, osgParticle::ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
         {
             const Nif::NiAutoNormalParticlesData *particledata = NULL;
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles)
@@ -970,7 +976,7 @@ namespace NifOsg
             }
         }
 
-        osg::ref_ptr<Emitter> handleParticleEmitter(const Nif::NiParticleSystemController* partctrl)
+        static osg::ref_ptr<Emitter> handleParticleEmitter(const Nif::NiParticleSystemController* partctrl)
         {
             std::vector<int> targets;
             if (partctrl->recType == Nif::RC_NiBSPArrayController)
@@ -1004,7 +1010,7 @@ namespace NifOsg
             return emitter;
         }
 
-        void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, int animflags, int particleflags, osg::Node* rootNode)
+        static void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, int animflags, int particleflags, osg::Node* rootNode)
         {
             osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
@@ -1100,7 +1106,7 @@ namespace NifOsg
             }
         }
 
-        void triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, osg::Geode* parentGeode, const std::map<int, int>& boundTextures, int animflags)
+        static void triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, osg::Geode* parentGeode, const std::map<int, int>& boundTextures, int animflags)
         {
             const Nif::NiTriShapeData* data = triShape->data.getPtr();
 
@@ -1183,7 +1189,7 @@ namespace NifOsg
             applyMaterialProperties(parentGeode, materialProps, !data->colors.empty(), animflags);
         }
 
-        void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, const std::map<int, int>& boundTextures, int animflags)
+        static void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, const std::map<int, int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osg::Geometry> geometry;
             if(!triShape->controller.empty())
@@ -1215,7 +1221,7 @@ namespace NifOsg
             parentNode->addChild(geode);
         }
 
-        osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher)
+        static osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher)
         {
             osg::ref_ptr<osgAnimation::MorphGeometry> morphGeom = new osgAnimation::MorphGeometry;
             morphGeom->setMethod(osgAnimation::MorphGeometry::RELATIVE);
@@ -1233,7 +1239,7 @@ namespace NifOsg
             return morphGeom;
         }
 
-        void handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, const std::map<int, int>& boundTextures, int animflags)
+        static void handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, const std::map<int, int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
             geode->setName(triShape->name); // name will be used for part filtering
@@ -1289,8 +1295,8 @@ namespace NifOsg
         }
 
 
-        void handleProperty(const Nif::Property *property,
-                            osg::Node *node, std::map<int, int>& boundTextures, int animflags)
+        static void handleProperty(const Nif::Property *property,
+                            osg::Node *node, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
         {
             osg::StateSet* stateset = node->getOrCreateStateSet();
 
@@ -1417,13 +1423,13 @@ namespace NifOsg
                             continue;
                         }
 
-                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, mTextureManager->getVFS());
+                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, textureManager->getVFS());
 
                         unsigned int clamp = static_cast<unsigned int>(tex.clamp);
                         int wrapT = (clamp) & 0x1;
                         int wrapS = (clamp >> 1) & 0x1;
 
-                        osg::Texture2D* texture2d = mTextureManager->getTexture2D(filename,
+                        osg::Texture2D* texture2d = textureManager->getTexture2D(filename,
                               wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP,
                               wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
 
@@ -1465,7 +1471,7 @@ namespace NifOsg
                         stateset->setTextureAttributeAndModes(i, new osg::Texture2D, osg::StateAttribute::OFF);
                         boundTextures.erase(i);
                     }
-                    handleTextureControllers(texprop, node, stateset, animflags);
+                    handleTextureControllers(texprop, node, textureManager, stateset, animflags);
                 }
                 break;
             }
@@ -1482,7 +1488,7 @@ namespace NifOsg
             }
         }
 
-        void applyMaterialProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties,
+        static void applyMaterialProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties,
                                              bool hasVertexColors, int animflags)
         {
             osg::StateSet* stateset = node->getOrCreateStateSet();
@@ -1550,22 +1556,19 @@ namespace NifOsg
 
     };
 
-    osg::ref_ptr<osg::Node> Loader::load(Nif::NIFFilePtr file, TextKeyMap *textKeys)
+    osg::ref_ptr<osg::Node> Loader::load(Nif::NIFFilePtr file, Resource::TextureManager* textureManager)
     {
-        LoaderImpl loader(mTextureManager, sShowMarkers);
-        return loader.load(file, textKeys);
+        return LoaderImpl::load(file, textureManager);
     }
 
-    osg::ref_ptr<osg::Node> Loader::loadAsSkeleton(Nif::NIFFilePtr file, TextKeyMap *textKeys)
+    osg::ref_ptr<osg::Node> Loader::loadAsSkeleton(Nif::NIFFilePtr file, Resource::TextureManager* textureManager)
     {
-        LoaderImpl loader(mTextureManager, sShowMarkers);
-        return loader.loadAsSkeleton(file, textKeys);
+        return LoaderImpl::loadAsSkeleton(file, textureManager);
     }
 
-    void Loader::loadKf(Nif::NIFFilePtr kf, osg::Node *rootNode, int sourceIndex, TextKeyMap &textKeys)
+    void Loader::loadKf(Nif::NIFFilePtr kf, KeyframeHolder& target)
     {
-        LoaderImpl loader(mTextureManager, sShowMarkers);
-        loader.loadKf(kf, rootNode, sourceIndex, textKeys);
+        LoaderImpl::loadKf(kf, target);
     }
 
 }

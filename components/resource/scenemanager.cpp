@@ -82,10 +82,7 @@ namespace Resource
             // TODO: add support for non-NIF formats
 
             NifOsg::Loader loader;
-            loader.mTextureManager = mTextureManager;
-            osg::ref_ptr<const osg::Node> loaded = loader.load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)));
-
-            // TODO: provide way for the user to get textKeys (attach to the node?)
+            osg::ref_ptr<const osg::Node> loaded = loader.load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), mTextureManager);
 
             mIndex[normalized] = loaded;
             return loaded;
@@ -106,6 +103,27 @@ namespace Resource
         osg::ref_ptr<osg::Node> cloned = createInstance(name);
         attachTo(cloned, parentNode);
         return cloned;
+    }
+
+    osg::ref_ptr<const NifOsg::KeyframeHolder> SceneManager::getKeyframes(const std::string &name)
+    {
+        std::string normalized = name;
+        mVFS->normalizeFilename(normalized);
+
+        KeyframeIndex::iterator it = mKeyframeIndex.find(normalized);
+        if (it == mKeyframeIndex.end())
+        {
+            Files::IStreamPtr file = mVFS->get(normalized);
+
+            NifOsg::Loader loader;
+            osg::ref_ptr<NifOsg::KeyframeHolder> loaded (new NifOsg::KeyframeHolder);
+            loader.loadKf(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), *loaded.get());
+
+            mKeyframeIndex[normalized] = loaded;
+            return loaded;
+        }
+        else
+            return it->second;
     }
 
     void SceneManager::attachTo(osg::Node *instance, osg::Group *parentNode) const

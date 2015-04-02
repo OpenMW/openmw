@@ -6,6 +6,9 @@
 #include <components/nifcache/nifcache.hpp> // NIFFilePtr
 
 #include <osg/ref_ptr>
+#include <osg/Referenced>
+
+#include "controller.hpp"
 
 namespace osg
 {
@@ -21,30 +24,52 @@ namespace NifOsg
 {
     typedef std::multimap<float,std::string> TextKeyMap;
 
+    struct TextKeyMapHolder : public osg::Object
+    {
+    public:
+        TextKeyMapHolder() {}
+        TextKeyMapHolder(const TextKeyMapHolder& copy, const osg::CopyOp& copyop)
+            : osg::Object(copy, copyop)
+            , mTextKeys(copy.mTextKeys)
+        {}
+
+        TextKeyMap mTextKeys;
+
+        META_Object(NifOsg, TextKeyMapHolder)
+
+    };
+
+    class KeyframeHolder : public osg::Referenced
+    {
+    public:
+        TextKeyMap mTextKeys;
+
+        std::map<std::string, osg::ref_ptr<SourcedKeyframeController> > mKeyframeControllers;
+    };
+
     /// The main class responsible for loading NIF files into an OSG-Scenegraph.
     /// @par This scene graph is self-contained and can be cloned using osg::clone if desired. Particle emitters
     ///      and programs hold a pointer to their ParticleSystem, which would need to be manually updated when cloning.
     class Loader
     {
     public:
+        // TODO: add text keys as user data on the node
         /// Create a scene graph for the given NIF. Auto-detects when skinning is used and calls loadAsSkeleton instead.
         /// @param node The parent of the new root node for the created scene graph.
-        osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr file, TextKeyMap* textKeys = NULL);
+        static osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr file, Resource::TextureManager* textureManager);
 
         /// Create a scene graph for the given NIF. Always creates a skeleton so that rigs can be attached on the created scene.
-        osg::ref_ptr<osg::Node> loadAsSkeleton(Nif::NIFFilePtr file, TextKeyMap* textKeys = NULL);
+        static osg::ref_ptr<osg::Node> loadAsSkeleton(Nif::NIFFilePtr file, Resource::TextureManager* textureManager);
 
-        /// Load keyframe controllers from the given kf file onto the given scene graph.
-        /// @param sourceIndex The source index for this animation source, used for identifying
-        ///        which animation source a keyframe controller came from.
-        void loadKf(Nif::NIFFilePtr kf, osg::Node* rootNode, int sourceIndex, TextKeyMap &textKeys);
+        /// Load keyframe controllers from the given kf file.
+        static void loadKf(Nif::NIFFilePtr kf, KeyframeHolder& target);
 
         /// Set whether or not nodes marked as "MRK" should be shown.
         /// These should be hidden ingame, but visible in the editior.
         /// Default: false.
         static void setShowMarkers(bool show);
 
-        Resource::TextureManager* mTextureManager;
+        static bool getShowMarkers();
 
     private:
 

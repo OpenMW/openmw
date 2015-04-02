@@ -169,14 +169,13 @@ namespace NifOsg
         osg::Quat getXYZRotation(float time) const;
     };
 
-    // Specialization of KeyframeController that remembers a "source index" for the animation source
-    // it came from, and can be enabled/disabled. Used for multiple animation sources support, i.e. .kf files.
+    // Specialization that can be enabled/disabled. Used for multiple animation sources support, i.e. .kf files.
     // A SourcedKeyframeController is disabled by default and should be manually enabled when playing an animation from
     // the relevant animation source.
     class SourcedKeyframeController : public KeyframeController
     {
     public:
-        SourcedKeyframeController(const Nif::NiKeyframeData* data, int sourceIndex);
+        SourcedKeyframeController(const Nif::NiKeyframeData* data);
         SourcedKeyframeController();
         SourcedKeyframeController(const SourcedKeyframeController& copy, const osg::CopyOp& copyop);
 
@@ -184,12 +183,9 @@ namespace NifOsg
 
         virtual void operator() (osg::Node*, osg::NodeVisitor*);
 
-        int getSourceIndex() const;
-
         void setEnabled(bool enabled);
 
     private:
-        int mSourceIndex;
         bool mEnabled;
     };
 

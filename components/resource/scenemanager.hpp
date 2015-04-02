@@ -7,6 +7,8 @@
 #include <osg/ref_ptr>
 #include <osg/Node>
 
+#include <components/nifosg/nifloader.hpp>
+
 namespace Resource
 {
     class TextureManager;
@@ -15,6 +17,11 @@ namespace Resource
 namespace VFS
 {
     class Manager;
+}
+
+namespace NifOsg
+{
+    class KeyframeHolder;
 }
 
 namespace Resource
@@ -41,6 +48,11 @@ namespace Resource
         /// @note Assumes the given instance was not attached to any parents before.
         void attachTo(osg::Node* instance, osg::Group* parentNode) const;
 
+        /// Get a read-only copy of the given keyframe file.
+        osg::ref_ptr<const NifOsg::KeyframeHolder> getKeyframes(const std::string& name);
+
+        /// Manually release created OpenGL objects for the given graphics context. This may be required
+        /// in cases where multiple contexts are used over the lifetime of the application.
         void releaseGLObjects(osg::State* state);
 
     private:
@@ -50,6 +62,9 @@ namespace Resource
         // observer_ptr?
         typedef std::map<std::string, osg::ref_ptr<const osg::Node> > Index;
         Index mIndex;
+
+        typedef std::map<std::string, osg::ref_ptr<const NifOsg::KeyframeHolder> > KeyframeIndex;
+        KeyframeIndex mKeyframeIndex;
     };
 
 }
