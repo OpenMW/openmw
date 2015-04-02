@@ -17,27 +17,27 @@ namespace CSMWorld
 {
     class CollectionBase;
     class RecordBase;
-    class IdTable;
+    class IdTree;
 
     class NestedTableProxyModel : public QAbstractProxyModel
     {
         Q_OBJECT
 
         const int mParentColumn;
-        IdTable* mMainModel;
+        IdTree* mMainModel;
         std::string mId;
 
         public:
         NestedTableProxyModel(const QModelIndex& parent,
                          ColumnBase::Display displayType,
-                         IdTable* parentModel);
+                         IdTree* parentModel);
         //parent is the parent of columns to work with. Columnid provides information about the column
 
         std::string getParentId() const;
 
         int getParentColumn() const;
 
-        CSMWorld::IdTable* model() const;
+        CSMWorld::IdTree* model() const;
 
         virtual QModelIndex mapFromSource(const QModelIndex& sourceIndex) const;
 

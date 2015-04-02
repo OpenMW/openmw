@@ -7,20 +7,10 @@
 #include "universalid.hpp"
 #include "columns.hpp"
 
-/*! \brief
- * Clas for holding the model. Uses typical qt table abstraction/interface for granting access to the individiual fields of the records,
- * Some records are holding nested data (for instance inventory list of the npc). In casses like this, table model offers interface
- * to access nested data in the qt way – that is specify parent. Since some of those nested data require multiple columns to
- * represent informations, single int (default way to index model in the qmodelindex) is not sufficiant. Therefore tablemodelindex class
- * can hold two ints for the sake of indexing two dimensions of the table. This model does not support multiple levels of the nested
- * data. Vast majority of methods makes sense only for the top level data.
- */
-
 namespace CSMWorld
 {
     class CollectionBase;
     struct RecordBase;
-    class NestedTableWrapperBase;
 
     class IdTable : public IdTableBase
     {
@@ -33,8 +23,6 @@ namespace CSMWorld
             // not implemented
             IdTable (const IdTable&);
             IdTable& operator= (const IdTable&);
-            unsigned int foldIndexAdress(const QModelIndex& index) const;
-            std::pair<int, int> unfoldIndexAdress(unsigned int id) const;
 
         public:
 
@@ -51,26 +39,16 @@ namespace CSMWorld
 
             virtual QVariant headerData (int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
-            QVariant nestedHeaderData(int section, int subSection, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-
-            NestedTableWrapperBase* nestedTable(const QModelIndex &index) const;
-
-            void setNestedTable(const QModelIndex &index, const NestedTableWrapperBase& nestedTable);
-
             virtual bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
 
             virtual Qt::ItemFlags flags (const QModelIndex & index) const;
 
             virtual bool removeRows (int row, int count, const QModelIndex& parent = QModelIndex());
 
-            void addNestedRow (const QModelIndex& parent, int position);
-
             virtual QModelIndex index (int row, int column, const QModelIndex& parent = QModelIndex())
                 const;
 
             virtual QModelIndex parent (const QModelIndex& index) const;
-
-            virtual bool hasChildren (const QModelIndex& index) const;
 
             void addRecord (const std::string& id, UniversalId::Type type = UniversalId::Type_None);
             ///< \param type Will be ignored, unless the collection supports multiple record types
@@ -105,11 +83,6 @@ namespace CSMWorld
             virtual bool isDeleted (const std::string& id) const;
 
             int getColumnId(int column) const;
-
-    signals:
-        void resetStart(const QString& id);
-
-        void resetEnd(const QString& id);
     };
 }
 

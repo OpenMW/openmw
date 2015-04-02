@@ -1,11 +1,11 @@
 #include "nestedtableproxymodel.hpp"
 
 #include <cassert>
-#include "idtable.hpp"
+#include "idtree.hpp"
 
 CSMWorld::NestedTableProxyModel::NestedTableProxyModel(const QModelIndex& parent,
                                              ColumnBase::Display columnId,
-                                             CSMWorld::IdTable* parentModel)
+                                             CSMWorld::IdTree* parentModel)
     : mParentColumn(parent.column()),
       mMainModel(parentModel)
 {
@@ -119,7 +119,7 @@ int CSMWorld::NestedTableProxyModel::getParentColumn() const
     return mParentColumn;
 }
 
-CSMWorld::IdTable* CSMWorld::NestedTableProxyModel::model() const
+CSMWorld::IdTree* CSMWorld::NestedTableProxyModel::model() const
 {
     return mMainModel;
 }

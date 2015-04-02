@@ -10,7 +10,6 @@
 #include <QVariant>
 #include <QUndoCommand>
 #include <QModelIndex>
-#include <QVariant>
 
 #include "universalid.hpp"
 #include "nestedtablewrapper.hpp"
@@ -21,7 +20,7 @@ class QAbstractItemModel;
 namespace CSMWorld
 {
     class IdTable;
-    class IdTable;
+    class IdTree;
     struct RecordBase;
     class NestedTableWrapperBase;
 
@@ -148,18 +147,18 @@ namespace CSMWorld
         NestedTableWrapperBase* mOld;
 
     public:
-        NestedTableStoring(const IdTable& model, const std::string& id, int parentColumn);
-        
+        NestedTableStoring(const IdTree& model, const std::string& id, int parentColumn);
+
         ~NestedTableStoring();
-        
+
     protected:
 
         const NestedTableWrapperBase& getOld() const;
     };
-    
+
     class DeleteNestedCommand : public QUndoCommand, private NestedTableStoring
     {
-            IdTable& mModel;
+            IdTree& mModel;
 
             std::string mId;
 
@@ -169,16 +168,16 @@ namespace CSMWorld
 
         public:
 
-            DeleteNestedCommand (IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
+            DeleteNestedCommand (IdTree& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
 
             virtual void redo();
 
             virtual void undo();
     };
-    
+
     class AddNestedCommand : public QUndoCommand, private NestedTableStoring
     {
-            IdTable& mModel;
+            IdTree& mModel;
 
             std::string mId;
 
@@ -188,7 +187,7 @@ namespace CSMWorld
 
         public:
 
-            AddNestedCommand(IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
+            AddNestedCommand(IdTree& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
 
             virtual void redo();
 

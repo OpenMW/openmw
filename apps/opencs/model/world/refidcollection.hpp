@@ -5,8 +5,7 @@
 #include <map>
 #include <deque>
 
-#include "columnbase.hpp"
-#include "collectionbase.hpp"
+#include "nestablecolumn.hpp"
 #include "nestedcollection.hpp"
 #include "refiddata.hpp"
 
@@ -18,9 +17,9 @@ namespace ESM
 namespace CSMWorld
 {
     class RefIdAdapter;
-    class NestedTableWrapperBase;
+    class NestedTableWrapperBase; // FIXME: is this really needed?
 
-    class RefIdColumn : public NestColumn
+    class RefIdColumn : public NestableColumn
     {
             bool mEditable;
             bool mUserEditable;
@@ -29,7 +28,7 @@ namespace CSMWorld
 
             RefIdColumn (int columnId, Display displayType,
                          int flag = Flag_Table | Flag_Dialogue, bool editable = true,
-                         bool userEditable = true, bool canNest = false);
+                         bool userEditable = true);
 
             virtual bool isEditable() const;
 
@@ -46,7 +45,7 @@ namespace CSMWorld
 
         private:
 
-            RefIdAdapter& findAdapter (UniversalId::Type) const;
+            /*const*/ RefIdAdapter& findAdapter (UniversalId::Type) const;
             ///< Throws an exception if no adaptor for \a Type can be found.
 
         public:
@@ -56,10 +55,6 @@ namespace CSMWorld
             virtual ~RefIdCollection();
 
             virtual int getSize() const;
-
-            virtual int getNestedRowsCount(int row, int column) const;
-
-            virtual int getNestedColumnsCount(int row, int column) const;
 
             virtual std::string getId (int index) const;
 
@@ -71,21 +66,9 @@ namespace CSMWorld
 
             virtual QVariant getData (int index, int column) const;
 
-            virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const;
-
-            virtual NestedTableWrapperBase* nestedTable(int row, int column) const;
-
-            virtual void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable);
-
             virtual void setData (int index, int column, const QVariant& data);
 
-            virtual void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn);
-
             virtual void removeRows (int index, int count);
-
-            virtual void removeNestedRows(int row, int column, int subRow);
-
-            virtual void addNestedRow(int row, int col, int position);
 
             virtual void cloneRecord(const std::string& origin,
                                      const std::string& destination,
@@ -127,6 +110,24 @@ namespace CSMWorld
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
             ///
             /// \return Success?
+
+            virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const;
+
+            virtual NestedTableWrapperBase* nestedTable(int row, int column) const;
+
+            virtual void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable);
+
+            // FIXME
+            virtual int getNestedRowsCount(int row, int column) const;
+
+            // FIXME
+            virtual int getNestedColumnsCount(int row, int column) const;
+
+            virtual void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn);
+
+            virtual void removeNestedRows(int row, int column, int subRow);
+
+            virtual void addNestedRow(int row, int col, int position);
 
             void save (int index, ESM::ESMWriter& writer) const;
 

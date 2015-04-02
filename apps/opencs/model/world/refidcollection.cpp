@@ -2,18 +2,17 @@
 
 #include <stdexcept>
 #include <memory>
-#include <QDebug>
 
 #include <components/esm/esmreader.hpp>
 
 #include "refidadapter.hpp"
 #include "refidadapterimp.hpp"
 #include "columns.hpp"
-#include "nestedtablewrapper.hpp"
+#include "nestedtablewrapper.hpp" // FIXME: is this really necessary?
 
 CSMWorld::RefIdColumn::RefIdColumn (int columnId, Display displayType, int flag,
-                                    bool editable, bool userEditable, bool canNest)
-    : NestColumn (columnId, displayType, flag, canNest), mEditable (editable), mUserEditable (userEditable)
+    bool editable, bool userEditable)
+    : NestableColumn (columnId, displayType, flag), mEditable (editable), mUserEditable (userEditable)
 {}
 
 bool CSMWorld::RefIdColumn::isEditable() const
@@ -27,7 +26,8 @@ bool CSMWorld::RefIdColumn::isUserEditable() const
 }
 
 
-CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdapter (UniversalId::Type type) const
+// FIXME: const problem
+/*const*/ CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdapter (UniversalId::Type type) const
 {
     std::map<UniversalId::Type, RefIdAdapter *>::const_iterator iter = mAdapters.find (type);
 
@@ -99,14 +99,19 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_AiAlarm, ColumnBase::Display_Integer));
     actorsColumns.mAlarm = &mColumns.back();
 
-    mColumns.push_back(RefIdColumn (Columns::ColumnId_ActorInventory, ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue, true, true, true));
+    // Nested table
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_ActorInventory, ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue));
     actorsColumns.mInventory = &mColumns.back();
-    mColumns.back().addNestedColumn(Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_String);
-    mColumns.back().addNestedColumn(Columns::ColumnId_ItemCount, CSMWorld::ColumnBase::Display_Integer);
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_String));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_ItemCount, CSMWorld::ColumnBase::Display_Integer));
 
-    mColumns.push_back(RefIdColumn (Columns::ColumnId_ActorSpells, ColumnBase::Display_NestedSpellList, ColumnBase::Flag_Dialogue, true, true, true));
+    // Nested table
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_ActorSpells, ColumnBase::Display_NestedSpellList, ColumnBase::Flag_Dialogue));
     actorsColumns.mSpells = &mColumns.back();
-    mColumns.back().addNestedColumn(Columns::ColumnId_SpellId, CSMWorld::ColumnBase::Display_String);
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_SpellId, CSMWorld::ColumnBase::Display_String));
 
     static const struct
     {
@@ -175,10 +180,13 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Respawn, ColumnBase::Display_Boolean));
     const RefIdColumn *respawn = &mColumns.back();
 
-    mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent, ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue, true, true, true));
+    // Nested table
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent, ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue));
     const RefIdColumn *content = &mColumns.back();
-    mColumns.back().addNestedColumn(Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_String);
-    mColumns.back().addNestedColumn(Columns::ColumnId_ItemCount, CSMWorld::ColumnBase::Display_Integer);
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_String));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_ItemCount, CSMWorld::ColumnBase::Display_Integer));
 
     CreatureColumns creatureColumns (actorsColumns);
 
@@ -315,16 +323,24 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     npcColumns.mFlags.insert (std::make_pair (metalBlood, ESM::NPC::Metal));
 
-    mColumns.push_back(RefIdColumn (Columns::ColumnId_NpcDestinations, ColumnBase::Display_NestedDestinationsList, ColumnBase::Flag_Dialogue, true, true, true));
+    // Nested table
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_NpcDestinations, ColumnBase::Display_NestedDestinationsList, ColumnBase::Flag_Dialogue));
     npcColumns.mDestinations = &mColumns.back();
-    mColumns.back().addNestedColumn(Columns::ColumnId_DestinationCell, CSMWorld::ColumnBase::Display_String);
-    mColumns.back().addNestedColumn(Columns::ColumnId_PosX, CSMWorld::ColumnBase::Display_Float);
-    mColumns.back().addNestedColumn(Columns::ColumnId_PosY, CSMWorld::ColumnBase::Display_Float);
-    mColumns.back().addNestedColumn(Columns::ColumnId_PosZ, CSMWorld::ColumnBase::Display_Float);
-    mColumns.back().addNestedColumn(Columns::ColumnId_RotX, CSMWorld::ColumnBase::Display_Float);
-    mColumns.back().addNestedColumn(Columns::ColumnId_RotY, CSMWorld::ColumnBase::Display_Float);
-    mColumns.back().addNestedColumn(Columns::ColumnId_RotZ, CSMWorld::ColumnBase::Display_Float);
-    
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_DestinationCell, CSMWorld::ColumnBase::Display_String));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_PosX, CSMWorld::ColumnBase::Display_Float));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_PosY, CSMWorld::ColumnBase::Display_Float));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_PosZ, CSMWorld::ColumnBase::Display_Float));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_RotX, CSMWorld::ColumnBase::Display_Float));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_RotY, CSMWorld::ColumnBase::Display_Float));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_RotZ, CSMWorld::ColumnBase::Display_Float));
+
     WeaponColumns weaponColumns (enchantableColumns);
 
     mColumns.push_back (RefIdColumn (Columns::ColumnId_WeaponType, ColumnBase::Display_WeaponType));
@@ -664,8 +680,10 @@ void CSMWorld::RefIdCollection::setNestedTable(int row, int column, const CSMWor
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
+    // FIXME: const problem
     CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
+    // FIXME: const problem
     adaptor.setNestedTable(&mColumns.at(column), mData, localIndex.first, nestedTable);
 }
 

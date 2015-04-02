@@ -52,7 +52,7 @@ namespace CSMWorld
         virtual void load (int index,  ESM::ESMReader& reader, bool base) = 0;
 
         virtual void erase (int index, int count) = 0;
-        
+
         virtual std::string getId (int index) const = 0;
 
         virtual void save (int index, ESM::ESMWriter& writer) const = 0;
@@ -134,7 +134,7 @@ namespace CSMWorld
             throw std::runtime_error ("invalid RefIdDataContainer index");
 
         mContainer.erase (mContainer.begin()+index, mContainer.begin()+index+count);
-    } 
+    }
 
     template<typename RecordT>
     std::string RefIdDataContainer<RecordT>::getId (int index) const
@@ -231,7 +231,7 @@ namespace CSMWorld
 
             void save (int index, ESM::ESMWriter& writer) const;
 
-        //RECORD CONTAINERS ACCESS METHODS
+            //RECORD CONTAINERS ACCESS METHODS
             const RefIdDataContainer<ESM::Book>& getBooks() const;
             const RefIdDataContainer<ESM::Activator>& getActivators() const;
             const RefIdDataContainer<ESM::Potion>& getPotions() const;

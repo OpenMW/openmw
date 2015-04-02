@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <exception>
+#include <stdexcept>
 
 #include <Qt>
 #include <QVariant>
@@ -117,9 +117,8 @@ namespace CSMWorld
         int mColumnId;
         int mFlags;
         Display mDisplayType;
-        bool mCanNest;
 
-        ColumnBase (int columnId, Display displayType, int flag, bool canNest = false);
+        ColumnBase (int columnId, Display displayType, int flag);
 
         virtual ~ColumnBase();
 
@@ -133,39 +132,11 @@ namespace CSMWorld
         virtual int getId() const;
     };
 
-    class NestedColumn;
-
-    class NestColumn : public ColumnBase
-    {
-        std::vector<NestedColumn> mNestedColumns;
-
-    public:
-        NestColumn(int columnId, Display displayType, int flags, bool canNest);
-
-        void addNestedColumn(int columnId, Display displayType);
-
-        bool canHaveNestedColumns() const;
-
-        const ColumnBase& nestedColumn(int subColumn) const;
-
-        int nestedColumnCount() const;
-    };
-
-    class NestedColumn : public ColumnBase
-    {
-        const ColumnBase* mParent;
-
-    public:
-        NestedColumn(int columnId, Display displayType, int flag, const NestColumn* parent);
-
-        virtual bool isEditable() const;
-    };
-
     template<typename ESXRecordT>
-    struct Column : public NestColumn
+    struct Column : public ColumnBase
     {
-        Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue, bool canNest = false)
-            : NestColumn (columnId, displayType, flags, canNest) {}
+        Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue)
+            : ColumnBase (columnId, displayType, flags) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
 

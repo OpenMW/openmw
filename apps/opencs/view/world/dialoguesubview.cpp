@@ -26,6 +26,7 @@
 #include "../../model/world/nestedtableproxymodel.hpp"
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/world/idtree.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/record.hpp"
 #include "../../model/world/tablemimedata.hpp"
@@ -422,7 +423,7 @@ void CSVWorld::EditWidget::remake(int row)
 
             if (mTable->hasChildren(mTable->index(row, i)))
             {
-                mNestedModels.push_back(new CSMWorld::NestedTableProxyModel (mTable->index(row, i), display, mTable));
+                mNestedModels.push_back(new CSMWorld::NestedTableProxyModel (mTable->index(row, i), display, dynamic_cast<CSMWorld::IdTree*>(mTable)));
 
                 NestedTable* table = new NestedTable(mDocument, mNestedModels.back(), this);
 

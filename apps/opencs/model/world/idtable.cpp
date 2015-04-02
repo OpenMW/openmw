@@ -1,12 +1,6 @@
 #include "idtable.hpp"
-#include <QDebug>
-
-#include <cassert>
-#include <iostream>
-#include "nestedtablewrapper.hpp"
 
 #include "collectionbase.hpp"
-#include "nestedcollection.hpp"
 #include "columnbase.hpp"
 
 CSMWorld::IdTable::IdTable (CollectionBase *idCollection, unsigned int features)
@@ -14,26 +8,20 @@ CSMWorld::IdTable::IdTable (CollectionBase *idCollection, unsigned int features)
 {}
 
 CSMWorld::IdTable::~IdTable()
-{
-    mIdCollection = 0; // FIXME: workaround only, should stop QHideEvent calling after destruction
-}
+{}
 
 int CSMWorld::IdTable::rowCount (const QModelIndex & parent) const
 {
-    if (hasChildren(parent))
-    {
-        return dynamic_cast<NestedCollection*>(mIdCollection)->getNestedRowsCount(parent.row(), parent.column());
-    }
+    if (parent.isValid())
+        return 0;
 
     return mIdCollection->getSize();
 }
 
 int CSMWorld::IdTable::columnCount (const QModelIndex & parent) const
 {
-    if (hasChildren(parent))
-    {
-        return dynamic_cast<NestedCollection*>(mIdCollection)->getNestedColumnsCount(parent.row(), parent.column());
-    }
+    if (parent.isValid())
+        return 0;
 
     return mIdCollection->getColumns();
 }
@@ -46,23 +34,10 @@ QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
     if (role==Qt::EditRole && !mIdCollection->getColumn (index.column()).isEditable())
         return QVariant();
 
-    if (index.internalId() != 0)
-    {
-        std::pair<int, int> parentAdress(unfoldIndexAdress(index.internalId()));
-        return dynamic_cast<NestedCollection*>(mIdCollection)->getNestedData(parentAdress.first,
-                                                                             parentAdress.second,
-                                                                             index.row(),
-                                                                             index.column());
-    }
-    else
-    {
-        return mIdCollection->getData (index.row(), index.column());
-    }
+    return mIdCollection->getData (index.row(), index.column());
 }
 
-QVariant CSMWorld::IdTable::headerData (int section,
-                                        Qt::Orientation orientation,
-                                        int role) const
+QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation, int role) const
 {
     if (orientation==Qt::Vertical)
         return QVariant();
@@ -74,63 +49,19 @@ QVariant CSMWorld::IdTable::headerData (int section,
         return mIdCollection->getColumn (section).mFlags;
 
     if (role==ColumnBase::Role_Display)
-    {
         return mIdCollection->getColumn (section).mDisplayType;
-    }
-
-    return QVariant();
-}
-
-QVariant CSMWorld::IdTable::nestedHeaderData(int section, int subSection, Qt::Orientation orientation, int role) const
-{
-    // FIXME: workaround only, should stop QHideEvent calling after destruction
-    if (section < 0 || !mIdCollection || section >= mIdCollection->getColumns())
-        return QVariant();
-
-    const NestColumn& parentColumn = dynamic_cast<const NestColumn&>(mIdCollection->getColumn(section));
-
-    if (orientation==Qt::Vertical)
-        return QVariant();
-
-    if (role==Qt::DisplayRole)
-        return tr(parentColumn.nestedColumn(subSection).getTitle().c_str());
-
-    if (role==ColumnBase::Role_Flags)
-        return mIdCollection->getColumn (section).mFlags;
-
-    if (role==ColumnBase::Role_Display)
-        return parentColumn.nestedColumn(subSection).mDisplayType;
 
     return QVariant();
 }
 
 bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value, int role)
 {
-    if (index.internalId() != 0)
-    {
-        if (mIdCollection->getColumn(parent(index).column()).isEditable() && role==Qt::EditRole)
-        {
-            const std::pair<int, int>& parentAdress(unfoldIndexAdress(index.internalId()));
-
-            dynamic_cast<NestedCollection*>(mIdCollection)->setNestedData(parentAdress.first, parentAdress.second, value, index.row(), index.column());
-
-            emit dataChanged (CSMWorld::IdTable::index (parentAdress.first, 0),
-                              CSMWorld::IdTable::index (parentAdress.second, mIdCollection->getColumns()-1));
-
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
     if (mIdCollection->getColumn (index.column()).isEditable() && role==Qt::EditRole)
     {
         mIdCollection->setData (index.row(), index.column(), value);
 
         emit dataChanged (CSMWorld::IdTable::index (index.row(), 0),
-                          CSMWorld::IdTable::index (index.row(), mIdCollection->getColumns()-1));
+            CSMWorld::IdTable::index (index.row(), mIdCollection->getColumns()-1));
 
         return true;
     }
@@ -150,56 +81,22 @@ Qt::ItemFlags CSMWorld::IdTable::flags (const QModelIndex & index) const
 
 bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& parent)
 {
+    if (parent.isValid())
+        return false;
+
     beginRemoveRows (parent, row, row+count-1);
 
-    if (parent.isValid())
-    {
-        for (int i = 0; i < count; ++i)
-        {
-            dynamic_cast<NestedCollection*>(mIdCollection)->removeNestedRows(parent.row(), parent.column(), row+i);
-        }
-    }
-    else
-    {
-
-        beginRemoveRows (parent, row, row+count-1);
-
-        mIdCollection->removeRows (row, count);
-    }
+    mIdCollection->removeRows (row, count);
 
     endRemoveRows();
-
-    emit dataChanged (CSMWorld::IdTable::index (parent.row(), 0),
-                      CSMWorld::IdTable::index (parent.row(), mIdCollection->getColumns()-1));
 
     return true;
 }
 
-void CSMWorld::IdTable::addNestedRow(const QModelIndex& parent, int position)
-{
-    if (!hasChildren(parent))
-    {
-        throw std::logic_error("Tried to set nested table, but index has no children");
-    }
-
-    int row = parent.row();
-
-    beginInsertRows(parent, position, position);
-    dynamic_cast<NestedCollection*>(mIdCollection)->addNestedRow(row, parent.column(), position);
-
-    endInsertRows();
-
-    emit dataChanged (CSMWorld::IdTable::index (row, 0),
-                      CSMWorld::IdTable::index (row, mIdCollection->getColumns()-1));
-}
-
 QModelIndex CSMWorld::IdTable::index (int row, int column, const QModelIndex& parent) const
 {
-    unsigned int encodedId = 0;
     if (parent.isValid())
-    {
-        encodedId = this->foldIndexAdress(parent);
-    }
+        return QModelIndex();
 
     if (row<0 || row>=mIdCollection->getSize())
         return QModelIndex();
@@ -207,24 +104,12 @@ QModelIndex CSMWorld::IdTable::index (int row, int column, const QModelIndex& pa
     if (column<0 || column>=mIdCollection->getColumns())
         return QModelIndex();
 
-    return createIndex(row, column, encodedId);
+    return createIndex (row, column);
 }
 
 QModelIndex CSMWorld::IdTable::parent (const QModelIndex& index) const
 {
-    if (index.internalId() == 0) //0 is used for indexs with invalid parent (top level data)
-    {
-        return QModelIndex();
-    }
-
-    unsigned int id = index.internalId();
-    const std::pair<int, int>& adress(unfoldIndexAdress(id));
-
-    if (adress.first >= this->rowCount() || adress.second >= this->columnCount())
-    {
-        throw "Parent index is not present in the model";
-    }
-    return createIndex(adress.first, adress.second);
+    return QModelIndex();
 }
 
 void CSMWorld::IdTable::addRecord (const std::string& id, UniversalId::Type type)
@@ -345,67 +230,4 @@ bool CSMWorld::IdTable::isDeleted (const std::string& id) const
 int CSMWorld::IdTable::getColumnId(int column) const
 {
     return mIdCollection->getColumn(column).getId();
-}
-
-unsigned int CSMWorld::IdTable::foldIndexAdress (const QModelIndex& index) const
-{
-    unsigned int out = index.row() * this->columnCount();
-    out += index.column();
-    return ++out;
-}
-
-std::pair< int, int > CSMWorld::IdTable::unfoldIndexAdress (unsigned int id) const
-{
-    if (id == 0)
-    {
-        throw "Attempt to unfold index id of the top level data cell";
-    }
-
-    --id;
-    int row = id / this->columnCount();
-    int column = id - row * this->columnCount();
-    return std::make_pair (row, column);
-}
-
-bool CSMWorld::IdTable::hasChildren(const QModelIndex& index) const
-{
-    return (index.isValid() &&
-            index.internalId() == 0 &&
-            mIdCollection->getColumn(index.column()).mCanNest &&
-            index.data().isValid());
-}
-
-void CSMWorld::IdTable::setNestedTable(const QModelIndex& index, const CSMWorld::NestedTableWrapperBase& nestedTable)
-{
-    if (!hasChildren(index))
-    {
-        throw std::logic_error("Tried to set nested table, but index has no children");
-    }
-
-    bool removeRowsMode = false;
-    if (nestedTable.size() != this->nestedTable(index)->size())
-    {
-        emit resetStart(this->index(index.row(), 0).data().toString());
-        removeRowsMode = true;
-    }
-
-    dynamic_cast<NestedCollection*>(mIdCollection)->setNestedTable(index.row(), index.column(), nestedTable);
-
-    emit dataChanged (CSMWorld::IdTable::index (index.row(), 0),
-                      CSMWorld::IdTable::index (index.row(), mIdCollection->getColumns()-1));
-
-    if (removeRowsMode)
-    {
-        emit resetEnd(this->index(index.row(), 0).data().toString());
-    }
-}
-
-CSMWorld::NestedTableWrapperBase* CSMWorld::IdTable::nestedTable(const QModelIndex& index) const
-{
-    if (!hasChildren(index))
-    {
-        throw std::logic_error("Tried to retrive nested table, but index has no children");
-    }
-
-    return dynamic_cast<NestedCollection*>(mIdCollection)->nestedTable(index.row(), index.column());
 }

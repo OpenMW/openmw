@@ -1,6 +1,8 @@
 #ifndef CSM_WOLRD_NESTEDCOLLECTION_H
 #define CSM_WOLRD_NESTEDCOLLECTION_H
 
+#include <vector>
+
 #include "collectionbase.hpp"
 
 class QVariant;
@@ -11,7 +13,12 @@ namespace CSMWorld
 
     class NestedCollection : public CollectionBase
     {
+
     public:
+
+        NestedCollection();
+        virtual ~NestedCollection();
+
         virtual void addNestedRow(int row, int col, int position) = 0;
 
         virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const = 0;
@@ -28,7 +35,10 @@ namespace CSMWorld
 
         virtual void removeNestedRows(int row, int column, int subRow) = 0;
 
+    private:
 
+        std::vector<NestedCollection *> mChildren;
+        NestedCollection *mParent; // currently unused
     };
 }
 

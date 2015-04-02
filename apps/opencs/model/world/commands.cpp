@@ -3,6 +3,7 @@
 #include <QAbstractItemModel>
 
 #include "idtable.hpp"
+#include "idtree.hpp"
 #include <components/misc/stringops.hpp>
 #include "nestedtablewrapper.hpp"
 
@@ -172,10 +173,10 @@ void CSMWorld::CloneCommand::undo()
     mModel.removeRow (mModel.getModelIndex (mId, 0).row());
 }
 
-CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTable& model,
+CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTree& model,
                                                     const std::string& id,
-                                                    int nestedRow, 
-                                                    int parentColumn, 
+                                                    int nestedRow,
+                                                    int parentColumn,
                                                     QUndoCommand* parent) :
     mId(id),
     mModel(model),
@@ -192,7 +193,7 @@ void CSMWorld::DeleteNestedCommand::redo()
     const QModelIndex& parentIndex = mModel.getModelIndex(mId, mParentColumn);
 
     mModel.removeRows (mNestedRow, 1, parentIndex);
-}   
+}
 
 
 void CSMWorld::DeleteNestedCommand::undo()
@@ -202,7 +203,7 @@ void CSMWorld::DeleteNestedCommand::undo()
     mModel.setNestedTable(parentIndex, getOld());
 }
 
-CSMWorld::AddNestedCommand::AddNestedCommand(IdTable& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent)
+CSMWorld::AddNestedCommand::AddNestedCommand(IdTree& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent)
     : mModel(model),
       mId(id),
       mNewRow(nestedRow),
@@ -227,7 +228,7 @@ void CSMWorld::AddNestedCommand::undo()
     mModel.setNestedTable(parentIndex, getOld());
 }
 
-CSMWorld::NestedTableStoring::NestedTableStoring(const IdTable& model, const std::string& id, int parentColumn)
+CSMWorld::NestedTableStoring::NestedTableStoring(const IdTree& model, const std::string& id, int parentColumn)
     : mOld(model.nestedTable(model.getModelIndex(id, parentColumn))) {}
 
 CSMWorld::NestedTableStoring::~NestedTableStoring()

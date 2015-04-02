@@ -18,15 +18,14 @@ opencs_hdrs_noqt (model/doc
 
 
 opencs_units (model/world
-    idtable idtableproxymodel regionmap data commanddispatcher
-    idtablebase resourcetable nestedtableproxymodel
+    idtable idtableproxymodel regionmap data commanddispatcher idtablebase resourcetable nestedtableproxymodel idtree
     )
 
 
 opencs_units_noqt (model/world
     universalid record commands columnbase scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
-    pathgrid landtexture land nestedtablewrapper nestedadapters
+    pathgrid landtexture land nestedtablewrapper nestedadapters nestedcollection nestablecolumn
     )
 
 opencs_hdrs_noqt (model/world
