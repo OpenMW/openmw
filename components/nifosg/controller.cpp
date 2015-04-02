@@ -70,7 +70,7 @@ FrameTimeSource::FrameTimeSource()
 
 float FrameTimeSource::getValue(osg::NodeVisitor *nv)
 {
-    return nv->getFrameStamp()->getReferenceTime();
+    return nv->getFrameStamp()->getSimulationTime();
 }
 
 KeyframeController::KeyframeController()
