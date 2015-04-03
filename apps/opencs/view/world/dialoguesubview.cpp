@@ -17,11 +17,9 @@
 #include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QComboBox>
-#include <QScrollArea>
 #include <QPushButton>
 #include <QToolButton>
 #include <QHeaderView>
-#include <QDebug>
 
 #include "../../model/world/nestedtableproxymodel.hpp"
 #include "../../model/world/columnbase.hpp"
@@ -384,27 +382,17 @@ void CSVWorld::EditWidget::remake(int row)
     mWidgetMapper->setModel(mTable);
     mWidgetMapper->setItemDelegate(&mDispatcher);
 
-    QFrame* line = new QFrame(mMainWidget);
-    line->setObjectName(QString::fromUtf8("line"));
-    line->setGeometry(QRect(320, 150, 118, 3));
-    line->setFrameShape(QFrame::HLine);
-    line->setFrameShadow(QFrame::Sunken);
-
-    QFrame* line2 = new QFrame(mMainWidget);
-    line2->setObjectName(QString::fromUtf8("line2"));
-    line2->setGeometry(QRect(320, 150, 118, 3));
-    line2->setFrameShape(QFrame::HLine);
-    line2->setFrameShadow(QFrame::Sunken);
-
     QVBoxLayout *mainLayout = new QVBoxLayout(mMainWidget);
-    QGridLayout *unlockedLayout = new QGridLayout();
+    QScrollArea *scroll = new QScrollArea(mMainWidget);
+    QWidget *unlockedWidget = new QWidget(scroll);
+    QGridLayout *unlockedLayout = new QGridLayout(unlockedWidget);
     QGridLayout *lockedLayout = new QGridLayout();
     QVBoxLayout *tablesLayout = new QVBoxLayout();
 
     mainLayout->addLayout(lockedLayout, 0);
-    mainLayout->addWidget(line, 1);
-    mainLayout->addLayout(unlockedLayout, 2);
-    mainLayout->addWidget(line2, 1);
+    mainLayout->addSpacing(5); // FIXME: arbitrary number
+    mainLayout->addWidget(scroll, 2);
+    mainLayout->addSpacing(5); // FIXME: arbitrary number
     mainLayout->addLayout(tablesLayout, 0);
     mainLayout->addStretch(1);
 
@@ -426,18 +414,8 @@ void CSVWorld::EditWidget::remake(int row)
                 mNestedModels.push_back(new CSMWorld::NestedTableProxyModel (mTable->index(row, i), display, dynamic_cast<CSMWorld::IdTree*>(mTable)));
 
                 NestedTable* table = new NestedTable(mDocument, mNestedModels.back(), this);
+                table->resizeColumnsToContents();
 
-                int rows = mNestedModels.back()->rowCount(mTable->index(row, i));
-                if (rows == 0) rows = 1; // FIXME: quick hack
-                int rowHeight = table->rowHeight(0);
-                int tableHeight = (rows * rowHeight)
-                    + table->horizontalHeader()->height() + 2 * table->frameWidth();
-                int tableMaxHeight = (5 * rowHeight)
-                    + table->horizontalHeader()->height() + 2 * table->frameWidth();
-                if (rows > 1 && rows < 5)
-                    table->setMinimumHeight(tableHeight);
-                else if (rows > 1)
-                    table->setMinimumHeight(tableMaxHeight);
 
                 QLabel* label = new QLabel (mTable->headerData (i, Qt::Horizontal, Qt::DisplayRole).toString(), mMainWidget);
 
@@ -479,6 +457,9 @@ void CSVWorld::EditWidget::remake(int row)
 
     mWidgetMapper->setCurrentModelIndex(mTable->index(row, 0));
 
+    scroll->setWidget(unlockedWidget);
+    scroll->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Fixed);
+    scroll->setWidgetResizable(true);
     this->setWidget(mMainWidget);
     this->setWidgetResizable(true);
 }
