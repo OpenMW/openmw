@@ -28,6 +28,7 @@ namespace MWGui
         : WindowPinnableBase("openmw_spell_window.layout")
         , NoDrop(drag, mMainWidget)
         , mSpellView(NULL)
+        , mUpdateTimer(0.0f)
     {
         mSpellIcons = new SpellIcons();
 
@@ -58,6 +59,20 @@ namespace MWGui
     void SpellWindow::open()
     {
         updateSpells();
+    }
+
+    void SpellWindow::onFrame(float dt) 
+    { 
+        if (mMainWidget->getVisible())
+        {
+            NoDrop::onFrame(dt);
+            mUpdateTimer += dt;
+            if (0.5f < mUpdateTimer)
+            {
+                mUpdateTimer = 0;
+                mSpellView->incrementalUpdate();
+            }
+        }
     }
 
     void SpellWindow::updateSpells()

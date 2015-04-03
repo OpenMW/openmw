@@ -10,6 +10,8 @@
 namespace MWGui
 {
 
+    const char* SpellView::sSpellModelIndex = "SpellModelIndex";
+
     SpellView::SpellView()
         : mShowCostColumn(true)
         , mHighlightSelected(true)
@@ -113,10 +115,10 @@ namespace MWGui
                 group.push_back(costChance);
                 Gui::SharedStateButton::createButtonGroup(group);
 
-                mLines.push_back(std::make_pair(t, costChance));
+                mLines.push_back(boost::make_tuple(t, costChance, true));
             }
             else
-                mLines.push_back(std::make_pair(t, (MyGUI::Widget*)NULL));
+                mLines.push_back(boost::make_tuple(t, (MyGUI::Widget*)NULL, true));
 
             t->setStateSelected(spell.mSelected);
         }
@@ -124,30 +126,85 @@ namespace MWGui
         layoutWidgets();
     }
 
+    void SpellView::incrementalUpdate()
+    {
+        if (!mModel.get())
+        {
+            return;
+        }
+
+        mModel->update();
+        bool fullUpdateRequired = false;
+        SpellModel::ModelIndex maxSpellIndexFound = -1;
+        for (std::vector< LineInfo >::iterator it = mLines.begin(); it != mLines.end(); ++it)
+        {
+            // only update the lines that are "updateable"
+            if (it->get<2>())
+            {
+                Gui::SharedStateButton* nameButton = reinterpret_cast<Gui::SharedStateButton*>(it->get<0>());
+
+                // match model against line
+                // if don't match, then major change has happened, so do a full update
+                SpellModel::ModelIndex spellIndex = getSpellModelIndex(nameButton);
+                if (mModel->getItemCount() <= static_cast<unsigned>(spellIndex))
+                {
+                    fullUpdateRequired = true;
+                    break;
+                }
+
+                // more checking for major change.
+                const Spell& spell = mModel->getItem(spellIndex);
+                if (nameButton->getCaption() != spell.mName)
+                {
+                    fullUpdateRequired = true;
+                    break;
+                }
+                else
+                {
+                    maxSpellIndexFound = spellIndex;
+                    Gui::SharedStateButton* costButton = reinterpret_cast<Gui::SharedStateButton*>(it->get<1>());
+                    if ((costButton != NULL) && (costButton->getCaption() != spell.mCostColumn))
+                    {
+                        costButton->setCaption(spell.mCostColumn);
+                    }
+                }
+            }
+        }
+
+        // special case, look for spells added to model that are beyond last updatable item
+        SpellModel::ModelIndex topSpellIndex = mModel->getItemCount() - 1;
+        if (fullUpdateRequired ||
+            ((0 <= topSpellIndex) && (maxSpellIndexFound < topSpellIndex)))
+        {
+            update();
+        }
+    }
+
+
     void SpellView::layoutWidgets()
     {
         int height = 0;
-        for (std::vector< std::pair<MyGUI::Widget*, MyGUI::Widget*> >::iterator it = mLines.begin();
+        for (std::vector< LineInfo >::iterator it = mLines.begin();
              it != mLines.end(); ++it)
         {
-            height += (it->first)->getHeight();
+            height += (it->get<0>())->getHeight();
         }
 
         bool scrollVisible = height > mScrollView->getHeight();
         int width = mScrollView->getWidth() - (scrollVisible ? 18 : 0);
 
         height = 0;
-        for (std::vector< std::pair<MyGUI::Widget*, MyGUI::Widget*> >::iterator it = mLines.begin();
+        for (std::vector< LineInfo >::iterator it = mLines.begin();
              it != mLines.end(); ++it)
         {
-            int lineHeight = (it->first)->getHeight();
-            (it->first)->setCoord(4, height, width-8, lineHeight);
-            if (it->second)
+            int lineHeight = (it->get<0>())->getHeight();
+            (it->get<0>())->setCoord(4, height, width - 8, lineHeight);
+            if (it->get<1>())
             {
-                (it->second)->setCoord(4, height, width-8, lineHeight);
-                MyGUI::TextBox* second = (it->second)->castType<MyGUI::TextBox>(false);
+                (it->get<1>())->setCoord(4, height, width - 8, lineHeight);
+                MyGUI::TextBox* second = (it->get<1>())->castType<MyGUI::TextBox>(false);
                 if (second)
-                    (it->first)->setSize(width-8-second->getTextSize().width, lineHeight);
+                    (it->get<0>())->setSize(width - 8 - second->getTextSize().width, lineHeight);
             }
 
             height += lineHeight;
@@ -167,7 +224,7 @@ namespace MWGui
                 MyGUI::IntCoord(0, 0, mScrollView->getWidth(), 18),
                 MyGUI::Align::Left | MyGUI::Align::Top);
             separator->setNeedMouseFocus(false);
-            mLines.push_back(std::make_pair(separator, (MyGUI::Widget*)NULL));
+            mLines.push_back(boost::make_tuple(separator, (MyGUI::Widget*)NULL, false));
         }
 
         MyGUI::TextBox* groupWidget = mScrollView->createWidget<MyGUI::TextBox>("SandBrightText",
@@ -186,10 +243,10 @@ namespace MWGui
             groupWidget2->setTextAlign(MyGUI::Align::Right);
             groupWidget2->setNeedMouseFocus(false);
 
-            mLines.push_back(std::make_pair(groupWidget, groupWidget2));
+            mLines.push_back(boost::make_tuple(groupWidget, groupWidget2, false));
         }
         else
-            mLines.push_back(std::make_pair(groupWidget, (MyGUI::Widget*)NULL));
+            mLines.push_back(boost::make_tuple(groupWidget, (MyGUI::Widget*)NULL, false));
     }
 
 
@@ -222,16 +279,20 @@ namespace MWGui
             widget->setUserString("Spell", spell.mId);
         }
 
-        widget->setUserString("SpellModelIndex", MyGUI::utility::toString(index));
+        widget->setUserString(sSpellModelIndex, MyGUI::utility::toString(index));
 
         widget->eventMouseWheel += MyGUI::newDelegate(this, &SpellView::onMouseWheel);
         widget->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellView::onSpellSelected);
     }
 
+    SpellModel::ModelIndex SpellView::getSpellModelIndex(MyGUI::Widget* widget)
+    {
+        return MyGUI::utility::parseInt(widget->getUserString(sSpellModelIndex));
+    }
+
     void SpellView::onSpellSelected(MyGUI::Widget* _sender)
     {
-        SpellModel::ModelIndex i = MyGUI::utility::parseInt(_sender->getUserString("SpellModelIndex"));
-        eventSpellClicked(i);
+        eventSpellClicked(getSpellModelIndex(_sender));
     }
 
     void SpellView::onMouseWheel(MyGUI::Widget* _sender, int _rel)

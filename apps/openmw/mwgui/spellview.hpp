@@ -1,6 +1,8 @@
 #ifndef OPENMW_GUI_SPELLVIEW_H
 #define OPENMW_GUI_SPELLVIEW_H
 
+#include <boost/tuple/tuple.hpp>
+
 #include <MyGUI_Widget.h>
 
 #include "spellmodel.hpp"
@@ -37,6 +39,9 @@ namespace MWGui
 
         void update();
 
+        /// simplified update called each frame
+        void incrementalUpdate();
+
         typedef MyGUI::delegates::CMultiDelegate1<SpellModel::ModelIndex> EventHandle_ModelIndex;
         /// Fired when a spell was clicked
         EventHandle_ModelIndex eventSpellClicked;
@@ -51,7 +56,13 @@ namespace MWGui
 
         std::auto_ptr<SpellModel> mModel;
 
-        std::vector< std::pair<MyGUI::Widget*, MyGUI::Widget*> > mLines;
+        /// tracks an item in the spell view
+        /// element<0> is the left column GUI object (usually holds the name)
+        /// element<1> is the right column (charge or cost info)
+        /// element<2> is if line needs to be checked during incremental update
+        typedef boost::tuple<MyGUI::Widget*, MyGUI::Widget*, bool> LineInfo;
+
+        std::vector< LineInfo > mLines;
 
         bool mShowCostColumn;
         bool mHighlightSelected;
@@ -62,6 +73,10 @@ namespace MWGui
 
         void onSpellSelected(MyGUI::Widget* _sender);
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+
+        SpellModel::ModelIndex getSpellModelIndex(MyGUI::Widget* _sender);
+
+        static const char* sSpellModelIndex;
     };
 
 }
