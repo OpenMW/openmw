@@ -22,7 +22,7 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     for (int i=0; i<mModel->columnCount(); ++i)
         if (mModel->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display)==
-            CSMWorld::ColumnBase::Display_Script)
+            CSMWorld::ColumnBase::Display_ScriptFile)
         {
             mColumn = i;
             break;

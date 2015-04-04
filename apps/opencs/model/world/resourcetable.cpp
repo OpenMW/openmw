@@ -60,7 +60,7 @@ QVariant CSMWorld::ResourceTable::headerData (int section, Qt::Orientation orien
                 return Columns::getName (Columns::ColumnId_Id).c_str();
 
             if (role==ColumnBase::Role_Display)
-                return ColumnBase::Display_String;
+                return ColumnBase::Display_Id;
 
             break;
 

@@ -66,6 +66,7 @@ bool CSMWorld::ColumnBase::isId (Display display)
         Display_JournalInfo,
         Display_Scene,
         Display_GlobalVariable,
+        Display_Script,
 
         Display_Mesh,
         Display_Icon,
@@ -74,8 +75,6 @@ bool CSMWorld::ColumnBase::isId (Display display)
         Display_Texture,
         Display_Video,
 
-        Display_Id,
-        
         Display_None
     };
 
@@ -93,5 +92,5 @@ bool CSMWorld::ColumnBase::isText (Display display)
 
 bool CSMWorld::ColumnBase::isScript (Display display)
 {
-    return display==Display_Script || display==Display_ScriptLines;
+    return display==Display_ScriptFile || display==Display_ScriptLines;
 }

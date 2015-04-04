@@ -101,6 +101,7 @@ namespace CSMWorld
             Display_Texture,
             Display_Video,
             Display_Colour,
+            Display_ScriptFile,
             Display_ScriptLines, // console context
             Display_SoundGeneratorType,
             Display_School,
