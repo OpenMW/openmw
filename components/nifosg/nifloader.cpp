@@ -362,6 +362,56 @@ namespace
         }
     };
 
+    struct FindNearestParentSkeleton : public osg::NodeVisitor
+    {
+        osg::ref_ptr<osgAnimation::Skeleton> _root;
+        FindNearestParentSkeleton() : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_PARENTS) {}
+        void apply(osg::Transform& node)
+        {
+            if (_root.valid())
+                return;
+            _root = dynamic_cast<osgAnimation::Skeleton*>(&node);
+            traverse(node);
+        }
+    };
+
+    // RigGeometry is skinned from a CullCallback to prevent unnecessary updates of culled rig geometries.
+    // Note: this assumes only one cull thread is using the given RigGeometry, there would be a race condition otherwise.
+    struct UpdateRigGeometry : public osg::Drawable::CullCallback
+    {
+        virtual bool cull(osg::NodeVisitor *, osg::Drawable * drw, osg::State *) const
+        {
+            osgAnimation::RigGeometry* geom = static_cast<osgAnimation::RigGeometry*>(drw);
+            if (!geom)
+                return false;
+            if (!geom->getSkeleton() && !geom->getParents().empty())
+            {
+                FindNearestParentSkeleton finder;
+                if (geom->getParents().size() > 1)
+                    osg::notify(osg::WARN) << "A RigGeometry should not have multi parent ( " << geom->getName() << " )" << std::endl;
+                geom->getParents()[0]->accept(finder);
+
+                if (!finder._root.valid())
+                {
+                    osg::notify(osg::WARN) << "A RigGeometry did not find a parent skeleton for RigGeometry ( " << geom->getName() << " )" << std::endl;
+                    return false;
+                }
+                geom->buildVertexInfluenceSet();
+                geom->setSkeleton(finder._root.get());
+            }
+
+            if (!geom->getSkeleton())
+                return false;
+
+            if (geom->getNeedToComputeMatrix())
+                geom->computeMatrixFromRootSkeleton();
+
+            geom->update();
+
+            return false;
+        }
+    };
+
     class RigBoundingBoxCallback : public osg::Drawable::ComputeBoundingBoxCallback
     {
     public:
@@ -1283,6 +1333,10 @@ namespace NifOsg
                 map->insert(std::make_pair(boneName, influence));
             }
             rig->setInfluenceMap(map);
+
+            // Override default update using cull callback instead for efficiency.
+            rig->setUpdateCallback(NULL);
+            rig->setCullCallback(new UpdateRigGeometry);
 
             osg::ref_ptr<osg::MatrixTransform> trans(new osg::MatrixTransform);
             trans->setUpdateCallback(new InvertBoneMatrix());
