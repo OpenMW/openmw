@@ -183,19 +183,22 @@ void GravityAffector::beginOperate(osgParticle::Program* program)
 
 void GravityAffector::operate(osgParticle::Particle *particle, double dt)
 {
+    const float magic = 1.6f;
     switch (mType)
     {
         case Type_Wind:
-            particle->addVelocity(mCachedWorldPositionDirection * mForce * dt);
+            particle->addVelocity(mCachedWorldPositionDirection * mForce * dt * magic);
             break;
         case Type_Point:
         {
             osg::Vec3f diff = mCachedWorldPositionDirection - particle->getPosition();
             diff.normalize();
-            particle->addVelocity(diff * mForce * dt);
+            particle->addVelocity(diff * mForce * dt * magic);
             break;
         }
     }
+
+    // velocity *= e^-[(dist/decay)^2]
 }
 
 Emitter::Emitter()
