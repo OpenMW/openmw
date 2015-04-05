@@ -51,6 +51,7 @@ namespace
         void transformInitialParticles(osgParticle::ParticleSystem* partsys, osg::Node* node)
         {
             osg::Matrix worldMat = node->getWorldMatrices()[0];
+            worldMat.orthoNormalize(worldMat); // scale is already applied on the particle node
             for (int i=0; i<partsys->numParticles(); ++i)
             {
                 partsys->getParticle(i)->transformPositionVelocity(worldMat);

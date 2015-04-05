@@ -974,7 +974,7 @@ namespace NifOsg
                 }
                 else if (affectors->recType == Nif::RC_NiParticleRotation)
                 {
-                    // unused?
+                    // unused
                 }
                 else
                     std::cerr << "Unhandled particle modifier " << affectors->recName << std::endl;
@@ -1064,8 +1064,6 @@ namespace NifOsg
         {
             osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
-            // Scaling the particle node should also scale particles, even when the worldspace flag is enabled
-            partsys->setParticleScaleReferenceFrame(osgParticle::ParticleSystem::LOCAL_COORDINATES);
 
             const Nif::NiParticleSystemController* partctrl = NULL;
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)

@@ -50,8 +50,8 @@ void InverseWorldMatrix::operator()(osg::Node *node, osg::NodeVisitor *nv)
         osg::MatrixTransform* trans = dynamic_cast<osg::MatrixTransform*>(node);
 
         osg::Matrix mat = osg::computeLocalToWorld( path );
-        mat = osg::Matrix::inverse(mat);
         mat.orthoNormalize(mat); // don't undo the scale
+        mat = osg::Matrix::inverse(mat);
         trans->setMatrix(mat);
     }
     traverse(node,nv);
@@ -239,6 +239,7 @@ void Emitter::setCounter(osgParticle::Counter *counter)
 void Emitter::emitParticles(double dt)
 {
     osg::Matrix worldToPs;
+    // maybe this could be optimized by halting at the lowest common ancestor of the particle and emitter nodes
     osg::MatrixList worldMats = getParticleSystem()->getWorldMatrices();
     if (!worldMats.empty())
     {
@@ -246,14 +247,9 @@ void Emitter::emitParticles(double dt)
         worldToPs = osg::Matrix::inverse(psToWorld);
     }
 
-    worldToPs.orthoNormalize(worldToPs);
-
     const osg::Matrix& ltw = getLocalToWorldMatrix();
-    const osg::Matrix emitterToPs = ltw * worldToPs;
+    osg::Matrix emitterToPs = ltw * worldToPs;
 
-    int n = mCounter->numParticlesToCreate(dt);
-
-    osg::Matrix transform;
     if (!mTargets.empty())
     {
         int randomRecIndex = mTargets[(std::rand() / (static_cast<double>(RAND_MAX)+1.0)) * mTargets.size()];
@@ -270,8 +266,12 @@ void Emitter::emitParticles(double dt)
 
         osg::NodePath path = visitor.mFoundPath;
         path.erase(path.begin());
-        transform = osg::computeLocalToWorld(path);
+        emitterToPs = osg::computeLocalToWorld(path) * emitterToPs;
     }
+
+    emitterToPs.orthoNormalize(emitterToPs);
+
+    int n = mCounter->numParticlesToCreate(dt);
 
     for (int i=0; i<n; ++i)
     {
@@ -281,8 +281,6 @@ void Emitter::emitParticles(double dt)
             mPlacer->place(P);
 
             mShooter->shoot(P);
-
-            P->transformPositionVelocity(transform);
 
             P->transformPositionVelocity(emitterToPs);
         }
