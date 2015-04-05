@@ -56,11 +56,23 @@ namespace MWGui
 
         std::auto_ptr<SpellModel> mModel;
 
-        /// tracks an item in the spell view
-        /// element<0> is the left column GUI object (usually holds the name)
-        /// element<1> is the right column (charge or cost info)
-        /// element<2> is if line needs to be checked during incremental update
-        typedef boost::tuple<MyGUI::Widget*, MyGUI::Widget*, bool> LineInfo;
+        /// tracks a row in the spell view
+        struct LineInfo
+        {
+            /// the widget on the left side of the row
+            MyGUI::Widget* mLeftWidget;
+
+            /// the widget on the left side of the row (if there is one)
+            MyGUI::Widget* mRightWidget;
+
+            /// index to item in mModel that row is showing information for
+            SpellModel::ModelIndex mSpellIndex;
+
+            LineInfo(MyGUI::Widget* leftWidget, MyGUI::Widget* rightWidget, SpellModel::ModelIndex spellIndex);
+        };
+
+        /// magic number indicating LineInfo does not correspond to an item in mModel
+        enum { NoSpellIndex = -1 };
 
         std::vector< LineInfo > mLines;
 

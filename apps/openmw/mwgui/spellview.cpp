@@ -12,6 +12,14 @@ namespace MWGui
 
     const char* SpellView::sSpellModelIndex = "SpellModelIndex";
 
+    SpellView::LineInfo::LineInfo(MyGUI::Widget* leftWidget, MyGUI::Widget* rightWidget, SpellModel::ModelIndex spellIndex)
+        : mLeftWidget(leftWidget)
+        , mRightWidget(rightWidget)
+        , mSpellIndex(spellIndex)
+    {
+
+    }
+
     SpellView::SpellView()
         : mShowCostColumn(true)
         , mHighlightSelected(true)
@@ -115,10 +123,10 @@ namespace MWGui
                 group.push_back(costChance);
                 Gui::SharedStateButton::createButtonGroup(group);
 
-                mLines.push_back(boost::make_tuple(t, costChance, true));
+                mLines.push_back(LineInfo(t, costChance, i));
             }
             else
-                mLines.push_back(boost::make_tuple(t, (MyGUI::Widget*)NULL, true));
+                mLines.push_back(LineInfo(t, (MyGUI::Widget*)NULL, i));
 
             t->setStateSelected(spell.mSelected);
         }
@@ -139,13 +147,13 @@ namespace MWGui
         for (std::vector< LineInfo >::iterator it = mLines.begin(); it != mLines.end(); ++it)
         {
             // only update the lines that are "updateable"
-            if (it->get<2>())
+            SpellModel::ModelIndex spellIndex(it->mSpellIndex);
+            if (spellIndex != NoSpellIndex)
             {
-                Gui::SharedStateButton* nameButton = reinterpret_cast<Gui::SharedStateButton*>(it->get<0>());
+                Gui::SharedStateButton* nameButton = reinterpret_cast<Gui::SharedStateButton*>(it->mLeftWidget);
 
                 // match model against line
                 // if don't match, then major change has happened, so do a full update
-                SpellModel::ModelIndex spellIndex = getSpellModelIndex(nameButton);
                 if (mModel->getItemCount() <= static_cast<unsigned>(spellIndex))
                 {
                     fullUpdateRequired = true;
@@ -162,7 +170,7 @@ namespace MWGui
                 else
                 {
                     maxSpellIndexFound = spellIndex;
-                    Gui::SharedStateButton* costButton = reinterpret_cast<Gui::SharedStateButton*>(it->get<1>());
+                    Gui::SharedStateButton* costButton = reinterpret_cast<Gui::SharedStateButton*>(it->mRightWidget);
                     if ((costButton != NULL) && (costButton->getCaption() != spell.mCostColumn))
                     {
                         costButton->setCaption(spell.mCostColumn);
@@ -187,7 +195,7 @@ namespace MWGui
         for (std::vector< LineInfo >::iterator it = mLines.begin();
              it != mLines.end(); ++it)
         {
-            height += (it->get<0>())->getHeight();
+            height += (it->mLeftWidget)->getHeight();
         }
 
         bool scrollVisible = height > mScrollView->getHeight();
@@ -197,14 +205,14 @@ namespace MWGui
         for (std::vector< LineInfo >::iterator it = mLines.begin();
              it != mLines.end(); ++it)
         {
-            int lineHeight = (it->get<0>())->getHeight();
-            (it->get<0>())->setCoord(4, height, width - 8, lineHeight);
-            if (it->get<1>())
+            int lineHeight = (it->mLeftWidget)->getHeight();
+            (it->mLeftWidget)->setCoord(4, height, width - 8, lineHeight);
+            if (it->mRightWidget)
             {
-                (it->get<1>())->setCoord(4, height, width - 8, lineHeight);
-                MyGUI::TextBox* second = (it->get<1>())->castType<MyGUI::TextBox>(false);
+                (it->mRightWidget)->setCoord(4, height, width - 8, lineHeight);
+                MyGUI::TextBox* second = (it->mRightWidget)->castType<MyGUI::TextBox>(false);
                 if (second)
-                    (it->get<0>())->setSize(width - 8 - second->getTextSize().width, lineHeight);
+                    (it->mLeftWidget)->setSize(width - 8 - second->getTextSize().width, lineHeight);
             }
 
             height += lineHeight;
@@ -224,7 +232,7 @@ namespace MWGui
                 MyGUI::IntCoord(0, 0, mScrollView->getWidth(), 18),
                 MyGUI::Align::Left | MyGUI::Align::Top);
             separator->setNeedMouseFocus(false);
-            mLines.push_back(boost::make_tuple(separator, (MyGUI::Widget*)NULL, false));
+            mLines.push_back(LineInfo(separator, (MyGUI::Widget*)NULL, NoSpellIndex));
         }
 
         MyGUI::TextBox* groupWidget = mScrollView->createWidget<MyGUI::TextBox>("SandBrightText",
@@ -243,10 +251,10 @@ namespace MWGui
             groupWidget2->setTextAlign(MyGUI::Align::Right);
             groupWidget2->setNeedMouseFocus(false);
 
-            mLines.push_back(boost::make_tuple(groupWidget, groupWidget2, false));
+            mLines.push_back(LineInfo(groupWidget, groupWidget2, NoSpellIndex));
         }
         else
-            mLines.push_back(boost::make_tuple(groupWidget, (MyGUI::Widget*)NULL, false));
+            mLines.push_back(LineInfo(groupWidget, (MyGUI::Widget*)NULL, NoSpellIndex));
     }
 
 
