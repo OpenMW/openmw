@@ -111,7 +111,7 @@ namespace MWWorld
             void updateMagicEffects(const Ptr& actor);
             void updateRechargingItems();
 
-            void fireEquipmentChangedEvent();
+            void fireEquipmentChangedEvent(const Ptr& actor);
 
             virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
             virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
