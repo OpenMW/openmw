@@ -16,7 +16,7 @@
 namespace CSMWorld
 {
     class CollectionBase;
-    class RecordBase;
+    struct RecordBase;
     class IdTree;
 
     class NestedTableProxyModel : public QAbstractProxyModel

@@ -9,7 +9,7 @@
 
 namespace CSMWorld
 {
-    class NestedTableWrapperBase;
+    struct NestedTableWrapperBase;
 
     template<typename ESXRecordT>
     class PathgridPointListAdapter : public NestedIdAdapter<ESXRecordT>
@@ -32,7 +32,16 @@ namespace CSMWorld
             point.mConnectionNum = 0;
             point.mUnknown = 0;
 
-            // FIXME: inserting a point should trigger re-indexing of the edges
+            // inserting a point should trigger re-indexing of the edges
+            std::vector<ESM::Pathgrid::Edge>::iterator iter = pathgrid.mEdges.begin();
+            for (;iter != pathgrid.mEdges.end(); ++iter)
+            {
+                if ((*iter).mV0 > position)
+                    (*iter).mV0++;
+                if ((*iter).mV1 > position)
+                    (*iter).mV1++;
+            }
+
             points.insert(points.begin()+position, point);
             pathgrid.mData.mS2 += 1; // increment the number of points
 
@@ -48,7 +57,21 @@ namespace CSMWorld
             if (rowToRemove < 0 || rowToRemove >= static_cast<int> (points.size()))
                 throw std::runtime_error ("index out of range");
 
-            // FIXME: deleting a point should trigger re-indexing of the edges
+            // deleting a point should trigger re-indexing of the edges
+            // dangling edges are not allowed and hence removed
+            std::vector<ESM::Pathgrid::Edge>::iterator iter = pathgrid.mEdges.begin();
+            for (;iter != pathgrid.mEdges.end(); ++iter)
+            {
+                if (((*iter).mV0 == rowToRemove) || ((*iter).mV1 == rowToRemove))
+                    pathgrid.mEdges.erase(iter);
+
+                if ((*iter).mV0 > rowToRemove)
+                    (*iter).mV0--;
+
+                if ((*iter).mV1 > rowToRemove)
+                    (*iter).mV1--;
+            }
+
             points.erase(points.begin()+rowToRemove);
             pathgrid.mData.mS2 -= 1; // decrement the number of points
 

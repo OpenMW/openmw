@@ -393,7 +393,7 @@ namespace CSMWorld
         {
             std::vector<ESM::ContItem>& list = CastableHelper<ESXRecordT>::getRecord(data, index).get().mInventory.mList;
 
-            ESM::ContItem newRow = {0, ""};
+            ESM::ContItem newRow = {0, {""}};
             if (position >= (int)list.size())
             {
                 list.push_back(newRow);
