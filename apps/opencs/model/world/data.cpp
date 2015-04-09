@@ -18,6 +18,7 @@
 #include "columns.hpp"
 #include "resourcesmanager.hpp"
 #include "resourcetable.hpp"
+#include "idadapterimp.hpp"
 
 void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type, bool update)
 {
@@ -255,6 +256,22 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mPathgrids.addColumn (new RecordStateColumn<Pathgrid>);
     mPathgrids.addColumn (new FixedRecordTypeColumn<Pathgrid> (UniversalId::Type_Pathgrid));
 
+    // new object deleted in dtor of Collection<T,A>
+    PathgridPointListColumn<Pathgrid> *pointList = new PathgridPointListColumn<Pathgrid> ();
+    mPathgrids.addColumn (pointList);
+    // new object deleted in dtor of SubCellCollection<T,A>
+    mPathgrids.addAdapter (std::make_pair(pointList, new PathgridPointListAdapter<Pathgrid> ()));
+    // new objects deleted in dtor of NestableColumn
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridPointColumn<Pathgrid> (0));
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridPointColumn<Pathgrid> (1));
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridPointColumn<Pathgrid> (2));
+
+    PathgridEdgeListColumn<Pathgrid> *edgeList = new PathgridEdgeListColumn<Pathgrid> ();
+    mPathgrids.addColumn (edgeList);
+    mPathgrids.addAdapter (std::make_pair(edgeList, new PathgridEdgeListAdapter<Pathgrid> ()));
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridEdgeColumn<Pathgrid> (0));
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridEdgeColumn<Pathgrid> (1));
+
     mStartScripts.addColumn (new StringIdColumn<ESM::StartScript>);
     mStartScripts.addColumn (new RecordStateColumn<ESM::StartScript>);
     mStartScripts.addColumn (new FixedRecordTypeColumn<ESM::StartScript> (UniversalId::Type_StartScript));
@@ -331,7 +348,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new IdTable (&mBodyParts), UniversalId::Type_BodyPart);
     addModel (new IdTable (&mSoundGens), UniversalId::Type_SoundGen);
     addModel (new IdTable (&mMagicEffects), UniversalId::Type_MagicEffect);
-    addModel (new IdTable (&mPathgrids), UniversalId::Type_Pathgrid);
+    addModel (new IdTree (&mPathgrids, &mPathgrids), UniversalId::Type_Pathgrid);
     addModel (new IdTable (&mStartScripts), UniversalId::Type_StartScript);
     addModel (new IdTree (&mReferenceables, &mReferenceables, IdTable::Feature_Preview),
         UniversalId::Type_Referenceable);

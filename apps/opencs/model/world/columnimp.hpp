@@ -1277,7 +1277,6 @@ namespace CSMWorld
         }
     };
 
-
     template<typename ESXRecordT>
     struct PosColumn : public Column<ESXRecordT>
     {
@@ -2258,6 +2257,104 @@ namespace CSMWorld
             *string = data.toString().toUtf8().constData();
 
             record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct PathgridPointListColumn : public Column<ESXRecordT>
+    {
+        PathgridPointListColumn ()
+        : Column<ESXRecordT> (Columns::ColumnId_PathgridPoints,
+                ColumnBase::Display_PathgridPointList, ColumnBase::Flag_Dialogue)
+        {
+        }
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return true; // required by IdTree::hasChildren()
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct PathgridPointColumn : public Column<ESXRecordT>
+    {
+        int mIndex; // 0=PosX, 1=PosY, 2=PosZ
+
+        PathgridPointColumn(int index)
+        : Column<ESXRecordT> (Columns::ColumnId_PathgridPosX+index, ColumnBase::Display_Integer), mIndex(index)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QVariant(); // FIXME
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct PathgridEdgeListColumn : public Column<ESXRecordT>
+    {
+        PathgridEdgeListColumn ()
+        : Column<ESXRecordT> (Columns::ColumnId_PathgridEdges,
+                ColumnBase::Display_PathgridEdgeList, ColumnBase::Flag_Dialogue)
+        {
+        }
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return true; // required by IdTree::hasChildren()
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+
+    };
+
+    template<typename ESXRecordT>
+    struct PathgridEdgeColumn : public Column<ESXRecordT>
+    {
+        int mIndex;
+
+        PathgridEdgeColumn (int index)
+        : Column<ESXRecordT> (Columns::ColumnId_PathgridEdge0+index, ColumnBase::Display_Integer), mIndex(index)
+        {
+        }
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QVariant(); // FIXME
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
         }
 
         virtual bool isEditable() const

@@ -1,4 +1,3 @@
-
 #include "columnbase.hpp"
 
 #include "columns.hpp"

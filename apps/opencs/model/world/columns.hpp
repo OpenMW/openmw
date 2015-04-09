@@ -211,6 +211,15 @@ namespace CSMWorld
             ColumnId_HitSound = 196,
             ColumnId_AreaSound = 197,
             ColumnId_BoltSound = 198,
+
+            ColumnId_PathgridPoints = 199,
+            ColumnId_PathgridPosX = 200,
+            ColumnId_PathgridPosY = 201,
+            ColumnId_PathgridPosZ = 202,
+            ColumnId_PathgridEdges = 203,
+            ColumnId_PathgridEdge0 = 204,
+            ColumnId_PathgridEdge1 = 205,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,

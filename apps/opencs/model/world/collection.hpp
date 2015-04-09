@@ -120,6 +120,8 @@ namespace CSMWorld
 
             virtual const Record<ESXRecordT>& getRecord (int index) const;
 
+            virtual Record<ESXRecordT>& getRecord (int index);
+
             virtual int getAppendIndex (const std::string& id,
                 UniversalId::Type type = UniversalId::Type_None) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types
@@ -429,6 +431,12 @@ namespace CSMWorld
 
     template<typename ESXRecordT, typename IdAccessorT>
     const Record<ESXRecordT>& Collection<ESXRecordT, IdAccessorT>::getRecord (int index) const
+    {
+        return mRecords.at (index);
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    Record<ESXRecordT>& Collection<ESXRecordT, IdAccessorT>::getRecord (int index)
     {
         return mRecords.at (index);
     }
