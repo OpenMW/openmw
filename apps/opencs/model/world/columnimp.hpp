@@ -2290,6 +2290,28 @@ namespace CSMWorld
     };
 
     template<typename ESXRecordT>
+    struct PathgridIndexColumn : public Column<ESXRecordT>
+    {
+        PathgridIndexColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_PathgridIndex, ColumnBase::Display_Integer)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QVariant(); // FIXME
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+        }
+
+        virtual bool isEditable() const
+        {
+            return false;
+        }
+    };
+
+    template<typename ESXRecordT>
     struct PathgridPointColumn : public Column<ESXRecordT>
     {
         int mIndex; // 0=PosX, 1=PosY, 2=PosZ
@@ -2336,6 +2358,28 @@ namespace CSMWorld
             return true;
         }
 
+    };
+
+    template<typename ESXRecordT>
+    struct PathgridEdgeIndexColumn : public Column<ESXRecordT>
+    {
+        PathgridEdgeIndexColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_PathgridEdgeIndex, ColumnBase::Display_Integer)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QVariant(); // FIXME
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+        }
+
+        virtual bool isEditable() const
+        {
+            return false;
+        }
     };
 
     template<typename ESXRecordT>

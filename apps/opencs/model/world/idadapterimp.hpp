@@ -33,6 +33,9 @@ namespace CSMWorld
             point.mUnknown = 0;
 
             // inserting a point should trigger re-indexing of the edges
+            //
+            // FIXME: undo does not restore edges table view
+            // FIXME: does not auto refresh edges table view
             std::vector<ESM::Pathgrid::Edge>::iterator iter = pathgrid.mEdges.begin();
             for (;iter != pathgrid.mEdges.end(); ++iter)
             {
@@ -59,19 +62,25 @@ namespace CSMWorld
 
             // deleting a point should trigger re-indexing of the edges
             // dangling edges are not allowed and hence removed
+            //
+            // FIXME: undo does not restore edges table view
+            // FIXME: does not auto refresh edges table view
             std::vector<ESM::Pathgrid::Edge>::iterator iter = pathgrid.mEdges.begin();
-            for (;iter != pathgrid.mEdges.end(); ++iter)
+            for (; iter != pathgrid.mEdges.end();)
             {
                 if (((*iter).mV0 == rowToRemove) || ((*iter).mV1 == rowToRemove))
-                    pathgrid.mEdges.erase(iter);
+                    iter = pathgrid.mEdges.erase(iter);
+                else
+                {
+                    if ((*iter).mV0 > rowToRemove)
+                        (*iter).mV0--;
 
-                if ((*iter).mV0 >= rowToRemove)
-                    (*iter).mV0--;
+                    if ((*iter).mV1 > rowToRemove)
+                        (*iter).mV1--;
 
-                if ((*iter).mV1 >= rowToRemove)
-                    (*iter).mV1--;
+                    ++iter;
+                }
             }
-
             points.erase(points.begin()+rowToRemove);
             pathgrid.mData.mS2 -= 1; // decrement the number of points
 
@@ -95,9 +104,10 @@ namespace CSMWorld
             ESM::Pathgrid::Point point = record.get().mPoints[subRowIndex];
             switch (subColIndex)
             {
-                case 0: return point.mX;
-                case 1: return point.mY;
-                case 2: return point.mZ;
+                case 0: return subRowIndex;
+                case 1: return point.mX;
+                case 2: return point.mY;
+                case 3: return point.mZ;
                 default: throw std::logic_error("Pathgrid point subcolumn index out of range");
             }
         }
@@ -109,9 +119,10 @@ namespace CSMWorld
             ESM::Pathgrid::Point point = pathgrid.mPoints[subRowIndex];
             switch (subColIndex)
             {
-                case 0: point.mX = value.toInt(); break;
-                case 1: point.mY = value.toInt(); break;
-                case 2: point.mZ = value.toInt(); break;
+                case 0: break;
+                case 1: point.mX = value.toInt(); break;
+                case 2: point.mY = value.toInt(); break;
+                case 3: point.mZ = value.toInt(); break;
                 default: throw std::logic_error("Pathgrid point subcolumn index out of range");
             }
 
@@ -122,7 +133,7 @@ namespace CSMWorld
 
         virtual int getNestedColumnsCount(const Record<ESXRecordT>& record) const
         {
-            return 3;
+            return 4;
         }
 
         virtual int getNestedRowsCount(const Record<ESXRecordT>& record) const
@@ -149,8 +160,11 @@ namespace CSMWorld
             edge.mV0 = 0;
             edge.mV1 = 0;
 
-            // FIXME: inserting a blank edge does not really make sense, perhaps this should be a
+            // NOTE: inserting a blank edge does not really make sense, perhaps this should be a
             // logic_error exception
+            //
+            // Currently the code assumes that the end user to know what he/she is doing.
+            // e.g. Edges come in pairs, from points a->b and b->a
             edges.insert(edges.begin()+position, edge);
 
             record.setModified (pathgrid);
@@ -187,12 +201,14 @@ namespace CSMWorld
             ESM::Pathgrid::Edge edge = record.get().mEdges[subRowIndex];
             switch (subColIndex)
             {
-                case 0: return edge.mV0;
-                case 1: return edge.mV1;
+                case 0: return subRowIndex;
+                case 1: return edge.mV0;
+                case 2: return edge.mV1;
                 default: throw std::logic_error("Pathgrid edge subcolumn index out of range");
             }
         }
 
+        // FIXME: detect duplicates in mEdges
         virtual void setNestedData(Record<ESXRecordT>& record, const QVariant& value,
                                     int subRowIndex, int subColIndex) const
         {
@@ -200,8 +216,9 @@ namespace CSMWorld
             ESM::Pathgrid::Edge edge = pathgrid.mEdges[subRowIndex];
             switch (subColIndex)
             {
-                case 0: edge.mV0 = value.toInt(); break;
-                case 1: edge.mV1 = value.toInt(); break;
+                case 0: break;
+                case 1: edge.mV0 = value.toInt(); break;
+                case 2: edge.mV1 = value.toInt(); break;
                 default: throw std::logic_error("Pathgrid edge subcolumn index out of range");
             }
 
@@ -212,7 +229,7 @@ namespace CSMWorld
 
         virtual int getNestedColumnsCount(const Record<ESXRecordT>& record) const
         {
-            return 2;
+            return 3;
         }
 
         virtual int getNestedRowsCount(const Record<ESXRecordT>& record) const

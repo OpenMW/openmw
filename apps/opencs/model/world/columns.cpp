@@ -224,12 +224,14 @@ namespace CSMWorld
             { ColumnId_BoltSound, "Bolt Sound" },
 
             { ColumnId_PathgridPoints, "Points"},
+            { ColumnId_PathgridIndex, "Index"},
             { ColumnId_PathgridPosX, "X"},
             { ColumnId_PathgridPosY, "Y"},
             { ColumnId_PathgridPosZ, "Z"},
             { ColumnId_PathgridEdges, "Edges"},
-            { ColumnId_PathgridEdge0, "Edge 0"},
-            { ColumnId_PathgridEdge1, "Edge 1"},
+            { ColumnId_PathgridEdgeIndex, "Index"},
+            { ColumnId_PathgridEdge0, "Point 0"},
+            { ColumnId_PathgridEdge1, "Point 1"},
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },

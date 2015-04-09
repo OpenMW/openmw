@@ -262,6 +262,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     // new object deleted in dtor of SubCellCollection<T,A>
     mPathgrids.addAdapter (std::make_pair(pointList, new PathgridPointListAdapter<Pathgrid> ()));
     // new objects deleted in dtor of NestableColumn
+    // WARNING: The order of the columns below are assumed in PathgridPointListAdapter
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridIndexColumn<Pathgrid> ());
     mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridPointColumn<Pathgrid> (0));
     mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridPointColumn<Pathgrid> (1));
     mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridPointColumn<Pathgrid> (2));
@@ -269,6 +271,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     PathgridEdgeListColumn<Pathgrid> *edgeList = new PathgridEdgeListColumn<Pathgrid> ();
     mPathgrids.addColumn (edgeList);
     mPathgrids.addAdapter (std::make_pair(edgeList, new PathgridEdgeListAdapter<Pathgrid> ()));
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridEdgeIndexColumn<Pathgrid> ());
     mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridEdgeColumn<Pathgrid> (0));
     mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridEdgeColumn<Pathgrid> (1));
 
