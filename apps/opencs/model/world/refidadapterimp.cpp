@@ -186,11 +186,11 @@ CSMWorld::ContainerRefIdAdapter::ContainerRefIdAdapter (const NameColumns& colum
     std::vector<std::pair <const RefIdColumn*, HelperBase*> > assoCol;
 
     assoCol.push_back(std::make_pair(content, new InventoryHelper<ESM::Container>(UniversalId::Type_Container)));
-    
+
     setAssocColumns(assoCol);
 }
 
-QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, 
+QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column,
                                                    const RefIdData& data,
                                                    int index) const
 {
@@ -207,11 +207,10 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column,
         return (record.get().mFlags & ESM::Container::Respawn)!=0;
 
     if (column==mContent)
-        return true;
+        return true; // required by IdTree::hasChildren()
 
     return NameRefIdAdapter<ESM::Container>::getData (column, data, index);
 }
-
 
 void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
     const QVariant& value) const
@@ -490,16 +489,16 @@ QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const Re
 
     if (column==mColumns.mHead)
         return QString::fromUtf8 (record.get().mHead.c_str());
-    
+
     if (column==mColumns.mDestinations)
-        return true;
+        return true; // required by IdTree::hasChildren()
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
 
     if (iter!=mColumns.mFlags.end())
         return (record.get().mFlags & iter->second)!=0;
-    
+
     return ActorRefIdAdapter<ESM::NPC>::getData (column, data, index);
 }
 

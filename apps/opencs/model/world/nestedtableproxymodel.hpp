@@ -27,7 +27,7 @@ namespace CSMWorld
         IdTree* mMainModel;
         std::string mId;
 
-        public:
+    public:
         NestedTableProxyModel(const QModelIndex& parent,
                          ColumnBase::Display displayType,
                          IdTree* parentModel);
@@ -51,9 +51,9 @@ namespace CSMWorld
 
         virtual QModelIndex parent(const QModelIndex& index) const;
 
-        virtual QVariant headerData ( int section, Qt::Orientation orientation, int role ) const;
+        virtual QVariant headerData (int section, Qt::Orientation orientation, int role) const;
 
-        virtual bool setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
+        virtual bool setData (const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
 
         virtual Qt::ItemFlags flags(const QModelIndex& index) const;
 

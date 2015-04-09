@@ -536,10 +536,10 @@ namespace CSMWorld
             return record.get().mAiData.mAlarm;
 
         if (column==mActors.mInventory)
-            return true;
+            return true; // required by IdTree::hasChildren()
 
         if (column==mActors.mSpells)
-            return true;
+            return true; // required by IdTree::hasChildren()
 
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
             mActors.mServices.find (column);

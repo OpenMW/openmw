@@ -99,7 +99,7 @@ QVariant CSMWorld::NestedTableProxyModel::headerData(int section,
 }
 
 
-bool CSMWorld::NestedTableProxyModel::setData ( const QModelIndex & index, const QVariant & value, int role)
+bool CSMWorld::NestedTableProxyModel::setData (const QModelIndex & index, const QVariant & value, int role)
 {
     return mMainModel->setData(mapToSource(index), value, role);
 }

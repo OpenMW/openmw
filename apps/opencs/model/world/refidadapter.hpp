@@ -9,6 +9,7 @@
 /*! \brief
  * Adapters acts as indirection layer, abstracting details of the record types (in the wrappers) from the higher levels of model.
  * Please notice that nested adaptor uses helper classes for actually performing any actions. Different record types require different helpers (needs to be created in the subclass and then fetched via member function).
+ *
  * Important point: don't forget to make sure that getData on the nestedColumn returns true (otherwise code will not treat the index pointing to the column as having childs!
  */
 
@@ -44,7 +45,7 @@ namespace CSMWorld
 
             virtual std::string getId (const RecordBase& record) const = 0;
 
-            virtual void setId(RecordBase& record, const std::string& id) = 0;
+            virtual void setId(RecordBase& record, const std::string& id) = 0; // FIXME: used by RefIdCollection::cloneRecord()
     };
 
     class NestedRefIdAdapterBase
@@ -75,7 +76,7 @@ namespace CSMWorld
 
     class NestedRefIdAdapter : public NestedRefIdAdapterBase
     {
-        std::vector<std::pair <const RefIdColumn*, HelperBase*> >  mAssociatedColumns; //basicly, i wanted map, but with pointer key
+        std::vector<std::pair <const RefIdColumn*, HelperBase*> >  mAssociatedColumns; //basically, i wanted a map, but with pointer key
 
     public:
         NestedRefIdAdapter();
