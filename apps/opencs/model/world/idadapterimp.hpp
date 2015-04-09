@@ -36,9 +36,9 @@ namespace CSMWorld
             std::vector<ESM::Pathgrid::Edge>::iterator iter = pathgrid.mEdges.begin();
             for (;iter != pathgrid.mEdges.end(); ++iter)
             {
-                if ((*iter).mV0 > position)
+                if ((*iter).mV0 >= position)
                     (*iter).mV0++;
-                if ((*iter).mV1 > position)
+                if ((*iter).mV1 >= position)
                     (*iter).mV1++;
             }
 
@@ -65,10 +65,10 @@ namespace CSMWorld
                 if (((*iter).mV0 == rowToRemove) || ((*iter).mV1 == rowToRemove))
                     pathgrid.mEdges.erase(iter);
 
-                if ((*iter).mV0 > rowToRemove)
+                if ((*iter).mV0 >= rowToRemove)
                     (*iter).mV0--;
 
-                if ((*iter).mV1 > rowToRemove)
+                if ((*iter).mV1 >= rowToRemove)
                     (*iter).mV1--;
             }
 
