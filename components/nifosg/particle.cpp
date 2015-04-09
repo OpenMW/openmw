@@ -238,7 +238,12 @@ void Emitter::setCounter(osgParticle::Counter *counter)
 
 void Emitter::emitParticles(double dt)
 {
+    int n = mCounter->numParticlesToCreate(dt);
+    if (n == 0)
+        return;
+
     osg::Matrix worldToPs;
+
     // maybe this could be optimized by halting at the lowest common ancestor of the particle and emitter nodes
     osg::MatrixList worldMats = getParticleSystem()->getWorldMatrices();
     if (!worldMats.empty())
@@ -270,8 +275,6 @@ void Emitter::emitParticles(double dt)
     }
 
     emitterToPs.orthoNormalize(emitterToPs);
-
-    int n = mCounter->numParticlesToCreate(dt);
 
     for (int i=0; i<n; ++i)
     {
