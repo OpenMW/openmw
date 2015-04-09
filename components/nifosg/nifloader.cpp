@@ -954,6 +954,7 @@ namespace NifOsg
             attachTo->addChild(program);
             program->setParticleSystem(partsys);
             program->setReferenceFrame(rf);
+            program->setCullingActive(true);
             for (; !affectors.empty(); affectors = affectors->extra)
             {
                 if (affectors->recType == Nif::RC_NiParticleGrowFade)
@@ -1100,6 +1101,7 @@ namespace NifOsg
             osg::ref_ptr<Emitter> emitter = handleParticleEmitter(partctrl);
             emitter->setParticleSystem(partsys);
             emitter->setReferenceFrame(osgParticle::ParticleProcessor::RELATIVE_RF);
+            emitter->setCullingActive(true);
 
             // Note: we assume that the Emitter node is placed *before* the Particle node in the scene graph.
             // This seems to be true for all NIF files in the game that I've checked, suggesting that NIFs work similar to OSG with regards to update order.
@@ -1140,6 +1142,7 @@ namespace NifOsg
             // particle system updater (after the emitters and affectors in the scene graph)
             // I think for correct culling needs to be *before* the ParticleSystem, though osg examples do it the other way
             osg::ref_ptr<osgParticle::ParticleSystemUpdater> updater = new osgParticle::ParticleSystemUpdater;
+            updater->setCullingActive(true);
             updater->addParticleSystem(partsys);
             parentNode->addChild(updater);
 
