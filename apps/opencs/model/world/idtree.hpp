@@ -20,7 +20,7 @@ namespace CSMWorld
 {
     class NestedCollection;
     struct RecordBase;
-    class NestedTableWrapperBase; // FIXME: is this necessary?
+    struct NestedTableWrapperBase;
 
     class IdTree : public IdTable
     {

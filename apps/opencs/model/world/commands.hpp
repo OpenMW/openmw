@@ -22,7 +22,7 @@ namespace CSMWorld
     class IdTable;
     class IdTree;
     struct RecordBase;
-    class NestedTableWrapperBase;
+    struct NestedTableWrapperBase;
 
     class ModifyCommand : public QUndoCommand
     {

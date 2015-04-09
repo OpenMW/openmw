@@ -18,7 +18,7 @@ namespace ESM
 namespace CSMWorld
 {
     class RefIdAdapter;
-    class NestedTableWrapperBase;
+    struct NestedTableWrapperBase;
 
     class RefIdColumn : public NestableColumn
     {

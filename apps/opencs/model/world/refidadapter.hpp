@@ -20,7 +20,7 @@ namespace CSMWorld
     class RefIdColumn;
     class RefIdData;
     struct RecordBase;
-    class NestedTableWrapperBase;
+    struct NestedTableWrapperBase;
     class HelperBase;
 
     class RefIdAdapter

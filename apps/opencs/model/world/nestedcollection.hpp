@@ -6,7 +6,7 @@ class QVariant;
 namespace CSMWorld
 {
     class NestableColumn;
-    class NestedTableWrapperBase;
+    struct NestedTableWrapperBase;
 
     class NestedCollection
     {

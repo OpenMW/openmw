@@ -7,7 +7,7 @@ class QVariant;
 
 namespace CSMWorld
 {
-    class NestedTableWrapperBase;
+    struct NestedTableWrapperBase;
 
     template<typename ESXRecordT>
     class NestedIdAdapter

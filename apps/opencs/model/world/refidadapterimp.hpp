@@ -16,7 +16,7 @@
 
 namespace CSMWorld
 {
-    class NestedTableWrapperBase;
+    struct NestedTableWrapperBase;
 
     struct BaseColumns
     {
