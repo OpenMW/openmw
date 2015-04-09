@@ -293,7 +293,6 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
             connect(proxy, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
                     this, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
 
-            //skip = true;
         }
         else if (qobject_cast<QCheckBox*>(editor))
         {
@@ -382,18 +381,27 @@ void CSVWorld::EditWidget::remake(int row)
     mWidgetMapper->setModel(mTable);
     mWidgetMapper->setItemDelegate(&mDispatcher);
 
+    QFrame* line = new QFrame(mMainWidget);
+    line->setObjectName(QString::fromUtf8("line"));
+    line->setGeometry(QRect(320, 150, 118, 3));
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
     QVBoxLayout *mainLayout = new QVBoxLayout(mMainWidget);
+    QGridLayout *lockedLayout = new QGridLayout();
     QScrollArea *scroll = new QScrollArea(mMainWidget);
     QWidget *unlockedWidget = new QWidget(scroll);
-    QGridLayout *unlockedLayout = new QGridLayout(unlockedWidget);
-    QGridLayout *lockedLayout = new QGridLayout();
+    QVBoxLayout *overLayout = new QVBoxLayout(unlockedWidget);
+    QGridLayout *unlockedLayout = new QGridLayout();
     QVBoxLayout *tablesLayout = new QVBoxLayout();
 
-    mainLayout->addLayout(lockedLayout, 0);
+    mainLayout->addLayout(lockedLayout, QSizePolicy::Fixed);
     mainLayout->addSpacing(5); // FIXME: arbitrary number
-    mainLayout->addWidget(scroll, 2);
+    mainLayout->addWidget(line, 1);
+    mainLayout->addWidget(scroll, QSizePolicy::Preferred);
+    overLayout->addLayout(unlockedLayout, QSizePolicy::Preferred);
+    overLayout->addStretch(1);
     mainLayout->addSpacing(5); // FIXME: arbitrary number
-    mainLayout->addLayout(tablesLayout, 0);
+    mainLayout->addLayout(tablesLayout, QSizePolicy::Preferred);
     mainLayout->addStretch(1);
 
     int unlocked = 0;
@@ -457,9 +465,19 @@ void CSVWorld::EditWidget::remake(int row)
 
     mWidgetMapper->setCurrentModelIndex(mTable->index(row, 0));
 
-    scroll->setWidget(unlockedWidget);
-    scroll->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Fixed);
-    scroll->setWidgetResizable(true);
+    if (unlocked != 0)
+    {
+        mainLayout->removeWidget(line);
+        scroll->setWidget(unlockedWidget);
+        scroll->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Minimum);
+        scroll->setWidgetResizable(true);
+    }
+    else
+    {
+        delete unlockedWidget;
+        delete scroll;
+    }
+
     this->setWidget(mMainWidget);
     this->setWidgetResizable(true);
 }
