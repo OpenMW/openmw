@@ -21,7 +21,7 @@ namespace CSMWorld
         {
             ESXRecordT pathgrid = record.get();
 
-            ESXRecordT::PointList& points = pathgrid.mPoints;
+            ESM::Pathgrid::PointList& points = pathgrid.mPoints;
 
             // blank row
             ESM::Pathgrid::Point point;
@@ -43,7 +43,7 @@ namespace CSMWorld
         {
             ESXRecordT pathgrid = record.get();
 
-            ESXRecordT::PointList& points = pathgrid.mPoints;
+            ESM::Pathgrid::PointList& points = pathgrid.mPoints;
 
             if (rowToRemove < 0 || rowToRemove >= static_cast<int> (points.size()))
                 throw std::runtime_error ("index out of range");
@@ -58,13 +58,13 @@ namespace CSMWorld
         virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable)
         {
             record.get().mPoints =
-                static_cast<const NestedTableWrapper<ESXRecordT::PointList> &>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<ESM::Pathgrid::PointList> &>(nestedTable).mNestedTable;
         }
 
         virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const
         {
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<ESXRecordT::PointList>(record.get().mPoints);
+            return new NestedTableWrapper<ESM::Pathgrid::PointList>(record.get().mPoints);
         }
 
         virtual QVariant getNestedData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const
@@ -119,7 +119,7 @@ namespace CSMWorld
         {
             ESXRecordT pathgrid = record.get();
 
-            ESXRecordT::EdgeList& edges = pathgrid.mEdges;
+            ESM::Pathgrid::EdgeList& edges = pathgrid.mEdges;
 
             // blank row
             ESM::Pathgrid::Edge edge;
@@ -137,7 +137,7 @@ namespace CSMWorld
         {
             ESXRecordT pathgrid = record.get();
 
-            ESXRecordT::EdgeList& edges = pathgrid.mEdges;
+            ESM::Pathgrid::EdgeList& edges = pathgrid.mEdges;
 
             if (rowToRemove < 0 || rowToRemove >= static_cast<int> (edges.size()))
                 throw std::runtime_error ("index out of range");
@@ -150,13 +150,13 @@ namespace CSMWorld
         virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable)
         {
             record.get().mEdges =
-                static_cast<const NestedTableWrapper<ESXRecordT::EdgeList> &>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<ESM::Pathgrid::EdgeList> &>(nestedTable).mNestedTable;
         }
 
         virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const
         {
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<ESXRecordT::EdgeList>(record.get().mEdges);
+            return new NestedTableWrapper<ESM::Pathgrid::EdgeList>(record.get().mEdges);
         }
 
         virtual QVariant getNestedData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const

@@ -42,7 +42,9 @@
 #include "refcollection.hpp"
 #include "infocollection.hpp"
 #include "pathgrid.hpp"
+#ifndef Q_MOC_RUN
 #include "subcellcollection.hpp"
+#endif
 
 class QAbstractItemModel;
 
