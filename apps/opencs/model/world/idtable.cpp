@@ -1,5 +1,7 @@
 #include "idtable.hpp"
 
+#include <stdexcept>
+
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
 
@@ -41,6 +43,9 @@ QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation
 {
     if (orientation==Qt::Vertical)
         return QVariant();
+
+    if (orientation != Qt::Horizontal)
+        throw std::logic_error("Unknown header orientation specified");
 
     if (role==Qt::DisplayRole)
         return tr (mIdCollection->getColumn (section).getTitle().c_str());
@@ -230,4 +235,9 @@ bool CSMWorld::IdTable::isDeleted (const std::string& id) const
 int CSMWorld::IdTable::getColumnId(int column) const
 {
     return mIdCollection->getColumn(column).getId();
+}
+
+CSMWorld::CollectionBase *CSMWorld::IdTable::idCollection() const
+{
+    return mIdCollection;
 }

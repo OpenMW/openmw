@@ -5,7 +5,8 @@
 #include <map>
 #include <deque>
 
-#include "nestablecolumn.hpp"
+#include "columnbase.hpp"
+#include "collectionbase.hpp"
 #include "nestedcollection.hpp"
 #include "refiddata.hpp"
 
@@ -17,7 +18,7 @@ namespace ESM
 namespace CSMWorld
 {
     class RefIdAdapter;
-    class NestedTableWrapperBase; // FIXME: is this really needed?
+    class NestedTableWrapperBase;
 
     class RefIdColumn : public NestableColumn
     {
@@ -35,7 +36,7 @@ namespace CSMWorld
             virtual bool isUserEditable() const;
     };
 
-    class RefIdCollection : public NestedCollection
+    class RefIdCollection : public CollectionBase, public NestedCollection
     {
         private:
 
@@ -117,11 +118,11 @@ namespace CSMWorld
 
             virtual void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable);
 
-            // FIXME
             virtual int getNestedRowsCount(int row, int column) const;
 
-            // FIXME
             virtual int getNestedColumnsCount(int row, int column) const;
+
+            NestableColumn *getNestableColumn(int column);
 
             virtual void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn);
 

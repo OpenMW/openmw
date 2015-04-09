@@ -129,14 +129,32 @@ namespace CSMWorld
 
         virtual std::string getTitle() const;
 
-        virtual int getId() const;
+        virtual int getId() const; // FIXME: why have an accessor for a public member?
+    };
+
+    class NestableColumn : public ColumnBase
+    {
+        std::vector<NestableColumn *> mNestedColumns;
+        bool mHasChildren;
+
+    public:
+
+        NestableColumn(int columnId, Display displayType, int flag);
+
+        ~NestableColumn();
+
+        void addColumn(CSMWorld::NestableColumn *column);
+
+        const ColumnBase& nestedColumn(int subColumn) const;
+
+        bool hasChildren() const;
     };
 
     template<typename ESXRecordT>
-    struct Column : public ColumnBase
+    struct Column : public NestableColumn
     {
         Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue)
-            : ColumnBase (columnId, displayType, flags) {}
+        : NestableColumn (columnId, displayType, flags) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
 

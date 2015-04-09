@@ -22,13 +22,13 @@ namespace CSMWorld
     struct RecordBase;
     class NestedTableWrapperBase; // FIXME: is this necessary?
 
-    class IdTree : public IdTable // IdTable is derived from QAbstractItemModel
+    class IdTree : public IdTable
     {
             Q_OBJECT
 
         private:
 
-            NestedCollection *mIdCollection;
+            NestedCollection *mNestedCollection;
 
             // not implemented
             IdTree (const IdTree&);
@@ -39,8 +39,8 @@ namespace CSMWorld
 
         public:
 
-            IdTree (NestedCollection *idCollection, unsigned int features = 0);
-            ///< The ownership of \a idCollection is not transferred.
+            IdTree (NestedCollection *nestedCollection, CollectionBase *idCollection, unsigned int features = 0);
+            ///< The ownerships of \a nestedCollecton and \a idCollection are not transferred.
 
             virtual ~IdTree();
 
@@ -49,8 +49,6 @@ namespace CSMWorld
             virtual int columnCount (const QModelIndex & parent = QModelIndex()) const;
 
             virtual QVariant data  (const QModelIndex & index, int role = Qt::DisplayRole) const;
-
-            virtual QVariant headerData (int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
             virtual bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
 
@@ -62,9 +60,6 @@ namespace CSMWorld
                 const;
 
             virtual QModelIndex parent (const QModelIndex& index) const;
-
-            void setRecord (const std::string& id, const RecordBase& record);
-            ///< Add record or overwrite existing recrod.
 
             // TODO: check if below methods are really needed
             QVariant nestedHeaderData(int section, int subSection, Qt::Orientation orientation, int role = Qt::DisplayRole) const;

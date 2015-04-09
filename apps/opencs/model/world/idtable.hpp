@@ -83,6 +83,10 @@ namespace CSMWorld
             virtual bool isDeleted (const std::string& id) const;
 
             int getColumnId(int column) const;
+
+        protected:
+
+            virtual CollectionBase *idCollection() const;
     };
 }
 

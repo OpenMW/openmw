@@ -333,7 +333,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new IdTable (&mMagicEffects), UniversalId::Type_MagicEffect);
     addModel (new IdTable (&mPathgrids), UniversalId::Type_Pathgrid);
     addModel (new IdTable (&mStartScripts), UniversalId::Type_StartScript);
-    addModel (new IdTree (&mReferenceables, IdTable::Feature_Preview),
+    addModel (new IdTree (&mReferenceables, &mReferenceables, IdTable::Feature_Preview),
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs, IdTable::Feature_ViewCell | IdTable::Feature_Preview), UniversalId::Type_Reference);
     addModel (new IdTable (&mFilters), UniversalId::Type_Filter);

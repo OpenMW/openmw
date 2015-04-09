@@ -8,7 +8,7 @@
 #include "refidadapter.hpp"
 #include "refidadapterimp.hpp"
 #include "columns.hpp"
-#include "nestedtablewrapper.hpp" // FIXME: is this really necessary?
+#include "nestedtablewrapper.hpp"
 
 CSMWorld::RefIdColumn::RefIdColumn (int columnId, Display displayType, int flag,
     bool editable, bool userEditable)
@@ -24,7 +24,6 @@ bool CSMWorld::RefIdColumn::isUserEditable() const
 {
     return mUserEditable;
 }
-
 
 // FIXME: const problem
 /*const*/ CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdapter (UniversalId::Type type) const
@@ -665,6 +664,11 @@ int CSMWorld::RefIdCollection::getNestedColumnsCount(int row, int column) const
     const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
     return adaptor.getNestedColumnsCount(&mColumns.at(column), mData);
+}
+
+CSMWorld::NestableColumn *CSMWorld::RefIdCollection::getNestableColumn(int column)
+{
+    return &mColumns.at(column);
 }
 
 void CSMWorld::RefIdCollection::addNestedRow(int row, int col, int position)
