@@ -379,6 +379,17 @@ namespace
     // Note: this assumes only one cull thread is using the given RigGeometry, there would be a race condition otherwise.
     struct UpdateRigGeometry : public osg::Drawable::CullCallback
     {
+        UpdateRigGeometry()
+        {
+        }
+
+        UpdateRigGeometry(const UpdateRigGeometry& copy, const osg::CopyOp& copyop)
+            : osg::Drawable::CullCallback(copy, copyop)
+        {
+        }
+
+        META_Object(NifOsg, UpdateRigGeometry)
+
         virtual bool cull(osg::NodeVisitor *, osg::Drawable * drw, osg::State *) const
         {
             osgAnimation::RigGeometry* geom = static_cast<osgAnimation::RigGeometry*>(drw);
@@ -410,6 +421,59 @@ namespace
 
             return false;
         }
+    };
+
+    // Same for MorphGeometry
+    struct UpdateMorphGeometry : public osg::Drawable::CullCallback
+    {
+        UpdateMorphGeometry()
+        {
+        }
+
+        UpdateMorphGeometry(const UpdateMorphGeometry& copy, const osg::CopyOp& copyop)
+            : osg::Drawable::CullCallback(copy, copyop)
+        {
+        }
+
+        META_Object(NifOsg, UpdateMorphGeometry)
+
+        virtual bool cull(osg::NodeVisitor *, osg::Drawable * drw, osg::State *) const
+        {
+            osgAnimation::MorphGeometry* geom = static_cast<osgAnimation::MorphGeometry*>(drw);
+            if (!geom)
+                return false;
+            geom->transformSoftwareMethod();
+            return false;
+        }
+    };
+
+    // Callback to return a static bounding box for a MorphGeometry. The idea is to not recalculate the bounding box
+    // every time the morph weights change. To do so we return a maximum containing box that is big enough for all possible combinations of morph targets.
+    class StaticBoundingBoxCallback : public osg::Drawable::ComputeBoundingBoxCallback
+    {
+    public:
+        StaticBoundingBoxCallback()
+        {
+        }
+
+        StaticBoundingBoxCallback(const osg::BoundingBox& bounds)
+            : mBoundingBox(bounds)
+        {
+        }
+
+        StaticBoundingBoxCallback(const StaticBoundingBoxCallback& copy, const osg::CopyOp& copyop)
+            : osg::Drawable::ComputeBoundingBoxCallback(copy, copyop)
+            , mBoundingBox(copy.mBoundingBox)
+        {
+        }
+
+        virtual osg::BoundingBox computeBound(const osg::Drawable& drawable) const
+        {
+            return mBoundingBox;
+        }
+
+    private:
+        osg::BoundingBox mBoundingBox;
     };
 
     class RigBoundingBoxCallback : public osg::Drawable::ComputeBoundingBoxCallback
@@ -1279,7 +1343,12 @@ namespace NifOsg
             // No normals available in the MorphData
             morphGeom->setMorphNormals(false);
 
+            morphGeom->setUpdateCallback(NULL);
+            morphGeom->setCullCallback(new UpdateMorphGeometry);
+
             const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
+            if (!morphs.size())
+                return morphGeom;
             // Note we are not interested in morph 0, which just contains the original vertices
             for (unsigned int i = 1; i < morphs.size(); ++i)
             {
@@ -1287,6 +1356,38 @@ namespace NifOsg
                 morphTarget->setVertexArray(new osg::Vec3Array(morphs[i].mVertices.size(), &morphs[i].mVertices[0]));
                 morphGeom->addMorphTarget(morphTarget, 0.f);
             }
+
+            // build the bounding box containing all possible morph combinations
+
+            std::vector<osg::BoundingBox> vertBounds(morphs[0].mVertices.size());
+
+            // Since we don't know what combinations of morphs are being applied we need to keep track of a bounding box for each vertex.
+            // The minimum/maximum of the box is the minimum/maximum offset the vertex can have from its starting position.
+
+            // Start with zero offsets which will happen when no morphs are applied.
+            for (unsigned int i=0; i<vertBounds.size(); ++i)
+                vertBounds[i].set(osg::Vec3f(0,0,0), osg::Vec3f(0,0,0));
+
+            for (unsigned int i = 1; i < morphs.size(); ++i)
+            {
+                for (unsigned int j=0; j<morphs[i].mVertices.size() && vertBounds.size(); ++j)
+                {
+                    osg::BoundingBox& bounds = vertBounds[j];
+                    bounds.expandBy(bounds._max + morphs[i].mVertices[j]);
+                    bounds.expandBy(bounds._min + morphs[i].mVertices[j]);
+                }
+            }
+
+            osg::BoundingBox box;
+            for (unsigned int i=0; i<vertBounds.size(); ++i)
+            {
+                vertBounds[i]._max += morphs[0].mVertices[i];
+                vertBounds[i]._min += morphs[0].mVertices[i];
+                box.expandBy(vertBounds[i]);
+            }
+
+            morphGeom->setComputeBoundingBoxCallback(new StaticBoundingBoxCallback(box));
+
             return morphGeom;
         }
 
