@@ -32,6 +32,10 @@ void CSVDoc::View::closeEvent (QCloseEvent *event)
         event->ignore();
     else
     {
+        // delete the subviews first
+        for (QList<CSVDoc::SubView *>::iterator iter = mSubViews.begin(); iter != mSubViews.end(); ++iter)
+            delete *iter;
+
         // closeRequest() returns true if last document
         mViewManager.removeDocAndView(mDocument);
     }

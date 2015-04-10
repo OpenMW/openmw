@@ -54,8 +54,7 @@ QVariant CSMWorld::IdTree::data  (const QModelIndex & index, int role) const
 
 QVariant CSMWorld::IdTree::nestedHeaderData(int section, int subSection, Qt::Orientation orientation, int role) const
 {
-    // FIXME: workaround only, a proper fix should stop QHideEvent calls after destruction
-    if (section < 0 || !idCollection() || section >= idCollection()->getColumns())
+    if (section < 0 || section >= idCollection()->getColumns())
         return QVariant();
 
     const NestableColumn *parentColumn = mNestedCollection->getNestableColumn(section);

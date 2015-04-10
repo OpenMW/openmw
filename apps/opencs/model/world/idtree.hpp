@@ -61,7 +61,6 @@ namespace CSMWorld
 
             virtual QModelIndex parent (const QModelIndex& index) const;
 
-            // TODO: check if below methods are really needed
             QVariant nestedHeaderData(int section, int subSection, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
             NestedTableWrapperBase* nestedTable(const QModelIndex &index) const;
