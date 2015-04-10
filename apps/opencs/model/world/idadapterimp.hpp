@@ -87,16 +87,36 @@ namespace CSMWorld
             record.setModified (pathgrid);
         }
 
+        struct PathgridPointsWrap : public NestedTableWrapperBase
+        {
+            ESM::Pathgrid mRecord;
+
+            PathgridPointsWrap(ESM::Pathgrid pathgrid)
+                : mRecord(pathgrid) {}
+
+            virtual ~PathgridPointsWrap() {}
+
+            virtual int size() const
+            {
+                return mRecord.mPoints.size(); // used in IdTree::setNestedTable()
+            }
+        };
+
         virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable)
         {
             record.get().mPoints =
-                static_cast<const NestedTableWrapper<ESM::Pathgrid::PointList> &>(nestedTable).mNestedTable;
+                static_cast<const PathgridPointsWrap &>(nestedTable).mRecord.mPoints;
+            record.get().mData.mS2 =
+                static_cast<const PathgridPointsWrap &>(nestedTable).mRecord.mData.mS2;
+            // also update edges in case points were added/removed
+            record.get().mEdges =
+                static_cast<const PathgridPointsWrap &>(nestedTable).mRecord.mEdges;
         }
 
         virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const
         {
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<ESM::Pathgrid::PointList>(record.get().mPoints);
+            return new PathgridPointsWrap(record.get());
         }
 
         virtual QVariant getNestedData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const
