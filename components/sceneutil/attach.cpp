@@ -12,40 +12,39 @@
 #include <osgAnimation/BoneMapVisitor>
 #include <osgAnimation/Skeleton>
 
+#include "visitor.hpp"
+
 namespace SceneUtil
 {
 
-    class FindByNameVisitor : public osg::NodeVisitor
+    class NodeMapVisitor : public osg::NodeVisitor
     {
     public:
-        FindByNameVisitor(const std::string& nameToFind)
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mNameToFind(nameToFind)
-            , mFoundNode(NULL)
+        NodeMapVisitor() : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN) {}
+
+        void apply(osg::MatrixTransform& trans)
         {
+            mMap[trans.getName()] = &trans;
+            traverse(trans);
         }
 
-        virtual void apply(osg::Node &node)
+        typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
+
+        const NodeMap& getNodeMap() const
         {
-            osg::Group* group = node.asGroup();
-            if (group && node.getName() == mNameToFind)
-            {
-                mFoundNode = group;
-                return;
-            }
-            traverse(node);
+            return mMap;
         }
 
-        const std::string& mNameToFind;
-        osg::Group* mFoundNode;
+    private:
+        NodeMap mMap;
     };
 
-    /// Copy the skeleton-space matrix of a "source" bone to a "dest" bone (the bone that the callback is attached to).
-    /// Must be set on a Bone.
+    /// Copy the matrix of a "source" node to a "dest" node (the node that the callback is attached to).
+    /// Must be set on a MatrixTransform.
     class CopyController : public osg::NodeCallback
     {
     public:
-        CopyController(osgAnimation::Bone* copyFrom)
+        CopyController(osg::MatrixTransform* copyFrom)
             : mCopyFrom(copyFrom)
         {
         }
@@ -66,22 +65,21 @@ namespace SceneUtil
             if (mCopyFrom)
             {
                 bone->setMatrix(mCopyFrom->getMatrix());
-                bone->setMatrixInSkeletonSpace(mCopyFrom->getMatrixInSkeletonSpace());
             }
 
             traverse(node, nv);
         }
 
     private:
-        const osgAnimation::Bone* mCopyFrom;
+        const osg::MatrixTransform* mCopyFrom;
     };
 
     class AddCopyControllerVisitor : public osg::NodeVisitor
     {
     public:
-        AddCopyControllerVisitor(const osgAnimation::BoneMap& boneMap)
+        AddCopyControllerVisitor(const NodeMapVisitor::NodeMap& boneMap)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mBoneMap(boneMap)
+            , mNodeMap(boneMap)
         {
         }
 
@@ -89,19 +87,23 @@ namespace SceneUtil
         {
             if (osgAnimation::Bone* bone = dynamic_cast<osgAnimation::Bone*>(&node))
             {
-                osgAnimation::BoneMap::const_iterator found = mBoneMap.find(bone->getName());
-                if (found != mBoneMap.end())
+                NodeMapVisitor::NodeMap::const_iterator found = mNodeMap.find(bone->getName());
+                if (found != mNodeMap.end())
                 {
+                    // add the CopyController at position 0 so it's executed before UpdateBone
+                    osg::ref_ptr<osg::NodeCallback> old = bone->getUpdateCallback();
                     bone->setUpdateCallback(new CopyController(found->second.get()));
+                    bone->addUpdateCallback(old);
                 }
             }
         }
 
     private:
-        const osgAnimation::BoneMap& mBoneMap;
+        const NodeMapVisitor::NodeMap& mNodeMap;
     };
 
     // FIXME: would be more efficient to copy only the wanted nodes instead of deleting unwanted ones later
+    // copying is kinda cheap though, so don't bother for now
     class FilterVisitor : public osg::NodeVisitor
     {
     public:
@@ -137,13 +139,12 @@ namespace SceneUtil
     {
         if (osgAnimation::Skeleton* skel = dynamic_cast<osgAnimation::Skeleton*>(toAttach.get()))
         {
-            osgAnimation::Skeleton* masterSkel = dynamic_cast<osgAnimation::Skeleton*>(master);
-            osgAnimation::BoneMapVisitor boneMapVisitor;
-            masterSkel->accept(boneMapVisitor);
+            NodeMapVisitor nodeMapVisitor;
+            master->accept(nodeMapVisitor);
 
             // would be more efficient if we could attach the RigGeometry directly to the master skeleton, but currently not possible
             // due to a difference in binding pose of the two skeletons
-            AddCopyControllerVisitor visitor(boneMapVisitor.getBoneMap());
+            AddCopyControllerVisitor visitor(nodeMapVisitor.getNodeMap());
             toAttach->accept(visitor);
 
             FilterVisitor filterVisitor(filter);

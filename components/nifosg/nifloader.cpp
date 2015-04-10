@@ -41,6 +41,7 @@
 #include <osg/TexEnvCombine>
 
 #include <components/nif/node.hpp>
+#include <components/sceneutil/util.hpp>
 
 #include "particle.hpp"
 #include "userdata.hpp"
@@ -467,7 +468,9 @@ namespace
         {
         }
 
-        virtual osg::BoundingBox computeBound(const osg::Drawable& drawable) const
+        META_Object(NifOsg, StaticBoundingBoxCallback)
+
+        virtual osg::BoundingBox computeBound(const osg::Drawable&) const
         {
             return mBoundingBox;
         }
@@ -497,37 +500,6 @@ namespace
             mBoundSpheres[bonename] = sphere;
         }
 
-        // based off code in osg::Transform
-        void transformBoundingSphere (const osg::Matrix& matrix, osg::BoundingSphere& bsphere) const
-        {
-            osg::BoundingSphere::vec_type xdash = bsphere._center;
-            xdash.x() += bsphere._radius;
-            xdash = xdash*matrix;
-
-            osg::BoundingSphere::vec_type ydash = bsphere._center;
-            ydash.y() += bsphere._radius;
-            ydash = ydash*matrix;
-
-            osg::BoundingSphere::vec_type zdash = bsphere._center;
-            zdash.z() += bsphere._radius;
-            zdash = zdash*matrix;
-
-            bsphere._center = bsphere._center*matrix;
-
-            xdash -= bsphere._center;
-            osg::BoundingSphere::value_type len_xdash = xdash.length();
-
-            ydash -= bsphere._center;
-            osg::BoundingSphere::value_type len_ydash = ydash.length();
-
-            zdash -= bsphere._center;
-            osg::BoundingSphere::value_type len_zdash = zdash.length();
-
-            bsphere._radius = len_xdash;
-            if (bsphere._radius<len_ydash) bsphere._radius = len_ydash;
-            if (bsphere._radius<len_zdash) bsphere._radius = len_zdash;
-        }
-
         virtual osg::BoundingBox computeBound(const osg::Drawable& drawable) const
         {
             osg::BoundingBox box;
@@ -549,7 +521,7 @@ namespace
             {
                 osgAnimation::Bone* bone = it->first;
                 osg::BoundingSphere bs = it->second;
-                transformBoundingSphere(bone->getMatrixInSkeletonSpace(), bs);
+                SceneUtil::transformBoundingSphere(bone->getMatrixInSkeletonSpace(), bs);
                 box.expandBy(bs);
             }
 
@@ -776,7 +748,6 @@ namespace NifOsg
                 osgAnimation::Bone* bone = new osgAnimation::Bone;
                 transformNode = bone;
                 bone->setMatrix(toMatrix(nifNode->trafo));
-                bone->setName(nifNode->name);
                 bone->setInvBindMatrixInSkeletonSpace(osg::Matrixf::inverse(getWorldTransform(nifNode)));
             }
             else
@@ -788,13 +759,13 @@ namespace NifOsg
                 transformNode->addCullCallback(new BillboardCallback);
             }
 
+            transformNode->setName(nifNode->name);
+
             if (parentNode)
                 parentNode->addChild(transformNode);
 
             if (!rootNode)
                 rootNode = transformNode;
-
-            // Ignoring name for non-bone nodes for now. We might need it later in isolated cases, e.g. AttachLight.
 
             // UserData used for a variety of features:
             // - finding the correct emitter node for a particle system
