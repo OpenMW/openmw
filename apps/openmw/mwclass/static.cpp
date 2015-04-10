@@ -19,11 +19,8 @@ namespace MWClass
 
     void Static::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Static> *ref =
-            ptr.get<ESM::Static>();
-
         if (!model.empty()) {
-            renderingInterface.getObjects().insertModel(ptr, model, !ref->mBase->mPersistent);
+            renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
