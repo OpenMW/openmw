@@ -559,6 +559,8 @@ if (BUILD_NIFTEST)
 endif(BUILD_NIFTEST)
 
 # Apps and tools
+add_subdirectory( apps/nifosgtest )
+
 if (BUILD_OPENMW)
     add_subdirectory( apps/openmw )
 endif()
