@@ -34,8 +34,8 @@ namespace CSMWorld
             IdTree (const IdTree&);
             IdTree& operator= (const IdTree&);
 
-            unsigned int foldIndexAdress(const QModelIndex& index) const;
-            std::pair<int, int> unfoldIndexAdress(unsigned int id) const;
+            unsigned int foldIndexAddress(const QModelIndex& index) const;
+            std::pair<int, int> unfoldIndexAddress(unsigned int id) const;
 
         public:
 
@@ -60,6 +60,8 @@ namespace CSMWorld
                 const;
 
             virtual QModelIndex parent (const QModelIndex& index) const;
+
+            QModelIndex getNestedModelIndex (const std::string& id, int column) const;
 
             QVariant nestedHeaderData(int section, int subSection, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 

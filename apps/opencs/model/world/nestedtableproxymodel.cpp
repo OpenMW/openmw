@@ -50,7 +50,7 @@ QModelIndex CSMWorld::NestedTableProxyModel::mapFromSource(const QModelIndex& so
 
 QModelIndex CSMWorld::NestedTableProxyModel::mapToSource(const QModelIndex& proxyIndex) const
 {
-    const QModelIndex& parent = mMainModel->getModelIndex (mId, mParentColumn);
+    const QModelIndex& parent = mMainModel->getNestedModelIndex (mId, mParentColumn);
     return mMainModel->index(proxyIndex.row(), proxyIndex.column(), parent);
 }
 
@@ -98,6 +98,10 @@ QVariant CSMWorld::NestedTableProxyModel::headerData(int section,
     return mMainModel->nestedHeaderData(mParentColumn, section, orientation, role);
 }
 
+QVariant CSMWorld::NestedTableProxyModel::data(const QModelIndex& index, int role) const
+{
+    return mMainModel->data(mapToSource(index), role);
+}
 
 bool CSMWorld::NestedTableProxyModel::setData (const QModelIndex & index, const QVariant & value, int role)
 {
