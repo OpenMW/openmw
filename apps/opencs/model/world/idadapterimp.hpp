@@ -6,11 +6,10 @@
 #include <components/esm/loadpgrd.hpp>
 
 #include "idadapter.hpp"
+#include "nestedtablewrapper.hpp"
 
 namespace CSMWorld
 {
-    struct NestedTableWrapperBase;
-
     template<typename ESXRecordT>
     class PathgridPointListAdapter : public NestedIdAdapter<ESXRecordT>
     {
