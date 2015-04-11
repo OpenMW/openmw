@@ -232,7 +232,7 @@ namespace CSMWorld
 
             ColumnId_EffectList = 214,
             ColumnId_EffectId = 215,
-            ColumnId_EffectAttribute = 216,
+            //ColumnId_EffectAttribute = 216,
             ColumnId_EffectRange = 217,
             ColumnId_EffectArea = 218,
 

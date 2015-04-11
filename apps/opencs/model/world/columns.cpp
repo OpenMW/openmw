@@ -242,8 +242,8 @@ namespace CSMWorld
             { ColumnId_FactionReaction, "Reaction"},
 
             { ColumnId_EffectList, "Effects"},
-            { ColumnId_EffectId, "ID"},
-            { ColumnId_EffectAttribute, "Attrib"},
+            { ColumnId_EffectId, "Effect"},
+            //{ ColumnId_EffectAttribute, "Attrib"},
             { ColumnId_EffectRange, "Range"},
             { ColumnId_EffectArea, "Area"},
 

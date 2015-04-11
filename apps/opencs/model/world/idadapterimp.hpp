@@ -7,6 +7,9 @@
 #include <components/esm/loadregn.hpp>
 #include <components/esm/loadfact.hpp>
 #include <components/esm/effectlist.hpp>
+#include <components/esm/loadmgef.hpp> // for converting magic effect id to string & back
+#include <components/esm/loadskil.hpp> // for converting skill names
+#include <components/esm/attr.hpp>     // for converting attributes
 
 #include "idadapter.hpp"
 #include "nestedtablewrapper.hpp"
@@ -651,10 +654,82 @@ namespace CSMWorld
             ESM::ENAMstruct effect = effectsList[subRowIndex];
             switch (subColIndex)
             {
-                case 0: return effect.mEffectID;
-                case 1: return effect.mSkill;
-                case 2: return effect.mAttribute;
-                case 3: return effect.mRange;
+                case 0:
+                {
+                    // indexToId() prepends "#d+" hence not so user friendly
+                    QString effectId(ESM::MagicEffect::effectIdToString(effect.mEffectID).c_str());
+                    return effectId.remove(0, 7); // 7 == sizeof("sEffect") - 1
+                }
+                case 1:
+                {
+                    switch (effect.mSkill)
+                    {
+                        // see ESM::Skill::SkillEnum in <component/esm/loadskil.hpp>
+                        case ESM::Skill::Block:
+                        case ESM::Skill::Armorer:
+                        case ESM::Skill::MediumArmor:
+                        case ESM::Skill::HeavyArmor:
+                        case ESM::Skill::BluntWeapon:
+                        case ESM::Skill::LongBlade:
+                        case ESM::Skill::Axe:
+                        case ESM::Skill::Spear:
+                        case ESM::Skill::Athletics:
+                        case ESM::Skill::Enchant:
+                        case ESM::Skill::Destruction:
+                        case ESM::Skill::Alteration:
+                        case ESM::Skill::Illusion:
+                        case ESM::Skill::Conjuration:
+                        case ESM::Skill::Mysticism:
+                        case ESM::Skill::Restoration:
+                        case ESM::Skill::Alchemy:
+                        case ESM::Skill::Unarmored:
+                        case ESM::Skill::Security:
+                        case ESM::Skill::Sneak:
+                        case ESM::Skill::Acrobatics:
+                        case ESM::Skill::LightArmor:
+                        case ESM::Skill::ShortBlade:
+                        case ESM::Skill::Marksman:
+                        case ESM::Skill::Mercantile:
+                        case ESM::Skill::Speechcraft:
+                        case ESM::Skill::HandToHand:
+                        {
+                            return QString(ESM::Skill::sSkillNames[effect.mSkill].c_str());
+                        }
+                        case -1: return QString("N/A");
+                        default: return QVariant();
+                    }
+                }
+                case 2:
+                {
+                    switch (effect.mAttribute)
+                    {
+                        // see ESM::Attribute::AttributeID in <component/esm/attr.hpp>
+                        case ESM::Attribute::Strength:
+                        case ESM::Attribute::Intelligence:
+                        case ESM::Attribute::Willpower:
+                        case ESM::Attribute::Agility:
+                        case ESM::Attribute::Speed:
+                        case ESM::Attribute::Endurance:
+                        case ESM::Attribute::Personality:
+                        case ESM::Attribute::Luck:
+                        {
+                            return QString(ESM::Attribute::sAttributeNames[effect.mAttribute].c_str());
+                        }
+                        case -1: return QString("N/A");
+                        default: return QVariant();
+                    }
+                }
+                case 3:
+                {
+                    switch (effect.mRange)
+                    {
+                        // see ESM::RangeType in <component/esm/defs.hpp>
+                        case ESM::RT_Self: return QString("Self");
+                        case ESM::RT_Touch: return QString("Touch");
+                        case ESM::RT_Target: return QString("Target");
+                        default: return QVariant();
+                    }
+                }
                 case 4: return effect.mArea;
                 case 5: return effect.mDuration;
                 case 6: return effect.mMagnMin;
@@ -676,10 +751,62 @@ namespace CSMWorld
             ESM::ENAMstruct effect = effectsList[subRowIndex];
             switch (subColIndex)
             {
-                case 0: effect.mEffectID = static_cast<short>(value.toInt()); break;
-                case 1: effect.mSkill = static_cast<signed char>(value.toInt()); break;
-                case 2: effect.mAttribute = static_cast<signed char>(value.toInt()); break;
-                case 3: effect.mRange = value.toInt(); break;
+                case 0:
+                {
+                    effect.mEffectID =
+                        ESM::MagicEffect::effectStringToId("sEffect"+value.toString().toStdString());
+                    break;
+                }
+                case 1:
+                {
+                    std::string skillName = value.toString().toStdString();
+                    if ("N/A" == skillName)
+                    {
+                        effect.mSkill = -1;
+                        break;
+                    }
+
+                    for (unsigned int i = 0; i < ESM::Skill::Length; ++i)
+                    {
+                        if (ESM::Skill::sSkillNames[i] == skillName)
+                        {
+                            effect.mSkill = static_cast<signed char>(i);
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case 2:
+                {
+                    std::string attr = value.toString().toStdString();
+                    if ("N/A" == attr)
+                    {
+                        effect.mAttribute = -1;
+                        break;
+                    }
+
+                    for (unsigned int i = 0; i < ESM::Attribute::Length; ++i)
+                    {
+                        if (ESM::Attribute::sAttributeNames[i] == attr)
+                        {
+                            effect.mAttribute = static_cast<signed char>(i);
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case 3:
+                {
+                    std::string effectId = value.toString().toStdString();
+                    if (effectId == "Self")
+                        effect.mRange = ESM::RT_Self;
+                    else if (effectId == "Touch")
+                        effect.mRange = ESM::RT_Touch;
+                    else if (effectId == "Target")
+                        effect.mRange = ESM::RT_Target;
+                    // else leave unchanged
+                    break;
+                }
                 case 4: effect.mArea = value.toInt(); break;
                 case 5: effect.mDuration = value.toInt(); break;
                 case 6: effect.mMagnMin = value.toInt(); break;

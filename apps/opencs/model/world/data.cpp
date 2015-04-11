@@ -195,15 +195,15 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mSpells.addColumn (spellEffect);
     mSpells.addAdapter (std::make_pair(spellEffect, new EffectsListAdapter<ESM::Spell> ()));
     mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
-            new NestedIntegerColumn (Columns::ColumnId_EffectId));
+            new NestedStringColumn (Columns::ColumnId_EffectId/*, false*/)); // false means no edit
     mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
-            new NestedIntegerColumn (Columns::ColumnId_Skill));
+            new NestedStringColumn (Columns::ColumnId_Skill));
     mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
-            new NestedIntegerColumn (Columns::ColumnId_EffectAttribute));
+            new NestedStringColumn (Columns::ColumnId_Attribute)); // reuse attribute
     mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
             new NestedIntegerColumn (Columns::ColumnId_EffectRange));
     mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
-            new NestedIntegerColumn (Columns::ColumnId_EffectArea));
+            new NestedStringColumn (Columns::ColumnId_EffectArea));
     mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
             new NestedIntegerColumn (Columns::ColumnId_Duration)); // reuse from light
     mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
@@ -269,15 +269,15 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mEnchantments.addColumn (enchantmentEffect);
     mEnchantments.addAdapter (std::make_pair(enchantmentEffect, new EffectsListAdapter<ESM::Enchantment> ()));
     mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
-            new NestedIntegerColumn (Columns::ColumnId_EffectId));
+            new NestedStringColumn (Columns::ColumnId_EffectId/*, false*/));
     mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
-            new NestedIntegerColumn (Columns::ColumnId_Skill));
+            new NestedStringColumn (Columns::ColumnId_Skill));
     mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
-            new NestedIntegerColumn (Columns::ColumnId_EffectAttribute));
+            new NestedStringColumn (Columns::ColumnId_Attribute)); // reuse attribute
     mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
             new NestedIntegerColumn (Columns::ColumnId_EffectRange));
     mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
-            new NestedIntegerColumn (Columns::ColumnId_EffectArea));
+            new NestedStringColumn (Columns::ColumnId_EffectArea));
     mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
             new NestedIntegerColumn (Columns::ColumnId_Duration)); // reuse from light
     mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(

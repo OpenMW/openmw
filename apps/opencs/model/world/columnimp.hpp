@@ -2286,13 +2286,16 @@ namespace CSMWorld
 
     struct NestedStringColumn : public NestableColumn
     {
-        NestedStringColumn (Columns::ColumnId id)
+        bool mIsEditable;
+
+        NestedStringColumn (Columns::ColumnId id, bool isEditable = true)
         : NestableColumn (id, ColumnBase::Display_String, ColumnBase::Flag_Dialogue)
+        , mIsEditable(isEditable)
         {}
 
         virtual bool isEditable() const
         {
-            return true;
+            return mIsEditable;
         }
     };
 
