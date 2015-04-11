@@ -5,6 +5,7 @@
 
 #include <components/esm/loadpgrd.hpp>
 #include <components/esm/loadregn.hpp>
+#include <components/esm/loadfact.hpp>
 
 #include "idadapter.hpp"
 #include "nestedtablewrapper.hpp"
@@ -218,7 +219,12 @@ namespace CSMWorld
 
         virtual QVariant getNestedData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const
         {
-            ESM::Pathgrid::Edge edge = record.get().mEdges[subRowIndex];
+            ESXRecordT pathgrid = record.get();
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (pathgrid.mEdges.size()))
+                throw std::runtime_error ("index out of range");
+
+            ESM::Pathgrid::Edge edge = pathgrid.mEdges[subRowIndex];
             switch (subColIndex)
             {
                 case 0: return subRowIndex;
@@ -233,6 +239,10 @@ namespace CSMWorld
                                     int subRowIndex, int subColIndex) const
         {
             ESXRecordT pathgrid = record.get();
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (pathgrid.mEdges.size()))
+                throw std::runtime_error ("index out of range");
+
             ESM::Pathgrid::Edge edge = pathgrid.mEdges[subRowIndex];
             switch (subColIndex)
             {
@@ -259,6 +269,126 @@ namespace CSMWorld
     };
 
     template<typename ESXRecordT>
+    class FactionReactionsAdapter : public NestedIdAdapter<ESXRecordT>
+    {
+    public:
+        FactionReactionsAdapter () {}
+
+        virtual void addNestedRow(Record<ESXRecordT>& record, int position) const
+        {
+            ESXRecordT faction = record.get();
+
+            std::map<std::string, int>& reactions = faction.mReactions;
+
+            // blank row
+            reactions.insert(std::make_pair("", 0));
+
+            record.setModified (faction);
+        }
+
+        virtual void removeNestedRow(Record<ESXRecordT>& record, int rowToRemove) const
+        {
+            ESXRecordT faction = record.get();
+
+            std::map<std::string, int>& reactions = faction.mReactions;
+
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (reactions.size()))
+                throw std::runtime_error ("index out of range");
+
+            // FIXME: how to ensure that the map entries correspond to table indicies?
+            // WARNING: Assumed that the table view has the same order as std::map
+            std::map<std::string, int>::const_iterator iter = reactions.begin();
+            for(int i = 0; i < rowToRemove; ++i)
+                iter++;
+            reactions.erase(iter);
+
+            record.setModified (faction);
+        }
+
+        virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const
+        {
+            record.get().mReactions =
+                static_cast<const NestedTableWrapper<std::map<std::string, int> >&>(nestedTable).mNestedTable;
+        }
+
+        virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const
+        {
+            // deleted by dtor of NestedTableStoring
+            return new NestedTableWrapper<std::map<std::string, int> >(record.get().mReactions);
+        }
+
+        virtual QVariant getNestedData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const
+        {
+            ESXRecordT faction = record.get();
+
+            std::map<std::string, int>& reactions = faction.mReactions;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (reactions.size()))
+                throw std::runtime_error ("index out of range");
+
+            // FIXME: how to ensure that the map entries correspond to table indicies?
+            // WARNING: Assumed that the table view has the same order as std::map
+            std::map<std::string, int>::const_iterator iter = reactions.begin();
+            for(int i = 0; i < subRowIndex; ++i)
+                iter++;
+            switch (subColIndex)
+            {
+                case 0: return QString((*iter).first.c_str());
+                case 1: return (*iter).second;
+                default: throw std::runtime_error("Faction reactions subcolumn index out of range");
+            }
+        }
+
+        virtual void setNestedData(Record<ESXRecordT>& record, const QVariant& value,
+                                    int subRowIndex, int subColIndex) const
+        {
+            ESXRecordT faction = record.get();
+
+            std::map<std::string, int>& reactions = faction.mReactions;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (reactions.size()))
+                throw std::runtime_error ("index out of range");
+
+            // FIXME: how to ensure that the map entries correspond to table indicies?
+            // WARNING: Assumed that the table view has the same order as std::map
+            std::map<std::string, int>::const_iterator iter = reactions.begin();
+            for(int i = 0; i < subRowIndex; ++i)
+                iter++;
+
+            std::string factionId = (*iter).first;
+            int reaction = (*iter).second;
+
+            switch (subColIndex)
+            {
+                case 0:
+                {
+                    reactions.erase(iter);
+                    reactions.insert(std::make_pair(value.toString().toUtf8().constData(), reaction));
+                    break;
+                }
+                case 1:
+                {
+                    reactions[factionId] = value.toInt();
+                    break;
+                }
+                default: throw std::runtime_error("Faction reactions subcolumn index out of range");
+            }
+
+            record.setModified (faction);
+        }
+
+        virtual int getNestedColumnsCount(const Record<ESXRecordT>& record) const
+        {
+            return 2;
+        }
+
+        virtual int getNestedRowsCount(const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int>(record.get().mReactions.size());
+        }
+    };
+
+    template<typename ESXRecordT>
     class RegionSoundListAdapter : public NestedIdAdapter<ESXRecordT>
     {
     public:
@@ -268,10 +398,10 @@ namespace CSMWorld
         {
             ESXRecordT region = record.get();
 
-            std::vector<ESXRecordT::SoundRef>& soundList = region.mSoundList;
+            std::vector<typename ESXRecordT::SoundRef>& soundList = region.mSoundList;
 
             // blank row
-            ESXRecordT::SoundRef soundRef;
+            typename ESXRecordT::SoundRef soundRef;
             soundRef.mSound.assign("");
             soundRef.mChance = 0;
 
@@ -284,7 +414,7 @@ namespace CSMWorld
         {
             ESXRecordT region = record.get();
 
-            std::vector<ESXRecordT::SoundRef>& soundList = region.mSoundList;
+            std::vector<typename ESXRecordT::SoundRef>& soundList = region.mSoundList;
 
             if (rowToRemove < 0 || rowToRemove >= static_cast<int> (soundList.size()))
                 throw std::runtime_error ("index out of range");
@@ -297,18 +427,25 @@ namespace CSMWorld
         virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const
         {
             record.get().mSoundList =
-                static_cast<const NestedTableWrapper<std::vector<ESM::Region::SoundRef> >&>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<std::vector<typename ESXRecordT::SoundRef> >&>(nestedTable).mNestedTable;
         }
 
         virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const
         {
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<ESM::Region::SoundRef> >(record.get().mSoundList);
+            return new NestedTableWrapper<std::vector<typename ESXRecordT::SoundRef> >(record.get().mSoundList);
         }
 
         virtual QVariant getNestedData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const
         {
-            ESXRecordT::SoundRef soundRef = record.get().mSoundList[subRowIndex];
+            ESXRecordT region = record.get();
+
+            std::vector<typename ESXRecordT::SoundRef>& soundList = region.mSoundList;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (soundList.size()))
+                throw std::runtime_error ("index out of range");
+
+            typename ESXRecordT::SoundRef soundRef = soundList[subRowIndex];
             switch (subColIndex)
             {
                 case 0: return QString(soundRef.mSound.toString().c_str());
@@ -321,7 +458,13 @@ namespace CSMWorld
                                     int subRowIndex, int subColIndex) const
         {
             ESXRecordT region = record.get();
-            ESXRecordT::SoundRef soundRef = region.mSoundList[subRowIndex];
+
+            std::vector<typename ESXRecordT::SoundRef>& soundList = region.mSoundList;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (soundList.size()))
+                throw std::runtime_error ("index out of range");
+
+            typename ESXRecordT::SoundRef soundRef = soundList[subRowIndex];
             switch (subColIndex)
             {
                 case 0: soundRef.mSound.assign(value.toString().toUtf8().constData()); break;

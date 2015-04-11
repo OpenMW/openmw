@@ -2357,11 +2357,10 @@ namespace CSMWorld
     };
 
     template<typename ESXRecordT>
-    struct RegionSoundListColumn : public Column<ESXRecordT>
+    struct NestedParentColumn : public Column<ESXRecordT>
     {
-        RegionSoundListColumn ()
-        : Column<ESXRecordT> (Columns::ColumnId_RegionSounds,
-                ColumnBase::Display_RegionSoundList, ColumnBase::Flag_Dialogue)
+        NestedParentColumn (Columns::ColumnId id)
+        : Column<ESXRecordT> (id, ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -2376,11 +2375,10 @@ namespace CSMWorld
 
     };
 
-    struct RegionSoundNameColumn : public NestableColumn
+    struct NestedStringColumn : public NestableColumn
     {
-        RegionSoundNameColumn ()
-        : NestableColumn (Columns::ColumnId_SoundName,
-                ColumnBase::Display_String, ColumnBase::Flag_Dialogue)
+        NestedStringColumn (Columns::ColumnId id)
+        : NestableColumn (id, ColumnBase::Display_String, ColumnBase::Flag_Dialogue)
         {}
 
         virtual bool isEditable() const
@@ -2389,11 +2387,10 @@ namespace CSMWorld
         }
     };
 
-    struct RegionSoundChanceColumn : public NestableColumn
+    struct NestedIntegerColumn : public NestableColumn
     {
-        RegionSoundChanceColumn ()
-        : NestableColumn (Columns::ColumnId_SoundChance,
-                ColumnBase::Display_Integer, ColumnBase::Flag_Dialogue)
+        NestedIntegerColumn (Columns::ColumnId id)
+        : NestableColumn (id, ColumnBase::Display_Integer, ColumnBase::Flag_Dialogue)
         {}
 
         virtual bool isEditable() const

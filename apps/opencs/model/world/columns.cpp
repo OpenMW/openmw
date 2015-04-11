@@ -237,6 +237,10 @@ namespace CSMWorld
             { ColumnId_SoundName, "Name"},
             { ColumnId_SoundChance, "Chance"},
 
+            { ColumnId_FactionReactions, "Reactions"},
+            //{ ColumnId_FactionID, "Faction ID"},
+            { ColumnId_FactionReaction, "Reaction"},
+
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
             { ColumnId_UseValue3, "Use value 3" },
@@ -263,6 +267,7 @@ namespace CSMWorld
             { ColumnId_Skill4, "Skill 4" },
             { ColumnId_Skill5, "Skill 5" },
             { ColumnId_Skill6, "Skill 6" },
+            { ColumnId_Skill7, "Skill 7" },
 
             { -1, 0 } // end marker
         };

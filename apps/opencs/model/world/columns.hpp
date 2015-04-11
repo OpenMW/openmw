@@ -226,6 +226,10 @@ namespace CSMWorld
             ColumnId_SoundName = 209,
             ColumnId_SoundChance = 210,
 
+            ColumnId_FactionReactions = 211,
+            //ColumnId_FactionID = 212,
+            ColumnId_FactionReaction = 213,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,
@@ -259,7 +263,8 @@ namespace CSMWorld
             ColumnId_Skill3 = 0x50002,
             ColumnId_Skill4 = 0x50003,
             ColumnId_Skill5 = 0x50004,
-            ColumnId_Skill6 = 0x50005
+            ColumnId_Skill6 = 0x50005,
+            ColumnId_Skill7 = 0x50006
         };
 
         std::string getName (ColumnId column);

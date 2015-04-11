@@ -108,6 +108,15 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mFactions.addColumn (new HiddenColumn<ESM::Faction>);
     for (int i=0; i<7; ++i)
         mFactions.addColumn (new SkillsColumn<ESM::Faction> (i));
+    // Faction Reactions
+    NestedParentColumn<ESM::Faction> *reactions =
+        new NestedParentColumn<ESM::Faction> (Columns::ColumnId_FactionReactions);
+    mFactions.addColumn (reactions);
+    mFactions.addAdapter (std::make_pair(reactions, new FactionReactionsAdapter<ESM::Faction> ()));
+    mFactions.getNestableColumn(mFactions.getColumns()-1)->addColumn(
+            new NestedStringColumn (Columns::ColumnId_Faction));
+    mFactions.getNestableColumn(mFactions.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_FactionReaction));
 
     mRaces.addColumn (new StringIdColumn<ESM::Race>);
     mRaces.addColumn (new RecordStateColumn<ESM::Race>);
@@ -140,12 +149,15 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRegions.addColumn (new NameColumn<ESM::Region>);
     mRegions.addColumn (new MapColourColumn<ESM::Region>);
     mRegions.addColumn (new SleepListColumn<ESM::Region>);
-    // see idadapterimpl.hpp and columnimp.hpp
-    RegionSoundListColumn<ESM::Region> *soundList = new RegionSoundListColumn<ESM::Region> ();
+    // Region Sounds
+    NestedParentColumn<ESM::Region> *soundList =
+        new NestedParentColumn<ESM::Region> (Columns::ColumnId_RegionSounds);
     mRegions.addColumn (soundList);
     mRegions.addAdapter (std::make_pair(soundList, new RegionSoundListAdapter<ESM::Region> ()));
-    mRegions.getNestableColumn(mRegions.getColumns()-1)->addColumn(new RegionSoundNameColumn ());
-    mRegions.getNestableColumn(mRegions.getColumns()-1)->addColumn(new RegionSoundChanceColumn ());
+    mRegions.getNestableColumn(mRegions.getColumns()-1)->addColumn(
+            new NestedStringColumn (Columns::ColumnId_SoundName));
+    mRegions.getNestableColumn(mRegions.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_SoundChance));
 
     mBirthsigns.addColumn (new StringIdColumn<ESM::BirthSign>);
     mBirthsigns.addColumn (new RecordStateColumn<ESM::BirthSign>);
@@ -341,7 +353,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skill);
     addModel (new IdTable (&mClasses), UniversalId::Type_Class);
-    addModel (new IdTable (&mFactions), UniversalId::Type_Faction);
+    addModel (new IdTree (&mFactions, &mFactions), UniversalId::Type_Faction);
     addModel (new IdTable (&mRaces), UniversalId::Type_Race);
     addModel (new IdTable (&mSounds), UniversalId::Type_Sound);
     addModel (new IdTable (&mScripts), UniversalId::Type_Script);

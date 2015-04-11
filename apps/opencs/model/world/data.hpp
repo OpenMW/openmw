@@ -69,7 +69,7 @@ namespace CSMWorld
             IdCollection<ESM::GameSetting> mGmsts;
             IdCollection<ESM::Skill> mSkills;
             IdCollection<ESM::Class> mClasses;
-            IdCollection<ESM::Faction> mFactions;
+            NestedIdCollection<ESM::Faction> mFactions;
             IdCollection<ESM::Race> mRaces;
             IdCollection<ESM::Sound> mSounds;
             IdCollection<ESM::Script> mScripts;
