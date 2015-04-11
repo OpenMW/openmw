@@ -46,7 +46,7 @@ namespace CSMWorld
 
         private:
 
-            /*const*/ RefIdAdapter& findAdapter (UniversalId::Type) const;
+            const RefIdAdapter& findAdapter (UniversalId::Type) const;
             ///< Throws an exception if no adaptor for \a Type can be found.
 
         public:

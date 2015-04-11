@@ -25,8 +25,7 @@ bool CSMWorld::RefIdColumn::isUserEditable() const
     return mUserEditable;
 }
 
-// FIXME: const problem
-/*const*/ CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdapter (UniversalId::Type type) const
+const CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdapter (UniversalId::Type type) const
 {
     std::map<UniversalId::Type, RefIdAdapter *>::const_iterator iter = mAdapters.find (type);
 
@@ -684,10 +683,8 @@ void CSMWorld::RefIdCollection::setNestedTable(int row, int column, const CSMWor
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
-    // FIXME: const problem
-    CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
+    const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
-    // FIXME: const problem
     adaptor.setNestedTable(&mColumns.at(column), mData, localIndex.first, nestedTable);
 }
 

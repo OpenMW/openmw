@@ -102,7 +102,7 @@ namespace CSMWorld
             }
         };
 
-        virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable)
+        virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const
         {
             record.get().mPoints =
                 static_cast<const PathgridPointsWrap &>(nestedTable).mRecord.mPoints;
@@ -204,7 +204,7 @@ namespace CSMWorld
             record.setModified (pathgrid);
         }
 
-        virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable)
+        virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const
         {
             record.get().mEdges =
                 static_cast<const NestedTableWrapper<ESM::Pathgrid::EdgeList> &>(nestedTable).mNestedTable;

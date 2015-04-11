@@ -69,7 +69,7 @@ namespace CSMWorld
 
             virtual void addNestedRow (const RefIdColumn *column, RefIdData& data, int index, int position) const = 0;
 
-            virtual void setNestedTable (const RefIdColumn* column, RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) = 0;
+            virtual void setNestedTable (const RefIdColumn* column, RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const = 0;
 
             virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column, const RefIdData& data, int index) const = 0;
     };
@@ -97,7 +97,7 @@ namespace CSMWorld
 
         virtual void addNestedRow (const RefIdColumn *column, RefIdData& data, int index, int position) const;
 
-        virtual void setNestedTable (const RefIdColumn* column, RefIdData& data, int index, const NestedTableWrapperBase& nestedTable);
+        virtual void setNestedTable (const RefIdColumn* column, RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const;
 
         virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column, const RefIdData& data, int index) const;
 

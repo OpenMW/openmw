@@ -22,7 +22,7 @@ namespace CSMWorld
 
         virtual void removeNestedRow(Record<ESXRecordT>& record, int rowToRemove) const = 0;
 
-        virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) = 0;
+        virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const = 0;
 
         virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const = 0;
 

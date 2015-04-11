@@ -145,8 +145,8 @@ namespace CSMWorld
             {
                 CastableHelper<ESXRecordT>::getRecord(data, index).get().mSpells.mList.at(subRowIndex) = std::string(value.toString().toUtf8());
             }
-
-            throw std::logic_error("Trying to access non-existing column in the nested table!");
+            else
+                throw std::logic_error("Trying to access non-existing column in the nested table!");
         }
 
         virtual void addNestedRow (RefIdData& data, int index, int position) const

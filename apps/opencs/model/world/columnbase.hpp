@@ -137,7 +137,6 @@ namespace CSMWorld
     class NestableColumn : public ColumnBase
     {
         std::vector<NestableColumn *> mNestedColumns;
-        bool mHasChildren;
 
     public:
 

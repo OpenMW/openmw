@@ -120,8 +120,6 @@ namespace CSMWorld
 
             virtual const Record<ESXRecordT>& getRecord (int index) const;
 
-            virtual Record<ESXRecordT>& getRecord (int index);
-
             virtual int getAppendIndex (const std::string& id,
                 UniversalId::Type type = UniversalId::Type_None) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types
@@ -151,7 +149,7 @@ namespace CSMWorld
             void setRecord (int index, const Record<ESXRecordT>& record);
             ///< \attention This function must not change the ID.
 
-            NestableColumn *getNestableColumn (int column);
+            NestableColumn *getNestableColumn (int column) const;
     };
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -294,7 +292,7 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    NestableColumn *Collection<ESXRecordT, IdAccessorT>::getNestableColumn (int column)
+    NestableColumn *Collection<ESXRecordT, IdAccessorT>::getNestableColumn (int column) const
     {
         if (column < 0 || column >= static_cast<int>(mColumns.size()))
             throw std::runtime_error("column index out of range");
@@ -431,12 +429,6 @@ namespace CSMWorld
 
     template<typename ESXRecordT, typename IdAccessorT>
     const Record<ESXRecordT>& Collection<ESXRecordT, IdAccessorT>::getRecord (int index) const
-    {
-        return mRecords.at (index);
-    }
-
-    template<typename ESXRecordT, typename IdAccessorT>
-    Record<ESXRecordT>& Collection<ESXRecordT, IdAccessorT>::getRecord (int index)
     {
         return mRecords.at (index);
     }

@@ -26,12 +26,11 @@ int  CSMWorld::ColumnBase::getId() const
 void CSMWorld::NestableColumn::addColumn(CSMWorld::NestableColumn *column)
 {
     mNestedColumns.push_back(column);
-    mHasChildren = true;
 }
 
 const CSMWorld::ColumnBase& CSMWorld::NestableColumn::nestedColumn(int subColumn) const
 {
-    if (!mHasChildren)
+    if (mNestedColumns.empty())
         throw std::logic_error("Tried to access nested column of the non-nest column");
 
     return *mNestedColumns.at(subColumn);
@@ -39,7 +38,7 @@ const CSMWorld::ColumnBase& CSMWorld::NestableColumn::nestedColumn(int subColumn
 
 CSMWorld::NestableColumn::NestableColumn(int columnId, CSMWorld::ColumnBase::Display displayType,
     int flag)
-    : mHasChildren(false), CSMWorld::ColumnBase(columnId, displayType, flag)
+    : CSMWorld::ColumnBase(columnId, displayType, flag)
 {
 }
 
@@ -53,5 +52,5 @@ CSMWorld::NestableColumn::~NestableColumn()
 
 bool CSMWorld::NestableColumn::hasChildren() const
 {
-    return mHasChildren;
+    return !mNestedColumns.empty();
 }

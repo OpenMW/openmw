@@ -57,7 +57,7 @@ void CSMWorld::NestedRefIdAdapter::addNestedRow (const RefIdColumn *column, RefI
     getHelper(column)->addNestedRow(data, index, position); //This code grows more boring and boring. I would love some macros.
 }
 
-void CSMWorld::NestedRefIdAdapter::setNestedTable (const RefIdColumn* column, RefIdData& data, int index, const NestedTableWrapperBase& nestedTable)
+void CSMWorld::NestedRefIdAdapter::setNestedTable (const RefIdColumn* column, RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
 {
     getHelper(column)->setNestedTable(data, index, nestedTable);
 }

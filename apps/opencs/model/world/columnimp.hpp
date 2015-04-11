@@ -2271,16 +2271,11 @@ namespace CSMWorld
         PathgridPointListColumn ()
         : Column<ESXRecordT> (Columns::ColumnId_PathgridPoints,
                 ColumnBase::Display_PathgridPointList, ColumnBase::Flag_Dialogue)
-        {
-        }
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
             return true; // required by IdTree::hasChildren()
-        }
-
-        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
-        {
         }
 
         virtual bool isEditable() const
@@ -2289,21 +2284,12 @@ namespace CSMWorld
         }
     };
 
-    template<typename ESXRecordT>
-    struct PathgridIndexColumn : public Column<ESXRecordT>
+    struct PathgridIndexColumn : public NestableColumn
     {
         PathgridIndexColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_PathgridIndex, ColumnBase::Display_Integer)
+        : NestableColumn (Columns::ColumnId_PathgridIndex,
+                ColumnBase::Display_Integer, ColumnBase::Flag_Dialogue)
         {}
-
-        virtual QVariant get (const Record<ESXRecordT>& record) const
-        {
-            return QVariant(); // FIXME
-        }
-
-        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
-        {
-        }
 
         virtual bool isEditable() const
         {
@@ -2311,23 +2297,12 @@ namespace CSMWorld
         }
     };
 
-    template<typename ESXRecordT>
-    struct PathgridPointColumn : public Column<ESXRecordT>
+    struct PathgridPointColumn : public NestableColumn
     {
-        int mIndex; // 0=PosX, 1=PosY, 2=PosZ
-
         PathgridPointColumn(int index)
-        : Column<ESXRecordT> (Columns::ColumnId_PathgridPosX+index, ColumnBase::Display_Integer), mIndex(index)
+        : NestableColumn (Columns::ColumnId_PathgridPosX+index,
+                ColumnBase::Display_Integer, ColumnBase::Flag_Dialogue)
         {}
-
-        virtual QVariant get (const Record<ESXRecordT>& record) const
-        {
-            return QVariant(); // FIXME
-        }
-
-        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
-        {
-        }
 
         virtual bool isEditable() const
         {
@@ -2341,16 +2316,11 @@ namespace CSMWorld
         PathgridEdgeListColumn ()
         : Column<ESXRecordT> (Columns::ColumnId_PathgridEdges,
                 ColumnBase::Display_PathgridEdgeList, ColumnBase::Flag_Dialogue)
-        {
-        }
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
             return true; // required by IdTree::hasChildren()
-        }
-
-        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
-        {
         }
 
         virtual bool isEditable() const
@@ -2360,21 +2330,12 @@ namespace CSMWorld
 
     };
 
-    template<typename ESXRecordT>
-    struct PathgridEdgeIndexColumn : public Column<ESXRecordT>
+    struct PathgridEdgeIndexColumn : public NestableColumn
     {
         PathgridEdgeIndexColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_PathgridEdgeIndex, ColumnBase::Display_Integer)
+        : NestableColumn (Columns::ColumnId_PathgridEdgeIndex,
+                ColumnBase::Display_Integer, ColumnBase::Flag_Dialogue)
         {}
-
-        virtual QVariant get (const Record<ESXRecordT>& record) const
-        {
-            return QVariant(); // FIXME
-        }
-
-        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
-        {
-        }
 
         virtual bool isEditable() const
         {
@@ -2382,24 +2343,12 @@ namespace CSMWorld
         }
     };
 
-    template<typename ESXRecordT>
-    struct PathgridEdgeColumn : public Column<ESXRecordT>
+    struct PathgridEdgeColumn : public NestableColumn
     {
-        int mIndex;
-
         PathgridEdgeColumn (int index)
-        : Column<ESXRecordT> (Columns::ColumnId_PathgridEdge0+index, ColumnBase::Display_Integer), mIndex(index)
-        {
-        }
-
-        virtual QVariant get (const Record<ESXRecordT>& record) const
-        {
-            return QVariant(); // FIXME
-        }
-
-        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
-        {
-        }
+        : NestableColumn (Columns::ColumnId_PathgridEdge0+index,
+                ColumnBase::Display_Integer, ColumnBase::Flag_Dialogue)
+        {}
 
         virtual bool isEditable() const
         {

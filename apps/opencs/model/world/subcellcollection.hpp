@@ -32,7 +32,7 @@ namespace CSMWorld
 
             virtual void loadRecord (ESXRecordT& record, ESM::ESMReader& reader);
 
-            NestedIdAdapter<ESXRecordT>* getAdapter(const ColumnBase &column) const;
+            const NestedIdAdapter<ESXRecordT>& getAdapter(const ColumnBase &column) const;
 
         public:
 
@@ -88,7 +88,7 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    NestedIdAdapter<ESXRecordT>* SubCellCollection<ESXRecordT, IdAccessorT>::getAdapter(const ColumnBase &column) const
+    const NestedIdAdapter<ESXRecordT>& SubCellCollection<ESXRecordT, IdAccessorT>::getAdapter(const ColumnBase &column) const
     {
         typename std::map<const ColumnBase *, NestedIdAdapter<ESXRecordT>* >::const_iterator iter =
             mAdapters.find (&column);
@@ -96,28 +96,36 @@ namespace CSMWorld
         if (iter==mAdapters.end())
             throw std::logic_error("No such column in the nestedidadapter");
 
-        return iter->second;
+        return *iter->second;
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
     void SubCellCollection<ESXRecordT, IdAccessorT>::addNestedRow(int row, int column, int position)
     {
-        getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column))->addNestedRow(
-                Collection<ESXRecordT, IdAccessorT>::getRecord(row), position);
+        Record<ESXRecordT> record;
+        record.assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
+
+        getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).addNestedRow(record, position);
+
+        Collection<ESXRecordT, IdAccessorT>::setRecord(row, record);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
     void SubCellCollection<ESXRecordT, IdAccessorT>::removeNestedRows(int row, int column, int subRow)
     {
-        getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column))->removeNestedRow(
-                Collection<ESXRecordT, IdAccessorT>::getRecord(row), subRow);
+        Record<ESXRecordT> record;
+        record.assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
+
+        getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).removeNestedRow(record, subRow);
+
+        Collection<ESXRecordT, IdAccessorT>::setRecord(row, record);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
     QVariant SubCellCollection<ESXRecordT, IdAccessorT>::getNestedData (int row,
             int column, int subRow, int subColumn) const
     {
-        return getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column))->getNestedData(
+        return getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).getNestedData(
                 Collection<ESXRecordT, IdAccessorT>::getRecord(row), subRow, subColumn);
     }
 
@@ -125,15 +133,20 @@ namespace CSMWorld
     void SubCellCollection<ESXRecordT, IdAccessorT>::setNestedData(int row,
             int column, const QVariant& data, int subRow, int subColumn)
     {
-        getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column))->setNestedData(
-                Collection<ESXRecordT, IdAccessorT>::getRecord(row), data, subRow, subColumn);
+        Record<ESXRecordT> record;
+        record.assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
+
+        getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).setNestedData(
+                record, data, subRow, subColumn);
+
+        Collection<ESXRecordT, IdAccessorT>::setRecord(row, record);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
     CSMWorld::NestedTableWrapperBase* SubCellCollection<ESXRecordT, IdAccessorT>::nestedTable(int row,
             int column) const
     {
-        return getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column))->nestedTable(
+        return getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).nestedTable(
                 Collection<ESXRecordT, IdAccessorT>::getRecord(row));
     }
 
@@ -141,21 +154,26 @@ namespace CSMWorld
     void SubCellCollection<ESXRecordT, IdAccessorT>::setNestedTable(int row,
             int column, const CSMWorld::NestedTableWrapperBase& nestedTable)
     {
-        getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column))->setNestedTable(
-                Collection<ESXRecordT, IdAccessorT>::getRecord(row), nestedTable);
+        Record<ESXRecordT> record;
+        record.assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
+
+        getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).setNestedTable(
+                record, nestedTable);
+
+        Collection<ESXRecordT, IdAccessorT>::setRecord(row, record);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
     int SubCellCollection<ESXRecordT, IdAccessorT>::getNestedRowsCount(int row, int column) const
     {
-        return getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column))->getNestedRowsCount(
+        return getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).getNestedRowsCount(
                 Collection<ESXRecordT, IdAccessorT>::getRecord(row));
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
     int SubCellCollection<ESXRecordT, IdAccessorT>::getNestedColumnsCount(int row, int column) const
     {
-        return getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column))->getNestedColumnsCount(
+        return getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).getNestedColumnsCount(
                 Collection<ESXRecordT, IdAccessorT>::getRecord(row));
     }
 

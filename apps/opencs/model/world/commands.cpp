@@ -185,7 +185,9 @@ CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTree& model,
     mNestedRow(nestedRow),
     NestedTableStoring(model, id, parentColumn)
 {
-    setText (("Delete nested row in " + mId).c_str());
+    std::string title =
+        model.headerData(parentColumn, Qt::Horizontal, Qt::DisplayRole).toString().toUtf8().constData();
+    setText (("Delete row in " + title + " sub-table of " + mId).c_str());
 }
 
 void CSMWorld::DeleteNestedCommand::redo()
@@ -211,7 +213,9 @@ CSMWorld::AddNestedCommand::AddNestedCommand(IdTree& model, const std::string& i
       QUndoCommand(parent),
       NestedTableStoring(model, id, parentColumn)
 {
-    setText (("Added nested row in " + mId).c_str());
+    std::string title =
+        model.headerData(parentColumn, Qt::Horizontal, Qt::DisplayRole).toString().toUtf8().constData();
+    setText (("Add row in " + title + " sub-table of " + mId).c_str());
 }
 
 void CSMWorld::AddNestedCommand::redo()
