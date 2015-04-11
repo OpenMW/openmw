@@ -297,7 +297,7 @@ namespace CSMWorld
 
             // FIXME: how to ensure that the map entries correspond to table indicies?
             // WARNING: Assumed that the table view has the same order as std::map
-            std::map<std::string, int>::const_iterator iter = reactions.begin();
+            std::map<std::string, int>::iterator iter = reactions.begin();
             for(int i = 0; i < rowToRemove; ++i)
                 iter++;
             reactions.erase(iter);
@@ -351,7 +351,7 @@ namespace CSMWorld
 
             // FIXME: how to ensure that the map entries correspond to table indicies?
             // WARNING: Assumed that the table view has the same order as std::map
-            std::map<std::string, int>::const_iterator iter = reactions.begin();
+            std::map<std::string, int>::iterator iter = reactions.begin();
             for(int i = 0; i < subRowIndex; ++i)
                 iter++;
 
