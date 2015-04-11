@@ -70,7 +70,7 @@ namespace CSMWorld
             IdCollection<ESM::Skill> mSkills;
             IdCollection<ESM::Class> mClasses;
             NestedIdCollection<ESM::Faction> mFactions;
-            IdCollection<ESM::Race> mRaces;
+            NestedIdCollection<ESM::Race> mRaces;
             IdCollection<ESM::Sound> mSounds;
             IdCollection<ESM::Script> mScripts;
             NestedIdCollection<ESM::Region> mRegions;

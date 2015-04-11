@@ -187,7 +187,7 @@ namespace CSMWorld
             { ColumnId_MeshType, "Mesh Type" },
 
             { ColumnId_ActorInventory, "Inventory" },
-            { ColumnId_ActorSpells, "Spells" },
+            { ColumnId_SpellList, "Spells" },
             { ColumnId_SpellId, "ID"},
 
             { ColumnId_NpcDestinations, "Destinations" },

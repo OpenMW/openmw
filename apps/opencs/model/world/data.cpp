@@ -110,7 +110,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         mFactions.addColumn (new SkillsColumn<ESM::Faction> (i));
     // Faction Reactions
     NestedParentColumn<ESM::Faction> *reactions =
-        new NestedParentColumn<ESM::Faction> (Columns::ColumnId_FactionReactions);
+            new NestedParentColumn<ESM::Faction> (Columns::ColumnId_FactionReactions);
     mFactions.addColumn (reactions);
     mFactions.addAdapter (std::make_pair(reactions, new FactionReactionsAdapter<ESM::Faction> ()));
     mFactions.getNestableColumn(mFactions.getColumns()-1)->addColumn(
@@ -129,6 +129,13 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (true, false));
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (false, true));
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (false, false));
+    // Race spells
+    NestedParentColumn<ESM::Race> *raceSpells =
+            new NestedParentColumn<ESM::Race> (Columns::ColumnId_SpellList);
+    mRaces.addColumn (raceSpells);
+    mRaces.addAdapter (std::make_pair(raceSpells, new SpellListAdapter<ESM::Race> ()));
+    mRaces.getNestableColumn(mRaces.getColumns()-1)->addColumn(
+            new NestedStringColumn (Columns::ColumnId_SpellId));
 
     mSounds.addColumn (new StringIdColumn<ESM::Sound>);
     mSounds.addColumn (new RecordStateColumn<ESM::Sound>);
@@ -151,7 +158,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRegions.addColumn (new SleepListColumn<ESM::Region>);
     // Region Sounds
     NestedParentColumn<ESM::Region> *soundList =
-        new NestedParentColumn<ESM::Region> (Columns::ColumnId_RegionSounds);
+            new NestedParentColumn<ESM::Region> (Columns::ColumnId_RegionSounds);
     mRegions.addColumn (soundList);
     mRegions.addAdapter (std::make_pair(soundList, new RegionSoundListAdapter<ESM::Region> ()));
     mRegions.getNestableColumn(mRegions.getColumns()-1)->addColumn(
@@ -354,7 +361,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new IdTable (&mSkills), UniversalId::Type_Skill);
     addModel (new IdTable (&mClasses), UniversalId::Type_Class);
     addModel (new IdTree (&mFactions, &mFactions), UniversalId::Type_Faction);
-    addModel (new IdTable (&mRaces), UniversalId::Type_Race);
+    addModel (new IdTree (&mRaces, &mRaces), UniversalId::Type_Race);
     addModel (new IdTable (&mSounds), UniversalId::Type_Sound);
     addModel (new IdTable (&mScripts), UniversalId::Type_Script);
     addModel (new IdTree (&mRegions, &mRegions), UniversalId::Type_Region);

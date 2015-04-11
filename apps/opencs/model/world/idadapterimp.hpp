@@ -487,6 +487,102 @@ namespace CSMWorld
             return static_cast<int>(record.get().mSoundList.size());
         }
     };
+
+    template<typename ESXRecordT>
+    class SpellListAdapter : public NestedIdAdapter<ESXRecordT>
+    {
+    public:
+        SpellListAdapter () {}
+
+        virtual void addNestedRow(Record<ESXRecordT>& record, int position) const
+        {
+            ESXRecordT raceOrBthSgn = record.get();
+
+            std::vector<std::string>& spells = raceOrBthSgn.mPowers.mList;
+
+            // blank row
+            std::string spell = "";
+
+            spells.insert(spells.begin()+position, spell);
+
+            record.setModified (raceOrBthSgn);
+        }
+
+        virtual void removeNestedRow(Record<ESXRecordT>& record, int rowToRemove) const
+        {
+            ESXRecordT raceOrBthSgn = record.get();
+
+            std::vector<std::string>& spells = raceOrBthSgn.mPowers.mList;
+
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (spells.size()))
+                throw std::runtime_error ("index out of range");
+
+            spells.erase(spells.begin()+rowToRemove);
+
+            record.setModified (raceOrBthSgn);
+        }
+
+        virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const
+        {
+            record.get().mPowers.mList =
+                static_cast<const NestedTableWrapper<std::vector<std::string> >&>(nestedTable).mNestedTable;
+        }
+
+        virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const
+        {
+            // deleted by dtor of NestedTableStoring
+            return new NestedTableWrapper<std::vector<std::string> >(record.get().mPowers.mList);
+        }
+
+        virtual QVariant getNestedData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const
+        {
+            ESXRecordT raceOrBthSgn = record.get();
+
+            std::vector<std::string>& spells = raceOrBthSgn.mPowers.mList;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (spells.size()))
+                throw std::runtime_error ("index out of range");
+
+            std::string spell = spells[subRowIndex];
+            switch (subColIndex)
+            {
+                case 0: return QString(spell.c_str());
+                default: throw std::runtime_error("Spells subcolumn index out of range");
+            }
+        }
+
+        virtual void setNestedData(Record<ESXRecordT>& record, const QVariant& value,
+                                    int subRowIndex, int subColIndex) const
+        {
+            ESXRecordT raceOrBthSgn = record.get();
+
+            std::vector<std::string>& spells = raceOrBthSgn.mPowers.mList;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (spells.size()))
+                throw std::runtime_error ("index out of range");
+
+            std::string spell = spells[subRowIndex];
+            switch (subColIndex)
+            {
+                case 0: spell = value.toString().toUtf8().constData(); break;
+                default: throw std::runtime_error("Spells subcolumn index out of range");
+            }
+
+            raceOrBthSgn.mPowers.mList[subRowIndex] = spell;
+
+            record.setModified (raceOrBthSgn);
+        }
+
+        virtual int getNestedColumnsCount(const Record<ESXRecordT>& record) const
+        {
+            return 1;
+        }
+
+        virtual int getNestedRowsCount(const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int>(record.get().mPowers.mList.size());
+        }
+    };
 }
 
 #endif // CSM_WOLRD_IDADAPTERIMP_H

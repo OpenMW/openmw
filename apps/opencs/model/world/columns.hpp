@@ -179,7 +179,7 @@ namespace CSMWorld
             ColumnId_BodyPartType = 164,
             ColumnId_MeshType = 165,
             ColumnId_ActorInventory = 166,
-            ColumnId_ActorSpells = 167,
+            ColumnId_SpellList = 167,
             ColumnId_SpellId = 168,
             ColumnId_NpcDestinations = 169,
             ColumnId_DestinationCell = 170,

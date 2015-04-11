@@ -106,7 +106,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
             new RefIdColumn (Columns::ColumnId_ItemCount, CSMWorld::ColumnBase::Display_Integer));
 
     // Nested table
-    mColumns.push_back(RefIdColumn (Columns::ColumnId_ActorSpells, ColumnBase::Display_NestedSpellList, ColumnBase::Flag_Dialogue));
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_SpellList, ColumnBase::Display_NestedSpellList, ColumnBase::Flag_Dialogue));
     actorsColumns.mSpells = &mColumns.back();
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_SpellId, CSMWorld::ColumnBase::Display_String));
