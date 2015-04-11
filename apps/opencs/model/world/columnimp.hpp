@@ -2264,55 +2264,6 @@ namespace CSMWorld
             return true;
         }
     };
-
-    template<typename ESXRecordT>
-    struct NestedParentColumn : public Column<ESXRecordT>
-    {
-        NestedParentColumn (Columns::ColumnId id)
-        : Column<ESXRecordT> (id, ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue)
-        {}
-
-        virtual QVariant get (const Record<ESXRecordT>& record) const
-        {
-            return true; // required by IdTree::hasChildren()
-        }
-
-        virtual bool isEditable() const
-        {
-            return true;
-        }
-
-    };
-
-    struct NestedStringColumn : public NestableColumn
-    {
-        bool mIsEditable;
-
-        NestedStringColumn (Columns::ColumnId id, bool isEditable = true)
-        : NestableColumn (id, ColumnBase::Display_String, ColumnBase::Flag_Dialogue)
-        , mIsEditable(isEditable)
-        {}
-
-        virtual bool isEditable() const
-        {
-            return mIsEditable;
-        }
-    };
-
-    struct NestedIntegerColumn : public NestableColumn
-    {
-        bool mIsEditable;
-
-        NestedIntegerColumn (Columns::ColumnId id, bool isEditable = true)
-        : NestableColumn (id, ColumnBase::Display_Integer, ColumnBase::Flag_Dialogue)
-        , mIsEditable(isEditable)
-        {}
-
-        virtual bool isEditable() const
-        {
-            return mIsEditable;
-        }
-    };
 }
 
 #endif

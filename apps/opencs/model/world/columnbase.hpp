@@ -165,6 +165,33 @@ namespace CSMWorld
             throw std::logic_error ("Column " + getTitle() + " is not editable");
         }
     };
+
+    template<typename ESXRecordT>
+    struct NestedParentColumn : public Column<ESXRecordT>
+    {
+        NestedParentColumn (int id) : Column<ESXRecordT> (id, Display_NestedHeader, Flag_Dialogue)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return true; // required by IdTree::hasChildren()
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    struct NestedChildColumn : public NestableColumn
+    {
+        NestedChildColumn (int id, Display display, bool isEditable = true);
+
+        virtual bool isEditable() const;
+
+    private:
+        bool mIsEditable;
+    };
 }
 
 #endif
