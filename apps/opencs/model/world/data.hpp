@@ -74,7 +74,7 @@ namespace CSMWorld
             IdCollection<ESM::Sound> mSounds;
             IdCollection<ESM::Script> mScripts;
             NestedIdCollection<ESM::Region> mRegions;
-            IdCollection<ESM::BirthSign> mBirthsigns;
+            NestedIdCollection<ESM::BirthSign> mBirthsigns;
             IdCollection<ESM::Spell> mSpells;
             IdCollection<ESM::Dialogue> mTopics;
             IdCollection<ESM::Dialogue> mJournals;

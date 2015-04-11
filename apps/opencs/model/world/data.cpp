@@ -172,6 +172,13 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mBirthsigns.addColumn (new NameColumn<ESM::BirthSign>);
     mBirthsigns.addColumn (new TextureColumn<ESM::BirthSign>);
     mBirthsigns.addColumn (new DescriptionColumn<ESM::BirthSign>);
+    // Birthsign spells
+    NestedParentColumn<ESM::BirthSign> *birthSpells =
+            new NestedParentColumn<ESM::BirthSign> (Columns::ColumnId_SpellList);
+    mBirthsigns.addColumn (birthSpells);
+    mBirthsigns.addAdapter (std::make_pair(birthSpells, new SpellListAdapter<ESM::BirthSign> ()));
+    mBirthsigns.getNestableColumn(mBirthsigns.getColumns()-1)->addColumn(
+            new NestedStringColumn (Columns::ColumnId_SpellId));
 
     mSpells.addColumn (new StringIdColumn<ESM::Spell>);
     mSpells.addColumn (new RecordStateColumn<ESM::Spell>);
@@ -365,7 +372,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new IdTable (&mSounds), UniversalId::Type_Sound);
     addModel (new IdTable (&mScripts), UniversalId::Type_Script);
     addModel (new IdTree (&mRegions, &mRegions), UniversalId::Type_Region);
-    addModel (new IdTable (&mBirthsigns), UniversalId::Type_Birthsign);
+    addModel (new IdTree (&mBirthsigns, &mBirthsigns), UniversalId::Type_Birthsign);
     addModel (new IdTable (&mSpells), UniversalId::Type_Spell);
     addModel (new IdTable (&mTopics), UniversalId::Type_Topic);
     addModel (new IdTable (&mJournals), UniversalId::Type_Journal);
