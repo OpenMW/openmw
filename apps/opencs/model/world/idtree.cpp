@@ -108,7 +108,19 @@ Qt::ItemFlags CSMWorld::IdTree::flags (const QModelIndex & index) const
     if (!index.isValid())
         return 0;
 
-    return IdTable::flags(index);
+    if (index.internalId() != 0)
+    {
+        std::pair<int, int> parentAddress(unfoldIndexAddress(index.internalId()));
+
+        Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+
+        if (mNestedCollection->getNestableColumn(parentAddress.second)->nestedColumn(index.column()).isEditable())
+            flags |= Qt::ItemIsEditable;
+
+        return flags;
+    }
+    else
+        return IdTable::flags(index);
 }
 
 bool CSMWorld::IdTree::removeRows (int row, int count, const QModelIndex& parent)

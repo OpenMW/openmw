@@ -110,7 +110,7 @@ bool CSMWorld::NestedTableProxyModel::setData (const QModelIndex & index, const 
 
 Qt::ItemFlags CSMWorld::NestedTableProxyModel::flags(const QModelIndex& index) const
 {
-    return mMainModel->flags(mMainModel->index(0, mParentColumn));
+    return mMainModel->flags(mapToSource(index));
 }
 
 std::string CSMWorld::NestedTableProxyModel::getParentId() const
