@@ -7,6 +7,8 @@
 
 #include <QtGui/qevent.h>
 
+#include <components/sceneutil/util.hpp>
+
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/data.hpp"
@@ -23,10 +25,7 @@ void CSVRender::UnpagedWorldspaceWidget::update()
     const CSMWorld::Record<CSMWorld::Cell>& record =
         dynamic_cast<const CSMWorld::Record<CSMWorld::Cell>&> (mCellsModel->getRecord (mCellId));
 
-    ESM::Color clr = record.get().mAmbi.mAmbient;
-    osg::Vec4f colour(((clr >> 0) & 0xFF) / 255.0f,
-                      ((clr >> 8) & 0xFF) / 255.0f,
-                      ((clr >> 16) & 0xFF) / 255.0f, 1.f);
+    osg::Vec4f colour = SceneUtil::colourFromRGB(record.get().mAmbi.mAmbient);
 
     setDefaultAmbient (colour);
 
