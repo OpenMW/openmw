@@ -291,7 +291,7 @@ void UVController::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
     if (hasInput())
     {
-        osg::StateSet* stateset = node->getStateSet();
+        osg::StateSet* stateset = getWritableStateSet(node);
         float value = getInputValue(nv);
         float uTrans = interpKey(mUTrans->mKeys, value, 0.0f);
         float vTrans = interpKey(mVTrans->mKeys, value, 0.0f);
@@ -372,7 +372,7 @@ void AlphaController::operator () (osg::Node* node, osg::NodeVisitor* nv)
 {
     if (hasInput())
     {
-        osg::StateSet* stateset = node->getStateSet();
+        osg::StateSet* stateset = getWritableStateSet(node);
         float value = interpKey(mData->mKeys, getInputValue(nv));
         osg::Material* mat = dynamic_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
         if (mat)
@@ -404,7 +404,7 @@ void MaterialColorController::operator() (osg::Node* node, osg::NodeVisitor* nv)
 {
     if (hasInput())
     {
-        osg::StateSet* stateset = node->getStateSet();
+        osg::StateSet* stateset = getWritableStateSet(node);
         osg::Vec3f value = interpKey(mData->mKeys, getInputValue(nv));
         osg::Material* mat = dynamic_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
         if (mat)
@@ -441,7 +441,7 @@ void FlipController::operator() (osg::Node* node, osg::NodeVisitor* nv)
 {
     if (hasInput() && mDelta != 0)
     {
-        osg::StateSet* stateset = node->getStateSet();
+        osg::StateSet* stateset = getWritableStateSet(node);
         int curTexture = int(getInputValue(nv) / mDelta) % mTextures.size();
         stateset->setTextureAttribute(mTexSlot, mTextures[curTexture]);
     }
@@ -505,6 +505,14 @@ void SourcedKeyframeController::operator ()(osg::Node* node, osg::NodeVisitor* n
         KeyframeController::operator()(node, nv); // calls traverse
     else
         traverse(node, nv);
+}
+
+osg::StateSet *StateSetController::getWritableStateSet(osg::Node *node)
+{
+    osg::StateSet* orig = node->getOrCreateStateSet();
+    osg::StateSet* cloned = new osg::StateSet(*orig, osg::CopyOp::SHALLOW_COPY);
+    node->setStateSet(cloned);
+    return cloned;
 }
 
 }

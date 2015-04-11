@@ -189,8 +189,19 @@ namespace NifOsg
         bool mEnabled;
     };
 
+    class StateSetController
+    {
+    protected:
+        // Clones a StateSet to make it "writable". This is to prevent race conditions when the OSG draw thread of the last frame
+        // queues up a StateSet that we want to modify. Note, we could also set the StateSet to DYNAMIC data variance but that would
+        // undo all the benefits of the threading model - having the cull and draw traversals run in parallel can yield up to 200% framerates.
+        // If the StateSet allocations per frame are proving too much of an overhead we could "reuse" StateSets from previous frames,
+        // kind of like a double buffering scheme.
+        osg::StateSet* getWritableStateSet(osg::Node* node);
+    };
+
     // Note we're using NodeCallback instead of StateSet::Callback because the StateSet callback doesn't support nesting
-    struct UVController : public osg::NodeCallback, public Controller, public ValueInterpolator
+    class UVController : public osg::NodeCallback, public Controller, public StateSetController, public ValueInterpolator
     {
     public:
         UVController();
@@ -226,7 +237,7 @@ namespace NifOsg
         virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
     };
 
-    class AlphaController : public osg::NodeCallback, public Controller, public ValueInterpolator
+    class AlphaController : public osg::NodeCallback, public Controller, public StateSetController, public ValueInterpolator
     {
     private:
         Nif::FloatKeyMapPtr mData;
@@ -241,7 +252,7 @@ namespace NifOsg
         META_Object(NifOsg, AlphaController)
     };
 
-    class MaterialColorController : public osg::NodeCallback, public Controller, public ValueInterpolator
+    class MaterialColorController : public osg::NodeCallback, public Controller, public StateSetController, public ValueInterpolator
     {
     private:
         Nif::Vector3KeyMapPtr mData;
@@ -256,7 +267,7 @@ namespace NifOsg
         virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
     };
 
-    class FlipController : public osg::NodeCallback, public Controller
+    class FlipController : public osg::NodeCallback, public Controller, public StateSetController
     {
     private:
         int mTexSlot;

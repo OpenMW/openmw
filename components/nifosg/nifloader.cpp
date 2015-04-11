@@ -881,7 +881,6 @@ namespace NifOsg
 
                     osg::ref_ptr<UVController> ctrl = new UVController(uvctrl->data.getPtr(), texUnits);
                     setupController(uvctrl, ctrl, animflags);
-                    transformNode->getOrCreateStateSet()->setDataVariance(osg::StateSet::DYNAMIC);
 
                     transformNode->addUpdateCallback(ctrl);
                 }
@@ -927,7 +926,6 @@ namespace NifOsg
                     const Nif::NiAlphaController* alphactrl = static_cast<const Nif::NiAlphaController*>(ctrl.getPtr());
                     osg::ref_ptr<AlphaController> ctrl(new AlphaController(alphactrl->data.getPtr()));
                     setupController(alphactrl, ctrl, animflags);
-                    stateset->setDataVariance(osg::StateSet::DYNAMIC);
                     node->addUpdateCallback(ctrl);
                 }
                 else if (ctrl->recType == Nif::RC_NiMaterialColorController)
@@ -935,7 +933,6 @@ namespace NifOsg
                     const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
                     osg::ref_ptr<MaterialColorController> ctrl(new MaterialColorController(matctrl->data.getPtr()));
                     setupController(matctrl, ctrl, animflags);
-                    stateset->setDataVariance(osg::StateSet::DYNAMIC);
                     node->addUpdateCallback(ctrl);
                 }
                 else
@@ -975,7 +972,6 @@ namespace NifOsg
                     }
                     osg::ref_ptr<FlipController> callback(new FlipController(flipctrl, textures));
                     setupController(ctrl.getPtr(), callback, animflags);
-                    stateset->setDataVariance(osg::StateSet::DYNAMIC);
                     node->addUpdateCallback(callback);
                 }
                 else
