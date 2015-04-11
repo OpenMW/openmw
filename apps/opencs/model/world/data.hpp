@@ -34,6 +34,7 @@
 #include "../doc/stage.hpp"
 
 #include "idcollection.hpp"
+#include "nestedidcollection.hpp"
 #include "universalid.hpp"
 #include "cell.hpp"
 #include "land.hpp"
@@ -72,7 +73,7 @@ namespace CSMWorld
             IdCollection<ESM::Race> mRaces;
             IdCollection<ESM::Sound> mSounds;
             IdCollection<ESM::Script> mScripts;
-            IdCollection<ESM::Region> mRegions;
+            NestedIdCollection<ESM::Region> mRegions;
             IdCollection<ESM::BirthSign> mBirthsigns;
             IdCollection<ESM::Spell> mSpells;
             IdCollection<ESM::Dialogue> mTopics;

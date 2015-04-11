@@ -99,6 +99,7 @@ namespace CSMWorld
             Display_NestedDestinationsList,
             Display_PathgridPointList,
             Display_PathgridEdgeList,
+            Display_RegionSoundList,
 
             Display_EnchantmentType,
             Display_BodyPartType,

@@ -233,6 +233,10 @@ namespace CSMWorld
             { ColumnId_PathgridEdge0, "Point 0"},
             { ColumnId_PathgridEdge1, "Point 1"},
 
+            { ColumnId_RegionSounds, "Sounds"},
+            { ColumnId_SoundName, "Name"},
+            { ColumnId_SoundChance, "Chance"},
+
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
             { ColumnId_UseValue3, "Use value 3" },

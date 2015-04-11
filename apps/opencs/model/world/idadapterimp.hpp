@@ -4,6 +4,7 @@
 #include <QVariant>
 
 #include <components/esm/loadpgrd.hpp>
+#include <components/esm/loadregn.hpp>
 
 #include "idadapter.hpp"
 #include "nestedtablewrapper.hpp"
@@ -127,7 +128,7 @@ namespace CSMWorld
                 case 1: return point.mX;
                 case 2: return point.mY;
                 case 3: return point.mZ;
-                default: throw std::logic_error("Pathgrid point subcolumn index out of range");
+                default: throw std::runtime_error("Pathgrid point subcolumn index out of range");
             }
         }
 
@@ -142,7 +143,7 @@ namespace CSMWorld
                 case 1: point.mX = value.toInt(); break;
                 case 2: point.mY = value.toInt(); break;
                 case 3: point.mZ = value.toInt(); break;
-                default: throw std::logic_error("Pathgrid point subcolumn index out of range");
+                default: throw std::runtime_error("Pathgrid point subcolumn index out of range");
             }
 
             pathgrid.mPoints[subRowIndex] = point;
@@ -223,7 +224,7 @@ namespace CSMWorld
                 case 0: return subRowIndex;
                 case 1: return edge.mV0;
                 case 2: return edge.mV1;
-                default: throw std::logic_error("Pathgrid edge subcolumn index out of range");
+                default: throw std::runtime_error("Pathgrid edge subcolumn index out of range");
             }
         }
 
@@ -238,7 +239,7 @@ namespace CSMWorld
                 case 0: break;
                 case 1: edge.mV0 = value.toInt(); break;
                 case 2: edge.mV1 = value.toInt(); break;
-                default: throw std::logic_error("Pathgrid edge subcolumn index out of range");
+                default: throw std::runtime_error("Pathgrid edge subcolumn index out of range");
             }
 
             pathgrid.mEdges[subRowIndex] = edge;
@@ -254,6 +255,93 @@ namespace CSMWorld
         virtual int getNestedRowsCount(const Record<ESXRecordT>& record) const
         {
             return static_cast<int>(record.get().mEdges.size());
+        }
+    };
+
+    template<typename ESXRecordT>
+    class RegionSoundListAdapter : public NestedIdAdapter<ESXRecordT>
+    {
+    public:
+        RegionSoundListAdapter () {}
+
+        virtual void addNestedRow(Record<ESXRecordT>& record, int position) const
+        {
+            ESXRecordT region = record.get();
+
+            std::vector<ESXRecordT::SoundRef>& soundList = region.mSoundList;
+
+            // blank row
+            ESXRecordT::SoundRef soundRef;
+            soundRef.mSound.assign("");
+            soundRef.mChance = 0;
+
+            soundList.insert(soundList.begin()+position, soundRef);
+
+            record.setModified (region);
+        }
+
+        virtual void removeNestedRow(Record<ESXRecordT>& record, int rowToRemove) const
+        {
+            ESXRecordT region = record.get();
+
+            std::vector<ESXRecordT::SoundRef>& soundList = region.mSoundList;
+
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (soundList.size()))
+                throw std::runtime_error ("index out of range");
+
+            soundList.erase(soundList.begin()+rowToRemove);
+
+            record.setModified (region);
+        }
+
+        virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const
+        {
+            record.get().mSoundList =
+                static_cast<const NestedTableWrapper<std::vector<ESM::Region::SoundRef> >&>(nestedTable).mNestedTable;
+        }
+
+        virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const
+        {
+            // deleted by dtor of NestedTableStoring
+            return new NestedTableWrapper<std::vector<ESM::Region::SoundRef> >(record.get().mSoundList);
+        }
+
+        virtual QVariant getNestedData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const
+        {
+            ESXRecordT::SoundRef soundRef = record.get().mSoundList[subRowIndex];
+            switch (subColIndex)
+            {
+                case 0: return QString(soundRef.mSound.toString().c_str());
+                case 1: return soundRef.mChance;
+                default: throw std::runtime_error("Region sounds subcolumn index out of range");
+            }
+        }
+
+        virtual void setNestedData(Record<ESXRecordT>& record, const QVariant& value,
+                                    int subRowIndex, int subColIndex) const
+        {
+            ESXRecordT region = record.get();
+            ESXRecordT::SoundRef soundRef = region.mSoundList[subRowIndex];
+            switch (subColIndex)
+            {
+                case 0: soundRef.mSound.assign(value.toString().toUtf8().constData()); break;
+                case 1: soundRef.mChance = static_cast<unsigned char>(value.toInt()); break;
+                default: throw std::runtime_error("Region sounds subcolumn index out of range");
+            }
+
+            region.mSoundList[subRowIndex] = soundRef;
+
+            record.setModified (region);
+        }
+
+        virtual int getNestedColumnsCount(const Record<ESXRecordT>& record) const
+        {
+            return 2;
+        }
+
+        virtual int getNestedRowsCount(const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int>(record.get().mSoundList.size());
         }
     };
 }

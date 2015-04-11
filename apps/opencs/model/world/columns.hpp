@@ -222,6 +222,10 @@ namespace CSMWorld
             ColumnId_PathgridEdge0 = 206,
             ColumnId_PathgridEdge1 = 207,
 
+            ColumnId_RegionSounds = 208,
+            ColumnId_SoundName = 209,
+            ColumnId_SoundChance = 210,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,
