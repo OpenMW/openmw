@@ -2266,97 +2266,6 @@ namespace CSMWorld
     };
 
     template<typename ESXRecordT>
-    struct PathgridPointListColumn : public Column<ESXRecordT>
-    {
-        PathgridPointListColumn ()
-        : Column<ESXRecordT> (Columns::ColumnId_PathgridPoints,
-                ColumnBase::Display_PathgridPointList, ColumnBase::Flag_Dialogue)
-        {}
-
-        virtual QVariant get (const Record<ESXRecordT>& record) const
-        {
-            return true; // required by IdTree::hasChildren()
-        }
-
-        virtual bool isEditable() const
-        {
-            return true;
-        }
-    };
-
-    struct PathgridIndexColumn : public NestableColumn
-    {
-        PathgridIndexColumn()
-        : NestableColumn (Columns::ColumnId_PathgridIndex,
-                ColumnBase::Display_Integer, ColumnBase::Flag_Dialogue)
-        {}
-
-        virtual bool isEditable() const
-        {
-            return false;
-        }
-    };
-
-    struct PathgridPointColumn : public NestableColumn
-    {
-        PathgridPointColumn(int index)
-        : NestableColumn (Columns::ColumnId_PathgridPosX+index,
-                ColumnBase::Display_Integer, ColumnBase::Flag_Dialogue)
-        {}
-
-        virtual bool isEditable() const
-        {
-            return true;
-        }
-    };
-
-    template<typename ESXRecordT>
-    struct PathgridEdgeListColumn : public Column<ESXRecordT>
-    {
-        PathgridEdgeListColumn ()
-        : Column<ESXRecordT> (Columns::ColumnId_PathgridEdges,
-                ColumnBase::Display_PathgridEdgeList, ColumnBase::Flag_Dialogue)
-        {}
-
-        virtual QVariant get (const Record<ESXRecordT>& record) const
-        {
-            return true; // required by IdTree::hasChildren()
-        }
-
-        virtual bool isEditable() const
-        {
-            return true;
-        }
-
-    };
-
-    struct PathgridEdgeIndexColumn : public NestableColumn
-    {
-        PathgridEdgeIndexColumn()
-        : NestableColumn (Columns::ColumnId_PathgridEdgeIndex,
-                ColumnBase::Display_Integer, ColumnBase::Flag_Dialogue)
-        {}
-
-        virtual bool isEditable() const
-        {
-            return false;
-        }
-    };
-
-    struct PathgridEdgeColumn : public NestableColumn
-    {
-        PathgridEdgeColumn (int index)
-        : NestableColumn (Columns::ColumnId_PathgridEdge0+index,
-                ColumnBase::Display_Integer, ColumnBase::Flag_Dialogue)
-        {}
-
-        virtual bool isEditable() const
-        {
-            return true;
-        }
-    };
-
-    template<typename ESXRecordT>
     struct NestedParentColumn : public Column<ESXRecordT>
     {
         NestedParentColumn (Columns::ColumnId id)
@@ -2389,13 +2298,16 @@ namespace CSMWorld
 
     struct NestedIntegerColumn : public NestableColumn
     {
-        NestedIntegerColumn (Columns::ColumnId id)
+        bool mIsEditable;
+
+        NestedIntegerColumn (Columns::ColumnId id, bool isEditable = true)
         : NestableColumn (id, ColumnBase::Display_Integer, ColumnBase::Flag_Dialogue)
+        , mIsEditable(isEditable)
         {}
 
         virtual bool isEditable() const
         {
-            return true;
+            return mIsEditable;
         }
     };
 }

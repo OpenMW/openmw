@@ -241,6 +241,12 @@ namespace CSMWorld
             //{ ColumnId_FactionID, "Faction ID"},
             { ColumnId_FactionReaction, "Reaction"},
 
+            { ColumnId_EffectList, "Effects"},
+            { ColumnId_EffectId, "ID"},
+            { ColumnId_EffectAttribute, "Attrib"},
+            { ColumnId_EffectRange, "Range"},
+            { ColumnId_EffectArea, "Area"},
+
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
             { ColumnId_UseValue3, "Use value 3" },

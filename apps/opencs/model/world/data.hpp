@@ -75,10 +75,10 @@ namespace CSMWorld
             IdCollection<ESM::Script> mScripts;
             NestedIdCollection<ESM::Region> mRegions;
             NestedIdCollection<ESM::BirthSign> mBirthsigns;
-            IdCollection<ESM::Spell> mSpells;
+            NestedIdCollection<ESM::Spell> mSpells;
             IdCollection<ESM::Dialogue> mTopics;
             IdCollection<ESM::Dialogue> mJournals;
-            IdCollection<ESM::Enchantment> mEnchantments;
+            NestedIdCollection<ESM::Enchantment> mEnchantments;
             IdCollection<ESM::BodyPart> mBodyParts;
             IdCollection<ESM::MagicEffect> mMagicEffects;
             SubCellCollection<Pathgrid> mPathgrids;

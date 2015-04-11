@@ -189,6 +189,27 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_AutoCalc, 0x1));
     mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_StarterSpell, 0x2));
     mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_AlwaysSucceeds, 0x4));
+    // Spell effects
+    NestedParentColumn<ESM::Spell> *spellEffect =
+            new NestedParentColumn<ESM::Spell> (Columns::ColumnId_EffectList);
+    mSpells.addColumn (spellEffect);
+    mSpells.addAdapter (std::make_pair(spellEffect, new EffectsListAdapter<ESM::Spell> ()));
+    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_EffectId));
+    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_Skill));
+    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_EffectAttribute));
+    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_EffectRange));
+    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_EffectArea));
+    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_Duration)); // reuse from light
+    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_MinRange)); // reuse from sound
+    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_MaxRange)); // reuse from sound
 
     mTopics.addColumn (new StringIdColumn<ESM::Dialogue>);
     mTopics.addColumn (new RecordStateColumn<ESM::Dialogue>);
@@ -242,6 +263,27 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mEnchantments.addColumn (new CostColumn<ESM::Enchantment>);
     mEnchantments.addColumn (new ChargesColumn2<ESM::Enchantment>);
     mEnchantments.addColumn (new AutoCalcColumn<ESM::Enchantment>);
+    // Enchantment effects
+    NestedParentColumn<ESM::Enchantment> *enchantmentEffect =
+            new NestedParentColumn<ESM::Enchantment> (Columns::ColumnId_EffectList);
+    mEnchantments.addColumn (enchantmentEffect);
+    mEnchantments.addAdapter (std::make_pair(enchantmentEffect, new EffectsListAdapter<ESM::Enchantment> ()));
+    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_EffectId));
+    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_Skill));
+    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_EffectAttribute));
+    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_EffectRange));
+    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_EffectArea));
+    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_Duration)); // reuse from light
+    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_MinRange)); // reuse from sound
+    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_MaxRange)); // reuse from sound
 
     mBodyParts.addColumn (new StringIdColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new RecordStateColumn<ESM::BodyPart>);
@@ -289,23 +331,32 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mPathgrids.addColumn (new FixedRecordTypeColumn<Pathgrid> (UniversalId::Type_Pathgrid));
 
     // new object deleted in dtor of Collection<T,A>
-    PathgridPointListColumn<Pathgrid> *pointList = new PathgridPointListColumn<Pathgrid> ();
+    NestedParentColumn<Pathgrid> *pointList =
+            new NestedParentColumn<Pathgrid> (Columns::ColumnId_PathgridPoints);
     mPathgrids.addColumn (pointList);
     // new object deleted in dtor of SubCellCollection<T,A>
     mPathgrids.addAdapter (std::make_pair(pointList, new PathgridPointListAdapter<Pathgrid> ()));
     // new objects deleted in dtor of NestableColumn
     // WARNING: The order of the columns below are assumed in PathgridPointListAdapter
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridIndexColumn ());
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridPointColumn (0));
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridPointColumn (1));
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridPointColumn (2));
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_PathgridIndex, false));
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_PathgridPosX));
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_PathgridPosY));
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_PathgridPosZ));
 
-    PathgridEdgeListColumn<Pathgrid> *edgeList = new PathgridEdgeListColumn<Pathgrid> ();
+    NestedParentColumn<Pathgrid> *edgeList =
+            new NestedParentColumn<Pathgrid> (Columns::ColumnId_PathgridEdges);
     mPathgrids.addColumn (edgeList);
     mPathgrids.addAdapter (std::make_pair(edgeList, new PathgridEdgeListAdapter<Pathgrid> ()));
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridEdgeIndexColumn ());
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridEdgeColumn (0));
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(new PathgridEdgeColumn (1));
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_PathgridEdgeIndex, false));
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_PathgridEdge0));
+    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+            new NestedIntegerColumn (Columns::ColumnId_PathgridEdge1));
 
     mStartScripts.addColumn (new StringIdColumn<ESM::StartScript>);
     mStartScripts.addColumn (new RecordStateColumn<ESM::StartScript>);
@@ -373,13 +424,13 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new IdTable (&mScripts), UniversalId::Type_Script);
     addModel (new IdTree (&mRegions, &mRegions), UniversalId::Type_Region);
     addModel (new IdTree (&mBirthsigns, &mBirthsigns), UniversalId::Type_Birthsign);
-    addModel (new IdTable (&mSpells), UniversalId::Type_Spell);
+    addModel (new IdTree (&mSpells, &mSpells), UniversalId::Type_Spell);
     addModel (new IdTable (&mTopics), UniversalId::Type_Topic);
     addModel (new IdTable (&mJournals), UniversalId::Type_Journal);
     addModel (new IdTable (&mTopicInfos, IdTable::Feature_ReorderWithinTopic), UniversalId::Type_TopicInfo);
     addModel (new IdTable (&mJournalInfos, IdTable::Feature_ReorderWithinTopic), UniversalId::Type_JournalInfo);
     addModel (new IdTable (&mCells, IdTable::Feature_ViewId), UniversalId::Type_Cell);
-    addModel (new IdTable (&mEnchantments), UniversalId::Type_Enchantment);
+    addModel (new IdTree (&mEnchantments, &mEnchantments), UniversalId::Type_Enchantment);
     addModel (new IdTable (&mBodyParts), UniversalId::Type_BodyPart);
     addModel (new IdTable (&mSoundGens), UniversalId::Type_SoundGen);
     addModel (new IdTable (&mMagicEffects), UniversalId::Type_MagicEffect);

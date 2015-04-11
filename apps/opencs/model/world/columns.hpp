@@ -230,6 +230,12 @@ namespace CSMWorld
             //ColumnId_FactionID = 212,
             ColumnId_FactionReaction = 213,
 
+            ColumnId_EffectList = 214,
+            ColumnId_EffectId = 215,
+            ColumnId_EffectAttribute = 216,
+            ColumnId_EffectRange = 217,
+            ColumnId_EffectArea = 218,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,

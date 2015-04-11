@@ -6,6 +6,7 @@
 #include <components/esm/loadpgrd.hpp>
 #include <components/esm/loadregn.hpp>
 #include <components/esm/loadfact.hpp>
+#include <components/esm/effectlist.hpp>
 
 #include "idadapter.hpp"
 #include "nestedtablewrapper.hpp"
@@ -581,6 +582,124 @@ namespace CSMWorld
         virtual int getNestedRowsCount(const Record<ESXRecordT>& record) const
         {
             return static_cast<int>(record.get().mPowers.mList.size());
+        }
+    };
+
+    template<typename ESXRecordT>
+    class EffectsListAdapter : public NestedIdAdapter<ESXRecordT>
+    {
+    public:
+        EffectsListAdapter () {}
+
+        virtual void addNestedRow(Record<ESXRecordT>& record, int position) const
+        {
+            ESXRecordT magic = record.get();
+
+            std::vector<ESM::ENAMstruct>& effectsList = magic.mEffects.mList;
+
+            // blank row
+            ESM::ENAMstruct effect;
+            effect.mEffectID = 0;
+            effect.mSkill = 0;
+            effect.mAttribute = 0;
+            effect.mRange = 0;
+            effect.mArea = 0;
+            effect.mDuration = 0;
+            effect.mMagnMin = 0;
+            effect.mMagnMax = 0;
+
+            effectsList.insert(effectsList.begin()+position, effect);
+
+            record.setModified (magic);
+        }
+
+        virtual void removeNestedRow(Record<ESXRecordT>& record, int rowToRemove) const
+        {
+            ESXRecordT magic = record.get();
+
+            std::vector<ESM::ENAMstruct>& effectsList = magic.mEffects.mList;
+
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (effectsList.size()))
+                throw std::runtime_error ("index out of range");
+
+            effectsList.erase(effectsList.begin()+rowToRemove);
+
+            record.setModified (magic);
+        }
+
+        virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const
+        {
+            record.get().mEffects.mList =
+                static_cast<const NestedTableWrapper<std::vector<ESM::ENAMstruct> >&>(nestedTable).mNestedTable;
+        }
+
+        virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const
+        {
+            // deleted by dtor of NestedTableStoring
+            return new NestedTableWrapper<std::vector<ESM::ENAMstruct> >(record.get().mEffects.mList);
+        }
+
+        virtual QVariant getNestedData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const
+        {
+            ESXRecordT magic = record.get();
+
+            std::vector<ESM::ENAMstruct>& effectsList = magic.mEffects.mList;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (effectsList.size()))
+                throw std::runtime_error ("index out of range");
+
+            ESM::ENAMstruct effect = effectsList[subRowIndex];
+            switch (subColIndex)
+            {
+                case 0: return effect.mEffectID;
+                case 1: return effect.mSkill;
+                case 2: return effect.mAttribute;
+                case 3: return effect.mRange;
+                case 4: return effect.mArea;
+                case 5: return effect.mDuration;
+                case 6: return effect.mMagnMin;
+                case 7: return effect.mMagnMax;
+                default: throw std::runtime_error("Magic Effects subcolumn index out of range");
+            }
+        }
+
+        virtual void setNestedData(Record<ESXRecordT>& record, const QVariant& value,
+                                    int subRowIndex, int subColIndex) const
+        {
+            ESXRecordT magic = record.get();
+
+            std::vector<ESM::ENAMstruct>& effectsList = magic.mEffects.mList;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (effectsList.size()))
+                throw std::runtime_error ("index out of range");
+
+            ESM::ENAMstruct effect = effectsList[subRowIndex];
+            switch (subColIndex)
+            {
+                case 0: effect.mEffectID = static_cast<short>(value.toInt()); break;
+                case 1: effect.mSkill = static_cast<signed char>(value.toInt()); break;
+                case 2: effect.mAttribute = static_cast<signed char>(value.toInt()); break;
+                case 3: effect.mRange = value.toInt(); break;
+                case 4: effect.mArea = value.toInt(); break;
+                case 5: effect.mDuration = value.toInt(); break;
+                case 6: effect.mMagnMin = value.toInt(); break;
+                case 7: effect.mMagnMax = value.toInt(); break;
+                default: throw std::runtime_error("Magic Effects subcolumn index out of range");
+            }
+
+            magic.mEffects.mList[subRowIndex] = effect;
+
+            record.setModified (magic);
+        }
+
+        virtual int getNestedColumnsCount(const Record<ESXRecordT>& record) const
+        {
+            return 8;
+        }
+
+        virtual int getNestedRowsCount(const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int>(record.get().mEffects.mList.size());
         }
     };
 }
