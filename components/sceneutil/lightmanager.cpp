@@ -45,122 +45,6 @@ namespace SceneUtil
         }
     };
 
-    class CullCallback : public osg::NodeCallback
-    {
-    public:
-        CullCallback()
-            : mLightManager(NULL)
-        {}
-        CullCallback(const CullCallback& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
-            : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop), mLightManager(copy.mLightManager)
-        {}
-        CullCallback(LightManager* lightManager)
-            : mLightManager(lightManager)
-        {}
-
-        META_Object(NifOsg, CullCallback)
-
-        void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-
-            mLightManager->prepareForCamera(cv->getCurrentCamera());
-
-            // Possible optimizations:
-            // - cull list of lights by the camera frustum
-            // - organize lights in a quad tree
-
-            const std::vector<LightManager::LightSourceTransform>& lights = mLightManager->getLights();
-
-            if (lights.size())
-            {
-
-                static std::map<osg::Node*, osg::ref_ptr<osg::StateSet> > statesets;
-                std::map<osg::Node*, osg::ref_ptr<osg::StateSet> >::iterator found = statesets.find(node);
-                osg::ref_ptr<osg::StateSet> stateset;
-                if (found != statesets.end())
-                {
-                    stateset = found->second;
-                }
-                else{
-
-                // we do the intersections in view space
-                osg::BoundingSphere nodeBound = node->getBound();
-                osg::Matrixf mat = *cv->getModelViewMatrix();
-                transformBoundingSphere(mat, nodeBound);
-
-                std::vector<int> lightList;
-                for (unsigned int i=0; i<lights.size(); ++i)
-                {
-                    const LightManager::LightSourceTransform& l = lights[i];
-                    if (l.mViewBound.intersects(nodeBound))
-                        lightList.push_back(i);
-                }
-
-                if (lightList.empty())
-                {
-                    statesets[node] = NULL;
-                    traverse(node, nv);
-                    return;
-                }
-
-                unsigned int maxLights = static_cast<unsigned int> (8 - mLightManager->getStartLight());
-
-                if (lightList.size() > maxLights)
-                {
-                    //std::cerr << "More than 8 lights!" << std::endl;
-
-                    // TODO: sort lights by certain criteria
-
-                    while (lightList.size() > maxLights)
-                        lightList.pop_back();
-                }
-
-                stateset = mLightManager->getLightListStateSet(lightList);
-                statesets[node] = stateset;
-                }
-
-                if (stateset)
-                cv->pushStateSet(stateset);
-
-                traverse(node, nv);
-
-                if (stateset)
-                cv->popStateSet();
-            }
-            else
-                traverse(node, nv);
-        }
-
-    private:
-        LightManager* mLightManager;
-    };
-
-    class AttachCullCallbackVisitor : public osg::NodeVisitor
-    {
-    public:
-        AttachCullCallbackVisitor(LightManager* lightManager)
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mLightManager(lightManager)
-        {
-        }
-
-        virtual void apply(osg::Geode &geode)
-        {
-            if (!geode.getNumParents())
-                return;
-
-            // Not working on a Geode. Drawables are not normal children of the Geode, the traverse() call
-            // does not traverse the drawables, so the push/pop in the CullCallback has no effect
-            // Should be no longer an issue with osg trunk
-            osg::Node* parent = geode.getParent(0);
-            parent->addCullCallback(new CullCallback(mLightManager));
-        }
-
-    private:
-        LightManager* mLightManager;
-    };
-
     // Set on a LightSource. Adds the light source to its light manager for the current frame.
     // This allows us to keep track of the current lights in the scene graph without tying creation & destruction to the manager.
     class CollectLightCallback : public osg::NodeCallback
@@ -191,7 +75,7 @@ namespace SceneUtil
                     throw std::runtime_error("can't find parent LightManager");
             }
 
-            //mLightManager->addLight(static_cast<LightSource*>(node), osg::computeLocalToWorld(nv->getNodePath()));
+            mLightManager->addLight(static_cast<LightSource*>(node), osg::computeLocalToWorld(nv->getNodePath()));
 
             traverse(node, nv);
         }
@@ -224,7 +108,6 @@ namespace SceneUtil
 
     LightManager::LightManager()
         : mLightsInViewSpace(false)
-        , mDecorated(false)
         , mStartLight(0)
     {
         setUpdateCallback(new LightManagerUpdateCallback);
@@ -233,16 +116,9 @@ namespace SceneUtil
     LightManager::LightManager(const LightManager &copy, const osg::CopyOp &copyop)
         : osg::Group(copy, copyop)
         , mLightsInViewSpace(false)
-        , mDecorated(copy.mDecorated)
         , mStartLight(copy.mStartLight)
     {
 
-    }
-
-    void LightManager::decorateGeodes()
-    {
-        AttachCullCallbackVisitor visitor(this);
-        accept(visitor);
     }
 
     void LightManager::update()
@@ -250,12 +126,6 @@ namespace SceneUtil
         mLightsInViewSpace = false;
         mLights.clear();
         mStateSetCache.clear();
-
-        if (!mDecorated)
-        {
-            decorateGeodes();
-            mDecorated = true;
-        }
     }
 
     void LightManager::addLight(LightSource* lightSource, osg::Matrix worldMat)
@@ -336,6 +206,92 @@ namespace SceneUtil
         : mRadius(0.f)
     {
         setUpdateCallback(new CollectLightCallback);
+    }
+
+    void LightListCallback::operator()(osg::Node *node, osg::NodeVisitor *nv)
+    {
+        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+
+        if (!mLightManager)
+        {
+            for (unsigned int i=0;i<nv->getNodePath().size(); ++i)
+            {
+                if (LightManager* lightManager = dynamic_cast<LightManager*>(nv->getNodePath()[i]))
+                {
+                    mLightManager = lightManager;
+                    break;
+                }
+            }
+            if (!mLightManager)
+                return;
+        }
+
+        mLightManager->prepareForCamera(cv->getCurrentCamera());
+
+        // Possible optimizations:
+        // - cull list of lights by the camera frustum
+        // - organize lights in a quad tree
+
+        const std::vector<LightManager::LightSourceTransform>& lights = mLightManager->getLights();
+
+        if (lights.size())
+        {
+
+            static std::map<osg::Node*, osg::ref_ptr<osg::StateSet> > statesets;
+            std::map<osg::Node*, osg::ref_ptr<osg::StateSet> >::iterator found = statesets.find(node);
+            osg::ref_ptr<osg::StateSet> stateset;
+            if (found != statesets.end())
+            {
+                stateset = found->second;
+            }
+            else{
+
+                // we do the intersections in view space
+                osg::BoundingSphere nodeBound = node->getBound();
+                osg::Matrixf mat = *cv->getModelViewMatrix();
+                transformBoundingSphere(mat, nodeBound);
+
+                std::vector<int> lightList;
+                for (unsigned int i=0; i<lights.size(); ++i)
+                {
+                    const LightManager::LightSourceTransform& l = lights[i];
+                    if (l.mViewBound.intersects(nodeBound))
+                        lightList.push_back(i);
+                }
+
+                if (lightList.empty())
+                {
+                    statesets[node] = NULL;
+                    traverse(node, nv);
+                    return;
+                }
+
+                unsigned int maxLights = static_cast<unsigned int> (8 - mLightManager->getStartLight());
+
+                if (lightList.size() > maxLights)
+                {
+                    //std::cerr << "More than 8 lights!" << std::endl;
+
+                    // TODO: sort lights by certain criteria
+
+                    while (lightList.size() > maxLights)
+                        lightList.pop_back();
+                }
+
+                stateset = mLightManager->getLightListStateSet(lightList);
+                statesets[node] = stateset;
+            }
+
+            if (stateset)
+                cv->pushStateSet(stateset);
+
+            traverse(node, nv);
+
+            if (stateset)
+                cv->popStateSet();
+        }
+        else
+            traverse(node, nv);
     }
 
 }

@@ -131,6 +131,9 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
 
     std::auto_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem));
 
+    if (anim->getObjectRoot())
+        anim->getObjectRoot()->addCullCallback(new SceneUtil::LightListCallback);
+
     if (ptr.getTypeName() == typeid(ESM::Light).name() && allowLight)
     {
         SceneUtil::FindByNameVisitor visitor("AttachLight");

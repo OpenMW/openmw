@@ -71,8 +71,6 @@ namespace SceneUtil
 
         void prepareForCamera(osg::Camera* cam);
 
-        void decorateGeodes();
-
         struct LightSourceTransform
         {
             LightSource* mLightSource;
@@ -102,10 +100,27 @@ namespace SceneUtil
         typedef std::map<size_t, osg::ref_ptr<osg::StateSet> > LightStateSetMap;
         LightStateSetMap mStateSetCache;
 
-        bool mDecorated;
-
         int mStartLight;
     };
+
+    class LightListCallback : public osg::NodeCallback
+    {
+    public:
+        LightListCallback()
+            : mLightManager(NULL)
+        {}
+        LightListCallback(const LightListCallback& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
+            : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop), mLightManager(copy.mLightManager)
+        {}
+
+        META_Object(NifOsg, LightListCallback)
+
+        void operator()(osg::Node* node, osg::NodeVisitor* nv);
+
+    private:
+        LightManager* mLightManager;
+    };
+
 
 }
 
