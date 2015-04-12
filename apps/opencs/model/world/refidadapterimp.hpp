@@ -6,6 +6,7 @@
 #include <QVariant>
 
 #include <components/esm/loadalch.hpp>
+#include <components/esm/loadench.hpp>
 #include <components/esm/loadappa.hpp>
 
 #include "record.hpp"
@@ -315,13 +316,21 @@ namespace CSMWorld
         record.setModified(record2);
     }
 
+    struct PotionColumns : public InventoryColumns
+    {
+        const RefIdColumn *mEffects;
+
+        PotionColumns (const InventoryColumns& columns);
+    };
+
     class PotionRefIdAdapter : public InventoryRefIdAdapter<ESM::Potion>
     {
+            PotionColumns mColumns;
             const RefIdColumn *mAutoCalc;
 
         public:
 
-            PotionRefIdAdapter (const InventoryColumns& columns, const RefIdColumn *autoCalc);
+            PotionRefIdAdapter (const PotionColumns& columns, const RefIdColumn *autoCalc);
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
                 const;
@@ -827,6 +836,88 @@ namespace CSMWorld
             virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
                 const QVariant& value) const;
             ///< If the data type does not match an exception is thrown.
+    };
+
+    class NestedRefIdAdapterBase;
+
+    template<typename ESXRecordT>
+    class EffectsListAdapter;
+
+    template<typename ESXRecordT>
+    class EffectsRefIdAdapter : public EffectsListAdapter<ESXRecordT>, public NestedRefIdAdapterBase
+    {
+        UniversalId::Type mType;
+
+        // not implemented
+        EffectsRefIdAdapter (const EffectsRefIdAdapter&);
+        EffectsRefIdAdapter& operator= (const EffectsRefIdAdapter&);
+
+    public:
+
+        EffectsRefIdAdapter(UniversalId::Type type) :mType(type) {}
+
+        virtual ~EffectsRefIdAdapter() {}
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            EffectsListAdapter<ESXRecordT>::addNestedRow(record, position);
+        }
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            EffectsListAdapter<ESXRecordT>::removeNestedRow(record, rowToRemove);
+        }
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            EffectsListAdapter<ESXRecordT>::setNestedTable(record, nestedTable);
+        }
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const
+        {
+            const Record<ESXRecordT>& record =
+                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            return EffectsListAdapter<ESXRecordT>::nestedTable(record);
+        }
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+        {
+            const Record<ESXRecordT>& record =
+                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            return EffectsListAdapter<ESXRecordT>::getNestedData(record, subRowIndex, subColIndex);
+        }
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+            EffectsListAdapter<ESXRecordT>::setNestedData(record, value, subRowIndex, subColIndex);
+        }
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+        {
+            const Record<ESXRecordT> record;
+            return EffectsListAdapter<ESXRecordT>::getNestedColumnsCount(record);
+        }
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+        {
+            const Record<ESXRecordT>& record =
+                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            return EffectsListAdapter<ESXRecordT>::getNestedRowsCount(record);
+        }
     };
 }
 

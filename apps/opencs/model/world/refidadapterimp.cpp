@@ -7,10 +7,13 @@
 #include <components/esm/loadcont.hpp>
 #include "nestedtablewrapper.hpp"
 
-CSMWorld::PotionRefIdAdapter::PotionRefIdAdapter (const InventoryColumns& columns,
+CSMWorld::PotionColumns::PotionColumns (const InventoryColumns& columns)
+: InventoryColumns (columns) {}
+
+CSMWorld::PotionRefIdAdapter::PotionRefIdAdapter (const PotionColumns& columns,
     const RefIdColumn *autoCalc)
 : InventoryRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion, columns),
-  mAutoCalc (autoCalc)
+  mAutoCalc (autoCalc), mColumns(columns)
 {}
 
 QVariant CSMWorld::PotionRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
@@ -21,6 +24,9 @@ QVariant CSMWorld::PotionRefIdAdapter::getData (const RefIdColumn *column, const
 
     if (column==mAutoCalc)
         return record.get().mData.mAutoCalc!=0;
+
+    if (column==mColumns.mEffects)
+        return true; // Required to show nested tables in dialogue subview
 
     return InventoryRefIdAdapter<ESM::Potion>::getData (column, data, index);
 }

@@ -9,6 +9,7 @@
 #include "refidadapterimp.hpp"
 #include "columns.hpp"
 #include "nestedtablewrapper.hpp"
+#include "nestedcoladapterimp.hpp"
 
 CSMWorld::RefIdColumn::RefIdColumn (int columnId, Display displayType, int flag,
     bool editable, bool userEditable)
@@ -69,6 +70,29 @@ CSMWorld::RefIdCollection::RefIdCollection()
     inventoryColumns.mWeight = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_CoinValue, ColumnBase::Display_Integer));
     inventoryColumns.mValue = &mColumns.back();
+
+    // nested table
+    PotionColumns potionColumns (inventoryColumns);
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_EffectList, ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
+    potionColumns.mEffects = &mColumns.back(); // see refidadapterimp.hpp
+    mNestedAdapters.insert (std::make_pair(&mColumns.back(),
+                new EffectsRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion)));
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_String/*, false*/));
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_String));
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_String)); // reuse attribute
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_Integer));
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_EffectArea, ColumnBase::Display_String));
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_Duration, ColumnBase::Display_Integer)); // reuse from light
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_MinRange, ColumnBase::Display_Integer)); // reuse from sound
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_MaxRange, ColumnBase::Display_Integer)); // reuse from sound
 
     EnchantableColumns enchantableColumns (inventoryColumns);
 
@@ -385,7 +409,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
-        new PotionRefIdAdapter (inventoryColumns, autoCalc)));
+        new PotionRefIdAdapter (potionColumns, autoCalc)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Apparatus,
         new ApparatusRefIdAdapter (inventoryColumns, apparatusType, toolsColumns.mQuality)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Armor,
@@ -429,6 +453,10 @@ CSMWorld::RefIdCollection::~RefIdCollection()
 {
     for (std::map<UniversalId::Type, RefIdAdapter *>::iterator iter (mAdapters.begin());
          iter!=mAdapters.end(); ++iter)
+         delete iter->second;
+
+    for (std::map<const ColumnBase*, NestedRefIdAdapterBase* >::iterator iter (mNestedAdapters.begin());
+         iter!=mNestedAdapters.end(); ++iter)
          delete iter->second;
 }
 
@@ -475,6 +503,12 @@ QVariant CSMWorld::RefIdCollection::getNestedData (int row, int column, int subR
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex(row);
 
+    const CSMWorld::NestedRefIdAdapterBase* nestedAdapter = getNestedAdapter(mColumns.at(column));
+    if (nestedAdapter)
+    {
+        return nestedAdapter->getNestedData(&mColumns.at (column), mData, localIndex.first, subRow, subColumn);
+    }
+
     const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
     return adaptor.getNestedData (&mColumns.at (column), mData, localIndex.first, subRow, subColumn);
@@ -493,6 +527,13 @@ void CSMWorld::RefIdCollection::setNestedData(int row, int column, const QVarian
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
+    const CSMWorld::NestedRefIdAdapterBase* nestedAdapter = getNestedAdapter(mColumns.at(column));
+    if (nestedAdapter)
+    {
+        nestedAdapter->setNestedData(&mColumns.at (column), mData, localIndex.first, data, subRow, subColumn);
+        return;
+    }
+
     const RefIdAdapter& adaptor = findAdapter (localIndex.second);
 
     dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(adaptor).setNestedData (&mColumns.at (column), mData, localIndex.first, data, subRow, subColumn);
@@ -506,6 +547,13 @@ void CSMWorld::RefIdCollection::removeRows (int index, int count)
 void CSMWorld::RefIdCollection::removeNestedRows(int row, int column, int subRow)
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
+
+    const CSMWorld::NestedRefIdAdapterBase* nestedAdapter = getNestedAdapter(mColumns.at(column));
+    if (nestedAdapter)
+    {
+        nestedAdapter->removeNestedRow(&mColumns.at (column), mData, localIndex.first, subRow);
+        return;
+    }
 
     const RefIdAdapter& adaptor = findAdapter (localIndex.second);
 
@@ -651,6 +699,12 @@ int CSMWorld::RefIdCollection::getNestedRowsCount(int row, int column) const
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
+    const CSMWorld::NestedRefIdAdapterBase* nestedAdapter = getNestedAdapter(mColumns.at(column));
+    if (nestedAdapter)
+    {
+        return nestedAdapter->getNestedRowsCount(&mColumns.at(column), mData, localIndex.first);
+    }
+
     const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
     return adaptor.getNestedRowsCount(&mColumns.at(column), mData, localIndex.first);
@@ -659,6 +713,12 @@ int CSMWorld::RefIdCollection::getNestedRowsCount(int row, int column) const
 int CSMWorld::RefIdCollection::getNestedColumnsCount(int row, int column) const
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
+
+    const CSMWorld::NestedRefIdAdapterBase* nestedAdapter = getNestedAdapter(mColumns.at(column));
+    if (nestedAdapter)
+    {
+        return nestedAdapter->getNestedColumnsCount(&mColumns.at(column), mData);
+    }
 
     const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
@@ -674,6 +734,13 @@ void CSMWorld::RefIdCollection::addNestedRow(int row, int col, int position)
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
+    const CSMWorld::NestedRefIdAdapterBase* nestedAdapter = getNestedAdapter(mColumns.at(col));
+    if (nestedAdapter)
+    {
+        nestedAdapter->addNestedRow(&mColumns.at(col), mData, localIndex.first, position);
+        return;
+    }
+
     const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
     adaptor.addNestedRow(&mColumns.at(col), mData, localIndex.first, position);
@@ -682,6 +749,13 @@ void CSMWorld::RefIdCollection::addNestedRow(int row, int col, int position)
 void CSMWorld::RefIdCollection::setNestedTable(int row, int column, const CSMWorld::NestedTableWrapperBase& nestedTable)
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
+
+    const CSMWorld::NestedRefIdAdapterBase* nestedAdapter = getNestedAdapter(mColumns.at(column));
+    if (nestedAdapter)
+    {
+        nestedAdapter->setNestedTable(&mColumns.at(column), mData, localIndex.first, nestedTable);
+        return;
+    }
 
     const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
@@ -692,7 +766,26 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::RefIdCollection::nestedTable(int row
 {
     RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (row);
 
+    const CSMWorld::NestedRefIdAdapterBase* nestedAdapter = getNestedAdapter(mColumns.at(column));
+    if (nestedAdapter)
+    {
+        return nestedAdapter->nestedTable(&mColumns.at(column), mData, localIndex.first);
+    }
+
     const CSMWorld::NestedRefIdAdapter& adaptor = dynamic_cast<const CSMWorld::NestedRefIdAdapter&>(findAdapter (localIndex.second));
 
     return adaptor.nestedTable(&mColumns.at(column), mData, localIndex.first);
+}
+
+const CSMWorld::NestedRefIdAdapterBase* CSMWorld::RefIdCollection::getNestedAdapter(const CSMWorld::ColumnBase &column) const
+{
+    std::map<const ColumnBase*, NestedRefIdAdapterBase* >::const_iterator iter =
+        mNestedAdapters.find (&column);
+
+    if (iter==mNestedAdapters.end())
+        return 0; // FIXME: testing only
+        //throw std::runtime_error("No such column in the nestedadapters");
+
+    //return *iter->second;
+    return iter->second;
 }
