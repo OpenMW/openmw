@@ -52,7 +52,7 @@ namespace CSMWorld
             const RefIdAdapter& findAdapter (UniversalId::Type) const;
             ///< Throws an exception if no adaptor for \a Type can be found.
 
-            const NestedRefIdAdapterBase* getNestedAdapter(const ColumnBase &column, UniversalId::Type type) const;
+            const NestedRefIdAdapterBase& getNestedAdapter(const ColumnBase &column, UniversalId::Type type) const;
 
         public:
 

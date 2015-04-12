@@ -997,7 +997,7 @@ namespace CSMWorld
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<ESM::ContItem> >(record.get().mInventory.mList);
+            return new NestedTableWrapper<typename std::vector<ESM::ContItem> >(record.get().mInventory.mList);
         }
 
         virtual QVariant getNestedData (const RefIdColumn *column,
