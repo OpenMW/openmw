@@ -15,17 +15,32 @@
 namespace SceneUtil
 {
 
-    class LightStateAttribute : public osg::Light
+    // Resets the modelview matrix to just the view matrix before applying lights.
+    class LightStateAttribute : public osg::StateAttribute
     {
     public:
-        LightStateAttribute() {}
+        LightStateAttribute() : mIndex(0) {}
+        LightStateAttribute(unsigned int index, const std::vector<osg::ref_ptr<osg::Light> >& lights) : mIndex(index), mLights(lights) {}
 
-        LightStateAttribute(const LightStateAttribute& light,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
-            : osg::Light(light,copyop) {}
+        LightStateAttribute(const LightStateAttribute& copy,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
+            : osg::StateAttribute(copy,copyop), mIndex(copy.mIndex), mLights(copy.mLights) {}
 
-        LightStateAttribute(const osg::Light& light,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
-            : osg::Light(light,copyop) {}
+        unsigned int getMember() const
+        {
+            return mIndex;
+        }
 
+        virtual bool getModeUsage(ModeUsage & usage) const
+        {
+            for (unsigned int i=0; i<mLights.size(); ++i)
+                usage.usesMode(GL_LIGHT0 + mIndex + i);
+            return true;
+        }
+
+        virtual int compare(const StateAttribute &sa) const
+        {
+            throw std::runtime_error("LightStateAttribute::compare: unimplemented");
+        }
 
         META_StateAttribute(NifOsg, LightStateAttribute, osg::StateAttribute::LIGHT)
 
@@ -33,16 +48,21 @@ namespace SceneUtil
         {
             osg::Matrix modelViewMatrix = state.getModelViewMatrix();
 
-            // FIXME: we shouldn't have to apply the modelview matrix after every light
-            // this could be solvable by having the LightStateAttribute contain all lights instead of just one.
             state.applyModelViewMatrix(state.getInitialViewMatrix());
 
-            osg::Light::apply(state);
-
-            state.setGlobalDefaultAttribute(this);
+            for (unsigned int i=0; i<mLights.size(); ++i)
+            {
+                mLights[i]->setLightNum(i+mIndex);
+                mLights[i]->apply(state);
+            }
 
             state.applyModelViewMatrix(modelViewMatrix);
         }
+
+    private:
+        unsigned int mIndex;
+
+        std::vector<osg::ref_ptr<osg::Light> > mLights;
     };
 
     // Set on a LightSource. Adds the light source to its light manager for the current frame.
@@ -133,6 +153,9 @@ namespace SceneUtil
         LightSourceTransform l;
         l.mLightSource = lightSource;
         l.mWorldMatrix = worldMat;
+        lightSource->getLight()->setPosition(osg::Vec4f(worldMat.getTrans().x(),
+                                                        worldMat.getTrans().y(),
+                                                        worldMat.getTrans().z(), 1.f));
         mLights.push_back(l);
     }
 
@@ -164,24 +187,22 @@ namespace SceneUtil
             return found->second;
         else
         {
-            osg::ref_ptr<osg::StateSet> stateset (new osg::StateSet);
+
+            std::vector<osg::ref_ptr<osg::Light> > lights;
             for (unsigned int i=0; i<lightList.size();++i)
             {
-                int lightIndex = lightList[i];
-                osg::Light* light = mLights[lightIndex].mLightSource->getLight();
-
-                osg::ref_ptr<LightStateAttribute> clonedLight = new LightStateAttribute(*light, osg::CopyOp::DEEP_COPY_ALL);
-                clonedLight->setPosition(mLights[lightIndex].mWorldMatrix.preMult(light->getPosition()));
-
-                clonedLight->setLightNum(i+mStartLight);
-
-                // don't use setAttributeAndModes, that does not support light indices!
-                stateset->setAttribute(clonedLight, osg::StateAttribute::ON);
-                stateset->setAssociatedModes(clonedLight, osg::StateAttribute::ON);
-
-                //stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-
+                const LightSourceTransform& l = mLights[lightList[i]];
+                lights.push_back(l.mLightSource->getLight());
             }
+
+            osg::ref_ptr<LightStateAttribute> attr = new LightStateAttribute(mStartLight, lights);
+
+            osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+
+            // don't use setAttributeAndModes, that does not support light indices!
+            stateset->setAttribute(attr, osg::StateAttribute::ON);
+            stateset->setAssociatedModes(attr, osg::StateAttribute::ON);
+
             mStateSetCache.insert(std::make_pair(hash, stateset));
             return stateset;
         }
