@@ -17,11 +17,10 @@
 #include "refiddata.hpp"
 #include "universalid.hpp"
 #include "refidadapter.hpp"
+#include "nestedtablewrapper.hpp"
 
 namespace CSMWorld
 {
-    struct NestedTableWrapperBase;
-
     struct BaseColumns
     {
         const RefIdColumn *mId;
@@ -857,6 +856,7 @@ namespace CSMWorld
 
         virtual ~EffectsRefIdAdapter() {}
 
+        using NestedRefIdAdapterBase::addNestedRow;
         virtual void addNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int position) const
         {
@@ -865,6 +865,7 @@ namespace CSMWorld
             EffectsListAdapter<ESXRecordT>::addNestedRow(record, position);
         }
 
+        using NestedRefIdAdapterBase::removeNestedRow;
         virtual void removeNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int rowToRemove) const
         {
@@ -873,6 +874,7 @@ namespace CSMWorld
             EffectsListAdapter<ESXRecordT>::removeNestedRow(record, rowToRemove);
         }
 
+        using NestedRefIdAdapterBase::setNestedTable;
         virtual void setNestedTable (const RefIdColumn* column,
                 RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
         {
@@ -881,6 +883,7 @@ namespace CSMWorld
             EffectsListAdapter<ESXRecordT>::setNestedTable(record, nestedTable);
         }
 
+        using NestedRefIdAdapterBase::nestedTable;
         virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
                 const RefIdData& data, int index) const
         {
@@ -889,6 +892,7 @@ namespace CSMWorld
             return EffectsListAdapter<ESXRecordT>::nestedTable(record);
         }
 
+        using NestedRefIdAdapterBase::getNestedData;
         virtual QVariant getNestedData (const RefIdColumn *column,
                 const RefIdData& data, int index, int subRowIndex, int subColIndex) const
         {
@@ -897,6 +901,7 @@ namespace CSMWorld
             return EffectsListAdapter<ESXRecordT>::getNestedData(record, subRowIndex, subColIndex);
         }
 
+        using NestedRefIdAdapterBase::setNestedData;
         virtual void setNestedData (const RefIdColumn *column,
                 RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
         {
@@ -905,12 +910,14 @@ namespace CSMWorld
             EffectsListAdapter<ESXRecordT>::setNestedData(record, value, subRowIndex, subColIndex);
         }
 
+        using NestedRefIdAdapterBase::getNestedColumnsCount;
         virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
         {
             const Record<ESXRecordT> record; // not used, just a dummy
             return EffectsListAdapter<ESXRecordT>::getNestedColumnsCount(record);
         }
 
+        using NestedRefIdAdapterBase::getNestedRowsCount;
         virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
         {
             const Record<ESXRecordT>& record =
@@ -978,7 +985,7 @@ namespace CSMWorld
             ESXRecordT container = record.get();
 
             container.mInventory.mList =
-                static_cast<const NestedTableWrapper<std::vector<ESM::ContItem> >&>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<typename std::vector<ESM::ContItem> >&>(nestedTable).mNestedTable;
 
             record.setModified (container);
         }
@@ -1116,7 +1123,7 @@ namespace CSMWorld
             ESXRecordT caster = record.get();
 
             caster.mSpells.mList =
-                static_cast<const NestedTableWrapper<std::vector<std::string> >&>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<typename std::vector<std::string> >&>(nestedTable).mNestedTable;
 
             record.setModified (caster);
         }
@@ -1128,7 +1135,7 @@ namespace CSMWorld
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<std::string> >(record.get().mSpells.mList);
+            return new NestedTableWrapper<typename std::vector<std::string> >(record.get().mSpells.mList);
         }
 
         virtual QVariant getNestedData (const RefIdColumn *column,
@@ -1251,7 +1258,7 @@ namespace CSMWorld
             ESXRecordT traveller = record.get();
 
             traveller.mTransport.mList =
-                static_cast<const NestedTableWrapper<std::vector<ESM::Transport::Dest> >&>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<typename std::vector<ESM::Transport::Dest> >&>(nestedTable).mNestedTable;
 
             record.setModified (traveller);
         }
@@ -1263,7 +1270,7 @@ namespace CSMWorld
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<std::vector<ESM::Transport::Dest> >(record.get().mTransport.mList);
+            return new NestedTableWrapper<typename std::vector<ESM::Transport::Dest> >(record.get().mTransport.mList);
         }
 
         virtual QVariant getNestedData (const RefIdColumn *column,
