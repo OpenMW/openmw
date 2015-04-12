@@ -173,8 +173,12 @@ namespace CSMWorld
 
         virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const
         {
-            record.get().mPowers.mList =
+            ESXRecordT raceOrBthSgn = record.get();
+
+           raceOrBthSgn.mPowers.mList =
                 static_cast<const NestedTableWrapper<std::vector<std::string> >&>(nestedTable).mNestedTable;
+
+            record.setModified (raceOrBthSgn);
         }
 
         virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const
@@ -277,8 +281,12 @@ namespace CSMWorld
 
         virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const
         {
-            record.get().mEffects.mList =
+            ESXRecordT magic = record.get();
+
+            magic.mEffects.mList =
                 static_cast<const NestedTableWrapper<std::vector<ESM::ENAMstruct> >&>(nestedTable).mNestedTable;
+
+            record.setModified (magic);
         }
 
         virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const

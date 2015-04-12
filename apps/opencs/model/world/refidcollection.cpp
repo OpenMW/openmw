@@ -76,7 +76,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_EffectList, ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
     potionColumns.mEffects = &mColumns.back(); // see refidadapterimp.hpp
     mNestedAdapters.insert (std::make_pair(&mColumns.back(),
-                new EffectsRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion)));
+        new EffectsRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion)));
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_String/*, false*/));
     mColumns.back().addColumn(
@@ -124,6 +124,10 @@ CSMWorld::RefIdCollection::RefIdCollection()
     // Nested table
     mColumns.push_back(RefIdColumn (Columns::ColumnId_ActorInventory, ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue));
     actorsColumns.mInventory = &mColumns.back();
+    mNestedAdapters.insert (std::make_pair(&mColumns.back(),
+            new NestedInventoryRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc)));
+    mNestedAdapters.insert (std::make_pair(&mColumns.back(),
+            new NestedInventoryRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature)));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_String));
     mColumns.back().addColumn(
@@ -205,6 +209,8 @@ CSMWorld::RefIdCollection::RefIdCollection()
     // Nested table
     mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent, ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue));
     const RefIdColumn *content = &mColumns.back();
+    mNestedAdapters.insert (std::make_pair(&mColumns.back(),
+            new NestedInventoryRefIdAdapter<ESM::Container> (UniversalId::Type_Container)));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_String));
     mColumns.back().addColumn(

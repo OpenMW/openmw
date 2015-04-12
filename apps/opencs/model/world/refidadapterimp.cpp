@@ -26,7 +26,7 @@ QVariant CSMWorld::PotionRefIdAdapter::getData (const RefIdColumn *column, const
         return record.get().mData.mAutoCalc!=0;
 
     if (column==mColumns.mEffects)
-        return true; // Required to show nested tables in dialogue subview
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
 
     return InventoryRefIdAdapter<ESM::Potion>::getData (column, data, index);
 }
@@ -213,7 +213,7 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column,
         return (record.get().mFlags & ESM::Container::Respawn)!=0;
 
     if (column==mContent)
-        return true; // required by IdTree::hasChildren()
+        return true; // Required to show nested tables in dialogue subview
 
     return NameRefIdAdapter<ESM::Container>::getData (column, data, index);
 }
@@ -497,7 +497,7 @@ QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const Re
         return QString::fromUtf8 (record.get().mHead.c_str());
 
     if (column==mColumns.mDestinations)
-        return true; // required by IdTree::hasChildren()
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);

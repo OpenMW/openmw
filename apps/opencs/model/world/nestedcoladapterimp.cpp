@@ -81,13 +81,17 @@ namespace CSMWorld
     void PathgridPointListAdapter::setNestedTable(Record<Pathgrid>& record,
             const NestedTableWrapperBase& nestedTable) const
     {
-        record.get().mPoints =
+        Pathgrid pathgrid = record.get();
+
+        pathgrid.mPoints =
             static_cast<const PathgridPointsWrap &>(nestedTable).mRecord.mPoints;
-        record.get().mData.mS2 =
+        pathgrid.mData.mS2 =
             static_cast<const PathgridPointsWrap &>(nestedTable).mRecord.mData.mS2;
         // also update edges in case points were added/removed
-        record.get().mEdges =
+        pathgrid.mEdges =
             static_cast<const PathgridPointsWrap &>(nestedTable).mRecord.mEdges;
+
+        record.setModified (pathgrid);
     }
 
     NestedTableWrapperBase* PathgridPointListAdapter::nestedTable(const Record<Pathgrid>& record) const
@@ -180,8 +184,12 @@ namespace CSMWorld
     void PathgridEdgeListAdapter::setNestedTable(Record<Pathgrid>& record,
             const NestedTableWrapperBase& nestedTable) const
     {
-        record.get().mEdges =
+        Pathgrid pathgrid = record.get();
+
+        pathgrid.mEdges =
             static_cast<const NestedTableWrapper<ESM::Pathgrid::EdgeList> &>(nestedTable).mNestedTable;
+
+        record.setModified (pathgrid);
     }
 
     NestedTableWrapperBase* PathgridEdgeListAdapter::nestedTable(const Record<Pathgrid>& record) const
@@ -277,8 +285,12 @@ namespace CSMWorld
     void FactionReactionsAdapter::setNestedTable(Record<ESM::Faction>& record,
             const NestedTableWrapperBase& nestedTable) const
     {
-        record.get().mReactions =
+        ESM::Faction faction = record.get();
+
+        faction.mReactions =
             static_cast<const NestedTableWrapper<std::map<std::string, int> >&>(nestedTable).mNestedTable;
+
+        record.setModified (faction);
     }
 
     NestedTableWrapperBase* FactionReactionsAdapter::nestedTable(const Record<ESM::Faction>& record) const
@@ -393,8 +405,12 @@ namespace CSMWorld
     void RegionSoundListAdapter::setNestedTable(Record<ESM::Region>& record,
             const NestedTableWrapperBase& nestedTable) const
     {
-        record.get().mSoundList =
+        ESM::Region region = record.get();
+
+        region.mSoundList =
             static_cast<const NestedTableWrapper<std::vector<ESM::Region::SoundRef> >&>(nestedTable).mNestedTable;
+
+        record.setModified (region);
     }
 
     NestedTableWrapperBase* RegionSoundListAdapter::nestedTable(const Record<ESM::Region>& record) const
