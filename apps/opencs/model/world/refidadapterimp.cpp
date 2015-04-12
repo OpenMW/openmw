@@ -188,13 +188,7 @@ CSMWorld::ContainerRefIdAdapter::ContainerRefIdAdapter (const NameColumns& colum
     const RefIdColumn *weight, const RefIdColumn *organic, const RefIdColumn *respawn, const RefIdColumn *content)
 : NameRefIdAdapter<ESM::Container> (UniversalId::Type_Container, columns), mWeight (weight),
   mOrganic (organic), mRespawn (respawn), mContent(content)
-{
-    std::vector<std::pair <const RefIdColumn*, HelperBase*> > assoCol;
-
-    assoCol.push_back(std::make_pair(content, new InventoryHelper<ESM::Container>(UniversalId::Type_Container)));
-
-    setAssocColumns(assoCol);
-}
+{}
 
 QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column,
                                                    const RefIdData& data,
@@ -471,9 +465,7 @@ CSMWorld::NpcColumns::NpcColumns (const ActorColumns& actorColumns)
 
 CSMWorld::NpcRefIdAdapter::NpcRefIdAdapter (const NpcColumns& columns)
 : ActorRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, columns), mColumns (columns)
-{
-    NestedRefIdAdapter::addAssocColumn(std::make_pair(columns.mDestinations, new DestinationsHelper<ESM::NPC>(UniversalId::Type_Npc)));
-}
+{}
 
 QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data, int index)
     const
@@ -495,9 +487,6 @@ QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const Re
 
     if (column==mColumns.mHead)
         return QString::fromUtf8 (record.get().mHead.c_str());
-
-    if (column==mColumns.mDestinations)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);

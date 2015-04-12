@@ -45,15 +45,14 @@ namespace CSMWorld
             std::deque<RefIdColumn> mColumns;
             std::map<UniversalId::Type, RefIdAdapter *> mAdapters;
 
-            std::map<const ColumnBase*, NestedRefIdAdapterBase* > mNestedAdapters;
+            std::vector<std::pair<const ColumnBase*, std::map<UniversalId::Type, NestedRefIdAdapterBase*> > > mNestedAdapters;
 
         private:
 
             const RefIdAdapter& findAdapter (UniversalId::Type) const;
             ///< Throws an exception if no adaptor for \a Type can be found.
 
-            //const NestedRefIdAdapterBase& getNestedAdapter(const ColumnBase &column) const;
-            const NestedRefIdAdapterBase* getNestedAdapter(const ColumnBase &column) const;
+            const NestedRefIdAdapterBase* getNestedAdapter(const ColumnBase &column, UniversalId::Type type) const;
 
         public:
 
