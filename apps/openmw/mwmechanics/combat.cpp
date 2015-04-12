@@ -75,7 +75,7 @@ namespace MWMechanics
             return false;
 
         Ogre::Degree angle = signedAngle (Ogre::Vector3(attacker.getRefData().getPosition().pos) - Ogre::Vector3(blocker.getRefData().getPosition().pos),
-                                          blocker.getRefData().getBaseNode()->getOrientation().yAxis(), Ogre::Vector3(0,0,1));
+                                          blocker.getRefData().getBaseNodeOld()->getOrientation().yAxis(), Ogre::Vector3(0,0,1));
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         if (angle.valueDegrees() < gmst.find("fCombatBlockLeftAngle")->getFloat())

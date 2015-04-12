@@ -1,10 +1,16 @@
 #ifndef GAME_RENDER_OBJECTS_H
 #define GAME_RENDER_OBJECTS_H
 
-#include <OgreColourValue.h>
 #include <OgreAxisAlignedBox.h>
 
-#include <openengine/ogre/renderer.hpp>
+#include <components/resource/resourcesystem.hpp>
+
+#include <osg/ref_ptr>
+
+namespace osg
+{
+    class Group;
+}
 
 namespace MWWorld
 {
@@ -14,53 +20,52 @@ namespace MWWorld
 
 namespace MWRender{
 
-class ObjectAnimation;
+class Animation;
+
 
 class Objects{
-    typedef std::map<MWWorld::Ptr,ObjectAnimation*> PtrAnimationMap;
+    typedef std::map<MWWorld::Ptr,Animation*> PtrAnimationMap;
 
-    OEngine::Render::OgreRenderer &mRenderer;
-
-    std::map<MWWorld::CellStore*,Ogre::SceneNode*> mCellSceneNodes;
-    std::map<MWWorld::CellStore*,Ogre::StaticGeometry*> mStaticGeometry;
-    std::map<MWWorld::CellStore*,Ogre::StaticGeometry*> mStaticGeometrySmall;
-    std::map<MWWorld::CellStore*,Ogre::AxisAlignedBox> mBounds;
+    typedef std::map<const MWWorld::CellStore*, osg::ref_ptr<osg::Group> > CellMap;
+    CellMap mCellSceneNodes;
     PtrAnimationMap mObjects;
 
-    Ogre::SceneNode* mRootNode;
-
-    static int uniqueID;
+    osg::ref_ptr<osg::Group> mRootNode;
 
     void insertBegin(const MWWorld::Ptr& ptr);
 
-
+    Resource::ResourceSystem* mResourceSystem;
 
 public:
-    Objects(OEngine::Render::OgreRenderer &renderer)
-        : mRenderer(renderer)
-        , mRootNode(NULL)
-    {}
-    ~Objects(){}
-    void insertModel(const MWWorld::Ptr& ptr, const std::string &model, bool batch=false);
+    Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode);
+    ~Objects();
 
-    ObjectAnimation* getAnimation(const MWWorld::Ptr &ptr);
+    /// @param animated Attempt to load separate keyframes from a .kf file matching the model file?
+    /// @param allowLight If false, no lights will be created, and particles systems will be cleared then frozen.
+    void insertModel(const MWWorld::Ptr& ptr, const std::string &model, bool animated=false, bool allowLight=true);
+
+    void insertNPC(const MWWorld::Ptr& ptr);
+    void insertCreature (const MWWorld::Ptr& ptr, const std::string& model, bool weaponsShields);
+
+    Animation* getAnimation(const MWWorld::Ptr &ptr);
 
     void update (float dt, Ogre::Camera* camera);
     ///< per-frame update
 
-    Ogre::AxisAlignedBox getDimensions(MWWorld::CellStore*);
+    //Ogre::AxisAlignedBox getDimensions(MWWorld::CellStore*);
     ///< get a bounding box that encloses all objects in the specified cell
 
     bool deleteObject (const MWWorld::Ptr& ptr);
     ///< \return found?
 
-    void removeCell(MWWorld::CellStore* store);
-    void setRootNode(Ogre::SceneNode* root);
-
-    void rebuildStaticGeometry();
+    void removeCell(const MWWorld::CellStore* store);
 
     /// Updates containing cell for object rendering data
     void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);
+
+private:
+    void operator = (const Objects&);
+    Objects(const Objects&);
 };
 }
 #endif

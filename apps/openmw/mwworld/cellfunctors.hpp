@@ -20,11 +20,11 @@ namespace MWWorld
 
         bool operator() (MWWorld::Ptr ptr)
         {
-            Ogre::SceneNode* handle = ptr.getRefData().getBaseNode();
+            Ogre::SceneNode* handle = ptr.getRefData().getBaseNodeOld();
             if (handle)
                 mHandles.push_back (handle);
 
-            ptr.getRefData().setBaseNode(0);
+            ptr.getRefData().setBaseNodeOld(0);
             return true;
         }
     };

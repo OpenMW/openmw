@@ -1,8 +1,6 @@
 #ifndef GAME_RENDER_ACTORS_H
 #define GAME_RENDER_ACTORS_H
 
-//#include <openengine/ogre/renderer.hpp>
-
 #include <string>
 
 namespace OEngine

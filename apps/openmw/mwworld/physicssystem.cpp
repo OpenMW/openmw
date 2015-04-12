@@ -653,7 +653,7 @@ namespace MWWorld
 
     std::vector<std::string> PhysicsSystem::getCollisions(const Ptr &ptr, int collisionGroup, int collisionMask)
     {
-        return mEngine->getCollisions(ptr.getRefData().getBaseNode()->getName(), collisionGroup, collisionMask);
+        return mEngine->getCollisions(ptr.getRefData().getBaseNodeOld()->getName(), collisionGroup, collisionMask);
     }
 
     Ogre::Vector3 PhysicsSystem::traceDown(const MWWorld::Ptr &ptr, float maxHeight)
@@ -675,7 +675,7 @@ namespace MWWorld
 
     void PhysicsSystem::addObject (const Ptr& ptr, const std::string& mesh, bool placeable)
     {
-        Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
+        Ogre::SceneNode* node = ptr.getRefData().getBaseNodeOld();
         handleToMesh[node->getName()] = mesh;
         mEngine->createAndAdjustRigidBody(
             mesh, node->getName(), ptr.getCellRef().getScale(), node->getPosition(), node->getOrientation(), 0, 0, false, placeable);
@@ -685,7 +685,7 @@ namespace MWWorld
 
     void PhysicsSystem::addActor (const Ptr& ptr, const std::string& mesh)
     {
-        Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
+        Ogre::SceneNode* node = ptr.getRefData().getBaseNodeOld();
         //TODO:optimize this. Searching the std::map isn't very efficient i think.
         mEngine->addCharacter(node->getName(), mesh, node->getPosition(), node->getScale().x, node->getOrientation());
     }
@@ -699,7 +699,7 @@ namespace MWWorld
 
     void PhysicsSystem::moveObject (const Ptr& ptr)
     {
-        Ogre::SceneNode *node = ptr.getRefData().getBaseNode();
+        Ogre::SceneNode *node = ptr.getRefData().getBaseNodeOld();
         const std::string &handle = node->getName();
         const Ogre::Vector3 &position = node->getPosition();
 
@@ -722,7 +722,7 @@ namespace MWWorld
 
     void PhysicsSystem::rotateObject (const Ptr& ptr)
     {
-        Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
+        Ogre::SceneNode* node = ptr.getRefData().getBaseNodeOld();
         const std::string &handle = node->getName();
         const Ogre::Quaternion &rotation = node->getOrientation();
 
@@ -751,7 +751,7 @@ namespace MWWorld
 
     void PhysicsSystem::scaleObject (const Ptr& ptr)
     {
-        Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
+        Ogre::SceneNode* node = ptr.getRefData().getBaseNodeOld();
         const std::string &handle = node->getName();
         if(handleToMesh.find(handle) != handleToMesh.end())
         {

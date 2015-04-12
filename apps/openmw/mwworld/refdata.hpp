@@ -10,6 +10,11 @@ namespace Ogre
     class SceneNode;
 }
 
+namespace osg
+{
+    class PositionAttitudeTransform;
+}
+
 namespace ESM
 {
     class Script;
@@ -28,7 +33,7 @@ namespace MWWorld
     class RefData
     {
             Ogre::SceneNode* mBaseNode;
-
+            osg::PositionAttitudeTransform* mBase;
 
             MWScript::Locals mLocals; // if we find the overhead of heaving a locals
                                       // object in the refdata of refs without a script,
@@ -78,10 +83,18 @@ namespace MWWorld
             const std::string &getHandle();
 
             /// Return OGRE base node (can be a null pointer).
-            Ogre::SceneNode* getBaseNode();
+            /// obsolete
+            Ogre::SceneNode* getBaseNodeOld();
+
+            /// Return base node (can be a null pointer).
+            osg::PositionAttitudeTransform* getBaseNode();
 
             /// Set OGRE base node (can be a null pointer).
-            void setBaseNode (Ogre::SceneNode* base);
+            /// obsolete
+            void setBaseNodeOld (Ogre::SceneNode* base);
+
+            /// Set base node (can be a null pointer).
+            void setBaseNode (osg::PositionAttitudeTransform* base);
 
             int getCount() const;
 

@@ -9,10 +9,22 @@
 #include <components/settings/settings.hpp>
 #include <components/nifcache/nifcache.hpp>
 
+#include <osgViewer/Viewer>
+
 
 #include "mwbase/environment.hpp"
 
 #include "mwworld/ptr.hpp"
+
+namespace Resource
+{
+    class ResourceSystem;
+}
+
+namespace VFS
+{
+    class Manager;
+}
 
 namespace Compiler
 {
@@ -39,19 +51,6 @@ namespace MWGui
     class WindowManager;
 }
 
-namespace OEngine
-{
-  namespace GUI
-  {
-    class MyGUIManager;
-  }
-
-  namespace Render
-  {
-    class OgreRenderer;
-  }
-}
-
 namespace Files
 {
     struct ConfigurationManager;
@@ -62,13 +61,15 @@ namespace OMW
     /// \brief Main engine class, that brings together all the components of OpenMW
     class Engine : private Ogre::FrameListener
     {
+            std::auto_ptr<VFS::Manager> mVFS;
+            std::auto_ptr<Resource::ResourceSystem> mResourceSystem;
             MWBase::Environment mEnvironment;
             ToUTF8::FromType mEncoding;
             ToUTF8::Utf8Encoder* mEncoder;
             Files::PathContainer mDataDirs;
             std::vector<std::string> mArchives;
             boost::filesystem::path mResDir;
-            OEngine::Render::OgreRenderer *mOgre;
+            osgViewer::Viewer mViewer;
             std::string mCellName;
             std::vector<std::string> mContentFiles;
             bool mVerboseScripts;
@@ -107,9 +108,6 @@ namespace OMW
             /// add resources directory
             /// \note This function works recursively.
             void addResourcesDirectory (const boost::filesystem::path& path);
-
-            /// add a .zip resource
-            void addZipResource (const boost::filesystem::path& path);
 
             void executeLocalScripts();
 

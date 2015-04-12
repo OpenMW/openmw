@@ -1385,7 +1385,7 @@ namespace MWMechanics
         static float fSneakViewMult = store.find("fSneakViewMult")->getFloat();
         float y = 0;
         Ogre::Vector3 vec = pos1 - pos2;
-        Ogre::Radian angle = observer.getRefData().getBaseNode()->getOrientation().yAxis().angleBetween(vec);
+        Ogre::Radian angle = observer.getRefData().getBaseNodeOld()->getOrientation().yAxis().angleBetween(vec);
         if (angle < Ogre::Degree(90))
             y = obsTerm * observerStats.getFatigueTerm() * fSneakNoViewMult;
         else

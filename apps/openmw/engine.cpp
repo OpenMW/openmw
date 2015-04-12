@@ -3,14 +3,22 @@
 #include <stdexcept>
 #include <iomanip>
 
-#include <OgreRoot.h>
-#include <OgreRenderWindow.h>
+#include <osgGA/TrackballManipulator>
+#include <osgViewer/ViewerEventHandlers>
+
+#include <osgUtil/IncrementalCompileOperation>
 
 #include <MyGUI_WidgetManager.h>
 
 #include <SDL.h>
 
+// TODO: move to component
 #include <openengine/misc/rng.hpp>
+
+#include <components/vfs/manager.hpp>
+#include <components/vfs/registerarchives.hpp>
+
+#include <components/resource/resourcesystem.hpp>
 
 #include <components/compiler/extensions0.hpp>
 
@@ -172,8 +180,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 }
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
-  : mOgre (0)
-  , mVerboseScripts (false)
+  : mVerboseScripts (false)
   , mSkipMenu (false)
   , mUseSound (true)
   , mCompileAll (false)
@@ -217,10 +224,6 @@ OMW::Engine::~Engine()
 // \note This function works recursively.
 
 void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
-{
-}
-
-void OMW::Engine::addZipResource (const boost::filesystem::path& path)
 {
 }
 
@@ -318,21 +321,27 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     addResourcesDirectory(mResDir / "shadows");
     addResourcesDirectory(mResDir / "materials");
 
-    OEngine::Render::WindowSettings windowSettings;
-    windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
-    windowSettings.window_border = settings.getBool("window border", "Video");
-    windowSettings.window_x = settings.getInt("resolution x", "Video");
-    windowSettings.window_y = settings.getInt("resolution y", "Video");
-    windowSettings.screen = settings.getInt("screen", "Video");
-    windowSettings.vsync = settings.getBool("vsync", "Video");
-    windowSettings.icon = "openmw.png";
-    std::string aa = settings.getString("antialiasing", "Video");
-    windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
+    //OEngine::Render::WindowSettings windowSettings;
+    //windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
+    //windowSettings.window_border = settings.getBool("window border", "Video");
+    //windowSettings.vsync = settings.getBool("vsync", "Video");
+    //windowSettings.icon = "openmw.png";
+    //std::string aa = settings.getString("antialiasing", "Video");
+    //windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
 
     SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS,
                 settings.getBool("minimize on focus loss", "Video") ? "1" : "0");
 
-    //Bsa::registerResources (mFileCollections, mArchives, true, mFSStrict);
+    // not handling fullscreen yet, we should figure this out when adding SDL to the mix
+    mViewer.setUpViewInWindow(0, 0, settings.getInt("resolution x", "Video"), settings.getInt("resolution y", "Video"), settings.getInt("screen", "Video"));
+    osg::ref_ptr<osg::Group> rootNode (new osg::Group);
+    mViewer.setSceneData(rootNode);
+
+    mVFS.reset(new VFS::Manager(mFSStrict));
+
+    VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true);
+
+    mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
 
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
@@ -378,8 +387,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     }
 
     // Create the world
-    mEnvironment.setWorld( new MWWorld::World (mFileCollections, mContentFiles,
-        mResDir, mCfgMgr.getCachePath(), mEncoder, mFallbackMap,
+    mEnvironment.setWorld( new MWWorld::World (mViewer, rootNode, mResourceSystem.get(),
+        mFileCollections, mContentFiles, mEncoder, mFallbackMap,
         mActivationDistanceOverride, mCellName, mStartupScript));
     MWBase::Environment::get().getWorld()->setupPlayer();
     //input->setPlayer(&mEnvironment.getWorld()->getPlayer());
@@ -460,7 +469,7 @@ void OMW::Engine::go()
     {
         MWBase::Environment::get().getStateManager()->loadGame(mSaveGameFile);
     }
-    else if (!mSkipMenu)
+    else if (0)// !mSkipMenu)
     {
         // start in main menu
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
@@ -481,6 +490,22 @@ void OMW::Engine::go()
     }
 
     // Start the main rendering loop
+    mViewer.setCameraManipulator(new osgGA::TrackballManipulator);
+    mViewer.addEventHandler(new osgViewer::StatsHandler);
+
+    osg::Timer timer;
+    //osgUtil::IncrementalCompileOperation* ico = new osgUtil::IncrementalCompileOperation;
+    //ico->compileAllForNextFrame(1);
+    //mViewer.setRealizeOperation(ico);
+    mViewer.realize();
+    std::cout << "realize took " << timer.time_m() << std::endl;
+    while (!mViewer.done())
+    {
+        MWBase::Environment::get().getWorld()->update(0.f, false);
+
+        mViewer.frame(/*simulationTime*/);
+    }
+
     /*
     Ogre::Timer timer;
     while (!MWBase::Environment::get().getStateManager()->hasQuitRequest())

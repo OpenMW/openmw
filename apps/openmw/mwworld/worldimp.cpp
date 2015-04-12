@@ -11,6 +11,8 @@
 #include "../mwscript/globalscripts.hpp"
 #include <OgreSceneNode.h>
 
+#include <osg/Group>
+
 #include <libs/openengine/bullet/trace.h>
 #include <libs/openengine/bullet/physic.hpp>
 
@@ -37,6 +39,7 @@
 #include "../mwmechanics/aiavoiddoor.hpp" //Used to tell actors to avoid doors
 
 //#include "../mwrender/animation.hpp"
+#include "../mwrender/renderingmanager.hpp"
 
 #include "../mwscript/interpretercontext.hpp"
 
@@ -143,9 +146,11 @@ namespace MWWorld
     }
 
     World::World (
+        osgViewer::Viewer& viewer,
+        osg::ref_ptr<osg::Group> rootNode,
+        Resource::ResourceSystem* resourceSystem,
         const Files::Collections& fileCollections,
         const std::vector<std::string>& contentFiles,
-        const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
         int activationDistanceOverride, const std::string& startCell, const std::string& startupScript)
     : mPlayer (0), mLocalScripts (mStore),
@@ -162,7 +167,7 @@ namespace MWWorld
 #if 0
         mProjectileManager.reset(new ProjectileManager(renderer.getScene(), *mPhysEngine));
 #endif
-        //mRendering = new MWRender::RenderingManager(renderer, resDir, cacheDir, mPhysEngine,&mFallback);
+        mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem);
 
         //mPhysEngine->setSceneManager(renderer.getScene());
 
@@ -476,7 +481,7 @@ namespace MWWorld
 #endif
         //delete mWeatherManager;
         delete mWorldScene;
-        //delete mRendering;
+        delete mRendering;
         //delete mPhysics;
 
         delete mPlayer;
@@ -1184,7 +1189,7 @@ namespace MWWorld
 
                     MWWorld::Ptr newPtr = ptr.getClass()
                             .copyToCell(ptr, *newCell);
-                    newPtr.getRefData().setBaseNode(0);
+                    newPtr.getRefData().setBaseNodeOld(0);
                 }
                 else if (!currCellActive && !newCellActive)
                     ptr.getClass().copyToCell(ptr, *newCell);
@@ -1194,7 +1199,7 @@ namespace MWWorld
                         ptr.getClass().copyToCell(ptr, *newCell, pos);
 
                     //mRendering->updateObjectCell(ptr, copy);
-                    ptr.getRefData().setBaseNode(NULL);
+                    ptr.getRefData().setBaseNodeOld(NULL);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, copy);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
@@ -1213,14 +1218,14 @@ namespace MWWorld
                 ptr.getRefData().setCount(0);
             }
         }
-        if (haveToMove && ptr.getRefData().getBaseNode())
+        if (haveToMove && ptr.getRefData().getBaseNodeOld())
         {
             //mRendering->moveObject(ptr, vec);
             //mPhysics->moveObject (ptr);
         }
         if (isPlayer)
         {
-            mWorldScene->playerMoved (vec);
+            //mWorldScene->playerMoved (vec);
         }
     }
 
@@ -1252,7 +1257,7 @@ namespace MWWorld
         ptr.getCellRef().setScale(scale);
         ptr.getClass().adjustScale(ptr,scale);
 
-        if(ptr.getRefData().getBaseNode() == 0)
+        if(ptr.getRefData().getBaseNodeOld() == 0)
             return;
         //mRendering->scaleObject(ptr, Vector3(scale,scale,scale));
         //mPhysics->scaleObject(ptr);
@@ -1303,7 +1308,7 @@ namespace MWWorld
 
         ptr.getRefData().setPosition(pos);
 
-        if(ptr.getRefData().getBaseNode() == 0)
+        if(ptr.getRefData().getBaseNodeOld() == 0)
             return;
 
         if (ptr.getClass().isActor())
@@ -1325,7 +1330,7 @@ namespace MWWorld
 
         ptr.getRefData().setLocalRotation(rot);
 
-        if (ptr.getRefData().getBaseNode() != 0)
+        if (ptr.getRefData().getBaseNodeOld() != 0)
         {
             mWorldScene->updateObjectLocalRotation(ptr);
         }
@@ -1335,7 +1340,7 @@ namespace MWWorld
     {
         ESM::Position pos (ptr.getRefData().getPosition());
 
-        if(!ptr.getRefData().getBaseNode())
+        if(!ptr.getRefData().getBaseNodeOld())
         {
             // will be adjusted when Ptr's cell becomes active
             return;
@@ -1352,9 +1357,9 @@ namespace MWWorld
 
         if (force || !isFlying(ptr))
         {
-            Ogre::Vector3 traced;// = mPhysics->traceDown(ptr, 500);
-            if (traced.z < pos.pos[2])
-                pos.pos[2] = traced.z;
+            //Ogre::Vector3 traced = mPhysics->traceDown(ptr, 500);
+            //if (traced.z < pos.pos[2])
+            //    pos.pos[2] = traced.z;
         }
 
         moveObject(ptr, ptr.getCell(), pos.pos[0], pos.pos[1], pos.pos[2]);
@@ -1599,13 +1604,14 @@ namespace MWWorld
 
     void World::update (float duration, bool paused)
     {
+        /*
         if (mGoToJail && !paused)
             goToJail();
 
         updateWeather(duration, paused);
 
-        //if (!paused)
-        //    doPhysics (duration);
+        if (!paused)
+            doPhysics (duration);
 
         mWorldScene->update (duration, paused);
 
@@ -1620,11 +1626,14 @@ namespace MWWorld
             ESM::Position pos = mPlayer->getPlayer().getRefData().getPosition();
             mPlayer->setLastKnownExteriorPosition(Ogre::Vector3(pos.pos));
         }
+        */
+
+        //mWorldScene->playerMoved(mRendering->getEyePos());
     }
 
     void World::updateSoundListener()
     {
-        Ogre::Vector3 playerPos = mPlayer->getPlayer().getRefData().getBaseNode()->getPosition();
+        Ogre::Vector3 playerPos = mPlayer->getPlayer().getRefData().getBaseNodeOld()->getPosition();
         const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(getPlayerPtr().getRefData().getHandle());
         if(actor) playerPos.z += 1.85f * actor->getHalfExtents().z;
         Ogre::Quaternion playerOrient = Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
@@ -1644,7 +1653,7 @@ namespace MWWorld
         // retrieve object dimensions so we know where to place the floating label
         if (!object.isEmpty ())
         {
-            Ogre::SceneNode* node = object.getRefData().getBaseNode();
+            Ogre::SceneNode* node = object.getRefData().getBaseNodeOld();
             Ogre::AxisAlignedBox bounds = node->_getWorldAABB();
             if (bounds.isFinite())
             {
@@ -2341,7 +2350,7 @@ namespace MWWorld
 
         bool operator() (Ptr ptr)
         {
-            Ogre::SceneNode* handle = ptr.getRefData().getBaseNode();
+            Ogre::SceneNode* handle = ptr.getRefData().getBaseNodeOld();
             if (handle)
                 mHandles.push_back(handle->getName());
             return true;
@@ -2366,7 +2375,7 @@ namespace MWWorld
     {
         if (!targetActor.getRefData().isEnabled() || !actor.getRefData().isEnabled())
             return false; // cannot get LOS unless both NPC's are enabled
-        if (!targetActor.getRefData().getBaseNode() || !targetActor.getRefData().getBaseNode())
+        if (!targetActor.getRefData().getBaseNodeOld() || !targetActor.getRefData().getBaseNodeOld())
             return false; // not in active cell
 
         OEngine::Physic::PhysicActor* actor1 = mPhysEngine->getCharacter(actor.getRefData().getHandle());

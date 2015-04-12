@@ -127,8 +127,7 @@ int main(int argc, char** argv)
     osg::Group* newNode = new osg::Group;
     NifOsg::Loader loader;
     Resource::TextureManager texMgr(&resourceMgr);
-    loader.mTextureManager = &texMgr;
-    newNode->addChild(loader.load(nif));
+    newNode->addChild(loader.load(nif, &texMgr));
 
     osg::PositionAttitudeTransform* trans = new osg::PositionAttitudeTransform;
     root->addChild(trans);

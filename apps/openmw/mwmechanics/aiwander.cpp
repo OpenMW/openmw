@@ -474,7 +474,7 @@ namespace MWMechanics
                     Ogre::Vector3 dir = playerPos - actorPos;
 
                     Ogre::Radian faceAngle = Ogre::Math::ATan2(dir.x,dir.y);
-                    Ogre::Radian actorAngle = actor.getRefData().getBaseNode()->getOrientation().getRoll();
+                    Ogre::Radian actorAngle = actor.getRefData().getBaseNodeOld()->getOrientation().getRoll();
                     // an attempt at reducing the turning animation glitch
                     if( Ogre::Math::Abs( faceAngle - actorAngle ) >= Ogre::Degree(5) ) // TODO: is there a better way?
                     {

@@ -35,7 +35,7 @@
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/cellstore.hpp"
 
-#include "../mwrender/actors.hpp"
+#include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/tooltips.hpp"
@@ -409,7 +409,7 @@ namespace MWClass
 
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        renderingInterface.getActors().insertNPC(ptr);
+        renderingInterface.getObjects().insertNPC(ptr);
     }
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const

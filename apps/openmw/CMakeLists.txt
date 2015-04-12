@@ -20,8 +20,8 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-actors objects
-#    renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
+    actors objects renderingmanager animation
+#     debugging sky camera npcanimation creatureanimation activatoranimation
 #    renderinginterface localmap occlusionquery water shadows
 #    characterpreview globalmap ripplesimulation refraction
 #    terrainstorage renderconst effectmanager weaponanimation
@@ -129,6 +129,7 @@ target_link_libraries(openmw
     ${OENGINE_LIBRARY}
     ${OGRE_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
+    ${OPENSCENEGRAPH_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}

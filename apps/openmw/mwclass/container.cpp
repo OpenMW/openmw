@@ -23,7 +23,7 @@
 
 #include "../mwgui/tooltips.hpp"
 
-#include "../mwrender/actors.hpp"
+#include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
@@ -93,8 +93,7 @@ namespace MWClass
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         if (!model.empty()) {
-            MWRender::Actors& actors = renderingInterface.getActors();
-            actors.insertActivator(ptr, model);
+            renderingInterface.getObjects().insertModel(ptr, model, true);
         }
     }
 

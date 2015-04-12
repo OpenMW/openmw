@@ -23,7 +23,6 @@
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
-#include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 namespace MWClass
@@ -39,8 +38,7 @@ namespace MWClass
             ptr.get<ESM::Light>();
 
         // Insert even if model is empty, so that the light is added
-        MWRender::Actors& actors = renderingInterface.getActors();
-        actors.insertActivator(ptr, model, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
+        renderingInterface.getObjects().insertModel(ptr, model, true, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
     }
 
     void Light::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const

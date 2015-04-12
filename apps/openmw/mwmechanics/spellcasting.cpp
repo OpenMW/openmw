@@ -418,7 +418,7 @@ namespace MWMechanics
             absorbed = (OEngine::Misc::Rng::roll0to99() < absorb);
             if (absorbed)
             {
-                const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
+                //const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
                 //MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
                 //            "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, "");
                 // Magicka is increased by cost of spell
@@ -466,7 +466,7 @@ namespace MWMechanics
                     bool isReflected = (OEngine::Misc::Rng::roll0to99() < reflect);
                     if (isReflected)
                     {
-                        const ESM::Static* reflectStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Reflect");
+                        //const ESM::Static* reflectStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Reflect");
                         //MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
                         //            "meshes\\" + reflectStatic->mModel, ESM::MagicEffect::Reflect, false, "");
                         reflectedEffects.mList.push_back(*effectIt);
@@ -565,7 +565,7 @@ namespace MWMechanics
                     }
 
                     // Add VFX
-                    const ESM::Static* castStatic;
+                    /*const ESM::Static* castStatic;
                     if (!magicEffect->mHit.empty())
                         castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
                     else
@@ -574,9 +574,10 @@ namespace MWMechanics
                     // TODO: VFX are no longer active after saving/reloading the game
                     bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
                     // Note: in case of non actor, a free effect should be fine as well
-                    //MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(target);
-                    //if (anim)
-                    //    anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
+                    MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(target);
+                    if (anim)
+                        anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
+                    */
                 }
             }
         }

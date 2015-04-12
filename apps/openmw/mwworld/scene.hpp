@@ -8,6 +8,11 @@
 
 #include <set>
 
+namespace osg
+{
+    class Vec3f;
+}
+
 namespace Ogre
 {
     class Vector3;
@@ -59,7 +64,7 @@ namespace MWWorld
             CellStoreCollection mActiveCells;
             bool mCellChanged;
             //PhysicsSystem *mPhysics;
-            //MWRender::RenderingManager& mRendering;
+            MWRender::RenderingManager& mRendering;
 
             bool mNeedMapUpdate;
 
@@ -80,7 +85,7 @@ namespace MWWorld
 
             void loadCell (CellStore *cell, Loading::Listener* loadingListener);
 
-            void playerMoved (const Ogre::Vector3& pos);
+            void playerMoved (const osg::Vec3f& pos);
 
             void changePlayerCell (CellStore* newCell, const ESM::Position& position, bool adjustPlayerPos);
 

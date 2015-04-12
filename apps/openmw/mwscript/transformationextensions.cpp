@@ -686,10 +686,10 @@ namespace MWScript
                     else
                         throw std::runtime_error ("invalid movement axis: " + axis);
 
-                    if (!ptr.getRefData().getBaseNode())
+                    if (!ptr.getRefData().getBaseNodeOld())
                         return;
 
-                    Ogre::Vector3 diff = ptr.getRefData().getBaseNode()->getOrientation() * posChange;
+                    Ogre::Vector3 diff = ptr.getRefData().getBaseNodeOld()->getOrientation() * posChange;
                     Ogre::Vector3 worldPos(ptr.getRefData().getPosition().pos);
                     worldPos += diff;
                     MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x, worldPos.y, worldPos.z);

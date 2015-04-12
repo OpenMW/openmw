@@ -87,6 +87,11 @@ namespace SceneUtil
 
         osg::ref_ptr<osg::StateSet> getLightListStateSet(const LightList& lightList);
 
+        /// Set the first light index that should be used by this manager, typically the number of directional lights in the scene.
+        void setStartLight(int start);
+
+        int getStartLight() const;
+
     private:
         // Lights collected from the scene graph. Only valid during the cull traversal.
         std::vector<LightSourceTransform> mLights;
@@ -98,6 +103,8 @@ namespace SceneUtil
         LightStateSetMap mStateSetCache;
 
         bool mDecorated;
+
+        int mStartLight;
     };
 
 }

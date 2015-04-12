@@ -4,13 +4,18 @@
 #include <OgreController.h>
 #include <OgreVector3.h>
 
-#include <components/nifogre/ogrenifloader.hpp>
-
 #include "../mwworld/ptr.hpp"
+
+#include <components/nifosg/controller.hpp>
 
 namespace ESM
 {
     struct Light;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
 }
 
 namespace MWRender
@@ -69,20 +74,18 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
-
-
-    class NullAnimationTime : public Ogre::ControllerValue<Ogre::Real>
+    class NullAnimationTime : public NifOsg::ControllerSource
     {
     public:
-        virtual Ogre::Real getValue() const
-        { return 0.0f; }
-        virtual void setValue(Ogre::Real value)
-        { }
+        virtual float getValue(osg::NodeVisitor *nv)
+        {
+            return 0.f;
+        }
     };
 
 
     struct AnimSource : public Ogre::AnimationAlloc {
-        NifOgre::TextKeyMap mTextKeys;
+        //NifOgre::TextKeyMap mTextKeys;
         std::vector<Ogre::Controller<Ogre::Real> > mControllers[sNumGroups];
     };
     typedef std::vector< Ogre::SharedPtr<AnimSource> > AnimSourceList;
@@ -113,105 +116,70 @@ protected:
 
     typedef std::map<Ogre::MovableObject*,std::string> ObjectAttachMap;
 
-    struct EffectParams
-    {
-        std::string mModelName; // Just here so we don't add the same effect twice
-        NifOgre::ObjectScenePtr mObjects;
-        int mEffectId;
-        bool mLoop;
-        std::string mBoneName;
-    };
+    osg::ref_ptr<osg::Group> mInsert;
 
-    std::vector<EffectParams> mEffects;
+    osg::ref_ptr<osg::Node> mObjectRoot;
 
     MWWorld::Ptr mPtr;
 
-    Ogre::Light* mGlowLight;
-
-    Ogre::SceneNode *mInsert;
-    Ogre::Entity *mSkelBase;
-    NifOgre::ObjectScenePtr mObjectRoot;
-    AnimSourceList mAnimSources;
-    Ogre::Node *mAccumRoot;
-    Ogre::Node *mNonAccumRoot;
-    NifOgre::NodeTargetValue<Ogre::Real> *mNonAccumCtrl;
-    Ogre::Vector3 mAccumulate;
-
-    AnimStateMap mStates;
-
-    Ogre::SharedPtr<AnimationTime> mAnimationTimePtr[sNumGroups];
-    Ogre::SharedPtr<NullAnimationTime> mNullAnimationTimePtr;
-
-    ObjectAttachMap mAttachedObjects;
-
+    Resource::ResourceSystem* mResourceSystem;
 
     /* Sets the appropriate animations on the bone groups based on priority.
      */
-    void resetActiveGroups();
+    //void resetActiveGroups();
 
-    static size_t detectAnimGroup(const Ogre::Node *node);
+    //static size_t detectAnimGroup(const Ogre::Node *node);
 
+    /*
     static float calcAnimVelocity(const NifOgre::TextKeyMap &keys,
                                   NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,
                                   const Ogre::Vector3 &accum,
                                   const std::string &groupname);
-
-    /* Updates a skeleton instance so that all bones matching the source skeleton (based on
-     * bone names) are positioned identically. */
-    void updateSkeletonInstance(const Ogre::SkeletonInstance *skelsrc, Ogre::SkeletonInstance *skel);
+    */
 
     /* Updates the position of the accum root node for the given time, and
      * returns the wanted movement vector from the previous time. */
-    void updatePosition(float oldtime, float newtime, Ogre::Vector3 &position);
+    //void updatePosition(float oldtime, float newtime, Ogre::Vector3 &position);
 
-    static NifOgre::TextKeyMap::const_iterator findGroupStart(const NifOgre::TextKeyMap &keys, const std::string &groupname);
+    //static NifOgre::TextKeyMap::const_iterator findGroupStart(const NifOgre::TextKeyMap &keys, const std::string &groupname);
 
     /* Resets the animation to the time of the specified start marker, without
      * moving anything, and set the end time to the specified stop marker. If
      * the marker is not found, or if the markers are the same, it returns
      * false.
      */
-    bool reset(AnimState &state, const NifOgre::TextKeyMap &keys,
-               const std::string &groupname, const std::string &start, const std::string &stop,
-               float startpoint, bool loopfallback);
+    //bool reset(AnimState &state, const NifOgre::TextKeyMap &keys,
+    //           const std::string &groupname, const std::string &start, const std::string &stop,
+    //           float startpoint, bool loopfallback);
 
-    void handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key,
-                       const NifOgre::TextKeyMap& map);
+    //void handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key,
+    //                   const NifOgre::TextKeyMap& map);
 
-    /* Sets the root model of the object. If 'baseonly' is true, then any meshes or particle
-     * systems in the model are ignored (useful for NPCs, where only the skeleton is needed for
-     * the root).
+    /* Sets the root model of the object.
      *
      * Note that you must make sure all animation sources are cleared before reseting the object
      * root. All nodes previously retrieved with getNode will also become invalidated.
      */
-    void setObjectRoot(const std::string &model, bool baseonly);
+    void setObjectRoot(const std::string &model);
 
     /* Adds the keyframe controllers in the specified model as a new animation source. Note that
      * the filename portion of the provided model name will be prepended with 'x', and the .nif
      * extension will be replaced with .kf. */
-    void addAnimSource(const std::string &model);
+    //void addAnimSource(const std::string &model);
 
     /** Adds an additional light to the given object list using the specified ESM record. */
-    void addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScenePtr objlist, const ESM::Light *light);
+    //void addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScenePtr objlist, const ESM::Light *light);
 
-    void clearAnimSources();
-
-    // TODO: Should not be here
-    Ogre::Vector3 getEnchantmentColor(MWWorld::Ptr item);
+    //void clearAnimSources();
 
 public:
-    // FIXME: Move outside of this class
-    static void setRenderProperties(NifOgre::ObjectScenePtr objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue,
-                                    Ogre::uint8 transqueue, Ogre::Real dist=0.0f,
-                                    bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
 
-    /// Returns the name of the .nif file that makes up this animation's base skeleton.
-    /// If there is no skeleton, returns "".
-    std::string getObjectRootName() const;
-
-    Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node);
+    Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> node, Resource::ResourceSystem* resourceSystem);
     virtual ~Animation();
+
+    osg::Group* getOrCreateObjectRoot();
+
+    osg::Group* getObjectRoot();
 
     /**
      * @brief Add an effect mesh attached to a bone or the insert scene node
@@ -223,25 +191,18 @@ public:
      * @param texture override the texture specified in the model's materials
      * @note Will not add an effect twice.
      */
-    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", std::string texture = "");
-    void removeEffect (int effectId);
-    void getLoopingEffects (std::vector<int>& out);
+    //void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", std::string texture = "");
+    //void removeEffect (int effectId);
+    //void getLoopingEffects (std::vector<int>& out);
 
-    /// Prepare this animation for being rendered with \a camera (rotates billboard nodes)
-    virtual void preRender (Ogre::Camera* camera);
+    //void updatePtr(const MWWorld::Ptr &ptr);
 
-    virtual void setAlpha(float alpha) {}
-    virtual void setVampire(bool vampire) {}
-
-public:
-    void updatePtr(const MWWorld::Ptr &ptr);
-
-    bool hasAnimation(const std::string &anim);
+    //bool hasAnimation(const std::string &anim);
 
     // Specifies the axis' to accumulate on. Non-accumulated axis will just
     // move visually, but not affect the actual movement. Each x/y/z value
     // should be on the scale of 0 to 1.
-    void setAccumulation(const Ogre::Vector3 &accum);
+    //void setAccumulation(const Ogre::Vector3 &accum);
 
     /** Plays an animation.
      * \param groupname Name of the animation group to play.
@@ -263,23 +224,23 @@ public:
      * \param loopFallback Allow looping an animation that has no loop keys, i.e. fall back to use
      *                     the "start" and "stop" keys for looping?
      */
-    void play(const std::string &groupname, int priority, int groups, bool autodisable,
-              float speedmult, const std::string &start, const std::string &stop,
-              float startpoint, size_t loops, bool loopfallback=false);
+    //void play(const std::string &groupname, int priority, int groups, bool autodisable,
+    //          float speedmult, const std::string &start, const std::string &stop,
+    //          float startpoint, size_t loops, bool loopfallback=false);
 
     /** If the given animation group is currently playing, set its remaining loop count to '0'.
      */
-    void stopLooping(const std::string& groupName);
+    //void stopLooping(const std::string& groupName);
 
     /** Adjust the speed multiplier of an already playing animation.
      */
-    void adjustSpeedMult (const std::string& groupname, float speedmult);
+    //void adjustSpeedMult (const std::string& groupname, float speedmult);
 
     /** Returns true if the named animation group is playing. */
-    bool isPlaying(const std::string &groupname) const;
+    //bool isPlaying(const std::string &groupname) const;
 
     /// Returns true if no important animations are currently playing on the upper body.
-    bool upperBodyReady() const;
+    //bool upperBodyReady() const;
 
     /** Gets info about the given animation group.
      * \param groupname Animation group to check.
@@ -287,71 +248,32 @@ public:
      * \param speedmult Stores the animation speed multiplier
      * \return True if the animation is active, false otherwise.
      */
-    bool getInfo(const std::string &groupname, float *complete=NULL, float *speedmult=NULL) const;
+    //bool getInfo(const std::string &groupname, float *complete=NULL, float *speedmult=NULL) const;
 
     /// Get the absolute position in the animation track of the first text key with the given group.
-    float getStartTime(const std::string &groupname) const;
+    //float getStartTime(const std::string &groupname) const;
 
     /// Get the absolute position in the animation track of the text key
-    float getTextKeyTime(const std::string &textKey) const;
+    //float getTextKeyTime(const std::string &textKey) const;
 
     /// Get the current absolute position in the animation track for the animation that is currently playing from the given group.
-    float getCurrentTime(const std::string& groupname) const;
+    //float getCurrentTime(const std::string& groupname) const;
 
     /** Disables the specified animation group;
      * \param groupname Animation group to disable.
      */
-    void disable(const std::string &groupname);
-    void changeGroups(const std::string &groupname, int group);
-
-    virtual void setWeaponGroup(const std::string& group) {}
+    //void disable(const std::string &groupname);
+    //void changeGroups(const std::string &groupname, int group);
 
     /** Retrieves the velocity (in units per second) that the animation will move. */
-    float getVelocity(const std::string &groupname) const;
+    //float getVelocity(const std::string &groupname) const;
 
-    /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
-    /// to indicate the facing orientation of the character.
-    virtual void setPitchFactor(float factor) {}
-    virtual void setHeadPitch(Ogre::Radian factor) {}
-    virtual void setHeadYaw(Ogre::Radian factor) {}
-    virtual Ogre::Radian getHeadPitch() const { return Ogre::Radian(0.f); }
-    virtual Ogre::Radian getHeadYaw() const { return Ogre::Radian(0.f); }
-
-    virtual Ogre::Vector3 runAnimation(float duration);
-
-    /// This is typically called as part of runAnimation, but may be called manually if needed.
-    void updateEffects(float duration);
-
-    // TODO: move outside of this class
-    /// Makes this object glow, by placing a Light in its center.
-    /// @param effect Controls the radius and intensity of the light.
-    void setLightEffect(float effect);
-
-    virtual void showWeapons(bool showWeapon);
-    virtual void showCarriedLeft(bool show) {}
-    virtual void attachArrow() {}
-    virtual void releaseArrow() {}
-    void enableLights(bool enable);
-    virtual void enableHeadAnimation(bool enable) {}
-
-    Ogre::AxisAlignedBox getWorldBounds();
-
-    Ogre::Node *getNode(const std::string &name);
-    Ogre::Node *getNode(int handle);
-
-    // Attaches the given object to a bone on this object's base skeleton. If the bone doesn't
-    // exist, the object isn't attached and NULL is returned. The returned TagPoint is only
-    // valid until the next setObjectRoot call.
-    Ogre::TagPoint *attachObjectToBone(const Ogre::String &bonename, Ogre::MovableObject *obj);
-    void detachObjectFromBone(Ogre::MovableObject *obj);
+    virtual osg::Vec3f runAnimation(float duration);
 };
 
 class ObjectAnimation : public Animation {
 public:
-    ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model);
-
-    bool canBatch() const;
-    void fillBatch(Ogre::StaticGeometry *sg);
+    ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, Resource::ResourceSystem* resourceSystem);
 };
 
 }

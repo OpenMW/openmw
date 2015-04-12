@@ -134,14 +134,23 @@ namespace MWWorld
         return mBaseNode->getName();
     }
 
-    Ogre::SceneNode* RefData::getBaseNode()
+    Ogre::SceneNode* RefData::getBaseNodeOld()
     {
         return mBaseNode;
     }
 
-    void RefData::setBaseNode(Ogre::SceneNode* base)
+    void RefData::setBaseNodeOld(Ogre::SceneNode* base)
     {
-         mBaseNode = base;
+    }
+
+    void RefData::setBaseNode(osg::PositionAttitudeTransform *base)
+    {
+        mBase = base;
+    }
+
+    osg::PositionAttitudeTransform* RefData::getBaseNode()
+    {
+        return mBase;
     }
 
     int RefData::getCount() const

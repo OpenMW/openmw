@@ -5,6 +5,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <osg/ref_ptr>
+
 #include "ptr.hpp"
 #include "scene.hpp"
 #include "esmstore.hpp"
@@ -20,6 +22,21 @@
 #include "contentloader.hpp"
 
 #include <components/settings/settings.hpp>
+
+namespace osg
+{
+    class Group;
+}
+
+namespace osgViewer
+{
+    class Viewer;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
+}
 
 namespace Ogre
 {
@@ -155,9 +172,11 @@ namespace MWWorld
         public:
 
             World (
+                osgViewer::Viewer& viewer,
+                osg::ref_ptr<osg::Group> rootNode,
+                Resource::ResourceSystem* resourceSystem,
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& contentFiles,
-                const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
                 int activationDistanceOverride, const std::string& startCell, const std::string& startupScript);
 

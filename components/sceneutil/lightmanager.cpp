@@ -74,6 +74,16 @@ namespace SceneUtil
 
             if (lights.size())
             {
+
+                static std::map<osg::Node*, osg::ref_ptr<osg::StateSet> > statesets;
+                std::map<osg::Node*, osg::ref_ptr<osg::StateSet> >::iterator found = statesets.find(node);
+                osg::ref_ptr<osg::StateSet> stateset;
+                if (found != statesets.end())
+                {
+                    stateset = found->second;
+                }
+                else{
+
                 // we do the intersections in view space
                 osg::BoundingSphere nodeBound = node->getBound();
                 osg::Matrixf mat = *cv->getModelViewMatrix();
@@ -89,26 +99,33 @@ namespace SceneUtil
 
                 if (lightList.empty())
                 {
+                    statesets[node] = NULL;
                     traverse(node, nv);
                     return;
                 }
 
-                if (lightList.size() > 8)
+                unsigned int maxLights = static_cast<unsigned int> (8 - mLightManager->getStartLight());
+
+                if (lightList.size() > maxLights)
                 {
                     //std::cerr << "More than 8 lights!" << std::endl;
 
                     // TODO: sort lights by certain criteria
 
-                    while (lightList.size() > 8)
+                    while (lightList.size() > maxLights)
                         lightList.pop_back();
                 }
 
-                osg::ref_ptr<osg::StateSet> stateset = mLightManager->getLightListStateSet(lightList);
+                stateset = mLightManager->getLightListStateSet(lightList);
+                statesets[node] = stateset;
+                }
 
+                if (stateset)
                 cv->pushStateSet(stateset);
 
                 traverse(node, nv);
 
+                if (stateset)
                 cv->popStateSet();
             }
             else
@@ -174,7 +191,7 @@ namespace SceneUtil
                     throw std::runtime_error("can't find parent LightManager");
             }
 
-            mLightManager->addLight(static_cast<LightSource*>(node), osg::computeLocalToWorld(nv->getNodePath()));
+            //mLightManager->addLight(static_cast<LightSource*>(node), osg::computeLocalToWorld(nv->getNodePath()));
 
             traverse(node, nv);
         }
@@ -208,6 +225,7 @@ namespace SceneUtil
     LightManager::LightManager()
         : mLightsInViewSpace(false)
         , mDecorated(false)
+        , mStartLight(0)
     {
         setUpdateCallback(new LightManagerUpdateCallback);
     }
@@ -216,6 +234,7 @@ namespace SceneUtil
         : osg::Group(copy, copyop)
         , mLightsInViewSpace(false)
         , mDecorated(copy.mDecorated)
+        , mStartLight(copy.mStartLight)
     {
 
     }
@@ -284,11 +303,14 @@ namespace SceneUtil
                 osg::ref_ptr<LightStateAttribute> clonedLight = new LightStateAttribute(*light, osg::CopyOp::DEEP_COPY_ALL);
                 clonedLight->setPosition(mLights[lightIndex].mWorldMatrix.preMult(light->getPosition()));
 
-                clonedLight->setLightNum(i);
+                clonedLight->setLightNum(i+mStartLight);
 
                 // don't use setAttributeAndModes, that does not support light indices!
                 stateset->setAttribute(clonedLight, osg::StateAttribute::ON);
                 stateset->setAssociatedModes(clonedLight, osg::StateAttribute::ON);
+
+                //stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
             }
             mStateSetCache.insert(std::make_pair(hash, stateset));
             return stateset;
@@ -298,6 +320,16 @@ namespace SceneUtil
     const std::vector<LightManager::LightSourceTransform>& LightManager::getLights() const
     {
         return mLights;
+    }
+
+    void LightManager::setStartLight(int start)
+    {
+        mStartLight = start;
+    }
+
+    int LightManager::getStartLight() const
+    {
+        return mStartLight;
     }
 
     LightSource::LightSource()
