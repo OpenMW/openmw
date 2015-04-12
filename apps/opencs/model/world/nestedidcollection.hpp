@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #include "nestedcollection.hpp"
-#include "idadapterimp.hpp"
+#include "nestedcoladapterimp.hpp"
 
 namespace ESM
 {
@@ -23,9 +23,9 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
     class NestedIdCollection : public IdCollection<ESXRecordT, IdAccessorT>, public NestedCollection
     {
-            std::map<const ColumnBase*, NestedIdAdapter<ESXRecordT>* > mAdapters;
+            std::map<const ColumnBase*, NestedColumnAdapter<ESXRecordT>* > mAdapters;
 
-            const NestedIdAdapter<ESXRecordT>& getAdapter(const ColumnBase &column) const;
+            const NestedColumnAdapter<ESXRecordT>& getAdapter(const ColumnBase &column) const;
 
         public:
 
@@ -51,7 +51,7 @@ namespace CSMWorld
             // this method is inherited from NestedCollection, not from Collection<ESXRecordT>
             virtual NestableColumn *getNestableColumn(int column);
 
-            void addAdapter(std::pair<const ColumnBase*, NestedIdAdapter<ESXRecordT>* > adapter);
+            void addAdapter(std::pair<const ColumnBase*, NestedColumnAdapter<ESXRecordT>* > adapter);
     };
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -61,21 +61,24 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT>
     NestedIdCollection<ESXRecordT, IdAccessorT>::~NestedIdCollection()
     {
-        for (typename std::map<const ColumnBase *, NestedIdAdapter<ESXRecordT>* >::iterator iter (mAdapters.begin());
-                iter!=mAdapters.end(); ++iter)
+        for (typename std::map<const ColumnBase *, NestedColumnAdapter<ESXRecordT>* >::iterator
+                iter (mAdapters.begin()); iter!=mAdapters.end(); ++iter)
+        {
             delete (*iter).second;
+        }
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void NestedIdCollection<ESXRecordT, IdAccessorT>::addAdapter(std::pair<const ColumnBase*, NestedIdAdapter<ESXRecordT>* > adapter)
+    void NestedIdCollection<ESXRecordT, IdAccessorT>::addAdapter(std::pair<const ColumnBase*,
+            NestedColumnAdapter<ESXRecordT>* > adapter)
     {
         mAdapters.insert(adapter);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    const NestedIdAdapter<ESXRecordT>& NestedIdCollection<ESXRecordT, IdAccessorT>::getAdapter(const ColumnBase &column) const
+    const NestedColumnAdapter<ESXRecordT>& NestedIdCollection<ESXRecordT, IdAccessorT>::getAdapter(const ColumnBase &column) const
     {
-        typename std::map<const ColumnBase *, NestedIdAdapter<ESXRecordT>* >::const_iterator iter =
+        typename std::map<const ColumnBase *, NestedColumnAdapter<ESXRecordT>* >::const_iterator iter =
             mAdapters.find (&column);
 
         if (iter==mAdapters.end())

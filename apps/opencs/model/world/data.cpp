@@ -18,7 +18,7 @@
 #include "columns.hpp"
 #include "resourcesmanager.hpp"
 #include "resourcetable.hpp"
-#include "idadapterimp.hpp"
+#include "nestedcoladapterimp.hpp"
 
 void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type, bool update)
 {
@@ -64,6 +64,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
   mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0)
 {
+    int index = 0;
+
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
     mGlobals.addColumn (new RecordStateColumn<ESM::Global>);
     mGlobals.addColumn (new FixedRecordTypeColumn<ESM::Global> (UniversalId::Type_Global));
@@ -109,14 +111,13 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     for (int i=0; i<7; ++i)
         mFactions.addColumn (new SkillsColumn<ESM::Faction> (i));
     // Faction Reactions
-    NestedParentColumn<ESM::Faction> *reactions =
-            new NestedParentColumn<ESM::Faction> (Columns::ColumnId_FactionReactions);
-    mFactions.addColumn (reactions);
-    mFactions.addAdapter (std::make_pair(reactions, new FactionReactionsAdapter ()));
-    mFactions.getNestableColumn(mFactions.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_Faction, ColumnBase::Display_String));
-    mFactions.getNestableColumn(mFactions.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_FactionReaction, ColumnBase::Display_Integer));
+    mFactions.addColumn (new NestedParentColumn<ESM::Faction> (Columns::ColumnId_FactionReactions));
+    index = mFactions.getColumns()-1;
+    mFactions.addAdapter (std::make_pair(&mFactions.getColumn(index), new FactionReactionsAdapter ()));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Faction, ColumnBase::Display_String));
+    mFactions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_FactionReaction, ColumnBase::Display_Integer));
 
     mRaces.addColumn (new StringIdColumn<ESM::Race>);
     mRaces.addColumn (new RecordStateColumn<ESM::Race>);
@@ -130,12 +131,11 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (false, true));
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (false, false));
     // Race spells
-    NestedParentColumn<ESM::Race> *raceSpells =
-            new NestedParentColumn<ESM::Race> (Columns::ColumnId_SpellList);
-    mRaces.addColumn (raceSpells);
-    mRaces.addAdapter (std::make_pair(raceSpells, new SpellListAdapter<ESM::Race> ()));
-    mRaces.getNestableColumn(mRaces.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_String));
+    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_SpellList));
+    index = mRaces.getColumns()-1;
+    mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new SpellListAdapter<ESM::Race> ()));
+    mRaces.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_String));
 
     mSounds.addColumn (new StringIdColumn<ESM::Sound>);
     mSounds.addColumn (new RecordStateColumn<ESM::Sound>);
@@ -157,14 +157,13 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRegions.addColumn (new MapColourColumn<ESM::Region>);
     mRegions.addColumn (new SleepListColumn<ESM::Region>);
     // Region Sounds
-    NestedParentColumn<ESM::Region> *soundList =
-            new NestedParentColumn<ESM::Region> (Columns::ColumnId_RegionSounds);
-    mRegions.addColumn (soundList);
-    mRegions.addAdapter (std::make_pair(soundList, new RegionSoundListAdapter ()));
-    mRegions.getNestableColumn(mRegions.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_SoundName, ColumnBase::Display_String));
-    mRegions.getNestableColumn(mRegions.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_SoundChance, ColumnBase::Display_Integer));
+    mRegions.addColumn (new NestedParentColumn<ESM::Region> (Columns::ColumnId_RegionSounds));
+    index = mRegions.getColumns()-1;
+    mRegions.addAdapter (std::make_pair(&mRegions.getColumn(index), new RegionSoundListAdapter ()));
+    mRegions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_SoundName, ColumnBase::Display_String));
+    mRegions.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_SoundChance, ColumnBase::Display_Integer));
 
     mBirthsigns.addColumn (new StringIdColumn<ESM::BirthSign>);
     mBirthsigns.addColumn (new RecordStateColumn<ESM::BirthSign>);
@@ -173,12 +172,12 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mBirthsigns.addColumn (new TextureColumn<ESM::BirthSign>);
     mBirthsigns.addColumn (new DescriptionColumn<ESM::BirthSign>);
     // Birthsign spells
-    NestedParentColumn<ESM::BirthSign> *birthSpells =
-            new NestedParentColumn<ESM::BirthSign> (Columns::ColumnId_SpellList);
-    mBirthsigns.addColumn (birthSpells);
-    mBirthsigns.addAdapter (std::make_pair(birthSpells, new SpellListAdapter<ESM::BirthSign> ()));
-    mBirthsigns.getNestableColumn(mBirthsigns.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_String));
+    mBirthsigns.addColumn (new NestedParentColumn<ESM::BirthSign> (Columns::ColumnId_SpellList));
+    index = mBirthsigns.getColumns()-1;
+    mBirthsigns.addAdapter (std::make_pair(&mBirthsigns.getColumn(index),
+        new SpellListAdapter<ESM::BirthSign> ()));
+    mBirthsigns.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_String));
 
     mSpells.addColumn (new StringIdColumn<ESM::Spell>);
     mSpells.addColumn (new RecordStateColumn<ESM::Spell>);
@@ -190,26 +189,25 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_StarterSpell, 0x2));
     mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_AlwaysSucceeds, 0x4));
     // Spell effects
-    NestedParentColumn<ESM::Spell> *spellEffect =
-            new NestedParentColumn<ESM::Spell> (Columns::ColumnId_EffectList);
-    mSpells.addColumn (spellEffect);
-    mSpells.addAdapter (std::make_pair(spellEffect, new EffectsListAdapter<ESM::Spell> ()));
-    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_String/*, false*/)); // false means no edit
-    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_String));
-    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_String)); // reuse attribute
-    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_Integer));
-    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_EffectArea, ColumnBase::Display_String));
-    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_Duration, ColumnBase::Display_Integer)); // reuse from light
-    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_MinRange, ColumnBase::Display_Integer)); // reuse from sound
-    mSpells.getNestableColumn(mSpells.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_MaxRange, ColumnBase::Display_Integer)); // reuse from sound
+    mSpells.addColumn (new NestedParentColumn<ESM::Spell> (Columns::ColumnId_EffectList));
+    index = mSpells.getColumns()-1;
+    mSpells.addAdapter (std::make_pair(&mSpells.getColumn(index), new EffectsListAdapter<ESM::Spell> ()));
+    mSpells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_String/*, false*/)); // false means no edit
+    mSpells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_String));
+    mSpells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_String)); // reuse attribute
+    mSpells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_Integer));
+    mSpells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_EffectArea, ColumnBase::Display_String));
+    mSpells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Duration, ColumnBase::Display_Integer)); // reuse from light
+    mSpells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_MinRange, ColumnBase::Display_Integer)); // reuse from sound
+    mSpells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_MaxRange, ColumnBase::Display_Integer)); // reuse from sound
 
     mTopics.addColumn (new StringIdColumn<ESM::Dialogue>);
     mTopics.addColumn (new RecordStateColumn<ESM::Dialogue>);
@@ -264,26 +262,26 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mEnchantments.addColumn (new ChargesColumn2<ESM::Enchantment>);
     mEnchantments.addColumn (new AutoCalcColumn<ESM::Enchantment>);
     // Enchantment effects
-    NestedParentColumn<ESM::Enchantment> *enchantmentEffect =
-            new NestedParentColumn<ESM::Enchantment> (Columns::ColumnId_EffectList);
-    mEnchantments.addColumn (enchantmentEffect);
-    mEnchantments.addAdapter (std::make_pair(enchantmentEffect, new EffectsListAdapter<ESM::Enchantment> ()));
-    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_String/*, false*/));
-    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_String));
-    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_String)); // reuse attribute
-    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_Integer));
-    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_EffectArea, ColumnBase::Display_String));
-    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_Duration, ColumnBase::Display_Integer)); // reuse from light
-    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_MinRange, ColumnBase::Display_Integer)); // reuse from sound
-    mEnchantments.getNestableColumn(mEnchantments.getColumns()-1)->addColumn(
-            new NestedChildColumn (Columns::ColumnId_MaxRange, ColumnBase::Display_Integer)); // reuse from sound
+    mEnchantments.addColumn (new NestedParentColumn<ESM::Enchantment> (Columns::ColumnId_EffectList));
+    index = mEnchantments.getColumns()-1;
+    mEnchantments.addAdapter (std::make_pair(&mEnchantments.getColumn(index),
+        new EffectsListAdapter<ESM::Enchantment> ()));
+    mEnchantments.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_String/*, false*/));
+    mEnchantments.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_String));
+    mEnchantments.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_String)); // reuse attribute
+    mEnchantments.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_Integer));
+    mEnchantments.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_EffectArea, ColumnBase::Display_String));
+    mEnchantments.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Duration, ColumnBase::Display_Integer)); // reuse from light
+    mEnchantments.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_MinRange, ColumnBase::Display_Integer)); // reuse from sound
+    mEnchantments.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_MaxRange, ColumnBase::Display_Integer)); // reuse from sound
 
     mBodyParts.addColumn (new StringIdColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new RecordStateColumn<ESM::BodyPart>);
@@ -331,31 +329,29 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mPathgrids.addColumn (new FixedRecordTypeColumn<Pathgrid> (UniversalId::Type_Pathgrid));
 
     // new object deleted in dtor of Collection<T,A>
-    NestedParentColumn<Pathgrid> *pointList =
-            new NestedParentColumn<Pathgrid> (Columns::ColumnId_PathgridPoints);
-    mPathgrids.addColumn (pointList);
-    // new object deleted in dtor of SubCellCollection<T,A>
-    mPathgrids.addAdapter (std::make_pair(pointList, new PathgridPointListAdapter ()));
+    mPathgrids.addColumn (new NestedParentColumn<Pathgrid> (Columns::ColumnId_PathgridPoints));
+    index = mPathgrids.getColumns()-1;
+    // new object deleted in dtor of NestedCollection<T,A>
+    mPathgrids.addAdapter (std::make_pair(&mPathgrids.getColumn(index), new PathgridPointListAdapter ()));
     // new objects deleted in dtor of NestableColumn
     // WARNING: The order of the columns below are assumed in PathgridPointListAdapter
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+    mPathgrids.getNestableColumn(index)->addColumn(
             new NestedChildColumn (Columns::ColumnId_PathgridIndex, ColumnBase::Display_Integer, false));
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+    mPathgrids.getNestableColumn(index)->addColumn(
             new NestedChildColumn (Columns::ColumnId_PathgridPosX, ColumnBase::Display_Integer));
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+    mPathgrids.getNestableColumn(index)->addColumn(
             new NestedChildColumn (Columns::ColumnId_PathgridPosY, ColumnBase::Display_Integer));
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+    mPathgrids.getNestableColumn(index)->addColumn(
             new NestedChildColumn (Columns::ColumnId_PathgridPosZ, ColumnBase::Display_Integer));
 
-    NestedParentColumn<Pathgrid> *edgeList =
-            new NestedParentColumn<Pathgrid> (Columns::ColumnId_PathgridEdges);
-    mPathgrids.addColumn (edgeList);
-    mPathgrids.addAdapter (std::make_pair(edgeList, new PathgridEdgeListAdapter ()));
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+    mPathgrids.addColumn (new NestedParentColumn<Pathgrid> (Columns::ColumnId_PathgridEdges));
+    index = mPathgrids.getColumns()-1;
+    mPathgrids.addAdapter (std::make_pair(&mPathgrids.getColumn(index), new PathgridEdgeListAdapter ()));
+    mPathgrids.getNestableColumn(index)->addColumn(
             new NestedChildColumn (Columns::ColumnId_PathgridEdgeIndex, ColumnBase::Display_Integer, false));
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+    mPathgrids.getNestableColumn(index)->addColumn(
             new NestedChildColumn (Columns::ColumnId_PathgridEdge0, ColumnBase::Display_Integer));
-    mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
+    mPathgrids.getNestableColumn(index)->addColumn(
             new NestedChildColumn (Columns::ColumnId_PathgridEdge1, ColumnBase::Display_Integer));
 
     mStartScripts.addColumn (new StringIdColumn<ESM::StartScript>);

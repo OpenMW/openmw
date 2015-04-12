@@ -1,5 +1,5 @@
-#ifndef CSM_WOLRD_IDADAPTERIMP_H
-#define CSM_WOLRD_IDADAPTERIMP_H
+#ifndef CSM_WOLRD_NESTEDCOLADAPTERIMP_H
+#define CSM_WOLRD_NESTEDCOLADAPTERIMP_H
 
 #include <QVariant>
 
@@ -9,7 +9,7 @@
 #include <components/esm/loadskil.hpp> // for converting skill names
 #include <components/esm/attr.hpp>     // for converting attributes
 
-#include "idadapter.hpp"
+#include "nestedcolumnadapter.hpp"
 #include "nestedtablewrapper.hpp"
 
 namespace ESM
@@ -37,7 +37,7 @@ namespace CSMWorld
         }
     };
 
-    class PathgridPointListAdapter : public NestedIdAdapter<Pathgrid>
+    class PathgridPointListAdapter : public NestedColumnAdapter<Pathgrid>
     {
     public:
         PathgridPointListAdapter ();
@@ -62,7 +62,7 @@ namespace CSMWorld
         virtual int getNestedRowsCount(const Record<Pathgrid>& record) const;
     };
 
-    class PathgridEdgeListAdapter : public NestedIdAdapter<Pathgrid>
+    class PathgridEdgeListAdapter : public NestedColumnAdapter<Pathgrid>
     {
     public:
         PathgridEdgeListAdapter ();
@@ -87,7 +87,7 @@ namespace CSMWorld
         virtual int getNestedRowsCount(const Record<Pathgrid>& record) const;
     };
 
-    class FactionReactionsAdapter : public NestedIdAdapter<ESM::Faction>
+    class FactionReactionsAdapter : public NestedColumnAdapter<ESM::Faction>
     {
     public:
         FactionReactionsAdapter ();
@@ -112,7 +112,7 @@ namespace CSMWorld
         virtual int getNestedRowsCount(const Record<ESM::Faction>& record) const;
     };
 
-    class RegionSoundListAdapter : public NestedIdAdapter<ESM::Region>
+    class RegionSoundListAdapter : public NestedColumnAdapter<ESM::Region>
     {
     public:
         RegionSoundListAdapter ();
@@ -138,7 +138,7 @@ namespace CSMWorld
     };
 
     template<typename ESXRecordT>
-    class SpellListAdapter : public NestedIdAdapter<ESXRecordT>
+    class SpellListAdapter : public NestedColumnAdapter<ESXRecordT>
     {
     public:
         SpellListAdapter () {}
@@ -234,7 +234,7 @@ namespace CSMWorld
     };
 
     template<typename ESXRecordT>
-    class EffectsListAdapter : public NestedIdAdapter<ESXRecordT>
+    class EffectsListAdapter : public NestedColumnAdapter<ESXRecordT>
     {
     public:
         EffectsListAdapter () {}
@@ -476,4 +476,4 @@ namespace CSMWorld
     };
 }
 
-#endif // CSM_WOLRD_IDADAPTERIMP_H
+#endif // CSM_WOLRD_NESTEDCOLADAPTERIMP_H

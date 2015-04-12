@@ -1,7 +1,5 @@
-#ifndef CSM_WOLRD_IDADAPTER_H
-#define CSM_WOLRD_IDADAPTER_H
-
-#include "record.hpp"
+#ifndef CSM_WOLRD_NESTEDCOLUMNADAPTER_H
+#define CSM_WOLRD_NESTEDCOLUMNADAPTER_H
 
 class QVariant;
 
@@ -9,14 +7,17 @@ namespace CSMWorld
 {
     struct NestedTableWrapperBase;
 
+    template <typename ESXRecordT>
+    struct Record;
+
     template<typename ESXRecordT>
-    class NestedIdAdapter
+    class NestedColumnAdapter
     {
     public:
 
-        NestedIdAdapter() {}
+        NestedColumnAdapter() {}
 
-        virtual ~NestedIdAdapter() {}
+        virtual ~NestedColumnAdapter() {}
 
         virtual void addNestedRow(Record<ESXRecordT>& record, int position) const = 0;
 
@@ -36,4 +37,4 @@ namespace CSMWorld
     };
 }
 
-#endif // CSM_WOLRD_IDADAPTER_H
+#endif // CSM_WOLRD_NESTEDCOLUMNADAPTER_H
