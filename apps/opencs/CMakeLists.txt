@@ -25,7 +25,7 @@ opencs_units (model/world
 opencs_units_noqt (model/world
     universalid record commands columnbase scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
-    pathgrid landtexture land nestedtablewrapper nestedadapters nestedcollection
+    pathgrid landtexture land nestedtablewrapper nestedadapters nestedcollection idadapterimp
     )
 
 opencs_hdrs_noqt (model/world

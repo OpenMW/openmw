@@ -112,7 +112,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     NestedParentColumn<ESM::Faction> *reactions =
             new NestedParentColumn<ESM::Faction> (Columns::ColumnId_FactionReactions);
     mFactions.addColumn (reactions);
-    mFactions.addAdapter (std::make_pair(reactions, new FactionReactionsAdapter<ESM::Faction> ()));
+    mFactions.addAdapter (std::make_pair(reactions, new FactionReactionsAdapter ()));
     mFactions.getNestableColumn(mFactions.getColumns()-1)->addColumn(
             new NestedChildColumn (Columns::ColumnId_Faction, ColumnBase::Display_String));
     mFactions.getNestableColumn(mFactions.getColumns()-1)->addColumn(
@@ -160,7 +160,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     NestedParentColumn<ESM::Region> *soundList =
             new NestedParentColumn<ESM::Region> (Columns::ColumnId_RegionSounds);
     mRegions.addColumn (soundList);
-    mRegions.addAdapter (std::make_pair(soundList, new RegionSoundListAdapter<ESM::Region> ()));
+    mRegions.addAdapter (std::make_pair(soundList, new RegionSoundListAdapter ()));
     mRegions.getNestableColumn(mRegions.getColumns()-1)->addColumn(
             new NestedChildColumn (Columns::ColumnId_SoundName, ColumnBase::Display_String));
     mRegions.getNestableColumn(mRegions.getColumns()-1)->addColumn(
@@ -335,7 +335,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
             new NestedParentColumn<Pathgrid> (Columns::ColumnId_PathgridPoints);
     mPathgrids.addColumn (pointList);
     // new object deleted in dtor of SubCellCollection<T,A>
-    mPathgrids.addAdapter (std::make_pair(pointList, new PathgridPointListAdapter<Pathgrid> ()));
+    mPathgrids.addAdapter (std::make_pair(pointList, new PathgridPointListAdapter ()));
     // new objects deleted in dtor of NestableColumn
     // WARNING: The order of the columns below are assumed in PathgridPointListAdapter
     mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
@@ -350,7 +350,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     NestedParentColumn<Pathgrid> *edgeList =
             new NestedParentColumn<Pathgrid> (Columns::ColumnId_PathgridEdges);
     mPathgrids.addColumn (edgeList);
-    mPathgrids.addAdapter (std::make_pair(edgeList, new PathgridEdgeListAdapter<Pathgrid> ()));
+    mPathgrids.addAdapter (std::make_pair(edgeList, new PathgridEdgeListAdapter ()));
     mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
             new NestedChildColumn (Columns::ColumnId_PathgridEdgeIndex, ColumnBase::Display_Integer, false));
     mPathgrids.getNestableColumn(mPathgrids.getColumns()-1)->addColumn(
