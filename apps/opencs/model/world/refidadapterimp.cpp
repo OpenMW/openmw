@@ -81,9 +81,10 @@ void CSMWorld::ApparatusRefIdAdapter::setData (const RefIdColumn *column, RefIdD
 
 
 CSMWorld::ArmorRefIdAdapter::ArmorRefIdAdapter (const EnchantableColumns& columns,
-    const RefIdColumn *type, const RefIdColumn *health, const RefIdColumn *armor)
+    const RefIdColumn *type, const RefIdColumn *health, const RefIdColumn *armor,
+    const RefIdColumn *partRef)
 : EnchantableRefIdAdapter<ESM::Armor> (UniversalId::Type_Armor, columns),
-    mType (type), mHealth (health), mArmor (armor)
+    mType (type), mHealth (health), mArmor (armor), mPartRef(partRef)
 {}
 
 QVariant CSMWorld::ArmorRefIdAdapter::getData (const RefIdColumn *column,
@@ -100,6 +101,9 @@ QVariant CSMWorld::ArmorRefIdAdapter::getData (const RefIdColumn *column,
 
     if (column==mArmor)
         return record.get().mData.mArmor;
+
+    if (column==mPartRef)
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
 
     return EnchantableRefIdAdapter<ESM::Armor>::getData (column, data, index);
 }
@@ -156,8 +160,9 @@ void CSMWorld::BookRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
 }
 
 CSMWorld::ClothingRefIdAdapter::ClothingRefIdAdapter (const EnchantableColumns& columns,
-    const RefIdColumn *type)
-: EnchantableRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing, columns), mType (type)
+    const RefIdColumn *type, const RefIdColumn *partRef)
+: EnchantableRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing, columns), mType (type),
+  mPartRef(partRef)
 {}
 
 QVariant CSMWorld::ClothingRefIdAdapter::getData (const RefIdColumn *column,
@@ -168,6 +173,9 @@ QVariant CSMWorld::ClothingRefIdAdapter::getData (const RefIdColumn *column,
 
     if (column==mType)
         return record.get().mData.mType;
+
+    if (column==mPartRef)
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
 
     return EnchantableRefIdAdapter<ESM::Clothing>::getData (column, data, index);
 }

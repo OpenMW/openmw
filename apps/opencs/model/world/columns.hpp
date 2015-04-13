@@ -239,7 +239,7 @@ namespace CSMWorld
             ColumnId_AiPackageList = 219,
             ColumnId_AiPackage = 220,
             ColumnId_AiWanderDist = 221,
-            ColumnId_AiWanderDuration = 222,
+            ColumnId_AiDuration = 222,
             ColumnId_AiWanderToD = 223,
             ColumnId_AiWanderIdle = 224,
             ColumnId_AiWanderRepeat = 225,
@@ -247,6 +247,11 @@ namespace CSMWorld
             // use ColumnId_PosX, etc for AI destinations
             ColumnId_AiTargetId = 227,
             ColumnId_AiTargetCell = 228,
+
+            ColumnId_PartRefList = 229,
+            ColumnId_PartRefType = 230,
+            ColumnId_PartRefMale = 231,
+            ColumnId_PartRefFemale = 232,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

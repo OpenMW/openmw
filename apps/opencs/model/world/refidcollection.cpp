@@ -196,7 +196,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiWanderDist, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_AiWanderDuration, CSMWorld::ColumnBase::Display_Integer));
+            new RefIdColumn (Columns::ColumnId_AiDuration, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiWanderToD, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
@@ -475,6 +475,24 @@ CSMWorld::RefIdCollection::RefIdCollection()
         weaponColumns.mFlags.insert (std::make_pair (&mColumns.back(), sWeaponFlagTable[i].mFlag));
     }
 
+    // Nested table
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_PartRefList, ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
+    const RefIdColumn *partRef = &mColumns.back();
+
+    std::map<UniversalId::Type, NestedRefIdAdapterBase*> partMap;
+    partMap.insert(
+        std::make_pair(UniversalId::Type_Armor, new BodyPartRefIdAdapter<ESM::Armor> (UniversalId::Type_Armor)));
+    partMap.insert(
+        std::make_pair(UniversalId::Type_Clothing, new BodyPartRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing)));
+
+    mNestedAdapters.push_back (std::make_pair(&mColumns.back(), partMap));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_PartRefType, CSMWorld::ColumnBase::Display_String));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_PartRefMale, CSMWorld::ColumnBase::Display_String));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_PartRefFemale, CSMWorld::ColumnBase::Display_String));
+
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
@@ -482,11 +500,11 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Apparatus,
         new ApparatusRefIdAdapter (inventoryColumns, apparatusType, toolsColumns.mQuality)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Armor,
-        new ArmorRefIdAdapter (enchantableColumns, armorType, health, armor)));
+        new ArmorRefIdAdapter (enchantableColumns, armorType, health, armor, partRef)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Book,
         new BookRefIdAdapter (enchantableColumns, scroll, attribute)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Clothing,
-        new ClothingRefIdAdapter (enchantableColumns, clothingType)));
+        new ClothingRefIdAdapter (enchantableColumns, clothingType, partRef)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Container,
         new ContainerRefIdAdapter (nameColumns, weightCapacity, organic, respawn, content)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Creature,

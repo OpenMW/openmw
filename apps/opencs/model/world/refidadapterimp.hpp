@@ -622,11 +622,12 @@ namespace CSMWorld
             const RefIdColumn *mType;
             const RefIdColumn *mHealth;
             const RefIdColumn *mArmor;
+            const RefIdColumn *mPartRef;
 
         public:
 
             ArmorRefIdAdapter (const EnchantableColumns& columns, const RefIdColumn *type,
-                const RefIdColumn *health, const RefIdColumn *armor);
+                const RefIdColumn *health, const RefIdColumn *armor, const RefIdColumn *partRef);
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
                 const;
@@ -657,10 +658,12 @@ namespace CSMWorld
     class ClothingRefIdAdapter : public EnchantableRefIdAdapter<ESM::Clothing>
     {
             const RefIdColumn *mType;
+            const RefIdColumn *mPartRef;
 
         public:
 
-            ClothingRefIdAdapter (const EnchantableColumns& columns, const RefIdColumn *type);
+            ClothingRefIdAdapter (const EnchantableColumns& columns,
+                    const RefIdColumn *type, const RefIdColumn *partRef);
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
                 const;
@@ -1290,27 +1293,13 @@ namespace CSMWorld
 
             switch (subColIndex)
             {
-                case 0:
-                    return QString::fromUtf8(content.mCellName.c_str());
-
-                case 1:
-                    return content.mPos.pos[0];
-
-                case 2:
-                    return content.mPos.pos[1];
-
-                case 3:
-                    return content.mPos.pos[2];
-
-                case 4:
-                    return content.mPos.rot[0];
-
-                case 5:
-                    return content.mPos.rot[1];
-
-                case 6:
-                    return content.mPos.rot[2];
-
+                case 0: return QString::fromUtf8(content.mCellName.c_str());
+                case 1: return content.mPos.pos[0];
+                case 2: return content.mPos.pos[1];
+                case 3: return content.mPos.pos[2];
+                case 4: return content.mPos.rot[0];
+                case 5: return content.mPos.rot[1];
+                case 6: return content.mPos.rot[2];
                 default:
                     throw std::runtime_error("Trying to access non-existing column in the nested table!");
             }
@@ -1673,6 +1662,170 @@ namespace CSMWorld
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
             return static_cast<int>(record.get().mAiPackage.mList.size());
+        }
+    };
+
+    static const char *sPartRefs[ESM::PRT_Count] =
+    {
+        "Head", "Hair", "Neck", "Cuirass", "Groin",
+        "Skirt", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist",
+        "Shield", "Right Forearm", "Left Forearm", "Right Upperarm", "Left Upperarm",
+        "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee",
+        "Left Knee", "Right Leg", "Left Leg", "Right Pauldron", "Left Pauldron",
+        "Weapon", "Tail"
+    };
+
+    template <typename ESXRecordT>
+    class BodyPartRefIdAdapter : public NestedRefIdAdapterBase
+    {
+        UniversalId::Type mType;
+
+        // not implemented
+        BodyPartRefIdAdapter (const BodyPartRefIdAdapter&);
+        BodyPartRefIdAdapter& operator= (const BodyPartRefIdAdapter&);
+
+    public:
+
+        BodyPartRefIdAdapter(UniversalId::Type type) :mType(type) {}
+
+        virtual ~BodyPartRefIdAdapter() {}
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            ESXRecordT apparel = record.get();
+
+            std::vector<ESM::PartReference>& list = apparel.mParts.mParts;
+
+            ESM::PartReference newPart;
+            newPart.mPart = 0; // 0 == head
+            newPart.mMale = "";
+            newPart.mFemale = "";
+
+            if (position >= (int)list.size())
+                list.push_back(newPart);
+            else
+                list.insert(list.begin()+position, newPart);
+
+            record.setModified (apparel);
+        }
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            ESXRecordT apparel = record.get();
+
+            std::vector<ESM::PartReference>& list = apparel.mParts.mParts;
+
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
+                throw std::runtime_error ("index out of range");
+
+            list.erase (list.begin () + rowToRemove);
+
+            record.setModified (apparel);
+        }
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            ESXRecordT apparel = record.get();
+
+            apparel.mParts.mParts =
+                static_cast<const NestedTableWrapper<std::vector<typename ESM::PartReference> >&>(nestedTable).mNestedTable;
+
+            record.setModified (apparel);
+        }
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const
+        {
+            const Record<ESXRecordT>& record =
+                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+            // deleted by dtor of NestedTableStoring
+            return new NestedTableWrapper<std::vector<typename ESM::PartReference> >(record.get().mParts.mParts);
+        }
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+        {
+            const Record<ESXRecordT>& record =
+                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+            const std::vector<ESM::PartReference>& list = record.get().mParts.mParts;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
+                throw std::runtime_error ("index out of range");
+
+            const ESM::PartReference& content = list.at(subRowIndex);
+
+            switch (subColIndex)
+            {
+                case 0: return QString(sPartRefs[content.mPart]);
+                case 1: return QString(content.mMale.c_str());
+                case 2: return QString(content.mFemale.c_str());
+                default:
+                    throw std::runtime_error("Trying to access non-existing column in the nested table!");
+            }
+        }
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+            ESXRecordT apparel = record.get();
+            std::vector<ESM::PartReference>& list = apparel.mParts.mParts;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
+                throw std::runtime_error ("index out of range");
+
+            switch(subColIndex)
+            {
+                case 0:
+                {
+                    std::string part = value.toString().toStdString();
+                    bool found = false;
+                    for (unsigned int i = 0; i < ESM::PRT_Count; ++i)
+                    {
+                        if (part == sPartRefs[i])
+                        {
+                            list.at(subRowIndex).mPart = static_cast<unsigned char>(i);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                        return; // return without saving
+                    else
+                        break;
+                }
+                case 1: list.at(subRowIndex).mMale = value.toString().toStdString(); break;
+                case 2: list.at(subRowIndex).mFemale = value.toString().toStdString(); break;
+                default:
+                    throw std::runtime_error("Trying to access non-existing column in the nested table!");
+            }
+
+            record.setModified (apparel);
+        }
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+        {
+            return 3;
+        }
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+        {
+            const Record<ESXRecordT>& record =
+                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+            return static_cast<int>(record.get().mParts.mParts.size());
         }
     };
 }

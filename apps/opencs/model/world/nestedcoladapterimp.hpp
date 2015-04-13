@@ -175,7 +175,7 @@ namespace CSMWorld
         {
             ESXRecordT raceOrBthSgn = record.get();
 
-           raceOrBthSgn.mPowers.mList =
+            raceOrBthSgn.mPowers.mList =
                 static_cast<const NestedTableWrapper<std::vector<std::string> >&>(nestedTable).mNestedTable;
 
             record.setModified (raceOrBthSgn);
