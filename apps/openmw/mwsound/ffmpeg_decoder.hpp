@@ -37,7 +37,10 @@ extern "C"
 #endif
 }
 
+#include <components/files/constrainedfilestream.hpp>
+
 #include <string>
+#include <istream>
 
 #include "sound_decoder.hpp"
 
@@ -66,7 +69,8 @@ namespace MWSound
 
         bool getNextPacket();
 
-        Ogre::DataStreamPtr mDataStream;
+        Files::IStreamPtr mDataStream;
+
         static int readPacket(void *user_data, uint8_t *buf, int buf_size);
         static int writePacket(void *user_data, uint8_t *buf, int buf_size);
         static int64_t seek(void *user_data, int64_t offset, int whence);
@@ -90,7 +94,7 @@ namespace MWSound
         FFmpeg_Decoder& operator=(const FFmpeg_Decoder &rhs);
         FFmpeg_Decoder(const FFmpeg_Decoder &rhs);
 
-        FFmpeg_Decoder();
+        FFmpeg_Decoder(const VFS::Manager* vfs);
     public:
         virtual ~FFmpeg_Decoder();
 

@@ -786,7 +786,7 @@ const CachedSound& OpenAL_Output::getBuffer(const std::string &fname)
     {
         decoder->open(fname);
     }
-    catch(Ogre::FileNotFoundException&)
+    catch(std::exception&)
     {
         std::string::size_type pos = fname.rfind('.');
         if(pos == std::string::npos)

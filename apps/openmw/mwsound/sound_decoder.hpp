@@ -2,8 +2,12 @@
 #define GAME_SOUND_SOUND_DECODER_H
 
 #include <string>
+#include <vector>
 
-#include <OgreResourceGroupManager.h>
+namespace VFS
+{
+    class Manager;
+}
 
 namespace MWSound
 {
@@ -28,7 +32,7 @@ namespace MWSound
 
     struct Sound_Decoder
     {
-        Ogre::ResourceGroupManager &mResourceMgr;
+        const VFS::Manager* mResourceMgr;
 
         virtual void open(const std::string &fname) = 0;
         virtual void close() = 0;
@@ -41,7 +45,7 @@ namespace MWSound
         virtual void rewind() = 0;
         virtual size_t getSampleOffset() = 0;
 
-        Sound_Decoder() : mResourceMgr(Ogre::ResourceGroupManager::getSingleton())
+        Sound_Decoder(const VFS::Manager* resourceMgr) : mResourceMgr(resourceMgr)
         { }
         virtual ~Sound_Decoder() { }
 

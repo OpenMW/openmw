@@ -6,6 +6,8 @@
 
 #include <openengine/misc/rng.hpp>
 
+#include <components/vfs/manager.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -27,8 +29,8 @@
 
 namespace MWSound
 {
-    SoundManager::SoundManager(bool useSound)
-        : mResourceMgr(Ogre::ResourceGroupManager::getSingleton())
+    SoundManager::SoundManager(const VFS::Manager* vfs, bool useSound)
+        : mVFS(vfs)
         , mOutput(new DEFAULT_OUTPUT(*this))
         , mMasterVolume(1.0f)
         , mSFXVolume(1.0f)
@@ -96,7 +98,7 @@ namespace MWSound
     // Return a new decoder instance, used as needed by the output implementations
     DecoderPtr SoundManager::getDecoder()
     {
-        return DecoderPtr(new DEFAULT_DECODER);
+        return DecoderPtr(new DEFAULT_DECODER (mVFS));
     }
 
     // Convert a soundId to file name, and modify the volume
@@ -208,20 +210,24 @@ namespace MWSound
 
     void SoundManager::startRandomTitle()
     {
-        Ogre::StringVector filelist;
+        std::vector<std::string> filelist;
         if (mMusicFiles.find(mCurrentPlaylist) == mMusicFiles.end())
         {
-#if 0
-            Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
-            for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
+            const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
+
+            std::string pattern = "Music/" + mCurrentPlaylist;
+            mVFS->normalizeFilename(pattern);
+
+            std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(pattern);
+            while (found != index.end())
             {
-                Ogre::StringVectorPtr resourcesInThisGroup = mResourceMgr.findResourceNames(*it,
-                                                                                            "Music/"+mCurrentPlaylist+"/*");
-                filelist.insert(filelist.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
+                if (found->first.size() >= pattern.size() && found->first.substr(0, pattern.size()) == pattern)
+                    filelist.push_back(found->first);
+                ++found;
             }
+
             mMusicFiles[mCurrentPlaylist] = filelist;
 
-#endif
         }
         else
             filelist = mMusicFiles[mCurrentPlaylist];

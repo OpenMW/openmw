@@ -8,11 +8,15 @@
 #include <boost/shared_ptr.hpp>
 
 #include <OgreVector3.h>
-#include <OgreResourceGroupManager.h>
 
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/soundmanager.hpp"
+
+namespace VFS
+{
+    class Manager;
+}
 
 namespace MWSound
 {
@@ -27,12 +31,12 @@ namespace MWSound
 
     class SoundManager : public MWBase::SoundManager
     {
-        Ogre::ResourceGroupManager& mResourceMgr;
+        const VFS::Manager* mVFS;
 
         std::auto_ptr<Sound_Output> mOutput;
 
         // Caches available music tracks by <playlist name, (sound files) >
-        std::map<std::string, Ogre::StringVector> mMusicFiles;
+        std::map<std::string, std::vector<std::string> > mMusicFiles;
         std::string mLastPlayedMusic; // The music file that was last played
 
         float mMasterVolume;
@@ -74,7 +78,7 @@ namespace MWSound
         friend class OpenAL_Output;
 
     public:
-        SoundManager(bool useSound);
+        SoundManager(const VFS::Manager* vfs, bool useSound);
         virtual ~SoundManager();
 
         virtual void processChangedSettings(const Settings::CategorySettingVector& settings);
