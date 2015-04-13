@@ -1828,6 +1828,188 @@ namespace CSMWorld
             return static_cast<int>(record.get().mParts.mParts.size());
         }
     };
+
+    struct LevListColumns : public BaseColumns
+    {
+        const RefIdColumn *mLevList;
+
+        LevListColumns (const BaseColumns& base) : BaseColumns (base) {}
+    };
+
+    template<typename RecordT>
+    class LevelledListRefIdAdapter : public BaseRefIdAdapter<RecordT>
+    {
+            LevListColumns mLevList;
+
+        public:
+
+            LevelledListRefIdAdapter (UniversalId::Type type, const LevListColumns &columns);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
+
+    template<typename RecordT>
+    LevelledListRefIdAdapter<RecordT>::LevelledListRefIdAdapter (UniversalId::Type type,
+            const LevListColumns &columns)
+    : BaseRefIdAdapter<RecordT> (type, columns), mLevList (columns)
+    {}
+
+    template<typename RecordT>
+    QVariant LevelledListRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
+        int index) const
+    {
+        if (column==mLevList.mLevList)
+            return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+
+        return BaseRefIdAdapter<RecordT>::getData (column, data, index);
+    }
+
+    template<typename RecordT>
+    void LevelledListRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data, int index,
+        const QVariant& value) const
+    {
+        BaseRefIdAdapter<RecordT>::setData (column, data, index, value);
+        return;
+    }
+
+    template <typename ESXRecordT>
+    class NestedLevListRefIdAdapter : public NestedRefIdAdapterBase
+    {
+        UniversalId::Type mType;
+
+        // not implemented
+        NestedLevListRefIdAdapter (const NestedLevListRefIdAdapter&);
+        NestedLevListRefIdAdapter& operator= (const NestedLevListRefIdAdapter&);
+
+    public:
+
+        NestedLevListRefIdAdapter(UniversalId::Type type) :mType(type) {}
+
+        virtual ~NestedLevListRefIdAdapter() {}
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            ESXRecordT leveled = record.get();
+
+            std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
+
+            ESM::LevelledListBase::LevelItem newItem;
+            newItem.mId = "";
+            newItem.mLevel = 0;
+
+            if (position >= (int)list.size())
+                list.push_back(newItem);
+            else
+                list.insert(list.begin()+position, newItem);
+
+            record.setModified (leveled);
+        }
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            ESXRecordT leveled = record.get();
+
+            std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
+
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
+                throw std::runtime_error ("index out of range");
+
+            list.erase (list.begin () + rowToRemove);
+
+            record.setModified (leveled);
+        }
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            ESXRecordT leveled = record.get();
+
+            leveled.mList =
+                static_cast<const NestedTableWrapper<std::vector<typename ESM::LevelledListBase::LevelItem> >&>(nestedTable).mNestedTable;
+
+            record.setModified (leveled);
+        }
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const
+        {
+            const Record<ESXRecordT>& record =
+                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+            // deleted by dtor of NestedTableStoring
+            return new NestedTableWrapper<std::vector<typename ESM::LevelledListBase::LevelItem> >(record.get().mList);
+        }
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+        {
+            const Record<ESXRecordT>& record =
+                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+            const std::vector<ESM::LevelledListBase::LevelItem>& list = record.get().mList;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
+                throw std::runtime_error ("index out of range");
+
+            const ESM::LevelledListBase::LevelItem& content = list.at(subRowIndex);
+
+            switch (subColIndex)
+            {
+                case 0: return QString(content.mId.c_str());
+                case 1: return content.mLevel;
+                default:
+                    throw std::runtime_error("Trying to access non-existing column in the nested table!");
+            }
+        }
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+            ESXRecordT leveled = record.get();
+            std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
+                throw std::runtime_error ("index out of range");
+
+            switch(subColIndex)
+            {
+                case 0: list.at(subRowIndex).mId = value.toString().toStdString(); break;
+                case 1: list.at(subRowIndex).mLevel = static_cast<short>(value.toInt()); break;
+                default:
+                    throw std::runtime_error("Trying to access non-existing column in the nested table!");
+            }
+
+            record.setModified (leveled);
+        }
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+        {
+            return 2;
+        }
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+        {
+            const Record<ESXRecordT>& record =
+                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+            return static_cast<int>(record.get().mList.size());
+        }
+    };
 }
 
 #endif

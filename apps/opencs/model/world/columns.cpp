@@ -263,6 +263,10 @@ namespace CSMWorld
             { ColumnId_PartRefMale, "Male"},
             { ColumnId_PartRefFemale, "Female"},
 
+            { ColumnId_LevelledList,"Levelled List"},
+            { ColumnId_LevelledItemId,"Item ID"},
+            { ColumnId_LevelledItemLevel,"Level"},
+
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
             { ColumnId_UseValue3, "Use value 3" },

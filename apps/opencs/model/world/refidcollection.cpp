@@ -73,14 +73,13 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     // nested table
     PotionColumns potionColumns (inventoryColumns);
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_EffectList, ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_EffectList,
+        ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
     potionColumns.mEffects = &mColumns.back(); // see refidadapterimp.hpp
-
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> effectsMap;
-    effectsMap.insert(
-        std::make_pair(UniversalId::Type_Potion, new EffectsRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion)));
+    effectsMap.insert(std::make_pair(UniversalId::Type_Potion,
+        new EffectsRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), effectsMap));
-
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_String/*, false*/));
     mColumns.back().addColumn(
@@ -126,15 +125,14 @@ CSMWorld::RefIdCollection::RefIdCollection()
     actorsColumns.mAlarm = &mColumns.back();
 
     // Nested table
-    mColumns.push_back(RefIdColumn (Columns::ColumnId_ActorInventory, ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue));
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_ActorInventory,
+            ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue));
     actorsColumns.mInventory = &mColumns.back();
-
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> inventoryMap;
-    inventoryMap.insert(
-        std::make_pair(UniversalId::Type_Npc, new NestedInventoryRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc)));
-    inventoryMap.insert(
-        std::make_pair(UniversalId::Type_Creature, new NestedInventoryRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature)));
-
+    inventoryMap.insert(std::make_pair(UniversalId::Type_Npc,
+            new NestedInventoryRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc)));
+    inventoryMap.insert(std::make_pair(UniversalId::Type_Creature,
+            new NestedInventoryRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), inventoryMap));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_String));
@@ -142,28 +140,27 @@ CSMWorld::RefIdCollection::RefIdCollection()
             new RefIdColumn (Columns::ColumnId_ItemCount, CSMWorld::ColumnBase::Display_Integer));
 
     // Nested table
-    mColumns.push_back(RefIdColumn (Columns::ColumnId_SpellList, ColumnBase::Display_NestedSpellList, ColumnBase::Flag_Dialogue));
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_SpellList,
+            ColumnBase::Display_NestedSpellList, ColumnBase::Flag_Dialogue));
     actorsColumns.mSpells = &mColumns.back();
-
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> spellsMap;
-    spellsMap.insert(
-        std::make_pair(UniversalId::Type_Npc, new NestedSpellRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc)));
-    spellsMap.insert(
-        std::make_pair(UniversalId::Type_Creature, new NestedSpellRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature)));
-
+    spellsMap.insert(std::make_pair(UniversalId::Type_Npc,
+            new NestedSpellRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc)));
+    spellsMap.insert(std::make_pair(UniversalId::Type_Creature,
+            new NestedSpellRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), spellsMap));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_SpellId, CSMWorld::ColumnBase::Display_String));
 
     // Nested table
-    mColumns.push_back(RefIdColumn (Columns::ColumnId_NpcDestinations, ColumnBase::Display_NestedDestinationsList, ColumnBase::Flag_Dialogue));
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_NpcDestinations,
+            ColumnBase::Display_NestedDestinationsList, ColumnBase::Flag_Dialogue));
     actorsColumns.mDestinations = &mColumns.back();
-
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> destMap;
-    destMap.insert(
-        std::make_pair(UniversalId::Type_Npc, new NestedTravelRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc)));
-    destMap.insert(
-        std::make_pair(UniversalId::Type_Creature, new NestedTravelRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature)));
+    destMap.insert(std::make_pair(UniversalId::Type_Npc,
+            new NestedTravelRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc)));
+    destMap.insert(std::make_pair(UniversalId::Type_Creature,
+            new NestedTravelRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), destMap));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_DestinationCell, CSMWorld::ColumnBase::Display_String));
@@ -181,15 +178,14 @@ CSMWorld::RefIdCollection::RefIdCollection()
             new RefIdColumn (Columns::ColumnId_RotZ, CSMWorld::ColumnBase::Display_Float));
 
     // Nested table
-    mColumns.push_back(RefIdColumn (Columns::ColumnId_AiPackageList, ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_AiPackageList,
+            ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
     actorsColumns.mAiPackages = &mColumns.back();
-
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> aiMap;
-    aiMap.insert(
-        std::make_pair(UniversalId::Type_Npc, new ActorAiRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc)));
-    aiMap.insert(
-        std::make_pair(UniversalId::Type_Creature, new ActorAiRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature)));
-
+    aiMap.insert(std::make_pair(UniversalId::Type_Npc,
+            new ActorAiRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc)));
+    aiMap.insert(std::make_pair(UniversalId::Type_Creature,
+            new ActorAiRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), aiMap));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiPackage, CSMWorld::ColumnBase::Display_String));
@@ -284,14 +280,13 @@ CSMWorld::RefIdCollection::RefIdCollection()
     const RefIdColumn *respawn = &mColumns.back();
 
     // Nested table
-    mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent, ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue));
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent,
+            ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue));
     const RefIdColumn *content = &mColumns.back();
-
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> contMap;
-    contMap.insert(
-        std::make_pair(UniversalId::Type_Container, new NestedInventoryRefIdAdapter<ESM::Container> (UniversalId::Type_Container)));
+    contMap.insert(std::make_pair(UniversalId::Type_Container,
+            new NestedInventoryRefIdAdapter<ESM::Container> (UniversalId::Type_Container)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), contMap));
-
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_InventoryItemId, CSMWorld::ColumnBase::Display_String));
     mColumns.back().addColumn(
@@ -478,20 +473,36 @@ CSMWorld::RefIdCollection::RefIdCollection()
     // Nested table
     mColumns.push_back(RefIdColumn (Columns::ColumnId_PartRefList, ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
     const RefIdColumn *partRef = &mColumns.back();
-
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> partMap;
-    partMap.insert(
-        std::make_pair(UniversalId::Type_Armor, new BodyPartRefIdAdapter<ESM::Armor> (UniversalId::Type_Armor)));
-    partMap.insert(
-        std::make_pair(UniversalId::Type_Clothing, new BodyPartRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing)));
-
+    partMap.insert(std::make_pair(UniversalId::Type_Armor,
+        new BodyPartRefIdAdapter<ESM::Armor> (UniversalId::Type_Armor)));
+    partMap.insert(std::make_pair(UniversalId::Type_Clothing,
+        new BodyPartRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), partMap));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_PartRefType, CSMWorld::ColumnBase::Display_String));
+        new RefIdColumn (Columns::ColumnId_PartRefType, CSMWorld::ColumnBase::Display_String));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_PartRefMale, CSMWorld::ColumnBase::Display_String));
+        new RefIdColumn (Columns::ColumnId_PartRefMale, CSMWorld::ColumnBase::Display_String));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_PartRefFemale, CSMWorld::ColumnBase::Display_String));
+        new RefIdColumn (Columns::ColumnId_PartRefFemale, CSMWorld::ColumnBase::Display_String));
+
+    LevListColumns levListColumns (baseColumns);
+
+    // Nested table
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_LevelledList,
+        ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
+    levListColumns.mLevList = &mColumns.back();
+    std::map<UniversalId::Type, NestedRefIdAdapterBase*> levListMap;
+    levListMap.insert(std::make_pair(UniversalId::Type_CreatureLevelledList,
+        new NestedLevListRefIdAdapter<ESM::CreatureLevList> (UniversalId::Type_CreatureLevelledList)));
+    levListMap.insert(std::make_pair(UniversalId::Type_ItemLevelledList,
+        new NestedLevListRefIdAdapter<ESM::ItemLevList> (UniversalId::Type_ItemLevelledList)));
+    mNestedAdapters.push_back (std::make_pair(&mColumns.back(), levListMap));
+    mColumns.back().addColumn(
+        new RefIdColumn (Columns::ColumnId_LevelledItemId, CSMWorld::ColumnBase::Display_String));
+    mColumns.back().addColumn(
+        new RefIdColumn (Columns::ColumnId_LevelledItemLevel, CSMWorld::ColumnBase::Display_Integer));
+
 
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
@@ -514,10 +525,10 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Ingredient,
         new InventoryRefIdAdapter<ESM::Ingredient> (UniversalId::Type_Ingredient, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_CreatureLevelledList,
-        new BaseRefIdAdapter<ESM::CreatureLevList> (
-        UniversalId::Type_CreatureLevelledList, baseColumns)));
+        new LevelledListRefIdAdapter<ESM::CreatureLevList> (
+        UniversalId::Type_CreatureLevelledList, levListColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_ItemLevelledList,
-        new BaseRefIdAdapter<ESM::ItemLevList> (UniversalId::Type_ItemLevelledList, baseColumns)));
+        new LevelledListRefIdAdapter<ESM::ItemLevList> (UniversalId::Type_ItemLevelledList, levListColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Light,
         new LightRefIdAdapter (lightColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Lockpick,

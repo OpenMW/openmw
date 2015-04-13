@@ -253,6 +253,10 @@ namespace CSMWorld
             ColumnId_PartRefMale = 231,
             ColumnId_PartRefFemale = 232,
 
+            ColumnId_LevelledList = 233,
+            ColumnId_LevelledItemId = 234,
+            ColumnId_LevelledItemLevel = 235,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,
