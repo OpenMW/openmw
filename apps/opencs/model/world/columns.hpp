@@ -183,9 +183,9 @@ namespace CSMWorld
             ColumnId_SpellId = 168,
             ColumnId_NpcDestinations = 169,
             ColumnId_DestinationCell = 170,
-            ColumnId_PosX = 171,
-            ColumnId_PosY = 172,
-            ColumnId_PosZ = 173,
+            ColumnId_PosX = 171, // these are float
+            ColumnId_PosY = 172, // these are float
+            ColumnId_PosZ = 173, // these are float
             ColumnId_RotX = 174,
             ColumnId_RotY = 175,
             ColumnId_RotZ = 176,
@@ -214,9 +214,9 @@ namespace CSMWorld
 
             ColumnId_PathgridPoints = 199,
             ColumnId_PathgridIndex = 200,
-            ColumnId_PathgridPosX = 201,
-            ColumnId_PathgridPosY = 202,
-            ColumnId_PathgridPosZ = 203,
+            ColumnId_PathgridPosX = 201, // these are int
+            ColumnId_PathgridPosY = 202, // these are int
+            ColumnId_PathgridPosZ = 203, // these are int
             ColumnId_PathgridEdges = 204,
             ColumnId_PathgridEdgeIndex = 205,
             ColumnId_PathgridEdge0 = 206,
@@ -235,6 +235,18 @@ namespace CSMWorld
             //ColumnId_EffectAttribute = 216,
             ColumnId_EffectRange = 217,
             ColumnId_EffectArea = 218,
+
+            ColumnId_AiPackageList = 219,
+            ColumnId_AiPackage = 220,
+            ColumnId_AiWanderDist = 221,
+            ColumnId_AiWanderDuration = 222,
+            ColumnId_AiWanderToD = 223,
+            ColumnId_AiWanderIdle = 224,
+            ColumnId_AiWanderRepeat = 225,
+            ColumnId_AiActivateName = 226,
+            // use ColumnId_PosX, etc for AI destinations
+            ColumnId_AiTargetId = 227,
+            ColumnId_AiTargetCell = 228,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

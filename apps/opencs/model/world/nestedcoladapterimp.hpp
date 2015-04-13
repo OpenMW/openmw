@@ -457,7 +457,8 @@ namespace CSMWorld
                         effect.mRange = ESM::RT_Touch;
                     else if (effectId == "Target")
                         effect.mRange = ESM::RT_Target;
-                    // else leave unchanged
+                    else
+                        return; // leave unchanged
                     break;
                 }
                 case 4: effect.mArea = value.toInt(); break;

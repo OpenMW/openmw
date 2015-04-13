@@ -10,8 +10,6 @@
 #include <components/esm/loadappa.hpp>
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/loadcrea.hpp>
-#include <components/esm/loadcont.hpp>
-#include <components/esm/transport.hpp>
 
 #include "record.hpp"
 #include "refiddata.hpp"
@@ -489,6 +487,7 @@ namespace CSMWorld
         const RefIdColumn *mInventory;
         const RefIdColumn *mSpells;
         const RefIdColumn *mDestinations;
+        const RefIdColumn *mAiPackages;
         std::map<const RefIdColumn *, unsigned int> mServices;
 
         ActorColumns (const NameColumns& base) : NameColumns (base) {}
@@ -547,6 +546,9 @@ namespace CSMWorld
             return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
 
         if (column==mActors.mDestinations)
+            return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+
+        if (column==mActors.mAiPackages)
             return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
 
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
@@ -985,7 +987,7 @@ namespace CSMWorld
             ESXRecordT container = record.get();
 
             container.mInventory.mList =
-                static_cast<const NestedTableWrapper<typename std::vector<ESM::ContItem> >&>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<std::vector<typename ESM::ContItem> >&>(nestedTable).mNestedTable;
 
             record.setModified (container);
         }
@@ -997,7 +999,7 @@ namespace CSMWorld
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<typename std::vector<ESM::ContItem> >(record.get().mInventory.mList);
+            return new NestedTableWrapper<std::vector<typename ESM::ContItem> >(record.get().mInventory.mList);
         }
 
         virtual QVariant getNestedData (const RefIdColumn *column,
@@ -1123,7 +1125,7 @@ namespace CSMWorld
             ESXRecordT caster = record.get();
 
             caster.mSpells.mList =
-                static_cast<const NestedTableWrapper<typename std::vector<std::string> >&>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<std::vector<typename std::string> >&>(nestedTable).mNestedTable;
 
             record.setModified (caster);
         }
@@ -1135,7 +1137,7 @@ namespace CSMWorld
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<typename std::vector<std::string> >(record.get().mSpells.mList);
+            return new NestedTableWrapper<std::vector<typename std::string> >(record.get().mSpells.mList);
         }
 
         virtual QVariant getNestedData (const RefIdColumn *column,
@@ -1258,7 +1260,7 @@ namespace CSMWorld
             ESXRecordT traveller = record.get();
 
             traveller.mTransport.mList =
-                static_cast<const NestedTableWrapper<typename std::vector<ESM::Transport::Dest> >&>(nestedTable).mNestedTable;
+                static_cast<const NestedTableWrapper<std::vector<typename ESM::Transport::Dest> >&>(nestedTable).mNestedTable;
 
             record.setModified (traveller);
         }
@@ -1270,7 +1272,7 @@ namespace CSMWorld
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
             // deleted by dtor of NestedTableStoring
-            return new NestedTableWrapper<typename std::vector<ESM::Transport::Dest> >(record.get().mTransport.mList);
+            return new NestedTableWrapper<std::vector<typename ESM::Transport::Dest> >(record.get().mTransport.mList);
         }
 
         virtual QVariant getNestedData (const RefIdColumn *column,
@@ -1373,6 +1375,304 @@ namespace CSMWorld
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
             return static_cast<int>(record.get().mTransport.mList.size());
+        }
+    };
+
+    template <typename ESXRecordT>
+    class ActorAiRefIdAdapter : public NestedRefIdAdapterBase
+    {
+        UniversalId::Type mType;
+
+        // not implemented
+        ActorAiRefIdAdapter (const ActorAiRefIdAdapter&);
+        ActorAiRefIdAdapter& operator= (const ActorAiRefIdAdapter&);
+
+    public:
+
+        ActorAiRefIdAdapter(UniversalId::Type type) :mType(type) {}
+
+        virtual ~ActorAiRefIdAdapter() {}
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            ESXRecordT actor = record.get();
+
+            std::vector<ESM::AIPackage>& list = actor.mAiPackage.mList;
+
+            ESM::AIPackage newRow;
+            newRow.mType = ESM::AI_CNDT;
+            newRow.mCellName = "";
+
+            if (position >= (int)list.size())
+                list.push_back(newRow);
+            else
+                list.insert(list.begin()+position, newRow);
+
+            record.setModified (actor);
+        }
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            ESXRecordT actor = record.get();
+
+            std::vector<ESM::AIPackage>& list = actor.mAiPackage.mList;
+
+            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
+                throw std::runtime_error ("index out of range");
+
+            list.erase (list.begin () + rowToRemove);
+
+            record.setModified (actor);
+        }
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+            ESXRecordT actor = record.get();
+
+            actor.mAiPackage.mList =
+                static_cast<const NestedTableWrapper<std::vector<typename ESM::AIPackage> >&>(nestedTable).mNestedTable;
+
+            record.setModified (actor);
+        }
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const
+        {
+            const Record<ESXRecordT>& record =
+                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+            // deleted by dtor of NestedTableStoring
+            return new NestedTableWrapper<std::vector<typename ESM::AIPackage> >(record.get().mAiPackage.mList);
+        }
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+        {
+            const Record<ESXRecordT>& record =
+                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+            const std::vector<ESM::AIPackage>& list = record.get().mAiPackage.mList;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
+                throw std::runtime_error ("index out of range");
+
+            const ESM::AIPackage& content = list.at(subRowIndex);
+
+            switch (subColIndex)
+            {
+                case 0:
+                    switch (content.mType)
+                    {
+                        case ESM::AI_Wander: return QString("AI Wander");
+                        case ESM::AI_Travel: return QString("AI Travel");
+                        case ESM::AI_Follow: return QString("AI Follow");
+                        case ESM::AI_Escort: return QString("AI Escort");
+                        case ESM::AI_Activate: return QString("AI Activate");
+                        case ESM::AI_CNDT:
+                        default: return QString("None");
+                    }
+                case 1: // wander dist
+                    if (content.mType == ESM::AI_Wander)
+                        return content.mWander.mDistance;
+                    else
+                        return QVariant();
+                case 2: // wander dur
+                    if (content.mType == ESM::AI_Wander ||
+                            content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        return content.mWander.mDuration;
+                    else
+                        return QVariant();
+                case 3: // wander ToD
+                    if (content.mType == ESM::AI_Wander)
+                        return content.mWander.mTimeOfDay; // FIXME: not sure of the format
+                    else
+                        return QVariant();
+                case 4: // wander idle
+                    if (content.mType == ESM::AI_Wander)
+                    {
+                        return static_cast<int>(content.mWander.mIdle[0]); // FIXME:
+                    }
+                    else
+                        return QVariant();
+                case 5: // wander repeat
+                    if (content.mType == ESM::AI_Wander)
+                        return QString(content.mWander.mShouldRepeat ? "Yes" : "No");
+                    else
+                        return QVariant();
+                case 6: // activate name
+                    if (content.mType == ESM::AI_Activate)
+                        return QString(content.mActivate.mName.toString().c_str());
+                    else
+                        return QVariant();
+                case 7: // target id
+                    if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        return QString(content.mTarget.mId.toString().c_str());
+                    else
+                        return QVariant();
+                case 8: // target cell
+                    if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        return QString::fromUtf8(content.mCellName.c_str());
+                    else
+                        return QVariant();
+                case 9:
+                    if (content.mType == ESM::AI_Travel)
+                        return content.mTravel.mX;
+                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        return content.mTarget.mX;
+                    else
+                        return QVariant();
+                case 10:
+                    if (content.mType == ESM::AI_Travel)
+                        return content.mTravel.mY;
+                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        return content.mTarget.mY;
+                    else
+                        return QVariant();
+                case 11:
+                    if (content.mType == ESM::AI_Travel)
+                        return content.mTravel.mZ;
+                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        return content.mTarget.mZ;
+                    else
+                        return QVariant();
+                default:
+                    throw std::runtime_error("Trying to access non-existing column in the nested table!");
+            }
+        }
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+            ESXRecordT actor = record.get();
+            std::vector<ESM::AIPackage>& list = actor.mAiPackage.mList;
+
+            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
+                throw std::runtime_error ("index out of range");
+
+            ESM::AIPackage& content = list.at(subRowIndex);
+
+            switch(subColIndex)
+            {
+                case 0: // ai package type
+                    if ("AI Wander" == value.toString().toStdString())
+                        content.mType = ESM::AI_Wander;
+                    else if ("AI Travel" == value.toString().toStdString())
+                        content.mType = ESM::AI_Travel;
+                    else if ("AI Follow" == value.toString().toStdString())
+                        content.mType = ESM::AI_Follow;
+                    else if ("AI Escort" == value.toString().toStdString())
+                        content.mType = ESM::AI_Escort;
+                    else if ("AI Activate" == value.toString().toStdString())
+                        content.mType = ESM::AI_Activate;
+                    else
+                        content.mType = ESM::AI_CNDT;
+                    break; // always save
+
+                case 1:
+                    if (content.mType == ESM::AI_Wander)
+                        content.mWander.mDistance = static_cast<short>(value.toInt());
+                    else
+                        return; // return without saving
+                case 2:
+                    if (content.mType == ESM::AI_Wander ||
+                            content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        content.mWander.mDuration = static_cast<short>(value.toInt());
+                    else
+                        return; // return without saving
+                case 3:
+                    if (content.mType == ESM::AI_Wander)
+                        content.mWander.mTimeOfDay = static_cast<unsigned char>(value.toInt());
+                    else
+                        return; // return without saving
+                case 4:
+                    if (content.mType == ESM::AI_Wander)
+                        break; // FIXME: idle
+                    else
+                        return; // return without saving
+                case 5:
+                    if (content.mType == ESM::AI_Wander)
+                    {
+                        if ("Yes" == value.toString().toStdString())
+                            content.mWander.mShouldRepeat = 1;
+                        if ("No" == value.toString().toStdString())
+                            content.mWander.mShouldRepeat = 0;
+                        else
+                            return; // return without saving
+                    }
+                case 6: // NAME32
+                    if (content.mType == ESM::AI_Activate)
+                    {
+                        content.mActivate.mName.assign(value.toString().toUtf8().constData());
+                        break;
+                    }
+                    else
+                        return; // return without saving
+                case 7: // NAME32
+                    if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    {
+                        content.mTarget.mId.assign(value.toString().toUtf8().constData());
+                        break;
+                    }
+                    else
+                        return; // return without saving
+                case 8:
+                    if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                    {
+                        content.mCellName = std::string(value.toString().toUtf8().constData());
+                        break;
+                    }
+                    else
+                        return; // return without saving
+                case 9:
+                    if (content.mType == ESM::AI_Travel)
+                        content.mTravel.mZ = value.toFloat();
+                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        content.mTarget.mZ = value.toFloat();
+                    else
+                        return; // return without saving
+                case 10:
+                    if (content.mType == ESM::AI_Travel)
+                        content.mTravel.mZ = value.toFloat();
+                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        content.mTarget.mZ = value.toFloat();
+                    else
+                        return; // return without saving
+                case 11:
+                    if (content.mType == ESM::AI_Travel)
+                        content.mTravel.mZ = value.toFloat();
+                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        content.mTarget.mZ = value.toFloat();
+                    else
+                        return; // return without saving
+                default:
+                    throw std::runtime_error("Trying to access non-existing column in the nested table!");
+            }
+
+            record.setModified (actor);
+        }
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+        {
+            return 12;
+        }
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+        {
+            const Record<ESXRecordT>& record =
+                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+            return static_cast<int>(record.get().mAiPackage.mList.size());
         }
     };
 }

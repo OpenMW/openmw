@@ -180,6 +180,42 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_RotZ, CSMWorld::ColumnBase::Display_Float));
 
+    // Nested table
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_AiPackageList, ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
+    actorsColumns.mAiPackages = &mColumns.back();
+
+    std::map<UniversalId::Type, NestedRefIdAdapterBase*> aiMap;
+    aiMap.insert(
+        std::make_pair(UniversalId::Type_Npc, new ActorAiRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc)));
+    aiMap.insert(
+        std::make_pair(UniversalId::Type_Creature, new ActorAiRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature)));
+
+    mNestedAdapters.push_back (std::make_pair(&mColumns.back(), aiMap));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_AiPackage, CSMWorld::ColumnBase::Display_String));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_AiWanderDist, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_AiWanderDuration, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_AiWanderToD, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_AiWanderIdle, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_AiWanderRepeat, CSMWorld::ColumnBase::Display_String));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_AiActivateName, CSMWorld::ColumnBase::Display_String));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_AiTargetId, CSMWorld::ColumnBase::Display_String));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_AiTargetCell, CSMWorld::ColumnBase::Display_String));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_PosX, CSMWorld::ColumnBase::Display_Float));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_PosY, CSMWorld::ColumnBase::Display_Float));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_PosZ, CSMWorld::ColumnBase::Display_Float));
+
     static const struct
     {
         int mName;

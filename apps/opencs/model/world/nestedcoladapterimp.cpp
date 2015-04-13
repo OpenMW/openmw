@@ -121,7 +121,7 @@ namespace CSMWorld
         ESM::Pathgrid::Point point = pathgrid.mPoints[subRowIndex];
         switch (subColIndex)
         {
-            case 0: break;
+            case 0: return; // return without saving
             case 1: point.mX = value.toInt(); break;
             case 2: point.mY = value.toInt(); break;
             case 3: point.mZ = value.toInt(); break;
@@ -228,7 +228,7 @@ namespace CSMWorld
         ESM::Pathgrid::Edge edge = pathgrid.mEdges[subRowIndex];
         switch (subColIndex)
         {
-            case 0: break;
+            case 0: return; // return without saving
             case 1: edge.mV0 = value.toInt(); break;
             case 2: edge.mV1 = value.toInt(); break;
             default: throw std::runtime_error("Pathgrid edge subcolumn index out of range");
