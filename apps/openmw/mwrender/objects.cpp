@@ -139,8 +139,6 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
         SceneUtil::FindByNameVisitor visitor("AttachLight");
         ptr.getRefData().getBaseNode()->accept(visitor);
 
-        osg::Vec3f lightOffset (0.f, 0.f, 0.f);
-
         osg::Group* attachTo = NULL;
         if (visitor.mFoundNode)
         {
@@ -152,9 +150,13 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
             osg::Group* objectRoot = anim->getOrCreateObjectRoot();
             objectRoot->accept(computeBound);
 
-            lightOffset = computeBound.getBoundingBox().center();
+            // PositionAttitudeTransform seems to be slightly faster than MatrixTransform
+            osg::ref_ptr<osg::PositionAttitudeTransform> trans(new osg::PositionAttitudeTransform);
+            trans->setPosition(computeBound.getBoundingBox().center());
 
-            attachTo = objectRoot;
+            objectRoot->addChild(trans);
+
+            attachTo = trans;
         }
 
         const ESM::Light* esmLight = ptr.get<ESM::Light>()->mBase;
@@ -162,7 +164,6 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
         osg::ref_ptr<SceneUtil::LightSource> lightSource = new SceneUtil::LightSource;
         osg::Light* light = new osg::Light;
         lightSource->setLight(light);
-        light->setPosition(osg::Vec4f(lightOffset.x(), lightOffset.y(), lightOffset.z(), 1.f));
 
         float realRadius = esmLight->mData.mRadius * 2;
 
