@@ -8,6 +8,8 @@
 
 #include <components/nifcache/nifcache.hpp>
 
+#include <components/sceneutil/statesetcontroller.hpp>
+
 #include <boost/shared_ptr.hpp>
 
 #include <set> //UVController
@@ -189,19 +191,7 @@ namespace NifOsg
         bool mEnabled;
     };
 
-    class StateSetController
-    {
-    protected:
-        // Clones a StateSet to make it "writable". This is to prevent race conditions when the OSG draw thread of the last frame
-        // queues up a StateSet that we want to modify. Note, we could also set the StateSet to DYNAMIC data variance but that would
-        // undo all the benefits of the threading model - having the cull and draw traversals run in parallel can yield up to 200% framerates.
-        // If the StateSet allocations per frame are proving too much of an overhead we could "reuse" StateSets from previous frames,
-        // kind of like a double buffering scheme.
-        osg::StateSet* getWritableStateSet(osg::Node* node);
-    };
-
-    // Note we're using NodeCallback instead of StateSet::Callback because the StateSet callback doesn't support nesting
-    class UVController : public osg::NodeCallback, public Controller, public StateSetController, public ValueInterpolator
+    class UVController : public SceneUtil::StateSetController, public Controller, public ValueInterpolator
     {
     public:
         UVController();
@@ -210,7 +200,8 @@ namespace NifOsg
 
         META_Object(NifOsg,UVController)
 
-        virtual void operator() (osg::Node*, osg::NodeVisitor*);
+        virtual void setDefaults(osg::StateSet* stateset);
+        virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
 
     private:
         Nif::FloatKeyMapPtr mUTrans;
@@ -237,7 +228,7 @@ namespace NifOsg
         virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
     };
 
-    class AlphaController : public osg::NodeCallback, public Controller, public StateSetController, public ValueInterpolator
+    class AlphaController : public SceneUtil::StateSetController, public Controller, public ValueInterpolator
     {
     private:
         Nif::FloatKeyMapPtr mData;
@@ -247,12 +238,12 @@ namespace NifOsg
         AlphaController();
         AlphaController(const AlphaController& copy, const osg::CopyOp& copyop);
 
-        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
+        virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv);
 
         META_Object(NifOsg, AlphaController)
     };
 
-    class MaterialColorController : public osg::NodeCallback, public Controller, public StateSetController, public ValueInterpolator
+    class MaterialColorController : public SceneUtil::StateSetController, public Controller, public ValueInterpolator
     {
     private:
         Nif::Vector3KeyMapPtr mData;
@@ -264,10 +255,10 @@ namespace NifOsg
 
         META_Object(NifOsg, MaterialColorController)
 
-        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
+        virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv);
     };
 
-    class FlipController : public osg::NodeCallback, public Controller, public StateSetController
+    class FlipController : public SceneUtil::StateSetController, public Controller
     {
     private:
         int mTexSlot;
@@ -281,7 +272,7 @@ namespace NifOsg
 
         META_Object(NifOsg, FlipController)
 
-        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
+        virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
     };
 
     class ParticleSystemController : public osg::NodeCallback, public Controller

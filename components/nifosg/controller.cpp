@@ -278,7 +278,7 @@ UVController::UVController(const Nif::NiUVData *data, std::set<int> textureUnits
 }
 
 UVController::UVController(const UVController& copy, const osg::CopyOp& copyop)
-    : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop), Controller(copy)
+    : osg::Object(copy, copyop), StateSetController(copy, copyop), Controller(copy)
     , mUTrans(copy.mUTrans)
     , mVTrans(copy.mVTrans)
     , mUScale(copy.mUScale)
@@ -287,11 +287,17 @@ UVController::UVController(const UVController& copy, const osg::CopyOp& copyop)
 {
 }
 
-void UVController::operator()(osg::Node* node, osg::NodeVisitor* nv)
+void UVController::setDefaults(osg::StateSet *stateset)
+{
+    osg::TexMat* texMat = new osg::TexMat;
+    for (std::set<int>::const_iterator it = mTextureUnits.begin(); it != mTextureUnits.end(); ++it)
+        stateset->setTextureAttributeAndModes(*it, texMat, osg::StateAttribute::ON);
+}
+
+void UVController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
 {
     if (hasInput())
     {
-        osg::StateSet* stateset = getWritableStateSet(node);
         float value = getInputValue(nv);
         float uTrans = interpKey(mUTrans->mKeys, value, 0.0f);
         float vTrans = interpKey(mVTrans->mKeys, value, 0.0f);
@@ -301,15 +307,13 @@ void UVController::operator()(osg::Node* node, osg::NodeVisitor* nv)
         osg::Matrixf mat = osg::Matrixf::scale(uScale, vScale, 1);
         mat.setTrans(uTrans, vTrans, 0);
 
-        osg::TexMat* texMat = new osg::TexMat;
-        texMat->setMatrix(mat);
-
-        for (std::set<int>::const_iterator it = mTextureUnits.begin(); it != mTextureUnits.end(); ++it)
+        // setting once is enough because all other texture units share the same TexMat (see setDefaults).
+        if (mTextureUnits.size())
         {
-            stateset->setTextureAttributeAndModes(*it, texMat, osg::StateAttribute::ON);
+            osg::TexMat* texMat = static_cast<osg::TexMat*>(stateset->getTextureAttribute(*mTextureUnits.begin(), osg::StateAttribute::TEXMAT));
+            texMat->setMatrix(mat);
         }
     }
-    traverse(node, nv);
 }
 
 VisController::VisController(const Nif::NiVisData *data)
@@ -363,26 +367,21 @@ AlphaController::AlphaController()
 }
 
 AlphaController::AlphaController(const AlphaController &copy, const osg::CopyOp &copyop)
-    : osg::NodeCallback(copy, copyop), ValueInterpolator(), Controller(copy)
+    : StateSetController(copy, copyop), ValueInterpolator(), Controller(copy)
     , mData(copy.mData)
 {
 }
 
-void AlphaController::operator () (osg::Node* node, osg::NodeVisitor* nv)
+void AlphaController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
 {
     if (hasInput())
     {
-        osg::StateSet* stateset = getWritableStateSet(node);
         float value = interpKey(mData->mKeys, getInputValue(nv));
-        osg::Material* mat = dynamic_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-        if (mat)
-        {
-            osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
-            diffuse.a() = value;
-            mat->setDiffuse(osg::Material::FRONT_AND_BACK, diffuse);
-        }
+        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+        osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
+        diffuse.a() = value;
+        mat->setDiffuse(osg::Material::FRONT_AND_BACK, diffuse);
     }
-    traverse(node, nv);
 }
 
 MaterialColorController::MaterialColorController(const Nif::NiPosData *data)
@@ -395,26 +394,21 @@ MaterialColorController::MaterialColorController()
 }
 
 MaterialColorController::MaterialColorController(const MaterialColorController &copy, const osg::CopyOp &copyop)
-    : osg::NodeCallback(copy, copyop), Controller(copy)
+    : StateSetController(copy, copyop), Controller(copy)
     , mData(copy.mData)
 {
 }
 
-void MaterialColorController::operator() (osg::Node* node, osg::NodeVisitor* nv)
+void MaterialColorController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
 {
     if (hasInput())
     {
-        osg::StateSet* stateset = getWritableStateSet(node);
         osg::Vec3f value = interpKey(mData->mKeys, getInputValue(nv));
-        osg::Material* mat = dynamic_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-        if (mat)
-        {
-            osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
-            diffuse.set(value.x(), value.y(), value.z(), diffuse.a());
-            mat->setDiffuse(osg::Material::FRONT_AND_BACK, diffuse);
-        }
+        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+        osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
+        diffuse.set(value.x(), value.y(), value.z(), diffuse.a());
+        mat->setDiffuse(osg::Material::FRONT_AND_BACK, diffuse);
     }
-    traverse(node, nv);
 }
 
 FlipController::FlipController(const Nif::NiFlipController *ctrl, std::vector<osg::ref_ptr<osg::Texture2D> > textures)
@@ -429,7 +423,7 @@ FlipController::FlipController()
 }
 
 FlipController::FlipController(const FlipController &copy, const osg::CopyOp &copyop)
-    : osg::NodeCallback(copy, copyop)
+    : StateSetController(copy, copyop)
     , Controller(copy)
     , mTexSlot(copy.mTexSlot)
     , mDelta(copy.mDelta)
@@ -437,15 +431,13 @@ FlipController::FlipController(const FlipController &copy, const osg::CopyOp &co
 {
 }
 
-void FlipController::operator() (osg::Node* node, osg::NodeVisitor* nv)
+void FlipController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
 {
     if (hasInput() && mDelta != 0)
     {
-        osg::StateSet* stateset = getWritableStateSet(node);
         int curTexture = int(getInputValue(nv) / mDelta) % mTextures.size();
         stateset->setTextureAttribute(mTexSlot, mTextures[curTexture]);
     }
-    traverse(node, nv);
 }
 
 ParticleSystemController::ParticleSystemController(const Nif::NiParticleSystemController *ctrl)
@@ -505,14 +497,6 @@ void SourcedKeyframeController::operator ()(osg::Node* node, osg::NodeVisitor* n
         KeyframeController::operator()(node, nv); // calls traverse
     else
         traverse(node, nv);
-}
-
-osg::StateSet *StateSetController::getWritableStateSet(osg::Node *node)
-{
-    osg::StateSet* orig = node->getOrCreateStateSet();
-    osg::StateSet* cloned = new osg::StateSet(*orig, osg::CopyOp::SHALLOW_COPY);
-    node->setStateSet(cloned);
-    return cloned;
 }
 
 }

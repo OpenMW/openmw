@@ -28,4 +28,47 @@ namespace SceneUtil
         traverse(node, nv);
     }
 
+    StateSetController::StateSetController()
+    {
+    }
+
+    StateSetController::StateSetController(const StateSetController &copy, const osg::CopyOp &copyop)
+        : osg::NodeCallback(copy, copyop)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------
+
+    void CompositeStateSetController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
+    {
+        for (unsigned int i=0; i<mCtrls.size(); ++i)
+            mCtrls[i]->apply(stateset, nv);
+    }
+
+    void CompositeStateSetController::setDefaults(osg::StateSet *stateset)
+    {
+        for (unsigned int i=0; i<mCtrls.size(); ++i)
+            mCtrls[i]->setDefaults(stateset);
+    }
+
+    CompositeStateSetController::CompositeStateSetController()
+    {
+    }
+
+    CompositeStateSetController::CompositeStateSetController(const CompositeStateSetController &copy, const osg::CopyOp &copyop)
+        : StateSetController(copy, copyop)
+        , mCtrls(copy.mCtrls)
+    {
+    }
+
+    unsigned int CompositeStateSetController::getNumControllers()
+    {
+        return mCtrls.size();
+    }
+
+    void CompositeStateSetController::addController(StateSetController *ctrl)
+    {
+        mCtrls.push_back(ctrl);
+    }
+
 }

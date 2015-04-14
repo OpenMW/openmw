@@ -719,13 +719,13 @@ namespace NifOsg
             return skel;
         }
 
-        static void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
+        static void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetController* composite, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
         {
             const Nif::PropertyList& props = nifNode->props;
             for (size_t i = 0; i <props.length();++i)
             {
                 if (!props[i].empty())
-                    handleProperty(props[i].getPtr(), applyTo, textureManager, boundTextures, animflags);
+                    handleProperty(props[i].getPtr(), applyTo, composite, textureManager, boundTextures, animflags);
             }
         }
 
@@ -825,7 +825,9 @@ namespace NifOsg
                 transformNode->setNodeMask(0x1);
             }
 
-            applyNodeProperties(nifNode, transformNode, textureManager, boundTextures, animflags);
+            osg::ref_ptr<SceneUtil::CompositeStateSetController> composite = new SceneUtil::CompositeStateSetController;
+
+            applyNodeProperties(nifNode, transformNode, composite, textureManager, boundTextures, animflags);
 
             if (nifNode->recType == Nif::RC_NiTriShape && !skipMeshes)
             {
@@ -836,8 +838,11 @@ namespace NifOsg
                     handleSkinnedTriShape(triShape, transformNode, boundTextures, animflags);
 
                 if (!nifNode->controller.empty())
-                    handleMeshControllers(nifNode, transformNode, boundTextures, animflags);
+                    handleMeshControllers(nifNode, composite, boundTextures, animflags);
             }
+
+            if (composite->getNumControllers() > 0)
+                transformNode->addUpdateCallback(composite);
 
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles || nifNode->recType == Nif::RC_NiRotatingParticles)
                 handleParticleSystem(nifNode, transformNode, animflags, particleflags, rootNode);
@@ -866,7 +871,7 @@ namespace NifOsg
             return transformNode;
         }
 
-        static void handleMeshControllers(const Nif::Node *nifNode, osg::MatrixTransform *transformNode, const std::map<int, int> &boundTextures, int animflags)
+        static void handleMeshControllers(const Nif::Node *nifNode, SceneUtil::CompositeStateSetController* composite, const std::map<int, int> &boundTextures, int animflags)
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -881,8 +886,7 @@ namespace NifOsg
 
                     osg::ref_ptr<UVController> ctrl = new UVController(uvctrl->data.getPtr(), texUnits);
                     setupController(uvctrl, ctrl, animflags);
-
-                    transformNode->addUpdateCallback(ctrl);
+                    composite->addController(ctrl);
                 }
             }
         }
@@ -915,8 +919,9 @@ namespace NifOsg
             }
         }
 
-        static void handleMaterialControllers(const Nif::Property *materialProperty, osg::Node* node, osg::StateSet *stateset, int animflags)
+        static void handleMaterialControllers(const Nif::Property *materialProperty, osg::Node* node, int animflags)
         {
+            osg::ref_ptr<SceneUtil::CompositeStateSetController> composite = new SceneUtil::CompositeStateSetController;
             for (Nif::ControllerPtr ctrl = materialProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
                 if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
@@ -926,21 +931,23 @@ namespace NifOsg
                     const Nif::NiAlphaController* alphactrl = static_cast<const Nif::NiAlphaController*>(ctrl.getPtr());
                     osg::ref_ptr<AlphaController> ctrl(new AlphaController(alphactrl->data.getPtr()));
                     setupController(alphactrl, ctrl, animflags);
-                    node->addUpdateCallback(ctrl);
+                    composite->addController(ctrl);
                 }
                 else if (ctrl->recType == Nif::RC_NiMaterialColorController)
                 {
                     const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
                     osg::ref_ptr<MaterialColorController> ctrl(new MaterialColorController(matctrl->data.getPtr()));
                     setupController(matctrl, ctrl, animflags);
-                    node->addUpdateCallback(ctrl);
+                    composite->addController(ctrl);
                 }
                 else
                     std::cerr << "Unexpected material controller " << ctrl->recType << std::endl;
             }
+            if (composite->getNumControllers() > 0)
+                node->addUpdateCallback(composite);
         }
 
-        static void handleTextureControllers(const Nif::Property *texProperty, osg::Node* node, Resource::TextureManager* textureManager, osg::StateSet *stateset, int animflags)
+        static void handleTextureControllers(const Nif::Property *texProperty, SceneUtil::CompositeStateSetController* composite, Resource::TextureManager* textureManager, osg::StateSet *stateset, int animflags)
         {
             for (Nif::ControllerPtr ctrl = texProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -972,7 +979,7 @@ namespace NifOsg
                     }
                     osg::ref_ptr<FlipController> callback(new FlipController(flipctrl, textures));
                     setupController(ctrl.getPtr(), callback, animflags);
-                    node->addUpdateCallback(callback);
+                    composite->addController(callback);
                 }
                 else
                     std::cerr << "Unexpected texture controller " << ctrl->recName << std::endl;
@@ -1419,7 +1426,7 @@ namespace NifOsg
 
 
         static void handleProperty(const Nif::Property *property,
-                            osg::Node *node, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
+                            osg::Node *node, SceneUtil::CompositeStateSetController* composite, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
         {
             osg::StateSet* stateset = node->getOrCreateStateSet();
 
@@ -1594,7 +1601,7 @@ namespace NifOsg
                         stateset->setTextureAttributeAndModes(i, new osg::Texture2D, osg::StateAttribute::OFF);
                         boundTextures.erase(i);
                     }
-                    handleTextureControllers(texprop, node, textureManager, stateset, animflags);
+                    handleTextureControllers(texprop, composite, textureManager, stateset, animflags);
                 }
                 break;
             }
@@ -1646,7 +1653,7 @@ namespace NifOsg
                     mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->data.glossiness);
 
                     if (!matprop->controller.empty())
-                        handleMaterialControllers(matprop, node, stateset, animflags);
+                        handleMaterialControllers(matprop, node, animflags);
 
                     break;
                 }
