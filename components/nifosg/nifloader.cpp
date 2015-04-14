@@ -176,6 +176,36 @@ namespace
             collectMaterialProperties(nifNode->parent, out);
     }
 
+    class FrameSwitch : public osg::Group
+    {
+    public:
+        FrameSwitch()
+        {
+        }
+
+        FrameSwitch(const FrameSwitch& copy, const osg::CopyOp& copyop)
+            : osg::Group(copy, copyop)
+        {
+        }
+
+        META_Object(NifOsg, FrameSwitch)
+
+        virtual void traverse(osg::NodeVisitor& nv)
+        {
+            const osg::FrameStamp* stamp = nv.getFrameStamp();
+            if (!stamp || nv.getTraversalMode() != osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN)
+                osg::Group::traverse(nv);
+            else
+            {
+                for (unsigned int i=0; i<getNumChildren(); ++i)
+                {
+                    if (i%2 == stamp->getFrameNumber()%2)
+                        getChild(i)->accept(nv);
+                }
+            }
+        }
+    };
+
     // NodeCallback used to update the bone matrices in skeleton space as needed for skinning.
     // Must be set on a Bone.
     class UpdateBone : public osg::NodeCallback
@@ -1306,7 +1336,19 @@ namespace NifOsg
 
             geode->addDrawable(geometry);
 
-            parentNode->addChild(geode);
+            if (geometry->getDataVariance() == osg::Object::DYNAMIC)
+            {
+                // Add a copy, we will alternate between the two copies every other frame using the FrameSwitch
+                // This is so we can set the DataVariance as STATIC, giving a huge performance boost
+                geometry->setDataVariance(osg::Object::STATIC);
+                osg::ref_ptr<osg::Geode> geode2 = static_cast<osg::Geode*>(osg::clone(geode.get(), osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES));
+                osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
+                frameswitch->addChild(geode);
+                frameswitch->addChild(geode2);
+                parentNode->addChild(frameswitch);
+            }
+            else
+                parentNode->addChild(geode);
         }
 
         static osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher)
@@ -1419,7 +1461,17 @@ namespace NifOsg
             geode->addDrawable(rig);
             geode->addUpdateCallback(new DirtyBoundCallback);
 
-            trans->addChild(geode);
+            // Add a copy, we will alternate between the two copies every other frame using the FrameSwitch
+            // This is so we can set the DataVariance as STATIC, giving a huge performance boost
+            rig->setDataVariance(osg::Object::STATIC);
+            osg::Geode* geode2 = static_cast<osg::Geode*>(osg::clone(geode.get(), osg::CopyOp::DEEP_COPY_NODES|
+                                                                     osg::CopyOp::DEEP_COPY_DRAWABLES));
+
+            osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
+            frameswitch->addChild(geode);
+            frameswitch->addChild(geode2);
+
+            trans->addChild(frameswitch);
             parentNode->addChild(trans);
         }
 
