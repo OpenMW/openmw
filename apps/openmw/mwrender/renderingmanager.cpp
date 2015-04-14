@@ -13,7 +13,7 @@
 
 #include <components/sceneutil/lightmanager.hpp>
 
-#include <components/sceneutil/statesetcontroller.hpp>
+#include <components/sceneutil/statesetupdater.hpp>
 
 #include <components/esm/loadcell.hpp>
 
@@ -22,7 +22,7 @@
 namespace MWRender
 {
 
-    class StateUpdater : public SceneUtil::StateSetController
+    class StateUpdater : public SceneUtil::StateSetUpdater
     {
     public:
         virtual void setDefaults(osg::StateSet *stateset)

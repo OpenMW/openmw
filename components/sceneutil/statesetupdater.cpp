@@ -1,11 +1,11 @@
-#include "statesetcontroller.hpp"
+#include "statesetupdater.hpp"
 
 #include <osg/Node>
 
 namespace SceneUtil
 {
 
-    void StateSetController::operator()(osg::Node* node, osg::NodeVisitor* nv)
+    void StateSetUpdater::operator()(osg::Node* node, osg::NodeVisitor* nv)
     {
         if (!mStateSets[0])
         {
@@ -28,45 +28,51 @@ namespace SceneUtil
         traverse(node, nv);
     }
 
-    StateSetController::StateSetController()
+    StateSetUpdater::StateSetUpdater()
     {
     }
 
-    StateSetController::StateSetController(const StateSetController &copy, const osg::CopyOp &copyop)
+    StateSetUpdater::StateSetUpdater(const StateSetUpdater &copy, const osg::CopyOp &copyop)
         : osg::NodeCallback(copy, copyop)
     {
     }
 
     // ----------------------------------------------------------------------------------
 
-    void CompositeStateSetController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
+    void CompositeStateSetUpdater::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
     {
         for (unsigned int i=0; i<mCtrls.size(); ++i)
             mCtrls[i]->apply(stateset, nv);
     }
 
-    void CompositeStateSetController::setDefaults(osg::StateSet *stateset)
+    void CompositeStateSetUpdater::setDefaults(osg::StateSet *stateset)
     {
         for (unsigned int i=0; i<mCtrls.size(); ++i)
             mCtrls[i]->setDefaults(stateset);
     }
 
-    CompositeStateSetController::CompositeStateSetController()
+    CompositeStateSetUpdater::CompositeStateSetUpdater()
     {
     }
 
-    CompositeStateSetController::CompositeStateSetController(const CompositeStateSetController &copy, const osg::CopyOp &copyop)
-        : StateSetController(copy, copyop)
-        , mCtrls(copy.mCtrls)
+    CompositeStateSetUpdater::CompositeStateSetUpdater(const CompositeStateSetUpdater &copy, const osg::CopyOp &copyop)
+        : StateSetUpdater(copy, copyop)
     {
+        for (unsigned int i=0; i<copy.mCtrls.size(); ++i)
+            mCtrls.push_back(static_cast<StateSetUpdater*>(osg::clone(copy.mCtrls[i].get(), copyop)));
     }
 
-    unsigned int CompositeStateSetController::getNumControllers()
+    unsigned int CompositeStateSetUpdater::getNumControllers()
     {
         return mCtrls.size();
     }
 
-    void CompositeStateSetController::addController(StateSetController *ctrl)
+    StateSetUpdater* CompositeStateSetUpdater::getController(int i)
+    {
+        return mCtrls[i];
+    }
+
+    void CompositeStateSetUpdater::addController(StateSetUpdater *ctrl)
     {
         mCtrls.push_back(ctrl);
     }

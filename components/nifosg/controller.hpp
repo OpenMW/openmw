@@ -8,7 +8,8 @@
 
 #include <components/nifcache/nifcache.hpp>
 
-#include <components/sceneutil/statesetcontroller.hpp>
+#include <components/sceneutil/controller.hpp>
+#include <components/sceneutil/statesetupdater.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -43,7 +44,6 @@ namespace osgAnimation
 namespace NifOsg
 {
 
-    // FIXME: Should not be here. We might also want to use this for non-NIF model formats
     class ValueInterpolator
     {
     protected:
@@ -76,8 +76,7 @@ namespace NifOsg
         }
     };
 
-    // FIXME: Should not be here. We might also want to use this for non-NIF model formats
-    class ControllerFunction
+    class ControllerFunction : public SceneUtil::ControllerFunction
     {
     private:
         float mFrequency;
@@ -98,35 +97,7 @@ namespace NifOsg
         float calculate(float value);
     };
 
-    class ControllerSource
-    {
-    public:
-        virtual float getValue(osg::NodeVisitor* nv) = 0;
-    };
-
-    class FrameTimeSource : public ControllerSource
-    {
-    public:
-        FrameTimeSource();
-        virtual float getValue(osg::NodeVisitor* nv);
-    };
-
-    class Controller
-    {
-    public:
-        Controller();
-
-        bool hasInput() const;
-
-        float getInputValue(osg::NodeVisitor* nv);
-
-        boost::shared_ptr<ControllerSource> mSource;
-
-        // The source value gets passed through this function before it's passed on to the DestValue.
-        boost::shared_ptr<ControllerFunction> mFunction;
-    };
-
-    class GeomMorpherController : public osg::Drawable::UpdateCallback, public Controller, public ValueInterpolator
+    class GeomMorpherController : public osg::Drawable::UpdateCallback, public SceneUtil::Controller, public ValueInterpolator
     {
     public:
         GeomMorpherController(const Nif::NiMorphData* data);
@@ -141,7 +112,7 @@ namespace NifOsg
         std::vector<Nif::FloatKeyMapPtr> mKeyFrames;
     };
 
-    class KeyframeController : public osg::NodeCallback, public Controller, public ValueInterpolator
+    class KeyframeController : public osg::NodeCallback, public SceneUtil::Controller, public ValueInterpolator
     {
     public:
         KeyframeController(const Nif::NiKeyframeData *data);
@@ -191,7 +162,7 @@ namespace NifOsg
         bool mEnabled;
     };
 
-    class UVController : public SceneUtil::StateSetController, public Controller, public ValueInterpolator
+    class UVController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller, public ValueInterpolator
     {
     public:
         UVController();
@@ -211,7 +182,7 @@ namespace NifOsg
         std::set<int> mTextureUnits;
     };
 
-    class VisController : public osg::NodeCallback, public Controller
+    class VisController : public osg::NodeCallback, public SceneUtil::Controller
     {
     private:
         std::vector<Nif::NiVisData::VisData> mData;
@@ -228,7 +199,7 @@ namespace NifOsg
         virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
     };
 
-    class AlphaController : public SceneUtil::StateSetController, public Controller, public ValueInterpolator
+    class AlphaController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller, public ValueInterpolator
     {
     private:
         Nif::FloatKeyMapPtr mData;
@@ -243,7 +214,7 @@ namespace NifOsg
         META_Object(NifOsg, AlphaController)
     };
 
-    class MaterialColorController : public SceneUtil::StateSetController, public Controller, public ValueInterpolator
+    class MaterialColorController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller, public ValueInterpolator
     {
     private:
         Nif::Vector3KeyMapPtr mData;
@@ -258,7 +229,7 @@ namespace NifOsg
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv);
     };
 
-    class FlipController : public SceneUtil::StateSetController, public Controller
+    class FlipController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
     private:
         int mTexSlot;
@@ -275,7 +246,7 @@ namespace NifOsg
         virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
     };
 
-    class ParticleSystemController : public osg::NodeCallback, public Controller
+    class ParticleSystemController : public osg::NodeCallback, public SceneUtil::Controller
     {
     public:
         ParticleSystemController(const Nif::NiParticleSystemController* ctrl);

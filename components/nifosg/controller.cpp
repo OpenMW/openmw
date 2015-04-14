@@ -64,15 +64,6 @@ float ControllerFunction::calculate(float value)
     }
 }
 
-FrameTimeSource::FrameTimeSource()
-{
-}
-
-float FrameTimeSource::getValue(osg::NodeVisitor *nv)
-{
-    return nv->getFrameStamp()->getSimulationTime();
-}
-
 KeyframeController::KeyframeController()
 {
 }
@@ -207,20 +198,6 @@ void KeyframeController::operator() (osg::Node* node, osg::NodeVisitor* nv)
     traverse(node, nv);
 }
 
-Controller::Controller()
-{
-}
-
-bool Controller::hasInput() const
-{
-    return mSource.get() != NULL;
-}
-
-float Controller::getInputValue(osg::NodeVisitor* nv)
-{
-    return mFunction->calculate(mSource->getValue(nv));
-}
-
 GeomMorpherController::GeomMorpherController()
 {
 }
@@ -278,7 +255,7 @@ UVController::UVController(const Nif::NiUVData *data, std::set<int> textureUnits
 }
 
 UVController::UVController(const UVController& copy, const osg::CopyOp& copyop)
-    : osg::Object(copy, copyop), StateSetController(copy, copyop), Controller(copy)
+    : osg::Object(copy, copyop), StateSetUpdater(copy, copyop), Controller(copy)
     , mUTrans(copy.mUTrans)
     , mVTrans(copy.mVTrans)
     , mUScale(copy.mUScale)
@@ -367,7 +344,7 @@ AlphaController::AlphaController()
 }
 
 AlphaController::AlphaController(const AlphaController &copy, const osg::CopyOp &copyop)
-    : StateSetController(copy, copyop), ValueInterpolator(), Controller(copy)
+    : StateSetUpdater(copy, copyop), ValueInterpolator(), Controller(copy)
     , mData(copy.mData)
 {
 }
@@ -394,7 +371,7 @@ MaterialColorController::MaterialColorController()
 }
 
 MaterialColorController::MaterialColorController(const MaterialColorController &copy, const osg::CopyOp &copyop)
-    : StateSetController(copy, copyop), Controller(copy)
+    : StateSetUpdater(copy, copyop), Controller(copy)
     , mData(copy.mData)
 {
 }
@@ -423,7 +400,7 @@ FlipController::FlipController()
 }
 
 FlipController::FlipController(const FlipController &copy, const osg::CopyOp &copyop)
-    : StateSetController(copy, copyop)
+    : StateSetUpdater(copy, copyop)
     , Controller(copy)
     , mTexSlot(copy.mTexSlot)
     , mDelta(copy.mDelta)

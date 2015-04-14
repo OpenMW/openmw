@@ -24,7 +24,7 @@
 #include <components/vfs/manager.hpp>
 
 #include <components/sceneutil/util.hpp>
-#include <components/sceneutil/statesetcontroller.hpp>
+#include <components/sceneutil/statesetupdater.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -36,14 +36,6 @@
 
 namespace
 {
-
-    osg::StateSet* getWritableStateSet(osg::Node* node)
-    {
-        osg::StateSet* stateset = node->getOrCreateStateSet();
-        osg::ref_ptr<osg::StateSet> cloned = static_cast<osg::StateSet*>(stateset->clone(osg::CopyOp::SHALLOW_COPY));
-        node->setStateSet(cloned);
-        return cloned;
-    }
 
     osg::ref_ptr<osg::Material> createAlphaTrackingUnlitMaterial()
     {
@@ -95,7 +87,7 @@ namespace
 namespace MWRender
 {
 
-class AtmosphereUpdater : public SceneUtil::StateSetController
+class AtmosphereUpdater : public SceneUtil::StateSetUpdater
 {
 public:
     void setEmissionColor(osg::Vec4f emissionColor)

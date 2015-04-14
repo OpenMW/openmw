@@ -15,14 +15,14 @@ namespace SceneUtil
     ///     the first StateSet is the one we can write to, the second is the one currently in use by the draw traversal of the last frame.
     ///     After a frame is completed the places are swapped.
     /// @par Must be set as UpdateCallback on a Node.
-    /// @note Do not add multiple StateSetControllers on the same Node as they will conflict - instead use the CompositeStateSetController.
-    class StateSetController : public osg::NodeCallback
+    /// @note Do not add multiple StateSetControllers on the same Node as they will conflict - instead use the CompositeStateSetUpdater.
+    class StateSetUpdater : public osg::NodeCallback
     {
     public:
-        StateSetController();
-        StateSetController(const StateSetController& copy, const osg::CopyOp& copyop);
+        StateSetUpdater();
+        StateSetUpdater(const StateSetUpdater& copy, const osg::CopyOp& copyop);
 
-        META_Object(SceneUtil, StateSetController)
+        META_Object(SceneUtil, StateSetUpdater)
 
         virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
 
@@ -40,17 +40,18 @@ namespace SceneUtil
     };
 
     /// @brief A variant of the StateSetController that can be made up of multiple controllers all controlling the same target.
-    class CompositeStateSetController : public StateSetController
+    class CompositeStateSetUpdater : public StateSetUpdater
     {
     public:
-        CompositeStateSetController();
-        CompositeStateSetController(const CompositeStateSetController& copy, const osg::CopyOp& copyop);
+        CompositeStateSetUpdater();
+        CompositeStateSetUpdater(const CompositeStateSetUpdater& copy, const osg::CopyOp& copyop);
 
-        META_Object(SceneUtil, CompositeStateSetController)
+        META_Object(SceneUtil, CompositeStateSetUpdater)
 
         unsigned int getNumControllers();
+        StateSetUpdater* getController(int i);
 
-        void addController(StateSetController* ctrl);
+        void addController(StateSetUpdater* ctrl);
 
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv);
 
@@ -58,7 +59,7 @@ namespace SceneUtil
 
         virtual void setDefaults(osg::StateSet *stateset);
 
-        std::vector<osg::ref_ptr<StateSetController> > mCtrls;
+        std::vector<osg::ref_ptr<StateSetUpdater> > mCtrls;
     };
 
 }

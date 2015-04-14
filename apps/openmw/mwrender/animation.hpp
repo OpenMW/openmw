@@ -74,7 +74,7 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
-    class NullAnimationTime : public NifOsg::ControllerSource
+    class NullAnimationTime : public SceneUtil::ControllerSource
     {
     public:
         virtual float getValue(osg::NodeVisitor *nv)

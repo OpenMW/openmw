@@ -719,7 +719,7 @@ namespace NifOsg
             return skel;
         }
 
-        static void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetController* composite, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
+        static void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
         {
             const Nif::PropertyList& props = nifNode->props;
             for (size_t i = 0; i <props.length();++i)
@@ -729,12 +729,11 @@ namespace NifOsg
             }
         }
 
-        static void setupController(const Nif::Controller* ctrl, Controller* toSetup, int animflags)
+        static void setupController(const Nif::Controller* ctrl, SceneUtil::Controller* toSetup, int animflags)
         {
-            // TODO: uncomment this, currently commented for easier testing
-            //bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
-            //if (autoPlay)
-                toSetup->mSource = boost::shared_ptr<ControllerSource>(new FrameTimeSource);
+            bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
+            if (autoPlay)
+                toSetup->mSource = boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource);
 
             toSetup->mFunction = boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl));
         }
@@ -825,7 +824,7 @@ namespace NifOsg
                 transformNode->setNodeMask(0x1);
             }
 
-            osg::ref_ptr<SceneUtil::CompositeStateSetController> composite = new SceneUtil::CompositeStateSetController;
+            osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
             applyNodeProperties(nifNode, transformNode, composite, textureManager, boundTextures, animflags);
 
@@ -871,7 +870,7 @@ namespace NifOsg
             return transformNode;
         }
 
-        static void handleMeshControllers(const Nif::Node *nifNode, SceneUtil::CompositeStateSetController* composite, const std::map<int, int> &boundTextures, int animflags)
+        static void handleMeshControllers(const Nif::Node *nifNode, SceneUtil::CompositeStateSetUpdater* composite, const std::map<int, int> &boundTextures, int animflags)
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -921,7 +920,7 @@ namespace NifOsg
 
         static void handleMaterialControllers(const Nif::Property *materialProperty, osg::Node* node, int animflags)
         {
-            osg::ref_ptr<SceneUtil::CompositeStateSetController> composite = new SceneUtil::CompositeStateSetController;
+            osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
             for (Nif::ControllerPtr ctrl = materialProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
                 if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
@@ -947,7 +946,7 @@ namespace NifOsg
                 node->addUpdateCallback(composite);
         }
 
-        static void handleTextureControllers(const Nif::Property *texProperty, SceneUtil::CompositeStateSetController* composite, Resource::TextureManager* textureManager, osg::StateSet *stateset, int animflags)
+        static void handleTextureControllers(const Nif::Property *texProperty, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, osg::StateSet *stateset, int animflags)
         {
             for (Nif::ControllerPtr ctrl = texProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -1426,7 +1425,7 @@ namespace NifOsg
 
 
         static void handleProperty(const Nif::Property *property,
-                            osg::Node *node, SceneUtil::CompositeStateSetController* composite, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
+                            osg::Node *node, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
         {
             osg::StateSet* stateset = node->getOrCreateStateSet();
 
