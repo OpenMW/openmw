@@ -81,7 +81,7 @@ namespace MWWorld
             MWWorld::Fallback mFallback;
             MWRender::RenderingManager* mRendering;
 
-            //MWWorld::WeatherManager* mWeatherManager;
+            MWWorld::WeatherManager* mWeatherManager;
 
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;

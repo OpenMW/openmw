@@ -20,8 +20,8 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    actors objects renderingmanager animation
-#     debugging sky camera npcanimation creatureanimation activatoranimation
+    actors objects renderingmanager animation sky
+#     debugging  camera npcanimation creatureanimation activatoranimation
 #    renderinginterface localmap occlusionquery water shadows
 #    characterpreview globalmap ripplesimulation refraction
 #    terrainstorage renderconst effectmanager weaponanimation
@@ -68,8 +68,8 @@ add_openmw_dir (mwworld
     cells localscripts customdata inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader actiontrap cellreflist cellref physicssystem
-# weather projectilemanager
+    contentloader esmloader actiontrap cellreflist cellref physicssystem weather
+#  projectilemanager
     )
 
 add_openmw_dir (mwclass

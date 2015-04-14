@@ -499,9 +499,17 @@ void OMW::Engine::go()
     //mViewer.setRealizeOperation(ico);
     mViewer.realize();
     std::cout << "realize took " << timer.time_m() << std::endl;
+    osg::Timer frameTimer;
     while (!mViewer.done())
     {
-        MWBase::Environment::get().getWorld()->update(0.f, false);
+        double dt = frameTimer.time_s();
+        frameTimer.setStartTick();
+
+        // frameRenderingQueued(dt);
+        MWBase::Environment::get().getWorld()->update(dt, false);
+
+        MWBase::Environment::get().getWorld()->advanceTime(
+            dt*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
 
         mViewer.frame(/*simulationTime*/);
     }

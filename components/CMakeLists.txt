@@ -39,7 +39,7 @@ add_component_dir (resource
     )
 
 add_component_dir (sceneutil
-    clone attach lightmanager visitor util
+    clone attach lightmanager visitor util statesetcontroller
     )
 
 add_component_dir (nif

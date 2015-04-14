@@ -142,4 +142,14 @@ namespace Resource
         }
     }
 
+    const VFS::Manager* SceneManager::getVFS() const
+    {
+        return mVFS;
+    }
+
+    Resource::TextureManager* SceneManager::getTextureManager()
+    {
+        return mTextureManager;
+    }
+
 }

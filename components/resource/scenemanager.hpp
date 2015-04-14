@@ -55,6 +55,10 @@ namespace Resource
         /// in cases where multiple contexts are used over the lifetime of the application.
         void releaseGLObjects(osg::State* state);
 
+        const VFS::Manager* getVFS() const;
+
+        Resource::TextureManager* getTextureManager();
+
     private:
         const VFS::Manager* mVFS;
         Resource::TextureManager* mTextureManager;

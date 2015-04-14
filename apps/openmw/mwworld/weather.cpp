@@ -13,16 +13,15 @@
 
 #include "../mwsound/sound.hpp"
 
-//#include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/sky.hpp"
 
 #include "player.hpp"
 #include "esmstore.hpp"
 #include "fallback.hpp"
 #include "cellstore.hpp"
 
-using namespace Ogre;
 using namespace MWWorld;
-using namespace MWSound;
 
 namespace
 {
@@ -31,7 +30,7 @@ namespace
         return x * (1-factor) + y * factor;
     }
 
-    Ogre::ColourValue lerp (const Ogre::ColourValue& x, const Ogre::ColourValue& y, float factor)
+    osg::Vec4f lerp (const osg::Vec4f& x, const osg::Vec4f& y, float factor)
     {
         return x * (1-factor) + y * factor;
     }
@@ -196,7 +195,7 @@ WeatherManager::~WeatherManager()
     stopSounds();
 }
 
-void WeatherManager::setWeather(const String& weather, bool instant)
+void WeatherManager::setWeather(const std::string& weather, bool instant)
 {
     if (weather == mCurrentWeather && mNextWeather == "")
     {
@@ -224,7 +223,7 @@ void WeatherManager::setWeather(const String& weather, bool instant)
     mFirstUpdate = false;
 }
 
-void WeatherManager::setResult(const String& weatherType)
+void WeatherManager::setResult(const std::string& weatherType)
 {
     const Weather& current = mWeatherSettings[weatherType];
 
@@ -387,8 +386,8 @@ void WeatherManager::update(float duration, bool paused)
     const bool exterior = (world->isCellExterior() || world->isCellQuasiExterior());
     if (!exterior)
     {
-        mRendering->skyDisable();
-        mRendering->getSkyManager()->setLightningStrength(0.f);
+        mRendering->setSkyEnabled(false);
+        //mRendering->getSkyManager()->setLightningStrength(0.f);
         stopSounds();
         return;
     }
@@ -421,16 +420,16 @@ void WeatherManager::update(float duration, bool paused)
 
         mStormDirection = (playerPos - redMountainPos);
         mStormDirection.z = 0;
-        mRendering->getSkyManager()->setStormDirection(mStormDirection);
+        //mRendering->getSkyManager()->setStormDirection(mStormDirection);
     }
 
     mRendering->configureFog(mResult.mFogDepth, mResult.mFogColor);
 
     // disable sun during night
-    if (mHour >= mNightStart || mHour <= mSunriseTime)
-        mRendering->getSkyManager()->sunDisable();
-    else
-        mRendering->getSkyManager()->sunEnable();
+    //if (mHour >= mNightStart || mHour <= mSunriseTime)
+        //mRendering->getSkyManager()->sunDisable();
+    //else
+        //mRendering->getSkyManager()->sunEnable();
 
     // Update the sun direction.  Run it east to west at a fixed angle from overhead.
     // The sun's speed at day and night may differ, since mSunriseTime and mNightStart
@@ -455,11 +454,11 @@ void WeatherManager::update(float duration, bool paused)
             theta = M_PI * (adjustedHour - adjustedNightStart) / nightDuration;
         }
 
-        Vector3 final(
+        osg::Vec3f final(
             static_cast<float>(cos(theta)),
             -0.268f, // approx tan( -15 degrees )
             static_cast<float>(sin(theta)));
-        mRendering->setSunDirection( final, is_night );
+        mRendering->setSunDirection( final * -1 );
     }
 
     /*
@@ -484,20 +483,20 @@ void WeatherManager::update(float duration, bool paused)
     if (moonHeight != 0)
     {
         int facing = (moonHeight <= 1) ? 1 : -1;
-        Vector3 masser(
+        osg::Vec3f masser(
                 (moonHeight - 1) * facing,
                 (1 - moonHeight) * facing,
                 moonHeight);
 
-        Vector3 secunda(
+        osg::Vec3f secunda(
                 (moonHeight - 1) * facing * 1.25f,
                 (1 - moonHeight) * facing * 0.8f,
                 moonHeight);
 
-        mRendering->getSkyManager()->setMasserDirection(masser);
-        mRendering->getSkyManager()->setSecundaDirection(secunda);
-        mRendering->getSkyManager()->masserEnable();
-        mRendering->getSkyManager()->secundaEnable();
+        //mRendering->getSkyManager()->setMasserDirection(masser);
+        //mRendering->getSkyManager()->setSecundaDirection(secunda);
+        //mRendering->getSkyManager()->masserEnable();
+        //mRendering->getSkyManager()->secundaEnable();
 
         float angle = (1-moonHeight) * 90.f * facing;
         float masserHourFade = calculateHourFade("Masser");
@@ -508,13 +507,13 @@ void WeatherManager::update(float duration, bool paused)
         masserAngleFade *= masserHourFade;
         secundaAngleFade *= secundaHourFade;
 
-        mRendering->getSkyManager()->setMasserFade(masserAngleFade);
-        mRendering->getSkyManager()->setSecundaFade(secundaAngleFade);
+        //mRendering->getSkyManager()->setMasserFade(masserAngleFade);
+        //mRendering->getSkyManager()->setSecundaFade(secundaAngleFade);
     }
     else
     {
-        mRendering->getSkyManager()->masserDisable();
-        mRendering->getSkyManager()->secundaDisable();
+        //mRendering->getSkyManager()->masserDisable();
+        //mRendering->getSkyManager()->secundaDisable();
     }
 
     if (!paused)
@@ -540,13 +539,13 @@ void WeatherManager::update(float duration, bool paused)
                 }
 
                 mThunderFlash -= duration;
-                if (mThunderFlash > 0)
-                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
-                else
+                //if (mThunderFlash > 0)
+                    //mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
+                //else
                 {
                     mThunderChanceNeeded = static_cast<float>(OEngine::Misc::Rng::rollDice(100));
                     mThunderChance = 0;
-                    mRendering->getSkyManager()->setLightningStrength( 0.f );
+                    //mRendering->getSkyManager()->setLightningStrength( 0.f );
                 }
             }
             else
@@ -557,19 +556,19 @@ void WeatherManager::update(float duration, bool paused)
                 {
                     mThunderFlash = mThunderThreshold;
 
-                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
+                    //mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
 
                     mThunderSoundDelay = 0.25;
                 }
             }
         }
-        else
-            mRendering->getSkyManager()->setLightningStrength(0.f);
+        //else
+            //mRendering->getSkyManager()->setLightningStrength(0.f);
     }
     
 
     mRendering->setAmbientColour(mResult.mAmbientColor);
-    mRendering->sunEnable(false);
+    //mRendering->sunEnable(false);
     mRendering->setSunColour(mResult.mSunColor);
 
     mRendering->getSkyManager()->setWeather(mResult);
@@ -849,4 +848,9 @@ bool WeatherManager::isInStorm() const
 Ogre::Vector3 WeatherManager::getStormDirection() const
 {
     return mStormDirection;
+}
+
+void WeatherManager::advanceTime(double hours)
+{
+    mTimePassed += hours*3600;
 }

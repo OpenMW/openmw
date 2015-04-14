@@ -131,18 +131,16 @@ namespace MWWorld
 
     void World::adjustSky()
     {
-#if 0
         if (mSky && (isCellExterior() || isCellQuasiExterior()))
         {
-            mRendering->skySetHour (mGlobalVariables["gamehour"].getFloat());
-            mRendering->skySetDate (mGlobalVariables["day"].getInteger(),
-                mGlobalVariables["month"].getInteger());
+            //mRendering->skySetHour (mGlobalVariables["gamehour"].getFloat());
+            //mRendering->skySetDate (mGlobalVariables["day"].getInteger(),
+            //    mGlobalVariables["month"].getInteger());
 
-            mRendering->skyEnable();
+            mRendering->setSkyEnabled(true);
         }
         else
-            mRendering->skyDisable();
-#endif
+            mRendering->setSkyEnabled(false);
     }
 
     World::World (
@@ -171,7 +169,7 @@ namespace MWWorld
 
         //mPhysEngine->setSceneManager(renderer.getScene());
 
-        //mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
+        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
@@ -267,9 +265,9 @@ namespace MWWorld
         //    mPhysics->toggleCollisionMode();
 
         // we don't want old weather to persist on a new game
-        //delete mWeatherManager;
-        //mWeatherManager = 0;
-        //mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
+        delete mWeatherManager;
+        mWeatherManager = 0;
+        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
         if (!mStartupScript.empty())
             MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);
@@ -277,7 +275,7 @@ namespace MWWorld
 
     void World::clear()
     {
-        //mWeatherManager->clear();
+        mWeatherManager->clear();
         //mRendering->clear();
 #if 0
         mProjectileManager->clear();
@@ -348,7 +346,7 @@ namespace MWWorld
         mCells.write (writer, progress);
         mGlobalVariables.write (writer, progress);
         mPlayer->write (writer, progress);
-        //mWeatherManager->write (writer, progress);
+        mWeatherManager->write (writer, progress);
 #if 0
         mProjectileManager->write (writer, progress);
 #endif
@@ -378,7 +376,7 @@ namespace MWWorld
                 if (!mStore.readRecord (reader, type) &&
                     !mGlobalVariables.readRecord (reader, type) &&
                     !mPlayer->readRecord (reader, type) &&
-                    //!mWeatherManager->readRecord (reader, type) &&
+                    !mWeatherManager->readRecord (reader, type) &&
                     !mCells.readRecord (reader, type, contentFileMap)
         #if 0
                      && !mProjectileManager->readRecord (reader, type)
@@ -479,7 +477,7 @@ namespace MWWorld
         // Must be cleared before mRendering is destroyed
         mProjectileManager->clear();
 #endif
-        //delete mWeatherManager;
+        delete mWeatherManager;
         delete mWorldScene;
         delete mRendering;
         //delete mPhysics;
@@ -819,7 +817,7 @@ namespace MWWorld
     {
         MWBase::Environment::get().getMechanicsManager()->advanceTime(static_cast<float>(hours * 3600));
 
-        //mWeatherManager->advanceTime (hours);
+        mWeatherManager->advanceTime (hours);
 
         hours += mGlobalVariables["gamehour"].getFloat();
 
@@ -845,7 +843,7 @@ namespace MWWorld
 
         //mRendering->skySetHour (hour);
 
-        //mWeatherManager->setHour(static_cast<float>(hour));
+        mWeatherManager->setHour(static_cast<float>(hour));
 
         if (days>0)
             setDay (days + mGlobalVariables["day"].getInteger());
@@ -1604,11 +1602,11 @@ namespace MWWorld
 
     void World::update (float duration, bool paused)
     {
-        /*
         if (mGoToJail && !paused)
             goToJail();
 
         updateWeather(duration, paused);
+        /*
 
         if (!paused)
             doPhysics (duration);
@@ -1731,17 +1729,17 @@ namespace MWWorld
 
     int World::getCurrentWeather() const
     {
-        return 0;//mWeatherManager->getWeatherID();
+        return mWeatherManager->getWeatherID();
     }
 
     void World::changeWeather(const std::string& region, const unsigned int id)
     {
-        //mWeatherManager->changeWeather(region, id);
+        mWeatherManager->changeWeather(region, id);
     }
 
     void World::modRegion(const std::string &regionid, const std::vector<char> &chances)
     {
-        //mWeatherManager->modRegion(regionid, chances);
+        mWeatherManager->modRegion(regionid, chances);
     }
 
     Ogre::Vector2 World::getNorthVector (CellStore* cell)
@@ -2975,10 +2973,10 @@ namespace MWWorld
         if (mPlayer->wasTeleported())
         {
             mPlayer->setTeleported(false);
-            //mWeatherManager->switchToNextWeather(true);
+            mWeatherManager->switchToNextWeather(true);
         }
         
-        //mWeatherManager->update(duration, paused);
+        mWeatherManager->update(duration, paused);
     }
 
     struct AddDetectedReference
