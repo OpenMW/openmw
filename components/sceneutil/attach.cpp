@@ -12,6 +12,8 @@
 #include <osgAnimation/BoneMapVisitor>
 #include <osgAnimation/Skeleton>
 
+#include <components/misc/stringops.hpp>
+
 #include "visitor.hpp"
 
 namespace SceneUtil
@@ -110,13 +112,14 @@ namespace SceneUtil
     public:
         FilterVisitor(const std::string& filter)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mFilter(filter)
+            , mFilter(Misc::StringUtils::lowerCase(filter))
         {
         }
 
         virtual void apply(osg::Geode &node)
         {
-            if (node.getName().find(mFilter) == std::string::npos)
+            std::string lowerName = Misc::StringUtils::lowerCase(node.getName());
+            if (lowerName.find(mFilter) == std::string::npos)
             {
                 mToRemove.push_back(&node);
             }
@@ -133,7 +136,7 @@ namespace SceneUtil
 
     private:
         std::vector<osg::Geode*> mToRemove;
-        const std::string& mFilter;
+        std::string mFilter;
     };
 
     osg::ref_ptr<osg::Node> attach(osg::ref_ptr<osg::Node> toAttach, osg::Node *master, const std::string &filter, const std::string &attachNode)
