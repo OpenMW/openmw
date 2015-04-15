@@ -172,7 +172,7 @@ namespace SceneUtil
                 // However MW isn't doing this either, so don't. Assuming all meshes are using backface culling is more efficient.
                 osg::FrontFace* frontFace = new osg::FrontFace;
                 frontFace->setMode(osg::FrontFace::CLOCKWISE);
-                toAttach->getOrCreateStateSet()->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
+                trans->getOrCreateStateSet()->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
 
                 find.mFoundNode->addChild(trans);
                 trans->addChild(toAttach);
