@@ -20,6 +20,9 @@ namespace Resource
 namespace MWRender
 {
     class AtmosphereUpdater;
+    class CloudUpdater;
+    class Sun;
+    class Moon;
 
     class SkyManager
     {
@@ -60,9 +63,9 @@ namespace MWRender
 
         void setSunDirection(const osg::Vec3f& direction);
 
-        void setMasserDirection(const Ogre::Vector3& direction);
+        void setMasserDirection(const osg::Vec3f& direction);
 
-        void setSecundaDirection(const Ogre::Vector3& direction);
+        void setSecundaDirection(const osg::Vec3f& direction);
 
         void setMasserFade(const float fade);
 
@@ -94,13 +97,17 @@ namespace MWRender
 
         osg::ref_ptr<osg::Node> mCloudNode;
 
+        osg::ref_ptr<CloudUpdater> mCloudUpdater;
+
         osg::ref_ptr<osg::Node> mAtmosphereDay;
 
         osg::ref_ptr<osg::Node> mAtmosphereNight;
 
         osg::ref_ptr<AtmosphereUpdater> mAtmosphereUpdater;
 
-        osg::ref_ptr<osg::PositionAttitudeTransform> mSunTransform;
+        std::auto_ptr<Sun> mSun;
+        std::auto_ptr<Moon> mMasser;
+        std::auto_ptr<Moon> mSecunda;
 
         bool mCreated;
 

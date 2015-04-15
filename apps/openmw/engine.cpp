@@ -6,8 +6,6 @@
 #include <osgGA/TrackballManipulator>
 #include <osgViewer/ViewerEventHandlers>
 
-#include <osgUtil/IncrementalCompileOperation>
-
 #include <MyGUI_WidgetManager.h>
 
 #include <SDL.h>
@@ -494,11 +492,7 @@ void OMW::Engine::go()
     mViewer.addEventHandler(new osgViewer::StatsHandler);
 
     osg::Timer timer;
-    //osgUtil::IncrementalCompileOperation* ico = new osgUtil::IncrementalCompileOperation;
-    //ico->compileAllForNextFrame(1);
-    //mViewer.setRealizeOperation(ico);
     mViewer.realize();
-    std::cout << "realize took " << timer.time_m() << std::endl;
     osg::Timer frameTimer;
     while (!mViewer.done())
     {

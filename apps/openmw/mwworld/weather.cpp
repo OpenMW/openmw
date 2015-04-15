@@ -426,10 +426,10 @@ void WeatherManager::update(float duration, bool paused)
     mRendering->configureFog(mResult.mFogDepth, mResult.mFogColor);
 
     // disable sun during night
-    //if (mHour >= mNightStart || mHour <= mSunriseTime)
-        //mRendering->getSkyManager()->sunDisable();
-    //else
-        //mRendering->getSkyManager()->sunEnable();
+    if (mHour >= mNightStart || mHour <= mSunriseTime)
+        mRendering->getSkyManager()->sunDisable();
+    else
+        mRendering->getSkyManager()->sunEnable();
 
     // Update the sun direction.  Run it east to west at a fixed angle from overhead.
     // The sun's speed at day and night may differ, since mSunriseTime and mNightStart
@@ -493,10 +493,10 @@ void WeatherManager::update(float duration, bool paused)
                 (1 - moonHeight) * facing * 0.8f,
                 moonHeight);
 
-        //mRendering->getSkyManager()->setMasserDirection(masser);
-        //mRendering->getSkyManager()->setSecundaDirection(secunda);
-        //mRendering->getSkyManager()->masserEnable();
-        //mRendering->getSkyManager()->secundaEnable();
+        mRendering->getSkyManager()->setMasserDirection(masser);
+        mRendering->getSkyManager()->setSecundaDirection(secunda);
+        mRendering->getSkyManager()->masserEnable();
+        mRendering->getSkyManager()->secundaEnable();
 
         float angle = (1-moonHeight) * 90.f * facing;
         float masserHourFade = calculateHourFade("Masser");
@@ -507,13 +507,13 @@ void WeatherManager::update(float duration, bool paused)
         masserAngleFade *= masserHourFade;
         secundaAngleFade *= secundaHourFade;
 
-        //mRendering->getSkyManager()->setMasserFade(masserAngleFade);
-        //mRendering->getSkyManager()->setSecundaFade(secundaAngleFade);
+        mRendering->getSkyManager()->setMasserFade(masserAngleFade);
+        mRendering->getSkyManager()->setSecundaFade(secundaAngleFade);
     }
     else
     {
-        //mRendering->getSkyManager()->masserDisable();
-        //mRendering->getSkyManager()->secundaDisable();
+        mRendering->getSkyManager()->masserDisable();
+        mRendering->getSkyManager()->secundaDisable();
     }
 
     if (!paused)
@@ -568,7 +568,6 @@ void WeatherManager::update(float duration, bool paused)
     
 
     mRendering->setAmbientColour(mResult.mAmbientColor);
-    //mRendering->sunEnable(false);
     mRendering->setSunColour(mResult.mSunColor);
 
     mRendering->getSkyManager()->setWeather(mResult);
