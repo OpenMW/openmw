@@ -25,6 +25,7 @@
 
 #include "renderconst.hpp"
 #include "animation.hpp"
+#include "npcanimation.hpp"
 
 namespace
 {
@@ -199,7 +200,10 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
 
 void Objects::insertNPC(const MWWorld::Ptr &ptr)
 {
+    insertBegin(ptr);
 
+    std::auto_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem, 0));
+    mObjects.insert(std::make_pair(ptr, anim.release()));
 }
 
 bool Objects::deleteObject (const MWWorld::Ptr& ptr)

@@ -174,7 +174,7 @@ protected:
 
 public:
 
-    Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> node, Resource::ResourceSystem* resourceSystem);
+    Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem);
     virtual ~Animation();
 
     osg::Group* getOrCreateObjectRoot();

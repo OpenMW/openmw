@@ -15,6 +15,7 @@ namespace ESM
 namespace MWRender
 {
 
+/*
 class HeadAnimationTime : public Ogre::ControllerValue<Ogre::Real>
 {
 private:
@@ -47,6 +48,27 @@ public:
     virtual void setValue(Ogre::Real value)
     { }
 };
+*/
+
+/// @brief Detaches the node from its parent when the object goes out of scope.
+class PartHolder
+{
+public:
+    PartHolder(osg::ref_ptr<osg::Node> node)
+        : mNode(node)
+    {
+    }
+
+    ~PartHolder()
+    {
+        if (mNode->getNumParents())
+            mNode->getParent(0)->removeChild(mNode);
+    }
+
+private:
+    osg::ref_ptr<osg::Node> mNode;
+};
+typedef boost::shared_ptr<PartHolder> PartHolderPtr;
 
 class NpcAnimation : public Animation, public WeaponAnimation, public MWWorld::InventoryStoreListener
 {
@@ -69,7 +91,7 @@ private:
     bool mListenerDisabled;
 
     // Bounded Parts
-    NifOgre::ObjectScenePtr mObjectParts[ESM::PRT_Count];
+    PartHolderPtr mObjectParts[ESM::PRT_Count];
     std::string mSoundIds[ESM::PRT_Count];
 
     const ESM::NPC *mNpc;
@@ -94,8 +116,8 @@ private:
 
     Ogre::Vector3 mFirstPersonOffset;
 
-    Ogre::SharedPtr<HeadAnimationTime> mHeadAnimationTime;
-    Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
+    //Ogre::SharedPtr<HeadAnimationTime> mHeadAnimationTime;
+    //Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
     bool mSoundsDisabled;
@@ -105,9 +127,8 @@ private:
 
     void updateNpcBase();
 
-    NifOgre::ObjectScenePtr insertBoundedPart(const std::string &model, int group, const std::string &bonename,
-                                              const std::string &bonefilter,
-                                          bool enchantedGlow, Ogre::Vector3* glowColor=NULL);
+    PartHolderPtr insertBoundedPart(const std::string &model, int group, const std::string &bonename,
+                                        const std::string &bonefilter, bool enchantedGlow, Ogre::Vector3* glowColor=NULL);
 
     void removeIndividualPart(ESM::PartReferenceType type);
     void reserveIndividualPart(ESM::PartReferenceType type, int group, int priority);
@@ -118,7 +139,7 @@ private:
     void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts,
                                     bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
 
-    void applyAlpha(float alpha, Ogre::Entity* ent, NifOgre::ObjectScenePtr scene);
+    //void applyAlpha(float alpha, Ogre::Entity* ent, NifOgre::ObjectScenePtr scene);
 
 public:
     /**
@@ -132,15 +153,16 @@ public:
      * @param disableSounds    Same as \a disableListener but for playing items sounds
      * @param viewMode
      */
-    NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, bool disableListener = false,
+    NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem,
+                 int visibilityFlags, bool disableListener = false,
                  bool disableSounds = false, ViewMode viewMode=VM_Normal);
     virtual ~NpcAnimation();
 
     virtual void enableHeadAnimation(bool enable);
 
-    virtual void setWeaponGroup(const std::string& group) { mWeaponAnimationTime->setGroup(group); }
+    virtual void setWeaponGroup(const std::string& group);
 
-    virtual Ogre::Vector3 runAnimation(float timepassed);
+    //virtual Ogre::Vector3 runAnimation(float timepassed);
 
     /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
     /// to indicate the facing orientation of the character.
@@ -158,9 +180,9 @@ public:
     virtual void releaseArrow();
 
     // WeaponAnimation
-    virtual NifOgre::ObjectScenePtr getWeapon() { return mObjectParts[ESM::PRT_Weapon]; }
+    //virtual NifOgre::ObjectScenePtr getWeapon() { return mObjectParts[ESM::PRT_Weapon]; }
     virtual void showWeapon(bool show) { showWeapons(show); }
-    virtual void configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot);
+    //virtual void configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot);
 
     void setViewMode(ViewMode viewMode);
 
@@ -178,9 +200,6 @@ public:
     virtual void setAlpha(float alpha);
 
     virtual void setVampire(bool vampire);
-
-    /// Prepare this animation for being rendered with \a camera (rotates billboard nodes)
-    virtual void preRender (Ogre::Camera* camera);
 };
 
 }

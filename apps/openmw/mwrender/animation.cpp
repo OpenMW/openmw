@@ -10,9 +10,9 @@
 namespace MWRender
 {
 
-    Animation::Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> node, Resource::ResourceSystem* resourceSystem)
+    Animation::Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
         : mPtr(ptr)
-        , mInsert(node)
+        , mInsert(parentNode)
         , mResourceSystem(resourceSystem)
     {
 
