@@ -222,21 +222,12 @@ namespace
         // Callback method called by the NodeVisitor when visiting a node.
         void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
-            if (nv && nv->getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR)
-            {
-                osgAnimation::Bone* b = dynamic_cast<osgAnimation::Bone*>(node);
-                if (!b)
-                {
-                    OSG_WARN << "Warning: UpdateBone set on non-Bone object." << std::endl;
-                    return;
-                }
-
-                osgAnimation::Bone* parent = b->getBoneParent();
-                if (parent)
-                    b->setMatrixInSkeletonSpace(b->getMatrixInBoneSpace() * parent->getMatrixInSkeletonSpace());
-                else
-                    b->setMatrixInSkeletonSpace(b->getMatrixInBoneSpace());
-            }
+            osgAnimation::Bone* b = static_cast<osgAnimation::Bone*>(node);
+            osgAnimation::Bone* parent = b->getBoneParent();
+            if (parent)
+                b->setMatrixInSkeletonSpace(b->getMatrixInBoneSpace() * parent->getMatrixInSkeletonSpace());
+            else
+                b->setMatrixInSkeletonSpace(b->getMatrixInBoneSpace());
             traverse(node,nv);
         }
     };

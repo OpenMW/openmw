@@ -96,6 +96,7 @@ namespace SceneUtil
                     bone->addUpdateCallback(old);
                 }
             }
+            traverse(node);
         }
 
     private:

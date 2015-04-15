@@ -546,11 +546,9 @@ void SkyManager::create()
     mCloudNode->accept(modClouds);
 
     mCloudUpdater = new CloudUpdater;
-    //mCloudNode->addUpdateCallback(mCloudUpdater);
+    mCloudNode->addUpdateCallback(mCloudUpdater);
 
     mCloudNode->getOrCreateStateSet()->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-
-    mCloudNode->setNodeMask(0);
 
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
     depth->setWriteMask(false);
@@ -568,8 +566,7 @@ SkyManager::~SkyManager()
 int SkyManager::getMasserPhase() const
 {
     if (!mCreated) return 0;
-    return 0;
-    //return mMasser->getPhaseInt();
+    return mMasser->getPhaseInt();
 }
 
 int SkyManager::getSecundaPhase() const
