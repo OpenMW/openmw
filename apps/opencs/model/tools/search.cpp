@@ -4,14 +4,16 @@
 #include <stdexcept>
 #include <sstream>
 
-#include "../../model/doc/messages.hpp"
+#include "../doc/messages.hpp"
+#include "../doc/document.hpp"
 
-#include "../../model/world/idtablebase.hpp"
-#include "../../model/world/columnbase.hpp"
-#include "../../model/world/universalid.hpp"
+#include "../world/idtablebase.hpp"
+#include "../world/columnbase.hpp"
+#include "../world/universalid.hpp"
+#include "../world/commands.hpp"
 
 void CSMTools::Search::searchTextCell (const CSMWorld::IdTableBase *model,
-    const QModelIndex& index, const CSMWorld::UniversalId& id,
+    const QModelIndex& index, const CSMWorld::UniversalId& id, bool writable,
     CSMDoc::Messages& messages) const
 {
     // using QString here for easier handling of case folding.
@@ -25,7 +27,8 @@ void CSMTools::Search::searchTextCell (const CSMWorld::IdTableBase *model,
     {
         std::ostringstream hint;
         hint
-            << "r: "
+            << (writable ? 'R' : 'r')
+            <<": "
             << model->getColumnId (index.column())
             << " " << pos
             << " " << search.length();
@@ -37,7 +40,7 @@ void CSMTools::Search::searchTextCell (const CSMWorld::IdTableBase *model,
 }
 
 void CSMTools::Search::searchRegExCell (const CSMWorld::IdTableBase *model,
-    const QModelIndex& index, const CSMWorld::UniversalId& id,
+    const QModelIndex& index, const CSMWorld::UniversalId& id, bool writable,
     CSMDoc::Messages& messages) const
 {
     QString text = model->data (index).toString();
@@ -49,7 +52,12 @@ void CSMTools::Search::searchRegExCell (const CSMWorld::IdTableBase *model,
         int length = mRegExp.matchedLength();
         
         std::ostringstream hint;
-        hint << "r: " << model->getColumnId (index.column()) << " " << pos << " " << length;
+        hint
+            << (writable ? 'R' : 'r')
+            <<": "
+            << model->getColumnId (index.column())
+            << " " << pos
+            << " " << length;
         
         messages.add (id, formatDescription (text, pos, length).toUtf8().data(), hint.str());
 
@@ -58,8 +66,11 @@ void CSMTools::Search::searchRegExCell (const CSMWorld::IdTableBase *model,
 }
 
 void CSMTools::Search::searchRecordStateCell (const CSMWorld::IdTableBase *model,
-    const QModelIndex& index, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages) const
+    const QModelIndex& index, const CSMWorld::UniversalId& id, bool writable, CSMDoc::Messages& messages) const
 {
+    if (writable)
+        throw std::logic_error ("Record state can not be modified by search and replace");
+        
     int data = model->data (index).toInt();
 
     if (data==mValue)
@@ -203,24 +214,26 @@ void CSMTools::Search::searchRow (const CSMWorld::IdTableBase *model, int row,
         
         CSMWorld::UniversalId id (
             type, model->data (model->index (row, mIdColumn)).toString().toUtf8().data());
-        
+
+        bool writable = model->flags (index) & Qt::ItemIsEditable;
+            
         switch (mType)
         {
             case Type_Text:
             case Type_Id:
 
-                searchTextCell (model, index, id, messages);
+                searchTextCell (model, index, id, writable, messages);
                 break;
             
             case Type_TextRegEx:
             case Type_IdRegEx:
 
-                searchRegExCell (model, index, id, messages);
+                searchRegExCell (model, index, id, writable, messages);
                 break;
             
             case Type_RecordState:
 
-                searchRecordStateCell (model, index, id, messages);
+                searchRecordStateCell (model, index, id, writable, messages);
                 break;
 
             case Type_None:
@@ -235,3 +248,32 @@ void CSMTools::Search::setPadding (int before, int after)
     mPaddingBefore = before;
     mPaddingAfter = after;
 }
+
+void CSMTools::Search::replace (CSMDoc::Document& document, CSMWorld::IdTableBase *model,
+    const CSMWorld::UniversalId& id, const std::string& messageHint,
+    const std::string& replaceText) const
+{
+    std::istringstream stream (messageHint.c_str());
+
+    char hint, ignore;
+    int columnId, pos, length;
+
+    if (stream >> hint >> ignore >> columnId >> pos >> length)
+    {
+        int column =
+            model->findColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (columnId));
+            
+        QModelIndex index = model->getModelIndex (id.getId(), column);
+
+        std::string text = model->data (index).toString().toUtf8().constData();
+
+        std::string before = text.substr (0, pos);
+        std::string after = text.substr (pos+length);
+
+        std::string newText = before + replaceText + after;
+        
+        document.getUndoStack().push (
+            new CSMWorld::ModifyCommand (*model, index, QString::fromUtf8 (newText.c_str())));
+    }
+}
+                

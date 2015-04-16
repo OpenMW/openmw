@@ -80,7 +80,7 @@ QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
         char type, ignore;
         int fieldIndex;
 
-        if ((stream >> type >> ignore >> fieldIndex) && type=='r')
+        if ((stream >> type >> ignore >> fieldIndex) && (type=='r' || type=='R'))
         {
             field = CSMWorld::Columns::getName (
                 static_cast<CSMWorld::Columns::ColumnId> (fieldIndex));
@@ -133,6 +133,21 @@ void CSMTools::ReportModel::add (const CSMWorld::UniversalId& id, const std::str
     mRows.push_back (Line (id, message, hint));
 
     endInsertRows();
+}
+
+void CSMTools::ReportModel::flagAsReplaced (int index)
+{
+    Line& line = mRows.at (index);
+    std::string hint = line.mHint;
+
+    if (hint.empty() || hint[0]!='R')
+        throw std::logic_error ("trying to flag message as replaced that is not replaceable");
+
+    hint[0] = 'r';
+
+    line.mHint = hint;
+
+    emit dataChanged (this->index (index, 0), this->index (index, columnCount()));
 }
 
 const CSMWorld::UniversalId& CSMTools::ReportModel::getUniversalId (int row) const

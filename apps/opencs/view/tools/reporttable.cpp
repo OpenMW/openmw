@@ -56,8 +56,25 @@ void CSVTools::ReportTable::contextMenuEvent (QContextMenuEvent *event)
     {
         menu.addAction (mShowAction);
         menu.addAction (mRemoveAction);
-    }
 
+        bool found = false;
+        for (QModelIndexList::const_iterator iter (selectedRows.begin());
+            iter!=selectedRows.end(); ++iter)
+        {
+            QString hint = mModel->data (mModel->index (iter->row(), 2)).toString();
+
+            if (!hint.isEmpty() && hint[0]=='R')
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if (found)
+            menu.addAction (mReplaceAction);
+
+    }
+    
     menu.exec (event->globalPos());
 }
 
@@ -129,6 +146,10 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     mRemoveAction = new QAction (tr ("Remove from list"), this);
     connect (mRemoveAction, SIGNAL (triggered()), this, SLOT (removeSelection()));
     addAction (mRemoveAction);
+
+    mReplaceAction = new QAction (tr ("Replace"), this);
+    connect (mReplaceAction, SIGNAL (triggered()), this, SIGNAL (replaceRequest()));
+    addAction (mReplaceAction);    
 }
 
 std::vector<CSMWorld::UniversalId> CSVTools::ReportTable::getDraggedRecords() const
@@ -151,6 +172,42 @@ void CSVTools::ReportTable::updateUserSetting (const QString& name, const QStrin
     mIdTypeDelegate->updateUserSetting (name, list);
 }
 
+std::vector<int> CSVTools::ReportTable::getReplaceIndices (bool selection) const
+{
+    std::vector<int> indices;
+
+    if (selection)
+    {
+        QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+        for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
+            ++iter)
+        {
+            QString hint = mModel->data (mModel->index (iter->row(), 2)).toString();
+
+            if (!hint.isEmpty() && hint[0]=='R')
+                indices.push_back (iter->row());
+        }
+    }
+    else
+    {
+        for (int i=0; i<mModel->rowCount(); ++i)
+        {
+            QString hint = mModel->data (mModel->index (i, 2)).toString();
+
+            if (!hint.isEmpty() && hint[0]=='R')
+                indices.push_back (i);
+        }
+    }
+
+    return indices;
+}
+
+void CSVTools::ReportTable::flagAsReplaced (int index)
+{
+    mModel->flagAsReplaced (index);
+}
+            
 void CSVTools::ReportTable::showSelection()
 {
     QModelIndexList selectedRows = selectionModel()->selectedRows();

@@ -12,6 +12,7 @@ class QModelIndex;
 namespace CSMDoc
 {
     class Messages;
+    class Document;
 }
 
 namespace CSMWorld
@@ -49,13 +50,13 @@ namespace CSMTools
             int mPaddingAfter;
 
             void searchTextCell (const CSMWorld::IdTableBase *model, const QModelIndex& index,
-                const CSMWorld::UniversalId& id, CSMDoc::Messages& messages) const;
+                const CSMWorld::UniversalId& id, bool writable, CSMDoc::Messages& messages) const;
 
             void searchRegExCell (const CSMWorld::IdTableBase *model, const QModelIndex& index,
-                const CSMWorld::UniversalId& id, CSMDoc::Messages& messages) const;
+                const CSMWorld::UniversalId& id, bool writable, CSMDoc::Messages& messages) const;
 
             void searchRecordStateCell (const CSMWorld::IdTableBase *model,
-                const QModelIndex& index, const CSMWorld::UniversalId& id,
+                const QModelIndex& index, const CSMWorld::UniversalId& id, bool writable,
                 CSMDoc::Messages& messages) const;
 
             QString formatDescription (const QString& description, int pos, int length) const;
@@ -82,6 +83,11 @@ namespace CSMTools
                 CSMDoc::Messages& messages) const;
 
             void setPadding (int before, int after);
+
+            // Configuring *this for the model is not necessary when calling this function.
+            void replace (CSMDoc::Document& document, CSMWorld::IdTableBase *model,
+                const CSMWorld::UniversalId& id, const std::string& messageHint,
+                const std::string& replaceText) const;
     };
 }
 

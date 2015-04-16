@@ -49,10 +49,12 @@ namespace CSMTools
             virtual QVariant headerData (int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
             virtual bool removeRows (int row, int count, const QModelIndex& parent = QModelIndex());
-
+            
             void add (const CSMWorld::UniversalId& id, const std::string& message,
                 const std::string& hint = "");
 
+            void flagAsReplaced (int index);
+                
             const CSMWorld::UniversalId& getUniversalId (int row) const;
 
             std::string getHint (int row) const;

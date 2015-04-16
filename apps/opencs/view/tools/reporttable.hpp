@@ -25,6 +25,7 @@ namespace CSVTools
             CSVWorld::CommandDelegate *mIdTypeDelegate;
             QAction *mShowAction;
             QAction *mRemoveAction;
+            QAction *mReplaceAction;
 
         private:
 
@@ -46,6 +47,13 @@ namespace CSVTools
 
             void clear();
 
+            // Return indices of rows that are suitable for replacement.
+            //
+            // \param selection Only list selected rows.
+            std::vector<int> getReplaceIndices (bool selection) const;
+
+            void flagAsReplaced (int index);
+
         private slots:
 
             void showSelection();
@@ -55,6 +63,8 @@ namespace CSVTools
         signals:
 
             void editRequest (const CSMWorld::UniversalId& id, const std::string& hint);
+
+            void replaceRequest();
     };
 }
 

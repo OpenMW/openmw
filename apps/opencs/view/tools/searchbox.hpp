@@ -6,6 +6,7 @@
 #include <QComboBox>
 #include <QStackedWidget>
 #include <QPushButton>
+#include <QLabel>
 
 class QGridLayout;
 
@@ -27,6 +28,9 @@ namespace CSVTools
             QGridLayout *mLayout;
             QComboBox mMode;
             bool mSearchEnabled;
+            QStackedWidget mReplaceInput;
+            QLineEdit mReplaceText;
+            QLabel mReplacePlaceholder;
 
         private:
 
@@ -39,6 +43,8 @@ namespace CSVTools
             void setSearchMode (bool enabled);
 
             CSMTools::Search getSearch() const;
+
+            std::string getReplaceText() const;
 
         private slots:
 

@@ -1,6 +1,8 @@
 #ifndef CSV_TOOLS_SEARCHSUBVIEW_H
 #define CSV_TOOLS_SEARCHSUBVIEW_H
 
+#include "../../model/tools/search.hpp"
+
 #include "../doc/subview.hpp"
 
 #include "searchbox.hpp"
@@ -26,6 +28,7 @@ namespace CSVTools
             CSMDoc::Document& mDocument;
             int mPaddingBefore;
             int mPaddingAfter;
+            CSMTools::Search mSearch;
 
         public:
 
@@ -40,6 +43,8 @@ namespace CSVTools
             void stateChanged (int state, CSMDoc::Document *document);
 
             void startSearch (const CSMTools::Search& search);
+
+            void replaceRequest();
     };
 }
 
