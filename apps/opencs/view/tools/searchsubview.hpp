@@ -29,6 +29,7 @@ namespace CSVTools
             int mPaddingBefore;
             int mPaddingAfter;
             CSMTools::Search mSearch;
+            bool mLocked;
 
         public:
 

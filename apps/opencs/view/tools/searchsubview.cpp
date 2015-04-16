@@ -12,7 +12,8 @@
 #include "searchbox.hpp"
 
 CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: CSVDoc::SubView (id), mDocument (document), mPaddingBefore (10), mPaddingAfter (10)
+: CSVDoc::SubView (id), mDocument (document), mPaddingBefore (10), mPaddingAfter (10),
+  mLocked (false)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
@@ -44,7 +45,7 @@ CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
 void CSVTools::SearchSubView::setEditLock (bool locked)
 {
-    // ignored. We don't change document state anyway.
+    mLocked = false;
 }
 
 void CSVTools::SearchSubView::updateUserSetting (const QString &name, const QStringList &list)
@@ -76,6 +77,9 @@ void CSVTools::SearchSubView::startSearch (const CSMTools::Search& search)
 
 void CSVTools::SearchSubView::replaceRequest()
 {
+    if (mLocked)
+        return;
+        
     std::vector<int> indices = mTable->getReplaceIndices (true);
 
     std::string replace = mSearchBox.getReplaceText();
