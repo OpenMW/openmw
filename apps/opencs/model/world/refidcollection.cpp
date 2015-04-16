@@ -40,7 +40,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 {
     BaseColumns baseColumns;
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Id, ColumnBase::Display_String,
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Id, ColumnBase::Display_Id,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
     baseColumns.mId = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Modification, ColumnBase::Display_RecordState,

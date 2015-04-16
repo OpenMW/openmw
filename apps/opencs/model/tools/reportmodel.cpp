@@ -2,6 +2,29 @@
 #include "reportmodel.hpp"
 
 #include <stdexcept>
+#include <sstream>
+
+#include "../world/columns.hpp"
+
+CSMTools::ReportModel::Line::Line (const CSMWorld::UniversalId& id, const std::string& message,
+    const std::string& hint)
+: mId (id), mMessage (message), mHint (hint)
+{}
+
+CSMTools::ReportModel::ReportModel (bool fieldColumn)
+{
+    if (fieldColumn)
+    {
+        mColumnField = 3;
+        mColumnDescription = 4;
+    }
+    else
+    {
+        mColumnDescription = 3;
+
+        mColumnField = -1;
+    }
+}
 
 int CSMTools::ReportModel::rowCount (const QModelIndex & parent) const
 {
@@ -16,7 +39,7 @@ int CSMTools::ReportModel::columnCount (const QModelIndex & parent) const
     if (parent.isValid())
         return 0;
 
-    return 3;
+    return mColumnDescription+1;
 }
 
 QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
@@ -24,13 +47,49 @@ QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
     if (role!=Qt::DisplayRole)
         return QVariant();
 
-    if (index.column()==0)
-        return static_cast<int> (mRows.at (index.row()).first.getType());
+    switch (index.column())
+    {
+        case Column_Type:
 
-    if (index.column()==1)
-        return QString::fromUtf8 (mRows.at (index.row()).second.first.c_str());
+            return static_cast<int> (mRows.at (index.row()).mId.getType());
+        
+        case Column_Id:
+        {
+            CSMWorld::UniversalId id = mRows.at (index.row()).mId;
 
-    return QString::fromUtf8 (mRows.at (index.row()).second.second.c_str());
+            if (id.getArgumentType()==CSMWorld::UniversalId::ArgumentType_Id)
+                return QString::fromUtf8 (id.getId().c_str());
+
+            return QString ("-");
+        }
+        
+        case Column_Hint:
+
+            return QString::fromUtf8 (mRows.at (index.row()).mHint.c_str());
+    }
+
+    if (index.column()==mColumnDescription)
+        return QString::fromUtf8 (mRows.at (index.row()).mMessage.c_str());
+
+    if (index.column()==mColumnField)
+    {
+        std::string field;
+
+        std::istringstream stream (mRows.at (index.row()).mHint);
+
+        char type, ignore;
+        int fieldIndex;
+
+        if ((stream >> type >> ignore >> fieldIndex) && (type=='r' || type=='R'))
+        {
+            field = CSMWorld::Columns::getName (
+                static_cast<CSMWorld::Columns::ColumnId> (fieldIndex));
+        }
+
+        return QString::fromUtf8 (field.c_str());
+    }
+    
+    return QVariant();
 }
 
 QVariant CSMTools::ReportModel::headerData (int section, Qt::Orientation orientation, int role) const
@@ -41,13 +100,19 @@ QVariant CSMTools::ReportModel::headerData (int section, Qt::Orientation orienta
     if (orientation==Qt::Vertical)
         return QVariant();
 
-    if (section==0)
-        return "Type";
+    switch (section)
+    {
+        case Column_Type: return "Type";
+        case Column_Id: return "ID";
+    }
 
-    if (section==1)
+    if (section==mColumnDescription)
         return "Description";
 
-    return "Hint";
+    if (section==mColumnField)
+        return "Field";
+
+    return "-";
 }
 
 bool CSMTools::ReportModel::removeRows (int row, int count, const QModelIndex& parent)
@@ -64,18 +129,43 @@ void CSMTools::ReportModel::add (const CSMWorld::UniversalId& id, const std::str
     const std::string& hint)
 {
     beginInsertRows (QModelIndex(), mRows.size(), mRows.size());
-
-    mRows.push_back (std::make_pair (id, std::make_pair (message, hint)));
+    
+    mRows.push_back (Line (id, message, hint));
 
     endInsertRows();
 }
 
+void CSMTools::ReportModel::flagAsReplaced (int index)
+{
+    Line& line = mRows.at (index);
+    std::string hint = line.mHint;
+
+    if (hint.empty() || hint[0]!='R')
+        throw std::logic_error ("trying to flag message as replaced that is not replaceable");
+
+    hint[0] = 'r';
+
+    line.mHint = hint;
+
+    emit dataChanged (this->index (index, 0), this->index (index, columnCount()));
+}
+
 const CSMWorld::UniversalId& CSMTools::ReportModel::getUniversalId (int row) const
 {
-    return mRows.at (row).first;
+    return mRows.at (row).mId;
 }
 
 std::string CSMTools::ReportModel::getHint (int row) const
 {
-    return mRows.at (row).second.second;
+    return mRows.at (row).mHint;
+}
+
+void CSMTools::ReportModel::clear()
+{
+    if (!mRows.empty())
+    {
+        beginRemoveRows (QModelIndex(), 0, mRows.size()-1);
+        mRows.clear();
+        endRemoveRows();
+    }
 }

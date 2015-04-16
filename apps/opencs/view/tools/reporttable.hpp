@@ -25,6 +25,7 @@ namespace CSVTools
             CSVWorld::CommandDelegate *mIdTypeDelegate;
             QAction *mShowAction;
             QAction *mRemoveAction;
+            QAction *mReplaceAction;
 
         private:
 
@@ -36,12 +37,22 @@ namespace CSVTools
 
         public:
 
+            /// \param richTextDescription Use rich text in the description column.
             ReportTable (CSMDoc::Document& document, const CSMWorld::UniversalId& id,
-                QWidget *parent = 0);
+                bool richTextDescription, QWidget *parent = 0);
 
             virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
 
             void updateUserSetting (const QString& name, const QStringList& list);
+
+            void clear();
+
+            // Return indices of rows that are suitable for replacement.
+            //
+            // \param selection Only list selected rows.
+            std::vector<int> getReplaceIndices (bool selection) const;
+
+            void flagAsReplaced (int index);
 
         private slots:
 
@@ -52,6 +63,8 @@ namespace CSVTools
         signals:
 
             void editRequest (const CSMWorld::UniversalId& id, const std::string& hint);
+
+            void replaceRequest();
     };
 }
 

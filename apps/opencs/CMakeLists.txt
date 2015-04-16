@@ -40,7 +40,7 @@ opencs_units (model/tools
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
-    startscriptcheck
+    startscriptcheck search searchoperation searchstage
     )
 
 
@@ -91,7 +91,7 @@ opencs_hdrs_noqt (view/render
 
 
 opencs_units (view/tools
-    reportsubview reporttable
+    reportsubview reporttable searchsubview searchbox
     )
 
 opencs_units_noqt (view/tools
