@@ -23,7 +23,8 @@ namespace CSMWorld
         enum Flags
         {
             Flag_Table = 1, // column should be displayed in table view
-            Flag_Dialogue = 2 // column should be displayed in dialogue view
+            Flag_Dialogue = 2, // column should be displayed in dialogue view
+            Flag_Dialogue_List = 4 // column should be diaplyed in dialogue view
         };
 
         enum Display
@@ -94,11 +95,11 @@ namespace CSMWorld
             Display_QuestStatusType,
 
             //Those are top level columns that nest other columns
-            Display_NestedItemList,
-            Display_NestedSpellList,
-            Display_NestedDestinationsList,
-            Display_PathgridPointList,
-            Display_PathgridEdgeList,
+            Display_NestedItemList, // delete?
+            Display_NestedSpellList, // delete?
+            Display_NestedDestinationsList, // delete?
+            Display_PathgridPointList, // delete?
+            Display_PathgridEdgeList, // delete?
             Display_NestedHeader,
 
             Display_EnchantmentType,

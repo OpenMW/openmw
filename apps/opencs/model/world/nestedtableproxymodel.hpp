@@ -47,7 +47,7 @@ namespace CSMWorld
 
         virtual int columnCount(const QModelIndex& parent) const;
 
-        virtual QModelIndex index(int row, int column, const QModelIndex& parent) const;
+        virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
 
         virtual QModelIndex parent(const QModelIndex& index) const;
 
@@ -76,6 +76,8 @@ namespace CSMWorld
         void forwardResetStart(const QString& id);
 
         void forwardResetEnd(const QString& id);
+
+        void forwardDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
     };
 }
 

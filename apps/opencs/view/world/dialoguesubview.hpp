@@ -107,9 +107,9 @@ namespace CSVWorld
 
         QObject* mParent;
 
-        CSMWorld::IdTable* mTable;
+        QAbstractItemModel* mTable;
 
-            CSMDoc::Document& mDocument;
+        CSMDoc::Document& mDocument;
 
         NotEditableSubDelegate mNotEditableDelegate;
 
@@ -119,22 +119,25 @@ namespace CSVWorld
     public:
         DialogueDelegateDispatcher(QObject* parent,
                                    CSMWorld::IdTable* table,
-                                   CSMDoc::Document& document);
+                                   CSMDoc::Document& document,
+                                   QAbstractItemModel* model = 0);
 
         ~DialogueDelegateDispatcher();
 
         CSVWorld::CommandDelegate* makeDelegate(CSMWorld::ColumnBase::Display display);
 
-        QWidget* makeEditor(CSMWorld::ColumnBase::Display display,
-                            const QModelIndex& index);
-        ///< will return null if delegate is not present, parent of the widget is same as for dispatcher itself
+        QWidget* makeEditor(CSMWorld::ColumnBase::Display display, const QModelIndex& index);
+        ///< will return null if delegate is not present, parent of the widget is
+        //same as for dispatcher itself
 
-        virtual void setEditorData (QWidget* editor,
-                                    const QModelIndex& index) const;
+        virtual void setEditorData (QWidget* editor, const QModelIndex& index) const;
 
-        virtual void setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
+        virtual void setModelData (QWidget* editor, QAbstractItemModel* model,
+                                   const QModelIndex& index) const;
 
-        virtual void setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index, CSMWorld::ColumnBase::Display display) const;
+        virtual void setModelData (QWidget* editor,
+                                   QAbstractItemModel* model, const QModelIndex& index,
+                                   CSMWorld::ColumnBase::Display display) const;
 
         virtual void paint (QPainter* painter,
                             const QStyleOptionViewItem& option,
@@ -153,15 +156,15 @@ namespace CSVWorld
         void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
                                   const CSMWorld::UniversalId& id,
                                   const CSMDoc::Document* document);
-
-
     };
 
     class EditWidget : public QScrollArea
     {
         Q_OBJECT
             QDataWidgetMapper *mWidgetMapper;
+            QDataWidgetMapper *mNestedTableMapper;
             DialogueDelegateDispatcher mDispatcher;
+            DialogueDelegateDispatcher *mNestedTableDispatcher;
             QWidget* mMainWidget;
             CSMWorld::IdTable* mTable;
             CSMDoc::Document& mDocument;

@@ -32,12 +32,15 @@ CSMWorld::NestedTableProxyModel::NestedTableProxyModel(const QModelIndex& parent
 
     connect(mMainModel, SIGNAL(resetEnd(const QString&)),
             this, SLOT(forwardResetEnd(const QString&)));
+
+    connect(mMainModel, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
+            this, SLOT(forwardDataChanged(const QModelIndex &, const QModelIndex &)));
 }
 
 QModelIndex CSMWorld::NestedTableProxyModel::mapFromSource(const QModelIndex& sourceIndex) const
 {
     const QModelIndex& testedParent = mMainModel->parent(sourceIndex);
-    const QModelIndex& parent = mMainModel->getModelIndex (mId, mParentColumn);
+    const QModelIndex& parent = mMainModel->getNestedModelIndex (mId, mParentColumn);
     if (testedParent == parent)
     {
         return createIndex(sourceIndex.row(), sourceIndex.column());
@@ -75,13 +78,8 @@ QModelIndex CSMWorld::NestedTableProxyModel::index(int row, int column, const QM
     int rows = mMainModel->rowCount(parent);
     int columns = mMainModel->columnCount(parent);
 
-    if (row < 0 ||
-        row >= rows ||
-        column < 0 ||
-        column >= columns)
-    {
+    if (row < 0 || row >= rows || column < 0 || column >= columns)
         return QModelIndex();
-    }
 
     return createIndex(row, column);
 }
@@ -103,6 +101,9 @@ QVariant CSMWorld::NestedTableProxyModel::data(const QModelIndex& index, int rol
     return mMainModel->data(mapToSource(index), role);
 }
 
+// NOTE: Due to mapToSouce(index) the dataChanged() signal resulting from setData() will have the
+// source model's index values.  The indicies need to be converted to the proxy space values.
+// See forwardDataChanged()
 bool CSMWorld::NestedTableProxyModel::setData (const QModelIndex & index, const QVariant & value, int role)
 {
     return mMainModel->setData(mapToSource(index), value, role);
@@ -128,7 +129,8 @@ CSMWorld::IdTree* CSMWorld::NestedTableProxyModel::model() const
     return mMainModel;
 }
 
-void CSMWorld::NestedTableProxyModel::forwardRowsAboutToInserted(const QModelIndex& parent, int first, int last)
+void CSMWorld::NestedTableProxyModel::forwardRowsAboutToInserted(const QModelIndex& parent,
+        int first, int last)
 {
     if (indexIsParent(parent))
     {
@@ -151,7 +153,8 @@ bool CSMWorld::NestedTableProxyModel::indexIsParent(const QModelIndex& index)
             mMainModel->data(mMainModel->index(index.row(), 0)).toString().toUtf8().constData() == mId);
 }
 
-void CSMWorld::NestedTableProxyModel::forwardRowsAboutToRemoved(const QModelIndex& parent, int first, int last)
+void CSMWorld::NestedTableProxyModel::forwardRowsAboutToRemoved(const QModelIndex& parent,
+        int first, int last)
 {
     if (indexIsParent(parent))
     {
@@ -177,4 +180,16 @@ void CSMWorld::NestedTableProxyModel::forwardResetEnd(const QString& id)
 {
     if (id.toUtf8() == mId.c_str())
         endResetModel();
+}
+
+void CSMWorld::NestedTableProxyModel::forwardDataChanged (const QModelIndex& topLeft,
+        const QModelIndex& bottomRight)
+{
+    const QModelIndex& parent = mMainModel->getNestedModelIndex (mId, mParentColumn);
+
+    if (topLeft.column() <= parent.column() && bottomRight.column() >= parent.column())
+    {
+        emit dataChanged(index(0,0),
+                index(mMainModel->rowCount(parent)-1, mMainModel->columnCount(parent)-1));
+    }
 }

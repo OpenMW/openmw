@@ -93,8 +93,7 @@ bool CSMWorld::IdTree::setData (const QModelIndex &index, const QVariant &value,
             mNestedCollection->setNestedData(parentAddress.first, parentAddress.second, value, index.row(), index.column());
 
             emit dataChanged (CSMWorld::IdTree::index (parentAddress.first, 0),
-                              CSMWorld::IdTree::index (parentAddress.second, idCollection()->getColumns()-1));
-
+                              CSMWorld::IdTree::index (parentAddress.first, idCollection()->getColumns()-1));
             return true;
         }
         else
