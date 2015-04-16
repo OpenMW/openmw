@@ -31,6 +31,10 @@ namespace CSVTools
             CSMTools::Search mSearch;
             bool mLocked;
 
+        private:
+
+            void replace (bool selection);
+            
         public:
 
             SearchSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
@@ -46,6 +50,8 @@ namespace CSVTools
             void startSearch (const CSMTools::Search& search);
 
             void replaceRequest();
+
+            void replaceAllRequest();
     };
 }
 

@@ -36,7 +36,7 @@ void CSVTools::SearchBox::updateSearchButton()
 }
 
 CSVTools::SearchBox::SearchBox (QWidget *parent)
-: QWidget (parent), mSearch ("Search"), mSearchEnabled (false)
+: QWidget (parent), mSearch ("Search"), mSearchEnabled (false), mReplace ("Replace All")
 {
     mLayout = new QGridLayout (this);
 
@@ -78,12 +78,16 @@ CSVTools::SearchBox::SearchBox (QWidget *parent)
     mReplaceInput.insertWidget (1, &mReplacePlaceholder);
 
     mLayout->addWidget (&mReplaceInput, 1, 1);
+
+    mLayout->addWidget (&mReplace, 1, 3);
     
     // layout adjustments
     mLayout->setColumnMinimumWidth (2, 50);
     mLayout->setColumnStretch (1, 1);
 
     mLayout->setContentsMargins (0, 0, 0, 0);
+
+    connect (&mReplace, (SIGNAL (clicked (bool))), this, SLOT (replaceAll (bool)));
     
     // update
     modeSelected (0);
@@ -144,6 +148,11 @@ std::string CSVTools::SearchBox::getReplaceText() const
     }
 }
 
+void CSVTools::SearchBox::setEditLock (bool locked)
+{
+    mReplace.setEnabled (!locked);
+}
+
 void CSVTools::SearchBox::modeSelected (int index)
 {
     switch (index)
@@ -175,4 +184,9 @@ void CSVTools::SearchBox::startSearch (bool checked)
 {
     if (mSearch.isEnabled())
         emit startSearch (getSearch());
+}
+
+void CSVTools::SearchBox::replaceAll (bool checked)
+{
+    emit replaceAll();
 }

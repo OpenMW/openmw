@@ -31,6 +31,7 @@ namespace CSVTools
             QStackedWidget mReplaceInput;
             QLineEdit mReplaceText;
             QLabel mReplacePlaceholder;
+            QPushButton mReplace;
 
         private:
 
@@ -46,6 +47,8 @@ namespace CSVTools
 
             std::string getReplaceText() const;
 
+            void setEditLock (bool locked);
+
         private slots:
 
             void modeSelected (int index);
@@ -54,9 +57,13 @@ namespace CSVTools
 
             void startSearch (bool checked = true);
 
+            void replaceAll (bool checked);
+
         signals:
 
             void startSearch (const CSMTools::Search& search);
+
+            void replaceAll();
     };
 }
 
