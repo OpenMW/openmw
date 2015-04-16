@@ -23,6 +23,7 @@ namespace Resource
         ResourceSystem(const VFS::Manager* vfs);
 
         SceneManager* getSceneManager();
+        TextureManager* getTextureManager();
 
         const VFS::Manager* getVFS() const;
 

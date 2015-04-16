@@ -328,8 +328,8 @@ void NpcAnimation::updateNpcBase()
 
 void NpcAnimation::updateParts()
 {
-    //if (!mSkelBase)
-    //    return;
+    if (!mObjectRoot.get())
+        return;
 
     mAlpha = 1.f;
     const MWWorld::Class &cls = mPtr.getClass();
@@ -386,8 +386,7 @@ void NpcAnimation::updateParts()
 
         int prio = 1;
         bool enchantedGlow = !store->getClass().getEnchantment(*store).empty();
-        //Ogre::Vector3 glowColor = getEnchantmentColor(*store);
-        Ogre::Vector3 glowColor (1,1,1);
+        osg::Vec4f glowColor = getEnchantmentColor(*store);
         if(store->getTypeName() == typeid(ESM::Clothing).name())
         {
             prio = ((slotlist[i].mBasePriority+1)<<1) + 0;
@@ -588,43 +587,14 @@ public:
     }
 };
 
-PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, int group, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, Ogre::Vector3* glowColor)
+PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, int group, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
 {
     osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->createInstance(model);
-std::cout << "inserting " << model << std::endl;
     osg::ref_ptr<osg::Node> attached = SceneUtil::attach(instance, mObjectRoot, bonefilter, bonename);
+    if (enchantedGlow)
+        addGlow(attached, *glowColor);
     return PartHolderPtr(new PartHolder(attached));
 }
-
-/*
-NifOgre::ObjectScenePtr NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename, const std::string &bonefilter, bool enchantedGlow, Ogre::Vector3* glowColor)
-{
-    NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(mSkelBase, bonename, bonefilter, mInsert, model);
-    setRenderProperties(objects, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha, 0,
-                        enchantedGlow, glowColor);
-
-    std::for_each(objects->mEntities.begin(), objects->mEntities.end(), SetObjectGroup(group));
-    std::for_each(objects->mParticles.begin(), objects->mParticles.end(), SetObjectGroup(group));
-
-    if(objects->mSkelBase)
-    {
-        Ogre::AnimationStateSet *aset = objects->mSkelBase->getAllAnimationStates();
-        Ogre::AnimationStateIterator asiter = aset->getAnimationStateIterator();
-        while(asiter.hasMoreElements())
-        {
-            Ogre::AnimationState *state = asiter.getNext();
-            state->setEnabled(false);
-            state->setLoop(false);
-        }
-        Ogre::SkeletonInstance *skelinst = objects->mSkelBase->getSkeleton();
-        Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
-        while(boneiter.hasMoreElements())
-            boneiter.getNext()->setManuallyControlled(true);
-    }
-
-    return objects;
-}
-*/
 
 /*
 Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
@@ -684,7 +654,7 @@ void NpcAnimation::removeIndividualPart(ESM::PartReferenceType type)
     mPartPriorities[type] = 0;
     mPartslots[type] = -1;
 
-    //mObjectParts[type].setNull();
+    mObjectParts[type].reset();
     if (!mSoundIds[type].empty() && !mSoundsDisabled)
     {
         MWBase::Environment::get().getSoundManager()->stopSound3D(mPtr, mSoundIds[type]);
@@ -711,7 +681,7 @@ void NpcAnimation::removePartGroup(int group)
     }
 }
 
-bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh, bool enchantedGlow, Ogre::Vector3* glowColor)
+bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh, bool enchantedGlow, osg::Vec4f* glowColor)
 {
     if(priority <= mPartPriorities[type])
         return false;
@@ -804,7 +774,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     return true;
 }
 
-void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts, bool enchantedGlow, Ogre::Vector3* glowColor)
+void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts, bool enchantedGlow, osg::Vec4f* glowColor)
 {
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
@@ -861,7 +831,7 @@ void NpcAnimation::showWeapons(bool showWeapon)
         MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         if(weapon != inv.end())
         {
-            Ogre::Vector3 glowColor (1,1,1); //= getEnchantmentColor(*weapon);
+            osg::Vec4f glowColor = getEnchantmentColor(*weapon);
             std::string mesh = weapon->getClass().getModel(*weapon);
             addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1,
                                        mesh, !weapon->getClass().getEnchantment(*weapon).empty(), &glowColor);
@@ -894,7 +864,7 @@ void NpcAnimation::showCarriedLeft(bool show)
     MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
     if(show && iter != inv.end())
     {
-        Ogre::Vector3 glowColor(1,1,1);// = getEnchantmentColor(*iter);
+        osg::Vec4f glowColor = getEnchantmentColor(*iter);
         std::string mesh = iter->getClass().getModel(*iter);
         if (addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
                                    mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))

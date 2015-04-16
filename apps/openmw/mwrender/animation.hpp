@@ -172,6 +172,10 @@ protected:
 
     //void clearAnimSources();
 
+    osg::Vec4f getEnchantmentColor(MWWorld::Ptr item);
+
+    void addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor);
+
 public:
 
     Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem);

@@ -18,6 +18,11 @@ namespace Resource
         return mSceneManager.get();
     }
 
+    TextureManager* ResourceSystem::getTextureManager()
+    {
+        return mTextureManager.get();
+    }
+
     const VFS::Manager* ResourceSystem::getVFS() const
     {
         return mVFS;

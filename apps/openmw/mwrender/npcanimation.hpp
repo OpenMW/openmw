@@ -128,16 +128,16 @@ private:
     void updateNpcBase();
 
     PartHolderPtr insertBoundedPart(const std::string &model, int group, const std::string &bonename,
-                                        const std::string &bonefilter, bool enchantedGlow, Ogre::Vector3* glowColor=NULL);
+                                        const std::string &bonefilter, bool enchantedGlow, osg::Vec4f* glowColor=NULL);
 
     void removeIndividualPart(ESM::PartReferenceType type);
     void reserveIndividualPart(ESM::PartReferenceType type, int group, int priority);
 
     bool addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh,
-                                    bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
+                                    bool enchantedGlow=false, osg::Vec4f* glowColor=NULL);
     void removePartGroup(int group);
     void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts,
-                                    bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
+                                    bool enchantedGlow=false, osg::Vec4f* glowColor=NULL);
 
     //void applyAlpha(float alpha, Ogre::Entity* ent, NifOgre::ObjectScenePtr scene);
 

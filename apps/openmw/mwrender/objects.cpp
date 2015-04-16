@@ -166,10 +166,10 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
         osg::Light* light = new osg::Light;
         lightSource->setLight(light);
 
-        float realRadius = esmLight->mData.mRadius * 2;
+        float realRadius = esmLight->mData.mRadius;
 
         lightSource->setRadius(realRadius);
-        light->setLinearAttenuation(10.f/realRadius);
+        light->setLinearAttenuation(10.f/(esmLight->mData.mRadius*2.f));
         //light->setLinearAttenuation(0.05);
         light->setConstantAttenuation(0.f);
 

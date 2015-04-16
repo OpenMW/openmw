@@ -491,7 +491,6 @@ void OMW::Engine::go()
     mViewer.setCameraManipulator(new osgGA::TrackballManipulator);
     mViewer.addEventHandler(new osgViewer::StatsHandler);
 
-    osg::Timer timer;
     mViewer.realize();
     osg::Timer frameTimer;
     while (!mViewer.done())
