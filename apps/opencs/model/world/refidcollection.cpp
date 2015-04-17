@@ -480,7 +480,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
         new BodyPartRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), partMap));
     mColumns.back().addColumn(
-        new RefIdColumn (Columns::ColumnId_PartRefType, CSMWorld::ColumnBase::Display_String));
+        new RefIdColumn (Columns::ColumnId_PartRefType, CSMWorld::ColumnBase::Display_PartRefType));
     mColumns.back().addColumn(
         new RefIdColumn (Columns::ColumnId_PartRefMale, CSMWorld::ColumnBase::Display_String));
     mColumns.back().addColumn(

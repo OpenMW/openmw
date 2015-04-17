@@ -1665,15 +1665,6 @@ namespace CSMWorld
         }
     };
 
-    static const char *sPartRefs[ESM::PRT_Count] =
-    {
-        "Head", "Hair", "Neck", "Cuirass", "Groin",
-        "Skirt", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist",
-        "Shield", "Right Forearm", "Left Forearm", "Right Upperarm", "Left Upperarm",
-        "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee",
-        "Left Knee", "Right Leg", "Left Leg", "Right Pauldron", "Left Pauldron",
-        "Weapon", "Tail"
-    };
 
     template <typename ESXRecordT>
     class BodyPartRefIdAdapter : public NestedRefIdAdapterBase
@@ -1767,7 +1758,13 @@ namespace CSMWorld
 
             switch (subColIndex)
             {
-                case 0: return QString(sPartRefs[content.mPart]);
+                case 0:
+                {
+                    if (content.mPart >=0 && content.mPart < ESM::PRT_Count)
+                        return content.mPart;
+                    else
+                        throw std::runtime_error("Part Reference Type unexpected value");
+                }
                 case 1: return QString(content.mMale.c_str());
                 case 2: return QString(content.mFemale.c_str());
                 default:
@@ -1788,24 +1785,7 @@ namespace CSMWorld
 
             switch(subColIndex)
             {
-                case 0:
-                {
-                    std::string part = value.toString().toStdString();
-                    bool found = false;
-                    for (unsigned int i = 0; i < ESM::PRT_Count; ++i)
-                    {
-                        if (part == sPartRefs[i])
-                        {
-                            list.at(subRowIndex).mPart = static_cast<unsigned char>(i);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                        return; // return without saving
-                    else
-                        break;
-                }
+                case 0: list.at(subRowIndex).mPart = static_cast<unsigned char>(value.toInt()); break;
                 case 1: list.at(subRowIndex).mMale = value.toString().toStdString(); break;
                 case 2: list.at(subRowIndex).mFemale = value.toString().toStdString(); break;
                 default:

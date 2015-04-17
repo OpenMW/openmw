@@ -476,6 +476,17 @@ namespace
         "SummonBonewolf", "SummonCreature04", "SummonCreature05", 0
     };
 
+    // see ESM::PartReferenceType in <component/esm/loadarmo.hpp>
+    static const char *sPartRefType[] =
+    {
+        "Head", "Hair", "Neck", "Cuirass", "Groin",
+        "Skirt", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist",
+        "Shield", "Right Forearm", "Left Forearm", "Right Upperarm", "Left Upperarm",
+        "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee",
+        "Left Knee", "Right Leg", "Left Leg", "Right Pauldron", "Left Pauldron",
+        "Weapon", "Tail", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -501,6 +512,7 @@ namespace
             case CSMWorld::Columns::ColumnId_SkillImpact: return sSkills;
             case CSMWorld::Columns::ColumnId_EffectRange: return sEffectRange;
             case CSMWorld::Columns::ColumnId_EffectId: return sEffectId;
+            case CSMWorld::Columns::ColumnId_PartRefType: return sPartRefType;
 
             default: return 0;
         }

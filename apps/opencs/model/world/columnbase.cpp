@@ -78,6 +78,7 @@ bool CSMWorld::ColumnBase::isId (Display display)
         Display_SkillImpact,
         Display_EffectRange,
         Display_EffectId,
+        Display_PartRefType,
 
         Display_None
     };
