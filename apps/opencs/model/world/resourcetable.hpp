@@ -51,6 +51,8 @@ namespace CSMWorld
 
             /// Is \a id flagged as deleted?
             virtual bool isDeleted (const std::string& id) const;
+
+            virtual int getColumnId (int column) const;            
     };
 }
 

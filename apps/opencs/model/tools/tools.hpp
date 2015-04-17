@@ -22,6 +22,8 @@ namespace CSMDoc
 namespace CSMTools
 {
     class ReportModel;
+    class Search;
+    class SearchOperation;
 
     class Tools : public QObject
     {
@@ -31,6 +33,8 @@ namespace CSMTools
             CSMWorld::Data& mData;
             CSMDoc::Operation *mVerifierOperation;
             CSMDoc::OperationHolder mVerifier;
+            SearchOperation *mSearchOperation;
+            CSMDoc::OperationHolder mSearch;
             std::map<int, ReportModel *> mReports;
             int mNextReportNumber;
             std::map<int, int> mActiveReports; // type, report number
@@ -56,6 +60,11 @@ namespace CSMTools
             CSMWorld::UniversalId runVerifier();
             ///< \return ID of the report for this verification run
 
+            /// Return ID of the report for this search.
+            CSMWorld::UniversalId newSearch();
+
+            void runSearch (const CSMWorld::UniversalId& searchId, const Search& search);
+            
             void abortOperation (int type);
             ///< \attention The operation is not aborted immediately.
 

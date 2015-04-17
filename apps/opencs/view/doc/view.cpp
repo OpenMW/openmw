@@ -95,6 +95,10 @@ void CSVDoc::View::setupEditMenu()
     QAction *userSettings = new QAction (tr ("&Preferences"), this);
     connect (userSettings, SIGNAL (triggered()), this, SIGNAL (editSettingsRequest()));
     edit->addAction (userSettings);
+
+    QAction *search = new QAction (tr ("Search"), this);
+    connect (search, SIGNAL (triggered()), this, SLOT (addSearchSubView()));
+    edit->addAction (search);    
 }
 
 void CSVDoc::View::setupViewMenu()
@@ -447,7 +451,7 @@ void CSVDoc::View::updateDocumentState()
 
     static const int operations[] =
     {
-        CSMDoc::State_Saving, CSMDoc::State_Verifying,
+        CSMDoc::State_Saving, CSMDoc::State_Verifying, CSMDoc::State_Searching,
         -1 // end marker
     };
 
@@ -730,6 +734,11 @@ void CSVDoc::View::addPathgridSubView()
 void CSVDoc::View::addStartScriptsSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_StartScripts);
+}
+
+void CSVDoc::View::addSearchSubView()
+{
+    addSubView (mDocument->newSearch());
 }
 
 void CSVDoc::View::abortOperation (int type)

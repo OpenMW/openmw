@@ -43,7 +43,7 @@ namespace CSMWorld
     struct StringIdColumn : public Column<ESXRecordT>
     {
         StringIdColumn (bool hidden = false)
-        : Column<ESXRecordT> (Columns::ColumnId_Id, ColumnBase::Display_String,
+        : Column<ESXRecordT> (Columns::ColumnId_Id, ColumnBase::Display_Id,
             hidden ? 0 : ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue)
         {}
 
@@ -818,7 +818,7 @@ namespace CSMWorld
 
         ScriptColumn (Type type)
         : Column<ESXRecordT> (Columns::ColumnId_ScriptText,
-            type==Type_File ? ColumnBase::Display_Script : ColumnBase::Display_ScriptLines,
+            type==Type_File ? ColumnBase::Display_ScriptFile : ColumnBase::Display_ScriptLines,
             type==Type_File ? 0 : ColumnBase::Flag_Dialogue)
         {}
 

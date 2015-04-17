@@ -113,9 +113,11 @@ namespace CSMWorld
             Display_Texture,
             Display_Video,
             Display_Colour,
+            Display_ScriptFile,
             Display_ScriptLines, // console context
             Display_SoundGeneratorType,
-            Display_School
+            Display_School,
+            Display_Id
         };
 
         int mColumnId;
@@ -134,6 +136,12 @@ namespace CSMWorld
         virtual std::string getTitle() const;
 
         virtual int getId() const; // FIXME: why have an accessor for a public member?
+
+        static bool isId (Display display);
+
+        static bool isText (Display display);
+
+        static bool isScript (Display display);
     };
 
     class NestableColumn : public ColumnBase

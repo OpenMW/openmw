@@ -28,6 +28,7 @@ namespace MWGui
         : WindowPinnableBase("openmw_spell_window.layout")
         , NoDrop(drag, mMainWidget)
         , mSpellView(NULL)
+        , mUpdateTimer(0.0f)
     {
         mSpellIcons = new SpellIcons();
 
@@ -60,12 +61,25 @@ namespace MWGui
         updateSpells();
     }
 
+    void SpellWindow::onFrame(float dt) 
+    { 
+        if (mMainWidget->getVisible())
+        {
+            NoDrop::onFrame(dt);
+            mUpdateTimer += dt;
+            if (0.5f < mUpdateTimer)
+            {
+                mUpdateTimer = 0;
+                mSpellView->incrementalUpdate();
+            }
+        }
+    }
+
     void SpellWindow::updateSpells()
     {
         mSpellIcons->updateWidgets(mEffectBox, false);
 
         mSpellView->setModel(new SpellModel(MWBase::Environment::get().getWorld()->getPlayerPtr()));
-        mSpellView->update();
     }
 
     void SpellWindow::onEnchantedItemSelected(MWWorld::Ptr item, bool alreadyEquipped)
@@ -170,7 +184,6 @@ namespace MWGui
     void SpellWindow::cycle(bool next)
     {
         mSpellView->setModel(new SpellModel(MWBase::Environment::get().getWorld()->getPlayerPtr()));
-        mSpellView->getModel()->update();
 
         SpellModel::ModelIndex selected = 0;
         for (SpellModel::ModelIndex i = 0; i<int(mSpellView->getModel()->getItemCount()); ++i)

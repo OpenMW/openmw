@@ -10,6 +10,9 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
+#include "../mwgui/inventorywindow.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
@@ -175,7 +178,7 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
 
     flagAsModified();
 
-    fireEquipmentChangedEvent();
+    fireEquipmentChangedEvent(actor);
 
     updateMagicEffects(actor);
 }
@@ -188,7 +191,7 @@ void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
 
     mUpdatesEnabled = true;
 
-    fireEquipmentChangedEvent();
+    fireEquipmentChangedEvent(actor);
     updateMagicEffects(actor);
 }
 
@@ -318,7 +321,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     if (changed)
     {
         mSlots.swap (slots_);
-        fireEquipmentChangedEvent();
+        fireEquipmentChangedEvent(actor);
         updateMagicEffects(actor);
         flagAsModified();
     }
@@ -549,7 +552,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
             }
         }
 
-        fireEquipmentChangedEvent();
+        fireEquipmentChangedEvent(actor);
         updateMagicEffects(actor);
 
         return retval;
@@ -576,12 +579,18 @@ void MWWorld::InventoryStore::setListener(InventoryStoreListener *listener, cons
     updateMagicEffects(actor);
 }
 
-void MWWorld::InventoryStore::fireEquipmentChangedEvent()
+void MWWorld::InventoryStore::fireEquipmentChangedEvent(const Ptr& actor)
 {
     if (!mUpdatesEnabled)
         return;
     if (mListener)
         mListener->equipmentChanged();
+
+    // if player, update inventory window
+    if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+    {
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
+    }
 }
 
 void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisitor &visitor)
