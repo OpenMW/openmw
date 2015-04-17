@@ -59,13 +59,27 @@ Ogre::HardwareIndexBufferSharedPtr createIndexBuffer(unsigned int flags, unsigne
     {
         for (size_t col = colStart; col < colEnd; col += increment)
         {
-            indices.push_back(verts*col+row);
-            indices.push_back(verts*(col+increment)+row+increment);
-            indices.push_back(verts*col+row+increment);
+            // diamond pattern
+            if ((row + col%2) % 2 == 1)
+            {
+                indices.push_back(verts*(col+increment)+row);
+                indices.push_back(verts*(col+increment)+row+increment);
+                indices.push_back(verts*col+row+increment);
 
-            indices.push_back(verts*col+row);
-            indices.push_back(verts*(col+increment)+row);
-            indices.push_back(verts*(col+increment)+row+increment);
+                indices.push_back(verts*col+row);
+                indices.push_back(verts*(col+increment)+row);
+                indices.push_back(verts*(col)+row+increment);
+            }
+            else
+            {
+                indices.push_back(verts*col+row);
+                indices.push_back(verts*(col+increment)+row+increment);
+                indices.push_back(verts*col+row+increment);
+
+                indices.push_back(verts*col+row);
+                indices.push_back(verts*(col+increment)+row);
+                indices.push_back(verts*(col+increment)+row+increment);
+            }
         }
     }
 
