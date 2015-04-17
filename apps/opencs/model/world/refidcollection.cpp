@@ -503,6 +503,20 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
         new RefIdColumn (Columns::ColumnId_LevelledItemLevel, CSMWorld::ColumnBase::Display_Integer));
 
+    // Nested list
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_LevelledList,
+        ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_List));
+    levListColumns.mNestedListLevList = &mColumns.back();
+    std::map<UniversalId::Type, NestedRefIdAdapterBase*> nestedListLevListMap;
+    nestedListLevListMap.insert(std::make_pair(UniversalId::Type_CreatureLevelledList,
+        new NestedListLevListRefIdAdapter<ESM::CreatureLevList> (UniversalId::Type_CreatureLevelledList)));
+    nestedListLevListMap.insert(std::make_pair(UniversalId::Type_ItemLevelledList,
+        new NestedListLevListRefIdAdapter<ESM::ItemLevList> (UniversalId::Type_ItemLevelledList)));
+    mNestedAdapters.push_back (std::make_pair(&mColumns.back(), nestedListLevListMap));
+    mColumns.back().addColumn(
+        new RefIdColumn (Columns::ColumnId_LevelledItemType, CSMWorld::ColumnBase::Display_String));
+    mColumns.back().addColumn(
+        new RefIdColumn (Columns::ColumnId_LevelledItemChanceNone, CSMWorld::ColumnBase::Display_Integer));
 
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));

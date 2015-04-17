@@ -1829,9 +1829,11 @@ namespace CSMWorld
         }
     };
 
+
     struct LevListColumns : public BaseColumns
     {
         const RefIdColumn *mLevList;
+        const RefIdColumn *mNestedListLevList;
 
         LevListColumns (const BaseColumns& base) : BaseColumns (base) {}
     };
@@ -1863,7 +1865,7 @@ namespace CSMWorld
     QVariant LevelledListRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
         int index) const
     {
-        if (column==mLevList.mLevList)
+        if (column==mLevList.mLevList || column == mLevList.mNestedListLevList)
             return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
 
         return BaseRefIdAdapter<RecordT>::getData (column, data, index);
@@ -1876,6 +1878,133 @@ namespace CSMWorld
         BaseRefIdAdapter<RecordT>::setData (column, data, index, value);
         return;
     }
+
+
+    template <typename ESXRecordT>
+    class NestedListLevListRefIdAdapter : public NestedRefIdAdapterBase
+    {
+
+        UniversalId::Type mType;
+
+        // not implemented
+        NestedListLevListRefIdAdapter (const NestedListLevListRefIdAdapter&);
+        NestedListLevListRefIdAdapter& operator= (const NestedListLevListRefIdAdapter&);
+
+    public:
+
+        NestedListLevListRefIdAdapter(UniversalId::Type type)
+                :mType(type) {}
+
+        virtual ~NestedListLevListRefIdAdapter() {}
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const
+        {
+            throw std::logic_error ("cannot add a row to a fixed table");
+        }
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const
+        {
+            throw std::logic_error ("cannot remove a row to a fixed table");
+        }
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
+        {
+            throw std::logic_error ("table operation not supported");
+        }
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const
+        {
+            throw std::logic_error ("table operation not supported");
+        }
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+        {
+            const Record<ESXRecordT>& record =
+                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+            switch (subColIndex)
+            {
+                case 0:
+                {
+                    if (mType == CSMWorld::UniversalId::Type_CreatureLevelledList &&
+                            record.get().mFlags == 0x01)
+                    {
+                        return QString("All Levels");
+                    }
+                    else if(mType == CSMWorld::UniversalId::Type_ItemLevelledList &&
+                            record.get().mFlags == 0x01)
+                    {
+                        return QString("Each");
+                    }
+                    else if(mType == CSMWorld::UniversalId::Type_ItemLevelledList &&
+                            record.get().mFlags == 0x02)
+                    {
+                        return QString("All Levels");
+                    }
+                    else
+                        throw std::runtime_error("unknown leveled list type");
+                }
+                case 1: return static_cast<int> (record.get().mChanceNone);
+                default:
+                    throw std::runtime_error("Trying to access non-existing column in the nested table!");
+            }
+        }
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+        {
+            Record<ESXRecordT>& record =
+                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+            ESXRecordT leveled = record.get();
+
+            switch(subColIndex)
+            {
+                case 0:
+                {
+                    if (mType == CSMWorld::UniversalId::Type_CreatureLevelledList &&
+                            value.toString().toStdString() == "All Levels")
+                    {
+                        leveled.mFlags = 0x01;
+                        break;
+                    }
+                    else if(mType == CSMWorld::UniversalId::Type_ItemLevelledList &&
+                            value.toString().toStdString() == "Each")
+                    {
+                        leveled.mFlags = 0x01;
+                        break;
+                    }
+                    else if(mType == CSMWorld::UniversalId::Type_ItemLevelledList &&
+                            value.toString().toStdString() == "All Levels")
+                    {
+                        leveled.mFlags = 0x02;
+                        break;
+                    }
+                    else
+                        return; // return without saving
+                }
+                case 1: leveled.mChanceNone = static_cast<unsigned char>(value.toInt()); break;
+                default:
+                    throw std::runtime_error("Trying to access non-existing column in the nested table!");
+            }
+
+            record.setModified (leveled);
+        }
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+        {
+            return 2;
+        }
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+        {
+            return 1; // fixed at size 1
+        }
+    };
 
     template <typename ESXRecordT>
     class NestedLevListRefIdAdapter : public NestedRefIdAdapterBase
