@@ -131,7 +131,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (false, true));
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (false, false));
     // Race spells
-    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_SpellList));
+    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_PowerList));
     index = mRaces.getColumns()-1;
     mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new SpellListAdapter<ESM::Race> ()));
     mRaces.getNestableColumn(index)->addColumn(
@@ -172,7 +172,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mBirthsigns.addColumn (new TextureColumn<ESM::BirthSign>);
     mBirthsigns.addColumn (new DescriptionColumn<ESM::BirthSign>);
     // Birthsign spells
-    mBirthsigns.addColumn (new NestedParentColumn<ESM::BirthSign> (Columns::ColumnId_SpellList));
+    mBirthsigns.addColumn (new NestedParentColumn<ESM::BirthSign> (Columns::ColumnId_PowerList));
     index = mBirthsigns.getColumns()-1;
     mBirthsigns.addAdapter (std::make_pair(&mBirthsigns.getColumn(index),
         new SpellListAdapter<ESM::BirthSign> ()));

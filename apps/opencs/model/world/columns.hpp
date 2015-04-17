@@ -259,6 +259,8 @@ namespace CSMWorld
             ColumnId_LevelledItemType = 236,
             ColumnId_LevelledItemChanceNone = 237,
 
+            ColumnId_PowerList = 238,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,

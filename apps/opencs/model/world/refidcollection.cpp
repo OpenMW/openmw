@@ -126,7 +126,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     // Nested table
     mColumns.push_back(RefIdColumn (Columns::ColumnId_ActorInventory,
-            ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue));
+            ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
     actorsColumns.mInventory = &mColumns.back();
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> inventoryMap;
     inventoryMap.insert(std::make_pair(UniversalId::Type_Npc,
@@ -141,7 +141,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     // Nested table
     mColumns.push_back(RefIdColumn (Columns::ColumnId_SpellList,
-            ColumnBase::Display_NestedSpellList, ColumnBase::Flag_Dialogue));
+            ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
     actorsColumns.mSpells = &mColumns.back();
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> spellsMap;
     spellsMap.insert(std::make_pair(UniversalId::Type_Npc,
@@ -154,7 +154,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     // Nested table
     mColumns.push_back(RefIdColumn (Columns::ColumnId_NpcDestinations,
-            ColumnBase::Display_NestedDestinationsList, ColumnBase::Flag_Dialogue));
+            ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
     actorsColumns.mDestinations = &mColumns.back();
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> destMap;
     destMap.insert(std::make_pair(UniversalId::Type_Npc,
@@ -281,7 +281,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     // Nested table
     mColumns.push_back(RefIdColumn (Columns::ColumnId_ContainerContent,
-            ColumnBase::Display_NestedItemList, ColumnBase::Flag_Dialogue));
+            ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
     const RefIdColumn *content = &mColumns.back();
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> contMap;
     contMap.insert(std::make_pair(UniversalId::Type_Container,

@@ -93,15 +93,6 @@ namespace CSMWorld
             Display_RefRecordType,
             Display_DialogueType,
             Display_QuestStatusType,
-
-            //Those are top level columns that nest other columns
-            Display_NestedItemList, // delete?
-            Display_NestedSpellList, // delete?
-            Display_NestedDestinationsList, // delete?
-            Display_PathgridPointList, // delete?
-            Display_PathgridEdgeList, // delete?
-            Display_NestedHeader,
-
             Display_EnchantmentType,
             Display_BodyPartType,
             Display_MeshType,
@@ -117,7 +108,10 @@ namespace CSMWorld
             Display_ScriptLines, // console context
             Display_SoundGeneratorType,
             Display_School,
-            Display_Id
+            Display_Id,
+
+            //top level columns that nest other columns
+            Display_NestedHeader
         };
 
         int mColumnId;
@@ -135,7 +129,7 @@ namespace CSMWorld
 
         virtual std::string getTitle() const;
 
-        virtual int getId() const; // FIXME: why have an accessor for a public member?
+        virtual int getId() const;
 
         static bool isId (Display display);
 
