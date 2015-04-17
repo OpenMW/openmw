@@ -110,6 +110,8 @@ namespace CSMWorld
             Display_School,
             Display_Id,
             Display_SkillImpact,
+            Display_EffectRange,
+            Display_EffectId,
 
             //top level columns that nest other columns
             Display_NestedHeader

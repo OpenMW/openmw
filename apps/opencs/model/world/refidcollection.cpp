@@ -81,13 +81,13 @@ CSMWorld::RefIdCollection::RefIdCollection()
         new EffectsRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), effectsMap));
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_String/*, false*/));
+        new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_SkillImpact, ColumnBase::Display_SkillImpact));
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute)); // reuse attribute
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_Integer));
+        new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_EffectRange));
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectArea, ColumnBase::Display_String));
     mColumns.back().addColumn(

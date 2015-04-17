@@ -309,28 +309,19 @@ namespace CSMWorld
             {
                 case 0:
                 {
-                    // indexToId() prepends "#d+" hence not so user friendly
-                    QString effectId(ESM::MagicEffect::effectIdToString(effect.mEffectID).c_str());
-                    return effectId.remove(0, 7); // 7 == sizeof("sEffect") - 1
+                    if (effect.mEffectID >=0 && effect.mEffectID < ESM::MagicEffect::Length)
+                        return effect.mRange;
+                    else
+                        throw std::runtime_error("Magic effects ID unexpected value");
                 }
-                case 1:
-                {
-                    return effect.mSkill;
-                }
-                case 2:
-                {
-                    return effect.mAttribute;
-                }
+                case 1: return effect.mSkill;
+                case 2: return effect.mAttribute;
                 case 3:
                 {
-                    switch (effect.mRange)
-                    {
-                        // see ESM::RangeType in <component/esm/defs.hpp>
-                        case ESM::RT_Self: return QString("Self");
-                        case ESM::RT_Touch: return QString("Touch");
-                        case ESM::RT_Target: return QString("Target");
-                        default: return QVariant();
-                    }
+                    if (effect.mRange >=0 && effect.mRange <=2)
+                        return effect.mRange;
+                    else
+                        throw std::runtime_error("Magic effects range unexpected value");
                 }
                 case 4: return effect.mArea;
                 case 5: return effect.mDuration;
@@ -355,8 +346,7 @@ namespace CSMWorld
             {
                 case 0:
                 {
-                    effect.mEffectID =
-                        ESM::MagicEffect::effectStringToId("sEffect"+value.toString().toStdString());
+                    effect.mEffectID = static_cast<short>(value.toInt());
                     break;
                 }
                 case 1:
@@ -371,15 +361,7 @@ namespace CSMWorld
                 }
                 case 3:
                 {
-                    std::string effectId = value.toString().toStdString();
-                    if (effectId == "Self")
-                        effect.mRange = ESM::RT_Self;
-                    else if (effectId == "Touch")
-                        effect.mRange = ESM::RT_Touch;
-                    else if (effectId == "Target")
-                        effect.mRange = ESM::RT_Target;
-                    else
-                        return; // leave unchanged
+                    effect.mRange = value.toInt();
                     break;
                 }
                 case 4: effect.mArea = value.toInt(); break;

@@ -332,6 +332,7 @@ namespace
         "Combat", "Magic", "Stealth", 0
     };
 
+    // see ESM::Attribute::AttributeID in <component/esm/attr.hpp>
     static const char *sAttributes[] =
     {
         "Strength", "Intelligence", "Willpower", "Agility", "Speed", "Endurance", "Personality",
@@ -424,7 +425,7 @@ namespace
         "Alteration", "Conjuration", "Destruction", "Illusion", "Mysticism", "Restoration", 0
     };
 
-    // impact from magic effects
+    // impact from magic effects, see ESM::Skill::SkillEnum in <component/esm/loadskil.hpp>
     static const char *sSkills[] =
     {
         "Block", "Armorer", "MediumArmor", "HeavyArmor", "BluntWeapon",
@@ -433,6 +434,46 @@ namespace
         "Restoration", "Alchemy", "Unarmored", "Security", "Sneak",
         "Acrobatics", "LightArmor", "ShortBlade", "Marksman", "Mercantile",
         "Speechcraft", "HandToHand", 0
+    };
+
+    // range of magic effects, see ESM::RangeType in <component/esm/defs.hpp>
+    static const char *sEffectRange[] =
+    {
+        "Self", "Touch", "Target", 0
+    };
+
+    // magic effect names, see ESM::MagicEffect::Effects in <component/esm/loadmgef.hpp>
+    static const char *sEffectId[] =
+    {
+        "WaterBreathing", "SwiftSwim", "WaterWalking", "Shield", "FireShield",
+        "LightningShield", "FrostShield", "Burden", "Feather", "Jump",
+        "Levitate", "SlowFall", "Lock", "Open", "FireDamage",
+        "ShockDamage", "FrostDamage", "DrainAttribute", "DrainHealth", "DrainMagicka",
+        "DrainFatigue", "DrainSkill", "DamageAttribute", "DamageHealth", "DamageMagicka",
+        "DamageFatigue", "DamageSkill", "Poison", "WeaknessToFire", "WeaknessToFrost",
+        "WeaknessToShock", "WeaknessToMagicka", "WeaknessToCommonDisease", "WeaknessToBlightDisease", "WeaknessToCorprusDisease",
+        "WeaknessToPoison", "WeaknessToNormalWeapons", "DisintegrateWeapon", "DisintegrateArmor", "Invisibility",
+        "Chameleon", "Light", "Sanctuary", "NightEye", "Charm",
+        "Paralyze", "Silence", "Blind", "Sound", "CalmHumanoid",
+        "CalmCreature", "FrenzyHumanoid", "FrenzyCreature", "DemoralizeHumanoid", "DemoralizeCreature",
+        "RallyHumanoid", "RallyCreature", "Dispel", "Soultrap", "Telekinesis",
+        "Mark", "Recall", "DivineIntervention", "AlmsiviIntervention", "DetectAnimal",
+        "DetectEnchantment", "DetectKey", "SpellAbsorption", "Reflect", "CureCommonDisease",
+        "CureBlightDisease", "CureCorprusDisease", "CurePoison", "CureParalyzation", "RestoreAttribute",
+        "RestoreHealth", "RestoreMagicka", "RestoreFatigue", "RestoreSkill", "FortifyAttribute",
+        "FortifyHealth", "FortifyMagicka", "FortifyFatigue", "FortifySkill", "FortifyMaximumMagicka",
+        "AbsorbAttribute", "AbsorbHealth", "AbsorbMagicka", "AbsorbFatigue", "AbsorbSkill",
+        "ResistFire", "ResistFrost", "ResistShock", "ResistMagicka", "ResistCommonDisease",
+        "ResistBlightDisease", "ResistCorprusDisease", "ResistPoison", "ResistNormalWeapons", "ResistParalysis",
+        "RemoveCurse", "TurnUndead", "SummonScamp", "SummonClannfear", "SummonDaedroth",
+        "SummonDremora", "SummonAncestralGhost", "SummonSkeletalMinion", "SummonBonewalker", "SummonGreaterBonewalker",
+        "SummonBonelord", "SummonWingedTwilight", "SummonHunger", "SummonGoldenSaint", "SummonFlameAtronach",
+        "SummonFrostAtronach", "SummonStormAtronach", "FortifyAttack", "CommandCreature", "CommandHumanoid",
+        "BoundDagger", "BoundLongsword", "BoundMace", "BoundBattleAxe", "BoundSpear",
+        "BoundLongbow", "ExtraSpell", "BoundCuirass", "BoundHelm", "BoundBoots",
+        "BoundShield", "BoundGloves", "Corprus", "Vampirism", "SummonCenturionSphere",
+        "SunDamage", "StuntedMagicka", "SummonFabricant", "SummonWolf", "SummonBear",
+        "SummonBonewolf", "SummonCreature04", "SummonCreature05", 0
     };
 
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
@@ -458,6 +499,8 @@ namespace
             case CSMWorld::Columns::ColumnId_SoundGeneratorType: return sSoundGeneratorType;
             case CSMWorld::Columns::ColumnId_School: return sSchools;
             case CSMWorld::Columns::ColumnId_SkillImpact: return sSkills;
+            case CSMWorld::Columns::ColumnId_EffectRange: return sEffectRange;
+            case CSMWorld::Columns::ColumnId_EffectId: return sEffectId;
 
             default: return 0;
         }
