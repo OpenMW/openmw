@@ -442,7 +442,8 @@ void CSVWorld::EditWidget::remake(int row)
                 mNestedModels.push_back(new CSMWorld::NestedTableProxyModel (mTable->index(row, i), display, dynamic_cast<CSMWorld::IdTree*>(mTable)));
 
                 NestedTable* table = new NestedTable(mDocument, mNestedModels.back(), this);
-                table->resizeColumnsToContents();
+                // FIXME: does not work well when enum delegates are used
+                //table->resizeColumnsToContents();
 
 
                 QLabel* label =

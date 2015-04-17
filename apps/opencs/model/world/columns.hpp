@@ -260,6 +260,7 @@ namespace CSMWorld
             ColumnId_LevelledItemChanceNone = 237,
 
             ColumnId_PowerList = 238,
+            ColumnId_SkillImpact = 239, // impact from magic effects
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

@@ -315,42 +315,7 @@ namespace CSMWorld
                 }
                 case 1:
                 {
-                    switch (effect.mSkill)
-                    {
-                        // see ESM::Skill::SkillEnum in <component/esm/loadskil.hpp>
-                        case ESM::Skill::Block:
-                        case ESM::Skill::Armorer:
-                        case ESM::Skill::MediumArmor:
-                        case ESM::Skill::HeavyArmor:
-                        case ESM::Skill::BluntWeapon:
-                        case ESM::Skill::LongBlade:
-                        case ESM::Skill::Axe:
-                        case ESM::Skill::Spear:
-                        case ESM::Skill::Athletics:
-                        case ESM::Skill::Enchant:
-                        case ESM::Skill::Destruction:
-                        case ESM::Skill::Alteration:
-                        case ESM::Skill::Illusion:
-                        case ESM::Skill::Conjuration:
-                        case ESM::Skill::Mysticism:
-                        case ESM::Skill::Restoration:
-                        case ESM::Skill::Alchemy:
-                        case ESM::Skill::Unarmored:
-                        case ESM::Skill::Security:
-                        case ESM::Skill::Sneak:
-                        case ESM::Skill::Acrobatics:
-                        case ESM::Skill::LightArmor:
-                        case ESM::Skill::ShortBlade:
-                        case ESM::Skill::Marksman:
-                        case ESM::Skill::Mercantile:
-                        case ESM::Skill::Speechcraft:
-                        case ESM::Skill::HandToHand:
-                        {
-                            return QString(ESM::Skill::sSkillNames[effect.mSkill].c_str());
-                        }
-                        case -1: return QString("N/A");
-                        default: return QVariant();
-                    }
+                    return effect.mSkill;
                 }
                 case 2:
                 {
@@ -396,21 +361,7 @@ namespace CSMWorld
                 }
                 case 1:
                 {
-                    std::string skillName = value.toString().toStdString();
-                    if ("N/A" == skillName)
-                    {
-                        effect.mSkill = -1;
-                        break;
-                    }
-
-                    for (unsigned int i = 0; i < ESM::Skill::Length; ++i)
-                    {
-                        if (ESM::Skill::sSkillNames[i] == skillName)
-                        {
-                            effect.mSkill = static_cast<signed char>(i);
-                            break;
-                        }
-                    }
+                    effect.mSkill = static_cast<signed char>(value.toInt());
                     break;
                 }
                 case 2:

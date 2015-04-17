@@ -270,6 +270,7 @@ namespace CSMWorld
             { ColumnId_LevelledItemChanceNone, "Chance None" },
 
             { ColumnId_PowerList, "Powers" },
+            { ColumnId_SkillImpact, "Skills" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
@@ -423,6 +424,17 @@ namespace
         "Alteration", "Conjuration", "Destruction", "Illusion", "Mysticism", "Restoration", 0
     };
 
+    // impact from magic effects
+    static const char *sSkills[] =
+    {
+        "Block", "Armorer", "MediumArmor", "HeavyArmor", "BluntWeapon",
+        "LongBlade", "Axe", "Spear", "Athletics", "Enchant",
+        "Destruction", "Alteration", "Illusion", "Conjuration", "Mysticism",
+        "Restoration", "Alchemy", "Unarmored", "Security", "Sneak",
+        "Acrobatics", "LightArmor", "ShortBlade", "Marksman", "Mercantile",
+        "Speechcraft", "HandToHand", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -445,6 +457,7 @@ namespace
             case CSMWorld::Columns::ColumnId_MeshType: return sMeshTypes;
             case CSMWorld::Columns::ColumnId_SoundGeneratorType: return sSoundGeneratorType;
             case CSMWorld::Columns::ColumnId_School: return sSchools;
+            case CSMWorld::Columns::ColumnId_SkillImpact: return sSkills;
 
             default: return 0;
         }

@@ -75,6 +75,7 @@ bool CSMWorld::ColumnBase::isId (Display display)
         Display_Video,
 
         Display_Id,
+        Display_SkillImpact,
 
         Display_None
     };

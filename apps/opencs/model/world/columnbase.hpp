@@ -109,6 +109,7 @@ namespace CSMWorld
             Display_SoundGeneratorType,
             Display_School,
             Display_Id,
+            Display_SkillImpact,
 
             //top level columns that nest other columns
             Display_NestedHeader
