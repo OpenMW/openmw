@@ -354,23 +354,7 @@ namespace CSMWorld
                 }
                 case 2:
                 {
-                    switch (effect.mAttribute)
-                    {
-                        // see ESM::Attribute::AttributeID in <component/esm/attr.hpp>
-                        case ESM::Attribute::Strength:
-                        case ESM::Attribute::Intelligence:
-                        case ESM::Attribute::Willpower:
-                        case ESM::Attribute::Agility:
-                        case ESM::Attribute::Speed:
-                        case ESM::Attribute::Endurance:
-                        case ESM::Attribute::Personality:
-                        case ESM::Attribute::Luck:
-                        {
-                            return QString(ESM::Attribute::sAttributeNames[effect.mAttribute].c_str());
-                        }
-                        case -1: return QString("N/A");
-                        default: return QVariant();
-                    }
+                    return effect.mAttribute;
                 }
                 case 3:
                 {
@@ -431,21 +415,7 @@ namespace CSMWorld
                 }
                 case 2:
                 {
-                    std::string attr = value.toString().toStdString();
-                    if ("N/A" == attr)
-                    {
-                        effect.mAttribute = -1;
-                        break;
-                    }
-
-                    for (unsigned int i = 0; i < ESM::Attribute::Length; ++i)
-                    {
-                        if (ESM::Attribute::sAttributeNames[i] == attr)
-                        {
-                            effect.mAttribute = static_cast<signed char>(i);
-                            break;
-                        }
-                    }
+                    effect.mAttribute = static_cast<signed char>(value.toInt());
                     break;
                 }
                 case 3:

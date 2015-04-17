@@ -197,7 +197,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mSpells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_String));
     mSpells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_String)); // reuse attribute
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute)); // reuse attribute
     mSpells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_Integer));
     mSpells.getNestableColumn(index)->addColumn(
@@ -271,7 +271,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mEnchantments.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_String));
     mEnchantments.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_String)); // reuse attribute
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute)); // reuse attribute
     mEnchantments.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_Integer));
     mEnchantments.getNestableColumn(index)->addColumn(

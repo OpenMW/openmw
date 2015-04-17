@@ -85,7 +85,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_String));
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_String)); // reuse attribute
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute)); // reuse attribute
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_Integer));
     mColumns.back().addColumn(
