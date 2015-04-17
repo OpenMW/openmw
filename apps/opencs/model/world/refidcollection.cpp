@@ -188,7 +188,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
             new ActorAiRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), aiMap));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_AiPackage, CSMWorld::ColumnBase::Display_String));
+            new RefIdColumn (Columns::ColumnId_AiPackageType, CSMWorld::ColumnBase::Display_AiPackageType));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiWanderDist, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
@@ -198,7 +198,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiWanderIdle, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_AiWanderRepeat, CSMWorld::ColumnBase::Display_String));
+            new RefIdColumn (Columns::ColumnId_AiWanderRepeat, CSMWorld::ColumnBase::Display_YesNo));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiActivateName, CSMWorld::ColumnBase::Display_String));
     mColumns.back().addColumn(

@@ -113,6 +113,8 @@ namespace CSMWorld
             Display_EffectRange,
             Display_EffectId,
             Display_PartRefType,
+            Display_AiPackageType,
+            Display_YesNo,
 
             //top level columns that nest other columns
             Display_NestedHeader

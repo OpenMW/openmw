@@ -248,7 +248,7 @@ namespace CSMWorld
             { ColumnId_EffectArea, "Area" },
 
             { ColumnId_AiPackageList, "Ai Packages" },
-            { ColumnId_AiPackage, "Package" },
+            { ColumnId_AiPackageType, "Package" },
             { ColumnId_AiWanderDist, "Wander Dist" },
             { ColumnId_AiDuration, "Duration" },
             { ColumnId_AiWanderToD, "Wander ToD" },
@@ -487,6 +487,17 @@ namespace
         "Weapon", "Tail", 0
     };
 
+    // see the enums in <component/esm/aipackage.hpp>
+    static const char *sAiPackageType[] =
+    {
+        "AI Wander", "AI Travel", "AI Follow", "AI Escort", "AI Activate", 0
+    };
+
+    static const char *sAiWanderRepeat[] =
+    {
+        "No", "Yes", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -513,6 +524,8 @@ namespace
             case CSMWorld::Columns::ColumnId_EffectRange: return sEffectRange;
             case CSMWorld::Columns::ColumnId_EffectId: return sEffectId;
             case CSMWorld::Columns::ColumnId_PartRefType: return sPartRefType;
+            case CSMWorld::Columns::ColumnId_AiPackageType: return sAiPackageType;
+            case CSMWorld::Columns::ColumnId_AiWanderRepeat: return sAiWanderRepeat;
 
             default: return 0;
         }

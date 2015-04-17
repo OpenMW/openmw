@@ -1318,34 +1318,13 @@ namespace CSMWorld
 
             switch(subColIndex)
             {
-                case 0:
-                    list.at(subRowIndex).mCellName = std::string(value.toString().toUtf8().constData());
-                    break;
-
-                case 1:
-                    list.at(subRowIndex).mPos.pos[0] = value.toFloat();
-                    break;
-
-                case 2:
-                    list.at(subRowIndex).mPos.pos[1] = value.toFloat();
-                    break;
-
-                case 3:
-                    list.at(subRowIndex).mPos.pos[2] = value.toFloat();
-                    break;
-
-                case 4:
-                    list.at(subRowIndex).mPos.rot[0] = value.toFloat();
-                    break;
-
-                case 5:
-                    list.at(subRowIndex).mPos.rot[1] = value.toFloat();
-                    break;
-
-                case 6:
-                    list.at(subRowIndex).mPos.rot[2] = value.toFloat();
-                    break;
-
+                case 0: list.at(subRowIndex).mCellName = std::string(value.toString().toUtf8().constData()); break;
+                case 1: list.at(subRowIndex).mPos.pos[0] = value.toFloat(); break;
+                case 2: list.at(subRowIndex).mPos.pos[1] = value.toFloat(); break;
+                case 3: list.at(subRowIndex).mPos.pos[2] = value.toFloat(); break;
+                case 4: list.at(subRowIndex).mPos.rot[0] = value.toFloat(); break;
+                case 5: list.at(subRowIndex).mPos.rot[1] = value.toFloat(); break;
+                case 6: list.at(subRowIndex).mPos.rot[2] = value.toFloat(); break;
                 default:
                     throw std::runtime_error("Trying to access non-existing column in the nested table!");
             }
@@ -1461,13 +1440,13 @@ namespace CSMWorld
                 case 0:
                     switch (content.mType)
                     {
-                        case ESM::AI_Wander: return QString("AI Wander");
-                        case ESM::AI_Travel: return QString("AI Travel");
-                        case ESM::AI_Follow: return QString("AI Follow");
-                        case ESM::AI_Escort: return QString("AI Escort");
-                        case ESM::AI_Activate: return QString("AI Activate");
+                        case ESM::AI_Wander: return 0;
+                        case ESM::AI_Travel: return 1;
+                        case ESM::AI_Follow: return 2;
+                        case ESM::AI_Escort: return 3;
+                        case ESM::AI_Activate: return 4;
                         case ESM::AI_CNDT:
-                        default: return QString("None");
+                        default: return QVariant();
                     }
                 case 1: // wander dist
                     if (content.mType == ESM::AI_Wander)
@@ -1494,7 +1473,7 @@ namespace CSMWorld
                         return QVariant();
                 case 5: // wander repeat
                     if (content.mType == ESM::AI_Wander)
-                        return QString(content.mWander.mShouldRepeat ? "Yes" : "No");
+                        return content.mWander.mShouldRepeat;
                     else
                         return QVariant();
                 case 6: // activate name
@@ -1554,18 +1533,14 @@ namespace CSMWorld
             switch(subColIndex)
             {
                 case 0: // ai package type
-                    if ("AI Wander" == value.toString().toStdString())
-                        content.mType = ESM::AI_Wander;
-                    else if ("AI Travel" == value.toString().toStdString())
-                        content.mType = ESM::AI_Travel;
-                    else if ("AI Follow" == value.toString().toStdString())
-                        content.mType = ESM::AI_Follow;
-                    else if ("AI Escort" == value.toString().toStdString())
-                        content.mType = ESM::AI_Escort;
-                    else if ("AI Activate" == value.toString().toStdString())
-                        content.mType = ESM::AI_Activate;
-                    else
-                        content.mType = ESM::AI_CNDT;
+                    switch (value.toInt())
+                    {
+                        case 0: content.mType = ESM::AI_Wander;
+                        case 1: content.mType = ESM::AI_Travel;
+                        case 2: content.mType = ESM::AI_Follow;
+                        case 3: content.mType = ESM::AI_Escort;
+                        case 4: content.mType = ESM::AI_Activate;
+                    }
                     break; // always save
 
                 case 1:
@@ -1592,12 +1567,8 @@ namespace CSMWorld
                 case 5:
                     if (content.mType == ESM::AI_Wander)
                     {
-                        if ("Yes" == value.toString().toStdString())
-                            content.mWander.mShouldRepeat = 1;
-                        if ("No" == value.toString().toStdString())
-                            content.mWander.mShouldRepeat = 0;
-                        else
-                            return; // return without saving
+                        content.mWander.mShouldRepeat = static_cast<unsigned char>(value.toInt());
+                        break;
                     }
                 case 6: // NAME32
                     if (content.mType == ESM::AI_Activate)

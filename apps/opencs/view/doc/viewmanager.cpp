@@ -88,7 +88,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         { CSMWorld::ColumnBase::Display_SkillImpact, CSMWorld::Columns::ColumnId_SkillImpact, true },
         { CSMWorld::ColumnBase::Display_EffectRange, CSMWorld::Columns::ColumnId_EffectRange, false },
         { CSMWorld::ColumnBase::Display_EffectId, CSMWorld::Columns::ColumnId_EffectId, false },
-        { CSMWorld::ColumnBase::Display_PartRefType, CSMWorld::Columns::ColumnId_PartRefType, false }
+        { CSMWorld::ColumnBase::Display_PartRefType, CSMWorld::Columns::ColumnId_PartRefType, false },
+        { CSMWorld::ColumnBase::Display_AiPackageType, CSMWorld::Columns::ColumnId_AiPackageType, false },
+        { CSMWorld::ColumnBase::Display_YesNo, CSMWorld::Columns::ColumnId_AiWanderRepeat, false }
     };
 
     for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)

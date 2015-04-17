@@ -237,7 +237,7 @@ namespace CSMWorld
             ColumnId_EffectArea = 218,
 
             ColumnId_AiPackageList = 219,
-            ColumnId_AiPackage = 220,
+            ColumnId_AiPackageType = 220,
             ColumnId_AiWanderDist = 221,
             ColumnId_AiDuration = 222,
             ColumnId_AiWanderToD = 223,
