@@ -252,8 +252,8 @@ namespace CSMWorld
             // blank row
             ESM::ENAMstruct effect;
             effect.mEffectID = 0;
-            effect.mSkill = 0;
-            effect.mAttribute = 0;
+            effect.mSkill = -1;
+            effect.mAttribute = -1;
             effect.mRange = 0;
             effect.mArea = 0;
             effect.mDuration = 0;
