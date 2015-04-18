@@ -25,7 +25,7 @@ namespace CSMWorld
 
         virtual void setTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const = 0;
 
-        virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const = 0;
+        virtual NestedTableWrapperBase* table(const Record<ESXRecordT>& record) const = 0;
 
         virtual QVariant getData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const = 0;
 

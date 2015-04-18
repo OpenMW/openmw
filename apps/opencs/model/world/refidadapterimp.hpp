@@ -861,7 +861,6 @@ namespace CSMWorld
 
         virtual ~EffectsRefIdAdapter() {}
 
-        using NestedRefIdAdapterBase::addNestedRow;
         virtual void addNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int position) const
         {
@@ -870,7 +869,6 @@ namespace CSMWorld
             EffectsListAdapter<ESXRecordT>::addRow(record, position);
         }
 
-        using NestedRefIdAdapterBase::removeNestedRow;
         virtual void removeNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int rowToRemove) const
         {
@@ -879,7 +877,6 @@ namespace CSMWorld
             EffectsListAdapter<ESXRecordT>::removeRow(record, rowToRemove);
         }
 
-        using NestedRefIdAdapterBase::setNestedTable;
         virtual void setNestedTable (const RefIdColumn* column,
                 RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
         {
@@ -888,16 +885,14 @@ namespace CSMWorld
             EffectsListAdapter<ESXRecordT>::setTable(record, nestedTable);
         }
 
-        using NestedRefIdAdapterBase::nestedTable;
         virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
                 const RefIdData& data, int index) const
         {
             const Record<ESXRecordT>& record =
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
-            return EffectsListAdapter<ESXRecordT>::nestedTable(record);
+            return EffectsListAdapter<ESXRecordT>::table(record);
         }
 
-        using NestedRefIdAdapterBase::getNestedData;
         virtual QVariant getNestedData (const RefIdColumn *column,
                 const RefIdData& data, int index, int subRowIndex, int subColIndex) const
         {
@@ -906,7 +901,6 @@ namespace CSMWorld
             return EffectsListAdapter<ESXRecordT>::getData(record, subRowIndex, subColIndex);
         }
 
-        using NestedRefIdAdapterBase::setNestedData;
         virtual void setNestedData (const RefIdColumn *column,
                 RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
         {
@@ -915,14 +909,12 @@ namespace CSMWorld
             EffectsListAdapter<ESXRecordT>::setData(record, value, subRowIndex, subColIndex);
         }
 
-        using NestedRefIdAdapterBase::getNestedColumnsCount;
         virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
         {
             const Record<ESXRecordT> record; // not used, just a dummy
             return EffectsListAdapter<ESXRecordT>::getColumnsCount(record);
         }
 
-        using NestedRefIdAdapterBase::getNestedRowsCount;
         virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
         {
             const Record<ESXRecordT>& record =

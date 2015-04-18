@@ -134,7 +134,7 @@ namespace CSMWorld
     CSMWorld::NestedTableWrapperBase* NestedIdCollection<ESXRecordT, IdAccessorT>::nestedTable(int row,
             int column) const
     {
-        return getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).nestedTable(
+        return getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).table(
                 Collection<ESXRecordT, IdAccessorT>::getRecord(row));
     }
 

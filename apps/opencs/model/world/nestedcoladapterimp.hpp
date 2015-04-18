@@ -49,7 +49,7 @@ namespace CSMWorld
         virtual void setTable(Record<Pathgrid>& record,
                 const NestedTableWrapperBase& nestedTable) const;
 
-        virtual NestedTableWrapperBase* nestedTable(const Record<Pathgrid>& record) const;
+        virtual NestedTableWrapperBase* table(const Record<Pathgrid>& record) const;
 
         virtual QVariant getData(const Record<Pathgrid>& record,
                 int subRowIndex, int subColIndex) const;
@@ -74,7 +74,7 @@ namespace CSMWorld
         virtual void setTable(Record<Pathgrid>& record,
                 const NestedTableWrapperBase& nestedTable) const;
 
-        virtual NestedTableWrapperBase* nestedTable(const Record<Pathgrid>& record) const;
+        virtual NestedTableWrapperBase* table(const Record<Pathgrid>& record) const;
 
         virtual QVariant getData(const Record<Pathgrid>& record,
                 int subRowIndex, int subColIndex) const;
@@ -99,7 +99,7 @@ namespace CSMWorld
         virtual void setTable(Record<ESM::Faction>& record,
                 const NestedTableWrapperBase& nestedTable) const;
 
-        virtual NestedTableWrapperBase* nestedTable(const Record<ESM::Faction>& record) const;
+        virtual NestedTableWrapperBase* table(const Record<ESM::Faction>& record) const;
 
         virtual QVariant getData(const Record<ESM::Faction>& record,
                 int subRowIndex, int subColIndex) const;
@@ -124,7 +124,7 @@ namespace CSMWorld
         virtual void setTable(Record<ESM::Region>& record,
                 const NestedTableWrapperBase& nestedTable) const;
 
-        virtual NestedTableWrapperBase* nestedTable(const Record<ESM::Region>& record) const;
+        virtual NestedTableWrapperBase* table(const Record<ESM::Region>& record) const;
 
         virtual QVariant getData(const Record<ESM::Region>& record,
                 int subRowIndex, int subColIndex) const;
@@ -181,7 +181,7 @@ namespace CSMWorld
             record.setModified (raceOrBthSgn);
         }
 
-        virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const
+        virtual NestedTableWrapperBase* table(const Record<ESXRecordT>& record) const
         {
             // deleted by dtor of NestedTableStoring
             return new NestedTableWrapper<std::vector<std::string> >(record.get().mPowers.mList);
@@ -289,7 +289,7 @@ namespace CSMWorld
             record.setModified (magic);
         }
 
-        virtual NestedTableWrapperBase* nestedTable(const Record<ESXRecordT>& record) const
+        virtual NestedTableWrapperBase* table(const Record<ESXRecordT>& record) const
         {
             // deleted by dtor of NestedTableStoring
             return new NestedTableWrapper<std::vector<ESM::ENAMstruct> >(record.get().mEffects.mList);

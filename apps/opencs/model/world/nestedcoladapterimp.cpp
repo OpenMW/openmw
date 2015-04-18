@@ -94,7 +94,7 @@ namespace CSMWorld
         record.setModified (pathgrid);
     }
 
-    NestedTableWrapperBase* PathgridPointListAdapter::nestedTable(const Record<Pathgrid>& record) const
+    NestedTableWrapperBase* PathgridPointListAdapter::table(const Record<Pathgrid>& record) const
     {
         // deleted by dtor of NestedTableStoring
         return new PathgridPointsWrap(record.get());
@@ -192,7 +192,7 @@ namespace CSMWorld
         record.setModified (pathgrid);
     }
 
-    NestedTableWrapperBase* PathgridEdgeListAdapter::nestedTable(const Record<Pathgrid>& record) const
+    NestedTableWrapperBase* PathgridEdgeListAdapter::table(const Record<Pathgrid>& record) const
     {
         // deleted by dtor of NestedTableStoring
         return new NestedTableWrapper<ESM::Pathgrid::EdgeList>(record.get().mEdges);
@@ -293,7 +293,7 @@ namespace CSMWorld
         record.setModified (faction);
     }
 
-    NestedTableWrapperBase* FactionReactionsAdapter::nestedTable(const Record<ESM::Faction>& record) const
+    NestedTableWrapperBase* FactionReactionsAdapter::table(const Record<ESM::Faction>& record) const
     {
         // deleted by dtor of NestedTableStoring
         return new NestedTableWrapper<std::map<std::string, int> >(record.get().mReactions);
@@ -413,7 +413,7 @@ namespace CSMWorld
         record.setModified (region);
     }
 
-    NestedTableWrapperBase* RegionSoundListAdapter::nestedTable(const Record<ESM::Region>& record) const
+    NestedTableWrapperBase* RegionSoundListAdapter::table(const Record<ESM::Region>& record) const
     {
         // deleted by dtor of NestedTableStoring
         return new NestedTableWrapper<std::vector<ESM::Region::SoundRef> >(record.get().mSoundList);
