@@ -3,6 +3,8 @@
 
 #include "weather.hpp"
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/esm/weatherstate.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -142,7 +144,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
      * These values are fallbacks attached to weather.
      */
     mNightStart = mSunsetTime + mSunsetDuration;
-    mNightEnd = mSunriseTime - 0.5;
+    mNightEnd = mSunriseTime - 0.5f;
     mDayStart = mSunriseTime + mSunriseDuration;
     mDayEnd = mSunsetTime;
 
@@ -368,7 +370,7 @@ void WeatherManager::transition(float factor)
         mResult.mParticleEffect = other.mParticleEffect;
         mResult.mRainSpeed = other.mRainSpeed;
         mResult.mRainFrequency = other.mRainFrequency;
-        mResult.mAmbientSoundVolume = 2*(factor-0.5);
+        mResult.mAmbientSoundVolume = 2*(factor-0.5f);
         mResult.mEffectFade = mResult.mAmbientSoundVolume;
         mResult.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
     }
@@ -376,7 +378,7 @@ void WeatherManager::transition(float factor)
 
 void WeatherManager::update(float duration, bool paused)
 {
-    float timePassed = mTimePassed;
+    float timePassed = static_cast<float>(mTimePassed);
     mTimePassed = 0;
 
     mWeatherUpdateTime -= timePassed;
@@ -454,9 +456,9 @@ void WeatherManager::update(float duration, bool paused)
         }
 
         Vector3 final(
-            cos( theta ),
+            static_cast<float>(cos(theta)),
             -0.268f, // approx tan( -15 degrees )
-            sin( theta ) );
+            static_cast<float>(sin(theta)));
         mRendering->setSunDirection( final, is_night );
     }
 
@@ -488,8 +490,8 @@ void WeatherManager::update(float duration, bool paused)
                 moonHeight);
 
         Vector3 secunda(
-                (moonHeight - 1) * facing * 1.25,
-                (1 - moonHeight) * facing * 0.8,
+                (moonHeight - 1) * facing * 1.25f,
+                (1 - moonHeight) * facing * 0.8f,
                 moonHeight);
 
         mRendering->getSkyManager()->setMasserDirection(masser);
@@ -526,7 +528,7 @@ void WeatherManager::update(float duration, bool paused)
                 if (mThunderSoundDelay <= 0)
                 {
                     // pick a random sound
-                    int sound = rand() % 4;
+                    int sound = OEngine::Misc::Rng::rollDice(4);
                     std::string* soundName = NULL;
                     if (sound == 0) soundName = &mThunderSoundID0;
                     else if (sound == 1) soundName = &mThunderSoundID1;
@@ -542,7 +544,7 @@ void WeatherManager::update(float duration, bool paused)
                     mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
                 else
                 {
-                    mThunderChanceNeeded = rand() % 100;
+                    mThunderChanceNeeded = static_cast<float>(OEngine::Misc::Rng::rollDice(100));
                     mThunderChance = 0;
                     mRendering->getSkyManager()->setLightningStrength( 0.f );
                 }
@@ -624,7 +626,7 @@ std::string WeatherManager::nextWeather(const ESM::Region* region) const
      * 70% will be greater than 30 (in theory).
      */
 
-    int chance = (rand() % 100) + 1; // 1..100
+    int chance = OEngine::Misc::Rng::rollDice(100) + 1; // 1..100
     int sum = 0;
     unsigned int i = 0;
     for (; i < probability.size(); ++i)

@@ -39,6 +39,7 @@ Programmers
     Eli2
     Emanuel Guével (potatoesmaster)
     eroen
+    escondida
     Evgeniy Mineev (sandstranger)
     Fil Krynicki (filkry)
     Gašper Sedej

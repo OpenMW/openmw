@@ -56,16 +56,16 @@ void TerrainGrid::loadCell(int x, int y)
     if (mGrid.find(std::make_pair(x, y)) != mGrid.end())
         return; // already loaded
 
-    Ogre::Vector2 center(x+0.5, y+0.5);
+    Ogre::Vector2 center(x+0.5f, y+0.5f);
     float minH, maxH;
     if (!mStorage->getMinMaxHeights(1, center, minH, maxH))
         return; // no terrain defined
 
-    Ogre::Vector3 min (-0.5*mStorage->getCellWorldSize(),
-                       -0.5*mStorage->getCellWorldSize(),
+    Ogre::Vector3 min (-0.5f*mStorage->getCellWorldSize(),
+                       -0.5f*mStorage->getCellWorldSize(),
                        minH);
-    Ogre::Vector3 max (0.5*mStorage->getCellWorldSize(),
-                       0.5*mStorage->getCellWorldSize(),
+    Ogre::Vector3 max (0.5f*mStorage->getCellWorldSize(),
+                       0.5f*mStorage->getCellWorldSize(),
                        maxH);
 
     Ogre::AxisAlignedBox bounds(min, max);
@@ -163,8 +163,8 @@ void TerrainGrid::setVisible(bool visible)
 
 Ogre::AxisAlignedBox TerrainGrid::getWorldBoundingBox (const Ogre::Vector2& center)
 {
-    int cellX = std::floor(center.x);
-    int cellY = std::floor(center.y);
+    int cellX = static_cast<int>(std::floor(center.x));
+    int cellY = static_cast<int>(std::floor(center.y));
 
     Grid::iterator it = mGrid.find(std::make_pair(cellX, cellY));
     if (it == mGrid.end())

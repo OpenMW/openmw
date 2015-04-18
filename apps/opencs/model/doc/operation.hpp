@@ -3,7 +3,8 @@
 
 #include <vector>
 
-#include <QThread>
+#include <QObject>
+#include <QTimer>
 
 namespace CSMWorld
 {
@@ -14,7 +15,7 @@ namespace CSMDoc
 {
     class Stage;
 
-    class Operation : public QThread
+    class Operation : public QObject
     {
             Q_OBJECT
 
@@ -27,6 +28,8 @@ namespace CSMDoc
             int mOrdered;
             bool mFinalAlways;
             bool mError;
+            bool mConnected;
+            QTimer *mTimer;
 
             void prepareStages();
 
@@ -37,8 +40,6 @@ namespace CSMDoc
             /// \param finalAlways Execute last stage even if an error occurred during earlier stages.
 
             virtual ~Operation();
-
-            virtual void run();
 
             void appendStage (Stage *stage);
             ///< The ownership of \a stage is transferred to *this.
@@ -59,6 +60,8 @@ namespace CSMDoc
         public slots:
 
             void abort();
+
+            void run();
 
         private slots:
 

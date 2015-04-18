@@ -239,7 +239,7 @@ namespace MWGui
                 params.mMagnMin = it->mMagnMin;
                 params.mMagnMax = it->mMagnMax;
                 params.mRange = it->mRange;
-                params.mIsConstant = (flags & MWEffectList::EF_Constant);
+                params.mIsConstant = (flags & MWEffectList::EF_Constant) != 0;
                 params.mNoTarget = (flags & MWEffectList::EF_NoTarget);
                 effect->setSpellEffect(params);
                 effects.push_back(effect);
@@ -540,8 +540,8 @@ namespace MWGui
 
         MWScrollBar::MWScrollBar()
             : mEnableRepeat(true)
-            , mRepeatTriggerTime(0.5)
-            , mRepeatStepTime(0.1)
+            , mRepeatTriggerTime(0.5f)
+            , mRepeatStepTime(0.1f)
             , mIsIncreasing(true)
         {
         }

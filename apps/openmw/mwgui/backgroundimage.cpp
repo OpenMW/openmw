@@ -41,8 +41,8 @@ void BackgroundImage::adjustSize()
 
     MyGUI::IntSize screenSize = getSize();
 
-    int leftPadding = std::max(0.0, (screenSize.width - screenSize.height * mAspect) / 2);
-    int topPadding = std::max(0.0, (screenSize.height - screenSize.width / mAspect) / 2);
+    int leftPadding = std::max(0, static_cast<int>(screenSize.width - screenSize.height * mAspect) / 2);
+    int topPadding = std::max(0, static_cast<int>(screenSize.height - screenSize.width / mAspect) / 2);
 
     mChild->setCoord(leftPadding, topPadding, screenSize.width - leftPadding*2, screenSize.height - topPadding*2);
 }

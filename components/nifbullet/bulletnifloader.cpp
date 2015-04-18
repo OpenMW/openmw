@@ -274,10 +274,12 @@ void ManualBulletShapeLoader::handleNode(const Nif::Node *node, int flags,
                 // No collision. Use an internal flag setting to mark this.
                 flags |= 0x800;
             }
-            else if (sd->string == "MRK" && !mShowMarkers)
-                // Marker objects. These are only visible in the
-                // editor.
+            else if (sd->string == "MRK" && !mShowMarkers && raycasting)
+            {
+                // Marker objects should be invisible, but still have collision.
+                // Except in the editor, the marker objects are visible.
                 return;
+            }
         }
     }
 

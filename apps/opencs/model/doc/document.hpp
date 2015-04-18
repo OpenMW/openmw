@@ -20,6 +20,7 @@
 #include "saving.hpp"
 #include "blacklist.hpp"
 #include "runner.hpp"
+#include "operationholder.hpp"
 
 class QAbstractItemModel;
 
@@ -32,7 +33,7 @@ namespace ESM
 
 namespace Files
 {
-    class ConfigurationManager;
+    struct ConfigurationManager;
 }
 
 namespace CSMWorld
@@ -59,7 +60,8 @@ namespace CSMDoc
             CSMWorld::Data mData;
             CSMTools::Tools mTools;
             boost::filesystem::path mProjectPath;
-            Saving mSaving;
+            Saving mSavingOperation;
+            OperationHolder mSaving;
             boost::filesystem::path mResDir;
             Blacklist mBlacklist;
             Runner mRunner;
@@ -118,6 +120,10 @@ namespace CSMDoc
 
             CSMWorld::UniversalId verify();
 
+            CSMWorld::UniversalId newSearch();
+
+            void runSearch (const CSMWorld::UniversalId& searchId, const CSMTools::Search& search);
+            
             void abortOperation (int type);
 
             const CSMWorld::Data& getData() const;

@@ -20,7 +20,7 @@ namespace MWInput
 
 namespace MWScript
 {
-    struct Locals;
+    class Locals;
 
     class InterpreterContext : public Interpreter::Context
     {

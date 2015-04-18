@@ -2,6 +2,8 @@
 
 #include <boost/format.hpp>
 
+#include <openengine/misc/rng.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -44,12 +46,12 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
 
     float toolQuality = ref->mBase->mData.mQuality;
 
-    float x = (0.1 * pcStrength + 0.1 * pcLuck + armorerSkill) * fatigueTerm;
+    float x = (0.1f * pcStrength + 0.1f * pcLuck + armorerSkill) * fatigueTerm;
 
-    int roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
+    int roll = OEngine::Misc::Rng::roll0to99();
     if (roll <= x)
     {
-        int y = fRepairAmountMult * toolQuality * roll;
+        int y = static_cast<int>(fRepairAmountMult * toolQuality * roll);
         y = std::max(1, y);
 
         // repair by 'y' points

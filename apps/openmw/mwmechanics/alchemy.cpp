@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <map>
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/esm/loadskil.hpp>
 #include <components/esm/loadappa.hpp>
 #include <components/esm/loadgmst.hpp>
@@ -67,7 +69,7 @@ void MWMechanics::Alchemy::applyTools (int flags, float& value) const
 {
     bool magnitude = !(flags & ESM::MagicEffect::NoMagnitude);
     bool duration = !(flags & ESM::MagicEffect::NoDuration);
-    bool negative = flags & (ESM::MagicEffect::Harmful);
+    bool negative = (flags & ESM::MagicEffect::Harmful) != 0;
 
     int tool = negative ? ESM::Apparatus::Retort : ESM::Apparatus::Albemic;
 
@@ -94,17 +96,17 @@ void MWMechanics::Alchemy::applyTools (int flags, float& value) const
 
             quality = negative ? 2 * toolQuality + 3 * calcinatorQuality :
                 (magnitude && duration ?
-                2 * toolQuality + calcinatorQuality : 2/3.0 * (toolQuality + calcinatorQuality) + 0.5);
+                2 * toolQuality + calcinatorQuality : 2/3.0f * (toolQuality + calcinatorQuality) + 0.5f);
             break;
 
         case 2:
 
-            quality = negative ? 1+toolQuality : (magnitude && duration ? toolQuality : toolQuality + 0.5);
+            quality = negative ? 1+toolQuality : (magnitude && duration ? toolQuality : toolQuality + 0.5f);
             break;
 
         case 3:
 
-            quality = magnitude && duration ? calcinatorQuality : calcinatorQuality + 0.5;
+            quality = magnitude && duration ? calcinatorQuality : calcinatorQuality + 0.5f;
             break;
     }
 
@@ -178,8 +180,8 @@ void MWMechanics::Alchemy::updateEffects()
         if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
             applyTools (magicEffect->mData.mFlags, duration);
 
-        duration = static_cast<int> (duration+0.5);
-        magnitude = static_cast<int> (magnitude+0.5);
+        duration = roundf(duration);
+        magnitude = roundf(magnitude);
 
         if (magnitude>0 && duration>0)
         {
@@ -197,8 +199,8 @@ void MWMechanics::Alchemy::updateEffects()
             effect.mRange = 0;
             effect.mArea = 0;
 
-            effect.mDuration = duration;
-            effect.mMagnMin = effect.mMagnMax = magnitude;
+            effect.mDuration = static_cast<int>(duration);
+            effect.mMagnMin = effect.mMagnMax = static_cast<int>(magnitude);
 
             mEffects.push_back (effect);
         }
@@ -294,7 +296,7 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
 
     newRecord.mName = name;
 
-    int index = static_cast<int> (std::rand()/(static_cast<double> (RAND_MAX)+1)*6);
+    int index = OEngine::Misc::Rng::rollDice(6);
     assert (index>=0 && index<6);
 
     static const char *meshes[] = { "standard", "bargain", "cheap", "fresh", "exclusive", "quality" };
@@ -323,8 +325,8 @@ float MWMechanics::Alchemy::getAlchemyFactor() const
 
     return
         (npcStats.getSkill (ESM::Skill::Alchemy).getModified() +
-        0.1 * creatureStats.getAttribute (ESM::Attribute::Intelligence).getModified()
-        + 0.1 * creatureStats.getAttribute (ESM::Attribute::Luck).getModified());
+        0.1f * creatureStats.getAttribute (ESM::Attribute::Intelligence).getModified()
+        + 0.1f * creatureStats.getAttribute (ESM::Attribute::Luck).getModified());
 }
 
 int MWMechanics::Alchemy::countIngredients() const
@@ -467,7 +469,7 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
         return Result_RandomFailure;
     }
 
-    if (getAlchemyFactor()<std::rand()/static_cast<double> (RAND_MAX)*100)
+    if (getAlchemyFactor() < OEngine::Misc::Rng::roll0to99())
     {
         removeIngredients();
         return Result_RandomFailure;

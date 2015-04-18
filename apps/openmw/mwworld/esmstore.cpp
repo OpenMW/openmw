@@ -124,7 +124,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                 mIds[Misc::StringUtils::lowerCase (id)] = n.val;
             }
         }
-        listener->setProgress(esm.getFileOffset() / (float)esm.getFileSize() * 1000);
+        listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
     }
 }
 

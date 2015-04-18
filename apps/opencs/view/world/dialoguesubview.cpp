@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <memory>
+#include <stdexcept>
 
 #include <QGridLayout>
 #include <QLabel>
@@ -39,8 +40,12 @@ QAbstractItemDelegate(parent),
 mTable(table)
 {}
 
-void CSVWorld::NotEditableSubDelegate::setEditorData (QLabel* editor, const QModelIndex& index) const
+void CSVWorld::NotEditableSubDelegate::setEditorData (QWidget* editor, const QModelIndex& index) const
 {
+    QLabel* label = qobject_cast<QLabel*>(editor);
+    if(!label)
+        return;
+
     QVariant v = index.data(Qt::EditRole);
     if (!v.isValid())
     {
@@ -53,16 +58,17 @@ void CSVWorld::NotEditableSubDelegate::setEditorData (QLabel* editor, const QMod
 
     if (QVariant::String == v.type())
     {
-        editor->setText(v.toString());
-    } else //else we are facing enums
+        label->setText(v.toString());
+    }
+    else //else we are facing enums
     {
         int data = v.toInt();
         std::vector<std::string> enumNames (CSMWorld::Columns::getEnums (static_cast<CSMWorld::Columns::ColumnId> (mTable->getColumnId (index.column()))));
-        editor->setText(QString::fromUtf8(enumNames.at(data).c_str()));
+        label->setText(QString::fromUtf8(enumNames.at(data).c_str()));
     }
 }
 
-void CSVWorld::NotEditableSubDelegate::setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index, CSMWorld::ColumnBase::Display display) const
+void CSVWorld::NotEditableSubDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
     //not editable widgets will not save model data
 }
@@ -79,8 +85,7 @@ QSize CSVWorld::NotEditableSubDelegate::sizeHint (const QStyleOptionViewItem& op
 
 QWidget* CSVWorld::NotEditableSubDelegate::createEditor (QWidget *parent,
                                 const QStyleOptionViewItem& option,
-                                const QModelIndex& index,
-                                CSMWorld::ColumnBase::Display display) const
+                                const QModelIndex& index) const
 {
     return new QLabel(parent);
 }
@@ -223,6 +228,11 @@ void CSVWorld::DialogueDelegateDispatcher::setEditorData (QWidget* editor, const
     }
 }
 
+void CSVWorld::DialogueDelegateDispatcher::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+{
+    setModelData(editor, model, index, CSMWorld::ColumnBase::Display_None);
+}
+
 void CSVWorld::DialogueDelegateDispatcher::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index, CSMWorld::ColumnBase::Display display) const
 {
     std::map<int, CommandDelegate*>::const_iterator delegateIt(mDelegates.find(display));
@@ -257,7 +267,7 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
     QWidget* editor = NULL;
     if (! (mTable->flags (index) & Qt::ItemIsEditable))
     {
-        return mNotEditableDelegate.createEditor(qobject_cast<QWidget*>(mParent), QStyleOptionViewItem(), index, display);
+        return mNotEditableDelegate.createEditor(qobject_cast<QWidget*>(mParent), QStyleOptionViewItem(), index);
     }
 
     std::map<int, CommandDelegate*>::iterator delegateIt(mDelegates.find(display));
@@ -266,6 +276,8 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         editor = delegateIt->second->createEditor(qobject_cast<QWidget*>(mParent), QStyleOptionViewItem(), index, display);
         DialogueDelegateDispatcherProxy* proxy = new DialogueDelegateDispatcherProxy(editor, display);
 
+        // NOTE: For each entry in CSVWorld::CommandDelegate::createEditor() a corresponding entry
+        // is required here
         if (qobject_cast<DropLineEdit*>(editor))
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
@@ -286,10 +298,12 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         {
             connect(editor, SIGNAL(currentIndexChanged (int)), proxy, SLOT(editorDataCommited()));
         }
-        else if (qobject_cast<QAbstractSpinBox*>(editor))
+        else if (qobject_cast<QAbstractSpinBox*>(editor) || qobject_cast<QLineEdit*>(editor))
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
         }
+        else // throw an exception because this is a coding error
+            throw std::logic_error ("Dialogue editor type missing");
 
         connect(proxy, SIGNAL(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)), this, SLOT(editorDataCommited(QWidget*, const QModelIndex&, CSMWorld::ColumnBase::Display)));
         mProxys.push_back(proxy); //deleted in the destructor

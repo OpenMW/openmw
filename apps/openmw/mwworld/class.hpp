@@ -347,6 +347,9 @@ namespace MWWorld
 
             virtual std::string getPrimaryFaction (const MWWorld::Ptr& ptr) const;
             virtual int getPrimaryFactionRank (const MWWorld::Ptr& ptr) const;
+
+            /// Get the effective armor rating, factoring in the actor's skills, for the given armor.
+            virtual int getEffectiveArmorRating(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const;
     };
 }
 

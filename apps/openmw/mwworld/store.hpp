@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <sstream>
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/esm/esmwriter.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
@@ -29,7 +31,7 @@ namespace MWWorld
         virtual bool eraseStatic(const std::string &id) {return false;}
         virtual void clearDynamic() {}
 
-        virtual void write (ESM::ESMWriter& writer) const {}
+        virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const {}
 
         virtual void read (ESM::ESMReader& reader, const std::string& id) {}
         ///< Read into dynamic storage
@@ -178,7 +180,7 @@ namespace MWWorld
             std::vector<const T*> results;
             std::for_each(mShared.begin(), mShared.end(), GetRecords(id, &results));
             if(!results.empty())
-                return results[int(std::rand()/((double)RAND_MAX+1)*results.size())];
+                return results[OEngine::Misc::Rng::rollDice(results.size())];
             return NULL;
         }
 
@@ -234,7 +236,7 @@ namespace MWWorld
 
         int getDynamicSize() const
         {
-            return mDynamic.size();
+            return static_cast<int> (mDynamic.size()); // truncated from unsigned __int64 if _MSC_VER && _WIN64
         }
 
         void listIdentifier(std::vector<std::string> &list) const {
@@ -362,19 +364,6 @@ namespace MWWorld
             mShared.push_back(&inserted.first->second);
         else
             inserted.first->second = scpt;
-    }
-
-    template <>
-    inline void Store<ESM::StartScript>::load(ESM::ESMReader &esm, const std::string &id) {
-        ESM::StartScript s;
-        s.load(esm);
-        s.mId = Misc::StringUtils::toLower(s.mScript);
-
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(s.mId, s));
-        if (inserted.second)
-            mShared.push_back(&inserted.first->second);
-        else
-            inserted.first->second = s;
     }
 
     template <>
@@ -555,6 +544,9 @@ namespace MWWorld
                 if (left.first == right.first)
                     return left.second > right.second;
 
+                // Exterior cells are listed in descending, row-major order,
+                // this is a workaround for an ambiguous chargen_plank reference in the vanilla game.
+                // there is one at -22,16 and one at -2,-9, the latter should be used.
                 return left.first > right.first;
             }
         };

@@ -17,7 +17,7 @@ namespace ESM
 
 namespace MWMechanics
 {
-    class EffectKey;
+    struct EffectKey;
     class MagicEffects;
 
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
@@ -97,8 +97,6 @@ namespace MWMechanics
 
         /// @note \a caster can be any type of object, or even an empty object.
         void applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const MWMechanics::EffectKey& effect, float magnitude);
-        
-        void applyDynamicStatsEffect (int attribute, const MWWorld::Ptr& target, float magnitude);
     };
 
 }

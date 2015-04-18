@@ -31,12 +31,12 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, AiState& stat
         float x = pos.pos[0] - mLastPos.pos[0];
         float y = pos.pos[1] - mLastPos.pos[1];
         float z = pos.pos[2] - mLastPos.pos[2];
-        int distance = x * x + y * y + z * z;
+        float distance = x * x + y * y + z * z;
         if(distance < 10 * 10) { //Got stuck, didn't move
             if(mAdjAngle == 0) //Try going in various directions
                 mAdjAngle = 1.57079632679f; //pi/2
             else if (mAdjAngle == 1.57079632679f)
-                mAdjAngle = -1.57079632679;
+                mAdjAngle = -1.57079632679f;
             else
                 mAdjAngle = 0;
             mDuration = 1; //reset timer

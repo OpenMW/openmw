@@ -87,7 +87,7 @@ namespace ESM
         mModel.clear();
         mScript.clear();
         mWeight = 0;
-        mFlags = 0;
+        mFlags = 0x8; // set default flag value
         mInventory.mList.clear();
     }
 }

@@ -109,7 +109,7 @@ namespace sh
 		{
 			params->addSharedParameters (name);
 		}
-		catch (Ogre::Exception& e)
+		catch (Ogre::Exception& )
 		{
 			std::stringstream msg;
 			msg << "Could not create a shared parameter instance for '"

@@ -16,7 +16,7 @@
 
 MWMechanics::AiPackage::~AiPackage() {}
 
-MWMechanics::AiPackage::AiPackage() : mTimer(.26), mStuckTimer(0) { //mTimer starts at .26 to force initial pathbuild
+MWMechanics::AiPackage::AiPackage() : mTimer(0.26f), mStuckTimer(0) { //mTimer starts at .26 to force initial pathbuild
 
 }
 
@@ -86,7 +86,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     //************************
     /// Checks if you aren't moving; attempts to unstick you
     //************************
-    if(mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2])) //Path finished?
+    if(mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1])) //Path finished?
         return true;
     else if(mStuckTimer>0.5) //Every half second see if we need to take action to avoid something
     {

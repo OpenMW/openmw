@@ -15,7 +15,7 @@ namespace ESM
 {
     namespace AiSequence
     {
-        class AiSequence;
+        struct AiSequence;
     }
 }
 

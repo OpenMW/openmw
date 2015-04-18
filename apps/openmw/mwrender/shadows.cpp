@@ -21,7 +21,7 @@ using namespace MWRender;
 
 Shadows::Shadows(OEngine::Render::OgreRenderer* rend) :
     mRendering(rend), mSceneMgr(rend->getScene()), mPSSMSetup(NULL),
-    mShadowFar(1000), mFadeStart(0.9)
+    mShadowFar(1000), mFadeStart(0.9f)
 {
     recreate();
 }
@@ -58,7 +58,7 @@ void Shadows::recreate()
     mSceneMgr->setShadowTexturePixelFormat(PF_FLOAT32_R);
     mSceneMgr->setShadowDirectionalLightExtrusionDistance(1000000);
 
-    mShadowFar = split ? Settings::Manager::getInt("split shadow distance", "Shadows") : Settings::Manager::getInt("shadow distance", "Shadows");
+    mShadowFar = Settings::Manager::getFloat(split ? "split shadow distance" : "shadow distance", "Shadows");
     mSceneMgr->setShadowFarDistance(mShadowFar);
 
     mFadeStart = Settings::Manager::getFloat("fade start", "Shadows");

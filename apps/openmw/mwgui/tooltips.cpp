@@ -308,7 +308,7 @@ namespace MWGui
     void ToolTips::position(MyGUI::IntPoint& position, MyGUI::IntSize size, MyGUI::IntSize viewportSize)
     {
         position += MyGUI::IntPoint(0, 32)
-        - MyGUI::IntPoint((MyGUI::InputManager::getInstance().getMousePosition().left / float(viewportSize.width) * size.width), 0);
+        - MyGUI::IntPoint(static_cast<int>(MyGUI::InputManager::getInstance().getMousePosition().left / float(viewportSize.width) * size.width), 0);
 
         if ((position.left + size.width) > viewportSize.width)
         {
@@ -413,7 +413,7 @@ namespace MWGui
         {
             MyGUI::ImageBox* icon = mDynamicToolTipBox->createWidget<MyGUI::ImageBox>("MarkerButton",
                 MyGUI::IntCoord(padding.left, totalSize.height+padding.top, 8, 8), MyGUI::Align::Default);
-            icon->setColour(MyGUI::Colour(1.0,0.3,0.3));
+            icon->setColour(MyGUI::Colour(1.0f, 0.3f, 0.3f));
             MyGUI::EditBox* edit = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("SandText",
                 MyGUI::IntCoord(padding.left+8+4, totalSize.height+padding.top, 300-padding.left-8-4, 300-totalSize.height),
                                                                                     MyGUI::Align::Default);

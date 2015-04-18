@@ -92,6 +92,11 @@ private:
     /** \brief Private operator= . This is a forbidden operation. */
     BulletShapeManager& operator=(const BulletShapeManager &);
 
+    // Not intended to be used, declared here to keep the compiler from complaining
+    // about hidden virtual methods.
+    virtual Ogre::ResourcePtr load(const Ogre::String &name, const Ogre::String &group,
+            bool isManual, Ogre::ManualResourceLoader *loader, const Ogre::NameValuePairList *loadParams,
+            bool backgroundThread);
 
 public:
 
@@ -101,7 +106,8 @@ public:
 
     /// Get a resource by name
     /// @see ResourceManager::getByName
-    BulletShapePtr getByName(const Ogre::String& name, const Ogre::String& groupName = Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+    BulletShapePtr getByName(const Ogre::String& name,
+            const Ogre::String& groupName = Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
 
     /// Create a new shape
     /// @see ResourceManager::createResource

@@ -23,7 +23,7 @@ namespace ESM
                     hasData = true;
                     break;
                 case ESM::FourCC<'N','A','M','E'>::value:
-                    mScript = esm.getHString();
+                    mId = esm.getHString();
                     hasName = true;
                     break;
                 default:
@@ -38,7 +38,11 @@ namespace ESM
     void StartScript::save(ESMWriter &esm) const
     {
         esm.writeHNString("DATA", mData);
-        esm.writeHNString("NAME", mScript);
+        esm.writeHNString("NAME", mId);
     }
 
+    void StartScript::blank()
+    {
+        mData.clear();
+    }
 }

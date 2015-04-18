@@ -283,14 +283,14 @@ namespace Physic
         }
     }
 
-    void PhysicEngine::setDebugRenderingMode(int mode)
+    void PhysicEngine::setDebugRenderingMode(bool isDebug)
     {
         if(!isDebugCreated)
         {
             createDebugRendering();
         }
-        mDebugDrawer->setDebugMode(mode);
-        mDebugActive = mode;
+        mDebugDrawer->setDebugMode(isDebug);
+        mDebugActive = isDebug;
     }
 
     bool  PhysicEngine::toggleDebugRendering()
@@ -385,7 +385,7 @@ namespace Physic
         }
 
         btHeightfieldTerrainShape* hfShape = new btHeightfieldTerrainShape(
-            sqrtVerts, sqrtVerts, heights, 1,
+            static_cast<int>(sqrtVerts), static_cast<int>(sqrtVerts), heights, 1,
             minh, maxh, 2,
             PHY_FLOAT,true);
 
@@ -396,7 +396,7 @@ namespace Physic
 
         btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,0,hfShape);
         RigidBody* body = new RigidBody(CI,name);
-        body->getWorldTransform().setOrigin(btVector3( (x+0.5)*triSize*(sqrtVerts-1), (y+0.5)*triSize*(sqrtVerts-1), (maxh+minh)/2.f));
+        body->getWorldTransform().setOrigin(btVector3( (x+0.5f)*triSize*(sqrtVerts-1), (y+0.5f)*triSize*(sqrtVerts-1), (maxh+minh)/2.f));
 
         HeightField hf;
         hf.mBody = body;
@@ -414,13 +414,17 @@ namespace Physic
             + boost::lexical_cast<std::string>(x) + "_"
             + boost::lexical_cast<std::string>(y);
 
-        HeightField hf = mHeightFieldMap [name];
+        HeightFieldContainer::iterator it = mHeightFieldMap.find(name);
+        if (it == mHeightFieldMap.end())
+            return;
+
+        const HeightField& hf = it->second;
 
         mDynamicsWorld->removeRigidBody(hf.mBody);
         delete hf.mShape;
         delete hf.mBody;
 
-        mHeightFieldMap.erase(name);
+        mHeightFieldMap.erase(it);
     }
 
     void PhysicEngine::adjustRigidBody(RigidBody* body, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
@@ -716,7 +720,7 @@ namespace Physic
     void PhysicEngine::stepSimulation(double deltaT)
     {
         // This seems to be needed for character controller objects
-        mDynamicsWorld->stepSimulation(deltaT,10, 1/60.0);
+        mDynamicsWorld->stepSimulation(static_cast<btScalar>(deltaT), 10, 1 / 60.0f);
         if(isDebugCreated)
         {
             mDebugDrawer->step();
@@ -824,7 +828,7 @@ namespace Physic
         if (callback.hasHit())
             return std::make_pair(true, callback.m_closestHitFraction);
         else
-            return std::make_pair(false, 1);
+            return std::make_pair(false, 1.0f);
     }
 
     std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(const btVector3& from, const btVector3& to, int filterGroup)

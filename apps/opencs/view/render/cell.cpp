@@ -11,6 +11,7 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
+#include "../../model/world/refcollection.hpp"
 #include "../../model/world/pathgrid.hpp"
 #include "../world/physicssystem.hpp"
 
@@ -89,26 +90,19 @@ bool CSVRender::Cell::removeObject (const std::string& id)
 
 bool CSVRender::Cell::addObjects (int start, int end)
 {
-    CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
-        *mData.getTableModel (CSMWorld::UniversalId::Type_References));
-
-    int idColumn = references.findColumnIndex (CSMWorld::Columns::ColumnId_Id);
-    int cellColumn = references.findColumnIndex (CSMWorld::Columns::ColumnId_Cell);
-    int stateColumn = references.findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
-
     bool modified = false;
 
+    const CSMWorld::RefCollection& collection = mData.getReferences();
+    
     for (int i=start; i<=end; ++i)
     {
-        std::string cell = Misc::StringUtils::lowerCase (references.data (
-            references.index (i, cellColumn)).toString().toUtf8().constData());
+        std::string cell = Misc::StringUtils::lowerCase (collection.getRecord (i).get().mCell);
 
-        int state = references.data (references.index (i, stateColumn)).toInt();
+        CSMWorld::RecordBase::State state = collection.getRecord (i).mState;
 
         if (cell==mId && state!=CSMWorld::RecordBase::State_Deleted)
         {
-            std::string id = Misc::StringUtils::lowerCase (references.data (
-                references.index (i, idColumn)).toString().toUtf8().constData());
+            std::string id = Misc::StringUtils::lowerCase (collection.getRecord (i).get().mId);
 
             mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false, mPhysics)));
             modified = true;
@@ -138,7 +132,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
     if (landIndex != -1)
     {
         const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
-        if(esmLand)
+        if(esmLand && esmLand->mDataTypes&ESM::Land::DATA_VHGT)
         {
             mTerrain.reset(new Terrain::TerrainGrid(sceneManager, new TerrainStorage(mData), Element_Terrain, true,
                                                     Terrain::Align_XY));
@@ -159,7 +153,6 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
 
 CSVRender::Cell::~Cell()
 {
-<<<<<<< .mine
     // destroy manual objects
     for(std::map<std::pair<int, int>, std::string>::iterator iter = mPgEdges.begin();
         iter != mPgEdges.end(); ++iter)
@@ -181,31 +174,9 @@ CSVRender::Cell::~Cell()
         delete iter->second;
     }
 
-    mPhysics->removeHeightField(mSceneMgr, mX, mY);
-=======
     if (mTerrain.get())
         mPhysics->removeHeightField(mSceneMgr, mX, mY);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> .theirs
 
     for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
         iter!=mObjects.end(); ++iter)

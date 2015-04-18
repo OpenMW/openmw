@@ -80,13 +80,13 @@ namespace MWGui
         if (mSkillView->getViewOffset().top + _rel*0.3 > 0)
             mSkillView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mSkillView->setViewOffset(MyGUI::IntPoint(0, mSkillView->getViewOffset().top + _rel*0.3));
+            mSkillView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + _rel*0.3)));
     }
 
     void StatsWindow::onWindowResize(MyGUI::Window* window)
     {
-        mLeftPane->setCoord( MyGUI::IntCoord(0, 0, 0.44*window->getSize().width, window->getSize().height) );
-        mRightPane->setCoord( MyGUI::IntCoord(0.44*window->getSize().width, 0, 0.56*window->getSize().width, window->getSize().height) );
+        mLeftPane->setCoord( MyGUI::IntCoord(0, 0, static_cast<int>(0.44*window->getSize().width), window->getSize().height) );
+        mRightPane->setCoord( MyGUI::IntCoord(static_cast<int>(0.44*window->getSize().width), 0, static_cast<int>(0.56*window->getSize().width), window->getSize().height) );
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
         mSkillView->setVisibleVScroll(false);
         mSkillView->setCanvasSize (mSkillView->getWidth(), mSkillView->getCanvasSize().height);

@@ -30,7 +30,7 @@ namespace MWGui
     {
         MagicEffectInfo newEffectSource;
         newEffectSource.mKey = key;
-        newEffectSource.mMagnitude = magnitude;
+        newEffectSource.mMagnitude = static_cast<int>(magnitude);
         newEffectSource.mPermanent = mIsPermanent;
         newEffectSource.mRemainingTime = remainingTime;
         newEffectSource.mSource = sourceName;

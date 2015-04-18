@@ -104,6 +104,8 @@ namespace MWGui
     };
 
     CSE mCreationStage; // Which state the character creating is in, controls back/next/ok buttons
+
+    void handleDialogDone(CSE currentStage, int nextMode);
     };
 }
 

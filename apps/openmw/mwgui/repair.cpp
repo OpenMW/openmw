@@ -150,10 +150,10 @@ void Repair::onRepairItem(MyGUI::Widget *sender)
 
 void Repair::onMouseWheel(MyGUI::Widget* _sender, int _rel)
 {
-    if (mRepairView->getViewOffset().top + _rel*0.3 > 0)
+    if (mRepairView->getViewOffset().top + _rel*0.3f > 0)
         mRepairView->setViewOffset(MyGUI::IntPoint(0, 0));
     else
-        mRepairView->setViewOffset(MyGUI::IntPoint(0, mRepairView->getViewOffset().top + _rel*0.3));
+        mRepairView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mRepairView->getViewOffset().top + _rel*0.3f)));
 }
 
 }

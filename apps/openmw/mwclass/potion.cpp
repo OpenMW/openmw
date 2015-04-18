@@ -185,7 +185,7 @@ namespace MWClass
 
     bool Potion::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Potions;
+        return (npcServices & ESM::NPC::Potions) != 0;
     }
 
     float Potion::getWeight(const MWWorld::Ptr &ptr) const

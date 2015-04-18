@@ -345,7 +345,7 @@ void CSVWorld::RegionMap::viewInTable()
 
 void CSVWorld::RegionMap::mouseMoveEvent (QMouseEvent* event)
 {
-    startDrag(*this);
+    startDragFromTable(*this);
 }
 
 std::vector< CSMWorld::UniversalId > CSVWorld::RegionMap::getDraggedRecords() const
@@ -400,7 +400,7 @@ void CSVWorld::RegionMap::dropEvent (QDropEvent* event)
         QModelIndex index2(cellsModel->getModelIndex (cellId,
             cellsModel->findColumnIndex (CSMWorld::Columns::ColumnId_Region)));
 
-        mDocument.getUndoStack().push(new CSMWorld::ModifyCommand 
+        mDocument.getUndoStack().push(new CSMWorld::ModifyCommand
                                         (*cellsModel, index2, QString::fromUtf8(record.getId().c_str())));
 
         mRegionId = record.getId();

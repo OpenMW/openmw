@@ -172,7 +172,7 @@ namespace MWClass
 
     bool Repair::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::RepairItem;
+        return (npcServices & ESM::NPC::RepairItem) != 0;
     }
 
     float Repair::getWeight(const MWWorld::Ptr &ptr) const

@@ -323,14 +323,14 @@ namespace MWMechanics
                 if (effect.mAttribute >= 0 && effect.mAttribute < ESM::Attribute::Length)
                 {
                     const float attributePriorities[ESM::Attribute::Length] = {
-                        1.f, // Strength
-                        0.5, // Intelligence
-                        0.6, // Willpower
-                        0.7, // Agility
-                        0.5, // Speed
-                        0.8, // Endurance
-                        0.7, // Personality
-                        0.3 // Luck
+                        1.0f, // Strength
+                        0.5f, // Intelligence
+                        0.6f, // Willpower
+                        0.7f, // Agility
+                        0.5f, // Speed
+                        0.8f, // Endurance
+                        0.7f, // Personality
+                        0.3f // Luck
                     };
                     rating *= attributePriorities[effect.mAttribute];
                 }

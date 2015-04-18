@@ -40,7 +40,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 {
     BaseColumns baseColumns;
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Id, ColumnBase::Display_String,
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Id, ColumnBase::Display_Id,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
     baseColumns.mId = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Modification, ColumnBase::Display_RecordState,
@@ -470,8 +470,7 @@ void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin,
                                      const std::string& destination,
                                      const CSMWorld::UniversalId::Type type)
 {
-        std::auto_ptr<RecordBase> newRecord(mData.getRecord(mData.searchId(origin)).clone());
-        newRecord->mState = RecordBase::State_ModifiedOnly;
+        std::auto_ptr<RecordBase> newRecord(mData.getRecord(mData.searchId(origin)).modifiedCopy());
         mAdapters.find(type)->second->setId(*newRecord, destination);
         mData.insertRecord(*newRecord, type, destination);
 }

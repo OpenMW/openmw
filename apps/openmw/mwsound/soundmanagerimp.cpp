@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <map>
 
+#include <openengine/misc/rng.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -106,7 +108,7 @@ namespace MWSound
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const ESM::Sound *snd = world->getStore().get<ESM::Sound>().find(soundId);
 
-        volume *= pow(10.0, (snd->mData.mVolume/255.0*3348.0 - 3348.0) / 2000.0);
+        volume *= static_cast<float>(pow(10.0, (snd->mData.mVolume / 255.0*3348.0 - 3348.0) / 2000.0));
 
         if(snd->mData.mMinRange == 0 && snd->mData.mMaxRange == 0)
         {
@@ -224,7 +226,7 @@ namespace MWSound
         if(!filelist.size())
             return;
 
-        int i = rand()%filelist.size();
+        int i = OEngine::Misc::Rng::rollDice(filelist.size());
 
         // Don't play the same music track twice in a row
         if (filelist[i] == mLastPlayedMusic)
@@ -477,7 +479,7 @@ namespace MWSound
         while(snditer != mActiveSounds.end())
         {
             if(snditer->second.first != MWWorld::Ptr() &&
-               snditer->second.first.getCellRef().getRefId() != "player" &&
+               snditer->second.first != MWBase::Environment::get().getWorld()->getPlayerPtr() &&
                snditer->second.first.getCell() == cell)
             {
                 snditer->first->stop();
@@ -559,7 +561,7 @@ namespace MWSound
         if(!cell->isExterior() || sTimePassed < sTimeToNextEnvSound)
             return;
 
-        float a = std::rand() / (double)RAND_MAX;
+        float a = OEngine::Misc::Rng::rollClosedProbability();
         // NOTE: We should use the "Minimum Time Between Environmental Sounds" and
         // "Maximum Time Between Environmental Sounds" fallback settings here.
         sTimeToNextEnvSound = 5.0f*a + 15.0f*(1.0f-a);
@@ -588,7 +590,7 @@ namespace MWSound
                 return;
         }
 
-        int r = (int)(rand()/((double)RAND_MAX+1) * total);
+        int r = OEngine::Misc::Rng::rollDice(total);
         int pos = 0;
 
         soundIter = regn->mSoundList.begin();

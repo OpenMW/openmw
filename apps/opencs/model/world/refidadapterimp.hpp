@@ -156,10 +156,16 @@ namespace CSMWorld
         Record<RecordT>& record = static_cast<Record<RecordT>&> (
             data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
 
+        RecordT record2 = record.get();
         if (column==mModel.mModel)
-            record.get().mModel = value.toString().toUtf8().constData();
+            record2.mModel = value.toString().toUtf8().constData();
         else
+        {
             BaseRefIdAdapter<RecordT>::setData (column, data, index, value);
+            return;
+        }
+
+        record.setModified(record2);
     }
 
     struct NameColumns : public ModelColumns
@@ -216,12 +222,18 @@ namespace CSMWorld
         Record<RecordT>& record = static_cast<Record<RecordT>&> (
             data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
 
+        RecordT record2 = record.get();
         if (column==mName.mName)
-            record.get().mName = value.toString().toUtf8().constData();
+            record2.mName = value.toString().toUtf8().constData();
         else if (column==mName.mScript)
-            record.get().mScript = value.toString().toUtf8().constData();
+            record2.mScript = value.toString().toUtf8().constData();
         else
+        {
             ModelRefIdAdapter<RecordT>::setData (column, data, index, value);
+            return;
+        }
+
+        record.setModified(record2);
     }
 
     struct InventoryColumns : public NameColumns
@@ -283,14 +295,20 @@ namespace CSMWorld
         Record<RecordT>& record = static_cast<Record<RecordT>&> (
             data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
 
+        RecordT record2 = record.get();
         if (column==mInventory.mIcon)
-            record.get().mIcon = value.toString().toUtf8().constData();
+            record2.mIcon = value.toString().toUtf8().constData();
         else if (column==mInventory.mWeight)
-            record.get().mData.mWeight = value.toFloat();
+            record2.mData.mWeight = value.toFloat();
         else if (column==mInventory.mValue)
-            record.get().mData.mValue = value.toInt();
+            record2.mData.mValue = value.toInt();
         else
+        {
             NameRefIdAdapter<RecordT>::setData (column, data, index, value);
+            return;
+        }
+
+        record.setModified(record2);
     }
 
     class PotionRefIdAdapter : public InventoryRefIdAdapter<ESM::Potion>
@@ -364,12 +382,18 @@ namespace CSMWorld
         Record<RecordT>& record = static_cast<Record<RecordT>&> (
             data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
 
+        RecordT record2 = record.get();
         if (column==mEnchantable.mEnchantment)
-            record.get().mEnchant = value.toString().toUtf8().constData();
+            record2.mEnchant = value.toString().toUtf8().constData();
         else if (column==mEnchantable.mEnchantmentPoints)
-            record.get().mData.mEnchant = value.toInt();
+            record2.mData.mEnchant = value.toInt();
         else
+        {
             InventoryRefIdAdapter<RecordT>::setData (column, data, index, value);
+            return;
+        }
+
+        record.setModified(record2);
     }
 
     struct ToolColumns : public InventoryColumns
@@ -426,12 +450,18 @@ namespace CSMWorld
         Record<RecordT>& record = static_cast<Record<RecordT>&> (
             data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
 
+        RecordT record2 = record.get();
         if (column==mTools.mQuality)
-            record.get().mData.mQuality = value.toFloat();
+            record2.mData.mQuality = value.toFloat();
         else if (column==mTools.mUses)
-            record.get().mData.mUses = value.toInt();
+            record2.mData.mUses = value.toInt();
         else
+        {
             InventoryRefIdAdapter<RecordT>::setData (column, data, index, value);
+            return;
+        }
+
+        record.setModified(record2);
     }
 
     struct ActorColumns : public NameColumns
@@ -508,16 +538,17 @@ namespace CSMWorld
         Record<RecordT>& record = static_cast<Record<RecordT>&> (
             data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
 
+        RecordT record2 = record.get();
         if (column==mActors.mHasAi)
-            record.get().mHasAI = value.toInt();
+            record2.mHasAI = value.toInt();
         else if (column==mActors.mHello)
-            record.get().mAiData.mHello = value.toInt();
+            record2.mAiData.mHello = value.toInt();
         else if (column==mActors.mFlee)
-            record.get().mAiData.mFlee = value.toInt();
+            record2.mAiData.mFlee = value.toInt();
         else if (column==mActors.mFight)
-            record.get().mAiData.mFight = value.toInt();
+            record2.mAiData.mFight = value.toInt();
         else if (column==mActors.mAlarm)
-            record.get().mAiData.mAlarm = value.toInt();
+            record2.mAiData.mAlarm = value.toInt();
         else
         {
             typename std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
@@ -525,13 +556,18 @@ namespace CSMWorld
             if (iter!=mActors.mServices.end())
             {
                 if (value.toInt()!=0)
-                    record.get().mAiData.mServices |= iter->second;
+                    record2.mAiData.mServices |= iter->second;
                 else
-                    record.get().mAiData.mServices &= ~iter->second;
+                    record2.mAiData.mServices &= ~iter->second;
             }
             else
+            {
                 NameRefIdAdapter<RecordT>::setData (column, data, index, value);
+                return;
+            }
         }
+
+        record.setModified(record2);
     }
 
     class ApparatusRefIdAdapter : public InventoryRefIdAdapter<ESM::Apparatus>

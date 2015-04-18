@@ -146,21 +146,21 @@ namespace MWGui
 
     void ReviewDialog::setHealth(const MWMechanics::DynamicStat<float>& value)
     {
-        mHealth->setValue(value.getCurrent(), value.getModified());
+        mHealth->setValue(static_cast<int>(value.getCurrent()), static_cast<int>(value.getModified()));
         std::string valStr =  MyGUI::utility::toString(value.getCurrent()) + "/" + MyGUI::utility::toString(value.getModified());
         mHealth->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
     }
 
     void ReviewDialog::setMagicka(const MWMechanics::DynamicStat<float>& value)
     {
-        mMagicka->setValue(value.getCurrent(), value.getModified());
+        mMagicka->setValue(static_cast<int>(value.getCurrent()), static_cast<int>(value.getModified()));
         std::string valStr =  MyGUI::utility::toString(value.getCurrent()) + "/" + MyGUI::utility::toString(value.getModified());
         mMagicka->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
     }
 
     void ReviewDialog::setFatigue(const MWMechanics::DynamicStat<float>& value)
     {
-        mFatigue->setValue(value.getCurrent(), value.getModified());
+        mFatigue->setValue(static_cast<int>(value.getCurrent()), static_cast<int>(value.getModified()));
         std::string valStr =  MyGUI::utility::toString(value.getCurrent()) + "/" + MyGUI::utility::toString(value.getModified());
         mFatigue->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
     }
@@ -180,7 +180,7 @@ namespace MWGui
         MyGUI::TextBox* widget = mSkillWidgetMap[skillId];
         if (widget)
         {
-            float modified = value.getModified(), base = value.getBase();
+            float modified = static_cast<float>(value.getModified()), base = static_cast<float>(value.getBase());
             std::string text = MyGUI::utility::toString(std::floor(modified));
             std::string state = "normal";
             if (modified > base)
@@ -376,7 +376,7 @@ namespace MWGui
         if (mSkillView->getViewOffset().top + _rel*0.3 > 0)
             mSkillView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mSkillView->setViewOffset(MyGUI::IntPoint(0, mSkillView->getViewOffset().top + _rel*0.3));
+            mSkillView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + _rel*0.3)));
     }
 
 }

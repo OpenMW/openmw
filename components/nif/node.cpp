@@ -38,7 +38,10 @@ void Node::getProperties(const Nif::NiTexturingProperty *&texprop,
             wireprop = static_cast<const Nif::NiWireframeProperty*>(pr);
         else if (pr->recType == Nif::RC_NiStencilProperty)
             stencilprop = static_cast<const Nif::NiStencilProperty*>(pr);
-        else
+        // the following are unused by the MW engine
+        else if (pr->recType != Nif::RC_NiFogProperty
+                 && pr->recType != Nif::RC_NiDitherProperty
+                 && pr->recType != Nif::RC_NiShadeProperty)
             std::cerr<< "Unhandled property type: "<<pr->recName <<std::endl;
     }
 }

@@ -59,11 +59,11 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
             float fRepairMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                     .find("fRepairMult")->getFloat();
 
-            float p = std::max(1, basePrice);
-            float r = std::max(1, static_cast<int>(maxDurability / p));
+            float p = static_cast<float>(std::max(1, basePrice));
+            float r = static_cast<float>(std::max(1, static_cast<int>(maxDurability / p)));
 
-            int x = ((maxDurability - durability) / r);
-            x = (fRepairMult * x);
+            int x = static_cast<int>((maxDurability - durability) / r);
+            x = static_cast<int>(fRepairMult * x);
 
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mActor, x, true);
 
@@ -105,10 +105,10 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
 void MerchantRepair::onMouseWheel(MyGUI::Widget* _sender, int _rel)
 {
-    if (mList->getViewOffset().top + _rel*0.3 > 0)
+    if (mList->getViewOffset().top + _rel*0.3f > 0)
         mList->setViewOffset(MyGUI::IntPoint(0, 0));
     else
-        mList->setViewOffset(MyGUI::IntPoint(0, mList->getViewOffset().top + _rel*0.3));
+        mList->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mList->getViewOffset().top + _rel*0.3f)));
 }
 
 void MerchantRepair::open()

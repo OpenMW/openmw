@@ -4,7 +4,7 @@
         <Property key="MinSize" value="430 446"/>
         <Widget type="TabControl" skin="TabControl" position="8 8 368 405" align="Stretch" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
-            <Widget type="TabItem" skin="" position="4 32 360 308">
+            <Widget type="TabItem" skin="" position="4 32 360 358">
                 <Property key="Caption" value="  #{sPrefs}  "/>
                 <Widget type="Widget" skin="" position="4 4 352 54" align="Left Top HStretch">
                     <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top">
@@ -172,15 +172,21 @@
             </Widget>
             <Widget type="TabItem" skin="" position="4 32 360 308">
                 <Property key="Caption" value="  #{sControls}  "/>
-                <Widget type="Widget" skin="MW_Box" position="4 4 352 154" align="Stretch">
+                <Widget type="AutoSizedButton" skin="MW_Button" position="4 4 137 24" align="Left Top" name="KeyboardButton">
+                    <Property key="Caption" value="Mouse/Keyboard"/>
+                </Widget>
+                <Widget type="AutoSizedButton" skin="MW_Button" position="141 4 137 24" align="Lept Top" name="ControllerButton">
+                    <Property key="Caption" value="Controller"/>
+                </Widget>
+                <Widget type="Widget" skin="MW_Box" position="4 34 352 154" align="Stretch">
                     <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 344 146" align="Stretch" name="ControlsBox">
                         <Property key="CanvasAlign" value="Left Top"/>
                     </Widget>
                 </Widget>
-                <Widget type="AutoSizedButton" skin="MW_Button" position="4 162 137 24" align="Left Bottom" name="ResetControlsButton">
+                <Widget type="AutoSizedButton" skin="MW_Button" position="4 194 137 24" align="Left Bottom" name="ResetControlsButton">
                     <Property key="Caption" value="#{sControlsMenu1}"/>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 192 300 24" align="Left Bottom">
+                <Widget type="HBox" skin="" position="4 224 300 24" align="Left Bottom">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Bottom" name="InvertYButton">
                         <UserString key="SettingCategory" value="Input"/>
                         <UserString key="SettingName" value="invert y axis"/>
@@ -190,10 +196,10 @@
                         <Property key="Caption" value="#{sMouseFlip}"/>
                     </Widget>
                 </Widget>
-                <Widget type="TextBox" skin="NormalText" position="4 228 336 18" align="Left Bottom">
+                <Widget type="TextBox" skin="NormalText" position="4 254 336 18" align="Left Bottom">
                     <Property key="Caption" value="Camera sensitivity"/>
                 </Widget>
-                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 252 336 18" align="HStretch Bottom" name="CameraSensitivitySlider">
+                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 278 336 18" align="HStretch Bottom" name="CameraSensitivitySlider">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
@@ -203,11 +209,11 @@
                     <UserString key="SettingMin" value="0.2"/>
                     <UserString key="SettingMax" value="5.0"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 276 336 18" align="Left Bottom">
+                <Widget type="TextBox" skin="SandText" position="4 302 336 18" align="Left Bottom">
                     <Property key="Caption" value="#{sLow}"/>
                     <Property key="TextAlign" value="Left"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 276 336 18" align="Right Bottom">
+                <Widget type="TextBox" skin="SandText" position="4 302 336 18" align="Right Bottom">
                     <Property key="Caption" value="#{sHigh}"/>
                     <Property key="TextAlign" value="Right"/>
                 </Widget>

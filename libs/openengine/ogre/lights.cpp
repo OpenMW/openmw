@@ -74,16 +74,16 @@ Ogre::Real LightFunction::calculate(Ogre::Real value)
     if(mType == LT_Normal)
     {
         // Less than 1/255 light modifier for a constant light:
-        brightness = 1.0 + flickerAmplitude(mDeltaCount*slow)/255.0f;
+        brightness = 1.0f + flickerAmplitude(mDeltaCount*slow)/255.0f;
     }
     else if(mType == LT_Flicker)
-        brightness = 0.75 + flickerAmplitude(mDeltaCount*fast)*0.25;
+        brightness = 0.75f + flickerAmplitude(mDeltaCount*fast)*0.25f;
     else if(mType == LT_FlickerSlow)
-        brightness = 0.75 + flickerAmplitude(mDeltaCount*slow)*0.25;
+        brightness = 0.75f + flickerAmplitude(mDeltaCount*slow)*0.25f;
     else if(mType == LT_Pulse)
-        brightness = 1.0 + pulseAmplitude(mDeltaCount*fast)*0.25;
+        brightness = 1.0f + pulseAmplitude(mDeltaCount*fast)*0.25f;
     else if(mType == LT_PulseSlow)
-        brightness = 1.0 + pulseAmplitude(mDeltaCount*slow)*0.25;
+        brightness = 1.0f + pulseAmplitude(mDeltaCount*slow)*0.25f;
 
     return brightness;
 }

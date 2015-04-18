@@ -107,7 +107,7 @@ namespace MWScript
                     // discard additional arguments (reset), because we have no idea what they mean.
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
-                    MWMechanics::AiEscort escortPackage(actorID, duration, x, y, z);
+                    MWMechanics::AiEscort escortPackage(actorID, static_cast<int>(duration), x, y, z);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(escortPackage, ptr);
 
                     std::cout << "AiEscort: " << x << ", " << y << ", " << z << ", " << duration
@@ -145,7 +145,7 @@ namespace MWScript
                     // discard additional arguments (reset), because we have no idea what they mean.
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
-                    MWMechanics::AiEscort escortPackage(actorID, cellID, duration, x, y, z);
+                    MWMechanics::AiEscort escortPackage(actorID, cellID, static_cast<int>(duration), x, y, z);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(escortPackage, ptr);
 
                     std::cout << "AiEscort: " << x << ", " << y << ", " << z << ", " << duration
@@ -177,13 +177,13 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer range = runtime[0].mFloat;
+                    Interpreter::Type_Integer range = static_cast<Interpreter::Type_Integer>(runtime[0].mFloat);
                     runtime.pop();
 
-                    Interpreter::Type_Integer duration = runtime[0].mFloat;
+                    Interpreter::Type_Integer duration = static_cast<Interpreter::Type_Integer>(runtime[0].mFloat);
                     runtime.pop();
 
-                    Interpreter::Type_Integer time = runtime[0].mFloat;
+                    Interpreter::Type_Integer time = static_cast<Interpreter::Type_Integer>(runtime[0].mFloat);
                     runtime.pop();
 
                     std::vector<unsigned char> idleList;
@@ -466,12 +466,9 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context
-                        = static_cast<InterpreterContext&> (runtime.getContext());
-
                     bool enabled = MWBase::Environment::get().getMechanicsManager()->toggleAI();
 
-                    context.report (enabled ? "AI -> On" : "AI -> Off");
+                    runtime.getContext().report (enabled ? "AI -> On" : "AI -> Off");
                 }
         };
 

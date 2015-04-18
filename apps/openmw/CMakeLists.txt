@@ -7,6 +7,7 @@ set(GAME
 )
 
 if (ANDROID)
+    set(GAME ${GAME} android_commandLine.cpp)
     set(GAME ${GAME} android_main.c)
 endif()
 
@@ -104,7 +105,6 @@ find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
 if (NOT ANDROID)
     add_executable(openmw
-        ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
         ${OPENMW_FILES}
         ${GAME} ${GAME_HEADER}
         ${APPLE_BUNDLE_RESOURCES}
@@ -112,7 +112,6 @@ if (NOT ANDROID)
 else ()
     add_library(openmw
         SHARED
-        ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
         ${OPENMW_FILES}
         ${GAME} ${GAME_HEADER}
     )
@@ -120,9 +119,10 @@ endif ()
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
-include_directories(${SOUND_INPUT_INCLUDES} ${BULLET_INCLUDE_DIRS})
+include_directories(${SOUND_INPUT_INCLUDES})
 
 target_link_libraries(openmw
+    ${OENGINE_LIBRARY}
     ${OGRE_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
     ${SHINY_LIBRARIES}

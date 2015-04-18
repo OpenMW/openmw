@@ -199,7 +199,7 @@ namespace MWWorld
                     (*iter)->getCell()->getGridX(),
                     (*iter)->getCell()->getGridY()
                 );
-            if (land)
+            if (land && land->mDataTypes&ESM::Land::DATA_VHGT)
                 mPhysics->removeHeightField ((*iter)->getCell()->getGridX(), (*iter)->getCell()->getGridY());
         }
 
@@ -219,6 +219,8 @@ namespace MWWorld
 
         if(result.second)
         {
+            std::cout << "loading cell " << cell->getCell()->getDescription() << std::endl;
+
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
 
@@ -490,8 +492,6 @@ namespace MWWorld
         loadingListener->setProgressRange(refsToLoad);
 
         // Load cell.
-        std::cout << "cellName: " << cell->getCell()->mName << std::endl;
-
         loadCell (cell, loadingListener);
 
         changePlayerCell(cell, position, true);

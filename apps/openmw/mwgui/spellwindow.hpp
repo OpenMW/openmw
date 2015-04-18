@@ -19,7 +19,7 @@ namespace MWGui
 
         void updateSpells();
 
-        void onFrame(float dt) { NoDrop::onFrame(dt); }
+        void onFrame(float dt);
 
         /// Cycle to next/previous spell
         void cycle(bool next);
@@ -41,6 +41,9 @@ namespace MWGui
 
         SpellView* mSpellView;
         SpellIcons* mSpellIcons;
+
+    private:
+        float mUpdateTimer;
     };
 }
 

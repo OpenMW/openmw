@@ -93,20 +93,14 @@ namespace MWMechanics
             mCellX = cell->mData.mX;
             mCellY = cell->mData.mY;
 
-            ESM::Pathgrid::Point dest;
-            dest.mX = mX;
-            dest.mY = mY;
-            dest.mZ = mZ;
+            ESM::Pathgrid::Point dest(static_cast<int>(mX), static_cast<int>(mY), static_cast<int>(mZ));
 
-            ESM::Pathgrid::Point start;
-            start.mX = pos.pos[0];
-            start.mY = pos.pos[1];
-            start.mZ = pos.pos[2];
+            ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
             mPathFinder.buildPath(start, dest, actor.getCell(), true);
         }
 
-        if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
+        if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1]))
         {
             movement.mPosition[1] = 0;
             return true;

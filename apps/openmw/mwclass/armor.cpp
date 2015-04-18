@@ -154,9 +154,9 @@ namespace MWClass
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        float iWeight = gmst.find (typeGmst)->getInt();
+        float iWeight = floor(gmst.find(typeGmst)->getFloat());
 
-        float epsilon = 5e-4;
+        float epsilon = 0.0005f;
 
         if (ref->mBase->mData.mWeight == 0)
             return ESM::Skill::Unarmored;
@@ -245,7 +245,8 @@ namespace MWClass
         else
             typeText = "#{sHeavy}";
 
-        text += "\n#{sArmorRating}: " + MWGui::ToolTips::toString(ref->mBase->mData.mArmor);
+        text += "\n#{sArmorRating}: " + MWGui::ToolTips::toString(getEffectiveArmorRating(ptr,
+            MWBase::Environment::get().getWorld()->getPlayerPtr()));
 
         int remainingHealth = getItemHealth(ptr);
         text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
@@ -261,7 +262,7 @@ namespace MWClass
 
         info.enchant = ref->mBase->mEnchant;
         if (!info.enchant.empty())
-            info.remainingEnchantCharge = ptr.getCellRef().getEnchantmentCharge();
+            info.remainingEnchantCharge = static_cast<int>(ptr.getCellRef().getEnchantmentCharge());
 
         info.text = text;
 
@@ -288,6 +289,22 @@ namespace MWClass
         newItem.mEnchant=enchId;
         const ESM::Armor *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         return record->mId;
+    }
+
+    int Armor::getEffectiveArmorRating(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor) const
+    {
+        MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+
+        int armorSkillType = getEquipmentSkill(ptr);
+        int armorSkill = actor.getClass().getSkill(actor, armorSkillType);
+
+        const MWBase::World *world = MWBase::Environment::get().getWorld();
+        int iBaseArmorSkill = world->getStore().get<ESM::GameSetting>().find("iBaseArmorSkill")->getInt();
+
+        if(ref->mBase->mData.mWeight == 0)
+            return ref->mBase->mData.mArmor;
+        else
+            return ref->mBase->mData.mArmor * armorSkill / iBaseArmorSkill;
     }
 
     std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const

@@ -40,7 +40,7 @@ namespace MWGui
     TrainingWindow::TrainingWindow()
         : WindowBase("openmw_trainingwindow.layout")
         , mFadeTimeRemaining(0)
-        , mTimeAdvancer(0.05)
+        , mTimeAdvancer(0.05f)
     {
         getWidget(mTrainingOptions, "TrainingOptions");
         getWidget(mCancelButton, "CancelButton");

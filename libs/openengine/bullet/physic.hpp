@@ -258,13 +258,12 @@ namespace Physic
         const Ogre::Vector3 &position, float scale, const Ogre::Quaternion &rotation);
 
         /**
-         * Remove a character from the scene. TODO:delete it! for now, a small memory leak^^ done?
+         * Remove a character from the scene.
          */
         void removeCharacter(const std::string &name);
 
         /**
          * Return a pointer to a character
-         * TODO:check if the actor exist...
          */
         PhysicActor* getCharacter(const std::string &name);
 
@@ -283,7 +282,7 @@ namespace Physic
          * Set the debug rendering mode. 0 to turn it off.
          * Important Note: this will crash if the Render is not yet initialise!
          */
-        void setDebugRenderingMode(int mode);
+        void setDebugRenderingMode(bool isDebug);
 
         bool toggleDebugRendering();
 

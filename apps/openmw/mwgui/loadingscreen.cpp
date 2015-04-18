@@ -15,6 +15,8 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_TextBox.h>
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -33,8 +35,8 @@ namespace MWGui
         : mSceneMgr(sceneMgr)
         , mWindow(rw)
         , WindowBase("openmw_loading_screen.layout")
-        , mLastRenderTime(0.f)
-        , mLastWallpaperChangeTime(0.f)
+        , mLastRenderTime(0)
+        , mLastWallpaperChangeTime(0)
         , mProgress(0)
         , mVSyncWasEnabled(false)
     {
@@ -146,7 +148,7 @@ namespace MWGui
 
         if (!mResources.empty())
         {
-            std::string const & randomSplash = mResources.at (rand() % mResources.size());
+            std::string const & randomSplash = mResources.at(OEngine::Misc::Rng::rollDice(mResources.size()));
 
             Ogre::TextureManager::getSingleton ().load (randomSplash, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
 
@@ -173,7 +175,7 @@ namespace MWGui
             return;
         mProgress = value;
         mProgressBar->setScrollPosition(0);
-        mProgressBar->setTrackSize(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize());
+        mProgressBar->setTrackSize(static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
         draw();
     }
 
@@ -182,7 +184,7 @@ namespace MWGui
         mProgressBar->setScrollPosition(0);
         size_t value = mProgress + increase;
         mProgress = value;
-        mProgressBar->setTrackSize(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize());
+        mProgressBar->setTrackSize(static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
         draw();
     }
 
@@ -193,7 +195,7 @@ namespace MWGui
             time = (time-2)*-1;
 
         mProgressBar->setTrackSize(50);
-        mProgressBar->setScrollPosition(time * (mProgressBar->getScrollRange()-1));
+        mProgressBar->setScrollPosition(static_cast<size_t>(time * (mProgressBar->getScrollRange() - 1)));
         draw();
     }
 

@@ -36,13 +36,13 @@ namespace MWRender
         for (; it != esmStore.get<ESM::Cell>().extEnd(); ++it)
         {
             if (it->getGridX() < minX)
-                minX = it->getGridX();
+                minX = static_cast<float>(it->getGridX());
             if (it->getGridX() > maxX)
-                maxX = it->getGridX();
+                maxX = static_cast<float>(it->getGridX());
             if (it->getGridY() < minY)
-                minY = it->getGridY();
+                minY = static_cast<float>(it->getGridY());
             if (it->getGridY() > maxY)
-                maxY = it->getGridY();
+                maxY = static_cast<float>(it->getGridY());
         }
 
         // since grid coords are at cell origin, we need to add 1 cell

@@ -115,9 +115,6 @@ namespace MWWorld
             void performUpdateSceneQueries ();
             void getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer=true);
 
-            float getNpcActivationDistance ();
-            float getObjectActivationDistance ();
-
             void removeContainerScripts(const Ptr& reference);
             void addContainerScripts(const Ptr& reference, CellStore* cell);
             void PCDropped (const Ptr& item);
