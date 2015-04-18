@@ -180,7 +180,7 @@ namespace MWWorld
             }
         }
 
-        //mRendering.update (duration, paused);
+        mRendering.update (duration, paused);
     }
 
     void Scene::unloadCell (CellStoreCollection::iterator iter)

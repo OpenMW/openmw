@@ -1606,13 +1606,13 @@ namespace MWWorld
             goToJail();
 
         updateWeather(duration, paused);
-        /*
 
-        if (!paused)
-            doPhysics (duration);
+        //if (!paused)
+        //    doPhysics (duration);
 
         mWorldScene->update (duration, paused);
 
+        /*
         performUpdateSceneQueries ();
 
         updateWindowManager ();

@@ -61,17 +61,18 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
-    class EffectAnimationTime : public Ogre::ControllerValue<Ogre::Real>
+    class EffectAnimationTime : public SceneUtil::ControllerSource
     {
     private:
         float mTime;
     public:
-        EffectAnimationTime() : mTime(0) {  }
-        void addTime(float time) { mTime += time; }
-        void resetTime(float value) { mTime = value; }
+        virtual float getValue(osg::NodeVisitor* nv);
 
-        virtual Ogre::Real getValue() const;
-        virtual void setValue(Ogre::Real value);
+        void addTime(float duration);
+        void resetTime(float time);
+        float getTime() const;
+
+        EffectAnimationTime() : mTime(0) {  }
     };
 
     class NullAnimationTime : public SceneUtil::ControllerSource
@@ -123,6 +124,44 @@ protected:
     MWWorld::Ptr mPtr;
 
     Resource::ResourceSystem* mResourceSystem;
+
+    /// @brief Detaches the node from its parent when the object goes out of scope.
+    class PartHolder
+    {
+    public:
+        PartHolder(osg::ref_ptr<osg::Node> node)
+            : mNode(node)
+        {
+        }
+
+        ~PartHolder()
+        {
+            if (mNode->getNumParents())
+                mNode->getParent(0)->removeChild(mNode);
+        }
+
+        osg::ref_ptr<osg::Node> getNode()
+        {
+            return mNode;
+        }
+
+    private:
+        osg::ref_ptr<osg::Node> mNode;
+    };
+    typedef boost::shared_ptr<PartHolder> PartHolderPtr;
+
+    struct EffectParams
+    {
+        std::string mModelName; // Just here so we don't add the same effect twice
+        PartHolderPtr mObjects;
+        boost::shared_ptr<EffectAnimationTime> mAnimTime;
+        float mMaxControllerLength;
+        int mEffectId;
+        bool mLoop;
+        std::string mBoneName;
+    };
+
+    std::vector<EffectParams> mEffects;
 
     /* Sets the appropriate animations on the bone groups based on priority.
      */
@@ -192,12 +231,12 @@ public:
      * @param loop Loop the effect. If false, it is removed automatically after it finishes playing. If true,
      *              you need to remove it manually using removeEffect when the effect should end.
      * @param bonename Bone to attach to, or empty string to use the scene node instead
-     * @param texture override the texture specified in the model's materials
+     * @param texture override the texture specified in the model's materials - if empty, do not override
      * @note Will not add an effect twice.
      */
-    //void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", std::string texture = "");
-    //void removeEffect (int effectId);
-    //void getLoopingEffects (std::vector<int>& out);
+    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", std::string texture = "");
+    void removeEffect (int effectId);
+    void getLoopingEffects (std::vector<int>& out);
 
     //void updatePtr(const MWWorld::Ptr &ptr);
 
@@ -273,6 +312,9 @@ public:
     //float getVelocity(const std::string &groupname) const;
 
     virtual osg::Vec3f runAnimation(float duration);
+
+    /// This is typically called as part of runAnimation, but may be called manually if needed.
+    void updateEffects(float duration);
 };
 
 class ObjectAnimation : public Animation {

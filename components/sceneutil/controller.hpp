@@ -25,6 +25,10 @@ namespace SceneUtil
     {
     public:
         virtual float calculate(float input) = 0;
+
+        /// Get the "stop time" of the controller function, typically the maximum of the calculate() function.
+        /// May not be meaningful for all types of controller functions.
+        virtual float getMaximum() const = 0;
     };
 
     class Controller
@@ -42,18 +46,27 @@ namespace SceneUtil
         boost::shared_ptr<ControllerFunction> mFunction;
     };
 
-    class AssignControllerSourcesVisitor : public osg::NodeVisitor
+    /// Pure virtual base class - visit() all controllers that are attached as UpdateCallbacks in a scene graph.
+    class ControllerVisitor : public osg::NodeVisitor
+    {
+    public:
+        ControllerVisitor();
+
+        virtual void apply(osg::Node& node);
+        virtual void apply(osg::Geode& geode);
+
+        virtual void visit(osg::Node& node, Controller& ctrl) = 0;
+    };
+
+    class AssignControllerSourcesVisitor : public ControllerVisitor
     {
     public:
         AssignControllerSourcesVisitor();
         AssignControllerSourcesVisitor(boost::shared_ptr<ControllerSource> toAssign);
 
-        virtual void apply(osg::Node& node);
-        virtual void apply(osg::Geode& geode);
-
         /// Assign the wanted ControllerSource. May be overriden in derived classes.
         /// By default assigns the ControllerSource passed to the constructor of this class if no ControllerSource is assigned to that controller yet.
-        virtual void assign(osg::Node& node, Controller& ctrl);
+        virtual void visit(osg::Node& node, Controller& ctrl);
 
     private:
         boost::shared_ptr<ControllerSource> mToAssign;

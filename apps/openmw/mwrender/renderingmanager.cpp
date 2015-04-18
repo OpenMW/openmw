@@ -160,4 +160,9 @@ namespace MWRender
         return mSky.get();
     }
 
+    void RenderingManager::update(float dt, bool paused)
+    {
+        mObjects->update(dt);
+    }
+
 }

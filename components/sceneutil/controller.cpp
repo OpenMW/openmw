@@ -32,31 +32,26 @@ namespace SceneUtil
         return nv->getFrameStamp()->getSimulationTime();
     }
 
-    AssignControllerSourcesVisitor::AssignControllerSourcesVisitor()
+    ControllerVisitor::ControllerVisitor()
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
     {
+
     }
 
-    AssignControllerSourcesVisitor::AssignControllerSourcesVisitor(boost::shared_ptr<ControllerSource> toAssign)
-        : mToAssign(toAssign)
-        , osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-    {
-    }
-
-    void AssignControllerSourcesVisitor::apply(osg::Node &node)
+    void ControllerVisitor::apply(osg::Node &node)
     {
         osg::NodeCallback* callback = node.getUpdateCallback();
         while (callback)
         {
             if (Controller* ctrl = dynamic_cast<Controller*>(callback))
-                assign(node, *ctrl);
+                visit(node, *ctrl);
             if (CompositeStateSetUpdater* composite = dynamic_cast<CompositeStateSetUpdater*>(callback))
             {
                 for (unsigned int i=0; i<composite->getNumControllers(); ++i)
                 {
                     StateSetUpdater* statesetcontroller = composite->getController(i);
                     if (Controller* ctrl = dynamic_cast<Controller*>(statesetcontroller))
-                        assign(node, *ctrl);
+                        visit(node, *ctrl);
                 }
             }
 
@@ -66,18 +61,29 @@ namespace SceneUtil
         traverse(node);
     }
 
-    void AssignControllerSourcesVisitor::apply(osg::Geode &geode)
+    void ControllerVisitor::apply(osg::Geode &geode)
     {
         for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
         {
             osg::Drawable* drw = geode.getDrawable(i);
             osg::Drawable::UpdateCallback* callback = drw->getUpdateCallback();
             if (Controller* ctrl = dynamic_cast<Controller*>(callback))
-                assign(geode, *ctrl);
+                visit(geode, *ctrl);
         }
     }
 
-    void AssignControllerSourcesVisitor::assign(osg::Node&, Controller &ctrl)
+    AssignControllerSourcesVisitor::AssignControllerSourcesVisitor()
+        : ControllerVisitor()
+    {
+    }
+
+    AssignControllerSourcesVisitor::AssignControllerSourcesVisitor(boost::shared_ptr<ControllerSource> toAssign)
+        : ControllerVisitor()
+        , mToAssign(toAssign)
+    {
+    }
+
+    void AssignControllerSourcesVisitor::visit(osg::Node&, Controller &ctrl)
     {
         if (!ctrl.mSource.get())
             ctrl.mSource = mToAssign;

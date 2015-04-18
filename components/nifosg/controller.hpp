@@ -95,6 +95,8 @@ namespace NifOsg
         ControllerFunction(const Nif::Controller *ctrl);
 
         float calculate(float value);
+
+        virtual float getMaximum() const;
     };
 
     class GeomMorpherController : public osg::Drawable::UpdateCallback, public SceneUtil::Controller, public ValueInterpolator

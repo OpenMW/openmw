@@ -14,6 +14,8 @@
 
 #include <components/files/configurationmanager.hpp>
 
+#include <components/sceneutil/controller.hpp>
+
 #include <osgGA/TrackballManipulator>
 #include <osg/PositionAttitudeTransform>
 
@@ -128,6 +130,9 @@ int main(int argc, char** argv)
     NifOsg::Loader loader;
     Resource::TextureManager texMgr(&resourceMgr);
     newNode->addChild(loader.load(nif, &texMgr));
+
+    SceneUtil::AssignControllerSourcesVisitor visitor(boost::shared_ptr<SceneUtil::FrameTimeSource>(new SceneUtil::FrameTimeSource));
+    newNode->accept(visitor);
 
     osg::PositionAttitudeTransform* trans = new osg::PositionAttitudeTransform;
     root->addChild(trans);

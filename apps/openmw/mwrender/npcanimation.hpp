@@ -50,26 +50,6 @@ public:
 };
 */
 
-/// @brief Detaches the node from its parent when the object goes out of scope.
-class PartHolder
-{
-public:
-    PartHolder(osg::ref_ptr<osg::Node> node)
-        : mNode(node)
-    {
-    }
-
-    ~PartHolder()
-    {
-        if (mNode->getNumParents())
-            mNode->getParent(0)->removeChild(mNode);
-    }
-
-private:
-    osg::ref_ptr<osg::Node> mNode;
-};
-typedef boost::shared_ptr<PartHolder> PartHolderPtr;
-
 class NpcAnimation : public Animation, public WeaponAnimation, public MWWorld::InventoryStoreListener
 {
 public:

@@ -587,12 +587,15 @@ public:
     }
 };
 
-PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, int group, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
+Animation::PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, int group, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
 {
     osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->createInstance(model);
     osg::ref_ptr<osg::Node> attached = SceneUtil::attach(instance, mObjectRoot, bonefilter, bonename);
     if (enchantedGlow)
         addGlow(attached, *glowColor);
+
+    // TODO: set group userdata for inventory picking
+
     return PartHolderPtr(new PartHolder(attached));
 }
 

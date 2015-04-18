@@ -64,6 +64,11 @@ float ControllerFunction::calculate(float value)
     }
 }
 
+float ControllerFunction::getMaximum() const
+{
+    return mStopTime;
+}
+
 KeyframeController::KeyframeController()
 {
 }

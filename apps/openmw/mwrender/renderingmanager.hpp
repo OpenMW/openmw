@@ -63,6 +63,8 @@ namespace MWRender
 
         osg::Vec3f getEyePos();
 
+        void update(float dt, bool paused);
+
     private:
         osgViewer::Viewer& mViewer;
         osg::ref_ptr<osg::Group> mRootNode;

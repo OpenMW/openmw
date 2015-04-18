@@ -10,12 +10,17 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/texturemanager.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include <components/sceneutil/statesetupdater.hpp>
+#include <components/sceneutil/visitor.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
+
+#include "vismask.hpp"
 
 namespace
 {
@@ -62,6 +67,30 @@ namespace
         std::vector<osg::ref_ptr<osg::Texture2D> > mTextures;
     };
 
+    class FindMaxControllerLengthVisitor : public SceneUtil::ControllerVisitor
+    {
+    public:
+        FindMaxControllerLengthVisitor()
+            : SceneUtil::ControllerVisitor()
+            , mMaxLength(0)
+        {
+        }
+
+        virtual void visit(osg::Node& , SceneUtil::Controller& ctrl)
+        {
+            if (ctrl.mFunction)
+                mMaxLength = std::max(mMaxLength, ctrl.mFunction->getMaximum());
+        }
+
+        float getMaxLength() const
+        {
+            return mMaxLength;
+        }
+
+    private:
+        float mMaxLength;
+    };
+
 }
 
 namespace MWRender
@@ -83,6 +112,8 @@ namespace MWRender
 
     osg::Vec3f Animation::runAnimation(float duration)
     {
+        updateEffects(duration);
+
         return osg::Vec3f();
     }
 
@@ -147,6 +178,133 @@ namespace MWRender
         return result;
     }
 
+    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, std::string texture)
+    {
+        // Early out if we already have this effect
+        for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+            if (it->mLoop && loop && it->mEffectId == effectId && it->mBoneName == bonename)
+                return;
+
+        EffectParams params;
+        params.mModelName = model;
+        osg::ref_ptr<osg::Group> parentNode;
+        if (bonename.empty())
+            parentNode = mObjectRoot->asGroup();
+        else
+        {
+            SceneUtil::FindByNameVisitor visitor(bonename);
+            mObjectRoot->accept(visitor);
+            if (!visitor.mFoundNode)
+                throw std::runtime_error("Can't find bone " + bonename);
+            parentNode = visitor.mFoundNode;
+        }
+        osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->createInstance(model, parentNode);
+        params.mObjects = PartHolderPtr(new PartHolder(node));
+
+        FindMaxControllerLengthVisitor findMaxLengthVisitor;
+        node->accept(findMaxLengthVisitor);
+
+        params.mMaxControllerLength = findMaxLengthVisitor.getMaxLength();
+
+        node->setNodeMask(Mask_Effect);
+
+        params.mLoop = loop;
+        params.mEffectId = effectId;
+        params.mBoneName = bonename;
+
+        params.mAnimTime = boost::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
+
+        SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
+        node->accept(assignVisitor);
+
+        if (!texture.empty())
+        {
+            std::string correctedTexture = Misc::ResourceHelpers::correctTexturePath(texture, mResourceSystem->getVFS());
+            // Not sure if wrap settings should be pulled from the overridden texture?
+            osg::ref_ptr<osg::Texture2D> tex = mResourceSystem->getTextureManager()->getTexture2D(correctedTexture, osg::Texture2D::CLAMP,
+                                                                                                  osg::Texture2D::CLAMP);
+            osg::ref_ptr<osg::StateSet> stateset;
+            if (node->getStateSet())
+                stateset = static_cast<osg::StateSet*>(node->getStateSet()->clone(osg::CopyOp::SHALLOW_COPY));
+            else
+                stateset = new osg::StateSet;
+
+            stateset->setTextureAttribute(0, tex, osg::StateAttribute::OVERRIDE);
+
+            node->setStateSet(stateset);
+        }
+
+        // TODO: in vanilla morrowind the effect is scaled based on the host object's bounding box.
+
+        mEffects.push_back(params);
+    }
+
+    void Animation::removeEffect(int effectId)
+    {
+        for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+        {
+            if (it->mEffectId == effectId)
+            {
+                mEffects.erase(it);
+                return;
+            }
+        }
+    }
+
+    void Animation::getLoopingEffects(std::vector<int> &out)
+    {
+        for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+        {
+            if (it->mLoop)
+                out.push_back(it->mEffectId);
+        }
+    }
+
+    void Animation::updateEffects(float duration)
+    {
+        for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); )
+        {
+            it->mAnimTime->addTime(duration);
+
+            if (it->mAnimTime->getTime() >= it->mMaxControllerLength)
+            {
+                if (it->mLoop)
+                {
+                    // Start from the beginning again; carry over the remainder
+                    // Not sure if this is actually needed, the controller function might already handle loops
+                    float remainder = it->mAnimTime->getTime() - it->mMaxControllerLength;
+                    it->mAnimTime->resetTime(remainder);
+                }
+                else
+                {
+                    it = mEffects.erase(it);
+                    continue;
+                }
+            }
+            ++it;
+        }
+    }
+
+    float Animation::EffectAnimationTime::getValue(osg::NodeVisitor*)
+    {
+        return mTime;
+    }
+
+    void Animation::EffectAnimationTime::addTime(float duration)
+    {
+        mTime += duration;
+    }
+
+    void Animation::EffectAnimationTime::resetTime(float time)
+    {
+        mTime = time;
+    }
+
+    float Animation::EffectAnimationTime::getTime() const
+    {
+        return mTime;
+    }
+
     // --------------------------------------------------------------------------------
 
     ObjectAnimation::ObjectAnimation(const MWWorld::Ptr &ptr, const std::string &model, Resource::ResourceSystem* resourceSystem)
@@ -158,11 +316,6 @@ namespace MWRender
 
             if (!ptr.getClass().getEnchantment(ptr).empty())
                 addGlow(mObjectRoot, getEnchantmentColor(ptr));
-        }
-        else
-        {
-            // No model given. Create an object root anyway, so that lights can be added to it if needed.
-            //mObjectRoot = NifOgre::ObjectScenePtr (new NifOgre::ObjectScene(mInsert->getCreator()));
         }
     }
 

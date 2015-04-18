@@ -49,7 +49,7 @@ public:
 
     Animation* getAnimation(const MWWorld::Ptr &ptr);
 
-    void update (float dt, Ogre::Camera* camera);
+    void update (float dt);
     ///< per-frame update
 
     //Ogre::AxisAlignedBox getDimensions(MWWorld::CellStore*);

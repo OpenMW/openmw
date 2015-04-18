@@ -246,7 +246,7 @@ void Objects::removeCell(const MWWorld::CellStore* store)
     }
 }
 
-void Objects::update(float dt, Ogre::Camera* camera)
+void Objects::update(float dt)
 {
     PtrAnimationMap::const_iterator it = mObjects.begin();
     for(;it != mObjects.end();++it)
