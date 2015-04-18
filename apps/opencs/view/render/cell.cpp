@@ -93,7 +93,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
     bool modified = false;
 
     const CSMWorld::RefCollection& collection = mData.getReferences();
-    
+
     for (int i=start; i<=end; ++i)
     {
         std::string cell = Misc::StringUtils::lowerCase (collection.getRecord (i).get().mCell);
@@ -176,7 +176,6 @@ CSVRender::Cell::~Cell()
 
     if (mTerrain.get())
         mPhysics->removeHeightField(mSceneMgr, mX, mY);
-
 
     for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
         iter!=mObjects.end(); ++iter)
