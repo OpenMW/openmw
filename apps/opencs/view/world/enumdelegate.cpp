@@ -88,6 +88,7 @@ void CSVWorld::EnumDelegate::setEditorData (QWidget *editor, const QModelIndex& 
             if (mValues[i].first==value)
             {
                 comboBox->setCurrentIndex (i);
+                comboBox->showPopup();
                 break;
             }
     }

@@ -444,6 +444,8 @@ void CSVWorld::EditWidget::remake(int row)
                 NestedTable* table = new NestedTable(mDocument, mNestedModels.back(), this);
                 // FIXME: does not work well when enum delegates are used
                 //table->resizeColumnsToContents();
+                table->setEditTriggers(QAbstractItemView::CurrentChanged);
+                table->setSelectionBehavior(QAbstractItemView::SelectItems);
 
 
                 QLabel* label =
