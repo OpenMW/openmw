@@ -867,7 +867,7 @@ namespace CSMWorld
         {
             Record<ESXRecordT>& record =
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
-            EffectsListAdapter<ESXRecordT>::addNestedRow(record, position);
+            EffectsListAdapter<ESXRecordT>::addRow(record, position);
         }
 
         using NestedRefIdAdapterBase::removeNestedRow;
@@ -876,7 +876,7 @@ namespace CSMWorld
         {
             Record<ESXRecordT>& record =
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
-            EffectsListAdapter<ESXRecordT>::removeNestedRow(record, rowToRemove);
+            EffectsListAdapter<ESXRecordT>::removeRow(record, rowToRemove);
         }
 
         using NestedRefIdAdapterBase::setNestedTable;
@@ -885,7 +885,7 @@ namespace CSMWorld
         {
             Record<ESXRecordT>& record =
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
-            EffectsListAdapter<ESXRecordT>::setNestedTable(record, nestedTable);
+            EffectsListAdapter<ESXRecordT>::setTable(record, nestedTable);
         }
 
         using NestedRefIdAdapterBase::nestedTable;
@@ -903,7 +903,7 @@ namespace CSMWorld
         {
             const Record<ESXRecordT>& record =
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
-            return EffectsListAdapter<ESXRecordT>::getNestedData(record, subRowIndex, subColIndex);
+            return EffectsListAdapter<ESXRecordT>::getData(record, subRowIndex, subColIndex);
         }
 
         using NestedRefIdAdapterBase::setNestedData;
@@ -912,14 +912,14 @@ namespace CSMWorld
         {
             Record<ESXRecordT>& record =
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
-            EffectsListAdapter<ESXRecordT>::setNestedData(record, value, subRowIndex, subColIndex);
+            EffectsListAdapter<ESXRecordT>::setData(record, value, subRowIndex, subColIndex);
         }
 
         using NestedRefIdAdapterBase::getNestedColumnsCount;
         virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
         {
             const Record<ESXRecordT> record; // not used, just a dummy
-            return EffectsListAdapter<ESXRecordT>::getNestedColumnsCount(record);
+            return EffectsListAdapter<ESXRecordT>::getColumnsCount(record);
         }
 
         using NestedRefIdAdapterBase::getNestedRowsCount;
@@ -927,7 +927,7 @@ namespace CSMWorld
         {
             const Record<ESXRecordT>& record =
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
-            return EffectsListAdapter<ESXRecordT>::getNestedRowsCount(record);
+            return EffectsListAdapter<ESXRecordT>::getRowsCount(record);
         }
     };
 
@@ -1731,7 +1731,7 @@ namespace CSMWorld
             {
                 case 0:
                 {
-                    if (content.mPart >=0 && content.mPart < ESM::PRT_Count)
+                    if (content.mPart < ESM::PRT_Count)
                         return content.mPart;
                     else
                         throw std::runtime_error("Part Reference Type unexpected value");

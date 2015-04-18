@@ -42,24 +42,24 @@ namespace CSMWorld
     public:
         PathgridPointListAdapter ();
 
-        virtual void addNestedRow(Record<Pathgrid>& record, int position) const;
+        virtual void addRow(Record<Pathgrid>& record, int position) const;
 
-        virtual void removeNestedRow(Record<Pathgrid>& record, int rowToRemove) const;
+        virtual void removeRow(Record<Pathgrid>& record, int rowToRemove) const;
 
-        virtual void setNestedTable(Record<Pathgrid>& record,
+        virtual void setTable(Record<Pathgrid>& record,
                 const NestedTableWrapperBase& nestedTable) const;
 
         virtual NestedTableWrapperBase* nestedTable(const Record<Pathgrid>& record) const;
 
-        virtual QVariant getNestedData(const Record<Pathgrid>& record,
+        virtual QVariant getData(const Record<Pathgrid>& record,
                 int subRowIndex, int subColIndex) const;
 
-        virtual void setNestedData(Record<Pathgrid>& record,
+        virtual void setData(Record<Pathgrid>& record,
                 const QVariant& value, int subRowIndex, int subColIndex) const;
 
-        virtual int getNestedColumnsCount(const Record<Pathgrid>& record) const;
+        virtual int getColumnsCount(const Record<Pathgrid>& record) const;
 
-        virtual int getNestedRowsCount(const Record<Pathgrid>& record) const;
+        virtual int getRowsCount(const Record<Pathgrid>& record) const;
     };
 
     class PathgridEdgeListAdapter : public NestedColumnAdapter<Pathgrid>
@@ -67,24 +67,24 @@ namespace CSMWorld
     public:
         PathgridEdgeListAdapter ();
 
-        virtual void addNestedRow(Record<Pathgrid>& record, int position) const;
+        virtual void addRow(Record<Pathgrid>& record, int position) const;
 
-        virtual void removeNestedRow(Record<Pathgrid>& record, int rowToRemove) const;
+        virtual void removeRow(Record<Pathgrid>& record, int rowToRemove) const;
 
-        virtual void setNestedTable(Record<Pathgrid>& record,
+        virtual void setTable(Record<Pathgrid>& record,
                 const NestedTableWrapperBase& nestedTable) const;
 
         virtual NestedTableWrapperBase* nestedTable(const Record<Pathgrid>& record) const;
 
-        virtual QVariant getNestedData(const Record<Pathgrid>& record,
+        virtual QVariant getData(const Record<Pathgrid>& record,
                 int subRowIndex, int subColIndex) const;
 
-        virtual void setNestedData(Record<Pathgrid>& record,
+        virtual void setData(Record<Pathgrid>& record,
                 const QVariant& value, int subRowIndex, int subColIndex) const;
 
-        virtual int getNestedColumnsCount(const Record<Pathgrid>& record) const;
+        virtual int getColumnsCount(const Record<Pathgrid>& record) const;
 
-        virtual int getNestedRowsCount(const Record<Pathgrid>& record) const;
+        virtual int getRowsCount(const Record<Pathgrid>& record) const;
     };
 
     class FactionReactionsAdapter : public NestedColumnAdapter<ESM::Faction>
@@ -92,24 +92,24 @@ namespace CSMWorld
     public:
         FactionReactionsAdapter ();
 
-        virtual void addNestedRow(Record<ESM::Faction>& record, int position) const;
+        virtual void addRow(Record<ESM::Faction>& record, int position) const;
 
-        virtual void removeNestedRow(Record<ESM::Faction>& record, int rowToRemove) const;
+        virtual void removeRow(Record<ESM::Faction>& record, int rowToRemove) const;
 
-        virtual void setNestedTable(Record<ESM::Faction>& record,
+        virtual void setTable(Record<ESM::Faction>& record,
                 const NestedTableWrapperBase& nestedTable) const;
 
         virtual NestedTableWrapperBase* nestedTable(const Record<ESM::Faction>& record) const;
 
-        virtual QVariant getNestedData(const Record<ESM::Faction>& record,
+        virtual QVariant getData(const Record<ESM::Faction>& record,
                 int subRowIndex, int subColIndex) const;
 
-        virtual void setNestedData(Record<ESM::Faction>& record,
+        virtual void setData(Record<ESM::Faction>& record,
                 const QVariant& value, int subRowIndex, int subColIndex) const;
 
-        virtual int getNestedColumnsCount(const Record<ESM::Faction>& record) const;
+        virtual int getColumnsCount(const Record<ESM::Faction>& record) const;
 
-        virtual int getNestedRowsCount(const Record<ESM::Faction>& record) const;
+        virtual int getRowsCount(const Record<ESM::Faction>& record) const;
     };
 
     class RegionSoundListAdapter : public NestedColumnAdapter<ESM::Region>
@@ -117,24 +117,24 @@ namespace CSMWorld
     public:
         RegionSoundListAdapter ();
 
-        virtual void addNestedRow(Record<ESM::Region>& record, int position) const;
+        virtual void addRow(Record<ESM::Region>& record, int position) const;
 
-        virtual void removeNestedRow(Record<ESM::Region>& record, int rowToRemove) const;
+        virtual void removeRow(Record<ESM::Region>& record, int rowToRemove) const;
 
-        virtual void setNestedTable(Record<ESM::Region>& record,
+        virtual void setTable(Record<ESM::Region>& record,
                 const NestedTableWrapperBase& nestedTable) const;
 
         virtual NestedTableWrapperBase* nestedTable(const Record<ESM::Region>& record) const;
 
-        virtual QVariant getNestedData(const Record<ESM::Region>& record,
+        virtual QVariant getData(const Record<ESM::Region>& record,
                 int subRowIndex, int subColIndex) const;
 
-        virtual void setNestedData(Record<ESM::Region>& record,
+        virtual void setData(Record<ESM::Region>& record,
                 const QVariant& value, int subRowIndex, int subColIndex) const;
 
-        virtual int getNestedColumnsCount(const Record<ESM::Region>& record) const;
+        virtual int getColumnsCount(const Record<ESM::Region>& record) const;
 
-        virtual int getNestedRowsCount(const Record<ESM::Region>& record) const;
+        virtual int getRowsCount(const Record<ESM::Region>& record) const;
     };
 
     template<typename ESXRecordT>
@@ -143,7 +143,7 @@ namespace CSMWorld
     public:
         SpellListAdapter () {}
 
-        virtual void addNestedRow(Record<ESXRecordT>& record, int position) const
+        virtual void addRow(Record<ESXRecordT>& record, int position) const
         {
             ESXRecordT raceOrBthSgn = record.get();
 
@@ -157,7 +157,7 @@ namespace CSMWorld
             record.setModified (raceOrBthSgn);
         }
 
-        virtual void removeNestedRow(Record<ESXRecordT>& record, int rowToRemove) const
+        virtual void removeRow(Record<ESXRecordT>& record, int rowToRemove) const
         {
             ESXRecordT raceOrBthSgn = record.get();
 
@@ -171,7 +171,7 @@ namespace CSMWorld
             record.setModified (raceOrBthSgn);
         }
 
-        virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const
+        virtual void setTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const
         {
             ESXRecordT raceOrBthSgn = record.get();
 
@@ -187,7 +187,7 @@ namespace CSMWorld
             return new NestedTableWrapper<std::vector<std::string> >(record.get().mPowers.mList);
         }
 
-        virtual QVariant getNestedData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const
+        virtual QVariant getData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const
         {
             ESXRecordT raceOrBthSgn = record.get();
 
@@ -204,7 +204,7 @@ namespace CSMWorld
             }
         }
 
-        virtual void setNestedData(Record<ESXRecordT>& record, const QVariant& value,
+        virtual void setData(Record<ESXRecordT>& record, const QVariant& value,
                                     int subRowIndex, int subColIndex) const
         {
             ESXRecordT raceOrBthSgn = record.get();
@@ -226,12 +226,12 @@ namespace CSMWorld
             record.setModified (raceOrBthSgn);
         }
 
-        virtual int getNestedColumnsCount(const Record<ESXRecordT>& record) const
+        virtual int getColumnsCount(const Record<ESXRecordT>& record) const
         {
             return 1;
         }
 
-        virtual int getNestedRowsCount(const Record<ESXRecordT>& record) const
+        virtual int getRowsCount(const Record<ESXRecordT>& record) const
         {
             return static_cast<int>(record.get().mPowers.mList.size());
         }
@@ -243,7 +243,7 @@ namespace CSMWorld
     public:
         EffectsListAdapter () {}
 
-        virtual void addNestedRow(Record<ESXRecordT>& record, int position) const
+        virtual void addRow(Record<ESXRecordT>& record, int position) const
         {
             ESXRecordT magic = record.get();
 
@@ -265,7 +265,7 @@ namespace CSMWorld
             record.setModified (magic);
         }
 
-        virtual void removeNestedRow(Record<ESXRecordT>& record, int rowToRemove) const
+        virtual void removeRow(Record<ESXRecordT>& record, int rowToRemove) const
         {
             ESXRecordT magic = record.get();
 
@@ -279,7 +279,7 @@ namespace CSMWorld
             record.setModified (magic);
         }
 
-        virtual void setNestedTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const
+        virtual void setTable(Record<ESXRecordT>& record, const NestedTableWrapperBase& nestedTable) const
         {
             ESXRecordT magic = record.get();
 
@@ -295,7 +295,7 @@ namespace CSMWorld
             return new NestedTableWrapper<std::vector<ESM::ENAMstruct> >(record.get().mEffects.mList);
         }
 
-        virtual QVariant getNestedData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const
+        virtual QVariant getData(const Record<ESXRecordT>& record, int subRowIndex, int subColIndex) const
         {
             ESXRecordT magic = record.get();
 
@@ -331,7 +331,7 @@ namespace CSMWorld
             }
         }
 
-        virtual void setNestedData(Record<ESXRecordT>& record, const QVariant& value,
+        virtual void setData(Record<ESXRecordT>& record, const QVariant& value,
                                     int subRowIndex, int subColIndex) const
         {
             ESXRecordT magic = record.get();
@@ -376,12 +376,12 @@ namespace CSMWorld
             record.setModified (magic);
         }
 
-        virtual int getNestedColumnsCount(const Record<ESXRecordT>& record) const
+        virtual int getColumnsCount(const Record<ESXRecordT>& record) const
         {
             return 8;
         }
 
-        virtual int getNestedRowsCount(const Record<ESXRecordT>& record) const
+        virtual int getRowsCount(const Record<ESXRecordT>& record) const
         {
             return static_cast<int>(record.get().mEffects.mList.size());
         }

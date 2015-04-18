@@ -10,7 +10,7 @@ namespace CSMWorld
 {
     PathgridPointListAdapter::PathgridPointListAdapter () {}
 
-    void PathgridPointListAdapter::addNestedRow(Record<Pathgrid>& record, int position) const
+    void PathgridPointListAdapter::addRow(Record<Pathgrid>& record, int position) const
     {
         Pathgrid pathgrid = record.get();
 
@@ -43,7 +43,7 @@ namespace CSMWorld
         record.setModified (pathgrid);
     }
 
-    void PathgridPointListAdapter::removeNestedRow(Record<Pathgrid>& record, int rowToRemove) const
+    void PathgridPointListAdapter::removeRow(Record<Pathgrid>& record, int rowToRemove) const
     {
         Pathgrid pathgrid = record.get();
 
@@ -78,7 +78,7 @@ namespace CSMWorld
         record.setModified (pathgrid);
     }
 
-    void PathgridPointListAdapter::setNestedTable(Record<Pathgrid>& record,
+    void PathgridPointListAdapter::setTable(Record<Pathgrid>& record,
             const NestedTableWrapperBase& nestedTable) const
     {
         Pathgrid pathgrid = record.get();
@@ -100,7 +100,7 @@ namespace CSMWorld
         return new PathgridPointsWrap(record.get());
     }
 
-    QVariant PathgridPointListAdapter::getNestedData(const Record<Pathgrid>& record,
+    QVariant PathgridPointListAdapter::getData(const Record<Pathgrid>& record,
             int subRowIndex, int subColIndex) const
     {
         ESM::Pathgrid::Point point = record.get().mPoints[subRowIndex];
@@ -114,7 +114,7 @@ namespace CSMWorld
         }
     }
 
-    void PathgridPointListAdapter::setNestedData(Record<Pathgrid>& record,
+    void PathgridPointListAdapter::setData(Record<Pathgrid>& record,
             const QVariant& value, int subRowIndex, int subColIndex) const
     {
         Pathgrid pathgrid = record.get();
@@ -133,12 +133,12 @@ namespace CSMWorld
         record.setModified (pathgrid);
     }
 
-    int PathgridPointListAdapter::getNestedColumnsCount(const Record<Pathgrid>& record) const
+    int PathgridPointListAdapter::getColumnsCount(const Record<Pathgrid>& record) const
     {
         return 4;
     }
 
-    int PathgridPointListAdapter::getNestedRowsCount(const Record<Pathgrid>& record) const
+    int PathgridPointListAdapter::getRowsCount(const Record<Pathgrid>& record) const
     {
         return static_cast<int>(record.get().mPoints.size());
     }
@@ -146,7 +146,7 @@ namespace CSMWorld
     PathgridEdgeListAdapter::PathgridEdgeListAdapter () {}
 
     // ToDo: seems to be auto-sorted in the dialog table display after insertion
-    void PathgridEdgeListAdapter::addNestedRow(Record<Pathgrid>& record, int position) const
+    void PathgridEdgeListAdapter::addRow(Record<Pathgrid>& record, int position) const
     {
         Pathgrid pathgrid = record.get();
 
@@ -167,7 +167,7 @@ namespace CSMWorld
         record.setModified (pathgrid);
     }
 
-    void PathgridEdgeListAdapter::removeNestedRow(Record<Pathgrid>& record, int rowToRemove) const
+    void PathgridEdgeListAdapter::removeRow(Record<Pathgrid>& record, int rowToRemove) const
     {
         Pathgrid pathgrid = record.get();
 
@@ -181,7 +181,7 @@ namespace CSMWorld
         record.setModified (pathgrid);
     }
 
-    void PathgridEdgeListAdapter::setNestedTable(Record<Pathgrid>& record,
+    void PathgridEdgeListAdapter::setTable(Record<Pathgrid>& record,
             const NestedTableWrapperBase& nestedTable) const
     {
         Pathgrid pathgrid = record.get();
@@ -198,7 +198,7 @@ namespace CSMWorld
         return new NestedTableWrapper<ESM::Pathgrid::EdgeList>(record.get().mEdges);
     }
 
-    QVariant PathgridEdgeListAdapter::getNestedData(const Record<Pathgrid>& record,
+    QVariant PathgridEdgeListAdapter::getData(const Record<Pathgrid>& record,
             int subRowIndex, int subColIndex) const
     {
         Pathgrid pathgrid = record.get();
@@ -217,7 +217,7 @@ namespace CSMWorld
     }
 
     // ToDo: detect duplicates in mEdges
-    void PathgridEdgeListAdapter::setNestedData(Record<Pathgrid>& record,
+    void PathgridEdgeListAdapter::setData(Record<Pathgrid>& record,
             const QVariant& value, int subRowIndex, int subColIndex) const
     {
         Pathgrid pathgrid = record.get();
@@ -239,19 +239,19 @@ namespace CSMWorld
         record.setModified (pathgrid);
     }
 
-    int PathgridEdgeListAdapter::getNestedColumnsCount(const Record<Pathgrid>& record) const
+    int PathgridEdgeListAdapter::getColumnsCount(const Record<Pathgrid>& record) const
     {
         return 3;
     }
 
-    int PathgridEdgeListAdapter::getNestedRowsCount(const Record<Pathgrid>& record) const
+    int PathgridEdgeListAdapter::getRowsCount(const Record<Pathgrid>& record) const
     {
         return static_cast<int>(record.get().mEdges.size());
     }
 
     FactionReactionsAdapter::FactionReactionsAdapter () {}
 
-    void FactionReactionsAdapter::addNestedRow(Record<ESM::Faction>& record, int position) const
+    void FactionReactionsAdapter::addRow(Record<ESM::Faction>& record, int position) const
     {
         ESM::Faction faction = record.get();
 
@@ -263,7 +263,7 @@ namespace CSMWorld
         record.setModified (faction);
     }
 
-    void FactionReactionsAdapter::removeNestedRow(Record<ESM::Faction>& record, int rowToRemove) const
+    void FactionReactionsAdapter::removeRow(Record<ESM::Faction>& record, int rowToRemove) const
     {
         ESM::Faction faction = record.get();
 
@@ -282,7 +282,7 @@ namespace CSMWorld
         record.setModified (faction);
     }
 
-    void FactionReactionsAdapter::setNestedTable(Record<ESM::Faction>& record,
+    void FactionReactionsAdapter::setTable(Record<ESM::Faction>& record,
             const NestedTableWrapperBase& nestedTable) const
     {
         ESM::Faction faction = record.get();
@@ -299,7 +299,7 @@ namespace CSMWorld
         return new NestedTableWrapper<std::map<std::string, int> >(record.get().mReactions);
     }
 
-    QVariant FactionReactionsAdapter::getNestedData(const Record<ESM::Faction>& record,
+    QVariant FactionReactionsAdapter::getData(const Record<ESM::Faction>& record,
             int subRowIndex, int subColIndex) const
     {
         ESM::Faction faction = record.get();
@@ -322,7 +322,7 @@ namespace CSMWorld
         }
     }
 
-    void FactionReactionsAdapter::setNestedData(Record<ESM::Faction>& record,
+    void FactionReactionsAdapter::setData(Record<ESM::Faction>& record,
             const QVariant& value, int subRowIndex, int subColIndex) const
     {
         ESM::Faction faction = record.get();
@@ -360,19 +360,19 @@ namespace CSMWorld
         record.setModified (faction);
     }
 
-    int FactionReactionsAdapter::getNestedColumnsCount(const Record<ESM::Faction>& record) const
+    int FactionReactionsAdapter::getColumnsCount(const Record<ESM::Faction>& record) const
     {
         return 2;
     }
 
-    int FactionReactionsAdapter::getNestedRowsCount(const Record<ESM::Faction>& record) const
+    int FactionReactionsAdapter::getRowsCount(const Record<ESM::Faction>& record) const
     {
         return static_cast<int>(record.get().mReactions.size());
     }
 
     RegionSoundListAdapter::RegionSoundListAdapter () {}
 
-    void RegionSoundListAdapter::addNestedRow(Record<ESM::Region>& record, int position) const
+    void RegionSoundListAdapter::addRow(Record<ESM::Region>& record, int position) const
     {
         ESM::Region region = record.get();
 
@@ -388,7 +388,7 @@ namespace CSMWorld
         record.setModified (region);
     }
 
-    void RegionSoundListAdapter::removeNestedRow(Record<ESM::Region>& record, int rowToRemove) const
+    void RegionSoundListAdapter::removeRow(Record<ESM::Region>& record, int rowToRemove) const
     {
         ESM::Region region = record.get();
 
@@ -402,7 +402,7 @@ namespace CSMWorld
         record.setModified (region);
     }
 
-    void RegionSoundListAdapter::setNestedTable(Record<ESM::Region>& record,
+    void RegionSoundListAdapter::setTable(Record<ESM::Region>& record,
             const NestedTableWrapperBase& nestedTable) const
     {
         ESM::Region region = record.get();
@@ -419,7 +419,7 @@ namespace CSMWorld
         return new NestedTableWrapper<std::vector<ESM::Region::SoundRef> >(record.get().mSoundList);
     }
 
-    QVariant RegionSoundListAdapter::getNestedData(const Record<ESM::Region>& record,
+    QVariant RegionSoundListAdapter::getData(const Record<ESM::Region>& record,
             int subRowIndex, int subColIndex) const
     {
         ESM::Region region = record.get();
@@ -438,7 +438,7 @@ namespace CSMWorld
         }
     }
 
-    void RegionSoundListAdapter::setNestedData(Record<ESM::Region>& record,
+    void RegionSoundListAdapter::setData(Record<ESM::Region>& record,
             const QVariant& value, int subRowIndex, int subColIndex) const
     {
         ESM::Region region = record.get();
@@ -461,12 +461,12 @@ namespace CSMWorld
         record.setModified (region);
     }
 
-    int RegionSoundListAdapter::getNestedColumnsCount(const Record<ESM::Region>& record) const
+    int RegionSoundListAdapter::getColumnsCount(const Record<ESM::Region>& record) const
     {
         return 2;
     }
 
-    int RegionSoundListAdapter::getNestedRowsCount(const Record<ESM::Region>& record) const
+    int RegionSoundListAdapter::getRowsCount(const Record<ESM::Region>& record) const
     {
         return static_cast<int>(record.get().mSoundList.size());
     }
