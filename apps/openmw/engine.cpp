@@ -497,6 +497,7 @@ void OMW::Engine::go()
     {
         double dt = frameTimer.time_s();
         frameTimer.setStartTick();
+        //dt = std::min(dt, 0.2f);
 
         // frameRenderingQueued(dt);
         MWBase::Environment::get().getWorld()->update(dt, false);
@@ -506,18 +507,6 @@ void OMW::Engine::go()
 
         mViewer.frame(/*simulationTime*/);
     }
-
-    /*
-    Ogre::Timer timer;
-    while (!MWBase::Environment::get().getStateManager()->hasQuitRequest())
-    {
-        float dt = timer.getMilliseconds()/1000.f;
-        dt = std::min(dt, 0.2f);
-
-        timer.reset();
-        Ogre::Root::getSingleton().renderOneFrame(dt);
-    }
-    */
 
     // Save user settings
     settings.saveUser(settingspath);

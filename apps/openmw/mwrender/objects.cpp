@@ -26,6 +26,7 @@
 #include "renderconst.hpp"
 #include "animation.hpp"
 #include "npcanimation.hpp"
+#include "creatureanimation.hpp"
 
 namespace
 {
@@ -194,7 +195,13 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
     insertBegin(ptr);
 
     // CreatureAnimation
-    std::auto_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem));
+    std::auto_ptr<Animation> anim;
+
+    if (weaponsShields)
+        anim.reset(new CreatureWeaponAnimation(ptr, mesh, mResourceSystem));
+    else
+        anim.reset(new CreatureAnimation(ptr, mesh, mResourceSystem));
+
     mObjects.insert(std::make_pair(ptr, anim.release()));
 }
 

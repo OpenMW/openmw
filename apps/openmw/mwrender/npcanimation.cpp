@@ -1,15 +1,5 @@
 #include "npcanimation.hpp"
 
-#include <OgreSceneManager.h>
-#include <OgreEntity.h>
-#include <OgreParticleSystem.h>
-#include <OgreSubEntity.h>
-#include <OgreSkeleton.h>
-#include <OgreSkeletonInstance.h>
-#include <OgreSceneNode.h>
-#include <OgreBone.h>
-#include <OgreTechnique.h>
-
 #include <openengine/misc/rng.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
@@ -574,18 +564,6 @@ void NpcAnimation::addFirstPersonOffset(const Ogre::Vector3 &offset)
 {
     mFirstPersonOffset += offset;
 }
-
-class SetObjectGroup {
-    int mGroup;
-
-public:
-    SetObjectGroup(int group) : mGroup(group) { }
-
-    void operator()(Ogre::MovableObject *obj) const
-    {
-        obj->getUserObjectBindings().setUserAny(Ogre::Any(mGroup));
-    }
-};
 
 Animation::PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, int group, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
 {
