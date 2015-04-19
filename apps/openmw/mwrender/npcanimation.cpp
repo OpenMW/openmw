@@ -1,5 +1,7 @@
 #include "npcanimation.hpp"
 
+#include <osg/UserDataContainer>
+
 #include <openengine/misc/rng.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
@@ -7,6 +9,8 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/attach.hpp>
+
+#include <components/nifosg/nifloader.hpp> // TextKeyMapHolder
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -67,7 +71,6 @@ std::string getVampireHead(const std::string& race, bool female)
 namespace MWRender
 {
 
-/*
 HeadAnimationTime::HeadAnimationTime(MWWorld::Ptr reference)
     : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0), mValue(0), mEnabled(true)
 {
@@ -107,13 +110,14 @@ void HeadAnimationTime::update(float dt)
     }
     else
     {
+        // FIXME: would be nice to hold on to the SoundPtr so we don't have to retrieve it every frame
         mValue = mTalkStart +
             (mTalkStop - mTalkStart) *
             std::min(1.f, MWBase::Environment::get().getSoundManager()->getSaySoundLoudness(mReference)*2); // Rescale a bit (most voices are not very loud)
     }
 }
 
-float HeadAnimationTime::getValue() const
+float HeadAnimationTime::getValue(osg::NodeVisitor*)
 {
     return mValue;
 }
@@ -137,7 +141,6 @@ void HeadAnimationTime::setBlinkStop(float value)
 {
     mBlinkStop = value;
 }
-*/
 
 static NpcAnimation::PartBoneMap createPartListMap()
 {
@@ -196,7 +199,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
-    //mHeadAnimationTime = Ogre::SharedPtr<HeadAnimationTime>(new HeadAnimationTime(mPtr));
+    mHeadAnimationTime = boost::shared_ptr<HeadAnimationTime>(new HeadAnimationTime(mPtr));
     //mWeaponAnimationTime = Ogre::SharedPtr<WeaponAnimationTime>(new WeaponAnimationTime(this));
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
@@ -577,13 +580,13 @@ Animation::PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& mode
     return PartHolderPtr(new PartHolder(attached));
 }
 
-/*
-Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
+osg::Vec3f NpcAnimation::runAnimation(float timepassed)
 {    
-    Ogre::Vector3 ret = Animation::runAnimation(timepassed);
+    osg::Vec3f ret = Animation::runAnimation(timepassed);
 
     mHeadAnimationTime->update(timepassed);
 
+    /*
     if (mSkelBase)
     {
         Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
@@ -625,10 +628,10 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 
         mObjectParts[i]->mSkelBase->getAllAnimationStates()->_notifyDirty();
     }
+    */
 
     return ret;
 }
-*/
 
 void NpcAnimation::removeIndividualPart(ESM::PartReferenceType type)
 {
@@ -697,35 +700,44 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
             }
         }
     }
-    /*
-    std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type]->mControllers.begin());
-    for(;ctrl != mObjectParts[type]->mControllers.end();++ctrl)
-    {
-        if(ctrl->getSource().isNull())
-        {
-            ctrl->setSource(mNullAnimationTimePtr);
 
-            if (type == ESM::PRT_Head)
+    boost::shared_ptr<SceneUtil::ControllerSource> src;
+    if (type == ESM::PRT_Head)
+    {
+        src = mHeadAnimationTime;
+
+        osg::Node* node = mObjectParts[type]->getNode();
+        if (node->getUserDataContainer())
+        {
+            for (unsigned int i=0; i<node->getUserDataContainer()->getNumUserObjects(); ++i)
             {
-                ctrl->setSource(mHeadAnimationTime);
-                const NifOgre::TextKeyMap& keys = mObjectParts[type]->mTextKeys;
-                for (NifOgre::TextKeyMap::const_iterator it = keys.begin(); it != keys.end(); ++it)
+                osg::Object* obj = node->getUserDataContainer()->getUserObject(i);
+                if (NifOsg::TextKeyMapHolder* keys = dynamic_cast<NifOsg::TextKeyMapHolder*>(obj))
                 {
-                    if (Misc::StringUtils::ciEqual(it->second, "talk: start"))
-                        mHeadAnimationTime->setTalkStart(it->first);
-                    if (Misc::StringUtils::ciEqual(it->second, "talk: stop"))
-                        mHeadAnimationTime->setTalkStop(it->first);
-                    if (Misc::StringUtils::ciEqual(it->second, "blink: start"))
-                        mHeadAnimationTime->setBlinkStart(it->first);
-                    if (Misc::StringUtils::ciEqual(it->second, "blink: stop"))
-                        mHeadAnimationTime->setBlinkStop(it->first);
+                    for (NifOsg::TextKeyMap::const_iterator it = keys->mTextKeys.begin(); it != keys->mTextKeys.end(); ++it)
+                    {
+                        if (Misc::StringUtils::ciEqual(it->second, "talk: start"))
+                            mHeadAnimationTime->setTalkStart(it->first);
+                        if (Misc::StringUtils::ciEqual(it->second, "talk: stop"))
+                            mHeadAnimationTime->setTalkStop(it->first);
+                        if (Misc::StringUtils::ciEqual(it->second, "blink: start"))
+                            mHeadAnimationTime->setBlinkStart(it->first);
+                        if (Misc::StringUtils::ciEqual(it->second, "blink: stop"))
+                            mHeadAnimationTime->setBlinkStop(it->first);
+                    }
+
+                    break;
                 }
             }
-            else if (type == ESM::PRT_Weapon)
-                ctrl->setSource(mWeaponAnimationTime);
         }
     }
-    */
+    //else if (type == ESM::PRT_Weapon)
+    //    src = mWeaponAnimationTime;
+    else
+        src.reset(new NullAnimationTime);
+
+    SceneUtil::AssignControllerSourcesVisitor assignVisitor(src);
+    mObjectParts[type]->getNode()->accept(assignVisitor);
 
     return true;
 }
@@ -825,6 +837,7 @@ void NpcAnimation::showCarriedLeft(bool show)
         if (addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
                                    mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))
         {
+            // TODO
             //if (iter->getTypeName() == typeid(ESM::Light).name())
                 //addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], iter->get<ESM::Light>()->mBase);
         }
@@ -863,13 +876,11 @@ void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, boo
 
     if (!magicEffect->mHit.empty())
     {
-        /*
         const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
         bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
         // Don't play particle VFX unless the effect is new or it should be looping.
         if (isNew || loop)
             addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
-        */
     }
 }
 
@@ -884,7 +895,7 @@ void NpcAnimation::setAlpha(float alpha)
 
 void NpcAnimation::enableHeadAnimation(bool enable)
 {
-    //mHeadAnimationTime->setEnabled(enable);
+    mHeadAnimationTime->setEnabled(enable);
 }
 
 void NpcAnimation::setWeaponGroup(const std::string &group)

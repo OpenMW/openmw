@@ -15,8 +15,7 @@ namespace ESM
 namespace MWRender
 {
 
-/*
-class HeadAnimationTime : public Ogre::ControllerValue<Ogre::Real>
+class HeadAnimationTime : public SceneUtil::ControllerSource
 {
 private:
     MWWorld::Ptr mReference;
@@ -44,11 +43,8 @@ public:
     void setBlinkStart(float value);
     void setBlinkStop(float value);
 
-    virtual Ogre::Real getValue() const;
-    virtual void setValue(Ogre::Real value)
-    { }
+    virtual float getValue(osg::NodeVisitor* nv);
 };
-*/
 
 class NpcAnimation : public Animation, public WeaponAnimation, public MWWorld::InventoryStoreListener
 {
@@ -96,7 +92,7 @@ private:
 
     Ogre::Vector3 mFirstPersonOffset;
 
-    //Ogre::SharedPtr<HeadAnimationTime> mHeadAnimationTime;
+    boost::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
     //Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
@@ -142,7 +138,7 @@ public:
 
     virtual void setWeaponGroup(const std::string& group);
 
-    //virtual Ogre::Vector3 runAnimation(float timepassed);
+    virtual osg::Vec3f runAnimation(float timepassed);
 
     /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
     /// to indicate the facing orientation of the character.
