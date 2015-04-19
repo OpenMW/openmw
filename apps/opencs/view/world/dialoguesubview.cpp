@@ -447,7 +447,7 @@ void CSVWorld::EditWidget::remake(int row)
                 //table->resizeColumnsToContents();
                 table->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
 
-                int rows = mNestedModels.back()->rowCount(mTable->index(row, i));
+                int rows = mTable->rowCount(mTable->index(row, i));
                 int rowHeight = (rows == 0) ? table->horizontalHeader()->height() : table->rowHeight(0);
                 int tableMaxHeight = (5 * rowHeight)
                     + table->horizontalHeader()->height() + 2 * table->frameWidth();
