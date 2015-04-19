@@ -5,12 +5,6 @@
 #endif
 #include <stdint.h>
 
-// Has to be included *before* ffmpeg, due to a macro collision with ffmpeg (#define PixelFormat in avformat.h - grumble)
-#include <OgreTextureManager.h>
-#include <OgreHardwarePixelBuffer.h>
-#include <OgreResourceGroupManager.h>
-#include <OgreStringConverter.h>
-
 #include <osg/Texture2D>
 
 extern "C"
@@ -535,11 +529,8 @@ void VideoState::decode_thread_loop(VideoState *self)
                 av_free_packet(packet);
         }
     }
-    catch(std::runtime_error& e) {
+    catch(std::exception& e) {
         std::cerr << "An error occured playing the video: " << e.what () << std::endl;
-    }
-    catch(Ogre::Exception& e) {
-        std::cerr << "An error occured playing the video: " << e.getFullDescription () << std::endl;
     }
 
     self->mQuit = true;

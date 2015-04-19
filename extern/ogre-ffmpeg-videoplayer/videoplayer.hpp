@@ -22,7 +22,7 @@ namespace Video
     class MovieAudioFactory;
 
     /**
-     * @brief Plays a video on an Ogre texture.
+     * @brief Plays a video on an osg texture.
      */
     class VideoPlayer
     {
