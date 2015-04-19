@@ -549,7 +549,7 @@ include_directories(libs)
 add_subdirectory(libs/openengine)
 
 # Extern
-#add_subdirectory (extern/ogre-ffmpeg-videoplayer)
+add_subdirectory (extern/ogre-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
 #add_subdirectory (extern/sdl4ogre)
 

@@ -599,8 +599,8 @@ void SkyManager::update(float duration)
     mCloudAnimationTimer += duration * mCloudSpeed;
 
     /// \todo improve this
-    //mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
-    //mSecunda->setPhase ( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
+    mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
+    mSecunda->setPhase ( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
 
     //mSecunda->setColour ( mMoonRed ? fallback->getFallbackColour("Moons_Script_Color") : ColourValue(1,1,1,1));
     //mMasser->setColour (ColourValue(1,1,1,1));
@@ -684,13 +684,8 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
             DisableCullingVisitor visitor;
             mParticleEffect->accept(visitor);
 
-            /*
-            for (size_t i = 0; i < mParticle->mControllers.size(); ++i)
-            {
-                if (mParticle->mControllers[i].getSource().isNull())
-                    mParticle->mControllers[i].setSource(Ogre::ControllerManager::getSingleton().getFrameTimeSource());
-            }
-            */
+            SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
+            mParticleEffect->accept(assignVisitor);
         }
     }
 

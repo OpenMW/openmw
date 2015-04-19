@@ -167,6 +167,7 @@ namespace MWRender
     {
         mObjects->update(dt);
         mEffectManager->update(dt);
+        mSky->update(dt);
     }
 
     void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale)

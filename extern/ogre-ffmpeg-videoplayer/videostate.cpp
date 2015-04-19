@@ -11,6 +11,8 @@
 #include <OgreResourceGroupManager.h>
 #include <OgreStringConverter.h>
 
+#include <osg/Texture2D>
+
 extern "C"
 {
     #include <libavcodec/avcodec.h>
@@ -172,12 +174,14 @@ void PacketQueue::clear()
     this->mutex.unlock ();
 }
 
-int VideoState::OgreResource_Read(void *user_data, uint8_t *buf, int buf_size)
+int VideoState::istream_read(void *user_data, uint8_t *buf, int buf_size)
 {
-    Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
     try
     {
-        return stream->read(buf, buf_size);
+        std::istream& stream = *static_cast<VideoState*>(user_data)->stream;
+        stream.read((char*)buf, buf_size);
+        stream.clear();
+        return stream.gcount();
     }
     catch (std::exception& )
     {
@@ -185,57 +189,57 @@ int VideoState::OgreResource_Read(void *user_data, uint8_t *buf, int buf_size)
     }
 }
 
-int VideoState::OgreResource_Write(void *user_data, uint8_t *buf, int buf_size)
+int VideoState::istream_write(void *, uint8_t *, int)
 {
-    Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
-    try
-    {
-        return stream->write(buf, buf_size);
-    }
-    catch (std::exception& )
-    {
-        return 0;
-    }
+    throw std::runtime_error("can't write to read-only stream");
 }
 
-int64_t VideoState::OgreResource_Seek(void *user_data, int64_t offset, int whence)
+int64_t VideoState::istream_seek(void *user_data, int64_t offset, int whence)
 {
-    Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
+    std::istream& stream = *static_cast<VideoState*>(user_data)->stream;
 
     whence &= ~AVSEEK_FORCE;
+
     if(whence == AVSEEK_SIZE)
-        return stream->size();
+    {
+        size_t prev = stream.tellg();
+        stream.seekg(0, std::ios_base::end);
+        size_t size = stream.tellg();
+        stream.seekg(prev, std::ios_base::beg);
+        return size;
+    }
+
     if(whence == SEEK_SET)
-        stream->seek(static_cast<size_t>(offset));
+        stream.seekg(offset, std::ios_base::beg);
     else if(whence == SEEK_CUR)
-        stream->seek(static_cast<size_t>(stream->tell()+offset));
+        stream.seekg(offset, std::ios_base::cur);
     else if(whence == SEEK_END)
-        stream->seek(static_cast<size_t>(stream->size() + offset));
+        stream.seekg(offset, std::ios_base::end);
     else
         return -1;
 
-    return stream->tell();
+    return stream.tellg();
 }
 
 void VideoState::video_display(VideoPicture *vp)
 {
     if((*this->video_st)->codec->width != 0 && (*this->video_st)->codec->height != 0)
     {
-        if (mTexture.isNull())
+        if (!mTexture.get())
         {
-            static int i = 0;
-            mTexture = Ogre::TextureManager::getSingleton().createManual(
-                            "ffmpeg/VideoTexture" + Ogre::StringConverter::toString(++i),
-                                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                    Ogre::TEX_TYPE_2D,
-                                    (*this->video_st)->codec->width, (*this->video_st)->codec->height,
-                                    0,
-                                    Ogre::PF_BYTE_RGBA,
-                                    Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
+            mTexture = new osg::Texture2D;
+            mTexture->setDataVariance(osg::Object::DYNAMIC);
+            mTexture->setResizeNonPowerOfTwoHint(false);
+            mTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+            mTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
         }
-        Ogre::PixelBox pb((*this->video_st)->codec->width, (*this->video_st)->codec->height, 1, Ogre::PF_BYTE_RGBA, &vp->data[0]);
-        Ogre::HardwarePixelBufferSharedPtr buffer = mTexture->getBuffer();
-        buffer->blitFromMemory(pb);
+
+        osg::ref_ptr<osg::Image> image = new osg::Image;
+
+        image->setImage((*this->video_st)->codec->width, (*this->video_st)->codec->height,
+                        1, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, &vp->data[0], osg::Image::NO_DELETE);
+
+        mTexture->setImage(image);
     }
 }
 
@@ -250,7 +254,7 @@ void VideoState::video_refresh()
         VideoPicture* vp = &this->pictq[this->pictq_rindex];
         this->video_display(vp);
 
-        this->pictq_rindex = (pictq_rindex+1) % VIDEO_PICTURE_QUEUE_SIZE;
+        this->pictq_rindex = (pictq_rindex+1) % VIDEO_PICTURE_ARRAY_SIZE;
         this->frame_last_pts = vp->pts;
         this->pictq_size--;
         this->pictq_cond.notify_one();
@@ -267,12 +271,12 @@ void VideoState::video_refresh()
         for (; i<this->pictq_size-1; ++i)
         {
             if (this->pictq[pictq_rindex].pts + threshold <= this->get_master_clock())
-                this->pictq_rindex = (this->pictq_rindex+1) % VIDEO_PICTURE_QUEUE_SIZE; // not enough time to show this picture
+                this->pictq_rindex = (this->pictq_rindex+1) % VIDEO_PICTURE_ARRAY_SIZE; // not enough time to show this picture
             else
                 break;
         }
 
-        assert (this->pictq_rindex < VIDEO_PICTURE_QUEUE_SIZE);
+        assert (this->pictq_rindex < VIDEO_PICTURE_ARRAY_SIZE);
         VideoPicture* vp = &this->pictq[this->pictq_rindex];
 
         this->video_display(vp);
@@ -282,7 +286,7 @@ void VideoState::video_refresh()
         this->pictq_size -= i;
         // update queue for next picture
         this->pictq_size--;
-        this->pictq_rindex = (this->pictq_rindex+1) % VIDEO_PICTURE_QUEUE_SIZE;
+        this->pictq_rindex = (this->pictq_rindex+1) % VIDEO_PICTURE_ARRAY_SIZE;
         this->pictq_cond.notify_one();
     }
 }
@@ -328,7 +332,7 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
               0, (*this->video_st)->codec->height, &dst, this->rgbaFrame->linesize);
 
     // now we inform our display thread that we have a pic ready
-    this->pictq_windex = (this->pictq_windex+1) % VIDEO_PICTURE_QUEUE_SIZE;
+    this->pictq_windex = (this->pictq_windex+1) % VIDEO_PICTURE_ARRAY_SIZE;
     this->pictq_size++;
     this->pictq_mutex.unlock();
 
@@ -605,7 +609,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
     return 0;
 }
 
-void VideoState::init(const std::string& resourceName)
+void VideoState::init(boost::shared_ptr<std::istream> inputstream)
 {
     int video_index = -1;
     int audio_index = -1;
@@ -614,16 +618,18 @@ void VideoState::init(const std::string& resourceName)
     this->av_sync_type = AV_SYNC_DEFAULT;
     this->mQuit = false;
 
-    this->stream = Ogre::ResourceGroupManager::getSingleton().openResource(resourceName);
-    if(this->stream.isNull())
+    this->stream = inputstream;
+    if(!this->stream.get())
         throw std::runtime_error("Failed to open video resource");
 
-    AVIOContext *ioCtx = avio_alloc_context(NULL, 0, 0, this, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
+    AVIOContext *ioCtx = avio_alloc_context(NULL, 0, 0, this, istream_read, istream_write, istream_seek);
     if(!ioCtx) throw std::runtime_error("Failed to allocate AVIOContext");
 
     this->format_ctx = avformat_alloc_context();
     if(this->format_ctx)
         this->format_ctx->pb = ioCtx;
+
+    std::string videoName;
 
     // Open video file
     ///
@@ -632,7 +638,7 @@ void VideoState::init(const std::string& resourceName)
     ///
     /// https://trac.ffmpeg.org/ticket/1357
     ///
-    if(!this->format_ctx || avformat_open_input(&this->format_ctx, resourceName.c_str(), NULL, NULL))
+    if(!this->format_ctx || avformat_open_input(&this->format_ctx, videoName.c_str(), NULL, NULL))
     {
         if (this->format_ctx != NULL)
         {
@@ -656,7 +662,7 @@ void VideoState::init(const std::string& resourceName)
         throw std::runtime_error("Failed to retrieve stream information");
 
     // Dump information about file onto standard error
-    av_dump_format(this->format_ctx, 0, resourceName.c_str(), 0);
+    av_dump_format(this->format_ctx, 0, videoName.c_str(), 0);
 
     for(i = 0;i < this->format_ctx->nb_streams;i++)
     {
@@ -724,11 +730,7 @@ void VideoState::deinit()
         avformat_close_input(&this->format_ctx);
     }
 
-    if (!mTexture.isNull())
-    {
-        Ogre::TextureManager::getSingleton().remove(mTexture->getName());
-        mTexture.setNull();
-    }
+    mTexture = NULL;
 }
 
 double VideoState::get_external_clock()

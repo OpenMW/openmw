@@ -59,8 +59,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanagerimp openal_output ffmpeg_decoder sound sound_decoder sound_output loudness libavwrapper
-# movieaudiofactory
+    soundmanagerimp openal_output ffmpeg_decoder sound sound_decoder sound_output loudness libavwrapper movieaudiofactory
     )
 
 add_openmw_dir (mwworld
@@ -138,6 +137,7 @@ target_link_libraries(openmw
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
+    "ogre-ffmpeg-videoplayer"
     "oics"
     components
 )

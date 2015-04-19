@@ -3,11 +3,17 @@
 
 #include <boost/thread.hpp>
 
-#include <OgreTexture.h>
+#include <osg/ref_ptr>
+namespace osg
+{
+    class Texture2D;
+}
 
 #include "videodefs.hpp"
 
 #define VIDEO_PICTURE_QUEUE_SIZE 50
+// allocate one extra to make sure we do not overwrite the osg::Image currently set on the texture
+#define VIDEO_PICTURE_ARRAY_SIZE (VIDEO_PICTURE_QUEUE_SIZE+1)
 
 extern "C"
 {
@@ -78,7 +84,7 @@ struct VideoState {
 
     void setAudioFactory(MovieAudioFactory* factory);
 
-    void init(const std::string& resourceName);
+    void init(boost::shared_ptr<std::istream> inputstream);
     void deinit();
 
     void setPaused(bool isPaused);
@@ -104,18 +110,18 @@ struct VideoState {
     double get_external_clock();
     double get_master_clock();
 
-    static int OgreResource_Read(void *user_data, uint8_t *buf, int buf_size);
-    static int OgreResource_Write(void *user_data, uint8_t *buf, int buf_size);
-    static int64_t OgreResource_Seek(void *user_data, int64_t offset, int whence);
+    static int istream_read(void *user_data, uint8_t *buf, int buf_size);
+    static int istream_write(void *user_data, uint8_t *buf, int buf_size);
+    static int64_t istream_seek(void *user_data, int64_t offset, int whence);
 
-    Ogre::TexturePtr mTexture;
+    osg::ref_ptr<osg::Texture2D> mTexture;
 
     MovieAudioFactory* mAudioFactory;
     boost::shared_ptr<MovieAudioDecoder> mAudioDecoder;
 
     ExternalClock mExternalClock;
 
-    Ogre::DataStreamPtr stream;
+    boost::shared_ptr<std::istream> stream;
     AVFormatContext* format_ctx;
 
     int av_sync_type;
@@ -130,7 +136,7 @@ struct VideoState {
     double      video_clock; ///<pts of last decoded frame / predicted pts of next decoded frame
     PacketQueue videoq;
     SwsContext*  sws_context;
-    VideoPicture pictq[VIDEO_PICTURE_QUEUE_SIZE];
+    VideoPicture pictq[VIDEO_PICTURE_ARRAY_SIZE];
     AVFrame*     rgbaFrame; // used as buffer for the frame converted from its native format to RGBA
     int          pictq_size, pictq_rindex, pictq_windex;
     boost::mutex pictq_mutex;

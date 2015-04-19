@@ -17,7 +17,8 @@ namespace MWSound
     {
     public:
         MWSoundDecoderBridge(MWSound::MovieAudioDecoder* decoder)
-            : mDecoder(decoder)
+            : Sound_Decoder(NULL)
+            , mDecoder(decoder)
         {
         }
 
@@ -51,7 +52,7 @@ namespace MWSound
 
         std::string getStreamName()
         {
-            return mVideoState->stream->getName();
+            return std::string();
         }
 
     private:

@@ -1,5 +1,7 @@
 #include "videoplayer.hpp"
 
+#include <osg/Texture2D>
+
 #include "audiofactory.hpp"
 #include "videostate.hpp"
 
@@ -23,7 +25,7 @@ void VideoPlayer::setAudioFactory(MovieAudioFactory *factory)
     mAudioFactory.reset(factory);
 }
 
-void VideoPlayer::playVideo(const std::string &resourceName)
+void VideoPlayer::playVideo(boost::shared_ptr<std::istream> inputstream)
 {
     if(mState)
         close();
@@ -31,10 +33,10 @@ void VideoPlayer::playVideo(const std::string &resourceName)
     try {
         mState = new VideoState;
         mState->setAudioFactory(mAudioFactory.get());
-        mState->init(resourceName);
+        mState->init(inputstream);
 
         // wait until we have the first picture
-        while (mState->video_st && mState->mTexture.isNull())
+        while (mState->video_st && !mState->mTexture.get())
         {
             if (!mState->update())
                 break;
@@ -53,27 +55,26 @@ bool VideoPlayer::update ()
     return false;
 }
 
-std::string VideoPlayer::getTextureName()
+osg::ref_ptr<osg::Texture2D> VideoPlayer::getVideoTexture()
 {
-    std::string name;
-    if (mState && !mState->mTexture.isNull())
-        name = mState->mTexture->getName();
-    return name;
+    if (mState)
+        return mState->mTexture;
+    return osg::ref_ptr<osg::Texture2D>();
 }
 
 int VideoPlayer::getVideoWidth()
 {
     int width=0;
-    if (mState && !mState->mTexture.isNull())
-        width = mState->mTexture->getWidth();
+    if (mState && mState->mTexture.get())
+        width = mState->mTexture->getTextureWidth();
     return width;
 }
 
 int VideoPlayer::getVideoHeight()
 {
     int height=0;
-    if (mState && !mState->mTexture.isNull())
-        height = mState->mTexture->getHeight();
+    if (mState && mState->mTexture.get())
+        height = mState->mTexture->getTextureHeight();
     return height;
 }
 

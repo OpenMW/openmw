@@ -4,6 +4,17 @@
 #include <string>
 #include <memory>
 
+#include <iosfwd>
+
+#include <osg/Texture2D>
+
+#include <boost/shared_ptr.hpp>
+
+namespace osg
+{
+    class Texture2D;
+}
+
 namespace Video
 {
 
@@ -30,7 +41,7 @@ namespace Video
 
         /// Play the given video. If a video is already playing, the old video is closed first.
         /// @note The video will be unpaused by default. Use the pause() and play() methods to control pausing.
-        void playVideo (const std::string& resourceName);
+        void playVideo (boost::shared_ptr<std::istream> inputstream);
 
         /// Get the current playback time position in the video, in seconds
         double getCurrentTime();
@@ -52,8 +63,9 @@ namespace Video
         /// Stop the currently playing video, if a video is playing.
         void close();
 
-        /// Return the texture name of the currently playing video, or "" if no video is playing.
-        std::string getTextureName();
+        /// Return the texture of the currently playing video, or a null pointer if no video is playing.
+        osg::ref_ptr<osg::Texture2D> getVideoTexture();
+
         /// Return the width of the currently playing video, or 0 if no video is playing.
         int getVideoWidth();
         /// Return the height of the currently playing video, or 0 if no video is playing.
