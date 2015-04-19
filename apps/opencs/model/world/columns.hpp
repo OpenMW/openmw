@@ -262,6 +262,8 @@ namespace CSMWorld
             ColumnId_PowerList = 238,
             ColumnId_SkillImpact = 239, // impact from magic effects
 
+            ColumnId_InfoList = 240,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,

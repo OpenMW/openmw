@@ -42,6 +42,7 @@
 #include "refidcollection.hpp"
 #include "refcollection.hpp"
 #include "infocollection.hpp"
+#include "nestedinfocollection.hpp"
 #include "pathgrid.hpp"
 #ifndef Q_MOC_RUN
 #include "subcellcollection.hpp"
@@ -85,7 +86,7 @@ namespace CSMWorld
             IdCollection<ESM::DebugProfile> mDebugProfiles;
             IdCollection<ESM::SoundGenerator> mSoundGens;
             IdCollection<ESM::StartScript> mStartScripts;
-            InfoCollection mTopicInfos;
+            NestedInfoCollection mTopicInfos;
             InfoCollection mJournalInfos;
             IdCollection<Cell> mCells;
             IdCollection<LandTexture> mLandTextures;

@@ -5,6 +5,7 @@
 
 #include "idcollection.hpp"
 #include "pathgrid.hpp"
+#include "info.hpp"
 
 namespace CSMWorld
 {
@@ -469,5 +470,62 @@ namespace CSMWorld
     int RegionSoundListAdapter::getRowsCount(const Record<ESM::Region>& record) const
     {
         return static_cast<int>(record.get().mSoundList.size());
+    }
+
+    InfoListAdapter::InfoListAdapter () {}
+
+    void InfoListAdapter::addRow(Record<Info>& record, int position) const
+    {
+        throw std::logic_error ("cannot add a row to a fixed table");
+    }
+
+    void InfoListAdapter::removeRow(Record<Info>& record, int rowToRemove) const
+    {
+        throw std::logic_error ("cannot add a row to a fixed table");
+    }
+
+    void InfoListAdapter::setTable(Record<Info>& record,
+            const NestedTableWrapperBase& nestedTable) const
+    {
+        throw std::logic_error ("table operation not supported");
+    }
+
+    NestedTableWrapperBase* InfoListAdapter::table(const Record<Info>& record) const
+    {
+        throw std::logic_error ("table operation not supported");
+    }
+
+    QVariant InfoListAdapter::getData(const Record<Info>& record,
+            int subRowIndex, int subColIndex) const
+    {
+        Info info = record.get();
+
+        if (subColIndex == 0)
+            return QString(info.mResultScript.c_str());
+        else
+            throw std::runtime_error("Trying to access non-existing column in the nested table!");
+    }
+
+    void InfoListAdapter::setData(Record<Info>& record,
+            const QVariant& value, int subRowIndex, int subColIndex) const
+    {
+        Info info = record.get();
+
+        if (subColIndex == 0)
+            info.mResultScript = value.toString().toStdString();
+        else
+            throw std::runtime_error("Trying to access non-existing column in the nested table!");
+
+        record.setModified (info);
+    }
+
+    int InfoListAdapter::getColumnsCount(const Record<Info>& record) const
+    {
+        return 1;
+    }
+
+    int InfoListAdapter::getRowsCount(const Record<Info>& record) const
+    {
+        return 1; // fixed at size 1
     }
 }

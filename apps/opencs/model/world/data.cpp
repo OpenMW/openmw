@@ -193,11 +193,11 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     index = mSpells.getColumns()-1;
     mSpells.addAdapter (std::make_pair(&mSpells.getColumn(index), new EffectsListAdapter<ESM::Spell> ()));
     mSpells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_EffectId)); // false means no edit
+        new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
     mSpells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_SkillImpact, ColumnBase::Display_SkillImpact));
     mSpells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute)); // reuse attribute
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute));
     mSpells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_EffectRange));
     mSpells.getNestableColumn(index)->addColumn(
@@ -235,6 +235,13 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mTopicInfos.addColumn (new PcRankColumn<Info>);
     mTopicInfos.addColumn (new SoundFileColumn<Info>);
     mTopicInfos.addColumn (new ResponseColumn<Info>);
+    // Result script
+    mTopicInfos.addColumn (new NestedParentColumn<Info> (Columns::ColumnId_InfoList,
+        ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_List));
+    index = mTopicInfos.getColumns()-1;
+    mTopicInfos.addAdapter (std::make_pair(&mTopicInfos.getColumn(index), new InfoListAdapter ()));
+    mTopicInfos.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_ScriptText, ColumnBase::Display_ScriptLines));
 
     mJournalInfos.addColumn (new StringIdColumn<Info> (true));
     mJournalInfos.addColumn (new RecordStateColumn<Info>);
@@ -271,7 +278,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mEnchantments.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_SkillImpact, ColumnBase::Display_SkillImpact));
     mEnchantments.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute)); // reuse attribute
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute));
     mEnchantments.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_EffectRange));
     mEnchantments.getNestableColumn(index)->addColumn(
@@ -423,7 +430,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new IdTree (&mSpells, &mSpells), UniversalId::Type_Spell);
     addModel (new IdTable (&mTopics), UniversalId::Type_Topic);
     addModel (new IdTable (&mJournals), UniversalId::Type_Journal);
-    addModel (new IdTable (&mTopicInfos, IdTable::Feature_ReorderWithinTopic), UniversalId::Type_TopicInfo);
+    addModel (new IdTree (&mTopicInfos, &mTopicInfos, IdTable::Feature_ReorderWithinTopic),
+        UniversalId::Type_TopicInfo);
     addModel (new IdTable (&mJournalInfos, IdTable::Feature_ReorderWithinTopic), UniversalId::Type_JournalInfo);
     addModel (new IdTable (&mCells, IdTable::Feature_ViewId), UniversalId::Type_Cell);
     addModel (new IdTree (&mEnchantments, &mEnchantments), UniversalId::Type_Enchantment);

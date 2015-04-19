@@ -178,8 +178,8 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct NestedParentColumn : public Column<ESXRecordT>
     {
-        NestedParentColumn (int id) : Column<ESXRecordT> (id,
-                ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue)
+        NestedParentColumn (int id, int flags = ColumnBase::Flag_Dialogue) : Column<ESXRecordT> (id,
+                ColumnBase::Display_NestedHeader, flags)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
