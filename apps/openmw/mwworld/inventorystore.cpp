@@ -587,10 +587,12 @@ void MWWorld::InventoryStore::fireEquipmentChangedEvent(const Ptr& actor)
         mListener->equipmentChanged();
 
     // if player, update inventory window
+    /*
     if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
     {
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
     }
+    */
 }
 
 void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisitor &visitor)
