@@ -206,8 +206,8 @@ protected:
      * extension will be replaced with .kf. */
     //void addAnimSource(const std::string &model);
 
-    /** Adds an additional light to the given object list using the specified ESM record. */
-    //void addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScenePtr objlist, const ESM::Light *light);
+    /** Adds an additional light to the given node using the specified ESM record. */
+    void addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light *light);
 
     //void clearAnimSources();
 
@@ -319,7 +319,7 @@ public:
 
 class ObjectAnimation : public Animation {
 public:
-    ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, Resource::ResourceSystem* resourceSystem);
+    ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, Resource::ResourceSystem* resourceSystem, bool allowLight);
 };
 
 }

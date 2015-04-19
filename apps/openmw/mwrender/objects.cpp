@@ -6,7 +6,6 @@
 #include <osg/Group>
 #include <osg/Geode>
 #include <osg/PositionAttitudeTransform>
-#include <osg/ComputeBoundsVisitor>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>
@@ -17,7 +16,6 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/visitor.hpp>
-#include <components/sceneutil/util.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
@@ -120,9 +118,10 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
     osg::Quat zr(-f[2], osg::Vec3(0,0,1));
 
     // Rotates first around z, then y, then x
-    insert->setAttitude(zr*yr*xr);
-
-    // TODO: actors rotate around z only
+    if (ptr.getClass().isActor())
+        insert->setAttitude(zr);
+    else
+        insert->setAttitude(zr*yr*xr);
 
     ptr.getRefData().setBaseNode(insert);
 }
@@ -131,55 +130,11 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
 {
     insertBegin(ptr);
 
-    std::auto_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem));
+    std::auto_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, allowLight));
 
     if (anim->getObjectRoot())
         anim->getObjectRoot()->addCullCallback(new SceneUtil::LightListCallback);
 
-    if (ptr.getTypeName() == typeid(ESM::Light).name() && allowLight)
-    {
-        SceneUtil::FindByNameVisitor visitor("AttachLight");
-        ptr.getRefData().getBaseNode()->accept(visitor);
-
-        osg::Group* attachTo = NULL;
-        if (visitor.mFoundNode)
-        {
-            attachTo = visitor.mFoundNode;
-        }
-        else
-        {
-            osg::ComputeBoundsVisitor computeBound;
-            osg::Group* objectRoot = anim->getOrCreateObjectRoot();
-            objectRoot->accept(computeBound);
-
-            // PositionAttitudeTransform seems to be slightly faster than MatrixTransform
-            osg::ref_ptr<osg::PositionAttitudeTransform> trans(new osg::PositionAttitudeTransform);
-            trans->setPosition(computeBound.getBoundingBox().center());
-
-            objectRoot->addChild(trans);
-
-            attachTo = trans;
-        }
-
-        const ESM::Light* esmLight = ptr.get<ESM::Light>()->mBase;
-
-        osg::ref_ptr<SceneUtil::LightSource> lightSource = new SceneUtil::LightSource;
-        osg::Light* light = new osg::Light;
-        lightSource->setLight(light);
-
-        float realRadius = esmLight->mData.mRadius;
-
-        lightSource->setRadius(realRadius);
-        light->setLinearAttenuation(10.f/(esmLight->mData.mRadius*2.f));
-        //light->setLinearAttenuation(0.05);
-        light->setConstantAttenuation(0.f);
-
-        light->setDiffuse(SceneUtil::colourFromRGB(esmLight->mData.mColor));
-        light->setAmbient(osg::Vec4f(0,0,0,1));
-        light->setSpecular(osg::Vec4f(0,0,0,0));
-
-        attachTo->addChild(lightSource);
-    }
     if (!allowLight)
     {
         RemoveParticlesVisitor visitor;
@@ -202,6 +157,9 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
     else
         anim.reset(new CreatureAnimation(ptr, mesh, mResourceSystem));
 
+    if (anim->getObjectRoot())
+        anim->getObjectRoot()->addCullCallback(new SceneUtil::LightListCallback);
+
     mObjects.insert(std::make_pair(ptr, anim.release()));
 }
 
@@ -210,6 +168,10 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
     insertBegin(ptr);
 
     std::auto_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem, 0));
+
+    if (anim->getObjectRoot())
+        anim->getObjectRoot()->addCullCallback(new SceneUtil::LightListCallback);
+
     mObjects.insert(std::make_pair(ptr, anim.release()));
 }
 

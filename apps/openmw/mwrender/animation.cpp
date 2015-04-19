@@ -3,6 +3,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/TexGen>
 #include <osg/TexEnvCombine>
+#include <osg/ComputeBoundsVisitor>
 
 #include <components/nifosg/nifloader.hpp>
 
@@ -14,6 +15,8 @@
 
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/util.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -178,6 +181,48 @@ namespace MWRender
         return result;
     }
 
+    void Animation::addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light *esmLight)
+    {
+        SceneUtil::FindByNameVisitor visitor("AttachLight");
+        parent->accept(visitor);
+
+        osg::Group* attachTo = NULL;
+        if (visitor.mFoundNode)
+        {
+            attachTo = visitor.mFoundNode;
+        }
+        else
+        {
+            osg::ComputeBoundsVisitor computeBound;
+            parent->accept(computeBound);
+
+            // PositionAttitudeTransform seems to be slightly faster than MatrixTransform
+            osg::ref_ptr<osg::PositionAttitudeTransform> trans(new osg::PositionAttitudeTransform);
+            trans->setPosition(computeBound.getBoundingBox().center());
+
+            parent->addChild(trans);
+
+            attachTo = trans;
+        }
+
+        osg::ref_ptr<SceneUtil::LightSource> lightSource = new SceneUtil::LightSource;
+        osg::Light* light = new osg::Light;
+        lightSource->setLight(light);
+
+        float realRadius = esmLight->mData.mRadius;
+
+        lightSource->setRadius(realRadius);
+        light->setLinearAttenuation(10.f/(esmLight->mData.mRadius*2.f));
+        //light->setLinearAttenuation(0.05);
+        light->setConstantAttenuation(0.f);
+
+        light->setDiffuse(SceneUtil::colourFromRGB(esmLight->mData.mColor));
+        light->setAmbient(osg::Vec4f(0,0,0,1));
+        light->setSpecular(osg::Vec4f(0,0,0,0));
+
+        attachTo->addChild(lightSource);
+    }
+
     void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, std::string texture)
     {
         // Early out if we already have this effect
@@ -307,7 +352,7 @@ namespace MWRender
 
     // --------------------------------------------------------------------------------
 
-    ObjectAnimation::ObjectAnimation(const MWWorld::Ptr &ptr, const std::string &model, Resource::ResourceSystem* resourceSystem)
+    ObjectAnimation::ObjectAnimation(const MWWorld::Ptr &ptr, const std::string &model, Resource::ResourceSystem* resourceSystem, bool allowLight)
         : Animation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), resourceSystem)
     {
         if (!model.empty())
@@ -316,6 +361,9 @@ namespace MWRender
 
             if (!ptr.getClass().getEnchantment(ptr).empty())
                 addGlow(mObjectRoot, getEnchantmentColor(ptr));
+
+            if (ptr.getTypeName() == typeid(ESM::Light).name() && allowLight)
+                addExtraLight(getOrCreateObjectRoot(), ptr.get<ESM::Light>()->mBase);
         }
     }
 
