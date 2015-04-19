@@ -137,7 +137,7 @@ target_link_libraries(openmw
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
-    "ogre-ffmpeg-videoplayer"
+    "osg-ffmpeg-videoplayer"
     "oics"
     components
 )

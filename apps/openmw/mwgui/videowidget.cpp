@@ -1,6 +1,6 @@
 #include "videowidget.hpp"
 
-//#include <extern/ogre-ffmpeg-videoplayer/videoplayer.hpp>
+//#include <extern/osg-ffmpeg-videoplayer/videoplayer.hpp>
 
 #include <MyGUI_RenderManager.h>
 
