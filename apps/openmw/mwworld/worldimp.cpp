@@ -276,7 +276,7 @@ namespace MWWorld
     void World::clear()
     {
         mWeatherManager->clear();
-        //mRendering->clear();
+        mRendering->clear();
 #if 0
         mProjectileManager->clear();
 #endif
@@ -991,8 +991,9 @@ namespace MWWorld
             // changed worldspace
 #if 0
             mProjectileManager->clear();
-            mRendering->notifyWorldSpaceChanged();
 #endif
+            mRendering->notifyWorldSpaceChanged();
+
             mCurrentWorldSpace = cellName;
         }
 
@@ -1010,8 +1011,8 @@ namespace MWWorld
             // changed worldspace
 #if 0
             mProjectileManager->clear();
-            mRendering->notifyWorldSpaceChanged();
 #endif
+            mRendering->notifyWorldSpaceChanged();
         }
         removeContainerScripts(getPlayerPtr());
         mWorldScene->changeToExteriorCell(position, true);
@@ -3203,7 +3204,7 @@ namespace MWWorld
         }
     }
 
-    void World::spawnBloodEffect(const Ptr &ptr, const Vector3 &worldPosition)
+    void World::spawnBloodEffect(const Ptr &ptr, const osg::Vec3f &worldPosition)
     {
         if (ptr == getPlayerPtr() && Settings::Manager::getBool("hit fader", "GUI"))
             return;
@@ -3230,12 +3231,12 @@ namespace MWWorld
         modelName << roll;
         std::string model = "meshes\\" + getFallback()->getFallbackString(modelName.str());
 
-        //mRendering->spawnEffect(model, texture, worldPosition);
+        mRendering->spawnEffect(model, texture, worldPosition);
     }
 
-    void World::spawnEffect(const std::string &model, const std::string &textureOverride, const Vector3 &worldPos)
+    void World::spawnEffect(const std::string &model, const std::string &textureOverride, const osg::Vec3f &worldPos)
     {
-        //mRendering->spawnEffect(model, textureOverride, worldPos);
+        mRendering->spawnEffect(model, textureOverride, worldPos);
     }
 
     void World::explodeSpell(const Vector3 &origin, const ESM::EffectList &effects, const Ptr &caster, ESM::RangeType rangeType,
@@ -3251,15 +3252,13 @@ namespace MWWorld
                 continue; // Not an area effect
 
             // Spawn the explosion orb effect
-            /*
             const ESM::Static* areaStatic;
             if (!effect->mCasting.empty())
                 areaStatic = getStore().get<ESM::Static>().find (effect->mArea);
             else
                 areaStatic = getStore().get<ESM::Static>().find ("VFX_DefaultArea");
 
-            mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, static_cast<float>(effectIt->mArea));
-            */
+            mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", osg::Vec3f(origin.x, origin.y, origin.z), static_cast<float>(effectIt->mArea));
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             static const std::string schools[] = {

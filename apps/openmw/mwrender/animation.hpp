@@ -22,6 +22,20 @@ namespace MWRender
 {
 class Camera;
 
+class EffectAnimationTime : public SceneUtil::ControllerSource
+{
+private:
+    float mTime;
+public:
+    virtual float getValue(osg::NodeVisitor* nv);
+
+    void addTime(float duration);
+    void resetTime(float time);
+    float getTime() const;
+
+    EffectAnimationTime() : mTime(0) {  }
+};
+
 class Animation
 {
 public:
@@ -59,20 +73,6 @@ protected:
 
         virtual Ogre::Real getValue() const;
         virtual void setValue(Ogre::Real value);
-    };
-
-    class EffectAnimationTime : public SceneUtil::ControllerSource
-    {
-    private:
-        float mTime;
-    public:
-        virtual float getValue(osg::NodeVisitor* nv);
-
-        void addTime(float duration);
-        void resetTime(float time);
-        float getTime() const;
-
-        EffectAnimationTime() : mTime(0) {  }
     };
 
     class NullAnimationTime : public SceneUtil::ControllerSource

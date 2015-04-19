@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include <osg/Vec3f>
+
 namespace ESM
 {
 
@@ -37,6 +39,11 @@ struct Position
 {
     float pos[3];
     float rot[3];
+
+    osg::Vec3f asVec3() const
+    {
+        return osg::Vec3f(pos[0], pos[1], pos[2]);
+    }
 };
 #pragma pack(pop)
 

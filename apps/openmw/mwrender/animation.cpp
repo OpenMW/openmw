@@ -24,6 +24,7 @@
 #include "../mwworld/class.hpp"
 
 #include "vismask.hpp"
+#include "util.hpp"
 
 namespace
 {
@@ -68,30 +69,6 @@ namespace
         int mTexUnit;
         osg::Vec4f mColor;
         std::vector<osg::ref_ptr<osg::Texture2D> > mTextures;
-    };
-
-    class FindMaxControllerLengthVisitor : public SceneUtil::ControllerVisitor
-    {
-    public:
-        FindMaxControllerLengthVisitor()
-            : SceneUtil::ControllerVisitor()
-            , mMaxLength(0)
-        {
-        }
-
-        virtual void visit(osg::Node& , SceneUtil::Controller& ctrl)
-        {
-            if (ctrl.mFunction)
-                mMaxLength = std::max(mMaxLength, ctrl.mFunction->getMaximum());
-        }
-
-        float getMaxLength() const
-        {
-            return mMaxLength;
-        }
-
-    private:
-        float mMaxLength;
     };
 
 }
@@ -246,7 +223,7 @@ namespace MWRender
         osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->createInstance(model, parentNode);
         params.mObjects = PartHolderPtr(new PartHolder(node));
 
-        FindMaxControllerLengthVisitor findMaxLengthVisitor;
+        SceneUtil::FindMaxControllerLengthVisitor findMaxLengthVisitor;
         node->accept(findMaxLengthVisitor);
 
         params.mMaxControllerLength = findMaxLengthVisitor.getMaxLength();
@@ -262,22 +239,7 @@ namespace MWRender
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
         node->accept(assignVisitor);
 
-        if (!texture.empty())
-        {
-            std::string correctedTexture = Misc::ResourceHelpers::correctTexturePath(texture, mResourceSystem->getVFS());
-            // Not sure if wrap settings should be pulled from the overridden texture?
-            osg::ref_ptr<osg::Texture2D> tex = mResourceSystem->getTextureManager()->getTexture2D(correctedTexture, osg::Texture2D::CLAMP,
-                                                                                                  osg::Texture2D::CLAMP);
-            osg::ref_ptr<osg::StateSet> stateset;
-            if (node->getStateSet())
-                stateset = static_cast<osg::StateSet*>(node->getStateSet()->clone(osg::CopyOp::SHALLOW_COPY));
-            else
-                stateset = new osg::StateSet;
-
-            stateset->setTextureAttribute(0, tex, osg::StateAttribute::OVERRIDE);
-
-            node->setStateSet(stateset);
-        }
+        overrideTexture(texture, mResourceSystem, node);
 
         // TODO: in vanilla morrowind the effect is scaled based on the host object's bounding box.
 
@@ -330,22 +292,22 @@ namespace MWRender
         }
     }
 
-    float Animation::EffectAnimationTime::getValue(osg::NodeVisitor*)
+    float EffectAnimationTime::getValue(osg::NodeVisitor*)
     {
         return mTime;
     }
 
-    void Animation::EffectAnimationTime::addTime(float duration)
+    void EffectAnimationTime::addTime(float duration)
     {
         mTime += duration;
     }
 
-    void Animation::EffectAnimationTime::resetTime(float time)
+    void EffectAnimationTime::resetTime(float time)
     {
         mTime = time;
     }
 
-    float Animation::EffectAnimationTime::getTime() const
+    float EffectAnimationTime::getTime() const
     {
         return mTime;
     }

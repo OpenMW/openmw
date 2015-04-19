@@ -18,6 +18,7 @@
 #include <components/esm/loadcell.hpp>
 
 #include "sky.hpp"
+#include "effectmanager.hpp"
 
 namespace MWRender
 {
@@ -59,6 +60,8 @@ namespace MWRender
         mObjects.reset(new Objects(mResourceSystem, lightRoot));
 
         mSky.reset(new SkyManager(mRootNode, resourceSystem->getSceneManager()));
+
+        mEffectManager.reset(new EffectManager(mRootNode, mResourceSystem));
 
         mViewer.setLightingMode(osgViewer::View::NO_LIGHT);
 
@@ -163,6 +166,24 @@ namespace MWRender
     void RenderingManager::update(float dt, bool paused)
     {
         mObjects->update(dt);
+        mEffectManager->update(dt);
+    }
+
+    void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale)
+    {
+        mEffectManager->addEffect(model, texture, worldPosition, scale);
+    }
+
+    void RenderingManager::notifyWorldSpaceChanged()
+    {
+        mEffectManager->clear();
+        //mWater->clearRipples();
+    }
+
+    void RenderingManager::clear()
+    {
+        //mLocalMap->clear();
+        notifyWorldSpaceChanged();
     }
 
 }

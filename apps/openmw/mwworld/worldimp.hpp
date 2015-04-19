@@ -650,9 +650,9 @@ namespace MWWorld
             virtual void spawnRandomCreature(const std::string& creatureList);
 
             /// Spawn a blood effect for \a ptr at \a worldPosition
-            virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition);
+            virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition);
 
-            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const Ogre::Vector3& worldPos);
+            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos);
 
             virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, ESM::RangeType rangeType, const std::string& id, const std::string& sourceName);

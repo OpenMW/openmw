@@ -72,6 +72,20 @@ namespace SceneUtil
         boost::shared_ptr<ControllerSource> mToAssign;
     };
 
+    /// Finds the maximum of all controller functions in the given scene graph
+    class FindMaxControllerLengthVisitor : public ControllerVisitor
+    {
+    public:
+        FindMaxControllerLengthVisitor();
+
+        virtual void visit(osg::Node& , Controller& ctrl);
+
+        float getMaxLength() const;
+
+    private:
+        float mMaxLength;
+    };
+
 }
 
 #endif

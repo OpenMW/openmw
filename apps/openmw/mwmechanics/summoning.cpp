@@ -34,7 +34,7 @@ namespace MWMechanics
                     .search("VFX_Summon_End");
             if (fx)
                 MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
-                    "", Ogre::Vector3(ptr.getRefData().getPosition().pos));
+                    "", ptr.getRefData().getPosition().asVec3());
         }
         else
         {
@@ -190,7 +190,7 @@ namespace MWMechanics
                         .search("VFX_Summon_End");
                 if (fx)
                     MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
-                        "", Ogre::Vector3(ptr.getRefData().getPosition().pos));
+                        "", ptr.getRefData().getPosition().asVec3());
 
                 MWBase::Environment::get().getWorld()->deleteObject(ptr);
             }

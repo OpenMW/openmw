@@ -19,7 +19,6 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/cellstore.hpp"
 
 #include "renderconst.hpp"
 #include "animation.hpp"

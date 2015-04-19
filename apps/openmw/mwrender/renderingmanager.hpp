@@ -33,6 +33,7 @@ namespace MWRender
 
     class StateUpdater;
 
+    class EffectManager;
     class SkyManager;
 
     class RenderingManager : public MWRender::RenderingInterface
@@ -63,6 +64,14 @@ namespace MWRender
 
         osg::Vec3f getEyePos();
 
+        void spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale = 1.f);
+
+        /// Clear all savegame-specific data
+        void clear();
+
+        /// Clear all worldspace-specific data
+        void notifyWorldSpaceChanged();
+
         void update(float dt, bool paused);
 
     private:
@@ -74,6 +83,7 @@ namespace MWRender
 
         std::auto_ptr<Objects> mObjects;
         std::auto_ptr<SkyManager> mSky;
+        std::auto_ptr<EffectManager> mEffectManager;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
 

@@ -89,4 +89,21 @@ namespace SceneUtil
             ctrl.mSource = mToAssign;
     }
 
+    FindMaxControllerLengthVisitor::FindMaxControllerLengthVisitor()
+        : SceneUtil::ControllerVisitor()
+        , mMaxLength(0)
+    {
+    }
+
+    void FindMaxControllerLengthVisitor::visit(osg::Node &, Controller &ctrl)
+    {
+        if (ctrl.mFunction)
+            mMaxLength = std::max(mMaxLength, ctrl.mFunction->getMaximum());
+    }
+
+    float FindMaxControllerLengthVisitor::getMaxLength() const
+    {
+        return mMaxLength;
+    }
+
 }

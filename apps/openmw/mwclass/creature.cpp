@@ -319,7 +319,7 @@ namespace MWClass
             damage = 0;
 
         if (damage > 0)
-            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
+            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, osg::Vec3f(hitPosition.x, hitPosition.y, hitPosition.z));
 
         MWMechanics::diseaseContact(victim, ptr);
 

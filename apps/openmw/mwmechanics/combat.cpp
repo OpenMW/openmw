@@ -218,7 +218,7 @@ namespace MWMechanics
             appliedEnchantment = applyEnchantment(attacker, victim, projectile, hitPosition);
 
         if (damage > 0)
-            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
+            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, osg::Vec3f(hitPosition.x, hitPosition.y, hitPosition.z));
 
         // Non-enchanted arrows shot at enemies have a chance to turn up in their inventory
         if (victim != MWBase::Environment::get().getWorld()->getPlayerPtr()

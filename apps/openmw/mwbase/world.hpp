@@ -17,6 +17,11 @@ namespace Ogre
     class Image;
 }
 
+namespace osg
+{
+    class Vec3f;
+}
+
 namespace Loading
 {
     class Listener;
@@ -546,9 +551,9 @@ namespace MWBase
             virtual void spawnRandomCreature(const std::string& creatureList) = 0;
 
             /// Spawn a blood effect for \a ptr at \a worldPosition
-            virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition) = 0;
+            virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) = 0;
 
-            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const Ogre::Vector3& worldPos) = 0;
+            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos) = 0;
 
             virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, ESM::RangeType rangeType, const std::string& id, const std::string& sourceName) = 0;
