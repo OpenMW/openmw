@@ -217,6 +217,8 @@ namespace CSVDoc
 
             void addStartScriptsSubView();
 
+            void addSearchSubView();
+
             void toggleShowStatusBar (bool show);
 
             void loadErrorLog();

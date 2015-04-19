@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <fstream>
+#include <iostream>
 
 #include <boost/filesystem.hpp>
 
@@ -2375,6 +2376,17 @@ CSMWorld::UniversalId CSMDoc::Document::verify()
     CSMWorld::UniversalId id = mTools.runVerifier();
     emit stateChanged (getState(), this);
     return id;
+}
+
+
+CSMWorld::UniversalId CSMDoc::Document::newSearch()
+{
+    return mTools.newSearch();
+}
+
+void CSMDoc::Document::runSearch (const CSMWorld::UniversalId& searchId, const CSMTools::Search& search)
+{
+    return mTools.runSearch (searchId, search);
 }
 
 void CSMDoc::Document::abortOperation (int type)

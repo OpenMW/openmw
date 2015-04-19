@@ -191,6 +191,21 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         shiftCtrlDoubleClick->setToolTip ("Action on shift control double click in table:<p>" + toolTip);
     }
 
+    declareSection ("search", "Search & Replace");
+    {
+        Setting *before = createSetting (Type_SpinBox, "char-before",
+            "Characters before search string");
+        before->setDefaultValue (10);
+        before->setRange (0, 1000);
+        before->setToolTip ("Maximum number of character to display in search result before the searched text");
+
+        Setting *after = createSetting (Type_SpinBox, "char-after",
+            "Characters after search string");
+        after->setDefaultValue (10);
+        after->setRange (0, 1000);
+        after->setToolTip ("Maximum number of character to display in search result after the searched text");        
+    }
+    
     {
         /******************************************************************
         * There are three types of values:

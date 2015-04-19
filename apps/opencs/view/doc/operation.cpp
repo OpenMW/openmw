@@ -18,6 +18,7 @@ void CSVDoc::Operation::updateLabel (int threads)
         {
             case CSMDoc::State_Saving: name = "saving"; break;
             case CSMDoc::State_Verifying: name = "verifying"; break;
+            case CSMDoc::State_Searching: name = "searching"; break;
         }
 
         std::ostringstream stream;

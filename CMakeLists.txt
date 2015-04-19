@@ -354,6 +354,14 @@ endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++98 -pedantic -Wno-long-long")
 
+    if (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT APPLE)
+        execute_process(COMMAND ${CMAKE_C_COMPILER} --version OUTPUT_VARIABLE CLANG_VERSION)
+        string(REGEX REPLACE ".*version ([0-9\\.]*).*" "\\1" CLANG_VERSION ${CLANG_VERSION})
+        if ("${CLANG_VERSION}" VERSION_GREATER 3.6 OR "${CLANG_VERSION}" VERSION_EQUAL 3.6)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-potentially-evaluated-expression")
+        endif ("${CLANG_VERSION}" VERSION_GREATER 3.6 OR "${CLANG_VERSION}" VERSION_EQUAL 3.6)
+    endif(CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT APPLE)
+
     execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
                 OUTPUT_VARIABLE GCC_VERSION)
     if (CMAKE_CXX_COMPILER_ID STREQUAL GNU AND "${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)

@@ -6,10 +6,44 @@
 #include <QHeaderView>
 #include <QAction>
 #include <QMenu>
+#include <QStyledItemDelegate>
+#include <QTextDocument>
+#include <QPainter>
 
 #include "../../model/tools/reportmodel.hpp"
 
 #include "../../view/world/idtypedelegate.hpp"
+
+namespace CSVTools
+{
+    class RichTextDelegate : public QStyledItemDelegate
+    {
+        public:
+
+            RichTextDelegate (QObject *parent = 0);
+            
+            virtual void paint(QPainter *painter, const QStyleOptionViewItem& option,
+                const QModelIndex& index) const;
+    };
+}
+
+CSVTools::RichTextDelegate::RichTextDelegate (QObject *parent) : QStyledItemDelegate (parent)
+{}
+
+void CSVTools::RichTextDelegate::paint(QPainter *painter, const QStyleOptionViewItem& option,
+    const QModelIndex& index) const
+{
+    QTextDocument document;
+    QVariant value = index.data (Qt::DisplayRole);
+    if (value.isValid() && !value.isNull())
+    {
+        document.setHtml (value.toString());
+        painter->translate (option.rect.topLeft());
+        document.drawContents (painter);
+        painter->translate (-option.rect.topLeft());
+    }
+}
+
 
 void CSVTools::ReportTable::contextMenuEvent (QContextMenuEvent *event)
 {
@@ -22,8 +56,25 @@ void CSVTools::ReportTable::contextMenuEvent (QContextMenuEvent *event)
     {
         menu.addAction (mShowAction);
         menu.addAction (mRemoveAction);
-    }
 
+        bool found = false;
+        for (QModelIndexList::const_iterator iter (selectedRows.begin());
+            iter!=selectedRows.end(); ++iter)
+        {
+            QString hint = mModel->data (mModel->index (iter->row(), 2)).toString();
+
+            if (!hint.isEmpty() && hint[0]=='R')
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if (found)
+            menu.addAction (mReplaceAction);
+
+    }
+    
     menu.exec (event->globalPos());
 }
 
@@ -67,10 +118,11 @@ void CSVTools::ReportTable::mouseDoubleClickEvent (QMouseEvent *event)
 }
 
 CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
-    const CSMWorld::UniversalId& id, QWidget *parent)
+    const CSMWorld::UniversalId& id, bool richTextDescription, QWidget *parent)
 : CSVWorld::DragRecordTable (document, parent), mModel (document.getReport (id))
 {
     horizontalHeader()->setResizeMode (QHeaderView::Interactive);
+    horizontalHeader()->setStretchLastSection (true);
     verticalHeader()->hide();
     setSortingEnabled (true);
     setSelectionBehavior (QAbstractItemView::SelectRows);
@@ -84,6 +136,9 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
 
     setItemDelegateForColumn (0, mIdTypeDelegate);
 
+    if (richTextDescription)
+        setItemDelegateForColumn (mModel->columnCount()-1, new RichTextDelegate (this));
+    
     mShowAction = new QAction (tr ("Show"), this);
     connect (mShowAction, SIGNAL (triggered()), this, SLOT (showSelection()));
     addAction (mShowAction);
@@ -91,6 +146,10 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     mRemoveAction = new QAction (tr ("Remove from list"), this);
     connect (mRemoveAction, SIGNAL (triggered()), this, SLOT (removeSelection()));
     addAction (mRemoveAction);
+
+    mReplaceAction = new QAction (tr ("Replace"), this);
+    connect (mReplaceAction, SIGNAL (triggered()), this, SIGNAL (replaceRequest()));
+    addAction (mReplaceAction);    
 }
 
 std::vector<CSMWorld::UniversalId> CSVTools::ReportTable::getDraggedRecords() const
@@ -113,6 +172,42 @@ void CSVTools::ReportTable::updateUserSetting (const QString& name, const QStrin
     mIdTypeDelegate->updateUserSetting (name, list);
 }
 
+std::vector<int> CSVTools::ReportTable::getReplaceIndices (bool selection) const
+{
+    std::vector<int> indices;
+
+    if (selection)
+    {
+        QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+        for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
+            ++iter)
+        {
+            QString hint = mModel->data (mModel->index (iter->row(), 2)).toString();
+
+            if (!hint.isEmpty() && hint[0]=='R')
+                indices.push_back (iter->row());
+        }
+    }
+    else
+    {
+        for (int i=0; i<mModel->rowCount(); ++i)
+        {
+            QString hint = mModel->data (mModel->index (i, 2)).toString();
+
+            if (!hint.isEmpty() && hint[0]=='R')
+                indices.push_back (i);
+        }
+    }
+
+    return indices;
+}
+
+void CSVTools::ReportTable::flagAsReplaced (int index)
+{
+    mModel->flagAsReplaced (index);
+}
+            
 void CSVTools::ReportTable::showSelection()
 {
     QModelIndexList selectedRows = selectionModel()->selectedRows();
@@ -133,4 +228,9 @@ void CSVTools::ReportTable::removeSelection()
         mModel->removeRows (iter->row(), 1);
 
     selectionModel()->clear();
+}
+
+void CSVTools::ReportTable::clear()
+{
+    mModel->clear();
 }

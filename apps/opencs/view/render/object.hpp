@@ -1,6 +1,8 @@
 #ifndef OPENCS_VIEW_OBJECT_H
 #define OPENCS_VIEW_OBJECT_H
 
+#include <string>
+
 #include <boost/shared_ptr.hpp>
 
 #include <osg/ref_ptr>
