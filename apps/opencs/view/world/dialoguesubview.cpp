@@ -405,21 +405,22 @@ void CSVWorld::EditWidget::remake(int row)
     line->setGeometry(QRect(320, 150, 118, 3));
     line->setFrameShape(QFrame::HLine);
     line->setFrameShadow(QFrame::Sunken);
+
+    QFrame* line2 = new QFrame(mMainWidget);
+    line2->setObjectName(QString::fromUtf8("line"));
+    line2->setGeometry(QRect(320, 150, 118, 3));
+    line2->setFrameShape(QFrame::HLine);
+    line2->setFrameShadow(QFrame::Sunken);
+
     QVBoxLayout *mainLayout = new QVBoxLayout(mMainWidget);
     QGridLayout *lockedLayout = new QGridLayout();
-    QScrollArea *scroll = new QScrollArea(mMainWidget);
-    QWidget *unlockedWidget = new QWidget(scroll);
-    QVBoxLayout *overLayout = new QVBoxLayout(unlockedWidget);
     QGridLayout *unlockedLayout = new QGridLayout();
     QVBoxLayout *tablesLayout = new QVBoxLayout();
 
     mainLayout->addLayout(lockedLayout, QSizePolicy::Fixed);
-    mainLayout->addSpacing(5); // FIXME: arbitrary number
     mainLayout->addWidget(line, 1);
-    mainLayout->addWidget(scroll, QSizePolicy::Preferred);
-    overLayout->addLayout(unlockedLayout, QSizePolicy::Preferred);
-    overLayout->addStretch(1);
-    mainLayout->addSpacing(5); // FIXME: arbitrary number
+    mainLayout->addLayout(unlockedLayout, QSizePolicy::Preferred);
+    mainLayout->addWidget(line2, 1);
     mainLayout->addLayout(tablesLayout, QSizePolicy::Preferred);
     mainLayout->addStretch(1);
 
@@ -443,10 +444,14 @@ void CSVWorld::EditWidget::remake(int row)
 
                 NestedTable* table = new NestedTable(mDocument, mNestedModels.back(), this);
                 // FIXME: does not work well when enum delegates are used
-                table->setVisible(false);
-                table->resizeColumnsToContents();
-                table->setVisible(true);
+                //table->resizeColumnsToContents();
                 table->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
+
+                int rows = mNestedModels.back()->rowCount(mTable->index(row, i));
+                int rowHeight = (rows == 0) ? table->horizontalHeader()->height() : table->rowHeight(0);
+                int tableMaxHeight = (5 * rowHeight)
+                    + table->horizontalHeader()->height() + 2 * table->frameWidth();
+                table->setMinimumHeight(tableMaxHeight);
 
                 QLabel* label =
                     new QLabel (mTable->headerData (i, Qt::Horizontal, Qt::DisplayRole).toString(), mMainWidget);
@@ -538,18 +543,8 @@ void CSVWorld::EditWidget::remake(int row)
 
     mWidgetMapper->setCurrentModelIndex(mTable->index(row, 0));
 
-    if (unlocked != 0)
-    {
+    if (unlocked == 0)
         mainLayout->removeWidget(line);
-        scroll->setWidget(unlockedWidget);
-        scroll->setSizePolicy (QSizePolicy::Expanding, QSizePolicy::Minimum);
-        scroll->setWidgetResizable(true);
-    }
-    else
-    {
-        delete unlockedWidget;
-        delete scroll;
-    }
 
     this->setWidget(mMainWidget);
     this->setWidgetResizable(true);
