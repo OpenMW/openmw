@@ -28,7 +28,7 @@ namespace SceneUtil
             traverse(node);
         }
 
-        const std::string& mNameToFind;
+        std::string mNameToFind;
         osg::Group* mFoundNode;
     };
 

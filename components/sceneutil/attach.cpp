@@ -165,9 +165,27 @@ namespace SceneUtil
             if (!find.mFoundNode)
                 throw std::runtime_error(std::string("Can't find attachment node ") + attachNode);
 
+            FindByNameVisitor findBoneOffset("BoneOffset");
+            toAttach->accept(findBoneOffset);
+
+            osg::ref_ptr<osg::PositionAttitudeTransform> trans;
+
+            if (findBoneOffset.mFoundNode)
+            {
+                osg::MatrixTransform* boneOffset = dynamic_cast<osg::MatrixTransform*>(findBoneOffset.mFoundNode);
+                if (!boneOffset)
+                    throw std::runtime_error("BoneOffset must be a MatrixTransform");
+
+                trans = new osg::PositionAttitudeTransform;
+                trans->setPosition(boneOffset->getMatrix().getTrans());
+                // The BoneOffset rotation seems to be incorrect
+                trans->setAttitude(osg::Quat(-90, osg::Vec3f(1,0,0)));
+            }
+
             if (attachNode.find("Left") != std::string::npos)
             {
-                osg::ref_ptr<osg::PositionAttitudeTransform> trans = new osg::PositionAttitudeTransform;
+                if (!trans)
+                    trans = new osg::PositionAttitudeTransform;
                 trans->setScale(osg::Vec3f(-1.f, 1.f, 1.f));
 
                 // Need to invert culling because of the negative scale
@@ -176,7 +194,10 @@ namespace SceneUtil
                 osg::FrontFace* frontFace = new osg::FrontFace;
                 frontFace->setMode(osg::FrontFace::CLOCKWISE);
                 trans->getOrCreateStateSet()->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
+            }
 
+            if (trans)
+            {
                 find.mFoundNode->addChild(trans);
                 trans->addChild(toAttach);
                 return trans;

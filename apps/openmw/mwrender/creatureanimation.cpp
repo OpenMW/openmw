@@ -133,32 +133,6 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     //else
         //mAmmunition.setNull();
 
-    // FIXME: code duplicated from NpcAnimation
-    /*
-    if(scene->mSkelBase)
-    {
-        Ogre::SkeletonInstance *skel = scene->mSkelBase->getSkeleton();
-        if(scene->mSkelBase->isParentTagPoint())
-        {
-            Ogre::Node *root = scene->mSkelBase->getParentNode();
-            if(skel->hasBone("BoneOffset"))
-            {
-                Ogre::Bone *offset = skel->getBone("BoneOffset");
-
-                root->translate(offset->getPosition());
-
-                // It appears that the BoneOffset rotation is completely bogus, at least for light models.
-                //root->rotate(offset->getOrientation());
-                root->pitch(Ogre::Degree(-90.0f));
-
-                root->scale(offset->getScale());
-                root->setInitialState();
-            }
-        }
-        updateSkeletonInstance(mSkelBase->getSkeleton(), skel);
-    }
-    */
-
     /*
     std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(scene->mControllers.begin());
     for(;ctrl != scene->mControllers.end();++ctrl)

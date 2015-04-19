@@ -698,31 +698,6 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         }
     }
     /*
-    if(mObjectParts[type]->mSkelBase)
-    {
-        Ogre::SkeletonInstance *skel = mObjectParts[type]->mSkelBase->getSkeleton();
-        if(mObjectParts[type]->mSkelBase->isParentTagPoint())
-        {
-            Ogre::Node *root = mObjectParts[type]->mSkelBase->getParentNode();
-            if(skel->hasBone("BoneOffset"))
-            {
-                Ogre::Bone *offset = skel->getBone("BoneOffset");
-
-                root->translate(offset->getPosition());
-
-                // It appears that the BoneOffset rotation is completely bogus, at least for light models.
-                //root->rotate(offset->getOrientation());
-                root->pitch(Ogre::Degree(-90.0f));
-
-                root->scale(offset->getScale());
-                root->setInitialState();
-            }
-        }
-
-        if (isSkinned(mObjectParts[type]))
-            updateSkeletonInstance(mSkelBase->getSkeleton(), skel);
-    }
-
     std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type]->mControllers.begin());
     for(;ctrl != mObjectParts[type]->mControllers.end();++ctrl)
     {
