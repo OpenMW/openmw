@@ -54,10 +54,7 @@ namespace Nif
     {
         Controlled::read(nif);
 
-        float decay = nif->getFloat();
-        if (decay != 0.f)
-            nif->file->warn("Unhandled gravity decay factor");
-
+        mDecay = nif->getFloat();
         mForce = nif->getFloat();
         mType = nif->getUInt();
         mPosition = nif->getVector3();

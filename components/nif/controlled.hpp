@@ -92,6 +92,7 @@ public:
      * 1 - Point (fixed origin)
      */
     int mType;
+    float mDecay;
     osg::Vec3f mPosition;
     osg::Vec3f mDirection;
 

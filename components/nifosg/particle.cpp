@@ -155,13 +155,14 @@ void ParticleColorAffector::operate(osgParticle::Particle* particle, double /* d
 GravityAffector::GravityAffector(const Nif::NiGravity *gravity)
     : mForce(gravity->mForce)
     , mType(static_cast<ForceType>(gravity->mType))
+    , mDecay(gravity->mDecay)
     , mPosition(gravity->mPosition)
     , mDirection(gravity->mDirection)
 {
 }
 
 GravityAffector::GravityAffector()
-    : mForce(0), mType(Type_Wind)
+    : mForce(0), mType(Type_Wind), mDecay(0.f)
 {
 
 }
@@ -175,10 +176,12 @@ GravityAffector::GravityAffector(const GravityAffector &copy, const osg::CopyOp 
 void GravityAffector::beginOperate(osgParticle::Program* program)
 {
     bool absolute = (program->getReferenceFrame() == osgParticle::ParticleProcessor::ABSOLUTE_RF);
-    if (mType == Type_Wind)
-        mCachedWorldPositionDirection = absolute ? program->rotateLocalToWorld(mDirection) : mDirection;
-    else // Type_Point
-        mCachedWorldPositionDirection = absolute ? program->transformLocalToWorld(mPosition) : mPosition;
+
+    if (mType == Type_Point || mDecay != 0.f) // we don't need the position for Wind gravity, except if decay is being applied
+        mCachedWorldPosition = absolute ? program->transformLocalToWorld(mPosition) : mPosition;
+
+    mCachedWorldDirection = absolute ? program->rotateLocalToWorld(mDirection) : mDirection;
+    mCachedWorldDirection.normalize();
 }
 
 void GravityAffector::operate(osgParticle::Particle *particle, double dt)
@@ -187,18 +190,33 @@ void GravityAffector::operate(osgParticle::Particle *particle, double dt)
     switch (mType)
     {
         case Type_Wind:
-            particle->addVelocity(mCachedWorldPositionDirection * mForce * dt * magic);
+        {
+            float decayFactor = 1.f;
+            if (mDecay != 0.f)
+            {
+                osg::Plane gravityPlane(mCachedWorldDirection, mCachedWorldPosition);
+                float distance = std::abs(gravityPlane.distance(particle->getPosition()));
+                decayFactor = std::exp(-1.f * mDecay * distance);
+            }
+
+            particle->addVelocity(mCachedWorldDirection * mForce * dt * decayFactor * magic);
+
             break;
+        }
         case Type_Point:
         {
-            osg::Vec3f diff = mCachedWorldPositionDirection - particle->getPosition();
+            osg::Vec3f diff = mCachedWorldPosition - particle->getPosition();
+
+            float decayFactor = 1.f;
+            if (mDecay != 0.f)
+                decayFactor = std::exp(-1.f * mDecay * diff.length());
+
             diff.normalize();
-            particle->addVelocity(diff * mForce * dt * magic);
+
+            particle->addVelocity(diff * mForce * dt * decayFactor * magic);
             break;
         }
     }
-
-    // velocity *= e^-[(dist/decay)^2]
 }
 
 Emitter::Emitter()

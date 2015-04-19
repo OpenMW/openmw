@@ -169,7 +169,9 @@ namespace NifOsg
         ForceType mType;
         osg::Vec3f mPosition;
         osg::Vec3f mDirection;
-        osg::Vec3f mCachedWorldPositionDirection;
+        float mDecay;
+        osg::Vec3f mCachedWorldPosition;
+        osg::Vec3f mCachedWorldDirection;
     };
 
     // NodeVisitor to find a child node with the given record index, stored in the node's user data container.
