@@ -173,8 +173,8 @@ int VideoState::istream_read(void *user_data, uint8_t *buf, int buf_size)
     try
     {
         std::istream& stream = *static_cast<VideoState*>(user_data)->stream;
-        stream.read((char*)buf, buf_size);
         stream.clear();
+        stream.read((char*)buf, buf_size);
         return stream.gcount();
     }
     catch (std::exception& )
@@ -193,6 +193,8 @@ int64_t VideoState::istream_seek(void *user_data, int64_t offset, int whence)
     std::istream& stream = *static_cast<VideoState*>(user_data)->stream;
 
     whence &= ~AVSEEK_FORCE;
+
+    stream.clear();
 
     if(whence == AVSEEK_SIZE)
     {

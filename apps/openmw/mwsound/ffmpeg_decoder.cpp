@@ -31,8 +31,8 @@ int FFmpeg_Decoder::readPacket(void *user_data, uint8_t *buf, int buf_size)
     try
     {
         std::istream& stream = *static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
-        stream.read((char*)buf, buf_size);
         stream.clear();
+        stream.read((char*)buf, buf_size);
         return stream.gcount();
     }
     catch (std::exception& )
@@ -51,6 +51,8 @@ int64_t FFmpeg_Decoder::seek(void *user_data, int64_t offset, int whence)
     std::istream& stream = *static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
 
     whence &= ~AVSEEK_FORCE;
+
+    stream.clear();
 
     if(whence == AVSEEK_SIZE)
     {
