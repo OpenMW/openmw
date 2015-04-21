@@ -48,7 +48,7 @@ class NiTriShapeData : public ShapeData
 {
 public:
     // Triangles, three vertex indices per triangle
-    std::vector<short> triangles;
+    std::vector<unsigned short> triangles;
 
     void read(NIFStream *nif);
 };
@@ -144,7 +144,7 @@ class NiSkinData : public Record
 public:
     struct VertWeight
     {
-        short vertex;
+        unsigned short vertex;
         float weight;
     };
 

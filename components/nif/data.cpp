@@ -71,7 +71,7 @@ void NiTriShapeData::read(NIFStream *nif)
     // We have three times as many vertices as triangles, so this
     // is always equal to tris*3.
     int cnt = nif->getInt();
-    nif->getShorts(triangles, cnt);
+    nif->getUShorts(triangles, cnt);
 
     // Read the match list, which lists the vertices that are equal to
     // vertices. We don't actually need need this for anything, so

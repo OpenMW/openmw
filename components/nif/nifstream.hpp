@@ -59,7 +59,7 @@ public:
     ///This is special since the version string doesn't start with a number, and ends with "\n"
     std::string getVersionString();
 
-    void getShorts(std::vector<short> &vec, size_t size);
+    void getUShorts(std::vector<unsigned short> &vec, size_t size);
     void getFloats(std::vector<float> &vec, size_t size);
     void getVector2s(std::vector<osg::Vec2f> &vec, size_t size);
     void getVector3s(std::vector<osg::Vec3f> &vec, size_t size);

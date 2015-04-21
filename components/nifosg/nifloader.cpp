@@ -1146,7 +1146,7 @@ namespace NifOsg
                 //influence.mWeights.reserve(weights.size());
                 for(size_t j = 0;j < weights.size();j++)
                 {
-                    std::pair<short, float> indexWeight = std::make_pair(weights[j].vertex, weights[j].weight);
+                    std::pair<unsigned short, float> indexWeight = std::make_pair(weights[j].vertex, weights[j].weight);
                     influence.mWeights.insert(indexWeight);
                 }
                 influence.mInvBindMatrix = toMatrix(data->bones[i].trafo);

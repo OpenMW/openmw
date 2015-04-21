@@ -103,11 +103,11 @@ std::string NIFStream::getVersionString()
     return result;
 }
 
-void NIFStream::getShorts(std::vector<short> &vec, size_t size)
+void NIFStream::getUShorts(std::vector<unsigned short> &vec, size_t size)
 {
     vec.resize(size);
     for(size_t i = 0;i < vec.size();i++)
-        vec[i] = getShort();
+        vec[i] = getUShort();
 }
 void NIFStream::getFloats(std::vector<float> &vec, size_t size)
 {

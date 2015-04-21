@@ -172,9 +172,9 @@ void RigGeometry::update(osg::NodeVisitor* nv)
 
         osg::Matrixf finalMatrix = bi.mInvBindMatrix * bone->mMatrixInSkeletonSpace * geomToSkel;
 
-        for (std::map<short, float>::const_iterator weightIt = bi.mWeights.begin(); weightIt != bi.mWeights.end(); ++weightIt)
+        for (std::map<unsigned short, float>::const_iterator weightIt = bi.mWeights.begin(); weightIt != bi.mWeights.end(); ++weightIt)
         {
-            short vertex = weightIt->first;
+            unsigned short vertex = weightIt->first;
             float weight = weightIt->second;
 
             osg::Vec3f a = (*positionSrc)[vertex];
