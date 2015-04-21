@@ -120,7 +120,7 @@ void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemM
 
     QVariant new_ = hack.getData();
 
-    if (model->data (index)!=new_)
+    if ((model->data (index)!=new_) && (model->flags(index) & Qt::ItemIsEditable))
         getUndoStack().push (new CSMWorld::ModifyCommand (*model, index, new_));
 }
 
@@ -180,7 +180,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_Float:
         {
             QDoubleSpinBox *dsb = new QDoubleSpinBox(parent);
-            dsb->setRange(FLT_MIN, FLT_MAX);
+            dsb->setRange(-FLT_MAX, FLT_MAX);
             dsb->setSingleStep(0.01f);
             dsb->setDecimals(3);
             return dsb;
