@@ -253,47 +253,6 @@ namespace
         }
     };
 
-    // NodeCallback used to set the inverse of the parent bone's matrix in skeleton space
-    // on the MatrixTransform that the NodeCallback is attached to. This is used so we can
-    // attach skinned meshes to their actual parent node, while still having the skinning
-    // work in skeleton space as expected.
-    // Must be set on a MatrixTransform.
-    class InvertBoneMatrix : public osg::NodeCallback
-    {
-    public:
-        InvertBoneMatrix() {}
-
-        InvertBoneMatrix(const InvertBoneMatrix& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
-            : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop) {}
-
-        META_Object(NifOsg, InvertBoneMatrix)
-
-        void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-            if (nv && nv->getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR)
-            {
-                osg::NodePath path = nv->getNodePath();
-                path.pop_back();
-
-                osg::MatrixTransform* trans = dynamic_cast<osg::MatrixTransform*>(node);
-
-                for (osg::NodePath::iterator it = path.begin(); it != path.end(); ++it)
-                {
-                    if (dynamic_cast<SceneUtil::Skeleton*>(*it))
-                    {
-                        path.erase(path.begin(), it+1);
-                        // the bone's transform in skeleton space
-                        osg::Matrix boneMat = osg::computeLocalToWorld( path );
-                        trans->setMatrix(osg::Matrix::inverse(boneMat));
-                        break;
-                    }
-                }
-            }
-            traverse(node,nv);
-        }
-    };
-
-
     // NodeVisitor that adds keyframe controllers to an existing scene graph, used when loading .kf files
     /*
     class LoadKfVisitor : public osg::NodeVisitor
