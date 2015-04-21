@@ -10,6 +10,9 @@ namespace SceneUtil
     class Skeleton;
     class Bone;
 
+    /// @brief Mesh skinning implementation.
+    /// @note A RigGeometry may be attached directly to a Skeleton, or somewhere below a Skeleton.
+    /// Note though that the RigGeometry ignores any transforms below the Skeleton, so the attachment point is not that important.
     class RigGeometry : public osg::Geometry
     {
     public:
@@ -24,7 +27,6 @@ namespace SceneUtil
             // <vertex index, weight>
             std::map<short, float> mWeights;
         };
-
 
         struct InfluenceMap : public osg::Referenced
         {
