@@ -34,6 +34,7 @@ private:
 Skeleton::Skeleton()
     : mBoneCacheInit(false)
     , mNeedToUpdateBoneMatrices(true)
+    , mLastFrameNumber(0)
 {
 
 }
@@ -42,6 +43,7 @@ Skeleton::Skeleton(const Skeleton &copy, const osg::CopyOp &copyop)
     : osg::Group(copy, copyop)
     , mBoneCacheInit(false)
     , mNeedToUpdateBoneMatrices(true)
+    , mLastFrameNumber(0)
 {
 
 }
@@ -100,11 +102,15 @@ Bone* Skeleton::getBone(const std::string &name)
     return bone;
 }
 
-void Skeleton::updateBoneMatrices()
+void Skeleton::updateBoneMatrices(osg::NodeVisitor* nv)
 {
-    //if (mNeedToUpdateBoneMatrices)
-    {
+    if (nv->getFrameStamp()->getFrameNumber() != mLastFrameNumber)
+        mNeedToUpdateBoneMatrices = true;
 
+    mLastFrameNumber = nv->getFrameStamp()->getFrameNumber();
+
+    if (mNeedToUpdateBoneMatrices)
+    {
         if (mRootBone.get())
         {
             for (unsigned int i=0; i<mRootBone->mChildren.size(); ++i)

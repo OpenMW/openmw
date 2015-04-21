@@ -135,7 +135,7 @@ void RigGeometry::update(osg::NodeVisitor* nv)
             return;
     }
 
-    mSkeleton->updateBoneMatrices();
+    mSkeleton->updateBoneMatrices(nv);
 
     osg::NodePath path;
     bool foundSkel = false;

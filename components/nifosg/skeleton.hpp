@@ -39,7 +39,7 @@ namespace NifOsg
 
         META_Node(NifOsg, Skeleton)
 
-        void updateBoneMatrices();
+        void updateBoneMatrices(osg::NodeVisitor* nv);
 
     private:
         // The root bone is not a "real" bone, it has no corresponding node in the scene graph.
@@ -51,6 +51,8 @@ namespace NifOsg
         bool mBoneCacheInit;
 
         bool mNeedToUpdateBoneMatrices;
+
+        unsigned int mLastFrameNumber;
     };
 
 }
