@@ -32,10 +32,6 @@ void CSVDoc::View::closeEvent (QCloseEvent *event)
         event->ignore();
     else
     {
-        // delete the subviews first
-        for (QList<CSVDoc::SubView *>::iterator iter = mSubViews.begin(); iter != mSubViews.end(); ++iter)
-            delete *iter;
-
         // closeRequest() returns true if last document
         mViewManager.removeDocAndView(mDocument);
     }
@@ -98,7 +94,7 @@ void CSVDoc::View::setupEditMenu()
 
     QAction *search = new QAction (tr ("Search"), this);
     connect (search, SIGNAL (triggered()), this, SLOT (addSearchSubView()));
-    edit->addAction (search);    
+    edit->addAction (search);
 }
 
 void CSVDoc::View::setupViewMenu()
