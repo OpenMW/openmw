@@ -1196,28 +1196,24 @@ namespace NifOsg
             }
             rig->setInfluenceMap(map);
 
-            rig->setComputeBoundingBoxCallback(new StaticBoundingBoxCallback(geometry->getBound()));
+            // Compute the bounding box
+            osg::BoundingBox boundingBox;
+
+            osg::Matrix worldTrans = getWorldTransform(triShape);
+            for(size_t i = 0;i < bones.length();i++)
+            {
+                osg::BoundingSphere boneSphere (data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
+                osg::Matrix boneWorldTrans(getWorldTransform(bones[i].getPtr()));
+                osg::Matrix mat = boneWorldTrans * worldTrans.inverse(worldTrans);
+                SceneUtil::transformBoundingSphere(mat, boneSphere);
+                boundingBox.expandBy(boneSphere);
+            }
+            rig->setComputeBoundingBoxCallback(new StaticBoundingBoxCallback(boundingBox));
 
             geode->addDrawable(rig);
 
-            // World bounding box callback & node
-            osg::ref_ptr<BoundingBoxCallback> bbcb = new BoundingBoxCallback;
-            bbcb->mDrawable = rig;
-
-            osg::ref_ptr<osg::Geode> geode2 = new osg::Geode;
-            geode2->addDrawable( new osg::ShapeDrawable(new osg::Box) );
-
-            osg::ref_ptr<osg::MatrixTransform> boundingBoxNode = new osg::MatrixTransform;
-            boundingBoxNode->addChild( geode2.get() );
-            boundingBoxNode->addUpdateCallback( bbcb.get() );
-            boundingBoxNode->getOrCreateStateSet()->setAttributeAndModes(
-                new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE) );
-            boundingBoxNode->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
-
-
             // Add a copy, we will alternate between the two copies every other frame using the FrameSwitch
             // This is so we can set the DataVariance as STATIC, giving a huge performance boost
-            /*
             rig->setDataVariance(osg::Object::STATIC);
             osg::Geode* geode2 = static_cast<osg::Geode*>(osg::clone(geode.get(), osg::CopyOp::DEEP_COPY_NODES|
                                                                      osg::CopyOp::DEEP_COPY_DRAWABLES));
@@ -1226,11 +1222,7 @@ namespace NifOsg
             frameswitch->addChild(geode);
             frameswitch->addChild(geode2);
 
-            trans->addChild(frameswitch);
-            */
-
-            parentNode->addChild(geode);
-            parentNode->addChild(boundingBoxNode);
+            parentNode->addChild(frameswitch);
         }
 
 

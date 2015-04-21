@@ -46,10 +46,8 @@ RigGeometry::RigGeometry()
 RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
     : osg::Geometry(copy, copyop)
     , mInfluenceMap(copy.mInfluenceMap)
-    , mSourceGeometry(copy.mSourceGeometry)
 {
-    //setVertexArray(dynamic_cast<osg::Array*>(from.getVertexArray()->clone(osg::CopyOp::DEEP_COPY_ALL)));
-    //setNormalArray(dynamic_cast<osg::Array*>(from.getNormalArray()->clone(osg::CopyOp::DEEP_COPY_ALL)), osg::Array::BIND_PER_VERTEX);
+    setSourceGeometry(copy.mSourceGeometry);
 }
 
 void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
@@ -109,8 +107,6 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
         std::cerr << "A RigGeometry did not find its parent skeleton" << std::endl;
         return false;
     }
-
-    // geometryToSkel = nv->getNodePath()...
 
     if (!mInfluenceMap)
     {
