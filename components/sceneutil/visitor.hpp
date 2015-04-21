@@ -17,15 +17,14 @@ namespace SceneUtil
         {
         }
 
-        virtual void apply(osg::Node &node)
+        virtual void apply(osg::Group& group)
         {
-            osg::Group* group = node.asGroup();
-            if (group && node.getName() == mNameToFind)
+            if (group.getName() == mNameToFind)
             {
-                mFoundNode = group;
+                mFoundNode = &group;
                 return;
             }
-            traverse(node);
+            traverse(group);
         }
 
         std::string mNameToFind;

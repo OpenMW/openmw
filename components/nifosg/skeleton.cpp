@@ -39,7 +39,8 @@ Skeleton::Skeleton()
 }
 
 Skeleton::Skeleton(const Skeleton &copy, const osg::CopyOp &copyop)
-    : mBoneCacheInit(false)
+    : osg::Group(copy, copyop)
+    , mBoneCacheInit(false)
     , mNeedToUpdateBoneMatrices(true)
 {
 

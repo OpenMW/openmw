@@ -8,155 +8,55 @@
 #include <osg/Geode>
 #include <osg/FrontFace>
 #include <osg/PositionAttitudeTransform>
-
-#include <osgAnimation/BoneMapVisitor>
-#include <osgAnimation/Skeleton>
+#include <osg/MatrixTransform>
 
 #include <components/misc/stringops.hpp>
+
+#include <components/nifosg/skeleton.hpp>
 
 #include "visitor.hpp"
 
 namespace SceneUtil
 {
 
-    class NodeMapVisitor : public osg::NodeVisitor
+    class CopyRigVisitor : public osg::NodeVisitor
     {
     public:
-        NodeMapVisitor() : osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN) {}
-
-        void apply(osg::MatrixTransform& trans)
-        {
-            mMap[trans.getName()] = &trans;
-            traverse(trans);
-        }
-
-        typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
-
-        const NodeMap& getNodeMap() const
-        {
-            return mMap;
-        }
-
-    private:
-        NodeMap mMap;
-    };
-
-    /// Copy the matrix of a "source" node to a "dest" node (the node that the callback is attached to).
-    /// Must be set on a MatrixTransform.
-    class CopyController : public osg::NodeCallback
-    {
-    public:
-        CopyController(osg::MatrixTransform* copyFrom)
-            : mCopyFrom(copyFrom)
-        {
-        }
-        CopyController(const CopyController& copy, const osg::CopyOp& copyop)
-            : osg::NodeCallback(copy, copyop)
-            , mCopyFrom(copy.mCopyFrom)
-        {
-        }
-        CopyController()
-            : mCopyFrom(NULL)
-        {
-        }
-
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-            osgAnimation::Bone* bone = static_cast<osgAnimation::Bone*>(node);
-
-            if (mCopyFrom)
-            {
-                bone->setMatrix(mCopyFrom->getMatrix());
-            }
-
-            traverse(node, nv);
-        }
-
-    private:
-        const osg::MatrixTransform* mCopyFrom;
-    };
-
-    class AddCopyControllerVisitor : public osg::NodeVisitor
-    {
-    public:
-        AddCopyControllerVisitor(const NodeMapVisitor::NodeMap& boneMap)
+        CopyRigVisitor(osg::ref_ptr<osg::Group> parent, const std::string& filter)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mNodeMap(boneMap)
-        {
-        }
-
-        virtual void apply(osg::MatrixTransform &node)
-        {
-            if (osgAnimation::Bone* bone = dynamic_cast<osgAnimation::Bone*>(&node))
-            {
-                NodeMapVisitor::NodeMap::const_iterator found = mNodeMap.find(bone->getName());
-                if (found != mNodeMap.end())
-                {
-                    // add the CopyController at position 0 so it's executed before UpdateBone
-                    osg::ref_ptr<osg::NodeCallback> old = bone->getUpdateCallback();
-                    bone->setUpdateCallback(new CopyController(found->second.get()));
-                    bone->addUpdateCallback(old);
-                }
-            }
-            traverse(node);
-        }
-
-    private:
-        const NodeMapVisitor::NodeMap& mNodeMap;
-    };
-
-    // FIXME: would be more efficient to copy only the wanted nodes instead of deleting unwanted ones later
-    // copying is kinda cheap though, so don't bother for now
-    class FilterVisitor : public osg::NodeVisitor
-    {
-    public:
-        FilterVisitor(const std::string& filter)
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mParent(parent)
             , mFilter(Misc::StringUtils::lowerCase(filter))
         {
         }
 
-        virtual void apply(osg::Geode &node)
+        virtual void apply(osg::Node& node)
         {
             std::string lowerName = Misc::StringUtils::lowerCase(node.getName());
-            if (lowerName.find(mFilter) == std::string::npos)
+            if (lowerName.find(mFilter) != std::string::npos)
             {
-                mToRemove.push_back(&node);
+                mParent->addChild(&node);
             }
-        }
-
-        void removeFilteredParts()
-        {
-            for (std::vector<osg::Geode*>::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
-            {
-                osg::Geode* geode = *it;
-                geode->getParent(0)->removeChild(geode);
-            }
+            else
+                traverse(node);
         }
 
     private:
-        std::vector<osg::Geode*> mToRemove;
+        osg::ref_ptr<osg::Group> mParent;
         std::string mFilter;
     };
 
     osg::ref_ptr<osg::Node> attach(osg::ref_ptr<osg::Node> toAttach, osg::Node *master, const std::string &filter, const std::string &attachNode)
     {
-        if (osgAnimation::Skeleton* skel = dynamic_cast<osgAnimation::Skeleton*>(toAttach.get()))
+        if (dynamic_cast<NifOsg::Skeleton*>(toAttach.get()))
         {
-            NodeMapVisitor nodeMapVisitor;
-            master->accept(nodeMapVisitor);
+            osg::ref_ptr<osg::Group> handle = new osg::Group;
 
-            // would be more efficient if we could attach the RigGeometry directly to the master skeleton, but currently not possible
-            // due to a difference in binding pose of the two skeletons
-            AddCopyControllerVisitor visitor(nodeMapVisitor.getNodeMap());
-            toAttach->accept(visitor);
+            CopyRigVisitor copyVisitor(handle, filter);
+            toAttach->accept(copyVisitor);
 
-            FilterVisitor filterVisitor(filter);
-            toAttach->accept(filterVisitor);
-            filterVisitor.removeFilteredParts();
+            master->asGroup()->addChild(handle);
 
-            master->asGroup()->addChild(skel);
-            return skel;
+            return handle;
         }
         else
         {
