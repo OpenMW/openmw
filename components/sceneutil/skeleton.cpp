@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-namespace NifOsg
+namespace SceneUtil
 {
 
 class InitBoneCacheVisitor : public osg::NodeVisitor

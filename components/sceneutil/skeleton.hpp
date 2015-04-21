@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace NifOsg
+namespace SceneUtil
 {
 
     // Defines a Bone hierarchy, used for updating of skeleton-space bone matrices.

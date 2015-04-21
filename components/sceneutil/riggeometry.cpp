@@ -11,7 +11,7 @@
 
 #include <osg/io_utils>
 
-namespace NifOsg
+namespace SceneUtil
 {
 
 // TODO: make threadsafe for multiple cull threads

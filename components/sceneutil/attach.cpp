@@ -12,7 +12,7 @@
 
 #include <components/misc/stringops.hpp>
 
-#include <components/nifosg/skeleton.hpp>
+#include <components/sceneutil/skeleton.hpp>
 
 #include "visitor.hpp"
 
@@ -47,7 +47,7 @@ namespace SceneUtil
 
     osg::ref_ptr<osg::Node> attach(osg::ref_ptr<osg::Node> toAttach, osg::Node *master, const std::string &filter, const std::string &attachNode)
     {
-        if (dynamic_cast<NifOsg::Skeleton*>(toAttach.get()))
+        if (dynamic_cast<SceneUtil::Skeleton*>(toAttach.get()))
         {
             osg::ref_ptr<osg::Group> handle = new osg::Group;
 

@@ -4,7 +4,7 @@
 #include <osg/Geometry>
 #include <osg/Matrixf>
 
-namespace NifOsg
+namespace SceneUtil
 {
 
     class Skeleton;

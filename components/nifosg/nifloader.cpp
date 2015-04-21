@@ -41,11 +41,11 @@
 
 #include <components/nif/node.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/sceneutil/skeleton.hpp>
+#include <components/sceneutil/riggeometry.hpp>
 
 #include "particle.hpp"
 #include "userdata.hpp"
-#include "skeleton.hpp"
-#include "riggeometry.hpp"
 
 namespace
 {
@@ -279,7 +279,7 @@ namespace
 
                 for (osg::NodePath::iterator it = path.begin(); it != path.end(); ++it)
                 {
-                    if (dynamic_cast<NifOsg::Skeleton*>(*it))
+                    if (dynamic_cast<SceneUtil::Skeleton*>(*it))
                     {
                         path.erase(path.begin(), it+1);
                         // the bone's transform in skeleton space
@@ -535,7 +535,7 @@ namespace NifOsg
 
             osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
 
-            osg::ref_ptr<Skeleton> skel = new Skeleton;
+            osg::ref_ptr<SceneUtil::Skeleton> skel = new SceneUtil::Skeleton;
             handleNode(nifNode, skel, textureManager, true, std::map<int, int>(), 0, 0, false, &textkeys->mTextKeys);
 
             skel->getOrCreateUserDataContainer()->addUserObject(textkeys);
@@ -1168,13 +1168,13 @@ namespace NifOsg
             osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
             triShapeToGeometry(triShape, geometry, geode, boundTextures, animflags);
 
-            osg::ref_ptr<RigGeometry> rig(new RigGeometry);
+            osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
             rig->setSourceGeometry(geometry);
 
             const Nif::NiSkinInstance *skin = triShape->skin.getPtr();
 
             // Assign bone weights
-            osg::ref_ptr<RigGeometry::InfluenceMap> map (new RigGeometry::InfluenceMap);
+            osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map (new SceneUtil::RigGeometry::InfluenceMap);
 
             const Nif::NiSkinData *data = skin->data.getPtr();
             const Nif::NodeList &bones = skin->bones;
@@ -1182,7 +1182,7 @@ namespace NifOsg
             {
                 std::string boneName = bones[i].getPtr()->name;
 
-                RigGeometry::BoneInfluence influence;
+                SceneUtil::RigGeometry::BoneInfluence influence;
                 const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[i].weights;
                 //influence.mWeights.reserve(weights.size());
                 for(size_t j = 0;j < weights.size();j++)

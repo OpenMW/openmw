@@ -39,7 +39,7 @@ add_component_dir (resource
     )
 
 add_component_dir (sceneutil
-    clone attach lightmanager visitor util statesetupdater controller
+    clone attach lightmanager visitor util statesetupdater controller skeleton riggeometry
     )
 
 add_component_dir (nif
@@ -47,7 +47,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifosg
-    nifloader controller particle userdata skeleton riggeometry
+    nifloader controller particle userdata
     )
 
 #add_component_dir (nifcache
