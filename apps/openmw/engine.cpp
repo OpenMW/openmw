@@ -370,7 +370,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     //mEnvironment.setInputManager (input);
 
     MWGui::WindowManager* window = new MWGui::WindowManager(
-                mExtensions, NULL, mCfgMgr.getLogPath().string() + std::string("/"),
+                mExtensions, mCfgMgr.getLogPath().string() + std::string("/"),
                 mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap);
     mEnvironment.setWindowManager (window);
 

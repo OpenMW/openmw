@@ -1,6 +1,5 @@
 set(OENGINE_OGRE
-    #ogre/renderer.cpp
-    ogre/lights.cpp
+    #ogre/lights.cpp
 )
 
 set(OENGINE_GUI

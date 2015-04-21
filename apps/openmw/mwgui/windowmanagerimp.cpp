@@ -24,8 +24,6 @@
 #include <SDL_keyboard.h>
 #include <SDL_clipboard.h>
 
-#include <openengine/ogre/renderer.hpp>
-
 #include <extern/sdl4ogre/sdlcursormanager.hpp>
 
 #include <components/fontloader/fontloader.hpp>
@@ -99,12 +97,10 @@ namespace MWGui
 {
 
     WindowManager::WindowManager(
-        const Compiler::Extensions& extensions, OEngine::Render::OgreRenderer *ogre,
-            const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
+        const Compiler::Extensions& extensions, const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
             Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap)
       : mConsoleOnlyScripts(consoleOnlyScripts)
       //, mGuiManager(NULL)
-      , mRendering(ogre)
       , mHud(NULL)
       , mMap(NULL)
       , mMenu(NULL)
@@ -838,7 +834,7 @@ namespace MWGui
                 mMessageBoxManager->onFrame(0.f);
                 MWBase::Environment::get().getInputManager()->update(0, true, false);
 
-                mRendering->getWindow()->update();
+                //mRendering->getWindow()->update();
             }
         }
     }
@@ -1714,6 +1710,7 @@ namespace MWGui
         }
 
         // Turn off all rendering except for the GUI
+        /*
         mRendering->getScene()->clearSpecialCaseRenderQueues();
         // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work?
         for(int i = 0;i < Ogre::RENDER_QUEUE_MAX;++i)
@@ -1722,6 +1719,7 @@ namespace MWGui
                 mRendering->getScene()->addSpecialCaseRenderQueue(i);
         }
         mRendering->getScene()->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+        */
 
         MyGUI::IntSize screenSize = MyGUI::RenderManager::getInstance().getViewSize();
         sizeVideo(screenSize.width, screenSize.height);
@@ -1741,7 +1739,7 @@ namespace MWGui
         {
             MWBase::Environment::get().getInputManager()->update(0, true, false);
 
-            mRendering->getWindow()->update();
+            //mRendering->getWindow()->update();
         }
         mVideoWidget->stop();
 
@@ -1750,8 +1748,8 @@ namespace MWGui
         setCursorVisible(cursorWasVisible);
 
         // Restore normal rendering
-        mRendering->getScene()->clearSpecialCaseRenderQueues();
-        mRendering->getScene()->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+        //mRendering->getScene()->clearSpecialCaseRenderQueues();
+        //mRendering->getScene()->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
 
         mVideoBackground->setVisible(false);
     }

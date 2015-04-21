@@ -13,7 +13,6 @@
 #include <openengine/bullet/trace.h>
 #include <openengine/bullet/physic.hpp>
 #include <openengine/bullet/BtOgreExtras.h>
-#include <openengine/ogre/renderer.hpp>
 //#include <openengine/bullet/BulletShapeLoader.h>
 
 #include <components/nifbullet/bulletnifloader.hpp>
@@ -499,8 +498,8 @@ namespace MWWorld
     };
 
 
-    PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend) :
-        mRender(_rend), mEngine(0), mTimeAccum(0.0f), mWaterEnabled(false), mWaterHeight(0)
+    PhysicsSystem::PhysicsSystem() :
+        mEngine(0), mTimeAccum(0.0f), mWaterEnabled(false), mWaterHeight(0)
     {
         // Create physics. shapeLoader is deleted by the physic engine
         //NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();

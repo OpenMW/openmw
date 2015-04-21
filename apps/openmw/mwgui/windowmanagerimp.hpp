@@ -99,8 +99,7 @@ namespace MWGui
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(const Compiler::Extensions& extensions,
-                  OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
+    WindowManager(const Compiler::Extensions& extensions, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
                   Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap);
     virtual ~WindowManager();
@@ -366,7 +365,6 @@ namespace MWGui
     CustomMarkerCollection mCustomMarkers;
 
     OEngine::GUI::MyGUIManager *mGuiManager;
-    OEngine::Render::OgreRenderer *mRendering;
     HUD *mHud;
     MapWindow *mMap;
     MainMenu *mMenu;

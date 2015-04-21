@@ -12,10 +12,6 @@
 
 namespace OEngine
 {
-    namespace Render
-    {
-        class OgreRenderer;
-    }
     namespace Physic
     {
         class PhysicEngine;
@@ -31,7 +27,7 @@ namespace MWWorld
     class PhysicsSystem
     {
         public:
-            PhysicsSystem (OEngine::Render::OgreRenderer &_rend);
+            PhysicsSystem ();
             ~PhysicsSystem ();
 
             void enableWater(float height);
@@ -116,7 +112,6 @@ namespace MWWorld
 
             void updateWater();
 
-            OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;
             std::map<std::string, std::string> handleToMesh;
 

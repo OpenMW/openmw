@@ -2,10 +2,10 @@
 #define GAME_RENDER_MWSCENE_H
 
 #include <utility>
-#include <openengine/ogre/renderer.hpp>
 
 #include <vector>
 #include <string>
+#include <map>
 
 namespace ESM
 {
@@ -29,6 +29,7 @@ namespace Ogre
     class RaySceneQuery;
     class Quaternion;
     class Vector3;
+    class ManualObject;
 }
 
 namespace MWWorld
