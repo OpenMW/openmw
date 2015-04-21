@@ -138,11 +138,6 @@ namespace MWRender
         return *mObjects.get();
     }
 
-    MWRender::Actors& RenderingManager::getActors()
-    {
-        throw std::runtime_error("unimplemented");
-    }
-
     Resource::ResourceSystem* RenderingManager::getResourceSystem()
     {
         return mResourceSystem;

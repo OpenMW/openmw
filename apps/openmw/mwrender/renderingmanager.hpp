@@ -43,7 +43,6 @@ namespace MWRender
         ~RenderingManager();
 
         MWRender::Objects& getObjects();
-        MWRender::Actors& getActors();
 
         Resource::ResourceSystem* getResourceSystem();
 
