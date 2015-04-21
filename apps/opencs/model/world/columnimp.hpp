@@ -1277,7 +1277,6 @@ namespace CSMWorld
         }
     };
 
-
     template<typename ESXRecordT>
     struct PosColumn : public Column<ESXRecordT>
     {

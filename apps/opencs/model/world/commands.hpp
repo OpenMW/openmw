@@ -12,6 +12,7 @@
 #include <QModelIndex>
 
 #include "universalid.hpp"
+#include "nestedtablewrapper.hpp"
 
 class QModelIndex;
 class QAbstractItemModel;
@@ -19,8 +20,9 @@ class QAbstractItemModel;
 namespace CSMWorld
 {
     class IdTable;
-    class IdTable;
+    class IdTree;
     struct RecordBase;
+    struct NestedTableWrapperBase;
 
     class ModifyCommand : public QUndoCommand
     {
@@ -134,6 +136,58 @@ namespace CSMWorld
         public:
 
             ReorderRowsCommand (IdTable& model, int baseIndex, const std::vector<int>& newOrder);
+
+            virtual void redo();
+
+            virtual void undo();
+    };
+
+    class NestedTableStoring
+    {
+        NestedTableWrapperBase* mOld;
+
+    public:
+        NestedTableStoring(const IdTree& model, const std::string& id, int parentColumn);
+
+        ~NestedTableStoring();
+
+    protected:
+
+        const NestedTableWrapperBase& getOld() const;
+    };
+
+    class DeleteNestedCommand : public QUndoCommand, private NestedTableStoring
+    {
+            IdTree& mModel;
+
+            std::string mId;
+
+            int mParentColumn;
+
+            int mNestedRow;
+
+        public:
+
+            DeleteNestedCommand (IdTree& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
+
+            virtual void redo();
+
+            virtual void undo();
+    };
+
+    class AddNestedCommand : public QUndoCommand, private NestedTableStoring
+    {
+            IdTree& mModel;
+
+            std::string mId;
+
+            int mNewRow;
+
+            int mParentColumn;
+
+        public:
+
+            AddNestedCommand(IdTree& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
 
             virtual void redo();
 

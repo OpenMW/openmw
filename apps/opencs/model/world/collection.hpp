@@ -148,6 +148,8 @@ namespace CSMWorld
 
             void setRecord (int index, const Record<ESXRecordT>& record);
             ///< \attention This function must not change the ID.
+
+            NestableColumn *getNestableColumn (int column) const;
     };
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -287,6 +289,15 @@ namespace CSMWorld
     const ColumnBase& Collection<ESXRecordT, IdAccessorT>::getColumn (int column) const
     {
         return *mColumns.at (column);
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    NestableColumn *Collection<ESXRecordT, IdAccessorT>::getNestableColumn (int column) const
+    {
+        if (column < 0 || column >= static_cast<int>(mColumns.size()))
+            throw std::runtime_error("column index out of range");
+
+        return mColumns.at (column);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>

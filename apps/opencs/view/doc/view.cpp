@@ -94,7 +94,7 @@ void CSVDoc::View::setupEditMenu()
 
     QAction *search = new QAction (tr ("Search"), this);
     connect (search, SIGNAL (triggered()), this, SLOT (addSearchSubView()));
-    edit->addAction (search);    
+    edit->addAction (search);
 }
 
 void CSVDoc::View::setupViewMenu()
