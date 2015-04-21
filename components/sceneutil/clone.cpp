@@ -6,8 +6,10 @@
 #include <osgParticle/ParticleSystemUpdater>
 #include <osgParticle/Emitter>
 #include <osgParticle/Program>
-#include <osgAnimation/RigGeometry>
+
 #include <osgAnimation/MorphGeometry>
+
+#include <components/sceneutil/riggeometry.hpp>
 
 namespace SceneUtil
 {
@@ -45,7 +47,7 @@ namespace SceneUtil
     {
         if (const osgParticle::ParticleSystem* partsys = dynamic_cast<const osgParticle::ParticleSystem*>(drawable))
             return operator()(partsys);
-        if (dynamic_cast<const osgAnimation::RigGeometry*>(drawable)
+        if (dynamic_cast<const SceneUtil::RigGeometry*>(drawable)
                 || dynamic_cast<const osgAnimation::MorphGeometry*>(drawable))
             return osg::clone(drawable, osg::CopyOp::DEEP_COPY_DRAWABLES);
 
