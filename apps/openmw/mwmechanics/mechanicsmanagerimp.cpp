@@ -52,6 +52,31 @@ namespace
         return ((50.f - disposition)  * fFightDispMult);
     }
 
+    void getPersuasionRatings(const MWMechanics::NpcStats& stats, float& rating1, float& rating2, float& rating3, bool player)
+    {
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        float persTerm = stats.getAttribute(ESM::Attribute::Personality).getModified() / gmst.find("fPersonalityMod")->getFloat();
+        float luckTerm = stats.getAttribute(ESM::Attribute::Luck).getModified() / gmst.find("fLuckMod")->getFloat();
+        float repTerm = stats.getReputation() * gmst.find("fReputationMod")->getFloat();
+        float fatigueTerm = stats.getFatigueTerm();
+        float levelTerm = stats.getLevel() * gmst.find("fLevelMod")->getFloat();
+
+        rating1 = (repTerm + luckTerm + persTerm + stats.getSkill(ESM::Skill::Speechcraft).getModified()) * fatigueTerm;
+
+        if (player)
+        {
+            rating2 = rating1 + levelTerm;
+            rating3 = (stats.getSkill(ESM::Skill::Mercantile).getModified() + luckTerm + persTerm) * fatigueTerm;
+        }
+        else
+        {
+            rating2 = (levelTerm + repTerm + luckTerm + persTerm + stats.getSkill(ESM::Skill::Speechcraft).getModified()) * fatigueTerm;
+            rating3 = (stats.getSkill(ESM::Skill::Mercantile).getModified() + repTerm + luckTerm + persTerm) * fatigueTerm;
+        }
+    }
+
 }
 
 namespace MWMechanics
@@ -685,24 +710,11 @@ namespace MWMechanics
         MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWMechanics::NpcStats &playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
-        float persTerm = playerStats.getAttribute(ESM::Attribute::Personality).getModified()
-                            / gmst.find("fPersonalityMod")->getFloat();
+        float npcRating1, npcRating2, npcRating3;
+        getPersuasionRatings(npcStats, npcRating1, npcRating2, npcRating3, false);
 
-        float luckTerm = playerStats.getAttribute(ESM::Attribute::Luck).getModified()
-                            / gmst.find("fLuckMod")->getFloat();
-
-        float repTerm = playerStats.getReputation() * gmst.find("fReputationMod")->getFloat();
-        float levelTerm = playerStats.getLevel() * gmst.find("fLevelMod")->getFloat();
-
-        float fatigueTerm = playerStats.getFatigueTerm();
-
-        float playerRating1 = (repTerm + luckTerm + persTerm + playerStats.getSkill(ESM::Skill::Speechcraft).getModified()) * fatigueTerm;
-        float playerRating2 = playerRating1 + levelTerm;
-        float playerRating3 = (playerStats.getSkill(ESM::Skill::Mercantile).getModified() + luckTerm + persTerm) * fatigueTerm;
-
-        float npcRating1 = (repTerm + luckTerm + persTerm + playerStats.getSkill(ESM::Skill::Speechcraft).getModified()) * fatigueTerm;
-        float npcRating2 = (levelTerm + repTerm + luckTerm + persTerm + npcStats.getSkill(ESM::Skill::Speechcraft).getModified()) * fatigueTerm;
-        float npcRating3 = (playerStats.getSkill(ESM::Skill::Mercantile).getModified() + repTerm + luckTerm + persTerm) * fatigueTerm;
+        float playerRating1, playerRating2, playerRating3;
+        getPersuasionRatings(playerStats, playerRating1, playerRating2, playerRating3, true);
 
         int currentDisposition = std::min(100, std::max(0, int(getDerivedDisposition(npc) + currentTemporaryDispositionDelta)));
 
