@@ -47,7 +47,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifosg
-    nifloader controller particle userdata
+    nifloader controller particle userdata skeleton riggeometry
     )
 
 #add_component_dir (nifcache
