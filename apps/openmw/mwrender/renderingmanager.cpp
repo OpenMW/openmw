@@ -5,9 +5,12 @@
 #include <osg/io_utils>
 #include <osg/Light>
 #include <osg/LightModel>
+#include <osg/Fog>
 #include <osg/Group>
 
 #include <osgViewer/Viewer>
+
+#include <components/settings/settings.hpp>
 
 #include <components/sceneutil/util.hpp>
 
@@ -26,25 +29,49 @@ namespace MWRender
     class StateUpdater : public SceneUtil::StateSetUpdater
     {
     public:
+        StateUpdater()
+            : mFogEnd(0.f)
+        {
+        }
+
         virtual void setDefaults(osg::StateSet *stateset)
         {
             osg::LightModel* lightModel = new osg::LightModel;
             stateset->setAttribute(lightModel, osg::StateAttribute::ON);
+            osg::Fog* fog = new osg::Fog;
+            fog->setStart(1);
+            stateset->setAttributeAndModes(fog, osg::StateAttribute::ON);
         }
 
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
         {
             osg::LightModel* lightModel = static_cast<osg::LightModel*>(stateset->getAttribute(osg::StateAttribute::LIGHTMODEL));
             lightModel->setAmbientIntensity(mAmbientColor);
+            osg::Fog* fog = static_cast<osg::Fog*>(stateset->getAttribute(osg::StateAttribute::FOG));
+            fog->setColor(mFogColor);
+            fog->setEnd(mFogEnd);
+            fog->setMode(osg::Fog::LINEAR);
         }
 
-        void setAmbientColor(osg::Vec4f col)
+        void setAmbientColor(const osg::Vec4f& col)
         {
             mAmbientColor = col;
         }
 
+        void setFogColor(const osg::Vec4f& col)
+        {
+            mFogColor = col;
+        }
+
+        void setFogEnd(float end)
+        {
+            mFogEnd = end;
+        }
+
     private:
         osg::Vec4f mAmbientColor;
+        osg::Vec4f mFogColor;
+        float mFogEnd;
     };
 
     RenderingManager::RenderingManager(osgViewer::Viewer &viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem)
@@ -80,16 +107,25 @@ namespace MWRender
         source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
 
         mStateUpdater = new StateUpdater;
-        mRootNode->addUpdateCallback(mStateUpdater);
+        lightRoot->addUpdateCallback(mStateUpdater);
+
+        osg::Camera::CullingMode cullingMode = osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING;
 
         // for consistent benchmarks against the ogre branch. remove later
-        osg::CullStack::CullingMode cullingMode = viewer.getCamera()->getCullingMode();
         cullingMode &= ~(osg::CullStack::SMALL_FEATURE_CULLING);
+
         viewer.getCamera()->setCullingMode( cullingMode );
+
+        mViewer.getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
+        mViewer.getCamera()->setCullingMode(cullingMode);
+
+        mViewDistance = Settings::Manager::getFloat("viewing distance", "Viewing distance");
 
         double fovy, aspect, zNear, zFar;
         mViewer.getCamera()->getProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
         fovy = 55.f;
+        zNear = 5.f;
+        zFar = mViewDistance;
         mViewer.getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
     }
 
@@ -153,9 +189,19 @@ namespace MWRender
         mSky->setEnabled(enabled);
     }
 
-    void RenderingManager::configureFog(float fogDepth, const osg::Vec4f &colour)
+    void RenderingManager::configureFog(const ESM::Cell *cell)
+    {
+        osg::Vec4f color = SceneUtil::colourFromRGB(cell->mAmbi.mFog);
+
+        configureFog (cell->mAmbi.mFogDensity, color);
+    }
+
+    void RenderingManager::configureFog(float /* fogDepth */, const osg::Vec4f &colour)
     {
         mViewer.getCamera()->setClearColor(colour);
+
+        mStateUpdater->setFogColor(colour);
+        mStateUpdater->setFogEnd(mViewDistance);
     }
 
     SkyManager* RenderingManager::getSkyManager()

@@ -511,7 +511,7 @@ namespace MWWorld
         changePlayerCell(cell, position, true);
 
         // adjust fog
-        //mRendering.configureFog(*mCurrentCell);
+        mRendering.configureFog(mCurrentCell->getCell());
 
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();

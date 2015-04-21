@@ -53,7 +53,7 @@ namespace MWRender
         void setSunColour(const osg::Vec4f& colour);
 
         void configureAmbient(const ESM::Cell* cell);
-
+        void configureFog(const ESM::Cell* cell);
         void configureFog(float fogDepth, const osg::Vec4f& colour);
 
         void removeCell(const MWWorld::CellStore* store);
@@ -86,6 +86,8 @@ namespace MWRender
         std::auto_ptr<EffectManager> mEffectManager;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
+
+        float mViewDistance;
 
         void operator = (const RenderingManager&);
         RenderingManager(const RenderingManager&);
