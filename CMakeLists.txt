@@ -557,9 +557,9 @@ add_subdirectory (extern/oics)
 add_subdirectory (components)
 
 # Plugins
-if (BUILD_MYGUI_PLUGIN)
-    add_subdirectory(plugins/mygui_resource_plugin)
-endif()
+#if (BUILD_MYGUI_PLUGIN)
+#    add_subdirectory(plugins/mygui_resource_plugin)
+#endif()
 
 #Testing
 if (BUILD_NIFTEST)
