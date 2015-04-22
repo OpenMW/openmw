@@ -3,7 +3,7 @@
 
 #include "weather.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/weatherstate.hpp>
 
@@ -527,7 +527,7 @@ void WeatherManager::update(float duration, bool paused)
                 if (mThunderSoundDelay <= 0)
                 {
                     // pick a random sound
-                    int sound = OEngine::Misc::Rng::rollDice(4);
+                    int sound = Misc::Rng::rollDice(4);
                     std::string* soundName = NULL;
                     if (sound == 0) soundName = &mThunderSoundID0;
                     else if (sound == 1) soundName = &mThunderSoundID1;
@@ -543,7 +543,7 @@ void WeatherManager::update(float duration, bool paused)
                     mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
                 else
                 {
-                    mThunderChanceNeeded = static_cast<float>(OEngine::Misc::Rng::rollDice(100));
+                    mThunderChanceNeeded = static_cast<float>(Misc::Rng::rollDice(100));
                     mThunderChance = 0;
                     mRendering->getSkyManager()->setLightningStrength( 0.f );
                 }
@@ -625,7 +625,7 @@ std::string WeatherManager::nextWeather(const ESM::Region* region) const
      * 70% will be greater than 30 (in theory).
      */
 
-    int chance = OEngine::Misc::Rng::rollDice(100) + 1; // 1..100
+    int chance = Misc::Rng::rollDice(100) + 1; // 1..100
     int sum = 0;
     unsigned int i = 0;
     for (; i < probability.size(); ++i)

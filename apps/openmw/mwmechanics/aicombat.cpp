@@ -2,7 +2,7 @@
 
 #include <OgreMath.h>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/aisequence.hpp>
 
@@ -395,7 +395,7 @@ namespace MWMechanics
                 if (!distantCombat) attackType = chooseBestAttack(weapon, movement);
                 else attackType = ESM::Weapon::AT_Chop; // cause it's =0
 
-                strength = OEngine::Misc::Rng::rollClosedProbability();
+                strength = Misc::Rng::rollClosedProbability();
 
                 // Note: may be 0 for some animations
                 timerAttack = minMaxAttackDuration[attackType][0] + 
@@ -406,7 +406,7 @@ namespace MWMechanics
                 {
                     const MWWorld::ESMStore &store = world->getStore();
                     int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->getInt();
-                    if (OEngine::Misc::Rng::roll0to99() < chance)
+                    if (Misc::Rng::roll0to99() < chance)
                     {
                         MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
                     }
@@ -513,17 +513,17 @@ namespace MWMechanics
             {
                 if(movement.mPosition[0] || movement.mPosition[1])
                 {
-                    timerCombatMove = 0.1f + 0.1f * OEngine::Misc::Rng::rollClosedProbability();
+                    timerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
                     combatMove = true;
                 }
                 // only NPCs are smart enough to use dodge movements
                 else if(actorClass.isNpc() && (!distantCombat || (distantCombat && distToTarget < rangeAttack/2)))
                 {
                     //apply sideway movement (kind of dodging) with some probability
-                    if (OEngine::Misc::Rng::rollClosedProbability() < 0.25)
+                    if (Misc::Rng::rollClosedProbability() < 0.25)
                     {
-                        movement.mPosition[0] = OEngine::Misc::Rng::rollProbability() < 0.5 ? 1.0f : -1.0f;
-                        timerCombatMove = 0.05f + 0.15f * OEngine::Misc::Rng::rollClosedProbability();
+                        movement.mPosition[0] = Misc::Rng::rollProbability() < 0.5 ? 1.0f : -1.0f;
+                        timerCombatMove = 0.05f + 0.15f * Misc::Rng::rollClosedProbability();
                         combatMove = true;
                     }
                 }
@@ -638,7 +638,7 @@ namespace MWMechanics
                 float s2 = speed2 * t;
                 float t_swing = 
                     minMaxAttackDuration[ESM::Weapon::AT_Thrust][0] + 
-                    (minMaxAttackDuration[ESM::Weapon::AT_Thrust][1] - minMaxAttackDuration[ESM::Weapon::AT_Thrust][0]) * OEngine::Misc::Rng::rollClosedProbability();
+                    (minMaxAttackDuration[ESM::Weapon::AT_Thrust][1] - minMaxAttackDuration[ESM::Weapon::AT_Thrust][0]) * Misc::Rng::rollClosedProbability();
 
                 if (t + s2/speed1 <= t_swing)
                 {
@@ -750,10 +750,10 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
     if (weapon == NULL)
     {
         //hand-to-hand deal equal damage for each type
-        float roll = OEngine::Misc::Rng::rollClosedProbability();
+        float roll = Misc::Rng::rollClosedProbability();
         if(roll <= 0.333f)  //side punch
         {
-            movement.mPosition[0] = OEngine::Misc::Rng::rollClosedProbability() ? 1.0f : -1.0f;
+            movement.mPosition[0] = Misc::Rng::rollClosedProbability() ? 1.0f : -1.0f;
             movement.mPosition[1] = 0;
             attackType = ESM::Weapon::AT_Slash;
         }
@@ -777,10 +777,10 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
 
         float total = static_cast<float>(slash + chop + thrust);
 
-        float roll = OEngine::Misc::Rng::rollClosedProbability();
+        float roll = Misc::Rng::rollClosedProbability();
         if(roll <= (slash/total))
         {
-            movement.mPosition[0] = (OEngine::Misc::Rng::rollClosedProbability() < 0.5f) ? 1.0f : -1.0f;
+            movement.mPosition[0] = (Misc::Rng::rollClosedProbability() < 0.5f) ? 1.0f : -1.0f;
             movement.mPosition[1] = 0;
             attackType = ESM::Weapon::AT_Slash;
         }

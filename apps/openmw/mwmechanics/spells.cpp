@@ -37,7 +37,7 @@ namespace MWMechanics
                 for (unsigned int i=0; i<spell->mEffects.mList.size();++i)
                 {
                     if (spell->mEffects.mList[i].mMagnMin != spell->mEffects.mList[i].mMagnMax)
-                        random[i] = OEngine::Misc::Rng::rollClosedProbability();
+                        random[i] = Misc::Rng::rollClosedProbability();
                 }
             }
 

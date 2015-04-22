@@ -1,6 +1,6 @@
 #include "activespells.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/misc/stringops.hpp>
 
@@ -231,7 +231,7 @@ namespace MWMechanics
     {
         for (TContainer::iterator it = mSpells.begin(); it != mSpells.end(); )
         {
-            if (OEngine::Misc::Rng::roll0to99() < chance)
+            if (Misc::Rng::roll0to99() < chance)
                 mSpells.erase(it++);
             else
                 ++it;

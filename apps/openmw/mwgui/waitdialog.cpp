@@ -2,7 +2,7 @@
 
 #include <MyGUI_ProgressBar.h>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/widgets/box.hpp>
 #include <components/settings/settings.hpp>
@@ -156,7 +156,7 @@ namespace MWGui
                 {
                     // figure out if player will be woken while sleeping
                     float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->getFloat();
-                    if (OEngine::Misc::Rng::rollProbability() > fSleepRandMod)
+                    if (Misc::Rng::rollProbability() > fSleepRandMod)
                     {
                         float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->getFloat();
                         mInterruptAt = hoursToWait - int(fSleepRestMod * hoursToWait);

@@ -2,7 +2,7 @@
 
 #include <boost/format.hpp>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -48,7 +48,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
 
     float x = (0.1f * pcStrength + 0.1f * pcLuck + armorerSkill) * fatigueTerm;
 
-    int roll = OEngine::Misc::Rng::roll0to99();
+    int roll = Misc::Rng::roll0to99();
     if (roll <= x)
     {
         int y = static_cast<int>(fRepairAmountMult * toolQuality * roll);

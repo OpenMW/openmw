@@ -19,7 +19,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/nifogre/ogrenifloader.hpp>
 #include <components/misc/resourcehelpers.hpp>

@@ -1,6 +1,6 @@
 #include "enchanting.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
@@ -70,7 +70,7 @@ namespace MWMechanics
 
         if(mSelfEnchanting)
         {
-            if(getEnchantChance() <= (OEngine::Misc::Rng::roll0to99()))
+            if(getEnchantChance() <= (Misc::Rng::roll0to99()))
                 return false;
 
             mEnchanter.getClass().skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 2);

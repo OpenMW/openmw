@@ -11,7 +11,7 @@
 
 #include <SDL.h>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/compiler/extensions0.hpp>
 
@@ -194,7 +194,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mNewGame (false)
   , mCfgMgr(configurationManager)
 {
-    OEngine::Misc::Rng::init();
+    Misc::Rng::init();
     std::srand ( static_cast<unsigned int>(std::time(NULL)) );
     MWClass::registerClasses();
 
