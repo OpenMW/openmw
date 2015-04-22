@@ -53,12 +53,8 @@ namespace NifOsg
     class Loader
     {
     public:
-        /// Create a scene graph for the given NIF. Auto-detects when skinning is used and calls loadAsSkeleton instead.
-        /// @param node The parent of the new root node for the created scene graph.
+        /// Create a scene graph for the given NIF. Auto-detects when skinning is used and wraps the graph in a Skeleton if so.
         static osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr file, Resource::TextureManager* textureManager);
-
-        /// Create a scene graph for the given NIF. Always creates a skeleton so that rigs can be attached on the created scene.
-        static osg::ref_ptr<osg::Node> loadAsSkeleton(Nif::NIFFilePtr file, Resource::TextureManager* textureManager);
 
         /// Load keyframe controllers from the given kf file.
         static void loadKf(Nif::NIFFilePtr kf, KeyframeHolder& target);

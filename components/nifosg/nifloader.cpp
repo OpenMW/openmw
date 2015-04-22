@@ -459,9 +459,6 @@ namespace NifOsg
 
         static osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::TextureManager* textureManager)
         {
-            if (nif->getUseSkinning())
-                return loadAsSkeleton(nif, textureManager);
-
             if (nif->numRoots() < 1)
                 nif->fail("Found no root nodes");
 
@@ -473,33 +470,17 @@ namespace NifOsg
 
             osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
 
-            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, textureManager, false, std::map<int, int>(), 0, 0, false, &textkeys->mTextKeys);
+            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, textureManager, std::map<int, int>(), 0, 0, false, &textkeys->mTextKeys);
 
+            if (nif->getUseSkinning())
+            {
+                osg::ref_ptr<SceneUtil::Skeleton> skel = new SceneUtil::Skeleton;
+                skel->addChild(created);
+                created = skel;
+            }
             created->getOrCreateUserDataContainer()->addUserObject(textkeys);
 
             return created;
-        }
-
-        static osg::ref_ptr<osg::Node> loadAsSkeleton(Nif::NIFFilePtr nif, Resource::TextureManager* textureManager)
-        {
-            if (nif->numRoots() < 1)
-                nif->fail("Found no root nodes");
-
-            const Nif::Record* r = nif->getRoot(0);
-            assert(r != NULL);
-
-            const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
-            if (nifNode == NULL)
-                nif->fail("First root was not a node, but a " + r->recName);
-
-            osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
-
-            osg::ref_ptr<SceneUtil::Skeleton> skel = new SceneUtil::Skeleton;
-            handleNode(nifNode, skel, textureManager, true, std::map<int, int>(), 0, 0, false, &textkeys->mTextKeys);
-
-            skel->getOrCreateUserDataContainer()->addUserObject(textkeys);
-
-            return skel;
         }
 
         static void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
@@ -521,7 +502,7 @@ namespace NifOsg
             toSetup->mFunction = boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl));
         }
 
-        static osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::TextureManager* textureManager, bool createSkeleton,
+        static osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::TextureManager* textureManager,
                                 std::map<int, int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
             osg::ref_ptr<osg::MatrixTransform> transformNode = new osg::MatrixTransform(toMatrix(nifNode->trafo));
@@ -604,7 +585,7 @@ namespace NifOsg
             if (nifNode->recType == Nif::RC_NiTriShape && !skipMeshes)
             {
                 const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
-                if (!createSkeleton || triShape->skin.empty())
+                if (triShape->skin.empty())
                     handleTriShape(triShape, transformNode, boundTextures, animflags);
                 else
                     handleSkinnedTriShape(triShape, transformNode, boundTextures, animflags);
@@ -630,8 +611,7 @@ namespace NifOsg
                 {
                     if(!children[i].empty())
                     {
-                        handleNode(children[i].getPtr(), transformNode, textureManager,
-                                   createSkeleton, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode);
+                        handleNode(children[i].getPtr(), transformNode, textureManager, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode);
                     }
                 }
             }
@@ -1449,11 +1429,6 @@ namespace NifOsg
     osg::ref_ptr<osg::Node> Loader::load(Nif::NIFFilePtr file, Resource::TextureManager* textureManager)
     {
         return LoaderImpl::load(file, textureManager);
-    }
-
-    osg::ref_ptr<osg::Node> Loader::loadAsSkeleton(Nif::NIFFilePtr file, Resource::TextureManager* textureManager)
-    {
-        return LoaderImpl::loadAsSkeleton(file, textureManager);
     }
 
     void Loader::loadKf(Nif::NIFFilePtr kf, KeyframeHolder& target)
