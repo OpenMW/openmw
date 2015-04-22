@@ -611,23 +611,6 @@ osg::Vec3f NpcAnimation::runAnimation(float timepassed)
         }
     }
     mFirstPersonOffset = 0.f; // reset the X, Y, Z offset for the next frame.
-
-    for(size_t i = 0;i < ESM::PRT_Count;i++)
-    {
-        if (mObjectParts[i].isNull())
-            continue;
-        std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i]->mControllers.begin());
-        for(;ctrl != mObjectParts[i]->mControllers.end();++ctrl)
-            ctrl->update();
-
-        if (!isSkinned(mObjectParts[i]))
-            continue;
-
-        if (mSkelBase)
-            updateSkeletonInstance(mSkelBase->getSkeleton(), mObjectParts[i]->mSkelBase->getSkeleton());
-
-        mObjectParts[i]->mSkelBase->getAllAnimationStates()->_notifyDirty();
-    }
     */
 
     return ret;
