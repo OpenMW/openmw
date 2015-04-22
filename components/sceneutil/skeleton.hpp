@@ -16,7 +16,7 @@ namespace SceneUtil
         Bone();
         ~Bone();
 
-        osg::Matrix mMatrixInSkeletonSpace;
+        osg::Matrixf mMatrixInSkeletonSpace;
 
         osg::MatrixTransform* mNode;
 

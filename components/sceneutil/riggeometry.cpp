@@ -149,7 +149,7 @@ void RigGeometry::update(osg::NodeVisitor* nv)
         else
             path.push_back(*it);
     }
-    osg::Matrix geomToSkel = osg::computeWorldToLocal(path);
+    osg::Matrixf geomToSkel = osg::computeWorldToLocal(path);
 
     // skinning
     osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());

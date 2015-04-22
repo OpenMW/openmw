@@ -1,7 +1,3 @@
-set(OENGINE_OGRE
-    #ogre/lights.cpp
-)
-
 set(OENGINE_GUI
     gui/loglistener.cpp
     #gui/manager.cpp
@@ -26,7 +22,7 @@ set(OENGINE_MISC
     misc/rng.hpp
 )
 
-set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_BULLET} ${OENGINE_MISC})
+set(OENGINE_ALL ${OENGINE_GUI} ${OENGINE_BULLET} ${OENGINE_MISC})
 
 set(OENGINE_LIBRARY "oengine")
 set(OENGINE_LIBRARY ${OENGINE_LIBRARY} PARENT_SCOPE)

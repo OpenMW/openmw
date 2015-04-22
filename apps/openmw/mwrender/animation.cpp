@@ -17,6 +17,7 @@
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/sceneutil/lightcontroller.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -196,6 +197,19 @@ namespace MWRender
         light->setDiffuse(SceneUtil::colourFromRGB(esmLight->mData.mColor));
         light->setAmbient(osg::Vec4f(0,0,0,1));
         light->setSpecular(osg::Vec4f(0,0,0,0));
+
+        osg::ref_ptr<SceneUtil::LightController> ctrl (new SceneUtil::LightController);
+        ctrl->setDiffuse(light->getDiffuse());
+        if (esmLight->mData.mFlags & ESM::Light::Flicker)
+            ctrl->setType(SceneUtil::LightController::LT_Flicker);
+        if (esmLight->mData.mFlags & ESM::Light::FlickerSlow)
+            ctrl->setType(SceneUtil::LightController::LT_FlickerSlow);
+        if (esmLight->mData.mFlags & ESM::Light::Pulse)
+            ctrl->setType(SceneUtil::LightController::LT_Pulse);
+        if (esmLight->mData.mFlags & ESM::Light::PulseSlow)
+            ctrl->setType(SceneUtil::LightController::LT_PulseSlow);
+
+        lightSource->addUpdateCallback(ctrl);
 
         attachTo->addChild(lightSource);
     }

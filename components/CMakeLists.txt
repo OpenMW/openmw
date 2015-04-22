@@ -39,7 +39,7 @@ add_component_dir (resource
     )
 
 add_component_dir (sceneutil
-    clone attach lightmanager visitor util statesetupdater controller skeleton riggeometry
+    clone attach lightmanager visitor util statesetupdater controller skeleton riggeometry lightcontroller
     )
 
 add_component_dir (nif
