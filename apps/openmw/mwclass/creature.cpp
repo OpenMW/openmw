@@ -1,7 +1,7 @@
 
 #include "creature.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/loadcrea.hpp>
 #include <components/esm/creaturestate.hpp>
@@ -251,7 +251,7 @@ namespace MWClass
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ref->mBase->mData.mCombat);
 
-        if(OEngine::Misc::Rng::rollProbability() >= hitchance/100.0f)
+        if(Misc::Rng::rollProbability() >= hitchance/100.0f)
         {
             victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
@@ -377,7 +377,7 @@ namespace MWClass
                 float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
                 float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
                         * getGmst().iKnockDownOddsMult->getInt() * 0.01f + getGmst().iKnockDownOddsBase->getInt();
-                if (ishealth && agilityTerm <= damage && knockdownTerm <= OEngine::Misc::Rng::roll0to99())
+                if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99())
                 {
                     getCreatureStats(ptr).setKnockedDown(true);
 
@@ -681,7 +681,7 @@ namespace MWClass
                 ++sound;
             }
             if(!sounds.empty())
-                return sounds[OEngine::Misc::Rng::rollDice(sounds.size())]->mSound;
+                return sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
         }
 
         if (type == ESM::SoundGenerator::Land)

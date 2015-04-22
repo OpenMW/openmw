@@ -2,8 +2,8 @@
 #include <cstdlib>
 #include <ctime>
 
-namespace OEngine {
-namespace Misc {
+namespace Misc
+{
 
     void Rng::init()
     {
@@ -25,5 +25,4 @@ namespace Misc {
         return static_cast<int>((std::rand() / (static_cast<double>(RAND_MAX)+1.0)) * (max));
     }
 
-}
 }

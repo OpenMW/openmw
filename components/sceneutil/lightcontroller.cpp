@@ -6,7 +6,7 @@
 
 #include <components/sceneutil/lightmanager.hpp>
 
-#include <libs/openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 namespace
 {
@@ -46,7 +46,7 @@ namespace SceneUtil
 
     LightController::LightController()
         : mType(LT_Normal)
-        , mPhase((OEngine::Misc::Rng::rollClosedProbability() * 2.f - 1.f) * 500.f)
+        , mPhase((Misc::Rng::rollClosedProbability() * 2.f - 1.f) * 500.f)
         , mLastTime(0.0)
         , mDeltaCount(0.f)
         , mDirection(1.f)

@@ -17,12 +17,7 @@ set(OENGINE_BULLET
     bullet/trace.h
 )
 
-set(OENGINE_MISC
-    misc/rng.cpp
-    misc/rng.hpp
-)
-
-set(OENGINE_ALL ${OENGINE_GUI} ${OENGINE_BULLET} ${OENGINE_MISC})
+set(OENGINE_ALL ${OENGINE_GUI} ${OENGINE_BULLET})
 
 set(OENGINE_LIBRARY "oengine")
 set(OENGINE_LIBRARY ${OENGINE_LIBRARY} PARENT_SCOPE)

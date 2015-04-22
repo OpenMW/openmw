@@ -2,7 +2,7 @@
 
 #include <osg/UserDataContainer>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
 
@@ -84,7 +84,7 @@ void HeadAnimationTime::setEnabled(bool enabled)
 
 void HeadAnimationTime::resetBlinkTimer()
 {
-    mBlinkTimer = -(2.0f + OEngine::Misc::Rng::rollDice(6));
+    mBlinkTimer = -(2.0f + Misc::Rng::rollDice(6));
 }
 
 void HeadAnimationTime::update(float dt)

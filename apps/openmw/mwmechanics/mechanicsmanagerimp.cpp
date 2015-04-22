@@ -2,7 +2,7 @@
 #include "mechanicsmanagerimp.hpp"
 #include "npcstats.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/stolenitems.hpp>
 
@@ -733,7 +733,7 @@ namespace MWMechanics
         float x = 0;
         float y = 0;
 
-        float roll = OEngine::Misc::Rng::rollClosedProbability() * 100;
+        float roll = Misc::Rng::rollClosedProbability() * 100;
 
         if (type == PT_Admire)
         {
@@ -1393,7 +1393,7 @@ namespace MWMechanics
 
         float target = x - y;
 
-        return (OEngine::Misc::Rng::roll0to99() >= target);
+        return (Misc::Rng::roll0to99() >= target);
     }
 
     void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)

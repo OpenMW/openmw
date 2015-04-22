@@ -1,9 +1,8 @@
-#ifndef MISC_RNG_H
-#define MISC_RNG_H
+#ifndef OPENMW_COMPONENTS_MISC_RNG_H
+#define OPENMW_COMPONENTS_MISC_RNG_H
 
 #include <cassert>
 
-namespace OEngine {
 namespace Misc
 {
 
@@ -30,7 +29,6 @@ public:
     static int roll0to99() { return rollDice(100); }
 };
 
-}
 }
 
 #endif

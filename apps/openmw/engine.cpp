@@ -11,7 +11,7 @@
 #include <SDL.h>
 
 // TODO: move to component
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
@@ -196,7 +196,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mExportFonts(false)
   , mNewGame (false)
 {
-    OEngine::Misc::Rng::init();
+    Misc::Rng::init();
     std::srand ( static_cast<unsigned int>(std::time(NULL)) );
     MWClass::registerClasses();
 

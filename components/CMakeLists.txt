@@ -78,7 +78,7 @@ add_component_dir (esmterrain
     )
 
 add_component_dir (misc
-    utf8stream stringops resourcehelpers
+    utf8stream stringops resourcehelpers rng
     )
 
 IF(NOT WIN32 AND NOT APPLE)

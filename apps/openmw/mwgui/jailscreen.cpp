@@ -1,6 +1,6 @@
 #include <MyGUI_ScrollBar.h>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -85,7 +85,7 @@ namespace MWGui
         std::set<int> skills;
         for (int day=0; day<mDays; ++day)
         {
-            int skill = OEngine::Misc::Rng::rollDice(ESM::Skill::Length);
+            int skill = Misc::Rng::rollDice(ESM::Skill::Length);
             skills.insert(skill);
 
             MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill);

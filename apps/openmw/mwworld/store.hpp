@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/esmwriter.hpp>
 
@@ -180,7 +180,7 @@ namespace MWWorld
             std::vector<const T*> results;
             std::for_each(mShared.begin(), mShared.end(), GetRecords(id, &results));
             if(!results.empty())
-                return results[OEngine::Misc::Rng::rollDice(results.size())];
+                return results[Misc::Rng::rollDice(results.size())];
             return NULL;
         }
 

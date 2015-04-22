@@ -12,7 +12,7 @@
 #include "runtime.hpp"
 #include "defines.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 namespace Interpreter
 {
@@ -148,7 +148,7 @@ namespace Interpreter
                     throw std::runtime_error (
                         "random: argument out of range (Don't be so negative!)");
 
-                Type_Integer value = OEngine::Misc::Rng::rollDice(limit); // [o, limit)
+                Type_Integer value = Misc::Rng::rollDice(limit); // [o, limit)
 
                 runtime[0].mInteger = value;
             }

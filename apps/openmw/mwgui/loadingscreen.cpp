@@ -15,7 +15,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_TextBox.h>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -148,7 +148,7 @@ namespace MWGui
 
         if (!mResources.empty())
         {
-            std::string const & randomSplash = mResources.at(OEngine::Misc::Rng::rollDice(mResources.size()));
+            std::string const & randomSplash = mResources.at(Misc::Rng::rollDice(mResources.size()));
 
             Ogre::TextureManager::getSingleton ().load (randomSplash, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
 
