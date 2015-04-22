@@ -27,12 +27,14 @@ namespace SceneUtil
             , mParent(parent)
             , mFilter(Misc::StringUtils::lowerCase(filter))
         {
+            mFilter2 = "tri " + mFilter;
         }
 
         virtual void apply(osg::Node& node)
         {
             std::string lowerName = Misc::StringUtils::lowerCase(node.getName());
-            if (lowerName.find(mFilter) != std::string::npos)
+            if ((lowerName.size() >= mFilter.size() && lowerName.compare(0, mFilter.size(), mFilter) == 0)
+                    || (lowerName.size() >= mFilter2.size() && lowerName.compare(0, mFilter2.size(), mFilter2) == 0))
             {
                 mParent->addChild(&node);
             }
@@ -43,6 +45,7 @@ namespace SceneUtil
     private:
         osg::ref_ptr<osg::Group> mParent;
         std::string mFilter;
+        std::string mFilter2;
     };
 
     osg::ref_ptr<osg::Node> attach(osg::ref_ptr<osg::Node> toAttach, osg::Node *master, const std::string &filter, const std::string &attachNode)
