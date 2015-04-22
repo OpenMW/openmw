@@ -94,7 +94,7 @@ namespace NifOsg
     public:
         ControllerFunction(const Nif::Controller *ctrl);
 
-        float calculate(float value);
+        float calculate(float value) const;
 
         virtual float getMaximum() const;
     };
@@ -142,26 +142,6 @@ namespace NifOsg
         osg::Quat interpKey(const Nif::QuaternionKeyMap::MapType &keys, float time);
 
         osg::Quat getXYZRotation(float time) const;
-    };
-
-    // Specialization that can be enabled/disabled. Used for multiple animation sources support, i.e. .kf files.
-    // A SourcedKeyframeController is disabled by default and should be manually enabled when playing an animation from
-    // the relevant animation source.
-    class SourcedKeyframeController : public KeyframeController
-    {
-    public:
-        SourcedKeyframeController(const Nif::NiKeyframeData* data);
-        SourcedKeyframeController();
-        SourcedKeyframeController(const SourcedKeyframeController& copy, const osg::CopyOp& copyop);
-
-        META_Object(NifOsg, SourcedKeyframeController)
-
-        virtual void operator() (osg::Node*, osg::NodeVisitor*);
-
-        void setEnabled(bool enabled);
-
-    private:
-        bool mEnabled;
     };
 
     class UVController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller, public ValueInterpolator

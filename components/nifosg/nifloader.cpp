@@ -253,44 +253,6 @@ namespace
         }
     };
 
-    // NodeVisitor that adds keyframe controllers to an existing scene graph, used when loading .kf files
-    /*
-    class LoadKfVisitor : public osg::NodeVisitor
-    {
-    public:
-        LoadKfVisitor(std::map<std::string, const Nif::NiKeyframeController*> map, int sourceIndex)
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mMap(map)
-            , mSourceIndex(sourceIndex)
-        {
-        }
-
-        void apply(osg::Node &node)
-        {
-            std::map<std::string, const Nif::NiKeyframeController*>::const_iterator found = mMap.find(node.getName());
-            if (node.asTransform() && found != mMap.end())
-            {
-                const Nif::NiKeyframeController* keyframectrl = found->second;
-
-                osg::ref_ptr<NifOsg::SourcedKeyframeController> callback(new NifOsg::SourcedKeyframeController(keyframectrl->data.getPtr(), mSourceIndex));
-                callback->mFunction = boost::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(keyframectrl));
-
-                // Insert in front of the callback list, to make sure UpdateBone is last.
-                // The order of SourcedKeyframeControllers doesn't matter since only one of them should be enabled at a time.
-                osg::ref_ptr<osg::NodeCallback> old = node.getUpdateCallback();
-                node.setUpdateCallback(callback);
-                callback->setNestedCallback(old);
-            }
-
-            traverse(node);
-        }
-
-    private:
-        std::map<std::string, const Nif::NiKeyframeController*> mMap;
-        int mSourceIndex;
-    };
-    */
-
     struct UpdateMorphGeometry : public osg::Drawable::CullCallback
     {
         UpdateMorphGeometry()
@@ -450,7 +412,7 @@ namespace NifOsg
                 if(key->data.empty())
                     continue;
 
-                osg::ref_ptr<NifOsg::SourcedKeyframeController> callback(new NifOsg::SourcedKeyframeController(key->data.getPtr()));
+                osg::ref_ptr<NifOsg::KeyframeController> callback(new NifOsg::KeyframeController(key->data.getPtr()));
                 callback->mFunction = boost::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key));
 
                 target.mKeyframeControllers[strdata->string] = callback;
@@ -1007,7 +969,6 @@ namespace NifOsg
                 geometry = new osg::Geometry;
 
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-            geode->setName(triShape->name); // name will be used for part filtering
             triShapeToGeometry(triShape, geometry, geode, boundTextures, animflags);
 
             geode->addDrawable(geometry);
@@ -1103,7 +1064,7 @@ namespace NifOsg
         static void handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, const std::map<int, int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-            geode->setName(triShape->name); // name will be used for part filtering
+
             osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
             triShapeToGeometry(triShape, geometry, geode, boundTextures, animflags);
 

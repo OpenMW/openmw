@@ -44,7 +44,7 @@ namespace NifOsg
     public:
         TextKeyMap mTextKeys;
 
-        std::map<std::string, osg::ref_ptr<const SourcedKeyframeController> > mKeyframeControllers;
+        std::map<std::string, osg::ref_ptr<KeyframeController> > mKeyframeControllers;
     };
 
     /// The main class responsible for loading NIF files into an OSG-Scenegraph.

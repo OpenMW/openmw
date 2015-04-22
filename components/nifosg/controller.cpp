@@ -27,7 +27,7 @@ ControllerFunction::ControllerFunction(const Nif::Controller *ctrl)
 {
 }
 
-float ControllerFunction::calculate(float value)
+float ControllerFunction::calculate(float value) const
 {
     float time = mFrequency * value + mPhase;
     if (time >= mStartTime && time <= mStopTime)
@@ -449,36 +449,6 @@ void ParticleSystemController::operator() (osg::Node* node, osg::NodeVisitor* nv
             emitter->setEnabled(time >= mEmitStart && time < mEmitStop);
     }
     traverse(node, nv);
-}
-
-SourcedKeyframeController::SourcedKeyframeController(const Nif::NiKeyframeData *data)
-    : KeyframeController(data)
-    , mEnabled(false)
-{
-}
-
-SourcedKeyframeController::SourcedKeyframeController()
-    : mEnabled(false)
-{
-}
-
-SourcedKeyframeController::SourcedKeyframeController(const SourcedKeyframeController &copy, const osg::CopyOp &copyop)
-    : KeyframeController(copy, copyop)
-    , mEnabled(copy.mEnabled)
-{
-}
-
-void SourcedKeyframeController::setEnabled(bool enabled)
-{
-    mEnabled = enabled;
-}
-
-void SourcedKeyframeController::operator ()(osg::Node* node, osg::NodeVisitor* nv)
-{
-    if (mEnabled)
-        KeyframeController::operator()(node, nv); // calls traverse
-    else
-        traverse(node, nv);
 }
 
 }

@@ -21,10 +21,11 @@ namespace SceneUtil
         virtual float getValue(osg::NodeVisitor* nv);
     };
 
+    /// @note ControllerFunctions may be shared - you should not hold any state in it. That is why all its methods are declared const.
     class ControllerFunction
     {
     public:
-        virtual float calculate(float input) = 0;
+        virtual float calculate(float input) const = 0;
 
         /// Get the "stop time" of the controller function, typically the maximum of the calculate() function.
         /// May not be meaningful for all types of controller functions.
