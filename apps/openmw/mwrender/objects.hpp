@@ -1,15 +1,20 @@
 #ifndef GAME_RENDER_OBJECTS_H
 #define GAME_RENDER_OBJECTS_H
 
-#include <OgreAxisAlignedBox.h>
-
-#include <components/resource/resourcesystem.hpp>
+#include <map>
+#include <memory>
+#include <string>
 
 #include <osg/ref_ptr>
 
 namespace osg
 {
     class Group;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
 }
 
 namespace MWWorld

@@ -10,12 +10,12 @@
 
 #include <osgViewer/Viewer>
 
+#include <components/resource/resourcesystem.hpp>
+
 #include <components/settings/settings.hpp>
 
 #include <components/sceneutil/util.hpp>
-
 #include <components/sceneutil/lightmanager.hpp>
-
 #include <components/sceneutil/statesetupdater.hpp>
 
 #include <components/esm/loadcell.hpp>

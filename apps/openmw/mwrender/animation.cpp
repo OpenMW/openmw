@@ -1,5 +1,7 @@
 #include "animation.hpp"
 
+#include <iomanip>
+
 #include <osg/PositionAttitudeTransform>
 #include <osg/TexGen>
 #include <osg/TexEnvCombine>
@@ -89,6 +91,16 @@ namespace MWRender
     {
         if (mObjectRoot)
             mInsert->removeChild(mObjectRoot);
+    }
+
+    void Animation::updatePtr(const MWWorld::Ptr &ptr)
+    {
+        mPtr = ptr;
+    }
+
+    void Animation::addAnimSource(const std::string &model)
+    {
+
     }
 
     osg::Vec3f Animation::runAnimation(float duration)

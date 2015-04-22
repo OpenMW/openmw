@@ -190,12 +190,12 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
     mViewMode(viewMode),
     mShowWeapons(false),
     mShowCarriedLeft(true),
-    mFirstPersonOffset(0.f, 0.f, 0.f),
+    //mFirstPersonOffset(0.f, 0.f, 0.f),
     mAlpha(1.f),
     mNpcType(Type_Normal),
-    mSoundsDisabled(disableSounds),
-    mHeadPitch(0.f),
-    mHeadYaw(0.f)
+    mSoundsDisabled(disableSounds)
+    //mHeadPitch(0.f),
+    //mHeadYaw(0.f)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -562,11 +562,11 @@ void NpcAnimation::updateParts()
     if (wasArrowAttached)
         attachArrow();
 }
-
+/*
 void NpcAnimation::addFirstPersonOffset(const Ogre::Vector3 &offset)
 {
     mFirstPersonOffset += offset;
-}
+}*/
 
 Animation::PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, int group, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
 {
@@ -903,6 +903,7 @@ void NpcAnimation::setVampire(bool vampire)
     }
 }
 
+/*
 void NpcAnimation::setHeadPitch(Ogre::Radian pitch)
 {
     mHeadPitch = pitch;
@@ -922,5 +923,6 @@ Ogre::Radian NpcAnimation::getHeadYaw() const
 {
     return mHeadYaw;
 }
+*/
 
 }

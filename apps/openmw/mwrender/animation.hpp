@@ -1,9 +1,6 @@
 #ifndef GAME_RENDER_ANIMATION_H
 #define GAME_RENDER_ANIMATION_H
 
-#include <OgreController.h>
-#include <OgreVector3.h>
-
 #include "../mwworld/ptr.hpp"
 
 #include <components/nifosg/controller.hpp>
@@ -55,7 +52,7 @@ protected:
     /* This is the number of *discrete* groups. */
     static const size_t sNumGroups = 4;
 
-    class AnimationTime : public Ogre::ControllerValue<Ogre::Real>
+    class AnimationTime : public SceneUtil::ControllerSource
     {
     private:
         Animation *mAnimation;
@@ -71,8 +68,7 @@ protected:
         const std::string &getAnimName() const
         { return mAnimationName; }
 
-        virtual Ogre::Real getValue() const;
-        virtual void setValue(Ogre::Real value);
+        virtual float getValue();
     };
 
     class NullAnimationTime : public SceneUtil::ControllerSource
@@ -85,14 +81,15 @@ protected:
     };
 
 
+    /*
     struct AnimSource : public Ogre::AnimationAlloc {
         //NifOgre::TextKeyMap mTextKeys;
         std::vector<Ogre::Controller<Ogre::Real> > mControllers[sNumGroups];
     };
     typedef std::vector< Ogre::SharedPtr<AnimSource> > AnimSourceList;
-
+    */
     struct AnimState {
-        Ogre::SharedPtr<AnimSource> mSource;
+        //Ogre::SharedPtr<AnimSource> mSource;
         float mStartTime;
         float mLoopStartTime;
         float mLoopStopTime;
@@ -114,8 +111,6 @@ protected:
         { }
     };
     typedef std::map<std::string,AnimState> AnimStateMap;
-
-    typedef std::map<Ogre::MovableObject*,std::string> ObjectAttachMap;
 
     osg::ref_ptr<osg::Group> mInsert;
 
@@ -204,7 +199,7 @@ protected:
     /* Adds the keyframe controllers in the specified model as a new animation source. Note that
      * the filename portion of the provided model name will be prepended with 'x', and the .nif
      * extension will be replaced with .kf. */
-    //void addAnimSource(const std::string &model);
+    void addAnimSource(const std::string &model);
 
     /** Adds an additional light to the given node using the specified ESM record. */
     void addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light *light);
@@ -238,7 +233,7 @@ public:
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out);
 
-    //void updatePtr(const MWWorld::Ptr &ptr);
+    void updatePtr(const MWWorld::Ptr &ptr);
 
     //bool hasAnimation(const std::string &anim);
 

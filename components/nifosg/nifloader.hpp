@@ -44,7 +44,7 @@ namespace NifOsg
     public:
         TextKeyMap mTextKeys;
 
-        std::map<std::string, osg::ref_ptr<SourcedKeyframeController> > mKeyframeControllers;
+        std::map<std::string, osg::ref_ptr<const SourcedKeyframeController> > mKeyframeControllers;
     };
 
     /// The main class responsible for loading NIF files into an OSG-Scenegraph.
@@ -53,7 +53,6 @@ namespace NifOsg
     class Loader
     {
     public:
-        // TODO: add text keys as user data on the node
         /// Create a scene graph for the given NIF. Auto-detects when skinning is used and calls loadAsSkeleton instead.
         /// @param node The parent of the new root node for the created scene graph.
         static osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr file, Resource::TextureManager* textureManager);
