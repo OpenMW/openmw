@@ -6,6 +6,7 @@
 #include "idcollection.hpp"
 #include "pathgrid.hpp"
 #include "info.hpp"
+#include "pathgridpointswrap.hpp"
 
 namespace CSMWorld
 {
@@ -147,6 +148,8 @@ namespace CSMWorld
     PathgridEdgeListAdapter::PathgridEdgeListAdapter () {}
 
     // ToDo: seems to be auto-sorted in the dialog table display after insertion
+    //
+    // FIXME: edges should be added in pairs
     void PathgridEdgeListAdapter::addRow(Record<Pathgrid>& record, int position) const
     {
         Pathgrid pathgrid = record.get();
@@ -168,6 +171,7 @@ namespace CSMWorld
         record.setModified (pathgrid);
     }
 
+    // FIXME: edges should be removed in pairs and Point.mConnectionNum updated
     void PathgridEdgeListAdapter::removeRow(Record<Pathgrid>& record, int rowToRemove) const
     {
         Pathgrid pathgrid = record.get();
@@ -218,6 +222,8 @@ namespace CSMWorld
     }
 
     // ToDo: detect duplicates in mEdges
+    //
+    // FIXME: Point.mConnectionNum needs to be updated
     void PathgridEdgeListAdapter::setData(Record<Pathgrid>& record,
             const QVariant& value, int subRowIndex, int subColIndex) const
     {

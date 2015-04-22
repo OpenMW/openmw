@@ -113,7 +113,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
         if (index > 0 && cells.getRecord (index).mState!=CSMWorld::RecordBase::State_Deleted &&
             mCells.find (*iter)==mCells.end())
         {
-            Cell *cell = new Cell (mDocument.getData(), getSceneManager(),
+            Cell *cell = new Cell (mDocument, getSceneManager(),
                     iter->getId (mWorldspace), mDocument.getPhysics());
             mCells.insert (std::make_pair (*iter, cell));
 

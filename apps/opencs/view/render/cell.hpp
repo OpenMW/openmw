@@ -25,10 +25,17 @@ namespace Ogre
     class ManualObject;
 }
 
+namespace CSMDoc
+{
+    class Document;
+}
+
 namespace CSMWorld
 {
-    class Data;
+    //class Data;
     class Pathgrid;
+    class NestedTableProxyModel;
+    class IdTree;
 }
 
 namespace CSVWorld
@@ -42,16 +49,16 @@ namespace CSVRender
 
     class Cell
     {
-            CSMWorld::Data& mData;
+            CSMDoc::Document& mDocument;
             std::string mId;
             Ogre::SceneNode *mCellNode;
             std::map<std::string, Object *> mObjects;
             std::map<std::string, PathgridPoint *> mPgPoints;
             std::map<std::pair<int, int>, std::string> mPgEdges;
 
-            ESM::Pathgrid::PointList mPoints; // FIXME: temporary storage until saving to document
-            ESM::Pathgrid::EdgeList mEdges; // FIXME: temporary storage until saving to document
-            std::string mPathgridId; // FIXME: temporary storage until saving to document
+            CSMWorld::NestedTableProxyModel *mProxyModel;
+            CSMWorld::IdTree *mModel;
+            int mPgIndex;
 
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
             boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
@@ -71,7 +78,7 @@ namespace CSVRender
 
         public:
 
-            Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager, const std::string& id,
+            Cell (CSMDoc::Document& document, Ogre::SceneManager *sceneManager, const std::string& id,
                 boost::shared_ptr<CSVWorld::PhysicsSystem> physics, const Ogre::Vector3& origin = Ogre::Vector3 (0, 0, 0));
 
             ~Cell();

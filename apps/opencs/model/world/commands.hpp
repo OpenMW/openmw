@@ -168,7 +168,8 @@ namespace CSMWorld
 
         public:
 
-            DeleteNestedCommand (IdTree& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
+            DeleteNestedCommand (IdTree& model,
+                    const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
 
             virtual void redo();
 
@@ -187,7 +188,28 @@ namespace CSMWorld
 
         public:
 
-            AddNestedCommand(IdTree& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
+            AddNestedCommand(IdTree& model,
+                    const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
+
+            virtual void redo();
+
+            virtual void undo();
+    };
+
+    class ModifyPathgridCommand : public QUndoCommand, private NestedTableStoring
+    {
+            IdTree& mModel;
+            std::string mId;
+
+            int mParentColumn;
+
+            NestedTableWrapperBase* mRecord;
+
+        public:
+
+            // if newEdges is NULL, only the paths are updated
+            ModifyPathgridCommand(IdTree& model, const std::string& id, int parentColumn,
+                    NestedTableWrapperBase* newRecord, QUndoCommand* parent = 0);
 
             virtual void redo();
 
