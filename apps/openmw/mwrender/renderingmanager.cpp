@@ -7,6 +7,7 @@
 #include <osg/LightModel>
 #include <osg/Fog>
 #include <osg/Group>
+#include <osg/PositionAttitudeTransform>
 
 #include <osgViewer/Viewer>
 
@@ -209,6 +210,25 @@ namespace MWRender
         mObjects->update(dt);
         mEffectManager->update(dt);
         mSky->update(dt);
+    }
+
+    void RenderingManager::rotateObject(const MWWorld::Ptr &ptr, const osg::Quat& rot)
+    {
+        //if(ptr.getRefData().getHandle() == mCamera->getHandle() &&
+        //   !mCamera->isVanityOrPreviewModeEnabled())
+        //    mCamera->rotateCamera(-rot, false);
+
+        ptr.getRefData().getBaseNode()->setAttitude(rot);
+    }
+
+    void RenderingManager::moveObject(const MWWorld::Ptr &ptr, const osg::Vec3f &pos)
+    {
+        ptr.getRefData().getBaseNode()->setPosition(pos);
+    }
+
+    void RenderingManager::scaleObject(const MWWorld::Ptr &ptr, const osg::Vec3f &scale)
+    {
+        ptr.getRefData().getBaseNode()->setScale(scale);
     }
 
     void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale)

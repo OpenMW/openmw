@@ -57,6 +57,11 @@ namespace MWRender
 
         void removeCell(const MWWorld::CellStore* store);
 
+        // TODO rename to setRotation/setPosition/setScale, along with the World equivalents
+        void rotateObject(const MWWorld::Ptr& ptr, const osg::Quat& rot);
+        void moveObject(const MWWorld::Ptr& ptr, const osg::Vec3f& pos);
+        void scaleObject(const MWWorld::Ptr& ptr, const osg::Vec3f& scale);
+
         void setSkyEnabled(bool enabled);
 
         SkyManager* getSkyManager();

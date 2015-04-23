@@ -42,7 +42,7 @@ namespace
         //ptr.getClass().insertObject (ptr, model, physics);
     }
 
-    void updateObjectLocalRotation (const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics,
+    void updateObjectLocalRotation (const MWWorld::Ptr& ptr, /*MWWorld::PhysicsSystem& physics,*/
                                     MWRender::RenderingManager& rendering)
     {
         if (ptr.getRefData().getBaseNode() != NULL)
@@ -60,7 +60,7 @@ namespace
             if (!ptr.getClass().isActor())
                 rot = rot * osg::Quat(y, osg::Vec3(0,-1,0)) * osg::Quat(x, osg::Vec3(-1,0,0));
 
-            ptr.getRefData().getBaseNode()->setAttitude(rot * worldRotQuat);
+            rendering.rotateObject(ptr, rot * worldRotQuat);
             //physics.rotateObject(ptr);
         }
     }
@@ -102,12 +102,12 @@ namespace
             try
             {
                 addObject(ptr, /*mPhysics, */mRendering);
-                //updateObjectLocalRotation(ptr, mPhysics, mRendering);
+                updateObjectLocalRotation(ptr, /*mPhysics,*/ mRendering);
                 if (ptr.getRefData().getBaseNode())
                 {
                     float scale = ptr.getCellRef().getScale();
                     ptr.getClass().adjustScale(ptr, scale);
-                    //mRendering.scaleObject(ptr, Ogre::Vector3(scale));
+                    mRendering.scaleObject(ptr, osg::Vec3f(scale, scale, scale));
                 }
                 ptr.getClass().adjustPosition (ptr, false);
             }
@@ -130,16 +130,7 @@ namespace MWWorld
 
     void Scene::updateObjectLocalRotation (const Ptr& ptr)
     {
-        //::updateObjectLocalRotation(ptr, *mPhysics, mRendering);
-    }
-
-    void Scene::updateObjectRotation (const Ptr& ptr)
-    {
-        if(ptr.getRefData().getBaseNodeOld() != 0)
-        {
-            //mRendering.rotateObject(ptr);
-            //mPhysics->rotateObject(ptr);
-        }
+        ::updateObjectLocalRotation(ptr, /* *mPhysics,*/ mRendering);
     }
 
     void Scene::getGridCenter(int &cellX, int &cellY)
@@ -563,8 +554,8 @@ namespace MWWorld
         try
         {
             addObject(ptr, /* *mPhysics, */mRendering);
-            //MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
-            //MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
+            MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
+            MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
         }
         catch (std::exception& e)
         {

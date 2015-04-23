@@ -102,25 +102,6 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
     const float *f = ptr.getRefData().getPosition().pos;
 
     insert->setPosition(osg::Vec3(f[0], f[1], f[2]));
-    insert->setScale(osg::Vec3(ptr.getCellRef().getScale(), ptr.getCellRef().getScale(), ptr.getCellRef().getScale()));
-
-    // Convert MW rotation to a quaternion:
-    f = ptr.getCellRef().getPosition().rot;
-
-    // Rotate around X axis
-    osg::Quat xr(-f[0], osg::Vec3(1,0,0));
-
-    // Rotate around Y axis
-    osg::Quat yr(-f[1], osg::Vec3(0,1,0));
-
-    // Rotate around Z axis
-    osg::Quat zr(-f[2], osg::Vec3(0,0,1));
-
-    // Rotates first around z, then y, then x
-    if (ptr.getClass().isActor())
-        insert->setAttitude(zr);
-    else
-        insert->setAttitude(zr*yr*xr);
 
     ptr.getRefData().setBaseNode(insert);
 }

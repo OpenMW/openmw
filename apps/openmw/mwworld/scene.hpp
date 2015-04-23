@@ -117,8 +117,6 @@ namespace MWWorld
 
             void updateObjectLocalRotation (const Ptr& ptr);
 
-            void updateObjectRotation (const Ptr& ptr);
-
             bool isCellActive(const CellStore &cell);
 
             Ptr searchPtrViaHandle (const std::string& handle);

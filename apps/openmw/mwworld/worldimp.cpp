@@ -1217,9 +1217,9 @@ namespace MWWorld
                 ptr.getRefData().setCount(0);
             }
         }
-        if (haveToMove && ptr.getRefData().getBaseNodeOld())
+        if (haveToMove && ptr.getRefData().getBaseNode())
         {
-            //mRendering->moveObject(ptr, vec);
+            mRendering->moveObject(ptr, osg::Vec3f(vec.x, vec.y, vec.z));
             //mPhysics->moveObject (ptr);
         }
         if (isPlayer)
@@ -1256,9 +1256,9 @@ namespace MWWorld
         ptr.getCellRef().setScale(scale);
         ptr.getClass().adjustScale(ptr,scale);
 
-        if(ptr.getRefData().getBaseNodeOld() == 0)
+        if(ptr.getRefData().getBaseNode() == 0)
             return;
-        //mRendering->scaleObject(ptr, Vector3(scale,scale,scale));
+        mRendering->scaleObject(ptr, osg::Vec3f(scale,scale,scale));
         //mPhysics->scaleObject(ptr);
     }
 
@@ -1307,13 +1307,10 @@ namespace MWWorld
 
         ptr.getRefData().setPosition(pos);
 
-        if(ptr.getRefData().getBaseNodeOld() == 0)
+        if(ptr.getRefData().getBaseNode() == 0)
             return;
 
-        if (ptr.getClass().isActor())
-            mWorldScene->updateObjectRotation(ptr);
-        else
-            mWorldScene->updateObjectLocalRotation(ptr);
+        mWorldScene->updateObjectLocalRotation(ptr);
     }
 
     void World::localRotateObject (const Ptr& ptr, float x, float y, float z)
@@ -1329,7 +1326,7 @@ namespace MWWorld
 
         ptr.getRefData().setLocalRotation(rot);
 
-        if (ptr.getRefData().getBaseNodeOld() != 0)
+        if (ptr.getRefData().getBaseNode() != 0)
         {
             mWorldScene->updateObjectLocalRotation(ptr);
         }
