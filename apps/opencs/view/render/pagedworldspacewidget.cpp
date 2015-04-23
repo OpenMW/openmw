@@ -19,6 +19,7 @@
 
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/world/pathgridcommands.hpp"
 
 #include "../widget/scenetooltoggle.hpp"
 #include "../widget/scenetoolmode.hpp"
@@ -115,6 +116,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
         {
             Cell *cell = new Cell (mDocument, getSceneManager(),
                     iter->getId (mWorldspace), mDocument.getPhysics());
+            connect (cell->getSignalHandler(), SIGNAL(flagAsModified()), this, SLOT(flagAsModSlot()));
             mCells.insert (std::make_pair (*iter, cell));
 
             float height = cell->getTerrainHeightAt(Ogre::Vector3(
@@ -636,4 +638,9 @@ void CSVRender::PagedWorldspaceWidget::cellAdded (const QModelIndex& index, int 
     /// \todo check if no selected cell is affected and do not update, if that is the case
     if (adjustCells())
         flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::flagAsModSlot ()
+{
+    flagAsModified();
 }

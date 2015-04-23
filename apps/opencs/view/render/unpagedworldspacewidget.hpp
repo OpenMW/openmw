@@ -76,6 +76,8 @@ namespace CSVRender
 
             void cellRowsAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
+            virtual void flagAsModSlot();
+
         signals:
 
             void cellChanged(const CSMWorld::UniversalId& id);

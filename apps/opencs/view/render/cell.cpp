@@ -16,6 +16,7 @@
 #include "../../model/world/refcollection.hpp"
 #include "../../model/world/pathgrid.hpp"
 #include "../../model/world/commands.hpp"
+#include "../../model/world/pathgridcommands.hpp"
 #include "../../model/world/pathgridpointswrap.hpp"
 #include "../../model/world/nestedtableproxymodel.hpp"
 #include "../world/physicssystem.hpp"
@@ -119,8 +120,9 @@ bool CSVRender::Cell::addObjects (int start, int end)
 
 CSVRender::Cell::Cell (CSMDoc::Document& document, Ogre::SceneManager *sceneManager,
     const std::string& id, boost::shared_ptr<CSVWorld::PhysicsSystem> physics, const Ogre::Vector3& origin)
-: mDocument (document), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager)
-, mPhysics(physics), mX(0), mY(0), mPgIndex(-1), mModel(0), mProxyModel(0)
+    : mDocument (document), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager)
+    , mPhysics(physics), mX(0), mY(0), mPgIndex(-1), mModel(0), mProxyModel(0)
+    , mHandler(new CSMWorld::SignalHandler(this))
 {
     mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
     mCellNode->setPosition (origin);
@@ -163,6 +165,7 @@ CSVRender::Cell::~Cell()
     destroyGridMaterials();
 
     delete mProxyModel;
+    delete mHandler;
 
     if (mTerrain.get())
         mPhysics->removeHeightField(mSceneMgr, mX, mY);
@@ -431,10 +434,12 @@ void CSVRender::Cell::pathgridPointAdded(const Ogre::Vector3 &pos, bool interior
 
     pathgrid.mData.mS2 += 1; // increment the number of points
 
-    // FIXME: probably will crash if this cell is deleted and undo() is actioned afterwards
-    mDocument.getUndoStack().push(new CSMWorld::ModifyPathgridCommand(*mModel,
-            mProxyModel->getParentId(), mProxyModel->getParentColumn(), this,
-            new CSMWorld::PathgridPointsWrap(pathgrid)));
+    // FIXME: possible issue if this cell is deleted and undo() is actioned afterwards
+    CSMWorld::ModifyPathgridCommand *cmd = new CSMWorld::ModifyPathgridCommand(*mModel,
+            mProxyModel->getParentId(), mProxyModel->getParentColumn(),
+            new CSMWorld::PathgridPointsWrap(pathgrid));
+    mHandler->connectToCommand(cmd);
+    mDocument.getUndoStack().push(cmd);
     // emit signal here?
 }
 
@@ -488,10 +493,12 @@ void CSVRender::Cell::pathgridPointRemoved(const std::string &name)
             << pathgridId + "_" + QString::number(index).toStdString() << std::endl;
     }
 
-    // FIXME: probably will crash if this cell is deleted and undo() is actioned afterwards
-    mDocument.getUndoStack().push(new CSMWorld::ModifyPathgridCommand(*mModel,
-            mProxyModel->getParentId(), mProxyModel->getParentColumn(), this,
-            new CSMWorld::PathgridPointsWrap(pathgrid)));
+    // FIXME: possible issue if this cell is deleted and undo() is actioned afterwards
+    CSMWorld::ModifyPathgridCommand *cmd = new CSMWorld::ModifyPathgridCommand(*mModel,
+            mProxyModel->getParentId(), mProxyModel->getParentColumn(),
+            new CSMWorld::PathgridPointsWrap(pathgrid));
+    mHandler->connectToCommand(cmd);
+    mDocument.getUndoStack().push(cmd);
 
     clearPathgrid();
     buildPathgrid();
@@ -529,10 +536,12 @@ void CSVRender::Cell::pathgridPointMoved(const std::string &name,
     pathgrid.mPoints[index].mY = y;
     pathgrid.mPoints[index].mZ = newPos.z;
 
-    // FIXME: probably will crash if this cell is deleted and undo() is actioned afterwards
-    mDocument.getUndoStack().push(new CSMWorld::ModifyPathgridCommand(*mModel,
-            mProxyModel->getParentId(), mProxyModel->getParentColumn(), this,
-            new CSMWorld::PathgridPointsWrap(pathgrid)));
+    // FIXME: possible issue if this cell is deleted and undo() is actioned afterwards
+    CSMWorld::ModifyPathgridCommand *cmd = new CSMWorld::ModifyPathgridCommand(*mModel,
+            mProxyModel->getParentId(), mProxyModel->getParentColumn(),
+            new CSMWorld::PathgridPointsWrap(pathgrid));
+    mHandler->connectToCommand(cmd);
+    mDocument.getUndoStack().push(cmd);
 
     clearPathgrid();
     buildPathgrid();
@@ -550,4 +559,9 @@ void CSVRender::Cell::addPathgridEdge()
 // FIXME: save to the document
 void CSVRender::Cell::removePathgridEdge()
 {
+}
+
+CSMWorld::SignalHandler *CSVRender::Cell::getSignalHandler()
+{
+    return mHandler;
 }

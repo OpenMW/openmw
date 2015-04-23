@@ -6,7 +6,6 @@
 #include "idtree.hpp"
 #include <components/misc/stringops.hpp>
 #include "nestedtablewrapper.hpp"
-#include "../../view/render/cell.hpp"
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
                                         const QVariant& new_, QUndoCommand* parent)
@@ -244,32 +243,4 @@ CSMWorld::NestedTableStoring::~NestedTableStoring()
 const CSMWorld::NestedTableWrapperBase& CSMWorld::NestedTableStoring::getOld() const
 {
     return *mOld;
-}
-
-// Current interface does not allow adding a non-blank row, so we're forced to modify
-// the whole record.
-CSMWorld::ModifyPathgridCommand::ModifyPathgridCommand(IdTree& model,
-    const std::string& id, int parentColumn, CSVRender::Cell *cell,
-    NestedTableWrapperBase* newRecord, QUndoCommand* parent)
-    : mModel(model), mId(id), mParentColumn(parentColumn), mRecord(newRecord), mCell(cell)
-    , QUndoCommand(parent), NestedTableStoring(model, id, parentColumn)
-{
-    setText (("Modify Pathgrid record " + mId).c_str()); // FIXME: better description
-}
-
-void CSMWorld::ModifyPathgridCommand::redo()
-{
-    const QModelIndex& parentIndex = mModel.getModelIndex(mId, mParentColumn);
-
-    mModel.setNestedTable(parentIndex, *mRecord);
-}
-
-void CSMWorld::ModifyPathgridCommand::undo()
-{
-    const QModelIndex& parentIndex = mModel.getModelIndex(mId, mParentColumn);
-
-    mModel.setNestedTable(parentIndex, getOld());
-
-    mCell->clearPathgrid();
-    mCell->buildPathgrid();
 }

@@ -12,15 +12,10 @@
 #include <QModelIndex>
 
 #include "universalid.hpp"
-#include "nestedtablewrapper.hpp"
+//#include "nestedtablewrapper.hpp"
 
 class QModelIndex;
 class QAbstractItemModel;
-
-namespace CSVRender
-{
-    class Cell;
-}
 
 namespace CSMWorld
 {
@@ -195,28 +190,6 @@ namespace CSMWorld
 
             AddNestedCommand(IdTree& model,
                     const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
-
-            virtual void redo();
-
-            virtual void undo();
-    };
-
-    class ModifyPathgridCommand : public QUndoCommand, private NestedTableStoring
-    {
-            IdTree& mModel;
-            std::string mId;
-
-            int mParentColumn;
-
-            NestedTableWrapperBase* mRecord;
-            CSVRender::Cell *mCell;
-
-        public:
-
-            // if newEdges is NULL, only the paths are updated
-            ModifyPathgridCommand(IdTree& model,
-                    const std::string& id, int parentColumn, CSVRender::Cell *cell,
-                    NestedTableWrapperBase* newRecord, QUndoCommand* parent = 0);
 
             virtual void redo();
 

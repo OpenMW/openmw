@@ -13,6 +13,7 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/tablemimedata.hpp"
+#include "../../model/world/pathgridcommands.hpp"
 
 #include "../widget/scenetooltoggle.hpp"
 #include "../widget/scenetooltoggle2.hpp"
@@ -49,7 +50,9 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
 
     update();
 
-    mCell.reset (new Cell (document, getSceneManager(), mCellId, document.getPhysics()));
+    Cell *cell = new Cell (document, getSceneManager(), mCellId, document.getPhysics());
+    connect (cell->getSignalHandler(), SIGNAL(flagAsModified()), this, SLOT(flagAsModSlot()));
+    mCell.reset (cell);
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,
@@ -91,7 +94,9 @@ bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld:
         return false;
 
     mCellId = data.begin()->getId();
-    mCell.reset (new Cell (getDocument(), getSceneManager(), mCellId, getDocument().getPhysics()));
+    Cell *cell = new Cell (getDocument(), getSceneManager(), mCellId, getDocument().getPhysics());
+    connect (cell->getSignalHandler(), SIGNAL(flagAsModified()), this, SLOT(flagAsModSlot()));
+    mCell.reset (cell);
 
     update();
     emit cellChanged(*data.begin());
@@ -211,4 +216,9 @@ CSVRender::WorldspaceWidget::dropRequirments CSVRender::UnpagedWorldspaceWidget:
         default:
             return ignored;
     }
+}
+
+void CSVRender::UnpagedWorldspaceWidget::flagAsModSlot ()
+{
+    flagAsModified();
 }

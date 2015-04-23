@@ -31,10 +31,10 @@ namespace CSMDoc
 
 namespace CSMWorld
 {
-    //class Data;
     class Pathgrid;
     class NestedTableProxyModel;
     class IdTree;
+    class SignalHandler;
 }
 
 namespace CSVWorld
@@ -58,6 +58,7 @@ namespace CSVRender
             CSMWorld::NestedTableProxyModel *mProxyModel;
             CSMWorld::IdTree *mModel;
             int mPgIndex;
+            CSMWorld::SignalHandler *mHandler;
 
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
             boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
@@ -126,6 +127,7 @@ namespace CSVRender
 
             void clearPathgrid();
             void buildPathgrid();
+            CSMWorld::SignalHandler *getSignalHandler();
     };
 }
 

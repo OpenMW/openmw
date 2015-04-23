@@ -120,6 +120,7 @@ namespace CSVRender
 
             virtual void cellAdded (const QModelIndex& index, int start, int end);
 
+            virtual void flagAsModSlot();
     };
 }
 
