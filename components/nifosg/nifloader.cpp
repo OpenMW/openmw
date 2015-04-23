@@ -413,7 +413,7 @@ namespace NifOsg
                     continue;
 
                 osg::ref_ptr<NifOsg::KeyframeController> callback(new NifOsg::KeyframeController(key->data.getPtr()));
-                callback->mFunction = boost::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key));
+                callback->setFunction(boost::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key)));
 
                 target.mKeyframeControllers[strdata->string] = callback;
             }
@@ -459,9 +459,9 @@ namespace NifOsg
         {
             bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
             if (autoPlay)
-                toSetup->mSource = boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource);
+                toSetup->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
 
-            toSetup->mFunction = boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl));
+            toSetup->setFunction(boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl)));
         }
 
         static osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::TextureManager* textureManager,

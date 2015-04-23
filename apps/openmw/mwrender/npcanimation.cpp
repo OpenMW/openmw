@@ -281,7 +281,6 @@ void NpcAnimation::updateNpcBase()
     smodel = Misc::ResourceHelpers::correctActorModelPath(smodel, mResourceSystem->getVFS());
     setObjectRoot(smodel /*, baseonly = true*/);
 
-    /*
     if(mViewMode != VM_FirstPerson)
     {
         addAnimSource(smodel);
@@ -310,7 +309,6 @@ void NpcAnimation::updateNpcBase()
                 addAnimSource("meshes\\xbase_anim_female.1st.nif");
         }
     }
-    */
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
         removeIndividualPart((ESM::PartReferenceType)i);

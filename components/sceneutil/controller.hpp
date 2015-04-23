@@ -41,6 +41,13 @@ namespace SceneUtil
 
         float getInputValue(osg::NodeVisitor* nv);
 
+        void setSource(boost::shared_ptr<ControllerSource> source);
+        void setFunction(boost::shared_ptr<ControllerFunction> function);
+
+        boost::shared_ptr<ControllerSource> getSource() const;
+        boost::shared_ptr<ControllerFunction> getFunction() const;
+
+    private:
         boost::shared_ptr<ControllerSource> mSource;
 
         // The source value gets passed through this function before it's passed on to the DestValue.

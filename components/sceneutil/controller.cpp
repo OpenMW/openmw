@@ -23,6 +23,26 @@ namespace SceneUtil
         return mFunction->calculate(mSource->getValue(nv));
     }
 
+    void Controller::setSource(boost::shared_ptr<ControllerSource> source)
+    {
+        mSource = source;
+    }
+
+    void Controller::setFunction(boost::shared_ptr<ControllerFunction> function)
+    {
+        mFunction = function;
+    }
+
+    boost::shared_ptr<ControllerSource> Controller::getSource() const
+    {
+        return mSource;
+    }
+
+    boost::shared_ptr<ControllerFunction> Controller::getFunction() const
+    {
+        return mFunction;
+    }
+
     FrameTimeSource::FrameTimeSource()
     {
     }
@@ -85,8 +105,8 @@ namespace SceneUtil
 
     void AssignControllerSourcesVisitor::visit(osg::Node&, Controller &ctrl)
     {
-        if (!ctrl.mSource.get())
-            ctrl.mSource = mToAssign;
+        if (!ctrl.getSource())
+            ctrl.setSource(mToAssign);
     }
 
     FindMaxControllerLengthVisitor::FindMaxControllerLengthVisitor()
@@ -97,8 +117,8 @@ namespace SceneUtil
 
     void FindMaxControllerLengthVisitor::visit(osg::Node &, Controller &ctrl)
     {
-        if (ctrl.mFunction)
-            mMaxLength = std::max(mMaxLength, ctrl.mFunction->getMaximum());
+        if (ctrl.getFunction())
+            mMaxLength = std::max(mMaxLength, ctrl.getFunction()->getMaximum());
     }
 
     float FindMaxControllerLengthVisitor::getMaxLength() const

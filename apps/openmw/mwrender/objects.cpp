@@ -167,6 +167,7 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
     insertBegin(ptr);
 
     std::auto_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem, 0));
+    anim->play("idle2", 0, Animation::Group_All, false, 1.f, "loop start", "loop stop", 0.f, 50); //testing
 
     if (anim->getObjectRoot())
         anim->getObjectRoot()->addCullCallback(new SceneUtil::LightListCallback);

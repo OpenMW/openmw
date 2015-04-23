@@ -22,16 +22,16 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr,
                                      const std::string& model, Resource::ResourceSystem* resourceSystem)
   : Animation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), resourceSystem)
 {
-    //MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
+    MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
 
     if(!model.empty())
     {
         setObjectRoot(model /* , baseonly = false */);
         //setRenderProperties(mObjectRoot, RV_Actors, RQG_Main, RQG_Alpha);
 
-        //if((ref->mBase->mFlags&ESM::Creature::Bipedal))
-        //    addAnimSource("meshes\\xbase_anim.nif");
-        //addAnimSource(model);
+        if((ref->mBase->mFlags&ESM::Creature::Bipedal))
+            addAnimSource("meshes\\xbase_anim.nif");
+        addAnimSource(model);
     }
 }
 
@@ -41,16 +41,16 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const 
     , mShowWeapons(false)
     , mShowCarriedLeft(false)
 {
-    //MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
+    MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
 
     if(!model.empty())
     {
         setObjectRoot(model /* , baseonly = false*/);
         //setRenderProperties(mObjectRoot, RV_Actors, RQG_Main, RQG_Alpha);
 
-        //if((ref->mBase->mFlags&ESM::Creature::Bipedal))
-        //    addAnimSource("meshes\\xbase_anim.nif");
-        //addAnimSource(model);
+        if((ref->mBase->mFlags&ESM::Creature::Bipedal))
+            addAnimSource("meshes\\xbase_anim.nif");
+        addAnimSource(model);
 
         mPtr.getClass().getInventoryStore(mPtr).setListener(this, mPtr);
 
