@@ -1,13 +1,10 @@
 #include "pathgridpoint.hpp"
 
-#include <iostream> // FIXME
-
 #include <QRegExp>
 
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 
-//#include "../../model/world/pathgrid.hpp"
 #include "../world/physicssystem.hpp"
 
 #include "elements.hpp"

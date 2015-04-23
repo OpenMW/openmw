@@ -17,6 +17,11 @@
 class QModelIndex;
 class QAbstractItemModel;
 
+namespace CSVRender
+{
+    class Cell;
+}
+
 namespace CSMWorld
 {
     class IdTable;
@@ -204,11 +209,13 @@ namespace CSMWorld
             int mParentColumn;
 
             NestedTableWrapperBase* mRecord;
+            CSVRender::Cell *mCell;
 
         public:
 
             // if newEdges is NULL, only the paths are updated
-            ModifyPathgridCommand(IdTree& model, const std::string& id, int parentColumn,
+            ModifyPathgridCommand(IdTree& model,
+                    const std::string& id, int parentColumn, CSVRender::Cell *cell,
                     NestedTableWrapperBase* newRecord, QUndoCommand* parent = 0);
 
             virtual void redo();

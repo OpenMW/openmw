@@ -11,7 +11,6 @@
 
 #ifndef Q_MOC_RUN
 #include <components/terrain/terraingrid.hpp>
-#include <components/esm/loadpgrd.hpp>  // FIXME: temporaty storage until saving to document
 #endif
 
 #include "object.hpp"
@@ -116,12 +115,17 @@ namespace CSVRender
             // for drawing pathgrid points & lines
             void createGridMaterials();
             void destroyGridMaterials();
-            void loadPathgrid();
+            void setupPathgrid();
             Ogre::ManualObject *createPathgridEdge(const std::string &name,
                     const Ogre::Vector3 &start, const Ogre::Vector3 &end);
 
             void addPathgridEdge();
             void removePathgridEdge();
+
+        public:
+
+            void clearPathgrid();
+            void buildPathgrid();
     };
 }
 
