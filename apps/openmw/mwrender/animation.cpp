@@ -27,6 +27,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/lightcontroller.hpp>
+#include <components/sceneutil/skeleton.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -308,6 +309,18 @@ namespace MWRender
             if (found != mNodeMap.end())
                 mAccumRoot = found->second;
         }
+    }
+
+    void Animation::clearAnimSources()
+    {
+        mStates.clear();
+
+        for(size_t i = 0;i < sNumGroups;i++)
+            mAnimationTimePtr[i]->setAnimName(std::string());
+
+        mAccumCtrl = NULL;
+
+        mAnimSources.clear();
     }
 
     bool Animation::hasAnimation(const std::string &anim)
@@ -668,13 +681,14 @@ namespace MWRender
 
     float Animation::getVelocity(const std::string &groupname) const
     {
-        return 0.f;
-        /*
+        if (!mAccumRoot)
+            return 0.0f;
+
         // Look in reverse; last-inserted source has priority.
         AnimSourceList::const_reverse_iterator animsrc(mAnimSources.rbegin());
         for(;animsrc != mAnimSources.rend();++animsrc)
         {
-            const NifOsg::TextKeyMap &keys = (*animsrc)->mTextKeys;
+            const NifOsg::TextKeyMap &keys = (*animsrc)->getTextKeys();
             if(findGroupStart(keys, groupname) != keys.end())
                 break;
         }
@@ -682,15 +696,14 @@ namespace MWRender
             return 0.0f;
 
         float velocity = 0.0f;
-        const NifOsg::TextKeyMap &keys = (*animsrc)->mTextKeys;
-        const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = (*animsrc)->mControllers[0];
-        for(size_t i = 0;i < ctrls.size();i++)
+        const NifOsg::TextKeyMap &keys = (*animsrc)->getTextKeys();
+
+        const AnimSource::ControllerMap& ctrls = (*animsrc)->mControllerMap[0];
+        for (AnimSource::ControllerMap::const_iterator it = ctrls.begin(); it != ctrls.end(); ++it)
         {
-            NifOsg::NodeTargetValue<Ogre::Real> *dstval;
-            dstval = static_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrls[i].getDestination().getPointer());
-            if(dstval->getNode() == mNonAccumRoot)
+            if (Misc::StringUtils::ciEqual(it->first, mAccumRoot->getName()))
             {
-                velocity = calcAnimVelocity(keys, dstval, mAccumulate, groupname);
+                velocity = calcAnimVelocity(keys, it->second, mAccumulate, groupname);
                 break;
             }
         }
@@ -704,15 +717,14 @@ namespace MWRender
 
             while(!(velocity > 1.0f) && ++animiter != mAnimSources.rend())
             {
-                const NifOgre::TextKeyMap &keys = (*animiter)->mTextKeys;
-                const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = (*animiter)->mControllers[0];
-                for(size_t i = 0;i < ctrls.size();i++)
+                const NifOsg::TextKeyMap &keys = (*animiter)->getTextKeys();
+
+                const AnimSource::ControllerMap& ctrls = (*animiter)->mControllerMap[0];
+                for (AnimSource::ControllerMap::const_iterator it = ctrls.begin(); it != ctrls.end(); ++it)
                 {
-                    NifOgre::NodeTargetValue<Ogre::Real> *dstval;
-                    dstval = static_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrls[i].getDestination().getPointer());
-                    if(dstval->getNode() == mNonAccumRoot)
+                    if (Misc::StringUtils::ciEqual(it->first, mAccumRoot->getName()))
                     {
-                        velocity = calcAnimVelocity(keys, dstval, mAccumulate, groupname);
+                        velocity = calcAnimVelocity(keys, it->second, mAccumulate, groupname);
                         break;
                     }
                 }
@@ -720,7 +732,6 @@ namespace MWRender
         }
 
         return velocity;
-        */
     }
 
     void Animation::updatePosition(float oldtime, float newtime, osg::Vec3f& position)
@@ -808,7 +819,7 @@ namespace MWRender
         return movement;
     }
 
-    void Animation::setObjectRoot(const std::string &model)
+    void Animation::setObjectRoot(const std::string &model, bool forceskeleton)
     {
         if (mObjectRoot)
         {
@@ -821,7 +832,20 @@ namespace MWRender
         mAccumRoot = NULL;
         mAccumCtrl = NULL;
 
-        mObjectRoot = mResourceSystem->getSceneManager()->createInstance(model, mInsert);
+        if (!forceskeleton)
+            mObjectRoot = mResourceSystem->getSceneManager()->createInstance(model, mInsert);
+        else
+        {
+            osg::ref_ptr<osg::Node> newObjectRoot = mResourceSystem->getSceneManager()->createInstance(model);
+            if (!dynamic_cast<SceneUtil::Skeleton*>(newObjectRoot.get()))
+            {
+                osg::ref_ptr<SceneUtil::Skeleton> skel = new SceneUtil::Skeleton;
+                skel->addChild(newObjectRoot);
+                newObjectRoot = skel;
+            }
+            mInsert->addChild(newObjectRoot);
+            mObjectRoot = newObjectRoot;
+        }
 
         NodeMapVisitor visitor;
         mObjectRoot->accept(visitor);
@@ -1062,7 +1086,7 @@ namespace MWRender
     {
         if (!model.empty())
         {
-            setObjectRoot(model);
+            setObjectRoot(model, false);
 
             if (!ptr.getClass().getEnchantment(ptr).empty())
                 addGlow(mObjectRoot, getEnchantmentColor(ptr));

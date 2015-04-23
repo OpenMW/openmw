@@ -215,12 +215,13 @@ protected:
     void handleTextKey(AnimState &state, const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
                        const std::multimap<float, std::string>& map);
 
-    /* Sets the root model of the object.
+    /** Sets the root model of the object.
      *
      * Note that you must make sure all animation sources are cleared before reseting the object
      * root. All nodes previously retrieved with getNode will also become invalidated.
+     * @param forceskeleton Wrap the object root in a Skeleton, even if it contains no skinned parts. Use this if you intend to add skinned parts manually.
      */
-    void setObjectRoot(const std::string &model);
+    void setObjectRoot(const std::string &model, bool forceskeleton);
 
     /* Adds the keyframe controllers in the specified model as a new animation source. Note that
      * the filename portion of the provided model name will be prepended with 'x', and the .nif
@@ -230,7 +231,7 @@ protected:
     /** Adds an additional light to the given node using the specified ESM record. */
     void addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light *light);
 
-    //void clearAnimSources();
+    void clearAnimSources();
 
     osg::Vec4f getEnchantmentColor(MWWorld::Ptr item);
 

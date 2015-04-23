@@ -26,7 +26,7 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr,
 
     if(!model.empty())
     {
-        setObjectRoot(model /* , baseonly = false */);
+        setObjectRoot(model, false /* , baseonly = false */);
         //setRenderProperties(mObjectRoot, RV_Actors, RQG_Main, RQG_Alpha);
 
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))
@@ -45,7 +45,7 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const 
 
     if(!model.empty())
     {
-        setObjectRoot(model /* , baseonly = false*/);
+        setObjectRoot(model, true /* , baseonly = false*/);
         //setRenderProperties(mObjectRoot, RV_Actors, RQG_Main, RQG_Alpha);
 
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))

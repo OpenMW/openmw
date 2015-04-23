@@ -233,7 +233,7 @@ void NpcAnimation::rebuild()
 
 void NpcAnimation::updateNpcBase()
 {
-    //clearAnimSources();
+    clearAnimSources();
 
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
@@ -279,7 +279,8 @@ void NpcAnimation::updateNpcBase()
                                                  : "meshes\\base_animkna.1st.nif"
                                       : "meshes\\wolf\\skin.1st.nif");
     smodel = Misc::ResourceHelpers::correctActorModelPath(smodel, mResourceSystem->getVFS());
-    setObjectRoot(smodel /*, baseonly = true*/);
+
+    setObjectRoot(smodel, true /*, baseonly = true*/);
 
     if(mViewMode != VM_FirstPerson)
     {
