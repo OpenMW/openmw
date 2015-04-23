@@ -330,23 +330,13 @@ void CSVRender::PagedWorldspaceWidget::referenceAdded (const QModelIndex& parent
             flagAsModified();
 }
 
-//void CSVRender::PagedWorldspaceWidget::pathgridAdded (const QModelIndex& parent,
-//    int start, int end)
-//{
-//    // FIXME:
-//}
-//
-//void CSVRender::PagedWorldspaceWidget::pathgridDataChanged (const QModelIndex& topLeft,
-//    const QModelIndex& bottomRight)
-//{
-//    // FIXME:
-//}
-//
-//void CSVRender::PagedWorldspaceWidget::pathgridAboutToBeRemoved (const QModelIndex& parent,
-//    int start, int end)
-//{
-//    // FIXME:
-//}
+void CSVRender::PagedWorldspaceWidget::pathgridDataChanged (const QModelIndex& topLeft,
+    const QModelIndex& bottomRight)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+        iter!=mCells.end(); ++iter)
+        iter->second->pathgridDataChanged (topLeft, bottomRight);
+}
 
 CSVRender::Cell *CSVRender::PagedWorldspaceWidget::findCell(const std::string &cellId)
 {

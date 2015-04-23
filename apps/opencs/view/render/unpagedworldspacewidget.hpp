@@ -58,12 +58,6 @@ namespace CSVRender
 
             virtual void referenceAdded (const QModelIndex& index, int start, int end);
 
-            //virtual void pathgridAdded (const QModelIndex& index, int start, int end);
-
-            //virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-            //virtual void pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end);
-
             virtual std::string getStartupInstruction();
 
         protected:
@@ -77,6 +71,8 @@ namespace CSVRender
             void cellRowsAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
             virtual void flagAsModSlot();
+
+            virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
         signals:
 

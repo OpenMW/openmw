@@ -166,23 +166,11 @@ void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
     tool->addButton (Element_Fog, "Fog");
 }
 
-//void CSVRender::UnpagedWorldspaceWidget::pathgridAdded (const QModelIndex& parent,
-//    int start, int end)
-//{
-//    // FIXME:
-//}
-//
-//void CSVRender::UnpagedWorldspaceWidget::pathgridDataChanged (const QModelIndex& topLeft,
-//    const QModelIndex& bottomRight)
-//{
-//    // FIXME:
-//}
-//
-//void CSVRender::UnpagedWorldspaceWidget::pathgridAboutToBeRemoved (const QModelIndex& parent,
-//    int start, int end)
-//{
-//    // FIXME:
-//}
+void CSVRender::UnpagedWorldspaceWidget::pathgridDataChanged (const QModelIndex& topLeft,
+    const QModelIndex& bottomRight)
+{
+    // FIXME:
+}
 
 std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()
 {

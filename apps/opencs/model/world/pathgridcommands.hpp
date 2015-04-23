@@ -53,7 +53,7 @@ namespace CSMWorld
 
             void connectToCommand(const ModifyPathgridCommand *command);
 
-        private slots:
+        public slots:
 
             void rebuildPathgrid();
 

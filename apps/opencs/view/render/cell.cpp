@@ -307,9 +307,34 @@ float CSVRender::Cell::getTerrainHeightAt(const Ogre::Vector3 &pos) const
         return -std::numeric_limits<float>::max();
 }
 
+void CSVRender::Cell::pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    CSMWorld::IdTree *pathgrids = dynamic_cast<CSMWorld::IdTree *>(
+                mDocument.getData().getTableModel(CSMWorld::UniversalId::Type_Pathgrid));
+
+    int idColumn = pathgrids->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
+    int colPaths = pathgrids->findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
+    //int colEdges = pathgrids->findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);
+
+    // FIXME: how to detect adds/deletes/modifies?
+
+    for (int i=topLeft.row(); i<=bottomRight.row(); ++i)
+    {
+        std::string cell = Misc::StringUtils::lowerCase (pathgrids->data (
+            pathgrids->index (i, idColumn)).toString().toUtf8().constData());
+
+        if (cell==mId && colPaths >= topLeft.column() && colPaths <= bottomRight.column())
+        {
+            if (!mModel)
+                setupPathgrid();
+
+            mHandler->rebuildPathgrid();
+        }
+    }
+}
+
 // FIXME:
 //  - adding edges (need the ability to select a pathgrid and highlight)
-//  - save to document & signals
 //  - repainting edges while moving
 void CSVRender::Cell::setupPathgrid()
 {
@@ -434,7 +459,7 @@ void CSVRender::Cell::pathgridPointAdded(const Ogre::Vector3 &pos, bool interior
 
     pathgrid.mData.mS2 += 1; // increment the number of points
 
-    // FIXME: possible issue if this cell is deleted and undo() is actioned afterwards
+    // TODO: check for possible issue if this cell is deleted and undo() is actioned afterwards
     CSMWorld::ModifyPathgridCommand *cmd = new CSMWorld::ModifyPathgridCommand(*mModel,
             mProxyModel->getParentId(), mProxyModel->getParentColumn(),
             new CSMWorld::PathgridPointsWrap(pathgrid));
@@ -493,7 +518,7 @@ void CSVRender::Cell::pathgridPointRemoved(const std::string &name)
             << pathgridId + "_" + QString::number(index).toStdString() << std::endl;
     }
 
-    // FIXME: possible issue if this cell is deleted and undo() is actioned afterwards
+    // TODO: check for possible issue if this cell is deleted and undo() is actioned afterwards
     CSMWorld::ModifyPathgridCommand *cmd = new CSMWorld::ModifyPathgridCommand(*mModel,
             mProxyModel->getParentId(), mProxyModel->getParentColumn(),
             new CSMWorld::PathgridPointsWrap(pathgrid));
@@ -536,7 +561,7 @@ void CSVRender::Cell::pathgridPointMoved(const std::string &name,
     pathgrid.mPoints[index].mY = y;
     pathgrid.mPoints[index].mZ = newPos.z;
 
-    // FIXME: possible issue if this cell is deleted and undo() is actioned afterwards
+    // TODO: check for possible issue if this cell is deleted and undo() is actioned afterwards
     CSMWorld::ModifyPathgridCommand *cmd = new CSMWorld::ModifyPathgridCommand(*mModel,
             mProxyModel->getParentId(), mProxyModel->getParentColumn(),
             new CSMWorld::PathgridPointsWrap(pathgrid));

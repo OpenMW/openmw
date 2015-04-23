@@ -12,7 +12,6 @@
 #include <QModelIndex>
 
 #include "universalid.hpp"
-//#include "nestedtablewrapper.hpp"
 
 class QModelIndex;
 class QAbstractItemModel;

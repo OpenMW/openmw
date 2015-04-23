@@ -1,6 +1,7 @@
 #include "pathgridcommands.hpp"
 
 #include "../../view/render/cell.hpp"
+
 #include "idtree.hpp"
 #include "nestedtablewrapper.hpp"
 
@@ -43,6 +44,5 @@ CSMWorld::SignalHandler::SignalHandler (CSVRender::Cell *parent) : mParent(paren
 
 void CSMWorld::SignalHandler::connectToCommand(const CSMWorld::ModifyPathgridCommand *command)
 {
-    connect (command, SIGNAL(undoActioned()),
-            this, SLOT(rebuildPathgrid()));
+    connect (command, SIGNAL(undoActioned()), this, SLOT(rebuildPathgrid()));
 }

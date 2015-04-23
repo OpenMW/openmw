@@ -163,11 +163,7 @@ namespace CSVRender
 
             void debugProfileAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
-            //virtual void pathgridAdded (const QModelIndex& index, int start, int end) = 0;
-
-            //virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight) = 0;
-
-            //virtual void pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end) = 0;
+            virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight) = 0;
 
         protected slots:
 

@@ -111,6 +111,8 @@ namespace CSVRender
                     const Ogre::Vector3 &newPos, bool interior = false);
             void pathgridPointRemoved(const std::string &name);
 
+            void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
         private:
 
             // for drawing pathgrid points & lines

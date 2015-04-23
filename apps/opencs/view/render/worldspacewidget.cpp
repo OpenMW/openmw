@@ -56,15 +56,11 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     connect (debugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
 
-    //QAbstractItemModel *pathgrids =
-        //document.getData().getTableModel (CSMWorld::UniversalId::Type_Pathgrid);
+    QAbstractItemModel *pathgrids =
+        document.getData().getTableModel (CSMWorld::UniversalId::Type_Pathgrid);
 
-    //connect (pathgrids, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        //this, SLOT (pathgridAdded (const QModelIndex&, int, int)));
-    //connect (pathgrids, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        //this, SLOT (pathgridDataChanged (const QModelIndex&, const QModelIndex&)));
-    //connect (pathgrids, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
-        //this, SLOT (pathgridAboutToBeRemoved (const QModelIndex&, int, int)));
+    connect (pathgrids, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+        this, SLOT (pathgridDataChanged (const QModelIndex&, const QModelIndex&)));
 
     mPhysics = document.getPhysics(); // create physics if one doesn't exist
     mPhysics->addSceneManager(getSceneManager(), this);
@@ -460,17 +456,14 @@ void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
         SceneWidget::keyPressEvent(event);
 }
 
-// FIXME: temporary until signals from the document are implemented
 void CSVRender::WorldspaceWidget::pathgridAboutToBeRemoved (const std::string &pgName)
 {
 }
 
-// FIXME: temporary until signals from the document are implemented
 void CSVRender::WorldspaceWidget::pathgridMoved (const std::string &pgName, const Ogre::Vector3 &newPos)
 {
 }
 
-// FIXME: temporary until signals from the document are implemented
 void CSVRender::WorldspaceWidget::pathgridInserted (const std::string &name, const Ogre::Vector3 &pos)
 {
 }
