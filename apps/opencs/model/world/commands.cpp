@@ -1,28 +1,37 @@
 #include "commands.hpp"
 
+#include <components/misc/stringops.hpp>
+
 #include <QAbstractItemModel>
+#include <QAbstractProxyModel>
 
 #include "idtable.hpp"
 #include "idtree.hpp"
-#include <components/misc/stringops.hpp>
 #include "nestedtablewrapper.hpp"
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
                                         const QVariant& new_, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (model), mIndex (index), mNew (new_)
+: QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_)
 {
-    setText ("Modify " + mModel.headerData (mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
+    if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (&model))
+    {
+        // Replace proxy with actual model
+        mIndex = proxy->mapToSource (index);
+        mModel = proxy->sourceModel();
+    }
+
+    setText ("Modify " + mModel->headerData (mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
 }
 
 void CSMWorld::ModifyCommand::redo()
 {
-    mOld = mModel.data (mIndex, Qt::EditRole);
-    mModel.setData (mIndex, mNew);
+    mOld = mModel->data (mIndex, Qt::EditRole);
+    mModel->setData (mIndex, mNew);
 }
 
 void CSMWorld::ModifyCommand::undo()
 {
-    mModel.setData (mIndex, mOld);
+    mModel->setData (mIndex, mOld);
 }
 
 

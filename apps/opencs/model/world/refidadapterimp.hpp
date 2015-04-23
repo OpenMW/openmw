@@ -1363,7 +1363,13 @@ namespace CSMWorld
             std::vector<ESM::AIPackage>& list = actor.mAiPackage.mList;
 
             ESM::AIPackage newRow;
-            newRow.mType = ESM::AI_CNDT;
+            newRow.mType = ESM::AI_Wander;
+            newRow.mWander.mDistance = 0;
+            newRow.mWander.mDuration = 0;
+            newRow.mWander.mTimeOfDay = 0;
+            for (int i = 0; i < 8; ++i)
+                newRow.mWander.mIdle[i] = 0;
+            newRow.mWander.mShouldRepeat = 0;
             newRow.mCellName = "";
 
             if (position >= (int)list.size())

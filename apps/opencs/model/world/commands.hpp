@@ -26,7 +26,7 @@ namespace CSMWorld
 
     class ModifyCommand : public QUndoCommand
     {
-            QAbstractItemModel& mModel;
+            QAbstractItemModel *mModel;
             QModelIndex mIndex;
             QVariant mNew;
             QVariant mOld;
