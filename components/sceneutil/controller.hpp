@@ -65,7 +65,7 @@ namespace SceneUtil
         AssignControllerSourcesVisitor();
         AssignControllerSourcesVisitor(boost::shared_ptr<ControllerSource> toAssign);
 
-        /// Assign the wanted ControllerSource. May be overriden in derived classes.
+        /// Assign the wanted ControllerSource. May be overridden in derived classes.
         /// By default assigns the ControllerSource passed to the constructor of this class if no ControllerSource is assigned to that controller yet.
         virtual void visit(osg::Node& node, Controller& ctrl);
 

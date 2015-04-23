@@ -3,6 +3,8 @@
 
 #include <osg/NodeVisitor>
 
+#include <components/misc/stringops.hpp>
+
 // Commonly used scene graph visitors
 namespace SceneUtil
 {
@@ -19,7 +21,7 @@ namespace SceneUtil
 
         virtual void apply(osg::Group& group)
         {
-            if (group.getName() == mNameToFind)
+            if (Misc::StringUtils::ciEqual(group.getName(), mNameToFind))
             {
                 mFoundNode = &group;
                 return;
