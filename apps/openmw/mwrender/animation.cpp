@@ -8,6 +8,7 @@
 #include <osg/TexEnvCombine>
 #include <osg/ComputeBoundsVisitor>
 #include <osg/MatrixTransform>
+#include <osg/io_utils>
 
 #include <components/nifosg/nifloader.hpp>
 
@@ -168,10 +169,39 @@ namespace
 namespace MWRender
 {
 
+    class ResetAccumRootCallback : public osg::NodeCallback
+    {
+    public:
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(node);
+
+            osg::Matrix mat = transform->getMatrix();
+            osg::Vec3f position = mat.getTrans();
+            position = osg::componentMultiply(mResetAxes, position);
+            mat.setTrans(position);
+            transform->setMatrix(mat);
+
+            traverse(node, nv);
+        }
+
+        void setAccumulate(const osg::Vec3f& accumulate)
+        {
+            // anything that accumulates (1.f) should be reset in the callback to (0.f)
+            mResetAxes.x() = accumulate.x() != 0.f ? 0.f : 1.f;
+            mResetAxes.y() = accumulate.y() != 0.f ? 0.f : 1.f;
+            mResetAxes.z() = accumulate.z() != 0.f ? 0.f : 1.f;
+        }
+
+    private:
+        osg::Vec3f mResetAxes;
+    };
+
     Animation::Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
         : mPtr(ptr)
         , mInsert(parentNode)
         , mResourceSystem(resourceSystem)
+        , mAccumulate(1.f, 1.f, 0.f)
     {
         for(size_t i = 0;i < sNumGroups;i++)
             mAnimationTimePtr[i].reset(new AnimationTime(this));
@@ -191,6 +221,9 @@ namespace MWRender
     void Animation::setAccumulation(const osg::Vec3f& accum)
     {
         mAccumulate = accum;
+
+        if (mResetAccumRootCallback)
+            mResetAccumRootCallback->setAccumulate(mAccumulate);
     }
 
     size_t Animation::detectAnimGroup(osg::Node* node)
@@ -322,6 +355,16 @@ namespace MWRender
     void Animation::handleTextKey(AnimState &state, const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
                        const std::multimap<float, std::string>& map)
     {
+        const std::string &evt = key->second;
+
+        size_t off = groupname.size()+2;
+        size_t len = evt.size() - off;
+
+        if(evt.compare(off, len, "loop start") == 0)
+            state.mLoopStartTime = key->first;
+        else if(evt.compare(off, len, "loop stop") == 0)
+            state.mLoopStopTime = key->first;
+
         // TODO: forward to listener?
     }
 
@@ -406,16 +449,6 @@ namespace MWRender
             std::cerr<< "Failed to find animation "<<groupname<<" for "<<mPtr.getCellRef().getRefId() <<std::endl;
 
         resetActiveGroups();
-
-        // This shouldn't be needed, same is already done in resetActiveGroups()
-        /*
-        if (!state.mPlaying && mNonAccumCtrl)
-        {
-            // If the animation state is not playing, we need to manually apply the accumulation
-            // (see updatePosition, which would be called if the animation was playing)
-            mAccumRoot->setPosition(-mNonAccumCtrl->getTranslation(state.mTime)*mAccumulate);
-        }
-        */
     }
 
     bool Animation::reset(AnimState &state, const NifOsg::TextKeyMap &keys, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, bool loopfallback)
@@ -504,6 +537,8 @@ namespace MWRender
             osg::Node* node = it->first;
             node->removeUpdateCallback(it->second);
         }
+        if (mResetAccumRootCallback && mAccumRoot)
+            mAccumRoot->removeUpdateCallback(mResetAccumRootCallback);
         mAnimSourceControllers.clear();
 
         mAccumCtrl = NULL;
@@ -538,26 +573,19 @@ namespace MWRender
                     mAnimSourceControllers[node] = it->second;
 
                     if (grp == 0 && node == mAccumRoot)
+                    {
                         mAccumCtrl = it->second;
+
+                        if (!mResetAccumRootCallback)
+                        {
+                            mResetAccumRootCallback = new ResetAccumRootCallback;
+                            mResetAccumRootCallback->setAccumulate(mAccumulate);
+                        }
+                        mAccumRoot->addUpdateCallback(mResetAccumRootCallback);
+                    }
                 }
             }
         }
-
-        //if(!mNonAccumRoot || mAccumulate == Ogre::Vector3(0.0f))
-        //    return;
-
-        /*
-        AnimStateMap::const_iterator state = mStates.find(mAnimationTimePtr[0]->getAnimName());
-        if(state == mStates.end())
-        {
-            //if (mAccumRoot && mNonAccumRoot)
-            //    mAccumRoot->setPosition(-mNonAccumRoot->getPosition()*mAccumulate);
-            return;
-        }
-        */
-
-        //if (mAccumRoot && mNonAccumCtrl)
-        //    mAccumRoot->setPosition(-mNonAccumCtrl->getTranslation(state->second.mTime)*mAccumulate);
     }
 
     void Animation::changeGroups(const std::string &groupname, int groups)
@@ -695,6 +723,13 @@ namespace MWRender
         */
     }
 
+    void Animation::updatePosition(float oldtime, float newtime, osg::Vec3f& position)
+    {
+        // Get the difference from the last update, and move the position
+        osg::Vec3f off = osg::componentMultiply(mAccumCtrl->getTranslation(newtime), mAccumulate);
+        position += off - osg::componentMultiply(mAccumCtrl->getTranslation(oldtime), mAccumulate);
+    }
+
     osg::Vec3f Animation::runAnimation(float duration)
     {
         osg::Vec3f movement(0.f, 0.f, 0.f);
@@ -716,14 +751,14 @@ namespace MWRender
                 targetTime = state.mTime + timepassed;
                 if(textkey == textkeys.end() || textkey->first > targetTime)
                 {
-                    //if(mNonAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
-                    //    updatePosition(state.mTime, targetTime, movement);
+                    if(mAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
+                        updatePosition(state.mTime, targetTime, movement);
                     state.mTime = std::min(targetTime, state.mStopTime);
                 }
                 else
                 {
-                    //if(mNonAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
-                    //    updatePosition(state.mTime, textkey->first, movement);
+                    if(mAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
+                        updatePosition(state.mTime, textkey->first, movement);
                     state.mTime = textkey->first;
                 }
 
@@ -779,9 +814,12 @@ namespace MWRender
         {
             mObjectRoot->getParent(0)->removeChild(mObjectRoot);
         }
+        mObjectRoot = NULL;
 
         mNodeMap.clear();
         mAnimSourceControllers.clear();
+        mAccumRoot = NULL;
+        mAccumCtrl = NULL;
 
         mObjectRoot = mResourceSystem->getSceneManager()->createInstance(model, mInsert);
 

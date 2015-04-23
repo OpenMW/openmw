@@ -23,6 +23,8 @@ namespace NifOsg
 namespace MWRender
 {
 
+class ResetAccumRootCallback;
+
 class EffectAnimationTime : public SceneUtil::ControllerSource
 {
 private:
@@ -133,6 +135,9 @@ protected:
     // The controller animating that node.
     osg::ref_ptr<NifOsg::KeyframeController> mAccumCtrl;
 
+    // Used to reset the position of the accumulation root every frame - the movement should be applied to the physics system
+    osg::ref_ptr<ResetAccumRootCallback> mResetAccumRootCallback;
+
     // Keep track of keyframe controllers from external files that we added to our scene graph.
     // We may need to rebuild these controllers when the active animation groups / sources change.
     typedef std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<NifOsg::KeyframeController> > AnimSourceControllerMap;
@@ -196,7 +201,7 @@ protected:
 
     /* Updates the position of the accum root node for the given time, and
      * returns the wanted movement vector from the previous time. */
-    //void updatePosition(float oldtime, float newtime, Ogre::Vector3 &position);
+    void updatePosition(float oldtime, float newtime, osg::Vec3f& position);
 
     /* Resets the animation to the time of the specified start marker, without
      * moving anything, and set the end time to the specified stop marker. If
