@@ -107,6 +107,8 @@ namespace MWGui
   class DebugWindow;
   class JailScreen;
 
+  class Platform;
+
   class WindowManager : public MWBase::WindowManager
   {
   public:
@@ -365,6 +367,8 @@ namespace MWGui
     virtual void cycleWeapon(bool next);
 
   private:
+    Platform* mGuiPlatform;
+
     bool mConsoleOnlyScripts;
 
     std::map<MyGUI::Window*, std::string> mTrackedWindows;

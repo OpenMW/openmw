@@ -173,8 +173,8 @@ namespace MWGui
       , mCurrentModals()
       , mFallbackMap(fallbackMap)
     {
-        Platform* platform = new Platform(viewer, guiRoot, textureManager);
-        platform->initialise(resourcePath, logpath);
+        mGuiPlatform = new Platform(viewer, guiRoot, textureManager);
+        mGuiPlatform->initialise(resourcePath, logpath);
 
         MyGUI::Gui* gui = new MyGUI::Gui;
         gui->initialise("");
@@ -411,6 +411,8 @@ namespace MWGui
         //delete mCursorManager;
 
         cleanupGarbage();
+
+        delete mGuiPlatform;
     }
 
     void WindowManager::cleanupGarbage()

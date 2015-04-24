@@ -69,7 +69,7 @@ namespace OMW
             Files::PathContainer mDataDirs;
             std::vector<std::string> mArchives;
             boost::filesystem::path mResDir;
-            osgViewer::Viewer mViewer;
+            osg::ref_ptr<osgViewer::Viewer> mViewer;
             std::string mCellName;
             std::vector<std::string> mContentFiles;
             bool mVerboseScripts;

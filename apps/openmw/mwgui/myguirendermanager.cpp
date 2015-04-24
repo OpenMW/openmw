@@ -561,7 +561,7 @@ void RenderManager::setViewSize(int width, int height)
     mInfo.aspectCoef = float(mViewSize.height) / float(mViewSize.width);
     mInfo.pixScaleX = 1.0f / float(mViewSize.width);
     mInfo.pixScaleY = 1.0f / float(mViewSize.height);
-std::cout << "setviewsize " << width << " " << height << std::endl;
+
     onResizeView(mViewSize);
     mUpdate = true;
 }

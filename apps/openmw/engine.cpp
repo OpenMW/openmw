@@ -314,9 +314,9 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
                 settings.getBool("minimize on focus loss", "Video") ? "1" : "0");
 
     // not handling fullscreen yet, we should figure this out when adding SDL to the mix
-    mViewer.setUpViewInWindow(0, 0, settings.getInt("resolution x", "Video"), settings.getInt("resolution y", "Video"), settings.getInt("screen", "Video"));
+    mViewer->setUpViewInWindow(0, 0, settings.getInt("resolution x", "Video"), settings.getInt("resolution y", "Video"), settings.getInt("screen", "Video"));
     osg::ref_ptr<osg::Group> rootNode (new osg::Group);
-    mViewer.setSceneData(rootNode);
+    mViewer->setSceneData(rootNode);
 
     mVFS.reset(new VFS::Manager(mFSStrict));
 
@@ -355,7 +355,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     std::string myguiResources = (mResDir / "mygui").string();
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
     rootNode->addChild(guiRoot);
-    MWGui::WindowManager* window = new MWGui::WindowManager(&mViewer, guiRoot, mResourceSystem->getTextureManager(),
+    MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem->getTextureManager(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
                 mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap);
     mEnvironment.setWindowManager (window);
@@ -371,7 +371,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     }
 
     // Create the world
-    mEnvironment.setWorld( new MWWorld::World (mViewer, rootNode, mResourceSystem.get(),
+    mEnvironment.setWorld( new MWWorld::World (*mViewer, rootNode, mResourceSystem.get(),
         mFileCollections, mContentFiles, mEncoder, mFallbackMap,
         mActivationDistanceOverride, mCellName, mStartupScript));
     MWBase::Environment::get().getWorld()->setupPlayer();
@@ -433,7 +433,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 void OMW::Engine::go()
 {
     assert (!mContentFiles.empty());
-    //assert (!mOgre);
+
+    mViewer = new osgViewer::Viewer;
 
     Settings::Manager settings;
     std::string settingspath;
@@ -474,12 +475,12 @@ void OMW::Engine::go()
     }
 
     // Start the main rendering loop
-    mViewer.setCameraManipulator(new osgGA::TrackballManipulator);
-    mViewer.addEventHandler(new osgViewer::StatsHandler);
+    mViewer->setCameraManipulator(new osgGA::TrackballManipulator);
+    mViewer->addEventHandler(new osgViewer::StatsHandler);
 
-    mViewer.realize();
+    mViewer->realize();
     osg::Timer frameTimer;
-    while (!mViewer.done())
+    while (!mViewer->done())
     {
         double dt = frameTimer.time_s();
         frameTimer.setStartTick();
@@ -491,7 +492,7 @@ void OMW::Engine::go()
         MWBase::Environment::get().getWorld()->advanceTime(
             dt*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
 
-        mViewer.frame(/*simulationTime*/);
+        mViewer->frame(/*simulationTime*/);
     }
 
     // Save user settings
