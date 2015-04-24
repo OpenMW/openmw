@@ -3,8 +3,6 @@
 
 #include <components/nif/niffile.hpp>
 
-#include <components/nifcache/nifcache.hpp> // NIFFilePtr
-
 #include <osg/ref_ptr>
 #include <osg/Referenced>
 

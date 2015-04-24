@@ -6,8 +6,6 @@
 #include <components/nif/controller.hpp>
 #include <components/nif/data.hpp>
 
-#include <components/nifcache/nifcache.hpp>
-
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 

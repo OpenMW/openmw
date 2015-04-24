@@ -7,7 +7,6 @@
 #include <components/files/collections.hpp>
 #include <components/translation/translation.hpp>
 #include <components/settings/settings.hpp>
-#include <components/nifcache/nifcache.hpp>
 
 #include <osgViewer/Viewer>
 
