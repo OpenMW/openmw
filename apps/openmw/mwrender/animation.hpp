@@ -338,6 +338,23 @@ public:
     /// This is typically called as part of runAnimation, but may be called manually if needed.
     void updateEffects(float duration);
 
+    /// Is there a node with the specified name?
+    /// @note The matching is case-insensitive.
+    bool hasNode(const std::string& name);
+
+    virtual void showWeapons(bool showWeapon) {}
+    virtual void showCarriedLeft(bool show) {}
+    virtual void setWeaponGroup(const std::string& group) {}
+    virtual void setVampire(bool vampire) {}
+    virtual void setAlpha(float alpha) {}
+    virtual void setPitchFactor(float factor) {}
+    virtual void attachArrow() {}
+    virtual void enableHeadAnimation(bool enable) {}
+    // TODO: move outside of this class
+    /// Makes this object glow, by placing a Light in its center.
+    /// @param effect Controls the radius and intensity of the light.
+    virtual void setLightEffect(float effect) {}
+
 private:
     Animation(const Animation&);
     void operator=(Animation&);

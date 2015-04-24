@@ -1050,6 +1050,12 @@ namespace MWRender
         }
     }
 
+    bool Animation::hasNode(const std::string &name)
+    {
+        std::string lowerName = Misc::StringUtils::lowerCase(name);
+        return (mNodeMap.find(lowerName) != mNodeMap.end());
+    }
+
     float Animation::AnimationTime::getValue(osg::NodeVisitor*)
     {
         // FIXME: hold a pointer instead of searching every frame

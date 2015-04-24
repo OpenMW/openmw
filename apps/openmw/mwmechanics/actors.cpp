@@ -252,7 +252,7 @@ namespace MWMechanics
                     .search("VFX_Soul_Trap");
             if (fx)
                 MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
-                    "", Ogre::Vector3(mCreature.getRefData().getPosition().pos));
+                    "", mCreature.getRefData().getPosition().asVec3());
 
             MWBase::Environment::get().getSoundManager()->playSound3D(mCreature, "conjuration hit", 1.f, 1.f,
                                                                       MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
@@ -274,6 +274,7 @@ namespace MWMechanics
     void Actors::updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
                                     MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance)
     {
+        /*
         static const float fMaxHeadTrackDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                 .find("fMaxHeadTrackDistance")->getFloat();
         static const float fInteriorHeadTrackMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
@@ -306,6 +307,7 @@ namespace MWMechanics
             sqrHeadTrackDistance = sqrDist;
             headTrackTarget = targetActor;
         }
+        */
     }
 
     void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer)

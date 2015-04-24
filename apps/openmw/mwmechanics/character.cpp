@@ -27,7 +27,7 @@
 #include "creaturestats.hpp"
 #include "security.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -222,7 +222,7 @@ std::string CharacterController::chooseRandomGroup (const std::string& prefix, i
     while (mAnimation->hasAnimation(prefix + Ogre::StringConverter::toString(numAnims+1)))
         ++numAnims;
 
-    int roll = OEngine::Misc::Rng::rollDice(numAnims) + 1; // [1, numAnims]
+    int roll = Misc::Rng::rollDice(numAnims) + 1; // [1, numAnims]
     if (num)
         *num = roll;
     return prefix + Ogre::StringConverter::toString(roll);
@@ -654,7 +654,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     {
         /* Accumulate along X/Y only for now, until we can figure out how we should
          * handle knockout and death which moves the character down. */
-        mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
+        mAnimation->setAccumulation(osg::Vec3f(1.0f, 1.0f, 0.0f));
 
         if (cls.hasInventoryStore(mPtr))
         {
@@ -685,7 +685,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     else
     {
         /* Don't accumulate with non-actors. */
-        mAnimation->setAccumulation(Ogre::Vector3(0.0f));
+        mAnimation->setAccumulation(osg::Vec3f(0.f, 0.f, 0.f));
 
         mIdleState = CharState_Idle;
     }
@@ -710,12 +710,14 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 void CharacterController::updateIdleStormState()
 {
     bool inStormDirection = false;
+    /*
     if (MWBase::Environment::get().getWorld()->isInStorm())
     {
         Ogre::Vector3 stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
         Ogre::Vector3 characterDirection = mPtr.getRefData().getBaseNode()->getOrientation().yAxis();
         inStormDirection = stormDirection.angleBetween(characterDirection) > Ogre::Degree(120);
     }
+    */
     if (inStormDirection && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
     {
         float complete = 0;
@@ -831,7 +833,7 @@ bool CharacterController::updateCreatureState()
             }
             if (weapType != WeapType_Spell || !mAnimation->hasAnimation("spellcast")) // Not all creatures have a dedicated spellcast animation
             {
-                int roll = OEngine::Misc::Rng::rollDice(3); // [0, 2]
+                int roll = Misc::Rng::rollDice(3); // [0, 2]
                 if (roll == 0)
                     mCurrentWeapon = "attack1";
                 else if (roll == 1)
@@ -1030,12 +1032,12 @@ bool CharacterController::updateWeaponState()
                     effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
 
                     const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
-                    if (mAnimation->getNode("Left Hand"))
+                    if (mAnimation->hasNode("Left Hand"))
                         mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Left Hand", effect->mParticle);
                     else
                         mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 L Hand", effect->mParticle);
 
-                    if (mAnimation->getNode("Right Hand"))
+                    if (mAnimation->hasNode("Right Hand"))
                         mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Right Hand", effect->mParticle);
                     else
                         mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 R Hand", effect->mParticle);
@@ -1127,7 +1129,7 @@ bool CharacterController::updateWeaponState()
                 // most creatures don't actually have an attack wind-up animation, so use a uniform random value
                 // (even some creatures that can use weapons don't have a wind-up animation either, e.g. Rieklings)
                 // Note: vanilla MW uses a random value for *all* non-player actors, but we probably don't need to go that far.
-                attackStrength = std::min(1.f, 0.1f + OEngine::Misc::Rng::rollClosedProbability());
+                attackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability());
             }
 
             if(mWeaponType != WeapType_Crossbow && mWeaponType != WeapType_BowAndArrow)
@@ -1690,26 +1692,26 @@ void CharacterController::update(float duration)
         world->queueMovement(mPtr, Ogre::Vector3(0.0f));
     }
 
-    Ogre::Vector3 moved = mAnimation->runAnimation(mSkipAnim ? 0.f : duration);
+    osg::Vec3f moved = mAnimation->runAnimation(mSkipAnim ? 0.f : duration);
     if(duration > 0.0f)
         moved /= duration;
     else
-        moved = Ogre::Vector3(0.0f);
+        moved = osg::Vec3f(0.f, 0.f, 0.f);
 
     // Ensure we're moving in generally the right direction...
     if(mMovementSpeed > 0.f)
     {
         float l = moved.length();
 
-        if((movement.x < 0.0f && movement.x < moved.x*2.0f) ||
-           (movement.x > 0.0f && movement.x > moved.x*2.0f))
-            moved.x = movement.x;
-        if((movement.y < 0.0f && movement.y < moved.y*2.0f) ||
-           (movement.y > 0.0f && movement.y > moved.y*2.0f))
-            moved.y = movement.y;
-        if((movement.z < 0.0f && movement.z < moved.z*2.0f) ||
-           (movement.z > 0.0f && movement.z > moved.z*2.0f))
-            moved.z = movement.z;
+        if((movement.x < 0.0f && movement.x < moved.x()*2.0f) ||
+           (movement.x > 0.0f && movement.x > moved.x()*2.0f))
+            moved.x() = movement.x;
+        if((movement.y < 0.0f && movement.y < moved.y()*2.0f) ||
+           (movement.y > 0.0f && movement.y > moved.y()*2.0f))
+            moved.y() = movement.y;
+        if((movement.z < 0.0f && movement.z < moved.z()*2.0f) ||
+           (movement.z > 0.0f && movement.z > moved.z()*2.0f))
+            moved.z() = movement.z;
         // but keep the original speed
         float newLength = moved.length();
         if (newLength > 0)
@@ -1721,7 +1723,7 @@ void CharacterController::update(float duration)
 
     // Update movement
     if(mMovementAnimationControlled && mPtr.getClass().isActor())
-        world->queueMovement(mPtr, moved);
+        world->queueMovement(mPtr, Ogre::Vector3(moved.x(), moved.y(), moved.z()));
 
     mSkipAnim = false;
 
@@ -1904,6 +1906,7 @@ void CharacterController::setHeadTrackTarget(const MWWorld::Ptr &target)
 
 void CharacterController::updateHeadTracking(float duration)
 {
+    /*
     Ogre::Node* head = mAnimation->getNode("Bip01 Head");
     if (!head)
         return;
@@ -1946,6 +1949,7 @@ void CharacterController::updateHeadTracking(float duration)
 
     mAnimation->setHeadPitch(xAngle);
     mAnimation->setHeadYaw(zAngle);
+    */
 }
 
 }
