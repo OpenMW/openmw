@@ -4,6 +4,7 @@
 
 #include "collectionbase.hpp"
 #include "nestedcollection.hpp"
+#include "refidcollection.hpp" // HACK: for searchId() only
 #include "columnbase.hpp"
 
 // NOTE: parent class still needs idCollection
@@ -256,4 +257,10 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::IdTree::nestedTable(const QModelInde
         throw std::logic_error("Tried to retrive nested table, but index has no children");
 
     return mNestedCollection->nestedTable(index.row(), index.column());
+}
+
+// HACK: to get the UniversalId::Type associated with a particular record
+std::pair<int, CSMWorld::UniversalId::Type> CSMWorld::IdTree::searchId (const std::string& id) const
+{
+    return dynamic_cast<CSMWorld::RefIdCollection*>(idCollection())->getDataSet().searchId(id);
 }

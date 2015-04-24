@@ -73,6 +73,8 @@ namespace CSMWorld
 
             virtual bool hasChildren (const QModelIndex& index) const;
 
+            std::pair<int, UniversalId::Type> searchId (const std::string& id) const;
+
     signals:
 
         void resetStart(const QString& id);

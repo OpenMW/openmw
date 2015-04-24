@@ -8,6 +8,7 @@
 #include "../doc/document.hpp"
 
 #include "idtable.hpp"
+#include "idtree.hpp"
 #include "record.hpp"
 #include "commands.hpp"
 
@@ -153,7 +154,15 @@ void CSMWorld::CommandDispatcher::executeDelete()
         std::string id = model.data (model.getModelIndex (*iter, columnIndex)).
             toString().toUtf8().constData();
 
-        mDocument.getUndoStack().push (new CSMWorld::DeleteCommand (model, id));
+        if (mId.getType() == UniversalId::Type_Referenceables)
+        {
+            IdTree& tree = dynamic_cast<IdTree&> (*mDocument.getData().getTableModel (mId));
+            std::pair<int, UniversalId::Type> localIndex = tree.searchId (id);
+
+            mDocument.getUndoStack().push (new CSMWorld::DeleteCommand (model, id, localIndex.second));
+        }
+        else
+            mDocument.getUndoStack().push (new CSMWorld::DeleteCommand (model, id));
     }
 
     if (rows.size()>1)
@@ -219,8 +228,17 @@ void CSMWorld::CommandDispatcher::executeExtendedDelete()
                     Misc::StringUtils::lowerCase (record.get().mCell)))
                     continue;
 
-                mDocument.getUndoStack().push (
-                    new CSMWorld::DeleteCommand (model, record.get().mId));
+                if (mId.getType() == UniversalId::Type_Referenceables)
+                {
+                    IdTree& tree = dynamic_cast<IdTree&> (*mDocument.getData().getTableModel (mId));
+                    std::pair<int, UniversalId::Type> localIndex = tree.searchId (record.get().mId);
+
+                    mDocument.getUndoStack().push (
+                        new CSMWorld::DeleteCommand (model, record.get().mId, localIndex.second));
+                }
+                else
+                    mDocument.getUndoStack().push (
+                        new CSMWorld::DeleteCommand (model, record.get().mId));
             }
         }
     }

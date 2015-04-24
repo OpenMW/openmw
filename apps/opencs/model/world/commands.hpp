@@ -111,6 +111,7 @@ namespace CSMWorld
             IdTable& mModel;
             std::string mId;
             RecordBase *mOld;
+            UniversalId::Type mType;
 
             // not implemented
             DeleteCommand (const DeleteCommand&);
@@ -118,7 +119,8 @@ namespace CSMWorld
 
         public:
 
-            DeleteCommand (IdTable& model, const std::string& id, QUndoCommand *parent = 0);
+            DeleteCommand (IdTable& model, const std::string& id,
+                    UniversalId::Type type = UniversalId::Type_None, QUndoCommand *parent = 0);
 
             virtual ~DeleteCommand();
 
