@@ -44,7 +44,7 @@ add_openmw_dir (mwgui
     itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel controllers savegamedialog
     recharge mode videowidget backgroundimage itemwidget screenfader debugwindow spellmodel spellview
-    draganddrop timeadvancer jailscreen
+    draganddrop timeadvancer jailscreen myguiplatform myguirendermanager myguidatamanager
     )
 
 add_openmw_dir (mwdialogue
@@ -107,6 +107,9 @@ endif(WIN32)
 
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
+# for MyGUI platform
+find_package(OpenGL REQUIRED)
+
 if (NOT ANDROID)
     add_executable(openmw
         ${OPENMW_FILES}
@@ -137,6 +140,7 @@ target_link_libraries(openmw
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
+    ${OPENGL_gl_LIBRARY}
     "osg-ffmpeg-videoplayer"
     "oics"
     components

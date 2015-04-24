@@ -19,8 +19,6 @@
 #include <MyGUI_ClipboardManager.h>
 #include <MyGUI_RenderManager.h>
 
-#include <MyGUI_DummyPlatform.h>
-
 #include <SDL_keyboard.h>
 #include <SDL_clipboard.h>
 
@@ -93,14 +91,16 @@
 #include "controllers.hpp"
 #include "jailscreen.hpp"
 
+#include "myguiplatform.hpp"
+
 namespace MWGui
 {
 
     WindowManager::WindowManager(
-        const Compiler::Extensions& extensions, const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
+            osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::TextureManager* textureManager
+            , const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts,
             Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap)
       : mConsoleOnlyScripts(consoleOnlyScripts)
-      //, mGuiManager(NULL)
       , mHud(NULL)
       , mMap(NULL)
       , mMenu(NULL)
@@ -173,11 +173,8 @@ namespace MWGui
       , mCurrentModals()
       , mFallbackMap(fallbackMap)
     {
-        // Set up the GUI system
-        //mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
-
-        MyGUI::DummyPlatform* platform = new MyGUI::DummyPlatform;
-        platform->initialise(logpath);
+        Platform* platform = new Platform(viewer, guiRoot, textureManager);
+        platform->initialise(resourcePath, logpath);
 
         MyGUI::Gui* gui = new MyGUI::Gui;
         gui->initialise("");
@@ -248,7 +245,6 @@ namespace MWGui
 
     void WindowManager::initUI()
     {
-        /*
         // Get size info from the Gui object
         int w = MyGUI::RenderManager::getInstance().getViewSize().width;
         int h = MyGUI::RenderManager::getInstance().getViewSize().height;
@@ -304,8 +300,8 @@ namespace MWGui
         std::string hitFaderTexture = "textures\\bm_player_hit_01.dds";
         // fall back to player_hit_01.dds if bm_player_hit_01.dds is not available
         // TODO: check if non-BM versions actually use player_hit_01.dds
-        if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(hitFaderTexture))
-            hitFaderTexture = "textures\\player_hit_01.dds";
+        //if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(hitFaderTexture))
+        //    hitFaderTexture = "textures\\player_hit_01.dds";
         mHitFader = new ScreenFader(hitFaderTexture);
         mScreenFader = new ScreenFader("black.png");
 
@@ -331,8 +327,7 @@ namespace MWGui
         // Set up visibility
         updateVisible();
 
-        MWBase::Environment::get().getInputManager()->changeInputMode(false);
-        */
+        //MWBase::Environment::get().getInputManager()->changeInputMode(false);
     }
 
     void WindowManager::renderWorldMap()
@@ -416,8 +411,6 @@ namespace MWGui
         //delete mCursorManager;
 
         cleanupGarbage();
-
-        //delete mGuiManager;
     }
 
     void WindowManager::cleanupGarbage()
@@ -928,7 +921,6 @@ namespace MWGui
 
     void WindowManager::changeCell(MWWorld::CellStore* cell)
     {
-        /*
         std::string name = MWBase::Environment::get().getWorld()->getCellName (cell);
 
         mMap->setCellName( name );
@@ -953,12 +945,10 @@ namespace MWGui
                 MWBase::Environment::get().getWorld()->getPlayer().setLastKnownExteriorPosition(worldPos);
             mMap->setGlobalMapPlayerPosition(worldPos.x, worldPos.y);
         }
-        */
     }
 
     void WindowManager::setActiveMap(int x, int y, bool interior)
     {
-        /*
         if (!interior)
         {
             mMap->setCellPrefix("Cell");
@@ -967,22 +957,19 @@ namespace MWGui
 
         mMap->setActiveCell(x,y, interior);
         mHud->setActiveCell(x,y, interior);
-        */
     }
 
     void WindowManager::setPlayerPos(int cellX, int cellY, const float x, const float y)
     {
-        //mMap->setPlayerPos(cellX, cellY, x, y);
-        //mHud->setPlayerPos(cellX, cellY, x, y);
+        mMap->setPlayerPos(cellX, cellY, x, y);
+        mHud->setPlayerPos(cellX, cellY, x, y);
     }
 
     void WindowManager::setPlayerDir(const float x, const float y)
     {
-        /*
         mMap->setPlayerDir(x,y);
         mMap->setGlobalMapPlayerDir(x, y);
         mHud->setPlayerDir(x,y);
-        */
     }
 
     void WindowManager::setDrowningBarVisibility(bool visible)
@@ -1098,7 +1085,7 @@ namespace MWGui
     void WindowManager::windowResized(int x, int y)
     {
         sizeVideo(x, y);
-        //mGuiManager->windowResized();
+
         if (!mHud)
             return; // UI not initialized yet
 
@@ -1279,7 +1266,7 @@ namespace MWGui
 
     void WindowManager::executeInConsole (const std::string& path)
     {
-        //mConsole->executeFile (path);
+        mConsole->executeFile (path);
     }
 
     void WindowManager::wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount)
@@ -1520,7 +1507,7 @@ namespace MWGui
 
     void WindowManager::updatePlayer()
     {
-        //mInventoryWindow->updatePlayer();
+        mInventoryWindow->updatePlayer();
 
         const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (player.getClass().getNpcStats(player).isWerewolf())
@@ -1808,29 +1795,23 @@ namespace MWGui
 
     void WindowManager::fadeScreenIn(const float time, bool clearQueue)
     {
-        /*
         if (clearQueue)
             mScreenFader->clearQueue();
         mScreenFader->fadeOut(time);
-        */
     }
 
     void WindowManager::fadeScreenOut(const float time, bool clearQueue)
     {
-        /*
         if (clearQueue)
             mScreenFader->clearQueue();
         mScreenFader->fadeIn(time);
-        */
     }
 
     void WindowManager::fadeScreenTo(const int percent, const float time, bool clearQueue)
     {
-        /*
         if (clearQueue)
             mScreenFader->clearQueue();
         mScreenFader->fadeTo(percent, time);
-        */
     }
 
     void WindowManager::setBlindness(const int percent)

@@ -99,15 +99,9 @@ namespace OMW
             bool mScriptBlacklistUse;
             bool mNewGame;
 
-            //Nif::Cache mNifCache;
-
             // not implemented
             Engine (const Engine&);
             Engine& operator= (const Engine&);
-
-            /// add resources directory
-            /// \note This function works recursively.
-            void addResourcesDirectory (const boost::filesystem::path& path);
 
             void executeLocalScripts();
 

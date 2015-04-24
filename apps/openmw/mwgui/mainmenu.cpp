@@ -53,7 +53,7 @@ namespace MWGui
         std::string output = sstream.str();
         mVersionText->setCaption(output);
 
-        mHasAnimatedMenu = (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("video\\menu_background.bik"));
+        mHasAnimatedMenu = 0;//(Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("video\\menu_background.bik"));
 
         updateMenu();
     }

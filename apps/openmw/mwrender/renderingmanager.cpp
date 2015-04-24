@@ -101,9 +101,9 @@ namespace MWRender
         mSunLight->setConstantAttenuation(1.f);
         lightRoot->addChild(source);
 
-        mRootNode->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
-        mRootNode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
-        mRootNode->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+        lightRoot->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+        lightRoot->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
+        lightRoot->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
 
         source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
 

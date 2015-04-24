@@ -52,6 +52,20 @@ namespace OEngine
     }
 }
 
+namespace osg
+{
+    class Group;
+}
+namespace osgViewer
+{
+    class Viewer;
+}
+
+namespace Resource
+{
+    class TextureManager;
+}
+
 namespace SFO
 {
     class CursorManager;
@@ -99,8 +113,8 @@ namespace MWGui
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(const Compiler::Extensions& extensions, const std::string& logpath,
-                  const std::string& cacheDir, bool consoleOnlyScripts,
+    WindowManager(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::TextureManager* textureManager,
+                  const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
                   Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap);
     virtual ~WindowManager();
 
@@ -364,7 +378,6 @@ namespace MWGui
     // Markers placed manually by the player. Must be shared between both map views (the HUD map and the map window).
     CustomMarkerCollection mCustomMarkers;
 
-    OEngine::GUI::MyGUIManager *mGuiManager;
     HUD *mHud;
     MapWindow *mMap;
     MainMenu *mMenu;

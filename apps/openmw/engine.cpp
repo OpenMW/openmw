@@ -218,13 +218,6 @@ OMW::Engine::~Engine()
     SDL_Quit();
 }
 
-// add resources directory
-// \note This function works recursively.
-
-void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
-{
-}
-
 void OMW::Engine::enableFSStrict(bool fsStrict)
 {
     mFSStrict = fsStrict;
@@ -309,16 +302,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 #endif
     }
 
-    // This has to be added BEFORE MyGUI is initialized, as it needs
-    // to find core.xml here.
-
-    addResourcesDirectory(mCfgMgr.getCachePath ().string());
-
-    addResourcesDirectory(mResDir / "mygui");
-    addResourcesDirectory(mResDir / "water");
-    addResourcesDirectory(mResDir / "shadows");
-    addResourcesDirectory(mResDir / "materials");
-
     //OEngine::Render::WindowSettings windowSettings;
     //windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
     //windowSettings.window_border = settings.getBool("window border", "Video");
@@ -369,9 +352,12 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     //MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
     //mEnvironment.setInputManager (input);
 
-    MWGui::WindowManager* window = new MWGui::WindowManager(
-                mExtensions, mCfgMgr.getLogPath().string() + std::string("/"),
-                mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap);
+    std::string myguiResources = (mResDir / "mygui").string();
+    osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
+    rootNode->addChild(guiRoot);
+    MWGui::WindowManager* window = new MWGui::WindowManager(&mViewer, guiRoot, mResourceSystem->getTextureManager(),
+                mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
+                mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap);
     mEnvironment.setWindowManager (window);
 
     // Create sound system
